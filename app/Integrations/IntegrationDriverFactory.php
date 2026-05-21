@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Integrations;
+
+use App\Contracts\Integrations\LeadPayloadNormalizer;
+use App\Enums\IntegrationPlatform;
+use App\Integrations\Facebook\FacebookLeadDriver;
+use App\Integrations\Generic\GenericWebhookDriver;
+use App\Integrations\Landing\LandingFormDriver;
+use InvalidArgumentException;
+
+class IntegrationDriverFactory
+{
+    public static function make(string|IntegrationPlatform $platform): LeadPayloadNormalizer
+    {
+        $key = $platform instanceof IntegrationPlatform ? $platform->value : $platform;
+        $class = config("integrations.platforms.{$key}.driver");
+
+        if (! $class || ! class_exists($class)) {
+            throw new InvalidArgumentException("Integration driver not found: {$key}");
+        }
+
+        return match ($key) {
+            IntegrationPlatform::Facebook->value => new FacebookLeadDriver,
+            IntegrationPlatform::Landing->value => new LandingFormDriver,
+            default => new GenericWebhookDriver($key),
+        };
+    }
+}
