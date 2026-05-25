@@ -5,11 +5,10 @@ import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import '../css/app.css';
 
+const pages = import.meta.glob('./pages/**/*.jsx');
+
 createInertiaApp({
-    resolve: (name) => {
-        const pages = import.meta.glob('./pages/**/*.jsx', { eager: true });
-        return pages[`./pages/${name}.jsx`];
-    },
+    resolve: (name) => pages[`./pages/${name}.jsx`](),
     setup({ el, App, props }) {
         createRoot(el).render(
             <ThemeProvider>

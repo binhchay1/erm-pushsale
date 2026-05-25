@@ -1,12 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { usePage } from '@inertiajs/react';
 
 import { applyAppearance, applyTheme } from '@/lib/themes';
 
 const ThemeContext = createContext(null);
 
-export function ThemeProvider({ children }) {
-    const { preferences, themes } = usePage().props;
+export function ThemeProvider({ children, preferences, themes }) {
     const [theme, setTheme] = useState(preferences?.theme ?? 'brand');
     const [appearance, setAppearance] = useState(preferences?.appearance ?? 'system');
 
@@ -38,6 +36,7 @@ export function ThemeProvider({ children }) {
             appearance,
             setTheme,
             setAppearance,
+            themes,
             applyLocal: (nextTheme, nextAppearance) => {
                 if (nextTheme) {
                     setTheme(nextTheme);
@@ -65,6 +64,6 @@ export function useTheme() {
 
 /** Preview theme without persisting */
 export function useThemePreview() {
-    const { themes } = usePage().props;
+    const { themes } = useTheme();
     return useCallback((themeId) => applyTheme(themeId, themes), [themes]);
 }
