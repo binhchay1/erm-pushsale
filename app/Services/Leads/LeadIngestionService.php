@@ -10,12 +10,14 @@ use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
-use App\Enums\UserRole;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class LeadIngestionService
 {
+    public function __construct(
+        protected LeadRoutingService $routing,
+    ) {}
     /**
      * @param  array<string, mixed>  $rawPayload
      */
@@ -36,9 +38,11 @@ class LeadIngestionService
             return $existing;
         }
 
+        $windowDays = (int) config('saleops.lead_routing.duplicate_window_days', 30);
+
         $duplicateOrder = Order::query()
             ->where('customer_phone', $normalized['customer_phone'])
-            ->where('created_at', '>=', now()->subDays(30))
+            ->where('created_at', '>=', now()->subDays($windowDays))
             ->exists();
 
         $ingestion = LeadIngestion::query()->create([
@@ -87,7 +91,7 @@ class LeadIngestionService
             ]
         );
 
-        $saleUser = User::query()->where('role', UserRole::Sales)->inRandomOrder()->first();
+        $saleUser = $this->routing->assignSalesUser();
 
         return Order::query()->create([
             'order_code' => 'PS'.strtoupper(Str::random(10)),

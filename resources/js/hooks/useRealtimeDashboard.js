@@ -46,6 +46,14 @@ export function useRealtimeDashboard(channelRole, initialStats, onUpdate) {
                         duration: 2800,
                     });
                 }
+            })
+            .listen('.lead.ingested', (payload) => {
+                if (noti.new_lead !== false) {
+                    toast.success('Lead mới', {
+                        description: `${payload.platform ?? 'Nguồn'} · ${payload.customer_phone ?? ''}`,
+                        duration: 5000,
+                    });
+                }
             });
 
         echo.connector.pusher.connection.bind('connected', () => setConnected(true));
@@ -58,9 +66,10 @@ export function useRealtimeDashboard(channelRole, initialStats, onUpdate) {
 
         return () => {
             channel.stopListening('.stats.updated');
+            channel.stopListening('.lead.ingested');
             echo.leave(channelName);
         };
-    }, [auth?.user?.id, channelRole, reverb?.key, noti.desktop]);
+    }, [auth?.user?.id, channelRole, reverb?.key, noti.desktop, noti.new_lead]);
 
     useEffect(() => () => disconnectEcho(), []);
 

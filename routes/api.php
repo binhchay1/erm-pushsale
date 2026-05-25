@@ -13,7 +13,7 @@ Route::prefix('v1')->group(function () {
     Route::post('auth/token', [AuthController::class, 'token']);
 
     Route::match(['get', 'post'], 'webhooks/{platform}', [WebhookController::class, 'handle'])
-        ->where('platform', 'facebook|tiktok|zalo|landing|google');
+        ->where('platform', 'facebook|tiktok|zalo|landing|google|shopee|lazada');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('auth/me', [AuthController::class, 'me']);

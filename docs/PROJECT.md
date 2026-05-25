@@ -74,8 +74,9 @@ Kiến trúc chi tiết: [`docs/ARCHITECTURE.md`](ARCHITECTURE.md)
 - [x] Auth 2 role, theme, noti, Reverb
 - [x] Domain DB + seed demo (`SaleOpsDemoSeeder`)
 - [x] 10 màn UI + Services/Repositories theo DATA-MODEL
-- [x] REST API v1 + webhooks lead (`docs/API.md`, `docs/INTEGRATIONS.md`)
-- [ ] Kết nối API vận chuyển / VoIP thật (GHTK, …)
+- [x] Admin UI tích hợp nền tảng + nhật ký lead (`/admin/integrations`, `/admin/leads`)
+- [x] Webhook xử lý lead → Order + Reverb `lead.ingested`
+- [ ] Vận chuyển thật (GHTK, GHN, VTP) + webhook ngược
 
 ## Lệnh dev
 

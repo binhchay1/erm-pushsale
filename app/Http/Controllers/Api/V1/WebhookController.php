@@ -8,6 +8,8 @@ use App\Http\Resources\V1\LeadIngestionResource;
 use App\Http\Traits\ApiResponds;
 use App\Integrations\Facebook\FacebookLeadDriver;
 use App\Integrations\IntegrationDriverFactory;
+use App\Models\IntegrationConnection;
+use App\Services\Integrations\IntegrationConfigService;
 use App\Services\Leads\LeadIngestionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,6 +21,7 @@ class WebhookController extends Controller
 
     public function __construct(
         protected LeadIngestionService $ingestionService,
+        protected IntegrationConfigService $configService,
     ) {}
 
     public function handle(Request $request, string $platform): JsonResponse|Response
@@ -40,11 +43,18 @@ class WebhookController extends Controller
                 : $this->error('Verify token không hợp lệ', 403);
         }
 
+        $connection = IntegrationConnection::forPlatform($enum);
+
+        if (! $connection->is_enabled && ! app()->environment('local')) {
+            return $this->error('Nền tảng chưa được bật trong admin', 503);
+        }
+
         if (! $driver->verifyWebhook($request)) {
             return $this->error('Webhook không được xác thực', 401);
         }
 
-        $payload = $request->all();
+        $processed = 0;
+
         if ($enum === IntegrationPlatform::Facebook) {
             foreach ($request->input('entry', []) as $entry) {
                 foreach ($entry['changes'] ?? [] as $change) {
@@ -52,14 +62,20 @@ class WebhookController extends Controller
                         $this->ingestionService->ingest($driver, [
                             'entry' => [['changes' => [$change]]],
                         ]);
+                        $processed++;
                     }
                 }
             }
 
-            return $this->success(message: 'Facebook webhook processed');
+            if ($processed > 0) {
+                $this->configService->touchSynced($enum);
+            }
+
+            return $this->success(['processed' => $processed], 'Facebook webhook processed');
         }
 
-        $ingestion = $this->ingestionService->ingest($driver, $payload);
+        $ingestion = $this->ingestionService->ingest($driver, $request->all());
+        $this->configService->touchSynced($enum);
 
         return $this->created(
             new LeadIngestionResource($ingestion->load('order')),

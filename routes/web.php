@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\Accounting\OperationsController as AccountingOperationsController;
+use App\Http\Controllers\Admin\IntegrationsController;
+use App\Http\Controllers\Admin\LeadsLogController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Marketing\DashboardController as MarketingDashboardController;
 use App\Http\Controllers\Admin\Marketing\RevenueReportController as MarketingRevenueReportController;
@@ -48,6 +50,10 @@ Route::middleware('auth')->group(function () {
         Route::get('warehouse/operations', WarehouseOperationsController::class)->name('warehouse.operations');
         Route::get('warehouse/inventory', InventoryController::class)->name('warehouse.inventory');
         Route::get('orders/failed', FailedOrdersController::class)->name('orders.failed');
+        Route::get('integrations', [IntegrationsController::class, 'index'])->name('integrations.index');
+        Route::put('integrations/{platform}', [IntegrationsController::class, 'update'])->name('integrations.update');
+        Route::post('integrations/{platform}/test', [IntegrationsController::class, 'testWebhook'])->name('integrations.test');
+        Route::get('leads', LeadsLogController::class)->name('leads.index');
     });
 
     Route::middleware('role:'.User::ROLE_SALES)->prefix('sales')->name('sales.')->group(function () {

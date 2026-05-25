@@ -39,4 +39,9 @@ return [
         ],
     ],
 
+    'lead_routing' => [
+        'strategy' => env('LEAD_ROUTING_STRATEGY', 'round_robin'),
+        'duplicate_window_days' => (int) env('LEAD_DUPLICATE_WINDOW_DAYS', 30),
+    ],
+
 ];

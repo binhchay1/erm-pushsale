@@ -5,6 +5,8 @@ import {
     Megaphone,
     Package,
     PhoneCall,
+    Plug,
+    RefreshCw,
     Settings,
     ShoppingCart,
     Truck,
@@ -43,6 +45,13 @@ const adminGroups = [
         label: 'Sale & KH',
         items: [
             { title: 'BC doanh số Sale', url: '/admin/sales/revenue', icon: PhoneCall },
+        ],
+    },
+    {
+        label: 'Hệ thống',
+        items: [
+            { title: 'Tích hợp nền tảng', url: '/admin/integrations', icon: Plug },
+            { title: 'Nhật ký lead', url: '/admin/leads', icon: RefreshCw },
         ],
     },
     {
