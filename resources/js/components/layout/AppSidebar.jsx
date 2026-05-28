@@ -96,16 +96,15 @@ const roleMenus = {
     ],
 };
 
-const salesItems = [
-    { title: 'Tác nghiệp', url: '/sales/workspace', icon: PhoneCall },
-    { title: 'Hồ sơ KH', url: '/sales/customers', icon: Home },
+const fallbackItems = [
     { title: 'Cài đặt', url: '/settings', icon: Settings },
 ];
 
 export function AppSidebar() {
     const { auth } = usePage().props;
     const isAdmin = auth.user?.role === 'admin';
-    const userItems = roleMenus[auth.user?.role] ?? salesItems;
+    const roleLabel = auth.user?.role_label ?? 'Người dùng';
+    const userItems = roleMenus[auth.user?.role] ?? fallbackItems;
 
     return (
         <Sidebar>
@@ -175,7 +174,7 @@ export function AppSidebar() {
                 )}
             </SidebarContent>
             <SidebarFooter className="px-3 py-2 text-xs text-muted-foreground">
-                {isAdmin ? 'Quản trị hệ thống' : 'Telesale'}
+                {isAdmin ? 'Quản trị hệ thống' : roleLabel}
             </SidebarFooter>
         </Sidebar>
     );

@@ -26,7 +26,7 @@ export default function Login() {
                 <Card className="border-border/80 shadow-lg shadow-blue-500/5">
                     <CardHeader>
                         <CardTitle>Đăng nhập</CardTitle>
-                        <CardDescription>Quản trị viên hoặc nhân viên Telesale</CardDescription>
+                        <CardDescription>Quản trị viên, Sale, Marketing hoặc Kho</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <LoginForm />
@@ -34,8 +34,9 @@ export default function Login() {
                 </Card>
 
                 <p className="mt-4 text-center text-xs text-muted-foreground">
-                    Demo: admin@saleops.local · sales@saleops.local — mật khẩu{' '}
-                    <code className="rounded bg-muted px-1 py-0.5">password</code>
+                    Demo: admin@saleops.local · sales@saleops.local · marketing@saleops.local · warehouse@saleops.local
+                    <br />
+                    Mật khẩu <code className="rounded bg-muted px-1 py-0.5">password</code>
                 </p>
             </div>
         </GuestLayout>
