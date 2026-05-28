@@ -1,13 +1,15 @@
 import { Head } from '@inertiajs/react';
 
-import AppLayout from '@/layouts/AppLayout';
-import { StatCard } from '@/components/charts/StatCard';
-import { RevenueAreaChart } from '@/components/charts/RevenueAreaChart';
-import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
 import { LeadSourcePieChart } from '@/components/charts/LeadSourcePieChart';
+import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
+import { RevenueAreaChart } from '@/components/charts/RevenueAreaChart';
+import { ConversionFunnel } from '@/components/dashboard/ConversionFunnel';
+import { DashboardKpiGrid } from '@/components/dashboard/DashboardKpiGrid';
+import { OpsAlerts } from '@/components/dashboard/OpsAlerts';
+import { RankingList } from '@/components/dashboard/RankingList';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
+import AppLayout from '@/layouts/AppLayout';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
-import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 
 export default function Dashboard({ stats: initialStats }) {
     const { stats, connected } = useRealtimeDashboard('admin', initialStats);
@@ -18,43 +20,52 @@ export default function Dashboard({ stats: initialStats }) {
 
             <div className="space-y-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
+                    <div className="max-w-2xl">
                         <h1 className="text-2xl font-bold tracking-tight">Tổng quan CEO</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Số liệu cập nhật real-time qua WebSocket (Reverb)
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Theo dõi doanh thu, lead, đơn hàng và cảnh báo vận hành theo thời gian gần thực.
                         </p>
                     </div>
                     <RealtimeBadge connected={connected} />
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <StatCard
-                        title="Doanh thu tạm tính (ngày)"
-                        value={formatCurrency(stats.revenue_today)}
-                    />
-                    <StatCard
-                        title="Đơn đã chốt"
-                        value={formatNumber(stats.orders_closed)}
-                        accent
-                    />
-                    <StatCard
-                        title="Lead mới (ngày)"
-                        value={formatNumber(stats.leads_today)}
-                    />
-                    <StatCard
-                        title="Tỷ lệ giao thành công"
-                        value={formatPercent(stats.delivery_rate)}
-                    />
-                </div>
+                <DashboardKpiGrid stats={stats} />
 
                 <div className="grid gap-4 lg:grid-cols-3">
                     <RevenueAreaChart
                         data={stats.revenue_series}
-                        description="Area chart — animation mượt (Recharts)"
+                        title="Doanh thu 7 ngày"
+                        description="Doanh thu từ đơn delivered/paid"
                     />
-                    <OrdersBarChart data={stats.orders_series} />
-                    <LeadSourcePieChart data={stats.lead_sources} />
+                    <OrdersBarChart
+                        data={stats.orders_series}
+                        title="Đơn phát sinh 7 ngày"
+                        description="Số đơn tạo mới theo ngày"
+                    />
+                    <LeadSourcePieChart
+                        data={stats.lead_sources}
+                        title="Nguồn lead hôm nay"
+                    />
                 </div>
+
+                <ConversionFunnel data={stats.funnel} />
+
+                <div className="grid gap-4 xl:grid-cols-2">
+                    <RankingList
+                        title="Top sale"
+                        description="Xếp hạng theo doanh thu giao thành công"
+                        rows={stats.top_sales}
+                        type="sales"
+                    />
+                    <RankingList
+                        title="Top nguồn lead / campaign"
+                        description="Nguồn tạo doanh thu và đơn hàng tốt nhất"
+                        rows={stats.top_sources}
+                        type="sources"
+                    />
+                </div>
+
+                <OpsAlerts alerts={stats.alerts} />
             </div>
         </AppLayout>
     );
