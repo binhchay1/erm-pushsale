@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     Home,
+    Users,
     Megaphone,
     Package,
     PhoneCall,
@@ -28,10 +29,12 @@ import {
 
 const adminGroups = [
     {
-        label: 'Tổng quan',
+        label: 'Điều hành',
         items: [
             { title: 'Dashboard CEO', url: '/admin/dashboard', icon: Home },
+            { title: 'Tổng hợp vận hành', url: '/admin/reports/business', icon: BarChart3 },
             { title: 'Báo cáo CEO', url: '/admin/reports/ceo', icon: BarChart3 },
+            { title: 'Tổ chức & xếp hạng', url: '/admin/organization', icon: Users },
         ],
     },
     {
@@ -42,16 +45,18 @@ const adminGroups = [
         ],
     },
     {
-        label: 'Sale & KH',
+        label: 'Telesale',
         items: [
             { title: 'BC doanh số Sale', url: '/admin/sales/revenue', icon: PhoneCall },
+            { title: 'Nhật ký lead', url: '/admin/leads', icon: RefreshCw },
         ],
     },
     {
         label: 'Hệ thống',
         items: [
             { title: 'Tích hợp nền tảng', url: '/admin/integrations', icon: Plug },
-            { title: 'Nhật ký lead', url: '/admin/leads', icon: RefreshCw },
+            { title: 'API vận chuyển', url: '/admin/shipping-partners', icon: Truck },
+            { title: 'Đối soát vận chuyển', url: '/admin/shipping/reconciliation', icon: ShoppingCart },
         ],
     },
     {
@@ -65,6 +70,32 @@ const adminGroups = [
     },
 ];
 
+const roleMenus = {
+    sales: [
+        { title: 'Tác nghiệp telesale', url: '/sales/workspace', icon: PhoneCall },
+        { title: 'Hồ sơ KH', url: '/sales/customers', icon: Home },
+        { title: 'Cài đặt', url: '/settings', icon: Settings },
+    ],
+    marketing: [
+        { title: 'Dashboard MKT', url: '/marketing/workspace', icon: Megaphone },
+        { title: 'Doanh thu MKT', url: '/marketing/revenue', icon: BarChart3 },
+        { title: 'Cài đặt', url: '/settings', icon: Settings },
+    ],
+    warehouse: [
+        { title: 'Tác nghiệp kho', url: '/warehouse/workspace', icon: Truck },
+        { title: 'Tồn kho', url: '/warehouse/inventory', icon: Package },
+        { title: 'Cài đặt', url: '/settings', icon: Settings },
+    ],
+    accounting: [
+        { title: 'Tác nghiệp kế toán', url: '/accounting/workspace', icon: Wallet },
+        { title: 'Cài đặt', url: '/settings', icon: Settings },
+    ],
+    allocator: [
+        { title: 'Chia số & lead', url: '/allocator/workspace', icon: RefreshCw },
+        { title: 'Cài đặt', url: '/settings', icon: Settings },
+    ],
+};
+
 const salesItems = [
     { title: 'Tác nghiệp', url: '/sales/workspace', icon: PhoneCall },
     { title: 'Hồ sơ KH', url: '/sales/customers', icon: Home },
@@ -74,6 +105,7 @@ const salesItems = [
 export function AppSidebar() {
     const { auth } = usePage().props;
     const isAdmin = auth.user?.role === 'admin';
+    const userItems = roleMenus[auth.user?.role] ?? salesItems;
 
     return (
         <Sidebar>
@@ -110,7 +142,7 @@ export function AppSidebar() {
                     <SidebarGroup>
                         <SidebarGroupContent>
                             <SidebarMenu>
-                                {salesItems.map((item) => (
+                                {userItems.map((item) => (
                                     <SidebarMenuItem key={item.url}>
                                         <SidebarMenuButton asChild tooltip={item.title}>
                                             <Link href={item.url}>

@@ -26,6 +26,10 @@ class WebhookController extends Controller
 
     public function handle(Request $request, string $platform): JsonResponse|Response
     {
+        if ($platform === 'ladipage') {
+            $platform = IntegrationPlatform::Landing->value;
+        }
+
         $enum = IntegrationPlatform::tryFromWebhookPath($platform);
 
         if (! $enum) {

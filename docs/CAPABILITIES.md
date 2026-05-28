@@ -13,7 +13,7 @@ Tài liệu này map yêu cầu nghiệp vụ (mô hình Pushsale / phễu bán 
 | ROI Marketing | ✅ Báo cáo | Dashboard MKT + BC doanh số theo nguồn |
 | Kho & tồn | ✅ UI + DB | Demo data |
 | Vận chuyển (GHTK, GHN, VTP) | ❌ Chưa API | Chỉ field trạng thái trên đơn |
-| Webhook VC ngược | ❌ Chưa | Cần module shipping riêng |
+| Webhook VC ngược | ✅ Có (generic) | Endpoint `/api/v1/shipping/webhooks/{provider}` + log đối soát |
 | Kế toán / COD | ✅ UI | Đối soát demo |
 | RBAC chi tiết | ⚠️ 2 role | admin + sales — chưa kho/kế toán/marketing |
 | Real-time dashboard | ✅ | Reverb + toast lead mới |
@@ -99,3 +99,4 @@ Biến môi trường bổ sung: xem `.env.example` (`LEAD_ROUTING_STRATEGY`, `S
 4. **Import Excel** — lead manual
 5. **Shopee/Lazada** — driver payload chuẩn + OAuth refresh token job
 6. **Online-aware routing** — chỉ chia cho sale đang online (presence)
+7. **Chuẩn hóa theo từng hãng** — map status chi tiết cho Viettel Post/GHN/GHTK production

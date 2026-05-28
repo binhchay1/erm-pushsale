@@ -22,7 +22,11 @@ Clone đầy đủ luồng nghiệp vụ (Marketing → Telesale → Kho → K�
 | Role | Mã | Mô tả |
 |------|-----|--------|
 | Quản trị | `admin` | Toàn hệ thống |
-| Telesale | `sales` | Chỉ lead/đơn của mình |
+| Telesale | `sales` | Xử lý khách hàng, chốt đơn |
+| Marketing | `marketing` | Theo dõi chiến dịch / nguồn lead |
+| Kho | `warehouse` | Duyệt kho, xuất nhập, vận đơn |
+| Chia số | `allocator` | Phân lead cho telesale |
+| Kế toán | `accounting` | Đối soát COD, tài chính |
 
 Demo (sau seed):
 
@@ -71,11 +75,14 @@ Kiến trúc chi tiết: [`docs/ARCHITECTURE.md`](ARCHITECTURE.md)
 
 ## Trạng thái
 
-- [x] Auth 2 role, theme, noti, Reverb
+- [x] Auth đa role, theme, noti, Reverb
+- [x] Cấu trúc tổ chức đa vai trò + trưởng nhóm + phân nhánh team
 - [x] Domain DB + seed demo (`SaleOpsDemoSeeder`)
 - [x] 10 màn UI + Services/Repositories theo DATA-MODEL
 - [x] Admin UI tích hợp nền tảng + nhật ký lead (`/admin/integrations`, `/admin/leads`)
 - [x] Webhook xử lý lead → Order + Reverb `lead.ingested`
+- [x] API webhook vận chuyển + màn đối soát (`/admin/shipping/reconciliation`)
+- [x] Màn tổng hợp business + xếp hạng nhân sự (`/admin/reports/business`, `/admin/organization`)
 - [ ] Vận chuyển thật (GHTK, GHN, VTP) + webhook ngược
 
 ## Lệnh dev

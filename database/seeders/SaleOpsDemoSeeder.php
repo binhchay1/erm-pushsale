@@ -23,18 +23,72 @@ class SaleOpsDemoSeeder extends Seeder
     {
         $admin = User::query()->where('email', 'admin@saleops.local')->first();
         $sales = User::query()->where('role', UserRole::Sales)->get();
+        $marketingUsers = User::query()->where('role', UserRole::Marketing)->get();
+        $warehouseUsers = User::query()->where('role', UserRole::Warehouse)->get();
+        $allocatorUsers = User::query()->where('role', UserRole::Allocator)->get();
+        $accountingUsers = User::query()->where('role', UserRole::Accounting)->get();
+
+        $rootTeam = Team::query()->create([
+            'name' => 'Khối vận hành',
+            'type' => TeamType::Sale,
+            'leader_user_id' => $admin?->id,
+        ]);
 
         $saleTeam = Team::query()->create([
             'name' => 'Nhóm Sale A',
             'type' => TeamType::Sale,
             'leader_user_id' => $admin?->id,
+            'parent_id' => $rootTeam->id,
         ]);
 
         $mktTeam = Team::query()->create([
             'name' => 'Nhóm Marketing',
             'type' => TeamType::Marketing,
             'leader_user_id' => $admin?->id,
+            'parent_id' => $rootTeam->id,
         ]);
+
+        $warehouseTeam = Team::query()->create([
+            'name' => 'Nhóm Kho',
+            'type' => TeamType::Warehouse,
+            'leader_user_id' => $admin?->id,
+            'parent_id' => $rootTeam->id,
+        ]);
+
+        $allocatorTeam = Team::query()->create([
+            'name' => 'Nhóm Chia số',
+            'type' => TeamType::Allocator,
+            'leader_user_id' => $admin?->id,
+            'parent_id' => $rootTeam->id,
+        ]);
+
+        $accountingTeam = Team::query()->create([
+            'name' => 'Nhóm Kế toán',
+            'type' => TeamType::Accounting,
+            'leader_user_id' => $admin?->id,
+            'parent_id' => $rootTeam->id,
+        ]);
+
+        $sales->each(fn (User $u) => $u->update([
+            'team_id' => $saleTeam->id,
+            'manager_user_id' => $admin?->id,
+        ]));
+        $marketingUsers->each(fn (User $u) => $u->update([
+            'team_id' => $mktTeam->id,
+            'manager_user_id' => $admin?->id,
+        ]));
+        $warehouseUsers->each(fn (User $u) => $u->update([
+            'team_id' => $warehouseTeam->id,
+            'manager_user_id' => $admin?->id,
+        ]));
+        $allocatorUsers->each(fn (User $u) => $u->update([
+            'team_id' => $allocatorTeam->id,
+            'manager_user_id' => $admin?->id,
+        ]));
+        $accountingUsers->each(fn (User $u) => $u->update([
+            'team_id' => $accountingTeam->id,
+            'manager_user_id' => $admin?->id,
+        ]));
 
         $parentProduct = Product::query()->create([
             'name' => 'Gối mây đan',

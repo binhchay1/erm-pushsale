@@ -26,6 +26,34 @@ class DatabaseSeeder extends Seeder
         ]);
         $sales->ensurePreferences();
 
+        User::factory()->create([
+            'name' => 'Nhân viên Marketing',
+            'email' => 'marketing@saleops.local',
+            'password' => 'password',
+            'role' => UserRole::Marketing,
+        ])->ensurePreferences();
+
+        User::factory()->create([
+            'name' => 'Nhân viên Kho',
+            'email' => 'warehouse@saleops.local',
+            'password' => 'password',
+            'role' => UserRole::Warehouse,
+        ])->ensurePreferences();
+
+        User::factory()->create([
+            'name' => 'Nhân viên Chia số',
+            'email' => 'allocator@saleops.local',
+            'password' => 'password',
+            'role' => UserRole::Allocator,
+        ])->ensurePreferences();
+
+        User::factory()->create([
+            'name' => 'Nhân viên Kế toán',
+            'email' => 'accounting@saleops.local',
+            'password' => 'password',
+            'role' => UserRole::Accounting,
+        ])->ensurePreferences();
+
         $this->call(SaleOpsDemoSeeder::class);
     }
 }

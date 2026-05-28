@@ -21,6 +21,7 @@ class HandleInertiaRequests extends Middleware
 
         if ($user) {
             $preferences = $user->ensurePreferences()->toFrontendArray();
+            $user->loadMissing(['team:id,name', 'manager:id,name']);
         }
 
         return [
@@ -32,6 +33,9 @@ class HandleInertiaRequests extends Middleware
                     'email' => $user->email,
                     'role' => $user->role->value,
                     'role_label' => $user->roleLabel(),
+                    'team' => $user->team?->name,
+                    'manager' => $user->manager?->name,
+                    'is_team_leader' => (bool) $user->is_team_leader,
                 ] : null,
             ],
             'preferences' => $preferences,

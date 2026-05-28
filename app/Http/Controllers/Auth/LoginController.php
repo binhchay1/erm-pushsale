@@ -50,8 +50,13 @@ class LoginController extends Controller
 
     public static function homeFor(User $user): string
     {
-        return $user->isAdmin()
-            ? route('admin.dashboard')
-            : route('sales.workspace');
+        return match ($user->role->value) {
+            User::ROLE_ADMIN => route('admin.dashboard'),
+            User::ROLE_MARKETING => route('marketing.workspace'),
+            User::ROLE_WAREHOUSE => route('warehouse.workspace'),
+            User::ROLE_ALLOCATOR => route('allocator.workspace'),
+            User::ROLE_ACCOUNTING => route('accounting.workspace'),
+            default => route('sales.workspace'),
+        };
     }
 }

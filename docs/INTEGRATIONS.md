@@ -1,6 +1,6 @@
 # Tích hợp nền tảng — ERM SaleOps
 
-Hướng dẫn lấy API / webhook và cấu hình `.env` + API admin để thu lead từ Facebook, TikTok, Zalo, Landing.
+Hướng dẫn lấy API / webhook và cấu hình `.env` + admin UI để thu lead từ Landing (Ladipage), Facebook, TikTok, Zalo, Google.
 
 ## Kiến trúc nhanh
 
@@ -19,7 +19,7 @@ Nền tảng (FB/TikTok/...)
 | Facebook | `{APP_URL}/api/v1/webhooks/facebook` |
 | TikTok | `{APP_URL}/api/v1/webhooks/tiktok` |
 | Zalo | `{APP_URL}/api/v1/webhooks/zalo` |
-| Landing | `{APP_URL}/api/v1/webhooks/landing` hoặc `POST /api/v1/leads` (Bearer token) |
+| Landing | `{APP_URL}/api/v1/webhooks/landing` hoặc `{APP_URL}/api/v1/webhooks/ladipage` |
 | Google | `{APP_URL}/api/v1/webhooks/google` |
 
 ---
@@ -99,11 +99,25 @@ Payload form lead map qua `GenericWebhookDriver` (phone, name, …).
 
 ## 4. Landing page / form riêng
 
-Hai cách:
+### Với Ladipage.vn (khuyến nghị cho dự án này)
+
+Hệ thống hiện ưu tiên nguồn lead từ Ladipage. Ladi có thể gửi body linh hoạt (JSON hoặc form-data), ví dụ:
+
+- key chuẩn: `name`, `phone`, `utm_source`, `utm_campaign`
+- key nested: `fields[]` hoặc `form_data[]` dạng `{ name, value }`
+- key WordPress plugin: `f1`, `f2`, ... và metadata `form_id`, `source`, `channels`
+
+`LandingFormDriver` đã map theo heuristic để tự tìm:
+
+- số điện thoại: `phone`, `dien_thoai`, `so_dien_thoai`, `sdt` hoặc field có dạng số điện thoại
+- tên: `name`, `ho_ten`, `full_name`
+- sản phẩm: `product`, `san_pham`
+
+Hai cách gọi webhook:
 
 **A. Webhook (không cần đăng nhập user)**  
-`POST /api/v1/webhooks/landing`  
-Header: `X-Api-Key: {LANDING_API_KEY}`
+`POST /api/v1/webhooks/landing` hoặc `POST /api/v1/webhooks/ladipage`  
+Header: `X-Api-Key: {LANDING_API_KEY}` hoặc query `?api_key=...` (dùng khi Ladipage không set custom header được)
 
 **B. API có token Sanctum**  
 `POST /api/v1/leads`  
@@ -157,6 +171,13 @@ php artisan migrate
 ---
 
 ## API quản lý tích hợp (Admin)
+
+Admin web đã có UI:
+
+- Nền tảng lead: `/admin/integrations`
+- API vận chuyển: `/admin/shipping-partners`
+
+Nếu cần gọi API trực tiếp:
 
 1. Lấy token: `POST /api/v1/auth/token`  
    Body: `{ "email": "admin@saleops.local", "password": "password", "device_name": "postman" }`

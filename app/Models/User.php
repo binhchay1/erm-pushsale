@@ -7,12 +7,14 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'role'])]
+#[Fillable(['name', 'email', 'password', 'role', 'team_id', 'manager_user_id', 'is_team_leader'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -22,6 +24,10 @@ class User extends Authenticatable
     public const ROLE_ADMIN = 'admin';
 
     public const ROLE_SALES = 'sales';
+    public const ROLE_MARKETING = 'marketing';
+    public const ROLE_WAREHOUSE = 'warehouse';
+    public const ROLE_ALLOCATOR = 'allocator';
+    public const ROLE_ACCOUNTING = 'accounting';
 
     protected function casts(): array
     {
@@ -29,6 +35,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
+            'is_team_leader' => 'boolean',
         ];
     }
 
@@ -45,6 +52,21 @@ class User extends Authenticatable
     public function roleLabel(): string
     {
         return $this->role->label();
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'manager_user_id');
+    }
+
+    public function members(): HasMany
+    {
+        return $this->hasMany(self::class, 'manager_user_id');
     }
 
     public function preferences(): HasOne
