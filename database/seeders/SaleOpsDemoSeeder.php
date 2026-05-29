@@ -22,48 +22,59 @@ class SaleOpsDemoSeeder extends Seeder
     public function run(): void
     {
         $admin = User::query()->where('email', 'admin@saleops.local')->first();
+
+        // Nhân sự demo cho bảng xếp hạng (đủ để thấy top 10 + top 50).
+        $this->ensureDemoStaff(UserRole::Sales, 'sale', 'Telesale', 55);
+        $this->ensureDemoStaff(UserRole::Marketing, 'mkt', 'Marketing', 55);
+
         $sales = User::query()->where('role', UserRole::Sales)->get();
         $marketingUsers = User::query()->where('role', UserRole::Marketing)->get();
         $warehouseUsers = User::query()->where('role', UserRole::Warehouse)->get();
         $allocatorUsers = User::query()->where('role', UserRole::Allocator)->get();
         $accountingUsers = User::query()->where('role', UserRole::Accounting)->get();
 
-        $rootTeam = Team::query()->create([
+        $rootTeam = Team::query()->firstOrCreate([
             'name' => 'Khối vận hành',
+        ], [
             'type' => TeamType::Sale,
             'leader_user_id' => $admin?->id,
         ]);
 
-        $saleTeam = Team::query()->create([
+        $saleTeam = Team::query()->firstOrCreate([
             'name' => 'Nhóm Sale A',
+        ], [
             'type' => TeamType::Sale,
             'leader_user_id' => $admin?->id,
             'parent_id' => $rootTeam->id,
         ]);
 
-        $mktTeam = Team::query()->create([
+        $mktTeam = Team::query()->firstOrCreate([
             'name' => 'Nhóm Marketing',
+        ], [
             'type' => TeamType::Marketing,
             'leader_user_id' => $admin?->id,
             'parent_id' => $rootTeam->id,
         ]);
 
-        $warehouseTeam = Team::query()->create([
+        $warehouseTeam = Team::query()->firstOrCreate([
             'name' => 'Nhóm Kho',
+        ], [
             'type' => TeamType::Warehouse,
             'leader_user_id' => $admin?->id,
             'parent_id' => $rootTeam->id,
         ]);
 
-        $allocatorTeam = Team::query()->create([
+        $allocatorTeam = Team::query()->firstOrCreate([
             'name' => 'Nhóm Chia số',
+        ], [
             'type' => TeamType::Allocator,
             'leader_user_id' => $admin?->id,
             'parent_id' => $rootTeam->id,
         ]);
 
-        $accountingTeam = Team::query()->create([
+        $accountingTeam = Team::query()->firstOrCreate([
             'name' => 'Nhóm Kế toán',
+        ], [
             'type' => TeamType::Accounting,
             'leader_user_id' => $admin?->id,
             'parent_id' => $rootTeam->id,
@@ -90,31 +101,41 @@ class SaleOpsDemoSeeder extends Seeder
             'manager_user_id' => $admin?->id,
         ]));
 
-        $parentProduct = Product::query()->create([
-            'name' => 'Gối mây đan',
+        $parentProduct = Product::query()->firstOrCreate([
             'sku' => 'SP-PARENT-01',
+        ], [
+            'name' => 'Gối mây đan',
             'unit_price' => 299_000,
         ]);
 
-        $product = Product::query()->create([
+        $product = Product::query()->firstOrCreate([
+            'sku' => 'SP292627',
+        ], [
             'parent_id' => $parentProduct->id,
             'name' => 'Gối mây đan (SP292627)',
-            'sku' => 'SP292627',
             'unit_price' => 159_000,
         ]);
 
-        $camera = Product::query()->create([
-            'name' => 'Camera mini NK',
+        $camera = Product::query()->firstOrCreate([
             'sku' => 'CAM-MINI',
+        ], [
+            'name' => 'Camera mini NK',
             'unit_price' => 890_000,
         ]);
 
-        $warehouse = Warehouse::query()->create([
-            'name' => 'Kho Hòa Bình',
+        $warehouse = Warehouse::query()->firstOrCreate([
             'code' => 'HB',
+        ], [
+            'name' => 'Kho Hòa Bình',
+            'phone' => '0988111222',
+            'address' => 'KCN Hòa Bình, Hà Nội',
+            'manager_user_id' => $warehouseUsers->first()?->id ?? $admin?->id,
+            'vtp_code' => 'VTP-HB-01',
         ]);
 
-        $sourceParent = MarketingSource::query()->create([
+        $sourceParent = MarketingSource::query()->firstOrCreate([
+            'name' => 'Hải - camera mini nhật bản',
+        ], [
             'name' => 'Hải - camera mini nhật bản',
             'product_id' => $camera->id,
             'ad_channel' => 'Facebook ads',
@@ -124,9 +145,10 @@ class SaleOpsDemoSeeder extends Seeder
             'contacts' => 180,
         ]);
 
-        MarketingSource::query()->create([
+        MarketingSource::query()->firstOrCreate([
             'parent_id' => $sourceParent->id,
             'name' => $sourceParent->name,
+        ], [
             'product_id' => $camera->id,
             'ad_channel' => 'Youtube',
             'utm_source' => 'youtube',
@@ -136,8 +158,9 @@ class SaleOpsDemoSeeder extends Seeder
             'contacts' => 60,
         ]);
 
-        $source2 = MarketingSource::query()->create([
+        $source2 = MarketingSource::query()->firstOrCreate([
             'name' => 'Ngọc Huyền - GG - Bột diệt cỏ',
+        ], [
             'product_id' => $product->id,
             'ad_channel' => 'Google',
             'utm_source' => 'google',
@@ -156,22 +179,44 @@ class SaleOpsDemoSeeder extends Seeder
         ];
 
         $stages = OperationStage::cases();
+        $marketers = $marketingUsers->values();
+        $marketerCount = $marketers->count();
         $i = 0;
 
-        foreach ($sales as $saleUser) {
-            for ($n = 0; $n < 12; $n++) {
+        foreach ($sales->values() as $sIndex => $saleUser) {
+            // Số đơn lệch nhau theo nhân sự để tạo thứ hạng rõ ràng (3..24 đơn).
+            $orderCount = 3 + (($sIndex * 13 + 7) % 22);
+
+            for ($n = 0; $n < $orderCount; $n++) {
                 $i++;
-                $status = $statuses[$n % count($statuses)];
-                $stage = $stages[$n % count($stages)];
-                $source = $n % 2 === 0 ? $sourceParent : $source2;
-                $qty = random_int(1, 3);
+                $status = $statuses[$i % count($statuses)];
+                $stage = $stages[$i % count($stages)];
+                $source = $i % 2 === 0 ? $sourceParent : $source2;
+
+                // Dồn 1/3 đơn về nhóm marketer đầu để top 10 marketing nổi bật.
+                if ($marketerCount > 0) {
+                    $marketerIndex = $i % 3 === 0
+                        ? $i % min(10, $marketerCount)
+                        : ($i * 7) % $marketerCount;
+                    $marketer = $marketers[$marketerIndex];
+                } else {
+                    $marketer = $admin;
+                }
+
+                $qty = 1 + ($i % 3);
                 $unitPrice = $product->unit_price;
                 $subtotal = $qty * $unitPrice;
 
-                $order = Order::query()->create([
-                    'order_code' => 'PS'.str_pad((string) (1_800_000 + $i), 11, '0', STR_PAD_LEFT),
+                // Trải ngày chốt suốt 1 quý để filter tuần/tháng/quý đều có dữ liệu.
+                $closedAt = now()->subDays(($i * 7) % 95);
+
+                $orderCode = 'PS'.str_pad((string) (1_800_000 + $i), 11, '0', STR_PAD_LEFT);
+
+                $order = Order::query()->firstOrCreate([
+                    'order_code' => $orderCode,
+                ], [
                     'sale_user_id' => $saleUser->id,
-                    'marketer_user_id' => $admin?->id,
+                    'marketer_user_id' => $marketer?->id,
                     'team_id' => $saleTeam->id,
                     'marketing_source_id' => $source->id,
                     'warehouse_id' => $warehouse->id,
@@ -181,29 +226,30 @@ class SaleOpsDemoSeeder extends Seeder
                     'phone_carrier' => 'VIETTEL',
                     'customer_note' => 'Ghi chú đơn mẫu #'.$i,
                     'shipping_address' => 'Hà Nội — địa chỉ demo '.$i,
-                    'data_arrived_at' => now()->subDays(random_int(0, 7)),
-                    'assigned_at' => now()->subDays(random_int(0, 6)),
-                    'closed_at' => now()->subDays(random_int(0, 5)),
+                    'data_arrived_at' => $closedAt->copy()->subDays(2),
+                    'assigned_at' => $closedAt->copy()->subDay(),
+                    'closed_at' => $closedAt,
                     'operation_stage' => $stage->value,
                     'delivery_status' => $status->value,
                     'carrier_name' => 'Viettel Post(COD)',
                     'tracking_number' => 'VT'.random_int(100000, 999999),
-                    'is_returning_customer' => $n % 3 === 0,
+                    'is_returning_customer' => $i % 3 === 0,
                     'subtotal' => $subtotal,
                     'discount' => (int) ($subtotal * 0.05),
                     'vat' => 0,
                     'shipping_fee_collected' => 30_000,
                     'total' => $subtotal + 30_000,
-                    'deposit' => $n % 4 === 0 ? 100_000 : 0,
+                    'deposit' => $i % 4 === 0 ? 100_000 : 0,
                     'amount_to_collect' => $subtotal + 30_000,
                     'contact_count' => 1,
                     'cod_fee' => 15_000,
                     'cod_support' => 5_000,
                 ]);
 
-                OrderItem::query()->create([
+                OrderItem::query()->firstOrCreate([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
+                ], [
                     'product_name' => $product->name,
                     'quantity' => $qty,
                     'unit_price' => $unitPrice,
@@ -211,28 +257,43 @@ class SaleOpsDemoSeeder extends Seeder
             }
         }
 
-        WarehouseInventory::query()->create([
+        WarehouseInventory::query()->updateOrCreate([
             'warehouse_id' => $warehouse->id,
             'product_id' => $product->id,
+        ], [
             'stock_quantity' => 36,
             'pending_sales_quantity' => 12,
             'location_code' => 'A-01',
         ]);
 
-        WarehouseInventory::query()->create([
+        WarehouseInventory::query()->updateOrCreate([
             'warehouse_id' => $warehouse->id,
             'product_id' => $camera->id,
+        ], [
             'stock_quantity' => 7,
             'pending_sales_quantity' => -2,
             'location_code' => 'B-12',
         ]);
 
-        FailedPartnerOrder::query()->create([
+        FailedPartnerOrder::query()->firstOrCreate([
             'platform' => 'TikTok',
+            'partner_order_id' => 'TT-DEMO-00001',
+        ], [
             'warehouse_id' => $warehouse->id,
             'shop_name' => 'Shop demo',
-            'partner_order_id' => 'TT-'.random_int(10000, 99999),
             'error_description' => 'Mã đơn không khớp kho',
         ]);
+    }
+
+    private function ensureDemoStaff(UserRole $role, string $prefix, string $label, int $count): void
+    {
+        for ($n = 1; $n <= $count; $n++) {
+            $seq = str_pad((string) $n, 2, '0', STR_PAD_LEFT);
+
+            User::query()->firstOrCreate(
+                ['email' => "{$prefix}{$seq}@saleops.local"],
+                ['name' => "{$label} {$seq}", 'password' => 'password', 'role' => $role],
+            );
+        }
     }
 }

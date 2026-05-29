@@ -9,7 +9,6 @@ use App\Models\Order;
 use App\Models\ShippingWebhookEvent;
 use App\Models\User;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DashboardStatsService
 {

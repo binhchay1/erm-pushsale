@@ -20,7 +20,7 @@ class RevenueReportService
     /** @return array<string, mixed> */
     public function forMarketers(ReportFilterData $filter): array
     {
-        $users = User::query()->where('role', UserRole::Admin)->get();
+        $users = User::query()->where('role', UserRole::Marketing)->get();
 
         return $this->buildGrouped($filter, $users, 'marketer_user_id', 'marketerId', 'marketerName');
     }

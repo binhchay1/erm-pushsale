@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Data\ReportFilterData;
 use App\Enums\DateType;
-use App\Enums\DiscountMode;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

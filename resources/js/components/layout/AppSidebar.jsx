@@ -2,7 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     Home,
-    Users,
+    Trophy,
     Megaphone,
     Package,
     PhoneCall,
@@ -34,7 +34,7 @@ const adminGroups = [
             { title: 'Dashboard CEO', url: '/admin/dashboard', icon: Home },
             { title: 'Tổng hợp vận hành', url: '/admin/reports/business', icon: BarChart3 },
             { title: 'Báo cáo CEO', url: '/admin/reports/ceo', icon: BarChart3 },
-            { title: 'Tổ chức & xếp hạng', url: '/admin/organization', icon: Users },
+            { title: 'Xếp hạng doanh thu', url: '/admin/rankings', icon: Trophy },
         ],
     },
     {
@@ -62,6 +62,7 @@ const adminGroups = [
     {
         label: 'Vận hành',
         items: [
+            { title: 'Danh sách kho', url: '/admin/warehouses', icon: Truck },
             { title: 'Kế toán', url: '/admin/accounting', icon: Wallet },
             { title: 'Thủ kho', url: '/admin/warehouse/operations', icon: Truck },
             { title: 'Tồn kho SP', url: '/admin/warehouse/inventory', icon: Package },

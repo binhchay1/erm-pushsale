@@ -10,50 +10,22 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::factory()->create([
-            'name' => 'Quản trị viên',
-            'email' => 'admin@saleops.local',
-            'password' => 'password',
-            'role' => UserRole::Admin,
-        ]);
-        $admin->ensurePreferences();
-
-        $sales = User::factory()->create([
-            'name' => 'Nhân viên Telesale',
-            'email' => 'sales@saleops.local',
-            'password' => 'password',
-            'role' => UserRole::Sales,
-        ]);
-        $sales->ensurePreferences();
-
-        User::factory()->create([
-            'name' => 'Nhân viên Marketing',
-            'email' => 'marketing@saleops.local',
-            'password' => 'password',
-            'role' => UserRole::Marketing,
-        ])->ensurePreferences();
-
-        User::factory()->create([
-            'name' => 'Nhân viên Kho',
-            'email' => 'warehouse@saleops.local',
-            'password' => 'password',
-            'role' => UserRole::Warehouse,
-        ])->ensurePreferences();
-
-        User::factory()->create([
-            'name' => 'Nhân viên Chia số',
-            'email' => 'allocator@saleops.local',
-            'password' => 'password',
-            'role' => UserRole::Allocator,
-        ])->ensurePreferences();
-
-        User::factory()->create([
-            'name' => 'Nhân viên Kế toán',
-            'email' => 'accounting@saleops.local',
-            'password' => 'password',
-            'role' => UserRole::Accounting,
-        ])->ensurePreferences();
+        $this->ensureUser('Quản trị viên', 'admin@saleops.local', UserRole::Admin);
+        $this->ensureUser('Nhân viên Telesale', 'sales@saleops.local', UserRole::Sales);
+        $this->ensureUser('Nhân viên Marketing', 'marketing@saleops.local', UserRole::Marketing);
+        $this->ensureUser('Nhân viên Kho', 'warehouse@saleops.local', UserRole::Warehouse);
+        $this->ensureUser('Nhân viên Chia số', 'allocator@saleops.local', UserRole::Allocator);
+        $this->ensureUser('Nhân viên Kế toán', 'accounting@saleops.local', UserRole::Accounting);
 
         $this->call(SaleOpsDemoSeeder::class);
+    }
+
+    protected function ensureUser(string $name, string $email, UserRole $role): void
+    {
+        $user = User::query()->updateOrCreate(
+            ['email' => $email],
+            ['name' => $name, 'password' => 'password', 'role' => $role]
+        );
+        $user->ensurePreferences();
     }
 }

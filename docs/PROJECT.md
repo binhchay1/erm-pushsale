@@ -82,7 +82,8 @@ Kiến trúc chi tiết: [`docs/ARCHITECTURE.md`](ARCHITECTURE.md)
 - [x] Admin UI tích hợp nền tảng + nhật ký lead (`/admin/integrations`, `/admin/leads`)
 - [x] Webhook xử lý lead → Order + Reverb `lead.ingested`
 - [x] API webhook vận chuyển + màn đối soát (`/admin/shipping/reconciliation`)
-- [x] Màn tổng hợp business + xếp hạng nhân sự (`/admin/reports/business`, `/admin/organization`)
+- [x] Màn tổng hợp business (`/admin/reports/business`)
+- [x] Xếp hạng doanh thu Telesale & Marketing theo tuần/tháng/quý (`/admin/rankings`)
 - [ ] Vận chuyển thật (GHTK, GHN, VTP) + webhook ngược
 
 ## Lệnh dev

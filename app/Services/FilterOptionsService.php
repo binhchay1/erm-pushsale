@@ -40,7 +40,7 @@ class FilterOptionsService
             'parentProducts' => Product::query()->whereNull('parent_id')->orderBy('name')->get(['id', 'name']),
             'warehouses' => Warehouse::query()->orderBy('name')->get(['id', 'name', 'code']),
             'salesUsers' => User::query()->where('role', UserRole::Sales)->get(['id', 'name', 'email']),
-            'marketingUsers' => User::query()->where('role', UserRole::Admin)->get(['id', 'name', 'email']),
+            'marketingUsers' => User::query()->where('role', UserRole::Marketing)->get(['id', 'name', 'email']),
             'sourceTypes' => [
                 ['value' => 'standard', 'label' => 'Chuẩn SaleOps'],
             ],
