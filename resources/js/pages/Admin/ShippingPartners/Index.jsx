@@ -84,6 +84,20 @@ function ProviderCard({ provider }) {
                         />
                     </div>
 
+                    {provider.api_base_url && (
+                        <div className="rounded-lg border bg-muted/20 px-4 py-3 text-xs">
+                            <p className="font-mono text-muted-foreground">API: {provider.api_base_url}</p>
+                            {provider.services?.length > 0 && (
+                                <p className="mt-1 text-muted-foreground">
+                                    Dịch vụ:{' '}
+                                    {provider.services
+                                        .map((s) => `${s.label} (${s.code})`)
+                                        .join(', ')}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
                     <div className="space-y-2">
                         <Label>Webhook URL nhận callback</Label>
                         <div className="flex gap-2">

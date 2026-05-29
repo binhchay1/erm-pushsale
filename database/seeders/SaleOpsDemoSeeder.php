@@ -8,6 +8,7 @@ use App\Enums\TeamType;
 use App\Enums\UserRole;
 use App\Models\FailedPartnerOrder;
 use App\Models\MarketingSource;
+use App\Models\UserNotification;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -133,16 +134,21 @@ class SaleOpsDemoSeeder extends Seeder
             'vtp_code' => 'VTP-HB-01',
         ]);
 
+        $mkt = $marketingUsers->values();
+
         $sourceParent = MarketingSource::query()->firstOrCreate([
             'name' => 'Hải - camera mini nhật bản',
         ], [
             'name' => 'Hải - camera mini nhật bản',
             'product_id' => $camera->id,
-            'ad_channel' => 'Facebook ads',
+            'marketer_user_id' => $mkt->get(0)?->id ?? $admin?->id,
+            'ad_channel' => 'facebook',
             'utm_source' => 'facebook',
+            'utm_campaign' => 'cam-mini-fb',
             'budget' => 5_000_000,
             'interactions' => 1200,
             'contacts' => 180,
+            'is_active' => true,
         ]);
 
         MarketingSource::query()->firstOrCreate([
@@ -150,23 +156,28 @@ class SaleOpsDemoSeeder extends Seeder
             'name' => $sourceParent->name,
         ], [
             'product_id' => $camera->id,
-            'ad_channel' => 'Youtube',
+            'marketer_user_id' => $mkt->get(1)?->id ?? $admin?->id,
+            'ad_channel' => 'google',
             'utm_source' => 'youtube',
             'utm_campaign' => 'cam-mini-q2',
             'budget' => 2_000_000,
             'interactions' => 400,
             'contacts' => 60,
+            'is_active' => true,
         ]);
 
         $source2 = MarketingSource::query()->firstOrCreate([
             'name' => 'Ngọc Huyền - GG - Bột diệt cỏ',
         ], [
             'product_id' => $product->id,
-            'ad_channel' => 'Google',
+            'marketer_user_id' => $mkt->get(2)?->id ?? $admin?->id,
+            'ad_channel' => 'google',
             'utm_source' => 'google',
+            'utm_campaign' => 'bot-diet-co-gg',
             'budget' => 3_500_000,
             'interactions' => 800,
             'contacts' => 95,
+            'is_active' => true,
         ]);
 
         $statuses = [
@@ -283,6 +294,34 @@ class SaleOpsDemoSeeder extends Seeder
             'shop_name' => 'Shop demo',
             'error_description' => 'Mã đơn không khớp kho',
         ]);
+
+        $this->seedNotifications($admin);
+    }
+
+    private function seedNotifications(?User $admin): void
+    {
+        if (! $admin) {
+            return;
+        }
+
+        $samples = [
+            ['lead', 'Lead mới từ landing', 'Nguyễn Văn A · 0987654321', '/admin/leads'],
+            ['order', 'Đơn PS1800001 đã giao thành công', 'COD 920.000đ đã thu', '/admin/reports/business'],
+            ['shipping', 'Lệch COD vận đơn VT123456', 'Đối tác báo 850.000đ / hệ thống 920.000đ', '/admin/shipping/reconciliation'],
+            ['system', 'Chiến dịch "cam-mini-fb" đang chạy', 'Đã nhận 12 lead trong hôm nay', '/admin/marketing/campaigns'],
+        ];
+
+        foreach ($samples as $index => [$type, $title, $message, $url]) {
+            UserNotification::query()->firstOrCreate(
+                ['user_id' => $admin->id, 'title' => $title],
+                [
+                    'type' => $type,
+                    'message' => $message,
+                    'url' => $url,
+                    'read_at' => $index >= 2 ? now() : null,
+                ],
+            );
+        }
     }
 
     private function ensureDemoStaff(UserRole $role, string $prefix, string $label, int $count): void

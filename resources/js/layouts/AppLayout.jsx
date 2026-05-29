@@ -2,8 +2,11 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { useFlashToast } from '@/hooks/useFlashToast';
 
 export default function AppLayout({ children }) {
+    useFlashToast();
+
     return (
         <SidebarProvider>
             <TooltipProvider>

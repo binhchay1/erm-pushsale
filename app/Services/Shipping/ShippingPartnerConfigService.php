@@ -79,6 +79,8 @@ class ShippingPartnerConfigService
             'label' => $meta['label'] ?? $provider,
             'description' => $meta['description'] ?? null,
             'docs_url' => $meta['docs_url'] ?? null,
+            'api_base_url' => $meta['api_base_url'] ?? null,
+            'services' => $meta['services'] ?? [],
             'is_enabled' => $connection->is_enabled,
             'is_configured' => collect($fields)->every(fn (array $f) => $f['is_set']),
             'webhook_secret_set' => filled($connection->webhook_secret),

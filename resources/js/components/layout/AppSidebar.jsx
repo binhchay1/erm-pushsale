@@ -1,18 +1,23 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
+    Activity,
+    AlertTriangle,
     BarChart3,
+    ClipboardList,
+    FileCheck,
     Home,
-    Trophy,
+    LineChart,
     Megaphone,
     Package,
     PhoneCall,
     Plug,
     RefreshCw,
     Settings,
-    ShoppingCart,
+    Target,
+    Trophy,
     Truck,
     Wallet,
-    AlertTriangle,
+    Warehouse,
 } from 'lucide-react';
 
 import {
@@ -32,7 +37,7 @@ const adminGroups = [
         label: 'Điều hành',
         items: [
             { title: 'Dashboard CEO', url: '/admin/dashboard', icon: Home },
-            { title: 'Tổng hợp vận hành', url: '/admin/reports/business', icon: BarChart3 },
+            { title: 'Tổng hợp vận hành', url: '/admin/reports/business', icon: Activity },
             { title: 'Báo cáo CEO', url: '/admin/reports/ceo', icon: BarChart3 },
             { title: 'Xếp hạng doanh thu', url: '/admin/rankings', icon: Trophy },
         ],
@@ -41,7 +46,8 @@ const adminGroups = [
         label: 'Marketing',
         items: [
             { title: 'Dashboard MKT', url: '/admin/marketing/dashboard', icon: Megaphone },
-            { title: 'BC doanh số MKT', url: '/admin/marketing/revenue', icon: BarChart3 },
+            { title: 'Chiến dịch MKT', url: '/admin/marketing/campaigns', icon: Target },
+            { title: 'BC doanh số MKT', url: '/admin/marketing/revenue', icon: LineChart },
         ],
     },
     {
@@ -56,15 +62,15 @@ const adminGroups = [
         items: [
             { title: 'Tích hợp nền tảng', url: '/admin/integrations', icon: Plug },
             { title: 'API vận chuyển', url: '/admin/shipping-partners', icon: Truck },
-            { title: 'Đối soát vận chuyển', url: '/admin/shipping/reconciliation', icon: ShoppingCart },
+            { title: 'Đối soát vận chuyển', url: '/admin/shipping/reconciliation', icon: FileCheck },
         ],
     },
     {
         label: 'Vận hành',
         items: [
-            { title: 'Danh sách kho', url: '/admin/warehouses', icon: Truck },
+            { title: 'Danh sách kho', url: '/admin/warehouses', icon: Warehouse },
             { title: 'Kế toán', url: '/admin/accounting', icon: Wallet },
-            { title: 'Thủ kho', url: '/admin/warehouse/operations', icon: Truck },
+            { title: 'Thủ kho', url: '/admin/warehouse/operations', icon: ClipboardList },
             { title: 'Tồn kho SP', url: '/admin/warehouse/inventory', icon: Package },
             { title: 'Đơn lỗi', url: '/admin/orders/failed', icon: AlertTriangle },
         ],
@@ -79,7 +85,8 @@ const roleMenus = {
     ],
     marketing: [
         { title: 'Dashboard MKT', url: '/marketing/workspace', icon: Megaphone },
-        { title: 'Doanh thu MKT', url: '/marketing/revenue', icon: BarChart3 },
+        { title: 'Chiến dịch MKT', url: '/marketing/campaigns', icon: Target },
+        { title: 'Doanh thu MKT', url: '/marketing/revenue', icon: LineChart },
         { title: 'Cài đặt', url: '/settings', icon: Settings },
     ],
     warehouse: [

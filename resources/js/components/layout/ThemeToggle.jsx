@@ -1,4 +1,4 @@
-import { Moon, Palette, Sun } from 'lucide-react';
+import { Monitor, Moon, Palette, Sun } from 'lucide-react';
 import { usePage } from '@inertiajs/react';
 
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ export function ThemeToggle() {
     };
 
     const Icon =
-        appearance === 'dark' ? Moon : appearance === 'light' ? Sun : Palette;
+        appearance === 'dark' ? Moon : appearance === 'light' ? Sun : Monitor;
 
     return (
         <div className="flex items-center gap-1">

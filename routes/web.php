@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\IntegrationsController;
 use App\Http\Controllers\Admin\LeadsLogController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BusinessOverviewController;
+use App\Http\Controllers\Admin\Marketing\CampaignController;
 use App\Http\Controllers\Admin\Marketing\DashboardController as MarketingDashboardController;
 use App\Http\Controllers\Admin\Marketing\RevenueReportController as MarketingRevenueReportController;
 use App\Http\Controllers\Admin\Orders\FailedOrdersController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Admin\Warehouse\InventoryController;
 use App\Http\Controllers\Admin\Warehouse\OperationsController as WarehouseOperationsController;
 use App\Http\Controllers\Admin\Warehouse\WarehouseController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Sales\CustomerProfileController;
 use App\Http\Controllers\Sales\OperationController;
 use App\Http\Controllers\SettingsController;
@@ -45,11 +47,21 @@ Route::middleware('auth')->group(function () {
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
 
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+
     Route::middleware('role:'.User::ROLE_ADMIN)->prefix('admin')->name('admin.')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
         Route::get('reports/business', BusinessOverviewController::class)->name('reports.business');
         Route::get('reports/ceo', CeoReportController::class)->name('reports.ceo');
         Route::get('marketing/dashboard', MarketingDashboardController::class)->name('marketing.dashboard');
+        Route::get('marketing/campaigns', [CampaignController::class, 'index'])->name('marketing.campaigns.index');
+        Route::get('marketing/campaigns/create', [CampaignController::class, 'create'])->name('marketing.campaigns.create');
+        Route::post('marketing/campaigns', [CampaignController::class, 'store'])->name('marketing.campaigns.store');
+        Route::get('marketing/campaigns/{campaign}/edit', [CampaignController::class, 'edit'])->name('marketing.campaigns.edit');
+        Route::put('marketing/campaigns/{campaign}', [CampaignController::class, 'update'])->name('marketing.campaigns.update');
+        Route::delete('marketing/campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('marketing.campaigns.destroy');
         Route::get('marketing/revenue', MarketingRevenueReportController::class)->name('marketing.revenue');
         Route::get('sales/revenue', SaleRevenueReportController::class)->name('sales.revenue');
         Route::get('accounting', AccountingOperationsController::class)->name('accounting');
@@ -80,6 +92,12 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:'.User::ROLE_MARKETING)->prefix('marketing')->name('marketing.')->group(function () {
         Route::get('workspace', MarketingDashboardController::class)->name('workspace');
+        Route::get('campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
+        Route::get('campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create');
+        Route::post('campaigns', [CampaignController::class, 'store'])->name('campaigns.store');
+        Route::get('campaigns/{campaign}/edit', [CampaignController::class, 'edit'])->name('campaigns.edit');
+        Route::put('campaigns/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
+        Route::delete('campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
         Route::get('revenue', MarketingRevenueReportController::class)->name('revenue');
     });
 

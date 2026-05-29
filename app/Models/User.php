@@ -74,6 +74,11 @@ class User extends Authenticatable
         return $this->hasOne(UserPreference::class);
     }
 
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class)->latest('id');
+    }
+
     public function ensurePreferences(): UserPreference
     {
         return $this->preferences()->firstOrCreate(
