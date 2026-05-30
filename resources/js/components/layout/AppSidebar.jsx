@@ -108,8 +108,17 @@ const fallbackItems = [
     { title: 'Cài đặt', url: '/settings', icon: Settings },
 ];
 
+function isNavActive(itemUrl, currentUrl) {
+    if (itemUrl === '/') {
+        return currentUrl === '/';
+    }
+
+    return currentUrl === itemUrl || currentUrl.startsWith(`${itemUrl}/`);
+}
+
 export function AppSidebar() {
-    const { auth } = usePage().props;
+    const { props, url } = usePage();
+    const { auth } = props;
     const isAdmin = auth.user?.role === 'admin';
     const roleLabel = auth.user?.role_label ?? 'Người dùng';
     const userItems = roleMenus[auth.user?.role] ?? fallbackItems;
@@ -133,7 +142,11 @@ export function AppSidebar() {
                                 <SidebarMenu>
                                     {group.items.map((item) => (
                                         <SidebarMenuItem key={item.url}>
-                                            <SidebarMenuButton asChild tooltip={item.title}>
+                                            <SidebarMenuButton
+                                                asChild
+                                                tooltip={item.title}
+                                                isActive={isNavActive(item.url, url)}
+                                            >
                                                 <Link href={item.url}>
                                                     <item.icon className="size-4" />
                                                     <span>{item.title}</span>
@@ -151,7 +164,11 @@ export function AppSidebar() {
                             <SidebarMenu>
                                 {userItems.map((item) => (
                                     <SidebarMenuItem key={item.url}>
-                                        <SidebarMenuButton asChild tooltip={item.title}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            tooltip={item.title}
+                                            isActive={isNavActive(item.url, url)}
+                                        >
                                             <Link href={item.url}>
                                                 <item.icon className="size-4" />
                                                 <span>{item.title}</span>
@@ -169,7 +186,7 @@ export function AppSidebar() {
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 <SidebarMenuItem>
-                                    <SidebarMenuButton asChild>
+                                    <SidebarMenuButton asChild isActive={isNavActive('/settings', url)}>
                                         <Link href="/settings">
                                             <Settings className="size-4" />
                                             <span>Cài đặt</span>
