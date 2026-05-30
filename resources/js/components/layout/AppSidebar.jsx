@@ -13,8 +13,17 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 
+function isNavActive(itemUrl, currentUrl) {
+    if (itemUrl === '/') {
+        return currentUrl === '/';
+    }
+
+    return currentUrl === itemUrl || currentUrl.startsWith(`${itemUrl}/`);
+}
+
 export function AppSidebar() {
-    const { auth, navigation = [] } = usePage().props;
+    const { props, url } = usePage();
+    const { auth, navigation = [] } = props;
     const isAdmin = auth.user?.role === 'admin';
     const roleLabel = auth.user?.role_label ?? 'Người dùng';
 
@@ -41,7 +50,11 @@ export function AppSidebar() {
 
                                     return (
                                         <SidebarMenuItem key={item.url}>
-                                            <SidebarMenuButton asChild tooltip={item.title}>
+                                            <SidebarMenuButton
+                                                asChild
+                                                tooltip={item.title}
+                                                isActive={isNavActive(item.url, url)}
+                                            >
                                                 <Link href={item.url}>
                                                     <Icon className="size-4" />
                                                     <span>{item.title}</span>
