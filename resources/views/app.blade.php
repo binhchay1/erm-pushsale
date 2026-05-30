@@ -13,9 +13,31 @@
         <script>
             (function () {
                 try {
-                    const raw = localStorage.getItem('saleops-appearance');
-                    if (raw === 'dark' || (raw === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                        document.documentElement.classList.add('dark');
+                    const themes = @json(config('saleops.themes'));
+                    const root = document.documentElement;
+                    const appearance = localStorage.getItem('saleops-appearance');
+                    const themeId = localStorage.getItem('saleops-theme');
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+                    if (appearance === 'dark' || (appearance === 'system' && prefersDark)) {
+                        root.classList.add('dark');
+                    } else if (appearance === 'light') {
+                        root.classList.remove('dark');
+                    }
+
+                    if (themeId && themes[themeId]) {
+                        const theme = themes[themeId];
+                        root.dataset.theme = themeId;
+                        root.style.setProperty('--primary', theme.primary);
+                        root.style.setProperty('--primary-foreground', theme.primary_foreground);
+                        root.style.setProperty('--sidebar-primary', theme.primary);
+                        root.style.setProperty('--ring', theme.primary);
+
+                        if (theme.chart && theme.chart.length) {
+                            root.style.setProperty('--chart-1', theme.chart[0]);
+                            root.style.setProperty('--chart-2', theme.chart[1] ?? theme.chart[0]);
+                            root.style.setProperty('--chart-3', theme.chart[2] ?? theme.chart[0]);
+                        }
                     }
                 } catch (e) {}
             })();

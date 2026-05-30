@@ -1,13 +1,12 @@
 import { usePage } from '@inertiajs/react';
 import { Check } from 'lucide-react';
 
-import { useTheme, useThemePreview } from '@/providers/ThemeProvider';
+import { useTheme } from '@/providers/ThemeProvider';
 import { cn } from '@/lib/utils';
 
-export function ThemeSettings({ value, onChange }) {
+export function ThemeSettings({ value }) {
     const { themes } = usePage().props;
-    const preview = useThemePreview();
-    const { applyLocal } = useTheme();
+    const { setTheme } = useTheme();
 
     const entries = Object.entries(themes ?? {});
 
@@ -17,11 +16,7 @@ export function ThemeSettings({ value, onChange }) {
                 <button
                     key={id}
                     type="button"
-                    onClick={() => {
-                        onChange(id);
-                        preview(id);
-                        applyLocal(id, null);
-                    }}
+                    onClick={() => setTheme(id)}
                     className={cn(
                         'relative flex flex-col items-start rounded-xl border p-4 text-left transition-all hover:border-primary/50 hover:shadow-sm',
                         value === id
@@ -49,7 +44,7 @@ export function ThemeSettings({ value, onChange }) {
     );
 }
 
-export function AppearanceSettings({ value, onChange }) {
+export function AppearanceSettings({ value }) {
     const { setAppearance } = useTheme();
     const options = [
         { id: 'light', label: 'Sáng' },
@@ -63,10 +58,7 @@ export function AppearanceSettings({ value, onChange }) {
                 <button
                     key={opt.id}
                     type="button"
-                    onClick={() => {
-                        onChange(opt.id);
-                        setAppearance(opt.id);
-                    }}
+                    onClick={() => setAppearance(opt.id)}
                     className={cn(
                         'rounded-lg border px-4 py-2 text-sm font-medium transition-colors',
                         value === opt.id

@@ -1,30 +1,24 @@
 import { Monitor, Moon, Palette, Sun } from 'lucide-react';
-import { usePage } from '@inertiajs/react';
 
 import { Button } from '@/components/ui/button';
-import { useTheme, useThemePreview } from '@/providers/ThemeProvider';
-import { applyAppearance } from '@/lib/themes';
+import { useTheme } from '@/providers/ThemeProvider';
 
 const cycle = ['light', 'dark', 'system'];
 
 export function ThemeToggle() {
-    const { appearance, setAppearance } = useTheme();
-    const preview = useThemePreview();
-    const { themes, preferences } = usePage().props;
+    const { theme, appearance, setTheme, setAppearance, themes } = useTheme();
     const themeIds = Object.keys(themes ?? {});
 
     const nextAppearance = () => {
         const idx = cycle.indexOf(appearance);
         const next = cycle[(idx + 1) % cycle.length];
         setAppearance(next);
-        applyAppearance(next);
     };
 
     const cycleTheme = () => {
-        const current = preferences?.theme ?? 'brand';
-        const idx = themeIds.indexOf(current);
+        const idx = themeIds.indexOf(theme);
         const nextId = themeIds[(idx + 1) % themeIds.length] ?? 'brand';
-        preview(nextId);
+        setTheme(nextId);
     };
 
     const Icon =

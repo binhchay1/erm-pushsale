@@ -7,26 +7,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ThemeSettings, AppearanceSettings } from '@/components/settings/ThemeSettings';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { useTheme } from '@/providers/ThemeProvider';
-import { applyAppearance } from '@/lib/themes';
 
 export default function SettingsIndex({ preferences, settingsBackUrl }) {
     const { themes } = usePage().props;
-    const { applyLocal } = useTheme();
+    const { theme, appearance } = useTheme();
 
-    const { data, setData, put, processing, recentlySuccessful } = useForm({
-        theme: preferences.theme,
-        appearance: preferences.appearance,
+    const { data, setData, transform, put, processing, recentlySuccessful } = useForm({
         notifications: { ...preferences.notifications },
     });
+
+    transform((formData) => ({
+        ...formData,
+        theme,
+        appearance,
+    }));
 
     const submit = (e) => {
         e.preventDefault();
         put('/settings', {
             preserveScroll: true,
-            onSuccess: () => {
-                applyLocal(data.theme, data.appearance);
-                applyAppearance(data.appearance);
-            },
         });
     };
 
@@ -56,10 +55,7 @@ export default function SettingsIndex({ preferences, settingsBackUrl }) {
                             <CardDescription>Chọn bộ màu theme cho dashboard</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <ThemeSettings
-                                value={data.theme}
-                                onChange={(theme) => setData('theme', theme)}
-                            />
+                            <ThemeSettings value={theme} />
                         </CardContent>
                     </Card>
 
@@ -69,10 +65,7 @@ export default function SettingsIndex({ preferences, settingsBackUrl }) {
                             <CardDescription>Sáng, tối hoặc theo hệ điều hành</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <AppearanceSettings
-                                value={data.appearance}
-                                onChange={(appearance) => setData('appearance', appearance)}
-                            />
+                            <AppearanceSettings value={appearance} />
                         </CardContent>
                     </Card>
 
@@ -102,7 +95,7 @@ export default function SettingsIndex({ preferences, settingsBackUrl }) {
                 </form>
 
                 <p className="text-center text-xs text-muted-foreground">
-                    Theme: {themes?.[data.theme]?.label ?? data.theme}
+                    Theme: {themes?.[theme]?.label ?? theme}
                 </p>
             </div>
         </AppLayout>
