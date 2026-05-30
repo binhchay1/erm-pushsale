@@ -6,7 +6,6 @@ use App\Enums\DateType;
 use App\Enums\DeliveryStatus;
 use App\Enums\DiscountMode;
 use App\Enums\OperationStage;
-use App\Enums\TeamType;
 use App\Enums\UserRole;
 use App\Models\Product;
 use App\Models\Team;
@@ -16,9 +15,9 @@ use App\Models\Warehouse;
 class FilterOptionsService
 {
     /** @return array<string, mixed> */
-    public function forReports(): array
+    public function forReports(?User $user = null): array
     {
-        return [
+        $options = [
             'dateTypes' => collect(DateType::cases())->map(fn ($e) => [
                 'value' => $e->value,
                 'label' => $e->label(),
@@ -49,5 +48,40 @@ class FilterOptionsService
                 ['value' => 'reconciled', 'label' => 'Đã đối soát'],
             ],
         ];
+
+        if ($user?->isSales()) {
+            unset($options['salesUsers'], $options['marketingUsers'], $options['teams']);
+        } elseif ($user && ! $user->isAdmin()) {
+            unset($options['salesUsers'], $options['marketingUsers']);
+        }
+
+        return $options;
+    }
+
+    /** @return list<string> */
+    public function visibleFilterFields(?User $user = null): array
+    {
+        $fields = [
+            'date_from',
+            'date_to',
+            'date_type',
+            'delivery_status',
+            'product_id',
+            'warehouse_id',
+            'sale_id',
+            'search',
+            'no_closing_date_limit',
+            'hide_zero_status',
+        ];
+
+        if ($user?->isSales()) {
+            return array_values(array_diff($fields, ['sale_id']));
+        }
+
+        if ($user && ! $user->isAdmin()) {
+            return array_values(array_diff($fields, ['sale_id']));
+        }
+
+        return $fields;
     }
 }

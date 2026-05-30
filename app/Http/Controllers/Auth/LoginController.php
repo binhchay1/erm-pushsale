@@ -52,11 +52,11 @@ class LoginController extends Controller
     {
         return match ($user->role->value) {
             User::ROLE_ADMIN => route('admin.dashboard'),
-            User::ROLE_MARKETING => route('marketing.workspace'),
-            User::ROLE_WAREHOUSE => route('warehouse.workspace'),
-            User::ROLE_ALLOCATOR => route('allocator.workspace'),
-            User::ROLE_ACCOUNTING => route('accounting.workspace'),
-            default => route('sales.workspace'),
+            User::ROLE_MARKETING => route('marketing.dashboard'),
+            User::ROLE_WAREHOUSE => route('warehouse.dashboard'),
+            User::ROLE_ALLOCATOR => route('allocator.dashboard'),
+            User::ROLE_ACCOUNTING => route('accounting.dashboard'),
+            default => route('sales.dashboard'),
         };
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\UserNotification;
+use App\Services\NavigationService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -62,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                     'is_team_leader' => (bool) $user->is_team_leader,
                 ] : null,
             ],
+            'navigation' => app(NavigationService::class)->forUser($user),
             'preferences' => $preferences,
             'brand' => config('saleops.brand'),
             'themes' => config('saleops.themes'),

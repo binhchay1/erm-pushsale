@@ -22,19 +22,19 @@ class LoginTest extends TestCase
         $this->assertValidCredentialsRedirectToRoleHome(UserRole::Admin, '/admin/dashboard');
     }
 
-    public function test_sales_credentials_redirect_to_sales_workspace(): void
+    public function test_sales_credentials_redirect_to_sales_dashboard(): void
     {
-        $this->assertValidCredentialsRedirectToRoleHome(UserRole::Sales, '/sales/workspace');
+        $this->assertValidCredentialsRedirectToRoleHome(UserRole::Sales, '/sales/dashboard');
     }
 
-    public function test_marketing_credentials_redirect_to_marketing_workspace(): void
+    public function test_marketing_credentials_redirect_to_marketing_dashboard(): void
     {
-        $this->assertValidCredentialsRedirectToRoleHome(UserRole::Marketing, '/marketing/workspace');
+        $this->assertValidCredentialsRedirectToRoleHome(UserRole::Marketing, '/marketing/dashboard');
     }
 
-    public function test_warehouse_credentials_redirect_to_warehouse_workspace(): void
+    public function test_warehouse_credentials_redirect_to_warehouse_dashboard(): void
     {
-        $this->assertValidCredentialsRedirectToRoleHome(UserRole::Warehouse, '/warehouse/workspace');
+        $this->assertValidCredentialsRedirectToRoleHome(UserRole::Warehouse, '/warehouse/dashboard');
     }
 
     public function test_invalid_credentials_return_email_validation_error(): void
@@ -72,19 +72,19 @@ class LoginTest extends TestCase
         $this->assertAuthenticatedRootRedirectsToRoleHome(UserRole::Admin, '/admin/dashboard');
     }
 
-    public function test_authenticated_sales_root_redirects_to_sales_workspace(): void
+    public function test_authenticated_sales_root_redirects_to_sales_dashboard(): void
     {
-        $this->assertAuthenticatedRootRedirectsToRoleHome(UserRole::Sales, '/sales/workspace');
+        $this->assertAuthenticatedRootRedirectsToRoleHome(UserRole::Sales, '/sales/dashboard');
     }
 
-    public function test_authenticated_marketing_root_redirects_to_marketing_workspace(): void
+    public function test_authenticated_marketing_root_redirects_to_marketing_dashboard(): void
     {
-        $this->assertAuthenticatedRootRedirectsToRoleHome(UserRole::Marketing, '/marketing/workspace');
+        $this->assertAuthenticatedRootRedirectsToRoleHome(UserRole::Marketing, '/marketing/dashboard');
     }
 
-    public function test_authenticated_warehouse_root_redirects_to_warehouse_workspace(): void
+    public function test_authenticated_warehouse_root_redirects_to_warehouse_dashboard(): void
     {
-        $this->assertAuthenticatedRootRedirectsToRoleHome(UserRole::Warehouse, '/warehouse/workspace');
+        $this->assertAuthenticatedRootRedirectsToRoleHome(UserRole::Warehouse, '/warehouse/dashboard');
     }
 
     private function assertValidCredentialsRedirectToRoleHome(UserRole $role, string $home): void

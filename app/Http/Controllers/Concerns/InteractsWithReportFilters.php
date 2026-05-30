@@ -18,9 +18,13 @@ trait InteractsWithReportFilters
     {
         $filter = $this->reportFilters($request);
 
+        $user = $request->user();
+        $filterOptions = app(FilterOptionsService::class);
+
         return array_merge([
             'filters' => $filter->toInertia(),
-            'filterOptions' => app(FilterOptionsService::class)->forReports(),
+            'filterOptions' => $filterOptions->forReports($user),
+            'filterFields' => $filterOptions->visibleFilterFields($user),
         ], $data);
     }
 }

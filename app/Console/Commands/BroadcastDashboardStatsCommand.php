@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Events\DashboardStatsUpdated;
+use App\Models\User;
 use App\Services\DashboardStatsService;
 use Illuminate\Console\Command;
 
@@ -18,7 +19,11 @@ class BroadcastDashboardStatsCommand extends Command
 
         do {
             event(new DashboardStatsUpdated('admin', DashboardStatsService::adminSnapshot()));
-            event(new DashboardStatsUpdated('sales', DashboardStatsService::salesSnapshot()));
+
+            $salesUser = User::query()->where('email', 'sales@saleops.local')->first();
+            if ($salesUser) {
+                event(new DashboardStatsUpdated('sales', DashboardStatsService::salesSnapshot($salesUser)));
+            }
 
             $this->line('['.now()->format('H:i:s').'] Broadcast admin + sales');
 

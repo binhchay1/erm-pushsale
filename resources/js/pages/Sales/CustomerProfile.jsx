@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
 
-export default function CustomerProfile({ filters, filterOptions, report }) {
+export default function CustomerProfile({ filters, filterOptions, filterFields, report }) {
     return (
         <AppLayout>
             <Head title="Hồ sơ khách hàng" />
@@ -19,6 +19,7 @@ export default function CustomerProfile({ filters, filterOptions, report }) {
                     routeUrl="/sales/customers"
                     filters={filters}
                     filterOptions={filterOptions}
+                    filterFields={filterFields}
                 />
 
                 <OperationOrderTable rows={report.rows} />

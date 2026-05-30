@@ -15,7 +15,7 @@ class InventoryController extends Controller
     {
         return Inertia::render('Admin/Warehouse/Inventory', [
             'report' => $service->build($request),
-            'filterOptions' => app(FilterOptionsService::class)->forReports(),
+            'filterOptions' => app(FilterOptionsService::class)->forReports($request->user()),
         ]);
     }
 }

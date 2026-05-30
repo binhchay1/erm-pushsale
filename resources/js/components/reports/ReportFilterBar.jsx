@@ -26,14 +26,29 @@ function SelectFilter({ label, name, value, options, onChange }) {
     );
 }
 
-export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null }) {
+export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields, extra = null }) {
     const { search } = useReportSearch(routeUrl, filters);
+    const fields = new Set(
+        filterFields ?? [
+            'date_from',
+            'date_to',
+            'date_type',
+            'delivery_status',
+            'product_id',
+            'warehouse_id',
+            'sale_id',
+            'search',
+            'no_closing_date_limit',
+            'hide_zero_status',
+        ]
+    );
 
     const set = (key, val) => search({ [key]: val, page: 1 });
 
     return (
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+                {fields.has('date_from') && (
                 <div className="space-y-1">
                     <Label className="text-xs">Từ ngày</Label>
                     <Input
@@ -42,6 +57,8 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                         onChange={(e) => set('date_from', e.target.value)}
                     />
                 </div>
+                )}
+                {fields.has('date_to') && (
                 <div className="space-y-1">
                     <Label className="text-xs">Đến ngày</Label>
                     <Input
@@ -50,6 +67,8 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                         onChange={(e) => set('date_to', e.target.value)}
                     />
                 </div>
+                )}
+                {fields.has('date_type') && (
                 <SelectFilter
                     label="Kiểu ngày"
                     name="date_type"
@@ -57,6 +76,8 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                     options={filterOptions?.dateTypes}
                     onChange={set}
                 />
+                )}
+                {fields.has('delivery_status') && (
                 <SelectFilter
                     label="Trạng thái giao"
                     name="delivery_status"
@@ -64,6 +85,8 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                     options={filterOptions?.deliveryStatuses}
                     onChange={set}
                 />
+                )}
+                {fields.has('product_id') && (
                 <SelectFilter
                     label="Sản phẩm"
                     name="product_id"
@@ -74,6 +97,8 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                     }))}
                     onChange={set}
                 />
+                )}
+                {fields.has('warehouse_id') && (
                 <SelectFilter
                     label="Kho"
                     name="warehouse_id"
@@ -84,6 +109,8 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                     }))}
                     onChange={set}
                 />
+                )}
+                {fields.has('sale_id') && (
                 <SelectFilter
                     label="Sale"
                     name="sale_id"
@@ -94,6 +121,8 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                     }))}
                     onChange={set}
                 />
+                )}
+                {fields.has('search') && (
                 <div className="space-y-1 sm:col-span-2">
                     <Label className="text-xs">Tìm tên / SĐT / mã đơn</Label>
                     <Input
@@ -102,6 +131,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                         placeholder="Họ tên, số điện thoại…"
                     />
                 </div>
+                )}
             </div>
             {extra}
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -109,6 +139,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                     <Search className="size-4" />
                     Tìm kiếm
                 </Button>
+                {fields.has('no_closing_date_limit') && (
                 <label className="flex items-center gap-2 text-xs text-muted-foreground">
                     <input
                         type="checkbox"
@@ -117,6 +148,8 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                     />
                     Không giới hạn ngày chốt
                 </label>
+                )}
+                {fields.has('hide_zero_status') && (
                 <label className="flex items-center gap-2 text-xs text-muted-foreground">
                     <input
                         type="checkbox"
@@ -125,6 +158,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, extra = null
                     />
                     Ẩn trạng thái không số
                 </label>
+                )}
             </div>
         </div>
     );

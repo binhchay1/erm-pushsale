@@ -3,11 +3,15 @@
 namespace App\Services;
 
 use App\Enums\LeadIngestionStatus;
+use App\Enums\OperationStage;
 use App\Enums\UserRole;
 use App\Models\LeadIngestion;
+use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\ShippingWebhookEvent;
 use App\Models\User;
+use App\Models\WarehouseInventory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 class DashboardStatsService
@@ -33,16 +37,218 @@ class DashboardStatsService
     /**
      * @return array<string, mixed>
      */
-    public static function salesSnapshot(): array
+    public static function salesSnapshot(User $user): array
     {
+        $orders = Order::query()->where('sale_user_id', $user->id);
+        $activeStages = collect(OperationStage::cases())
+            ->reject(fn (OperationStage $s) => in_array($s, [OperationStage::Skipped, OperationStage::NoOperation], true))
+            ->map(fn (OperationStage $s) => $s->value)
+            ->all();
+
+        $pipeline = (clone $orders)->whereNull('closed_at')->whereIn('operation_stage', $activeStages);
+
         return [
-            'leads_pending' => 12 + random_int(0, 4),
-            'orders_today' => 5 + random_int(0, 3),
-            'reminders' => random_int(0, 4),
-            'calls_series' => self::randomSeries(7, 8, 28),
-            'conversion_series' => self::randomSeries(7, 12, 35),
+            'leads_pending' => (clone $pipeline)->count(),
+            'orders_today' => (clone $orders)->whereDate('closed_at', today())->count(),
+            'reminders' => (clone $orders)
+                ->whereNull('closed_at')
+                ->whereIn('operation_stage', [
+                    OperationStage::Call3->value,
+                    OperationStage::Call4->value,
+                    OperationStage::Call5->value,
+                    OperationStage::Call6->value,
+                    OperationStage::Care1->value,
+                    OperationStage::Care2->value,
+                    OperationStage::Care3->value,
+                ])
+                ->count(),
+            'calls_series' => self::dailyOrderSeries($orders, 'contact_count', 7),
+            'conversion_series' => self::dailyConversionSeries($orders, 7),
+            'pipeline' => self::stageBreakdown($orders),
             'updated_at' => now()->toIso8601String(),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function marketingSnapshot(User $user): array
+    {
+        $sourceIds = MarketingSource::query()
+            ->where('marketer_user_id', $user->id)
+            ->pluck('id');
+
+        $orders = Order::query()->when(
+            $sourceIds->isNotEmpty(),
+            fn (Builder $q) => $q->whereIn('marketing_source_id', $sourceIds),
+            fn (Builder $q) => $q->where('marketer_user_id', $user->id),
+        );
+
+        $sources = MarketingSource::query()->where('marketer_user_id', $user->id);
+
+        return [
+            'active_campaigns' => (clone $sources)->where('is_active', true)->count(),
+            'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
+            'contacts_today' => (int) (clone $sources)->sum('contacts'),
+            'orders_closed' => (clone $orders)->whereNotNull('closed_at')->whereDate('closed_at', today())->count(),
+            'budget_total' => (int) (clone $sources)->sum('budget'),
+            'lead_series' => self::dailyLeadSeries(7),
+            'conversion_series' => self::dailyConversionSeries($orders, 7),
+            'top_sources' => self::marketingTopSources($user),
+            'updated_at' => now()->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function warehouseSnapshot(): array
+    {
+        return [
+            'waiting_waybill' => Order::query()->where('delivery_status', 'waiting_waybill')->count(),
+            'delivering' => Order::query()->where('delivery_status', 'delivering')->count(),
+            'low_stock_items' => WarehouseInventory::query()->where('stock_quantity', '<', 10)->count(),
+            'pending_export' => Order::query()->where('delivery_status', 'picking_up')->count(),
+            'orders_series' => self::dailyOrderSeries(Order::query(), 'id', 7),
+            'inventory_alerts' => WarehouseInventory::query()
+                ->with(['product:id,name', 'warehouse:id,name'])
+                ->where('stock_quantity', '<', 10)
+                ->limit(5)
+                ->get()
+                ->map(fn (WarehouseInventory $row) => [
+                    'product' => $row->product?->name ?? '—',
+                    'warehouse' => $row->warehouse?->name ?? '—',
+                    'stock' => $row->stock_quantity,
+                ])
+                ->all(),
+            'updated_at' => now()->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function accountingSnapshot(): array
+    {
+        return [
+            'pending_cod' => Order::query()->where('delivery_status', 'delivered')->count(),
+            'paid_today' => Order::query()->where('delivery_status', 'paid')->whereDate('updated_at', today())->count(),
+            'cod_mismatch' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(),
+            'reconciliation_pending' => Order::query()->where('reconciliation_status', 'pending')->count(),
+            'revenue_series' => self::revenueSeries(),
+            'cod_series' => self::dailyOrderSeries(
+                Order::query()->whereIn('delivery_status', ['delivered', 'paid']),
+                'total',
+                7,
+            ),
+            'updated_at' => now()->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function allocatorSnapshot(): array
+    {
+        return [
+            'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
+            'pending_routing' => LeadIngestion::query()->where('status', LeadIngestionStatus::Pending->value)->count(),
+            'processed_today' => LeadIngestion::query()
+                ->where('status', LeadIngestionStatus::Processed->value)
+                ->whereDate('updated_at', today())
+                ->count(),
+            'failed_leads' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(),
+            'duplicate_leads' => LeadIngestion::query()->where('status', LeadIngestionStatus::Duplicate->value)->count(),
+            'lead_series' => self::dailyLeadSeries(7),
+            'platform_breakdown' => LeadIngestion::query()
+                ->selectRaw('platform as name, count(*) as value')
+                ->groupBy('platform')
+                ->orderByDesc('value')
+                ->limit(5)
+                ->get()
+                ->map(fn (LeadIngestion $row) => ['name' => $row->name ?: 'Khác', 'value' => (int) $row->value])
+                ->values()
+                ->all(),
+            'updated_at' => now()->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @return list<array{label: string, value: int}>
+     */
+    private static function stageBreakdown(Builder $orders): array
+    {
+        return collect(OperationStage::cases())->map(function (OperationStage $stage) use ($orders) {
+            return [
+                'label' => $stage->label(),
+                'value' => (clone $orders)->where('operation_stage', $stage->value)->whereNull('closed_at')->count(),
+            ];
+        })->filter(fn (array $row) => $row['value'] > 0)->values()->all();
+    }
+
+    /**
+     * @return list<array{name: string, contacts: int, orders: int}>
+     */
+    private static function marketingTopSources(User $user): array
+    {
+        return MarketingSource::query()
+            ->where('marketer_user_id', $user->id)
+            ->withCount(['orders'])
+            ->orderByDesc('orders_count')
+            ->limit(5)
+            ->get()
+            ->map(fn (MarketingSource $source) => [
+                'name' => $source->name,
+                'contacts' => (int) $source->contacts,
+                'orders' => (int) $source->orders_count,
+            ])
+            ->all();
+    }
+
+    /**
+     * @param  Builder<Order>  $query
+     * @return list<array{label: string, value: int|float}>
+     */
+    private static function dailyOrderSeries(Builder $query, string $sumColumn, int $days): array
+    {
+        return self::days($days)->map(function (Carbon $day) use ($query, $sumColumn) {
+            $dayQuery = (clone $query)->whereDate('data_arrived_at', $day);
+
+            return [
+                'label' => $day->format('d/m'),
+                'value' => $sumColumn === 'id'
+                    ? $dayQuery->count()
+                    : (int) $dayQuery->sum($sumColumn),
+            ];
+        })->values()->all();
+    }
+
+    /**
+     * @param  Builder<Order>  $query
+     * @return list<array{label: string, value: int|float}>
+     */
+    private static function dailyConversionSeries(Builder $query, int $days): array
+    {
+        return self::days($days)->map(function (Carbon $day) use ($query) {
+            $total = (clone $query)->whereDate('data_arrived_at', $day)->count();
+            $closed = (clone $query)->whereDate('data_arrived_at', $day)->whereNotNull('closed_at')->count();
+
+            return [
+                'label' => $day->format('d/m'),
+                'value' => self::percentage($closed, $total),
+            ];
+        })->values()->all();
+    }
+
+    /**
+     * @return list<array{label: string, value: int}>
+     */
+    private static function dailyLeadSeries(int $days): array
+    {
+        return self::days($days)->map(fn (Carbon $day) => [
+            'label' => $day->format('d/m'),
+            'value' => LeadIngestion::query()->whereDate('created_at', $day)->count(),
+        ])->values()->all();
     }
 
     /**
@@ -250,22 +456,5 @@ class DashboardStatsService
         }
 
         return round(($value / $total) * 100, 1);
-    }
-
-    /**
-     * @return list<array{label: string, value: int|float}>
-     */
-    private static function randomSeries(int $days, int|float $min, int|float $max): array
-    {
-        $points = [];
-
-        for ($i = $days - 1; $i >= 0; $i--) {
-            $points[] = [
-                'label' => now()->subDays($i)->format('d/m'),
-                'value' => random_int((int) $min, (int) $max),
-            ];
-        }
-
-        return $points;
     }
 }

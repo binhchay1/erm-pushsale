@@ -15,7 +15,7 @@ class FailedOrdersController extends Controller
     {
         return Inertia::render('Admin/Orders/FailedOrders', [
             'report' => $service->build($request),
-            'filterOptions' => app(FilterOptionsService::class)->forReports(),
+            'filterOptions' => app(FilterOptionsService::class)->forReports($request->user()),
         ]);
     }
 }
