@@ -77,6 +77,7 @@ class NavigationService
         return [
             ['title' => 'Dashboard', 'url' => '/sales/dashboard', 'icon' => 'home'],
             ['title' => 'Tác nghiệp telesale', 'url' => '/sales/workspace', 'icon' => 'phone-call'],
+            ['title' => 'Xếp hạng doanh thu', 'url' => '/sales/rankings', 'icon' => 'trophy'],
             ['title' => 'Hồ sơ KH', 'url' => '/sales/customers', 'icon' => 'clipboard-list'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
@@ -90,6 +91,7 @@ class NavigationService
             ['title' => 'Báo cáo nguồn', 'url' => '/marketing/workspace', 'icon' => 'megaphone'],
             ['title' => 'Chiến dịch MKT', 'url' => '/marketing/campaigns', 'icon' => 'target'],
             ['title' => 'Doanh thu MKT', 'url' => '/marketing/revenue', 'icon' => 'line-chart'],
+            ['title' => 'Xếp hạng doanh thu', 'url' => '/marketing/rankings', 'icon' => 'trophy'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }

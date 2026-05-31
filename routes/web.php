@@ -22,9 +22,11 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Sales\CustomerProfileController;
 use App\Http\Controllers\Sales\DashboardController as SalesDashboardController;
 use App\Http\Controllers\Sales\OperationController;
+use App\Http\Controllers\Sales\RankingController as SalesRankingController;
 use App\Http\Controllers\Accounting\DashboardController as AccountingDashboardController;
 use App\Http\Controllers\Allocator\DashboardController as AllocatorDashboardController;
 use App\Http\Controllers\Marketing\DashboardController as RoleMarketingDashboardController;
+use App\Http\Controllers\Marketing\RankingController as MarketingRankingController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Warehouse\DashboardController as WarehouseDashboardController;
 use App\Models\User;
@@ -92,12 +94,14 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:'.User::ROLE_SALES)->prefix('sales')->name('sales.')->group(function () {
         Route::get('dashboard', SalesDashboardController::class)->name('dashboard');
+        Route::get('rankings', SalesRankingController::class)->name('rankings');
         Route::get('workspace', OperationController::class)->name('workspace');
         Route::get('customers', CustomerProfileController::class)->name('customers');
     });
 
     Route::middleware('role:'.User::ROLE_MARKETING)->prefix('marketing')->name('marketing.')->group(function () {
         Route::get('dashboard', RoleMarketingDashboardController::class)->name('dashboard');
+        Route::get('rankings', MarketingRankingController::class)->name('rankings');
         Route::get('workspace', MarketingDashboardController::class)->name('workspace');
         Route::get('campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
         Route::get('campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create');

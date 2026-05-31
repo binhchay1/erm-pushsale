@@ -39,7 +39,7 @@ function RankBadge({ rank }) {
     );
 }
 
-export function RevenueRankingBoard({ items }) {
+export function RevenueRankingBoard({ items, highlightUserId }) {
     const data = items ?? [];
 
     if (data.length === 0) {
@@ -66,7 +66,8 @@ export function RevenueRankingBoard({ items }) {
                             key={row.id}
                             className={cn(
                                 'flex items-center justify-between gap-3 rounded-xl border bg-card p-3 transition-colors hover:bg-muted/40',
-                                row.rank <= 3 ? podiumStyles[row.rank] : 'border-border'
+                                row.rank <= 3 ? podiumStyles[row.rank] : 'border-border',
+                                highlightUserId === row.id && 'ring-2 ring-primary ring-offset-2 ring-offset-background'
                             )}
                         >
                             <div className="flex min-w-0 items-center gap-3">
@@ -107,7 +108,13 @@ export function RevenueRankingBoard({ items }) {
                             </thead>
                             <tbody>
                                 {rest.map((row) => (
-                                    <tr key={row.id} className="hover:bg-muted/30">
+                                    <tr
+                                        key={row.id}
+                                        className={cn(
+                                            'hover:bg-muted/30',
+                                            highlightUserId === row.id && 'bg-primary/10'
+                                        )}
+                                    >
                                         <Td className="font-medium tabular-nums">{row.rank}</Td>
                                         <Td className="font-medium">{row.name}</Td>
                                         <Td>{row.team ?? '—'}</Td>

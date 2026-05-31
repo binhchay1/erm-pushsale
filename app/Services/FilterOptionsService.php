@@ -84,4 +84,27 @@ class FilterOptionsService
 
         return $fields;
     }
+
+    /** @return array<string, mixed> */
+    public function forRankings(?User $user = null): array
+    {
+        return [
+            'discountModes' => collect(DiscountMode::cases())->map(fn ($e) => [
+                'value' => $e->value,
+                'label' => $e->label(),
+            ])->values(),
+            'operationStages' => collect(OperationStage::cases())->map(fn ($e) => [
+                'value' => $e->value,
+                'label' => $e->label(),
+            ])->values(),
+            'teams' => Team::query()->orderBy('name')->get(['id', 'name', 'type']),
+            'teamLeaders' => User::query()
+                ->where(function ($q) {
+                    $q->where('is_team_leader', true)
+                        ->orWhereIn('id', Team::query()->whereNotNull('leader_user_id')->pluck('leader_user_id'));
+                })
+                ->orderBy('name')
+                ->get(['id', 'name']),
+        ];
+    }
 }

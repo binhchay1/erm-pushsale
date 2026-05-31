@@ -24,6 +24,7 @@ class NavigationTest extends TestCase
         $this->assertSame([
             '/sales/dashboard',
             '/sales/workspace',
+            '/sales/rankings',
             '/sales/customers',
             '/settings',
         ], $urls);

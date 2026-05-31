@@ -23,6 +23,15 @@ enum RankingDepartment: string
         };
     }
 
+    public static function forUserRole(UserRole $role): ?self
+    {
+        return match ($role) {
+            UserRole::Sales => self::Sales,
+            UserRole::Marketing => self::Marketing,
+            default => null,
+        };
+    }
+
     /** Cột trên bảng orders dùng để quy doanh số về nhân sự. */
     public function orderColumn(): string
     {

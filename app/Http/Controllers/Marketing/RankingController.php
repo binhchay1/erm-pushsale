@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Marketing;
 
 use App\Http\Controllers\Concerns\InteractsWithRevenueRanking;
 use App\Http\Controllers\Controller;
@@ -15,12 +15,15 @@ class RankingController extends Controller
 
     public function __invoke(Request $request, RevenueRankingService $service): Response
     {
+        $user = $request->user();
+
         return Inertia::render('Rankings/Index', $this->revenueRankingPageProps(
             $request,
             $service,
-            route('admin.rankings'),
-            roleScope: null,
-            showDepartmentTabs: true,
+            route('marketing.rankings'),
+            roleScope: $user->role,
+            showDepartmentTabs: false,
+            highlightUserId: $user->id,
         ));
     }
 }
