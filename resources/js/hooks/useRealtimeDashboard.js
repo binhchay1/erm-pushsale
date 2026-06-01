@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
 import { usePage } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import { getEcho, disconnectEcho } from '@/lib/echo';
+import { disconnectEcho, getEcho } from '@/lib/echo';
 
 /**
  * Lắng nghe WebSocket cập nhật stats dashboard.
@@ -10,9 +10,14 @@ import { getEcho, disconnectEcho } from '@/lib/echo';
  * @param {object} initialStats
  * @param {(stats: object) => void} [onUpdate]
  */
+function hasLoadedStats(value) {
+    return Boolean(value?.updated_at);
+}
+
 export function useRealtimeDashboard(channelRole, initialStats, onUpdate) {
     const { auth, reverb, preferences } = usePage().props;
-    const [stats, setStats] = useState(initialStats);
+    const [stats, setStats] = useState(() => (hasLoadedStats(initialStats) ? initialStats : null));
+    const [isReady, setIsReady] = useState(() => hasLoadedStats(initialStats));
     const [connected, setConnected] = useState(false);
     const noti = preferences?.notifications ?? {};
     const onUpdateRef = useRef(onUpdate);
@@ -22,7 +27,14 @@ export function useRealtimeDashboard(channelRole, initialStats, onUpdate) {
     }, [onUpdate]);
 
     useEffect(() => {
-        setStats(initialStats);
+        if (hasLoadedStats(initialStats)) {
+            setStats(initialStats);
+            setIsReady(true);
+            return;
+        }
+
+        setStats(null);
+        setIsReady(false);
     }, [initialStats]);
 
     useEffect(() => {
@@ -37,14 +49,19 @@ export function useRealtimeDashboard(channelRole, initialStats, onUpdate) {
             .private(channelName)
             .listen('.stats.updated', (payload) => {
                 const next = payload?.stats ?? payload;
+                if (!hasLoadedStats(next)) {
+                    return;
+                }
+
                 setStats(next);
+                setIsReady(true);
                 onUpdateRef.current?.(next);
 
                 if (noti.desktop) {
-                    toast.info('Số liệu vừa cập nhật', {
-                        description: 'Dashboard đồng bộ real-time',
-                        duration: 2800,
-                    });
+                    // toast.info('Số liệu vừa cập nhật', {
+                    //     description: 'Dashboard đồng bộ real-time',
+                    //     duration: 2800,
+                    // });
                 }
             })
             .listen('.lead.ingested', (payload) => {
@@ -73,5 +90,5 @@ export function useRealtimeDashboard(channelRole, initialStats, onUpdate) {
 
     useEffect(() => () => disconnectEcho(), []);
 
-    return { stats, connected };
+    return { stats, connected, isReady };
 }

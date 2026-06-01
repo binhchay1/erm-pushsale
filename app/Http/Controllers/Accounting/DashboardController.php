@@ -16,7 +16,9 @@ class DashboardController extends Controller
         $filter = ReportFilterData::fromRequest($request, $request->user());
 
         return Inertia::render('Accounting/Dashboard', [
-            'stats' => DashboardStatsService::accountingSnapshot($request->user(), $filter),
+            'stats' => Inertia::defer(
+                fn () => DashboardStatsService::accountingSnapshot($request->user(), $filter),
+            ),
             'filters' => $filter->toInertia(),
         ]);
     }

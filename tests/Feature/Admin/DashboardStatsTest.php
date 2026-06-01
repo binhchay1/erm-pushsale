@@ -58,15 +58,18 @@ class DashboardStatsTest extends TestCase
             ->get('/admin/dashboard')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->has('stats')
-                ->where('stats.revenue_today', 1_500_000)
-                ->where('stats.orders_closed', 1)
-                ->where('stats.leads_today', 1)
-                ->where('stats.delivery_rate', 100)
-                ->where('stats.shipping_mismatch', 1)
-                ->has('stats.revenue_series')
-                ->has('stats.orders_series')
-                ->has('stats.lead_sources')
+                ->component('Admin/Dashboard')
+                ->loadDeferredProps('default', fn (Assert $reload) => $reload
+                    ->has('stats')
+                    ->where('stats.revenue_today', 1_500_000)
+                    ->where('stats.orders_closed', 1)
+                    ->where('stats.leads_today', 1)
+                    ->where('stats.delivery_rate', 100)
+                    ->where('stats.shipping_mismatch', 1)
+                    ->has('stats.revenue_series')
+                    ->has('stats.orders_series')
+                    ->has('stats.lead_sources')
+                )
             );
     }
 

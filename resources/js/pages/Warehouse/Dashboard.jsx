@@ -1,55 +1,90 @@
-import { Head } from '@inertiajs/react';
+import { Deferred, Head } from '@inertiajs/react';
+import { AlertTriangle, Package, PackageCheck, Truck } from 'lucide-react';
 
-import AppLayout from '@/layouts/AppLayout';
-import { StatCard } from '@/components/charts/StatCard';
 import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
+import { StatCard } from '@/components/charts/StatCard';
+import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
+import { OpsAlerts } from '@/components/dashboard/OpsAlerts';
+import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
+import AppLayout from '@/layouts/AppLayout';
+import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { formatNumber } from '@/lib/format';
 
-export default function Dashboard({ stats }) {
+function WarehouseDashboardContent({ stats: initialStats }) {
+    const { stats, connected } = useRealtimeDashboard('warehouse', initialStats);
+
+    const kpis = [
+        {
+            title: 'Chờ vận đơn',
+            value: formatNumber(stats.waiting_waybill),
+            hint: 'Đơn cần tạo / đẩy vận đơn',
+            icon: PackageCheck,
+        },
+        {
+            title: 'Đang giao',
+            value: formatNumber(stats.delivering),
+            hint: 'Đơn đang ở carrier',
+            icon: Truck,
+        },
+        {
+            title: 'Chờ lấy hàng',
+            value: formatNumber(stats.pending_export),
+            hint: 'Đơn cần bàn giao kho / shipper',
+            icon: Package,
+        },
+        {
+            title: 'SP sắp hết',
+            value: formatNumber(stats.low_stock_items ?? stats.stock_issues),
+            hint: 'SKU tồn thấp cần xử lý',
+            icon: AlertTriangle,
+            accent: true,
+        },
+    ];
+
+    const alerts = (stats.inventory_alerts ?? []).map((row) => ({
+        type: 'warning',
+        title: row.product,
+        value: row.stock,
+        description: `${row.warehouse} còn ${formatNumber(row.stock)} sản phẩm`,
+    }));
+
+    return (
+        <div className="space-y-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="max-w-2xl">
+                    <h1 className="text-2xl font-bold tracking-tight">Dashboard Kho</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Theo dõi vận đơn, xử lý xuất kho, đơn đang giao và cảnh báo tồn kho.
+                    </p>
+                </div>
+                <RealtimeBadge connected={connected} />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {kpis.map((card) => (
+                    <StatCard key={card.title} {...card} className="min-h-[132px]" />
+                ))}
+            </div>
+
+            <OrdersBarChart
+                data={stats.orders_series}
+                title="Đơn xử lý 7 ngày"
+                description="Số đơn phát sinh theo ngày để kho xử lý"
+            />
+
+            <OpsAlerts alerts={alerts} />
+        </div>
+    );
+}
+
+export default function Dashboard({ stats: initialStats }) {
     return (
         <AppLayout>
             <Head title="Dashboard Kho" />
 
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Dashboard Kho</h1>
-                    <p className="text-sm text-muted-foreground">Tình trạng xuất kho, vận đơn và tồn kho</p>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <StatCard title="Chờ vận đơn" value={formatNumber(stats.waiting_waybill)} />
-                    <StatCard title="Đang giao" value={formatNumber(stats.delivering)} />
-                    <StatCard title="Chờ lấy hàng" value={formatNumber(stats.pending_export)} />
-                    <StatCard title="SP sắp hết" value={formatNumber(stats.low_stock_items)} accent />
-                </div>
-
-                <OrdersBarChart
-                    data={stats.orders_series}
-                    title="Đơn xử lý 7 ngày"
-                    description="Số đơn có data về theo ngày"
-                />
-
-                {stats.inventory_alerts?.length > 0 && (
-                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                        <h2 className="mb-3 text-sm font-semibold">Cảnh báo tồn kho thấp</h2>
-                        <div className="space-y-2">
-                            {stats.inventory_alerts.map((row) => (
-                                <div
-                                    key={`${row.warehouse}-${row.product}`}
-                                    className="flex items-center justify-between gap-3 text-sm"
-                                >
-                                    <span className="truncate">
-                                        {row.product} · {row.warehouse}
-                                    </span>
-                                    <span className="shrink-0 font-medium text-destructive">
-                                        Còn {formatNumber(row.stock)}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-            </div>
+            <Deferred data="stats" fallback={<DashboardSkeleton role="warehouse" />}>
+                <WarehouseDashboardContent stats={initialStats} />
+            </Deferred>
         </AppLayout>
     );
 }
