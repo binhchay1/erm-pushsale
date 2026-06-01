@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Marketing;
 
+use App\Data\ReportFilterData;
 use App\Http\Controllers\Controller;
 use App\Services\DashboardStatsService;
 use Illuminate\Http\Request;
@@ -12,8 +13,11 @@ class DashboardController extends Controller
 {
     public function __invoke(Request $request): Response
     {
+        $filter = ReportFilterData::fromRequest($request, $request->user());
+
         return Inertia::render('Marketing/Dashboard', [
-            'stats' => DashboardStatsService::marketingSnapshot($request->user()),
+            'stats' => DashboardStatsService::marketingSnapshot($request->user(), $filter),
+            'filters' => $filter->toInertia(),
         ]);
     }
 }

@@ -24,6 +24,7 @@ class ReportMetricService
     public function kpiSummary(User $user, ReportFilterData $filter): array
     {
         $orders = $this->queries->orders($user, $filter);
+        $revenueOrders = $this->queries->orders($user, $filter);
         $leads = $this->queries->leads($user, $filter);
         $closedOrders = (clone $orders)->whereNotNull('closed_at')->count();
         $ordersCount = (clone $orders)->count();
@@ -35,7 +36,15 @@ class ReportMetricService
             'duplicate_leads' => (clone $leads)->where('status', LeadIngestionStatus::Duplicate->value)->count(),
             'orders' => $ordersCount,
             'closed_orders' => $closedOrders,
-            'revenue' => (int) (clone $orders)->whereIn('delivery_status', ['delivered', 'paid'])->sum('total'),
+            'revenue' => (int) (clone $revenueOrders)
+                ->where(function (Builder $q) use ($filter) {
+                    $dateColumn = $this->queries->dateColumn($filter);
+                    $q->whereIn('delivery_status', ['delivered', 'paid'])
+                        ->orWhereDate('created_at', today())
+                        ->orWhereDate($dateColumn, today());
+                })
+                ->whereIn('delivery_status', ['delivered', 'paid'])
+                ->sum('total'),
             'conversion_rate' => $this->percentage($closedOrders, $ordersCount),
         ];
     }
