@@ -11,8 +11,10 @@ import {
 import { ChartTooltip } from '@/components/charts/ChartTooltip';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 export function RevenueAreaChart({
+    className,
     data,
     title = 'Doanh thu 7 ngày',
     description,
@@ -22,7 +24,7 @@ export function RevenueAreaChart({
     const chartData = data ?? [];
 
     return (
-        <Card className="col-span-full lg:col-span-2">
+        <Card className={cn('col-span-full lg:col-span-2', className)}>
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
                 {description && <CardDescription>{description}</CardDescription>}
