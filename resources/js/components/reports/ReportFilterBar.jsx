@@ -5,6 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useReportSearch } from '@/hooks/useReportSearch';
 
+const PRESET_OPTIONS = [
+    { value: 'today', label: 'Hôm nay' },
+    { value: 'last_7_days', label: '7 ngày' },
+    { value: 'last_30_days', label: '30 ngày' },
+    { value: 'this_month', label: 'Tháng này' },
+];
+
 function SelectFilter({ label, name, value, options, onChange }) {
     return (
         <div className="space-y-1">
@@ -44,9 +51,23 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
     );
 
     const set = (key, val) => search({ [key]: val, page: 1 });
+    const setPreset = (preset) => search({ preset, date_from: null, date_to: null, page: 1 });
 
     return (
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <div className="mb-3 flex flex-wrap gap-2">
+                {PRESET_OPTIONS.map((option) => (
+                    <Button
+                        key={option.value}
+                        type="button"
+                        size="sm"
+                        variant={filters.preset === option.value ? 'default' : 'outline'}
+                        onClick={() => setPreset(option.value)}
+                    >
+                        {option.label}
+                    </Button>
+                ))}
+            </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
                 {fields.has('date_from') && (
                 <div className="space-y-1">
