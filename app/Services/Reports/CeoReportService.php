@@ -2,34 +2,34 @@
 
 namespace App\Services\Reports;
 
-use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Data\ReportFilterData;
 use App\Enums\DeliveryStatus;
 use App\Enums\UserRole;
+use App\Models\MarketingSource;
 use App\Models\User;
-use App\Support\RevenueMetricsCalculator;
 
 class CeoReportService
 {
     public function __construct(
-        private readonly OrderRepositoryInterface $orders,
+        private readonly ReportQueryService $queries,
     ) {}
 
     /** @return array<string, mixed> */
-    public function build(ReportFilterData $filter): array
+    public function build(ReportFilterData $filter, ?User $viewer = null): array
     {
-        $collection = $this->orders->allFiltered($filter);
+        $viewer ??= User::query()->where('role', UserRole::Admin)->firstOrFail();
+        $orders = $this->queries->orders($viewer, $filter)->with('items');
 
         $statusSummary = [];
         foreach (DeliveryStatus::ceoSummaryMap() as $key => $status) {
-            $statusSummary[$key] = $collection->where('delivery_status', $status->value)->count();
+            $statusSummary[$key] = (clone $orders)->where('delivery_status', $status->value)->count();
         }
 
         $saleRows = User::query()
             ->where('role', UserRole::Sales)
             ->get()
-            ->map(function (User $user, int $index) use ($collection) {
-                $mine = $collection->where('sale_user_id', $user->id);
+            ->map(function (User $user, int $index) use ($orders) {
+                $mine = (clone $orders)->where('sale_user_id', $user->id)->get();
                 $newCustomers = $mine->where('is_returning_customer', false);
                 $oldCustomers = $mine->where('is_returning_customer', true);
                 $newContact = (int) $newCustomers->sum('contact_count');
@@ -66,12 +66,12 @@ class CeoReportService
             ->values()
             ->all();
 
-        $marketingRows = \App\Models\MarketingSource::query()
+        $marketingRows = MarketingSource::query()
             ->whereNull('parent_id')
             ->with('children')
             ->get()
-            ->map(function ($source, int $index) use ($collection) {
-                $sourceOrders = $collection->where('marketing_source_id', $source->id);
+            ->map(function (MarketingSource $source, int $index) use ($orders) {
+                $sourceOrders = (clone $orders)->where('marketing_source_id', $source->id)->get();
                 $budget = $source->budget;
                 $contacts = max($source->contacts, (int) $sourceOrders->sum('contact_count'));
                 $newRev = (int) $sourceOrders->where('is_returning_customer', false)->sum(fn ($o) => $o->effectiveRevenue());

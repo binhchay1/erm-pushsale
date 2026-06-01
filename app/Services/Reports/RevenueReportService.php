@@ -2,70 +2,55 @@
 
 namespace App\Services\Reports;
 
-use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Data\ReportFilterData;
 use App\Enums\UserRole;
 use App\Models\User;
 use App\Support\RevenueMetricsCalculator;
 
-/**
- * Template Method: dùng chung cho báo cáo doanh số Marketing & Sale.
- */
 class RevenueReportService
 {
     public function __construct(
-        private readonly OrderRepositoryInterface $orders,
+        private readonly ReportQueryService $queries,
     ) {}
 
     /** @return array<string, mixed> */
-    public function forMarketers(ReportFilterData $filter): array
+    public function forMarketers(ReportFilterData $filter, ?User $viewer = null): array
     {
+        $viewer ??= User::query()->where('role', UserRole::Admin)->firstOrFail();
         $users = User::query()->where('role', UserRole::Marketing)->get();
 
-        return $this->buildGrouped($filter, $users, 'marketer_user_id', 'marketerId', 'marketerName');
+        return $this->buildGrouped($filter, $viewer, $users, 'marketer_user_id', 'marketerId', 'marketerName');
     }
 
     /** @return array<string, mixed> */
-    public function forSales(ReportFilterData $filter): array
+    public function forSales(ReportFilterData $filter, ?User $viewer = null): array
     {
+        $viewer ??= User::query()->where('role', UserRole::Admin)->firstOrFail();
         $users = User::query()->where('role', UserRole::Sales)->get();
 
-        return $this->buildGrouped($filter, $users, 'sale_user_id', 'saleId', 'saleName');
+        return $this->buildGrouped($filter, $viewer, $users, 'sale_user_id', 'saleId', 'saleName');
     }
 
     /**
      * @param  \Illuminate\Support\Collection<int, User>  $users
      * @return array<string, mixed>
      */
-    private function buildGrouped(
-        ReportFilterData $filter,
-        $users,
-        string $foreignKey,
-        string $idKey,
-        string $nameKey,
-    ): array {
-        $all = $this->orders->allFiltered($filter);
-        $rows = [];
-        $totalMetrics = RevenueMetricsCalculator::build($all);
-
-        $rows[] = array_merge(
-            ['stt' => 0, $idKey => 'total', $nameKey => 'Tổng', 'isTotalRow' => true],
-            $totalMetrics,
-        );
+    private function buildGrouped(ReportFilterData $filter, User $viewer, $users, string $foreignKey, string $idKey, string $nameKey): array
+    {
+        $allQuery = $this->queries->orders($viewer, $filter)->with('items');
+        $totalMetrics = RevenueMetricsCalculator::build((clone $allQuery)->get());
+        $rows = [array_merge(['stt' => 0, $idKey => 'total', $nameKey => 'Tổng', 'isTotalRow' => true], $totalMetrics)];
 
         foreach ($users as $index => $user) {
-            $subset = $all->where($foreignKey, $user->id);
+            $subset = (clone $allQuery)->where($foreignKey, $user->id)->get();
             $metrics = RevenueMetricsCalculator::build($subset);
-            $rows[] = array_merge(
-                [
-                    'stt' => $index + 1,
-                    $idKey => (string) $user->id,
-                    $nameKey => $user->name,
-                    'saleUsername' => strstr($user->email, '@', true),
-                    'isTotalRow' => false,
-                ],
-                $metrics,
-            );
+            $rows[] = array_merge([
+                'stt' => $index + 1,
+                $idKey => (string) $user->id,
+                $nameKey => $user->name,
+                'saleUsername' => strstr($user->email, '@', true),
+                'isTotalRow' => false,
+            ], $metrics);
         }
 
         return ['rows' => $rows, 'formulaLegend' => $this->formulaLegend()];

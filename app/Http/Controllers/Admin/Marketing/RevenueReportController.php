@@ -18,7 +18,7 @@ class RevenueReportController extends Controller
         $filter = $this->reportFilters($request);
 
         return Inertia::render('Admin/Marketing/RevenueReport', $this->reportPageProps($request, [
-            'report' => $service->forMarketers($filter),
+            'report' => $service->forMarketers($filter, $request->user()),
         ]));
     }
 }
