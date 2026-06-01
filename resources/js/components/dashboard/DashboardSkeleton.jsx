@@ -6,6 +6,7 @@ const roleCopy = {
         subtitleWidth: 'w-[420px]',
         cards: 5,
         chartCols: 'lg:grid-cols-3',
+        chartRows: 2,
         showRankings: true,
         showFunnel: true,
         showAlerts: true,
@@ -14,15 +15,16 @@ const roleCopy = {
         titleWidth: 'w-52',
         subtitleWidth: 'w-[360px]',
         cards: 4,
-        chartCols: 'lg:grid-cols-2',
+        chartCols: 'lg:grid-cols-3',
+        chartRows: 2,
         showFunnel: true,
-        showPipeline: true,
     },
     marketing: {
         titleWidth: 'w-56',
         subtitleWidth: 'w-[430px]',
         cards: 4,
         chartCols: 'lg:grid-cols-3',
+        chartRows: 2,
         showFunnel: true,
         showRankings: true,
     },
@@ -30,7 +32,8 @@ const roleCopy = {
         titleWidth: 'w-44',
         subtitleWidth: 'w-[380px]',
         cards: 4,
-        chartCols: 'lg:grid-cols-1',
+        chartCols: 'lg:grid-cols-3',
+        chartRows: 1,
         showAlerts: true,
     },
     accounting: {
@@ -38,13 +41,17 @@ const roleCopy = {
         subtitleWidth: 'w-[400px]',
         cards: 4,
         chartCols: 'lg:grid-cols-2',
+        chartRows: 1,
+        chartLayout: 'equal',
+        showExtraChart: true,
         showAlerts: true,
     },
     allocator: {
         titleWidth: 'w-52',
         subtitleWidth: 'w-[420px]',
         cards: 5,
-        chartCols: 'lg:grid-cols-2',
+        chartCols: 'lg:grid-cols-3',
+        chartRows: 2,
         showFunnel: true,
         showAlerts: true,
     },
@@ -158,15 +165,53 @@ export function DashboardSkeleton({ role = 'admin' }) {
 
             <KpiSkeleton count={config.cards} />
 
-            <div className={`grid gap-4 ${config.chartCols}`}>
-                <ChartSkeleton compact />
-                {config.chartCols !== 'lg:grid-cols-1' && <ChartSkeleton compact />}
-                {config.chartCols === 'lg:grid-cols-3' && <ChartSkeleton compact />}
-            </div>
+            {config.chartRows ? (
+                Array.from({ length: config.chartRows }).map((_, rowIndex) => (
+                    <div key={rowIndex} className={`grid gap-4 ${config.chartCols}`}>
+                        {config.chartLayout === 'sidebar' ? (
+                            <>
+                                <div className="col-span-full space-y-4 lg:col-span-2">
+                                    <ChartSkeleton />
+                                    <ChartSkeleton />
+                                </div>
+                                <div className="col-span-full space-y-4 lg:col-span-1">
+                                    <ChartSkeleton compact />
+                                    <ChartSkeleton compact />
+                                </div>
+                            </>
+                        ) : config.chartLayout === 'equal' ? (
+                            <>
+                                <ChartSkeleton compact />
+                                <ChartSkeleton compact />
+                            </>
+                        ) : rowIndex === 0 ? (
+                            <>
+                                <div className="col-span-full lg:col-span-2">
+                                    <ChartSkeleton />
+                                </div>
+                                <ChartSkeleton compact />
+                            </>
+                        ) : (
+                            <>
+                                <ChartSkeleton compact />
+                                <div className="col-span-full lg:col-span-2">
+                                    <ChartSkeleton />
+                                </div>
+                            </>
+                        )}
+                    </div>
+                ))
+            ) : (
+                <div className={`grid gap-4 ${config.chartCols}`}>
+                    <ChartSkeleton compact />
+                    {config.chartCols !== 'lg:grid-cols-1' && <ChartSkeleton compact />}
+                    {config.chartCols === 'lg:grid-cols-3' && <ChartSkeleton compact />}
+                </div>
+            )}
+
+            {config.showExtraChart && <ChartSkeleton />}
 
             {config.showFunnel && <FunnelSkeleton />}
-
-            {config.showPipeline && <ChartSkeleton />}
 
             {config.showRankings && (
                 <div className="grid gap-4 xl:grid-cols-2">
