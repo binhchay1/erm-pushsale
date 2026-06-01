@@ -58,8 +58,9 @@ class NavigationTest extends TestCase
             ->has('navigation', 1)
             ->where('navigation.0.items.0.url', '/sales/dashboard')
             ->where('navigation.0.items.1.url', '/sales/workspace')
-            ->where('navigation.0.items.2.url', '/sales/customers')
-            ->where('navigation.0.items.3.url', '/settings')
+            ->where('navigation.0.items.2.url', '/sales/rankings')
+            ->where('navigation.0.items.3.url', '/sales/customers')
+            ->where('navigation.0.items.4.url', '/settings')
         );
     }
 }
