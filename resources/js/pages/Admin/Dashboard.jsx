@@ -11,6 +11,7 @@ import { RankingList } from '@/components/dashboard/RankingList';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
 import AppLayout from '@/layouts/AppLayout';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
+import { formatNumber } from '@/lib/format';
 
 function AdminDashboardContent({ stats: initialStats }) {
     const { stats, connected } = useRealtimeDashboard('admin', initialStats);
@@ -29,21 +30,35 @@ function AdminDashboardContent({ stats: initialStats }) {
 
             <DashboardKpiGrid stats={stats} />
 
-            <div className="grid gap-4 lg:grid-cols-3">
-                <RevenueAreaChart
-                    data={stats.revenue_series}
-                    title="Doanh thu 7 ngày"
-                    description="Doanh thu từ đơn delivered/paid"
-                />
-                <OrdersBarChart
-                    data={stats.orders_series}
-                    title="Đơn phát sinh 7 ngày"
-                    description="Số đơn tạo mới theo ngày"
-                />
-                <LeadSourcePieChart
-                    data={stats.lead_sources}
-                    title="Nguồn lead hôm nay"
-                />
+            <div className="space-y-4">
+                <div className="grid gap-4 lg:grid-cols-3">
+                    <RevenueAreaChart
+                        data={stats.revenue_series}
+                        title="Doanh thu 7 ngày"
+                        description="Doanh thu từ đơn delivered/paid"
+                    />
+                    <OrdersBarChart
+                        data={stats.orders_series}
+                        title="Đơn phát sinh 7 ngày"
+                        description="Số đơn tạo mới theo ngày"
+                    />
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
+                    <RevenueAreaChart
+                        data={stats.lead_series}
+                        title="Lead 7 ngày"
+                        description="Lead ingest theo ngày"
+                        valueFormatter={(v) => formatNumber(v)}
+                        yTickFormatter={(v) => String(v)}
+                    />
+                    <LeadSourcePieChart
+                        compact
+                        fillHeight
+                        data={stats.lead_sources}
+                        title="Nguồn lead hôm nay"
+                    />
+                </div>
             </div>
 
             <ConversionFunnel data={stats.funnel} />
