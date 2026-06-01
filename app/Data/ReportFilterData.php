@@ -5,6 +5,7 @@ namespace App\Data;
 use App\Enums\DateType;
 use App\Enums\DiscountMode;
 use App\Models\User;
+use App\Services\Reports\ReportDateRange;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -12,6 +13,7 @@ readonly class ReportFilterData
 {
     public function __construct(
         public ?string $sourceType = null,
+        public string $preset = ReportDateRange::PRESET_LAST_7_DAYS,
         public ?Carbon $dateFrom = null,
         public ?Carbon $dateTo = null,
         public DateType $dateType = DateType::DataArrival,
@@ -39,13 +41,7 @@ readonly class ReportFilterData
 
     public static function fromRequest(Request $request, ?User $user = null): self
     {
-        $today = now()->startOfDay();
-        $dateFrom = $request->input('date_from')
-            ? Carbon::parse($request->input('date_from'))->startOfDay()
-            : $today->copy();
-        $dateTo = $request->input('date_to')
-            ? Carbon::parse($request->input('date_to'))->endOfDay()
-            : $today->copy()->endOfDay();
+        $dateRange = ReportDateRange::fromRequest($request);
 
         $saleId = $request->integer('sale_id') ?: null;
         if ($user?->isSales()) {
@@ -54,8 +50,9 @@ readonly class ReportFilterData
 
         return new self(
             sourceType: $request->input('source_type'),
-            dateFrom: $dateFrom,
-            dateTo: $dateTo,
+            preset: $dateRange->preset,
+            dateFrom: $dateRange->from,
+            dateTo: $dateRange->to,
             dateType: DateType::tryFrom($request->input('date_type', '')) ?? DateType::DataArrival,
             deliveryStatus: $request->input('delivery_status'),
             reconciliationStatus: $request->input('reconciliation_status'),
@@ -85,6 +82,7 @@ readonly class ReportFilterData
     {
         return [
             'source_type' => $this->sourceType,
+            'preset' => $this->preset,
             'date_from' => $this->dateFrom?->toDateString(),
             'date_to' => $this->dateTo?->toDateString(),
             'date_type' => $this->dateType->value,
