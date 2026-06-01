@@ -2,6 +2,7 @@ import { Deferred, Head } from '@inertiajs/react';
 import { AlertTriangle, Package, PackageCheck, Truck } from 'lucide-react';
 
 import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
+import { RevenueAreaChart } from '@/components/charts/RevenueAreaChart';
 import { StatCard } from '@/components/charts/StatCard';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { OpsAlerts } from '@/components/dashboard/OpsAlerts';
@@ -66,11 +67,20 @@ function WarehouseDashboardContent({ stats: initialStats }) {
                 ))}
             </div>
 
-            <OrdersBarChart
-                data={stats.orders_series}
-                title="Đơn xử lý 7 ngày"
-                description="Số đơn phát sinh theo ngày để kho xử lý"
-            />
+            <div className="grid gap-4 lg:grid-cols-3">
+                <RevenueAreaChart
+                    data={stats.orders_series}
+                    title="Đơn xử lý 7 ngày"
+                    description="Số đơn phát sinh theo ngày để kho xử lý"
+                    valueFormatter={(v) => formatNumber(v)}
+                    yTickFormatter={(v) => String(v)}
+                />
+                <OrdersBarChart
+                    data={stats.delivery_breakdown}
+                    title="Trạng thái vận đơn"
+                    description="Phân bổ đơn đang xử lý"
+                />
+            </div>
 
             <OpsAlerts alerts={alerts} />
         </div>

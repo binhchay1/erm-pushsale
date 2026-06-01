@@ -2,6 +2,7 @@ import { Deferred, Head } from '@inertiajs/react';
 import { AlertTriangle, CopyCheck, GitBranch, Inbox, UsersRound } from 'lucide-react';
 
 import { LeadSourcePieChart } from '@/components/charts/LeadSourcePieChart';
+import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
 import { RevenueAreaChart } from '@/components/charts/RevenueAreaChart';
 import { StatCard } from '@/components/charts/StatCard';
 import { ConversionFunnel } from '@/components/dashboard/ConversionFunnel';
@@ -88,7 +89,7 @@ function AllocatorDashboardContent({ stats: initialStats }) {
                 ))}
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-3">
                 <RevenueAreaChart
                     data={stats.lead_series}
                     title="Lead ingest 7 ngày"
@@ -97,6 +98,21 @@ function AllocatorDashboardContent({ stats: initialStats }) {
                     yTickFormatter={(v) => String(v)}
                 />
                 <LeadSourcePieChart data={stats.platform_breakdown} title="Lead theo nền tảng" />
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+                <RevenueAreaChart
+                    data={stats.processed_series}
+                    title="Lead xử lý 7 ngày"
+                    description="Lead processed theo ngày"
+                    valueFormatter={(v) => formatNumber(v)}
+                    yTickFormatter={(v) => String(v)}
+                />
+                <OrdersBarChart
+                    data={stats.routing_status_breakdown}
+                    title="Trạng thái routing"
+                    description="Lead chờ phân số, lỗi và trùng"
+                />
             </div>
 
             {stats.funnel?.length > 0 && <ConversionFunnel data={stats.funnel} />}

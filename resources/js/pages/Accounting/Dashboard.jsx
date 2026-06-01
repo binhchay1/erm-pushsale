@@ -1,6 +1,7 @@
 import { Deferred, Head } from '@inertiajs/react';
 import { AlertTriangle, Banknote, FileCheck2, WalletCards } from 'lucide-react';
 
+import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
 import { RevenueAreaChart } from '@/components/charts/RevenueAreaChart';
 import { StatCard } from '@/components/charts/StatCard';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
@@ -77,18 +78,26 @@ function AccountingDashboardContent({ stats: initialStats }) {
 
             <div className="grid gap-4 lg:grid-cols-2">
                 <RevenueAreaChart
+                    className="col-span-full lg:col-span-1"
                     data={stats.revenue_series}
                     title="Doanh thu 7 ngày"
                     description="Doanh thu delivered/paid theo ngày"
                     valueFormatter={(v) => formatCurrency(v)}
                 />
                 <RevenueAreaChart
+                    className="col-span-full lg:col-span-1"
                     data={stats.cod_series}
                     title="COD thu 7 ngày"
                     description="Tổng COD ghi nhận theo ngày"
                     valueFormatter={(v) => formatCurrency(v)}
                 />
             </div>
+
+            <OrdersBarChart
+                data={stats.paid_orders_series}
+                title="Đơn paid 7 ngày"
+                description="Số đơn đã thanh toán theo ngày"
+            />
 
             <OpsAlerts alerts={alerts} />
         </div>

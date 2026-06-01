@@ -75,7 +75,15 @@ function MarketingDashboardContent({ stats: initialStats }) {
                     title="Tỷ lệ chốt / đơn theo ngày"
                     description="Hiệu quả chuyển đổi từ nguồn marketing"
                 />
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
                 <LeadSourcePieChart data={stats.lead_sources} title="Nguồn lead" />
+                <RevenueAreaChart
+                    data={stats.revenue_series}
+                    title="Doanh thu 7 ngày"
+                    description="Doanh thu delivered/paid từ campaign"
+                />
             </div>
 
             {stats.funnel?.length > 0 && <ConversionFunnel data={stats.funnel} />}

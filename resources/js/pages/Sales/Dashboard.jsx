@@ -60,7 +60,7 @@ function SalesDashboardContent({ stats: initialStats }) {
                 ))}
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-3">
                 <RevenueAreaChart
                     data={stats.calls_series}
                     title="Cuộc gọi 7 ngày"
@@ -75,15 +75,24 @@ function SalesDashboardContent({ stats: initialStats }) {
                 />
             </div>
 
-            {stats.funnel?.length > 0 && <ConversionFunnel data={stats.funnel} />}
-
-            {stats.pipeline?.length > 0 && (
-                <OrdersBarChart
-                    data={stats.pipeline}
-                    title="Pipeline tác nghiệp"
-                    description="Số lead đang xử lý theo giai đoạn chăm sóc"
+            <div className="grid gap-4 lg:grid-cols-3">
+                <RevenueAreaChart
+                    data={stats.orders_closed_series}
+                    title="Đơn chốt 7 ngày"
+                    description="Số đơn chốt theo ngày"
+                    valueFormatter={(v) => formatNumber(v)}
+                    yTickFormatter={(v) => String(v)}
                 />
-            )}
+                {stats.pipeline?.length > 0 && (
+                    <OrdersBarChart
+                        data={stats.pipeline}
+                        title="Pipeline tác nghiệp"
+                        description="Lead theo giai đoạn chăm sóc"
+                    />
+                )}
+            </div>
+
+            {stats.funnel?.length > 0 && <ConversionFunnel data={stats.funnel} />}
         </div>
     );
 }
