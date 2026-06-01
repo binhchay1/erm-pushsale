@@ -69,6 +69,7 @@ class DashboardStatsTest extends TestCase
                     ->has('stats.revenue_series')
                     ->has('stats.orders_series')
                     ->has('stats.lead_sources')
+                    ->has('stats.lead_series')
                 )
             );
     }
@@ -141,6 +142,9 @@ class DashboardStatsTest extends TestCase
         $this->assertArrayHasKey('top_sales', $stats);
         $this->assertArrayHasKey('top_sources', $stats);
         $this->assertArrayHasKey('alerts', $stats);
+        $this->assertArrayHasKey('lead_series', $stats);
+        $this->assertCount(7, $stats['lead_series']);
+        $this->assertSame(['label', 'value'], array_keys($stats['lead_series'][0]));
         $this->assertSame('Lead', $stats['funnel'][0]['label']);
         $this->assertSame(2, $stats['funnel'][0]['value']);
         $this->assertSame('Sale Top', $stats['top_sales'][0]['name']);

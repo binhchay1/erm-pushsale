@@ -34,6 +34,7 @@ class DashboardStatsService
             ...self::todaySummary(),
             'revenue_series' => self::revenueSeries(),
             'orders_series' => self::ordersSeries(),
+            'lead_series' => self::dailyLeadSeries(7),
             'lead_sources' => self::leadSources(),
             'funnel' => self::funnel(),
             'top_sales' => self::topSales(),
@@ -58,7 +59,9 @@ class DashboardStatsService
             'reminders' => self::reminderOrders($orders)->count(),
             'calls_series' => self::dailyOrderSeries($orders, 'contact_count', 7),
             'conversion_series' => self::dailyConversionSeries($orders, 7),
+            'orders_closed_series' => self::dailyClosedOrderSeries($orders, 7),
             'pipeline' => self::stageBreakdown($orders),
+            'funnel' => self::salesFunnel($orders),
             'updated_at' => now()->toIso8601String(),
         ];
     }
@@ -86,6 +89,9 @@ class DashboardStatsService
             'budget_total' => (int) (clone $sources)->sum('budget'),
             'lead_series' => self::dailyLeadSeries(7),
             'conversion_series' => self::dailyConversionSeries($orders, 7),
+            'lead_sources' => self::marketerLeadSources($user),
+            'revenue_series' => self::marketerRevenueSeries($orders, 7),
+            'funnel' => self::marketerFunnel($user, $orders),
             'top_sources' => self::marketingTopSources($user),
             'updated_at' => now()->toIso8601String(),
         ];
@@ -104,6 +110,11 @@ class DashboardStatsService
             'low_stock_items' => WarehouseInventory::query()->where('stock_quantity', '<', 10)->count(),
             'pending_export' => Order::query()->where('delivery_status', 'picking_up')->count(),
             'orders_series' => self::dailyOrderSeries(Order::query(), 'id', 7),
+            'delivery_breakdown' => self::deliveryBreakdown(
+                Order::query()->where('delivery_status', 'waiting_waybill')->count(),
+                Order::query()->where('delivery_status', 'picking_up')->count(),
+                Order::query()->where('delivery_status', 'delivering')->count(),
+            ),
             'inventory_alerts' => self::inventoryAlerts(),
             'updated_at' => now()->toIso8601String(),
         ];
@@ -123,6 +134,7 @@ class DashboardStatsService
             'reconciliation_pending' => Order::query()->where('reconciliation_status', 'pending')->count(),
             'revenue_series' => self::revenueSeries(),
             'cod_series' => self::dailyOrderSeries(Order::query()->whereIn('delivery_status', ['delivered', 'paid']), 'total', 7),
+            'paid_orders_series' => self::dailyPaidOrderSeries(7),
             'updated_at' => now()->toIso8601String(),
         ];
     }
@@ -141,7 +153,14 @@ class DashboardStatsService
             'failed_leads' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(),
             'duplicate_leads' => LeadIngestion::query()->where('status', LeadIngestionStatus::Duplicate->value)->count(),
             'lead_series' => self::dailyLeadSeries(7),
+            'processed_series' => self::dailyProcessedLeadSeries(7),
             'platform_breakdown' => self::platformBreakdown(),
+            'routing_status_breakdown' => self::routingStatusBreakdown(
+                LeadIngestion::query()->where('status', LeadIngestionStatus::Pending->value)->count(),
+                LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(),
+                LeadIngestion::query()->where('status', LeadIngestionStatus::Duplicate->value)->count(),
+            ),
+            'funnel' => self::allocatorFunnel(),
             'updated_at' => now()->toIso8601String(),
         ];
     }
@@ -192,6 +211,10 @@ class DashboardStatsService
                 'reminders' => $summary['orders'] - $summary['closed_orders'],
                 'calls_series' => $this->metrics->orderSeries($user, $filter, 'contact_count'),
                 'conversion_series' => $this->metrics->orderSeries($user, $filter),
+                'orders_closed_series' => self::dailyClosedOrderSeries(
+                    app(\App\Services\Reports\ReportQueryService::class)->orders($user, $filter),
+                    7,
+                ),
                 'pipeline' => $this->metrics->stageBreakdown($user, $filter),
             ]),
             'marketing' => array_merge($base, [
@@ -201,8 +224,17 @@ class DashboardStatsService
                 'budget_total' => (int) MarketingSource::query()->where('marketer_user_id', $user->id)->sum('budget'),
                 'top_sources' => $this->metrics->topSources($user, $filter),
             ]),
-            'warehouse' => array_merge($base, $this->metrics->warehouseBuckets($user, $filter), ['inventory_alerts' => self::inventoryAlerts()]),
-            'accounting' => array_merge($base, $this->metrics->accountingBuckets($user, $filter)),
+            'warehouse' => array_merge($base, $warehouseBuckets = $this->metrics->warehouseBuckets($user, $filter), [
+                'inventory_alerts' => self::inventoryAlerts(),
+                'delivery_breakdown' => self::deliveryBreakdown(
+                    $warehouseBuckets['waiting_waybill'] ?? 0,
+                    $warehouseBuckets['pending_export'] ?? 0,
+                    $warehouseBuckets['delivering'] ?? 0,
+                ),
+            ]),
+            'accounting' => array_merge($base, $this->metrics->accountingBuckets($user, $filter), [
+                'paid_orders_series' => self::dailyPaidOrderSeries(7),
+            ]),
             'allocator' => array_merge($base, [
                 'leads_today' => $summary['leads'],
                 'pending_routing' => $summary['leads'] - $summary['processed_leads'],
@@ -210,6 +242,13 @@ class DashboardStatsService
                 'failed_leads' => $summary['failed_leads'],
                 'duplicate_leads' => $summary['duplicate_leads'],
                 'platform_breakdown' => $this->metrics->leadSourceBreakdown($user, $filter),
+                'processed_series' => self::dailyProcessedLeadSeries(7),
+                'routing_status_breakdown' => self::routingStatusBreakdown(
+                    $summary['leads'] - $summary['processed_leads'],
+                    $summary['failed_leads'],
+                    $summary['duplicate_leads'],
+                ),
+                'funnel' => self::allocatorFunnel(),
             ]),
             default => $base,
         };
@@ -297,6 +336,132 @@ class DashboardStatsService
     private static function dailyLeadSeries(int $days): array
     {
         return self::days($days)->map(fn (Carbon $day) => ['label' => $day->format('d/m'), 'value' => LeadIngestion::query()->whereDate('created_at', $day)->count()])->values()->all();
+    }
+
+    /** @param Builder<Order> $query
+     * @return list<array{label: string, value: int}>
+     */
+    private static function dailyClosedOrderSeries(Builder $query, int $days): array
+    {
+        return self::days($days)->map(fn (Carbon $day) => [
+            'label' => $day->format('d/m'),
+            'value' => (clone $query)->whereDate('closed_at', $day)->count(),
+        ])->values()->all();
+    }
+
+    /** @return list<array{label: string, value: int}> */
+    private static function dailyPaidOrderSeries(int $days): array
+    {
+        return self::days($days)->map(fn (Carbon $day) => [
+            'label' => $day->format('d/m'),
+            'value' => Order::query()->where('delivery_status', 'paid')->whereDate('updated_at', $day)->count(),
+        ])->values()->all();
+    }
+
+    /** @return list<array{label: string, value: int}> */
+    private static function dailyProcessedLeadSeries(int $days): array
+    {
+        return self::days($days)->map(fn (Carbon $day) => [
+            'label' => $day->format('d/m'),
+            'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Processed->value)->whereDate('updated_at', $day)->count(),
+        ])->values()->all();
+    }
+
+    /** @return list<array{label: string, value: int}> */
+    private static function deliveryBreakdown(int $waitingWaybill, int $pendingExport, int $delivering): array
+    {
+        return collect([
+            ['label' => 'Chờ vận đơn', 'value' => $waitingWaybill],
+            ['label' => 'Chờ lấy hàng', 'value' => $pendingExport],
+            ['label' => 'Đang giao', 'value' => $delivering],
+        ])->filter(fn (array $row) => $row['value'] > 0)->values()->all();
+    }
+
+    /** @return list<array{label: string, value: int}> */
+    private static function routingStatusBreakdown(int $pending, int $failed, int $duplicate): array
+    {
+        return collect([
+            ['label' => 'Chờ phân số', 'value' => $pending],
+            ['label' => 'Lỗi', 'value' => $failed],
+            ['label' => 'Trùng', 'value' => $duplicate],
+        ])->filter(fn (array $row) => $row['value'] > 0)->values()->all();
+    }
+
+    /** @return list<array{name: string, value: int}> */
+    private static function marketerLeadSources(User $user): array
+    {
+        $sourceIds = MarketingSource::query()->where('marketer_user_id', $user->id)->pluck('id');
+        $query = LeadIngestion::query()->whereDate('created_at', today());
+
+        if ($sourceIds->isNotEmpty()) {
+            $query->whereIn('marketing_source_id', $sourceIds);
+        }
+
+        return $query->selectRaw('platform as name, count(*) as value')
+            ->groupBy('platform')
+            ->orderByDesc('value')
+            ->limit(4)
+            ->get()
+            ->map(fn (LeadIngestion $row) => ['name' => $row->name ?: 'Khác', 'value' => (int) $row->value])
+            ->values()
+            ->all();
+    }
+
+    /** @param Builder<Order> $orders
+     * @return list<array{label: string, value: int}>
+     */
+    private static function marketerRevenueSeries(Builder $orders, int $days): array
+    {
+        $paidOrders = (clone $orders)->whereIn('delivery_status', ['delivered', 'paid']);
+
+        return self::days($days)->map(fn (Carbon $day) => [
+            'label' => $day->format('d/m'),
+            'value' => (int) (clone $paidOrders)->whereDate('created_at', $day)->sum('total'),
+        ])->values()->all();
+    }
+
+    /** @param Builder<Order> $orders
+     * @return list<array{label: string, value: int}>
+     */
+    private static function marketerFunnel(User $user, Builder $orders): array
+    {
+        $sourceIds = MarketingSource::query()->where('marketer_user_id', $user->id)->pluck('id');
+        $leadQuery = LeadIngestion::query();
+
+        if ($sourceIds->isNotEmpty()) {
+            $leadQuery->whereIn('marketing_source_id', $sourceIds);
+        }
+
+        return [
+            ['label' => 'Lead', 'value' => $leadQuery->count()],
+            ['label' => 'Đơn', 'value' => (clone $orders)->count()],
+            ['label' => 'Chốt', 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
+            ['label' => 'Giao', 'value' => (clone $orders)->whereIn('delivery_status', ['delivered', 'paid'])->count()],
+        ];
+    }
+
+    /** @param Builder<Order> $orders
+     * @return list<array{label: string, value: int}>
+     */
+    private static function salesFunnel(Builder $orders): array
+    {
+        return [
+            ['label' => 'Lead', 'value' => (clone $orders)->count()],
+            ['label' => 'Đang xử lý', 'value' => self::activePipeline($orders)->count()],
+            ['label' => 'Chốt', 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
+            ['label' => 'Giao', 'value' => (clone $orders)->whereIn('delivery_status', ['delivered', 'paid'])->count()],
+        ];
+    }
+
+    /** @return list<array{label: string, value: int}> */
+    private static function allocatorFunnel(): array
+    {
+        return [
+            ['label' => 'Lead ingest', 'value' => LeadIngestion::query()->count()],
+            ['label' => 'Chờ phân số', 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Pending->value)->count()],
+            ['label' => 'Đã xử lý', 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Processed->value)->count()],
+            ['label' => 'Lead lỗi', 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count()],
+        ];
     }
 
     /** @return array<string, int|float> */
