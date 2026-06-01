@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { Head } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
 import { RankingFilterBar } from '@/components/rankings/RankingFilterBar';
 import { RevenueRankingChart } from '@/components/rankings/RevenueRankingChart';
 import { formatCurrency, formatNumber } from '@/lib/format';
@@ -18,10 +16,8 @@ export default function RankingsIndex({
     periods,
     departments,
 }) {
-    const [activeKey, setActiveKey] = useState(departments?.[0]?.key ?? 'sales');
-
-    const activeDept =
-        departments.find((dept) => dept.key === activeKey) ?? departments[0];
+    const deptList = departments ?? [];
+    const showAllDepartments = showDepartmentTabs && deptList.length > 1;
 
     return (
         <AppLayout>
@@ -62,43 +58,36 @@ export default function RankingsIndex({
                                 <p className="text-muted-foreground">Đơn chốt</p>
                             </div>
                             <div>
-                                <p className="font-semibold tabular-nums">{formatCurrency(myRank.avgOrderValue)}</p>
+                                <p className="font-semibold tabular-nums">
+                                    {formatCurrency(myRank.avgOrderValue)}
+                                </p>
                                 <p className="text-muted-foreground">TB/đơn</p>
                             </div>
                         </CardContent>
                     </Card>
                 )}
 
-                {showDepartmentTabs && departments.length > 1 && (
-                    <div className="inline-flex flex-wrap gap-2">
-                        {departments.map((dept) => (
-                            <button
-                                key={dept.key}
-                                type="button"
-                                onClick={() => setActiveKey(dept.key)}
-                                className={cn(
-                                    'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
-                                    dept.key === activeKey
-                                        ? 'border-primary bg-primary text-primary-foreground'
-                                        : 'border-border bg-card text-muted-foreground hover:bg-muted'
-                                )}
-                            >
-                                {dept.label}
-                            </button>
-                        ))}
-                    </div>
-                )}
-
-                <Card>
-                    <CardContent className="pt-6">
-                        <RevenueRankingChart
-                            chartItems={activeDept?.chartItems ?? activeDept?.items}
-                            tableItems={activeDept?.items}
-                            highlightUserId={highlightUserId}
-                            departmentLabel={activeDept?.label}
-                        />
-                    </CardContent>
-                </Card>
+                <div className={showAllDepartments ? 'grid gap-8 xl:grid-cols-1' : 'space-y-0'}>
+                    {deptList.map((dept) => (
+                        <Card key={dept.key} className="overflow-hidden">
+                            <CardHeader className="border-b border-border/60 bg-muted/20 pb-4">
+                                <CardTitle className="text-lg">{dept.label}</CardTitle>
+                                <CardDescription>
+                                    Top {dept.chartItems?.length ?? 0} trên biểu đồ · tối đa 50 hạng
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-6">
+                                <RevenueRankingChart
+                                    chartItems={dept.chartItems ?? dept.items}
+                                    tableItems={dept.items}
+                                    highlightUserId={highlightUserId}
+                                    departmentLabel={dept.label}
+                                    compactTable={showAllDepartments}
+                                />
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             </div>
         </AppLayout>
     );
