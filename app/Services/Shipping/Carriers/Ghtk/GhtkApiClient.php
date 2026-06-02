@@ -4,6 +4,7 @@ namespace App\Services\Shipping\Carriers\Ghtk;
 
 use App\Services\Shipping\Support\AbstractCarrierHttpClient;
 use App\Services\Shipping\Support\PartnerCredentialResolver;
+use App\Services\Shipping\Support\ShippingHttpSsl;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -93,7 +94,10 @@ class GhtkApiClient extends AbstractCarrierHttpClient
         $endpoint = '/services/label/'.rawurlencode($trackingKey);
         $url = rtrim($this->baseUrl(), '/').$endpoint;
 
-        $response = Http::timeout(45)->withHeaders($this->headers())->get($url, $query);
+        $response = Http::timeout(45)
+            ->withHeaders($this->headers())
+            ->withOptions(['verify' => ShippingHttpSsl::verifyOption()])
+            ->get($url, $query);
 
         $contentType = $response->header('Content-Type') ?? '';
         $isPdf = str_contains($contentType, 'pdf');

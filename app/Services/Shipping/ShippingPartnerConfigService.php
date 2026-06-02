@@ -35,14 +35,15 @@ class ShippingPartnerConfigService
             $updates['webhook_secret'] = (string) $payload['webhook_secret'];
         }
 
-        if (! empty($payload['credentials']) && is_array($payload['credentials'])) {
-            $merged = $connection->credentials ?? [];
-            foreach ($payload['credentials'] as $key => $value) {
-                if (filled($value)) {
-                    $merged[$key] = $value;
+        if (is_array($payload['credentials'] ?? null)) {
+            $filled = array_filter($payload['credentials'], fn ($v) => filled($v));
+            if ($filled !== []) {
+                $merged = $connection->credentials ?? [];
+                foreach ($filled as $key => $value) {
+                    $merged[$key] = (string) $value;
                 }
+                $updates['credentials'] = $merged;
             }
-            $updates['credentials'] = $merged;
         }
 
         if ($updates !== []) {

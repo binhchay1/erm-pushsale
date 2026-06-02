@@ -1,6 +1,11 @@
 <?php
 
 return [
+    // Verify SSL khi gọi API hãng vận chuyển. Đặt false chỉ khi debug tạm (không dùng production).
+    'verify_ssl' => filter_var(env('SHIPPING_VERIFY_SSL', true), FILTER_VALIDATE_BOOL),
+    // Đường dẫn CA bundle; mặc định dùng certs/cacert.pem trong project nếu file tồn tại.
+    'ca_bundle' => env('SHIPPING_CA_BUNDLE'),
+
     // Địa chỉ giao mặc định khi đơn chưa có shipping_geo.
     'default_geo' => [
         'province' => env('SHIPPING_DEFAULT_PROVINCE', 'Hà Nội'),

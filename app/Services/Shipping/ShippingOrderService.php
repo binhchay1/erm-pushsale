@@ -5,6 +5,7 @@ namespace App\Services\Shipping;
 use App\Data\ReportFilterData;
 use App\Models\Order;
 use App\Models\ShippingApiLog;
+use App\Models\Shipment;
 use App\Services\Operations\OrderOperationPresenter;
 use App\Services\Shipping\Support\PartnerCredentialResolver;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -31,7 +32,10 @@ class ShippingOrderService
     /** @return array<string, mixed> */
     public function detail(Order $order): array
     {
-        $order->load(['items', 'warehouse', 'saleUser', 'shipments', 'shippingApiLogs' => fn ($q) => $q->latest('id')->limit(30)]);
+        $order->load([
+            'items', 'warehouse', 'saleUser', 'shipments',
+            'shippingApiLogs' => fn ($q) => $q->latest('id')->limit(50),
+        ]);
 
         $provider = $order->shipping_provider ?? $order->shipments->sortByDesc('id')->first()?->provider;
         $shipment = $provider
@@ -42,24 +46,99 @@ class ShippingOrderService
             'order' => OrderOperationPresenter::toArray($order),
             'shipment' => $shipment ? $this->presentShipment($shipment) : null,
             'shipments' => $order->shipments->map(fn ($s) => $this->presentShipment($s))->values()->all(),
-            'apiLogs' => $order->shippingApiLogs->map(fn (ShippingApiLog $log) => [
-                'id' => $log->id,
-                'provider' => $log->provider,
-                'action' => $log->action,
-                'method' => $log->method,
-                'endpoint' => $log->endpoint,
-                'httpStatus' => $log->http_status,
-                'success' => $log->success,
-                'message' => $log->message,
-                'logId' => $log->log_id,
-                'createdAt' => $log->created_at?->toIso8601String(),
-            ])->values()->all(),
+            'tracking' => $this->buildTrackingTimeline($order, $shipment),
             'carriers' => $this->registry->summary(),
             'activeProvider' => $provider,
             'trackingUrl' => $shipment?->tracking_number && $shipment->provider
                 ? $this->credentials->trackingUrl($shipment->provider, $shipment->tracking_number)
                 : null,
         ];
+    }
+
+    /**
+     * Build a unified tracking timeline from API log entries (carrier-agnostic).
+     *
+     * @return list<array{at: string, provider: string, statusText: string, note: ?string, isCurrent: bool}>
+     */
+    private function buildTrackingTimeline(Order $order, ?Shipment $activeShipment): array
+    {
+        $events = [];
+
+        // Seed with shipment creation event if exists
+        if ($activeShipment?->submitted_at) {
+            $events[] = [
+                'at' => $activeShipment->submitted_at->toIso8601String(),
+                'provider' => $activeShipment->provider,
+                'statusText' => 'Đã tạo vận đơn',
+                'note' => $activeShipment->tracking_number ? 'Mã vận đơn: '.$activeShipment->tracking_number : null,
+                'isCurrent' => false,
+            ];
+        }
+
+        // Extract status events from API sync logs
+        foreach ($order->shippingApiLogs->whereIn('action', ['order_status', 'create_order'])->sortBy('id') as $log) {
+            /** @var ShippingApiLog $log */
+            if (! $log->success) {
+                continue;
+            }
+
+            $resp = $log->response_payload ?? [];
+            $statusText = $this->extractStatusTextFromPayload($log->provider, $resp);
+
+            if (! filled($statusText)) {
+                continue;
+            }
+
+            // Deduplicate consecutive identical statuses
+            $lastEvent = end($events);
+            if ($lastEvent !== false && $lastEvent['provider'] === $log->provider && $lastEvent['statusText'] === $statusText) {
+                // Update timestamp only — keep most recent
+                $events[array_key_last($events)]['at'] = $log->created_at?->toIso8601String() ?? $lastEvent['at'];
+                continue;
+            }
+
+            $events[] = [
+                'at' => $log->created_at?->toIso8601String(),
+                'provider' => $log->provider,
+                'statusText' => $statusText,
+                'note' => $log->message && $log->message !== $statusText ? $log->message : null,
+                'isCurrent' => false,
+            ];
+        }
+
+        // Mark last event as current
+        if ($events !== []) {
+            $events[array_key_last($events)]['isCurrent'] = true;
+        }
+
+        return $events;
+    }
+
+    /**
+     * Extract human-readable status text from a carrier API response payload.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function extractStatusTextFromPayload(string $provider, array $payload): ?string
+    {
+        return match ($provider) {
+            'ghtk' => $payload['data']['status_text']
+                ?? $payload['order']['status_text']
+                ?? null,
+            'ghn' => $payload['data']['status']
+                ?? $payload['data']['StatusName']
+                ?? null,
+            'viettel_post' => $payload['data']['ORDER_STATUS_NAME']
+                ?? $payload['data']['STATUS_NAME']
+                ?? $payload['data']['status_name']
+                ?? null,
+            'jnt' => $payload['data']['status_desc']
+                ?? $payload['data']['statusDesc']
+                ?? null,
+            default => $payload['data']['status_text']
+                ?? $payload['data']['status']
+                ?? null,
+        };
     }
 
     /** @return array<string, mixed> */

@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { CheckCircle2, Copy, ExternalLink, Save, Unplug } from 'lucide-react';
 
 import { CarrierApiTestPanel } from '@/components/shipping/CarrierApiTestPanel';
@@ -21,6 +22,12 @@ export function ShippingPartnerCard({ provider }) {
         webhook_secret: '',
         credentials: initialCredentials,
     });
+
+    // Sync is_enabled with fresh server-side props after each Inertia visit
+    useEffect(() => {
+        setData('is_enabled', provider.is_enabled);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [provider.is_enabled]);
 
     const submit = (e) => {
         e.preventDefault();

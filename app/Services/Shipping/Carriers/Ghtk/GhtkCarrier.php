@@ -157,7 +157,16 @@ class GhtkCarrier extends AbstractShippingCarrier
             'pick-addresses' => $this->client->listPickAddresses(),
             'products' => $this->client->listProducts(),
             'solutions' => $this->client->listSolutions(),
-            'fee' => $this->calculateFee(new Order),
+            'fee' => $this->client->calculateFee([
+                'pick_province' => config('shipping_partners.pickup.province', 'Hà Nội'),
+                'pick_district' => config('shipping_partners.pickup.district', 'Quận Hoàn Kiếm'),
+                'province' => 'Hồ Chí Minh',
+                'district' => 'Quận 1',
+                'address' => '123 Lê Lợi',
+                'weight' => 500,
+                'value' => 1000000,
+                'transport' => 'road',
+            ]),
             default => throw new RuntimeException("Action GHTK [{$action}] không hỗ trợ."),
         };
     }

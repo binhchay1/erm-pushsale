@@ -21,7 +21,7 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">{pageTitle ?? 'Đơn vận chuyển'}</h1>
                     <p className="text-sm text-muted-foreground">
-                        Đơn đã chốt — tạo vận đơn GHTK, đồng bộ trạng thái và in nhãn
+                        Đơn đã chốt — tạo vận đơn, đồng bộ trạng thái và theo dõi lộ trình
                     </p>
                 </div>
 
@@ -37,7 +37,7 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
                                 <Th>Sale</Th>
                                 <Th>Chốt lúc</Th>
                                 <Th>Trạng thái giao</Th>
-                                <Th>Vận đơn GHTK</Th>
+                                <Th>Mã vận đơn</Th>
                                 <Th>Phí VC</Th>
                                 <Th />
                             </tr>

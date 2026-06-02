@@ -29,7 +29,9 @@ class ShippingPartnerConnection extends Model
     protected function credentials(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? json_decode(Crypt::decryptString($value), true) : [],
+            get: fn (?string $value) => $value
+                ? rescue(fn () => json_decode(Crypt::decryptString($value), true) ?? [], [], false)
+                : [],
             set: fn (?array $value) => $value ? Crypt::encryptString(json_encode($value)) : null,
         );
     }

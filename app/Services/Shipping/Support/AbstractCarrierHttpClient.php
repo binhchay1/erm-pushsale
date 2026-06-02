@@ -29,7 +29,9 @@ abstract class AbstractCarrierHttpClient
     ): array {
         $url = rtrim($this->baseUrl(), '/').$endpoint;
 
-        $pending = Http::timeout(45)->withHeaders($this->headers());
+        $pending = Http::timeout(45)
+            ->withHeaders($this->headers())
+            ->withOptions(['verify' => ShippingHttpSsl::verifyOption()]);
 
         /** @var Response $response */
         $response = match (strtoupper($method)) {
