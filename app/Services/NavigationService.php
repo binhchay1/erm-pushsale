@@ -56,6 +56,7 @@ class NavigationService
             $this->group('Hệ thống', [
                 ['title' => 'Tích hợp nền tảng', 'url' => '/admin/integrations', 'icon' => 'plug'],
                 ['title' => 'API vận chuyển', 'url' => '/admin/shipping-partners', 'icon' => 'truck'],
+                ['title' => 'Đơn vận chuyển', 'url' => '/admin/shipping/orders', 'icon' => 'package'],
                 ['title' => 'Đối soát vận chuyển', 'url' => '/admin/shipping/reconciliation', 'icon' => 'file-check'],
             ]),
             $this->group('Vận hành', [
@@ -102,6 +103,7 @@ class NavigationService
         return [
             ['title' => 'Dashboard', 'url' => '/warehouse/dashboard', 'icon' => 'home'],
             ['title' => 'Tác nghiệp kho', 'url' => '/warehouse/workspace', 'icon' => 'truck'],
+            ['title' => 'Đơn vận chuyển', 'url' => '/warehouse/shipping/orders', 'icon' => 'package'],
             ['title' => 'Tồn kho', 'url' => '/warehouse/inventory', 'icon' => 'package'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];

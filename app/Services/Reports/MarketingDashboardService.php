@@ -5,6 +5,8 @@ namespace App\Services\Reports;
 use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Data\ReportFilterData;
 use App\Models\MarketingSource;
+use App\Models\Order;
+use Illuminate\Support\Collection;
 
 class MarketingDashboardService
 {
@@ -45,7 +47,7 @@ class MarketingDashboardService
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, \App\Models\Order>  $orders
+     * @param  Collection<int, Order>  $orders
      * @return array<string, mixed>
      */
     private function mapSourceRow(MarketingSource $source, $orders, int $stt, ?int $parentId): array

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\LeadIngestionStatus;
 use App\Http\Controllers\Controller;
 use App\Models\LeadIngestion;
 use Illuminate\Http\Request;
@@ -44,7 +45,7 @@ class LeadsLogController extends Controller
                 'status' => $status,
             ],
             'platforms' => array_keys(config('integrations.platforms', [])),
-            'statuses' => collect(\App\Enums\LeadIngestionStatus::cases())
+            'statuses' => collect(LeadIngestionStatus::cases())
                 ->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()])
                 ->all(),
         ]);

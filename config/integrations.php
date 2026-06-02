@@ -1,5 +1,9 @@
 <?php
 
+use App\Integrations\Facebook\FacebookLeadDriver;
+use App\Integrations\Generic\GenericWebhookDriver;
+use App\Integrations\Landing\LandingFormDriver;
+
 /**
  * Cấu hình tích hợp nền tảng — giá trị nhạy cảm đặt trong .env hoặc lưu DB (admin).
  * Chi tiết: docs/INTEGRATIONS.md
@@ -48,7 +52,7 @@ return [
             'label' => 'Facebook Lead Ads',
             'category' => 'advertising',
             'description' => 'Lead từ form quảng cáo Facebook — webhook leadgen real-time.',
-            'driver' => \App\Integrations\Facebook\FacebookLeadDriver::class,
+            'driver' => FacebookLeadDriver::class,
             'fields' => [
                 'app_id' => ['label' => 'App ID', 'env' => 'FACEBOOK_APP_ID'],
                 'app_secret' => ['label' => 'App Secret', 'env' => 'FACEBOOK_APP_SECRET', 'secret' => true],
@@ -61,7 +65,7 @@ return [
             'label' => 'TikTok Lead Generation',
             'category' => 'advertising',
             'description' => 'Lead form TikTok Ads / TikTok Shop.',
-            'driver' => \App\Integrations\Generic\GenericWebhookDriver::class,
+            'driver' => GenericWebhookDriver::class,
             'fields' => [
                 'app_id' => ['label' => 'App ID', 'env' => 'TIKTOK_APP_ID'],
                 'app_secret' => ['label' => 'App Secret', 'env' => 'TIKTOK_APP_SECRET', 'secret' => true],
@@ -74,7 +78,7 @@ return [
             'label' => 'Google Ads Lead Form',
             'category' => 'advertising',
             'description' => 'Lead form mở rộng Google Ads.',
-            'driver' => \App\Integrations\Generic\GenericWebhookDriver::class,
+            'driver' => GenericWebhookDriver::class,
             'fields' => [
                 'webhook_key' => ['label' => 'Webhook Key', 'env' => 'GOOGLE_LEADS_WEBHOOK_KEY', 'secret' => true],
             ],
@@ -85,7 +89,7 @@ return [
             'label' => 'Zalo OA',
             'category' => 'social',
             'description' => 'Tin nhắn / form từ Zalo Official Account.',
-            'driver' => \App\Integrations\Generic\GenericWebhookDriver::class,
+            'driver' => GenericWebhookDriver::class,
             'fields' => [
                 'oa_id' => ['label' => 'OA ID', 'env' => 'ZALO_OA_ID'],
                 'app_id' => ['label' => 'App ID', 'env' => 'ZALO_APP_ID'],
@@ -99,7 +103,7 @@ return [
             'label' => 'Landing Page (Ladipage, Web)',
             'category' => 'landing',
             'description' => 'Webhook khi khách bấm "Đặt mua" trên landing — real-time.',
-            'driver' => \App\Integrations\Landing\LandingFormDriver::class,
+            'driver' => LandingFormDriver::class,
             'fields' => [
                 'api_key' => ['label' => 'API Key / Webhook Secret', 'env' => 'LANDING_API_KEY', 'secret' => true],
             ],
@@ -110,7 +114,7 @@ return [
             'label' => 'Shopee',
             'category' => 'marketplace',
             'description' => 'Đơn / chat Shopee — đẩy qua webhook hoặc API đối tác.',
-            'driver' => \App\Integrations\Generic\GenericWebhookDriver::class,
+            'driver' => GenericWebhookDriver::class,
             'fields' => [
                 'partner_id' => ['label' => 'Partner ID', 'env' => 'SHOPEE_PARTNER_ID'],
                 'partner_key' => ['label' => 'Partner Key', 'env' => 'SHOPEE_PARTNER_KEY', 'secret' => true],
@@ -124,7 +128,7 @@ return [
             'label' => 'Lazada',
             'category' => 'marketplace',
             'description' => 'Đơn Lazada — webhook từ Open Platform.',
-            'driver' => \App\Integrations\Generic\GenericWebhookDriver::class,
+            'driver' => GenericWebhookDriver::class,
             'fields' => [
                 'app_key' => ['label' => 'App Key', 'env' => 'LAZADA_APP_KEY'],
                 'app_secret' => ['label' => 'App Secret', 'env' => 'LAZADA_APP_SECRET', 'secret' => true],

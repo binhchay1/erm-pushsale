@@ -1,8 +1,13 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,27 +20,27 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
+            HandleInertiaRequests::class,
         ]);
 
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+            'role' => EnsureUserHasRole::class,
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));
 
-        $middleware->redirectUsersTo(function (\Illuminate\Http\Request $request) {
-            return \App\Http\Controllers\Auth\LoginController::homeFor($request->user());
+        $middleware->redirectUsersTo(function (Request $request) {
+            return LoginController::homeFor($request->user());
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (\Illuminate\Http\Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
             true
         );
 
         // Inertia: trả về trang lỗi có nội dung thay vì body trống khi 500
-        $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, \Throwable $e, \Illuminate\Http\Request $request) {
+        $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
             if (! $request->header('X-Inertia') || ! config('app.debug')) {
                 return $response;
             }

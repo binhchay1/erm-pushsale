@@ -1,26 +1,12 @@
 import { Head } from '@inertiajs/react';
 import { AlertTriangle, BadgeCheck, Link2Off, Wallet } from 'lucide-react';
 
-import AppLayout from '@/layouts/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatCard } from '@/components/charts/StatCard';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
-
-function StatCard({ icon: Icon, title, value, hint }) {
-    return (
-        <Card>
-            <CardHeader className="pb-2">
-                <CardDescription className="flex items-center gap-2">
-                    <Icon className="size-4" />
-                    {title}
-                </CardDescription>
-                <CardTitle className="text-3xl">{value}</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-                <p className="text-xs text-muted-foreground">{hint}</p>
-            </CardContent>
-        </Card>
-    );
-}
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatCurrency } from '@/lib/format';
+import AppLayout from '@/layouts/AppLayout';
 
 export default function ShippingReconciliation({ stats, issues }) {
     return (
@@ -28,12 +14,10 @@ export default function ShippingReconciliation({ stats, issues }) {
             <Head title="Đối soát vận chuyển" />
 
             <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Đối soát vận chuyển</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Theo dõi callback từ hãng giao hàng và phát hiện lệch COD/không map được đơn.
-                    </p>
-                </div>
+                <PageHeader
+                    title="Đối soát vận chuyển"
+                    description="Theo dõi callback từ hãng giao hàng và phát hiện lệch COD/không map được đơn."
+                />
 
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <StatCard
@@ -97,8 +81,8 @@ export default function ShippingReconciliation({ stats, issues }) {
                                                 <Td className="font-mono">{row.partner_order_code ?? '—'}</Td>
                                                 <Td className="font-mono">{row.order_code ?? '—'}</Td>
                                                 <Td>{row.mapped_status ?? row.raw_status ?? '—'}</Td>
-                                                <Td>{row.partner_cod ?? '—'}</Td>
-                                                <Td>{row.system_cod ?? '—'}</Td>
+                                                <Td>{row.partner_cod != null ? formatCurrency(row.partner_cod) : '—'}</Td>
+                                                <Td>{row.system_cod != null ? formatCurrency(row.system_cod) : '—'}</Td>
                                                 <Td className="max-w-xs whitespace-normal text-muted-foreground">
                                                     {row.is_cod_mismatch
                                                         ? 'Lệch COD'

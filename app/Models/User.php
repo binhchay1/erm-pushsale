@@ -24,9 +24,13 @@ class User extends Authenticatable
     public const ROLE_ADMIN = 'admin';
 
     public const ROLE_SALES = 'sales';
+
     public const ROLE_MARKETING = 'marketing';
+
     public const ROLE_WAREHOUSE = 'warehouse';
+
     public const ROLE_ALLOCATOR = 'allocator';
+
     public const ROLE_ACCOUNTING = 'accounting';
 
     protected function casts(): array

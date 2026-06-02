@@ -43,6 +43,16 @@ enum DeliveryStatus: string
         };
     }
 
+    /**
+     * Trạng thái được tính là doanh thu (đã giao thành công / đã thu tiền).
+     *
+     * @return array<int, string>
+     */
+    public static function revenueEligible(): array
+    {
+        return [self::Delivered->value, self::Paid->value];
+    }
+
     /** @return array<string, self> */
     public static function ceoSummaryMap(): array
     {

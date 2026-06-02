@@ -1,6 +1,23 @@
 <?php
 
 return [
+    // Địa chỉ giao mặc định khi đơn chưa có shipping_geo.
+    'default_geo' => [
+        'province' => env('SHIPPING_DEFAULT_PROVINCE', 'Hà Nội'),
+        'district' => env('SHIPPING_DEFAULT_DISTRICT', 'Quận Hoàn Kiếm'),
+        'ward' => env('SHIPPING_DEFAULT_WARD', 'Phường Hàng Bài'),
+    ],
+
+    // Kho lấy hàng mặc định khi đơn/kho chưa cấu hình.
+    'pickup' => [
+        'name' => env('SHIPPING_PICK_NAME', 'ERM SaleOps Kho'),
+        'tel' => env('SHIPPING_PICK_TEL', '0900000000'),
+        'address' => env('SHIPPING_PICK_ADDRESS', 'Kho demo SaleOps'),
+        'province' => env('SHIPPING_PICK_PROVINCE', 'Hà Nội'),
+        'district' => env('SHIPPING_PICK_DISTRICT', 'Quận Cầu Giấy'),
+        'ward' => env('SHIPPING_PICK_WARD'),
+    ],
+
     'providers' => [
         'viettel_post' => [
             'label' => 'Viettel Post',
@@ -14,10 +31,10 @@ return [
                 ['code' => 'PHS', 'label' => 'Phát hỏa tốc'],
             ],
             'fields' => [
-                'username' => ['label' => 'Username', 'secret' => false],
-                'password' => ['label' => 'Password', 'secret' => true],
-                'token' => ['label' => 'API Token', 'secret' => true],
-                'customer_code' => ['label' => 'Mã khách hàng (GROUPADDRESS)', 'secret' => false],
+                'username' => ['label' => 'Username', 'secret' => false, 'default' => env('VIETTEL_POST_USERNAME')],
+                'password' => ['label' => 'Password', 'secret' => true, 'default' => env('VIETTEL_POST_PASSWORD')],
+                'token' => ['label' => 'API Token', 'secret' => true, 'default' => env('VIETTEL_POST_TOKEN')],
+                'customer_code' => ['label' => 'Mã khách hàng (GROUPADDRESS)', 'secret' => false, 'default' => env('VIETTEL_POST_CUSTOMER_CODE')],
             ],
         ],
         'ghn' => [
@@ -31,24 +48,27 @@ return [
                 ['code' => '5', 'label' => 'Hàng nặng'],
             ],
             'fields' => [
-                'shop_id' => ['label' => 'Shop ID', 'secret' => false],
-                'token' => ['label' => 'Token', 'secret' => true],
-                'client_id' => ['label' => 'Client ID', 'secret' => false],
+                'shop_id' => ['label' => 'Shop ID', 'secret' => false, 'default' => env('GHN_SHOP_ID')],
+                'token' => ['label' => 'Token', 'secret' => true, 'default' => env('GHN_TOKEN')],
+                'client_id' => ['label' => 'Client ID', 'secret' => false, 'default' => env('GHN_CLIENT_ID')],
             ],
         ],
         'ghtk' => [
             'label' => 'Giao Hàng Tiết Kiệm',
             'description' => 'Đẩy đơn sang GHTK và nhận trạng thái trả về.',
-            'docs_url' => 'https://docs.giaohangtietkiem.vn/',
+            'docs_url' => 'https://api.ghtk.vn/docs/submit-order/logistic-overview',
             'api_base_url' => 'https://services.giaohangtietkiem.vn',
+            'api_staging_url' => 'https://services-staging.ghtklab.com',
+            'use_sandbox' => filter_var(env('GHTK_USE_SANDBOX', false), FILTER_VALIDATE_BOOL),
             'tracking_url' => 'https://i.ghtk.vn/{code}',
             'services' => [
                 ['code' => 'road', 'label' => 'Đường bộ'],
                 ['code' => 'fly', 'label' => 'Đường bay'],
             ],
             'fields' => [
-                'token' => ['label' => 'Token API', 'secret' => true],
-                'pick_address_id' => ['label' => 'ID kho lấy hàng', 'secret' => false],
+                'token' => ['label' => 'Token API', 'secret' => true, 'default' => env('GHTK_TOKEN')],
+                'partner_code' => ['label' => 'Mã shop / X-Client-Source', 'secret' => false, 'default' => env('GHTK_PARTNER_CODE', 'saleops')],
+                'pick_address_id' => ['label' => 'ID kho lấy hàng GHTK', 'secret' => false, 'default' => env('GHTK_PICK_ADDRESS_ID')],
             ],
         ],
         'jnt' => [
@@ -61,9 +81,9 @@ return [
                 ['code' => 'EZ', 'label' => 'Tiêu chuẩn'],
             ],
             'fields' => [
-                'api_key' => ['label' => 'API Account / Key', 'secret' => true],
-                'api_secret' => ['label' => 'Private Key', 'secret' => true],
-                'client_code' => ['label' => 'Customer Code', 'secret' => false],
+                'api_key' => ['label' => 'API Account / Key', 'secret' => true, 'default' => env('JNT_API_KEY')],
+                'api_secret' => ['label' => 'Private Key', 'secret' => true, 'default' => env('JNT_API_SECRET')],
+                'client_code' => ['label' => 'Customer Code', 'secret' => false, 'default' => env('JNT_CLIENT_CODE')],
             ],
         ],
     ],

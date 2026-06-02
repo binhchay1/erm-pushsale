@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources\V1;
 
+use App\Models\LeadIngestion;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin \App\Models\LeadIngestion */
+/** @mixin LeadIngestion */
 class LeadIngestionResource extends JsonResource
 {
     /** @return array<string, mixed> */

@@ -14,10 +14,10 @@ class Order extends Model
     protected $fillable = [
         'order_code', 'sale_user_id', 'marketer_user_id', 'team_id', 'marketing_source_id',
         'warehouse_id', 'product_id', 'customer_name', 'customer_phone', 'phone_carrier',
-        'customer_note', 'shipping_address', 'shipping_notes', 'accounting_notes',
-        'internal_recon_note', 'data_arrived_at', 'assigned_at', 'closed_at',
+        'customer_note',         'shipping_address', 'shipping_notes', 'accounting_notes',
+        'internal_recon_note', 'shipping_geo', 'data_arrived_at', 'assigned_at', 'closed_at',
         'desired_delivery_at', 'operation_stage', 'operation_result', 'closing_status',
-        'delivery_status', 'shipping_method', 'carrier_name', 'tracking_number',
+        'delivery_status', 'shipping_method', 'shipping_provider', 'carrier_name', 'tracking_number',
         'reconciliation_status', 'is_returning_customer', 'is_duplicate_phone',
         'subtotal', 'discount', 'vat', 'shipping_fee_collected', 'total', 'deposit',
         'amount_to_collect', 'carrier_service_fee', 'shipping_support_fee',
@@ -33,6 +33,7 @@ class Order extends Model
             'desired_delivery_at' => 'datetime',
             'is_returning_customer' => 'boolean',
             'is_duplicate_phone' => 'boolean',
+            'shipping_geo' => 'array',
         ];
     }
 
@@ -69,6 +70,16 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function shipments(): HasMany
+    {
+        return $this->hasMany(Shipment::class);
+    }
+
+    public function shippingApiLogs(): HasMany
+    {
+        return $this->hasMany(ShippingApiLog::class);
     }
 
     public function effectiveRevenue(): int

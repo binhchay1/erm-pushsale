@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Marketing;
 
+use App\Enums\DeliveryStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CampaignRequest;
@@ -22,7 +23,7 @@ class CampaignController extends Controller
             ->with(['product:id,name,sku', 'marketer:id,name'])
             ->withCount('orders')
             ->withSum(['orders as revenue' => function ($q) {
-                $q->whereIn('delivery_status', ['delivered', 'paid']);
+                $q->whereIn('delivery_status', DeliveryStatus::revenueEligible());
             }], 'total')
             ->latest('id')
             ->get()

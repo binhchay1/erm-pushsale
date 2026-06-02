@@ -6,6 +6,7 @@ use App\Data\ReportFilterData;
 use App\Enums\UserRole;
 use App\Models\User;
 use App\Support\RevenueMetricsCalculator;
+use Illuminate\Support\Collection;
 
 class RevenueReportService
 {
@@ -32,7 +33,7 @@ class RevenueReportService
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, User>  $users
+     * @param  Collection<int, User>  $users
      * @return array<string, mixed>
      */
     private function buildGrouped(ReportFilterData $filter, User $viewer, $users, string $foreignKey, string $idKey, string $nameKey): array

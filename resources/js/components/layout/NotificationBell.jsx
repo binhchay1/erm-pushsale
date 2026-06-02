@@ -1,25 +1,15 @@
 import { useState } from 'react';
-import { Link, router, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Bell, CheckCheck, Settings } from 'lucide-react';
 
+import { NotificationRow } from '@/components/notifications/NotificationRow';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { useNotificationActions } from '@/hooks/useNotificationActions';
 
 export function NotificationBell() {
     const { notifications = [], notificationsUnread = 0 } = usePage().props;
     const [open, setOpen] = useState(false);
-
-    const markAllRead = () => {
-        router.post('/notifications/read-all', {}, { preserveScroll: true, preserveState: true });
-    };
-
-    const openItem = (n) => {
-        if (!n.is_read) {
-            router.post(`/notifications/${n.id}/read`, {}, { preserveScroll: true, preserveState: true });
-        }
-        setOpen(false);
-        if (n.url) router.visit(n.url);
-    };
+    const { markAllRead, openItem } = useNotificationActions();
 
     return (
         <div className="relative">
@@ -70,33 +60,12 @@ export function NotificationBell() {
                                 </p>
                             ) : (
                                 notifications.map((n) => (
-                                    <button
+                                    <NotificationRow
                                         key={n.id}
-                                        type="button"
-                                        onClick={() => openItem(n)}
-                                        className={cn(
-                                            'flex w-full gap-2 border-b border-border px-3 py-2.5 text-left last:border-0 hover:bg-muted/50',
-                                            !n.is_read && 'bg-primary/5'
-                                        )}
-                                    >
-                                        <span
-                                            className={cn(
-                                                'mt-1.5 size-2 shrink-0 rounded-full',
-                                                n.is_read ? 'bg-transparent' : 'bg-primary'
-                                            )}
-                                        />
-                                        <span className="min-w-0 flex-1">
-                                            <span className="block truncate text-sm font-medium">{n.title}</span>
-                                            {n.message && (
-                                                <span className="block truncate text-xs text-muted-foreground">
-                                                    {n.message}
-                                                </span>
-                                            )}
-                                            <span className="block text-[11px] text-muted-foreground">
-                                                {n.created_at}
-                                            </span>
-                                        </span>
-                                    </button>
+                                        notification={n}
+                                        dense
+                                        onClick={() => openItem(n, { onNavigate: () => setOpen(false) })}
+                                    />
                                 ))
                             )}
                         </div>

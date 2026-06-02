@@ -1,25 +1,18 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Bell, CheckCheck } from 'lucide-react';
 
+import { PageHeader } from '@/components/layout/PageHeader';
+import { NotificationRow } from '@/components/notifications/NotificationRow';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useNotificationActions } from '@/hooks/useNotificationActions';
 import AppLayout from '@/layouts/AppLayout';
-import { cn } from '@/lib/utils';
 
 export default function NotificationsIndex({ tab, items, unreadCount }) {
+    const { markAllRead, openItem } = useNotificationActions();
+
     const setTab = (next) => {
         router.get('/notifications', { tab: next }, { preserveScroll: true, preserveState: true });
-    };
-
-    const markAllRead = () => {
-        router.post('/notifications/read-all', {}, { preserveScroll: true });
-    };
-
-    const openItem = (n) => {
-        if (!n.is_read) {
-            router.post(`/notifications/${n.id}/read`, {}, { preserveScroll: true, preserveState: true });
-        }
-        if (n.url) router.visit(n.url);
     };
 
     const tabs = [
@@ -32,15 +25,17 @@ export default function NotificationsIndex({ tab, items, unreadCount }) {
             <Head title="Thông báo" />
 
             <div className="mx-auto max-w-3xl space-y-6">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold tracking-tight">Thông báo</h1>
-                    {unreadCount > 0 && (
-                        <Button variant="outline" size="sm" onClick={markAllRead}>
-                            <CheckCheck className="size-4" />
-                            Đánh dấu tất cả đã đọc
-                        </Button>
-                    )}
-                </div>
+                <PageHeader
+                    title="Thông báo"
+                    actions={
+                        unreadCount > 0 && (
+                            <Button variant="outline" size="sm" onClick={markAllRead}>
+                                <CheckCheck className="size-4" />
+                                Đánh dấu tất cả đã đọc
+                            </Button>
+                        )
+                    }
+                />
 
                 <div className="flex gap-2">
                     {tabs.map((t) => (
@@ -59,29 +54,11 @@ export default function NotificationsIndex({ tab, items, unreadCount }) {
                     <CardContent className="p-0">
                         {items.length ? (
                             items.map((n) => (
-                                <button
+                                <NotificationRow
                                     key={n.id}
-                                    type="button"
+                                    notification={n}
                                     onClick={() => openItem(n)}
-                                    className={cn(
-                                        'flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left last:border-0 hover:bg-muted/40',
-                                        !n.is_read && 'bg-primary/5'
-                                    )}
-                                >
-                                    <span
-                                        className={cn(
-                                            'mt-1.5 size-2 shrink-0 rounded-full',
-                                            n.is_read ? 'bg-transparent' : 'bg-primary'
-                                        )}
-                                    />
-                                    <span className="min-w-0 flex-1">
-                                        <span className="block font-medium">{n.title}</span>
-                                        {n.message && (
-                                            <span className="block text-sm text-muted-foreground">{n.message}</span>
-                                        )}
-                                        <span className="block text-xs text-muted-foreground">{n.created_at}</span>
-                                    </span>
-                                </button>
+                                />
                             ))
                         ) : (
                             <div className="px-4 py-16 text-center text-muted-foreground">

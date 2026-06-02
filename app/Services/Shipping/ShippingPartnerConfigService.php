@@ -3,10 +3,13 @@
 namespace App\Services\Shipping;
 
 use App\Models\ShippingPartnerConnection;
+use App\Services\Shipping\Support\PartnerCredentialResolver;
 use Illuminate\Support\Str;
 
 class ShippingPartnerConfigService
 {
+    public function __construct(private readonly PartnerCredentialResolver $credentials) {}
+
     /** @return list<array<string, mixed>> */
     public function listForAdmin(): array
     {
@@ -56,19 +59,23 @@ class ShippingPartnerConfigService
     protected function buildProviderRow(string $provider, array $meta): array
     {
         $connection = ShippingPartnerConnection::forProvider($provider);
+        $stored = $connection->credentials ?? [];
+        $merged = $this->credentials->mergeCredentials($provider, $stored);
+
         $fields = collect($meta['fields'] ?? [])
-            ->map(function (array $field, string $key) use ($connection) {
-                $value = $connection->credentials[$key] ?? null;
+            ->map(function (array $field, string $key) use ($stored, $merged) {
+                $value = $merged[$key] ?? null;
                 $isSet = filled($value);
+                $isSecret = (bool) ($field['secret'] ?? false);
 
                 return [
                     'key' => $key,
                     'label' => $field['label'] ?? $key,
-                    'is_secret' => (bool) ($field['secret'] ?? false),
+                    'is_secret' => $isSecret,
                     'is_set' => $isSet,
-                    'masked' => $isSet && ($field['secret'] ?? false)
-                        ? Str::mask((string) $value, '*', 3)
-                        : null,
+                    'source' => filled($stored[$key] ?? null) ? 'db' : ($isSet ? 'env' : null),
+                    'masked' => $isSet && $isSecret ? Str::mask((string) $value, '*', 3) : null,
+                    'value' => $isSet && ! $isSecret ? (string) $value : null,
                 ];
             })
             ->values()

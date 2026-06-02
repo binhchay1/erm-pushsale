@@ -1,7 +1,8 @@
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
+import { CloseOrderButton } from '@/components/operations/CloseOrderButton';
 import { formatCurrency } from '@/lib/format';
 
-export function OperationOrderTable({ rows }) {
+export function OperationOrderTable({ rows, enableCloseOrder = false }) {
     return (
         <ScrollDataTable>
             <table className="min-w-[1600px] w-full border-collapse">
@@ -16,6 +17,7 @@ export function OperationOrderTable({ rows }) {
                         <Th>Sản phẩm</Th>
                         <Th>Tài chính</Th>
                         <Th>Giao hàng</Th>
+                        {enableCloseOrder && <Th>Chốt</Th>}
                     </tr>
                 </thead>
                 <tbody>
@@ -63,11 +65,16 @@ export function OperationOrderTable({ rows }) {
                                     <div>{row.deliveryStatus}</div>
                                     <div className="text-muted-foreground">{row.desiredDeliveryAt}</div>
                                 </Td>
+                                {enableCloseOrder && (
+                                    <Td>
+                                        <CloseOrderButton order={row} />
+                                    </Td>
+                                )}
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <Td colSpan={9} className="py-8 text-center text-muted-foreground">
+                            <Td colSpan={enableCloseOrder ? 10 : 9} className="py-8 text-center text-muted-foreground">
                                 Không có dữ liệu
                             </Td>
                         </tr>

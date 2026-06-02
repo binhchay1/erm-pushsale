@@ -1,15 +1,13 @@
-import { Deferred, Head } from '@inertiajs/react';
-
 import { LeadSourcePieChart } from '@/components/charts/LeadSourcePieChart';
 import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
 import { RevenueAreaChart } from '@/components/charts/RevenueAreaChart';
 import { ConversionFunnel } from '@/components/dashboard/ConversionFunnel';
 import { DashboardKpiGrid } from '@/components/dashboard/DashboardKpiGrid';
-import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { OpsAlerts } from '@/components/dashboard/OpsAlerts';
 import { RankingList } from '@/components/dashboard/RankingList';
+import { RoleDashboardShell } from '@/components/dashboard/RoleDashboardShell';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
-import AppLayout from '@/layouts/AppLayout';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { formatNumber } from '@/lib/format';
 
@@ -18,15 +16,11 @@ function AdminDashboardContent({ stats: initialStats }) {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="max-w-2xl">
-                    <h1 className="text-2xl font-bold tracking-tight">Tổng quan CEO</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        Theo dõi doanh thu, lead, đơn hàng và cảnh báo vận hành theo thời gian gần thực.
-                    </p>
-                </div>
-                <RealtimeBadge connected={connected} />
-            </div>
+            <PageHeader
+                title="Tổng quan CEO"
+                description="Theo dõi doanh thu, lead, đơn hàng và cảnh báo vận hành theo thời gian gần thực."
+                actions={<RealtimeBadge connected={connected} />}
+            />
 
             <DashboardKpiGrid stats={stats} />
 
@@ -85,12 +79,8 @@ function AdminDashboardContent({ stats: initialStats }) {
 
 export default function Dashboard({ stats: initialStats }) {
     return (
-        <AppLayout>
-            <Head title="Tổng quan CEO" />
-
-            <Deferred data="stats" fallback={<DashboardSkeleton role="admin" />}>
-                <AdminDashboardContent stats={initialStats} />
-            </Deferred>
-        </AppLayout>
+        <RoleDashboardShell role="admin" title="Tổng quan CEO">
+            <AdminDashboardContent stats={initialStats} />
+        </RoleDashboardShell>
     );
 }

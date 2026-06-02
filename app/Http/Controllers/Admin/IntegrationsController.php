@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\UpdateIntegrationRequest;
 use App\Enums\IntegrationPlatform;
 use App\Enums\LeadIngestionStatus;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UpdateIntegrationRequest;
 use App\Integrations\IntegrationDriverFactory;
 use App\Models\LeadIngestion;
 use App\Services\Integrations\IntegrationConfigService;

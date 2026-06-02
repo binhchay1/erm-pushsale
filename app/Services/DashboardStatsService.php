@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Data\ReportFilterData;
+use App\Enums\DeliveryStatus;
 use App\Enums\LeadIngestionStatus;
 use App\Enums\OperationStage;
 use App\Enums\UserRole;
@@ -13,9 +14,10 @@ use App\Models\ShippingWebhookEvent;
 use App\Models\User;
 use App\Models\WarehouseInventory;
 use App\Services\Reports\ReportMetricService;
+use App\Services\Reports\ReportQueryService;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class DashboardStatsService
 {
@@ -133,7 +135,7 @@ class DashboardStatsService
             'cod_mismatch' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(),
             'reconciliation_pending' => Order::query()->where('reconciliation_status', 'pending')->count(),
             'revenue_series' => self::revenueSeries(),
-            'cod_series' => self::dailyOrderSeries(Order::query()->whereIn('delivery_status', ['delivered', 'paid']), 'total', 7),
+            'cod_series' => self::dailyOrderSeries(Order::query()->whereIn('delivery_status', DeliveryStatus::revenueEligible()), 'total', 7),
             'paid_orders_series' => self::dailyPaidOrderSeries(7),
             'updated_at' => now()->toIso8601String(),
         ];
@@ -212,7 +214,7 @@ class DashboardStatsService
                 'calls_series' => $this->metrics->orderSeries($user, $filter, 'contact_count'),
                 'conversion_series' => $this->metrics->orderSeries($user, $filter),
                 'orders_closed_series' => self::dailyClosedOrderSeries(
-                    app(\App\Services\Reports\ReportQueryService::class)->orders($user, $filter),
+                    app(ReportQueryService::class)->orders($user, $filter),
                     7,
                 ),
                 'pipeline' => $this->metrics->stageBreakdown($user, $filter),
@@ -252,15 +254,6 @@ class DashboardStatsService
             ]),
             default => $base,
         };
-    }
-
-    private function deliveryRate(User $user, ReportFilterData $filter): float
-    {
-        $orders = app(\App\Services\Reports\ReportQueryService::class)->orders($user, $filter);
-        $total = (clone $orders)->count();
-        $delivered = (clone $orders)->whereIn('delivery_status', ['delivered', 'paid'])->count();
-
-        return self::percentage($delivered, $total);
     }
 
     /** @return Builder<Order> */
@@ -412,7 +405,7 @@ class DashboardStatsService
      */
     private static function marketerRevenueSeries(Builder $orders, int $days): array
     {
-        $paidOrders = (clone $orders)->whereIn('delivery_status', ['delivered', 'paid']);
+        $paidOrders = (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible());
 
         return self::days($days)->map(fn (Carbon $day) => [
             'label' => $day->format('d/m'),
@@ -436,7 +429,7 @@ class DashboardStatsService
             ['label' => 'Lead', 'value' => $leadQuery->count()],
             ['label' => 'Đơn', 'value' => (clone $orders)->count()],
             ['label' => 'Chốt', 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
-            ['label' => 'Giao', 'value' => (clone $orders)->whereIn('delivery_status', ['delivered', 'paid'])->count()],
+            ['label' => 'Giao', 'value' => (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
         ];
     }
 
@@ -449,7 +442,7 @@ class DashboardStatsService
             ['label' => 'Lead', 'value' => (clone $orders)->count()],
             ['label' => 'Đang xử lý', 'value' => self::activePipeline($orders)->count()],
             ['label' => 'Chốt', 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
-            ['label' => 'Giao', 'value' => (clone $orders)->whereIn('delivery_status', ['delivered', 'paid'])->count()],
+            ['label' => 'Giao', 'value' => (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
         ];
     }
 
@@ -468,11 +461,11 @@ class DashboardStatsService
     private static function todaySummary(): array
     {
         $todayOrders = Order::query()->whereDate('created_at', today());
-        $deliveredTotal = Order::query()->whereIn('delivery_status', ['delivered', 'paid'])->count();
+        $deliveredTotal = Order::query()->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count();
         $ordersTotal = Order::query()->count();
 
         return [
-            'revenue_today' => (int) (clone $todayOrders)->whereIn('delivery_status', ['delivered', 'paid'])->sum('total'),
+            'revenue_today' => (int) (clone $todayOrders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->sum('total'),
             'orders_closed' => (int) (clone $todayOrders)->count(),
             'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
             'delivery_rate' => self::percentage($deliveredTotal, $ordersTotal),
@@ -486,7 +479,7 @@ class DashboardStatsService
     {
         return self::days($days)->map(fn (Carbon $day) => [
             'label' => $day->format('d/m'),
-            'value' => (int) Order::query()->whereDate('created_at', $day)->whereIn('delivery_status', ['delivered', 'paid'])->sum('total'),
+            'value' => (int) Order::query()->whereDate('created_at', $day)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->sum('total'),
         ])->values()->all();
     }
 
@@ -512,7 +505,7 @@ class DashboardStatsService
             ['label' => 'Lead', 'value' => LeadIngestion::query()->count()],
             ['label' => 'Đơn', 'value' => Order::query()->count()],
             ['label' => 'Chốt', 'value' => Order::query()->whereNotNull('closed_at')->count()],
-            ['label' => 'Giao', 'value' => Order::query()->whereIn('delivery_status', ['delivered', 'paid'])->count()],
+            ['label' => 'Giao', 'value' => Order::query()->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
             ['label' => 'Paid', 'value' => Order::query()->where('delivery_status', 'paid')->count()],
         ];
     }
@@ -564,7 +557,7 @@ class DashboardStatsService
         return LeadIngestion::query()->selectRaw('platform as name, count(*) as value')->groupBy('platform')->orderByDesc('value')->limit(5)->get()->map(fn (LeadIngestion $row) => ['name' => $row->name ?: 'Khác', 'value' => (int) $row->value])->values()->all();
     }
 
-    /** @return \Illuminate\Support\Collection<int, Carbon> */
+    /** @return Collection<int, Carbon> */
     private static function days(int $days)
     {
         return collect(range($days - 1, 0))->map(fn (int $offset) => Carbon::today()->subDays($offset));

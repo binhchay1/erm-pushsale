@@ -1,13 +1,12 @@
-import { Deferred, Head } from '@inertiajs/react';
 import { Bell, PhoneCall, Target, TrendingUp } from 'lucide-react';
 
 import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
 import { RevenueAreaChart } from '@/components/charts/RevenueAreaChart';
 import { StatCard } from '@/components/charts/StatCard';
 import { ConversionFunnel } from '@/components/dashboard/ConversionFunnel';
-import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
+import { RoleDashboardShell } from '@/components/dashboard/RoleDashboardShell';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
-import AppLayout from '@/layouts/AppLayout';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { formatNumber } from '@/lib/format';
 
@@ -44,15 +43,11 @@ function SalesDashboardContent({ stats: initialStats }) {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="max-w-2xl">
-                    <h1 className="text-2xl font-bold tracking-tight">Dashboard Telesale</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        Theo dõi lead, cuộc gọi, pipeline và tỷ lệ chốt theo thời gian gần thực.
-                    </p>
-                </div>
-                <RealtimeBadge connected={connected} />
-            </div>
+            <PageHeader
+                title="Dashboard Telesale"
+                description="Theo dõi lead, cuộc gọi, pipeline và tỷ lệ chốt theo thời gian gần thực."
+                actions={<RealtimeBadge connected={connected} />}
+            />
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {kpis.map((card) => (
@@ -99,12 +94,8 @@ function SalesDashboardContent({ stats: initialStats }) {
 
 export default function Dashboard({ stats: initialStats }) {
     return (
-        <AppLayout>
-            <Head title="Dashboard Telesale" />
-
-            <Deferred data="stats" fallback={<DashboardSkeleton role="sales" />}>
-                <SalesDashboardContent stats={initialStats} />
-            </Deferred>
-        </AppLayout>
+        <RoleDashboardShell role="sales" title="Dashboard Telesale">
+            <SalesDashboardContent stats={initialStats} />
+        </RoleDashboardShell>
     );
 }

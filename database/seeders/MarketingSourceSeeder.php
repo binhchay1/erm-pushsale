@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\MarketingSource;
 use App\Models\Product;
-use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 

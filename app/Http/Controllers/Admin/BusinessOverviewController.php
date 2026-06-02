@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DeliveryStatus;
 use App\Http\Controllers\Controller;
 use App\Models\LeadIngestion;
 use App\Models\Order;
@@ -30,7 +31,7 @@ class BusinessOverviewController extends Controller
                 'label' => $day->format('d/m'),
                 'value' => (int) Order::query()
                     ->whereDate('created_at', $day)
-                    ->whereIn('delivery_status', ['delivered', 'paid'])
+                    ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
                     ->sum('total'),
             ];
         })->values();
@@ -46,7 +47,7 @@ class BusinessOverviewController extends Controller
         return Inertia::render('Admin/Reports/BusinessOverview', [
             'summary' => [
                 'orders_total' => Order::query()->count(),
-                'orders_delivered' => Order::query()->whereIn('delivery_status', ['delivered', 'paid'])->count(),
+                'orders_delivered' => Order::query()->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count(),
                 'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
                 'shipping_mismatch' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(),
             ],

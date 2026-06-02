@@ -1,12 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Pencil, Plus, Target, Trash2 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
+import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/lib/format';
 import AppLayout from '@/layouts/AppLayout';
-
-const formatVnd = (value) =>
-    new Intl.NumberFormat('vi-VN').format(Number(value || 0)) + ' đ';
 
 export default function CampaignIndex({ baseUrl, campaigns }) {
     const remove = (id, name) => {
@@ -19,21 +18,23 @@ export default function CampaignIndex({ baseUrl, campaigns }) {
             <Head title="Chiến dịch marketing" />
 
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Chiến dịch marketing</h1>
-                        <p className="text-sm text-muted-foreground">
+                <PageHeader
+                    title="Chiến dịch marketing"
+                    description={
+                        <>
                             Mỗi chiến dịch gắn 1 sản phẩm trong kho + 1 marketer phụ trách. Lead từ Ladipage khớp
                             theo <span className="font-mono">utm_campaign</span> sẽ tự tính doanh thu cho marketer này.
-                        </p>
-                    </div>
-                    <Button asChild>
-                        <Link href={`${baseUrl}/create`}>
-                            <Plus className="size-4" />
-                            Tạo chiến dịch
-                        </Link>
-                    </Button>
-                </div>
+                        </>
+                    }
+                    actions={
+                        <Button asChild>
+                            <Link href={`${baseUrl}/create`}>
+                                <Plus className="size-4" />
+                                Tạo chiến dịch
+                            </Link>
+                        </Button>
+                    }
+                />
 
                 <ScrollDataTable>
                     <table className="w-full min-w-[1040px] border-collapse text-xs">
@@ -60,9 +61,9 @@ export default function CampaignIndex({ baseUrl, campaigns }) {
                                         <Td>{row.marketer ?? <span className="text-destructive">Chưa gán</span>}</Td>
                                         <Td>{row.ad_channel ?? '—'}</Td>
                                         <Td className="font-mono">{row.utm_campaign ?? '—'}</Td>
-                                        <Td className="text-right">{formatVnd(row.budget)}</Td>
+                                        <Td className="text-right">{formatCurrency(row.budget)}</Td>
                                         <Td className="text-right">{row.orders_count}</Td>
-                                        <Td className="text-right font-semibold">{formatVnd(row.revenue)}</Td>
+                                        <Td className="text-right font-semibold">{formatCurrency(row.revenue)}</Td>
                                         <Td>
                                             <span
                                                 className={

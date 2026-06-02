@@ -1,10 +1,11 @@
 <?php
 
+use App\Http\Controllers\Accounting\DashboardController as AccountingDashboardController;
 use App\Http\Controllers\Admin\Accounting\OperationsController as AccountingOperationsController;
+use App\Http\Controllers\Admin\BusinessOverviewController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\IntegrationsController;
 use App\Http\Controllers\Admin\LeadsLogController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\BusinessOverviewController;
 use App\Http\Controllers\Admin\Marketing\CampaignController;
 use App\Http\Controllers\Admin\Marketing\DashboardController as MarketingDashboardController;
 use App\Http\Controllers\Admin\Marketing\RevenueReportController as MarketingRevenueReportController;
@@ -12,21 +13,23 @@ use App\Http\Controllers\Admin\Orders\FailedOrdersController;
 use App\Http\Controllers\Admin\RankingController;
 use App\Http\Controllers\Admin\Reports\CeoReportController;
 use App\Http\Controllers\Admin\Sales\RevenueReportController as SaleRevenueReportController;
+use App\Http\Controllers\Admin\ShippingOrderController;
 use App\Http\Controllers\Admin\ShippingPartnersController;
+use App\Http\Controllers\Admin\ShippingPartnerTestController;
 use App\Http\Controllers\Admin\ShippingReconciliationController;
 use App\Http\Controllers\Admin\Warehouse\InventoryController;
 use App\Http\Controllers\Admin\Warehouse\OperationsController as WarehouseOperationsController;
 use App\Http\Controllers\Admin\Warehouse\WarehouseController;
+use App\Http\Controllers\Allocator\DashboardController as AllocatorDashboardController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Marketing\DashboardController as RoleMarketingDashboardController;
+use App\Http\Controllers\Marketing\RankingController as MarketingRankingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Sales\CustomerProfileController;
 use App\Http\Controllers\Sales\DashboardController as SalesDashboardController;
 use App\Http\Controllers\Sales\OperationController;
+use App\Http\Controllers\Sales\OrderClosingController;
 use App\Http\Controllers\Sales\RankingController as SalesRankingController;
-use App\Http\Controllers\Accounting\DashboardController as AccountingDashboardController;
-use App\Http\Controllers\Allocator\DashboardController as AllocatorDashboardController;
-use App\Http\Controllers\Marketing\DashboardController as RoleMarketingDashboardController;
-use App\Http\Controllers\Marketing\RankingController as MarketingRankingController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Warehouse\DashboardController as WarehouseDashboardController;
 use App\Models\User;
@@ -90,12 +93,21 @@ Route::middleware('auth')->group(function () {
         Route::get('shipping-partners', [ShippingPartnersController::class, 'index'])->name('shipping-partners.index');
         Route::put('shipping-partners/{provider}', [ShippingPartnersController::class, 'update'])->name('shipping-partners.update');
         Route::get('shipping/reconciliation', ShippingReconciliationController::class)->name('shipping.reconciliation');
+        Route::get('shipping/orders', [ShippingOrderController::class, 'index'])->name('shipping.orders');
+        Route::get('shipping/orders/{order}/detail', [ShippingOrderController::class, 'detail'])->name('shipping.orders.detail');
+        Route::post('shipping/orders/{order}/create-shipment', [ShippingOrderController::class, 'createShipment'])->name('shipping.orders.create-shipment');
+        Route::post('shipping/orders/{order}/sync-status', [ShippingOrderController::class, 'syncStatus'])->name('shipping.orders.sync-status');
+        Route::post('shipping/orders/{order}/calculate-fee', [ShippingOrderController::class, 'calculateFee'])->name('shipping.orders.calculate-fee');
+        Route::post('shipping/orders/{order}/cancel-shipment', [ShippingOrderController::class, 'cancelShipment'])->name('shipping.orders.cancel-shipment');
+        Route::get('shipping/orders/{order}/label', [ShippingOrderController::class, 'printLabel'])->name('shipping.orders.label');
+        Route::post('shipping-partners/{provider}/test/{action}', ShippingPartnerTestController::class)->name('shipping-partners.test');
     });
 
     Route::middleware('role:'.User::ROLE_SALES)->prefix('sales')->name('sales.')->group(function () {
         Route::get('dashboard', SalesDashboardController::class)->name('dashboard');
         Route::get('rankings', SalesRankingController::class)->name('rankings');
         Route::get('workspace', OperationController::class)->name('workspace');
+        Route::post('orders/{order}/close', [OrderClosingController::class, 'store'])->name('orders.close');
         Route::get('customers', CustomerProfileController::class)->name('customers');
     });
 
@@ -116,6 +128,13 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', WarehouseDashboardController::class)->name('dashboard');
         Route::get('workspace', WarehouseOperationsController::class)->name('workspace');
         Route::get('inventory', InventoryController::class)->name('inventory');
+        Route::get('shipping/orders', [App\Http\Controllers\Warehouse\ShippingOrderController::class, 'index'])->name('shipping.orders');
+        Route::get('shipping/orders/{order}/detail', [ShippingOrderController::class, 'detail'])->name('shipping.orders.detail');
+        Route::post('shipping/orders/{order}/create-shipment', [ShippingOrderController::class, 'createShipment'])->name('shipping.orders.create-shipment');
+        Route::post('shipping/orders/{order}/sync-status', [ShippingOrderController::class, 'syncStatus'])->name('shipping.orders.sync-status');
+        Route::post('shipping/orders/{order}/calculate-fee', [ShippingOrderController::class, 'calculateFee'])->name('shipping.orders.calculate-fee');
+        Route::post('shipping/orders/{order}/cancel-shipment', [ShippingOrderController::class, 'cancelShipment'])->name('shipping.orders.cancel-shipment');
+        Route::get('shipping/orders/{order}/label', [ShippingOrderController::class, 'printLabel'])->name('shipping.orders.label');
     });
 
     Route::middleware('role:'.User::ROLE_ACCOUNTING)->prefix('accounting')->name('accounting.')->group(function () {

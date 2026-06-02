@@ -2,8 +2,11 @@
 
 namespace App\Services\Shipping;
 
+use App\Enums\DeliveryStatus;
 use App\Models\Order;
 use App\Models\ShippingWebhookEvent;
+use App\Services\Shipping\Carriers\Ghtk\GhtkStatusMapper;
+use App\Services\Shipping\Support\DeliveryStatusTextMapper;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -13,18 +16,19 @@ class ShippingWebhookService
     public function process(string $provider, array $payload): ShippingWebhookEvent
     {
         $trackingNumber = $this->firstFilled($payload, [
-            'tracking_number', 'trackingNo', 'tracking_no', 'billcode', 'label_id',
+            'tracking_number', 'trackingNo', 'tracking_no', 'billcode', 'label_id', 'label',
         ]);
         $partnerOrderCode = $this->firstFilled($payload, [
             'partner_order_code', 'partnerOrderCode', 'order_code', 'orderCode',
-            'client_order_code', 'reference', 'order_id',
+            'client_order_code', 'reference', 'order_id', 'partner_id',
         ]);
         $rawStatus = $this->firstFilled($payload, [
-            'status', 'status_text', 'state', 'current_status', 'order_status',
+            'status', 'status_text', 'state', 'current_status', 'order_status', 'status_name',
         ]);
-        $mappedStatus = $this->mapStatus($rawStatus);
+        $statusId = $this->toInt($this->firstFilled($payload, ['status_id']));
+        $mappedStatus = $this->mapStatus($rawStatus, $statusId, $provider);
         $partnerCod = $this->toInt($this->firstFilled($payload, [
-            'cod', 'cod_amount', 'money_collect', 'amount_to_collect',
+            'cod', 'cod_amount', 'money_collect', 'amount_to_collect', 'pick_money',
         ]));
         $eventType = $this->firstFilled($payload, ['event', 'event_type', 'type']) ?? 'status_update';
 
@@ -38,10 +42,10 @@ class ShippingWebhookService
             $order->update(array_filter([
                 'carrier_name' => config("shipping_partners.providers.{$provider}.label", Str::title($provider)),
                 'tracking_number' => $order->tracking_number ?: $trackingNumber,
-                'delivery_status' => $mappedStatus ?? $order->delivery_status,
+                'delivery_status' => $mappedStatus?->value ?? $order->delivery_status,
                 'reconciliation_status' => $codMismatch
                     ? 'mismatch'
-                    : ($mappedStatus === 'delivered' ? 'reconciled' : $order->reconciliation_status),
+                    : ($mappedStatus === DeliveryStatus::Delivered ? 'reconciled' : $order->reconciliation_status),
             ], fn ($v) => $v !== null && $v !== ''));
         }
 
@@ -51,7 +55,7 @@ class ShippingWebhookService
             'partner_order_code' => $partnerOrderCode,
             'tracking_number' => $trackingNumber,
             'raw_status' => $rawStatus,
-            'mapped_status' => $mappedStatus,
+            'mapped_status' => $mappedStatus?->value,
             'partner_cod' => $partnerCod,
             'system_cod' => $systemCod,
             'is_cod_mismatch' => $codMismatch,
@@ -79,22 +83,13 @@ class ShippingWebhookService
         return null;
     }
 
-    protected function mapStatus(?string $raw): ?string
+    protected function mapStatus(?string $raw, ?int $statusId, string $provider): ?DeliveryStatus
     {
-        if (! $raw) {
-            return null;
+        if ($provider === 'ghtk' && $statusId) {
+            return GhtkStatusMapper::fromStatusId($statusId, $raw)['status'];
         }
 
-        $value = Str::lower($raw);
-
-        return match (true) {
-            Str::contains($value, ['delivered', 'success', 'giao_thanh_cong', 'hoan_tat']) => 'delivered',
-            Str::contains($value, ['return', 'returned', 'hoan']) => 'returned',
-            Str::contains($value, ['cancel', 'huy']) => 'cancelled',
-            Str::contains($value, ['transit', 'shipping', 'picked', 'dang_giao']) => 'shipping',
-            Str::contains($value, ['waiting', 'pending', 'tao_don']) => 'waiting_waybill',
-            default => 'shipping',
-        };
+        return DeliveryStatusTextMapper::map($raw);
     }
 
     /** @param  array<string, mixed>  $payload */

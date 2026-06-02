@@ -3,16 +3,18 @@
 namespace App\Services\Reports;
 
 use App\Data\ReportFilterData;
+use App\Enums\DeliveryStatus;
 use App\Enums\LeadIngestionStatus;
 use App\Enums\OperationStage;
+use App\Enums\UserRole;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
-use App\Models\Order;
 use App\Models\ShippingWebhookEvent;
 use App\Models\User;
 use App\Models\WarehouseInventory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class ReportMetricService
 {
@@ -39,11 +41,11 @@ class ReportMetricService
             'revenue' => (int) (clone $revenueOrders)
                 ->where(function (Builder $q) use ($filter) {
                     $dateColumn = $this->queries->dateColumn($filter);
-                    $q->whereIn('delivery_status', ['delivered', 'paid'])
+                    $q->whereIn('delivery_status', DeliveryStatus::revenueEligible())
                         ->orWhereDate('created_at', today())
                         ->orWhereDate($dateColumn, today());
                 })
-                ->whereIn('delivery_status', ['delivered', 'paid'])
+                ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
                 ->sum('total'),
             'conversion_rate' => $this->percentage($closedOrders, $ordersCount),
         ];
@@ -76,7 +78,7 @@ class ReportMetricService
                 'label' => $day->format('d/m'),
                 'value' => (int) (clone $orders)
                     ->whereDate($dateColumn, $day)
-                    ->whereIn('delivery_status', ['delivered', 'paid'])
+                    ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
                     ->sum('total'),
             ];
         })->values()->all();
@@ -119,7 +121,7 @@ class ReportMetricService
             ['label' => 'Đã chia', 'value' => (clone $orders)->whereNotNull('sale_user_id')->count()],
             ['label' => 'Đã liên hệ', 'value' => (clone $orders)->where('contact_count', '>', 0)->count()],
             ['label' => 'Chốt', 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
-            ['label' => 'Giao/Paid', 'value' => (clone $orders)->whereIn('delivery_status', ['delivered', 'paid'])->count()],
+            ['label' => 'Giao/Paid', 'value' => (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
         ];
     }
 
@@ -129,7 +131,7 @@ class ReportMetricService
         $orders = $this->queries->orders($user, $filter);
 
         return User::query()
-            ->where('role', \App\Enums\UserRole::Sales->value)
+            ->where('role', UserRole::Sales->value)
             ->whereIn('id', (clone $orders)->select('sale_user_id')->whereNotNull('sale_user_id'))
             ->get()
             ->map(function (User $sale) use ($orders) {
@@ -140,7 +142,7 @@ class ReportMetricService
                 return [
                     'name' => $sale->name,
                     'orders' => $ordersCount,
-                    'revenue' => (int) (clone $mine)->whereIn('delivery_status', ['delivered', 'paid'])->sum('total'),
+                    'revenue' => (int) (clone $mine)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->sum('total'),
                     'conversion_rate' => $this->percentage($closedCount, $ordersCount),
                 ];
             })
@@ -170,7 +172,7 @@ class ReportMetricService
                     'name' => $name,
                     'leads' => (int) ($leadCounts[$name] ?? $leadCounts[$source->ad_channel] ?? 0),
                     'orders' => (clone $sourceOrders)->count(),
-                    'revenue' => (int) (clone $sourceOrders)->whereIn('delivery_status', ['delivered', 'paid'])->sum('total'),
+                    'revenue' => (int) (clone $sourceOrders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->sum('total'),
                 ];
             })
             ->sortByDesc('revenue')
@@ -216,7 +218,7 @@ class ReportMetricService
         ];
     }
 
-    /** @return \Illuminate\Support\Collection<int, Carbon> */
+    /** @return Collection<int, Carbon> */
     private function days(ReportFilterData $filter)
     {
         $from = $filter->dateFrom?->copy()->startOfDay() ?? today();

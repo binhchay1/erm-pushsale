@@ -19,6 +19,7 @@ class LeadIngestionService
     public function __construct(
         protected LeadRoutingService $routing,
     ) {}
+
     /**
      * @param  array<string, mixed>  $rawPayload
      */

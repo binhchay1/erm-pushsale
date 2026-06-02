@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
 
+import { SelectFilter } from '@/components/filters/SelectFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,27 +12,6 @@ const PRESET_OPTIONS = [
     { value: 'last_30_days', label: '30 ngày' },
     { value: 'this_month', label: 'Tháng này' },
 ];
-
-function SelectFilter({ label, name, value, options, onChange }) {
-    return (
-        <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">{label}</Label>
-            <select
-                name={name}
-                value={value ?? ''}
-                onChange={(e) => onChange(name, e.target.value || null)}
-                className="h-8 w-full rounded-lg border border-input bg-background px-2 text-sm"
-            >
-                <option value="">— Tất cả —</option>
-                {(options ?? []).map((opt) => (
-                    <option key={opt.value ?? opt.id} value={opt.value ?? opt.id}>
-                        {opt.label ?? opt.name}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
-}
 
 export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields, extra = null }) {
     const { search } = useReportSearch(routeUrl, filters);

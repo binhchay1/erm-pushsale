@@ -31,7 +31,7 @@ export default function Workspace({ filters, filterOptions, filterFields, report
                     tabs={report.statusTabs}
                 />
 
-                <OperationOrderTable rows={report.rows} />
+                <OperationOrderTable rows={report.rows} enableCloseOrder />
             </div>
         </AppLayout>
     );

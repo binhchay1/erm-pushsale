@@ -9,9 +9,13 @@ use InvalidArgumentException;
 readonly class ReportDateRange
 {
     public const PRESET_TODAY = 'today';
+
     public const PRESET_LAST_7_DAYS = 'last_7_days';
+
     public const PRESET_LAST_30_DAYS = 'last_30_days';
+
     public const PRESET_THIS_MONTH = 'this_month';
+
     public const PRESET_CUSTOM = 'custom';
 
     /** @var list<string> */

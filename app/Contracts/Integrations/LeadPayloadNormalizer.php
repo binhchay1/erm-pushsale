@@ -2,6 +2,8 @@
 
 namespace App\Contracts\Integrations;
 
+use Illuminate\Http\Request;
+
 /**
  * Chuẩn hóa payload từ từng nền tảng → cấu trúc lead thống nhất.
  */
@@ -23,5 +25,5 @@ interface LeadPayloadNormalizer
     public function normalize(array $payload): array;
 
     /** Xác minh webhook (GET challenge hoặc POST signature). */
-    public function verifyWebhook(\Illuminate\Http\Request $request): bool;
+    public function verifyWebhook(Request $request): bool;
 }

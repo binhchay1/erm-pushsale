@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Warehouse extends Model
 {
-    protected $fillable = ['name', 'phone', 'address', 'manager_user_id', 'vtp_code', 'code'];
+    protected $fillable = [
+        'name', 'phone', 'address', 'pick_province', 'pick_district', 'pick_ward',
+        'manager_user_id', 'vtp_code', 'ghtk_pick_address_id', 'code',
+    ];
 
     public function orders(): HasMany
     {
