@@ -59,8 +59,12 @@ class NavigationService
                 ['title' => 'Đơn vận chuyển', 'url' => '/admin/shipping/orders', 'icon' => 'package'],
                 ['title' => 'Đối soát vận chuyển', 'url' => '/admin/shipping/reconciliation', 'icon' => 'file-check'],
             ]),
-            $this->group('Vận hành', [
+            $this->group('Danh mục', [
+                ['title' => 'Nhân viên', 'url' => '/admin/users', 'icon' => 'users'],
+                ['title' => 'Sản phẩm', 'url' => '/admin/products', 'icon' => 'package'],
                 ['title' => 'Danh sách kho', 'url' => '/admin/warehouses', 'icon' => 'warehouse'],
+            ]),
+            $this->group('Vận hành', [
                 ['title' => 'Kế toán', 'url' => '/admin/accounting', 'icon' => 'wallet'],
                 ['title' => 'Thủ kho', 'url' => '/admin/warehouse/operations', 'icon' => 'clipboard-list'],
                 ['title' => 'Tồn kho SP', 'url' => '/admin/warehouse/inventory', 'icon' => 'package'],

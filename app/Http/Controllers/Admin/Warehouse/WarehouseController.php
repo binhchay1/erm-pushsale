@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Warehouse;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\WarehouseRequest;
+use App\Models\Order;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
@@ -118,6 +119,11 @@ class WarehouseController extends Controller
 
     public function destroy(Warehouse $warehouse): RedirectResponse
     {
+        if (Order::query()->where('warehouse_id', $warehouse->id)->exists()) {
+            return back()->with('error', 'Kho đang gắn với đơn hàng — không thể xóa.');
+        }
+
+        WarehouseInventory::query()->where('warehouse_id', $warehouse->id)->delete();
         $warehouse->delete();
 
         return back()->with('success', 'Đã xóa kho.');

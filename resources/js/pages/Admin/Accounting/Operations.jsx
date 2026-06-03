@@ -26,7 +26,7 @@ export default function AccountingOperations({ filters, filterOptions, report })
                     filterKey="delivery_status"
                 />
 
-                <OperationOrderTable rows={report.rows} />
+                <OperationOrderTable rows={report.rows} enableDeleteOrder />
             </div>
         </AppLayout>
     );

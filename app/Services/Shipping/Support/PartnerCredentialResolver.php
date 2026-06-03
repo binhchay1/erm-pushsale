@@ -55,6 +55,9 @@ class PartnerCredentialResolver
                 || (filled($pack['credentials']['username'] ?? null) && filled($pack['credentials']['password'] ?? null)),
             'jnt' => filled($pack['credentials']['api_key'] ?? null)
                 && filled($pack['credentials']['api_secret'] ?? null),
+            'spx' => filled($pack['credentials']['user_id'] ?? null)
+                && filled($pack['credentials']['secret_key'] ?? null)
+                && filled($pack['base_url'] ?? null),
             default => false,
         };
     }

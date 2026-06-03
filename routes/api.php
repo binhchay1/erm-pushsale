@@ -16,7 +16,7 @@ Route::prefix('v1')->group(function () {
     Route::match(['get', 'post'], 'webhooks/{platform}', [WebhookController::class, 'handle'])
         ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada');
     Route::post('shipping/webhooks/{provider}', [ShippingWebhookController::class, 'handle'])
-        ->where('provider', 'viettel_post|ghn|ghtk|jnt');
+        ->where('provider', 'viettel_post|ghn|ghtk|jnt|spx');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('auth/me', [AuthController::class, 'me']);

@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Plug, Search } from 'lucide-react';
 
+import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
@@ -80,6 +81,7 @@ export default function LeadsIndex({ leads, filters, platforms, statuses }) {
                                 <Th>Trạng thái</Th>
                                 <Th>Mã đơn</Th>
                                 <Th>Ghi chú</Th>
+                                <Th />
                             </tr>
                         </thead>
                         <tbody>
@@ -98,11 +100,17 @@ export default function LeadsIndex({ leads, filters, platforms, statuses }) {
                                         <Td className="max-w-xs truncate text-muted-foreground">
                                             {row.error_message ?? row.product_interest ?? '—'}
                                         </Td>
+                                        <Td>
+                                            <DeleteRowButton
+                                                url={`/admin/leads/${row.id}`}
+                                                label={`#${row.id}`}
+                                            />
+                                        </Td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <Td colSpan={8} className="py-8 text-center text-muted-foreground">
+                                    <Td colSpan={9} className="py-8 text-center text-muted-foreground">
                                         Chưa có lead nào — bật webhook tại Tích hợp nền tảng
                                     </Td>
                                 </tr>

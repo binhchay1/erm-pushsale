@@ -10,6 +10,7 @@ use App\Services\Shipping\CarrierRegistry;
 use App\Services\Shipping\Carriers\Ghn\GhnCarrier;
 use App\Services\Shipping\Carriers\Ghtk\GhtkCarrier;
 use App\Services\Shipping\Carriers\Jnt\JntCarrier;
+use App\Services\Shipping\Carriers\Spx\SpxCarrier;
 use App\Services\Shipping\Carriers\ViettelPost\ViettelPostCarrier;
 use App\Services\Shipping\Support\PartnerCredentialResolver;
 use Illuminate\Support\Facades\Event;
@@ -27,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(GhnCarrier::class),
                 $app->make(ViettelPostCarrier::class),
                 $app->make(JntCarrier::class),
+                $app->make(SpxCarrier::class),
             ], $app->make(PartnerCredentialResolver::class));
         });
     }

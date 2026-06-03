@@ -26,7 +26,7 @@ export default function WarehouseOperations({ filters, filterOptions, report, pa
                     filterKey="delivery_status"
                 />
 
-                <OperationOrderTable rows={report.rows} />
+                <OperationOrderTable rows={report.rows} enableDeleteOrder />
             </div>
         </AppLayout>
     );

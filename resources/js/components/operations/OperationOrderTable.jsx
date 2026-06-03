@@ -1,8 +1,9 @@
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { CloseOrderButton } from '@/components/operations/CloseOrderButton';
+import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { formatCurrency } from '@/lib/format';
 
-export function OperationOrderTable({ rows, enableCloseOrder = false }) {
+export function OperationOrderTable({ rows, enableCloseOrder = false, enableDeleteOrder = false }) {
     return (
         <ScrollDataTable>
             <table className="min-w-[1600px] w-full border-collapse">
@@ -18,6 +19,7 @@ export function OperationOrderTable({ rows, enableCloseOrder = false }) {
                         <Th>Tài chính</Th>
                         <Th>Giao hàng</Th>
                         {enableCloseOrder && <Th>Chốt</Th>}
+                        {enableDeleteOrder && <Th />}
                     </tr>
                 </thead>
                 <tbody>
@@ -70,11 +72,23 @@ export function OperationOrderTable({ rows, enableCloseOrder = false }) {
                                         <CloseOrderButton order={row} />
                                     </Td>
                                 )}
+                                {enableDeleteOrder && (
+                                    <Td>
+                                        <DeleteRowButton
+                                            url={`/admin/orders/${row.id}`}
+                                            label={row.orderCode}
+                                            confirmMessage={`Xóa đơn "${row.orderCode}"? Dữ liệu thống kê và kế toán liên quan sẽ bị gỡ.`}
+                                        />
+                                    </Td>
+                                )}
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <Td colSpan={enableCloseOrder ? 10 : 9} className="py-8 text-center text-muted-foreground">
+                            <Td
+                                colSpan={9 + (enableCloseOrder ? 1 : 0) + (enableDeleteOrder ? 1 : 0)}
+                                className="py-8 text-center text-muted-foreground"
+                            >
                                 Không có dữ liệu
                             </Td>
                         </tr>

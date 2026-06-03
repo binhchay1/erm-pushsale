@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { formatNumber } from '@/lib/format';
+import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import AppLayout from '@/layouts/AppLayout';
 
 export default function WarehouseShow({ warehouse, filters, rows }) {
@@ -56,6 +57,7 @@ export default function WarehouseShow({ warehouse, filters, rows }) {
                                 <Th>Tồn kho</Th>
                                 <Th>Chờ xuất</Th>
                                 <Th>Ngừng KD</Th>
+                                <Th />
                             </tr>
                         </thead>
                         <tbody>
@@ -72,11 +74,17 @@ export default function WarehouseShow({ warehouse, filters, rows }) {
                                         <Td className="font-semibold">{formatNumber(r.stock_quantity)}</Td>
                                         <Td>{formatNumber(r.pending_sales_quantity)}</Td>
                                         <Td>{r.is_discontinued ? '✓' : ''}</Td>
+                                        <Td>
+                                            <DeleteRowButton
+                                                url={`/admin/warehouse-inventories/${r.id}`}
+                                                label={r.product_name}
+                                            />
+                                        </Td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <Td colSpan={7} className="py-8 text-center text-muted-foreground">
+                                    <Td colSpan={8} className="py-8 text-center text-muted-foreground">
                                         Kho chưa có sản phẩm nào
                                     </Td>
                                 </tr>

@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 
+import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,6 +60,7 @@ export default function Inventory({ report, filterOptions }) {
                                 <Th>Tồn</Th>
                                 <Th>Chờ xuất</Th>
                                 <Th>Ngừng KD</Th>
+                                <Th />
                             </tr>
                         </thead>
                         <tbody>
@@ -79,6 +81,9 @@ export default function Inventory({ report, filterOptions }) {
                                     </Td>
                                     <Td className="tabular-nums">{formatNumber(r.pendingSalesQuantity)}</Td>
                                     <Td>{r.isDiscontinued ? '✓' : ''}</Td>
+                                    <Td>
+                                        <DeleteRowButton url={`/admin/warehouse-inventories/${r.id}`} label={r.productName} />
+                                    </Td>
                                 </tr>
                             ))}
                         </tbody>

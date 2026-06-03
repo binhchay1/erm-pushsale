@@ -15,6 +15,7 @@ import {
     Target,
     Trophy,
     Truck,
+    Users,
     Wallet,
     Warehouse,
 } from 'lucide-react';
@@ -36,6 +37,7 @@ export const navigationIcons = {
     target: Target,
     trophy: Trophy,
     truck: Truck,
+    users: Users,
     wallet: Wallet,
     warehouse: Warehouse,
 };

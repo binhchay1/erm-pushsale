@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 
+import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,6 +68,7 @@ export default function FailedOrders({ report, filterOptions }) {
                                 <Th>Nền tảng</Th>
                                 <Th>Kho</Th>
                                 <Th>Mô tả lỗi</Th>
+                                <Th />
                             </tr>
                         </thead>
                         <tbody>
@@ -80,11 +82,17 @@ export default function FailedOrders({ report, filterOptions }) {
                                         <Td className="whitespace-normal text-destructive">
                                             {r.errorDescription}
                                         </Td>
+                                        <Td>
+                                            <DeleteRowButton
+                                                url={`/admin/failed-orders/${r.stt}`}
+                                                label={r.partnerOrderId}
+                                            />
+                                        </Td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">
+                                    <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
                                         Không có đơn lỗi
                                     </td>
                                 </tr>
