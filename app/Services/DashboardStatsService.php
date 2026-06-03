@@ -42,6 +42,14 @@ class DashboardStatsService
             'top_sales' => self::topSales(),
             'top_sources' => self::topSources(),
             'alerts' => self::alerts(),
+            'inventory_alerts' => self::inventoryAlerts(),
+            'reconciliation_pending' => Order::query()->where('reconciliation_status', 'pending')->count(),
+            'cod_mismatch' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(),
+            'failed_leads' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(),
+            'carrier_performance' => app(ReportMetricService::class)->carrierPerformance(
+                $user ?? auth()->user() ?? new User,
+                $filter ?? ReportFilterData::fromRequest(request())
+            ),
             'updated_at' => now()->toIso8601String(),
         ];
     }
@@ -206,6 +214,11 @@ class DashboardStatsService
                 'top_sales' => $this->metrics->topSales($user, $filter),
                 'top_sources' => $this->metrics->topSources($user, $filter),
                 'alerts' => self::alerts(),
+                'inventory_alerts' => self::inventoryAlerts(),
+                'reconciliation_pending' => Order::query()->where('reconciliation_status', 'pending')->count(),
+                'cod_mismatch' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(),
+                'failed_leads' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(),
+                'carrier_performance' => $this->metrics->carrierPerformance($user, $filter),
             ]),
             'sales' => array_merge($base, [
                 'leads_pending' => $summary['orders'],

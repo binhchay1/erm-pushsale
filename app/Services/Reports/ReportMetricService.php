@@ -26,28 +26,51 @@ class ReportMetricService
     public function kpiSummary(User $user, ReportFilterData $filter): array
     {
         $orders = $this->queries->orders($user, $filter);
-        $revenueOrders = $this->queries->orders($user, $filter);
         $leads = $this->queries->leads($user, $filter);
         $closedOrders = (clone $orders)->whereNotNull('closed_at')->count();
         $ordersCount = (clone $orders)->count();
 
+        $eligibleOrdersQuery = (clone $orders)
+            ->where(function (Builder $q) use ($filter) {
+                $dateColumn = $this->queries->dateColumn($filter);
+                $q->whereIn('delivery_status', DeliveryStatus::revenueEligible())
+                    ->orWhereDate('created_at', today())
+                    ->orWhereDate($dateColumn, today());
+            })
+            ->whereIn('delivery_status', DeliveryStatus::revenueEligible());
+
+        $totalRevenue = (int) (clone $eligibleOrdersQuery)->sum('total');
+
+        // Compute total cost price + shipping fees
+        $totalCost = 0;
+        $ordersList = (clone $eligibleOrdersQuery)->with(['items', 'product'])->get();
+        foreach ($ordersList as $ord) {
+            $totalCost += $ord->costPrice() + (int) $ord->carrier_service_fee;
+        }
+
+        $totalProfit = max(0, $totalRevenue - $totalCost);
+        $profitMargin = $totalRevenue > 0 ? round(($totalProfit / $totalRevenue) * 100, 1) : 0.0;
+
+        $leadsCount = (clone $leads)->count();
+        $duplicateLeads = (clone $leads)->where('status', LeadIngestionStatus::Duplicate->value)->count();
+        $duplicateRate = $this->percentage($duplicateLeads, $leadsCount);
+
+        $returnedCount = (clone $orders)->whereIn('delivery_status', ['returned', 'returning', 'refund'])->count();
+        $returnRate = $this->percentage($returnedCount, $ordersCount);
+
         return [
-            'leads' => (clone $leads)->count(),
+            'leads' => $leadsCount,
             'processed_leads' => (clone $leads)->where('status', LeadIngestionStatus::Processed->value)->count(),
             'failed_leads' => (clone $leads)->where('status', LeadIngestionStatus::Failed->value)->count(),
-            'duplicate_leads' => (clone $leads)->where('status', LeadIngestionStatus::Duplicate->value)->count(),
+            'duplicate_leads' => $duplicateLeads,
+            'duplicate_rate' => $duplicateRate,
             'orders' => $ordersCount,
             'closed_orders' => $closedOrders,
-            'revenue' => (int) (clone $revenueOrders)
-                ->where(function (Builder $q) use ($filter) {
-                    $dateColumn = $this->queries->dateColumn($filter);
-                    $q->whereIn('delivery_status', DeliveryStatus::revenueEligible())
-                        ->orWhereDate('created_at', today())
-                        ->orWhereDate($dateColumn, today());
-                })
-                ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
-                ->sum('total'),
+            'revenue' => $totalRevenue,
+            'profit' => $totalProfit,
+            'profit_margin' => $profitMargin,
             'conversion_rate' => $this->percentage($closedOrders, $ordersCount),
+            'return_rate' => $returnRate,
         ];
     }
 
@@ -216,6 +239,28 @@ class ReportMetricService
             'cod_mismatch' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(),
             'reconciliation_pending' => (clone $orders)->where('reconciliation_status', 'pending')->count(),
         ];
+    }
+
+    /** @return list<array{carrier: string, total: int, success_rate: float, return_rate: float}> */
+    public function carrierPerformance(User $user, ReportFilterData $filter): array
+    {
+        $orders = $this->queries->orders($user, $filter);
+
+        return (clone $orders)
+            ->selectRaw("coalesce(carrier_name, 'Chưa xác định') as carrier")
+            ->selectRaw('count(*) as total')
+            ->selectRaw("sum(case when delivery_status in ('delivered', 'paid') then 1 else 0 end) as success_count")
+            ->selectRaw("sum(case when delivery_status in ('returned', 'returning') then 1 else 0 end) as return_count")
+            ->groupBy('carrier')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn ($row) => [
+                'carrier' => $row->carrier,
+                'total' => (int) $row->total,
+                'success_rate' => $row->total > 0 ? round(($row->success_count / $row->total) * 100, 1) : 0.0,
+                'return_rate' => $row->total > 0 ? round(($row->return_count / $row->total) * 100, 1) : 0.0,
+            ])
+            ->all();
     }
 
     /** @return Collection<int, Carbon> */
