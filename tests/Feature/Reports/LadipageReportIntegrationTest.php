@@ -8,6 +8,7 @@ use App\Enums\LeadIngestionStatus;
 use App\Enums\UserRole;
 use App\Models\IntegrationConnection;
 use App\Models\LeadIngestion;
+use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\Reports\ReportMetricService;
@@ -95,6 +96,62 @@ class LadipageReportIntegrationTest extends TestCase
 
         $this->assertSame(LeadIngestionStatus::Processed, $lead->status);
         $this->assertSame('0988887777', $lead->customer_phone);
+    }
+
+    public function test_campaign_webhook_assigns_sale_when_approved(): void
+    {
+        User::factory()->create(['role' => UserRole::Sales]);
+        $marketer = User::factory()->create(['role' => UserRole::Marketing]);
+
+        $campaign = MarketingSource::query()->create([
+            'name' => 'Landing Test',
+            'utm_campaign' => 'landing-test',
+            'utm_source' => 'ladipage',
+            'webhook_token' => 'testtoken123456789012345678901234',
+            'created_by_user_id' => $marketer->id,
+            'marketer_user_id' => $marketer->id,
+            'is_active' => true,
+            'is_approved' => true,
+        ]);
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'lp-campaign-1',
+            'name' => 'Khách Campaign',
+            'phone' => '0901111222',
+            'message' => 'Ghi chú test',
+            'products' => 'Serum',
+            'quantity' => 2,
+        ])->assertCreated();
+
+        $order = Order::query()->where('customer_phone', '0901111222')->first();
+        $this->assertNotNull($order);
+        $this->assertNotNull($order->sale_user_id);
+        $this->assertSame($campaign->id, $order->marketing_source_id);
+    }
+
+    public function test_campaign_webhook_without_approval_does_not_assign_sale(): void
+    {
+        User::factory()->create(['role' => UserRole::Sales]);
+        $marketer = User::factory()->create(['role' => UserRole::Marketing]);
+
+        $campaign = MarketingSource::query()->create([
+            'name' => 'Landing Pending',
+            'utm_campaign' => 'landing-pending',
+            'webhook_token' => 'pendingtoken1234567890123456789012',
+            'created_by_user_id' => $marketer->id,
+            'is_active' => true,
+            'is_approved' => false,
+        ]);
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'lp-pending-1',
+            'name' => 'Khách Pending',
+            'phone' => '0903333444',
+        ])->assertCreated();
+
+        $order = Order::query()->where('customer_phone', '0903333444')->first();
+        $this->assertNotNull($order);
+        $this->assertNull($order->sale_user_id);
     }
 
     private function enableLandingIntegration(): void

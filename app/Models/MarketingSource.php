@@ -9,15 +9,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MarketingSource extends Model
 {
     protected $fillable = [
-        'parent_id', 'name', 'product_id', 'marketer_user_id', 'ad_channel',
-        'utm_source', 'utm_campaign', 'budget', 'interactions', 'contacts', 'is_active',
+        'parent_id', 'name', 'product_id', 'marketer_user_id', 'created_by_user_id', 'ad_channel',
+        'utm_source', 'utm_campaign', 'webhook_token', 'budget', 'interactions', 'contacts',
+        'is_active', 'is_approved',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'is_approved' => 'boolean',
         ];
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
     public function parent(): BelongsTo

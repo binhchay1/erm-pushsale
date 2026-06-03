@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CampaignLandingWebhookController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\IntegrationController;
 use App\Http\Controllers\Api\V1\LeadController;
@@ -12,6 +13,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::post('auth/token', [AuthController::class, 'token']);
+
+    Route::post('landing/{token}/receive', [CampaignLandingWebhookController::class, 'receive'])
+        ->where('token', '[a-z0-9]{16,64}');
 
     Route::match(['get', 'post'], 'webhooks/{platform}', [WebhookController::class, 'handle'])
         ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada');

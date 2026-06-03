@@ -102,7 +102,7 @@ return [
         'landing' => [
             'label' => 'Landing Page (Ladipage, Web)',
             'category' => 'landing',
-            'description' => 'Webhook khi khách bấm "Đặt mua" trên landing — real-time.',
+            'description' => 'Mỗi chiến dịch có URL API riêng (Marketing → Kết nối Landing). Webhook chung bên dưới chỉ dùng dự phòng.',
             'driver' => LandingFormDriver::class,
             'fields' => [
                 'api_key' => ['label' => 'API Key / Webhook Secret', 'env' => 'LANDING_API_KEY', 'secret' => true],

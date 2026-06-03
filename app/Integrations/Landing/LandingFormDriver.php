@@ -29,11 +29,17 @@ class LandingFormDriver implements LeadPayloadNormalizer
             ?? Arr::get($payload, 'form_data.id')
             ?? uniqid('lp_', true);
 
+        $message = $this->findMessage($payload, $flatFields);
+        $products = $this->findProducts($payload, $flatFields) ?? $product;
+        $quantity = max(1, (int) (Arr::get($payload, 'quantity') ?? Arr::get($flatFields, 'quantity') ?? 1));
+
         return [
             'external_id' => (string) $externalId,
             'customer_name' => $name ?: 'Khách Landing',
             'customer_phone' => preg_replace('/\D+/', '', (string) $phone),
-            'product_interest' => $product,
+            'product_interest' => $products,
+            'message' => $message,
+            'quantity' => $quantity,
             'utm_source' => Arr::get($payload, 'utm_source')
                 ?? Arr::get($payload, 'utm.source')
                 ?? Arr::get($payload, 'source')
@@ -161,12 +167,48 @@ class LandingFormDriver implements LeadPayloadNormalizer
      */
     protected function findProduct(array $payload, array $flatFields): ?string
     {
+        return $this->findProducts($payload, $flatFields);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, string>  $flatFields
+     */
+    protected function findProducts(array $payload, array $flatFields): ?string
+    {
         $candidates = [
+            Arr::get($payload, 'products'),
             Arr::get($payload, 'product'),
             Arr::get($payload, 'product_interest'),
+            Arr::get($flatFields, 'products'),
             Arr::get($flatFields, 'product'),
             Arr::get($flatFields, 'san_pham'),
             Arr::get($flatFields, 'ten_san_pham'),
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_scalar($candidate) && filled($candidate)) {
+                return (string) $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, string>  $flatFields
+     */
+    protected function findMessage(array $payload, array $flatFields): ?string
+    {
+        $candidates = [
+            Arr::get($payload, 'message'),
+            Arr::get($payload, 'note'),
+            Arr::get($payload, 'customer_note'),
+            Arr::get($flatFields, 'message'),
+            Arr::get($flatFields, 'note'),
+            Arr::get($flatFields, 'ghi_chu'),
+            Arr::get($flatFields, 'tin_nhan'),
         ];
 
         foreach ($candidates as $candidate) {

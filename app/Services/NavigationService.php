@@ -46,7 +46,7 @@ class NavigationService
             ]),
             $this->group('Marketing', [
                 ['title' => 'Dashboard MKT', 'url' => '/admin/marketing/dashboard', 'icon' => 'megaphone'],
-                ['title' => 'Chiến dịch MKT', 'url' => '/admin/marketing/campaigns', 'icon' => 'target'],
+                ['title' => 'Duyệt Landing', 'url' => '/admin/landing-approvals', 'icon' => 'target'],
                 ['title' => 'BC doanh số MKT', 'url' => '/admin/marketing/revenue', 'icon' => 'line-chart'],
             ]),
             $this->group('Telesale', [
@@ -94,7 +94,7 @@ class NavigationService
         return [
             ['title' => 'Dashboard', 'url' => '/marketing/dashboard', 'icon' => 'home'],
             ['title' => 'Báo cáo nguồn', 'url' => '/marketing/workspace', 'icon' => 'megaphone'],
-            ['title' => 'Chiến dịch MKT', 'url' => '/marketing/campaigns', 'icon' => 'target'],
+            ['title' => 'Kết nối Landing', 'url' => '/marketing/campaigns', 'icon' => 'target'],
             ['title' => 'Doanh thu MKT', 'url' => '/marketing/revenue', 'icon' => 'line-chart'],
             ['title' => 'Xếp hạng doanh thu', 'url' => '/marketing/rankings', 'icon' => 'trophy'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
