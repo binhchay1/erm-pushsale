@@ -7,6 +7,7 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useFlashToast } from '@/hooks/useFlashToast';
+import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 
 const dashboardRoutes = [
     { prefix: '/admin/dashboard', role: 'admin' },
@@ -25,6 +26,7 @@ function dashboardRoleFromUrl(url) {
 
 export default function AppLayout({ children }) {
     useFlashToast();
+    useRealtimeNotifications();
 
     const [pendingDashboardRole, setPendingDashboardRole] = useState(null);
 

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Enums\UserRole;
+use App\Events\UserNotificationCreated;
+use App\Models\MarketingSource;
 use App\Models\User;
 use App\Models\UserNotification;
 
@@ -15,13 +17,17 @@ class NotificationService
         ?string $message = null,
         ?string $url = null,
     ): UserNotification {
-        return UserNotification::query()->create([
+        $notification = UserNotification::query()->create([
             'user_id' => $userId,
             'type' => $type,
             'title' => $title,
             'message' => $message,
             'url' => $url,
         ]);
+
+        event(new UserNotificationCreated($notification));
+
+        return $notification;
     }
 
     /** Gửi cùng một thông báo tới tất cả user theo (các) vai trò. */
@@ -40,5 +46,34 @@ class NotificationService
             ->whereIn('role', $values)
             ->pluck('id')
             ->each(fn (int $id) => self::push($id, $type, $title, $message, $url));
+    }
+
+    public static function notifyLandingApprovalPending(MarketingSource $campaign): void
+    {
+        $campaign->loadMissing('creator:id,name');
+        $creatorName = $campaign->creator?->name ?? 'Marketing';
+
+        self::pushToRole(
+            UserRole::Admin,
+            'landing_approval',
+            'Cần duyệt Landing: '.$campaign->name,
+            "{$creatorName} vừa tạo kết nối Ladipage — bấm để xét duyệt",
+            '/admin/landing-approvals?campaign='.$campaign->id,
+        );
+    }
+
+    public static function notifyLandingApproved(MarketingSource $campaign): void
+    {
+        if (! $campaign->created_by_user_id) {
+            return;
+        }
+
+        self::push(
+            $campaign->created_by_user_id,
+            'landing_approved',
+            'Đã duyệt Landing: '.$campaign->name,
+            'Lead mới sẽ được chia số cho Sale',
+            '/marketing/campaigns/'.$campaign->id.'/edit',
+        );
     }
 }

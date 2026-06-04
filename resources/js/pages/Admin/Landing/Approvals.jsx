@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { CheckCircle2, Clock, Copy } from 'lucide-react';
 import { toast } from 'sonner';
@@ -6,9 +7,12 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/clipboard';
+import { cn } from '@/lib/utils';
 import AppLayout from '@/layouts/AppLayout';
 
-export default function LandingApprovals({ campaigns }) {
+export default function LandingApprovals({ campaigns, highlightCampaignId }) {
+    const rowRefs = useRef({});
+
     const approve = (id, name) => {
         if (!window.confirm(`Duyệt nguồn Landing "${name}"? Lead mới sẽ được chia số cho Sale.`)) return;
         router.post(`/admin/landing-approvals/${id}/approve`, {}, { preserveScroll: true });
@@ -21,6 +25,14 @@ export default function LandingApprovals({ campaigns }) {
 
     const pending = campaigns.filter((c) => !c.is_approved);
 
+    useEffect(() => {
+        if (!highlightCampaignId) return;
+        const el = rowRefs.current[highlightCampaignId];
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [highlightCampaignId, campaigns]);
+
     return (
         <AppLayout>
             <Head title="Duyệt kết nối Landing" />
@@ -32,6 +44,11 @@ export default function LandingApprovals({ campaigns }) {
                         <>
                             Marketing tạo nguồn trên Ladipage → copy URL API. <strong>Chưa duyệt</strong> thì lead
                             test chỉ về Admin, <strong>không chia số Sale</strong> ({pending.length} chờ duyệt).
+                            {highlightCampaignId && (
+                                <span className="mt-1 block text-primary">
+                                    Đang hiển thị chiến dịch cần xét duyệt từ thông báo.
+                                </span>
+                            )}
                         </>
                     }
                 />
@@ -52,7 +69,17 @@ export default function LandingApprovals({ campaigns }) {
                         <tbody>
                             {campaigns.length ? (
                                 campaigns.map((row) => (
-                                    <tr key={row.id} className="hover:bg-muted/30">
+                                    <tr
+                                        key={row.id}
+                                        ref={(el) => {
+                                            rowRefs.current[row.id] = el;
+                                        }}
+                                        className={cn(
+                                            'hover:bg-muted/30',
+                                            highlightCampaignId === row.id &&
+                                                'bg-primary/10 ring-2 ring-inset ring-primary',
+                                        )}
+                                    >
                                         <Td className="font-medium">{row.name}</Td>
                                         <Td>{row.creator ?? '—'}</Td>
                                         <Td>{row.marketer ?? '—'}</Td>
@@ -62,7 +89,7 @@ export default function LandingApprovals({ campaigns }) {
                                             {row.is_approved ? (
                                                 <span className="text-emerald-600">Đã duyệt</span>
                                             ) : (
-                                                <span className="text-amber-600">Chờ duyệt</span>
+                                                <span className="font-medium text-amber-600">Chờ duyệt</span>
                                             )}
                                         </Td>
                                         <Td>

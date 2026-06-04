@@ -5,13 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MarketingSource;
 use App\Services\Marketing\CampaignLandingService;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class LandingApprovalController extends Controller
 {
-    public function index(CampaignLandingService $landing): Response
+    public function index(Request $request, CampaignLandingService $landing): Response
     {
         $campaigns = MarketingSource::query()
             ->whereNull('parent_id')
@@ -32,8 +34,11 @@ class LandingApprovalController extends Controller
             ])
             ->values();
 
+        $highlightId = $request->integer('campaign') ?: null;
+
         return Inertia::render('Admin/Landing/Approvals', [
             'campaigns' => $campaigns,
+            'highlightCampaignId' => $highlightId,
         ]);
     }
 
@@ -42,6 +47,7 @@ class LandingApprovalController extends Controller
         abort_unless($campaign->parent_id === null, 404);
 
         $campaign->update(['is_approved' => true]);
+        NotificationService::notifyLandingApproved($campaign->fresh());
 
         return back()->with('success', 'Đã duyệt nguồn Landing — lead mới sẽ được chia số cho Sale.');
     }

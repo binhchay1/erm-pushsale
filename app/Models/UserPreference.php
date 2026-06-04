@@ -38,6 +38,7 @@ class UserPreference extends Model
     {
         return [
             'new_lead' => true,
+            'landing_approval' => true,
             'order_update' => true,
             'reminder' => true,
             'delivery_issue' => true,
