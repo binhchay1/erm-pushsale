@@ -16,7 +16,7 @@ class Order extends Model
         'warehouse_id', 'product_id', 'customer_name', 'customer_phone', 'phone_carrier',
         'customer_note',         'shipping_address', 'shipping_notes', 'accounting_notes',
         'internal_recon_note', 'shipping_geo', 'data_arrived_at', 'assigned_at', 'closed_at',
-        'desired_delivery_at', 'operation_stage', 'operation_result', 'closing_status',
+        'desired_delivery_at', 'next_operation_at', 'operation_stage', 'operation_result', 'closing_status',
         'delivery_status', 'shipping_method', 'shipping_provider', 'carrier_name', 'tracking_number',
         'reconciliation_status', 'is_returning_customer', 'is_duplicate_phone',
         'subtotal', 'discount', 'vat', 'shipping_fee_collected', 'total', 'deposit',
@@ -31,6 +31,7 @@ class Order extends Model
             'assigned_at' => 'datetime',
             'closed_at' => 'datetime',
             'desired_delivery_at' => 'datetime',
+            'next_operation_at' => 'datetime',
             'is_returning_customer' => 'boolean',
             'is_duplicate_phone' => 'boolean',
             'shipping_geo' => 'array',
@@ -139,6 +140,21 @@ class Order extends Model
 
         if ($filter->operationStage) {
             $query->where('operation_stage', $filter->operationStage);
+        }
+
+        if ($filter->operationResult) {
+            $query->where('operation_result', $filter->operationResult);
+        }
+
+        if ($filter->closingStatus) {
+            if ($filter->closingStatus === 'open') {
+                $query->where(function (Builder $q) {
+                    $q->whereNull('closing_status')
+                        ->orWhere('closing_status', 'open');
+                })->whereNull('closed_at');
+            } else {
+                $query->where('closing_status', $filter->closingStatus);
+            }
         }
 
         if ($filter->search) {

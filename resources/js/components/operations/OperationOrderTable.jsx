@@ -1,23 +1,50 @@
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { CloseOrderButton } from '@/components/operations/CloseOrderButton';
+import { OperationCallButton } from '@/components/operations/OperationCallButton';
+import { OperationStatusDialog } from '@/components/operations/OperationStatusDialog';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { formatCurrency } from '@/lib/format';
 
-export function OperationOrderTable({ rows, enableCloseOrder = false, enableDeleteOrder = false }) {
+function formatDateTime(value) {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+}
+
+export function OperationOrderTable({
+    rows,
+    enableCloseOrder = false,
+    enableDeleteOrder = false,
+    enableSaleActions = false,
+    operationStatusOptions = [],
+}) {
+    const actionCols =
+        (enableSaleActions ? 1 : 0) + (enableCloseOrder ? 1 : 0) + (enableDeleteOrder ? 1 : 0);
+    const baseCols = 10;
+
     return (
         <ScrollDataTable>
-            <table className="min-w-[1600px] w-full border-collapse">
+            <table className="min-w-[1800px] w-full border-collapse">
                 <thead>
                     <tr>
                         <Th>Mã đơn</Th>
                         <Th>Nguồn / Ngày data</Th>
-                        <Th>Sale</Th>
+                        <Th>Sale / Nhận data</Th>
                         <Th>Khách hàng</Th>
                         <Th>Tin nhắn</Th>
                         <Th>TN / Kết quả</Th>
                         <Th>Sản phẩm</Th>
                         <Th>Tài chính</Th>
+                        <Th>Chốt đơn</Th>
                         <Th>Giao hàng</Th>
+                        {enableSaleActions && <Th>Hành động</Th>}
                         {enableCloseOrder && <Th>Chốt</Th>}
                         {enableDeleteOrder && <Th />}
                     </tr>
@@ -34,6 +61,9 @@ export function OperationOrderTable({ rows, enableCloseOrder = false, enableDele
                                 <Td>
                                     <div>{row.saleName}</div>
                                     <div className="text-muted-foreground">{row.saleGroup}</div>
+                                    <div className="text-[11px] text-muted-foreground">
+                                        Nhận: {row.assignedAt?.slice(0, 10) ?? '—'}
+                                    </div>
                                 </Td>
                                 <Td>
                                     <div className="font-medium text-primary">{row.customerName}</div>
@@ -50,6 +80,16 @@ export function OperationOrderTable({ rows, enableCloseOrder = false, enableDele
                                 <Td>
                                     <span className="font-medium text-destructive">{row.currentOperation}</span>
                                     <div className="text-muted-foreground">{row.operationResult || '—'}</div>
+                                    {row.nextOperationAt && (
+                                        <div className="mt-1 text-[11px] text-amber-700 dark:text-amber-400">
+                                            Hẹn: {formatDateTime(row.nextOperationAt)}
+                                        </div>
+                                    )}
+                                    {row.contactCount > 0 && (
+                                        <div className="text-[11px] text-muted-foreground">
+                                            Đã gọi: {row.contactCount} lần
+                                        </div>
+                                    )}
                                 </Td>
                                 <Td className="whitespace-normal">
                                     {row.products?.map((p) => (
@@ -64,9 +104,33 @@ export function OperationOrderTable({ rows, enableCloseOrder = false, enableDele
                                     <div className="font-semibold">Tổng: {formatCurrency(row.total)}</div>
                                 </Td>
                                 <Td>
+                                    <StatusBadge
+                                        tone={
+                                            row.closingStatus === 'closed'
+                                                ? 'success'
+                                                : row.closingStatus === 'cancelled'
+                                                  ? 'danger'
+                                                  : 'info'
+                                        }
+                                    >
+                                        {row.closingStatusLabel}
+                                    </StatusBadge>
+                                </Td>
+                                <Td>
                                     <div>{row.deliveryStatus}</div>
                                     <div className="text-muted-foreground">{row.desiredDeliveryAt}</div>
                                 </Td>
+                                {enableSaleActions && (
+                                    <Td>
+                                        <div className="flex flex-col gap-1.5">
+                                            <OperationCallButton order={row} />
+                                            <OperationStatusDialog
+                                                order={row}
+                                                options={operationStatusOptions}
+                                            />
+                                        </div>
+                                    </Td>
+                                )}
                                 {enableCloseOrder && (
                                     <Td>
                                         <CloseOrderButton order={row} />
@@ -86,7 +150,7 @@ export function OperationOrderTable({ rows, enableCloseOrder = false, enableDele
                     ) : (
                         <tr>
                             <Td
-                                colSpan={9 + (enableCloseOrder ? 1 : 0) + (enableDeleteOrder ? 1 : 0)}
+                                colSpan={baseCols + actionCols}
                                 className="py-8 text-center text-muted-foreground"
                             >
                                 Không có dữ liệu

@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\ClosingStatus;
 use App\Enums\DateType;
 use App\Enums\DeliveryStatus;
 use App\Enums\DiscountMode;
+use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Enums\UserRole;
 use App\Models\Product;
@@ -34,6 +36,8 @@ class FilterOptionsService
                 'value' => $e->value,
                 'label' => $e->label(),
             ])->values(),
+            'operationResults' => OperationResult::filterOptions(),
+            'closingStatuses' => ClosingStatus::options(),
             'teams' => Team::query()->orderBy('name')->get(['id', 'name', 'type']),
             'products' => Product::query()->orderBy('name')->get(['id', 'name', 'sku', 'parent_id']),
             'parentProducts' => Product::query()->whereNull('parent_id')->orderBy('name')->get(['id', 'name']),
@@ -83,6 +87,24 @@ class FilterOptionsService
         }
 
         return $fields;
+    }
+
+    /** @return list<string> */
+    public function saleOperationFilterFields(): array
+    {
+        return [
+            'date_from',
+            'date_to',
+            'date_type',
+            'parent_product_id',
+            'product_id',
+            'operation_result',
+            'closing_status',
+            'search',
+            'hide_no_phone',
+            'hide_zero_status',
+            'no_closing_date_limit',
+        ];
     }
 
     /** @return array<string, mixed> */

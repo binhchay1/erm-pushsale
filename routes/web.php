@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\ShippingOrderController;
 use App\Http\Controllers\Admin\ShippingPartnersController;
 use App\Http\Controllers\Admin\ShippingPartnerTestController;
 use App\Http\Controllers\Admin\ShippingReconciliationController;
+use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\Warehouse\InventoryController;
 use App\Http\Controllers\Admin\Warehouse\OperationsController as WarehouseOperationsController;
@@ -31,14 +32,16 @@ use App\Http\Controllers\Allocator\DashboardController as AllocatorDashboardCont
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Marketing\DashboardController as RoleMarketingDashboardController;
 use App\Http\Controllers\Marketing\RankingController as MarketingRankingController;
-use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrgChartController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Sales\CustomerProfileController;
 use App\Http\Controllers\Sales\DashboardController as SalesDashboardController;
 use App\Http\Controllers\Sales\OperationController;
 use App\Http\Controllers\Sales\OrderClosingController;
 use App\Http\Controllers\Sales\RankingController as SalesRankingController;
+use App\Http\Controllers\Sales\SaleOperationCallController;
+use App\Http\Controllers\Sales\SaleOperationStatusController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Warehouse\DashboardController as WarehouseDashboardController;
 use App\Models\User;
@@ -62,6 +65,9 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
+
+    // Sơ đồ tổ chức — test RBAC: /org-chart (xem OrgChartController)
+    Route::get('org-chart', [OrgChartController::class, 'index'])->name('org-chart.index');
 
     Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -124,6 +130,8 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', SalesDashboardController::class)->name('dashboard');
         Route::get('rankings', SalesRankingController::class)->name('rankings');
         Route::get('workspace', OperationController::class)->name('workspace');
+        Route::post('orders/{order}/call', [SaleOperationCallController::class, 'store'])->name('orders.call');
+        Route::post('orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('orders.operation-status');
         Route::post('orders/{order}/close', [OrderClosingController::class, 'store'])->name('orders.close');
         Route::get('customers', CustomerProfileController::class)->name('customers');
     });

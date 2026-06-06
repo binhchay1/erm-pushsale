@@ -1,11 +1,22 @@
 import { Head } from '@inertiajs/react';
+import { useEffect } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
 import { StatusTabs } from '@/components/operations/StatusTabs';
 
-export default function Workspace({ filters, filterOptions, filterFields, report }) {
+export default function Workspace({ filters, filterOptions, filterFields, report, operationStatusOptions }) {
+    useEffect(() => {
+        console.info(
+            '[ERM SaleOps] Telesale tác nghiệp — URL: /sales/workspace\n' +
+                '• Đăng nhập: sales@saleops.local / password\n' +
+                '• Nút Gọi + Chuyển trạng thái: cột Hành động (đơn đang mở)\n' +
+                '• Modal chuyển trạng thái: OperationStatusDialog\n' +
+                '• Chốt đơn: CloseOrderButton + POST /sales/orders/{id}/close'
+        );
+    }, []);
+
     return (
         <AppLayout>
             <Head title="Sale tác nghiệp" />
@@ -31,7 +42,12 @@ export default function Workspace({ filters, filterOptions, filterFields, report
                     tabs={report.statusTabs}
                 />
 
-                <OperationOrderTable rows={report.rows} enableCloseOrder />
+                <OperationOrderTable
+                    rows={report.rows}
+                    enableSaleActions
+                    enableCloseOrder
+                    operationStatusOptions={operationStatusOptions}
+                />
             </div>
         </AppLayout>
     );

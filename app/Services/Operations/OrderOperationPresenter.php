@@ -2,7 +2,9 @@
 
 namespace App\Services\Operations;
 
+use App\Enums\ClosingStatus;
 use App\Enums\DeliveryStatus;
+use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Models\Order;
 use Illuminate\Support\Collection;
@@ -16,6 +18,10 @@ final class OrderOperationPresenter
     public static function toArray(Order $order): array
     {
         $stage = OperationStage::tryFrom($order->operation_stage);
+        $result = OperationResult::tryFromStored($order->operation_result);
+        $closing = $order->closed_at
+            ? ClosingStatus::Closed
+            : (ClosingStatus::tryFrom((string) ($order->closing_status ?? '')) ?? ClosingStatus::Open);
 
         return [
             'id' => (string) $order->id,
@@ -32,8 +38,15 @@ final class OrderOperationPresenter
             'customerNote' => $order->customer_note,
             'shippingAddress' => $order->shipping_address,
             'currentOperation' => $stage?->label() ?? $order->operation_stage,
-            'operationResult' => $order->operation_result,
+            'operationResult' => $result?->label() ?? $order->operation_result,
+            'operationResultValue' => $result?->value ?? $order->operation_result,
             'operationStage' => $order->operation_stage,
+            'closingStatus' => $closing->value,
+            'closingStatusLabel' => $closing->label(),
+            'nextOperationAt' => $order->next_operation_at?->toIso8601String(),
+            'contactCount' => (int) $order->contact_count,
+            'canCall' => SaleOperationPolicy::canCall($order),
+            'canChangeStatus' => SaleOperationPolicy::canChangeStatus($order),
             'products' => $order->items->map(fn ($item) => [
                 'productId' => (string) $item->product_id,
                 'productName' => $item->product_name,

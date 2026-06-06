@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\OrgLevel;
+use App\Enums\UserRole;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -44,47 +45,201 @@ class OrgStructureService
             ->all();
     }
 
-    /** @return array{team_path: list<array{name: string, type_label: string}>, manager_chain: list<array{name: string, org_level_label: string|null}>, direct_reports: list<array{name: string, org_level_label: string|null}>} */
-    public function profileContext(User $user): array
+    /** @return array{scope: string, scope_label: string, roots: list<array<string, mixed>>} */
+    public function chartForViewer(User $viewer): array
     {
-        $user->loadMissing([
-            'team.parent.parent',
-            'manager.manager',
-            'members' => fn ($q) => $q->orderBy('name')->limit(20),
-        ]);
+        $users = User::query()
+            ->with(['team:id,name'])
+            ->orderBy('name')
+            ->get();
 
-        $teamPath = [];
-        $team = $user->team;
-        while ($team) {
-            array_unshift($teamPath, [
-                'name' => $team->name,
-                'type_label' => $team->type->label(),
-            ]);
-            $team = $team->parent;
+        $visibleIds = $this->visibleUserIds($viewer, $users);
+        $scope = $this->resolveChartScope($viewer);
+
+        $visibleUsers = $users->whereIn('id', $visibleIds)->values();
+        $roots = $this->buildUserChartRoots($visibleUsers, $viewer->id);
+
+        return [
+            'scope' => $scope,
+            'scope_label' => $this->chartScopeLabel($scope),
+            'roots' => $roots,
+        ];
+    }
+
+    /** @param  Collection<int, User>  $users
+     * @return list<int>
+     */
+    private function visibleUserIds(User $viewer, Collection $users): array
+    {
+        if ($viewer->role === UserRole::Admin) {
+            return $users->pluck('id')->map(fn ($id) => (int) $id)->all();
         }
 
-        $managerChain = [];
-        $manager = $user->manager;
-        while ($manager) {
-            $managerChain[] = [
-                'name' => $manager->name,
-                'org_level_label' => $manager->orgLevelLabel(),
-            ];
-            $manager = $manager->manager;
+        if ($this->isOrgManager($viewer)) {
+            $director = $this->departmentDirector($viewer, $users);
+
+            return $this->collectDescendantIds($director->id, $users);
         }
 
-        $directReports = $user->members
-            ->map(fn (User $m) => [
-                'name' => $m->name,
-                'org_level_label' => $m->orgLevelLabel(),
-            ])
+        return $this->staffVisibleIds($viewer, $users);
+    }
+
+    private function resolveChartScope(User $viewer): string
+    {
+        if ($viewer->role === UserRole::Admin) {
+            return 'admin';
+        }
+
+        if ($this->isOrgManager($viewer)) {
+            return 'manager';
+        }
+
+        return 'staff';
+    }
+
+    private function chartScopeLabel(string $scope): string
+    {
+        return match ($scope) {
+            'admin' => 'Toàn công ty',
+            'manager' => 'Bộ phận của bạn',
+            'staff' => 'Nhóm làm việc trực tiếp',
+        };
+    }
+
+    public function isOrgManager(User $user): bool
+    {
+        if ($user->is_team_leader) {
+            return true;
+        }
+
+        return in_array($user->org_level, [OrgLevel::Head, OrgLevel::Supervisor], true);
+    }
+
+    /** @param  Collection<int, User>  $users */
+    private function departmentDirector(User $viewer, Collection $users): User
+    {
+        $byId = $users->keyBy('id');
+        $current = $byId->get($viewer->id) ?? $viewer;
+        $director = $current;
+
+        while ($current) {
+            if ($this->isDepartmentHead($current)) {
+                $director = $current;
+                break;
+            }
+
+            $current = $current->manager_user_id ? $byId->get($current->manager_user_id) : null;
+        }
+
+        if (! $this->isDepartmentHead($director) && $viewer->team_id) {
+            $teamLeaderId = Team::query()
+                ->whereKey($viewer->team_id)
+                ->value('leader_user_id');
+
+            if ($teamLeaderId && $byId->has($teamLeaderId)) {
+                return $byId->get($teamLeaderId);
+            }
+        }
+
+        return $director;
+    }
+
+    private function isDepartmentHead(User $user): bool
+    {
+        if ($user->org_level === OrgLevel::Head) {
+            return true;
+        }
+
+        return $user->is_team_leader && $user->org_level !== OrgLevel::Staff;
+    }
+
+    /** @param  Collection<int, User>  $users
+     * @return list<int>
+     */
+    private function staffVisibleIds(User $viewer, Collection $users): array
+    {
+        if (! $viewer->manager_user_id) {
+            $peerIds = $users
+                ->whereNull('manager_user_id')
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            return array_values(array_unique(array_merge([$viewer->id], $peerIds)));
+        }
+
+        $managerSubtree = $this->collectDescendantIds($viewer->manager_user_id, $users);
+        $peerIds = $users
+            ->where('manager_user_id', $viewer->manager_user_id)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        return array_values(array_unique(array_merge($managerSubtree, $peerIds)));
+    }
+
+    /** @param  Collection<int, User>  $users
+     * @return list<int>
+     */
+    private function collectDescendantIds(int $rootId, Collection $users): array
+    {
+        $ids = [$rootId];
+        $children = $users->where('manager_user_id', $rootId);
+
+        foreach ($children as $child) {
+            $ids = array_merge($ids, $this->collectDescendantIds($child->id, $users));
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @param  Collection<int, User>  $visibleUsers
+     * @return list<array<string, mixed>>
+     */
+    private function buildUserChartRoots(Collection $visibleUsers, int $viewerId): array
+    {
+        $visibleIds = $visibleUsers->pluck('id')->flip();
+
+        $roots = $visibleUsers->filter(function (User $user) use ($visibleIds) {
+            if (! $user->manager_user_id) {
+                return true;
+            }
+
+            return ! $visibleIds->has($user->manager_user_id);
+        });
+
+        return $roots
+            ->sortBy('name')
+            ->map(fn (User $user) => $this->userChartNode($user, $visibleUsers, $viewerId))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  Collection<int, User>  $visibleUsers
+     * @return array<string, mixed>
+     */
+    private function userChartNode(User $user, Collection $visibleUsers, int $viewerId): array
+    {
+        $children = $visibleUsers
+            ->where('manager_user_id', $user->id)
+            ->sortBy('name')
+            ->map(fn (User $child) => $this->userChartNode($child, $visibleUsers, $viewerId))
             ->values()
             ->all();
 
         return [
-            'team_path' => $teamPath,
-            'manager_chain' => $managerChain,
-            'direct_reports' => $directReports,
+            'id' => $user->id,
+            'name' => $user->name,
+            'job_title' => $user->job_title,
+            'role_label' => $user->roleLabel(),
+            'team_name' => $user->team?->name,
+            'org_level_label' => $user->orgLevelLabel(),
+            'avatar_url' => $user->avatarUrl(),
+            'initials' => $user->initials(),
+            'is_self' => $user->id === $viewerId,
+            'children' => $children,
         ];
     }
 

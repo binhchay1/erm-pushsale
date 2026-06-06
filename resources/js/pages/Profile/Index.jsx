@@ -2,7 +2,6 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { Camera, Save, Trash2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 
-import { OrgStructureCard } from '@/components/org/OrgStructureCard';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout';
 
-export default function ProfileIndex({ profile, org }) {
+export default function ProfileIndex({ profile }) {
     const fileRef = useRef(null);
     const [preview, setPreview] = useState(null);
 
@@ -196,8 +195,6 @@ export default function ProfileIndex({ profile, org }) {
                         </form>
                     </CardContent>
                 </Card>
-
-                <OrgStructureCard org={org} />
             </div>
         </AppLayout>
     );

@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Enums\ClosingStatus;
 use App\Enums\DeliveryStatus;
+use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Models\MarketingSource;
 use App\Models\Order;
@@ -34,7 +36,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00001',
                 'stage' => OperationStage::NewCustomer,
-                'result' => 'Chưa liên hệ',
+                'result' => OperationResult::NoContact,
                 'note' => 'Lead mới từ Facebook — khách để lại SĐT qua form landing.',
                 'customer' => 'Trần Minh Anh',
                 'phone' => '0912345678',
@@ -47,7 +49,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00002',
                 'stage' => OperationStage::Call2,
-                'result' => 'Không nghe máy',
+                'result' => OperationResult::NoAnswer1,
                 'note' => 'Gọi lần 1 không nghe — hẹn gọi lại 14:00 chiều nay.',
                 'customer' => 'Lê Hoàng Nam',
                 'phone' => '0988111222',
@@ -60,7 +62,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00003',
                 'stage' => OperationStage::Call3,
-                'result' => 'Khách bận — hẹn gọi lại',
+                'result' => OperationResult::CallbackScheduled,
                 'note' => 'Khách đang lái xe, nhờ gọi lại sau 2 tiếng.',
                 'customer' => 'Phạm Thu Hà',
                 'phone' => '0977665544',
@@ -73,7 +75,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00004',
                 'stage' => OperationStage::Call4,
-                'result' => 'Quan tâm — gửi báo giá Zalo',
+                'result' => OperationResult::SentQuote,
                 'note' => 'Đã gửi combo 2 gối giảm 10%. Chờ phản hồi trên Zalo.',
                 'customer' => 'Nguyễn Văn Bình',
                 'phone' => '0909123456',
@@ -86,7 +88,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00005',
                 'stage' => OperationStage::Call5,
-                'result' => 'Tư vấn xong — chờ quyết định',
+                'result' => OperationResult::Considering,
                 'note' => 'Khách hỏi thêm phí ship về Đà Nẵng, đã báo 35k.',
                 'customer' => 'Hoàng Thị Lan',
                 'phone' => '0934567890',
@@ -99,7 +101,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00006',
                 'stage' => OperationStage::Call6,
-                'result' => 'Đồng ý đặt hàng COD',
+                'result' => OperationResult::ReadyToClose,
                 'note' => 'Khách xác nhận địa chỉ 123 Nguyễn Trãi, Q.5 — chờ chốt.',
                 'customer' => 'Đỗ Quốc Huy',
                 'phone' => '0966888999',
@@ -112,7 +114,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00007',
                 'stage' => OperationStage::Care1,
-                'result' => 'Đã chốt — xác nhận giao hàng',
+                'result' => OperationResult::ClosedSuccess,
                 'note' => 'Đơn COD 318k, khách muốn nhận tối thứ 7.',
                 'customer' => 'Võ Thị Mai',
                 'phone' => '0945123789',
@@ -125,7 +127,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00008',
                 'stage' => OperationStage::Care2,
-                'result' => 'Chăm sóc sau giao — hài lòng',
+                'result' => OperationResult::ClosedSuccess,
                 'note' => 'Khách nhận hàng OK, hỏi thêm sản phẩm liên quan.',
                 'customer' => 'Bùi Văn Tài',
                 'phone' => '0922334455',
@@ -138,7 +140,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00009',
                 'stage' => OperationStage::Care3,
-                'result' => 'Upsell thành công',
+                'result' => OperationResult::ClosedSuccess,
                 'note' => 'Khách cũ mua thêm 1 camera mini sau CS lần 3.',
                 'customer' => 'Ngô Thị Hồng',
                 'phone' => '0918776655',
@@ -152,7 +154,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00010',
                 'stage' => OperationStage::Skipped,
-                'result' => 'Từ chối — giá cao',
+                'result' => OperationResult::PriceRejected,
                 'note' => 'Khách so sánh giá sàn TMDT, không chốt.',
                 'customer' => 'Trịnh Văn Đức',
                 'phone' => '0900112233',
@@ -165,7 +167,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00011',
                 'stage' => OperationStage::NoOperation,
-                'result' => 'Sai số / nhầm số',
+                'result' => OperationResult::WrongNumber,
                 'note' => 'SĐT không tồn tại — cần marketing xác minh lại lead.',
                 'customer' => 'Khách không xác định',
                 'phone' => '0999000111',
@@ -178,7 +180,7 @@ class SaleOperationSeeder extends Seeder
             [
                 'code' => 'PS-OPS-00012',
                 'stage' => OperationStage::NewCustomer,
-                'result' => 'Khách cũ quay lại',
+                'result' => OperationResult::NoContact,
                 'note' => 'Khách đã mua tháng trước, inbox hỏi mua thêm quà tặng.',
                 'customer' => 'Phan Minh Tuấn',
                 'phone' => '0933445566',
@@ -220,7 +222,10 @@ class SaleOperationSeeder extends Seeder
                 'closed_at' => $closedAt,
                 'desired_delivery_at' => now()->addDays(2)->toDateString(),
                 'operation_stage' => $scenario['stage']->value,
-                'operation_result' => $scenario['result'],
+                'operation_result' => $scenario['result']->value,
+                'closing_status' => $scenario['closed']
+                    ? ClosingStatus::Closed->value
+                    : ($scenario['stage'] === OperationStage::Skipped ? ClosingStatus::Cancelled->value : ClosingStatus::Open->value),
                 'delivery_status' => $deliveryStatus,
                 'is_returning_customer' => $scenario['returning'] ?? false,
                 'subtotal' => $subtotal,

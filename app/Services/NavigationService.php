@@ -62,6 +62,7 @@ class NavigationService
             $this->group('Danh mục', [
                 ['title' => 'Nhân viên', 'url' => '/admin/users', 'icon' => 'users'],
                 ['title' => 'Phòng ban', 'url' => '/admin/teams', 'icon' => 'network'],
+                ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
                 ['title' => 'Sản phẩm', 'url' => '/admin/products', 'icon' => 'package'],
                 ['title' => 'Danh sách kho', 'url' => '/admin/warehouses', 'icon' => 'warehouse'],
             ]),
@@ -85,6 +86,7 @@ class NavigationService
             ['title' => 'Tác nghiệp telesale', 'url' => '/sales/workspace', 'icon' => 'phone-call'],
             ['title' => 'Xếp hạng doanh thu', 'url' => '/sales/rankings', 'icon' => 'trophy'],
             ['title' => 'Hồ sơ KH', 'url' => '/sales/customers', 'icon' => 'clipboard-list'],
+            ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }
@@ -98,6 +100,7 @@ class NavigationService
             ['title' => 'Kết nối Landing', 'url' => '/marketing/campaigns', 'icon' => 'target'],
             ['title' => 'Doanh thu MKT', 'url' => '/marketing/revenue', 'icon' => 'line-chart'],
             ['title' => 'Xếp hạng doanh thu', 'url' => '/marketing/rankings', 'icon' => 'trophy'],
+            ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }
@@ -110,6 +113,7 @@ class NavigationService
             ['title' => 'Tác nghiệp kho', 'url' => '/warehouse/workspace', 'icon' => 'truck'],
             ['title' => 'Đơn vận chuyển', 'url' => '/warehouse/shipping/orders', 'icon' => 'package'],
             ['title' => 'Tồn kho', 'url' => '/warehouse/inventory', 'icon' => 'package'],
+            ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }
@@ -120,6 +124,7 @@ class NavigationService
         return [
             ['title' => 'Dashboard', 'url' => '/accounting/dashboard', 'icon' => 'home'],
             ['title' => 'Tác nghiệp kế toán', 'url' => '/accounting/workspace', 'icon' => 'wallet'],
+            ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }
@@ -130,6 +135,7 @@ class NavigationService
         return [
             ['title' => 'Dashboard', 'url' => '/allocator/dashboard', 'icon' => 'home'],
             ['title' => 'Chia số & lead', 'url' => '/allocator/workspace', 'icon' => 'refresh-cw'],
+            ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }

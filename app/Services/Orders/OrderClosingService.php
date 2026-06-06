@@ -2,7 +2,10 @@
 
 namespace App\Services\Orders;
 
+use App\Enums\ClosingStatus;
 use App\Enums\DeliveryStatus;
+use App\Enums\OperationResult;
+use App\Enums\OperationStage;
 use App\Events\OrderClosed;
 use App\Models\Order;
 use App\Models\User;
@@ -41,8 +44,9 @@ class OrderClosingService
 
             $order->update([
                 'closed_at' => now(),
-                'closing_status' => 'closed',
-                'operation_result' => $payload['operation_result'] ?? 'chot_don',
+                'closing_status' => ClosingStatus::Closed->value,
+                'operation_stage' => OperationStage::Care1->value,
+                'operation_result' => $payload['operation_result'] ?? OperationResult::ClosedSuccess->value,
                 'delivery_status' => DeliveryStatus::WaitingWaybill->value,
                 'amount_to_collect' => $amountToCollect,
                 'shipping_geo' => $payload['shipping_geo'] ?? $order->shipping_geo,

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Services\OrgStructureService;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,10 +13,6 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
-    public function __construct(
-        private readonly OrgStructureService $orgStructure,
-    ) {}
-
     public function index(Request $request): Response
     {
         $user = $request->user();
@@ -24,7 +20,6 @@ class ProfileController extends Controller
 
         return Inertia::render('Profile/Index', [
             'profile' => $this->profilePayload($user),
-            'org' => $this->orgStructure->profileContext($user),
         ]);
     }
 
@@ -75,7 +70,7 @@ class ProfileController extends Controller
     }
 
     /** @return array<string, mixed> */
-    private function profilePayload(\App\Models\User $user): array
+    private function profilePayload(User $user): array
     {
         return [
             'name' => $user->name,

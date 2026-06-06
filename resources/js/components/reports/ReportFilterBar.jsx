@@ -99,6 +99,36 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                     onChange={set}
                 />
                 )}
+                {fields.has('parent_product_id') && (
+                <SelectFilter
+                    label="Sản phẩm gốc"
+                    name="parent_product_id"
+                    value={filters.parent_product_id}
+                    options={filterOptions?.parentProducts?.map((p) => ({
+                        value: p.id,
+                        label: p.name,
+                    }))}
+                    onChange={set}
+                />
+                )}
+                {fields.has('operation_result') && (
+                <SelectFilter
+                    label="Kết quả tác nghiệp"
+                    name="operation_result"
+                    value={filters.operation_result}
+                    options={filterOptions?.operationResults}
+                    onChange={set}
+                />
+                )}
+                {fields.has('closing_status') && (
+                <SelectFilter
+                    label="Trạng thái chốt"
+                    name="closing_status"
+                    value={filters.closing_status}
+                    options={filterOptions?.closingStatuses}
+                    onChange={set}
+                />
+                )}
                 {fields.has('warehouse_id') && (
                 <SelectFilter
                     label="Kho"
@@ -157,7 +187,17 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                         checked={!!filters.hide_zero_status}
                         onChange={(e) => set('hide_zero_status', e.target.checked ? 1 : 0)}
                     />
-                    Ẩn trạng thái không số
+                    Ẩn tab trạng thái 0 đơn
+                </label>
+                )}
+                {fields.has('hide_no_phone') && (
+                <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <input
+                        type="checkbox"
+                        checked={!!filters.hide_no_phone}
+                        onChange={(e) => set('hide_no_phone', e.target.checked ? 1 : 0)}
+                    />
+                    Ẩn đơn không có SĐT
                 </label>
                 )}
             </div>
