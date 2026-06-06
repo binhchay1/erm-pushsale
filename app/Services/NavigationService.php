@@ -61,6 +61,7 @@ class NavigationService
             ]),
             $this->group('Danh mục', [
                 ['title' => 'Nhân viên', 'url' => '/admin/users', 'icon' => 'users'],
+                ['title' => 'Phòng ban', 'url' => '/admin/teams', 'icon' => 'network'],
                 ['title' => 'Sản phẩm', 'url' => '/admin/products', 'icon' => 'package'],
                 ['title' => 'Danh sách kho', 'url' => '/admin/warehouses', 'icon' => 'warehouse'],
             ]),

@@ -203,23 +203,15 @@ class LeadIngestionService
             ? 'Lead Landing — '.$campaign->name
             : 'Lead mới từ '.$ingestion->platform;
         $message = trim(($ingestion->customer_name ?? 'Khách').' · '.($ingestion->customer_phone ?? ''));
-        $adminUrl = '/admin/leads';
+        $adminUrl = $campaign && ! $campaign->is_approved
+            ? '/admin/landing-approvals?campaign='.$campaign->id
+            : '/admin/leads';
 
         if ($order->sale_user_id) {
             NotificationService::push($order->sale_user_id, 'lead', $title, $message, '/sales/workspace');
         }
 
         NotificationService::pushToRole(UserRole::Admin, 'lead', $title, $message, $adminUrl);
-
-        if ($campaign && ! $campaign->is_approved) {
-            NotificationService::pushToRole(
-                UserRole::Admin,
-                'lead',
-                'Cần duyệt Landing: '.$campaign->name,
-                'Lead test chờ duyệt — chưa chia số Sale',
-                '/admin/landing-approvals',
-            );
-        }
     }
 
     /** @param  array<string, mixed>  $payload */

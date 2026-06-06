@@ -10,6 +10,7 @@ use App\Models\MarketingSource;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Marketing\CampaignLandingService;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -56,7 +57,8 @@ class CampaignController extends Controller
     public function store(CampaignRequest $request): RedirectResponse
     {
         $data = $this->landing->prepareForCreate($request->validated(), $request->user()->id);
-        MarketingSource::query()->create($data);
+        $campaign = MarketingSource::query()->create($data);
+        NotificationService::notifyLandingApprovalPending($campaign);
 
         return redirect()->route('marketing.campaigns.index')
             ->with('success', 'Đã tạo kết nối Landing — copy URL API sang Ladipage và chờ Admin duyệt.');

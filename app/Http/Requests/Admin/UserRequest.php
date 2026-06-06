@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -19,6 +20,7 @@ class UserRequest extends FormRequest
         $this->merge([
             'team_id' => $this->input('team_id') ?: null,
             'manager_user_id' => $this->input('manager_user_id') ?: null,
+            'org_level' => $this->input('org_level') ?: null,
         ]);
     }
 
@@ -34,6 +36,9 @@ class UserRequest extends FormRequest
             'team_id' => ['nullable', 'exists:teams,id'],
             'manager_user_id' => ['nullable', 'exists:users,id', Rule::notIn([$userId])],
             'is_team_leader' => ['sometimes', 'boolean'],
+            'org_level' => ['nullable', Rule::enum(OrgLevel::class)],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'job_title' => ['nullable', 'string', 'max:120'],
             'password' => [$userId ? 'nullable' : 'required', 'confirmed', Password::defaults()],
         ];
     }

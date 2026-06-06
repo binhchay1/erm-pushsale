@@ -89,55 +89,6 @@ class Order extends Model
         return (int) max(0, $base - $this->discount);
     }
 
-    public function costPrice(): int
-    {
-        $totalCost = 0;
-        
-        $items = $this->items()->with('product')->get();
-        if ($items->isNotEmpty()) {
-            foreach ($items as $item) {
-                $product = $item->product;
-                $quantity = $item->quantity ?? 1;
-                $unitPrice = $item->price ?? 0;
-                
-                if ($product) {
-                    $costPrice = self::guessProductCostPrice($product->id, $product->sku ?? '', $unitPrice);
-                } else {
-                    $costPrice = (int) round($unitPrice * 0.4);
-                }
-                
-                $totalCost += $costPrice * $quantity;
-            }
-            return $totalCost;
-        }
-
-        if ($this->product_id) {
-            $product = $this->product;
-            $unitPrice = $this->total > 0 ? $this->total : ($this->subtotal ?? 0);
-            if ($product) {
-                return self::guessProductCostPrice($product->id, $product->sku ?? '', $unitPrice);
-            }
-            return (int) round($unitPrice * 0.4);
-        }
-
-        return 0;
-    }
-
-    private static function guessProductCostPrice(int $productId, string $sku, int $unitPrice): int
-    {
-        if (str_contains(strtolower($sku), 'goi_may_lon') || $productId === 1) {
-            return 120000;
-        }
-        if (str_contains(strtolower($sku), 'goi_may_nho') || $productId === 2) {
-            return 60000;
-        }
-        if (str_contains(strtolower($sku), 'camera') || $productId === 3) {
-            return 350000;
-        }
-        
-        return (int) round($unitPrice * 0.4);
-    }
-
     public function scopeApplyReportFilter(Builder $query, ReportFilterData $filter): Builder
     {
         $column = match ($filter->dateType) {

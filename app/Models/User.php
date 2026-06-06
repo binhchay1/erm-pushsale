@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -14,7 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'role', 'team_id', 'manager_user_id', 'is_team_leader'])]
+#[Fillable(['name', 'email', 'password', 'role', 'avatar_path', 'phone', 'job_title', 'team_id', 'manager_user_id', 'is_team_leader', 'org_level'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -40,7 +41,43 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => UserRole::class,
             'is_team_leader' => 'boolean',
+            'org_level' => OrgLevel::class,
         ];
+    }
+
+    public function avatarUrl(): ?string
+    {
+        if (! $this->avatar_path) {
+            return null;
+        }
+
+        return asset('storage/'.$this->avatar_path);
+    }
+
+    public function initials(): string
+    {
+        $parts = preg_split('/\s+/u', trim($this->name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        if (count($parts) >= 2) {
+            return mb_strtoupper(
+                mb_substr($parts[0], 0, 1).mb_substr($parts[count($parts) - 1], 0, 1)
+            );
+        }
+
+        return mb_strtoupper(mb_substr($this->name, 0, 2));
+    }
+
+    public function orgLevelLabel(): ?string
+    {
+        if ($this->org_level instanceof OrgLevel) {
+            return $this->org_level->label();
+        }
+
+        if ($this->is_team_leader) {
+            return OrgLevel::Head->label();
+        }
+
+        return null;
     }
 
     public function isAdmin(): bool

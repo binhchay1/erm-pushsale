@@ -1,0 +1,150 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Enums\TeamType;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\TeamRequest;
+use App\Models\Team;
+use App\Models\User;
+use App\Services\OrgStructureService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class TeamController extends Controller
+{
+    public function __construct(
+        private readonly OrgStructureService $orgStructure,
+    ) {}
+
+    public function index(): Response
+    {
+        return Inertia::render('Admin/Teams/Index', [
+            'tree' => $this->orgStructure->teamTree(),
+        ]);
+    }
+
+    public function create(Request $request): Response
+    {
+        $parentId = $request->integer('parent_id') ?: null;
+
+        return Inertia::render('Admin/Teams/Form', [
+            'team' => $parentId ? ['parent_id' => $parentId] : null,
+            'types' => $this->typeOptions(),
+            'parents' => $this->parentOptions(),
+            'leaders' => $this->leaderOptions(),
+        ]);
+    }
+
+    public function store(TeamRequest $request): RedirectResponse
+    {
+        Team::query()->create($request->validated());
+
+        return redirect()->route('admin.teams.index')->with('success', 'Đã tạo phòng ban.');
+    }
+
+    public function edit(Team $team): Response
+    {
+        return Inertia::render('Admin/Teams/Form', [
+            'team' => [
+                'id' => $team->id,
+                'name' => $team->name,
+                'type' => $team->type->value,
+                'parent_id' => $team->parent_id,
+                'leader_user_id' => $team->leader_user_id,
+            ],
+            'types' => $this->typeOptions(),
+            'parents' => $this->parentOptions(excludeId: $team->id),
+            'leaders' => $this->leaderOptions(),
+        ]);
+    }
+
+    public function update(TeamRequest $request, Team $team): RedirectResponse
+    {
+        if ($request->validated('parent_id') === $team->id) {
+            return back()->with('error', 'Phòng ban không thể là cha của chính nó.');
+        }
+
+        if ($this->isDescendant($team, (int) $request->input('parent_id'))) {
+            return back()->with('error', 'Không thể đặt phòng ban con làm phòng ban cha.');
+        }
+
+        $team->update($request->validated());
+
+        return redirect()->route('admin.teams.index')->with('success', 'Đã cập nhật phòng ban.');
+    }
+
+    public function destroy(Team $team): RedirectResponse
+    {
+        if ($team->children()->exists()) {
+            return back()->with('error', 'Xóa các phòng ban con trước.');
+        }
+
+        if ($team->users()->exists()) {
+            return back()->with('error', 'Phòng ban còn nhân viên, hãy chuyển họ sang phòng ban khác.');
+        }
+
+        $team->delete();
+
+        return back()->with('success', 'Đã xóa phòng ban.');
+    }
+
+    private function isDescendant(Team $team, ?int $parentId): bool
+    {
+        if (! $parentId) {
+            return false;
+        }
+
+        $cursorId = $parentId;
+
+        while ($cursorId) {
+            if ($cursorId === $team->id) {
+                return true;
+            }
+            $cursorId = Team::query()->whereKey($cursorId)->value('parent_id');
+        }
+
+        return false;
+    }
+
+    /** @return list<array{value: string, label: string}> */
+    private function typeOptions(): array
+    {
+        return collect(TeamType::cases())
+            ->map(fn (TeamType $t) => ['value' => $t->value, 'label' => $t->label()])
+            ->values()
+            ->all();
+    }
+
+    /** @return list<array{id: int, name: string, depth: int}> */
+    private function parentOptions(?int $excludeId = null): array
+    {
+        $teams = Team::query()->orderBy('name')->get(['id', 'name', 'parent_id']);
+        $options = [];
+
+        $walk = function (?int $parentId, int $depth) use (&$walk, &$options, $teams, $excludeId): void {
+            foreach ($teams->where('parent_id', $parentId) as $team) {
+                if ($excludeId && $team->id === $excludeId) {
+                    continue;
+                }
+                $prefix = $depth > 0 ? str_repeat('— ', $depth) : '';
+                $options[] = ['id' => $team->id, 'name' => $prefix.$team->name, 'depth' => $depth];
+                $walk($team->id, $depth + 1);
+            }
+        };
+
+        $walk(null, 0);
+
+        return $options;
+    }
+
+    /** @return list<array{id: int, name: string}> */
+    private function leaderOptions(): array
+    {
+        return User::query()->orderBy('name')->get(['id', 'name'])
+            ->map(fn (User $u) => ['id' => $u->id, 'name' => $u->name])
+            ->all();
+    }
+}

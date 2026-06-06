@@ -2,15 +2,8 @@ import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { CloseOrderButton } from '@/components/operations/CloseOrderButton';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { formatCurrency } from '@/lib/format';
-import { cn } from '@/lib/utils';
 
-export function OperationOrderTable({ 
-    rows, 
-    enableCloseOrder = false, 
-    enableDeleteOrder = false,
-    selectedId = null,
-    onRowClick = null
-}) {
+export function OperationOrderTable({ rows, enableCloseOrder = false, enableDeleteOrder = false }) {
     return (
         <ScrollDataTable>
             <table className="min-w-[1600px] w-full border-collapse">
@@ -32,17 +25,8 @@ export function OperationOrderTable({
                 <tbody>
                     {rows?.length ? (
                         rows.map((row) => (
-                            <tr 
-                                key={row.id} 
-                                className={cn(
-                                    "align-top hover:bg-muted/30 cursor-pointer transition-all border-l-2",
-                                    selectedId === row.id 
-                                        ? "bg-primary/10 border-l-primary hover:bg-primary/15 font-medium" 
-                                        : "border-l-transparent"
-                                )}
-                                onClick={() => onRowClick && onRowClick(row)}
-                            >
-                                <Td className="font-mono text-primary font-bold">{row.orderCode}</Td>
+                            <tr key={row.id} className="align-top hover:bg-muted/30">
+                                <Td className="font-mono text-primary">{row.orderCode}</Td>
                                 <Td>
                                     <div className="font-medium">{row.sourceName}</div>
                                     <div className="text-muted-foreground">{row.dataArrivedAt?.slice(0, 10)}</div>

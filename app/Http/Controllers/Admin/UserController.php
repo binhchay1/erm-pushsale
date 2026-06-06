@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserRequest;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\OrgStructureService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -29,6 +31,8 @@ class UserController extends Controller
                 'team_name' => $u->team?->name,
                 'manager_name' => $u->manager?->name,
                 'is_team_leader' => (bool) $u->is_team_leader,
+                'org_level_label' => $u->orgLevelLabel(),
+                'job_title' => $u->job_title,
             ])
             ->values();
 
@@ -44,14 +48,14 @@ class UserController extends Controller
             'roles' => $this->roleOptions(),
             'teams' => $this->teamOptions(),
             'managers' => $this->managerOptions(),
+            'orgLevels' => OrgStructureService::orgLevelOptions(),
         ]);
     }
 
     public function store(UserRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $this->normalizeUserData($request->validated());
         $data['password'] = Hash::make($data['password']);
-        $data['is_team_leader'] = (bool) ($data['is_team_leader'] ?? false);
 
         User::query()->create($data);
 
@@ -69,17 +73,20 @@ class UserController extends Controller
                 'team_id' => $user->team_id,
                 'manager_user_id' => $user->manager_user_id,
                 'is_team_leader' => (bool) $user->is_team_leader,
+                'org_level' => $user->org_level?->value,
+                'phone' => $user->phone,
+                'job_title' => $user->job_title,
             ],
             'roles' => $this->roleOptions(),
             'teams' => $this->teamOptions(),
             'managers' => $this->managerOptions(excludeId: $user->id),
+            'orgLevels' => OrgStructureService::orgLevelOptions(),
         ]);
     }
 
     public function update(UserRequest $request, User $user): RedirectResponse
     {
-        $data = $request->validated();
-        $data['is_team_leader'] = (bool) ($data['is_team_leader'] ?? false);
+        $data = $this->normalizeUserData($request->validated());
 
         if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
@@ -107,6 +114,20 @@ class UserController extends Controller
         return back()->with('success', 'Đã xóa nhân viên.');
     }
 
+    /** @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function normalizeUserData(array $data): array
+    {
+        $data['is_team_leader'] = (bool) ($data['is_team_leader'] ?? false);
+
+        if (($data['org_level'] ?? null) === OrgLevel::Head->value) {
+            $data['is_team_leader'] = true;
+        }
+
+        return $data;
+    }
+
     /** @return list<array{value: string, label: string}> */
     private function roleOptions(): array
     {
@@ -119,9 +140,20 @@ class UserController extends Controller
     /** @return list<array{id: int, name: string}> */
     private function teamOptions(): array
     {
-        return Team::query()->orderBy('name')->get(['id', 'name'])
-            ->map(fn (Team $t) => ['id' => $t->id, 'name' => $t->name])
-            ->all();
+        $teams = Team::query()->orderBy('name')->get(['id', 'name', 'parent_id']);
+        $options = [];
+
+        $walk = function (?int $parentId, int $depth) use (&$walk, &$options, $teams): void {
+            foreach ($teams->where('parent_id', $parentId) as $team) {
+                $prefix = $depth > 0 ? str_repeat('— ', $depth) : '';
+                $options[] = ['id' => $team->id, 'name' => $prefix.$team->name];
+                $walk($team->id, $depth + 1);
+            }
+        };
+
+        $walk(null, 0);
+
+        return $options;
     }
 
     /** @return list<array{id: int, name: string}> */

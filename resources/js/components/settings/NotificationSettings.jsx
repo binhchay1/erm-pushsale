@@ -8,6 +8,11 @@ const items = [
         description: 'Thông báo khi có khách đổ từ ads / landing',
     },
     {
+        key: 'landing_approval',
+        label: 'Duyệt Landing / Ladipage',
+        description: 'Admin: cần duyệt kết nối · Marketing: đã được duyệt',
+    },
+    {
         key: 'order_update',
         label: 'Cập nhật đơn hàng',
         description: 'Trạng thái chốt, hủy, thay đổi giá trị đơn',

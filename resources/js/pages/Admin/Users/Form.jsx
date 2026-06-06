@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/AppLayout';
 
-export default function UserForm({ user, roles, teams, managers }) {
+export default function UserForm({ user, roles, teams, managers, orgLevels }) {
     const isEdit = Boolean(user?.id);
     const { data, setData, post, put, processing, errors } = useForm({
         name: user?.name ?? '',
@@ -17,6 +17,9 @@ export default function UserForm({ user, roles, teams, managers }) {
         team_id: user?.team_id ?? '',
         manager_user_id: user?.manager_user_id ?? '',
         is_team_leader: user?.is_team_leader ?? false,
+        org_level: user?.org_level ?? '',
+        phone: user?.phone ?? '',
+        job_title: user?.job_title ?? '',
         password: '',
         password_confirmation: '',
     });
@@ -92,7 +95,26 @@ export default function UserForm({ user, roles, teams, managers }) {
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="team_id">Team</Label>
+                                    <Label htmlFor="phone">Số điện thoại</Label>
+                                    <Input
+                                        id="phone"
+                                        value={data.phone}
+                                        onChange={(e) => setData('phone', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="job_title">Chức danh</Label>
+                                    <Input
+                                        id="job_title"
+                                        value={data.job_title}
+                                        onChange={(e) => setData('job_title', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="team_id">Phòng ban</Label>
                                     <select
                                         id="team_id"
                                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
@@ -125,8 +147,25 @@ export default function UserForm({ user, roles, teams, managers }) {
                                 </div>
                             </div>
 
+                            <div className="space-y-2">
+                                <Label htmlFor="org_level">Cấp trong phòng ban</Label>
+                                <select
+                                    id="org_level"
+                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                                    value={data.org_level}
+                                    onChange={(e) => setData('org_level', e.target.value || '')}
+                                >
+                                    <option value="">— Không chọn —</option>
+                                    {(orgLevels ?? []).map((l) => (
+                                        <option key={l.value} value={l.value}>
+                                            {l.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div className="flex items-center justify-between rounded-lg border px-4 py-3">
-                                <Label htmlFor="is_team_leader">Trưởng nhóm</Label>
+                                <Label htmlFor="is_team_leader">Trưởng nhóm (legacy)</Label>
                                 <Switch
                                     id="is_team_leader"
                                     checked={data.is_team_leader}

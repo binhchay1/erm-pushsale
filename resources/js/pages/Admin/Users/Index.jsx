@@ -33,7 +33,8 @@ export default function UsersIndex({ users }) {
                                 <Th>Họ tên</Th>
                                 <Th>Email</Th>
                                 <Th>Vai trò</Th>
-                                <Th>Team</Th>
+                                <Th>Phòng ban</Th>
+                                <Th>Cấp</Th>
                                 <Th>Quản lý</Th>
                                 <Th>Thao tác</Th>
                             </tr>
@@ -46,6 +47,7 @@ export default function UsersIndex({ users }) {
                                         <Td>{row.email}</Td>
                                         <Td>{row.role_label}</Td>
                                         <Td>{row.team_name ?? '—'}</Td>
+                                        <Td>{row.org_level_label ?? '—'}</Td>
                                         <Td>{row.manager_name ?? '—'}</Td>
                                         <Td>
                                             <div className="flex gap-1">
