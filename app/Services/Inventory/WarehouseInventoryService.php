@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 
 class WarehouseInventoryService
 {
+    public function __construct(
+        private readonly InventoryIntakeService $intakeService,
+    ) {}
+
     /** @return array<string, mixed> */
     public function build(Request $request): array
     {
@@ -47,6 +51,7 @@ class WarehouseInventoryService
                 'product_id' => $request->input('product_id'),
                 'search' => $request->input('search'),
             ],
+            'recentIntakes' => $this->intakeService->recentMovements(),
         ];
     }
 }

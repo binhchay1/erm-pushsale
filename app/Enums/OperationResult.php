@@ -150,4 +150,34 @@ enum OperationResult: string
             ->values()
             ->all();
     }
+
+    /** Kết quả coi là lead rác / không bắt máy (sai số, không nghe). */
+    public static function junkLeadResults(): array
+    {
+        return [
+            self::NoContact,
+            self::WrongNumber,
+            self::NoAnswer1,
+            self::NoAnswer2,
+            self::NoAnswer3,
+            self::NoAnswer4,
+            self::NoAnswer5,
+            self::NoAnswer6,
+        ];
+    }
+
+    public function isJunkLead(): bool
+    {
+        return in_array($this, self::junkLeadResults(), true);
+    }
+
+    public function indicatesAnswered(): bool
+    {
+        if ($this === self::ClosedSuccess) {
+            return true;
+        }
+
+        return ! $this->isJunkLead()
+            && ! in_array($this, [self::NoNeed, self::PriceRejected], true);
+    }
 }

@@ -4,21 +4,19 @@ namespace App\Services\Leads;
 
 use App\Contracts\Integrations\LeadPayloadNormalizer;
 use App\Enums\LeadIngestionStatus;
-use App\Enums\OperationStage;
 use App\Enums\UserRole;
 use App\Events\LeadIngested;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
-use App\Models\Product;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class LeadIngestionService
 {
     public function __construct(
         protected LeadRoutingService $routing,
+        protected LeadOrderFactory $orderFactory,
     ) {}
 
     /**
@@ -96,8 +94,17 @@ class LeadIngestionService
             return $ingestion;
         }
 
-        return DB::transaction(function () use ($ingestion, $normalized, $campaign) {
-            $order = $this->createOrderFromLead($ingestion, $normalized, $campaign);
+        $assignToSale = $campaign === null || $campaign->is_approved;
+        $saleUser = $assignToSale ? $this->routing->assignSalesUser() : null;
+
+        if (! $saleUser) {
+            event(new LeadIngested($ingestion));
+
+            return $ingestion;
+        }
+
+        return DB::transaction(function () use ($ingestion, $normalized, $saleUser, $campaign) {
+            $order = $this->orderFactory->createFromLead($ingestion, $normalized, $saleUser);
             $ingestion->update([
                 'status' => LeadIngestionStatus::Processed,
                 'order_id' => $order->id,
@@ -109,89 +116,6 @@ class LeadIngestionService
 
             return $ingestion;
         });
-    }
-
-    /**
-     * @param  array<string, mixed>  $normalized
-     */
-    protected function createOrderFromLead(
-        LeadIngestion $ingestion,
-        array $normalized,
-        ?MarketingSource $campaign = null,
-    ): Order {
-        $source = $campaign ?? $this->resolveCampaign($ingestion, $normalized);
-        $assignToSale = $campaign === null || $campaign->is_approved;
-        $saleUser = $assignToSale ? $this->routing->assignSalesUser() : null;
-
-        $noteParts = array_filter([
-            filled($normalized['message'] ?? null) ? (string) $normalized['message'] : null,
-            filled($normalized['product_interest'] ?? null)
-                ? 'SP: '.$normalized['product_interest'].(isset($normalized['quantity']) ? ' x'.$normalized['quantity'] : '')
-                : null,
-        ]);
-
-        $order = Order::query()->create([
-            'order_code' => 'PS'.strtoupper(Str::random(10)),
-            'sale_user_id' => $saleUser?->id,
-            'marketer_user_id' => $source->marketer_user_id,
-            'marketing_source_id' => $source->id,
-            'product_id' => $source->product_id,
-            'customer_name' => $normalized['customer_name'],
-            'customer_phone' => $normalized['customer_phone'],
-            'customer_note' => $noteParts !== [] ? implode("\n", $noteParts) : null,
-            'data_arrived_at' => now(),
-            'assigned_at' => $assignToSale ? now() : null,
-            'operation_stage' => OperationStage::NewCustomer->value,
-            'delivery_status' => 'waiting_waybill',
-            'is_duplicate_phone' => false,
-            'contact_count' => 1,
-        ]);
-
-        if ($source->product_id) {
-            $product = Product::query()->find($source->product_id);
-            $qty = max(1, (int) ($normalized['quantity'] ?? 1));
-            $order->items()->create([
-                'product_id' => $product?->id,
-                'product_name' => $product?->name ?? ($normalized['product_interest'] ?? 'Sản phẩm'),
-                'quantity' => $qty,
-                'unit_price' => $product?->unit_price ?? 0,
-            ]);
-        }
-
-        return $order;
-    }
-
-    /**
-     * Khớp lead về đúng chiến dịch marketing theo utm_campaign / utm_source.
-     * Nếu không khớp chiến dịch nào (campaign chưa tạo) thì tạo nguồn tạm để không mất dữ liệu.
-     *
-     * @param  array<string, mixed>  $normalized
-     */
-    protected function resolveCampaign(LeadIngestion $ingestion, array $normalized): MarketingSource
-    {
-        $campaign = MarketingSource::query()
-            ->when($normalized['utm_campaign'] ?? null, fn ($q, $c) => $q->where('utm_campaign', $c))
-            ->when(
-                empty($normalized['utm_campaign']) && ! empty($normalized['utm_source']),
-                fn ($q) => $q->where('utm_source', $normalized['utm_source']),
-            )
-            ->when(! empty($normalized['utm_campaign']) || ! empty($normalized['utm_source']),
-                fn ($q) => $q->where('is_active', true)->orderByDesc('id'),
-            )
-            ->first();
-
-        if ($campaign) {
-            return $campaign;
-        }
-
-        return MarketingSource::query()->firstOrCreate(
-            ['name' => $ingestion->platform.' — '.($normalized['utm_campaign'] ?? 'default')],
-            [
-                'utm_source' => $normalized['utm_source'],
-                'utm_campaign' => $normalized['utm_campaign'],
-                'ad_channel' => $ingestion->platform,
-            ]
-        );
     }
 
     protected function notifyNewLead(

@@ -9,11 +9,16 @@ use App\Enums\OperationStage;
 use App\Events\OrderClosed;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Inventory\InventoryDeductionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class OrderClosingService
 {
+    public function __construct(
+        private readonly InventoryDeductionService $inventory,
+    ) {}
+
     /**
      * Chốt đơn telesale → chuyển sang kho (chờ tạo vận đơn).
      *
@@ -32,6 +37,9 @@ class OrderClosingService
                 'order' => 'Bạn không có quyền chốt đơn này.',
             ]);
         }
+
+        $confirmInsufficient = (bool) ($payload['confirm_insufficient_stock'] ?? false);
+        $this->inventory->assertCanClose($order, $confirmInsufficient);
 
         return DB::transaction(function () use ($order, $payload) {
             $amountToCollect = (int) ($payload['amount_to_collect']

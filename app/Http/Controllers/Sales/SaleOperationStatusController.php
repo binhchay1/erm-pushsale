@@ -25,6 +25,7 @@ class SaleOperationStatusController extends Controller
             ],
             'next_operation_at' => ['nullable', 'date'],
             'note' => ['nullable', 'string', 'max:1000'],
+            'confirm_insufficient_stock' => ['nullable', 'boolean'],
         ]);
 
         $service->applyStatus($order, $request->user(), $validated);

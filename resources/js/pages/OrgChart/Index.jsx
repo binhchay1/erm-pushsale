@@ -40,7 +40,7 @@ export default function OrgChartIndex({ chart }) {
                     <CardHeader>
                         <CardTitle>Sơ đồ nhân sự</CardTitle>
                         <CardDescription>
-                            Quản lý trực tiếp → cấp dưới. Thẻ có viền primary là vị trí của bạn.
+                            Cây tổ chức từ trên xuống — màu theo vai trò; Sale/MKT hiển thị % chốt và doanh thu 30 ngày.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>

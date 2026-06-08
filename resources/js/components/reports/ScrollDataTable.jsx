@@ -2,8 +2,8 @@ import { cn } from '@/lib/utils';
 
 export function ScrollDataTable({ children, className }) {
     return (
-        <div className={cn('overflow-hidden rounded-xl border border-border bg-card shadow-sm', className)}>
-            <div className="overflow-x-auto">{children}</div>
+        <div className={cn('max-w-full overflow-hidden rounded-xl border border-border bg-card shadow-sm', className)}>
+            <div className="max-w-full overflow-x-auto">{children}</div>
         </div>
     );
 }

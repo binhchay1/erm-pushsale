@@ -7,6 +7,7 @@ use App\Enums\DeliveryStatus;
 use App\Models\Order;
 use App\Models\Shipment;
 use App\Models\ShippingPartnerConnection;
+use App\Services\Inventory\InventoryDeductionService;
 use RuntimeException;
 
 abstract class AbstractShippingCarrier implements ShippingCarrierInterface
@@ -84,6 +85,8 @@ abstract class AbstractShippingCarrier implements ShippingCarrierInterface
         ], fn ($v) => $v !== null && $v !== ''));
 
         ShippingPartnerConnection::forProvider($this->provider())->update(['last_synced_at' => now()]);
+
+        app(InventoryDeductionService::class)->deductForOrder($order->fresh(['items']));
 
         return $shipment->fresh();
     }

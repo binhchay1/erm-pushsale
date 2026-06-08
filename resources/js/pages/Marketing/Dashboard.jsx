@@ -44,7 +44,7 @@ function MarketingDashboardContent({ stats: initialStats }) {
     ];
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <PageHeader
                 title="Dashboard Marketing"
                 description="Theo dõi hiệu quả campaign, lead source, conversion và doanh thu theo nguồn."

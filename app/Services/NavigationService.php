@@ -47,28 +47,30 @@ class NavigationService
             $this->group('Marketing', [
                 ['title' => 'Dashboard MKT', 'url' => '/admin/marketing/dashboard', 'icon' => 'megaphone'],
                 ['title' => 'Duyệt Landing', 'url' => '/admin/landing-approvals', 'icon' => 'target'],
+                ['title' => 'BC chiến dịch', 'url' => '/admin/marketing/campaign-report', 'icon' => 'bar-chart-3'],
                 ['title' => 'BC doanh số MKT', 'url' => '/admin/marketing/revenue', 'icon' => 'line-chart'],
             ]),
             $this->group('Telesale', [
+                ['title' => 'BC hiệu suất Sale', 'url' => '/admin/sales/performance', 'icon' => 'bar-chart-3'],
                 ['title' => 'BC doanh số Sale', 'url' => '/admin/sales/revenue', 'icon' => 'phone-call'],
                 ['title' => 'Nhật ký lead', 'url' => '/admin/leads', 'icon' => 'refresh-cw'],
             ]),
-            $this->group('Hệ thống', [
+            $this->group('Kết nối & Đối soát', [
                 ['title' => 'Tích hợp nền tảng', 'url' => '/admin/integrations', 'icon' => 'plug'],
                 ['title' => 'API vận chuyển', 'url' => '/admin/shipping-partners', 'icon' => 'truck'],
                 ['title' => 'Đơn vận chuyển', 'url' => '/admin/shipping/orders', 'icon' => 'package'],
                 ['title' => 'Đối soát vận chuyển', 'url' => '/admin/shipping/reconciliation', 'icon' => 'file-check'],
             ]),
-            $this->group('Danh mục', [
+            $this->group('Quản trị hệ thống', [
                 ['title' => 'Nhân viên', 'url' => '/admin/users', 'icon' => 'users'],
                 ['title' => 'Phòng ban', 'url' => '/admin/teams', 'icon' => 'network'],
                 ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
                 ['title' => 'Sản phẩm', 'url' => '/admin/products', 'icon' => 'package'],
-                ['title' => 'Danh sách kho', 'url' => '/admin/warehouses', 'icon' => 'warehouse'],
             ]),
-            $this->group('Vận hành', [
+            $this->group('Nghiệp vụ Vận hành', [
                 ['title' => 'Kế toán', 'url' => '/admin/accounting', 'icon' => 'wallet'],
                 ['title' => 'Thủ kho', 'url' => '/admin/warehouse/operations', 'icon' => 'clipboard-list'],
+                ['title' => 'Danh sách kho', 'url' => '/admin/warehouses', 'icon' => 'warehouse'],
                 ['title' => 'Tồn kho SP', 'url' => '/admin/warehouse/inventory', 'icon' => 'package'],
                 ['title' => 'Đơn lỗi', 'url' => '/admin/orders/failed', 'icon' => 'alert-triangle'],
             ]),
@@ -84,6 +86,7 @@ class NavigationService
         return [
             ['title' => 'Dashboard', 'url' => '/sales/dashboard', 'icon' => 'home'],
             ['title' => 'Tác nghiệp telesale', 'url' => '/sales/workspace', 'icon' => 'phone-call'],
+            ['title' => 'BC hiệu suất', 'url' => '/sales/performance', 'icon' => 'bar-chart-3'],
             ['title' => 'Xếp hạng doanh thu', 'url' => '/sales/rankings', 'icon' => 'trophy'],
             ['title' => 'Hồ sơ KH', 'url' => '/sales/customers', 'icon' => 'clipboard-list'],
             ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
@@ -97,6 +100,7 @@ class NavigationService
         return [
             ['title' => 'Dashboard', 'url' => '/marketing/dashboard', 'icon' => 'home'],
             ['title' => 'Báo cáo nguồn', 'url' => '/marketing/workspace', 'icon' => 'megaphone'],
+            ['title' => 'BC chiến dịch', 'url' => '/marketing/campaign-report', 'icon' => 'bar-chart-3'],
             ['title' => 'Kết nối Landing', 'url' => '/marketing/campaigns', 'icon' => 'target'],
             ['title' => 'Doanh thu MKT', 'url' => '/marketing/revenue', 'icon' => 'line-chart'],
             ['title' => 'Xếp hạng doanh thu', 'url' => '/marketing/rankings', 'icon' => 'trophy'],

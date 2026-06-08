@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
 import { StatusTabs } from '@/components/operations/StatusTabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Workspace({ filters, filterOptions, filterFields, report, operationStatusOptions }) {
     useEffect(() => {
@@ -21,11 +22,11 @@ export default function Workspace({ filters, filterOptions, filterFields, report
         <AppLayout>
             <Head title="Sale tác nghiệp" />
 
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Sale tác nghiệp</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Hàng đợi lead, gọi khách và chốt đơn — pipeline tương tác KH
+            <div className="space-y-8 pb-8">
+                <div className="space-y-2">
+                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Sale tác nghiệp</h1>
+                    <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+                        Hàng đợi lead, gọi khách và chốt đơn — pipeline tương tác khách hàng
                     </p>
                 </div>
 
@@ -36,18 +37,27 @@ export default function Workspace({ filters, filterOptions, filterFields, report
                     filterFields={filterFields}
                 />
 
-                <StatusTabs
-                    routeUrl="/sales/workspace"
-                    filters={filters}
-                    tabs={report.statusTabs}
-                />
-
-                <OperationOrderTable
-                    rows={report.rows}
-                    enableSaleActions
-                    enableCloseOrder
-                    operationStatusOptions={operationStatusOptions}
-                />
+                <Card className="border-border/80 shadow-sm">
+                    <CardHeader className="pb-3">
+                        <CardTitle>Pipeline tác nghiệp</CardTitle>
+                        <CardDescription>
+                            Lọc nhanh theo giai đoạn gọi — bảng chi tiết bên dưới
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-5">
+                        <StatusTabs
+                            routeUrl="/sales/workspace"
+                            filters={filters}
+                            tabs={report.statusTabs}
+                        />
+                        <OperationOrderTable
+                            rows={report.rows}
+                            enableSaleActions
+                            enableCloseOrder
+                            operationStatusOptions={operationStatusOptions}
+                        />
+                    </CardContent>
+                </Card>
             </div>
         </AppLayout>
     );

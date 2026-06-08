@@ -7,6 +7,7 @@ use App\Enums\DeliveryStatus;
 use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Models\Order;
+use App\Services\Inventory\InventoryDeductionService;
 use Illuminate\Support\Collection;
 
 /**
@@ -74,6 +75,8 @@ final class OrderOperationPresenter
             'isDuplicatePhone' => $order->is_duplicate_phone,
             'closedAt' => $order->closed_at?->toIso8601String(),
             'carePersonName' => $order->saleUser?->name,
+            'stockWarnings' => app(InventoryDeductionService::class)->checkOrderStock($order),
+            'hasInsufficientStock' => ! app(InventoryDeductionService::class)->hasSufficientStock($order),
         ];
     }
 

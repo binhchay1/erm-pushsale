@@ -55,6 +55,8 @@ class FilterOptionsService
 
         if ($user?->isSales()) {
             unset($options['salesUsers'], $options['marketingUsers'], $options['teams']);
+        } elseif ($user?->role === UserRole::Marketing) {
+            unset($options['salesUsers'], $options['teams']);
         } elseif ($user && ! $user->isAdmin()) {
             unset($options['salesUsers'], $options['marketingUsers']);
         }
@@ -68,22 +70,48 @@ class FilterOptionsService
         $fields = [
             'date_from',
             'date_to',
-            'date_type',
-            'delivery_status',
             'product_id',
-            'warehouse_id',
-            'sale_id',
             'search',
-            'no_closing_date_limit',
-            'hide_zero_status',
         ];
 
-        if ($user?->isSales()) {
-            return array_values(array_diff($fields, ['sale_id']));
+        if (! $user?->isSales()) {
+            $fields[] = 'sale_id';
         }
 
-        if ($user && ! $user->isAdmin()) {
-            return array_values(array_diff($fields, ['sale_id']));
+        return $fields;
+    }
+
+    /** @return list<string> */
+    public function marketingDashboardFilterFields(?User $user = null): array
+    {
+        $fields = ['date_from', 'date_to', 'product_id'];
+
+        if ($user?->role !== UserRole::Marketing) {
+            $fields[] = 'marketer_id';
+        }
+
+        return $fields;
+    }
+
+    /** @return list<string> */
+    public function detailReportFilterFields(?User $user = null): array
+    {
+        $fields = ['date_from', 'date_to', 'product_id'];
+
+        if (! $user?->isSales()) {
+            $fields[] = 'sale_id';
+        }
+
+        return $fields;
+    }
+
+    /** @return list<string> */
+    public function marketingCampaignReportFilterFields(?User $user = null): array
+    {
+        $fields = ['date_from', 'date_to', 'product_id'];
+
+        if ($user?->role !== UserRole::Marketing) {
+            $fields[] = 'marketer_id';
         }
 
         return $fields;
@@ -95,16 +123,22 @@ class FilterOptionsService
         return [
             'date_from',
             'date_to',
-            'date_type',
-            'parent_product_id',
             'product_id',
             'operation_result',
-            'closing_status',
             'search',
-            'hide_no_phone',
-            'hide_zero_status',
-            'no_closing_date_limit',
         ];
+    }
+
+    /** @return list<string> */
+    public function inventoryFilterFields(): array
+    {
+        return ['search', 'warehouse_id', 'product_id'];
+    }
+
+    /** @return list<string> */
+    public function leadsFilterFields(): array
+    {
+        return ['search'];
     }
 
     /** @return array<string, mixed> */

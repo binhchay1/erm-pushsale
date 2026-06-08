@@ -16,26 +16,15 @@ const PRESET_OPTIONS = [
 export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields, extra = null }) {
     const { search } = useReportSearch(routeUrl, filters);
     const fields = new Set(
-        filterFields ?? [
-            'date_from',
-            'date_to',
-            'date_type',
-            'delivery_status',
-            'product_id',
-            'warehouse_id',
-            'sale_id',
-            'search',
-            'no_closing_date_limit',
-            'hide_zero_status',
-        ]
+        filterFields ?? ['date_from', 'date_to', 'product_id', 'search']
     );
 
     const set = (key, val) => search({ [key]: val, page: 1 });
     const setPreset = (preset) => search({ preset, date_from: null, date_to: null, page: 1 });
 
     return (
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <div className="mb-3 flex flex-wrap gap-2">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
+            <div className="mb-4 flex flex-wrap gap-2">
                 {PRESET_OPTIONS.map((option) => (
                     <Button
                         key={option.value}
@@ -48,7 +37,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                     </Button>
                 ))}
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
                 {fields.has('date_from') && (
                 <div className="space-y-1">
                     <Label className="text-xs">Từ ngày</Label>
@@ -153,6 +142,18 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                     onChange={set}
                 />
                 )}
+                {fields.has('marketer_id') && (
+                <SelectFilter
+                    label="Nhân viên Marketing"
+                    name="marketer_id"
+                    value={filters.marketer_id}
+                    options={filterOptions?.marketingUsers?.map((u) => ({
+                        value: u.id,
+                        label: u.name,
+                    }))}
+                    onChange={set}
+                />
+                )}
                 {fields.has('search') && (
                 <div className="space-y-1 sm:col-span-2">
                     <Label className="text-xs">Tìm tên / SĐT / mã đơn</Label>
@@ -165,7 +166,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 )}
             </div>
             {extra}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-3">
                 <Button size="sm" onClick={() => search()}>
                     <Search className="size-4" />
                     Tìm kiếm

@@ -4,6 +4,7 @@ namespace App\Data;
 
 use App\Enums\DateType;
 use App\Enums\DiscountMode;
+use App\Enums\UserRole;
 use App\Models\User;
 use App\Services\Reports\ReportDateRange;
 use Carbon\Carbon;
@@ -50,6 +51,11 @@ readonly class ReportFilterData
             $saleId = $user->id;
         }
 
+        $marketerId = $request->integer('marketer_id') ?: null;
+        if ($user?->role === UserRole::Marketing) {
+            $marketerId = $user->id;
+        }
+
         return new self(
             sourceType: $request->input('source_type'),
             preset: $dateRange->preset,
@@ -66,7 +72,7 @@ readonly class ReportFilterData
             saleId: $saleId,
             marketingTeamLeaderId: $request->integer('marketing_team_leader_id') ?: null,
             marketingTeamId: $request->integer('marketing_team_id') ?: null,
-            marketerId: $request->integer('marketer_id') ?: null,
+            marketerId: $marketerId,
             warehouseId: $request->integer('warehouse_id') ?: null,
             shippingMethod: $request->input('shipping_method'),
             operationStage: $request->input('operation_stage'),

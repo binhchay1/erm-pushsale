@@ -12,6 +12,7 @@ class MarketingDashboardService
 {
     public function __construct(
         private readonly OrderRepositoryInterface $orders,
+        private readonly MarketingTeamTreeService $teamTree,
     ) {}
 
     /** @return array<string, mixed> */
@@ -38,11 +39,37 @@ class MarketingDashboardService
         }
 
         $totals = $this->aggregateTotals($rows);
+        $kpis = $this->buildKpis($orderCollection, $rows);
+        $tree = $this->teamTree->build($filter, $orderCollection);
 
         return [
             'rows' => $rows,
             'filterTotal' => $totals,
             'pageTotal' => $totals,
+            'kpis' => $kpis,
+            'teamTree' => $tree,
+        ];
+    }
+
+    /**
+     * @param  Collection<int, Order>  $orders
+     * @param  list<array<string, mixed>>  $rows
+     * @return array<string, int|float>
+     */
+    private function buildKpis($orders, array $rows): array
+    {
+        $parents = array_filter($rows, fn ($r) => ! ($r['isChild'] ?? false));
+        $contacts = max(array_sum(array_column($parents, 'contacts')), 1);
+        $closed = (int) $orders->count();
+        $revenue = (int) $orders->sum(fn (Order $o) => $o->effectiveRevenue());
+        $productQty = (int) $orders->sum(fn (Order $o) => $o->items->sum('quantity'));
+
+        return [
+            'totalRevenue' => $revenue,
+            'productQuantity' => $productQty,
+            'conversionRate' => round($closed / $contacts * 100, 1),
+            'closedOrders' => $closed,
+            'contacts' => $contacts,
         ];
     }
 

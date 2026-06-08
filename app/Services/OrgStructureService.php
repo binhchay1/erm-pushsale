@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\OrgLevel;
 use App\Enums\UserRole;
+use App\Models\Order;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -57,7 +58,8 @@ class OrgStructureService
         $scope = $this->resolveChartScope($viewer);
 
         $visibleUsers = $users->whereIn('id', $visibleIds)->values();
-        $roots = $this->buildUserChartRoots($visibleUsers, $viewer->id);
+        $performanceMetrics = $this->performanceMetricsByUser($visibleUsers);
+        $roots = $this->buildUserChartRoots($visibleUsers, $viewer->id, $performanceMetrics);
 
         return [
             'scope' => $scope,
@@ -195,9 +197,10 @@ class OrgStructureService
 
     /**
      * @param  Collection<int, User>  $visibleUsers
+     * @param  array<int, array{conversionRate: float, revenue: int}>  $performanceMetrics
      * @return list<array<string, mixed>>
      */
-    private function buildUserChartRoots(Collection $visibleUsers, int $viewerId): array
+    private function buildUserChartRoots(Collection $visibleUsers, int $viewerId, array $performanceMetrics): array
     {
         $visibleIds = $visibleUsers->pluck('id')->flip();
 
@@ -211,36 +214,101 @@ class OrgStructureService
 
         return $roots
             ->sortBy('name')
-            ->map(fn (User $user) => $this->userChartNode($user, $visibleUsers, $viewerId))
+            ->map(fn (User $user) => $this->userChartNode($user, $visibleUsers, $viewerId, $performanceMetrics))
             ->values()
             ->all();
     }
 
     /**
      * @param  Collection<int, User>  $visibleUsers
+     * @param  array<int, array{conversionRate: float, revenue: int}>  $performanceMetrics
      * @return array<string, mixed>
      */
-    private function userChartNode(User $user, Collection $visibleUsers, int $viewerId): array
-    {
+    private function userChartNode(
+        User $user,
+        Collection $visibleUsers,
+        int $viewerId,
+        array $performanceMetrics,
+    ): array {
         $children = $visibleUsers
             ->where('manager_user_id', $user->id)
             ->sortBy('name')
-            ->map(fn (User $child) => $this->userChartNode($child, $visibleUsers, $viewerId))
+            ->map(fn (User $child) => $this->userChartNode($child, $visibleUsers, $viewerId, $performanceMetrics))
             ->values()
             ->all();
+
+        $metrics = $performanceMetrics[$user->id] ?? null;
 
         return [
             'id' => $user->id,
             'name' => $user->name,
             'job_title' => $user->job_title,
+            'role' => $user->role->value,
             'role_label' => $user->roleLabel(),
             'team_name' => $user->team?->name,
             'org_level_label' => $user->orgLevelLabel(),
             'avatar_url' => $user->avatarUrl(),
             'initials' => $user->initials(),
             'is_self' => $user->id === $viewerId,
+            'show_metrics' => $metrics !== null,
+            'conversion_rate' => $metrics['conversionRate'] ?? null,
+            'revenue' => $metrics['revenue'] ?? null,
             'children' => $children,
         ];
+    }
+
+    /**
+     * @param  Collection<int, User>  $users
+     * @return array<int, array{conversionRate: float, revenue: int}>
+     */
+    private function performanceMetricsByUser(Collection $users): array
+    {
+        $performanceUserIds = $users
+            ->filter(fn (User $user) => in_array($user->role, [UserRole::Sales, UserRole::Marketing], true))
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        if ($performanceUserIds === []) {
+            return [];
+        }
+
+        $since = now()->subDays(30)->startOfDay();
+        $orders = Order::query()
+            ->where('created_at', '>=', $since)
+            ->where(function ($query) use ($performanceUserIds) {
+                $query->whereIn('sale_user_id', $performanceUserIds)
+                    ->orWhereIn('marketer_user_id', $performanceUserIds);
+            })
+            ->get(['id', 'sale_user_id', 'marketer_user_id', 'closed_at', 'total', 'subtotal', 'discount', 'contact_count']);
+
+        $metrics = [];
+
+        foreach ($performanceUserIds as $userId) {
+            $user = $users->firstWhere('id', $userId);
+            if (! $user) {
+                continue;
+            }
+
+            $userOrders = $orders->filter(function (Order $order) use ($user) {
+                return $user->role === UserRole::Sales
+                    ? (int) $order->sale_user_id === $user->id
+                    : (int) $order->marketer_user_id === $user->id;
+            });
+
+            $contacts = max($userOrders->count(), 1);
+            $closed = $userOrders->whereNotNull('closed_at')->count();
+            $revenue = (int) $userOrders
+                ->whereNotNull('closed_at')
+                ->sum(fn (Order $order) => $order->effectiveRevenue());
+
+            $metrics[$userId] = [
+                'conversionRate' => round($closed / $contacts * 100, 1),
+                'revenue' => $revenue,
+            ];
+        }
+
+        return $metrics;
     }
 
     /** @return list<array{value: string, label: string}> */

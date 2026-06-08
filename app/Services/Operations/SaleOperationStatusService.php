@@ -7,6 +7,7 @@ use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Orders\OrderClosingService;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -15,6 +16,7 @@ class SaleOperationStatusService
 {
     public function __construct(
         private readonly OrderClosingService $closing,
+        private readonly InventoryDeductionService $inventory,
     ) {}
 
     public function logCall(Order $order, User $actor): Order
@@ -69,8 +71,12 @@ class SaleOperationStatusService
         }
 
         if ($result === OperationResult::ClosedSuccess) {
+            $confirm = (bool) ($payload['confirm_insufficient_stock'] ?? false);
+            $this->inventory->assertCanClose($order, $confirm);
+
             return $this->closing->close($order, $actor, [
                 'operation_result' => $result->value,
+                'confirm_insufficient_stock' => $confirm,
             ]);
         }
 

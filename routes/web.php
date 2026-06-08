@@ -9,7 +9,10 @@ use App\Http\Controllers\Admin\IntegrationsController;
 use App\Http\Controllers\Admin\LandingApprovalController;
 use App\Http\Controllers\Admin\LeadIngestionController;
 use App\Http\Controllers\Admin\LeadsLogController;
+use App\Http\Controllers\Admin\ManualLeadAllocationController;
+use App\Http\Controllers\Admin\Marketing\CampaignBudgetController;
 use App\Http\Controllers\Admin\Marketing\CampaignController;
+use App\Http\Controllers\Admin\Marketing\CampaignReportController;
 use App\Http\Controllers\Admin\Marketing\DashboardController as MarketingDashboardController;
 use App\Http\Controllers\Admin\Marketing\RevenueReportController as MarketingRevenueReportController;
 use App\Http\Controllers\Admin\OrderController;
@@ -17,6 +20,7 @@ use App\Http\Controllers\Admin\Orders\FailedOrdersController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RankingController;
 use App\Http\Controllers\Admin\Reports\CeoReportController;
+use App\Http\Controllers\Admin\Sales\PerformanceReportController as AdminSalesPerformanceReportController;
 use App\Http\Controllers\Admin\Sales\RevenueReportController as SaleRevenueReportController;
 use App\Http\Controllers\Admin\ShippingOrderController;
 use App\Http\Controllers\Admin\ShippingPartnersController;
@@ -25,11 +29,13 @@ use App\Http\Controllers\Admin\ShippingReconciliationController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\Warehouse\InventoryController;
+use App\Http\Controllers\Admin\Warehouse\InventoryIntakeController;
 use App\Http\Controllers\Admin\Warehouse\OperationsController as WarehouseOperationsController;
 use App\Http\Controllers\Admin\Warehouse\WarehouseController;
 use App\Http\Controllers\Admin\WarehouseInventoryController;
 use App\Http\Controllers\Allocator\DashboardController as AllocatorDashboardController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Marketing\CampaignReportController as MarketingCampaignReportController;
 use App\Http\Controllers\Marketing\DashboardController as RoleMarketingDashboardController;
 use App\Http\Controllers\Marketing\RankingController as MarketingRankingController;
 use App\Http\Controllers\NotificationController;
@@ -39,6 +45,7 @@ use App\Http\Controllers\Sales\CustomerProfileController;
 use App\Http\Controllers\Sales\DashboardController as SalesDashboardController;
 use App\Http\Controllers\Sales\OperationController;
 use App\Http\Controllers\Sales\OrderClosingController;
+use App\Http\Controllers\Sales\PerformanceReportController as SalesPerformanceReportController;
 use App\Http\Controllers\Sales\RankingController as SalesRankingController;
 use App\Http\Controllers\Sales\SaleOperationCallController;
 use App\Http\Controllers\Sales\SaleOperationStatusController;
@@ -89,10 +96,14 @@ Route::middleware('auth')->group(function () {
         Route::get('landing-approvals', [LandingApprovalController::class, 'index'])->name('landing-approvals.index');
         Route::post('landing-approvals/{campaign}/approve', [LandingApprovalController::class, 'approve'])->name('landing-approvals.approve');
         Route::get('marketing/revenue', MarketingRevenueReportController::class)->name('marketing.revenue');
+        Route::get('marketing/campaign-report', CampaignReportController::class)->name('marketing.campaign-report');
+        Route::patch('marketing/campaigns/{campaign}/budget', [CampaignBudgetController::class, 'update'])->name('marketing.campaigns.budget');
         Route::get('sales/revenue', SaleRevenueReportController::class)->name('sales.revenue');
+        Route::get('sales/performance', AdminSalesPerformanceReportController::class)->name('sales.performance');
         Route::get('accounting', AccountingOperationsController::class)->name('accounting');
         Route::get('warehouse/operations', WarehouseOperationsController::class)->name('warehouse.operations');
         Route::get('warehouse/inventory', InventoryController::class)->name('warehouse.inventory');
+        Route::post('warehouse/inventory/intake', [InventoryIntakeController::class, 'store'])->name('warehouse.inventory.intake');
         Route::get('warehouses', [WarehouseController::class, 'index'])->name('warehouses.index');
         Route::get('warehouses/create', [WarehouseController::class, 'create'])->name('warehouses.create');
         Route::post('warehouses', [WarehouseController::class, 'store'])->name('warehouses.store');
@@ -113,6 +124,7 @@ Route::middleware('auth')->group(function () {
         Route::put('integrations/{platform}', [IntegrationsController::class, 'update'])->name('integrations.update');
         Route::post('integrations/{platform}/test', [IntegrationsController::class, 'testWebhook'])->name('integrations.test');
         Route::get('leads', LeadsLogController::class)->name('leads.index');
+        Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
         Route::get('shipping-partners', [ShippingPartnersController::class, 'index'])->name('shipping-partners.index');
         Route::put('shipping-partners/{provider}', [ShippingPartnersController::class, 'update'])->name('shipping-partners.update');
         Route::get('shipping/reconciliation', ShippingReconciliationController::class)->name('shipping.reconciliation');
@@ -129,6 +141,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:'.User::ROLE_SALES)->prefix('sales')->name('sales.')->group(function () {
         Route::get('dashboard', SalesDashboardController::class)->name('dashboard');
         Route::get('rankings', SalesRankingController::class)->name('rankings');
+        Route::get('performance', SalesPerformanceReportController::class)->name('performance');
         Route::get('workspace', OperationController::class)->name('workspace');
         Route::post('orders/{order}/call', [SaleOperationCallController::class, 'store'])->name('orders.call');
         Route::post('orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('orders.operation-status');
@@ -147,12 +160,15 @@ Route::middleware('auth')->group(function () {
         Route::put('campaigns/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
         Route::delete('campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
         Route::get('revenue', MarketingRevenueReportController::class)->name('revenue');
+        Route::get('campaign-report', MarketingCampaignReportController::class)->name('campaign-report');
+        Route::patch('campaigns/{campaign}/budget', [CampaignBudgetController::class, 'update'])->name('campaigns.budget');
     });
 
     Route::middleware('role:'.User::ROLE_WAREHOUSE)->prefix('warehouse')->name('warehouse.')->group(function () {
         Route::get('dashboard', WarehouseDashboardController::class)->name('dashboard');
         Route::get('workspace', WarehouseOperationsController::class)->name('workspace');
         Route::get('inventory', InventoryController::class)->name('inventory');
+        Route::post('inventory/intake', [InventoryIntakeController::class, 'store'])->name('inventory.intake');
         Route::get('shipping/orders', [App\Http\Controllers\Warehouse\ShippingOrderController::class, 'index'])->name('shipping.orders');
         Route::get('shipping/orders/{order}/detail', [ShippingOrderController::class, 'detail'])->name('shipping.orders.detail');
         Route::post('shipping/orders/{order}/create-shipment', [ShippingOrderController::class, 'createShipment'])->name('shipping.orders.create-shipment');
@@ -170,5 +186,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:'.User::ROLE_ALLOCATOR)->prefix('allocator')->name('allocator.')->group(function () {
         Route::get('dashboard', AllocatorDashboardController::class)->name('dashboard');
         Route::get('workspace', LeadsLogController::class)->name('workspace');
+        Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
     });
 });

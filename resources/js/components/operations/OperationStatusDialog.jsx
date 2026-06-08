@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatNumber } from '@/lib/format';
 
 const QUICK_NO_ANSWER = {
     value: 'no_answer_auto',
@@ -21,12 +22,34 @@ const QUICK_NO_ANSWER = {
     group: 'Gọi không nghe máy',
 };
 
+function StockWarningBlock({ warnings = [] }) {
+    const insufficient = warnings.filter((w) => !w.sufficient);
+
+    if (!insufficient.length) {
+        return null;
+    }
+
+    return (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            <p className="font-semibold">Hàng trong kho không đủ</p>
+            <ul className="mt-2 list-inside list-disc text-xs">
+                {insufficient.map((w) => (
+                    <li key={w.productId}>
+                        {w.productName}: cần {formatNumber(w.required)}, tồn {formatNumber(w.available)}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
 export function OperationStatusDialog({ order, options = [] }) {
     const [open, setOpen] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [result, setResult] = useState('');
     const [nextAt, setNextAt] = useState('');
     const [note, setNote] = useState('');
+    const [confirmInsufficient, setConfirmInsufficient] = useState(false);
 
     const groupedOptions = useMemo(() => {
         const all = [QUICK_NO_ANSWER, ...options];
@@ -45,6 +68,8 @@ export function OperationStatusDialog({ order, options = [] }) {
     }
 
     const needsSchedule = result === 'callback_scheduled';
+    const isClosing = result === 'closed_success';
+    const showStockWarning = isClosing && order.hasInsufficientStock;
 
     const submit = () => {
         if (!result) {
@@ -57,6 +82,11 @@ export function OperationStatusDialog({ order, options = [] }) {
             return;
         }
 
+        if (isClosing && order.hasInsufficientStock && !confirmInsufficient) {
+            setConfirmInsufficient(true);
+            return;
+        }
+
         setProcessing(true);
         router.post(
             `/sales/orders/${order.id}/operation-status`,
@@ -64,6 +94,7 @@ export function OperationStatusDialog({ order, options = [] }) {
                 operation_result: result,
                 next_operation_at: needsSchedule ? nextAt : null,
                 note: note || null,
+                confirm_insufficient_stock: confirmInsufficient,
             },
             {
                 preserveScroll: true,
@@ -72,9 +103,16 @@ export function OperationStatusDialog({ order, options = [] }) {
                     setResult('');
                     setNextAt('');
                     setNote('');
+                    setConfirmInsufficient(false);
                     toast.success('Đã cập nhật trạng thái.');
                 },
                 onError: (errors) => {
+                    if (errors.insufficient_stock || errors.stock) {
+                        setConfirmInsufficient(true);
+                        toast.error('Hàng trong kho không đủ — xác nhận để tiếp tục.');
+                        return;
+                    }
+
                     const message =
                         errors.operation_result ??
                         errors.next_operation_at ??
@@ -83,7 +121,7 @@ export function OperationStatusDialog({ order, options = [] }) {
                     toast.error(message);
                 },
                 onFinish: () => setProcessing(false),
-            }
+            },
         );
     };
 
@@ -93,7 +131,15 @@ export function OperationStatusDialog({ order, options = [] }) {
                 <RefreshCw className="size-3.5" />
                 Chuyển trạng thái
             </Button>
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog
+                open={open}
+                onOpenChange={(value) => {
+                    setOpen(value);
+                    if (!value) {
+                        setConfirmInsufficient(false);
+                    }
+                }}
+            >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle>Chuyển trạng thái — {order.orderCode}</DialogTitle>
@@ -109,7 +155,10 @@ export function OperationStatusDialog({ order, options = [] }) {
                                 id={`status-${order.id}`}
                                 className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 value={result}
-                                onChange={(e) => setResult(e.target.value)}
+                                onChange={(e) => {
+                                    setResult(e.target.value);
+                                    setConfirmInsufficient(false);
+                                }}
                             >
                                 <option value="">— Chọn kết quả —</option>
                                 {Object.entries(groupedOptions).map(([group, items]) => (
@@ -123,6 +172,10 @@ export function OperationStatusDialog({ order, options = [] }) {
                                 ))}
                             </select>
                         </div>
+
+                        {(showStockWarning || (confirmInsufficient && isClosing)) && (
+                            <StockWarningBlock warnings={order.stockWarnings} />
+                        )}
 
                         {needsSchedule && (
                             <div className="space-y-2">
@@ -151,9 +204,18 @@ export function OperationStatusDialog({ order, options = [] }) {
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                             Huỷ
                         </Button>
-                        <Button type="button" onClick={submit} disabled={processing}>
+                        <Button
+                            type="button"
+                            variant={showStockWarning && confirmInsufficient ? 'destructive' : 'default'}
+                            onClick={submit}
+                            disabled={processing}
+                        >
                             {processing && <Loader2 className="mr-1 size-4 animate-spin" />}
-                            Lưu trạng thái
+                            {showStockWarning && !confirmInsufficient
+                                ? 'Tiếp tục'
+                                : showStockWarning && confirmInsufficient
+                                  ? 'Vẫn chốt (thiếu hàng)'
+                                  : 'Lưu trạng thái'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

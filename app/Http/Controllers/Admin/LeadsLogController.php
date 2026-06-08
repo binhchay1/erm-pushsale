@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\LeadIngestionStatus;
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\LeadIngestion;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -48,6 +50,22 @@ class LeadsLogController extends Controller
             'statuses' => collect(LeadIngestionStatus::cases())
                 ->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()])
                 ->all(),
+            'salesUsers' => User::query()
+                ->where('role', UserRole::Sales)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (User $u) => ['id' => (string) $u->id, 'name' => $u->name])
+                ->all(),
+            'allocateUrl' => $request->is('allocator/*')
+                ? '/allocator/leads/allocate'
+                : '/admin/leads/allocate',
+            'deleteUrlPrefix' => $request->is('allocator/*')
+                ? '/allocator/leads'
+                : '/admin/leads',
+            'listUrl' => $request->is('allocator/*')
+                ? '/allocator/workspace'
+                : '/admin/leads',
+            'canDelete' => ! $request->is('allocator/*'),
         ]);
     }
 }

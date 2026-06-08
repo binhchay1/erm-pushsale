@@ -6,7 +6,7 @@ use App\Integrations\Landing\LandingFormDriver;
 
 /**
  * Cấu hình tích hợp nền tảng — giá trị nhạy cảm đặt trong .env hoặc lưu DB (admin).
- * Chi tiết: docs/INTEGRATIONS.md
+ * Chi tiết: docs/API_AND_ROUTES.md § Tích hợp nền tảng
  */
 return [
 

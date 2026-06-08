@@ -24,6 +24,7 @@ class OrderClosingController extends Controller
             'shipping_method' => ['nullable', 'string', 'max:40'],
             'shipping_provider' => ['nullable', 'string', 'in:ghtk,ghn,viettel_post,jnt'],
             'amount_to_collect' => ['nullable', 'integer', 'min:0'],
+            'confirm_insufficient_stock' => ['nullable', 'boolean'],
         ]);
 
         $service->close($order, $request->user(), $validated);
