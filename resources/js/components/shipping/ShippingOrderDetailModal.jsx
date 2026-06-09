@@ -69,22 +69,7 @@ function TrackingTimeline({ events }) {
     );
 }
 
-// ─── Fee / action result ───────────────────────────────────────────────────────
-
-function ActionResult({ title, data }) {
-    if (!data) return null;
-
-    return (
-        <div className="rounded-lg border bg-muted/30 p-3 text-xs">
-            <p className="mb-2 font-semibold">{title}</p>
-            <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all text-muted-foreground">
-                {JSON.stringify(data, null, 2)}
-            </pre>
-        </div>
-    );
-}
-
-// ─── Main modal ───────────────────────────────────────────────────────────────
+import { ShippingFeeResult } from '@/components/shipping/ShippingFeeResult';
 
 export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase }) {
     const [loading, setLoading] = useState(false);
@@ -376,7 +361,7 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                         </div>
 
                         {/* Fee result */}
-                        <ActionResult title="Kết quả tính phí" data={feeResult} />
+                        <ShippingFeeResult display={feeResult?.display} />
 
                         {/* Tracking timeline */}
                         {tracking.length > 0 && <TrackingTimeline events={tracking} />}

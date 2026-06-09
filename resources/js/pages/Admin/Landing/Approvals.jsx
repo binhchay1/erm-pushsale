@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { useConfirm } from '@/hooks/use-confirm';
 import { copyToClipboard } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
@@ -95,9 +96,9 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                                         <Td>{row.created_at}</Td>
                                         <Td>
                                             {row.is_approved ? (
-                                                <span className="text-emerald-600">Đã duyệt</span>
+                                                <StatusBadge tone="success">Đã duyệt</StatusBadge>
                                             ) : (
-                                                <span className="font-medium text-amber-600">Chờ duyệt</span>
+                                                <StatusBadge tone="warning">Chờ duyệt</StatusBadge>
                                             )}
                                         </Td>
                                         <Td>

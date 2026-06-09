@@ -9,13 +9,7 @@ import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { cn } from '@/lib/utils';
 import { formatNumber } from '@/lib/format';
-
-const MOVEMENT_TONES = {
-    intake: 'success',
-    export: 'warning',
-    deduction: 'info',
-    return: 'muted',
-};
+import { movementTone } from '@/lib/status-tones';
 
 export default function MovementHistory({ rows, filters, warehouses, products, types }) {
     const data = rows?.data ?? [];
@@ -135,7 +129,7 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
                                     <tr key={m.id}>
                                         <Td>{m.createdAt}</Td>
                                         <Td>
-                                            <StatusBadge tone={MOVEMENT_TONES[m.type] ?? 'muted'}>
+                                            <StatusBadge tone={movementTone(m.type)}>
                                                 {m.typeLabel}
                                             </StatusBadge>
                                         </Td>

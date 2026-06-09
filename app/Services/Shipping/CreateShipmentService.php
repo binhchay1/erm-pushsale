@@ -13,6 +13,7 @@ class CreateShipmentService
     public function __construct(
         private readonly CarrierRegistry $registry,
         private readonly InventoryDeductionService $inventory,
+        private readonly ShippingFeePresenter $feePresenter,
     ) {}
 
     public function createForOrder(Order $order, ?string $provider = null): Shipment
@@ -43,8 +44,11 @@ class CreateShipmentService
     public function calculateFee(Order $order, ?string $provider = null): array
     {
         $carrier = $this->carrierForOrder($order, $provider);
+        $raw = $carrier->calculateFee($order->loadMissing(['items', 'warehouse']));
 
-        return $carrier->calculateFee($order->loadMissing(['items', 'warehouse']));
+        return array_merge($raw, [
+            'display' => $this->feePresenter->present($raw),
+        ]);
     }
 
     public function cancel(Order $order, ?string $provider = null): Shipment
