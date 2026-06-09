@@ -48,7 +48,7 @@ export default function AppLayout({ children }) {
         <SidebarProvider>
             <TooltipProvider>
                 <AppSidebar />
-                <main className="relative flex min-h-svh min-w-0 w-full flex-1 flex-col overflow-x-hidden bg-muted/30">
+                <main className="relative flex min-h-svh min-w-0 w-full flex-1 flex-col overflow-x-hidden bg-background">
                     <AppHeader />
                     <div className="min-w-0 flex-1 overflow-x-hidden p-4 md:p-6">
                         {shouldShowDashboardSkeleton ? (

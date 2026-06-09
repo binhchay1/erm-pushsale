@@ -80,7 +80,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                                 <Label htmlFor="role">Vai trò</Label>
                                 <select
                                     id="role"
-                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                                    className="input-soft flex h-9 w-full px-3"
                                     value={data.role}
                                     onChange={(e) => setData('role', e.target.value)}
                                 >
@@ -117,7 +117,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                                     <Label htmlFor="team_id">Phòng ban</Label>
                                     <select
                                         id="team_id"
-                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                                        className="input-soft flex h-9 w-full px-3"
                                         value={data.team_id}
                                         onChange={(e) => setData('team_id', e.target.value || '')}
                                     >
@@ -133,7 +133,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                                     <Label htmlFor="manager_user_id">Quản lý trực tiếp</Label>
                                     <select
                                         id="manager_user_id"
-                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                                        className="input-soft flex h-9 w-full px-3"
                                         value={data.manager_user_id}
                                         onChange={(e) => setData('manager_user_id', e.target.value || '')}
                                     >
@@ -151,7 +151,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                                 <Label htmlFor="org_level">Cấp trong phòng ban</Label>
                                 <select
                                     id="org_level"
-                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                                    className="input-soft flex h-9 w-full px-3"
                                     value={data.org_level}
                                     onChange={(e) => setData('org_level', e.target.value || '')}
                                 >

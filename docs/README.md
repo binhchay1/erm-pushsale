@@ -22,14 +22,29 @@ composer run dev
 
 **Tài khoản demo** (mật khẩu `password`):
 
-| Role | Email |
-|------|-------|
-| Admin | `admin@saleops.local` |
-| Telesale | `sales@saleops.local` |
-| Marketing | `marketing@saleops.local` |
-| Kho | `warehouse@saleops.local` |
-| Chia số | `allocator@saleops.local` |
-| Kế toán | `accounting@saleops.local` |
+| Role | Email | Vị trí |
+|------|-------|--------|
+| Admin | `admin@saleops.local` | Quản trị hệ thống |
+| Telesale | `sales@saleops.local` | Nhân viên — Nhóm Sale A |
+| Telesale | `head.sale@saleops.local` | Trưởng bộ phận Telesale |
+| Telesale | `leader.sale.a@saleops.local` / `leader.sale.b@saleops.local` | Trưởng nhóm Sale A / B |
+| Marketing | `marketing@saleops.local` | Nhân viên — Nhóm Marketing A |
+| Marketing | `head.marketing@saleops.local` | Trưởng bộ phận Marketing |
+| Marketing | `leader.marketing.a@saleops.local` / `leader.marketing.b@saleops.local` | Trưởng nhóm Marketing A / B |
+| Kho | `warehouse@saleops.local` | Nhân viên kho |
+| Kho | `head.warehouse@saleops.local` | Trưởng kho — ký duyệt nhập/xuất |
+| Chia số | `allocator@saleops.local` | Trưởng bộ phận Chia số |
+| Kế toán | `accounting@saleops.local` | Trưởng bộ phận Kế toán |
+
+> Chi tiết cơ cấu & quyền của từng tài khoản: docblock `database/seeders/AccountSeeder.php`.
+
+## Làm mới dữ liệu demo (kể cả trên production / AWS)
+
+```bash
+php artisan migrate --force && php artisan db:seed --force
+```
+
+`db:seed` luôn **xóa sạch dữ liệu nghiệp vụ + tài khoản cũ rồi seed lại từ đầu** (`DemoResetSeeder`), giữ nguyên cấu hình kết nối nền tảng & hãng vận chuyển. Dữ liệu sinh ra deterministic — seed bao nhiêu lần cũng cho cùng một bộ số liệu đồng bộ: tồn kho khớp lịch sử nhập xuất, lead khớp đơn hàng, doanh số khớp báo cáo.
 
 ## Liên kết chéo
 

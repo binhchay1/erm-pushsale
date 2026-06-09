@@ -6,15 +6,22 @@ import { toast } from 'sonner';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/hooks/use-confirm';
 import { copyToClipboard } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
 import AppLayout from '@/layouts/AppLayout';
 
 export default function LandingApprovals({ campaigns, highlightCampaignId }) {
     const rowRefs = useRef({});
+    const { ask, ConfirmDialogPortal } = useConfirm();
 
-    const approve = (id, name) => {
-        if (!window.confirm(`Duyệt nguồn Landing "${name}"? Lead mới sẽ được chia số cho Sale.`)) return;
+    const approve = async (id, name) => {
+        const ok = await ask({
+            title: 'Duyệt trang Landing',
+            description: `Duyệt nguồn Landing "${name}"? Lead mới sẽ được chia số cho Sale.`,
+            confirmLabel: 'Duyệt',
+        });
+        if (!ok) return;
         router.post(`/admin/landing-approvals/${id}/approve`, {}, { preserveScroll: true });
     };
 
@@ -35,15 +42,16 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
 
     return (
         <AppLayout>
-            <Head title="Duyệt kết nối Landing" />
+            <Head title="Duyệt trang Landing" />
 
             <div className="space-y-6">
                 <PageHeader
-                    title="Duyệt kết nối Landing"
+                    title="Duyệt trang Landing"
                     description={
                         <>
-                            Marketing tạo nguồn trên Ladipage → copy URL API. <strong>Chưa duyệt</strong> thì lead
-                            test chỉ về Admin, <strong>không chia số Sale</strong> ({pending.length} chờ duyệt).
+                            Marketing tạo kết nối Landing và chờ duyệt tại đây. <strong>Chưa duyệt</strong>{' '}
+                            thì lead thử chỉ về Admin, <strong>chưa chia cho Sale</strong> ({pending.length}{' '}
+                            chờ duyệt).
                             {highlightCampaignId && (
                                 <span className="mt-1 block text-primary">
                                     Đang hiển thị chiến dịch cần xét duyệt từ thông báo.
@@ -131,6 +139,8 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                     </table>
                 </ScrollDataTable>
             </div>
+
+            <ConfirmDialogPortal />
         </AppLayout>
     );
 }

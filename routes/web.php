@@ -29,7 +29,8 @@ use App\Http\Controllers\Admin\ShippingReconciliationController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\Warehouse\InventoryController;
-use App\Http\Controllers\Admin\Warehouse\InventoryIntakeController;
+use App\Http\Controllers\Admin\Warehouse\InventoryMovementController;
+use App\Http\Controllers\Admin\Warehouse\MovementHistoryController;
 use App\Http\Controllers\Admin\Warehouse\OperationsController as WarehouseOperationsController;
 use App\Http\Controllers\Admin\Warehouse\WarehouseController;
 use App\Http\Controllers\Admin\WarehouseInventoryController;
@@ -51,6 +52,7 @@ use App\Http\Controllers\Sales\SaleOperationCallController;
 use App\Http\Controllers\Sales\SaleOperationStatusController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Warehouse\DashboardController as WarehouseDashboardController;
+use App\Http\Controllers\Warehouse\OrderReturnController;
 use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -103,7 +105,9 @@ Route::middleware('auth')->group(function () {
         Route::get('accounting', AccountingOperationsController::class)->name('accounting');
         Route::get('warehouse/operations', WarehouseOperationsController::class)->name('warehouse.operations');
         Route::get('warehouse/inventory', InventoryController::class)->name('warehouse.inventory');
-        Route::post('warehouse/inventory/intake', [InventoryIntakeController::class, 'store'])->name('warehouse.inventory.intake');
+        Route::post('warehouse/inventory/intake', [InventoryMovementController::class, 'intake'])->name('warehouse.inventory.intake');
+        Route::post('warehouse/inventory/export', [InventoryMovementController::class, 'export'])->name('warehouse.inventory.export');
+        Route::get('warehouse/movements', MovementHistoryController::class)->name('warehouse.movements');
         Route::get('warehouses', [WarehouseController::class, 'index'])->name('warehouses.index');
         Route::get('warehouses/create', [WarehouseController::class, 'create'])->name('warehouses.create');
         Route::post('warehouses', [WarehouseController::class, 'store'])->name('warehouses.store');
@@ -135,6 +139,7 @@ Route::middleware('auth')->group(function () {
         Route::post('shipping/orders/{order}/calculate-fee', [ShippingOrderController::class, 'calculateFee'])->name('shipping.orders.calculate-fee');
         Route::post('shipping/orders/{order}/cancel-shipment', [ShippingOrderController::class, 'cancelShipment'])->name('shipping.orders.cancel-shipment');
         Route::get('shipping/orders/{order}/label', [ShippingOrderController::class, 'printLabel'])->name('shipping.orders.label');
+        Route::post('shipping/orders/{order}/receive-return', [OrderReturnController::class, 'store'])->name('shipping.orders.receive-return');
         Route::post('shipping-partners/{provider}/test/{action}', ShippingPartnerTestController::class)->name('shipping-partners.test');
     });
 
@@ -168,7 +173,8 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', WarehouseDashboardController::class)->name('dashboard');
         Route::get('workspace', WarehouseOperationsController::class)->name('workspace');
         Route::get('inventory', InventoryController::class)->name('inventory');
-        Route::post('inventory/intake', [InventoryIntakeController::class, 'store'])->name('inventory.intake');
+        Route::post('inventory/intake', [InventoryMovementController::class, 'intake'])->name('inventory.intake');
+        Route::post('inventory/export', [InventoryMovementController::class, 'export'])->name('inventory.export');
         Route::get('shipping/orders', [App\Http\Controllers\Warehouse\ShippingOrderController::class, 'index'])->name('shipping.orders');
         Route::get('shipping/orders/{order}/detail', [ShippingOrderController::class, 'detail'])->name('shipping.orders.detail');
         Route::post('shipping/orders/{order}/create-shipment', [ShippingOrderController::class, 'createShipment'])->name('shipping.orders.create-shipment');
@@ -176,6 +182,7 @@ Route::middleware('auth')->group(function () {
         Route::post('shipping/orders/{order}/calculate-fee', [ShippingOrderController::class, 'calculateFee'])->name('shipping.orders.calculate-fee');
         Route::post('shipping/orders/{order}/cancel-shipment', [ShippingOrderController::class, 'cancelShipment'])->name('shipping.orders.cancel-shipment');
         Route::get('shipping/orders/{order}/label', [ShippingOrderController::class, 'printLabel'])->name('shipping.orders.label');
+        Route::post('shipping/orders/{order}/receive-return', [OrderReturnController::class, 'store'])->name('shipping.orders.receive-return');
     });
 
     Route::middleware('role:'.User::ROLE_ACCOUNTING)->prefix('accounting')->name('accounting.')->group(function () {

@@ -2,54 +2,43 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\DeliveryStatus;
 use App\Http\Controllers\Controller;
-use App\Models\LeadIngestion;
-use App\Models\Order;
-use App\Models\ShippingWebhookEvent;
+use App\Repositories\LeadIngestionRepository;
+use App\Repositories\OrderRepository;
+use App\Repositories\ShippingWebhookEventRepository;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BusinessOverviewController extends Controller
 {
-    public function __invoke(): Response
-    {
+    public function __invoke(
+        OrderRepository $orderStats,
+        LeadIngestionRepository $leads,
+        ShippingWebhookEventRepository $shippingEvents,
+    ): Response {
         $days = collect(range(6, 0))->map(function (int $offset) {
             return Carbon::today()->subDays($offset);
         });
 
-        $ordersByDay = $days->map(function (Carbon $day) {
-            return [
-                'label' => $day->format('d/m'),
-                'value' => Order::query()->whereDate('created_at', $day)->count(),
-            ];
-        })->values();
+        $ordersByDay = $days->map(fn (Carbon $day) => [
+            'label' => $day->format('d/m'),
+            'value' => $orderStats->countOnDay($day),
+        ])->values();
 
-        $revenueByDay = $days->map(function (Carbon $day) {
-            return [
-                'label' => $day->format('d/m'),
-                'value' => (int) Order::query()
-                    ->whereDate('created_at', $day)
-                    ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
-                    ->sum('total'),
-            ];
-        })->values();
+        $revenueByDay = $days->map(fn (Carbon $day) => [
+            'label' => $day->format('d/m'),
+            'value' => $orderStats->revenueOnDay($day),
+        ])->values();
 
-        $leadSources = LeadIngestion::query()
-            ->whereDate('created_at', today())
-            ->selectRaw('platform as name, count(*) as value')
-            ->groupBy('platform')
-            ->orderByDesc('value')
-            ->limit(4)
-            ->get();
+        $leadSources = $leads->todaySourceBreakdown();
 
         return Inertia::render('Admin/Reports/BusinessOverview', [
             'summary' => [
-                'orders_total' => Order::query()->count(),
-                'orders_delivered' => Order::query()->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count(),
-                'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
-                'shipping_mismatch' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(),
+                'orders_total' => $orderStats->total(),
+                'orders_delivered' => $orderStats->deliveredTotal(),
+                'leads_today' => $leads->countToday(),
+                'shipping_mismatch' => $shippingEvents->codMismatchTotal(),
             ],
             'charts' => [
                 'orders_by_day' => $ordersByDay,

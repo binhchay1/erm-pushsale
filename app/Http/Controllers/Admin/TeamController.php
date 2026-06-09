@@ -6,7 +6,8 @@ use App\Enums\TeamType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\TeamRequest;
 use App\Models\Team;
-use App\Models\User;
+use App\Repositories\TeamRepository;
+use App\Repositories\UserRepository;
 use App\Services\OrgStructureService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,8 @@ class TeamController extends Controller
 {
     public function __construct(
         private readonly OrgStructureService $orgStructure,
+        private readonly TeamRepository $teams,
+        private readonly UserRepository $users,
     ) {}
 
     public function index(): Response
@@ -103,7 +106,7 @@ class TeamController extends Controller
             if ($cursorId === $team->id) {
                 return true;
             }
-            $cursorId = Team::query()->whereKey($cursorId)->value('parent_id');
+            $cursorId = $this->teams->parentIdOf($cursorId);
         }
 
         return false;
@@ -121,30 +124,12 @@ class TeamController extends Controller
     /** @return list<array{id: int, name: string, depth: int}> */
     private function parentOptions(?int $excludeId = null): array
     {
-        $teams = Team::query()->orderBy('name')->get(['id', 'name', 'parent_id']);
-        $options = [];
-
-        $walk = function (?int $parentId, int $depth) use (&$walk, &$options, $teams, $excludeId): void {
-            foreach ($teams->where('parent_id', $parentId) as $team) {
-                if ($excludeId && $team->id === $excludeId) {
-                    continue;
-                }
-                $prefix = $depth > 0 ? str_repeat('— ', $depth) : '';
-                $options[] = ['id' => $team->id, 'name' => $prefix.$team->name, 'depth' => $depth];
-                $walk($team->id, $depth + 1);
-            }
-        };
-
-        $walk(null, 0);
-
-        return $options;
+        return $this->teams->indentedOptions($excludeId);
     }
 
     /** @return list<array{id: int, name: string}> */
     private function leaderOptions(): array
     {
-        return User::query()->orderBy('name')->get(['id', 'name'])
-            ->map(fn (User $u) => ['id' => $u->id, 'name' => $u->name])
-            ->all();
+        return $this->users->nameOptions();
     }
 }

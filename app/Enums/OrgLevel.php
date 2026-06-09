@@ -11,7 +11,7 @@ enum OrgLevel: string
     public function label(): string
     {
         return match ($this) {
-            self::Head => 'Trưởng ban / nhóm',
+            self::Head => 'Trưởng bộ phận',
             self::Supervisor => 'Giám sát',
             self::Staff => 'Nhân viên',
         };

@@ -20,7 +20,7 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
     };
 
     return (
-        <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="space-y-4 rounded-lg bg-card p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm font-semibold text-foreground">Bộ lọc xếp hạng</p>
                 <div className="inline-flex rounded-lg border bg-muted/30 p-0.5">
@@ -41,7 +41,7 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
                 </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 <div className="space-y-1">
                     <Label className="text-xs">Từ ngày chốt</Label>
                     <Input

@@ -5,20 +5,22 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Product;
-use App\Models\WarehouseInventory;
+use App\Repositories\ProductRepository;
+use App\Repositories\WarehouseRepository;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProductController extends Controller
 {
+    public function __construct(
+        private readonly ProductRepository $products,
+        private readonly WarehouseRepository $warehouses,
+    ) {}
+
     public function index(): Response
     {
-        $products = Product::query()
-            ->with('parent:id,name')
-            ->withCount('children')
-            ->orderBy('name')
-            ->get()
+        $products = $this->products->allWithParentAndVariantCount()
             ->map(fn (Product $p) => [
                 'id' => $p->id,
                 'name' => $p->name,
@@ -84,7 +86,7 @@ class ProductController extends Controller
             return back()->with('error', 'Sản phẩm còn biến thể con — xóa các biến thể trước.');
         }
 
-        WarehouseInventory::query()->where('product_id', $product->id)->delete();
+        $this->warehouses->deleteInventoriesOfProduct($product->id);
         $product->delete();
 
         return back()->with('success', 'Đã xóa sản phẩm.');
@@ -93,15 +95,6 @@ class ProductController extends Controller
     /** @return list<array{id: int, name: string}> */
     private function parentOptions(?int $excludeId = null): array
     {
-        return Product::query()
-            ->whereNull('parent_id')
-            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
-            ->orderBy('name')
-            ->get(['id', 'name', 'sku'])
-            ->map(fn (Product $p) => [
-                'id' => $p->id,
-                'name' => $p->sku ? $p->name.' ('.$p->sku.')' : $p->name,
-            ])
-            ->all();
+        return $this->products->parentOptionsWithSku($excludeId);
     }
 }

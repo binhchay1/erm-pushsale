@@ -4,16 +4,11 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
+import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
-
-const statusClass = {
-    processed: 'text-emerald-600',
-    pending: 'text-amber-600',
-    duplicate: 'text-orange-600',
-    failed: 'text-destructive',
-};
+import { leadTone } from '@/lib/status-tones';
 
 export default function LeadsIndex({
     leads,
@@ -79,14 +74,15 @@ export default function LeadsIndex({
 
     return (
         <AppLayout>
-            <Head title="Nhật ký lead" />
+                <Head title="Nhật ký lead về" />
 
             <div className="space-y-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Nhật ký thu lead</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Nhật ký lead về</h1>
                         <p className="text-sm text-muted-foreground">
-                            Webhook / API → phân số telesale · Chia số thủ công khi hệ thống chưa tự phân
+                            Khách để lại thông tin từ quảng cáo sẽ tự chia cho telesale — có thể chia tay
+                            khi cần
                         </p>
                     </div>
                     {canDelete && (
@@ -103,7 +99,7 @@ export default function LeadsIndex({
                     <div className="min-w-[200px] flex-1 space-y-1">
                         <p className="text-xs font-medium text-muted-foreground">Chia số thủ công</p>
                         <select
-                            className="h-9 w-full max-w-xs rounded-lg border bg-background px-2 text-sm"
+                            className="input-soft h-9 w-full max-w-xs px-2"
                             value={saleUserId}
                             onChange={(e) => setSaleUserId(e.target.value)}
                         >
@@ -126,7 +122,7 @@ export default function LeadsIndex({
 
                 <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">
                     <select
-                        className="h-8 rounded-lg border px-2 text-sm"
+                        className="input-soft h-8 px-2"
                         value={filters.platform ?? ''}
                         onChange={(e) => search({ platform: e.target.value || null })}
                     >
@@ -138,7 +134,7 @@ export default function LeadsIndex({
                         ))}
                     </select>
                     <select
-                        className="h-8 rounded-lg border px-2 text-sm"
+                        className="input-soft h-8 px-2"
                         value={filters.status ?? ''}
                         onChange={(e) => search({ status: e.target.value || null })}
                     >
@@ -197,8 +193,10 @@ export default function LeadsIndex({
                                         <Td className="font-medium">{row.platform}</Td>
                                         <Td>{row.customer_name ?? '—'}</Td>
                                         <Td className="font-mono">{row.customer_phone ?? '—'}</Td>
-                                        <Td className={statusClass[row.status] ?? ''}>
-                                            {row.status_label}
+                                        <Td>
+                                            <StatusBadge tone={leadTone(row.status)}>
+                                                {row.status_label}
+                                            </StatusBadge>
                                         </Td>
                                         <Td className="font-mono">{row.order_code ?? '—'}</Td>
                                         <Td className="max-w-xs truncate text-muted-foreground">
@@ -220,7 +218,7 @@ export default function LeadsIndex({
                                         colSpan={canDelete ? 10 : 9}
                                         className="py-8 text-center text-muted-foreground"
                                     >
-                                        Chưa có lead nào — bật webhook tại Tích hợp nền tảng
+                                        Chưa có lead nào — kiểm tra mục Kết nối nền tảng
                                     </Td>
                                 </tr>
                             )}

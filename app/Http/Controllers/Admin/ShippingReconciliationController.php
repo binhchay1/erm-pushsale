@@ -4,31 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ShippingWebhookEvent;
+use App\Repositories\ShippingWebhookEventRepository;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ShippingReconciliationController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(ShippingWebhookEventRepository $events): Response
     {
-        $today = now()->startOfDay();
-        $events = ShippingWebhookEvent::query();
+        $stats = $events->todayStats();
 
-        $stats = [
-            'callbacks_today' => (clone $events)->where('created_at', '>=', $today)->count(),
-            'matched_today' => (clone $events)->where('created_at', '>=', $today)->whereNotNull('order_id')->count(),
-            'unmatched_today' => (clone $events)->where('created_at', '>=', $today)->whereNull('order_id')->count(),
-            'cod_mismatch_today' => (clone $events)->where('created_at', '>=', $today)->where('is_cod_mismatch', true)->count(),
-        ];
-
-        $issues = ShippingWebhookEvent::query()
-            ->with('order:id,order_code,delivery_status,reconciliation_status')
-            ->where(function ($q) {
-                $q->whereNull('order_id')->orWhere('is_cod_mismatch', true);
-            })
-            ->latest()
-            ->limit(100)
-            ->get()
+        $issues = $events->latestIssues()
             ->map(fn (ShippingWebhookEvent $event) => [
                 'id' => $event->id,
                 'provider' => $event->provider,

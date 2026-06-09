@@ -1,5 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { Camera, Save, Trash2, Upload } from 'lucide-react';
+import { Camera, KeyRound, Save, Trash2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,17 +7,24 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useConfirm } from '@/hooks/use-confirm';
 import AppLayout from '@/layouts/AppLayout';
+
+function ReadOnlyField({ label, value }) {
+    return (
+        <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">{label}</p>
+            <p className="text-sm font-medium">{value || '—'}</p>
+        </div>
+    );
+}
 
 export default function ProfileIndex({ profile }) {
     const fileRef = useRef(null);
     const [preview, setPreview] = useState(null);
+    const { ask, ConfirmDialogPortal } = useConfirm();
 
-    const { data, setData, put, processing, errors, recentlySuccessful } = useForm({
-        name: profile.name ?? '',
-        email: profile.email ?? '',
-        phone: profile.phone ?? '',
-        job_title: profile.job_title ?? '',
+    const { data, setData, put, processing, errors, recentlySuccessful, reset } = useForm({
         password: '',
         password_confirmation: '',
     });
@@ -42,14 +49,23 @@ export default function ProfileIndex({ profile }) {
         );
     };
 
-    const removeAvatar = () => {
-        if (!window.confirm('Xóa ảnh đại diện?')) return;
+    const removeAvatar = async () => {
+        const ok = await ask({
+            title: 'Xóa ảnh đại diện',
+            description: 'Xóa ảnh đại diện hiện tại?',
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
+        if (!ok) return;
         router.delete('/profile/avatar', { preserveScroll: true });
     };
 
-    const submit = (e) => {
+    const submitPassword = (e) => {
         e.preventDefault();
-        put('/profile', { preserveScroll: true });
+        put('/profile', {
+            preserveScroll: true,
+            onSuccess: () => reset('password', 'password_confirmation'),
+        });
     };
 
     return (
@@ -60,7 +76,7 @@ export default function ProfileIndex({ profile }) {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Hồ sơ cá nhân</h1>
                     <p className="text-sm text-muted-foreground">
-                        Ảnh đại diện, thông tin liên hệ và mật khẩu
+                        Ảnh đại diện và đổi mật khẩu — thông tin cá nhân do quản trị viên quản lý
                     </p>
                 </div>
 
@@ -102,7 +118,7 @@ export default function ProfileIndex({ profile }) {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Thông tin</CardTitle>
+                        <CardTitle>Thông tin tài khoản</CardTitle>
                         <CardDescription>
                             {profile.role_label}
                             {profile.team_name ? ` · ${profile.team_name}` : ''}
@@ -110,92 +126,74 @@ export default function ProfileIndex({ profile }) {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={submit} className="space-y-4">
+                        <div className="grid gap-4 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2">
+                            <ReadOnlyField label="Họ tên" value={profile.name} />
+                            <ReadOnlyField label="Email" value={profile.email} />
+                            <ReadOnlyField label="Số điện thoại" value={profile.phone} />
+                            <ReadOnlyField label="Chức danh" value={profile.job_title} />
+                            {profile.manager_name && (
+                                <ReadOnlyField label="Người quản lý" value={profile.manager_name} />
+                            )}
+                        </div>
+                        <p className="mt-3 text-xs text-muted-foreground">
+                            Cần thay đổi họ tên, email hoặc phòng ban? Liên hệ quản trị viên hệ thống.
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <KeyRound className="size-4" />
+                            Đổi mật khẩu
+                        </CardTitle>
+                        <CardDescription>Nhập mật khẩu mới và xác nhận lại</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={submitPassword} className="space-y-4">
                             <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-2 sm:col-span-2">
-                                    <Label htmlFor="name">Họ tên</Label>
-                                    <Input
-                                        id="name"
-                                        value={data.name}
-                                        onChange={(e) => setData('name', e.target.value)}
-                                    />
-                                    {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
-                                </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
+                                    <Label htmlFor="password">Mật khẩu mới</Label>
                                     <Input
-                                        id="email"
-                                        type="email"
-                                        value={data.email}
-                                        onChange={(e) => setData('email', e.target.value)}
+                                        id="password"
+                                        type="password"
+                                        autoComplete="new-password"
+                                        value={data.password}
+                                        onChange={(e) => setData('password', e.target.value)}
                                     />
-                                    {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="phone">Số điện thoại</Label>
-                                    <Input
-                                        id="phone"
-                                        value={data.phone}
-                                        onChange={(e) => setData('phone', e.target.value)}
-                                    />
-                                    {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
-                                </div>
-                                <div className="space-y-2 sm:col-span-2">
-                                    <Label htmlFor="job_title">Chức danh</Label>
-                                    <Input
-                                        id="job_title"
-                                        value={data.job_title}
-                                        onChange={(e) => setData('job_title', e.target.value)}
-                                        placeholder="VD: Giám sát Marketing"
-                                    />
-                                    {errors.job_title && (
-                                        <p className="text-xs text-destructive">{errors.job_title}</p>
+                                    {errors.password && (
+                                        <p className="text-xs text-destructive">{errors.password}</p>
                                     )}
                                 </div>
-                            </div>
-
-                            <div className="rounded-lg border border-dashed p-4">
-                                <p className="mb-3 text-sm font-medium">Đổi mật khẩu (tùy chọn)</p>
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="password">Mật khẩu mới</Label>
-                                        <Input
-                                            id="password"
-                                            type="password"
-                                            value={data.password}
-                                            onChange={(e) => setData('password', e.target.value)}
-                                        />
-                                        {errors.password && (
-                                            <p className="text-xs text-destructive">{errors.password}</p>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="password_confirmation">Xác nhận</Label>
-                                        <Input
-                                            id="password_confirmation"
-                                            type="password"
-                                            value={data.password_confirmation}
-                                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                                        />
-                                    </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="password_confirmation">Xác nhận mật khẩu</Label>
+                                    <Input
+                                        id="password_confirmation"
+                                        type="password"
+                                        autoComplete="new-password"
+                                        value={data.password_confirmation}
+                                        onChange={(e) => setData('password_confirmation', e.target.value)}
+                                    />
                                 </div>
                             </div>
 
                             <div className="flex items-center justify-end gap-2">
                                 {recentlySuccessful && (
-                                    <span className="text-xs text-muted-foreground animate-in fade-in-0">
-                                        Đã lưu
+                                    <span className="text-xs text-emerald-600 animate-in fade-in-0">
+                                        Đã đổi mật khẩu
                                     </span>
                                 )}
                                 <Button type="submit" disabled={processing}>
                                     <Save className="size-4" />
-                                    {processing ? 'Đang lưu…' : 'Lưu thay đổi'}
+                                    {processing ? 'Đang lưu…' : 'Lưu mật khẩu'}
                                 </Button>
                             </div>
                         </form>
                     </CardContent>
                 </Card>
             </div>
+
+            <ConfirmDialogPortal />
         </AppLayout>
     );
 }

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\LoginRequest;
 use App\Http\Resources\V1\UserResource;
 use App\Http\Traits\ApiResponds;
-use App\Models\User;
+use App\Repositories\UserRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -16,9 +16,9 @@ class AuthController extends Controller
 {
     use ApiResponds;
 
-    public function token(LoginRequest $request): JsonResponse
+    public function token(LoginRequest $request, UserRepository $users): JsonResponse
     {
-        $user = User::query()->where('email', $request->validated('email'))->first();
+        $user = $users->findByEmail($request->validated('email'));
 
         if (! $user || ! Hash::check($request->validated('password'), $user->password)) {
             throw ValidationException::withMessages([

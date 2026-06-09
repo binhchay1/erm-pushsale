@@ -2,41 +2,70 @@
 
 namespace Database\Seeders;
 
-use App\Enums\UserRole;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Database\Seeder;
 
+/**
+ * Danh mục sản phẩm (cha + biến thể) và hệ thống kho.
+ * Admin là người duy nhất quản lý danh mục này trên giao diện.
+ */
 class CatalogSeeder extends Seeder
 {
     public function run(): void
     {
-        $warehouseUsers = User::query()->where('role', UserRole::Warehouse)->get();
-        $admin = User::query()->where('email', 'admin@saleops.local')->first();
-
-        Product::query()->firstOrCreate(['sku' => 'SP-PARENT-01'], [
-            'name' => 'Gối mây đan',
+        $goi = Product::query()->create([
+            'sku' => 'SP-GOI-01',
+            'name' => 'Gối mây đan cao cấp',
             'unit_price' => 299_000,
         ]);
 
-        Product::query()->firstOrCreate(['sku' => 'SP292627'], [
-            'parent_id' => Product::query()->where('sku', 'SP-PARENT-01')->value('id'),
-            'name' => 'Gối mây đan (SP292627)',
+        Product::query()->create([
+            'parent_id' => $goi->id,
+            'sku' => 'SP-GOI-01S',
+            'name' => 'Gối mây đan — size nhỏ',
             'unit_price' => 159_000,
         ]);
 
-        Product::query()->firstOrCreate(['sku' => 'CAM-MINI'], [
-            'name' => 'Camera mini NK',
+        Product::query()->create([
+            'sku' => 'SP-CAM-01',
+            'name' => 'Camera mini an ninh',
             'unit_price' => 890_000,
         ]);
 
-        Warehouse::query()->firstOrCreate(['code' => 'HB'], [
-            'name' => 'Kho Hòa Bình',
-            'phone' => '0988111222',
-            'address' => 'KCN Hòa Bình, Hà Nội',
-            'manager_user_id' => $warehouseUsers->first()?->id ?? $admin?->id,
-            'vtp_code' => 'VTP-HB-01',
+        Product::query()->create([
+            'sku' => 'SP-SRM-01',
+            'name' => 'Serum dưỡng da Vitamin C',
+            'unit_price' => 350_000,
         ]);
+
+        Product::query()->create([
+            'sku' => 'SP-BDC-01',
+            'name' => 'Bột diệt cỏ sinh học',
+            'unit_price' => 120_000,
+        ]);
+
+        $warehouseHead = User::query()->where('email', 'head.warehouse@saleops.local')->first();
+
+        Warehouse::query()->create([
+            'code' => 'HN',
+            'name' => 'Kho Hà Nội',
+            'phone' => '0988111222',
+            'address' => 'KCN Quang Minh, Mê Linh, Hà Nội',
+            'manager_user_id' => $warehouseHead?->id,
+            'vtp_code' => 'VTP-HN-01',
+        ]);
+
+        Warehouse::query()->create([
+            'code' => 'HCM',
+            'name' => 'Kho Hồ Chí Minh',
+            'phone' => '0988333444',
+            'address' => 'KCN Tân Bình, Q. Tân Phú, TP.HCM',
+            'manager_user_id' => $warehouseHead?->id,
+            'vtp_code' => 'VTP-HCM-01',
+        ]);
+
+        $this->command?->info('Đã tạo danh mục sản phẩm và 2 kho.');
     }
 }

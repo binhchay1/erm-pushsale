@@ -14,7 +14,6 @@ class ShippingPartnerConnection extends Model
         'credentials',
         'webhook_secret',
         'last_synced_at',
-        'metadata',
     ];
 
     protected function casts(): array
@@ -22,7 +21,6 @@ class ShippingPartnerConnection extends Model
         return [
             'is_enabled' => 'boolean',
             'last_synced_at' => 'datetime',
-            'metadata' => 'array',
         ];
     }
 

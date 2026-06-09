@@ -12,7 +12,7 @@ return [
         'brand' => [
             'label' => 'SaleOps Blue',
             'description' => 'Xanh chủ đạo — mặc định',
-            'primary' => 'oklch(0.488 0.243 264.376)',
+            'primary' => 'oklch(0.546 0.215 262.881)',
             'primary_foreground' => 'oklch(0.985 0 0)',
             'chart' => ['#3b82f6', '#60a5fa', '#93c5fd'],
         ],

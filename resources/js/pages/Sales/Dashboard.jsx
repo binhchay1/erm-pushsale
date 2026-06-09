@@ -23,7 +23,7 @@ function SalesDashboardContent({ stats: initialStats }) {
         {
             title: 'Đơn chốt hôm nay',
             value: formatNumber(stats.orders_today),
-            hint: 'Đơn đã chốt theo scope của bạn',
+            hint: 'Đơn bạn đã chốt thành công',
             icon: Target,
             accent: true,
         },

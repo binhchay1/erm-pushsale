@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Shipping\CreateShipmentService;
 use App\Services\Shipping\ShippingOrderService;
 use Illuminate\Http\JsonResponse;
@@ -47,6 +48,13 @@ class ShippingOrderController extends Controller
     public function createShipment(Request $request, Order $order, CreateShipmentService $service): JsonResponse
     {
         abort_unless($order->closed_at, 422, 'Đơn chưa chốt.');
+
+        if (! $order->inventory_deducted_at && ! app(InventoryDeductionService::class)->hasSufficientStock($order)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hết hàng trong kho.',
+            ], 422);
+        }
 
         $provider = $request->string('provider')->toString() ?: null;
         $service->createForOrder($order->fresh(['items', 'warehouse']), $provider);

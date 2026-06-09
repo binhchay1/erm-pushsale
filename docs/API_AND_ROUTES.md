@@ -157,7 +157,9 @@ Các endpoint dưới đây là thiết kế mục tiêu — triển khai khi c�
 | GET | `/admin/accounting` | admin.accounting | Kế toán tác nghiệp |
 | GET | `/admin/warehouse/operations` | admin.warehouse.operations | Thủ kho |
 | GET | `/admin/warehouse/inventory` | admin.warehouse.inventory | Tồn kho |
-| POST | `/admin/warehouse/inventory/intake` | admin.warehouse.inventory.intake | Nhập kho |
+| POST | `/admin/warehouse/inventory/intake` | admin.warehouse.inventory.intake | Nhập kho (có người duyệt) |
+| POST | `/admin/warehouse/inventory/export` | admin.warehouse.inventory.export | Xuất kho (có người duyệt) |
+| GET | `/admin/warehouse/movements` | admin.warehouse.movements | Lịch sử nhập xuất kho (chỉ admin) |
 | GET/POST/… | `/admin/warehouses` | admin.warehouses.* | CRUD kho |
 | DELETE | `/admin/warehouse-inventories/{id}` | admin.warehouse-inventories.destroy | |
 | GET | `/admin/orders/failed` | admin.orders.failed | Đơn lỗi |
@@ -222,7 +224,8 @@ Các endpoint dưới đây là thiết kế mục tiêu — triển khai khi c�
 | GET | `/warehouse/dashboard` | warehouse.dashboard | Dashboard |
 | GET | `/warehouse/workspace` | warehouse.workspace | Tác nghiệp kho |
 | GET | `/warehouse/inventory` | warehouse.inventory | Tồn kho |
-| POST | `/warehouse/inventory/intake` | warehouse.inventory.intake | Nhập kho |
+| POST | `/warehouse/inventory/intake` | warehouse.inventory.intake | Nhập kho (có người duyệt) |
+| POST | `/warehouse/inventory/export` | warehouse.inventory.export | Xuất kho (có người duyệt) |
 | GET | `/warehouse/shipping/orders` | warehouse.shipping.orders | Đơn VC |
 | POST/GET | `/warehouse/shipping/orders/{id}/*` | warehouse.shipping.orders.* | create/sync/fee/cancel/label |
 
@@ -261,6 +264,7 @@ Các endpoint dưới đây là thiết kế mục tiêu — triển khai khi c�
 | `/admin/accounting` | `pages/Admin/Accounting/Index.jsx` |
 | `/admin/warehouse/operations` | `pages/Admin/Warehouse/Operations.jsx` |
 | `/admin/warehouse/inventory` | `pages/Admin/Warehouse/Inventory.jsx` |
+| `/admin/warehouse/movements` | `pages/Admin/Warehouse/MovementHistory.jsx` |
 | `/admin/orders/failed` | `pages/Admin/Orders/Failed.jsx` |
 | `/sales/workspace` | `pages/Sales/Workspace.jsx` |
 | `/sales/customers` | `pages/Sales/Customers.jsx` |

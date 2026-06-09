@@ -24,7 +24,7 @@ export default function FailedOrders({ report, filterOptions }) {
 
                 <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">
                     <select
-                        className="h-8 rounded-lg border px-2 text-sm"
+                        className="input-soft h-8 px-2"
                         value={f.platform ?? ''}
                         onChange={(e) => search({ platform: e.target.value || null })}
                     >
@@ -36,7 +36,7 @@ export default function FailedOrders({ report, filterOptions }) {
                         ))}
                     </select>
                     <select
-                        className="h-8 rounded-lg border px-2 text-sm"
+                        className="input-soft h-8 px-2"
                         value={f.warehouse_id ?? ''}
                         onChange={(e) => search({ warehouse_id: e.target.value || null })}
                     >

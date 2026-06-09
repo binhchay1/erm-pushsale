@@ -14,6 +14,7 @@ class SalesPerformanceReportService
     public function __construct(
         private readonly ReportQueryService $queries,
         private readonly ReportScopeResolver $scope,
+        private readonly SalesTeamTreeService $teamTree,
     ) {}
 
     /** @return array<string, mixed> */
@@ -48,6 +49,8 @@ class SalesPerformanceReportService
         return [
             'rows' => $rows,
             'columns' => $this->columns(),
+            // Cây doanh số theo team — chỉ admin (sale chỉ thấy số của mình)
+            'teamTree' => $viewer->isAdmin() ? $this->teamTree->build($orders) : null,
         ];
     }
 

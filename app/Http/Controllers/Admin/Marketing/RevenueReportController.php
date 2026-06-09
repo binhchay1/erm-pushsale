@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Marketing;
 
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
 use App\Http\Controllers\Controller;
+use App\Services\FilterOptionsService;
 use App\Services\Reports\RevenueReportService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,8 +18,14 @@ class RevenueReportController extends Controller
     {
         $filter = $this->reportFilters($request);
 
-        return Inertia::render('Admin/Marketing/RevenueReport', $this->reportPageProps($request, [
-            'report' => $service->forMarketers($filter, $request->user()),
-        ]));
+        return Inertia::render('Admin/Marketing/RevenueReport', array_merge(
+            $this->reportPageProps($request, [
+                'report' => $service->forMarketers($filter, $request->user()),
+            ]),
+            [
+                'filterFields' => app(FilterOptionsService::class)->revenueReportFilterFields($request->user(), 'marketing'),
+                'routeUrl' => $request->routeIs('marketing.*') ? '/marketing/revenue' : '/admin/marketing/revenue',
+            ],
+        ));
     }
 }

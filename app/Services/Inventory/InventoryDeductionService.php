@@ -139,7 +139,7 @@ class InventoryDeductionService
             ->sum('stock_quantity');
     }
 
-    protected function findOrCreateInventory(int $warehouseId, int $productId): WarehouseInventory
+    public function findOrCreateInventory(int $warehouseId, int $productId): WarehouseInventory
     {
         $existing = WarehouseInventory::query()
             ->where('warehouse_id', $warehouseId)

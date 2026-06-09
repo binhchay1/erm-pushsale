@@ -6,8 +6,9 @@ use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserRequest;
-use App\Models\Team;
 use App\Models\User;
+use App\Repositories\TeamRepository;
+use App\Repositories\UserRepository;
 use App\Services\OrgStructureService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
@@ -16,12 +17,14 @@ use Inertia\Response;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private readonly UserRepository $users,
+        private readonly TeamRepository $teams,
+    ) {}
+
     public function index(): Response
     {
-        $users = User::query()
-            ->with(['team:id,name', 'manager:id,name'])
-            ->orderBy('name')
-            ->get()
+        $users = $this->users->allWithTeamAndManager()
             ->map(fn (User $u) => [
                 'id' => $u->id,
                 'name' => $u->name,
@@ -105,7 +108,7 @@ class UserController extends Controller
             return back()->with('error', 'Không thể xóa tài khoản đang đăng nhập.');
         }
 
-        if ($user->role === UserRole::Admin && User::query()->where('role', UserRole::Admin)->count() <= 1) {
+        if ($user->role === UserRole::Admin && $this->users->adminCount() <= 1) {
             return back()->with('error', 'Không thể xóa quản trị viên cuối cùng.');
         }
 
@@ -140,30 +143,15 @@ class UserController extends Controller
     /** @return list<array{id: int, name: string}> */
     private function teamOptions(): array
     {
-        $teams = Team::query()->orderBy('name')->get(['id', 'name', 'parent_id']);
-        $options = [];
-
-        $walk = function (?int $parentId, int $depth) use (&$walk, &$options, $teams): void {
-            foreach ($teams->where('parent_id', $parentId) as $team) {
-                $prefix = $depth > 0 ? str_repeat('— ', $depth) : '';
-                $options[] = ['id' => $team->id, 'name' => $prefix.$team->name];
-                $walk($team->id, $depth + 1);
-            }
-        };
-
-        $walk(null, 0);
-
-        return $options;
+        return array_map(
+            fn (array $o) => ['id' => $o['id'], 'name' => $o['name']],
+            $this->teams->indentedOptions(),
+        );
     }
 
     /** @return list<array{id: int, name: string}> */
     private function managerOptions(?int $excludeId = null): array
     {
-        return User::query()
-            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn (User $u) => ['id' => $u->id, 'name' => $u->name])
-            ->all();
+        return $this->users->nameOptions($excludeId);
     }
 }

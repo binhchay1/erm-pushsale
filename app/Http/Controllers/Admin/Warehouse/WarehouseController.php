@@ -5,10 +5,11 @@ namespace App\Http\Controllers\Admin\Warehouse;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\WarehouseRequest;
-use App\Models\Order;
-use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
+use App\Repositories\OrderRepository;
+use App\Repositories\UserRepository;
+use App\Repositories\WarehouseRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,13 +17,15 @@ use Inertia\Response;
 
 class WarehouseController extends Controller
 {
+    public function __construct(
+        private readonly WarehouseRepository $warehouses,
+        private readonly UserRepository $users,
+        private readonly OrderRepository $orderStats,
+    ) {}
+
     public function index(): Response
     {
-        $warehouses = Warehouse::query()
-            ->withCount('inventories')
-            ->with('manager:id,name')
-            ->latest('id')
-            ->get()
+        $warehouses = $this->warehouses->allWithManagerAndCounts()
             ->map(fn (Warehouse $w) => [
                 'id' => $w->id,
                 'name' => $w->name,
@@ -58,15 +61,7 @@ class WarehouseController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
 
-        $rows = WarehouseInventory::query()
-            ->where('warehouse_id', $warehouse->id)
-            ->with('product:id,name,sku')
-            ->when($search !== '', fn ($q) => $q->whereHas('product', function ($qq) use ($search) {
-                $term = '%'.$search.'%';
-                $qq->where('name', 'like', $term)->orWhere('sku', 'like', $term);
-            }))
-            ->orderByDesc('id')
-            ->get()
+        $rows = $this->warehouses->inventoriesOf($warehouse->id, $search)
             ->map(fn (WarehouseInventory $i) => [
                 'id' => $i->id,
                 'product_name' => $i->product?->name,
@@ -119,11 +114,11 @@ class WarehouseController extends Controller
 
     public function destroy(Warehouse $warehouse): RedirectResponse
     {
-        if (Order::query()->where('warehouse_id', $warehouse->id)->exists()) {
+        if ($this->orderStats->existsForWarehouse($warehouse->id)) {
             return back()->with('error', 'Kho đang gắn với đơn hàng — không thể xóa.');
         }
 
-        WarehouseInventory::query()->where('warehouse_id', $warehouse->id)->delete();
+        $this->warehouses->deleteInventoriesOfWarehouse($warehouse->id);
         $warehouse->delete();
 
         return back()->with('success', 'Đã xóa kho.');
@@ -132,12 +127,6 @@ class WarehouseController extends Controller
     /** @return list<array{id:int,name:string}> */
     protected function managerOptions(): array
     {
-        return User::query()
-            ->whereIn('role', [UserRole::Admin, UserRole::Warehouse])
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn (User $u) => ['id' => $u->id, 'name' => $u->name])
-            ->values()
-            ->all();
+        return $this->users->nameOptionsByRoles([UserRole::Admin, UserRole::Warehouse]);
     }
 }

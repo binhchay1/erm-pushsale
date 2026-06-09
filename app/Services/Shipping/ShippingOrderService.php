@@ -4,8 +4,8 @@ namespace App\Services\Shipping;
 
 use App\Data\ReportFilterData;
 use App\Models\Order;
-use App\Models\ShippingApiLog;
 use App\Models\Shipment;
+use App\Models\ShippingApiLog;
 use App\Services\Operations\OrderOperationPresenter;
 use App\Services\Shipping\Support\PartnerCredentialResolver;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -15,6 +15,7 @@ class ShippingOrderService
     public function __construct(
         private readonly CarrierRegistry $registry,
         private readonly PartnerCredentialResolver $credentials,
+        private readonly ShipmentActionResolver $actions,
     ) {}
 
     /** @return LengthAwarePaginator<int, Order> */
@@ -49,6 +50,7 @@ class ShippingOrderService
             'tracking' => $this->buildTrackingTimeline($order, $shipment),
             'carriers' => $this->registry->summary(),
             'activeProvider' => $provider,
+            'actions' => $this->actions->forShipment($shipment, $order),
             'trackingUrl' => $shipment?->tracking_number && $shipment->provider
                 ? $this->credentials->trackingUrl($shipment->provider, $shipment->tracking_number)
                 : null,
@@ -94,6 +96,7 @@ class ShippingOrderService
             if ($lastEvent !== false && $lastEvent['provider'] === $log->provider && $lastEvent['statusText'] === $statusText) {
                 // Update timestamp only — keep most recent
                 $events[array_key_last($events)]['at'] = $log->created_at?->toIso8601String() ?? $lastEvent['at'];
+
                 continue;
             }
 
@@ -154,6 +157,8 @@ class ShippingOrderService
             ? config("shipping_partners.providers.{$provider}.label", strtoupper($provider))
             : null;
 
+        $shipmentActions = $this->actions->forShipment($shipment, $order);
+
         return array_merge($base, [
             'shippingProvider' => $provider,
             'shippingProviderLabel' => $providerLabel,
@@ -161,7 +166,7 @@ class ShippingOrderService
             'shipmentStatus' => $shipment?->status_text,
             'shipmentError' => $shipment?->error_message,
             'carrierFee' => $shipment?->fee,
-            'canCreateShipment' => $order->closed_at && ! $shipment?->tracking_number,
+            'canCreateShipment' => (bool) $order->closed_at && $shipmentActions['canCreate'],
         ]);
     }
 

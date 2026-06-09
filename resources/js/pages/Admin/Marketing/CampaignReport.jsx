@@ -16,7 +16,7 @@ export default function MarketingCampaignReport({
 }) {
     return (
         <AppLayout>
-            <Head title="BC chiến dịch Marketing" />
+            <Head title="Báo cáo chiến dịch" />
 
             <div className="space-y-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">

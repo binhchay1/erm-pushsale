@@ -5,6 +5,7 @@ import { OperationStatusDialog } from '@/components/operations/OperationStatusDi
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatCurrency } from '@/lib/format';
+import { closingTone, deliveryTone } from '@/lib/status-tones';
 
 function formatDateTime(value) {
     if (!value) return null;
@@ -104,21 +105,17 @@ export function OperationOrderTable({
                                     <div className="font-semibold">Tổng: {formatCurrency(row.total)}</div>
                                 </Td>
                                 <Td>
-                                    <StatusBadge
-                                        tone={
-                                            row.closingStatus === 'closed'
-                                                ? 'success'
-                                                : row.closingStatus === 'cancelled'
-                                                  ? 'danger'
-                                                  : 'info'
-                                        }
-                                    >
+                                    <StatusBadge tone={closingTone(row.closingStatus)}>
                                         {row.closingStatusLabel}
                                     </StatusBadge>
                                 </Td>
                                 <Td>
-                                    <div>{row.deliveryStatus}</div>
-                                    <div className="text-muted-foreground">{row.desiredDeliveryAt}</div>
+                                    <StatusBadge tone={deliveryTone(row.deliveryStatusValue)}>
+                                        {row.deliveryStatus}
+                                    </StatusBadge>
+                                    {row.desiredDeliveryAt && (
+                                        <div className="mt-1 text-muted-foreground">{row.desiredDeliveryAt}</div>
+                                    )}
                                 </Td>
                                 {enableSaleActions && (
                                     <Td>

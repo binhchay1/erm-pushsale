@@ -57,6 +57,8 @@ class MarketingTeamTreeService
             $teamNodes[] = [
                 'id' => 'team-'.($team?->id ?? 'unassigned'),
                 'name' => $team?->name ?? 'Chưa gán phòng ban',
+                'leaderName' => $team?->leader?->name,
+                'memberCount' => count($memberNodes),
                 'roleLabel' => 'Team Marketing',
                 'type' => 'team',
                 'conversionRate' => $teamMetrics['conversionRate'],

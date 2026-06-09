@@ -17,11 +17,12 @@ class Order extends Model
         'customer_note',         'shipping_address', 'shipping_notes', 'accounting_notes',
         'internal_recon_note', 'shipping_geo', 'data_arrived_at', 'assigned_at', 'closed_at', 'inventory_deducted_at',
         'desired_delivery_at', 'next_operation_at', 'operation_stage', 'operation_result', 'closing_status',
-        'delivery_status', 'shipping_method', 'shipping_provider', 'carrier_name', 'tracking_number',
+        'delivery_status', 'return_reason', 'return_restocked_at',
+        'shipping_method', 'shipping_provider', 'carrier_name', 'tracking_number',
         'reconciliation_status', 'is_returning_customer', 'is_duplicate_phone',
         'subtotal', 'discount', 'vat', 'shipping_fee_collected', 'total', 'deposit',
         'amount_to_collect', 'carrier_service_fee', 'shipping_support_fee',
-        'cod_fee', 'cod_support', 'contact_count', 'sales_kpi',
+        'cod_fee', 'cod_support', 'contact_count',
     ];
 
     protected function casts(): array
@@ -31,6 +32,7 @@ class Order extends Model
             'assigned_at' => 'datetime',
             'closed_at' => 'datetime',
             'inventory_deducted_at' => 'datetime',
+            'return_restocked_at' => 'datetime',
             'desired_delivery_at' => 'datetime',
             'next_operation_at' => 'datetime',
             'is_returning_customer' => 'boolean',

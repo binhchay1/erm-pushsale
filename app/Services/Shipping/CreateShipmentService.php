@@ -5,15 +5,23 @@ namespace App\Services\Shipping;
 use App\Contracts\Shipping\ShippingCarrierInterface;
 use App\Models\Order;
 use App\Models\Shipment;
+use App\Services\Inventory\InventoryDeductionService;
 use RuntimeException;
 
 class CreateShipmentService
 {
-    public function __construct(private readonly CarrierRegistry $registry) {}
+    public function __construct(
+        private readonly CarrierRegistry $registry,
+        private readonly InventoryDeductionService $inventory,
+    ) {}
 
     public function createForOrder(Order $order, ?string $provider = null): Shipment
     {
         $order->loadMissing(['items', 'warehouse']);
+
+        if (! $order->inventory_deducted_at && ! $this->inventory->hasSufficientStock($order)) {
+            throw new RuntimeException('Hết hàng trong kho — không thể tạo vận đơn.');
+        }
 
         $carrier = $this->registry->resolveForOrder($provider ?? $order->shipping_provider);
 

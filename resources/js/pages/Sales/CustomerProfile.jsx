@@ -12,7 +12,9 @@ export default function CustomerProfile({ filters, filterOptions, filterFields, 
             <div className="space-y-6">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Hồ sơ khách hàng</h1>
-                    <p className="text-sm text-muted-foreground">360° theo SĐT — lịch sử mua & tác nghiệp</p>
+                    <p className="text-sm text-muted-foreground">
+                        Tra theo số điện thoại — xem lịch sử mua hàng và các lần chăm sóc
+                    </p>
                 </div>
 
                 <ReportFilterBar

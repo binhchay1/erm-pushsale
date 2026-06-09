@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react';
-import { useEffect } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
@@ -8,25 +7,15 @@ import { StatusTabs } from '@/components/operations/StatusTabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Workspace({ filters, filterOptions, filterFields, report, operationStatusOptions }) {
-    useEffect(() => {
-        console.info(
-            '[ERM SaleOps] Telesale tác nghiệp — URL: /sales/workspace\n' +
-                '• Đăng nhập: sales@saleops.local / password\n' +
-                '• Nút Gọi + Chuyển trạng thái: cột Hành động (đơn đang mở)\n' +
-                '• Modal chuyển trạng thái: OperationStatusDialog\n' +
-                '• Chốt đơn: CloseOrderButton + POST /sales/orders/{id}/close'
-        );
-    }, []);
-
     return (
         <AppLayout>
-            <Head title="Sale tác nghiệp" />
+            <Head title="Gọi & chốt đơn" />
 
             <div className="space-y-8 pb-8">
                 <div className="space-y-2">
-                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Sale tác nghiệp</h1>
+                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Gọi & chốt đơn</h1>
                     <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                        Hàng đợi lead, gọi khách và chốt đơn — pipeline tương tác khách hàng
+                        Danh sách khách cần gọi của bạn — gọi, cập nhật kết quả và chốt đơn ngay tại đây
                     </p>
                 </div>
 

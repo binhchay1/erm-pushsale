@@ -86,7 +86,7 @@ export default function WarehouseForm({ warehouse, managers }) {
                             <div className="space-y-2">
                                 <Label>Quản kho</Label>
                                 <select
-                                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                    className="input-soft h-10 w-full px-3"
                                     value={data.manager_user_id}
                                     onChange={(e) => setData('manager_user_id', e.target.value)}
                                 >

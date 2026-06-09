@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\OrderResource;
 use App\Http\Traits\ApiResponds;
 use App\Models\Order;
+use App\Repositories\OrderRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,22 +14,15 @@ class OrderController extends Controller
 {
     use ApiResponds;
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, OrderRepository $orders): JsonResponse
     {
-        $orders = Order::query()
-            ->with(['saleUser', 'marketingSource'])
-            ->when($request->user()->isSales(), fn ($q) => $q->where('sale_user_id', $request->user()->id))
-            ->when($request->query('search'), function ($q, $search) {
-                $term = '%'.$search.'%';
-                $q->where(fn ($inner) => $inner
-                    ->where('customer_name', 'like', $term)
-                    ->orWhere('customer_phone', 'like', $term)
-                    ->orWhere('order_code', 'like', $term));
-            })
-            ->latest('data_arrived_at')
-            ->paginate(min((int) $request->query('per_page', 20), 100));
+        $list = $orders->paginatedApiList(
+            $request->user()->isSales() ? $request->user()->id : null,
+            $request->query('search'),
+            min((int) $request->query('per_page', 20), 100),
+        );
 
-        return $this->success(OrderResource::collection($orders));
+        return $this->success(OrderResource::collection($list));
     }
 
     public function show(Request $request, Order $order): JsonResponse

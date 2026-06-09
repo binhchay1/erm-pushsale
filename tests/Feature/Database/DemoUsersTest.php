@@ -4,7 +4,7 @@ namespace Tests\Feature\Database;
 
 use App\Enums\UserRole;
 use App\Models\User;
-use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\AccountSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -13,14 +13,17 @@ class DemoUsersTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_database_seeder_creates_phase_zero_demo_users(): void
+    public function test_account_seeder_creates_demo_users_for_every_role(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(AccountSeeder::class);
 
         $this->assertDemoUser('admin@saleops.local', UserRole::Admin);
         $this->assertDemoUser('sales@saleops.local', UserRole::Sales);
         $this->assertDemoUser('marketing@saleops.local', UserRole::Marketing);
         $this->assertDemoUser('warehouse@saleops.local', UserRole::Warehouse);
+        $this->assertDemoUser('allocator@saleops.local', UserRole::Allocator);
+        $this->assertDemoUser('accounting@saleops.local', UserRole::Accounting);
+        $this->assertDemoUser('head.warehouse@saleops.local', UserRole::Warehouse);
     }
 
     private function assertDemoUser(string $email, UserRole $role): void

@@ -87,6 +87,19 @@ readonly class ReportFilterData
         );
     }
 
+    /**
+     * Bỏ deliveryStatus khỏi filter — dùng cho màn có tab gộp nhóm trạng thái,
+     * nơi việc lọc theo tab được xử lý in-memory thay vì ở SQL.
+     */
+    public function withoutDeliveryStatus(): self
+    {
+        if ($this->deliveryStatus === null) {
+            return $this;
+        }
+
+        return new self(...array_merge(get_object_vars($this), ['deliveryStatus' => null]));
+    }
+
     /** @return array<string, mixed> */
     public function toInertia(): array
     {

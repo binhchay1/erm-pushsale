@@ -153,7 +153,7 @@ export function OperationStatusDialog({ order, options = [] }) {
                             <Label htmlFor={`status-${order.id}`}>Kết quả tác nghiệp</Label>
                             <select
                                 id={`status-${order.id}`}
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                                className="input-soft flex h-9 w-full px-3"
                                 value={result}
                                 onChange={(e) => {
                                     setResult(e.target.value);

@@ -5,33 +5,41 @@ import { toast } from 'sonner';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/hooks/use-confirm';
 import { formatCurrency } from '@/lib/format';
 import { copyToClipboard } from '@/lib/clipboard';
 import AppLayout from '@/layouts/AppLayout';
 
 export default function CampaignIndex({ campaigns }) {
-    const remove = (id, name) => {
-        if (!window.confirm(`Xóa kết nối Landing "${name}"?`)) return;
+    const { ask, ConfirmDialogPortal } = useConfirm();
+
+    const remove = async (id, name) => {
+        const ok = await ask({
+            title: 'Xóa kết nối Landing',
+            description: `Xóa kết nối Landing "${name}"?`,
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
+        if (!ok) return;
         router.delete(`/marketing/campaigns/${id}`);
     };
 
     const copyUrl = async (url) => {
         const ok = await copyToClipboard(url);
-        ok ? toast.success('Đã copy URL API') : toast.error('Không copy được');
+        ok ? toast.success('Đã copy đường dẫn nhận lead') : toast.error('Không copy được');
     };
 
     return (
         <AppLayout>
-            <Head title="Kết nối Landing" />
+            <Head title="Trang Landing" />
 
             <div className="space-y-6">
                 <PageHeader
-                    title="Kết nối Landing (Ladipage)"
+                    title="Trang Landing (Ladipage)"
                     description={
                         <>
-                            Tạo nguồn dữ liệu → hệ thống sinh <strong>URL API riêng</strong> → dán vào Ladipage
-                            (Content-Type: <span className="font-mono">application/json</span>) → Admin duyệt → lead
-                            chia số Sale.
+                            Tạo kết nối → hệ thống cấp <strong>đường dẫn nhận lead riêng</strong> → dán vào
+                            Ladipage → Admin duyệt → lead tự chia cho Sale.
                         </>
                     }
                     actions={
@@ -49,8 +57,8 @@ export default function CampaignIndex({ campaigns }) {
                         <thead>
                             <tr>
                                 <Th>Chiến dịch</Th>
-                                <Th>URL API (Ladipage)</Th>
-                                <Th>utm_campaign</Th>
+                                <Th>Đường dẫn nhận lead</Th>
+                                <Th>Mã chiến dịch</Th>
                                 <Th>Sản phẩm</Th>
                                 <Th>Đơn / DT</Th>
                                 <Th>Duyệt</Th>
@@ -130,6 +138,8 @@ export default function CampaignIndex({ campaigns }) {
                     </table>
                 </ScrollDataTable>
             </div>
+
+            <ConfirmDialogPortal />
         </AppLayout>
     );
 }

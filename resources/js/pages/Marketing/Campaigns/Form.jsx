@@ -43,7 +43,7 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
     const copyUrl = async () => {
         if (!campaign?.webhook_url) return;
         const ok = await copyToClipboard(campaign.webhook_url);
-        ok ? toast.success('Đã copy URL API') : toast.error('Không copy được');
+        ok ? toast.success('Đã copy đường dẫn nhận lead') : toast.error('Không copy được');
     };
 
     return (
@@ -65,9 +65,9 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                 {isEdit && campaign?.webhook_url && (
                     <Card className="border-primary/30 bg-primary/5">
                         <CardHeader>
-                            <CardTitle className="text-base">URL API cho Ladipage</CardTitle>
+                            <CardTitle className="text-base">Đường dẫn nhận lead cho Ladipage</CardTitle>
                             <CardDescription>
-                                Dán vào Form → Lưu Data → API URL. Content-Type: application/json
+                                Trên Ladipage, vào Form → Lưu Data → API URL và dán đường dẫn này vào
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="flex gap-2">
@@ -108,7 +108,7 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                                 <div className="space-y-2">
                                     <Label>Sản phẩm</Label>
                                     <select
-                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        className="input-soft h-10 w-full px-3"
                                         value={data.product_id}
                                         onChange={(e) => setData('product_id', e.target.value)}
                                     >
@@ -123,7 +123,7 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                                 <div className="space-y-2">
                                     <Label>Marketer phụ trách</Label>
                                     <select
-                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        className="input-soft h-10 w-full px-3"
                                         value={data.marketer_user_id}
                                         onChange={(e) => setData('marketer_user_id', e.target.value)}
                                     >
@@ -158,7 +158,7 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
 
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Đang lưu...' : isEdit ? 'Lưu' : 'Tạo & lấy URL API'}
+                                    {processing ? 'Đang lưu...' : isEdit ? 'Lưu' : 'Tạo & lấy đường dẫn'}
                                 </Button>
                             </div>
                         </form>

@@ -1,8 +1,8 @@
 import { Head } from '@inertiajs/react';
 
 import { MarketingKpiHero } from '@/components/marketing/MarketingKpiHero';
-import { MarketingTeamTree } from '@/components/marketing/MarketingTeamTree';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
+import { TeamRevenueTable } from '@/components/reports/TeamRevenueTable';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import {
     MARKETING_SOURCE_COLUMNS,
@@ -51,13 +51,16 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
 
                 <Card className="border-border/80 shadow-sm">
                     <CardHeader className="pb-2">
-                        <CardTitle>Sơ đồ doanh thu theo Team</CardTitle>
+                        <CardTitle>Doanh số theo team</CardTitle>
                         <CardDescription>
-                            Giám đốc / Leader → Team → Nhân viên MKT — khối xanh là hiệu suất cao
+                            Mỗi team một dòng: trưởng nhóm, số đơn chốt, tỷ lệ chốt và doanh thu
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-2">
-                        <MarketingTeamTree roots={report.teamTree?.roots} />
+                        <TeamRevenueTable
+                            roots={report.teamTree?.roots}
+                            emptyText="Chưa có team Marketing nào. Vào mục Nhân viên để xếp nhân viên vào team."
+                        />
                     </CardContent>
                 </Card>
 

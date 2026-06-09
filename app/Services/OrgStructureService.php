@@ -3,14 +3,20 @@
 namespace App\Services;
 
 use App\Enums\OrgLevel;
+use App\Enums\TeamType;
 use App\Enums\UserRole;
 use App\Models\Order;
 use App\Models\Team;
 use App\Models\User;
+use App\Repositories\UserRepository;
 use Illuminate\Support\Collection;
 
 class OrgStructureService
 {
+    public function __construct(
+        private readonly UserRepository $users,
+    ) {}
+
     /** @return list<array<string, mixed>> */
     public function teamTree(?int $parentId = null): array
     {
@@ -46,29 +52,135 @@ class OrgStructureService
             ->all();
     }
 
-    /** @return array{scope: string, scope_label: string, roots: list<array<string, mixed>>} */
+    /**
+     * Sơ đồ nhân sự dạng khối dọc: Ban giám đốc → từng bộ phận → các team → thành viên.
+     * Tránh dạng cây trải ngang khó nhìn khi team đông người.
+     *
+     * @return array{scope: string, scope_label: string, admins: list<array<string, mixed>>, departments: list<array<string, mixed>>}
+     */
     public function chartForViewer(User $viewer): array
     {
-        $users = User::query()
-            ->with(['team:id,name'])
-            ->orderBy('name')
-            ->get();
+        $users = $this->users->allWithTeamForOrgChart();
 
         $visibleIds = $this->visibleUserIds($viewer, $users);
         $scope = $this->resolveChartScope($viewer);
 
         $visibleUsers = $users->whereIn('id', $visibleIds)->values();
         $performanceMetrics = $this->performanceMetricsByUser($visibleUsers);
-        $roots = $this->buildUserChartRoots($visibleUsers, $viewer->id, $performanceMetrics);
+
+        $admins = $visibleUsers
+            ->filter(fn (User $u) => $u->role === UserRole::Admin)
+            ->map(fn (User $u) => $this->person($u, $viewer->id, $performanceMetrics))
+            ->values()
+            ->all();
 
         return [
             'scope' => $scope,
             'scope_label' => $this->chartScopeLabel($scope),
-            'roots' => $roots,
+            'admins' => $admins,
+            'departments' => $this->buildDepartments($visibleUsers, $viewer->id, $performanceMetrics),
         ];
     }
 
-    /** @param  Collection<int, User>  $users
+    /**
+     * @param  Collection<int, User>  $visibleUsers
+     * @param  array<int, array{conversionRate: float, revenue: int}>  $metrics
+     * @return list<array<string, mixed>>
+     */
+    private function buildDepartments(Collection $visibleUsers, int $viewerId, array $metrics): array
+    {
+        $nonAdmins = $visibleUsers->filter(fn (User $u) => $u->role !== UserRole::Admin);
+
+        $byDept = $nonAdmins->groupBy(function (User $u) {
+            $type = $u->team?->type ?? $this->teamTypeForRole($u->role);
+
+            return $type?->value ?? 'other';
+        });
+
+        $departments = [];
+
+        foreach ($byDept as $typeValue => $members) {
+            $type = TeamType::tryFrom((string) $typeValue);
+            $head = $members->first(fn (User $u) => $u->org_level === OrgLevel::Head);
+            $pool = $members->reject(fn (User $u) => $u->id === $head?->id);
+
+            $teams = [];
+
+            foreach ($pool->filter(fn (User $u) => $u->team_id)->groupBy('team_id') as $teamId => $teamMembers) {
+                $team = $teamMembers->first()->team;
+                $leader = $teamMembers->first(fn (User $u) => $u->id === (int) ($team?->leader_user_id ?? 0))
+                    ?? $teamMembers->first(fn (User $u) => $u->is_team_leader);
+                $rest = $teamMembers
+                    ->reject(fn (User $u) => $u->id === $leader?->id)
+                    ->sortBy('name')
+                    ->values();
+
+                $teams[] = [
+                    'id' => (int) $teamId,
+                    'name' => $team?->name ?? 'Team chưa đặt tên',
+                    'member_count' => $teamMembers->count(),
+                    'leader' => $leader ? $this->person($leader, $viewerId, $metrics) : null,
+                    'members' => $rest->map(fn (User $u) => $this->person($u, $viewerId, $metrics))->all(),
+                ];
+            }
+
+            usort($teams, fn (array $a, array $b) => strcmp($a['name'], $b['name']));
+
+            $unassigned = $pool
+                ->filter(fn (User $u) => ! $u->team_id)
+                ->sortBy('name')
+                ->map(fn (User $u) => $this->person($u, $viewerId, $metrics))
+                ->values()
+                ->all();
+
+            $departments[] = [
+                'key' => (string) $typeValue,
+                'name' => $type?->label() ?? 'Bộ phận khác',
+                'member_count' => $members->count(),
+                'head' => $head ? $this->person($head, $viewerId, $metrics) : null,
+                'teams' => $teams,
+                'unassigned' => $unassigned,
+            ];
+        }
+
+        $order = ['sale', 'marketing', 'warehouse', 'allocator', 'accounting', 'other'];
+        usort($departments, function (array $a, array $b) use ($order) {
+            return array_search($a['key'], $order, true) <=> array_search($b['key'], $order, true);
+        });
+
+        return $departments;
+    }
+
+    /** @param  array<int, array{conversionRate: float, revenue: int}>  $metrics
+     * @return array<string, mixed>
+     */
+    private function person(User $user, int $viewerId, array $metrics): array
+    {
+        $m = $metrics[$user->id] ?? null;
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'job_title' => $user->job_title,
+            'role' => $user->role->value,
+            'role_label' => $user->roleLabel(),
+            'org_level_label' => $user->orgLevelLabel(),
+            'avatar_url' => $user->avatarUrl(),
+            'initials' => $user->initials(),
+            'is_self' => $user->id === $viewerId,
+            'show_metrics' => $m !== null,
+            'conversion_rate' => $m['conversionRate'] ?? null,
+            'revenue' => $m['revenue'] ?? null,
+        ];
+    }
+
+    /**
+     * Phạm vi nhìn thấy theo business:
+     * - Admin: toàn công ty (admin cũng là người duy nhất tạo/phân chia team — route /admin/teams).
+     * - Trưởng bộ phận (org_level = head): toàn bộ ngành của mình (mọi team cùng loại + nhân sự cùng ngành).
+     * - Leader & nhân viên: chỉ team của mình.
+     *
+     * @param  Collection<int, User>  $users
      * @return list<int>
      */
     private function visibleUserIds(User $viewer, Collection $users): array
@@ -77,13 +189,11 @@ class OrgStructureService
             return $users->pluck('id')->map(fn ($id) => (int) $id)->all();
         }
 
-        if ($this->isOrgManager($viewer)) {
-            $director = $this->departmentDirector($viewer, $users);
-
-            return $this->collectDescendantIds($director->id, $users);
+        if ($viewer->org_level === OrgLevel::Head) {
+            return $this->departmentMemberIds($viewer, $users);
         }
 
-        return $this->staffVisibleIds($viewer, $users);
+        return $this->teamMemberIds($viewer, $users);
     }
 
     private function resolveChartScope(User $viewer): string
@@ -92,169 +202,97 @@ class OrgStructureService
             return 'admin';
         }
 
-        if ($this->isOrgManager($viewer)) {
-            return 'manager';
+        if ($viewer->org_level === OrgLevel::Head) {
+            return 'department';
         }
 
-        return 'staff';
+        return 'team';
     }
 
     private function chartScopeLabel(string $scope): string
     {
         return match ($scope) {
             'admin' => 'Toàn công ty',
-            'manager' => 'Bộ phận của bạn',
-            'staff' => 'Nhóm làm việc trực tiếp',
+            'department' => 'Bộ phận của bạn',
+            'team' => 'Team của bạn',
+            default => 'Team của bạn',
         };
     }
 
-    public function isOrgManager(User $user): bool
-    {
-        if ($user->is_team_leader) {
-            return true;
-        }
-
-        return in_array($user->org_level, [OrgLevel::Head, OrgLevel::Supervisor], true);
-    }
-
-    /** @param  Collection<int, User>  $users */
-    private function departmentDirector(User $viewer, Collection $users): User
-    {
-        $byId = $users->keyBy('id');
-        $current = $byId->get($viewer->id) ?? $viewer;
-        $director = $current;
-
-        while ($current) {
-            if ($this->isDepartmentHead($current)) {
-                $director = $current;
-                break;
-            }
-
-            $current = $current->manager_user_id ? $byId->get($current->manager_user_id) : null;
-        }
-
-        if (! $this->isDepartmentHead($director) && $viewer->team_id) {
-            $teamLeaderId = Team::query()
-                ->whereKey($viewer->team_id)
-                ->value('leader_user_id');
-
-            if ($teamLeaderId && $byId->has($teamLeaderId)) {
-                return $byId->get($teamLeaderId);
-            }
-        }
-
-        return $director;
-    }
-
-    private function isDepartmentHead(User $user): bool
-    {
-        if ($user->org_level === OrgLevel::Head) {
-            return true;
-        }
-
-        return $user->is_team_leader && $user->org_level !== OrgLevel::Staff;
-    }
-
-    /** @param  Collection<int, User>  $users
+    /**
+     * Trưởng bộ phận thấy toàn ngành: mọi user thuộc team cùng loại,
+     * hoặc cùng ngành (theo role) nếu chưa được gán team.
+     *
+     * @param  Collection<int, User>  $users
      * @return list<int>
      */
-    private function staffVisibleIds(User $viewer, Collection $users): array
+    private function departmentMemberIds(User $viewer, Collection $users): array
     {
-        if (! $viewer->manager_user_id) {
-            $peerIds = $users
-                ->whereNull('manager_user_id')
-                ->pluck('id')
-                ->map(fn ($id) => (int) $id)
-                ->all();
+        $viewerRecord = $users->firstWhere('id', $viewer->id) ?? $viewer;
+        $type = $viewerRecord->team?->type ?? $this->teamTypeForRole($viewer->role);
 
-            return array_values(array_unique(array_merge([$viewer->id], $peerIds)));
+        return $users
+            ->filter(function (User $user) use ($type, $viewer) {
+                if ($user->id === $viewer->id) {
+                    return true;
+                }
+
+                if ($user->role === UserRole::Admin || $type === null) {
+                    return false;
+                }
+
+                if ($user->team) {
+                    return $user->team->type === $type;
+                }
+
+                return $this->teamTypeForRole($user->role) === $type;
+            })
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Leader & nhân viên chỉ thấy team của mình (gồm cả leader của team).
+     *
+     * @param  Collection<int, User>  $users
+     * @return list<int>
+     */
+    private function teamMemberIds(User $viewer, Collection $users): array
+    {
+        if (! $viewer->team_id) {
+            return [$viewer->id];
         }
 
-        $managerSubtree = $this->collectDescendantIds($viewer->manager_user_id, $users);
-        $peerIds = $users
-            ->where('manager_user_id', $viewer->manager_user_id)
+        $ids = $users
+            ->where('team_id', $viewer->team_id)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->all();
 
-        return array_values(array_unique(array_merge($managerSubtree, $peerIds)));
-    }
+        $viewerRecord = $users->firstWhere('id', $viewer->id);
+        $leaderId = (int) ($viewerRecord?->team?->leader_user_id ?? 0);
 
-    /** @param  Collection<int, User>  $users
-     * @return list<int>
-     */
-    private function collectDescendantIds(int $rootId, Collection $users): array
-    {
-        $ids = [$rootId];
-        $children = $users->where('manager_user_id', $rootId);
-
-        foreach ($children as $child) {
-            $ids = array_merge($ids, $this->collectDescendantIds($child->id, $users));
+        if ($leaderId) {
+            $ids[] = $leaderId;
         }
 
-        return $ids;
+        $ids[] = $viewer->id;
+
+        return array_values(array_unique($ids));
     }
 
-    /**
-     * @param  Collection<int, User>  $visibleUsers
-     * @param  array<int, array{conversionRate: float, revenue: int}>  $performanceMetrics
-     * @return list<array<string, mixed>>
-     */
-    private function buildUserChartRoots(Collection $visibleUsers, int $viewerId, array $performanceMetrics): array
+    private function teamTypeForRole(UserRole $role): ?TeamType
     {
-        $visibleIds = $visibleUsers->pluck('id')->flip();
-
-        $roots = $visibleUsers->filter(function (User $user) use ($visibleIds) {
-            if (! $user->manager_user_id) {
-                return true;
-            }
-
-            return ! $visibleIds->has($user->manager_user_id);
-        });
-
-        return $roots
-            ->sortBy('name')
-            ->map(fn (User $user) => $this->userChartNode($user, $visibleUsers, $viewerId, $performanceMetrics))
-            ->values()
-            ->all();
-    }
-
-    /**
-     * @param  Collection<int, User>  $visibleUsers
-     * @param  array<int, array{conversionRate: float, revenue: int}>  $performanceMetrics
-     * @return array<string, mixed>
-     */
-    private function userChartNode(
-        User $user,
-        Collection $visibleUsers,
-        int $viewerId,
-        array $performanceMetrics,
-    ): array {
-        $children = $visibleUsers
-            ->where('manager_user_id', $user->id)
-            ->sortBy('name')
-            ->map(fn (User $child) => $this->userChartNode($child, $visibleUsers, $viewerId, $performanceMetrics))
-            ->values()
-            ->all();
-
-        $metrics = $performanceMetrics[$user->id] ?? null;
-
-        return [
-            'id' => $user->id,
-            'name' => $user->name,
-            'job_title' => $user->job_title,
-            'role' => $user->role->value,
-            'role_label' => $user->roleLabel(),
-            'team_name' => $user->team?->name,
-            'org_level_label' => $user->orgLevelLabel(),
-            'avatar_url' => $user->avatarUrl(),
-            'initials' => $user->initials(),
-            'is_self' => $user->id === $viewerId,
-            'show_metrics' => $metrics !== null,
-            'conversion_rate' => $metrics['conversionRate'] ?? null,
-            'revenue' => $metrics['revenue'] ?? null,
-            'children' => $children,
-        ];
+        return match ($role) {
+            UserRole::Sales => TeamType::Sale,
+            UserRole::Marketing => TeamType::Marketing,
+            UserRole::Warehouse => TeamType::Warehouse,
+            UserRole::Allocator => TeamType::Allocator,
+            UserRole::Accounting => TeamType::Accounting,
+            default => null,
+        };
     }
 
     /**

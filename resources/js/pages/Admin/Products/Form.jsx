@@ -87,7 +87,7 @@ export default function ProductForm({ product, parents }) {
                                 <Label htmlFor="parent_id">Sản phẩm cha (nhóm)</Label>
                                 <select
                                     id="parent_id"
-                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                                    className="input-soft flex h-9 w-full px-3"
                                     value={data.parent_id}
                                     onChange={(e) => setData('parent_id', e.target.value || '')}
                                 >

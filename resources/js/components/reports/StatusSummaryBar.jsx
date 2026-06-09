@@ -1,12 +1,12 @@
 import { cn } from '@/lib/utils';
 
 const styles = {
-    waitingDelivery: 'bg-blue-600 text-white',
-    cancelWaybill: 'bg-blue-900 text-white',
-    delivering: 'bg-amber-500 text-white',
-    delivered: 'bg-emerald-600 text-white',
-    paid: 'bg-emerald-400 text-emerald-950',
-    returned: 'bg-red-600 text-white',
+    waitingDelivery: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+    cancelWaybill: 'bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300',
+    delivering: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+    delivered: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+    paid: 'bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300',
+    returned: 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300',
 };
 
 const labels = {

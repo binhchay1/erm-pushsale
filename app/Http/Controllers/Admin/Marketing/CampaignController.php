@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admin\Marketing;
 
-use App\Enums\DeliveryStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CampaignRequest;
 use App\Models\MarketingSource;
-use App\Models\Product;
-use App\Models\User;
+use App\Repositories\MarketingSourceRepository;
+use App\Repositories\ProductRepository;
+use App\Repositories\UserRepository;
 use App\Services\Marketing\CampaignLandingService;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
@@ -18,22 +18,18 @@ use Inertia\Response;
 
 class CampaignController extends Controller
 {
-    public function __construct(private readonly CampaignLandingService $landing) {}
+    public function __construct(
+        private readonly CampaignLandingService $landing,
+        private readonly MarketingSourceRepository $sources,
+        private readonly ProductRepository $products,
+        private readonly UserRepository $users,
+    ) {}
 
     public function index(Request $request): Response
     {
         abort_unless($request->user()?->role === UserRole::Marketing, 403);
 
-        $campaigns = MarketingSource::query()
-            ->whereNull('parent_id')
-            ->where('created_by_user_id', $request->user()->id)
-            ->with(['product:id,name,sku', 'marketer:id,name'])
-            ->withCount('orders')
-            ->withSum(['orders as revenue' => function ($q) {
-                $q->whereIn('delivery_status', DeliveryStatus::revenueEligible());
-            }], 'total')
-            ->latest('id')
-            ->get()
+        $campaigns = $this->sources->ownedCampaignsWithStats($request->user()->id)
             ->map(fn (MarketingSource $c) => $this->presentCampaign($c))
             ->values();
 
@@ -132,25 +128,13 @@ class CampaignController extends Controller
     /** @return list<array{id:int,name:string}> */
     private function productOptions(): array
     {
-        return Product::query()
-            ->orderBy('name')
-            ->get(['id', 'name', 'sku'])
-            ->map(fn (Product $p) => [
-                'id' => $p->id,
-                'name' => $p->sku ? $p->name.' ('.$p->sku.')' : $p->name,
-            ])
-            ->all();
+        return $this->products->optionsWithSkuLabel();
     }
 
     /** @return list<array{id:int,name:string}> */
     private function marketerOptions(): array
     {
-        return User::query()
-            ->where('role', UserRole::Marketing)
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn (User $u) => ['id' => $u->id, 'name' => $u->name])
-            ->all();
+        return $this->users->nameOptionsByRoles([UserRole::Marketing]);
     }
 
     /** @return list<array{ladipage: string, system: string}> */

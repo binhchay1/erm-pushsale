@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserNotification;
+use App\Repositories\NotificationRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -10,23 +11,23 @@ use Inertia\Response;
 
 class NotificationController extends Controller
 {
+    public function __construct(
+        private readonly NotificationRepository $notifications,
+    ) {}
+
     public function index(Request $request): Response
     {
         $tab = $request->query('tab') === 'unread' ? 'unread' : 'all';
 
-        $items = UserNotification::query()
-            ->where('user_id', $request->user()->id)
-            ->when($tab === 'unread', fn ($q) => $q->unread())
-            ->latest('id')
-            ->limit(100)
-            ->get()
+        $items = $this->notifications
+            ->latestForUser($request->user()->id, unreadOnly: $tab === 'unread')
             ->map(fn (UserNotification $n) => $this->toArray($n))
             ->values();
 
         return Inertia::render('Notifications/Index', [
             'tab' => $tab,
             'items' => $items,
-            'unreadCount' => $this->unreadCount($request),
+            'unreadCount' => $this->notifications->unreadCount($request->user()->id),
         ]);
     }
 
@@ -43,20 +44,9 @@ class NotificationController extends Controller
 
     public function markAllRead(Request $request): RedirectResponse
     {
-        UserNotification::query()
-            ->where('user_id', $request->user()->id)
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+        $this->notifications->markAllRead($request->user()->id);
 
         return back()->with('success', 'Đã đánh dấu tất cả thông báo là đã đọc.');
-    }
-
-    private function unreadCount(Request $request): int
-    {
-        return UserNotification::query()
-            ->where('user_id', $request->user()->id)
-            ->whereNull('read_at')
-            ->count();
     }
 
     /** @return array<string, mixed> */

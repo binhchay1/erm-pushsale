@@ -10,8 +10,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { apiGet, apiPost } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
+import { deliveryTone, shipmentTone } from '@/lib/status-tones';
 import { cn } from '@/lib/utils';
 
 // ─── Tracking timeline ────────────────────────────────────────────────────────
@@ -142,6 +144,9 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
     const readyCarriers = detail?.carriers?.filter((c) => c.ready) ?? [];
     const tracking = detail?.tracking ?? [];
 
+    // Actions theo trạng thái vận đơn — backend tính sẵn, đổi provider thì tính lại client-side
+    const actions = resolveActions(shipment ?? null, order);
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
@@ -205,7 +210,12 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                 <div className="space-y-0.5">
                                     <p>Tổng đơn: <span className="font-medium">{formatCurrency(order?.total)}</span></p>
                                     <p>Thu hộ (COD): <span className="font-medium">{formatCurrency(order?.amountToCollect)}</span></p>
-                                    <p className="text-muted-foreground">Trạng thái: {order?.deliveryStatus}</p>
+                                    <p className="text-muted-foreground">
+                                        Trạng thái:{' '}
+                                        <StatusBadge tone={deliveryTone(order?.deliveryStatusValue)} className="ml-1 align-middle">
+                                            {order?.deliveryStatus}
+                                        </StatusBadge>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -243,15 +253,10 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                     </div>
                                     <div>
                                         <dt className="text-xs text-muted-foreground">Trạng thái</dt>
-                                        <dd
-                                            className={cn(
-                                                'font-medium',
-                                                shipment.state === 'failed' && 'text-destructive',
-                                                shipment.state === 'cancelled' && 'text-muted-foreground',
-                                                shipment.state === 'submitted' && 'text-emerald-600',
-                                            )}
-                                        >
-                                            {shipment.statusText ?? shipment.state}
+                                        <dd>
+                                            <StatusBadge tone={shipmentTone(shipment.state)}>
+                                                {shipment.statusText ?? shipment.state}
+                                            </StatusBadge>
                                         </dd>
                                     </div>
                                     <div>
@@ -281,73 +286,93 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                             )}
                         </div>
 
-                        {/* Action buttons */}
+                        {/* Action buttons — chỉ hiện thao tác hợp lệ theo trạng thái */}
                         <div className="flex flex-wrap gap-2">
-                            <Button
-                                size="sm"
-                                disabled={!!acting || !selectedProvider}
-                                onClick={() => runAction('create', `${apiBase}/${orderId}/create-shipment`)}
-                            >
-                                {acting === 'create' ? (
-                                    <Loader2 className="mr-1 size-4 animate-spin" />
-                                ) : (
-                                    <Truck className="mr-1 size-4" />
+                            {actions.canCreate && (
+                                <Button
+                                    size="sm"
+                                    disabled={!!acting || !selectedProvider}
+                                    onClick={() => runAction('create', `${apiBase}/${orderId}/create-shipment`)}
+                                >
+                                    {acting === 'create' ? (
+                                        <Loader2 className="mr-1 size-4 animate-spin" />
+                                    ) : (
+                                        <Truck className="mr-1 size-4" />
+                                    )}
+                                    Tạo vận đơn
+                                </Button>
+                            )}
+
+                            {actions.canSync && (
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={!!acting || !shipment}
+                                    onClick={() => runAction('sync', `${apiBase}/${orderId}/sync-status`)}
+                                >
+                                    {acting === 'sync' ? (
+                                        <Loader2 className="mr-1 size-4 animate-spin" />
+                                    ) : (
+                                        <RefreshCw className="mr-1 size-4" />
+                                    )}
+                                    Đồng bộ
+                                </Button>
+                            )}
+
+                            {actions.canCalculateFee && (
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={!!acting || !selectedProvider}
+                                    onClick={() => runAction('fee', `${apiBase}/${orderId}/calculate-fee`)}
+                                >
+                                    Tính phí
+                                </Button>
+                            )}
+
+                            {actions.canPrintLabel && (
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={!!acting || !shipment?.trackingNumber}
+                                    onClick={() =>
+                                        runAction(
+                                            'label',
+                                            `${apiBase}/${orderId}/label?provider=${selectedProvider}`,
+                                            { method: 'GET' },
+                                        )
+                                    }
+                                >
+                                    <Printer className="mr-1 size-4" />
+                                    In nhãn
+                                </Button>
+                            )}
+
+                            {actions.canCancel && (
+                                <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    disabled={!!acting || !shipment}
+                                    onClick={() => runAction('cancel', `${apiBase}/${orderId}/cancel-shipment`)}
+                                >
+                                    {acting === 'cancel' ? (
+                                        <Loader2 className="mr-1 size-4 animate-spin" />
+                                    ) : (
+                                        <XCircle className="mr-1 size-4" />
+                                    )}
+                                    Hủy vận đơn
+                                </Button>
+                            )}
+
+                            {!actions.canCreate &&
+                                !actions.canSync &&
+                                !actions.canCalculateFee &&
+                                !actions.canPrintLabel &&
+                                !actions.canCancel && (
+                                    <p className="text-sm text-muted-foreground">
+                                        Không còn thao tác vận chuyển cho trạng thái hiện tại.
+                                    </p>
                                 )}
-                                Tạo vận đơn
-                            </Button>
-
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={!!acting || !shipment}
-                                onClick={() => runAction('sync', `${apiBase}/${orderId}/sync-status`)}
-                            >
-                                {acting === 'sync' ? (
-                                    <Loader2 className="mr-1 size-4 animate-spin" />
-                                ) : (
-                                    <RefreshCw className="mr-1 size-4" />
-                                )}
-                                Đồng bộ
-                            </Button>
-
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={!!acting || !selectedProvider}
-                                onClick={() => runAction('fee', `${apiBase}/${orderId}/calculate-fee`)}
-                            >
-                                Tính phí
-                            </Button>
-
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={!!acting || !shipment?.trackingNumber}
-                                onClick={() =>
-                                    runAction(
-                                        'label',
-                                        `${apiBase}/${orderId}/label?provider=${selectedProvider}`,
-                                        { method: 'GET' },
-                                    )
-                                }
-                            >
-                                <Printer className="mr-1 size-4" />
-                                In nhãn
-                            </Button>
-
-                            <Button
-                                size="sm"
-                                variant="destructive"
-                                disabled={!!acting || !shipment}
-                                onClick={() => runAction('cancel', `${apiBase}/${orderId}/cancel-shipment`)}
-                            >
-                                {acting === 'cancel' ? (
-                                    <Loader2 className="mr-1 size-4 animate-spin" />
-                                ) : (
-                                    <XCircle className="mr-1 size-4" />
-                                )}
-                                Hủy
-                            </Button>
                         </div>
 
                         {/* Fee result */}
@@ -361,4 +386,36 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
             </DialogContent>
         </Dialog>
     );
+}
+
+/** Mirror logic ShipmentActionResolver (PHP) khi đổi tab đơn vị VC. */
+function resolveActions(shipment, order) {
+    if (!shipment) {
+        return {
+            canCreate: true,
+            canSync: false,
+            canCalculateFee: true,
+            canPrintLabel: false,
+            canCancel: false,
+        };
+    }
+
+    const hasTracking = Boolean(shipment.trackingNumber);
+    const state = shipment.state;
+    const isSubmitted = state === 'submitted';
+    const isRetryable = state === 'failed' || state === 'cancelled';
+    const deliveryTerminal = [
+        'delivered', 'paid', 'returned', 'returning', 'refund',
+        'cancel_waybill', 'cancel_closing', 'cannot_deliver',
+    ].includes(order?.deliveryStatusValue);
+
+    const hasActiveWaybill = hasTracking && isSubmitted;
+
+    return {
+        canCreate: !hasTracking || isRetryable,
+        canSync: hasActiveWaybill,
+        canCalculateFee: !hasActiveWaybill,
+        canPrintLabel: hasActiveWaybill,
+        canCancel: hasActiveWaybill && !deliveryTerminal,
+    };
 }

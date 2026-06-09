@@ -67,7 +67,7 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                                 <div className="space-y-2">
                                     <Label>Sản phẩm (trong kho)</Label>
                                     <select
-                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        className="input-soft h-10 w-full px-3"
                                         value={data.product_id}
                                         onChange={(e) => setData('product_id', e.target.value)}
                                     >
@@ -85,7 +85,7 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                                 <div className="space-y-2">
                                     <Label>Marketer phụ trách</Label>
                                     <select
-                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        className="input-soft h-10 w-full px-3"
                                         value={data.marketer_user_id}
                                         onChange={(e) => setData('marketer_user_id', e.target.value)}
                                     >
@@ -106,7 +106,7 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                                 <div className="space-y-2">
                                     <Label>Kênh quảng cáo</Label>
                                     <select
-                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        className="input-soft h-10 w-full px-3"
                                         value={data.ad_channel}
                                         onChange={(e) => setData('ad_channel', e.target.value)}
                                     >
@@ -138,7 +138,7 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>utm_campaign (mã webhook)</Label>
+                                    <Label>utm_campaign (mã chiến dịch)</Label>
                                     <Input
                                         value={data.utm_campaign}
                                         onChange={(e) => setData('utm_campaign', e.target.value)}

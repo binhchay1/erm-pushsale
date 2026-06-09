@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\IntegrationPlatform;
-use App\Enums\LeadIngestionStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateIntegrationRequest;
 use App\Integrations\IntegrationDriverFactory;
-use App\Models\LeadIngestion;
+use App\Repositories\LeadIngestionRepository;
 use App\Services\Integrations\IntegrationConfigService;
 use App\Services\Leads\LeadIngestionService;
 use Illuminate\Http\RedirectResponse;
@@ -17,18 +16,16 @@ use Inertia\Response;
 
 class IntegrationsController extends Controller
 {
-    public function index(IntegrationConfigService $config): Response
+    public function index(IntegrationConfigService $config, LeadIngestionRepository $leads): Response
     {
-        $today = now()->startOfDay();
-
         return Inertia::render('Admin/Integrations/Index', [
             'hub' => $config->hubOverview(),
             'categories' => $config->categories(),
             'platforms' => $config->listForAdmin(),
             'leadRouting' => config('saleops.lead_routing'),
             'stats' => [
-                'leads_today' => LeadIngestion::query()->where('created_at', '>=', $today)->count(),
-                'leads_pending' => LeadIngestion::query()->where('status', LeadIngestionStatus::Pending)->count(),
+                'leads_today' => $leads->countToday(),
+                'leads_pending' => $leads->countPending(),
                 'platforms_enabled' => collect($config->listForAdmin())->where('is_enabled', true)->count(),
             ],
         ]);

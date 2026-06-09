@@ -8,6 +8,7 @@ use App\Http\Resources\V1\LeadIngestionResource;
 use App\Http\Traits\ApiResponds;
 use App\Integrations\IntegrationDriverFactory;
 use App\Models\LeadIngestion;
+use App\Repositories\LeadIngestionRepository;
 use App\Services\Leads\LeadIngestionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,16 +19,16 @@ class LeadController extends Controller
 
     public function __construct(
         protected LeadIngestionService $ingestionService,
+        protected LeadIngestionRepository $leads,
     ) {}
 
     public function index(Request $request): JsonResponse
     {
-        $leads = LeadIngestion::query()
-            ->with('order')
-            ->when($request->query('platform'), fn ($q, $p) => $q->where('platform', $p))
-            ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s))
-            ->latest()
-            ->paginate(min((int) $request->query('per_page', 20), 100));
+        $leads = $this->leads->paginatedApiList(
+            $request->query('platform'),
+            $request->query('status'),
+            min((int) $request->query('per_page', 20), 100),
+        );
 
         return $this->success(LeadIngestionResource::collection($leads));
     }

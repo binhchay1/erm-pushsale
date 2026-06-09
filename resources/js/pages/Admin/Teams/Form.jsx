@@ -65,7 +65,7 @@ export default function TeamForm({ team, types, parents, leaders }) {
                                 <Label htmlFor="type">Loại bộ phận</Label>
                                 <select
                                     id="type"
-                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                                    className="input-soft flex h-9 w-full px-3"
                                     value={data.type}
                                     onChange={(e) => setData('type', e.target.value)}
                                 >
@@ -82,7 +82,7 @@ export default function TeamForm({ team, types, parents, leaders }) {
                                 <Label htmlFor="parent_id">Thuộc phòng ban (cha)</Label>
                                 <select
                                     id="parent_id"
-                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                                    className="input-soft flex h-9 w-full px-3"
                                     value={data.parent_id}
                                     onChange={(e) => setData('parent_id', e.target.value || '')}
                                 >
@@ -99,7 +99,7 @@ export default function TeamForm({ team, types, parents, leaders }) {
                                 <Label htmlFor="leader_user_id">Trưởng ban / nhóm</Label>
                                 <select
                                     id="leader_user_id"
-                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                                    className="input-soft flex h-9 w-full px-3"
                                     value={data.leader_user_id}
                                     onChange={(e) => setData('leader_user_id', e.target.value || '')}
                                 >

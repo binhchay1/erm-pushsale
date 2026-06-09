@@ -9,13 +9,18 @@ class WarehouseInventoryMovement extends Model
 {
     public const TYPE_INTAKE = 'intake';
 
+    public const TYPE_EXPORT = 'export';
+
     public const TYPE_DEDUCTION = 'deduction';
+
+    public const TYPE_RETURN = 'return';
 
     protected $fillable = [
         'warehouse_inventory_id',
         'warehouse_id',
         'product_id',
         'user_id',
+        'approved_by_user_id',
         'type',
         'quantity',
         'stock_after',
@@ -23,6 +28,17 @@ class WarehouseInventoryMovement extends Model
         'reference_id',
         'note',
     ];
+
+    public static function typeLabel(string $type): string
+    {
+        return match ($type) {
+            self::TYPE_INTAKE => 'Nhập kho',
+            self::TYPE_EXPORT => 'Xuất kho',
+            self::TYPE_DEDUCTION => 'Xuất theo đơn hàng',
+            self::TYPE_RETURN => 'Nhập hàng hoàn',
+            default => $type,
+        };
+    }
 
     public function warehouse(): BelongsTo
     {
@@ -37,6 +53,11 @@ class WarehouseInventoryMovement extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by_user_id');
     }
 
     public function inventory(): BelongsTo

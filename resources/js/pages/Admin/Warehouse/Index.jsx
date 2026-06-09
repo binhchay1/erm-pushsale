@@ -3,11 +3,20 @@ import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
+import { useConfirm } from '@/hooks/use-confirm';
 import AppLayout from '@/layouts/AppLayout';
 
 export default function WarehouseIndex({ warehouses }) {
-    const removeWarehouse = (id, name) => {
-        if (!window.confirm(`Xóa kho "${name}"?`)) return;
+    const { ask, ConfirmDialogPortal } = useConfirm();
+
+    const removeWarehouse = async (id, name) => {
+        const ok = await ask({
+            title: 'Xóa kho',
+            description: `Xóa kho "${name}"?`,
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
+        if (!ok) return;
         router.delete(`/admin/warehouses/${id}`);
     };
 
@@ -84,6 +93,8 @@ export default function WarehouseIndex({ warehouses }) {
                     </table>
                 </ScrollDataTable>
             </div>
+
+            <ConfirmDialogPortal />
         </AppLayout>
     );
 }

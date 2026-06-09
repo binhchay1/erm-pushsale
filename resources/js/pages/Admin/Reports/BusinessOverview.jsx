@@ -11,19 +11,19 @@ import AppLayout from '@/layouts/AppLayout';
 export default function BusinessOverview({ summary, charts }) {
     return (
         <AppLayout>
-            <Head title="Tổng hợp vận hành" />
+            <Head title="Toàn cảnh vận hành" />
 
             <div className="space-y-6">
                 <PageHeader
-                    title="Thống kê tổng hợp theo business"
-                    description="Gom KPI marketing, telesale, kho và đối soát vận chuyển về một màn."
+                    title="Toàn cảnh vận hành"
+                    description="Số liệu marketing, telesale, kho và đối soát vận chuyển gom về một màn hình."
                 />
 
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <StatCard title="Tổng đơn" value={formatNumber(summary.orders_total)} hint="Toàn bộ vòng đời đơn hàng" />
-                    <StatCard title="Đơn giao thành công" value={formatNumber(summary.orders_delivered)} hint="Đã delivered/paid" />
-                    <StatCard title="Lead hôm nay" value={formatNumber(summary.leads_today)} hint="Từ landing + webhook nền tảng" />
-                    <StatCard title="Lệch vận chuyển" value={formatNumber(summary.shipping_mismatch)} hint="Số callback lệch COD" />
+                    <StatCard title="Tổng đơn" value={formatNumber(summary.orders_total)} hint="Toàn bộ đơn hàng trên hệ thống" />
+                    <StatCard title="Đơn giao thành công" value={formatNumber(summary.orders_delivered)} hint="Đã giao hoặc đã thu tiền" />
+                    <StatCard title="Lead hôm nay" value={formatNumber(summary.leads_today)} hint="Từ trang Landing và các kênh quảng cáo" />
+                    <StatCard title="Lệch tiền vận chuyển" value={formatNumber(summary.shipping_mismatch)} hint="Số lần hãng vận chuyển báo lệch COD" />
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-3">

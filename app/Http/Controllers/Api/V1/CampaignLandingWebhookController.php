@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\LeadIngestionResource;
 use App\Http\Traits\ApiResponds;
 use App\Integrations\IntegrationDriverFactory;
-use App\Models\MarketingSource;
+use App\Repositories\MarketingSourceRepository;
 use App\Services\Leads\LeadIngestionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,14 +18,12 @@ class CampaignLandingWebhookController extends Controller
 
     public function __construct(
         protected LeadIngestionService $ingestionService,
+        protected MarketingSourceRepository $sources,
     ) {}
 
     public function receive(Request $request, string $token): JsonResponse
     {
-        $campaign = MarketingSource::query()
-            ->whereNull('parent_id')
-            ->where('webhook_token', $token)
-            ->first();
+        $campaign = $this->sources->findRootByWebhookToken($token);
 
         if (! $campaign) {
             return $this->error('Không tìm thấy nguồn Landing / chiến dịch', 404);

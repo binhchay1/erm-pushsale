@@ -47,7 +47,7 @@ function AccountingDashboardContent({ stats: initialStats }) {
             type: 'warning',
             title: 'Lệch COD',
             value: stats.cod_mismatch,
-            description: 'Cần kiểm tra webhook vận chuyển và số tiền đối soát.',
+            description: 'Cần kiểm tra dữ liệu từ hãng vận chuyển và số tiền đối soát.',
         },
         Number(stats.reconciliation_pending ?? 0) > 0 && {
             type: 'info',

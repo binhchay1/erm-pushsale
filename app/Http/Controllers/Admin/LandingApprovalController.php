@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\MarketingSource;
+use App\Repositories\MarketingSourceRepository;
 use App\Services\Marketing\CampaignLandingService;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
@@ -13,13 +14,12 @@ use Inertia\Response;
 
 class LandingApprovalController extends Controller
 {
-    public function index(Request $request, CampaignLandingService $landing): Response
-    {
-        $campaigns = MarketingSource::query()
-            ->whereNull('parent_id')
-            ->with(['product:id,name', 'marketer:id,name', 'creator:id,name'])
-            ->latest('id')
-            ->get()
+    public function index(
+        Request $request,
+        CampaignLandingService $landing,
+        MarketingSourceRepository $sources,
+    ): Response {
+        $campaigns = $sources->rootCampaignsForApproval()
             ->map(fn (MarketingSource $c) => [
                 'id' => $c->id,
                 'name' => $c->name,

@@ -39,39 +39,39 @@ class NavigationService
     {
         return $this->grouped([
             $this->group('Điều hành', [
-                ['title' => 'Dashboard CEO', 'url' => '/admin/dashboard', 'icon' => 'home'],
-                ['title' => 'Tổng hợp vận hành', 'url' => '/admin/reports/business', 'icon' => 'activity'],
-                ['title' => 'Báo cáo CEO', 'url' => '/admin/reports/ceo', 'icon' => 'bar-chart-3'],
+                ['title' => 'Tổng quan điều hành', 'url' => '/admin/dashboard', 'icon' => 'home'],
+                ['title' => 'Toàn cảnh vận hành', 'url' => '/admin/reports/business', 'icon' => 'activity'],
+                ['title' => 'Báo cáo điều hành', 'url' => '/admin/reports/ceo', 'icon' => 'bar-chart-3'],
                 ['title' => 'Xếp hạng doanh thu', 'url' => '/admin/rankings', 'icon' => 'trophy'],
             ]),
             $this->group('Marketing', [
-                ['title' => 'Dashboard MKT', 'url' => '/admin/marketing/dashboard', 'icon' => 'megaphone'],
-                ['title' => 'Duyệt Landing', 'url' => '/admin/landing-approvals', 'icon' => 'target'],
-                ['title' => 'BC chiến dịch', 'url' => '/admin/marketing/campaign-report', 'icon' => 'bar-chart-3'],
-                ['title' => 'BC doanh số MKT', 'url' => '/admin/marketing/revenue', 'icon' => 'line-chart'],
+                ['title' => 'Tổng quan Marketing', 'url' => '/admin/marketing/dashboard', 'icon' => 'megaphone'],
+                ['title' => 'Duyệt trang Landing', 'url' => '/admin/landing-approvals', 'icon' => 'target'],
+                ['title' => 'Báo cáo chiến dịch', 'url' => '/admin/marketing/campaign-report', 'icon' => 'pie-chart'],
+                ['title' => 'Doanh số Marketing', 'url' => '/admin/marketing/revenue', 'icon' => 'trending-up'],
             ]),
             $this->group('Telesale', [
-                ['title' => 'BC hiệu suất Sale', 'url' => '/admin/sales/performance', 'icon' => 'bar-chart-3'],
-                ['title' => 'BC doanh số Sale', 'url' => '/admin/sales/revenue', 'icon' => 'phone-call'],
-                ['title' => 'Nhật ký lead', 'url' => '/admin/leads', 'icon' => 'refresh-cw'],
+                ['title' => 'Hiệu suất Telesale', 'url' => '/admin/sales/performance', 'icon' => 'gauge'],
+                ['title' => 'Doanh số Telesale', 'url' => '/admin/sales/revenue', 'icon' => 'phone-call'],
+                ['title' => 'Nhật ký lead về', 'url' => '/admin/leads', 'icon' => 'history'],
             ]),
             $this->group('Kết nối & Đối soát', [
-                ['title' => 'Tích hợp nền tảng', 'url' => '/admin/integrations', 'icon' => 'plug'],
-                ['title' => 'API vận chuyển', 'url' => '/admin/shipping-partners', 'icon' => 'truck'],
+                ['title' => 'Kết nối nền tảng', 'url' => '/admin/integrations', 'icon' => 'plug'],
+                ['title' => 'Đối tác vận chuyển', 'url' => '/admin/shipping-partners', 'icon' => 'truck'],
                 ['title' => 'Đơn vận chuyển', 'url' => '/admin/shipping/orders', 'icon' => 'package'],
                 ['title' => 'Đối soát vận chuyển', 'url' => '/admin/shipping/reconciliation', 'icon' => 'file-check'],
             ]),
-            $this->group('Quản trị hệ thống', [
+            $this->group('Nhân sự & Danh mục', [
                 ['title' => 'Nhân viên', 'url' => '/admin/users', 'icon' => 'users'],
-                ['title' => 'Phòng ban', 'url' => '/admin/teams', 'icon' => 'network'],
-                ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
-                ['title' => 'Sản phẩm', 'url' => '/admin/products', 'icon' => 'package'],
+                ['title' => 'Phòng ban & Team', 'url' => '/admin/teams', 'icon' => 'network'],
+                ['title' => 'Sơ đồ nhân sự', 'url' => '/org-chart', 'icon' => 'git-branch'],
+                ['title' => 'Sản phẩm', 'url' => '/admin/products', 'icon' => 'box'],
             ]),
-            $this->group('Nghiệp vụ Vận hành', [
+            $this->group('Kho & Tài chính', [
                 ['title' => 'Kế toán', 'url' => '/admin/accounting', 'icon' => 'wallet'],
-                ['title' => 'Thủ kho', 'url' => '/admin/warehouse/operations', 'icon' => 'clipboard-list'],
                 ['title' => 'Danh sách kho', 'url' => '/admin/warehouses', 'icon' => 'warehouse'],
-                ['title' => 'Tồn kho SP', 'url' => '/admin/warehouse/inventory', 'icon' => 'package'],
+                ['title' => 'Tồn kho sản phẩm', 'url' => '/admin/warehouse/inventory', 'icon' => 'boxes'],
+                ['title' => 'Lịch sử nhập xuất kho', 'url' => '/admin/warehouse/movements', 'icon' => 'clipboard-list'],
                 ['title' => 'Đơn lỗi', 'url' => '/admin/orders/failed', 'icon' => 'alert-triangle'],
             ]),
             $this->group(null, [
@@ -84,12 +84,12 @@ class NavigationService
     private function salesItems(): array
     {
         return [
-            ['title' => 'Dashboard', 'url' => '/sales/dashboard', 'icon' => 'home'],
-            ['title' => 'Tác nghiệp telesale', 'url' => '/sales/workspace', 'icon' => 'phone-call'],
-            ['title' => 'BC hiệu suất', 'url' => '/sales/performance', 'icon' => 'bar-chart-3'],
+            ['title' => 'Tổng quan', 'url' => '/sales/dashboard', 'icon' => 'home'],
+            ['title' => 'Gọi & chốt đơn', 'url' => '/sales/workspace', 'icon' => 'phone-call'],
+            ['title' => 'Báo cáo hiệu suất', 'url' => '/sales/performance', 'icon' => 'bar-chart-3'],
             ['title' => 'Xếp hạng doanh thu', 'url' => '/sales/rankings', 'icon' => 'trophy'],
-            ['title' => 'Hồ sơ KH', 'url' => '/sales/customers', 'icon' => 'clipboard-list'],
-            ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
+            ['title' => 'Hồ sơ khách hàng', 'url' => '/sales/customers', 'icon' => 'users'],
+            ['title' => 'Sơ đồ nhân sự', 'url' => '/org-chart', 'icon' => 'git-branch'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }
@@ -98,13 +98,13 @@ class NavigationService
     private function marketingItems(): array
     {
         return [
-            ['title' => 'Dashboard', 'url' => '/marketing/dashboard', 'icon' => 'home'],
-            ['title' => 'Báo cáo nguồn', 'url' => '/marketing/workspace', 'icon' => 'megaphone'],
-            ['title' => 'BC chiến dịch', 'url' => '/marketing/campaign-report', 'icon' => 'bar-chart-3'],
-            ['title' => 'Kết nối Landing', 'url' => '/marketing/campaigns', 'icon' => 'target'],
-            ['title' => 'Doanh thu MKT', 'url' => '/marketing/revenue', 'icon' => 'line-chart'],
+            ['title' => 'Tổng quan', 'url' => '/marketing/dashboard', 'icon' => 'home'],
+            ['title' => 'Báo cáo nguồn quảng cáo', 'url' => '/marketing/workspace', 'icon' => 'megaphone'],
+            ['title' => 'Báo cáo chiến dịch', 'url' => '/marketing/campaign-report', 'icon' => 'pie-chart'],
+            ['title' => 'Trang Landing', 'url' => '/marketing/campaigns', 'icon' => 'target'],
+            ['title' => 'Báo cáo doanh số', 'url' => '/marketing/revenue', 'icon' => 'trending-up'],
             ['title' => 'Xếp hạng doanh thu', 'url' => '/marketing/rankings', 'icon' => 'trophy'],
-            ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
+            ['title' => 'Sơ đồ nhân sự', 'url' => '/org-chart', 'icon' => 'git-branch'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }
@@ -113,11 +113,11 @@ class NavigationService
     private function warehouseItems(): array
     {
         return [
-            ['title' => 'Dashboard', 'url' => '/warehouse/dashboard', 'icon' => 'home'],
-            ['title' => 'Tác nghiệp kho', 'url' => '/warehouse/workspace', 'icon' => 'truck'],
+            ['title' => 'Tổng quan', 'url' => '/warehouse/dashboard', 'icon' => 'home'],
+            ['title' => 'Xuất kho & vận đơn', 'url' => '/warehouse/workspace', 'icon' => 'truck'],
             ['title' => 'Đơn vận chuyển', 'url' => '/warehouse/shipping/orders', 'icon' => 'package'],
-            ['title' => 'Tồn kho', 'url' => '/warehouse/inventory', 'icon' => 'package'],
-            ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
+            ['title' => 'Tồn kho sản phẩm', 'url' => '/warehouse/inventory', 'icon' => 'boxes'],
+            ['title' => 'Sơ đồ nhân sự', 'url' => '/org-chart', 'icon' => 'git-branch'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }
@@ -126,9 +126,9 @@ class NavigationService
     private function accountingItems(): array
     {
         return [
-            ['title' => 'Dashboard', 'url' => '/accounting/dashboard', 'icon' => 'home'],
-            ['title' => 'Tác nghiệp kế toán', 'url' => '/accounting/workspace', 'icon' => 'wallet'],
-            ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
+            ['title' => 'Tổng quan', 'url' => '/accounting/dashboard', 'icon' => 'home'],
+            ['title' => 'Theo dõi đơn & dòng tiền', 'url' => '/accounting/workspace', 'icon' => 'wallet'],
+            ['title' => 'Sơ đồ nhân sự', 'url' => '/org-chart', 'icon' => 'git-branch'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }
@@ -137,9 +137,9 @@ class NavigationService
     private function allocatorItems(): array
     {
         return [
-            ['title' => 'Dashboard', 'url' => '/allocator/dashboard', 'icon' => 'home'],
-            ['title' => 'Chia số & lead', 'url' => '/allocator/workspace', 'icon' => 'refresh-cw'],
-            ['title' => 'Sơ đồ tổ chức', 'url' => '/org-chart', 'icon' => 'git-branch'],
+            ['title' => 'Tổng quan', 'url' => '/allocator/dashboard', 'icon' => 'home'],
+            ['title' => 'Chia số cho sale', 'url' => '/allocator/workspace', 'icon' => 'refresh-cw'],
+            ['title' => 'Sơ đồ nhân sự', 'url' => '/org-chart', 'icon' => 'git-branch'],
             ['title' => 'Cài đặt', 'url' => '/settings', 'icon' => 'settings'],
         ];
     }

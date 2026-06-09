@@ -6,25 +6,23 @@ use App\Enums\LeadIngestionStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\LeadIngestion;
-use App\Models\User;
+use App\Repositories\LeadIngestionRepository;
+use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class LeadsLogController extends Controller
 {
-    public function __invoke(Request $request): Response
-    {
+    public function __invoke(
+        Request $request,
+        LeadIngestionRepository $leadRepo,
+        UserRepository $users,
+    ): Response {
         $platform = $request->query('platform');
         $status = $request->query('status');
 
-        $leads = LeadIngestion::query()
-            ->with('order:id,order_code,customer_name,sale_user_id')
-            ->when($platform, fn ($q) => $q->where('platform', $platform))
-            ->when($status, fn ($q) => $q->where('status', $status))
-            ->latest()
-            ->paginate(25)
-            ->withQueryString()
+        $leads = $leadRepo->paginatedLog($platform, $status)
             ->through(fn (LeadIngestion $lead) => [
                 'id' => $lead->id,
                 'platform' => $lead->platform,
@@ -50,11 +48,8 @@ class LeadsLogController extends Controller
             'statuses' => collect(LeadIngestionStatus::cases())
                 ->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()])
                 ->all(),
-            'salesUsers' => User::query()
-                ->where('role', UserRole::Sales)
-                ->orderBy('name')
-                ->get(['id', 'name'])
-                ->map(fn (User $u) => ['id' => (string) $u->id, 'name' => $u->name])
+            'salesUsers' => collect($users->nameOptionsByRoles([UserRole::Sales]))
+                ->map(fn (array $u) => ['id' => (string) $u['id'], 'name' => $u['name']])
                 ->all(),
             'allocateUrl' => $request->is('allocator/*')
                 ? '/allocator/leads/allocate'

@@ -9,13 +9,22 @@ use App\Enums\DiscountMode;
 use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Enums\UserRole;
-use App\Models\Product;
 use App\Models\Team;
 use App\Models\User;
-use App\Models\Warehouse;
+use App\Repositories\ProductRepository;
+use App\Repositories\TeamRepository;
+use App\Repositories\UserRepository;
+use App\Repositories\WarehouseRepository;
 
 class FilterOptionsService
 {
+    public function __construct(
+        private readonly TeamRepository $teams,
+        private readonly ProductRepository $products,
+        private readonly WarehouseRepository $warehouses,
+        private readonly UserRepository $users,
+    ) {}
+
     /** @return array<string, mixed> */
     public function forReports(?User $user = null): array
     {
@@ -38,12 +47,12 @@ class FilterOptionsService
             ])->values(),
             'operationResults' => OperationResult::filterOptions(),
             'closingStatuses' => ClosingStatus::options(),
-            'teams' => Team::query()->orderBy('name')->get(['id', 'name', 'type']),
-            'products' => Product::query()->orderBy('name')->get(['id', 'name', 'sku', 'parent_id']),
-            'parentProducts' => Product::query()->whereNull('parent_id')->orderBy('name')->get(['id', 'name']),
-            'warehouses' => Warehouse::query()->orderBy('name')->get(['id', 'name', 'code']),
-            'salesUsers' => User::query()->where('role', UserRole::Sales)->get(['id', 'name', 'email']),
-            'marketingUsers' => User::query()->where('role', UserRole::Marketing)->get(['id', 'name', 'email']),
+            'teams' => $this->teams->optionsWithType(),
+            'products' => $this->products->options(),
+            'parentProducts' => $this->products->parentProducts(),
+            'warehouses' => $this->warehouses->options(),
+            'salesUsers' => $this->users->byRole(UserRole::Sales),
+            'marketingUsers' => $this->users->byRole(UserRole::Marketing),
             'sourceTypes' => [
                 ['value' => 'standard', 'label' => 'Chuẩn SaleOps'],
             ],
@@ -75,6 +84,27 @@ class FilterOptionsService
         ];
 
         if (! $user?->isSales()) {
+            $fields[] = 'sale_id';
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Báo cáo tổng hợp doanh số — tập trung tỷ lệ chốt/doanh thu,
+     * không cần ô tìm tên/SĐT. Màn marketing lọc theo NV marketing (không phải sales).
+     *
+     * @return list<string>
+     */
+    public function revenueReportFilterFields(?User $user = null, string $department = 'sale'): array
+    {
+        $fields = ['date_from', 'date_to', 'product_id'];
+
+        if ($department === 'marketing') {
+            if ($user?->role !== UserRole::Marketing) {
+                $fields[] = 'marketer_id';
+            }
+        } elseif (! $user?->isSales()) {
             $fields[] = 'sale_id';
         }
 
@@ -136,6 +166,12 @@ class FilterOptionsService
     }
 
     /** @return list<string> */
+    public function warehouseOperationFilterFields(): array
+    {
+        return ['date_from', 'date_to', 'product_id', 'search', 'warehouse_id'];
+    }
+
+    /** @return list<string> */
     public function leadsFilterFields(): array
     {
         return ['search'];
@@ -153,7 +189,7 @@ class FilterOptionsService
                 'value' => $e->value,
                 'label' => $e->label(),
             ])->values(),
-            'teams' => Team::query()->orderBy('name')->get(['id', 'name', 'type']),
+            'teams' => $this->teams->optionsWithType(),
             'teamLeaders' => User::query()
                 ->where(function ($q) {
                     $q->where('is_team_leader', true)

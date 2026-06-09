@@ -92,14 +92,16 @@ flowchart TB
 
 | Vai trò | Mã | Email demo | Việc chính |
 |---------|-----|------------|------------|
-| **Quản trị** | `admin` | `admin@saleops.local` | Toàn hệ thống: báo cáo CEO, duyệt landing, tích hợp, vận hành |
+| **Quản trị** | `admin` | `admin@saleops.local` | Toàn hệ thống: báo cáo CEO, duyệt landing, tích hợp, vận hành, lịch sử nhập xuất kho |
 | **Telesale** | `sales` | `sales@saleops.local` | Gọi khách, chuyển trạng thái, chốt đơn — chỉ thấy đơn được gán |
 | **Marketing** | `marketing` | `marketing@saleops.local` | Tạo chiến dịch, copy URL webhook sang Ladipage, xem hiệu quả |
-| **Kho** | `warehouse` | `warehouse@saleops.local` | Xuất hàng, tạo vận đơn, quản lý tồn |
+| **Kho** | `warehouse` | `warehouse@saleops.local` | Xuất hàng, tạo vận đơn, quản lý tồn — phiếu nhập/xuất cần trưởng kho duyệt |
 | **Chia số** | `allocator` | `allocator@saleops.local` | Theo dõi lead, xử lý lead chờ / lỗi, phân bổ thủ công |
 | **Kế toán** | `accounting` | `accounting@saleops.local` | Đối soát COD, chuyển khoản, trạng thái giao hàng |
 
 Mật khẩu demo: **`password`**
+
+Mỗi bộ phận có chuỗi cấp bậc **Trưởng bộ phận (head) → Trưởng nhóm (supervisor) → Nhân viên (staff)** — tài khoản demo cho từng cấp (vd. `head.sale@`, `leader.sale.a@`) liệt kê tại [README](./README.md) và `database/seeders/AccountSeeder.php`. Trưởng kho (`head.warehouse@saleops.local`) là người ký duyệt mọi phiếu nhập / xuất kho thủ công.
 
 ### Nguyên tắc phân quyền
 

@@ -33,7 +33,7 @@ function WarehouseDashboardContent({ stats: initialStats }) {
             icon: Package,
         },
         {
-            title: 'SP sắp hết',
+            title: 'Sản phẩm sắp hết hàng',
             value: formatNumber(stats.low_stock_items ?? stats.stock_issues),
             hint: 'SKU tồn thấp cần xử lý',
             icon: AlertTriangle,

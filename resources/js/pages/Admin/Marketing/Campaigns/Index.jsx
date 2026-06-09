@@ -4,12 +4,21 @@ import { Pencil, Plus, Target, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/hooks/use-confirm';
 import { formatCurrency } from '@/lib/format';
 import AppLayout from '@/layouts/AppLayout';
 
 export default function CampaignIndex({ baseUrl, campaigns }) {
-    const remove = (id, name) => {
-        if (!window.confirm(`Xóa chiến dịch "${name}"?`)) return;
+    const { ask, ConfirmDialogPortal } = useConfirm();
+
+    const remove = async (id, name) => {
+        const ok = await ask({
+            title: 'Xóa chiến dịch',
+            description: `Xóa chiến dịch "${name}"?`,
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
+        if (!ok) return;
         router.delete(`${baseUrl}/${id}`);
     };
 
@@ -106,6 +115,8 @@ export default function CampaignIndex({ baseUrl, campaigns }) {
                     </table>
                 </ScrollDataTable>
             </div>
+
+            <ConfirmDialogPortal />
         </AppLayout>
     );
 }

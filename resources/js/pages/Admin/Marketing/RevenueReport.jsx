@@ -4,21 +4,30 @@ import AppLayout from '@/layouts/AppLayout';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { RevenueMetricsTable } from '@/components/reports/RevenueMetricsTable';
 
-export default function MarketingRevenueReport({ filters, filterOptions, report }) {
+export default function MarketingRevenueReport({
+    filters,
+    filterOptions,
+    filterFields,
+    report,
+    routeUrl = '/admin/marketing/revenue',
+}) {
     return (
         <AppLayout>
-            <Head title="BC doanh số Marketing" />
+            <Head title="Doanh số Marketing" />
 
             <div className="space-y-6">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Báo cáo doanh số Marketing</h1>
-                    <p className="text-sm text-muted-foreground">Công thức chỉ số (1)–(19)</p>
+                    <p className="text-sm text-muted-foreground">
+                        Tổng hợp số đơn, tỷ lệ chốt và doanh thu theo từng nhân viên Marketing
+                    </p>
                 </div>
 
                 <ReportFilterBar
-                    routeUrl="/admin/marketing/revenue"
+                    routeUrl={routeUrl}
                     filters={filters}
                     filterOptions={filterOptions}
+                    filterFields={filterFields}
                 />
 
                 <ul className="flex flex-wrap gap-2 text-xs text-muted-foreground">

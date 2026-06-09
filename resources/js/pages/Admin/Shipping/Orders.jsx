@@ -6,8 +6,9 @@ import AppLayout from '@/layouts/AppLayout';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { ShippingOrderDetailModal } from '@/components/shipping/ShippingOrderDetailModal';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { deliveryTone, shipmentTone } from '@/lib/status-tones';
 import { formatCurrency } from '@/lib/format';
-import { cn } from '@/lib/utils';
 
 export default function ShippingOrders({ filters, filterOptions, orders, pageTitle, routeUrl }) {
     const [selectedId, setSelectedId] = useState(null);
@@ -56,20 +57,21 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
                                         <Td className="text-muted-foreground">
                                             {row.closedAt?.slice(0, 16)?.replace('T', ' ')}
                                         </Td>
-                                        <Td>{row.deliveryStatus}</Td>
+                                        <Td>
+                                            <StatusBadge tone={deliveryTone(row.deliveryStatusValue)}>
+                                                {row.deliveryStatus}
+                                            </StatusBadge>
+                                        </Td>
                                         <Td>
                                             <div className="font-mono text-xs">
                                                 {row.trackingNumber ?? '—'}
                                             </div>
-                                            <div
-                                                className={cn(
-                                                    'text-xs',
-                                                    row.shipmentState === 'failed' && 'text-destructive',
-                                                    row.shipmentState === 'submitted' && 'text-emerald-600'
-                                                )}
+                                            <StatusBadge
+                                                tone={shipmentTone(row.shipmentState)}
+                                                className="mt-1"
                                             >
                                                 {row.shipmentStatus ?? row.shipmentState ?? 'Chưa tạo'}
-                                            </div>
+                                            </StatusBadge>
                                             {row.shipmentError && (
                                                 <p className="text-xs text-destructive">{row.shipmentError}</p>
                                             )}

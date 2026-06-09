@@ -2,31 +2,52 @@ import { Head } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
-import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
 import { StatusTabs } from '@/components/operations/StatusTabs';
+import { WarehouseOrderTable } from '@/components/operations/WarehouseOrderTable';
 
-export default function WarehouseOperations({ filters, filterOptions, report, pageTitle }) {
+export default function WarehouseOperations({
+    filters,
+    filterOptions,
+    filterFields,
+    report,
+    pageTitle,
+    routeUrl = '/admin/warehouse/operations',
+    shippingApiBase = '/admin/shipping/orders',
+    canDeleteOrder = false,
+}) {
     return (
         <AppLayout>
-            <Head title={pageTitle ?? 'Thủ kho tác nghiệp'} />
+            <Head title={pageTitle ?? 'Xuất kho & vận đơn'} />
 
             <div className="space-y-4">
-                <h1 className="text-2xl font-bold tracking-tight">{pageTitle ?? 'Thủ kho tác nghiệp'}</h1>
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        {pageTitle ?? 'Xuất kho & vận đơn'}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Đơn đã chốt chờ xuất kho — tạo vận đơn, in vận đơn và theo dõi giao hàng.
+                    </p>
+                </div>
 
                 <ReportFilterBar
-                    routeUrl="/admin/warehouse/operations"
+                    routeUrl={routeUrl}
                     filters={filters}
                     filterOptions={filterOptions}
+                    filterFields={filterFields}
                 />
 
                 <StatusTabs
-                    routeUrl="/admin/warehouse/operations"
+                    routeUrl={routeUrl}
                     filters={filters}
                     tabs={report.statusTabs}
                     filterKey="delivery_status"
                 />
 
-                <OperationOrderTable rows={report.rows} enableDeleteOrder />
+                <WarehouseOrderTable
+                    rows={report.rows}
+                    apiBase={shippingApiBase}
+                    canDeleteOrder={canDeleteOrder}
+                />
             </div>
         </AppLayout>
     );

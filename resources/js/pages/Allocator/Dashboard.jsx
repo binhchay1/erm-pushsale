@@ -19,7 +19,7 @@ function AllocatorDashboardContent({ stats: initialStats }) {
         {
             title: 'Lead hôm nay',
             value: formatNumber(stats.leads_today),
-            hint: 'Lead ingest từ webhook/platform',
+            hint: 'Lead đổ về từ các kênh quảng cáo',
             icon: Inbox,
         },
         {
