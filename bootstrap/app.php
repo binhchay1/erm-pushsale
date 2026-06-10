@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Inertia\Support\Header;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -39,10 +38,9 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Chỉ API / request expectsJson — KHÔNG ép JSON cho Inertia (form validate cần redirect + session errors)
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*')
-                || $request->header(Header::INERTIA)
-                || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
         // Trang lỗi custom (Inertia) — đồng bộ giao diện SaleOps

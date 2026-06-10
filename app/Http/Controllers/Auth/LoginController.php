@@ -20,10 +20,14 @@ class LoginController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        try {
+            $credentials = $request->validate([
+                'email' => ['required', 'email'],
+                'password' => ['required', 'string'],
+            ]);
+        } catch (ValidationException $e) {
+            throw $e->redirectTo(route('login'));
+        }
 
         $remember = $request->boolean('remember');
 
