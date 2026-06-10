@@ -9,7 +9,9 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Inertia\Support\Header;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -38,12 +40,18 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
-            true
+            fn (Request $request) => $request->is('api/*')
+                || $request->header(Header::INERTIA)
+                || $request->expectsJson(),
         );
 
         // Trang lỗi custom (Inertia) — đồng bộ giao diện SaleOps
         $exceptions->render(function (Throwable $e, Request $request) {
+            // Để Laravel/Inertia xử lý lỗi validate (422 + errors trên form)
+            if ($e instanceof ValidationException) {
+                return null;
+            }
+
             if ($request->is('api/*') || $request->expectsJson()) {
                 return null;
             }
