@@ -75,7 +75,7 @@ class WebhookController extends Controller
                 $this->configService->touchSynced($enum);
             }
 
-            return $this->success(['processed' => $processed], 'Facebook webhook processed');
+            return $this->success(['processed' => $processed], 'Đã xử lý webhook Facebook.');
         }
 
         $ingestion = $this->ingestionService->ingest($driver, $request->all());
@@ -83,7 +83,7 @@ class WebhookController extends Controller
 
         return $this->created(
             new LeadIngestionResource($ingestion->load('order')),
-            'Webhook processed'
+            'Đã xử lý webhook.'
         );
     }
 }

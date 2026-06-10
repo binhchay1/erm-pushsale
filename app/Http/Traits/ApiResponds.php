@@ -40,7 +40,7 @@ trait ApiResponds
         return response()->json($body, $status);
     }
 
-    protected function created(mixed $data = null, ?string $message = 'Created'): JsonResponse
+    protected function created(mixed $data = null, ?string $message = 'Đã tạo thành công.'): JsonResponse
     {
         return $this->success($data, $message, 201);
     }

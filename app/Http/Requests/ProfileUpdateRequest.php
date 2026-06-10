@@ -26,6 +26,7 @@ class ProfileUpdateRequest extends FormRequest
         return [
             'password.required' => 'Vui lòng nhập mật khẩu mới.',
             'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
+            'password.min' => 'Mật khẩu phải có ít nhất :min ký tự.',
         ];
     }
 }

@@ -46,6 +46,6 @@ class ShippingWebhookController extends Controller
             'result' => $event->result,
             'order_id' => $event->order_id,
             'cod_mismatch' => $event->is_cod_mismatch,
-        ], 'Shipping webhook processed');
+        ], 'Đã xử lý webhook vận chuyển.');
     }
 }

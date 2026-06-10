@@ -25,26 +25,26 @@ function AllocatorDashboardContent({ stats: initialStats }) {
         {
             title: 'Chờ phân số',
             value: formatNumber(stats.pending_routing),
-            hint: 'Lead cần routing sang sale',
+            hint: 'Lead cần phân số cho sale',
             icon: GitBranch,
         },
         {
             title: 'Đã xử lý',
             value: formatNumber(stats.processed_today),
-            hint: 'Lead processed trong kỳ',
+            hint: 'Lead đã xử lý trong kỳ',
             icon: CopyCheck,
             accent: true,
         },
         {
             title: 'Lead lỗi',
             value: formatNumber(stats.failed_leads),
-            hint: 'Lead ingest thất bại cần retry',
+            hint: 'Lead nhận về thất bại — cần thử lại',
             icon: AlertTriangle,
         },
         {
             title: 'Trùng số',
             value: formatNumber(stats.duplicate_leads),
-            hint: 'Lead duplicate theo phone/external id',
+            hint: 'Lead trùng số điện thoại hoặc mã ngoài',
             icon: UsersRound,
         },
     ];
@@ -54,13 +54,13 @@ function AllocatorDashboardContent({ stats: initialStats }) {
             type: 'info',
             title: 'Chờ phân số',
             value: stats.pending_routing,
-            description: 'Lead mới cần được routing tới sale phù hợp.',
+            description: 'Lead mới cần được phân số cho sale phù hợp.',
         },
         Number(stats.failed_leads ?? 0) > 0 && {
             type: 'danger',
             title: 'Lead lỗi',
             value: stats.failed_leads,
-            description: 'Lead ingest lỗi cần kiểm tra payload hoặc retry.',
+            description: 'Lead nhận về lỗi — kiểm tra dữ liệu gửi lên hoặc thử lại.',
         },
         Number(stats.duplicate_leads ?? 0) > 0 && {
             type: 'warning',
@@ -74,7 +74,7 @@ function AllocatorDashboardContent({ stats: initialStats }) {
         <div className="space-y-6">
             <PageHeader
                 title="Dashboard Chia số"
-                description="Theo dõi lead ingest, routing, lỗi payload và nguồn lead theo thời gian gần thực."
+                description="Theo dõi lead đổ về, phân số, lỗi dữ liệu và nguồn lead theo thời gian gần thực."
                 actions={<RealtimeBadge connected={connected} />}
             />
 
@@ -87,7 +87,7 @@ function AllocatorDashboardContent({ stats: initialStats }) {
             <div className="grid gap-4 lg:grid-cols-3">
                 <RevenueAreaChart
                     data={stats.lead_series}
-                    title="Lead ingest 7 ngày"
+                    title="Lead đổ về 7 ngày"
                     description="Số lead đổ về hệ thống theo ngày"
                     valueFormatter={(v) => formatNumber(v)}
                     yTickFormatter={(v) => String(v)}
@@ -99,13 +99,13 @@ function AllocatorDashboardContent({ stats: initialStats }) {
                 <RevenueAreaChart
                     data={stats.processed_series}
                     title="Lead xử lý 7 ngày"
-                    description="Lead processed theo ngày"
+                    description="Số lead đã xử lý theo ngày"
                     valueFormatter={(v) => formatNumber(v)}
                     yTickFormatter={(v) => String(v)}
                 />
                 <OrdersBarChart
                     data={stats.routing_status_breakdown}
-                    title="Trạng thái routing"
+                    title="Trạng thái phân số"
                     description="Lead chờ phân số, lỗi và trùng"
                 />
             </div>

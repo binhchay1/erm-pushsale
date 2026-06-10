@@ -29,7 +29,7 @@ function AdminDashboardContent({ stats: initialStats }) {
                     <RevenueAreaChart
                         data={stats.revenue_series}
                         title="Doanh thu 7 ngày"
-                        description="Doanh thu từ đơn delivered/paid"
+                        description="Doanh thu từ đơn đã giao / đã thanh toán"
                     />
                     <OrdersBarChart
                         data={stats.orders_series}
@@ -42,7 +42,7 @@ function AdminDashboardContent({ stats: initialStats }) {
                     <RevenueAreaChart
                         data={stats.lead_series}
                         title="Lead 7 ngày"
-                        description="Lead ingest theo ngày"
+                        description="Số lead đổ về theo ngày"
                         valueFormatter={(v) => formatNumber(v)}
                         yTickFormatter={(v) => String(v)}
                     />

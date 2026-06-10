@@ -13,6 +13,8 @@ use App\Services\Shipping\Carriers\Jnt\JntCarrier;
 use App\Services\Shipping\Carriers\Spx\SpxCarrier;
 use App\Services\Shipping\Carriers\ViettelPost\ViettelPostCarrier;
 use App\Services\Shipping\Support\PartnerCredentialResolver;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -35,6 +37,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        App::setLocale(config('app.locale'));
+        Carbon::setLocale(config('app.locale'));
+
         Event::listen(
             OrderClosed::class,
             DispatchShipmentOnOrderClosed::class,

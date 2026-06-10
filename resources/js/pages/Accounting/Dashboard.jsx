@@ -76,7 +76,7 @@ function AccountingDashboardContent({ stats: initialStats }) {
                     className="col-span-full lg:col-span-1"
                     data={stats.revenue_series}
                     title="Doanh thu 7 ngày"
-                    description="Doanh thu delivered/paid theo ngày"
+                    description="Doanh thu đã giao / đã thanh toán theo ngày"
                     valueFormatter={(v) => formatCurrency(v)}
                 />
                 <RevenueAreaChart

@@ -61,7 +61,7 @@ function MarketingDashboardContent({ stats: initialStats }) {
                 <RevenueAreaChart
                     data={stats.lead_series}
                     title="Lead 7 ngày"
-                    description="Lead ingest theo ngày"
+                    description="Số lead đổ về theo ngày"
                     valueFormatter={(v) => formatNumber(v)}
                     yTickFormatter={(v) => String(v)}
                 />
@@ -77,7 +77,7 @@ function MarketingDashboardContent({ stats: initialStats }) {
                 <RevenueAreaChart
                     data={stats.revenue_series}
                     title="Doanh thu 7 ngày"
-                    description="Doanh thu delivered/paid từ campaign"
+                    description="Doanh thu đã giao / đã thanh toán từ chiến dịch"
                 />
             </div>
 

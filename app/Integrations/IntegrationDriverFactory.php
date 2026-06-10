@@ -17,7 +17,7 @@ class IntegrationDriverFactory
         $class = config("integrations.platforms.{$key}.driver");
 
         if (! $class || ! class_exists($class)) {
-            throw new InvalidArgumentException("Integration driver not found: {$key}");
+            throw new InvalidArgumentException("Chưa cấu hình driver tích hợp cho nền tảng: {$key}");
         }
 
         return match ($key) {

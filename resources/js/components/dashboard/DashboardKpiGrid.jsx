@@ -10,7 +10,7 @@ export function DashboardKpiGrid({ stats }) {
         {
             title: 'Doanh thu hôm nay',
             value: formatCurrency(stats.revenue_today),
-            hint: 'Đơn delivered/paid trong ngày',
+            hint: 'Đơn đã giao / đã thanh toán trong ngày',
             icon: TrendingUp,
             accent: true,
         },
