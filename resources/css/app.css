@@ -134,7 +134,19 @@
     }
   html {
     @apply font-sans overflow-x-hidden;
+    /* Giữ chỗ cho thanh cuộn — tránh layout nhảy ~10px khi Dialog/Modal khóa scroll body */
+    scrollbar-gutter: stable;
     }
+  @supports not (scrollbar-gutter: stable) {
+    html {
+      overflow-y: scroll;
+    }
+  }
+  /* Radix Dialog dùng react-remove-scroll — đã có scrollbar-gutter thì không bù padding nữa */
+  body[data-scroll-locked] {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
   body {
     @apply bg-background text-foreground overflow-x-hidden max-w-[100vw];
     }

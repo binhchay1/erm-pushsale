@@ -18,6 +18,7 @@ import {
 import { StatusBadge } from '@/components/ui/status-badge';
 import { apiPost } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
+import { openShippingLabel } from '@/lib/shipping';
 import { deliveryTone } from '@/lib/status-tones';
 
 function formatDate(value) {
@@ -246,10 +247,8 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                                                     variant="outline"
                                                     className="w-full"
                                                     onClick={() =>
-                                                        window.open(
-                                                            `${apiBase}/${row.id}/label`,
-                                                            '_blank',
-                                                            'noopener,noreferrer'
+                                                        openShippingLabel(`${apiBase}/${row.id}/label`).catch(
+                                                            (e) => toast.error(e.message)
                                                         )
                                                     }
                                                 >

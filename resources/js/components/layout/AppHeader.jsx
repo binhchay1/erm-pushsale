@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { PageInfoButton } from '@/components/layout/PageInfoButton';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { NotificationBell } from '@/components/layout/NotificationBell';
 import { UserMenu } from '@/components/layout/UserMenu';
@@ -23,6 +24,7 @@ export function AppHeader() {
                 </p>
             </div>
             <div className="flex items-center gap-0.5">
+                <PageInfoButton />
                 <ThemeToggle />
                 <NotificationBell />
                 <UserMenu />

@@ -148,6 +148,7 @@ Các endpoint dưới đây là thiết kế mục tiêu — triển khai khi c�
 | GET | `/admin/dashboard` | admin.dashboard | Dashboard CEO |
 | GET | `/admin/reports/business` | admin.reports.business | Báo cáo tổng hợp |
 | GET | `/admin/reports/ceo` | admin.reports.ceo | Báo cáo CEO |
+| GET | `/admin/reports/extra/{report}` | admin.reports.extra | Báo cáo bổ sung (sale-1…5, marketing-1…2, kho-1…2) |
 | GET | `/admin/marketing/dashboard` | admin.marketing.dashboard | Dashboard MKT |
 | GET | `/admin/marketing/revenue` | admin.marketing.revenue | BC doanh số MKT |
 | GET | `/admin/marketing/campaign-report` | admin.marketing.campaign-report | BC chiến dịch |
@@ -199,6 +200,7 @@ Các endpoint dưới đây là thiết kế mục tiêu — triển khai khi c�
 | POST | `/sales/orders/{id}/operation-status` | sales.orders.operation-status | Chuyển trạng thái |
 | POST | `/sales/orders/{id}/close` | sales.orders.close | Chốt đơn |
 | GET | `/sales/customers` | sales.customers | Hồ sơ KH |
+| GET | `/sales/reports/{report}` | sales.reports.extra | Báo cáo bổ sung Telesale (nhân viên chỉ thấy dữ liệu của mình) |
 
 ### Marketing (`role:marketing`, prefix `/marketing`)
 
@@ -216,6 +218,7 @@ Các endpoint dưới đây là thiết kế mục tiêu — triển khai khi c�
 | GET | `/marketing/revenue` | marketing.revenue | BC doanh số |
 | GET | `/marketing/campaign-report` | marketing.campaign-report | BC chiến dịch |
 | PATCH | `/marketing/campaigns/{id}/budget` | marketing.campaigns.budget | |
+| GET | `/marketing/reports/{report}` | marketing.reports.extra | Báo cáo bổ sung MKT (marketing-1, marketing-2 cho trưởng nhóm) |
 
 ### Warehouse (`role:warehouse`, prefix `/warehouse`)
 
@@ -228,6 +231,7 @@ Các endpoint dưới đây là thiết kế mục tiêu — triển khai khi c�
 | POST | `/warehouse/inventory/export` | warehouse.inventory.export | Xuất kho (có người duyệt) |
 | GET | `/warehouse/shipping/orders` | warehouse.shipping.orders | Đơn VC |
 | POST/GET | `/warehouse/shipping/orders/{id}/*` | warehouse.shipping.orders.* | create/sync/fee/cancel/label |
+| GET | `/warehouse/reports/{report}` | warehouse.reports.extra | Báo cáo bổ sung (kho-1, chỉ trưởng kho) |
 
 ### Accounting (`role:accounting`, prefix `/accounting`)
 
@@ -235,6 +239,7 @@ Các endpoint dưới đây là thiết kế mục tiêu — triển khai khi c�
 |--------|------|------|-------|
 | GET | `/accounting/dashboard` | accounting.dashboard | Dashboard |
 | GET | `/accounting/workspace` | accounting.workspace | Tác nghiệp |
+| GET | `/accounting/reports/{report}` | accounting.reports.extra | Báo cáo bổ sung (kho-1, kho-2) |
 
 ### Allocator (`role:allocator`, prefix `/allocator`)
 

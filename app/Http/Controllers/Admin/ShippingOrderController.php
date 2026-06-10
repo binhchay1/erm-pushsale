@@ -70,7 +70,10 @@ class ShippingOrderController extends Controller
         $provider = $request->string('provider')->toString() ?: null;
         $service->sync($order, $provider);
 
-        return response()->json($presenter->detail($order->fresh()));
+        return response()->json(array_merge(
+            ['success' => true, 'message' => 'Đã đồng bộ trạng thái từ hãng vận chuyển.'],
+            $presenter->detail($order->fresh()),
+        ));
     }
 
     public function calculateFee(Request $request, Order $order, CreateShipmentService $service): JsonResponse
@@ -85,7 +88,10 @@ class ShippingOrderController extends Controller
         $provider = $request->string('provider')->toString() ?: null;
         $service->cancel($order, $provider);
 
-        return response()->json($presenter->detail($order->fresh()));
+        return response()->json(array_merge(
+            ['success' => true, 'message' => 'Đã hủy vận đơn.'],
+            $presenter->detail($order->fresh()),
+        ));
     }
 
     public function printLabel(Request $request, Order $order, CreateShipmentService $service): Response|JsonResponse

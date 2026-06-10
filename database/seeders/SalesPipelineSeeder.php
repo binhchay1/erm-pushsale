@@ -299,8 +299,9 @@ class SalesPipelineSeeder extends Seeder
             return null;
         }
 
+        // Rải lịch hẹn trong 7 ngày tới để báo cáo lịch hẹn telesales có dữ liệu mỗi ngày
         return in_array($result, [OperationResult::CallbackScheduled, OperationResult::Considering, OperationResult::SentQuote], true)
-            ? now()->addHours(mt_rand(2, 48))
+            ? now()->addDays(mt_rand(0, 6))->setTime(mt_rand(8, 18), [0, 15, 30, 45][mt_rand(0, 3)])
             : null;
     }
 

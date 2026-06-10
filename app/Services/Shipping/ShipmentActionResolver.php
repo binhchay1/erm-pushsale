@@ -23,6 +23,20 @@ class ShipmentActionResolver
     ];
 
     /**
+     * Đơn đã chốt sổ giao hàng — không cho tạo vận đơn / tính phí nữa.
+     * Riêng "hủy vận đơn" (cancel_waybill) vẫn cho tạo lại vận đơn mới.
+     */
+    private const ORDER_FINAL = [
+        'delivered',
+        'paid',
+        'returned',
+        'returning',
+        'refund',
+        'cancel_closing',
+        'cannot_deliver',
+    ];
+
+    /**
      * @return array{
      *     canCreate: bool,
      *     canSync: bool,
@@ -37,17 +51,19 @@ class ShipmentActionResolver
         $hasTracking = filled($shipment?->tracking_number);
         $isSubmitted = $state === Shipment::STATE_SUBMITTED;
         $isRetryable = in_array($state, [Shipment::STATE_FAILED, Shipment::STATE_CANCELLED], true);
-        $deliveryTerminal = in_array((string) ($order?->delivery_status ?? ''), self::DELIVERY_TERMINAL, true);
+        $deliveryStatus = (string) ($order?->delivery_status ?? '');
+        $deliveryTerminal = in_array($deliveryStatus, self::DELIVERY_TERMINAL, true);
+        $orderFinal = in_array($deliveryStatus, self::ORDER_FINAL, true);
 
         $hasActiveWaybill = $hasTracking && $isSubmitted;
 
         return [
-            // Chưa có mã vận đơn, hoặc lần trước thất bại / đã hủy → cho tạo lại
-            'canCreate' => ! $hasTracking || $isRetryable,
+            // Chưa có mã vận đơn (hoặc lần trước thất bại / đã hủy) và đơn chưa chốt sổ giao
+            'canCreate' => (! $hasTracking || $isRetryable) && ! $orderFinal,
             // Có vận đơn đang hoạt động → đồng bộ lộ trình từ hãng VC
             'canSync' => $hasActiveWaybill,
-            // Chỉ tính phí trước khi có vận đơn hoạt động
-            'canCalculateFee' => ! $hasActiveWaybill,
+            // Chỉ tính phí khi còn khả năng tạo vận đơn
+            'canCalculateFee' => ! $hasActiveWaybill && ! $orderFinal,
             // Đã có mã vận đơn thành công → in nhãn
             'canPrintLabel' => $hasActiveWaybill,
             // Hủy chỉ khi vận đơn còn hoạt động và đơn chưa kết thúc giao hàng

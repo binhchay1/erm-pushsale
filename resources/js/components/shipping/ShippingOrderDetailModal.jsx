@@ -13,6 +13,7 @@ import {
 import { StatusBadge } from '@/components/ui/status-badge';
 import { apiGet, apiPost } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
+import { openShippingLabel } from '@/lib/shipping';
 import { deliveryTone, shipmentTone } from '@/lib/status-tones';
 import { cn } from '@/lib/utils';
 
@@ -104,8 +105,8 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
         try {
             if (options.method === 'GET') {
                 const url = `${path}${path.includes('?') ? '&' : '?'}provider=${selectedProvider}`;
-                window.open(url, '_blank', 'noopener,noreferrer');
-                toast.success('Đang mở nhãn…');
+                await openShippingLabel(url);
+                toast.success('Đã mở nhãn vận đơn.');
                 return;
             }
             const data = await apiPost(path, { provider: selectedProvider });
@@ -321,11 +322,9 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                     variant="outline"
                                     disabled={!!acting || !shipment?.trackingNumber}
                                     onClick={() =>
-                                        runAction(
-                                            'label',
-                                            `${apiBase}/${orderId}/label?provider=${selectedProvider}`,
-                                            { method: 'GET' },
-                                        )
+                                        runAction('label', `${apiBase}/${orderId}/label`, {
+                                            method: 'GET',
+                                        })
                                     }
                                 >
                                     <Printer className="mr-1 size-4" />
@@ -375,11 +374,19 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
 
 /** Mirror logic ShipmentActionResolver (PHP) khi đổi tab đơn vị VC. */
 function resolveActions(shipment, order) {
+    const status = order?.deliveryStatusValue;
+    // Đơn đã chốt sổ giao — không tạo vận đơn / tính phí nữa (trừ "hủy vận đơn": cho tạo lại)
+    const orderFinal = [
+        'delivered', 'paid', 'returned', 'returning', 'refund',
+        'cancel_closing', 'cannot_deliver',
+    ].includes(status);
+    const deliveryTerminal = orderFinal || status === 'cancel_waybill';
+
     if (!shipment) {
         return {
-            canCreate: true,
+            canCreate: !orderFinal,
             canSync: false,
-            canCalculateFee: true,
+            canCalculateFee: !orderFinal,
             canPrintLabel: false,
             canCancel: false,
         };
@@ -389,17 +396,13 @@ function resolveActions(shipment, order) {
     const state = shipment.state;
     const isSubmitted = state === 'submitted';
     const isRetryable = state === 'failed' || state === 'cancelled';
-    const deliveryTerminal = [
-        'delivered', 'paid', 'returned', 'returning', 'refund',
-        'cancel_waybill', 'cancel_closing', 'cannot_deliver',
-    ].includes(order?.deliveryStatusValue);
 
     const hasActiveWaybill = hasTracking && isSubmitted;
 
     return {
-        canCreate: !hasTracking || isRetryable,
+        canCreate: (!hasTracking || isRetryable) && !orderFinal,
         canSync: hasActiveWaybill,
-        canCalculateFee: !hasActiveWaybill,
+        canCalculateFee: !hasActiveWaybill && !orderFinal,
         canPrintLabel: hasActiveWaybill,
         canCancel: hasActiveWaybill && !deliveryTerminal,
     };

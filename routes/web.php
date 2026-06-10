@@ -42,6 +42,7 @@ use App\Http\Controllers\Marketing\RankingController as MarketingRankingControll
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrgChartController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Reports\ExtraReportController;
 use App\Http\Controllers\Sales\CustomerProfileController;
 use App\Http\Controllers\Sales\DashboardController as SalesDashboardController;
 use App\Http\Controllers\Sales\OperationController;
@@ -94,6 +95,7 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
         Route::get('reports/business', BusinessOverviewController::class)->name('reports.business');
         Route::get('reports/ceo', CeoReportController::class)->name('reports.ceo');
+        Route::get('reports/extra/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
         Route::get('marketing/dashboard', MarketingDashboardController::class)->name('marketing.dashboard');
         Route::get('landing-approvals', [LandingApprovalController::class, 'index'])->name('landing-approvals.index');
         Route::post('landing-approvals/{campaign}/approve', [LandingApprovalController::class, 'approve'])->name('landing-approvals.approve');
@@ -152,6 +154,7 @@ Route::middleware('auth')->group(function () {
         Route::post('orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('orders.operation-status');
         Route::post('orders/{order}/close', [OrderClosingController::class, 'store'])->name('orders.close');
         Route::get('customers', CustomerProfileController::class)->name('customers');
+        Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
     });
 
     Route::middleware('role:'.User::ROLE_MARKETING)->prefix('marketing')->name('marketing.')->group(function () {
@@ -167,6 +170,7 @@ Route::middleware('auth')->group(function () {
         Route::get('revenue', MarketingRevenueReportController::class)->name('revenue');
         Route::get('campaign-report', MarketingCampaignReportController::class)->name('campaign-report');
         Route::patch('campaigns/{campaign}/budget', [CampaignBudgetController::class, 'update'])->name('campaigns.budget');
+        Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
     });
 
     Route::middleware('role:'.User::ROLE_WAREHOUSE)->prefix('warehouse')->name('warehouse.')->group(function () {
@@ -183,11 +187,13 @@ Route::middleware('auth')->group(function () {
         Route::post('shipping/orders/{order}/cancel-shipment', [ShippingOrderController::class, 'cancelShipment'])->name('shipping.orders.cancel-shipment');
         Route::get('shipping/orders/{order}/label', [ShippingOrderController::class, 'printLabel'])->name('shipping.orders.label');
         Route::post('shipping/orders/{order}/receive-return', [OrderReturnController::class, 'store'])->name('shipping.orders.receive-return');
+        Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
     });
 
     Route::middleware('role:'.User::ROLE_ACCOUNTING)->prefix('accounting')->name('accounting.')->group(function () {
         Route::get('dashboard', AccountingDashboardController::class)->name('dashboard');
         Route::get('workspace', AccountingOperationsController::class)->name('workspace');
+        Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
     });
 
     Route::middleware('role:'.User::ROLE_ALLOCATOR)->prefix('allocator')->name('allocator.')->group(function () {
