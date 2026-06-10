@@ -3,11 +3,14 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Session\TokenMismatchException;
+use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -39,33 +42,49 @@ return Application::configure(basePath: dirname(__DIR__))
             true
         );
 
-        // Inertia: trả về trang lỗi có nội dung thay vì body trống khi 500
-        $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
-            if (! $request->header('X-Inertia') || ! config('app.debug')) {
-                return $response;
+        // Trang lỗi custom (Inertia) — đồng bộ giao diện SaleOps
+        $exceptions->render(function (Throwable $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return null;
             }
 
-            if ($response->getStatusCode() < 500) {
-                return $response;
+            $status = 500;
+
+            if ($e instanceof HttpExceptionInterface) {
+                $status = $e->getStatusCode();
+            } elseif ($e instanceof AuthenticationException) {
+                $status = 401;
+            } elseif ($e instanceof TokenMismatchException) {
+                $status = 419;
             }
 
-            $message = $e->getMessage();
-            $hint = str_contains($message, "doesn't exist")
-                ? "\n\nGợi ý: chạy `php artisan migrate` và `php artisan db:seed`."
-                : '';
+            if (! in_array($status, [401, 403, 404, 419, 429, 500, 503], true)) {
+                if ($status < 500 || config('app.debug')) {
+                    return null;
+                }
+                $status = 500;
+            }
 
-            return response(
-                '<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><title>Lỗi server</title></head>'
-                .'<body style="font-family:system-ui;padding:2rem;max-width:48rem;margin:0 auto">'
-                .'<h1>Lỗi server (500)</h1>'
-                .'<p><strong>'.htmlspecialchars(class_basename($e)).'</strong></p>'
-                .'<pre style="background:#fef2f2;padding:1rem;overflow:auto;white-space:pre-wrap">'
-                .htmlspecialchars($message.$hint)
-                .'</pre>'
-                .'<p><a href="'.htmlspecialchars(route('login')).'">← Về đăng nhập</a></p>'
-                .'</body></html>',
-                500,
-                ['Content-Type' => 'text/html; charset=UTF-8']
-            );
+            if (config('app.debug') && $status >= 500 && ! $e instanceof HttpExceptionInterface) {
+                return null;
+            }
+
+            $user = $request->user();
+            $homeUrl = $user ? LoginController::homeFor($user) : route('login');
+
+            $message = null;
+            if ($e instanceof HttpExceptionInterface && $status < 500 && $status !== 404) {
+                $raw = $e->getMessage();
+                // Bỏ thông báo kỹ thuật Laravel (route not found, v.v.)
+                if ($raw && ! str_contains($raw, 'could not be found')) {
+                    $message = $raw;
+                }
+            }
+
+            return Inertia::render('Errors/ErrorPage', [
+                'status' => $status,
+                'message' => $message,
+                'homeUrl' => $homeUrl,
+            ])->toResponse($request)->setStatusCode($status);
         });
     })->create();
