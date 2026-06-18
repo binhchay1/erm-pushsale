@@ -20,6 +20,7 @@ import { apiPost } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
 import { deliveryTone } from '@/lib/status-tones';
+import { useT } from '@/providers/I18nProvider';
 
 function formatDate(value) {
     if (!value) return '—';
@@ -29,13 +30,14 @@ function formatDate(value) {
 }
 
 function CreateShipmentButton({ row, apiBase }) {
+    const t = useT();
     const [loading, setLoading] = useState(false);
 
     const create = async () => {
         setLoading(true);
         try {
             await apiPost(`${apiBase}/${row.id}/create-shipment`);
-            toast.success(`Đã tạo vận đơn cho ${row.orderCode}.`);
+            toast.success(t('operations.warehouse_table.shipment_created', { code: row.orderCode }));
             router.reload({ only: ['report'] });
         } catch (e) {
             toast.error(e.message);
@@ -50,11 +52,15 @@ function CreateShipmentButton({ row, apiBase }) {
             <div className="space-y-1">
                 <Button size="sm" variant="destructive" disabled className="w-full">
                     <AlertTriangle className="size-3.5" />
-                    Hết hàng trong kho
+                    {t('operations.warehouse_table.out_of_stock')}
                 </Button>
                 {missing.map((w) => (
                     <p key={w.productId} className="text-[11px] font-medium text-red-600 dark:text-red-400">
-                        {w.productName}: cần {w.required}, tồn {w.available}
+                        {t('operations.warehouse_table.stock_warning', {
+                            product: w.productName,
+                            required: w.required,
+                            available: w.available,
+                        })}
                     </p>
                 ))}
             </div>
@@ -64,12 +70,13 @@ function CreateShipmentButton({ row, apiBase }) {
     return (
         <Button size="sm" onClick={create} disabled={loading} className="w-full">
             {loading ? <Loader2 className="size-3.5 animate-spin" /> : <Truck className="size-3.5" />}
-            Tạo vận đơn
+            {t('operations.warehouse_table.create_waybill')}
         </Button>
     );
 }
 
 function ReceiveReturnButton({ row, apiBase }) {
+    const t = useT();
     const [open, setOpen] = useState(false);
     const [reason, setReason] = useState(row.returnReason ?? '');
     const [loading, setLoading] = useState(false);
@@ -78,7 +85,9 @@ function ReceiveReturnButton({ row, apiBase }) {
         setLoading(true);
         try {
             const res = await apiPost(`${apiBase}/${row.id}/receive-return`, { reason });
-            toast.success(res?.message ?? `Đã nhập kho hàng hoàn cho ${row.orderCode}.`);
+            toast.success(
+                res?.message ?? t('operations.warehouse_table.return_received_success', { code: row.orderCode }),
+            );
             setOpen(false);
             router.reload({ only: ['report'] });
         } catch (e) {
@@ -97,27 +106,29 @@ function ReceiveReturnButton({ row, apiBase }) {
                 onClick={() => setOpen(true)}
             >
                 <RotateCcw className="size-3.5" />
-                Nhận hàng hoàn
+                {t('operations.warehouse_table.receive_return')}
             </Button>
 
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Nhận hàng hoàn — {row.orderCode}</DialogTitle>
+                        <DialogTitle>
+                            {t('operations.warehouse_table.return_dialog_title', { code: row.orderCode })}
+                        </DialogTitle>
                         <DialogDescription>
-                            Ghi lý do hoàn và nhập lại số lượng sản phẩm vào tồn kho
-                            {row.inventoryDeducted ? '' : ' (đơn này chưa trừ kho nên chỉ ghi nhận lý do)'}.
+                            {t('operations.warehouse_table.return_dialog_desc')}
+                            {row.inventoryDeducted ? '' : t('operations.warehouse_table.return_dialog_desc_no_deduct')}.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium" htmlFor={`return-reason-${row.id}`}>
-                            Lý do hoàn
+                            {t('operations.warehouse_table.return_reason')}
                         </label>
                         <textarea
                             id={`return-reason-${row.id}`}
                             className="input-soft min-h-20 w-full resize-y"
-                            placeholder="VD: Khách không nhận, sai địa chỉ, hàng lỗi..."
+                            placeholder={t('operations.warehouse_table.return_placeholder')}
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             maxLength={500}
@@ -126,11 +137,11 @@ function ReceiveReturnButton({ row, apiBase }) {
 
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
-                            Hủy
+                            {t('operations.warehouse_table.cancel')}
                         </Button>
                         <Button onClick={submit} disabled={loading}>
                             {loading ? <Loader2 className="size-3.5 animate-spin" /> : <RotateCcw className="size-3.5" />}
-                            Xác nhận nhập kho hoàn
+                            {t('operations.warehouse_table.confirm_return')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -140,6 +151,7 @@ function ReceiveReturnButton({ row, apiBase }) {
 }
 
 export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
+    const t = useT();
     const [detailOrderId, setDetailOrderId] = useState(null);
     const baseCols = 6 + (canDeleteOrder ? 1 : 0);
 
@@ -149,12 +161,12 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                 <table className="w-full min-w-[1100px] border-collapse">
                     <thead>
                         <tr>
-                            <Th>Mã đơn</Th>
-                            <Th>Khách hàng</Th>
-                            <Th>Sản phẩm (SKU / SL)</Th>
-                            <Th className="text-right">Tiền thu hộ (COD)</Th>
-                            <Th>Vận chuyển</Th>
-                            <Th>Hành động</Th>
+                            <Th>{t('operations.warehouse_table.col_order')}</Th>
+                            <Th>{t('operations.warehouse_table.col_customer')}</Th>
+                            <Th>{t('operations.warehouse_table.col_products')}</Th>
+                            <Th className="text-right">{t('operations.warehouse_table.col_cod')}</Th>
+                            <Th>{t('operations.warehouse_table.col_shipping')}</Th>
+                            <Th>{t('operations.warehouse_table.col_actions')}</Th>
                             {canDeleteOrder && <Th />}
                         </tr>
                     </thead>
@@ -165,11 +177,11 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                                     <Td className="font-mono text-primary">
                                         <div className="font-semibold">{row.orderCode}</div>
                                         <div className="font-sans text-[11px] text-muted-foreground">
-                                            Chốt: {formatDate(row.closedAt)}
+                                            {t('operations.warehouse_table.closed_at')} {formatDate(row.closedAt)}
                                         </div>
                                         {row.warehouseName && (
                                             <div className="font-sans text-[11px] text-muted-foreground">
-                                                Kho: {row.warehouseName}
+                                                {t('operations.warehouse_table.warehouse_label')} {row.warehouseName}
                                             </div>
                                         )}
                                     </Td>
@@ -177,7 +189,7 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                                         <div className="font-medium">{row.customerName}</div>
                                         <div className="tabular-nums">{row.customerPhone}</div>
                                         <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-                                            {row.shippingAddress || '— Chưa có địa chỉ —'}
+                                            {row.shippingAddress || t('operations.warehouse_table.no_address')}
                                         </div>
                                     </Td>
                                     <Td className="whitespace-normal">
@@ -198,7 +210,7 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                                         )}
                                         {row.inventoryDeducted && (
                                             <StatusBadge tone="success" icon={PackageCheck} className="mt-1">
-                                                Đã trừ kho
+                                                {t('operations.warehouse_table.stock_deducted')}
                                             </StatusBadge>
                                         )}
                                     </Td>
@@ -224,12 +236,12 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                                         )}
                                         {row.returnReason && (
                                             <div className="mt-1 max-w-[180px] whitespace-normal text-[11px] text-amber-700 dark:text-amber-400">
-                                                Lý do hoàn: {row.returnReason}
+                                                {t('operations.warehouse_table.return_reason_label')} {row.returnReason}
                                             </div>
                                         )}
                                         {row.returnRestockedAt && (
                                             <StatusBadge tone="success" icon={PackageCheck} className="mt-1">
-                                                Đã nhập kho hoàn
+                                                {t('operations.warehouse_table.return_received')}
                                             </StatusBadge>
                                         )}
                                     </Td>
@@ -253,7 +265,7 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                                                     }
                                                 >
                                                     <Printer className="size-3.5" />
-                                                    In vận đơn
+                                                    {t('operations.warehouse_table.print_label')}
                                                 </Button>
                                             )}
                                             <Button
@@ -263,7 +275,7 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                                                 onClick={() => setDetailOrderId(row.id)}
                                             >
                                                 <Eye className="size-3.5" />
-                                                Chi tiết
+                                                {t('operations.warehouse_table.detail')}
                                             </Button>
                                         </div>
                                     </Td>
@@ -272,7 +284,7 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                                             <DeleteRowButton
                                                 url={`/admin/orders/${row.id}`}
                                                 label={row.orderCode}
-                                                confirmMessage={`Xóa đơn "${row.orderCode}"? Dữ liệu thống kê và kế toán liên quan sẽ bị gỡ.`}
+                                                confirmMessage={t('operations.delete_order_confirm', { code: row.orderCode })}
                                             />
                                         </Td>
                                     )}
@@ -281,7 +293,7 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                         ) : (
                             <tr>
                                 <Td colSpan={baseCols} className="py-8 text-center text-muted-foreground">
-                                    Không có đơn hàng nào
+                                    {t('operations.warehouse_table.empty')}
                                 </Td>
                             </tr>
                         )}

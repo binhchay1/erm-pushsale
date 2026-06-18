@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Toaster } from 'sonner';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { I18nProvider } from '@/providers/I18nProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import '../css/app.css';
 
@@ -13,15 +14,20 @@ createInertiaApp({
     setup({ el, App, props }) {
         const pageProps = props.initialPage?.props ?? {};
         createRoot(el).render(
-            <ErrorBoundary>
-                <ThemeProvider
-                    preferences={pageProps.preferences}
-                    themes={pageProps.themes}
-                >
-                    <App {...props} />
-                    <Toaster richColors position="top-right" closeButton />
-                </ThemeProvider>
-            </ErrorBoundary>
+            <I18nProvider
+                initialLocale={pageProps.locale ?? 'vi'}
+                localeMeta={pageProps.locales}
+            >
+                <ErrorBoundary>
+                    <ThemeProvider
+                        preferences={pageProps.preferences}
+                        themes={pageProps.themes}
+                    >
+                        <App {...props} />
+                        <Toaster richColors position="top-right" closeButton />
+                    </ThemeProvider>
+                </ErrorBoundary>
+            </I18nProvider>
         );
     },
     progress: {

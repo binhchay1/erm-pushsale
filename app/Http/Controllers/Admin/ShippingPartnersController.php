@@ -29,6 +29,6 @@ class ShippingPartnersController extends Controller
 
         $service->update($provider, $request->validated());
 
-        return back()->with('success', 'Đã lưu cấu hình vận chuyển.');
+        return back()->with('success', __('messages.shipping_saved'));
     }
 }

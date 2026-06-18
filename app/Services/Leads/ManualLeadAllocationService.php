@@ -63,9 +63,14 @@ class ManualLeadAllocationService
                 NotificationService::push(
                     $saleUser->id,
                     'lead',
-                    'Lead được phân thủ công',
-                    trim(($lead->customer_name ?? 'Khách').' · '.($lead->customer_phone ?? '')),
+                    null,
+                    null,
                     '/sales/workspace',
+                    [
+                        'variant' => 'manual',
+                        'customer_name' => $lead->customer_name,
+                        'customer_phone' => $lead->customer_phone,
+                    ],
                 );
 
                 $allocated++;

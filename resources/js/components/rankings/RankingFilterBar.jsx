@@ -4,9 +4,13 @@ import { SelectFilter } from '@/components/filters/SelectFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLocalizedFilterOptions } from '@/hooks/use-localized-filter-options';
 import { useReportSearch } from '@/hooks/useReportSearch';
+import { useT } from '@/providers/I18nProvider';
 
 export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) {
+    const t = useT();
+    const localizedOptions = useLocalizedFilterOptions(filterOptions);
     const { search } = useReportSearch(routeUrl, filters);
 
     const set = (key, val) => search({ [key]: val });
@@ -22,7 +26,7 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
     return (
         <div className="space-y-4 rounded-lg bg-card p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-foreground">Bộ lọc xếp hạng</p>
+                <p className="text-sm font-semibold text-foreground">{t('rankings.filter_title')}</p>
                 <div className="inline-flex rounded-lg border bg-muted/30 p-0.5">
                     {periods.map((item) => (
                         <button
@@ -35,7 +39,7 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
                                     : 'text-muted-foreground hover:text-foreground'
                             }`}
                         >
-                            {item.label}
+                            {t(`filters.periods.${item.value}`)}
                         </button>
                     ))}
                 </div>
@@ -43,7 +47,7 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
 
             <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 <div className="space-y-1">
-                    <Label className="text-xs">Từ ngày chốt</Label>
+                    <Label className="text-xs">{t('rankings.from_date')}</Label>
                     <Input
                         type="date"
                         value={filters.date_from ?? ''}
@@ -51,7 +55,7 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
                     />
                 </div>
                 <div className="space-y-1">
-                    <Label className="text-xs">Đến ngày chốt</Label>
+                    <Label className="text-xs">{t('rankings.to_date')}</Label>
                     <Input
                         type="date"
                         value={filters.date_to ?? ''}
@@ -59,22 +63,22 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
                     />
                 </div>
                 <SelectFilter
-                    label="Cách tính DS"
+                    label={t('rankings.revenue_calc')}
                     name="discount_mode"
                     value={filters.discount_mode}
-                    options={filterOptions?.discountModes}
+                    options={localizedOptions?.discountModes}
                     onChange={set}
                 />
                 <SelectFilter
-                    label="Tác nghiệp cần"
+                    label={t('rankings.operation_needed')}
                     name="operation_stage"
                     value={filters.operation_stage}
-                    options={filterOptions?.operationStages}
+                    options={localizedOptions?.operationStages}
                     onChange={set}
-                    placeholder="— Tất cả TN —"
+                    placeholder={t('rankings.all_operations')}
                 />
                 <SelectFilter
-                    label="Trưởng nhóm"
+                    label={t('rankings.team_leader')}
                     name="team_leader_id"
                     value={filters.team_leader_id}
                     options={filterOptions?.teamLeaders?.map((u) => ({
@@ -82,25 +86,25 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
                         label: u.name,
                     }))}
                     onChange={set}
-                    placeholder="— Chọn trưởng nhóm —"
+                    placeholder={t('rankings.select_leader')}
                 />
                 <SelectFilter
-                    label="Nhóm"
+                    label={t('rankings.team')}
                     name="team_id"
                     value={filters.team_id}
-                    options={filterOptions?.teams?.map((t) => ({
-                        value: t.id,
-                        label: t.name,
+                    options={filterOptions?.teams?.map((team) => ({
+                        value: team.id,
+                        label: team.name,
                     }))}
                     onChange={set}
-                    placeholder="— Chọn nhóm —"
+                    placeholder={t('rankings.select_team')}
                 />
             </div>
 
             <div className="flex justify-end">
                 <Button size="sm" onClick={() => search()}>
                     <Search className="size-4" />
-                    Tìm kiếm
+                    {t('rankings.search')}
                 </Button>
             </div>
         </div>

@@ -10,15 +10,17 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { formatNumber } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 function AdminDashboardContent({ stats: initialStats }) {
+    const t = useT();
     const { stats, connected } = useRealtimeDashboard('admin', initialStats);
 
     return (
         <div className="space-y-6">
             <PageHeader
-                title="Tổng quan CEO"
-                description="Theo dõi doanh thu, lead, đơn hàng và cảnh báo vận hành theo thời gian gần thực."
+                title={t('dashboard.admin_title')}
+                description={t('dashboard.admin_desc')}
                 actions={<RealtimeBadge connected={connected} />}
             />
 
@@ -28,21 +30,21 @@ function AdminDashboardContent({ stats: initialStats }) {
                 <div className="grid gap-4 lg:grid-cols-3">
                     <RevenueAreaChart
                         data={stats.revenue_series}
-                        title="Doanh thu 7 ngày"
-                        description="Doanh thu từ đơn đã giao / đã thanh toán"
+                        title={t('dashboard.revenue_7d')}
+                        description={t('dashboard.revenue_7d_desc')}
                     />
                     <OrdersBarChart
                         data={stats.orders_series}
-                        title="Đơn phát sinh 7 ngày"
-                        description="Số đơn tạo mới theo ngày"
+                        title={t('dashboard.orders_7d')}
+                        description={t('dashboard.orders_7d_desc')}
                     />
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
                     <RevenueAreaChart
                         data={stats.lead_series}
-                        title="Lead 7 ngày"
-                        description="Số lead đổ về theo ngày"
+                        title={t('dashboard.leads_7d')}
+                        description={t('dashboard.leads_7d_desc')}
                         valueFormatter={(v) => formatNumber(v)}
                         yTickFormatter={(v) => String(v)}
                     />
@@ -50,7 +52,7 @@ function AdminDashboardContent({ stats: initialStats }) {
                         compact
                         fillHeight
                         data={stats.lead_sources}
-                        title="Nguồn lead hôm nay"
+                        title={t('dashboard.lead_sources_today')}
                     />
                 </div>
             </div>
@@ -59,14 +61,14 @@ function AdminDashboardContent({ stats: initialStats }) {
 
             <div className="grid gap-4 xl:grid-cols-2">
                 <RankingList
-                    title="Top sale"
-                    description="Xếp hạng theo doanh thu giao thành công"
+                    title={t('dashboard.top_sales')}
+                    description={t('dashboard.top_sales_desc')}
                     rows={stats.top_sales}
                     type="sales"
                 />
                 <RankingList
-                    title="Top nguồn lead / campaign"
-                    description="Nguồn tạo doanh thu và đơn hàng tốt nhất"
+                    title={t('dashboard.top_sources')}
+                    description={t('dashboard.top_sources_desc')}
                     rows={stats.top_sources}
                     type="sources"
                 />
@@ -78,8 +80,10 @@ function AdminDashboardContent({ stats: initialStats }) {
 }
 
 export default function Dashboard({ stats: initialStats }) {
+    const t = useT();
+
     return (
-        <RoleDashboardShell role="admin" title="Tổng quan CEO">
+        <RoleDashboardShell role="admin" title={t('dashboard.admin_title')}>
             <AdminDashboardContent stats={initialStats} />
         </RoleDashboardShell>
     );

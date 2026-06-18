@@ -3,6 +3,7 @@ import { AlertCircle, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
 const variants = {
     danger: {
@@ -24,21 +25,22 @@ const variants = {
 };
 
 export function OpsAlerts({ alerts }) {
+    const t = useT();
     const data = alerts ?? [];
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Cảnh báo vận hành</CardTitle>
-                <CardDescription>Ưu tiên xử lý các điểm nghẽn ảnh hưởng doanh thu.</CardDescription>
+                <CardTitle>{t('dashboard.ops_alerts.title')}</CardTitle>
+                <CardDescription>{t('dashboard.ops_alerts.desc')}</CardDescription>
             </CardHeader>
             <CardContent>
                 {data.length === 0 ? (
                     <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-300">
                         <CheckCircle2 className="size-5" />
                         <div>
-                            <p className="text-sm font-semibold">Không có cảnh báo nghiêm trọng</p>
-                            <p className="text-xs opacity-80">Hệ thống vận hành đang ổn định.</p>
+                            <p className="text-sm font-semibold">{t('dashboard.ops_alerts.empty_title')}</p>
+                            <p className="text-xs opacity-80">{t('dashboard.ops_alerts.empty_desc')}</p>
                         </div>
                     </div>
                 ) : (

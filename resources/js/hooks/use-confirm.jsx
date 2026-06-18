@@ -1,40 +1,51 @@
 import { useCallback, useState } from 'react';
 
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-
-const CLOSED = {
-    open: false,
-    title: 'Xác nhận',
-    description: '',
-    confirmLabel: 'Xác nhận',
-    cancelLabel: 'Huỷ',
-    variant: 'default',
-    resolve: null,
-};
+import { useT } from '@/providers/I18nProvider';
 
 export function useConfirm() {
-    const [state, setState] = useState(CLOSED);
+    const t = useT();
+    const [state, setState] = useState({
+        open: false,
+        title: '',
+        description: '',
+        confirmLabel: '',
+        cancelLabel: '',
+        variant: 'default',
+        resolve: null,
+    });
 
     const close = useCallback((result) => {
         setState((current) => {
             current.resolve?.(result);
-            return CLOSED;
+            return {
+                open: false,
+                title: '',
+                description: '',
+                confirmLabel: '',
+                cancelLabel: '',
+                variant: 'default',
+                resolve: null,
+            };
         });
     }, []);
 
-    const ask = useCallback((options = {}) => {
-        return new Promise((resolve) => {
-            setState({
-                open: true,
-                title: options.title ?? 'Xác nhận',
-                description: options.description ?? '',
-                confirmLabel: options.confirmLabel ?? 'Xác nhận',
-                cancelLabel: options.cancelLabel ?? 'Huỷ',
-                variant: options.variant ?? 'default',
-                resolve,
+    const ask = useCallback(
+        (options = {}) => {
+            return new Promise((resolve) => {
+                setState({
+                    open: true,
+                    title: options.title ?? t('confirm_dialog.title'),
+                    description: options.description ?? '',
+                    confirmLabel: options.confirmLabel ?? t('common.confirm'),
+                    cancelLabel: options.cancelLabel ?? t('confirm_dialog.cancel_label'),
+                    variant: options.variant ?? 'default',
+                    resolve,
+                });
             });
-        });
-    }, []);
+        },
+        [t],
+    );
 
     const ConfirmDialogPortal = () => (
         <ConfirmDialog

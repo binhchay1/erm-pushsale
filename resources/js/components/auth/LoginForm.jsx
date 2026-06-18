@@ -3,8 +3,10 @@ import { useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useT } from '@/providers/I18nProvider';
 
 export function LoginForm() {
+    const t = useT();
     const { data, setData, post, processing, errors } = useForm({
         email: '',
         password: '',
@@ -19,7 +21,7 @@ export function LoginForm() {
     return (
         <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <Input
                     id="email"
                     type="email"
@@ -35,7 +37,7 @@ export function LoginForm() {
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="password">Mật khẩu</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <Input
                     id="password"
                     type="password"
@@ -56,11 +58,11 @@ export function LoginForm() {
                     checked={data.remember}
                     onChange={(e) => setData('remember', e.target.checked)}
                 />
-                Ghi nhớ đăng nhập
+                {t('auth.remember')}
             </label>
 
             <Button type="submit" className="w-full" size="lg" disabled={processing}>
-                {processing ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                {processing ? t('auth.logging_in') : t('auth.login')}
             </Button>
         </form>
     );

@@ -46,20 +46,12 @@ class NotificationController extends Controller
     {
         $this->notifications->markAllRead($request->user()->id);
 
-        return back()->with('success', 'Đã đánh dấu tất cả thông báo là đã đọc.');
+        return back()->with('success', __('messages.notifications_read_all'));
     }
 
     /** @return array<string, mixed> */
     private function toArray(UserNotification $n): array
     {
-        return [
-            'id' => $n->id,
-            'type' => $n->type,
-            'title' => $n->title,
-            'message' => $n->message,
-            'url' => $n->url,
-            'is_read' => (bool) $n->read_at,
-            'created_at' => $n->created_at?->diffForHumans(),
-        ];
+        return $n->toFrontendArray();
     }
 }

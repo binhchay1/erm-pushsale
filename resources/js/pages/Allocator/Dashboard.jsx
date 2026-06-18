@@ -11,40 +11,42 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { formatNumber } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 function AllocatorDashboardContent({ stats: initialStats }) {
+    const t = useT();
     const { stats, connected } = useRealtimeDashboard('allocator', initialStats);
 
     const kpis = [
         {
-            title: 'Lead hôm nay',
+            title: t('dashboard.allocator.leads_today'),
             value: formatNumber(stats.leads_today),
-            hint: 'Lead đổ về từ các kênh quảng cáo',
+            hint: t('dashboard.allocator.leads_today_hint'),
             icon: Inbox,
         },
         {
-            title: 'Chờ phân số',
+            title: t('dashboard.allocator.pending_routing'),
             value: formatNumber(stats.pending_routing),
-            hint: 'Lead cần phân số cho sale',
+            hint: t('dashboard.allocator.pending_routing_hint'),
             icon: GitBranch,
         },
         {
-            title: 'Đã xử lý',
+            title: t('dashboard.allocator.processed'),
             value: formatNumber(stats.processed_today),
-            hint: 'Lead đã xử lý trong kỳ',
+            hint: t('dashboard.allocator.processed_hint'),
             icon: CopyCheck,
             accent: true,
         },
         {
-            title: 'Lead lỗi',
+            title: t('dashboard.allocator.failed'),
             value: formatNumber(stats.failed_leads),
-            hint: 'Lead nhận về thất bại — cần thử lại',
+            hint: t('dashboard.allocator.failed_hint'),
             icon: AlertTriangle,
         },
         {
-            title: 'Trùng số',
+            title: t('dashboard.allocator.duplicate'),
             value: formatNumber(stats.duplicate_leads),
-            hint: 'Lead trùng số điện thoại hoặc mã ngoài',
+            hint: t('dashboard.allocator.duplicate_hint'),
             icon: UsersRound,
         },
     ];
@@ -52,29 +54,29 @@ function AllocatorDashboardContent({ stats: initialStats }) {
     const alerts = [
         Number(stats.pending_routing ?? 0) > 0 && {
             type: 'info',
-            title: 'Chờ phân số',
+            title: t('dashboard.allocator.pending_routing'),
             value: stats.pending_routing,
-            description: 'Lead mới cần được phân số cho sale phù hợp.',
+            description: t('dashboard.allocator.pending_alert'),
         },
         Number(stats.failed_leads ?? 0) > 0 && {
             type: 'danger',
-            title: 'Lead lỗi',
+            title: t('dashboard.allocator.failed'),
             value: stats.failed_leads,
-            description: 'Lead nhận về lỗi — kiểm tra dữ liệu gửi lên hoặc thử lại.',
+            description: t('dashboard.allocator.failed_alert'),
         },
         Number(stats.duplicate_leads ?? 0) > 0 && {
             type: 'warning',
-            title: 'Trùng số',
+            title: t('dashboard.allocator.duplicate'),
             value: stats.duplicate_leads,
-            description: 'Lead trùng cần rà soát trước khi chia lại.',
+            description: t('dashboard.allocator.duplicate_alert'),
         },
     ].filter(Boolean);
 
     return (
         <div className="space-y-6">
             <PageHeader
-                title="Dashboard Chia số"
-                description="Theo dõi lead đổ về, phân số, lỗi dữ liệu và nguồn lead theo thời gian gần thực."
+                title={t('dashboard.allocator.title')}
+                description={t('dashboard.allocator.desc')}
                 actions={<RealtimeBadge connected={connected} />}
             />
 
@@ -87,26 +89,26 @@ function AllocatorDashboardContent({ stats: initialStats }) {
             <div className="grid gap-4 lg:grid-cols-3">
                 <RevenueAreaChart
                     data={stats.lead_series}
-                    title="Lead đổ về 7 ngày"
-                    description="Số lead đổ về hệ thống theo ngày"
+                    title={t('dashboard.allocator.leads_7d')}
+                    description={t('dashboard.allocator.leads_7d_desc')}
                     valueFormatter={(v) => formatNumber(v)}
                     yTickFormatter={(v) => String(v)}
                 />
-                <LeadSourcePieChart data={stats.platform_breakdown} title="Lead theo nền tảng" />
+                <LeadSourcePieChart data={stats.platform_breakdown} title={t('dashboard.allocator.platform')} />
             </div>
 
             <div className="grid gap-4 lg:grid-cols-3">
                 <RevenueAreaChart
                     data={stats.processed_series}
-                    title="Lead xử lý 7 ngày"
-                    description="Số lead đã xử lý theo ngày"
+                    title={t('dashboard.allocator.processed_7d')}
+                    description={t('dashboard.allocator.processed_7d_desc')}
                     valueFormatter={(v) => formatNumber(v)}
                     yTickFormatter={(v) => String(v)}
                 />
                 <OrdersBarChart
                     data={stats.routing_status_breakdown}
-                    title="Trạng thái phân số"
-                    description="Lead chờ phân số, lỗi và trùng"
+                    title={t('dashboard.allocator.routing_status')}
+                    description={t('dashboard.allocator.routing_status_desc')}
                 />
             </div>
 
@@ -118,8 +120,10 @@ function AllocatorDashboardContent({ stats: initialStats }) {
 }
 
 export default function Dashboard({ stats: initialStats }) {
+    const t = useT();
+
     return (
-        <RoleDashboardShell role="allocator" title="Dashboard Chia số">
+        <RoleDashboardShell role="allocator" title={t('dashboard.allocator.title')}>
             <AllocatorDashboardContent stats={initialStats} />
         </RoleDashboardShell>
     );

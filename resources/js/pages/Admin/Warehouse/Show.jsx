@@ -7,15 +7,18 @@ import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { formatNumber } from '@/lib/format';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function WarehouseShow({ warehouse, filters, rows }) {
+    const t = useT();
+
     const search = (value) => {
         router.get(`/admin/warehouses/${warehouse.id}`, { search: value }, { preserveState: true });
     };
 
     return (
         <AppLayout>
-            <Head title={`Kho ${warehouse.name}`} />
+            <Head title={`${t('pages.warehouse.show_title')} — ${warehouse.name}`} />
 
             <div className="space-y-6">
                 <div className="flex items-center gap-3">
@@ -27,7 +30,8 @@ export default function WarehouseShow({ warehouse, filters, rows }) {
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">{warehouse.name}</h1>
                         <p className="text-sm text-muted-foreground">
-                            {warehouse.address ?? '—'} · {warehouse.phone ?? '—'} · Quản kho: {warehouse.manager_name ?? '—'} · Mã VTP:{' '}
+                            {warehouse.address ?? '—'} · {warehouse.phone ?? '—'} · {t('pages.warehouse.show_manager')}{' '}
+                            {warehouse.manager_name ?? '—'} · {t('pages.warehouse.show_vtp')}{' '}
                             {warehouse.vtp_code ?? '—'}
                         </p>
                     </div>
@@ -35,14 +39,14 @@ export default function WarehouseShow({ warehouse, filters, rows }) {
 
                 <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">
                     <Input
-                        placeholder="Tìm theo tên sản phẩm / SKU"
+                        placeholder={t('pages.warehouse.show_search')}
                         value={filters.search ?? ''}
                         onChange={(e) => search(e.target.value)}
                         className="max-w-md"
                     />
                     <Button size="sm" onClick={() => search(filters.search ?? '')}>
                         <Search className="size-4" />
-                        Tìm kiếm
+                        {t('common.search')}
                     </Button>
                 </div>
 
@@ -51,12 +55,12 @@ export default function WarehouseShow({ warehouse, filters, rows }) {
                         <thead>
                             <tr>
                                 <Th>#</Th>
-                                <Th>Sản phẩm</Th>
-                                <Th>Mã lô</Th>
-                                <Th>Vị trí</Th>
-                                <Th>Tồn kho</Th>
-                                <Th>Chờ xuất</Th>
-                                <Th>Ngừng KD</Th>
+                                <Th>{t('operations.inventory.product')}</Th>
+                                <Th>{t('pages.warehouse.col_batch')}</Th>
+                                <Th>{t('pages.warehouse.col_location')}</Th>
+                                <Th>{t('pages.warehouse.col_stock')}</Th>
+                                <Th>{t('pages.warehouse.col_pending')}</Th>
+                                <Th>{t('pages.warehouse.col_discontinued')}</Th>
                                 <Th />
                             </tr>
                         </thead>
@@ -85,7 +89,7 @@ export default function WarehouseShow({ warehouse, filters, rows }) {
                             ) : (
                                 <tr>
                                     <Td colSpan={8} className="py-8 text-center text-muted-foreground">
-                                        Kho chưa có sản phẩm nào
+                                        {t('pages.warehouse.show_empty')}
                                     </Td>
                                 </tr>
                             )}

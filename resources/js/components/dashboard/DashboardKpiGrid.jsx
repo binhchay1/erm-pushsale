@@ -2,40 +2,42 @@ import { AlertTriangle, CheckCircle2, PackageCheck, PhoneCall, TrendingUp } from
 
 import { StatCard } from '@/components/charts/StatCard';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 export function DashboardKpiGrid({ stats }) {
+    const t = useT();
     const alertCount = Number(stats.failed_orders ?? 0) + Number(stats.shipping_mismatch ?? 0);
 
     const cards = [
         {
-            title: 'Doanh thu hôm nay',
+            title: t('dashboard.kpi.revenue_today'),
             value: formatCurrency(stats.revenue_today),
-            hint: 'Đơn đã giao / đã thanh toán trong ngày',
+            hint: t('dashboard.kpi.revenue_today_hint'),
             icon: TrendingUp,
             accent: true,
         },
         {
-            title: 'Đơn đã chốt',
+            title: t('dashboard.kpi.orders_closed'),
             value: formatNumber(stats.orders_closed),
-            hint: 'Đơn phát sinh hôm nay',
+            hint: t('dashboard.kpi.orders_closed_hint'),
             icon: PackageCheck,
         },
         {
-            title: 'Lead hôm nay',
+            title: t('dashboard.kpi.leads_today'),
             value: formatNumber(stats.leads_today),
-            hint: 'Từ webhook/landing/platform',
+            hint: t('dashboard.kpi.leads_today_hint'),
             icon: PhoneCall,
         },
         {
-            title: 'Tỷ lệ giao thành công',
+            title: t('dashboard.kpi.delivery_rate'),
             value: formatPercent(stats.delivery_rate),
-            hint: 'Delivered hoặc paid / tổng đơn',
+            hint: t('dashboard.kpi.delivery_rate_hint'),
             icon: CheckCircle2,
         },
         {
-            title: 'Cảnh báo vận hành',
+            title: t('dashboard.kpi.ops_alerts'),
             value: formatNumber(alertCount),
-            hint: 'Đơn lỗi + lệch COD',
+            hint: t('dashboard.kpi.ops_alerts_hint'),
             icon: AlertTriangle,
         },
     ];

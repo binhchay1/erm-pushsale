@@ -14,6 +14,6 @@ class OrderController extends Controller
         $label = $order->order_code;
         $deletion->delete($order);
 
-        return back()->with('success', "Đã xóa đơn {$label}.");
+        return back()->with('success', __('messages.order_deleted', ['label' => $label]));
     }
 }

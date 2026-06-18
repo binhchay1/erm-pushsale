@@ -62,7 +62,7 @@ class UserController extends Controller
 
         User::query()->create($data);
 
-        return redirect()->route('admin.users.index')->with('success', 'Đã tạo nhân viên.');
+        return redirect()->route('admin.users.index')->with('success', __('messages.user_created'));
     }
 
     public function edit(User $user): Response
@@ -99,22 +99,22 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('admin.users.index')->with('success', 'Đã cập nhật nhân viên.');
+        return redirect()->route('admin.users.index')->with('success', __('messages.user_updated'));
     }
 
     public function destroy(User $user): RedirectResponse
     {
         if ($user->id === auth()->id()) {
-            return back()->with('error', 'Không thể xóa tài khoản đang đăng nhập.');
+            return back()->with('error', __('messages.user_cannot_delete_self'));
         }
 
         if ($user->role === UserRole::Admin && $this->users->adminCount() <= 1) {
-            return back()->with('error', 'Không thể xóa quản trị viên cuối cùng.');
+            return back()->with('error', __('messages.user_cannot_delete_last_admin'));
         }
 
         $user->delete();
 
-        return back()->with('success', 'Đã xóa nhân viên.');
+        return back()->with('success', __('messages.user_deleted'));
     }
 
     /** @param  array<string, mixed>  $data

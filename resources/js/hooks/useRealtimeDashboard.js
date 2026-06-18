@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { disconnectEcho, getEcho } from '@/lib/echo';
 
 /**
- * Lắng nghe WebSocket cập nhật stats dashboard.
+ * Listen for WebSocket dashboard stat updates.
  * @param {string} channelRole - 'admin' | 'sales'
  * @param {object} initialStats
  * @param {(stats: object) => void} [onUpdate]
@@ -56,8 +56,8 @@ export function useRealtimeDashboard(channelRole, initialStats, onUpdate) {
                 onUpdateRef.current?.(next);
 
                 if (noti.desktop) {
-                    // toast.info('Số liệu vừa cập nhật', {
-                    //     description: 'Dashboard đồng bộ real-time',
+                    // toast.info('Stats updated', {
+                    //     description: 'Dashboard synced in real-time',
                     //     duration: 2800,
                     // });
                 }

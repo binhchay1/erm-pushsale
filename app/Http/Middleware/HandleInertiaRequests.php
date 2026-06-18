@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\UserNotification;
+use App\Services\LabelRegistry;
 use App\Services\NavigationService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -33,15 +34,7 @@ class HandleInertiaRequests extends Middleware
                 ->limit(5)
                 ->get();
 
-            $notifications = $recent->map(fn (UserNotification $n) => [
-                'id' => $n->id,
-                'type' => $n->type,
-                'title' => $n->title,
-                'message' => $n->message,
-                'url' => $n->url,
-                'is_read' => (bool) $n->read_at,
-                'created_at' => $n->created_at?->diffForHumans(),
-            ])->all();
+            $notifications = $recent->map(fn (UserNotification $n) => $n->toFrontendArray())->all();
 
             $notificationsUnread = UserNotification::query()
                 ->where('user_id', $user->id)
@@ -51,6 +44,9 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+            'locale' => app()->getLocale(),
+            'locales' => config('saleops.locales'),
+            'labels' => app(LabelRegistry::class)->all(),
             'auth' => [
                 'user' => $user ? [
                     'id' => $user->id,
@@ -58,6 +54,7 @@ class HandleInertiaRequests extends Middleware
                     'email' => $user->email,
                     'role' => $user->role->value,
                     'role_label' => $user->roleLabel(),
+                    'org_level' => $user->org_level?->value,
                     'team' => $user->team?->name,
                     'manager' => $user->manager?->name,
                     'is_team_leader' => (bool) $user->is_team_leader,
@@ -68,7 +65,9 @@ class HandleInertiaRequests extends Middleware
             ],
             'navigation' => app(NavigationService::class)->forUser($user),
             'preferences' => $preferences,
-            'brand' => config('saleops.brand'),
+            'brand' => array_merge(config('saleops.brand'), [
+                'tagline' => __('brand.tagline'),
+            ]),
             'themes' => config('saleops.themes'),
             'reverb' => [
                 'key' => config('broadcasting.connections.reverb.key'),

@@ -1,3 +1,4 @@
+import { useLabels } from '@/hooks/use-labels';
 import { cn } from '@/lib/utils';
 
 const styles = {
@@ -9,30 +10,39 @@ const styles = {
     returned: 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300',
 };
 
-const labels = {
-    waitingDelivery: 'CHỜ GIAO',
-    cancelWaybill: 'HỦY VẬN ĐƠN',
-    delivering: 'ĐANG GIAO',
-    delivered: 'ĐÃ GIAO',
-    paid: 'ĐÃ THANH TOÁN',
-    returned: 'ĐÃ HOÀN',
+const statusKeys = {
+    waitingDelivery: 'waiting_waybill',
+    cancelWaybill: 'cancel_waybill',
+    delivering: 'delivering',
+    delivered: 'delivered',
+    paid: 'paid',
+    returned: 'returned',
 };
 
 export function StatusSummaryBar({ summary }) {
+    const labels = useLabels();
+
     return (
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {Object.entries(labels).map(([key, label]) => (
-                <div
-                    key={key}
-                    className={cn(
-                        'rounded-lg px-4 py-3 text-center text-sm font-semibold shadow-sm',
-                        styles[key]
-                    )}
-                >
-                    <div>{label}</div>
-                    <div className="text-2xl font-bold tabular-nums">{summary?.[key] ?? 0}</div>
-                </div>
-            ))}
+            {Object.entries(statusKeys).map(([key, statusKey]) => {
+                const label =
+                    labels.delivery_status?.[statusKey] ??
+                    labels.delivery_status_short?.[statusKey] ??
+                    key;
+
+                return (
+                    <div
+                        key={key}
+                        className={cn(
+                            'rounded-lg px-4 py-3 text-center text-sm font-semibold shadow-sm',
+                            styles[key]
+                        )}
+                    >
+                        <div>{label}</div>
+                        <div className="text-2xl font-bold tabular-nums">{summary?.[key] ?? 0}</div>
+                    </div>
+                );
+            })}
         </div>
     );
 }

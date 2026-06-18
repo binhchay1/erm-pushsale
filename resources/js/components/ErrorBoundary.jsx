@@ -1,11 +1,28 @@
 import { Component } from 'react';
+import { RefreshCw } from 'lucide-react';
 
 import { ErrorShell } from '@/components/errors/ErrorShell';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { useT } from '@/providers/I18nProvider';
+
+function ClientErrorActions() {
+    const t = useT();
+
+    return (
+        <>
+            <Button type="button" onClick={() => window.location.reload()}>
+                <RefreshCw className="size-4" />
+                {t('common.refresh')}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => window.history.back()}>
+                {t('common.back')}
+            </Button>
+        </>
+    );
+}
 
 /**
- * Bắt lỗi React — hiển thị cùng giao diện với trang lỗi HTTP.
+ * Catch React errors — same layout as HTTP error pages.
  */
 export class ErrorBoundary extends Component {
     state = { error: null };
@@ -28,13 +45,7 @@ export class ErrorBoundary extends Component {
                     status="client"
                     detail={import.meta.env.DEV ? `${message}${stack ? `\n\n${stack}` : ''}` : message}
                 >
-                    <Button type="button" onClick={() => window.location.reload()}>
-                        <RefreshCw className="size-4" />
-                        Tải lại trang
-                    </Button>
-                    <Button type="button" variant="outline" onClick={() => window.history.back()}>
-                        Quay lại
-                    </Button>
+                    <ClientErrorActions />
                 </ErrorShell>
             );
         }

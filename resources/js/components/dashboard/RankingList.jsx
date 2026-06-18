@@ -3,6 +3,7 @@ import { Trophy } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
 const rankClassNames = [
     'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
@@ -11,6 +12,7 @@ const rankClassNames = [
 ];
 
 export function RankingList({ title, description, rows, type = 'sales' }) {
+    const t = useT();
     const data = rows ?? [];
 
     return (
@@ -22,7 +24,7 @@ export function RankingList({ title, description, rows, type = 'sales' }) {
             <CardContent>
                 {data.length === 0 ? (
                     <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                        Chưa có dữ liệu xếp hạng.
+                        {t('dashboard.ranking_list.empty')}
                     </p>
                 ) : (
                     <div className="space-y-3">
@@ -44,8 +46,14 @@ export function RankingList({ title, description, rows, type = 'sales' }) {
                                         <p className="truncate text-sm font-semibold">{row.name}</p>
                                         <p className="text-xs text-muted-foreground">
                                             {type === 'sales'
-                                                ? `${formatNumber(row.orders)} đơn · ${formatPercent(row.conversion_rate)} chốt`
-                                                : `${formatNumber(row.leads)} lead · ${formatNumber(row.orders)} đơn`}
+                                                ? t('dashboard.ranking_list.sales_detail', {
+                                                      orders: formatNumber(row.orders),
+                                                      rate: formatPercent(row.conversion_rate),
+                                                  })
+                                                : t('dashboard.ranking_list.source_detail', {
+                                                      leads: formatNumber(row.leads),
+                                                      orders: formatNumber(row.orders),
+                                                  })}
                                         </p>
                                     </div>
                                 </div>
@@ -53,7 +61,9 @@ export function RankingList({ title, description, rows, type = 'sales' }) {
                                     <p className="text-sm font-semibold tabular-nums">
                                         {formatCurrency(row.revenue)}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">doanh thu</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('dashboard.ranking_list.revenue_label')}
+                                    </p>
                                 </div>
                             </div>
                         ))}

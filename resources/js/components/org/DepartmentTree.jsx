@@ -5,8 +5,10 @@ import { useState } from 'react';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
 function DepartmentNode({ node, depth = 0 }) {
+    const t = useT();
     const [open, setOpen] = useState(depth < 2);
     const hasChildren = node.children?.length > 0;
 
@@ -23,7 +25,7 @@ function DepartmentNode({ node, depth = 0 }) {
                         type="button"
                         className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
                         onClick={() => setOpen((v) => !v)}
-                        aria-label={open ? 'Thu gọn' : 'Mở rộng'}
+                        aria-label={open ? t('org.collapse') : t('org.expand')}
                     >
                         {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
                     </button>
@@ -34,19 +36,19 @@ function DepartmentNode({ node, depth = 0 }) {
                     <p className="truncate font-medium">{node.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
                         {node.type_label}
-                        {node.leader_name ? ` · Trưởng: ${node.leader_name}` : ''}
+                        {node.leader_name ? ` · ${t('org.head_label')} ${node.leader_name}` : ''}
                         {' · '}
                         <Users className="mr-0.5 inline size-3" />
-                        {node.users_count} nhân sự
+                        {t('org.staff_count', { count: node.users_count })}
                     </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
-                    <Button variant="ghost" size="icon-xs" asChild title="Thêm phòng ban con">
+                    <Button variant="ghost" size="icon-xs" asChild title={t('org.add_child')}>
                         <Link href={`/admin/teams/create?parent_id=${node.id}`}>
                             <Plus className="size-3.5" />
                         </Link>
                     </Button>
-                    <Button variant="ghost" size="icon-xs" asChild title="Sửa">
+                    <Button variant="ghost" size="icon-xs" asChild title={t('org.edit_dept')}>
                         <Link href={`/admin/teams/${node.id}/edit`}>
                             <Pencil className="size-3.5" />
                         </Link>
@@ -54,7 +56,7 @@ function DepartmentNode({ node, depth = 0 }) {
                     <DeleteRowButton
                         url={`/admin/teams/${node.id}`}
                         label={node.name}
-                        confirmMessage={`Xóa phòng ban "${node.name}"?`}
+                        confirmMessage={t('org.delete_dept_named', { name: node.name })}
                     />
                 </div>
             </div>
@@ -70,10 +72,12 @@ function DepartmentNode({ node, depth = 0 }) {
 }
 
 export function DepartmentTree({ tree }) {
+    const t = useT();
+
     if (!tree?.length) {
         return (
             <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
-                Chưa có phòng ban. Tạo phòng ban gốc (ví dụ Marketing, Telesale) rồi thêm nhánh con.
+                {t('org.tree_empty_extended')}
             </p>
         );
     }

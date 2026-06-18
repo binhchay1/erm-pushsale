@@ -11,18 +11,20 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useI18n } from '@/providers/I18nProvider';
 import { findPageGuide } from '@/lib/page-guides';
 
 /**
- * Nút "i" trên header — mở popup giải thích nghiệp vụ của trang hiện tại.
- * Tự ẩn nếu trang chưa có nội dung hướng dẫn.
+ * Header "i" button — opens a popup explaining the current page's business logic.
+ * Hidden when no guide content exists for the page.
  */
 export function PageInfoButton() {
     const { url } = usePage();
+    const { locale, t } = useI18n();
     const [open, setOpen] = useState(false);
 
     const pathname = url.split('?')[0];
-    const guide = findPageGuide(pathname);
+    const guide = findPageGuide(pathname, locale);
 
     if (!guide) return null;
 
@@ -33,13 +35,13 @@ export function PageInfoButton() {
                     <Button
                         variant="ghost"
                         size="icon-sm"
-                        aria-label="Giải thích nghiệp vụ trang này"
+                        aria-label={t('page_info.tooltip')}
                         onClick={() => setOpen(true)}
                     >
                         <Info className="size-4" />
                     </Button>
                 </TooltipTrigger>
-                <TooltipContent>Trang này dùng để làm gì?</TooltipContent>
+                <TooltipContent>{t('page_info.what_is_this')}</TooltipContent>
             </Tooltip>
 
             <Dialog open={open} onOpenChange={setOpen}>

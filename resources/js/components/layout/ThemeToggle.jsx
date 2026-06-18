@@ -2,11 +2,13 @@ import { Monitor, Moon, Palette, Sun } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/providers/ThemeProvider';
+import { useT } from '@/providers/I18nProvider';
 
 const cycle = ['light', 'dark', 'system'];
 
 export function ThemeToggle() {
     const { theme, appearance, setTheme, setAppearance, themes } = useTheme();
+    const t = useT();
     const themeIds = Object.keys(themes ?? {});
 
     const nextAppearance = () => {
@@ -31,7 +33,7 @@ export function ThemeToggle() {
                 variant="ghost"
                 size="icon-sm"
                 onClick={cycleTheme}
-                title="Đổi màu theme"
+                title={t('common.theme_color')}
             >
                 <Palette className="size-4" />
             </Button>
@@ -40,7 +42,7 @@ export function ThemeToggle() {
                 variant="ghost"
                 size="icon-sm"
                 onClick={nextAppearance}
-                title="Sáng / Tối / Hệ thống"
+                title={t('common.appearance')}
             >
                 <Icon className="size-4" />
             </Button>

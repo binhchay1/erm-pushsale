@@ -6,28 +6,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { useLocalizedFilterOptions } from '@/hooks/use-localized-filter-options';
 import { useReportSearch } from '@/hooks/useReportSearch';
+import { useT } from '@/providers/I18nProvider';
 
-const PRESET_OPTIONS = [
-    { value: 'today', label: 'Hôm nay' },
-    { value: 'last_7_days', label: '7 ngày' },
-    { value: 'last_30_days', label: '30 ngày' },
-    { value: 'this_month', label: 'Tháng này' },
-];
-
-// Filter cốt lõi luôn hiển thị; phần còn lại gấp vào "Bộ lọc nâng cao"
 const PRIMARY_FIELDS = ['date_from', 'date_to', 'product_id', 'search'];
 
+const PRESET_KEYS = ['today', 'last_7_days', 'last_30_days', 'this_month'];
+
 export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields, extra = null }) {
+    const t = useT();
+    const localizedOptions = useLocalizedFilterOptions(filterOptions);
     const { search } = useReportSearch(routeUrl, filters);
     const fields = useMemo(
         () => new Set(filterFields ?? PRIMARY_FIELDS),
-        [filterFields]
+        [filterFields],
     );
 
     const advancedFieldKeys = useMemo(
         () => [...fields].filter((f) => !PRIMARY_FIELDS.includes(f)),
-        [fields]
+        [fields],
     );
 
     const hasActiveAdvanced = advancedFieldKeys.some((key) => {
@@ -45,7 +43,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
             case 'date_from':
                 return (
                     <div key={key} className="space-y-1.5">
-                        <Label className="text-xs font-medium text-muted-foreground">Từ ngày</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">{t('filters.date_from')}</Label>
                         <Input
                             type="date"
                             value={filters.date_from ?? ''}
@@ -56,7 +54,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
             case 'date_to':
                 return (
                     <div key={key} className="space-y-1.5">
-                        <Label className="text-xs font-medium text-muted-foreground">Đến ngày</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">{t('filters.date_to')}</Label>
                         <Input
                             type="date"
                             value={filters.date_to ?? ''}
@@ -68,7 +66,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return (
                     <SelectFilter
                         key={key}
-                        label="Sản phẩm"
+                        label={t('filters.product')}
                         name="product_id"
                         value={filters.product_id}
                         options={filterOptions?.products?.map((p) => ({ value: p.id, label: p.name }))}
@@ -79,12 +77,12 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return (
                     <div key={key} className="space-y-1.5 sm:col-span-2">
                         <Label className="text-xs font-medium text-muted-foreground">
-                            Tìm tên / SĐT / mã đơn
+                            {t('filters.search_label')}
                         </Label>
                         <Input
                             value={filters.search ?? ''}
                             onChange={(e) => set('search', e.target.value)}
-                            placeholder="Họ tên, số điện thoại…"
+                            placeholder={t('filters.search_placeholder')}
                         />
                     </div>
                 );
@@ -92,10 +90,10 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return (
                     <SelectFilter
                         key={key}
-                        label="Kiểu ngày"
+                        label={t('filters.date_type')}
                         name="date_type"
                         value={filters.date_type}
-                        options={filterOptions?.dateTypes}
+                        options={localizedOptions?.dateTypes}
                         onChange={set}
                     />
                 );
@@ -103,10 +101,10 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return (
                     <SelectFilter
                         key={key}
-                        label="Trạng thái giao"
+                        label={t('filters.delivery_status')}
                         name="delivery_status"
                         value={filters.delivery_status}
-                        options={filterOptions?.deliveryStatuses}
+                        options={localizedOptions?.deliveryStatuses}
                         onChange={set}
                     />
                 );
@@ -114,7 +112,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return (
                     <SelectFilter
                         key={key}
-                        label="Sản phẩm gốc"
+                        label={t('filters.parent_product')}
                         name="parent_product_id"
                         value={filters.parent_product_id}
                         options={filterOptions?.parentProducts?.map((p) => ({ value: p.id, label: p.name }))}
@@ -125,10 +123,10 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return (
                     <SelectFilter
                         key={key}
-                        label="Kết quả tác nghiệp"
+                        label={t('filters.operation_result')}
                         name="operation_result"
                         value={filters.operation_result}
-                        options={filterOptions?.operationResults}
+                        options={localizedOptions?.operationResults}
                         onChange={set}
                     />
                 );
@@ -136,10 +134,10 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return (
                     <SelectFilter
                         key={key}
-                        label="Trạng thái chốt"
+                        label={t('filters.closing_status')}
                         name="closing_status"
                         value={filters.closing_status}
-                        options={filterOptions?.closingStatuses}
+                        options={localizedOptions?.closingStatuses}
                         onChange={set}
                     />
                 );
@@ -147,7 +145,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return (
                     <SelectFilter
                         key={key}
-                        label="Kho"
+                        label={t('filters.warehouse')}
                         name="warehouse_id"
                         value={filters.warehouse_id}
                         options={filterOptions?.warehouses?.map((w) => ({ value: w.id, label: w.name }))}
@@ -158,7 +156,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return (
                     <SelectFilter
                         key={key}
-                        label="Sale phụ trách"
+                        label={t('filters.sale')}
                         name="sale_id"
                         value={filters.sale_id}
                         options={filterOptions?.salesUsers?.map((u) => ({ value: u.id, label: u.name }))}
@@ -169,7 +167,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return (
                     <SelectFilter
                         key={key}
-                        label="Nhân viên Marketing"
+                        label={t('filters.marketer')}
                         name="marketer_id"
                         value={filters.marketer_id}
                         options={filterOptions?.marketingUsers?.map((u) => ({ value: u.id, label: u.name }))}
@@ -200,23 +198,23 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
 
     const primaryToRender = PRIMARY_FIELDS.filter((key) => fields.has(key));
     const advancedToRender = advancedFieldKeys.filter(
-        (key) => !['no_closing_date_limit', 'hide_zero_status', 'hide_no_phone'].includes(key)
+        (key) => !['no_closing_date_limit', 'hide_zero_status', 'hide_no_phone'].includes(key),
     );
 
     return (
         <div className="rounded-lg bg-card p-5 shadow-sm sm:p-6">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap gap-2">
-                    {PRESET_OPTIONS.map((option) => (
+                    {PRESET_KEYS.map((value) => (
                         <Button
-                            key={option.value}
+                            key={value}
                             type="button"
                             size="sm"
-                            variant={filters.preset === option.value ? 'default' : 'ghost'}
-                            className={filters.preset !== option.value ? 'text-muted-foreground' : ''}
-                            onClick={() => setPreset(option.value)}
+                            variant={filters.preset === value ? 'default' : 'ghost'}
+                            className={filters.preset !== value ? 'text-muted-foreground' : ''}
+                            onClick={() => setPreset(value)}
                         >
-                            {option.label}
+                            {t(`filters.presets.${value}`)}
                         </Button>
                     ))}
                 </div>
@@ -229,7 +227,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                         onClick={() => setShowAdvanced((v) => !v)}
                     >
                         <SlidersHorizontal className="size-3.5" />
-                        Bộ lọc nâng cao
+                        {t('filters.advanced')}
                         <ChevronDown
                             className={cn('size-3.5 transition-transform', showAdvanced && 'rotate-180')}
                         />
@@ -252,11 +250,11 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
             <div className="mt-5 flex flex-wrap items-center gap-4">
                 <Button size="sm" onClick={() => search()}>
                     <Search className="size-4" />
-                    Tìm kiếm
+                    {t('common.search')}
                 </Button>
-                {checkboxField('no_closing_date_limit', 'Không giới hạn ngày chốt')}
-                {checkboxField('hide_zero_status', 'Ẩn tab trạng thái 0 đơn')}
-                {checkboxField('hide_no_phone', 'Ẩn đơn không có SĐT')}
+                {checkboxField('no_closing_date_limit', t('filters.no_closing_date_limit'))}
+                {checkboxField('hide_zero_status', t('filters.hide_zero_status'))}
+                {checkboxField('hide_no_phone', t('filters.hide_no_phone'))}
             </div>
         </div>
     );

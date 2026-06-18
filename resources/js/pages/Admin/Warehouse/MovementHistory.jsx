@@ -10,8 +10,10 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { cn } from '@/lib/utils';
 import { formatNumber } from '@/lib/format';
 import { movementTone } from '@/lib/status-tones';
+import { useT } from '@/providers/I18nProvider';
 
 export default function MovementHistory({ rows, filters, warehouses, products, types }) {
+    const t = useT();
     const data = rows?.data ?? [];
     const f = filters ?? {};
 
@@ -21,20 +23,17 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
 
     return (
         <AppLayout>
-            <Head title="Lịch sử nhập xuất kho" />
+            <Head title={t('operations.movement_history.title_full')} />
 
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Lịch sử nhập xuất kho</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Toàn bộ biến động hàng hóa: nhập kho, xuất kho, xuất theo đơn và nhập hàng hoàn —
-                        kèm người thực hiện và người duyệt
-                    </p>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('operations.movement_history.title_full')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('operations.movement_history.desc_detail')}</p>
                 </div>
 
                 <div className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-2 lg:grid-cols-6">
                     <div className="space-y-1">
-                        <Label htmlFor="mh-from">Từ ngày</Label>
+                        <Label htmlFor="mh-from">{t('operations.movement_history.from_date')}</Label>
                         <Input
                             id="mh-from"
                             type="date"
@@ -43,7 +42,7 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
                         />
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor="mh-to">Đến ngày</Label>
+                        <Label htmlFor="mh-to">{t('operations.movement_history.to_date')}</Label>
                         <Input
                             id="mh-to"
                             type="date"
@@ -52,14 +51,14 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
                         />
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor="mh-warehouse">Kho</Label>
+                        <Label htmlFor="mh-warehouse">{t('operations.inventory.warehouse')}</Label>
                         <select
                             id="mh-warehouse"
                             className="input-soft flex h-9 w-full px-2"
                             value={f.warehouse_id ?? ''}
                             onChange={(e) => search({ warehouse_id: e.target.value || null })}
                         >
-                            <option value="">Tất cả kho</option>
+                            <option value="">{t('operations.movement_history.all_warehouses')}</option>
                             {warehouses?.map((w) => (
                                 <option key={w.id} value={w.id}>
                                     {w.name}
@@ -68,14 +67,14 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
                         </select>
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor="mh-product">Sản phẩm</Label>
+                        <Label htmlFor="mh-product">{t('operations.inventory.product')}</Label>
                         <select
                             id="mh-product"
                             className="input-soft flex h-9 w-full px-2"
                             value={f.product_id ?? ''}
                             onChange={(e) => search({ product_id: e.target.value || null })}
                         >
-                            <option value="">Tất cả sản phẩm</option>
+                            <option value="">{t('operations.movement_history.all_products')}</option>
                             {products?.map((p) => (
                                 <option key={p.id} value={p.id}>
                                     {p.name}
@@ -85,17 +84,17 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
                         </select>
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor="mh-type">Loại biến động</Label>
+                        <Label htmlFor="mh-type">{t('operations.movement_history.type')}</Label>
                         <select
                             id="mh-type"
                             className="input-soft flex h-9 w-full px-2"
                             value={f.type ?? ''}
                             onChange={(e) => search({ type: e.target.value || null })}
                         >
-                            <option value="">Tất cả</option>
-                            {types?.map((t) => (
-                                <option key={t.value} value={t.value}>
-                                    {t.label}
+                            <option value="">{t('common.all')}</option>
+                            {types?.map((type) => (
+                                <option key={type.value} value={type.value}>
+                                    {type.label}
                                 </option>
                             ))}
                         </select>
@@ -103,7 +102,7 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
                     <div className="flex items-end">
                         <Button size="sm" onClick={() => search()}>
                             <Search className="size-4" />
-                            Lọc
+                            {t('operations.movement_history.filter')}
                         </Button>
                     </div>
                 </div>
@@ -112,15 +111,15 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
                     <table className="w-full min-w-[1000px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>Thời gian</Th>
-                                <Th>Loại</Th>
-                                <Th>Kho</Th>
-                                <Th>Sản phẩm</Th>
-                                <Th className="text-right">Số lượng</Th>
-                                <Th className="text-right">Tồn sau</Th>
-                                <Th>Người thực hiện</Th>
-                                <Th>Người duyệt</Th>
-                                <Th>Ghi chú</Th>
+                                <Th>{t('operations.movement_history.col_time')}</Th>
+                                <Th>{t('operations.movement_history.col_type')}</Th>
+                                <Th>{t('operations.inventory.warehouse')}</Th>
+                                <Th>{t('operations.movement_history.col_product')}</Th>
+                                <Th className="text-right">{t('operations.movement_history.col_qty')}</Th>
+                                <Th className="text-right">{t('operations.inventory.col_stock_after')}</Th>
+                                <Th>{t('operations.movement_history.col_actor')}</Th>
+                                <Th>{t('operations.movement_history.col_approver')}</Th>
+                                <Th>{t('operations.movement_history.col_note')}</Th>
                             </tr>
                         </thead>
                         <tbody>
@@ -165,7 +164,7 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
                             ) : (
                                 <tr>
                                     <Td colSpan={9} className="py-10 text-center text-muted-foreground">
-                                        Chưa có biến động kho nào khớp bộ lọc
+                                        {t('operations.movement_history.empty_filtered')}
                                     </Td>
                                 </tr>
                             )}

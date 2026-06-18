@@ -4,14 +4,17 @@ import AppLayout from '@/layouts/AppLayout';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
 import { StatusTabs } from '@/components/operations/StatusTabs';
+import { useT } from '@/providers/I18nProvider';
 
 export default function AccountingOperations({ filters, filterOptions, report }) {
+    const t = useT();
+
     return (
         <AppLayout>
-            <Head title="Kế toán tác nghiệp" />
+            <Head title={t('pages.accounting.ops_title')} />
 
             <div className="space-y-4">
-                <h1 className="text-2xl font-bold tracking-tight">Kế toán tác nghiệp</h1>
+                <h1 className="text-2xl font-bold tracking-tight">{t('pages.accounting.ops_title')}</h1>
 
                 <ReportFilterBar
                     routeUrl="/admin/accounting"

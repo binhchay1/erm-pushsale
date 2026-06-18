@@ -12,11 +12,7 @@ enum RankingPeriod: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Week => 'Tuần này',
-            self::Month => 'Tháng này',
-            self::Quarter => 'Quý này',
-        };
+        return __('enums.ranking_period.'.$this->value);
     }
 
     /**

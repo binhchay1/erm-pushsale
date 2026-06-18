@@ -1,6 +1,11 @@
 import { cn } from '@/lib/utils';
+import { getNotificationText } from '@/lib/notification-text';
+import { useT } from '@/providers/I18nProvider';
 
 export function NotificationRow({ notification, onClick, dense = false }) {
+    const t = useT();
+    const { title, message } = getNotificationText(notification, t);
+
     return (
         <button
             type="button"
@@ -19,11 +24,11 @@ export function NotificationRow({ notification, onClick, dense = false }) {
             />
             <span className="min-w-0 flex-1">
                 <span className={cn('block font-medium', dense && 'truncate text-sm')}>
-                    {notification.title}
+                    {title}
                 </span>
-                {notification.message && (
+                {message && (
                     <span className={cn('block text-muted-foreground', dense ? 'truncate text-xs' : 'text-sm')}>
-                        {notification.message}
+                        {message}
                     </span>
                 )}
                 <span className={cn('block text-muted-foreground', dense ? 'text-[11px]' : 'text-xs')}>

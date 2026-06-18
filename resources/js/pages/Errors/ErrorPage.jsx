@@ -3,15 +3,17 @@ import { ArrowLeft, Home, LogIn, RefreshCw } from 'lucide-react';
 
 import { ErrorShell } from '@/components/errors/ErrorShell';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/providers/I18nProvider';
 
 export default function ErrorPage({ status = 500, message = null, homeUrl = '/login' }) {
     const { brand } = usePage().props;
+    const t = useT();
     const needsLogin = status === 401 || status === 419;
     const canReload = status === 419 || status === 429 || status >= 500;
 
     return (
         <>
-            <Head title={`Lỗi ${status}`} />
+            <Head title={`${t('errors.error_code', { code: status })}`} />
 
             <ErrorShell
                 status={status}
@@ -25,14 +27,14 @@ export default function ErrorPage({ status = 500, message = null, homeUrl = '/lo
                     <Button asChild>
                         <Link href="/login">
                             <LogIn className="size-4" />
-                            Đăng nhập lại
+                            {t('auth.login')}
                         </Link>
                     </Button>
                 ) : (
                     <Button asChild>
                         <Link href={homeUrl}>
                             <Home className="size-4" />
-                            Về trang chủ
+                            {t('errors.back_home')}
                         </Link>
                     </Button>
                 )}
@@ -40,13 +42,13 @@ export default function ErrorPage({ status = 500, message = null, homeUrl = '/lo
                 {canReload && (
                     <Button type="button" variant="outline" onClick={() => window.location.reload()}>
                         <RefreshCw className="size-4" />
-                        Tải lại trang
+                        {t('common.refresh')}
                     </Button>
                 )}
 
                 <Button type="button" variant="ghost" onClick={() => window.history.back()}>
                     <ArrowLeft className="size-4" />
-                    Quay lại
+                    {t('common.back')}
                 </Button>
             </ErrorShell>
         </>

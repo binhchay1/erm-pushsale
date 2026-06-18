@@ -14,6 +14,6 @@ class SaleOperationCallController extends Controller
     {
         $service->logCall($order, $request->user());
 
-        return back()->with('success', 'Đã ghi nhận cuộc gọi.');
+        return back()->with('success', __('messages.call_logged'));
     }
 }

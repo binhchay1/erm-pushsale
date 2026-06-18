@@ -1,8 +1,10 @@
 import { ChevronRight, GitBranch, Users } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useT } from '@/providers/I18nProvider';
 
 export function OrgStructureCard({ org }) {
+    const t = useT();
     const hasPath = org?.team_path?.length > 0;
     const hasManagers = org?.manager_chain?.length > 0;
     const hasReports = org?.direct_reports?.length > 0;
@@ -16,15 +18,15 @@ export function OrgStructureCard({ org }) {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                     <GitBranch className="size-4 text-primary" />
-                    Cơ cấu tổ chức
+                    {t('org.structure_title')}
                 </CardTitle>
-                <CardDescription>Phòng ban và báo cáo trực tiếp của bạn</CardDescription>
+                <CardDescription>{t('org.structure_desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5 text-sm">
                 {hasPath && (
                     <div>
                         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            Phòng ban
+                            {t('org.dept_section')}
                         </p>
                         <ol className="flex flex-wrap items-center gap-1">
                             {org.team_path.map((node, i) => (
@@ -43,7 +45,7 @@ export function OrgStructureCard({ org }) {
                 {hasManagers && (
                     <div>
                         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            Quản lý trên
+                            {t('org.managers_section')}
                         </p>
                         <ul className="space-y-1">
                             {org.manager_chain.map((m, i) => (
@@ -65,7 +67,7 @@ export function OrgStructureCard({ org }) {
                     <div>
                         <p className="mb-2 flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                             <Users className="size-3" />
-                            Cấp dưới trực tiếp
+                            {t('org.reports_section')}
                         </p>
                         <ul className="space-y-1">
                             {org.direct_reports.map((m, i) => (

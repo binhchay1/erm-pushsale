@@ -1,7 +1,7 @@
 /** @typedef {{ label: string, description?: string, primary: string, primary_foreground: string, chart?: string[] }} ThemeConfig */
 
 /**
- * Áp theme preset lên document (CSS variables).
+ * Apply theme preset to document (CSS variables).
  * @param {string} themeId
  * @param {Record<string, ThemeConfig>} themesFromServer
  */

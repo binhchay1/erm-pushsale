@@ -11,11 +11,6 @@ enum DateType: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::DataArrival => 'Ngày data về',
-            self::SaleReceived => 'Ngày sale nhận data',
-            self::Closing => 'Ngày chốt đơn',
-            self::CareUpdate => 'Ngày care cập nhật',
-        };
+        return __('enums.date_type.'.$this->value);
     }
 }

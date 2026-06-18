@@ -1,19 +1,18 @@
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
-/**
- * Bảng doanh số theo team — thay cho dạng sơ đồ thẻ trải ngang.
- * Nhận dữ liệu cây (trưởng bộ phận → team → nhân viên) và hiển thị mỗi team 1 dòng.
- */
-export function TeamRevenueTable({ roots, emptyText = 'Chưa có dữ liệu team trong kỳ đã chọn.' }) {
+export function TeamRevenueTable({ roots, emptyText }) {
+    const t = useT();
     const summary = roots?.[0];
     const teams = summary?.children ?? [];
+    const displayEmpty = emptyText ?? t('reports.team_table.empty');
 
     if (!teams.length) {
         return (
             <p className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
-                {emptyText}
+                {displayEmpty}
             </p>
         );
     }
@@ -24,11 +23,11 @@ export function TeamRevenueTable({ roots, emptyText = 'Chưa có dữ liệu tea
                 <thead>
                     <tr>
                         <Th>Team</Th>
-                        <Th>Trưởng nhóm</Th>
-                        <Th className="text-right">Nhân viên</Th>
-                        <Th className="text-right">Đơn chốt</Th>
-                        <Th className="text-right">Tỷ lệ chốt</Th>
-                        <Th className="text-right">Doanh thu</Th>
+                        <Th>{t('reports.team_table.team_lead')}</Th>
+                        <Th className="text-right">{t('reports.team_table.members')}</Th>
+                        <Th className="text-right">{t('reports.team_table.closed_orders')}</Th>
+                        <Th className="text-right">{t('reports.team_table.closing_rate')}</Th>
+                        <Th className="text-right">{t('reports.team_table.revenue')}</Th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,12 +58,12 @@ export function TeamRevenueTable({ roots, emptyText = 'Chưa có dữ liệu tea
                         </tr>
                     ))}
                     <tr className="bg-muted/40">
-                        <Td className="font-semibold">Tổng cộng</Td>
+                        <Td className="font-semibold">{t('reports.team_table.grand_total')}</Td>
                         <Td className="text-muted-foreground">{summary.name}</Td>
                         <Td className="text-right font-semibold tabular-nums">
                             {formatNumber(
                                 teams.reduce(
-                                    (sum, t) => sum + (t.memberCount ?? t.children?.length ?? 0),
+                                    (sum, teamRow) => sum + (teamRow.memberCount ?? teamRow.children?.length ?? 0),
                                     0
                                 )
                             )}

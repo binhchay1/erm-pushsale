@@ -1,0 +1,36 @@
+export default {
+    new_lead: { label: 'Lead mới', description: 'Thông báo khi có khách đổ từ ads / landing' },
+    landing_approval: { label: 'Duyệt Landing / Ladipage', description: 'Admin: cần duyệt kết nối · Marketing: đã được duyệt' },
+    order_update: { label: 'Cập nhật đơn hàng', description: 'Trạng thái chốt, hủy, thay đổi giá trị đơn' },
+    reminder: { label: 'Nhắc gọi lại', description: 'Lịch hẹn telesale đến giờ' },
+    delivery_issue: { label: 'Đơn giao lỗi', description: 'Hoàn / delay từ hãng vận chuyển' },
+    kpi_alert: { label: 'Cảnh báo KPI', description: 'Chạm ngưỡng doanh số hoặc tỷ lệ chuyển đổi' },
+    sound: { label: 'Âm thanh', description: 'Phát tiếng khi có thông báo desktop' },
+    desktop: { label: 'Toast trên màn hình', description: 'Hiện popup khi số liệu real-time cập nhật' },
+    email_digest: { label: 'Email tổng hợp ngày', description: 'Gửi báo cáo cuối ngày (sắp có)' },
+    title: 'Thông báo',
+    mark_all_read: 'Đánh dấu tất cả đã đọc',
+    empty: 'Chưa có thông báo',
+    empty_page: 'Không có thông báo nào',
+    view_all: 'Xem tất cả',
+    tab_all: 'Tất cả',
+    tab_unread: 'Chưa đọc',
+    settings_link: 'Tùy chỉnh loại thông báo trong Cài đặt',
+    view: 'Xem',
+    items: {
+        lead: {
+            guest: 'Khách',
+            landing_title: 'Lead Landing — :name',
+            platform_title: 'Lead mới từ :platform',
+            manual_title: 'Lead được phân thủ công',
+        },
+        landing_approval: {
+            title: 'Cần duyệt Landing: :name',
+            message: ':creator vừa tạo kết nối Ladipage — bấm để xét duyệt',
+        },
+        landing_approved: {
+            title: 'Đã duyệt Landing: :name',
+            message: 'Lead mới sẽ được chia số cho Sale',
+        },
+    },
+};

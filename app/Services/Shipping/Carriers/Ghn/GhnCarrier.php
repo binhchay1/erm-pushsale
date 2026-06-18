@@ -136,7 +136,7 @@ class GhnCarrier extends AbstractShippingCarrier
         return match ($action) {
             'shop' => $this->client->getStore(),
             'fee' => $this->calculateFee(new Order),
-            default => throw new RuntimeException("Action GHN [{$action}] không hỗ trợ."),
+            default => throw new RuntimeException("Thao tác GHN [{$action}] không được hỗ trợ."),
         };
     }
 

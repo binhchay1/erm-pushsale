@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\IntegrationPlatform;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\V1\LeadIngestionResource;
 use App\Http\Traits\ApiResponds;
 use App\Integrations\Facebook\FacebookLeadDriver;
 use App\Integrations\IntegrationDriverFactory;
+use App\Jobs\Leads\ProcessLeadIngestionJob;
 use App\Models\IntegrationConnection;
-use App\Services\Integrations\IntegrationConfigService;
-use App\Services\Leads\LeadIngestionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -18,11 +16,6 @@ use Illuminate\Http\Response;
 class WebhookController extends Controller
 {
     use ApiResponds;
-
-    public function __construct(
-        protected LeadIngestionService $ingestionService,
-        protected IntegrationConfigService $configService,
-    ) {}
 
     public function handle(Request $request, string $platform): JsonResponse|Response
     {
@@ -33,7 +26,7 @@ class WebhookController extends Controller
         $enum = IntegrationPlatform::tryFromWebhookPath($platform);
 
         if (! $enum) {
-            return $this->error('Nền tảng không hỗ trợ', 404);
+            return $this->error(__('messages.webhook.platform_unsupported'), 404);
         }
 
         $driver = IntegrationDriverFactory::make($enum);
@@ -44,46 +37,25 @@ class WebhookController extends Controller
 
             return $challenge
                 ? response($challenge, 200)->header('Content-Type', 'text/plain')
-                : $this->error('Verify token không hợp lệ', 403);
+                : $this->error(__('messages.webhook.verify_token_invalid'), 403);
         }
 
         $connection = IntegrationConnection::forPlatform($enum);
 
         if (! $connection->is_enabled && ! app()->environment('local')) {
-            return $this->error('Nền tảng chưa được bật trong admin', 503);
+            return $this->error(__('messages.webhook.platform_disabled'), 503);
         }
 
         if (! $driver->verifyWebhook($request)) {
-            return $this->error('Webhook không được xác thực', 401);
+            return $this->error(__('messages.webhook.unauthorized'), 401);
         }
 
-        $processed = 0;
+        ProcessLeadIngestionJob::dispatch($enum->value, $request->all());
 
-        if ($enum === IntegrationPlatform::Facebook) {
-            foreach ($request->input('entry', []) as $entry) {
-                foreach ($entry['changes'] ?? [] as $change) {
-                    if (($change['field'] ?? '') === 'leadgen') {
-                        $this->ingestionService->ingest($driver, [
-                            'entry' => [['changes' => [$change]]],
-                        ]);
-                        $processed++;
-                    }
-                }
-            }
+        $message = $enum === IntegrationPlatform::Facebook
+            ? __('messages.webhook.facebook_queued')
+            : __('messages.webhook.queued');
 
-            if ($processed > 0) {
-                $this->configService->touchSynced($enum);
-            }
-
-            return $this->success(['processed' => $processed], 'Đã xử lý webhook Facebook.');
-        }
-
-        $ingestion = $this->ingestionService->ingest($driver, $request->all());
-        $this->configService->touchSynced($enum);
-
-        return $this->created(
-            new LeadIngestionResource($ingestion->load('order')),
-            'Đã xử lý webhook.'
-        );
+        return $this->success(['queued' => true], $message, 202);
     }
 }

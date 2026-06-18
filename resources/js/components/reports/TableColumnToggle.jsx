@@ -1,7 +1,8 @@
 import { Columns3 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { useT } from '@/providers/I18nProvider';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -47,16 +48,18 @@ export function useTableColumnVisibility(columns, storageKey) {
 }
 
 export function TableColumnToggle({ columns, visible, onToggle }) {
+    const t = useT();
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button type="button" variant="outline" size="sm" className="gap-1.5">
                     <Columns3 className="size-4" />
-                    Cột hiển thị
+                    {t('reports.column_toggle.title')}
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>Ẩn / hiện cột</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('reports.column_toggle.desc')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {columns.map((col) => (
                     <DropdownMenuCheckboxItem
@@ -72,17 +75,25 @@ export function TableColumnToggle({ columns, visible, onToggle }) {
     );
 }
 
-export const MARKETING_SOURCE_COLUMNS = [
-    { id: 'product', label: 'Sản phẩm', default: true },
-    { id: 'channel', label: 'Kênh quảng cáo', default: false },
-    { id: 'budget', label: 'Ngân sách', default: false },
-    { id: 'contacts', label: 'Contact', default: true },
-    { id: 'contactRate', label: '% Contact', default: false },
-    { id: 'costPerContact', label: 'Giá contact', default: false },
-    { id: 'closedOrders', label: 'Đơn chốt', default: true },
-    { id: 'closingRate', label: '% Chốt', default: true },
-];
+function marketingSourceColumns(t) {
+    return [
+        { id: 'product', label: t('reports.column_toggle.product'), default: true },
+        { id: 'channel', label: t('reports.column_toggle.channel'), default: false },
+        { id: 'budget', label: t('reports.column_toggle.budget'), default: false },
+        { id: 'contacts', label: t('reports.column_toggle.contacts'), default: true },
+        { id: 'contactRate', label: t('reports.column_toggle.contact_rate'), default: false },
+        { id: 'costPerContact', label: t('reports.column_toggle.cost_per_contact'), default: false },
+        { id: 'closedOrders', label: t('reports.column_toggle.closed_orders'), default: true },
+        { id: 'closingRate', label: t('reports.column_toggle.closing_rate'), default: true },
+    ];
+}
 
 export function useMarketingSourceColumns() {
-    return useTableColumnVisibility(MARKETING_SOURCE_COLUMNS, 'saleops-mkt-source-columns');
+    const t = useT();
+    const columns = useMemo(() => marketingSourceColumns(t), [t]);
+    const visibility = useTableColumnVisibility(columns, 'saleops-mkt-source-columns');
+
+    return { ...visibility, columns };
 }
+
+export { marketingSourceColumns as MARKETING_SOURCE_COLUMNS };

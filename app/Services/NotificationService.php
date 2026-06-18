@@ -13,15 +13,17 @@ class NotificationService
     public static function push(
         int $userId,
         string $type,
-        string $title,
+        ?string $title = null,
         ?string $message = null,
         ?string $url = null,
+        ?array $data = null,
     ): UserNotification {
         $notification = UserNotification::query()->create([
             'user_id' => $userId,
             'type' => $type,
-            'title' => $title,
-            'message' => $message,
+            'title' => $data !== null ? '' : ($title ?? ''),
+            'message' => $data !== null ? null : $message,
+            'data' => $data,
             'url' => $url,
         ]);
 
@@ -34,9 +36,10 @@ class NotificationService
     public static function pushToRole(
         UserRole|array $roles,
         string $type,
-        string $title,
+        ?string $title = null,
         ?string $message = null,
         ?string $url = null,
+        ?array $data = null,
     ): void {
         $values = collect(is_array($roles) ? $roles : [$roles])
             ->map(fn (UserRole $r) => $r->value)
@@ -45,7 +48,7 @@ class NotificationService
         User::query()
             ->whereIn('role', $values)
             ->pluck('id')
-            ->each(fn (int $id) => self::push($id, $type, $title, $message, $url));
+            ->each(fn (int $id) => self::push($id, $type, $title, $message, $url, $data));
     }
 
     public static function notifyLandingApprovalPending(MarketingSource $campaign): void
@@ -56,9 +59,13 @@ class NotificationService
         self::pushToRole(
             UserRole::Admin,
             'landing_approval',
-            'Cần duyệt Landing: '.$campaign->name,
-            "{$creatorName} vừa tạo kết nối Ladipage — bấm để xét duyệt",
+            null,
+            null,
             '/admin/landing-approvals?campaign='.$campaign->id,
+            [
+                'campaign_name' => $campaign->name,
+                'creator' => $creatorName,
+            ],
         );
     }
 
@@ -71,9 +78,12 @@ class NotificationService
         self::push(
             $campaign->created_by_user_id,
             'landing_approved',
-            'Đã duyệt Landing: '.$campaign->name,
-            'Lead mới sẽ được chia số cho Sale',
+            null,
+            null,
             '/marketing/campaigns/'.$campaign->id.'/edit',
+            [
+                'campaign_name' => $campaign->name,
+            ],
         );
     }
 }

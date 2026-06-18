@@ -5,17 +5,20 @@ import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
 import { StatusTabs } from '@/components/operations/StatusTabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useT } from '@/providers/I18nProvider';
 
 export default function Workspace({ filters, filterOptions, filterFields, report, operationStatusOptions }) {
+    const t = useT();
+
     return (
         <AppLayout>
-            <Head title="Gọi & chốt đơn" />
+            <Head title={t('pages.workspace.title')} />
 
             <div className="space-y-8 pb-8">
                 <div className="space-y-2">
-                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Gọi & chốt đơn</h1>
+                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('pages.workspace.title')}</h1>
                     <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                        Danh sách khách cần gọi của bạn — gọi, cập nhật kết quả và chốt đơn ngay tại đây
+                        {t('pages.workspace.desc_detail')}
                     </p>
                 </div>
 
@@ -28,10 +31,8 @@ export default function Workspace({ filters, filterOptions, filterFields, report
 
                 <Card className="border-border/80 shadow-sm">
                     <CardHeader className="pb-3">
-                        <CardTitle>Pipeline tác nghiệp</CardTitle>
-                        <CardDescription>
-                            Lọc nhanh theo giai đoạn gọi — bảng chi tiết bên dưới
-                        </CardDescription>
+                        <CardTitle>{t('pages.workspace.pipeline')}</CardTitle>
+                        <CardDescription>{t('pages.workspace.pipeline_desc')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-5">
                         <StatusTabs

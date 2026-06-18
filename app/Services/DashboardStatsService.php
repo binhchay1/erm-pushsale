@@ -364,9 +364,9 @@ class DashboardStatsService
     private static function deliveryBreakdown(int $waitingWaybill, int $pendingExport, int $delivering): array
     {
         return collect([
-            ['label' => 'Chờ vận đơn', 'value' => $waitingWaybill],
-            ['label' => 'Chờ lấy hàng', 'value' => $pendingExport],
-            ['label' => 'Đang giao', 'value' => $delivering],
+            ['label' => __('dashboard_data.delivery.waiting_waybill'), 'value' => $waitingWaybill],
+            ['label' => __('dashboard_data.delivery.pending_pickup'), 'value' => $pendingExport],
+            ['label' => __('dashboard_data.delivery.delivering'), 'value' => $delivering],
         ])->filter(fn (array $row) => $row['value'] > 0)->values()->all();
     }
 
@@ -374,9 +374,9 @@ class DashboardStatsService
     private static function routingStatusBreakdown(int $pending, int $failed, int $duplicate): array
     {
         return collect([
-            ['label' => 'Chờ phân số', 'value' => $pending],
-            ['label' => 'Lỗi', 'value' => $failed],
-            ['label' => 'Trùng', 'value' => $duplicate],
+            ['label' => __('dashboard_data.routing.pending'), 'value' => $pending],
+            ['label' => __('dashboard_data.routing.failed'), 'value' => $failed],
+            ['label' => __('dashboard_data.routing.duplicate'), 'value' => $duplicate],
         ])->filter(fn (array $row) => $row['value'] > 0)->values()->all();
     }
 
@@ -395,7 +395,7 @@ class DashboardStatsService
             ->orderByDesc('value')
             ->limit(4)
             ->get()
-            ->map(fn (LeadIngestion $row) => ['name' => $row->name ?: 'Khác', 'value' => (int) $row->value])
+            ->map(fn (LeadIngestion $row) => ['name' => $row->name ?: __('dashboard_data.other'), 'value' => (int) $row->value])
             ->values()
             ->all();
     }
@@ -426,10 +426,10 @@ class DashboardStatsService
         }
 
         return [
-            ['label' => 'Lead', 'value' => $leadQuery->count()],
-            ['label' => 'Đơn', 'value' => (clone $orders)->count()],
-            ['label' => 'Chốt', 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
-            ['label' => 'Giao', 'value' => (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
+            ['label' => __('dashboard_data.funnel.lead'), 'value' => $leadQuery->count()],
+            ['label' => __('dashboard_data.funnel.order'), 'value' => (clone $orders)->count()],
+            ['label' => __('dashboard_data.funnel.closed'), 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
+            ['label' => __('dashboard_data.funnel.delivered'), 'value' => (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
         ];
     }
 
@@ -439,10 +439,10 @@ class DashboardStatsService
     private static function salesFunnel(Builder $orders): array
     {
         return [
-            ['label' => 'Lead', 'value' => (clone $orders)->count()],
-            ['label' => 'Đang xử lý', 'value' => self::activePipeline($orders)->count()],
-            ['label' => 'Chốt', 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
-            ['label' => 'Giao', 'value' => (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
+            ['label' => __('dashboard_data.funnel.lead'), 'value' => (clone $orders)->count()],
+            ['label' => __('dashboard_data.funnel.in_progress'), 'value' => self::activePipeline($orders)->count()],
+            ['label' => __('dashboard_data.funnel.closed'), 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
+            ['label' => __('dashboard_data.funnel.delivered'), 'value' => (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
         ];
     }
 
@@ -450,10 +450,10 @@ class DashboardStatsService
     private static function allocatorFunnel(): array
     {
         return [
-            ['label' => 'Lead ingest', 'value' => LeadIngestion::query()->count()],
-            ['label' => 'Chờ phân số', 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Pending->value)->count()],
-            ['label' => 'Đã xử lý', 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Processed->value)->count()],
-            ['label' => 'Lead lỗi', 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count()],
+            ['label' => __('dashboard_data.funnel.lead_ingest'), 'value' => LeadIngestion::query()->count()],
+            ['label' => __('dashboard_data.routing.pending'), 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Pending->value)->count()],
+            ['label' => __('dashboard_data.funnel.processed'), 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Processed->value)->count()],
+            ['label' => __('dashboard_data.funnel.failed_leads'), 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count()],
         ];
     }
 
@@ -493,7 +493,7 @@ class DashboardStatsService
     private static function leadSources(): array
     {
         return LeadIngestion::query()->whereDate('created_at', today())->selectRaw('platform as name, count(*) as value')->groupBy('platform')->orderByDesc('value')->limit(4)->get()->map(fn (LeadIngestion $lead) => [
-            'name' => $lead->name ?: 'Khác',
+            'name' => $lead->name ?: __('dashboard_data.other'),
             'value' => (int) $lead->value,
         ])->values()->all();
     }
@@ -502,11 +502,11 @@ class DashboardStatsService
     private static function funnel(): array
     {
         return [
-            ['label' => 'Lead', 'value' => LeadIngestion::query()->count()],
-            ['label' => 'Đơn', 'value' => Order::query()->count()],
-            ['label' => 'Chốt', 'value' => Order::query()->whereNotNull('closed_at')->count()],
-            ['label' => 'Giao', 'value' => Order::query()->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
-            ['label' => 'Paid', 'value' => Order::query()->where('delivery_status', 'paid')->count()],
+            ['label' => __('dashboard_data.funnel.lead'), 'value' => LeadIngestion::query()->count()],
+            ['label' => __('dashboard_data.funnel.order'), 'value' => Order::query()->count()],
+            ['label' => __('dashboard_data.funnel.closed'), 'value' => Order::query()->whereNotNull('closed_at')->count()],
+            ['label' => __('dashboard_data.funnel.delivered'), 'value' => Order::query()->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
+            ['label' => __('dashboard_data.funnel.paid'), 'value' => Order::query()->where('delivery_status', 'paid')->count()],
         ];
     }
 
@@ -525,19 +525,20 @@ class DashboardStatsService
     private static function topSources(): array
     {
         $leadCounts = LeadIngestion::query()->selectRaw('platform, count(*) as leads_count')->groupBy('platform')->pluck('leads_count', 'platform');
-        $sourceRows = Order::query()->leftJoin('marketing_sources', 'marketing_sources.id', '=', 'orders.marketing_source_id')->selectRaw("coalesce(marketing_sources.utm_source, marketing_sources.ad_channel, marketing_sources.name, 'Khác') as source_name")->selectRaw('count(orders.id) as orders_count')->selectRaw("sum(case when orders.delivery_status in ('delivered', 'paid') then orders.total else 0 end) as revenue")->groupBy('source_name')->orderByDesc('revenue')->orderByDesc('orders_count')->limit(5)->get();
+        $other = '__other__';
+        $sourceRows = Order::query()->leftJoin('marketing_sources', 'marketing_sources.id', '=', 'orders.marketing_source_id')->selectRaw("coalesce(marketing_sources.utm_source, marketing_sources.ad_channel, marketing_sources.name, '{$other}') as source_name")->selectRaw('count(orders.id) as orders_count')->selectRaw("sum(case when orders.delivery_status in ('delivered', 'paid') then orders.total else 0 end) as revenue")->groupBy('source_name')->orderByDesc('revenue')->orderByDesc('orders_count')->limit(5)->get();
 
-        return $sourceRows->map(fn (object $row) => ['name' => $row->source_name, 'leads' => (int) ($leadCounts[$row->source_name] ?? 0), 'orders' => (int) $row->orders_count, 'revenue' => (int) $row->revenue])->values()->all();
+        return $sourceRows->map(fn (object $row) => ['name' => $row->source_name === $other ? __('dashboard_data.other') : $row->source_name, 'leads' => (int) ($leadCounts[$row->source_name] ?? $leadCounts['Khác'] ?? 0), 'orders' => (int) $row->orders_count, 'revenue' => (int) $row->revenue])->values()->all();
     }
 
     /** @return list<array{type: string, title: string, value: int, description: string}> */
     private static function alerts(): array
     {
         return collect([
-            ['type' => 'danger', 'title' => 'Đơn lỗi / hoàn hủy', 'value' => Order::query()->whereIn('delivery_status', ['failed', 'cancelled', 'returned'])->count(), 'description' => 'Cần rà soát trạng thái giao hàng.'],
-            ['type' => 'warning', 'title' => 'Lệch COD', 'value' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(), 'description' => 'Webhook vận chuyển có số tiền lệch.'],
-            ['type' => 'warning', 'title' => 'Lead lỗi', 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(), 'description' => 'Lead ingest thất bại cần retry.'],
-            ['type' => 'info', 'title' => 'Chờ vận đơn', 'value' => Order::query()->where('delivery_status', 'waiting_waybill')->count(), 'description' => 'Đơn đang chờ tạo/đẩy vận đơn.'],
+            ['type' => 'danger', 'title' => __('dashboard_data.alerts.failed_orders'), 'value' => Order::query()->whereIn('delivery_status', ['failed', 'cancelled', 'returned'])->count(), 'description' => __('dashboard_data.alerts.failed_orders_desc')],
+            ['type' => 'warning', 'title' => __('dashboard_data.alerts.cod_mismatch'), 'value' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(), 'description' => __('dashboard_data.alerts.cod_mismatch_desc')],
+            ['type' => 'warning', 'title' => __('dashboard_data.alerts.failed_leads'), 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(), 'description' => __('dashboard_data.alerts.failed_leads_desc')],
+            ['type' => 'info', 'title' => __('dashboard_data.alerts.waiting_waybill'), 'value' => Order::query()->where('delivery_status', 'waiting_waybill')->count(), 'description' => __('dashboard_data.alerts.waiting_waybill_desc')],
         ])->filter(fn (array $alert) => $alert['value'] > 0)->values()->all();
     }
 
@@ -554,7 +555,7 @@ class DashboardStatsService
     /** @return list<array{name: string, value: int}> */
     private static function platformBreakdown(): array
     {
-        return LeadIngestion::query()->selectRaw('platform as name, count(*) as value')->groupBy('platform')->orderByDesc('value')->limit(5)->get()->map(fn (LeadIngestion $row) => ['name' => $row->name ?: 'Khác', 'value' => (int) $row->value])->values()->all();
+        return LeadIngestion::query()->selectRaw('platform as name, count(*) as value')->groupBy('platform')->orderByDesc('value')->limit(5)->get()->map(fn (LeadIngestion $row) => ['name' => $row->name ?: __('dashboard_data.other'), 'value' => (int) $row->value])->values()->all();
     }
 
     /** @return Collection<int, Carbon> */

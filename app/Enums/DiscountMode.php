@@ -9,9 +9,6 @@ enum DiscountMode: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::BeforeDiscount => 'Trước chiết khấu',
-            self::AfterDiscount => 'Sau chiết khấu',
-        };
+        return __('enums.discount_mode.'.$this->value);
     }
 }

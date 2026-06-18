@@ -9,10 +9,12 @@ use App\Integrations\IntegrationDriverFactory;
 use App\Repositories\LeadIngestionRepository;
 use App\Services\Integrations\IntegrationConfigService;
 use App\Services\Leads\LeadIngestionService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class IntegrationsController extends Controller
 {
@@ -44,7 +46,7 @@ class IntegrationsController extends Controller
 
         $config->updateConnection($enum, $request->validated());
 
-        return back()->with('success', "Đã lưu cấu hình {$enum->label()}.");
+        return back()->with('success', __('messages.integrations_saved', ['platform' => $enum->label()]));
     }
 
     public function testWebhook(
@@ -52,47 +54,78 @@ class IntegrationsController extends Controller
         string $platform,
         LeadIngestionService $ingestionService,
         IntegrationConfigService $config,
-    ): RedirectResponse {
+    ): JsonResponse {
         $enum = IntegrationPlatform::tryFrom($platform);
 
         if (! $enum) {
-            abort(404);
+            return response()->json([
+                'success' => false,
+                'message' => __('integrations.test.unsupported'),
+            ], 404);
         }
 
-        $phone = '09'.random_int(10000000, 99999999);
+        try {
+            $phone = '09'.random_int(10000000, 99999999);
+            $sampleName = __('integrations.test.sample_name');
+            $sampleProduct = __('integrations.test.sample_product');
 
-        $payload = match ($enum) {
-            IntegrationPlatform::Facebook => [
-                'entry' => [[
-                    'changes' => [[
-                        'field' => 'leadgen',
-                        'value' => [
-                            'leadgen_id' => 'test_'.uniqid(),
-                            'field_data' => [
-                                ['name' => 'full_name', 'values' => ['Khách test webhook']],
-                                ['name' => 'phone_number', 'values' => [$phone]],
+            $payload = match ($enum) {
+                IntegrationPlatform::Facebook => [
+                    'entry' => [[
+                        'changes' => [[
+                            'field' => 'leadgen',
+                            'value' => [
+                                'leadgen_id' => 'test_'.uniqid(),
+                                'field_data' => [
+                                    ['name' => 'full_name', 'values' => [$sampleName]],
+                                    ['name' => 'phone_number', 'values' => [$phone]],
+                                ],
                             ],
-                        ],
+                        ]],
                     ]],
-                ]],
-            ],
-            default => [
-                'id' => 'test_'.uniqid(),
-                'name' => 'Khách test webhook',
-                'phone' => $phone,
-                'product' => 'Sản phẩm demo',
-                'utm_source' => $enum->value,
-                'utm_campaign' => 'admin-test',
-            ],
-        };
+                ],
+                default => [
+                    'id' => 'test_'.uniqid(),
+                    'name' => $sampleName,
+                    'phone' => $phone,
+                    'product' => $sampleProduct,
+                    'utm_source' => $enum->value,
+                    'utm_campaign' => 'admin-test',
+                ],
+            };
 
-        $driver = IntegrationDriverFactory::make($enum);
-        $ingestion = $ingestionService->ingest($driver, $payload);
-        $config->touchSynced($enum);
+            $driver = IntegrationDriverFactory::make($enum);
+            $ingestion = $ingestionService->ingest($driver, $payload);
+            $config->touchSynced($enum);
 
-        return back()->with(
-            'success',
-            "Test webhook OK — lead #{$ingestion->id}, trạng thái: {$ingestion->status->label()}"
-        );
+            return response()->json([
+                'success' => true,
+                'message' => __('integrations.test.success'),
+                'display' => [
+                    'success' => true,
+                    'message' => __('integrations.test.sample_recorded'),
+                    'lines' => [
+                        ['label' => __('integrations.test.platform'), 'value' => $enum->label(), 'highlight' => true],
+                        ['label' => __('integrations.test.lead_id'), 'value' => (string) $ingestion->id],
+                        ['label' => __('integrations.test.status'), 'value' => $ingestion->status->label()],
+                        ['label' => __('integrations.test.sample_phone'), 'value' => $phone],
+                    ],
+                    'items' => [],
+                    'options' => [],
+                ],
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('integrations.test.failed', ['error' => $e->getMessage()]),
+                'display' => [
+                    'success' => false,
+                    'message' => __('integrations.test.payload_failed'),
+                    'lines' => [],
+                    'items' => [],
+                    'options' => [],
+                ],
+            ], 422);
+        }
     }
 }

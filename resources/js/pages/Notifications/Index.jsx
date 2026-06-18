@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function NotificationsIndex({ tab, items, unreadCount }) {
+    const t = useT();
     const { markAllRead, openItem } = useNotificationActions();
 
     const setTab = (next) => {
@@ -16,36 +18,39 @@ export default function NotificationsIndex({ tab, items, unreadCount }) {
     };
 
     const tabs = [
-        { key: 'all', label: 'Tất cả' },
-        { key: 'unread', label: `Chưa đọc${unreadCount ? ` (${unreadCount})` : ''}` },
+        { key: 'all', label: t('notifications.tab_all') },
+        {
+            key: 'unread',
+            label: `${t('notifications.tab_unread')}${unreadCount ? ` (${unreadCount})` : ''}`,
+        },
     ];
 
     return (
         <AppLayout>
-            <Head title="Thông báo" />
+            <Head title={t('notifications.title')} />
 
             <div className="mx-auto max-w-3xl space-y-6">
                 <PageHeader
-                    title="Thông báo"
+                    title={t('notifications.title')}
                     actions={
                         unreadCount > 0 && (
                             <Button variant="outline" size="sm" onClick={markAllRead}>
                                 <CheckCheck className="size-4" />
-                                Đánh dấu tất cả đã đọc
+                                {t('notifications.mark_all_read')}
                             </Button>
                         )
                     }
                 />
 
                 <div className="flex gap-2">
-                    {tabs.map((t) => (
+                    {tabs.map((tabItem) => (
                         <Button
-                            key={t.key}
-                            variant={tab === t.key ? 'default' : 'outline'}
+                            key={tabItem.key}
+                            variant={tab === tabItem.key ? 'default' : 'outline'}
                             size="sm"
-                            onClick={() => setTab(t.key)}
+                            onClick={() => setTab(tabItem.key)}
                         >
-                            {t.label}
+                            {tabItem.label}
                         </Button>
                     ))}
                 </div>
@@ -63,7 +68,7 @@ export default function NotificationsIndex({ tab, items, unreadCount }) {
                         ) : (
                             <div className="px-4 py-16 text-center text-muted-foreground">
                                 <Bell className="mx-auto mb-2 size-6 opacity-50" />
-                                Không có thông báo nào
+                                {t('notifications.empty_page')}
                             </div>
                         )}
                     </CardContent>
@@ -71,7 +76,7 @@ export default function NotificationsIndex({ tab, items, unreadCount }) {
 
                 <p className="text-center text-xs text-muted-foreground">
                     <Link href="/settings" className="hover:underline">
-                        Tùy chỉnh loại thông báo trong Cài đặt
+                        {t('notifications.settings_link')}
                     </Link>
                 </p>
             </div>

@@ -29,7 +29,7 @@ class ProfileController extends Controller
             'password' => Hash::make($request->validated('password')),
         ]);
 
-        return back()->with('success', 'Đã đổi mật khẩu.');
+        return back()->with('success', __('messages.password_changed'));
     }
 
     public function updateAvatar(Request $request): RedirectResponse
@@ -47,7 +47,7 @@ class ProfileController extends Controller
         $path = $request->file('avatar')->store('avatars/'.$user->id, 'public');
         $user->update(['avatar_path' => $path]);
 
-        return back()->with('success', 'Đã cập nhật ảnh đại diện.');
+        return back()->with('success', __('messages.avatar_updated'));
     }
 
     public function destroyAvatar(Request $request): RedirectResponse
@@ -59,7 +59,7 @@ class ProfileController extends Controller
             $user->update(['avatar_path' => null]);
         }
 
-        return back()->with('success', 'Đã xóa ảnh đại diện.');
+        return back()->with('success', __('messages.avatar_removed'));
     }
 
     /** @return array<string, mixed> */

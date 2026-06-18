@@ -1,20 +1,23 @@
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 export function SalesPerformanceTable({ rows = [] }) {
+    const t = useT();
+
     return (
         <ScrollDataTable>
             <table className="w-full min-w-[960px] border-collapse text-xs">
                 <thead>
                     <tr>
-                        <Th>STT</Th>
-                        <Th>Tên Sales</Th>
-                        <Th className="text-right">Tổng lead nhận</Th>
-                        <Th className="text-right">Cuộc gọi thực tế</Th>
-                        <Th className="text-right">Tỷ lệ bắt máy</Th>
-                        <Th className="text-right">Đơn chốt</Th>
-                        <Th className="text-right">Tỷ lệ chốt</Th>
-                        <Th className="text-right">Doanh thu</Th>
+                        <Th>{t('reports.sales_performance.stt')}</Th>
+                        <Th>{t('reports.sales_performance.name')}</Th>
+                        <Th className="text-right">{t('reports.sales_performance.total_leads')}</Th>
+                        <Th className="text-right">{t('reports.sales_performance.calls')}</Th>
+                        <Th className="text-right">{t('reports.sales_performance.pickup_rate')}</Th>
+                        <Th className="text-right">{t('reports.sales_performance.closed')}</Th>
+                        <Th className="text-right">{t('reports.sales_performance.closing_rate')}</Th>
+                        <Th className="text-right">{t('reports.sales_performance.revenue')}</Th>
                     </tr>
                 </thead>
                 <tbody>

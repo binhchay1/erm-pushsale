@@ -12,6 +12,6 @@ class WarehouseInventoryController extends Controller
     {
         $inventory->delete();
 
-        return back()->with('success', 'Đã xóa dòng tồn kho.');
+        return back()->with('success', __('messages.inventory_row_deleted'));
     }
 }

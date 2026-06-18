@@ -85,7 +85,7 @@ class JntCarrier extends AbstractShippingCarrier
 
     public function testActions(): array
     {
-        return ['connection' => 'Kiểm tra credentials'];
+        return ['connection' => 'Kiểm tra thông tin kết nối'];
     }
 
     public function runTest(string $action): array

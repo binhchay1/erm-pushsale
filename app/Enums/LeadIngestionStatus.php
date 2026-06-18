@@ -11,11 +11,6 @@ enum LeadIngestionStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Pending => 'Chờ xử lý',
-            self::Processed => 'Đã tạo lead',
-            self::Duplicate => 'Trùng số',
-            self::Failed => 'Lỗi',
-        };
+        return __('enums.lead_ingestion_status.'.$this->value);
     }
 }

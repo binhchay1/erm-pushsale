@@ -9,34 +9,36 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { formatNumber } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 function SalesDashboardContent({ stats: initialStats }) {
+    const t = useT();
     const { stats, connected } = useRealtimeDashboard('sales', initialStats);
 
     const kpis = [
         {
-            title: 'Lead chờ gọi',
+            title: t('dashboard.sales.leads_pending'),
             value: formatNumber(stats.leads_pending),
-            hint: 'Lead còn trong pipeline tác nghiệp',
+            hint: t('dashboard.sales.leads_pending_hint'),
             icon: PhoneCall,
         },
         {
-            title: 'Đơn chốt hôm nay',
+            title: t('dashboard.sales.orders_today'),
             value: formatNumber(stats.orders_today),
-            hint: 'Đơn bạn đã chốt thành công',
+            hint: t('dashboard.sales.orders_today_hint'),
             icon: Target,
             accent: true,
         },
         {
-            title: 'Nhắc việc',
+            title: t('dashboard.sales.reminders'),
             value: formatNumber(stats.reminders),
-            hint: 'Lead cần follow-up / chăm sóc',
+            hint: t('dashboard.sales.reminders_hint'),
             icon: Bell,
         },
         {
-            title: 'Tổng đơn trong kỳ',
+            title: t('dashboard.sales.orders_period'),
             value: formatNumber(stats.summary?.orders ?? stats.orders_today),
-            hint: 'Theo bộ lọc dashboard hiện tại',
+            hint: t('dashboard.sales.orders_period_hint'),
             icon: TrendingUp,
         },
     ];
@@ -44,8 +46,8 @@ function SalesDashboardContent({ stats: initialStats }) {
     return (
         <div className="space-y-6">
             <PageHeader
-                title="Dashboard Telesale"
-                description="Theo dõi lead, cuộc gọi, pipeline và tỷ lệ chốt theo thời gian gần thực."
+                title={t('dashboard.sales.title')}
+                description={t('dashboard.sales.desc')}
                 actions={<RealtimeBadge connected={connected} />}
             />
 
@@ -58,31 +60,31 @@ function SalesDashboardContent({ stats: initialStats }) {
             <div className="grid gap-4 lg:grid-cols-3">
                 <RevenueAreaChart
                     data={stats.calls_series}
-                    title="Cuộc gọi 7 ngày"
-                    description="Tổng contact count theo ngày"
+                    title={t('dashboard.sales.calls_7d')}
+                    description={t('dashboard.sales.calls_7d_desc')}
                     valueFormatter={(v) => formatNumber(v)}
                     yTickFormatter={(v) => String(v)}
                 />
                 <OrdersBarChart
                     data={stats.conversion_series}
-                    title="Tỷ lệ chốt / đơn theo ngày"
-                    description="Xu hướng chuyển đổi trong kỳ gần nhất"
+                    title={t('dashboard.sales.conversion_7d')}
+                    description={t('dashboard.sales.conversion_7d_desc')}
                 />
             </div>
 
             <div className="grid gap-4 lg:grid-cols-3">
                 <RevenueAreaChart
                     data={stats.orders_closed_series}
-                    title="Đơn chốt 7 ngày"
-                    description="Số đơn chốt theo ngày"
+                    title={t('dashboard.sales.closed_7d')}
+                    description={t('dashboard.sales.closed_7d_desc')}
                     valueFormatter={(v) => formatNumber(v)}
                     yTickFormatter={(v) => String(v)}
                 />
                 {stats.pipeline?.length > 0 && (
                     <OrdersBarChart
                         data={stats.pipeline}
-                        title="Pipeline tác nghiệp"
-                        description="Lead theo giai đoạn chăm sóc"
+                        title={t('dashboard.sales.pipeline')}
+                        description={t('dashboard.sales.pipeline_desc')}
                     />
                 )}
             </div>
@@ -93,8 +95,10 @@ function SalesDashboardContent({ stats: initialStats }) {
 }
 
 export default function Dashboard({ stats: initialStats }) {
+    const t = useT();
+
     return (
-        <RoleDashboardShell role="sales" title="Dashboard Telesale">
+        <RoleDashboardShell role="sales" title={t('dashboard.sales.title')}>
             <SalesDashboardContent stats={initialStats} />
         </RoleDashboardShell>
     );

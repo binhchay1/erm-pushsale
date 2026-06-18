@@ -45,7 +45,7 @@ class TeamController extends Controller
     {
         Team::query()->create($request->validated());
 
-        return redirect()->route('admin.teams.index')->with('success', 'Đã tạo phòng ban.');
+        return redirect()->route('admin.teams.index')->with('success', __('messages.team_created'));
     }
 
     public function edit(Team $team): Response
@@ -67,31 +67,31 @@ class TeamController extends Controller
     public function update(TeamRequest $request, Team $team): RedirectResponse
     {
         if ($request->validated('parent_id') === $team->id) {
-            return back()->with('error', 'Phòng ban không thể là cha của chính nó.');
+            return back()->with('error', __('messages.team_self_parent'));
         }
 
         if ($this->isDescendant($team, (int) $request->input('parent_id'))) {
-            return back()->with('error', 'Không thể đặt phòng ban con làm phòng ban cha.');
+            return back()->with('error', __('messages.team_child_parent'));
         }
 
         $team->update($request->validated());
 
-        return redirect()->route('admin.teams.index')->with('success', 'Đã cập nhật phòng ban.');
+        return redirect()->route('admin.teams.index')->with('success', __('messages.team_updated'));
     }
 
     public function destroy(Team $team): RedirectResponse
     {
         if ($team->children()->exists()) {
-            return back()->with('error', 'Xóa các phòng ban con trước.');
+            return back()->with('error', __('messages.team_has_children'));
         }
 
         if ($team->users()->exists()) {
-            return back()->with('error', 'Phòng ban còn nhân viên, hãy chuyển họ sang phòng ban khác.');
+            return back()->with('error', __('messages.team_has_members'));
         }
 
         $team->delete();
 
-        return back()->with('success', 'Đã xóa phòng ban.');
+        return back()->with('success', __('messages.team_deleted'));
     }
 
     private function isDescendant(Team $team, ?int $parentId): bool

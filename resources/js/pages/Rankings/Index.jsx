@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RankingFilterBar } from '@/components/rankings/RankingFilterBar';
 import { RevenueRankingChart } from '@/components/rankings/RevenueRankingChart';
 import { formatCurrency, formatNumber } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 export default function RankingsIndex({
     routeUrl,
@@ -16,19 +17,18 @@ export default function RankingsIndex({
     periods,
     departments,
 }) {
+    const t = useT();
     const deptList = departments ?? [];
     const showAllDepartments = showDepartmentTabs && deptList.length > 1;
 
     return (
         <AppLayout>
-            <Head title="Bảng xếp hạng" />
+            <Head title={t('rankings.title')} />
 
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Bảng xếp hạng</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Xếp hạng doanh số chốt theo kỳ — lọc theo nhóm, tác nghiệp và cách tính chiết khấu.
-                    </p>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('rankings.title')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('rankings.desc')}</p>
                 </div>
 
                 <RankingFilterBar
@@ -41,27 +41,27 @@ export default function RankingsIndex({
                 {myRank && (
                     <Card className="border-primary/30 bg-primary/5">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-base">Thứ hạng của bạn</CardTitle>
-                            <CardDescription>Trong bộ lọc hiện tại</CardDescription>
+                            <CardTitle className="text-base">{t('rankings.my_rank')}</CardTitle>
+                            <CardDescription>{t('rankings.my_rank_desc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-wrap items-center gap-6 text-sm">
                             <div>
                                 <p className="text-2xl font-bold tabular-nums text-primary">#{myRank.rank}</p>
-                                <p className="text-muted-foreground">Hạng hiện tại</p>
+                                <p className="text-muted-foreground">{t('rankings.current_rank')}</p>
                             </div>
                             <div>
                                 <p className="font-semibold tabular-nums">{formatCurrency(myRank.revenue)}</p>
-                                <p className="text-muted-foreground">Doanh số chốt</p>
+                                <p className="text-muted-foreground">{t('rankings.closed_revenue')}</p>
                             </div>
                             <div>
                                 <p className="font-semibold tabular-nums">{formatNumber(myRank.orders)}</p>
-                                <p className="text-muted-foreground">Đơn chốt</p>
+                                <p className="text-muted-foreground">{t('rankings.closed_orders')}</p>
                             </div>
                             <div>
                                 <p className="font-semibold tabular-nums">
                                     {formatCurrency(myRank.avgOrderValue)}
                                 </p>
-                                <p className="text-muted-foreground">TB/đơn</p>
+                                <p className="text-muted-foreground">{t('rankings.avg_order')}</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -73,7 +73,7 @@ export default function RankingsIndex({
                             <CardHeader className="border-b border-border/60 bg-muted/20 pb-4">
                                 <CardTitle className="text-lg">{dept.label}</CardTitle>
                                 <CardDescription>
-                                    Top {dept.chartItems?.length ?? 0} trên biểu đồ · tối đa 50 hạng
+                                    {t('rankings.chart_desc', { count: dept.chartItems?.length ?? 0 })}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="pt-6">

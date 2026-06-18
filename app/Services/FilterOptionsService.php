@@ -54,11 +54,11 @@ class FilterOptionsService
             'salesUsers' => $this->users->byRole(UserRole::Sales),
             'marketingUsers' => $this->users->byRole(UserRole::Marketing),
             'sourceTypes' => [
-                ['value' => 'standard', 'label' => 'Chuẩn SaleOps'],
+                ['value' => 'standard', 'label' => __('filters.source_standard')],
             ],
             'reconciliationStatuses' => [
-                ['value' => 'pending', 'label' => 'Chờ đối soát'],
-                ['value' => 'reconciled', 'label' => 'Đã đối soát'],
+                ['value' => 'pending', 'label' => __('filters.reconciliation_pending')],
+                ['value' => 'reconciled', 'label' => __('filters.reconciliation_reconciled')],
             ],
         ];
 

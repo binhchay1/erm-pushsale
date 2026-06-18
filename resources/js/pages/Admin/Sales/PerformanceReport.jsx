@@ -6,6 +6,7 @@ import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { SalesPerformanceTable } from '@/components/reports/SalesPerformanceTable';
 import { TeamRevenueTable } from '@/components/reports/TeamRevenueTable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useT } from '@/providers/I18nProvider';
 
 export default function SalesPerformanceReport({
     filters,
@@ -14,17 +15,17 @@ export default function SalesPerformanceReport({
     report,
     routeUrl = '/admin/sales/performance',
 }) {
+    const t = useT();
+
     return (
         <AppLayout>
-            <Head title="Hiệu suất Telesale" />
+            <Head title={t('reports.performance.title')} />
 
             <div className="space-y-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Báo cáo hiệu suất Telesale</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Lead nhận · cuộc gọi · tỷ lệ bắt máy · chốt đơn · doanh thu theo từng sale
-                        </p>
+                        <h1 className="text-2xl font-bold tracking-tight">{t('reports.performance.report_title')}</h1>
+                        <p className="text-sm text-muted-foreground">{t('reports.performance.report_desc')}</p>
                     </div>
                     <ReportExportButton routeUrl={routeUrl} filters={filters} />
                 </div>
@@ -39,15 +40,13 @@ export default function SalesPerformanceReport({
                 {report?.teamTree && (
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle>Doanh số theo team</CardTitle>
-                            <CardDescription>
-                                Mỗi team một dòng: trưởng nhóm, số đơn chốt, tỷ lệ chốt và doanh thu
-                            </CardDescription>
+                            <CardTitle>{t('reports.performance.team_revenue')}</CardTitle>
+                            <CardDescription>{t('reports.performance.team_desc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="pt-2">
                             <TeamRevenueTable
                                 roots={report.teamTree.roots}
-                                emptyText="Chưa có team bán hàng nào. Vào mục Nhân viên để xếp nhân viên vào team."
+                                emptyText={t('reports.performance.team_empty')}
                             />
                         </CardContent>
                     </Card>

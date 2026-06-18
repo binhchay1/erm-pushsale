@@ -18,18 +18,6 @@ enum OperationStage: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::NewCustomer => 'Khách mới',
-            self::Call2 => 'Gọi lần 2',
-            self::Call3 => 'Gọi lần 3',
-            self::Call4 => 'Gọi lần 4',
-            self::Call5 => 'Gọi lần 5',
-            self::Call6 => 'Gọi lần 6',
-            self::Care1 => 'Chăm sóc lần 1',
-            self::Care2 => 'Chăm sóc lần 2',
-            self::Care3 => 'Chăm sóc lần 3',
-            self::Skipped => 'Bỏ qua',
-            self::NoOperation => 'Chưa có TN',
-        };
+        return __('enums.operation_stage.'.$this->value);
     }
 }

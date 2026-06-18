@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Accounting\DashboardController as AccountingDashboardController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\Admin\Accounting\OperationsController as AccountingOperationsController;
 use App\Http\Controllers\Admin\BusinessOverviewController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -59,6 +60,8 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 Broadcast::routes(['middleware' => ['web', 'auth']]);
+
+Route::post('locale', [LocaleController::class, 'update'])->name('locale.update');
 
 Route::get('/', function () {
     if (auth()->check()) {

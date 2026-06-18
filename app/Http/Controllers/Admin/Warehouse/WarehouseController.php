@@ -54,7 +54,7 @@ class WarehouseController extends Controller
     {
         Warehouse::query()->create($request->validated());
 
-        return redirect()->route('admin.warehouses.index')->with('success', 'Đã tạo kho mới.');
+        return redirect()->route('admin.warehouses.index')->with('success', __('messages.warehouse_created'));
     }
 
     public function show(Warehouse $warehouse, Request $request): Response
@@ -109,19 +109,19 @@ class WarehouseController extends Controller
     {
         $warehouse->update($request->validated());
 
-        return redirect()->route('admin.warehouses.index')->with('success', 'Đã cập nhật kho.');
+        return redirect()->route('admin.warehouses.index')->with('success', __('messages.warehouse_updated'));
     }
 
     public function destroy(Warehouse $warehouse): RedirectResponse
     {
         if ($this->orderStats->existsForWarehouse($warehouse->id)) {
-            return back()->with('error', 'Kho đang gắn với đơn hàng — không thể xóa.');
+            return back()->with('error', __('messages.warehouse_has_orders'));
         }
 
         $this->warehouses->deleteInventoriesOfWarehouse($warehouse->id);
         $warehouse->delete();
 
-        return back()->with('success', 'Đã xóa kho.');
+        return back()->with('success', __('messages.warehouse_deleted'));
     }
 
     /** @return list<array{id:int,name:string}> */

@@ -10,11 +10,7 @@ enum ClosingStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Open => 'Đang mở',
-            self::Closed => 'Đã chốt',
-            self::Cancelled => 'Đã hủy / bỏ',
-        };
+        return __('enums.closing_status.'.$this->value);
     }
 
     /** @return list<array{value: string, label: string}> */

@@ -7,8 +7,10 @@ import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 function BudgetCell({ row, budgetUpdateUrl, canEditBudget }) {
+    const t = useT();
     const [value, setValue] = useState(String(row.adCost ?? 0));
     const [saving, setSaving] = useState(false);
 
@@ -23,8 +25,8 @@ function BudgetCell({ row, budgetUpdateUrl, canEditBudget }) {
             { budget: Number(value) || 0 },
             {
                 preserveScroll: true,
-                onSuccess: () => toast.success('Đã lưu chi phí quảng cáo.'),
-                onError: () => toast.error('Không lưu được chi phí.'),
+                onSuccess: () => toast.success(t('reports.marketing_campaign_table.budget_saved')),
+                onError: () => toast.error(t('reports.marketing_campaign_table.budget_failed')),
                 onFinish: () => setSaving(false),
             },
         );
@@ -47,18 +49,20 @@ function BudgetCell({ row, budgetUpdateUrl, canEditBudget }) {
 }
 
 export function MarketingCampaignTable({ rows = [], budgetUpdateUrl, canEditBudget = false }) {
+    const t = useT();
+
     return (
         <ScrollDataTable>
             <table className="w-full min-w-[980px] border-collapse text-xs">
                 <thead>
                     <tr>
-                        <Th>STT</Th>
-                        <Th>Tên chiến dịch</Th>
-                        <Th>Người phụ trách</Th>
-                        <Th className="text-right">Số lead</Th>
-                        <Th className="text-right">Tỷ lệ lead rác</Th>
-                        <Th>Chi phí QC</Th>
-                        <Th className="text-right">Doanh thu thực tế</Th>
+                        <Th>{t('reports.marketing_campaign_table.stt')}</Th>
+                        <Th>{t('reports.marketing_campaign_table.campaign_name')}</Th>
+                        <Th>{t('reports.marketing_campaign_table.marketer')}</Th>
+                        <Th className="text-right">{t('reports.marketing_campaign_table.leads')}</Th>
+                        <Th className="text-right">{t('reports.marketing_campaign_table.junk_rate')}</Th>
+                        <Th>{t('reports.marketing_campaign_table.ad_cost')}</Th>
+                        <Th className="text-right">{t('reports.marketing_campaign_table.revenue')}</Th>
                     </tr>
                 </thead>
                 <tbody>

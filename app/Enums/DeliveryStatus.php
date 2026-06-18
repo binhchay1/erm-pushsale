@@ -23,24 +23,7 @@ enum DeliveryStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::WaitingWaybill => 'Chờ vận đơn',
-            self::Delivering => 'Đang giao hàng',
-            self::Delivered => 'Đã giao hàng',
-            self::Paid => 'Đã thanh toán',
-            self::Returned => 'Đã hoàn',
-            self::Returning => 'Đang hoàn',
-            self::CancelWaybill => 'Hủy vận đơn',
-            self::CannotDeliver => 'Không giao được',
-            self::DeliverNow => 'Giao ngay',
-            self::DeliveryComplete => 'Hoàn giao hàng',
-            self::CancelClosing => 'Hủy đóng đơn',
-            self::PickingUp => 'Đang lấy hàng',
-            self::CannotPickup => 'Không lấy được hàng',
-            self::Redelivery => 'Yêu cầu giao lại',
-            self::Refund => 'Bồi hoàn',
-            self::Posted => 'Đã đăng',
-        };
+        return __('enums.delivery_status.'.$this->value);
     }
 
     /**

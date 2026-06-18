@@ -44,4 +44,11 @@ return [
         'duplicate_window_days' => (int) env('LEAD_DUPLICATE_WINDOW_DAYS', 30),
     ],
 
+    'locales' => [
+        'vi' => ['label' => 'Tiếng Việt', 'short' => 'VI'],
+        'en' => ['label' => 'English', 'short' => 'EN'],
+    ],
+
+    'default_locale' => 'vi',
+
 ];

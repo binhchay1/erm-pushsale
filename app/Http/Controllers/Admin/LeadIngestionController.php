@@ -12,6 +12,6 @@ class LeadIngestionController extends Controller
     {
         $leadIngestion->delete();
 
-        return back()->with('success', 'Đã xóa bản ghi lead.');
+        return back()->with('success', __('messages.lead_deleted'));
     }
 }

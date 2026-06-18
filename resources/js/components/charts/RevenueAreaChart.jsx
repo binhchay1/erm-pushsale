@@ -10,23 +10,25 @@ import {
 
 import { ChartTooltip } from '@/components/charts/ChartTooltip';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatCurrencyCompact } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
 export function RevenueAreaChart({
     className,
     data,
-    title = 'Doanh thu 7 ngày',
+    title,
     description,
     valueFormatter = formatCurrency,
-    yTickFormatter = (v) => `${Math.round(v / 1_000_000)}tr`,
+    yTickFormatter = (v) => formatCurrencyCompact(v),
 }) {
+    const t = useT();
     const chartData = data ?? [];
 
     return (
         <Card className={cn('col-span-full lg:col-span-2', className)}>
             <CardHeader>
-                <CardTitle>{title}</CardTitle>
+                <CardTitle>{title ?? t('charts.revenue_default')}</CardTitle>
                 {description && <CardDescription>{description}</CardDescription>}
             </CardHeader>
             <CardContent className="h-[280px] pl-0">

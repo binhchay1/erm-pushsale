@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useConfirm } from '@/hooks/use-confirm';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 function ReadOnlyField({ label, value }) {
     return (
@@ -20,6 +21,7 @@ function ReadOnlyField({ label, value }) {
 }
 
 export default function ProfileIndex({ profile }) {
+    const t = useT();
     const fileRef = useRef(null);
     const [preview, setPreview] = useState(null);
     const { ask, ConfirmDialogPortal } = useConfirm();
@@ -51,9 +53,9 @@ export default function ProfileIndex({ profile }) {
 
     const removeAvatar = async () => {
         const ok = await ask({
-            title: 'Xóa ảnh đại diện',
-            description: 'Xóa ảnh đại diện hiện tại?',
-            confirmLabel: 'Xóa',
+            title: t('profile.remove_confirm_title'),
+            description: t('profile.remove_confirm_desc'),
+            confirmLabel: t('common.delete'),
             variant: 'destructive',
         });
         if (!ok) return;
@@ -70,20 +72,18 @@ export default function ProfileIndex({ profile }) {
 
     return (
         <AppLayout>
-            <Head title="Hồ sơ cá nhân" />
+            <Head title={t('profile.title')} />
 
             <div className="mx-auto max-w-3xl space-y-6 animate-in fade-in-0 duration-300">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Hồ sơ cá nhân</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Ảnh đại diện và đổi mật khẩu — thông tin cá nhân do quản trị viên quản lý
-                    </p>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('profile.title')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('profile.desc')}</p>
                 </div>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Ảnh đại diện</CardTitle>
-                        <CardDescription>JPG, PNG — tối đa 2MB</CardDescription>
+                        <CardTitle>{t('profile.avatar_title')}</CardTitle>
+                        <CardDescription>{t('profile.avatar_desc')}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-wrap items-center gap-4">
                         <Avatar className="size-20 border-2 border-border/80 shadow-sm transition-transform duration-200 hover:scale-[1.02]">
@@ -100,25 +100,25 @@ export default function ProfileIndex({ profile }) {
                             />
                             <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
                                 <Upload className="size-4" />
-                                Tải ảnh lên
+                                {t('profile.upload')}
                             </Button>
                             {profile.avatar_url && (
                                 <Button type="button" variant="ghost" size="sm" onClick={removeAvatar}>
                                     <Trash2 className="size-4" />
-                                    Xóa ảnh
+                                    {t('profile.remove')}
                                 </Button>
                             )}
                         </div>
                         <p className="flex w-full items-center gap-1 text-xs text-muted-foreground">
                             <Camera className="size-3" />
-                            Ảnh hiển thị trên thanh menu và hồ sơ
+                            {t('profile.avatar_hint')}
                         </p>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Thông tin tài khoản</CardTitle>
+                        <CardTitle>{t('profile.account_title')}</CardTitle>
                         <CardDescription>
                             {profile.role_label}
                             {profile.team_name ? ` · ${profile.team_name}` : ''}
@@ -127,17 +127,15 @@ export default function ProfileIndex({ profile }) {
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-4 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2">
-                            <ReadOnlyField label="Họ tên" value={profile.name} />
-                            <ReadOnlyField label="Email" value={profile.email} />
-                            <ReadOnlyField label="Số điện thoại" value={profile.phone} />
-                            <ReadOnlyField label="Chức danh" value={profile.job_title} />
+                            <ReadOnlyField label={t('profile.name')} value={profile.name} />
+                            <ReadOnlyField label={t('profile.email')} value={profile.email} />
+                            <ReadOnlyField label={t('profile.phone')} value={profile.phone} />
+                            <ReadOnlyField label={t('profile.job_title')} value={profile.job_title} />
                             {profile.manager_name && (
-                                <ReadOnlyField label="Người quản lý" value={profile.manager_name} />
+                                <ReadOnlyField label={t('profile.manager')} value={profile.manager_name} />
                             )}
                         </div>
-                        <p className="mt-3 text-xs text-muted-foreground">
-                            Cần thay đổi họ tên, email hoặc phòng ban? Liên hệ quản trị viên hệ thống.
-                        </p>
+                        <p className="mt-3 text-xs text-muted-foreground">{t('profile.admin_contact')}</p>
                     </CardContent>
                 </Card>
 
@@ -145,15 +143,15 @@ export default function ProfileIndex({ profile }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <KeyRound className="size-4" />
-                            Đổi mật khẩu
+                            {t('profile.password_title')}
                         </CardTitle>
-                        <CardDescription>Nhập mật khẩu mới và xác nhận lại</CardDescription>
+                        <CardDescription>{t('profile.password_desc')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={submitPassword} className="space-y-4">
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="password">Mật khẩu mới</Label>
+                                    <Label htmlFor="password">{t('profile.new_password')}</Label>
                                     <Input
                                         id="password"
                                         type="password"
@@ -166,7 +164,7 @@ export default function ProfileIndex({ profile }) {
                                     )}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="password_confirmation">Xác nhận mật khẩu</Label>
+                                    <Label htmlFor="password_confirmation">{t('profile.confirm_password')}</Label>
                                     <Input
                                         id="password_confirmation"
                                         type="password"
@@ -180,12 +178,12 @@ export default function ProfileIndex({ profile }) {
                             <div className="flex items-center justify-end gap-2">
                                 {recentlySuccessful && (
                                     <span className="text-xs text-emerald-600 animate-in fade-in-0">
-                                        Đã đổi mật khẩu
+                                        {t('profile.password_saved')}
                                     </span>
                                 )}
                                 <Button type="submit" disabled={processing}>
                                     <Save className="size-4" />
-                                    {processing ? 'Đang lưu…' : 'Lưu mật khẩu'}
+                                    {processing ? t('common.saving') : t('profile.save_password')}
                                 </Button>
                             </div>
                         </form>

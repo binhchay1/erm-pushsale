@@ -13,6 +13,8 @@ import {
 } from '@/lib/status-tones';
 import { formatCurrency } from '@/lib/format';
 import AppLayout from '@/layouts/AppLayout';
+import { useLabels } from '@/hooks/use-labels';
+import { useT } from '@/providers/I18nProvider';
 
 function issueType(row) {
     if (row.is_cod_mismatch) return 'cod_mismatch';
@@ -20,73 +22,75 @@ function issueType(row) {
     return 'matched';
 }
 
-function issueLabel(row) {
-    if (row.is_cod_mismatch) return 'Lệch COD';
-    if (!row.order_code) return 'Không map đơn';
-    return 'Khớp đơn';
-}
-
 export default function ShippingReconciliation({ stats, issues }) {
+    const t = useT();
+    const labels = useLabels();
+
+    const issueLabel = (row) => {
+        const type = issueType(row);
+        if (type === 'cod_mismatch') return t('shipping.reconciliation.issue_cod');
+        if (type === 'unmatched') return t('shipping.reconciliation.issue_unmatched');
+        return t('shipping.reconciliation.issue_matched');
+    };
+
     return (
         <AppLayout>
-            <Head title="Đối soát vận chuyển" />
+            <Head title={t('shipping.reconciliation_title')} />
 
             <div className="space-y-6">
                 <PageHeader
-                    title="Đối soát vận chuyển"
-                    description="Theo dõi callback từ hãng giao hàng và phát hiện lệch COD/không map được đơn."
+                    title={t('shipping.reconciliation_title')}
+                    description={t('shipping.reconciliation.desc')}
                 />
 
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <StatCard
                         icon={BadgeCheck}
-                        title="Callback hôm nay"
+                        title={t('shipping.reconciliation.callback_today')}
                         value={stats.callbacks_today}
-                        hint="Tổng webhook nhận từ hãng vận chuyển"
+                        hint={t('shipping.reconciliation.callback_hint')}
                     />
                     <StatCard
                         icon={Wallet}
-                        title="Match đơn thành công"
+                        title={t('shipping.reconciliation.matched')}
                         value={stats.matched_today}
-                        hint="Tìm được order từ tracking/order code"
+                        hint={t('shipping.reconciliation.matched_hint')}
                     />
                     <StatCard
                         icon={Link2Off}
-                        title="Không map được đơn"
+                        title={t('shipping.reconciliation.unmatched')}
                         value={stats.unmatched_today}
-                        hint="Cần kiểm tra mapping mã đơn của đối tác"
+                        hint={t('shipping.reconciliation.unmatched_hint')}
                     />
                     <StatCard
                         icon={AlertTriangle}
-                        title="Lệch COD"
+                        title={t('shipping.reconciliation.cod_mismatch')}
                         value={stats.cod_mismatch_today}
-                        hint="COD đối tác khác số hệ thống (> 500đ)"
+                        hint={t('shipping.reconciliation.cod_mismatch_hint')}
                     />
                 </div>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Danh sách vấn đề cần xử lý</CardTitle>
-                        <CardDescription>
-                            Ưu tiên các dòng lệch COD và callback không tìm được order
-                        </CardDescription>
+                        <CardTitle>{t('shipping.reconciliation.issues_title')}</CardTitle>
+                        <CardDescription>{t('shipping.reconciliation.issues_desc')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ScrollDataTable>
                             <table className="w-full border-collapse text-xs">
                                 <thead>
                                     <tr>
-                                        <Th>ID</Th>
-                                        <Th>Thời gian</Th>
-                                        <Th>Đối tác</Th>
-                                        <Th>Tracking</Th>
-                                        <Th>Mã đơn đối tác</Th>
-                                        <Th>Mã đơn hệ thống</Th>
-                                        <Th>Trạng thái giao</Th>
-                                        <Th>Loại vấn đề</Th>
-                                        <Th>COD đối tác</Th>
-                                        <Th>COD hệ thống</Th>
-                                        <Th>Ghi chú</Th>
+                                        <Th>{t('shipping.reconciliation.col_id')}</Th>
+                                        <Th>{t('shipping.reconciliation.col_time')}</Th>
+                                        <Th>{t('shipping.reconciliation.col_partner')}</Th>
+                                        <Th>{t('shipping.reconciliation.col_tracking')}</Th>
+                                        <Th>{t('shipping.reconciliation.col_partner_order')}</Th>
+                                        <Th>{t('shipping.reconciliation.col_system_order')}</Th>
+                                        <Th>{t('shipping.reconciliation.col_delivery')}</Th>
+                                        <Th>{t('shipping.reconciliation.col_issue_type')}</Th>
+                                        <Th>{t('shipping.reconciliation.col_partner_cod')}</Th>
+                                        <Th>{t('shipping.reconciliation.col_system_cod')}</Th>
+                                        <Th>{t('shipping.reconciliation.col_note')}</Th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -102,7 +106,7 @@ export default function ShippingReconciliation({ stats, issues }) {
                                                 <Td>
                                                     {row.mapped_status ? (
                                                         <StatusBadge tone={deliveryTone(row.mapped_status)}>
-                                                            {deliveryLabel(row.mapped_status)}
+                                                            {deliveryLabel(row.mapped_status, labels)}
                                                         </StatusBadge>
                                                     ) : (
                                                         <span className="text-muted-foreground">
@@ -129,7 +133,7 @@ export default function ShippingReconciliation({ stats, issues }) {
                                     ) : (
                                         <tr>
                                             <Td colSpan={11} className="py-8 text-center text-muted-foreground">
-                                                Chưa phát hiện bất thường vận chuyển
+                                                {t('shipping.reconciliation.empty')}
                                             </Td>
                                         </tr>
                                     )}

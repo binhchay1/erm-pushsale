@@ -54,6 +54,6 @@ class SettingsController extends Controller
             'notifications' => $validated['notifications'],
         ]);
 
-        return back()->with('success', 'Đã lưu cài đặt.');
+        return back()->with('success', __('messages.saved'));
     }
 }

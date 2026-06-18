@@ -12,12 +12,6 @@ enum TeamType: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Sale => 'Telesale',
-            self::Marketing => 'Marketing',
-            self::Warehouse => 'Kho',
-            self::Allocator => 'Chia số',
-            self::Accounting => 'Kế toán',
-        };
+        return __('enums.team_type.'.$this->value);
     }
 }

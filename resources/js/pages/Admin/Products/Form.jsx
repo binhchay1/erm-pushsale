@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function ProductForm({ product, parents }) {
+    const t = useT();
     const isEdit = Boolean(product?.id);
     const { data, setData, post, put, processing, errors } = useForm({
         name: product?.name ?? '',
@@ -29,7 +31,7 @@ export default function ProductForm({ product, parents }) {
 
     return (
         <AppLayout>
-            <Head title={isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm'} />
+            <Head title={isEdit ? t('pages.products.edit') : t('pages.products.form_create')} />
 
             <div className="mx-auto max-w-2xl space-y-6">
                 <div className="flex items-center gap-3">
@@ -39,18 +41,18 @@ export default function ProductForm({ product, parents }) {
                         </Link>
                     </Button>
                     <h1 className="text-2xl font-bold tracking-tight">
-                        {isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}
+                        {isEdit ? t('pages.products.edit') : t('pages.products.form_create')}
                     </h1>
                 </div>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Thông tin sản phẩm</CardTitle>
+                        <CardTitle>{t('pages.products.form_info')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={submit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Tên sản phẩm</Label>
+                                <Label htmlFor="name">{t('pages.products.name')}</Label>
                                 <Input
                                     id="name"
                                     value={data.name}
@@ -60,7 +62,7 @@ export default function ProductForm({ product, parents }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="sku">SKU</Label>
+                                <Label htmlFor="sku">{t('pages.products.sku')}</Label>
                                 <Input
                                     id="sku"
                                     value={data.sku}
@@ -70,7 +72,7 @@ export default function ProductForm({ product, parents }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="unit_price">Đơn giá (VNĐ)</Label>
+                                <Label htmlFor="unit_price">{t('pages.products.unit_price')}</Label>
                                 <Input
                                     id="unit_price"
                                     type="number"
@@ -84,14 +86,14 @@ export default function ProductForm({ product, parents }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="parent_id">Sản phẩm cha (nhóm)</Label>
+                                <Label htmlFor="parent_id">{t('pages.products.parent_product')}</Label>
                                 <select
                                     id="parent_id"
                                     className="input-soft flex h-9 w-full px-3"
                                     value={data.parent_id}
                                     onChange={(e) => setData('parent_id', e.target.value || '')}
                                 >
-                                    <option value="">— Không có —</option>
+                                    <option value="">{t('pages.no_parent')}</option>
                                     {parents.map((p) => (
                                         <option key={p.id} value={p.id}>
                                             {p.name}
@@ -101,7 +103,7 @@ export default function ProductForm({ product, parents }) {
                             </div>
 
                             <div className="flex items-center justify-between rounded-lg border px-4 py-3">
-                                <Label htmlFor="is_active">Đang kinh doanh</Label>
+                                <Label htmlFor="is_active">{t('pages.products.active')}</Label>
                                 <Switch
                                     id="is_active"
                                     checked={data.is_active}
@@ -112,7 +114,7 @@ export default function ProductForm({ product, parents }) {
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={processing}>
                                     <Save className="size-4" />
-                                    {processing ? 'Đang lưu…' : 'Lưu'}
+                                    {processing ? t('common.saving') : t('pages.save')}
                                 </Button>
                             </div>
                         </form>

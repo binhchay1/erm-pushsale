@@ -7,21 +7,24 @@ import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/format';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function ProductsIndex({ products }) {
+    const t = useT();
+
     return (
         <AppLayout>
-            <Head title="Sản phẩm" />
+            <Head title={t('pages.products.title')} />
 
             <div className="space-y-6">
                 <PageHeader
-                    title="Sản phẩm"
-                    description="Danh mục sản phẩm dùng cho đơn hàng, kho và chiến dịch marketing."
+                    title={t('pages.products.title')}
+                    description={t('pages.products.desc_index')}
                     actions={
                         <Button asChild>
                             <Link href="/admin/products/create">
                                 <Plus className="size-4" />
-                                Thêm sản phẩm
+                                {t('pages.products.create')}
                             </Link>
                         </Button>
                     }
@@ -31,13 +34,13 @@ export default function ProductsIndex({ products }) {
                     <table className="w-full min-w-[900px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>Tên</Th>
-                                <Th>SKU</Th>
-                                <Th>Giá</Th>
-                                <Th>Nhóm cha</Th>
-                                <Th>Biến thể</Th>
-                                <Th>Trạng thái</Th>
-                                <Th>Thao tác</Th>
+                                <Th>{t('pages.products.col_name')}</Th>
+                                <Th>{t('pages.products.col_sku')}</Th>
+                                <Th>{t('pages.products.col_price')}</Th>
+                                <Th>{t('pages.products.col_parent')}</Th>
+                                <Th>{t('pages.products.col_variants')}</Th>
+                                <Th>{t('pages.products.col_status')}</Th>
+                                <Th>{t('pages.actions')}</Th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,7 +52,7 @@ export default function ProductsIndex({ products }) {
                                         <Td className="tabular-nums">{formatCurrency(row.unit_price)}</Td>
                                         <Td>{row.parent_name ?? '—'}</Td>
                                         <Td>{row.variants_count || '—'}</Td>
-                                        <Td>{row.is_active ? 'Đang bán' : 'Ngừng'}</Td>
+                                        <Td>{row.is_active ? t('pages.selling') : t('pages.stopped_short')}</Td>
                                         <Td>
                                             <div className="flex gap-1">
                                                 <Button variant="outline" size="icon-sm" asChild>
@@ -60,7 +63,7 @@ export default function ProductsIndex({ products }) {
                                                 <DeleteRowButton
                                                     url={`/admin/products/${row.id}`}
                                                     label={row.name}
-                                                    confirmMessage={`Xóa sản phẩm "${row.name}"?`}
+                                                    confirmMessage={t('pages.products.delete_confirm', { name: row.name })}
                                                 />
                                             </div>
                                         </Td>
@@ -69,7 +72,7 @@ export default function ProductsIndex({ products }) {
                             ) : (
                                 <tr>
                                     <Td colSpan={7} className="py-8 text-center text-muted-foreground">
-                                        Chưa có sản phẩm
+                                        {t('pages.products.empty')}
                                     </Td>
                                 </tr>
                             )}

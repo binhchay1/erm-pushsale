@@ -41,71 +41,28 @@ class ExtraReportService
      */
     public static function registry(): array
     {
-        return [
-            'sale-1' => [
-                'title' => 'Báo cáo công việc sale',
-                'description' => 'Số khách được gán và tiến độ gọi theo từng bước tác nghiệp của mỗi telesale.',
-                'roles' => ['sales', 'admin'],
-                'level' => 'staff',
-                'filters' => ['date_from', 'date_to', 'product_id'],
-            ],
-            'sale-2' => [
-                'title' => 'Bảng tổng hợp chốt đơn',
-                'description' => 'Số contact, đơn chốt, tỷ lệ chốt và doanh số trước / sau chiết khấu theo telesale.',
-                'roles' => ['sales', 'accounting', 'admin'],
-                'level' => 'staff',
-                'filters' => ['date_from', 'date_to', 'date_type', 'product_id'],
-            ],
-            'sale-3' => [
-                'title' => 'Báo cáo doanh số chi tiết sale',
-                'description' => 'Đơn chốt theo từng trạng thái giao hàng: đang giao, đã giao, đã thanh toán, hoàn, hủy.',
-                'roles' => ['sales', 'accounting', 'admin'],
-                'level' => 'staff',
-                'filters' => ['date_from', 'date_to', 'date_type', 'product_id'],
-            ],
-            'sale-4' => [
-                'title' => 'Sale KPI',
-                'description' => 'Contact khách mới / khách cũ, tỷ lệ chốt, doanh số dự kiến và doanh số thực nhận.',
-                'roles' => ['sales', 'admin'],
-                'level' => 'staff',
-                'filters' => ['date_from', 'date_to', 'product_id'],
-            ],
-            'sale-5' => [
-                'title' => 'Báo cáo lịch hẹn telesales',
-                'description' => 'Số khách đã hẹn gọi lại trong 7 ngày tới — sắp xếp công việc theo ngày.',
-                'roles' => ['sales', 'admin'],
-                'level' => 'staff',
-                'filters' => [],
-            ],
-            'marketing-1' => [
-                'title' => 'Báo cáo doanh số marketing',
-                'description' => 'Đơn và doanh số theo từng nhân viên marketing, chia theo trạng thái giao hàng.',
-                'roles' => ['marketing', 'accounting', 'admin'],
-                'level' => 'staff',
-                'filters' => ['date_from', 'date_to', 'date_type', 'product_id'],
-            ],
-            'marketing-2' => [
-                'title' => 'Tỉ lệ chốt đơn sản phẩm',
-                'description' => 'Contact, đơn chốt, tỷ lệ chốt và giá trị trung bình của từng sản phẩm.',
-                'roles' => ['marketing', 'sales', 'accounting', 'admin'],
-                'level' => 'leader',
-                'filters' => ['date_from', 'date_to', 'date_type'],
-            ],
-            'kho-1' => [
-                'title' => 'Báo cáo doanh số theo kho',
-                'description' => 'Doanh số chốt, xác nhận giao, đang giao và hàng hoàn của từng kho.',
-                'roles' => ['accounting', 'warehouse', 'admin'],
-                'level' => 'leader',
-                'filters' => ['date_from', 'date_to', 'date_type', 'product_id', 'warehouse_id'],
-            ],
-            'kho-2' => [
-                'title' => 'Báo cáo kinh doanh hệ thống',
-                'description' => 'Doanh số theo kho, tách khách mới và khách mua lại để đánh giá chất lượng tệp khách.',
-                'roles' => ['accounting', 'admin'],
-                'level' => 'leader',
-                'filters' => ['date_from', 'date_to', 'date_type', 'warehouse_id'],
-            ],
+        $defs = [
+            'sale-1' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'product_id']],
+            'sale-2' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
+            'sale-3' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
+            'sale-4' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'product_id']],
+            'sale-5' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => []],
+            'marketing-1' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
+            'marketing-2' => ['roles' => ['marketing', 'sales', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type']],
+            'kho-1' => ['roles' => ['accounting', 'warehouse', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id', 'warehouse_id']],
+            'kho-2' => ['roles' => ['accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'warehouse_id']],
         ];
+
+        $out = [];
+        foreach ($defs as $key => $meta) {
+            $out[$key] = [
+                'title' => __("reports.extra.{$key}.title"),
+                'description' => __("reports.extra.{$key}.description"),
+                ...$meta,
+            ];
+        }
+
+        return $out;
     }
 
     public function exists(string $key): bool
@@ -207,11 +164,13 @@ class ExtraReportService
         ];
 
         $columns = array_merge([
-            ['key' => 'name', 'label' => 'Telesale', 'format' => 'text'],
-            ['key' => 'contacts', 'label' => 'Tổng contact', 'format' => 'number'],
-            ['key' => 'untouched', 'label' => 'Chưa tác nghiệp', 'format' => 'number'],
+            $this->col('telesale', 'name', 'text'),
+            $this->col('contacts_total', 'contacts', 'number'),
+            $this->col('untouched', 'untouched', 'number'),
         ], array_map(fn (OperationStage $stage) => [
             'key' => 'stage_'.$stage->value,
+            'label_key' => $stage->value,
+            'label_type' => 'operation_stage',
             'label' => $stage->label(),
             'format' => 'number',
         ], $stages));
@@ -241,13 +200,13 @@ class ExtraReportService
             ->filter(fn (Order $o) => $o->sale_user_id !== null);
 
         $columns = [
-            ['key' => 'name', 'label' => 'Telesale', 'format' => 'text'],
-            ['key' => 'contacts', 'label' => 'Số contact', 'format' => 'number'],
-            ['key' => 'closed', 'label' => 'Chốt đơn', 'format' => 'number'],
-            ['key' => 'rate', 'label' => 'Tỷ lệ chốt', 'format' => 'percent', 'tone' => 'positive'],
-            ['key' => 'gross', 'label' => 'Doanh số', 'format' => 'currency'],
-            ['key' => 'discount', 'label' => 'Chiết khấu', 'format' => 'currency'],
-            ['key' => 'net', 'label' => 'Doanh số sau CK', 'format' => 'currency'],
+            $this->col('telesale', 'name', 'text'),
+            $this->col('contacts', 'contacts', 'number'),
+            $this->col('closed', 'closed', 'number'),
+            $this->col('rate', 'rate', 'percent', ['tone' => 'positive']),
+            $this->col('gross', 'gross', 'currency'),
+            $this->col('discount', 'discount', 'currency'),
+            $this->col('net', 'net', 'currency'),
         ];
 
         $rows = $orders->groupBy('sale_user_id')->map(function (Collection $group) {
@@ -280,22 +239,22 @@ class ExtraReportService
             ->filter(fn (Order $o) => $bySale ? $o->sale_user_id !== null : $o->marketer_user_id !== null);
 
         $columns = [
-            ['key' => 'name', 'label' => $bySale ? 'Telesale' : 'Marketer', 'format' => 'text'],
-            ['key' => 'contacts', 'label' => 'Contact', 'format' => 'number'],
-            ['key' => 'closed_qty', 'label' => 'Đơn chốt', 'format' => 'number'],
-            ['key' => 'closed_rev', 'label' => 'DS chốt', 'format' => 'currency'],
-            ['key' => 'delivering_qty', 'label' => 'Đang giao (SL)', 'format' => 'number'],
-            ['key' => 'delivering_rev', 'label' => 'Đang giao (DS)', 'format' => 'currency'],
-            ['key' => 'delivered_qty', 'label' => 'Đã giao (SL)', 'format' => 'number'],
-            ['key' => 'delivered_rev', 'label' => 'Đã giao (DS)', 'format' => 'currency'],
-            ['key' => 'paid_qty', 'label' => 'Đã thanh toán (SL)', 'format' => 'number'],
-            ['key' => 'paid_rev', 'label' => 'Đã thanh toán (DS)', 'format' => 'currency'],
-            ['key' => 'returned_qty', 'label' => 'Hoàn (SL)', 'format' => 'number'],
-            ['key' => 'returned_rev', 'label' => 'Hoàn (DS)', 'format' => 'currency'],
-            ['key' => 'cancelled_qty', 'label' => 'Hủy (SL)', 'format' => 'number'],
-            ['key' => 'return_rate', 'label' => '% Hoàn', 'format' => 'percent', 'tone' => 'negative'],
-            ['key' => 'close_rate', 'label' => 'Tỷ lệ chốt', 'format' => 'percent', 'tone' => 'positive'],
-            ['key' => 'avg_order', 'label' => 'Giá trị TB/đơn', 'format' => 'currency'],
+            ['key' => 'name', 'label_key' => $bySale ? 'telesale' : 'marketer', 'label' => $bySale ? __('reports.columns.telesale') : __('reports.columns.marketer'), 'format' => 'text'],
+            $this->col('contacts', 'contacts', 'number'),
+            $this->col('closed_qty', 'closed_qty', 'number'),
+            $this->col('closed_rev', 'closed_rev', 'currency'),
+            $this->col('delivering_qty', 'delivering_qty', 'number'),
+            $this->col('delivering_rev', 'delivering_rev', 'currency'),
+            $this->col('delivered_qty', 'delivered_qty', 'number'),
+            $this->col('delivered_rev', 'delivered_rev', 'currency'),
+            $this->col('paid_qty', 'paid_qty', 'number'),
+            $this->col('paid_rev', 'paid_rev', 'currency'),
+            $this->col('returned_qty', 'returned_qty', 'number'),
+            $this->col('returned_rev', 'returned_rev', 'currency'),
+            $this->col('cancelled_qty', 'cancelled_qty', 'number'),
+            $this->col('return_rate', 'return_rate', 'percent', ['tone' => 'negative']),
+            $this->col('close_rate', 'close_rate', 'percent', ['tone' => 'positive']),
+            $this->col('avg_order', 'avg_order', 'currency'),
         ];
 
         $groupKey = $bySale ? 'sale_user_id' : 'marketer_user_id';
@@ -345,16 +304,16 @@ class ExtraReportService
             ->filter(fn (Order $o) => $o->sale_user_id !== null);
 
         $columns = [
-            ['key' => 'name', 'label' => 'Telesale', 'format' => 'text'],
-            ['key' => 'new_contacts', 'label' => 'Contact mới', 'format' => 'number'],
-            ['key' => 'new_closed', 'label' => 'Chốt (mới)', 'format' => 'number'],
-            ['key' => 'new_rate', 'label' => 'Tỷ lệ (mới)', 'format' => 'percent', 'tone' => 'positive'],
-            ['key' => 'old_contacts', 'label' => 'Contact khách cũ', 'format' => 'number'],
-            ['key' => 'old_closed', 'label' => 'Chốt (cũ)', 'format' => 'number'],
-            ['key' => 'old_rate', 'label' => 'Tỷ lệ (cũ)', 'format' => 'percent', 'tone' => 'positive'],
-            ['key' => 'total_closed', 'label' => 'Tổng đơn chốt', 'format' => 'number'],
-            ['key' => 'expected_rev', 'label' => 'Doanh số dự kiến', 'format' => 'currency'],
-            ['key' => 'actual_rev', 'label' => 'Doanh số thực nhận', 'format' => 'currency'],
+            $this->col('telesale', 'name', 'text'),
+            $this->col('new_contacts', 'new_contacts', 'number'),
+            $this->col('new_closed', 'new_closed', 'number'),
+            $this->col('new_rate', 'new_rate', 'percent', ['tone' => 'positive']),
+            $this->col('old_contacts', 'old_contacts', 'number'),
+            $this->col('old_closed', 'old_closed', 'number'),
+            $this->col('old_rate', 'old_rate', 'percent', ['tone' => 'positive']),
+            $this->col('total_closed', 'total_closed', 'number'),
+            $this->col('expected_rev', 'expected_rev', 'currency'),
+            $this->col('actual_rev', 'actual_rev', 'currency'),
         ];
 
         $rows = $orders->groupBy('sale_user_id')->map(function (Collection $group) {
@@ -398,13 +357,12 @@ class ExtraReportService
             ->get();
 
         $columns = [
-            ['key' => 'date', 'label' => 'Ngày', 'format' => 'text'],
-            ['key' => 'weekday', 'label' => 'Thứ', 'format' => 'text'],
-            ['key' => 'count', 'label' => 'Khách hẹn gọi lại', 'format' => 'number'],
-            ['key' => 'sales', 'label' => 'Telesale phụ trách', 'format' => 'text'],
+            $this->col('date', 'date', 'text'),
+            $this->col('weekday', 'weekday', 'text'),
+            $this->col('appointment_count', 'count', 'number'),
+            $this->col('sales_assigned', 'sales', 'text'),
         ];
 
-        $weekdays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
         $rows = [];
 
         for ($i = 0; $i <= 6; $i++) {
@@ -413,13 +371,13 @@ class ExtraReportService
 
             $rows[] = [
                 'date' => $day->format('d/m/Y'),
-                'weekday' => $i === 0 ? 'Hôm nay' : $weekdays[$day->dayOfWeek],
+                'weekday' => $i === 0 ? __('reports.today') : __('reports.weekdays.'.$day->dayOfWeek),
                 'count' => $dayOrders->count(),
                 'sales' => $dayOrders->pluck('saleUser.name')->filter()->unique()->implode(', ') ?: '—',
             ];
         }
 
-        $totals = ['date' => 'Tổng', 'count' => array_sum(array_column($rows, 'count'))];
+        $totals = ['date' => __('reports.total'), 'count' => array_sum(array_column($rows, 'count'))];
 
         return ['columns' => $columns, 'rows' => $rows, 'totals' => $totals];
     }
@@ -436,13 +394,13 @@ class ExtraReportService
         )->filter(fn (Order $o) => $o->product_id !== null);
 
         $columns = [
-            ['key' => 'name', 'label' => 'Sản phẩm', 'format' => 'text'],
-            ['key' => 'sku', 'label' => 'SKU', 'format' => 'text'],
-            ['key' => 'contacts', 'label' => 'Số contact', 'format' => 'number'],
-            ['key' => 'closed', 'label' => 'Chốt đơn', 'format' => 'number'],
-            ['key' => 'rate', 'label' => 'Tỷ lệ chốt', 'format' => 'percent', 'tone' => 'positive'],
-            ['key' => 'revenue', 'label' => 'Doanh số', 'format' => 'currency'],
-            ['key' => 'avg', 'label' => 'Giá trị TB/đơn', 'format' => 'currency'],
+            $this->col('product', 'name', 'text'),
+            $this->col('sku', 'sku', 'text'),
+            $this->col('contacts', 'contacts', 'number'),
+            $this->col('closed', 'closed', 'number'),
+            $this->col('rate', 'rate', 'percent', ['tone' => 'positive']),
+            $this->col('revenue', 'revenue', 'currency'),
+            $this->col('avg', 'avg', 'currency'),
         ];
 
         $rows = $orders->groupBy('product_id')->map(function (Collection $group) {
@@ -475,16 +433,16 @@ class ExtraReportService
             ->filter(fn (Order $o) => $o->warehouse_id !== null);
 
         $columns = [
-            ['key' => 'name', 'label' => 'Kho', 'format' => 'text'],
-            ['key' => 'closed_qty', 'label' => 'Đơn chốt', 'format' => 'number'],
-            ['key' => 'closed_rev', 'label' => 'Doanh số chốt', 'format' => 'currency'],
-            ['key' => 'confirmed_qty', 'label' => 'Đã giao + TT (SL)', 'format' => 'number'],
-            ['key' => 'confirmed_rev', 'label' => 'Doanh số xác nhận', 'format' => 'currency'],
-            ['key' => 'delivering_qty', 'label' => 'Đang giao (SL)', 'format' => 'number'],
-            ['key' => 'delivering_rev', 'label' => 'Đang giao (DS)', 'format' => 'currency'],
-            ['key' => 'returned_qty', 'label' => 'Hoàn (SL)', 'format' => 'number'],
-            ['key' => 'returned_rev', 'label' => 'Hoàn (DS)', 'format' => 'currency'],
-            ['key' => 'discount', 'label' => 'Chiết khấu', 'format' => 'currency'],
+            $this->col('warehouse', 'name', 'text'),
+            $this->col('closed_qty', 'closed_qty', 'number'),
+            $this->col('closed_rev_wh', 'closed_rev', 'currency'),
+            $this->col('confirmed_qty', 'confirmed_qty', 'number'),
+            $this->col('confirmed_rev', 'confirmed_rev', 'currency'),
+            $this->col('delivering_qty', 'delivering_qty', 'number'),
+            $this->col('delivering_rev', 'delivering_rev', 'currency'),
+            $this->col('returned_qty', 'returned_qty', 'number'),
+            $this->col('returned_rev', 'returned_rev', 'currency'),
+            $this->col('discount', 'discount', 'currency'),
         ];
 
         $rows = $orders->groupBy('warehouse_id')->map(function (Collection $group) {
@@ -516,16 +474,16 @@ class ExtraReportService
             ->filter(fn (Order $o) => $o->warehouse_id !== null);
 
         $columns = [
-            ['key' => 'name', 'label' => 'Kho', 'format' => 'text'],
-            ['key' => 'closed_qty', 'label' => 'Đơn chốt', 'format' => 'number'],
-            ['key' => 'revenue', 'label' => 'Tổng doanh số', 'format' => 'currency'],
-            ['key' => 'avg', 'label' => 'DS trung bình/đơn', 'format' => 'currency'],
-            ['key' => 'new_qty', 'label' => 'KH mới (SL)', 'format' => 'number'],
-            ['key' => 'new_rev', 'label' => 'KH mới (DS)', 'format' => 'currency'],
-            ['key' => 'new_share', 'label' => '% DS khách mới', 'format' => 'percent'],
-            ['key' => 'old_qty', 'label' => 'KH cũ (SL)', 'format' => 'number'],
-            ['key' => 'old_rev', 'label' => 'KH cũ (DS)', 'format' => 'currency'],
-            ['key' => 'old_share', 'label' => '% DS khách cũ', 'format' => 'percent'],
+            $this->col('warehouse', 'name', 'text'),
+            $this->col('closed_qty', 'closed_qty', 'number'),
+            $this->col('total_revenue', 'revenue', 'currency'),
+            $this->col('avg_per_order', 'avg', 'currency'),
+            $this->col('new_qty', 'new_qty', 'number'),
+            $this->col('new_rev', 'new_rev', 'currency'),
+            $this->col('new_share', 'new_share', 'percent'),
+            $this->col('old_qty', 'old_qty', 'number'),
+            $this->col('old_rev', 'old_rev', 'currency'),
+            $this->col('old_share', 'old_share', 'percent'),
         ];
 
         $rows = $orders->groupBy('warehouse_id')->map(function (Collection $group) {
@@ -660,7 +618,7 @@ class ExtraReportService
      */
     private function sumTotals(array $columns, array $rows): array
     {
-        $totals = ['name' => 'Tổng cộng'];
+        $totals = ['name' => __('reports.grand_total')];
 
         foreach ($columns as $column) {
             if (! in_array($column['format'], ['number', 'currency'], true)) {
@@ -674,5 +632,16 @@ class ExtraReportService
         }
 
         return $totals;
+    }
+
+    /** @param  array<string, mixed>  $extra */
+    private function col(string $labelKey, string $key, string $format, array $extra = []): array
+    {
+        return array_merge([
+            'key' => $key,
+            'label_key' => $labelKey,
+            'label' => __("reports.columns.{$labelKey}"),
+            'format' => $format,
+        ], $extra);
     }
 }

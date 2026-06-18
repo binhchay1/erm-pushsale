@@ -25,23 +25,22 @@ class ShippingFeePresenter
         if (! $success) {
             return [
                 'success' => false,
-                'message' => $message ?: 'Không tính được phí vận chuyển.',
+                'message' => $message ?: __('shipping.fee.unavailable'),
                 'lines' => [],
                 'options' => [],
             ];
         }
 
-        // VTP getPriceAll — nhiều gói dịch vụ
         if (is_array($data) && $this->isListOfServices($data)) {
             $options = collect($data)->map(function (array $row) {
-                $name = (string) ($row['SERVICE_NAME'] ?? $row['service_name'] ?? $row['name'] ?? 'Gói dịch vụ');
+                $name = (string) ($row['SERVICE_NAME'] ?? $row['service_name'] ?? $row['name'] ?? __('shipping.fee.service_package'));
                 $fee = $this->money($row['MONEY_TOTAL'] ?? $row['money_total'] ?? $row['fee'] ?? 0);
                 $time = $row['KPI_HT'] ?? $row['delivery_time'] ?? null;
 
                 return [
                     'label' => $name,
                     'value' => $this->formatMoney($fee),
-                    'note' => $time ? "Dự kiến: {$time}" : null,
+                    'note' => $time ? __('shipping.fee.eta_prefix', ['time' => $time]) : null,
                 ];
             })->values()->all();
 
@@ -51,7 +50,7 @@ class ShippingFeePresenter
                 'success' => true,
                 'message' => $message,
                 'lines' => $cheapest ? [[
-                    'label' => 'Phí thấp nhất',
+                    'label' => __('shipping.fee.lowest'),
                     'value' => $this->formatMoney($this->money($cheapest['MONEY_TOTAL'] ?? $cheapest['money_total'] ?? 0)),
                     'highlight' => true,
                 ]] : [],
@@ -61,7 +60,6 @@ class ShippingFeePresenter
 
         $payload = is_array($data) ? $data : [];
 
-        // GHTK: { fee, insurance_fee, ... } hoặc nested trong data.fee
         if (isset($payload['fee']) && is_array($payload['fee'])) {
             $payload = $payload['fee'];
         }
@@ -84,25 +82,27 @@ class ShippingFeePresenter
     private function linesFromPayload(array $payload): array
     {
         $map = [
-            'Phí vận chuyển' => $payload['fee'] ?? $payload['ship_fee'] ?? $payload['MONEY_TOTAL'] ?? $payload['total_fee'] ?? null,
-            'Phí bảo hiểm' => $payload['insurance_fee'] ?? $payload['MONEY_COLLECTION_FEE'] ?? null,
-            'Phí thu hộ (COD)' => $payload['cod_fee'] ?? $payload['codFee'] ?? null,
-            'Phí ngoại thành' => $payload['extFees'] ?? $payload['ext_fee'] ?? null,
-            'Tổng phí' => $payload['total'] ?? $payload['MONEY_TOTALFEE'] ?? $payload['MONEY_TOTAL'] ?? null,
-            'Thời gian giao dự kiến' => $payload['delivery_time'] ?? $payload['estimated_deliver_time'] ?? $payload['leadtime'] ?? null,
+            __('shipping.fee.shipping') => $payload['fee'] ?? $payload['ship_fee'] ?? $payload['MONEY_TOTAL'] ?? $payload['total_fee'] ?? null,
+            __('shipping.fee.insurance') => $payload['insurance_fee'] ?? $payload['MONEY_COLLECTION_FEE'] ?? null,
+            __('shipping.fee.cod') => $payload['cod_fee'] ?? $payload['codFee'] ?? null,
+            __('shipping.fee.remote') => $payload['extFees'] ?? $payload['ext_fee'] ?? null,
+            __('shipping.fee.total') => $payload['total'] ?? $payload['MONEY_TOTALFEE'] ?? $payload['MONEY_TOTAL'] ?? null,
+            __('shipping.fee.eta') => $payload['delivery_time'] ?? $payload['estimated_deliver_time'] ?? $payload['leadtime'] ?? null,
         ];
 
         $lines = [];
         $highlightSet = false;
+        $highlightKeys = [__('shipping.fee.shipping'), __('shipping.fee.total')];
+        $etaKey = __('shipping.fee.eta');
 
         foreach ($map as $label => $value) {
             if ($value === null || $value === '') {
                 continue;
             }
 
-            $isMoney = ! in_array($label, ['Thời gian giao dự kiến'], true);
+            $isMoney = $label !== $etaKey;
             $formatted = $isMoney ? $this->formatMoney($this->money($value)) : (string) $value;
-            $highlight = ! $highlightSet && in_array($label, ['Phí vận chuyển', 'Tổng phí'], true);
+            $highlight = ! $highlightSet && in_array($label, $highlightKeys, true);
 
             if ($highlight) {
                 $highlightSet = true;

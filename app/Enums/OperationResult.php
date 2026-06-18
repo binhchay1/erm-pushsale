@@ -22,23 +22,7 @@ enum OperationResult: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::NoContact => 'Chưa liên hệ',
-            self::NoAnswer1 => 'Gọi không nghe máy — Lần 1',
-            self::NoAnswer2 => 'Gọi không nghe máy — Lần 2',
-            self::NoAnswer3 => 'Gọi không nghe máy — Lần 3',
-            self::NoAnswer4 => 'Gọi không nghe máy — Lần 4',
-            self::NoAnswer5 => 'Gọi không nghe máy — Lần 5',
-            self::NoAnswer6 => 'Gọi không nghe máy — Lần 6',
-            self::CallbackScheduled => 'Hẹn gọi lại sau',
-            self::Considering => 'Khách đang cân nhắc (chưa chốt)',
-            self::SentQuote => 'Đã gửi báo giá / tư vấn',
-            self::ReadyToClose => 'Khách đồng ý — chờ chốt',
-            self::WrongNumber => 'Sai số / nhầm số',
-            self::NoNeed => 'Không có nhu cầu',
-            self::PriceRejected => 'Từ chối — giá cao',
-            self::ClosedSuccess => 'Đã chốt đơn thành công',
-        };
+        return __('enums.operation_result.'.$this->value);
     }
 
     public function isTerminal(): bool
@@ -113,10 +97,10 @@ enum OperationResult: string
     public static function selectableOptions(): array
     {
         $groups = [
-            'no_answer' => 'Gọi không nghe máy',
-            'follow_up' => 'Theo dõi',
-            'terminal' => 'Kết thúc tác nghiệp',
-            'success' => 'Chốt đơn',
+            'no_answer' => __('enums.operation_result.groups.no_answer'),
+            'follow_up' => __('enums.operation_result.groups.follow_up'),
+            'terminal' => __('enums.operation_result.groups.terminal'),
+            'success' => __('enums.operation_result.groups.success'),
         ];
 
         $items = [

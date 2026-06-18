@@ -11,14 +11,17 @@ import {
 import { ChartTooltip } from '@/components/charts/ChartTooltip';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatNumber } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
-export function OrdersBarChart({ data, title = 'Đơn chốt theo ngày', description }) {
+export function OrdersBarChart({ data, title, description }) {
+    const t = useT();
     const chartData = data ?? [];
+    const displayTitle = title ?? t('reports.orders_chart_default');
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>{title}</CardTitle>
+                <CardTitle>{displayTitle}</CardTitle>
                 {description && <CardDescription>{description}</CardDescription>}
             </CardHeader>
             <CardContent className="h-[280px] pl-0">

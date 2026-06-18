@@ -103,7 +103,7 @@ class ReportMetricService
             ->limit($limit)
             ->get()
             ->map(fn (LeadIngestion $lead) => [
-                'name' => $lead->platform ?: 'Khác',
+                'name' => $lead->platform ?: __('dashboard_data.other'),
                 'value' => (int) $lead->leads_count,
             ])
             ->values()
@@ -117,11 +117,11 @@ class ReportMetricService
         $orders = $this->queries->orders($user, $filter);
 
         return [
-            ['label' => 'Lead', 'value' => (clone $leads)->count()],
-            ['label' => 'Đã chia', 'value' => (clone $orders)->whereNotNull('sale_user_id')->count()],
-            ['label' => 'Đã liên hệ', 'value' => (clone $orders)->where('contact_count', '>', 0)->count()],
-            ['label' => 'Chốt', 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
-            ['label' => 'Giao/Paid', 'value' => (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
+            ['label' => __('dashboard_data.funnel.lead'), 'value' => (clone $leads)->count()],
+            ['label' => __('dashboard_data.funnel.allocated'), 'value' => (clone $orders)->whereNotNull('sale_user_id')->count()],
+            ['label' => __('dashboard_data.funnel.contacted'), 'value' => (clone $orders)->where('contact_count', '>', 0)->count()],
+            ['label' => __('dashboard_data.funnel.closed'), 'value' => (clone $orders)->whereNotNull('closed_at')->count()],
+            ['label' => __('dashboard_data.funnel.delivered_paid'), 'value' => (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
         ];
     }
 

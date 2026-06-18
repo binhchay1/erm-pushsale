@@ -5,6 +5,7 @@ namespace App\Services\Integrations;
 use App\Enums\IntegrationPlatform;
 use App\Models\IntegrationConnection;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 
 class IntegrationConfigService
@@ -12,13 +13,23 @@ class IntegrationConfigService
     /** @return array<string, mixed> */
     public function hubOverview(): array
     {
-        return config('integrations.hub', []);
+        $hub = config('integrations.hub', []);
+
+        return [
+            'title' => __('integrations.hub.title'),
+            'summary' => __('integrations.hub.summary'),
+            'problems' => collect($hub['problems'] ?? [])->map(fn ($_, $i) => __("integrations.hub.problems.{$i}"))->values()->all(),
+            'solutions' => collect($hub['solutions'] ?? [])->mapWithKeys(fn ($_, $key) => [$key => __("integrations.hub.solutions.{$key}")])->all(),
+            'workflow' => collect($hub['workflow'] ?? [])->map(fn ($_, $i) => __("integrations.hub.workflow.{$i}"))->values()->all(),
+        ];
     }
 
     /** @return array<string, string> */
     public function categories(): array
     {
-        return config('integrations.categories', []);
+        return collect(config('integrations.categories', []))
+            ->mapWithKeys(fn ($_, $key) => [$key => __("integrations.categories.{$key}")])
+            ->all();
     }
 
     /** @return list<array<string, mixed>> */
@@ -39,7 +50,7 @@ class IntegrationConfigService
             abort(404);
         }
 
-        return $this->buildPlatformRow($platform->value, $meta, includeSecrets: true);
+        return $this->buildPlatformRow($platform->value, $meta);
     }
 
     /**
@@ -113,27 +124,33 @@ class IntegrationConfigService
      * @param  array<string, mixed>  $meta
      * @return array<string, mixed>
      */
-    protected function buildPlatformRow(string $key, array $meta, bool $includeSecrets = false): array
+    protected function buildPlatformRow(string $key, array $meta): array
     {
         $connection = IntegrationConnection::forPlatform(IntegrationPlatform::from($key));
-        $fields = $this->fieldStates($key, $connection, $includeSecrets);
+        $fields = $this->fieldStates($key, $connection);
+
+        $verifyValue = $key === 'facebook'
+            ? ($connection->verify_token ?? env('FACEBOOK_VERIFY_TOKEN'))
+            : null;
+
+        $webhookSecret = $connection->webhook_secret ?? config('integrations.webhook.global_secret');
 
         return [
             'platform' => $key,
-            'label' => $meta['label'] ?? $key,
+            'label' => __("integrations.platforms.{$key}.label"),
             'category' => $meta['category'] ?? 'advertising',
-            'category_label' => config("integrations.categories.{$meta['category']}", $meta['category'] ?? ''),
-            'description' => $meta['description'] ?? '',
+            'category_label' => __("integrations.categories.{$meta['category']}"),
+            'description' => __("integrations.platforms.{$key}.description"),
             'is_enabled' => $connection->is_enabled,
             'is_configured' => collect($fields)->every(fn ($f) => $f['is_set']),
             'webhook_url' => url("/api/v1/webhooks/{$meta['webhook_path']}"),
             'api_leads_url' => url('/api/v1/leads'),
             'last_synced_at' => $connection->last_synced_at?->toIso8601String(),
             'docs_url' => $meta['docs'] ?? null,
-            'verify_token' => $includeSecrets ? ($connection->verify_token ?? '') : null,
-            'verify_token_set' => filled($connection->verify_token)
-                || ($key === 'facebook' && filled(env('FACEBOOK_VERIFY_TOKEN'))),
-            'webhook_secret_set' => filled($connection->webhook_secret) || filled(config('integrations.webhook.global_secret')),
+            'verify_token_set' => filled($verifyValue),
+            'verify_token_masked' => filled($verifyValue) ? Str::mask((string) $verifyValue, '*', 2) : null,
+            'webhook_secret_set' => filled($webhookSecret),
+            'webhook_secret_masked' => filled($webhookSecret) ? Str::mask((string) $webhookSecret, '*', 2) : null,
             'fields' => $fields,
         ];
     }
@@ -141,36 +158,36 @@ class IntegrationConfigService
     /**
      * @return list<array<string, mixed>>
      */
-    protected function fieldStates(string $platformKey, IntegrationConnection $connection, bool $includeSecrets): array
+    protected function fieldStates(string $platformKey, IntegrationConnection $connection): array
     {
         $fieldDefs = config("integrations.platforms.{$platformKey}.fields", []);
 
-        return collect($fieldDefs)->map(function (array $def, string $credKey) use ($connection, $includeSecrets) {
+        return collect($fieldDefs)->map(function (array $def, string $credKey) use ($connection) {
             $envVar = $def['env'] ?? '';
-            $fromEnv = filled(env($envVar));
+            $defaultValue = $def['default'] ?? (filled($envVar) ? env($envVar) : null);
             $fromDb = filled($connection->credentials[$credKey] ?? null);
-            $isSet = $fromEnv || $fromDb;
+            $fromEnv = ! $fromDb && filled($defaultValue);
+            $isSet = $fromDb || $fromEnv;
             $isSecret = (bool) ($def['secret'] ?? false);
+            $resolved = $fromDb
+                ? (string) ($connection->credentials[$credKey] ?? '')
+                : (string) ($defaultValue ?? '');
 
             $row = [
                 'key' => $credKey,
-                'label' => $def['label'] ?? $credKey,
+                'label' => Lang::has("integrations.fields.{$credKey}")
+                    ? __("integrations.fields.{$credKey}")
+                    : ($def['label'] ?? $credKey),
                 'env' => $envVar,
                 'is_secret' => $isSecret,
                 'is_set' => $isSet,
-                'source' => $fromDb ? 'database' : ($fromEnv ? 'env' : null),
+                'source' => $fromDb ? 'db' : ($fromEnv ? 'env' : null),
             ];
 
-            if ($includeSecrets && $isSet && ! $isSecret) {
-                $row['value'] = $fromDb
-                    ? ($connection->credentials[$credKey] ?? '')
-                    : env($envVar);
-            } elseif ($includeSecrets && $isSet && $isSecret) {
-                $row['masked'] = Str::mask(
-                    $fromDb ? ($connection->credentials[$credKey] ?? '********') : (env($envVar) ?: '********'),
-                    '*',
-                    3
-                );
+            if ($isSet && ! $isSecret) {
+                $row['value'] = $resolved;
+            } elseif ($isSet && $isSecret) {
+                $row['masked'] = Str::mask($resolved ?: '********', '*', 3);
             }
 
             return $row;

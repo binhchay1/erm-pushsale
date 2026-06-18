@@ -17,6 +17,7 @@ class UserPreference extends Model
 
     protected $fillable = [
         'user_id',
+        'locale',
         'theme',
         'appearance',
         'notifications',
@@ -57,6 +58,7 @@ class UserPreference extends Model
     public function toFrontendArray(): array
     {
         return [
+            'locale' => $this->locale ?? 'vi',
             'theme' => $this->theme,
             'appearance' => $this->appearance,
             'notifications' => $this->mergedNotifications(),

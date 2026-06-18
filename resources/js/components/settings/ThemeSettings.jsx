@@ -2,6 +2,7 @@ import { usePage } from '@inertiajs/react';
 import { Check } from 'lucide-react';
 
 import { useTheme } from '@/providers/ThemeProvider';
+import { useT } from '@/providers/I18nProvider';
 import { cn } from '@/lib/utils';
 
 export function ThemeSettings({ value }) {
@@ -45,11 +46,12 @@ export function ThemeSettings({ value }) {
 }
 
 export function AppearanceSettings({ value }) {
+    const t = useT();
     const { setAppearance } = useTheme();
     const options = [
-        { id: 'light', label: 'Sáng' },
-        { id: 'dark', label: 'Tối' },
-        { id: 'system', label: 'Theo hệ thống' },
+        { id: 'light', label: t('common.appearance_light') },
+        { id: 'dark', label: t('common.appearance_dark') },
+        { id: 'system', label: t('common.appearance_system') },
     ];
 
     return (

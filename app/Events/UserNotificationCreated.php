@@ -32,14 +32,6 @@ class UserNotificationCreated implements ShouldBroadcastNow
     /** @return array<string, mixed> */
     public function broadcastWith(): array
     {
-        return [
-            'id' => $this->notification->id,
-            'type' => $this->notification->type,
-            'title' => $this->notification->title,
-            'message' => $this->notification->message,
-            'url' => $this->notification->url,
-            'is_read' => $this->notification->read_at !== null,
-            'created_at' => $this->notification->created_at?->diffForHumans(),
-        ];
+        return $this->notification->toFrontendArray();
     }
 }

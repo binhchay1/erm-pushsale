@@ -29,6 +29,6 @@ class OrderClosingController extends Controller
 
         $service->close($order, $request->user(), $validated);
 
-        return back()->with('success', 'Đã chốt đơn — hệ thống chuyển sang kho và tạo vận đơn GHTK (nếu đã bật).');
+        return back()->with('success', __('messages.order_closed'));
     }
 }

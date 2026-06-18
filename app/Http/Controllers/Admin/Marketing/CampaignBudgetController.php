@@ -20,7 +20,7 @@ class CampaignBudgetController extends Controller
 
         $campaign->update(['budget' => $validated['budget']]);
 
-        return back()->with('success', 'Đã cập nhật chi phí quảng cáo.');
+        return back()->with('success', __('messages.campaign_budget_updated'));
     }
 
     private function authorizeCampaign(Request $request, MarketingSource $campaign): void

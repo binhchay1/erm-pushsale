@@ -1,9 +1,8 @@
 /**
- * Mở file nhãn vận đơn (PDF) trong tab mới.
- * Nếu hãng vận chuyển trả lỗi (JSON) thì ném Error với thông điệp dễ hiểu
- * thay vì mở tab hiển thị JSON thô.
+ * Open waybill label PDF in a new tab.
+ * If carrier returns JSON error, throw with a readable message instead of opening raw JSON.
  */
-export async function openShippingLabel(url) {
+export async function openShippingLabel(url, fallbackMessage = 'Could not print waybill label.') {
     const response = await fetch(url, {
         credentials: 'same-origin',
         headers: { Accept: 'application/pdf,application/json' },
@@ -20,5 +19,5 @@ export async function openShippingLabel(url) {
     }
 
     const data = await response.json().catch(() => null);
-    throw new Error(data?.message ?? 'Không in được nhãn vận đơn.');
+    throw new Error(data?.message ?? fallbackMessage);
 }

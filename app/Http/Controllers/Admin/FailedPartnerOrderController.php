@@ -12,6 +12,6 @@ class FailedPartnerOrderController extends Controller
     {
         $failedPartnerOrder->delete();
 
-        return back()->with('success', 'Đã xóa đơn lỗi.');
+        return back()->with('success', __('messages.failed_order_deleted'));
     }
 }

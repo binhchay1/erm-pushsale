@@ -15,14 +15,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatNumber } from '@/lib/format';
-
-const QUICK_NO_ANSWER = {
-    value: 'no_answer_auto',
-    label: 'Gọi không nghe máy (tự tăng lần gọi)',
-    group: 'Gọi không nghe máy',
-};
+import { useT } from '@/providers/I18nProvider';
 
 function StockWarningBlock({ warnings = [] }) {
+    const t = useT();
     const insufficient = warnings.filter((w) => !w.sufficient);
 
     if (!insufficient.length) {
@@ -31,11 +27,15 @@ function StockWarningBlock({ warnings = [] }) {
 
     return (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-            <p className="font-semibold">Hàng trong kho không đủ</p>
+            <p className="font-semibold">{t('operations.insufficient_stock')}</p>
             <ul className="mt-2 list-inside list-disc text-xs">
                 {insufficient.map((w) => (
                     <li key={w.productId}>
-                        {w.productName}: cần {formatNumber(w.required)}, tồn {formatNumber(w.available)}
+                        {t('operations.stock_line', {
+                            name: w.productName,
+                            required: formatNumber(w.required),
+                            available: formatNumber(w.available),
+                        })}
                     </li>
                 ))}
             </ul>
@@ -44,6 +44,7 @@ function StockWarningBlock({ warnings = [] }) {
 }
 
 export function OperationStatusDialog({ order, options = [] }) {
+    const t = useT();
     const [open, setOpen] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [result, setResult] = useState('');
@@ -51,8 +52,17 @@ export function OperationStatusDialog({ order, options = [] }) {
     const [note, setNote] = useState('');
     const [confirmInsufficient, setConfirmInsufficient] = useState(false);
 
+    const quickNoAnswer = useMemo(
+        () => ({
+            value: 'no_answer_auto',
+            label: t('operations.status_dialog.no_answer'),
+            group: t('operations.status_dialog.no_answer_group'),
+        }),
+        [t],
+    );
+
     const groupedOptions = useMemo(() => {
-        const all = [QUICK_NO_ANSWER, ...options];
+        const all = [quickNoAnswer, ...options];
         const groups = {};
 
         all.forEach((item) => {
@@ -61,7 +71,7 @@ export function OperationStatusDialog({ order, options = [] }) {
         });
 
         return groups;
-    }, [options]);
+    }, [options, quickNoAnswer]);
 
     if (!order?.canChangeStatus) {
         return null;
@@ -73,12 +83,12 @@ export function OperationStatusDialog({ order, options = [] }) {
 
     const submit = () => {
         if (!result) {
-            toast.error('Chọn kết quả tác nghiệp.');
+            toast.error(t('operations.status_dialog.select_result'));
             return;
         }
 
         if (needsSchedule && !nextAt) {
-            toast.error('Chọn thời gian hẹn gọi lại.');
+            toast.error(t('operations.status_dialog.select_schedule'));
             return;
         }
 
@@ -104,12 +114,12 @@ export function OperationStatusDialog({ order, options = [] }) {
                     setNextAt('');
                     setNote('');
                     setConfirmInsufficient(false);
-                    toast.success('Đã cập nhật trạng thái.');
+                    toast.success(t('operations.status_dialog.update_success'));
                 },
                 onError: (errors) => {
                     if (errors.insufficient_stock || errors.stock) {
                         setConfirmInsufficient(true);
-                        toast.error('Hàng trong kho không đủ — xác nhận để tiếp tục.');
+                        toast.error(t('operations.close_insufficient_error'));
                         return;
                     }
 
@@ -117,7 +127,7 @@ export function OperationStatusDialog({ order, options = [] }) {
                         errors.operation_result ??
                         errors.next_operation_at ??
                         errors.order ??
-                        'Không cập nhật được trạng thái.';
+                        t('operations.status_dialog.update_failed');
                     toast.error(message);
                 },
                 onFinish: () => setProcessing(false),
@@ -129,7 +139,7 @@ export function OperationStatusDialog({ order, options = [] }) {
         <>
             <Button type="button" size="sm" variant="secondary" className="gap-1" onClick={() => setOpen(true)}>
                 <RefreshCw className="size-3.5" />
-                Chuyển trạng thái
+                {t('operations.status_dialog.title')}
             </Button>
             <Dialog
                 open={open}
@@ -142,7 +152,9 @@ export function OperationStatusDialog({ order, options = [] }) {
             >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Chuyển trạng thái — {order.orderCode}</DialogTitle>
+                        <DialogTitle>
+                            {t('operations.status_dialog.title_with_code', { code: order.orderCode })}
+                        </DialogTitle>
                         <DialogDescription>
                             {order.customerName} · {order.customerPhone}
                         </DialogDescription>
@@ -150,7 +162,9 @@ export function OperationStatusDialog({ order, options = [] }) {
 
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor={`status-${order.id}`}>Kết quả tác nghiệp</Label>
+                            <Label htmlFor={`status-${order.id}`}>
+                                {t('operations.status_dialog.operation_result')}
+                            </Label>
                             <select
                                 id={`status-${order.id}`}
                                 className="input-soft flex h-9 w-full px-3"
@@ -160,7 +174,7 @@ export function OperationStatusDialog({ order, options = [] }) {
                                     setConfirmInsufficient(false);
                                 }}
                             >
-                                <option value="">— Chọn kết quả —</option>
+                                <option value="">{t('operations.status_dialog.select_result_placeholder')}</option>
                                 {Object.entries(groupedOptions).map(([group, items]) => (
                                     <optgroup key={group} label={group}>
                                         {items.map((item) => (
@@ -179,7 +193,7 @@ export function OperationStatusDialog({ order, options = [] }) {
 
                         {needsSchedule && (
                             <div className="space-y-2">
-                                <Label htmlFor={`next-${order.id}`}>Hẹn gọi lại</Label>
+                                <Label htmlFor={`next-${order.id}`}>{t('operations.status_dialog.next_at')}</Label>
                                 <Input
                                     id={`next-${order.id}`}
                                     type="datetime-local"
@@ -190,19 +204,19 @@ export function OperationStatusDialog({ order, options = [] }) {
                         )}
 
                         <div className="space-y-2">
-                            <Label htmlFor={`note-${order.id}`}>Ghi chú (tùy chọn)</Label>
+                            <Label htmlFor={`note-${order.id}`}>{t('operations.status_dialog.note_optional')}</Label>
                             <Input
                                 id={`note-${order.id}`}
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
-                                placeholder="VD: Khách bận, gọi lại 15:00"
+                                placeholder={t('operations.status_dialog.note_example')}
                             />
                         </div>
                     </div>
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                            Huỷ
+                            {t('operations.status_dialog.cancel')}
                         </Button>
                         <Button
                             type="button"
@@ -212,10 +226,10 @@ export function OperationStatusDialog({ order, options = [] }) {
                         >
                             {processing && <Loader2 className="mr-1 size-4 animate-spin" />}
                             {showStockWarning && !confirmInsufficient
-                                ? 'Tiếp tục'
+                                ? t('operations.status_dialog.continue')
                                 : showStockWarning && confirmInsufficient
-                                  ? 'Vẫn chốt (thiếu hàng)'
-                                  : 'Lưu trạng thái'}
+                                  ? t('operations.status_dialog.confirm_insufficient')
+                                  : t('operations.status_dialog.save')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

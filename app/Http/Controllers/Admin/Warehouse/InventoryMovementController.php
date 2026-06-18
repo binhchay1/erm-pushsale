@@ -25,7 +25,7 @@ class InventoryMovementController extends Controller
             $data['approved_by_user_id'],
         );
 
-        return back()->with('success', 'Đã nhập kho thành công.');
+        return back()->with('success', __('messages.inventory_intake'));
     }
 
     public function export(Request $request, InventoryIntakeService $service): RedirectResponse
@@ -41,7 +41,7 @@ class InventoryMovementController extends Controller
             $data['approved_by_user_id'],
         );
 
-        return back()->with('success', 'Đã xuất kho thành công.');
+        return back()->with('success', __('messages.inventory_export'));
     }
 
     /** @return array<string, mixed> */

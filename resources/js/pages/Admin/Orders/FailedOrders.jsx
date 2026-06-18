@@ -6,8 +6,10 @@ import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
+import { useT } from '@/providers/I18nProvider';
 
 export default function FailedOrders({ report, filterOptions }) {
+    const t = useT();
     const f = report.filters ?? {};
     const rows = report.rows?.data ?? [];
 
@@ -17,10 +19,10 @@ export default function FailedOrders({ report, filterOptions }) {
 
     return (
         <AppLayout>
-            <Head title="Đơn hàng lỗi" />
+            <Head title={t('pages.failed_orders.title')} />
 
             <div className="space-y-6">
-                <h1 className="text-2xl font-bold tracking-tight">Danh sách đơn hàng lỗi</h1>
+                <h1 className="text-2xl font-bold tracking-tight">{t('pages.failed_orders.list_title')}</h1>
 
                 <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">
                     <select
@@ -28,7 +30,7 @@ export default function FailedOrders({ report, filterOptions }) {
                         value={f.platform ?? ''}
                         onChange={(e) => search({ platform: e.target.value || null })}
                     >
-                        <option value="">— Nền tảng —</option>
+                        <option value="">{t('pages.failed_orders.filter_platform')}</option>
                         {report.platforms?.map((p) => (
                             <option key={p} value={p}>
                                 {p}
@@ -40,7 +42,7 @@ export default function FailedOrders({ report, filterOptions }) {
                         value={f.warehouse_id ?? ''}
                         onChange={(e) => search({ warehouse_id: e.target.value || null })}
                     >
-                        <option value="">— Kho —</option>
+                        <option value="">{t('pages.failed_orders.filter_warehouse')}</option>
                         {filterOptions?.warehouses?.map((w) => (
                             <option key={w.id} value={w.id}>
                                 {w.name}
@@ -48,14 +50,14 @@ export default function FailedOrders({ report, filterOptions }) {
                         ))}
                     </select>
                     <Input
-                        placeholder="Mã đơn đối tác"
+                        placeholder={t('pages.failed_orders.partner_order_ph')}
                         value={f.partner_order_id ?? ''}
                         onChange={(e) => search({ partner_order_id: e.target.value })}
                         className="max-w-xs"
                     />
                     <Button size="sm" onClick={() => search()}>
                         <Search className="size-4" />
-                        Tìm kiếm
+                        {t('common.search')}
                     </Button>
                 </div>
 
@@ -63,11 +65,11 @@ export default function FailedOrders({ report, filterOptions }) {
                     <table className="w-full border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>STT</Th>
-                                <Th>Mã đơn đối tác</Th>
-                                <Th>Nền tảng</Th>
-                                <Th>Kho</Th>
-                                <Th>Mô tả lỗi</Th>
+                                <Th>{t('pages.stt')}</Th>
+                                <Th>{t('pages.failed_orders.col_partner_order')}</Th>
+                                <Th>{t('pages.failed_orders.col_platform')}</Th>
+                                <Th>{t('pages.failed_orders.col_warehouse')}</Th>
+                                <Th>{t('pages.failed_orders.col_error_desc')}</Th>
                                 <Th />
                             </tr>
                         </thead>
@@ -93,7 +95,7 @@ export default function FailedOrders({ report, filterOptions }) {
                             ) : (
                                 <tr>
                                     <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
-                                        Không có đơn lỗi
+                                        {t('pages.failed_orders.empty')}
                                     </td>
                                 </tr>
                             )}

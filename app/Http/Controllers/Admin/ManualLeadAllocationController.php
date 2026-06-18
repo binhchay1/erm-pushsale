@@ -26,6 +26,6 @@ class ManualLeadAllocationController extends Controller
         $saleUser = User::query()->findOrFail($validated['sale_user_id']);
         $count = $service->allocate($validated['lead_ids'], $saleUser, $request->user());
 
-        return back()->with('success', "Đã phân bổ {$count} lead cho {$saleUser->name}.");
+        return back()->with('success', __('messages.leads_allocated', ['count' => $count, 'name' => $saleUser->name]));
     }
 }

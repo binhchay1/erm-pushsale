@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { MarketingCampaignTable } from '@/components/reports/MarketingCampaignTable';
 import { ReportExportButton } from '@/components/reports/ReportExportButton';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
+import { useT } from '@/providers/I18nProvider';
 
 export default function MarketingCampaignReport({
     filters,
@@ -14,17 +15,17 @@ export default function MarketingCampaignReport({
     budgetUpdateUrl = '/admin/marketing/campaigns',
     canEditBudget = true,
 }) {
+    const t = useT();
+
     return (
         <AppLayout>
-            <Head title="Báo cáo chiến dịch" />
+            <Head title={t('reports.campaign_report.title')} />
 
             <div className="space-y-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Báo cáo chiến dịch Marketing</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Lead sinh ra · lead rác · chi phí quảng cáo (nhập tay) · doanh thu thực tế
-                        </p>
+                        <h1 className="text-2xl font-bold tracking-tight">{t('reports.campaign_report.report_title')}</h1>
+                        <p className="text-sm text-muted-foreground">{t('reports.campaign_report.report_desc')}</p>
                     </div>
                     <ReportExportButton routeUrl={routeUrl} filters={filters} />
                 </div>

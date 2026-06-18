@@ -3,8 +3,8 @@ import { usePage } from '@inertiajs/react';
 import { toast } from 'sonner';
 
 /**
- * Toast tổng: tự hiển thị flash.success / flash.error từ server cho mọi tác vụ
- * (thêm/sửa/xóa, lưu cấu hình...). Dùng ref để không toast lặp khi re-render.
+ * Global toast: auto-display flash.success / flash.error from server for all actions
+ * (create/update/delete, save config...). Uses ref to avoid duplicate toasts on re-render.
  */
 export function useFlashToast() {
     const page = usePage();

@@ -9,15 +9,17 @@ import { useConfirm } from '@/hooks/use-confirm';
 import { formatCurrency } from '@/lib/format';
 import { copyToClipboard } from '@/lib/clipboard';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function CampaignIndex({ campaigns }) {
+    const t = useT();
     const { ask, ConfirmDialogPortal } = useConfirm();
 
     const remove = async (id, name) => {
         const ok = await ask({
-            title: 'Xóa kết nối Landing',
-            description: `Xóa kết nối Landing "${name}"?`,
-            confirmLabel: 'Xóa',
+            title: t('pages.campaigns.marketing_delete_title'),
+            description: t('pages.campaigns.marketing_delete_desc', { name }),
+            confirmLabel: t('common.delete'),
             variant: 'destructive',
         });
         if (!ok) return;
@@ -26,27 +28,22 @@ export default function CampaignIndex({ campaigns }) {
 
     const copyUrl = async (url) => {
         const ok = await copyToClipboard(url);
-        ok ? toast.success('Đã copy đường dẫn nhận lead') : toast.error('Không copy được');
+        ok ? toast.success(t('pages.campaigns.marketing_copy_success')) : toast.error(t('common.copy_failed'));
     };
 
     return (
         <AppLayout>
-            <Head title="Trang Landing" />
+            <Head title={t('pages.campaigns.marketing_title')} />
 
             <div className="space-y-6">
                 <PageHeader
-                    title="Trang Landing (Ladipage)"
-                    description={
-                        <>
-                            Tạo kết nối → hệ thống cấp <strong>đường dẫn nhận lead riêng</strong> → dán vào
-                            Ladipage → Admin duyệt → lead tự chia cho Sale.
-                        </>
-                    }
+                    title={t('pages.campaigns.marketing_title')}
+                    description={t('pages.campaigns.marketing_desc_detail')}
                     actions={
                         <Button asChild>
                             <Link href="/marketing/campaigns/create">
                                 <Plus className="size-4" />
-                                Thêm kết nối
+                                {t('pages.campaigns.marketing_create')}
                             </Link>
                         </Button>
                     }
@@ -56,13 +53,13 @@ export default function CampaignIndex({ campaigns }) {
                     <table className="w-full min-w-[1100px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>Chiến dịch</Th>
-                                <Th>Đường dẫn nhận lead</Th>
-                                <Th>Mã chiến dịch</Th>
-                                <Th>Sản phẩm</Th>
-                                <Th>Đơn / DT</Th>
-                                <Th>Duyệt</Th>
-                                <Th>Thao tác</Th>
+                                <Th>{t('pages.campaigns.col_campaign')}</Th>
+                                <Th>{t('pages.campaigns.col_webhook')}</Th>
+                                <Th>{t('pages.campaigns.col_utm_code')}</Th>
+                                <Th>{t('pages.campaigns.col_product')}</Th>
+                                <Th>{t('pages.campaigns.col_orders_revenue')}</Th>
+                                <Th>{t('pages.campaigns.col_approval')}</Th>
+                                <Th>{t('pages.actions')}</Th>
                             </tr>
                         </thead>
                         <tbody>
@@ -98,12 +95,12 @@ export default function CampaignIndex({ campaigns }) {
                                             {row.is_approved ? (
                                                 <span className="inline-flex items-center gap-1 text-emerald-600">
                                                     <CheckCircle2 className="size-3.5" />
-                                                    Đã duyệt
+                                                    {t('pages.approved')}
                                                 </span>
                                             ) : (
                                                 <span className="inline-flex items-center gap-1 text-amber-600">
                                                     <Clock className="size-3.5" />
-                                                    Chờ duyệt
+                                                    {t('pages.pending_approval')}
                                                 </span>
                                             )}
                                         </Td>
@@ -130,7 +127,7 @@ export default function CampaignIndex({ campaigns }) {
                                 <tr>
                                     <Td colSpan={7} className="py-10 text-center text-muted-foreground">
                                         <Target className="mx-auto mb-2 size-6 opacity-50" />
-                                        Chưa có kết nối Landing — bấm Thêm kết nối
+                                        {t('pages.campaigns.marketing_empty')}
                                     </Td>
                                 </tr>
                             )}

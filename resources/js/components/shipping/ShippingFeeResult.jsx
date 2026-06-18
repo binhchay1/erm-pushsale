@@ -1,11 +1,12 @@
 import { AlertCircle, CheckCircle2, Package } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
-/**
- * Hiển thị kết quả tính phí từ API (field `display` do backend chuẩn hóa).
- */
+/** Display fee calculation result from API (`display` field normalized by backend). */
 export function ShippingFeeResult({ display }) {
+    const t = useT();
+
     if (!display) return null;
 
     if (!display.success) {
@@ -14,9 +15,9 @@ export function ShippingFeeResult({ display }) {
                 <div className="flex items-start gap-2">
                     <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
                     <div>
-                        <p className="text-sm font-semibold text-destructive">Không tính được phí</p>
+                        <p className="text-sm font-semibold text-destructive">{t('shipping.fee_failed')}</p>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            {display.message ?? 'Vui lòng kiểm tra cấu hình đối tác hoặc địa chỉ giao hàng.'}
+                            {display.message ?? t('shipping.fee_check_config')}
                         </p>
                     </div>
                 </div>
@@ -28,7 +29,7 @@ export function ShippingFeeResult({ display }) {
         <div className="rounded-lg border bg-muted/20 p-4">
             <div className="mb-3 flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-emerald-600" />
-                <p className="text-sm font-semibold">Kết quả tính phí</p>
+                <p className="text-sm font-semibold">{t('shipping.fee_result')}</p>
             </div>
 
             {display.lines?.length > 0 && (
@@ -58,7 +59,7 @@ export function ShippingFeeResult({ display }) {
             {display.options?.length > 0 && (
                 <div className="mt-3 space-y-2">
                     <p className="text-xs font-medium text-muted-foreground">
-                        Các gói dịch vụ khả dụng
+                        {t('shipping.fee_services')}
                     </p>
                     <ul className="space-y-1.5">
                         {display.options.map((opt, idx) => (
@@ -85,9 +86,7 @@ export function ShippingFeeResult({ display }) {
             )}
 
             {display.lines?.length === 0 && display.options?.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                    Hãng vận chuyển chưa trả về chi tiết phí — thử lại hoặc kiểm tra cấu hình kết nối.
-                </p>
+                <p className="text-sm text-muted-foreground">{t('shipping.fee_empty_detail')}</p>
             )}
         </div>
     );

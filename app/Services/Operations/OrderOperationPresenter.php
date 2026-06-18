@@ -97,7 +97,7 @@ final class OrderOperationPresenter
     {
         $tabs = [];
         $allCount = $orders->count();
-        $tabs[] = ['status' => 'all', 'label' => 'Tất cả', 'count' => $allCount, 'total' => $allCount];
+        $tabs[] = ['status' => 'all', 'label' => __('operations.all'), 'count' => $allCount, 'total' => $allCount];
 
         foreach (OperationStage::cases() as $stage) {
             $count = $orders->where('operation_stage', $stage->value)->count();
@@ -123,7 +123,7 @@ final class OrderOperationPresenter
     {
         $tabs = [];
         $allCount = $orders->count();
-        $tabs[] = ['status' => 'all', 'label' => 'Tất cả', 'count' => $allCount];
+        $tabs[] = ['status' => 'all', 'label' => __('operations.all'), 'count' => $allCount];
 
         foreach (DeliveryStatus::cases() as $status) {
             $count = $orders->where('delivery_status', $status->value)->count();

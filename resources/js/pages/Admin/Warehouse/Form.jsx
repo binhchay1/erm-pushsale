@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function WarehouseForm({ warehouse, managers }) {
+    const t = useT();
     const isEdit = Boolean(warehouse?.id);
     const { data, setData, post, put, processing, errors } = useForm({
         name: warehouse?.name ?? '',
@@ -28,7 +30,7 @@ export default function WarehouseForm({ warehouse, managers }) {
 
     return (
         <AppLayout>
-            <Head title={isEdit ? 'Sửa kho' : 'Tạo kho'} />
+            <Head title={isEdit ? t('pages.warehouse.edit') : t('pages.warehouse.form_create')} />
 
             <div className="mx-auto max-w-2xl space-y-6">
                 <div className="flex items-center gap-3">
@@ -38,59 +40,57 @@ export default function WarehouseForm({ warehouse, managers }) {
                         </Link>
                     </Button>
                     <h1 className="text-2xl font-bold tracking-tight">
-                        {isEdit ? 'Sửa kho' : 'Tạo kho'}
+                        {isEdit ? t('pages.warehouse.edit') : t('pages.warehouse.form_create')}
                     </h1>
                 </div>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Thông tin kho</CardTitle>
+                        <CardTitle>{t('pages.warehouse.form_info')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={submit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label>Tên kho</Label>
+                                <Label>{t('pages.warehouse.name')}</Label>
                                 <Input
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
-                                    placeholder="Ví dụ: Kho Hà Nội"
+                                    placeholder={t('pages.warehouse.name_placeholder')}
                                 />
                                 {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                             </div>
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label>Số điện thoại</Label>
+                                    <Label>{t('pages.warehouse.phone')}</Label>
                                     <Input
                                         value={data.phone}
                                         onChange={(e) => setData('phone', e.target.value)}
-                                        placeholder="0988xxxxxx"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Mã VTP</Label>
+                                    <Label>{t('pages.warehouse.vtp_code')}</Label>
                                     <Input
                                         value={data.vtp_code}
                                         onChange={(e) => setData('vtp_code', e.target.value)}
-                                        placeholder="VTP-HN-01"
                                     />
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label>Địa chỉ</Label>
+                                <Label>{t('pages.warehouse.address')}</Label>
                                 <Input
                                     value={data.address}
                                     onChange={(e) => setData('address', e.target.value)}
-                                    placeholder="Số nhà, quận/huyện, tỉnh/thành"
+                                    placeholder={t('pages.warehouse.address_placeholder')}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Quản kho</Label>
+                                <Label>{t('pages.warehouse.manager')}</Label>
                                 <select
                                     className="input-soft h-10 w-full px-3"
                                     value={data.manager_user_id}
                                     onChange={(e) => setData('manager_user_id', e.target.value)}
                                 >
-                                    <option value="">-- Chọn quản kho --</option>
+                                    <option value="">{t('pages.warehouse.select_manager')}</option>
                                     {managers.map((m) => (
                                         <option key={m.id} value={m.id}>
                                             {m.name}
@@ -101,7 +101,7 @@ export default function WarehouseForm({ warehouse, managers }) {
 
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Đang lưu...' : 'Lưu kho'}
+                                    {processing ? t('common.saving') : t('pages.warehouse.save')}
                                 </Button>
                             </div>
                         </form>

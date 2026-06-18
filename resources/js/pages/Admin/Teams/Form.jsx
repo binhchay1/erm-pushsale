@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function TeamForm({ team, types, parents, leaders }) {
+    const t = useT();
     const { url } = usePage();
     const isEdit = Boolean(team?.id);
     const parentFromQuery = new URLSearchParams(url.split('?')[1] ?? '').get('parent_id');
@@ -30,7 +32,7 @@ export default function TeamForm({ team, types, parents, leaders }) {
 
     return (
         <AppLayout>
-            <Head title={isEdit ? 'Sửa phòng ban' : 'Thêm phòng ban'} />
+            <Head title={isEdit ? t('pages.teams.edit') : t('pages.teams.form_create')} />
 
             <div className="mx-auto max-w-2xl space-y-6">
                 <div className="flex items-center gap-3">
@@ -40,38 +42,38 @@ export default function TeamForm({ team, types, parents, leaders }) {
                         </Link>
                     </Button>
                     <h1 className="text-2xl font-bold tracking-tight">
-                        {isEdit ? 'Sửa phòng ban' : 'Thêm phòng ban'}
+                        {isEdit ? t('pages.teams.edit') : t('pages.teams.form_create')}
                     </h1>
                 </div>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Thông tin phòng ban</CardTitle>
+                        <CardTitle>{t('pages.teams.form_info')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={submit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Tên phòng ban</Label>
+                                <Label htmlFor="name">{t('org.name')}</Label>
                                 <Input
                                     id="name"
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
-                                    placeholder="VD: Ban Marketing — Giám sát A"
+                                    placeholder={t('pages.teams.name_placeholder')}
                                 />
                                 {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="type">Loại bộ phận</Label>
+                                <Label htmlFor="type">{t('pages.teams.dept_type')}</Label>
                                 <select
                                     id="type"
                                     className="input-soft flex h-9 w-full px-3"
                                     value={data.type}
                                     onChange={(e) => setData('type', e.target.value)}
                                 >
-                                    {types.map((t) => (
-                                        <option key={t.value} value={t.value}>
-                                            {t.label}
+                                    {types.map((type) => (
+                                        <option key={type.value} value={type.value}>
+                                            {type.label}
                                         </option>
                                     ))}
                                 </select>
@@ -79,14 +81,14 @@ export default function TeamForm({ team, types, parents, leaders }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="parent_id">Thuộc phòng ban (cha)</Label>
+                                <Label htmlFor="parent_id">{t('pages.teams.parent_dept')}</Label>
                                 <select
                                     id="parent_id"
                                     className="input-soft flex h-9 w-full px-3"
                                     value={data.parent_id}
                                     onChange={(e) => setData('parent_id', e.target.value || '')}
                                 >
-                                    <option value="">— Gốc (không có cha) —</option>
+                                    <option value="">{t('pages.select_root')}</option>
                                     {parents.map((p) => (
                                         <option key={p.id} value={p.id}>
                                             {p.name}
@@ -96,14 +98,14 @@ export default function TeamForm({ team, types, parents, leaders }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="leader_user_id">Trưởng ban / nhóm</Label>
+                                <Label htmlFor="leader_user_id">{t('pages.teams.leader')}</Label>
                                 <select
                                     id="leader_user_id"
                                     className="input-soft flex h-9 w-full px-3"
                                     value={data.leader_user_id}
                                     onChange={(e) => setData('leader_user_id', e.target.value || '')}
                                 >
-                                    <option value="">— Chưa gán —</option>
+                                    <option value="">{t('pages.select_unassigned')}</option>
                                     {leaders.map((l) => (
                                         <option key={l.id} value={l.id}>
                                             {l.name}
@@ -115,7 +117,7 @@ export default function TeamForm({ team, types, parents, leaders }) {
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={processing}>
                                     <Save className="size-4" />
-                                    {processing ? 'Đang lưu…' : 'Lưu'}
+                                    {processing ? t('common.saving') : t('org.save')}
                                 </Button>
                             </div>
                         </form>

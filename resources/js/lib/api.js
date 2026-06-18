@@ -1,3 +1,5 @@
+import { translate } from '@/i18n/translate';
+
 export function getCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 }
@@ -18,7 +20,7 @@ export async function apiPost(url, body = {}) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw new Error(data.message ?? 'Yêu cầu thất bại.');
+        throw new Error(data.message ?? translate('common.request_failed'));
     }
 
     return data;
@@ -36,7 +38,7 @@ export async function apiGet(url) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw new Error(data.message ?? 'Yêu cầu thất bại.');
+        throw new Error(data.message ?? translate('common.request_failed'));
     }
 
     return data;

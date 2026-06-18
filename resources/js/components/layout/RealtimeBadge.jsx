@@ -1,8 +1,11 @@
 import { Radio } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
 export function RealtimeBadge({ connected }) {
+    const t = useT();
+
     return (
         <span
             className={cn(
@@ -13,7 +16,7 @@ export function RealtimeBadge({ connected }) {
             )}
         >
             <Radio className={cn('size-3', connected && 'animate-pulse text-emerald-500')} />
-            {connected ? 'Live' : 'Offline'}
+            {connected ? t('dashboard.realtime.live') : t('dashboard.realtime.offline')}
         </span>
     );
 }

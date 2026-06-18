@@ -5,15 +5,17 @@ import { Button } from '@/components/ui/button';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { useConfirm } from '@/hooks/use-confirm';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function WarehouseIndex({ warehouses }) {
+    const t = useT();
     const { ask, ConfirmDialogPortal } = useConfirm();
 
     const removeWarehouse = async (id, name) => {
         const ok = await ask({
-            title: 'Xóa kho',
-            description: `Xóa kho "${name}"?`,
-            confirmLabel: 'Xóa',
+            title: t('pages.warehouse.delete_title'),
+            description: t('pages.warehouse.delete_desc', { name }),
+            confirmLabel: t('common.delete'),
             variant: 'destructive',
         });
         if (!ok) return;
@@ -22,15 +24,15 @@ export default function WarehouseIndex({ warehouses }) {
 
     return (
         <AppLayout>
-            <Head title="Danh sách kho" />
+            <Head title={t('pages.warehouse.title')} />
 
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold tracking-tight">Danh sách kho</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('pages.warehouse.title')}</h1>
                     <Button asChild>
                         <Link href="/admin/warehouses/create">
                             <Plus className="size-4" />
-                            Tạo kho
+                            {t('pages.warehouse.create')}
                         </Link>
                     </Button>
                 </div>
@@ -39,13 +41,13 @@ export default function WarehouseIndex({ warehouses }) {
                     <table className="w-full min-w-[980px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>Tên kho</Th>
-                                <Th>Số điện thoại</Th>
-                                <Th>Địa chỉ</Th>
-                                <Th>Quản kho</Th>
-                                <Th>Mã VTP</Th>
-                                <Th>Sản phẩm</Th>
-                                <Th>Thao tác</Th>
+                                <Th>{t('pages.warehouse.col_name')}</Th>
+                                <Th>{t('pages.warehouse.col_phone')}</Th>
+                                <Th>{t('pages.warehouse.col_address')}</Th>
+                                <Th>{t('pages.warehouse.col_manager')}</Th>
+                                <Th>{t('pages.warehouse.col_vtp')}</Th>
+                                <Th>{t('pages.warehouse.col_products_count')}</Th>
+                                <Th>{t('pages.actions')}</Th>
                             </tr>
                         </thead>
                         <tbody>
@@ -85,7 +87,7 @@ export default function WarehouseIndex({ warehouses }) {
                             ) : (
                                 <tr>
                                     <Td colSpan={7} className="py-8 text-center text-muted-foreground">
-                                        Chưa có kho nào
+                                        {t('pages.warehouse.empty')}
                                     </Td>
                                 </tr>
                             )}

@@ -14,8 +14,9 @@ import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { barFill, RankingChartTooltip } from '@/components/rankings/RankingChartTooltip';
 import { formatCurrency, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
-/** Sắp tăng dần doanh số: hạng thấp bên trái → #1 bên phải (cột cao dần). */
+/** Sort ascending by revenue: lower rank on the left, #1 on the right (bars grow taller). */
 function toAscendingChartData(chartItems) {
     return [...(chartItems ?? [])].sort((a, b) => a.revenue - b.revenue);
 }
@@ -71,6 +72,7 @@ export function RevenueRankingChart({
     departmentLabel,
     compactTable = false,
 }) {
+    const t = useT();
     const ascending = toAscendingChartData(chartItems);
     const rest = (tableItems ?? []).slice(3, 50);
     const barCount = ascending.length;
@@ -79,7 +81,7 @@ export function RevenueRankingChart({
     if (!barCount) {
         return (
             <p className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
-                Chưa có doanh số chốt trong kỳ / bộ lọc hiện tại.
+                {t('rankings.empty_period')}
             </p>
         );
     }
@@ -88,11 +90,11 @@ export function RevenueRankingChart({
         <div className="space-y-5">
             <div>
                 <p className="text-sm font-semibold text-foreground">
-                    {departmentLabel ? `Doanh số — ${departmentLabel}` : 'Doanh số theo hạng'}
+                    {departmentLabel
+                        ? t('rankings.chart_revenue', { label: departmentLabel })
+                        : t('rankings.chart_revenue_default')}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                    Cột tăng dần từ trái sang phải · Di chuột để xem chi tiết
-                </p>
+                <p className="text-xs text-muted-foreground">{t('rankings.chart_hint')}</p>
             </div>
 
             <div className="-mx-1 overflow-x-auto pb-1">
@@ -162,18 +164,18 @@ export function RevenueRankingChart({
             {!compactTable && rest.length > 0 && (
                 <div className="border-t border-border/60 pt-4">
                     <p className="mb-3 text-sm font-medium text-muted-foreground">
-                        Hạng 4 – {3 + rest.length}
+                        {t('rankings.rank_range', { count: 3 + rest.length })}
                     </p>
                     <ScrollDataTable>
                         <table className="w-full border-collapse text-xs">
                             <thead>
                                 <tr>
                                     <Th>#</Th>
-                                    <Th>Nhân viên</Th>
-                                    <Th>Nhóm</Th>
-                                    <Th>Đơn chốt</Th>
-                                    <Th>TB/đơn</Th>
-                                    <Th>Doanh số chốt</Th>
+                                    <Th>{t('rankings.col_employee')}</Th>
+                                    <Th>{t('rankings.col_team')}</Th>
+                                    <Th>{t('rankings.closed_orders')}</Th>
+                                    <Th>{t('rankings.avg_order')}</Th>
+                                    <Th>{t('rankings.closed_revenue')}</Th>
                                 </tr>
                             </thead>
                             <tbody>

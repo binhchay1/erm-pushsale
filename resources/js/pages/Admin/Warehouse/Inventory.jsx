@@ -13,6 +13,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { cn } from '@/lib/utils';
 import { formatNumber } from '@/lib/format';
 import { movementTone } from '@/lib/status-tones';
+import { useT } from '@/providers/I18nProvider';
 
 export default function Inventory({
     report,
@@ -21,6 +22,7 @@ export default function Inventory({
     exportUrl = '/admin/warehouse/inventory/export',
     approverOptions = [],
 }) {
+    const t = useT();
     const f = report.filters ?? {};
     const rows = report.rows?.data ?? [];
     const recentMovements = report.recentIntakes ?? [];
@@ -41,11 +43,11 @@ export default function Inventory({
 
     const submitMovement = () => {
         if (!warehouseId || !productId || !quantity) {
-            toast.error('Chọn kho, sản phẩm và số lượng.');
+            toast.error(t('operations.inventory.validation'));
             return;
         }
         if (!approverId) {
-            toast.error('Chọn trưởng kho ký duyệt.');
+            toast.error(t('operations.inventory.approver_required'));
             return;
         }
 
@@ -64,14 +66,14 @@ export default function Inventory({
                 onSuccess: () => {
                     setQuantity('');
                     setNote('');
-                    toast.success(isIntake ? 'Đã nhập kho.' : 'Đã xuất kho.');
+                    toast.success(isIntake ? t('operations.inventory.intake_success') : t('operations.inventory.export_success'));
                 },
                 onError: (errors) => {
                     toast.error(
                         errors.quantity ??
                             errors.approved_by_user_id ??
                             errors.warehouse_id ??
-                            (isIntake ? 'Không nhập kho được.' : 'Không xuất kho được.')
+                            (isIntake ? t('operations.inventory.intake_failed') : t('operations.inventory.export_failed'))
                     );
                 },
                 onFinish: () => setSubmitting(false),
@@ -81,15 +83,12 @@ export default function Inventory({
 
     return (
         <AppLayout>
-            <Head title="Tồn kho sản phẩm" />
+            <Head title={t('operations.inventory.inventory_title')} />
 
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Tồn kho sản phẩm</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Theo dõi số lượng hàng từng kho, nhập thêm hoặc xuất bớt hàng — có trưởng kho ký
-                        duyệt
-                    </p>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('operations.inventory.inventory_title')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('operations.inventory.inventory_desc')}</p>
                 </div>
 
                 <div className="rounded-xl border bg-card p-4">
@@ -101,7 +100,7 @@ export default function Inventory({
                                 <PackageMinus className="size-4 text-amber-600" />
                             )}
                             <h2 className="text-sm font-semibold">
-                                {isIntake ? 'Nhập hàng vào kho' : 'Xuất hàng khỏi kho'}
+                                {isIntake ? t('operations.inventory.intake_form') : t('operations.inventory.export_form')}
                             </h2>
                         </div>
                         <div className="flex rounded-lg bg-muted p-0.5">
@@ -113,7 +112,7 @@ export default function Inventory({
                                     isIntake ? 'bg-card shadow-sm' : 'text-muted-foreground'
                                 )}
                             >
-                                Nhập kho
+                                {t('operations.inventory.intake')}
                             </button>
                             <button
                                 type="button"
@@ -123,20 +122,20 @@ export default function Inventory({
                                     !isIntake ? 'bg-card shadow-sm' : 'text-muted-foreground'
                                 )}
                             >
-                                Xuất kho
+                                {t('operations.inventory.export')}
                             </button>
                         </div>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
                         <div className="space-y-1">
-                            <Label htmlFor="move-warehouse">Kho</Label>
+                            <Label htmlFor="move-warehouse">{t('operations.inventory.warehouse')}</Label>
                             <select
                                 id="move-warehouse"
                                 className="input-soft flex h-9 w-full px-2"
                                 value={warehouseId}
                                 onChange={(e) => setWarehouseId(e.target.value)}
                             >
-                                <option value="">— Chọn kho —</option>
+                                <option value="">{t('operations.inventory.select_warehouse')}</option>
                                 {filterOptions?.warehouses?.map((w) => (
                                     <option key={w.id} value={w.id}>
                                         {w.name}
@@ -145,14 +144,14 @@ export default function Inventory({
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <Label htmlFor="move-product">Sản phẩm</Label>
+                            <Label htmlFor="move-product">{t('operations.inventory.product')}</Label>
                             <select
                                 id="move-product"
                                 className="input-soft flex h-9 w-full px-2"
                                 value={productId}
                                 onChange={(e) => setProductId(e.target.value)}
                             >
-                                <option value="">— Chọn sản phẩm —</option>
+                                <option value="">{t('operations.inventory.select_product')}</option>
                                 {filterOptions?.products?.map((p) => (
                                     <option key={p.id} value={p.id}>
                                         {p.name}
@@ -162,7 +161,7 @@ export default function Inventory({
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <Label htmlFor="move-qty">Số lượng</Label>
+                            <Label htmlFor="move-qty">{t('operations.inventory.quantity')}</Label>
                             <Input
                                 id="move-qty"
                                 type="number"
@@ -172,14 +171,14 @@ export default function Inventory({
                             />
                         </div>
                         <div className="space-y-1">
-                            <Label htmlFor="move-approver">Trưởng kho duyệt</Label>
+                            <Label htmlFor="move-approver">{t('operations.inventory.approver')}</Label>
                             <select
                                 id="move-approver"
                                 className="input-soft flex h-9 w-full px-2"
                                 value={approverId}
                                 onChange={(e) => setApproverId(e.target.value)}
                             >
-                                <option value="">— Chọn người duyệt —</option>
+                                <option value="">{t('operations.inventory.select_approver')}</option>
                                 {approverOptions.map((u) => (
                                     <option key={u.id} value={u.id}>
                                         {u.name}
@@ -188,40 +187,40 @@ export default function Inventory({
                             </select>
                         </div>
                         <div className="space-y-1 lg:col-span-2">
-                            <Label htmlFor="move-note">Ghi chú</Label>
+                            <Label htmlFor="move-note">{t('operations.inventory.note')}</Label>
                             <Input
                                 id="move-note"
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
                                 placeholder={
-                                    isIntake ? 'Lô hàng, nhà cung cấp…' : 'Lý do xuất, nơi nhận…'
+                                    isIntake ? t('operations.inventory.note_intake_ph') : t('operations.inventory.note_export_ph')
                                 }
                             />
                         </div>
                     </div>
                     <div className="mt-3">
                         <Button size="sm" onClick={submitMovement} disabled={submitting}>
-                            {isIntake ? 'Xác nhận nhập kho' : 'Xác nhận xuất kho'}
+                            {isIntake ? t('operations.inventory.submit_intake') : t('operations.inventory.submit_export')}
                         </Button>
                     </div>
                 </div>
 
                 {recentMovements.length > 0 && (
                     <div className="rounded-xl border bg-card p-4">
-                        <h2 className="mb-3 text-sm font-semibold">Phiếu nhập / xuất gần đây</h2>
+                        <h2 className="mb-3 text-sm font-semibold">{t('operations.inventory.recent_movements')}</h2>
                         <ScrollDataTable>
                             <table className="w-full border-collapse text-xs">
                                 <thead>
                                     <tr>
-                                        <Th>Thời gian</Th>
-                                        <Th>Loại</Th>
-                                        <Th>Kho</Th>
-                                        <Th>Sản phẩm</Th>
-                                        <Th className="text-right">Số lượng</Th>
-                                        <Th className="text-right">Tồn sau</Th>
-                                        <Th>Người thực hiện</Th>
-                                        <Th>Người duyệt</Th>
-                                        <Th>Ghi chú</Th>
+                                        <Th>{t('operations.movement_history.col_time')}</Th>
+                                        <Th>{t('operations.movement_history.col_type')}</Th>
+                                        <Th>{t('operations.inventory.warehouse')}</Th>
+                                        <Th>{t('operations.inventory.product')}</Th>
+                                        <Th className="text-right">{t('operations.inventory.quantity')}</Th>
+                                        <Th className="text-right">{t('operations.inventory.col_stock_after')}</Th>
+                                        <Th>{t('operations.movement_history.col_actor')}</Th>
+                                        <Th>{t('operations.movement_history.col_approver')}</Th>
+                                        <Th>{t('operations.movement_history.col_note')}</Th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -267,7 +266,7 @@ export default function Inventory({
 
                 <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">
                     <Input
-                        placeholder="Tìm theo tên sản phẩm"
+                        placeholder={t('operations.inventory.search_product')}
                         value={f.search ?? ''}
                         onChange={(e) => search({ search: e.target.value })}
                         className="max-w-xs"
@@ -277,7 +276,7 @@ export default function Inventory({
                         value={f.warehouse_id ?? ''}
                         onChange={(e) => search({ warehouse_id: e.target.value || null })}
                     >
-                        <option value="">Tất cả kho</option>
+                        <option value="">{t('operations.inventory.all_warehouses')}</option>
                         {filterOptions?.warehouses?.map((w) => (
                             <option key={w.id} value={w.id}>
                                 {w.name}
@@ -286,7 +285,7 @@ export default function Inventory({
                     </select>
                     <Button size="sm" onClick={() => search()}>
                         <Search className="size-4" />
-                        Tìm kiếm
+                        {t('common.search')}
                     </Button>
                 </div>
 
@@ -295,13 +294,13 @@ export default function Inventory({
                         <thead>
                             <tr>
                                 <Th>#</Th>
-                                <Th>Kho</Th>
-                                <Th>Sản phẩm</Th>
-                                <Th>Mã lô</Th>
-                                <Th>Vị trí</Th>
-                                <Th className="text-right">Đang tồn</Th>
-                                <Th className="text-right">Chờ xuất</Th>
-                                <Th>Ngừng bán</Th>
+                                <Th>{t('operations.inventory.warehouse')}</Th>
+                                <Th>{t('operations.inventory.product')}</Th>
+                                <Th>{t('operations.inventory.col_batch')}</Th>
+                                <Th>{t('operations.inventory.col_location')}</Th>
+                                <Th className="text-right">{t('operations.inventory.col_on_hand')}</Th>
+                                <Th className="text-right">{t('operations.inventory.col_pending')}</Th>
+                                <Th>{t('operations.inventory.col_stopped')}</Th>
                                 <Th />
                             </tr>
                         </thead>
@@ -339,7 +338,7 @@ export default function Inventory({
                             {!rows.length && (
                                 <tr>
                                     <Td colSpan={9} className="py-8 text-center text-muted-foreground">
-                                        Chưa có hàng trong kho
+                                        {t('operations.inventory.no_stock')}
                                     </Td>
                                 </tr>
                             )}

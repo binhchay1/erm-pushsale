@@ -4,9 +4,11 @@ import { BarChart3 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
+import { useLabels } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
 function formatCell(value, format) {
     if (value === null || value === undefined || value === '') return '—';
@@ -23,7 +25,6 @@ function formatCell(value, format) {
     }
 }
 
-// Chip màu cho cột % — tone 'positive': càng cao càng tốt, 'negative': càng cao càng xấu
 function percentToneClass(value, tone) {
     const v = Number(value);
     if (Number.isNaN(v)) return '';
@@ -60,6 +61,28 @@ function CellValue({ value, column }) {
     return formatCell(value, column.format);
 }
 
+function resolveColumnLabel(col, t, labels) {
+    if (col.label_type === 'operation_stage' && col.label_key) {
+        return labels.operation_stage?.[col.label_key] ?? col.label;
+    }
+
+    if (col.label_key) {
+        const translated = t(`reports.columns.${col.label_key}`);
+        if (translated !== `reports.columns.${col.label_key}`) {
+            return translated;
+        }
+    }
+
+    return col.label;
+}
+
+function reportText(t, key, field, fallback) {
+    const path = `reports.extra.${key}.${field}`;
+    const translated = t(path);
+
+    return translated !== path ? translated : fallback;
+}
+
 export default function ExtraReport({
     meta,
     reportNav = [],
@@ -71,14 +94,19 @@ export default function ExtraReport({
     filterFields = [],
     routeUrl,
 }) {
+    const t = useT();
+    const labels = useLabels();
     const hasFilters = filterFields.length > 0;
+
+    const title = reportText(t, meta.key, 'title', meta.title);
+    const description = reportText(t, meta.key, 'description', meta.description);
 
     return (
         <AppLayout>
-            <Head title={meta.title} />
+            <Head title={title} />
 
             <div className="space-y-6">
-                <PageHeader icon={BarChart3} title={meta.title} description={meta.description} />
+                <PageHeader icon={BarChart3} title={title} description={description} />
 
                 {reportNav.length > 1 && (
                     <div className="flex flex-wrap gap-2">
@@ -93,7 +121,7 @@ export default function ExtraReport({
                                         : 'border-border bg-card text-muted-foreground hover:bg-muted',
                                 )}
                             >
-                                {item.title}
+                                {reportText(t, item.key, 'title', item.title)}
                             </Link>
                         ))}
                     </div>
@@ -112,13 +140,13 @@ export default function ExtraReport({
                     <table className="w-full min-w-max text-sm">
                         <thead>
                             <tr>
-                                <Th className="w-10 text-center">STT</Th>
+                                <Th className="w-10 text-center">{t('pages.stt')}</Th>
                                 {columns.map((col) => (
                                     <Th
                                         key={col.key}
                                         className={col.format === 'text' ? '' : 'text-right'}
                                     >
-                                        {col.label}
+                                        {resolveColumnLabel(col, t, labels)}
                                     </Th>
                                 ))}
                             </tr>
@@ -130,7 +158,7 @@ export default function ExtraReport({
                                         colSpan={columns.length + 1}
                                         className="py-10 text-center text-muted-foreground"
                                     >
-                                        Chưa có dữ liệu trong khoảng thời gian đã chọn.
+                                        {t('reports.empty_period')}
                                     </Td>
                                 </tr>
                             )}
@@ -168,7 +196,7 @@ export default function ExtraReport({
                                             )}
                                         >
                                             {index === 0 && col.format === 'text'
-                                                ? 'Tổng cộng'
+                                                ? t('common.grand_total')
                                                 : formatCell(totals[col.key], col.format)}
                                         </Td>
                                     ))}

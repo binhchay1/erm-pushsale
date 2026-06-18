@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 const channels = ['facebook', 'tiktok', 'google', 'zalo', 'landing', 'shopee', 'lazada'];
 
 export default function CampaignForm({ baseUrl, campaign, products, marketers }) {
+    const t = useT();
     const isEdit = Boolean(campaign?.id);
     const { data, setData, post, put, processing, errors } = useForm({
         name: campaign?.name ?? '',
@@ -33,7 +35,7 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
 
     return (
         <AppLayout>
-            <Head title={isEdit ? 'Sửa chiến dịch' : 'Tạo chiến dịch'} />
+            <Head title={isEdit ? t('pages.campaigns.admin_edit') : t('pages.campaigns.admin_form_create')} />
 
             <div className="mx-auto max-w-2xl space-y-6">
                 <div className="flex items-center gap-3">
@@ -43,35 +45,35 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                         </Link>
                     </Button>
                     <h1 className="text-2xl font-bold tracking-tight">
-                        {isEdit ? 'Sửa chiến dịch' : 'Tạo chiến dịch'}
+                        {isEdit ? t('pages.campaigns.admin_edit') : t('pages.campaigns.admin_form_create')}
                     </h1>
                 </div>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Thông tin chiến dịch</CardTitle>
+                        <CardTitle>{t('pages.campaigns.form_info')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={submit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label>Tên chiến dịch</Label>
+                                <Label>{t('pages.campaigns.name')}</Label>
                                 <Input
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
-                                    placeholder="VD: Serum Vitamin C - TikTok T5"
+                                    placeholder={t('pages.campaigns.name_placeholder')}
                                 />
                                 {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                             </div>
 
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label>Sản phẩm (trong kho)</Label>
+                                    <Label>{t('pages.campaigns.product_in_stock')}</Label>
                                     <select
                                         className="input-soft h-10 w-full px-3"
                                         value={data.product_id}
                                         onChange={(e) => setData('product_id', e.target.value)}
                                     >
-                                        <option value="">-- Chọn sản phẩm --</option>
+                                        <option value="">{t('pages.campaigns.select_product')}</option>
                                         {products.map((p) => (
                                             <option key={p.id} value={p.id}>
                                                 {p.name}
@@ -83,13 +85,13 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                                     )}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Marketer phụ trách</Label>
+                                    <Label>{t('pages.campaigns.marketer_label')}</Label>
                                     <select
                                         className="input-soft h-10 w-full px-3"
                                         value={data.marketer_user_id}
                                         onChange={(e) => setData('marketer_user_id', e.target.value)}
                                     >
-                                        <option value="">-- Chọn marketer --</option>
+                                        <option value="">{t('pages.campaigns.select_marketer')}</option>
                                         {marketers.map((m) => (
                                             <option key={m.id} value={m.id}>
                                                 {m.name}
@@ -104,7 +106,7 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
 
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label>Kênh quảng cáo</Label>
+                                    <Label>{t('pages.campaigns.channel')}</Label>
                                     <select
                                         className="input-soft h-10 w-full px-3"
                                         value={data.ad_channel}
@@ -118,7 +120,7 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Ngân sách (đ)</Label>
+                                    <Label>{t('pages.campaigns.budget_vnd')}</Label>
                                     <Input
                                         type="number"
                                         min={0}
@@ -138,7 +140,7 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>utm_campaign (mã chiến dịch)</Label>
+                                    <Label>{t('pages.campaigns.utm_campaign_label')}</Label>
                                     <Input
                                         value={data.utm_campaign}
                                         onChange={(e) => setData('utm_campaign', e.target.value)}
@@ -148,7 +150,7 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                                         <p className="text-xs text-destructive">{errors.utm_campaign}</p>
                                     ) : (
                                         <p className="text-xs text-muted-foreground">
-                                            Ladipage gửi field này → hệ thống tự khớp về đúng chiến dịch.
+                                            {t('pages.campaigns.utm_campaign_hint')}
                                         </p>
                                     )}
                                 </div>
@@ -161,12 +163,12 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                                     onChange={(e) => setData('is_active', e.target.checked)}
                                     className="size-4 rounded border"
                                 />
-                                Đang chạy (nhận lead)
+                                {t('pages.campaigns.active_receive')}
                             </label>
 
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Đang lưu...' : 'Lưu chiến dịch'}
+                                    {processing ? t('common.saving') : t('pages.campaigns.save')}
                                 </Button>
                             </div>
                         </form>

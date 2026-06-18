@@ -125,6 +125,7 @@ class User extends Authenticatable
         return $this->preferences()->firstOrCreate(
             ['user_id' => $this->id],
             [
+                'locale' => 'vi',
                 'theme' => UserPreference::THEME_DEFAULT,
                 'appearance' => UserPreference::APPEARANCE_SYSTEM,
                 'notifications' => UserPreference::defaultNotifications(),

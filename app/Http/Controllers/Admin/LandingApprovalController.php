@@ -49,6 +49,6 @@ class LandingApprovalController extends Controller
         $campaign->update(['is_approved' => true]);
         NotificationService::notifyLandingApproved($campaign->fresh());
 
-        return back()->with('success', 'Đã duyệt nguồn Landing — lead mới sẽ được chia số cho Sale.');
+        return back()->with('success', __('messages.landing_approved'));
     }
 }

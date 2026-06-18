@@ -3,38 +3,41 @@ import { Percent, Package, Wallet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
-
-const ITEMS = [
-    {
-        key: 'totalRevenue',
-        title: 'Tổng doanh thu',
-        icon: Wallet,
-        format: formatCurrency,
-        accent: 'text-emerald-600 dark:text-emerald-400',
-        bg: 'from-emerald-500/10 to-transparent',
-    },
-    {
-        key: 'productQuantity',
-        title: 'Sản phẩm bán ra',
-        icon: Package,
-        format: (v) => `${formatNumber(v)} SP`,
-        accent: 'text-blue-600 dark:text-blue-400',
-        bg: 'from-blue-500/10 to-transparent',
-    },
-    {
-        key: 'conversionRate',
-        title: 'Tỷ lệ chốt',
-        icon: Percent,
-        format: formatPercent,
-        accent: 'text-violet-600 dark:text-violet-400',
-        bg: 'from-violet-500/10 to-transparent',
-    },
-];
+import { useT } from '@/providers/I18nProvider';
 
 export function MarketingKpiHero({ kpis }) {
+    const t = useT();
+
+    const items = [
+        {
+            key: 'totalRevenue',
+            title: t('dashboard.marketing.kpi_revenue'),
+            icon: Wallet,
+            format: formatCurrency,
+            accent: 'text-emerald-600 dark:text-emerald-400',
+            bg: 'from-emerald-500/10 to-transparent',
+        },
+        {
+            key: 'productQuantity',
+            title: t('dashboard.marketing.kpi_products'),
+            icon: Package,
+            format: (v) => `${formatNumber(v)} SP`,
+            accent: 'text-blue-600 dark:text-blue-400',
+            bg: 'from-blue-500/10 to-transparent',
+        },
+        {
+            key: 'conversionRate',
+            title: t('dashboard.marketing.kpi_closing_rate'),
+            icon: Percent,
+            format: formatPercent,
+            accent: 'text-violet-600 dark:text-violet-400',
+            bg: 'from-violet-500/10 to-transparent',
+        },
+    ];
+
     return (
         <div className="grid gap-6 md:grid-cols-3">
-            {ITEMS.map(({ key, title, icon: Icon, format, accent, bg }) => (
+            {items.map(({ key, title, icon: Icon, format, accent, bg }) => (
                 <Card
                     key={key}
                     className={cn(
@@ -54,7 +57,10 @@ export function MarketingKpiHero({ kpis }) {
                         </p>
                         {key === 'conversionRate' && kpis?.closedOrders != null && (
                             <p className="text-xs text-muted-foreground">
-                                {formatNumber(kpis.closedOrders)} đơn / {formatNumber(kpis.contacts)} contact
+                                {t('dashboard.marketing.kpi_subtext', {
+                                    orders: formatNumber(kpis.closedOrders),
+                                    contacts: formatNumber(kpis.contacts),
+                                })}
                             </p>
                         )}
                     </CardContent>

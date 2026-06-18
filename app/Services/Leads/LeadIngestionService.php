@@ -123,19 +123,23 @@ class LeadIngestionService
         Order $order,
         ?MarketingSource $campaign = null,
     ): void {
-        $title = $campaign
-            ? 'Lead Landing — '.$campaign->name
-            : 'Lead mới từ '.$ingestion->platform;
-        $message = trim(($ingestion->customer_name ?? 'Khách').' · '.($ingestion->customer_phone ?? ''));
         $adminUrl = $campaign && ! $campaign->is_approved
             ? '/admin/landing-approvals?campaign='.$campaign->id
             : '/admin/leads';
 
+        $data = [
+            'variant' => $campaign ? 'landing' : 'platform',
+            'campaign_name' => $campaign?->name,
+            'platform' => $ingestion->platform,
+            'customer_name' => $ingestion->customer_name,
+            'customer_phone' => $ingestion->customer_phone,
+        ];
+
         if ($order->sale_user_id) {
-            NotificationService::push($order->sale_user_id, 'lead', $title, $message, '/sales/workspace');
+            NotificationService::push($order->sale_user_id, 'lead', null, null, '/sales/workspace', $data);
         }
 
-        NotificationService::pushToRole(UserRole::Admin, 'lead', $title, $message, $adminUrl);
+        NotificationService::pushToRole(UserRole::Admin, 'lead', null, null, $adminUrl, $data);
     }
 
     /** @param  array<string, mixed>  $payload */

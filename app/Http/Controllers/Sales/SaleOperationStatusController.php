@@ -30,6 +30,6 @@ class SaleOperationStatusController extends Controller
 
         $service->applyStatus($order, $request->user(), $validated);
 
-        return back()->with('success', 'Đã cập nhật trạng thái tác nghiệp.');
+        return back()->with('success', __('messages.operation_status_updated'));
     }
 }

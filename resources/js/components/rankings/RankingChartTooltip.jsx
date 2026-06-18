@@ -2,8 +2,11 @@ import { Crown } from 'lucide-react';
 
 import { formatCurrency, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
 export function RankingChartTooltip({ active, payload }) {
+    const t = useT();
+
     if (!active || !payload?.length) return null;
 
     const row = payload[0]?.payload;
@@ -22,12 +25,20 @@ export function RankingChartTooltip({ active, payload }) {
             </div>
             <div className="space-y-1 text-muted-foreground">
                 <p>
-                    <span className="font-medium text-foreground">Hạng #{row.rank}</span>
+                    <span className="font-medium text-foreground">
+                        {t('rankings.tooltip_rank')}{row.rank}
+                    </span>
                     {row.team ? ` · ${row.team}` : ''}
                 </p>
-                <p>Doanh số chốt: {formatCurrency(row.revenue)}</p>
-                <p>Đơn chốt: {formatNumber(row.orders)}</p>
-                <p>TB/đơn: {formatCurrency(row.avgOrderValue)}</p>
+                <p>
+                    {t('rankings.tooltip_revenue')} {formatCurrency(row.revenue)}
+                </p>
+                <p>
+                    {t('rankings.tooltip_orders')} {formatNumber(row.orders)}
+                </p>
+                <p>
+                    {t('rankings.tooltip_avg')} {formatCurrency(row.avgOrderValue)}
+                </p>
             </div>
         </div>
     );

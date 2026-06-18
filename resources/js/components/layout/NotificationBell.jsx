@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, CheckCheck, Settings } from 'lucide-react';
+import { Bell, CheckCheck } from 'lucide-react';
 
 import { NotificationRow } from '@/components/notifications/NotificationRow';
 import { Button } from '@/components/ui/button';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
+import { useT } from '@/providers/I18nProvider';
 
 export function NotificationBell() {
     const { notifications = [], notificationsUnread = 0 } = usePage().props;
+    const t = useT();
     const [open, setOpen] = useState(false);
     const { markAllRead, openItem } = useNotificationActions();
 
@@ -18,8 +20,8 @@ export function NotificationBell() {
                 variant="ghost"
                 size="icon-sm"
                 onClick={() => setOpen((o) => !o)}
-                title="Thông báo"
-                aria-label="Thông báo"
+                title={t('notifications.title')}
+                aria-label={t('notifications.title')}
             >
                 <span className="relative inline-flex">
                     <Bell className="size-4" />
@@ -41,14 +43,14 @@ export function NotificationBell() {
                     />
                     <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-background shadow-lg">
                         <div className="flex items-center justify-between border-b border-border px-3 py-2">
-                            <p className="text-sm font-semibold">Thông báo</p>
+                            <p className="text-sm font-semibold">{t('notifications.title')}</p>
                             {notificationsUnread > 0 && (
                                 <button
                                     type="button"
                                     onClick={markAllRead}
                                     className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                                 >
-                                    <CheckCheck className="size-3.5" /> Đọc tất cả
+                                    <CheckCheck className="size-3.5" /> {t('notifications.mark_all_read')}
                                 </button>
                             )}
                         </div>
@@ -56,7 +58,7 @@ export function NotificationBell() {
                         <div className="max-h-80 overflow-y-auto">
                             {notifications.length === 0 ? (
                                 <p className="px-3 py-8 text-center text-sm text-muted-foreground">
-                                    Chưa có thông báo
+                                    {t('notifications.empty')}
                                 </p>
                             ) : (
                                 notifications.map((n) => (
@@ -75,22 +77,11 @@ export function NotificationBell() {
                             onClick={() => setOpen(false)}
                             className="block border-t border-border px-3 py-2 text-center text-sm font-medium text-primary hover:bg-muted/50"
                         >
-                            Xem tất cả
+                            {t('notifications.view_all')}
                         </Link>
                     </div>
                 </>
             )}
         </div>
-    );
-}
-
-export function SettingsLink() {
-    return (
-        <Button variant="ghost" size="sm" asChild>
-            <Link href="/settings">
-                <Settings className="size-4" />
-                <span className="hidden md:inline">Cài đặt</span>
-            </Link>
-        </Button>
     );
 }

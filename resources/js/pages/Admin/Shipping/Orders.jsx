@@ -9,21 +9,22 @@ import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { deliveryTone, shipmentTone } from '@/lib/status-tones';
 import { formatCurrency } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 export default function ShippingOrders({ filters, filterOptions, orders, pageTitle, routeUrl }) {
+    const t = useT();
     const [selectedId, setSelectedId] = useState(null);
     const apiBase = routeUrl?.replace(/\/$/, '') ?? '/admin/shipping/orders';
+    const title = pageTitle ?? t('shipping.orders_title');
 
     return (
         <AppLayout>
-            <Head title={pageTitle ?? 'Đơn vận chuyển'} />
+            <Head title={title} />
 
             <div className="space-y-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{pageTitle ?? 'Đơn vận chuyển'}</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Đơn đã chốt — tạo vận đơn, đồng bộ trạng thái và theo dõi lộ trình
-                    </p>
+                    <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+                    <p className="text-sm text-muted-foreground">{t('shipping.orders_desc')}</p>
                 </div>
 
                 <ReportFilterBar routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} />
@@ -32,14 +33,14 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
                     <table className="min-w-[1100px] w-full border-collapse text-sm">
                         <thead>
                             <tr>
-                                <Th>Mã đơn</Th>
-                                <Th>ĐVVC</Th>
-                                <Th>Khách / SĐT</Th>
-                                <Th>Sale</Th>
-                                <Th>Chốt lúc</Th>
-                                <Th>Trạng thái giao</Th>
-                                <Th>Mã vận đơn</Th>
-                                <Th>Phí VC</Th>
+                                <Th>{t('shipping.col_order')}</Th>
+                                <Th>{t('shipping.col_carrier')}</Th>
+                                <Th>{t('shipping.col_customer')}</Th>
+                                <Th>{t('shipping.col_sale')}</Th>
+                                <Th>{t('shipping.col_closed_at')}</Th>
+                                <Th>{t('shipping.col_delivery')}</Th>
+                                <Th>{t('shipping.col_waybill')}</Th>
+                                <Th>{t('shipping.col_fee')}</Th>
                                 <Th />
                             </tr>
                         </thead>
@@ -70,7 +71,7 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
                                                 tone={shipmentTone(row.shipmentState)}
                                                 className="mt-1"
                                             >
-                                                {row.shipmentStatus ?? row.shipmentState ?? 'Chưa tạo'}
+                                                {row.shipmentStatus ?? row.shipmentState ?? t('shipping.not_created')}
                                             </StatusBadge>
                                             {row.shipmentError && (
                                                 <p className="text-xs text-destructive">{row.shipmentError}</p>
@@ -84,7 +85,7 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
                                                 className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
                                             >
                                                 <PackageSearch className="size-3.5" />
-                                                Chi tiết
+                                                {t('pages.detail')}
                                             </button>
                                         </Td>
                                     </tr>
@@ -92,7 +93,7 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
                             ) : (
                                 <tr>
                                     <Td colSpan={9} className="py-10 text-center text-muted-foreground">
-                                        Chưa có đơn đã chốt trong bộ lọc hiện tại
+                                        {t('shipping.empty_filtered')}
                                     </Td>
                                 </tr>
                             )}

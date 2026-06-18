@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { AppSidebar } from '@/components/layout/AppSidebar';
+import { LocaleSync } from '@/components/layout/LocaleSync';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useFlashToast } from '@/hooks/useFlashToast';
@@ -46,6 +47,7 @@ export default function AppLayout({ children }) {
 
     return (
         <SidebarProvider>
+            <LocaleSync />
             <TooltipProvider>
                 <AppSidebar />
                 <main className="relative flex min-h-svh min-w-0 w-full flex-1 flex-col overflow-x-hidden bg-background">

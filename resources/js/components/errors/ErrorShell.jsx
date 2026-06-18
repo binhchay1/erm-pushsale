@@ -15,7 +15,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { getErrorMeta } from '@/lib/error-pages';
+import { useT } from '@/providers/I18nProvider';
 import { cn } from '@/lib/utils';
 
 const TONE_STYLES = {
@@ -34,6 +34,16 @@ const TONE_STYLES = {
         code: 'text-destructive/15',
         accent: 'from-destructive/10 to-transparent',
     },
+};
+
+const STATUS_TONE = {
+    401: 'warning',
+    403: 'warning',
+    404: 'muted',
+    419: 'warning',
+    429: 'warning',
+    503: 'muted',
+    client: 'danger',
 };
 
 function StatusIcon({ status }) {
@@ -59,8 +69,24 @@ function StatusIcon({ status }) {
     }
 }
 
+function errorTitle(t, status) {
+    if (status === 'client') {
+        return t('errors.client_title');
+    }
+
+    return t(`errors.title_${status}`) ?? t('errors.title_500');
+}
+
+function errorDescription(t, status) {
+    if (status === 'client') {
+        return t('errors.desc_client');
+    }
+
+    return t(`errors.desc_${status}`) ?? t('errors.desc_500');
+}
+
 /**
- * Khung hiển thị lỗi — dùng chung cho trang HTTP và ErrorBoundary.
+ * Error display shell — shared by HTTP error pages and ErrorBoundary.
  */
 export function ErrorShell({
     status = 500,
@@ -74,10 +100,11 @@ export function ErrorShell({
     children,
     detail,
 }) {
-    const meta = getErrorMeta(status === 'client' ? 'client' : status);
-    const tone = TONE_STYLES[meta.tone] ?? TONE_STYLES.danger;
-    const displayTitle = title ?? meta.title;
-    const displayDescription = description ?? meta.description;
+    const t = useT();
+    const key = status === 'client' ? 'client' : status;
+    const tone = TONE_STYLES[STATUS_TONE[key] ?? 'danger'] ?? TONE_STYLES.danger;
+    const displayTitle = title ?? errorTitle(t, key);
+    const displayDescription = description ?? errorDescription(t, key);
     const codeLabel = status === 'client' ? '!' : String(status);
 
     return (
@@ -133,7 +160,9 @@ export function ErrorShell({
                                 </div>
                                 <div className="min-w-0 pt-0.5">
                                     <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                        {status === 'client' ? 'Lỗi ứng dụng' : `Mã lỗi ${status}`}
+                                        {status === 'client'
+                                            ? t('errors.client_title')
+                                            : t('errors.error_code', { code: status })}
                                     </p>
                                     <h1 className="mt-1 text-xl font-bold tracking-tight text-foreground">
                                         {displayTitle}
@@ -163,7 +192,7 @@ export function ErrorShell({
                                         <Button asChild>
                                             <Link href={homeUrl}>
                                                 <Home className="size-4" />
-                                                {showLogin ? 'Đăng nhập' : 'Về trang chủ'}
+                                                {showLogin ? t('errors.login') : t('errors.back_home')}
                                             </Link>
                                         </Button>
                                         <Button
@@ -172,7 +201,7 @@ export function ErrorShell({
                                             onClick={() => window.history.back()}
                                         >
                                             <ArrowLeft className="size-4" />
-                                            Quay lại
+                                            {t('common.back')}
                                         </Button>
                                     </>
                                 )}

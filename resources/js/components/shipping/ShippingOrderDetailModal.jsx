@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Circle, ExternalLink, Loader2, MapPin, Printer, RefreshCw, Truck, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { ShippingFeeResult } from '@/components/shipping/ShippingFeeResult';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -16,15 +17,16 @@ import { formatCurrency, formatDateTime } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
 import { deliveryTone, shipmentTone } from '@/lib/status-tones';
 import { cn } from '@/lib/utils';
-
-// ─── Tracking timeline ────────────────────────────────────────────────────────
+import { useT } from '@/providers/I18nProvider';
 
 function TrackingTimeline({ events }) {
+    const t = useT();
+
     if (!events?.length) return null;
 
     return (
         <div>
-            <p className="mb-3 text-sm font-semibold">Lộ trình vận chuyển</p>
+            <p className="mb-3 text-sm font-semibold">{t('shipping.tracking_title')}</p>
             <ol className="relative border-l border-border pl-4 space-y-4">
                 {[...events].reverse().map((ev, idx) => (
                     <li key={idx} className="relative">
@@ -70,9 +72,8 @@ function TrackingTimeline({ events }) {
     );
 }
 
-import { ShippingFeeResult } from '@/components/shipping/ShippingFeeResult';
-
 export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase }) {
+    const t = useT();
     const [loading, setLoading] = useState(false);
     const [acting, setActing] = useState(null);
     const [detail, setDetail] = useState(null);
@@ -106,7 +107,7 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
             if (options.method === 'GET') {
                 const url = `${path}${path.includes('?') ? '&' : '?'}provider=${selectedProvider}`;
                 await openShippingLabel(url);
-                toast.success('Đã mở nhãn vận đơn.');
+                toast.success(t('shipping.label_opened'));
                 return;
             }
             const data = await apiPost(path, { provider: selectedProvider });
@@ -116,7 +117,7 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                 setDetail(data);
                 if (data.activeProvider) setSelectedProvider(data.activeProvider);
             }
-            toast.success(data.message ?? 'Thành công');
+            toast.success(data.message ?? t('shipping.success_default'));
         } catch (e) {
             toast.error(e.message);
         } finally {
@@ -130,34 +131,31 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
     const readyCarriers = detail?.carriers?.filter((c) => c.ready) ?? [];
     const tracking = detail?.tracking ?? [];
 
-    // Actions theo trạng thái vận đơn — backend tính sẵn, đổi provider thì tính lại client-side
     const actions = resolveActions(shipment ?? null, order);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Chi tiết vận chuyển — {order?.orderCode ?? '…'}</DialogTitle>
-                    <DialogDescription>
-                        Tạo vận đơn, đồng bộ trạng thái và theo dõi lộ trình giao hàng
-                    </DialogDescription>
+                    <DialogTitle>
+                        {t('shipping.detail_title_with_code', { code: order?.orderCode ?? '…' })}
+                    </DialogTitle>
+                    <DialogDescription>{t('shipping.detail_desc')}</DialogDescription>
                 </DialogHeader>
 
                 {loading ? (
                     <div className="flex items-center justify-center py-12 text-muted-foreground">
                         <Loader2 className="mr-2 size-5 animate-spin" />
-                        Đang tải…
+                        {t('shipping.loading')}
                     </div>
                 ) : (
                     <div className="space-y-5">
-                        {/* No carrier configured warning */}
                         {readyCarriers.length === 0 && (
                             <p className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10">
-                                Chưa có đơn vị vận chuyển nào được bật — vào cấu hình đối tác để thiết lập.
+                                {t('shipping.no_carrier_enabled')}
                             </p>
                         )}
 
-                        {/* Carrier selector tabs */}
                         {detail?.carriers?.length > 0 && (
                             <div className="flex flex-wrap gap-2">
                                 {detail.carriers.map((c) => (
@@ -175,16 +173,15 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                         )}
                                     >
                                         {c.label}
-                                        {!c.ready && ' (chưa bật)'}
+                                        {!c.ready && ` ${t('shipping.not_enabled')}`}
                                     </button>
                                 ))}
                             </div>
                         )}
 
-                        {/* Order info */}
                         <div className="grid gap-3 sm:grid-cols-2">
                             <div className="rounded-lg border p-3 text-sm">
-                                <p className="mb-1 font-semibold">Khách hàng</p>
+                                <p className="mb-1 font-semibold">{t('shipping.customer')}</p>
                                 <p className="font-medium">{order?.customerName}</p>
                                 <p className="text-muted-foreground">{order?.customerPhone}</p>
                                 <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
@@ -192,12 +189,18 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                 </p>
                             </div>
                             <div className="rounded-lg border p-3 text-sm">
-                                <p className="mb-1 font-semibold">Tài chính / COD</p>
+                                <p className="mb-1 font-semibold">{t('shipping.finance_cod')}</p>
                                 <div className="space-y-0.5">
-                                    <p>Tổng đơn: <span className="font-medium">{formatCurrency(order?.total)}</span></p>
-                                    <p>Thu hộ (COD): <span className="font-medium">{formatCurrency(order?.amountToCollect)}</span></p>
+                                    <p>
+                                        {t('shipping.order_total')}:{' '}
+                                        <span className="font-medium">{formatCurrency(order?.total)}</span>
+                                    </p>
+                                    <p>
+                                        {t('shipping.cod_amount')}:{' '}
+                                        <span className="font-medium">{formatCurrency(order?.amountToCollect)}</span>
+                                    </p>
                                     <p className="text-muted-foreground">
-                                        Trạng thái:{' '}
+                                        {t('shipping.status')}:{' '}
                                         <StatusBadge tone={deliveryTone(order?.deliveryStatusValue)} className="ml-1 align-middle">
                                             {order?.deliveryStatus}
                                         </StatusBadge>
@@ -206,11 +209,10 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                             </div>
                         </div>
 
-                        {/* Shipment card */}
                         <div className="rounded-lg border p-3">
                             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                                 <p className="font-semibold">
-                                    Vận đơn{' '}
+                                    {t('shipping.waybill')}{' '}
                                     {shipment?.providerLabel
                                         ? `— ${shipment.providerLabel}`
                                         : selectedProvider
@@ -224,7 +226,7 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                         rel="noreferrer"
                                         className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                                     >
-                                        Tra cứu <ExternalLink className="size-3" />
+                                        {t('shipping.lookup')} <ExternalLink className="size-3" />
                                     </a>
                                 )}
                             </div>
@@ -232,13 +234,13 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                             {shipment ? (
                                 <dl className="grid gap-2 text-sm sm:grid-cols-2">
                                     <div>
-                                        <dt className="text-xs text-muted-foreground">Mã vận đơn</dt>
+                                        <dt className="text-xs text-muted-foreground">{t('shipping.waybill_code')}</dt>
                                         <dd className="font-mono font-medium">
                                             {shipment.trackingNumber ?? '—'}
                                         </dd>
                                     </div>
                                     <div>
-                                        <dt className="text-xs text-muted-foreground">Trạng thái</dt>
+                                        <dt className="text-xs text-muted-foreground">{t('shipping.status')}</dt>
                                         <dd>
                                             <StatusBadge tone={shipmentTone(shipment.state)}>
                                                 {shipment.statusText ?? shipment.state}
@@ -246,18 +248,18 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                         </dd>
                                     </div>
                                     <div>
-                                        <dt className="text-xs text-muted-foreground">Phí vận chuyển</dt>
+                                        <dt className="text-xs text-muted-foreground">{t('shipping.shipping_fee')}</dt>
                                         <dd>{formatCurrency(shipment.fee)}</dd>
                                     </div>
                                     {shipment.submittedAt && (
                                         <div>
-                                            <dt className="text-xs text-muted-foreground">Tạo lúc</dt>
+                                            <dt className="text-xs text-muted-foreground">{t('shipping.created_at')}</dt>
                                             <dd className="text-xs">{formatDateTime(shipment.submittedAt)}</dd>
                                         </div>
                                     )}
                                     {shipment.lastSyncedAt && (
                                         <div>
-                                            <dt className="text-xs text-muted-foreground">Đồng bộ lần cuối</dt>
+                                            <dt className="text-xs text-muted-foreground">{t('shipping.synced_at')}</dt>
                                             <dd className="text-xs">{formatDateTime(shipment.lastSyncedAt)}</dd>
                                         </div>
                                     )}
@@ -268,11 +270,10 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                     )}
                                 </dl>
                             ) : (
-                                <p className="text-sm text-muted-foreground">Chưa có vận đơn cho đơn vị này.</p>
+                                <p className="text-sm text-muted-foreground">{t('shipping.no_waybill_for_provider')}</p>
                             )}
                         </div>
 
-                        {/* Action buttons — chỉ hiện thao tác hợp lệ theo trạng thái */}
                         <div className="flex flex-wrap gap-2">
                             {actions.canCreate && (
                                 <Button
@@ -285,7 +286,7 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                     ) : (
                                         <Truck className="mr-1 size-4" />
                                     )}
-                                    Tạo vận đơn
+                                    {t('shipping.create_waybill')}
                                 </Button>
                             )}
 
@@ -301,7 +302,7 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                     ) : (
                                         <RefreshCw className="mr-1 size-4" />
                                     )}
-                                    Đồng bộ
+                                    {t('shipping.sync')}
                                 </Button>
                             )}
 
@@ -312,7 +313,7 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                     disabled={!!acting || !selectedProvider}
                                     onClick={() => runAction('fee', `${apiBase}/${orderId}/calculate-fee`)}
                                 >
-                                    Tính phí
+                                    {t('shipping.calc_fee')}
                                 </Button>
                             )}
 
@@ -328,7 +329,7 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                     }
                                 >
                                     <Printer className="mr-1 size-4" />
-                                    In nhãn
+                                    {t('shipping.print_label')}
                                 </Button>
                             )}
 
@@ -344,7 +345,7 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                     ) : (
                                         <XCircle className="mr-1 size-4" />
                                     )}
-                                    Hủy vận đơn
+                                    {t('shipping.cancel_waybill')}
                                 </Button>
                             )}
 
@@ -354,17 +355,14 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
                                 !actions.canPrintLabel &&
                                 !actions.canCancel && (
                                     <p className="text-sm text-muted-foreground">
-                                        Không còn thao tác vận chuyển cho trạng thái hiện tại.
+                                        {t('shipping.no_shipping_actions')}
                                     </p>
                                 )}
                         </div>
 
-                        {/* Fee result */}
                         <ShippingFeeResult display={feeResult?.display} />
 
-                        {/* Tracking timeline */}
                         {tracking.length > 0 && <TrackingTimeline events={tracking} />}
-
                     </div>
                 )}
             </DialogContent>
@@ -372,10 +370,9 @@ export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase 
     );
 }
 
-/** Mirror logic ShipmentActionResolver (PHP) khi đổi tab đơn vị VC. */
+/** Mirror ShipmentActionResolver (PHP) when switching carrier tab. */
 function resolveActions(shipment, order) {
     const status = order?.deliveryStatusValue;
-    // Đơn đã chốt sổ giao — không tạo vận đơn / tính phí nữa (trừ "hủy vận đơn": cho tạo lại)
     const orderFinal = [
         'delivered', 'paid', 'returned', 'returning', 'refund',
         'cancel_closing', 'cannot_deliver',

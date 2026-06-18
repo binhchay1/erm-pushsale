@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function UserForm({ user, roles, teams, managers, orgLevels }) {
+    const t = useT();
     const isEdit = Boolean(user?.id);
     const { data, setData, post, put, processing, errors } = useForm({
         name: user?.name ?? '',
@@ -35,7 +37,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
 
     return (
         <AppLayout>
-            <Head title={isEdit ? 'Sửa nhân viên' : 'Thêm nhân viên'} />
+            <Head title={isEdit ? t('pages.users.edit') : t('pages.users.form_create')} />
 
             <div className="mx-auto max-w-2xl space-y-6">
                 <div className="flex items-center gap-3">
@@ -45,18 +47,18 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                         </Link>
                     </Button>
                     <h1 className="text-2xl font-bold tracking-tight">
-                        {isEdit ? 'Sửa nhân viên' : 'Thêm nhân viên'}
+                        {isEdit ? t('pages.users.edit') : t('pages.users.form_create')}
                     </h1>
                 </div>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Thông tin tài khoản</CardTitle>
+                        <CardTitle>{t('pages.users.form_account')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={submit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Họ tên</Label>
+                                <Label htmlFor="name">{t('pages.users.name')}</Label>
                                 <Input
                                     id="name"
                                     value={data.name}
@@ -66,7 +68,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
+                                <Label htmlFor="email">{t('pages.users.email')}</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -77,7 +79,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="role">Vai trò</Label>
+                                <Label htmlFor="role">{t('pages.users.role')}</Label>
                                 <select
                                     id="role"
                                     className="input-soft flex h-9 w-full px-3"
@@ -95,7 +97,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="phone">Số điện thoại</Label>
+                                    <Label htmlFor="phone">{t('pages.users.phone')}</Label>
                                     <Input
                                         id="phone"
                                         value={data.phone}
@@ -103,7 +105,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="job_title">Chức danh</Label>
+                                    <Label htmlFor="job_title">{t('pages.users.job_title')}</Label>
                                     <Input
                                         id="job_title"
                                         value={data.job_title}
@@ -114,30 +116,30 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="team_id">Phòng ban</Label>
+                                    <Label htmlFor="team_id">{t('pages.users.col_team')}</Label>
                                     <select
                                         id="team_id"
                                         className="input-soft flex h-9 w-full px-3"
                                         value={data.team_id}
                                         onChange={(e) => setData('team_id', e.target.value || '')}
                                     >
-                                        <option value="">— Không chọn —</option>
-                                        {teams.map((t) => (
-                                            <option key={t.id} value={t.id}>
-                                                {t.name}
+                                        <option value="">{t('pages.users.no_select')}</option>
+                                        {teams.map((team) => (
+                                            <option key={team.id} value={team.id}>
+                                                {team.name}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="manager_user_id">Quản lý trực tiếp</Label>
+                                    <Label htmlFor="manager_user_id">{t('pages.users.direct_manager')}</Label>
                                     <select
                                         id="manager_user_id"
                                         className="input-soft flex h-9 w-full px-3"
                                         value={data.manager_user_id}
                                         onChange={(e) => setData('manager_user_id', e.target.value || '')}
                                     >
-                                        <option value="">— Không chọn —</option>
+                                        <option value="">{t('pages.users.no_select')}</option>
                                         {managers.map((m) => (
                                             <option key={m.id} value={m.id}>
                                                 {m.name}
@@ -148,14 +150,14 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="org_level">Cấp trong phòng ban</Label>
+                                <Label htmlFor="org_level">{t('pages.users.org_level')}</Label>
                                 <select
                                     id="org_level"
                                     className="input-soft flex h-9 w-full px-3"
                                     value={data.org_level}
                                     onChange={(e) => setData('org_level', e.target.value || '')}
                                 >
-                                    <option value="">— Không chọn —</option>
+                                    <option value="">{t('pages.users.no_select')}</option>
                                     {(orgLevels ?? []).map((l) => (
                                         <option key={l.value} value={l.value}>
                                             {l.label}
@@ -165,7 +167,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                             </div>
 
                             <div className="flex items-center justify-between rounded-lg border px-4 py-3">
-                                <Label htmlFor="is_team_leader">Trưởng nhóm (legacy)</Label>
+                                <Label htmlFor="is_team_leader">{t('pages.users.team_lead_legacy')}</Label>
                                 <Switch
                                     id="is_team_leader"
                                     checked={data.is_team_leader}
@@ -175,7 +177,8 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
 
                             <div className="space-y-2">
                                 <Label htmlFor="password">
-                                    Mật khẩu {isEdit && '(để trống nếu giữ nguyên)'}
+                                    {t('pages.users.password')}
+                                    {isEdit && ` (${t('pages.users.password_hint')})`}
                                 </Label>
                                 <Input
                                     id="password"
@@ -189,7 +192,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="password_confirmation">Xác nhận mật khẩu</Label>
+                                <Label htmlFor="password_confirmation">{t('pages.users.password_confirm')}</Label>
                                 <Input
                                     id="password_confirmation"
                                     type="password"
@@ -201,7 +204,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={processing}>
                                     <Save className="size-4" />
-                                    {processing ? 'Đang lưu…' : 'Lưu'}
+                                    {processing ? t('common.saving') : t('pages.save')}
                                 </Button>
                             </div>
                         </form>

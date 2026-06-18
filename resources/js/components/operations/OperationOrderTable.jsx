@@ -6,6 +6,7 @@ import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatCurrency } from '@/lib/format';
 import { closingTone, deliveryTone } from '@/lib/status-tones';
+import { useT } from '@/providers/I18nProvider';
 
 function formatDateTime(value) {
     if (!value) return null;
@@ -26,6 +27,7 @@ export function OperationOrderTable({
     enableSaleActions = false,
     operationStatusOptions = [],
 }) {
+    const t = useT();
     const actionCols =
         (enableSaleActions ? 1 : 0) + (enableCloseOrder ? 1 : 0) + (enableDeleteOrder ? 1 : 0);
     const baseCols = 10;
@@ -35,18 +37,18 @@ export function OperationOrderTable({
             <table className="min-w-[1800px] w-full border-collapse">
                 <thead>
                     <tr>
-                        <Th>Mã đơn</Th>
-                        <Th>Nguồn / Ngày data</Th>
-                        <Th>Sale / Nhận data</Th>
-                        <Th>Khách hàng</Th>
-                        <Th>Tin nhắn</Th>
-                        <Th>TN / Kết quả</Th>
-                        <Th>Sản phẩm</Th>
-                        <Th>Tài chính</Th>
-                        <Th>Chốt đơn</Th>
-                        <Th>Giao hàng</Th>
-                        {enableSaleActions && <Th>Hành động</Th>}
-                        {enableCloseOrder && <Th>Chốt</Th>}
+                        <Th>{t('operations.order_table.order_code')}</Th>
+                        <Th>{t('operations.order_table.source_date')}</Th>
+                        <Th>{t('operations.order_table.sale_assigned')}</Th>
+                        <Th>{t('operations.order_table.customer')}</Th>
+                        <Th>{t('operations.order_table.message')}</Th>
+                        <Th>{t('operations.order_table.operation')}</Th>
+                        <Th>{t('operations.order_table.products')}</Th>
+                        <Th>{t('operations.order_table.finance')}</Th>
+                        <Th>{t('operations.order_table.closing')}</Th>
+                        <Th>{t('operations.order_table.delivery')}</Th>
+                        {enableSaleActions && <Th>{t('operations.order_table.actions')}</Th>}
+                        {enableCloseOrder && <Th>{t('operations.order_table.close')}</Th>}
                         {enableDeleteOrder && <Th />}
                     </tr>
                 </thead>
@@ -63,7 +65,7 @@ export function OperationOrderTable({
                                     <div>{row.saleName}</div>
                                     <div className="text-muted-foreground">{row.saleGroup}</div>
                                     <div className="text-[11px] text-muted-foreground">
-                                        Nhận: {row.assignedAt?.slice(0, 10) ?? '—'}
+                                        {t('operations.order_table.assigned')} {row.assignedAt?.slice(0, 10) ?? '—'}
                                     </div>
                                 </Td>
                                 <Td>
@@ -79,16 +81,16 @@ export function OperationOrderTable({
                                     {row.customerNote || row.shippingAddress}
                                 </Td>
                                 <Td>
-                                    <span className="font-medium text-destructive">{row.currentOperation}</span>
+                                    <span className="font-semibold text-destructive">{row.currentOperation}</span>
                                     <div className="text-muted-foreground">{row.operationResult || '—'}</div>
                                     {row.nextOperationAt && (
                                         <div className="mt-1 text-[11px] text-amber-700 dark:text-amber-400">
-                                            Hẹn: {formatDateTime(row.nextOperationAt)}
+                                            {t('operations.order_table.scheduled')} {formatDateTime(row.nextOperationAt)}
                                         </div>
                                     )}
                                     {row.contactCount > 0 && (
                                         <div className="text-[11px] text-muted-foreground">
-                                            Đã gọi: {row.contactCount} lần
+                                            {t('operations.order_table.called', { count: row.contactCount })}
                                         </div>
                                     )}
                                 </Td>
@@ -100,9 +102,9 @@ export function OperationOrderTable({
                                     ))}
                                 </Td>
                                 <Td>
-                                    <div>TT: {formatCurrency(row.subtotal)}</div>
-                                    <div>Phí VC: {formatCurrency(row.shippingFeeCollected)}</div>
-                                    <div className="font-semibold">Tổng: {formatCurrency(row.total)}</div>
+                                    <div>{t('operations.order_table.subtotal')} {formatCurrency(row.subtotal)}</div>
+                                    <div>{t('operations.order_table.shipping_fee')} {formatCurrency(row.shippingFeeCollected)}</div>
+                                    <div className="font-semibold">{t('operations.order_table.total')} {formatCurrency(row.total)}</div>
                                 </Td>
                                 <Td>
                                     <StatusBadge tone={closingTone(row.closingStatus)}>
@@ -138,7 +140,7 @@ export function OperationOrderTable({
                                         <DeleteRowButton
                                             url={`/admin/orders/${row.id}`}
                                             label={row.orderCode}
-                                            confirmMessage={`Xóa đơn "${row.orderCode}"? Dữ liệu thống kê và kế toán liên quan sẽ bị gỡ.`}
+                                            confirmMessage={t('operations.delete_order_confirm', { code: row.orderCode })}
                                         />
                                     </Td>
                                 )}
@@ -150,7 +152,7 @@ export function OperationOrderTable({
                                 colSpan={baseCols + actionCols}
                                 className="py-8 text-center text-muted-foreground"
                             >
-                                Không có dữ liệu
+                                {t('operations.order_table.no_data')}
                             </Td>
                         </tr>
                     )}

@@ -6,26 +6,29 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout';
+import { tOr } from '@/lib/i18n-fallback';
+import { useT } from '@/providers/I18nProvider';
 
 export default function IntegrationsIndex({ hub, categories, platforms, stats }) {
+    const t = useT();
     const grouped = Object.keys(categories).map((key) => ({
         key,
-        label: categories[key],
+        label: tOr(t, `integrations.categories.${key}`, categories[key]),
         items: platforms.filter((p) => p.category === key),
     }));
 
     return (
         <AppLayout>
-            <Head title="Tích hợp nền tảng" />
+            <Head title={t('pages.integrations_page.title')} />
 
             <div className="space-y-8">
                 <PageHeader
-                    title={hub.title}
-                    description={hub.summary}
+                    title={tOr(t, 'integrations.hub.title', hub.title)}
+                    description={tOr(t, 'integrations.hub.summary', hub.summary)}
                     actions={
                         <Button variant="outline" asChild>
                             <Link href="/admin/leads">
-                                Nhật ký lead
+                                {t('integrations.leads_log')}
                                 <ArrowRight className="size-4" />
                             </Link>
                         </Button>
@@ -35,19 +38,19 @@ export default function IntegrationsIndex({ hub, categories, platforms, stats })
                 <div className="grid gap-4 sm:grid-cols-3">
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardDescription>Lead hôm nay</CardDescription>
+                            <CardDescription>{t('integrations.leads_today')}</CardDescription>
                             <CardTitle className="text-3xl">{stats.leads_today}</CardTitle>
                         </CardHeader>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardDescription>Đang chờ xử lý</CardDescription>
+                            <CardDescription>{t('integrations.leads_pending')}</CardDescription>
                             <CardTitle className="text-3xl">{stats.leads_pending}</CardTitle>
                         </CardHeader>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardDescription>Nền tảng đang bật</CardDescription>
+                            <CardDescription>{t('integrations.platforms_enabled')}</CardDescription>
                             <CardTitle className="text-3xl">{stats.platforms_enabled}</CardTitle>
                         </CardHeader>
                     </Card>

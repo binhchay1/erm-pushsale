@@ -52,7 +52,7 @@ class ProductController extends Controller
 
         Product::query()->create($data);
 
-        return redirect()->route('admin.products.index')->with('success', 'Đã tạo sản phẩm.');
+        return redirect()->route('admin.products.index')->with('success', __('messages.product_created'));
     }
 
     public function edit(Product $product): Response
@@ -77,19 +77,19 @@ class ProductController extends Controller
 
         $product->update($data);
 
-        return redirect()->route('admin.products.index')->with('success', 'Đã cập nhật sản phẩm.');
+        return redirect()->route('admin.products.index')->with('success', __('messages.product_updated'));
     }
 
     public function destroy(Product $product): RedirectResponse
     {
         if ($product->children()->exists()) {
-            return back()->with('error', 'Sản phẩm còn biến thể con — xóa các biến thể trước.');
+            return back()->with('error', __('messages.product_has_variants'));
         }
 
         $this->warehouses->deleteInventoriesOfProduct($product->id);
         $product->delete();
 
-        return back()->with('success', 'Đã xóa sản phẩm.');
+        return back()->with('success', __('messages.product_deleted'));
     }
 
     /** @return list<array{id: int, name: string}> */

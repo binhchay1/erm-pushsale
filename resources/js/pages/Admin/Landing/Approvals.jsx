@@ -11,16 +11,18 @@ import { useConfirm } from '@/hooks/use-confirm';
 import { copyToClipboard } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function LandingApprovals({ campaigns, highlightCampaignId }) {
+    const t = useT();
     const rowRefs = useRef({});
     const { ask, ConfirmDialogPortal } = useConfirm();
 
     const approve = async (id, name) => {
         const ok = await ask({
-            title: 'Duyệt trang Landing',
-            description: `Duyệt nguồn Landing "${name}"? Lead mới sẽ được chia số cho Sale.`,
-            confirmLabel: 'Duyệt',
+            title: t('pages.landing.approve_title'),
+            description: t('pages.landing.approve_desc', { name }),
+            confirmLabel: t('pages.landing.approve'),
         });
         if (!ok) return;
         router.post(`/admin/landing-approvals/${id}/approve`, {}, { preserveScroll: true });
@@ -28,7 +30,7 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
 
     const copyUrl = async (url) => {
         const ok = await copyToClipboard(url);
-        ok ? toast.success('Đã copy URL') : toast.error('Không copy được');
+        ok ? toast.success(t('pages.landing.copy_url_success')) : toast.error(t('pages.landing.copy_url_failed'));
     };
 
     const pending = campaigns.filter((c) => !c.is_approved);
@@ -43,20 +45,16 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
 
     return (
         <AppLayout>
-            <Head title="Duyệt trang Landing" />
+            <Head title={t('pages.landing.title')} />
 
             <div className="space-y-6">
                 <PageHeader
-                    title="Duyệt trang Landing"
+                    title={t('pages.landing.title')}
                     description={
                         <>
-                            Marketing tạo kết nối Landing và chờ duyệt tại đây. <strong>Chưa duyệt</strong>{' '}
-                            thì lead thử chỉ về Admin, <strong>chưa chia cho Sale</strong> ({pending.length}{' '}
-                            chờ duyệt).
+                            {t('pages.landing.desc_detail', { count: pending.length })}
                             {highlightCampaignId && (
-                                <span className="mt-1 block text-primary">
-                                    Đang hiển thị chiến dịch cần xét duyệt từ thông báo.
-                                </span>
+                                <span className="mt-1 block text-primary">{t('pages.landing.highlight_hint')}</span>
                             )}
                         </>
                     }
@@ -66,12 +64,12 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                     <table className="w-full min-w-[1000px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>Chiến dịch</Th>
-                                <Th>Người tạo</Th>
-                                <Th>Marketer</Th>
+                                <Th>{t('pages.landing.col_campaign')}</Th>
+                                <Th>{t('pages.landing.col_creator')}</Th>
+                                <Th>{t('pages.landing.col_marketer')}</Th>
                                 <Th>utm_campaign</Th>
-                                <Th>Tạo lúc</Th>
-                                <Th>Trạng thái</Th>
+                                <Th>{t('pages.landing.col_created')}</Th>
+                                <Th>{t('pages.landing.col_status')}</Th>
                                 <Th />
                             </tr>
                         </thead>
@@ -96,9 +94,9 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                                         <Td>{row.created_at}</Td>
                                         <Td>
                                             {row.is_approved ? (
-                                                <StatusBadge tone="success">Đã duyệt</StatusBadge>
+                                                <StatusBadge tone="success">{t('pages.approved')}</StatusBadge>
                                             ) : (
-                                                <StatusBadge tone="warning">Chờ duyệt</StatusBadge>
+                                                <StatusBadge tone="warning">{t('pages.pending_approval')}</StatusBadge>
                                             )}
                                         </Td>
                                         <Td>
@@ -121,7 +119,7 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                                                         onClick={() => approve(row.id, row.name)}
                                                     >
                                                         <CheckCircle2 className="size-3.5" />
-                                                        Duyệt
+                                                        {t('pages.landing.approve')}
                                                     </Button>
                                                 )}
                                             </div>
@@ -132,7 +130,7 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                                 <tr>
                                     <Td colSpan={7} className="py-10 text-center text-muted-foreground">
                                         <Clock className="mx-auto mb-2 size-6 opacity-50" />
-                                        Chưa có kết nối Landing nào
+                                        {t('pages.landing.empty_landing')}
                                     </Td>
                                 </tr>
                             )}

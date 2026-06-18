@@ -18,7 +18,7 @@ class EnsureUserHasRole
         $roleValue = $user?->role instanceof \BackedEnum ? $user->role->value : $user?->role;
 
         if (! $user || ! in_array($roleValue, $roles, true)) {
-            abort(403, 'Bạn không có quyền truy cập khu vực này.');
+            abort(403, __('messages.forbidden'));
         }
 
         return $next($request);

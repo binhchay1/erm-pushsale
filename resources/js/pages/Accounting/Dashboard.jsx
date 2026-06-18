@@ -9,35 +9,37 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { formatCurrency, formatNumber } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 function AccountingDashboardContent({ stats: initialStats }) {
+    const t = useT();
     const { stats, connected } = useRealtimeDashboard('accounting', initialStats);
 
     const paidValue = stats.paid_today ?? stats.paid ?? 0;
     const kpis = [
         {
-            title: 'Chờ thu COD',
+            title: t('dashboard.accounting.pending_cod'),
             value: formatNumber(stats.pending_cod),
-            hint: 'Đơn delivered chờ ghi nhận tiền',
+            hint: t('dashboard.accounting.pending_cod_hint'),
             icon: WalletCards,
         },
         {
-            title: 'Đã thu',
+            title: t('dashboard.accounting.paid'),
             value: formatNumber(paidValue),
-            hint: 'Đơn paid trong kỳ hiện tại',
+            hint: t('dashboard.accounting.paid_hint'),
             icon: Banknote,
             accent: true,
         },
         {
-            title: 'Lệch COD',
+            title: t('dashboard.accounting.cod_mismatch'),
             value: formatNumber(stats.cod_mismatch),
-            hint: 'Webhook vận chuyển lệch tiền',
+            hint: t('dashboard.accounting.cod_mismatch_hint'),
             icon: AlertTriangle,
         },
         {
-            title: 'Chờ đối soát',
+            title: t('dashboard.accounting.reconciliation'),
             value: formatNumber(stats.reconciliation_pending),
-            hint: 'Đơn pending reconciliation',
+            hint: t('dashboard.accounting.reconciliation_hint'),
             icon: FileCheck2,
         },
     ];
@@ -45,23 +47,23 @@ function AccountingDashboardContent({ stats: initialStats }) {
     const alerts = [
         Number(stats.cod_mismatch ?? 0) > 0 && {
             type: 'warning',
-            title: 'Lệch COD',
+            title: t('dashboard.accounting.cod_mismatch'),
             value: stats.cod_mismatch,
-            description: 'Cần kiểm tra dữ liệu từ hãng vận chuyển và số tiền đối soát.',
+            description: t('dashboard.accounting.cod_mismatch_alert'),
         },
         Number(stats.reconciliation_pending ?? 0) > 0 && {
             type: 'info',
-            title: 'Chờ đối soát',
+            title: t('dashboard.accounting.reconciliation'),
             value: stats.reconciliation_pending,
-            description: 'Danh sách đơn cần xác nhận COD / chuyển khoản.',
+            description: t('dashboard.accounting.reconciliation_alert'),
         },
     ].filter(Boolean);
 
     return (
         <div className="space-y-6">
             <PageHeader
-                title="Dashboard Kế toán"
-                description="Theo dõi COD, doanh thu, lệch tiền và tiến độ đối soát vận chuyển."
+                title={t('dashboard.accounting.title')}
+                description={t('dashboard.accounting.desc')}
                 actions={<RealtimeBadge connected={connected} />}
             />
 
@@ -75,23 +77,23 @@ function AccountingDashboardContent({ stats: initialStats }) {
                 <RevenueAreaChart
                     className="col-span-full lg:col-span-1"
                     data={stats.revenue_series}
-                    title="Doanh thu 7 ngày"
-                    description="Doanh thu đã giao / đã thanh toán theo ngày"
+                    title={t('dashboard.revenue_7d')}
+                    description={t('dashboard.revenue_7d_desc')}
                     valueFormatter={(v) => formatCurrency(v)}
                 />
                 <RevenueAreaChart
                     className="col-span-full lg:col-span-1"
                     data={stats.cod_series}
-                    title="COD thu 7 ngày"
-                    description="Tổng COD ghi nhận theo ngày"
+                    title={t('dashboard.accounting.cod_7d')}
+                    description={t('dashboard.accounting.cod_7d_desc')}
                     valueFormatter={(v) => formatCurrency(v)}
                 />
             </div>
 
             <OrdersBarChart
                 data={stats.paid_orders_series}
-                title="Đơn paid 7 ngày"
-                description="Số đơn đã thanh toán theo ngày"
+                title={t('dashboard.accounting.paid_7d')}
+                description={t('dashboard.accounting.paid_7d_desc')}
             />
 
             <OpsAlerts alerts={alerts} />
@@ -100,8 +102,10 @@ function AccountingDashboardContent({ stats: initialStats }) {
 }
 
 export default function Dashboard({ stats: initialStats }) {
+    const t = useT();
+
     return (
-        <RoleDashboardShell role="accounting" title="Dashboard Kế toán">
+        <RoleDashboardShell role="accounting" title={t('dashboard.accounting.title')}>
             <AccountingDashboardContent stats={initialStats} />
         </RoleDashboardShell>
     );

@@ -7,15 +7,17 @@ import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/hooks/use-confirm';
 import { formatCurrency } from '@/lib/format';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function CampaignIndex({ baseUrl, campaigns }) {
+    const t = useT();
     const { ask, ConfirmDialogPortal } = useConfirm();
 
     const remove = async (id, name) => {
         const ok = await ask({
-            title: 'Xóa chiến dịch',
-            description: `Xóa chiến dịch "${name}"?`,
-            confirmLabel: 'Xóa',
+            title: t('pages.campaigns.delete_title'),
+            description: t('pages.campaigns.delete_desc', { name }),
+            confirmLabel: t('common.delete'),
             variant: 'destructive',
         });
         if (!ok) return;
@@ -24,22 +26,17 @@ export default function CampaignIndex({ baseUrl, campaigns }) {
 
     return (
         <AppLayout>
-            <Head title="Chiến dịch marketing" />
+            <Head title={t('pages.campaigns.admin_title')} />
 
             <div className="space-y-6">
                 <PageHeader
-                    title="Chiến dịch marketing"
-                    description={
-                        <>
-                            Mỗi chiến dịch gắn 1 sản phẩm trong kho + 1 marketer phụ trách. Lead từ Ladipage khớp
-                            theo <span className="font-mono">utm_campaign</span> sẽ tự tính doanh thu cho marketer này.
-                        </>
-                    }
+                    title={t('pages.campaigns.admin_title')}
+                    description={t('pages.campaigns.admin_desc_detail')}
                     actions={
                         <Button asChild>
                             <Link href={`${baseUrl}/create`}>
                                 <Plus className="size-4" />
-                                Tạo chiến dịch
+                                {t('pages.campaigns.admin_create')}
                             </Link>
                         </Button>
                     }
@@ -49,16 +46,16 @@ export default function CampaignIndex({ baseUrl, campaigns }) {
                     <table className="w-full min-w-[1040px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>Chiến dịch</Th>
-                                <Th>Sản phẩm</Th>
-                                <Th>Marketer</Th>
-                                <Th>Kênh</Th>
-                                <Th>utm_campaign</Th>
-                                <Th>Ngân sách</Th>
-                                <Th>Đơn</Th>
-                                <Th>Doanh thu</Th>
-                                <Th>Trạng thái</Th>
-                                <Th>Thao tác</Th>
+                                <Th>{t('pages.campaigns.col_campaign')}</Th>
+                                <Th>{t('pages.campaigns.col_product')}</Th>
+                                <Th>{t('pages.campaigns.col_marketer')}</Th>
+                                <Th>{t('pages.campaigns.col_channel')}</Th>
+                                <Th>{t('pages.campaigns.col_utm')}</Th>
+                                <Th>{t('pages.campaigns.budget')}</Th>
+                                <Th>{t('pages.campaigns.col_orders')}</Th>
+                                <Th>{t('pages.campaigns.col_revenue')}</Th>
+                                <Th>{t('pages.campaigns.col_status')}</Th>
+                                <Th>{t('pages.actions')}</Th>
                             </tr>
                         </thead>
                         <tbody>
@@ -67,7 +64,7 @@ export default function CampaignIndex({ baseUrl, campaigns }) {
                                     <tr key={row.id} className="hover:bg-muted/30">
                                         <Td className="font-medium">{row.name}</Td>
                                         <Td>{row.product ?? '—'}</Td>
-                                        <Td>{row.marketer ?? <span className="text-destructive">Chưa gán</span>}</Td>
+                                        <Td>{row.marketer ?? <span className="text-destructive">{t('pages.unassigned')}</span>}</Td>
                                         <Td>{row.ad_channel ?? '—'}</Td>
                                         <Td className="font-mono">{row.utm_campaign ?? '—'}</Td>
                                         <Td className="text-right">{formatCurrency(row.budget)}</Td>
@@ -81,7 +78,7 @@ export default function CampaignIndex({ baseUrl, campaigns }) {
                                                         : 'rounded-full bg-muted px-2 py-0.5 text-muted-foreground'
                                                 }
                                             >
-                                                {row.is_active ? 'Đang chạy' : 'Tạm dừng'}
+                                                {row.is_active ? t('pages.active') : t('pages.paused')}
                                             </span>
                                         </Td>
                                         <Td>
@@ -107,7 +104,7 @@ export default function CampaignIndex({ baseUrl, campaigns }) {
                                 <tr>
                                     <Td colSpan={10} className="py-10 text-center text-muted-foreground">
                                         <Target className="mx-auto mb-2 size-6 opacity-50" />
-                                        Chưa có chiến dịch nào
+                                        {t('pages.campaigns.empty')}
                                     </Td>
                                 </tr>
                             )}

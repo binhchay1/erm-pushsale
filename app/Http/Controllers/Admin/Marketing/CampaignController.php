@@ -57,7 +57,7 @@ class CampaignController extends Controller
         NotificationService::notifyLandingApprovalPending($campaign);
 
         return redirect()->route('marketing.campaigns.index')
-            ->with('success', 'Đã tạo kết nối Landing — copy URL API sang Ladipage và chờ Admin duyệt.');
+            ->with('success', __('messages.campaign_created'));
     }
 
     public function edit(Request $request, MarketingSource $campaign): Response
@@ -79,7 +79,7 @@ class CampaignController extends Controller
         $data = $this->landing->prepareForUpdate($campaign, $request->validated());
         $campaign->update($data);
 
-        return redirect()->route('marketing.campaigns.index')->with('success', 'Đã cập nhật kết nối Landing.');
+        return redirect()->route('marketing.campaigns.index')->with('success', __('messages.campaign_updated'));
     }
 
     public function destroy(Request $request, MarketingSource $campaign): RedirectResponse
@@ -88,7 +88,7 @@ class CampaignController extends Controller
         $this->authorizeCampaignOwner($request, $campaign);
         $campaign->delete();
 
-        return redirect()->route('marketing.campaigns.index')->with('success', 'Đã xóa kết nối Landing.');
+        return redirect()->route('marketing.campaigns.index')->with('success', __('messages.campaign_deleted'));
     }
 
     /** @return array<string, mixed> */

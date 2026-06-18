@@ -1,4 +1,4 @@
-/** Màu badge trạng thái giao hàng — mỗi trạng thái một tone riêng khi có thể. */
+/** Delivery status badge tones. */
 export const DELIVERY_TONES = {
     waiting_waybill: 'warning',
     deliver_now: 'orange',
@@ -18,14 +18,14 @@ export const DELIVERY_TONES = {
     refund: 'rose',
 };
 
-/** Trạng thái chốt đơn (telesale). */
+/** Telesale closing status tones. */
 export const CLOSING_TONES = {
     open: 'info',
     closed: 'emerald',
     cancelled: 'danger',
 };
 
-/** Trạng thái vận đơn trên hệ thống. */
+/** Shipment state tones. */
 export const SHIPMENT_TONES = {
     pending: 'warning',
     submitted: 'teal',
@@ -33,7 +33,7 @@ export const SHIPMENT_TONES = {
     cancelled: 'muted',
 };
 
-/** Trạng thái lead đổ về. */
+/** Lead ingestion status tones. */
 export const LEAD_TONES = {
     processed: 'success',
     pending: 'warning',
@@ -41,7 +41,7 @@ export const LEAD_TONES = {
     failed: 'danger',
 };
 
-/** Loại phiếu nhập/xuất kho. */
+/** Inventory movement type tones. */
 export const MOVEMENT_TONES = {
     intake: 'success',
     export: 'warning',
@@ -49,7 +49,7 @@ export const MOVEMENT_TONES = {
     return: 'purple',
 };
 
-/** Loại vấn đề đối soát vận chuyển. */
+/** Shipping reconciliation issue tones. */
 export const RECONCILIATION_ISSUE_TONES = {
     cod_mismatch: 'danger',
     unmatched: 'warning',
@@ -78,29 +78,9 @@ export function movementTone(value) {
 }
 
 export function reconciliationIssueTone(type) {
-    return RECONCILIATION_ISSUE_TONES[type] ?? 'muted';
+    return RECONCILIATION_ISSUE_TONES[type] ?? 'info';
 }
 
-/** Nhãn tiếng Việt cho mã trạng thái giao hàng (bảng đối soát). */
-export const DELIVERY_LABELS = {
-    waiting_waybill: 'Chờ vận đơn',
-    deliver_now: 'Giao ngay',
-    posted: 'Đã đăng',
-    picking_up: 'Đang lấy hàng',
-    delivering: 'Đang giao hàng',
-    redelivery: 'Yêu cầu giao lại',
-    delivered: 'Đã giao hàng',
-    delivery_complete: 'Hoàn giao hàng',
-    paid: 'Đã thanh toán',
-    returned: 'Đã hoàn',
-    returning: 'Đang hoàn',
-    cannot_deliver: 'Không giao được',
-    cannot_pickup: 'Không lấy được hàng',
-    cancel_waybill: 'Hủy vận đơn',
-    cancel_closing: 'Hủy đóng đơn',
-    refund: 'Bồi hoàn',
-};
-
-export function deliveryLabel(value) {
-    return DELIVERY_LABELS[value] ?? value;
+export function deliveryLabel(value, labels) {
+    return labels?.delivery_status?.[value] ?? value;
 }

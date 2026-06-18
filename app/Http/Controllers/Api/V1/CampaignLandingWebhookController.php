@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Enums\IntegrationPlatform;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\V1\LeadIngestionResource;
 use App\Http\Traits\ApiResponds;
-use App\Integrations\IntegrationDriverFactory;
+use App\Jobs\Leads\ProcessLeadIngestionJob;
 use App\Repositories\MarketingSourceRepository;
-use App\Services\Leads\LeadIngestionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,7 +14,6 @@ class CampaignLandingWebhookController extends Controller
     use ApiResponds;
 
     public function __construct(
-        protected LeadIngestionService $ingestionService,
         protected MarketingSourceRepository $sources,
     ) {}
 
@@ -26,26 +22,19 @@ class CampaignLandingWebhookController extends Controller
         $campaign = $this->sources->findRootByWebhookToken($token);
 
         if (! $campaign) {
-            return $this->error('Không tìm thấy nguồn Landing / chiến dịch', 404);
+            return $this->error(__('messages.webhook.landing_not_found'), 404);
         }
 
         if (! $campaign->is_active) {
-            return $this->error('Chiến dịch đã tạm dừng nhận lead', 403);
+            return $this->error(__('messages.webhook.campaign_paused'), 403);
         }
 
-        $driver = IntegrationDriverFactory::make(IntegrationPlatform::Landing);
+        ProcessLeadIngestionJob::dispatch('landing', $request->all(), $campaign->id);
 
-        $ingestion = $this->ingestionService->ingestForCampaign(
-            $driver,
-            $campaign,
-            $request->all(),
-        );
-
-        return $this->created(
-            new LeadIngestionResource($ingestion->load('order')),
-            $campaign->is_approved
-                ? 'Lead đã nhận và chia số cho Sale'
-                : 'Lead đã nhận — chờ Admin duyệt chiến dịch mới chia số Sale',
+        return $this->success(
+            ['queued' => true],
+            __('messages.webhook.landing_queued'),
+            202,
         );
     }
 }

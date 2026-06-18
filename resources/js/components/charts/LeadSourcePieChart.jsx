@@ -4,6 +4,7 @@ import { ChartTooltip } from '@/components/charts/ChartTooltip';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatNumber, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useT } from '@/providers/I18nProvider';
 
 const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--muted-foreground)'];
 
@@ -12,8 +13,9 @@ export function LeadSourcePieChart({
     compact = false,
     fillHeight = false,
     data,
-    title = 'Nguồn lead hôm nay',
+    title,
 }) {
+    const t = useT();
     const chartData = data ?? [];
     const total = chartData.reduce((sum, item) => sum + Number(item.value ?? 0), 0);
     const topSource = chartData[0];
@@ -27,9 +29,11 @@ export function LeadSourcePieChart({
             )}
         >
             <CardHeader className={compact || fillHeight ? 'pb-2' : undefined}>
-                <CardTitle className={compact || fillHeight ? 'text-base' : undefined}>{title}</CardTitle>
+                <CardTitle className={compact || fillHeight ? 'text-base' : undefined}>
+                    {title ?? t('charts.lead_sources_default')}
+                </CardTitle>
                 <CardDescription className={compact || fillHeight ? 'text-xs' : undefined}>
-                    Phân bổ lead theo nền tảng/kênh ads
+                    {t('charts.lead_distribution')}
                 </CardDescription>
             </CardHeader>
             <CardContent className={cn(fillHeight && 'h-[280px] pl-0')}>
@@ -40,7 +44,7 @@ export function LeadSourcePieChart({
                             !fillHeight && (compact ? 'min-h-[160px]' : 'min-h-[220px]'),
                         )}
                     >
-                        Chưa có lead hôm nay.
+                        {t('charts.no_leads_today')}
                     </div>
                 ) : (
                     <div
@@ -82,7 +86,7 @@ export function LeadSourcePieChart({
                                 <span className={cn('font-bold tabular-nums', compact || fillHeight ? 'text-xl' : 'text-2xl')}>
                                     {formatNumber(total)}
                                 </span>
-                                <span className="text-[11px] text-muted-foreground">lead</span>
+                                <span className="text-[11px] text-muted-foreground">{t('charts.lead_unit')}</span>
                             </div>
                         </div>
 
@@ -94,7 +98,7 @@ export function LeadSourcePieChart({
                         >
                             {!compact && !fillHeight && topSource && (
                                 <div className="rounded-xl border bg-muted/30 p-3">
-                                    <p className="text-xs text-muted-foreground">Nguồn mạnh nhất</p>
+                                    <p className="text-xs text-muted-foreground">{t('charts.top_source')}</p>
                                     <div className="mt-1 flex items-end justify-between gap-3">
                                         <p className="truncate text-sm font-semibold">{topSource.name}</p>
                                         <p className="text-sm font-semibold tabular-nums">

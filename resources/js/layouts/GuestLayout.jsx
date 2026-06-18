@@ -1,6 +1,13 @@
+import { LanguageToggle } from '@/components/layout/LanguageToggle';
+import { LocaleSync } from '@/components/layout/LocaleSync';
+
 export default function GuestLayout({ children }) {
     return (
         <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/40 to-slate-100 px-4 py-10">
+            <LocaleSync />
+            <div className="absolute right-4 top-4 z-20">
+                <LanguageToggle />
+            </div>
             <div
                 className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-blue-400/20 blur-3xl"
                 aria-hidden

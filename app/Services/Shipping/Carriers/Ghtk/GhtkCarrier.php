@@ -167,7 +167,7 @@ class GhtkCarrier extends AbstractShippingCarrier
                 'value' => 1000000,
                 'transport' => 'road',
             ]),
-            default => throw new RuntimeException("Action GHTK [{$action}] không hỗ trợ."),
+            default => throw new RuntimeException("Thao tác GHTK [{$action}] không được hỗ trợ."),
         };
     }
 

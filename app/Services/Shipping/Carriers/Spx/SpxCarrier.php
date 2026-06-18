@@ -136,7 +136,7 @@ class SpxCarrier extends AbstractShippingCarrier
     public function testActions(): array
     {
         return [
-            'connection' => 'Test endpoint kết nối SPX',
+            'connection' => 'Kiểm tra kết nối SPX',
             'fee' => 'Tính phí mẫu',
         ];
     }

@@ -9,33 +9,35 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { formatNumber } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 function WarehouseDashboardContent({ stats: initialStats }) {
+    const t = useT();
     const { stats, connected } = useRealtimeDashboard('warehouse', initialStats);
 
     const kpis = [
         {
-            title: 'Chờ vận đơn',
+            title: t('dashboard.warehouse.waiting_waybill'),
             value: formatNumber(stats.waiting_waybill),
-            hint: 'Đơn cần tạo / đẩy vận đơn',
+            hint: t('dashboard.warehouse.waiting_waybill_hint'),
             icon: PackageCheck,
         },
         {
-            title: 'Đang giao',
+            title: t('dashboard.warehouse.delivering'),
             value: formatNumber(stats.delivering),
-            hint: 'Đơn đang ở carrier',
+            hint: t('dashboard.warehouse.delivering_hint'),
             icon: Truck,
         },
         {
-            title: 'Chờ lấy hàng',
+            title: t('dashboard.warehouse.pending_export'),
             value: formatNumber(stats.pending_export),
-            hint: 'Đơn cần bàn giao kho / shipper',
+            hint: t('dashboard.warehouse.pending_export_hint'),
             icon: Package,
         },
         {
-            title: 'Sản phẩm sắp hết hàng',
+            title: t('dashboard.warehouse.low_stock'),
             value: formatNumber(stats.low_stock_items ?? stats.stock_issues),
-            hint: 'SKU tồn thấp cần xử lý',
+            hint: t('dashboard.warehouse.low_stock_hint'),
             icon: AlertTriangle,
             accent: true,
         },
@@ -45,14 +47,17 @@ function WarehouseDashboardContent({ stats: initialStats }) {
         type: 'warning',
         title: row.product,
         value: row.stock,
-        description: `${row.warehouse} còn ${formatNumber(row.stock)} sản phẩm`,
+        description: t('dashboard.warehouse.stock_alert', {
+            warehouse: row.warehouse,
+            stock: formatNumber(row.stock),
+        }),
     }));
 
     return (
         <div className="space-y-6">
             <PageHeader
-                title="Dashboard Kho"
-                description="Theo dõi vận đơn, xử lý xuất kho, đơn đang giao và cảnh báo tồn kho."
+                title={t('dashboard.warehouse.title')}
+                description={t('dashboard.warehouse.desc')}
                 actions={<RealtimeBadge connected={connected} />}
             />
 
@@ -65,15 +70,15 @@ function WarehouseDashboardContent({ stats: initialStats }) {
             <div className="grid gap-4 lg:grid-cols-3">
                 <RevenueAreaChart
                     data={stats.orders_series}
-                    title="Đơn xử lý 7 ngày"
-                    description="Số đơn phát sinh theo ngày để kho xử lý"
+                    title={t('dashboard.warehouse.orders_7d')}
+                    description={t('dashboard.warehouse.orders_7d_desc')}
                     valueFormatter={(v) => formatNumber(v)}
                     yTickFormatter={(v) => String(v)}
                 />
                 <OrdersBarChart
                     data={stats.delivery_breakdown}
-                    title="Trạng thái vận đơn"
-                    description="Phân bổ đơn đang xử lý"
+                    title={t('dashboard.warehouse.delivery_status')}
+                    description={t('dashboard.warehouse.delivery_status_desc')}
                 />
             </div>
 
@@ -83,8 +88,10 @@ function WarehouseDashboardContent({ stats: initialStats }) {
 }
 
 export default function Dashboard({ stats: initialStats }) {
+    const t = useT();
+
     return (
-        <RoleDashboardShell role="warehouse" title="Dashboard Kho">
+        <RoleDashboardShell role="warehouse" title={t('dashboard.warehouse.title')}>
             <WarehouseDashboardContent stats={initialStats} />
         </RoleDashboardShell>
     );

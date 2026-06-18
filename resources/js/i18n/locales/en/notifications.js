@@ -1,0 +1,36 @@
+export default {
+    new_lead: { label: 'New lead', description: 'When a lead arrives from ads / landing' },
+    landing_approval: { label: 'Landing approval', description: 'Admin: pending approval · Marketing: approved' },
+    order_update: { label: 'Order updates', description: 'Closing status, cancel, value changes' },
+    reminder: { label: 'Callback reminder', description: 'Scheduled telesales callbacks' },
+    delivery_issue: { label: 'Delivery issues', description: 'Returns / delays from carrier' },
+    kpi_alert: { label: 'KPI alerts', description: 'Revenue or conversion thresholds' },
+    sound: { label: 'Sound', description: 'Play sound for desktop notifications' },
+    desktop: { label: 'On-screen toast', description: 'Popup when realtime data updates' },
+    email_digest: { label: 'Daily email digest', description: 'End-of-day report (coming soon)' },
+    title: 'Notifications',
+    mark_all_read: 'Mark all as read',
+    empty: 'No notifications',
+    empty_page: 'No notifications',
+    view_all: 'View all',
+    tab_all: 'All',
+    tab_unread: 'Unread',
+    settings_link: 'Customize notification types in Settings',
+    view: 'View',
+    items: {
+        lead: {
+            guest: 'Guest',
+            landing_title: 'Landing lead — :name',
+            platform_title: 'New lead from :platform',
+            manual_title: 'Manually assigned lead',
+        },
+        landing_approval: {
+            title: 'Landing approval needed: :name',
+            message: ':creator created a Ladipage connection — tap to review',
+        },
+        landing_approved: {
+            title: 'Landing approved: :name',
+            message: 'New leads will be routed to sales',
+        },
+    },
+};

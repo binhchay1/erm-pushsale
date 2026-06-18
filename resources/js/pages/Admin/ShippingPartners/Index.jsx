@@ -4,17 +4,20 @@ import { Truck } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ShippingPartnerCard } from '@/components/shipping/ShippingPartnerCard';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 export default function ShippingPartnersIndex({ providers }) {
+    const t = useT();
+
     return (
         <AppLayout>
-            <Head title="Đối tác vận chuyển" />
+            <Head title={t('shipping.title')} />
 
             <div className="space-y-6">
                 <PageHeader
                     icon={Truck}
-                    title="Đối tác vận chuyển"
-                    description="Kết nối tài khoản Viettel Post, GHN, GHTK… để hệ thống tạo vận đơn tự động."
+                    title={t('shipping.title')}
+                    description={t('shipping.partners_desc')}
                 />
 
                 <div className="grid gap-6 xl:grid-cols-2">

@@ -2,8 +2,10 @@ import { ArrowDown } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatNumber, formatPercent } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 export function ConversionFunnel({ data }) {
+    const t = useT();
     const steps = data ?? [];
     const total = Math.max(Number(steps[0]?.value ?? 0), 1);
     const paidStep = steps[steps.length - 1];
@@ -13,12 +15,12 @@ export function ConversionFunnel({ data }) {
         <Card>
             <CardHeader className="flex flex-row items-start justify-between gap-4">
                 <div>
-                    <CardTitle>Phễu chuyển đổi</CardTitle>
-                    <CardDescription>Lead → đơn → chốt → giao thành công → paid</CardDescription>
+                    <CardTitle>{t('dashboard.funnel_ui.title')}</CardTitle>
+                    <CardDescription>{t('dashboard.funnel_ui.desc')}</CardDescription>
                 </div>
                 {steps.length > 0 && (
                     <div className="rounded-xl border bg-muted/40 px-3 py-2 text-right">
-                        <p className="text-xs text-muted-foreground">Tỷ lệ cuối phễu</p>
+                        <p className="text-xs text-muted-foreground">{t('dashboard.funnel_ui.final_rate')}</p>
                         <p className="text-lg font-bold tabular-nums">{formatPercent(finalRate)}</p>
                     </div>
                 )}
@@ -26,7 +28,7 @@ export function ConversionFunnel({ data }) {
             <CardContent>
                 {steps.length === 0 ? (
                     <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                        Chưa có dữ liệu phễu chuyển đổi.
+                        {t('dashboard.funnel_ui.empty')}
                     </p>
                 ) : (
                     <div className="grid gap-3 md:grid-cols-5">
@@ -65,8 +67,8 @@ export function ConversionFunnel({ data }) {
                                         </div>
                                         <p className="mt-2 text-xs text-muted-foreground">
                                             {index === 0
-                                                ? 'Điểm bắt đầu phễu'
-                                                : `${formatPercent(stepRate)} so với bước trước`}
+                                                ? t('dashboard.funnel_ui.start')
+                                                : t('dashboard.funnel_ui.vs_prev', { rate: formatPercent(stepRate) })}
                                         </p>
                                     </div>
                                 </div>

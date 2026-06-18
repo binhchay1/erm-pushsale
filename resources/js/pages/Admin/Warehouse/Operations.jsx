@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { StatusTabs } from '@/components/operations/StatusTabs';
 import { WarehouseOrderTable } from '@/components/operations/WarehouseOrderTable';
+import { useT } from '@/providers/I18nProvider';
 
 export default function WarehouseOperations({
     filters,
@@ -15,18 +16,17 @@ export default function WarehouseOperations({
     shippingApiBase = '/admin/shipping/orders',
     canDeleteOrder = false,
 }) {
+    const t = useT();
+    const title = pageTitle ?? t('pages.warehouse_ops.title');
+
     return (
         <AppLayout>
-            <Head title={pageTitle ?? 'Xuất kho & vận đơn'} />
+            <Head title={title} />
 
             <div className="space-y-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">
-                        {pageTitle ?? 'Xuất kho & vận đơn'}
-                    </h1>
-                    <p className="text-sm text-muted-foreground">
-                        Đơn đã chốt chờ xuất kho — tạo vận đơn, in vận đơn và theo dõi giao hàng.
-                    </p>
+                    <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+                    <p className="text-sm text-muted-foreground">{t('pages.warehouse_ops.desc')}</p>
                 </div>
 
                 <ReportFilterBar
