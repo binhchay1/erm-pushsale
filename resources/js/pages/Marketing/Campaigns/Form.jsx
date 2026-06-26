@@ -19,6 +19,34 @@ function slugPreview(name) {
         .replace(/^-+|-+$/g, '');
 }
 
+function StepBadge({ n }) {
+    return (
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+            {n}
+        </span>
+    );
+}
+
+function CopyValue({ value, mono = true }) {
+    const t = useT();
+    const copy = async () => {
+        const ok = await copyToClipboard(value);
+        ok ? toast.success(t('pages.campaigns.copied')) : toast.error(t('common.copy_failed'));
+    };
+
+    return (
+        <button
+            type="button"
+            onClick={copy}
+            title={t('common.copy')}
+            className="group inline-flex max-w-full items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-left hover:border-primary/50"
+        >
+            <code className={`truncate text-xs ${mono ? 'font-mono' : ''}`}>{value}</code>
+            <Copy className="size-3.5 shrink-0 text-muted-foreground group-hover:text-primary" />
+        </button>
+    );
+}
+
 export default function CampaignForm({ campaign, products, marketers, fieldMapping }) {
     const t = useT();
     const isEdit = Boolean(campaign?.id);
@@ -42,12 +70,6 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
         }
     };
 
-    const copyUrl = async () => {
-        if (!campaign?.webhook_url) return;
-        const ok = await copyToClipboard(campaign.webhook_url);
-        ok ? toast.success(t('pages.campaigns.marketing_copy_success')) : toast.error(t('common.copy_failed'));
-    };
-
     return (
         <AppLayout>
             <Head title={isEdit ? t('pages.campaigns.marketing_edit') : t('pages.campaigns.marketing_form_create')} />
@@ -67,15 +89,87 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                 {isEdit && campaign?.webhook_url && (
                     <Card className="border-primary/30 bg-primary/5">
                         <CardHeader>
-                            <CardTitle className="text-base">{t('pages.campaigns.webhook_title')}</CardTitle>
-                            <CardDescription>{t('pages.campaigns.webhook_desc')}</CardDescription>
+                            <CardTitle className="text-base">{t('pages.campaigns.connect_title')}</CardTitle>
+                            <CardDescription>{t('pages.campaigns.connect_desc')}</CardDescription>
                         </CardHeader>
-                        <CardContent className="flex gap-2">
-                            <Input readOnly value={campaign.webhook_url} className="font-mono text-xs" />
-                            <Button type="button" variant="outline" onClick={copyUrl}>
-                                <Copy className="size-4" />
-                                {t('common.copy')}
-                            </Button>
+                        <CardContent className="space-y-5 text-sm">
+                            <div className="flex gap-3">
+                                <StepBadge n={1} />
+                                <div className="space-y-1">
+                                    <p className="font-medium">{t('pages.campaigns.connect_step1_title')}</p>
+                                    <p className="text-xs text-muted-foreground">{t('pages.campaigns.connect_step1_desc')}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <StepBadge n={2} />
+                                <div className="min-w-0 flex-1 space-y-2">
+                                    <p className="font-medium">{t('pages.campaigns.connect_step2_title')}</p>
+                                    <p className="text-xs text-muted-foreground">{t('pages.campaigns.connect_step2_desc')}</p>
+                                    <div className="space-y-1.5">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="w-40 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.api_url')}</span>
+                                            <CopyValue value={campaign.webhook_url} />
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="w-40 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.connection_name')}</span>
+                                            <CopyValue value={campaign.name} mono={false} />
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="w-40 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.content_type')}</span>
+                                            <CopyValue value="x-www-form-urlencoded" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <StepBadge n={3} />
+                                <div className="min-w-0 flex-1 space-y-2">
+                                    <p className="font-medium">{t('pages.campaigns.connect_step3_title')}</p>
+                                    <p className="text-xs text-muted-foreground">{t('pages.campaigns.connect_step3_desc')}</p>
+                                    <div className="overflow-hidden rounded-md border bg-background">
+                                        <table className="w-full text-xs">
+                                            <thead>
+                                                <tr className="border-b bg-muted/40 text-left text-muted-foreground">
+                                                    <th className="px-3 py-2 font-medium">{t('pages.campaigns.map_form_field')}</th>
+                                                    <th className="px-3 py-2 font-medium">{t('pages.campaigns.map_api_name')}</th>
+                                                    <th className="px-3 py-2 font-medium">{t('pages.campaigns.map_required')}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {fieldMapping?.map((row) => (
+                                                    <tr key={row.api_name} className="border-b border-border/50 last:border-0">
+                                                        <td className="px-3 py-2">{t(`pages.campaigns.fields.${row.key}`)}</td>
+                                                        <td className="px-3 py-2">
+                                                            <CopyValue value={row.api_name} />
+                                                        </td>
+                                                        <td className="px-3 py-2">
+                                                            {row.required ? (
+                                                                <span className="font-medium text-destructive">{t('pages.campaigns.required_yes')}</span>
+                                                            ) : (
+                                                                <span className="text-muted-foreground">{t('pages.campaigns.required_no')}</span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                                {t('pages.campaigns.connect_note')}
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {!isEdit && (
+                    <Card className="border-dashed">
+                        <CardContent className="py-4 text-sm text-muted-foreground">
+                            {t('pages.campaigns.connect_save_first')}
                         </CardContent>
                     </Card>
                 )}
@@ -164,31 +258,6 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                                 </Button>
                             </div>
                         </form>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-base">{t('pages.campaigns.ladipage_map')}</CardTitle>
-                        <CardDescription>{t('pages.campaigns.ladipage_map_desc')}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <table className="w-full text-xs">
-                            <thead>
-                                <tr className="border-b text-left text-muted-foreground">
-                                    <th className="pb-2">{t('pages.campaigns.ladipage_col')}</th>
-                                    <th className="pb-2">{t('pages.campaigns.system_col')}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {fieldMapping?.map((row) => (
-                                    <tr key={row.ladipage} className="border-b border-border/50">
-                                        <td className="py-2 font-mono">{row.ladipage}</td>
-                                        <td className="py-2">{row.system}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
                     </CardContent>
                 </Card>
             </div>

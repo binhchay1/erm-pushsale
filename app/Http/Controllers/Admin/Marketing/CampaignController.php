@@ -137,17 +137,15 @@ class CampaignController extends Controller
         return $this->users->nameOptionsByRoles([UserRole::Marketing]);
     }
 
-    /** @return list<array{ladipage: string, system: string}> */
+    /** @return list<array{key: string, api_name: string, required: bool}> */
     private function fieldMappingGuide(): array
     {
         return [
-            ['ladipage' => 'name', 'system' => 'name'],
-            ['ladipage' => 'phone', 'system' => 'phone'],
-            ['ladipage' => 'message', 'system' => 'message'],
-            ['ladipage' => 'products', 'system' => 'products'],
-            ['ladipage' => 'quantity', 'system' => 'quantity'],
-            ['ladipage' => 'utm_source', 'system' => 'utm_source (tùy chọn)'],
-            ['ladipage' => 'utm_campaign', 'system' => 'utm_campaign (tự điền theo tên chiến dịch)'],
+            ['key' => 'name', 'api_name' => 'name', 'required' => false],
+            ['key' => 'phone', 'api_name' => 'phone', 'required' => true],
+            ['key' => 'products', 'api_name' => 'products', 'required' => false],
+            ['key' => 'quantity', 'api_name' => 'quantity', 'required' => false],
+            ['key' => 'message', 'api_name' => 'message', 'required' => false],
         ];
     }
 }

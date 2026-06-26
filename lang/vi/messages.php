@@ -61,6 +61,13 @@ return [
         'invalid_status' => 'Một hoặc nhiều lead không ở trạng thái Chờ xử lý hoặc đã được phân bổ.',
         'invalid_phone' => 'Số điện thoại không hợp lệ',
     ],
+    'lead_intake' => [
+        'invalid_phone' => 'Số điện thoại không hợp lệ (không đúng định dạng di động VN).',
+        'honeypot' => 'Bị chặn: nghi ngờ bot (honeypot).',
+        'spam_detected' => 'Bị chặn: nội dung nghi ngờ spam.',
+        'payload_too_large' => 'Dữ liệu gửi lên quá lớn — đã bị từ chối.',
+        'guest_name' => 'Khách Landing',
+    ],
     'inventory' => [
         'approver_required' => 'Chọn trưởng kho ký duyệt.',
     ],

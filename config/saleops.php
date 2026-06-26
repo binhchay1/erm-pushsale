@@ -44,6 +44,23 @@ return [
         'duplicate_window_days' => (int) env('LEAD_DUPLICATE_WINDOW_DAYS', 30),
     ],
 
+    /*
+    | Chống rác / spam khi nhận lead từ Landing & nền tảng ngoài.
+    | Mục tiêu: dữ liệu vào hệ thống luôn sạch, đúng định dạng, không spam.
+    */
+    'lead_intake' => [
+        // Trường bẫy bot (honeypot): nếu form gửi lên có 1 trong các tên này và CÓ giá trị → bỏ qua.
+        // Marketing thêm 1 field ẩn tên "website" trên LadiPage là bật được chống bot.
+        'honeypot_fields' => ['website', 'url', 'homepage', 'email_confirm', '_gotcha', 'hp'],
+        'max_name_length' => 100,
+        'max_message_length' => 1000,
+        'max_product_length' => 255,
+        // Giới hạn kích thước payload thô (bytes) để tránh nhồi dữ liệu.
+        'max_payload_bytes' => (int) env('LEAD_MAX_PAYLOAD_BYTES', 65536),
+        // Rate limit cổng nhận lead.
+        'rate_limit_per_minute' => (int) env('LEAD_RATE_LIMIT_PER_MINUTE', 60),
+    ],
+
     'locales' => [
         'vi' => ['label' => 'Tiếng Việt', 'short' => 'VI'],
         'en' => ['label' => 'English', 'short' => 'EN'],

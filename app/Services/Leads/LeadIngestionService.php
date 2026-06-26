@@ -19,6 +19,7 @@ class LeadIngestionService
     public function __construct(
         protected LeadRoutingService $routing,
         protected LeadOrderFactory $orderFactory,
+        protected LeadSanitizer $sanitizer,
     ) {}
 
     /**
@@ -58,8 +59,46 @@ class LeadIngestionService
         array $normalized,
         ?MarketingSource $campaign = null,
     ): LeadIngestion {
-        if (strlen($normalized['customer_phone']) < 9) {
-            return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_allocation.invalid_phone'));
+        // 1) Chặn payload nhồi dữ liệu
+        if ($this->sanitizer->exceedsPayloadLimit($rawPayload)) {
+            return $this->recordFailed($driver->platform(), ['oversized' => true], __('messages.lead_intake.payload_too_large'));
+        }
+
+        // 2) Bẫy bot (honeypot)
+        if ($this->sanitizer->hasHoneypot($rawPayload)) {
+            return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_intake.honeypot'));
+        }
+
+        // 3) Chuẩn hóa & kiểm tra SĐT Việt Nam
+        $phone = $this->sanitizer->normalizePhone($normalized['customer_phone'] ?? null);
+
+        if (! $phone) {
+            return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_intake.invalid_phone'));
+        }
+
+        $normalized['customer_phone'] = $phone;
+
+        // 4) Làm sạch & giới hạn độ dài các trường text
+        $normalized['customer_name'] = $this->sanitizer->cleanText(
+            $normalized['customer_name'] ?? null,
+            (int) config('saleops.lead_intake.max_name_length', 100),
+        ) ?? __('messages.lead_intake.guest_name');
+
+        $normalized['product_interest'] = $this->sanitizer->cleanText(
+            $normalized['product_interest'] ?? null,
+            (int) config('saleops.lead_intake.max_product_length', 255),
+        );
+
+        if (array_key_exists('message', $normalized)) {
+            $normalized['message'] = $this->sanitizer->cleanText(
+                $normalized['message'],
+                (int) config('saleops.lead_intake.max_message_length', 1000),
+            );
+        }
+
+        // 5) Nội dung spam rõ ràng
+        if ($this->sanitizer->looksLikeSpam($normalized['customer_name'], $normalized['message'] ?? null)) {
+            return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_intake.spam_detected'));
         }
 
         $existing = LeadIngestion::query()

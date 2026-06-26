@@ -61,6 +61,13 @@ return [
         'invalid_status' => 'One or more leads are not pending or have already been allocated.',
         'invalid_phone' => 'Invalid phone number',
     ],
+    'lead_intake' => [
+        'invalid_phone' => 'Invalid phone number (not a valid VN mobile format).',
+        'honeypot' => 'Blocked: suspected bot (honeypot).',
+        'spam_detected' => 'Blocked: content flagged as spam.',
+        'payload_too_large' => 'Submitted payload too large — rejected.',
+        'guest_name' => 'Landing guest',
+    ],
     'inventory' => [
         'approver_required' => 'Select a warehouse lead to approve.',
     ],

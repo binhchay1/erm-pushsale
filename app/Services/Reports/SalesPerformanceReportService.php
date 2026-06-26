@@ -42,7 +42,7 @@ class SalesPerformanceReportService
         array_unshift($rows, array_merge([
             'stt' => 0,
             'saleId' => 'total',
-            'saleName' => 'Tổng',
+            'saleName' => __('reports.total'),
             'isTotalRow' => true,
         ], $this->finalizeMetrics($totals)));
 

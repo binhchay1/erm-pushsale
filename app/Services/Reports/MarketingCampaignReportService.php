@@ -68,7 +68,7 @@ class MarketingCampaignReportService
         array_unshift($rows, [
             'stt' => 0,
             'campaignId' => 'total',
-            'campaignName' => 'Tổng',
+            'campaignName' => __('reports.total'),
             'marketerName' => '—',
             'leadsGenerated' => $totals['leadsGenerated'],
             'junkLeadRate' => round($totals['junkLeads'] / $totalLeads * 100, 1),

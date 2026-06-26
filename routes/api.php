@@ -15,10 +15,12 @@ Route::prefix('v1')->group(function () {
     Route::post('auth/token', [AuthController::class, 'token']);
 
     Route::post('landing/{token}/receive', [CampaignLandingWebhookController::class, 'receive'])
-        ->where('token', '[a-z0-9]{16,64}');
+        ->where('token', '[a-z0-9]{16,64}')
+        ->middleware('throttle:lead-intake');
 
     Route::match(['get', 'post'], 'webhooks/{platform}', [WebhookController::class, 'handle'])
-        ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada');
+        ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada')
+        ->middleware('throttle:lead-intake');
     Route::post('shipping/webhooks/{provider}', [ShippingWebhookController::class, 'handle'])
         ->where('provider', 'viettel_post|ghn|ghtk|jnt|spx');
 
