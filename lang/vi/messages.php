@@ -71,6 +71,16 @@ return [
     'inventory' => [
         'approver_required' => 'Chọn trưởng kho ký duyệt.',
     ],
+    'sale_ops' => [
+        'cannot_call' => 'Đơn này không thể gọi (đã chốt, hủy hoặc thiếu SĐT).',
+        'cannot_change_status' => 'Đơn đã chốt hoặc đã kết thúc tác nghiệp — không thể đổi trạng thái.',
+        'invalid_result' => 'Kết quả tác nghiệp không hợp lệ.',
+        'schedule_required' => 'Vui lòng chọn thời gian hẹn gọi lại.',
+        'no_permission_operate' => 'Bạn không có quyền tác nghiệp đơn này.',
+        'already_closed' => 'Đơn đã được chốt trước đó.',
+        'no_permission_close' => 'Bạn không có quyền chốt đơn này.',
+        'cannot_close_cancelled' => 'Đơn đã hủy — không thể chốt.',
+    ],
     'shipping_actions' => [
         'order_not_closed' => 'Đơn chưa chốt.',
         'out_of_stock' => 'Hết hàng trong kho.',

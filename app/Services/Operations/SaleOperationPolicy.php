@@ -60,4 +60,13 @@ final class SaleOperationPolicy
     {
         return self::isOpen($order) && ! self::isTerminal($order);
     }
+
+    /**
+     * Chỉ được chốt đơn khi đơn còn đang tác nghiệp (chưa chốt, chưa hủy).
+     * Dùng chung cho nút "Đóng đơn" (UI) và validate backend để luồng đồng nhất.
+     */
+    public static function canClose(Order $order): bool
+    {
+        return self::isOpen($order) && ! self::isTerminal($order);
+    }
 }

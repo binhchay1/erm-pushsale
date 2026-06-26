@@ -60,17 +60,14 @@ class LeadIngestionService
         array $normalized,
         ?MarketingSource $campaign = null,
     ): LeadIngestion {
-        // 1) Chặn payload nhồi dữ liệu
         if ($this->sanitizer->exceedsPayloadLimit($rawPayload)) {
             return $this->recordFailed($driver->platform(), ['oversized' => true], __('messages.lead_intake.payload_too_large'));
         }
 
-        // 2) Bẫy bot (honeypot)
         if ($this->sanitizer->hasHoneypot($rawPayload)) {
             return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_intake.honeypot'));
         }
 
-        // 3) Chuẩn hóa & kiểm tra SĐT Việt Nam
         $phone = $this->sanitizer->normalizePhone($normalized['customer_phone'] ?? null);
 
         if (! $phone) {
@@ -79,7 +76,6 @@ class LeadIngestionService
 
         $normalized['customer_phone'] = $phone;
 
-        // 4) Làm sạch & giới hạn độ dài các trường text
         $normalized['customer_name'] = $this->sanitizer->cleanText(
             $normalized['customer_name'] ?? null,
             (int) config('saleops.lead_intake.max_name_length', 100),
@@ -97,7 +93,6 @@ class LeadIngestionService
             );
         }
 
-        // 5) Nội dung spam rõ ràng
         if ($this->sanitizer->looksLikeSpam($normalized['customer_name'], $normalized['message'] ?? null)) {
             return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_intake.spam_detected'));
         }

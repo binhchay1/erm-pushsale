@@ -71,6 +71,16 @@ return [
     'inventory' => [
         'approver_required' => 'Select a warehouse lead to approve.',
     ],
+    'sale_ops' => [
+        'cannot_call' => 'This order cannot be called (closed, cancelled, or missing phone).',
+        'cannot_change_status' => 'Order already closed or operation ended — status cannot be changed.',
+        'invalid_result' => 'Invalid operation result.',
+        'schedule_required' => 'Please pick a callback time.',
+        'no_permission_operate' => 'You are not allowed to operate on this order.',
+        'already_closed' => 'This order was already closed.',
+        'no_permission_close' => 'You are not allowed to close this order.',
+        'cannot_close_cancelled' => 'Order was cancelled — cannot be closed.',
+    ],
     'shipping_actions' => [
         'order_not_closed' => 'Order is not closed yet.',
         'out_of_stock' => 'Out of stock.',

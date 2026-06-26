@@ -47,7 +47,8 @@ export function CloseOrderButton({ order, disabled }) {
     const [processing, setProcessing] = useState(false);
     const [confirmInsufficient, setConfirmInsufficient] = useState(false);
 
-    const canClose = !order.closedAt && !disabled;
+    // Đồng nhất backend SaleOperationPolicy::canClose; fallback theo closedAt nếu prop thiếu.
+    const canClose = (order.canClose ?? !order.closedAt) && !disabled;
     const hasInsufficientStock = order.hasInsufficientStock;
     const warnings = order.stockWarnings ?? [];
 

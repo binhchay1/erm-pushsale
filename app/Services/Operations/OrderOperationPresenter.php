@@ -48,6 +48,7 @@ final class OrderOperationPresenter
             'contactCount' => (int) $order->contact_count,
             'canCall' => SaleOperationPolicy::canCall($order),
             'canChangeStatus' => SaleOperationPolicy::canChangeStatus($order),
+            'canClose' => SaleOperationPolicy::canClose($order),
             'products' => $order->items->map(fn ($item) => [
                 'productId' => (string) $item->product_id,
                 'productName' => $item->product_name,

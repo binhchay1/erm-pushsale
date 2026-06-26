@@ -2,6 +2,7 @@
 
 namespace App\Services\Leads;
 
+use App\Enums\DeliveryStatus;
 use App\Enums\OperationStage;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
@@ -37,6 +38,10 @@ class LeadOrderFactory
     {
         $source = $this->resolveCampaign($lead, $normalized);
 
+        // Khách cũ = SĐT đã từng có đơn trước đó (đồng bộ với báo cáo khách mới/cũ).
+        $isReturningCustomer = filled($normalized['customer_phone'] ?? null)
+            && Order::query()->where('customer_phone', $normalized['customer_phone'])->exists();
+
         $noteParts = array_filter([
             filled($normalized['message'] ?? null) ? (string) $normalized['message'] : null,
             filled($normalized['product_interest'] ?? null)
@@ -56,8 +61,10 @@ class LeadOrderFactory
             'data_arrived_at' => now(),
             'assigned_at' => $saleUser ? now() : null,
             'operation_stage' => OperationStage::NewCustomer->value,
-            'delivery_status' => 'waiting_waybill',
+            // Đơn mới chưa chốt → "cần giao/đang tác nghiệp"; chỉ chuyển 'waiting_waybill' khi chốt đơn.
+            'delivery_status' => DeliveryStatus::DeliverNow->value,
             'is_duplicate_phone' => false,
+            'is_returning_customer' => $isReturningCustomer,
             'contact_count' => 1,
         ]);
 

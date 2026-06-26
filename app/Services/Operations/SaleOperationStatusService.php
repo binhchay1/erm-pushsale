@@ -25,7 +25,7 @@ class SaleOperationStatusService
 
         if (! SaleOperationPolicy::canCall($order)) {
             throw ValidationException::withMessages([
-                'order' => 'Đơn này không thể gọi (đã chốt, hủy hoặc thiếu SĐT).',
+                'order' => __('messages.sale_ops.cannot_call'),
             ]);
         }
 
@@ -45,7 +45,7 @@ class SaleOperationStatusService
 
         if (! SaleOperationPolicy::canChangeStatus($order)) {
             throw ValidationException::withMessages([
-                'order' => 'Đơn đã chốt hoặc đã kết thúc tác nghiệp — không thể đổi trạng thái.',
+                'order' => __('messages.sale_ops.cannot_change_status'),
             ]);
         }
 
@@ -60,13 +60,13 @@ class SaleOperationStatusService
 
         if (! $result) {
             throw ValidationException::withMessages([
-                'operation_result' => 'Kết quả tác nghiệp không hợp lệ.',
+                'operation_result' => __('messages.sale_ops.invalid_result'),
             ]);
         }
 
         if ($result === OperationResult::CallbackScheduled && empty($payload['next_operation_at'])) {
             throw ValidationException::withMessages([
-                'next_operation_at' => 'Vui lòng chọn thời gian hẹn gọi lại.',
+                'next_operation_at' => __('messages.sale_ops.schedule_required'),
             ]);
         }
 
@@ -145,7 +145,7 @@ class SaleOperationStatusService
     {
         if ($actor->isSales() && $order->sale_user_id !== $actor->id) {
             throw ValidationException::withMessages([
-                'order' => 'Bạn không có quyền tác nghiệp đơn này.',
+                'order' => __('messages.sale_ops.no_permission_operate'),
             ]);
         }
     }

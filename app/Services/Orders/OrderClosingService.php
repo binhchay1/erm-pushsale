@@ -28,13 +28,21 @@ class OrderClosingService
     {
         if ($order->closed_at) {
             throw ValidationException::withMessages([
-                'order' => 'Đơn đã được chốt trước đó.',
+                'order' => __('messages.sale_ops.already_closed'),
+            ]);
+        }
+
+        // Không cho chốt đơn đã hủy / đã ngừng tác nghiệp — đồng nhất với điều kiện ẩn nút "Đóng đơn".
+        if (in_array($order->closing_status, [ClosingStatus::Cancelled->value], true)
+            || $order->delivery_status === DeliveryStatus::CancelClosing->value) {
+            throw ValidationException::withMessages([
+                'order' => __('messages.sale_ops.cannot_close_cancelled'),
             ]);
         }
 
         if ($order->sale_user_id && $actor->isSales() && $order->sale_user_id !== $actor->id) {
             throw ValidationException::withMessages([
-                'order' => 'Bạn không có quyền chốt đơn này.',
+                'order' => __('messages.sale_ops.no_permission_close'),
             ]);
         }
 

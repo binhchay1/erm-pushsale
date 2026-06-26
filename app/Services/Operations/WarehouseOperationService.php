@@ -149,6 +149,6 @@ class WarehouseOperationService
 
     private function isReturnStatus(Order $order): bool
     {
-        return in_array((string) $order->delivery_status, self::TAB_GROUPS['returns']['statuses'], true);
+        return in_array((string) $order->delivery_status, self::TAB_GROUPS['returns'], true);
     }
 }

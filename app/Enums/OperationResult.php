@@ -97,14 +97,15 @@ enum OperationResult: string
     public static function selectableOptions(): array
     {
         $groups = [
-            'no_answer' => __('enums.operation_result.groups.no_answer'),
             'follow_up' => __('enums.operation_result.groups.follow_up'),
             'terminal' => __('enums.operation_result.groups.terminal'),
             'success' => __('enums.operation_result.groups.success'),
         ];
 
+        // "Không nghe máy" được cung cấp riêng bằng lựa chọn auto (no_answer_auto) ở dialog —
+        // tự nâng đúng cấp gọi (lần 2, 3...) theo cấp hiện tại, nên không liệt kê no_answer_* tĩnh
+        // ở đây để tránh chọn nhầm làm nhảy lùi cấp gọi.
         $items = [
-            ['value' => self::NoAnswer1->value, 'group' => 'no_answer'],
             ['value' => self::CallbackScheduled->value, 'group' => 'follow_up'],
             ['value' => self::Considering->value, 'group' => 'follow_up'],
             ['value' => self::SentQuote->value, 'group' => 'follow_up'],
