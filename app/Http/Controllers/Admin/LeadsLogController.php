@@ -61,6 +61,7 @@ class LeadsLogController extends Controller
                 ? '/allocator/workspace'
                 : '/admin/leads',
             'canDelete' => ! $request->is('allocator/*'),
+            'realtimeChannel' => $request->is('allocator/*') ? 'dashboard.allocator' : 'dashboard.admin',
         ]);
     }
 }

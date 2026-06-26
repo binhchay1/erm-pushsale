@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
+import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import { leadTone } from '@/lib/status-tones';
 import { useT } from '@/providers/I18nProvider';
 
@@ -21,8 +22,11 @@ export default function LeadsIndex({
     deleteUrlPrefix = '/admin/leads',
     listUrl = '/admin/leads',
     canDelete = true,
+    realtimeChannel = 'dashboard.admin',
 }) {
     const t = useT();
+
+    useRealtimeReload(realtimeChannel, '.leads.changed', ['leads']);
     const [selected, setSelected] = useState([]);
     const [saleUserId, setSaleUserId] = useState('');
     const [allocating, setAllocating] = useState(false);

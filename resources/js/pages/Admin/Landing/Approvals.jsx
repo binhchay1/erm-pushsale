@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { CheckCircle2, Clock, Copy } from 'lucide-react';
+import { CheckCircle2, Clock, Copy, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { CampaignApprovalDetailModal } from '@/components/marketing/CampaignApprovalDetailModal';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
@@ -13,22 +14,44 @@ import { cn } from '@/lib/utils';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
-export default function LandingApprovals({ campaigns, highlightCampaignId }) {
+export default function LandingApprovals({ campaigns, highlightCampaignId, fieldMapping }) {
     const t = useT();
     const rowRefs = useRef({});
     const { ask, ConfirmDialogPortal } = useConfirm();
+    const [selectedCampaign, setSelectedCampaign] = useState(null);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [approving, setApproving] = useState(false);
 
-    const approve = async (id, name) => {
+    const openDetail = (campaign) => {
+        setSelectedCampaign(campaign);
+        setModalOpen(true);
+    };
+
+    const approve = async (campaign) => {
         const ok = await ask({
             title: t('pages.landing.approve_title'),
-            description: t('pages.landing.approve_desc', { name }),
+            description: t('pages.landing.approve_desc', { name: campaign.name }),
             confirmLabel: t('pages.landing.approve'),
         });
         if (!ok) return;
-        router.post(`/admin/landing-approvals/${id}/approve`, {}, { preserveScroll: true });
+
+        setApproving(true);
+        router.post(
+            `/admin/landing-approvals/${campaign.id}/approve`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setModalOpen(false);
+                    setSelectedCampaign(null);
+                },
+                onFinish: () => setApproving(false),
+            },
+        );
     };
 
-    const copyUrl = async (url) => {
+    const copyUrl = async (url, e) => {
+        e?.stopPropagation();
         const ok = await copyToClipboard(url);
         ok ? toast.success(t('pages.landing.copy_url_success')) : toast.error(t('pages.landing.copy_url_failed'));
     };
@@ -40,6 +63,10 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
         const el = rowRefs.current[highlightCampaignId];
         if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        const campaign = campaigns.find((c) => c.id === highlightCampaignId);
+        if (campaign) {
+            openDetail(campaign);
         }
     }, [highlightCampaignId, campaigns]);
 
@@ -53,6 +80,7 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                     description={
                         <>
                             {t('pages.landing.desc_detail', { count: pending.length })}
+                            <span className="mt-1 block text-muted-foreground">{t('pages.landing.click_row_hint')}</span>
                             {highlightCampaignId && (
                                 <span className="mt-1 block text-primary">{t('pages.landing.highlight_hint')}</span>
                             )}
@@ -81,8 +109,9 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                                         ref={(el) => {
                                             rowRefs.current[row.id] = el;
                                         }}
+                                        onClick={() => openDetail(row)}
                                         className={cn(
-                                            'hover:bg-muted/30',
+                                            'cursor-pointer hover:bg-muted/30',
                                             highlightCampaignId === row.id &&
                                                 'bg-primary/10 ring-2 ring-inset ring-primary',
                                         )}
@@ -100,13 +129,22 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                                             )}
                                         </Td>
                                         <Td>
-                                            <div className="flex gap-1">
+                                            <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => openDetail(row)}
+                                                >
+                                                    <Eye className="size-3.5" />
+                                                    {t('pages.landing.view_detail')}
+                                                </Button>
                                                 {row.webhook_url && (
                                                     <Button
                                                         type="button"
                                                         variant="outline"
                                                         size="sm"
-                                                        onClick={() => copyUrl(row.webhook_url)}
+                                                        onClick={(e) => copyUrl(row.webhook_url, e)}
                                                     >
                                                         <Copy className="size-3.5" />
                                                         URL
@@ -116,7 +154,7 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                                                     <Button
                                                         type="button"
                                                         size="sm"
-                                                        onClick={() => approve(row.id, row.name)}
+                                                        onClick={() => approve(row)}
                                                     >
                                                         <CheckCircle2 className="size-3.5" />
                                                         {t('pages.landing.approve')}
@@ -138,6 +176,15 @@ export default function LandingApprovals({ campaigns, highlightCampaignId }) {
                     </table>
                 </ScrollDataTable>
             </div>
+
+            <CampaignApprovalDetailModal
+                campaign={selectedCampaign}
+                open={modalOpen}
+                onOpenChange={setModalOpen}
+                fieldMapping={fieldMapping}
+                onApprove={approve}
+                approving={approving}
+            />
 
             <ConfirmDialogPortal />
         </AppLayout>

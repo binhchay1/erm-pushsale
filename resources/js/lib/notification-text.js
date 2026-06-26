@@ -5,10 +5,26 @@ function customerLine(t, data) {
     return phone ? `${name} · ${phone}` : name;
 }
 
+function pickLocale(map, locale, source) {
+    if (!map || typeof map !== 'object') {
+        return null;
+    }
+
+    return map[locale] ?? (source ? map[source] : null) ?? Object.values(map)[0] ?? null;
+}
+
 /** Resolve notification title/message from structured `data` + active locale. */
-export function getNotificationText(notification, t) {
+export function getNotificationText(notification, t, locale = 'vi') {
     const data = notification?.data;
     const type = notification?.type;
+
+    if (data && typeof data === 'object' && data.variant === 'free_text') {
+        const source = data.source;
+        return {
+            title: pickLocale(data.title, locale, source) ?? notification?.title ?? '',
+            message: pickLocale(data.message, locale, source) ?? notification?.message ?? '',
+        };
+    }
 
     if (data && typeof data === 'object' && type) {
         switch (type) {

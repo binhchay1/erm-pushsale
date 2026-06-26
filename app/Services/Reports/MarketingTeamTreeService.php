@@ -56,10 +56,10 @@ class MarketingTeamTreeService
             $teamMetrics = $this->aggregateMetrics($memberNodes);
             $teamNodes[] = [
                 'id' => 'team-'.($team?->id ?? 'unassigned'),
-                'name' => $team?->name ?? 'Chưa gán phòng ban',
+                'name' => $team?->name ?? __('reports.tree.unassigned_dept'),
                 'leaderName' => $team?->leader?->name,
                 'memberCount' => count($memberNodes),
-                'roleLabel' => 'Team Marketing',
+                'roleLabel' => __('reports.tree.team_marketing'),
                 'type' => 'team',
                 'conversionRate' => $teamMetrics['conversionRate'],
                 'revenue' => $teamMetrics['revenue'],
@@ -75,8 +75,8 @@ class MarketingTeamTreeService
 
         $roots = [[
             'id' => 'director-'.($director?->id ?? 'head'),
-            'name' => $director?->name ?? 'Giám đốc Marketing',
-            'roleLabel' => $director?->orgLevelLabel() ?? 'Leader',
+            'name' => $director?->name ?? __('reports.tree.marketing_director'),
+            'roleLabel' => $director?->orgLevelLabel() ?? __('reports.tree.leader'),
             'type' => 'director',
             'conversionRate' => $rootMetrics['conversionRate'],
             'revenue' => $rootMetrics['revenue'],

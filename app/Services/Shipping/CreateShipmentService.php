@@ -21,13 +21,13 @@ class CreateShipmentService
         $order->loadMissing(['items', 'warehouse']);
 
         if (! $order->inventory_deducted_at && ! $this->inventory->hasSufficientStock($order)) {
-            throw new RuntimeException('Hết hàng trong kho — không thể tạo vận đơn.');
+            throw new RuntimeException(__('messages.shipping_actions.out_of_stock_create'));
         }
 
         $carrier = $this->registry->resolveForOrder($provider ?? $order->shipping_provider);
 
         if (! $carrier) {
-            throw new RuntimeException('Chưa có đơn vị vận chuyển nào được bật và cấu hình.');
+            throw new RuntimeException(__('messages.shipping_actions.no_carrier_configured'));
         }
 
         return $carrier->createFromOrder($order);
@@ -77,7 +77,7 @@ class CreateShipmentService
         $key = $provider ?? $order->shipping_provider ?? $order->shipments()->latest('id')->value('provider');
 
         if (! $key || ! $this->registry->has($key)) {
-            throw new RuntimeException('Không xác định được đơn vị vận chuyển của đơn.');
+            throw new RuntimeException(__('messages.shipping_actions.carrier_undetermined'));
         }
 
         return $this->registry->get($key);

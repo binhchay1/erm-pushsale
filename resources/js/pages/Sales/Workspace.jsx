@@ -1,14 +1,20 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
 import { StatusTabs } from '@/components/operations/StatusTabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import { useT } from '@/providers/I18nProvider';
 
 export default function Workspace({ filters, filterOptions, filterFields, report, operationStatusOptions }) {
     const t = useT();
+    const authId = usePage().props.auth?.user?.id;
+
+    useRealtimeReload('dashboard.sales', '.workspace.changed', ['report'], {
+        shouldReload: (payload) => Number(payload?.sale_user_id) === Number(authId),
+    });
 
     return (
         <AppLayout>

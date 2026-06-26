@@ -18,17 +18,18 @@ class WarehouseOperationService
     /**
      * Tab gom nhóm trạng thái VC cho thủ kho: kho đi / kho hoàn tách bạch,
      * trong đó "Đơn hoàn" là tab riêng theo yêu cầu nghiệp vụ.
+     * Nhãn hiển thị được dịch theo locale qua operations.warehouse_tabs.*
      *
-     * @var array<string, array{label: string, statuses: list<string>}>
+     * @var array<string, list<string>>
      */
     private const TAB_GROUPS = [
-        'waiting' => ['label' => 'Chờ vận đơn', 'statuses' => ['waiting_waybill', 'posted']],
-        'pickup' => ['label' => 'Lấy hàng', 'statuses' => ['picking_up', 'cannot_pickup']],
-        'delivering' => ['label' => 'Đang giao', 'statuses' => ['delivering', 'deliver_now', 'redelivery']],
-        'delivered' => ['label' => 'Đã giao', 'statuses' => ['delivered', 'delivery_complete']],
-        'paid' => ['label' => 'Đã thanh toán', 'statuses' => ['paid']],
-        'returns' => ['label' => 'Đơn hoàn', 'statuses' => ['returning', 'returned', 'refund', 'cannot_deliver']],
-        'cancelled' => ['label' => 'Đã hủy', 'statuses' => ['cancel_waybill', 'cancel_closing']],
+        'waiting' => ['waiting_waybill', 'posted'],
+        'pickup' => ['picking_up', 'cannot_pickup'],
+        'delivering' => ['delivering', 'deliver_now', 'redelivery'],
+        'delivered' => ['delivered', 'delivery_complete'],
+        'paid' => ['paid'],
+        'returns' => ['returning', 'returned', 'refund', 'cannot_deliver'],
+        'cancelled' => ['cancel_waybill', 'cancel_closing'],
     ];
 
     public function __construct(
@@ -66,7 +67,7 @@ class WarehouseOperationService
         }
 
         if (isset(self::TAB_GROUPS[$value])) {
-            $statuses = self::TAB_GROUPS[$value]['statuses'];
+            $statuses = self::TAB_GROUPS[$value];
 
             return $all->filter(fn (Order $o) => in_array((string) $o->delivery_status, $statuses, true));
         }
@@ -82,20 +83,20 @@ class WarehouseOperationService
     {
         $tabs = [[
             'value' => 'all',
-            'label' => 'Tất cả',
+            'label' => __('operations.all'),
             'count' => $all->count(),
         ]];
 
-        foreach (self::TAB_GROUPS as $value => $group) {
+        foreach (self::TAB_GROUPS as $value => $statuses) {
             $count = $all
-                ->filter(fn (Order $o) => in_array((string) $o->delivery_status, $group['statuses'], true))
+                ->filter(fn (Order $o) => in_array((string) $o->delivery_status, $statuses, true))
                 ->count();
 
             if ($hideZero && $count === 0) {
                 continue;
             }
 
-            $tabs[] = ['value' => $value, 'label' => $group['label'], 'count' => $count];
+            $tabs[] = ['value' => $value, 'label' => __('operations.warehouse_tabs.'.$value), 'count' => $count];
         }
 
         return $tabs;

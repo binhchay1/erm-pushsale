@@ -35,7 +35,7 @@ class GhnCarrier extends AbstractShippingCarrier
     public function createFromOrder(Order $order): Shipment
     {
         if (! $this->isReady()) {
-            throw new RuntimeException('GHN chưa bật hoặc thiếu Token/Shop ID.');
+            throw new RuntimeException(__('carriers.not_configured', ['provider' => 'GHN']));
         }
 
         $order->loadMissing(['items', 'warehouse']);
@@ -47,7 +47,7 @@ class GhnCarrier extends AbstractShippingCarrier
         $response = $this->client->createOrder($payload, $order->id);
 
         if (! $response['success']) {
-            $this->markFailed($shipment, $response['message'] ?? 'GHN từ chối tạo đơn.', $response['raw'] ?? null);
+            $this->markFailed($shipment, $response['message'] ?? __('carriers.create_rejected', ['provider' => 'GHN']), $response['raw'] ?? null);
         }
 
         $data = is_array($response['data']) ? $response['data'] : [];
@@ -56,7 +56,7 @@ class GhnCarrier extends AbstractShippingCarrier
             'partner_order_id' => $order->order_code,
             'tracking_number' => (string) ($data['order_code'] ?? ''),
             'fee' => (int) ($data['total_fee'] ?? 0),
-            'status_text' => 'Đã tạo trên GHN',
+            'status_text' => __('carriers.created_status', ['provider' => 'GHN']),
             'response_payload' => $data,
         ], DeliveryStatus::PickingUp);
     }
@@ -66,13 +66,13 @@ class GhnCarrier extends AbstractShippingCarrier
         $shipment ??= $this->requireShipment($order);
 
         if (! $shipment->tracking_number) {
-            throw new RuntimeException('Chưa có mã vận đơn GHN.');
+            throw new RuntimeException(__('carriers.no_waybill', ['provider' => 'GHN']));
         }
 
         $response = $this->client->getOrderDetail($shipment->tracking_number, $order->id);
 
         if (! $response['success']) {
-            throw new RuntimeException($response['message'] ?? 'Không lấy được trạng thái GHN.');
+            throw new RuntimeException($response['message'] ?? __('carriers.status_failed', ['provider' => 'GHN']));
         }
 
         $data = is_array($response['data']) ? $response['data'] : [];
@@ -105,10 +105,10 @@ class GhnCarrier extends AbstractShippingCarrier
         ], $order->id);
 
         if (! $response['success']) {
-            throw new RuntimeException($response['message'] ?? 'Không hủy được đơn GHN.');
+            throw new RuntimeException($response['message'] ?? __('carriers.cancel_failed', ['provider' => 'GHN']));
         }
 
-        return $this->markCancelled($shipment, $order, 'Đã hủy trên GHN');
+        return $this->markCancelled($shipment, $order, __('carriers.cancelled_status', ['provider' => 'GHN']));
     }
 
     public function printLabel(Order $order, ?Shipment $shipment = null): array
@@ -118,7 +118,7 @@ class GhnCarrier extends AbstractShippingCarrier
 
         return [
             'success' => (bool) ($result['success'] ?? false),
-            'message' => $result['message'] ?? 'GHN trả token in nhãn — mở link từ response.',
+            'message' => $result['message'] ?? __('carriers.print_token', ['provider' => 'GHN']),
             'data' => $result['data'] ?? $result['raw'] ?? null,
         ];
     }
@@ -136,7 +136,7 @@ class GhnCarrier extends AbstractShippingCarrier
         return match ($action) {
             'shop' => $this->client->getStore(),
             'fee' => $this->calculateFee(new Order),
-            default => throw new RuntimeException("Thao tác GHN [{$action}] không được hỗ trợ."),
+            default => throw new RuntimeException(__('carriers.action_unsupported', ['provider' => 'GHN', 'action' => $action])),
         };
     }
 

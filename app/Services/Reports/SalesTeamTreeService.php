@@ -52,10 +52,10 @@ class SalesTeamTreeService
             $teamMetrics = $this->aggregateMetrics($memberNodes);
             $teamNodes[] = [
                 'id' => 'team-'.($team?->id ?? 'unassigned'),
-                'name' => $team?->name ?? 'Chưa gán team',
+                'name' => $team?->name ?? __('reports.tree.unassigned_team'),
                 'leaderName' => $team?->leader?->name,
                 'memberCount' => count($memberNodes),
-                'roleLabel' => $team?->leader ? 'Leader: '.$team->leader->name : 'Team Telesale',
+                'roleLabel' => $team?->leader ? __('reports.tree.leader_prefix', ['name' => $team->leader->name]) : __('reports.tree.team_telesale'),
                 'type' => 'team',
                 'conversionRate' => $teamMetrics['conversionRate'],
                 'revenue' => $teamMetrics['revenue'],
@@ -70,8 +70,8 @@ class SalesTeamTreeService
 
         $roots = [[
             'id' => 'director-'.($director?->id ?? 'head'),
-            'name' => $director?->name ?? 'Trưởng bộ phận Sale',
-            'roleLabel' => $director?->orgLevelLabel() ?? 'Trưởng bộ phận',
+            'name' => $director?->name ?? __('reports.tree.sales_director'),
+            'roleLabel' => $director?->orgLevelLabel() ?? __('reports.tree.dept_head'),
             'type' => 'director',
             'conversionRate' => $rootMetrics['conversionRate'],
             'revenue' => $rootMetrics['revenue'],

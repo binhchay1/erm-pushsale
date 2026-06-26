@@ -6,6 +6,8 @@ use App\Contracts\Integrations\LeadPayloadNormalizer;
 use App\Enums\LeadIngestionStatus;
 use App\Enums\UserRole;
 use App\Events\LeadIngested;
+use App\Events\LeadPoolChanged;
+use App\Events\SaleWorkspaceChanged;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
@@ -57,7 +59,7 @@ class LeadIngestionService
         ?MarketingSource $campaign = null,
     ): LeadIngestion {
         if (strlen($normalized['customer_phone']) < 9) {
-            return $this->recordFailed($driver->platform(), $rawPayload, 'Số điện thoại không hợp lệ');
+            return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_allocation.invalid_phone'));
         }
 
         $existing = LeadIngestion::query()
@@ -90,6 +92,7 @@ class LeadIngestionService
 
         if ($duplicateOrder) {
             event(new LeadIngested($ingestion));
+            event(new LeadPoolChanged);
 
             return $ingestion;
         }
@@ -99,6 +102,7 @@ class LeadIngestionService
 
         if (! $saleUser) {
             event(new LeadIngested($ingestion));
+            event(new LeadPoolChanged);
 
             return $ingestion;
         }
@@ -112,6 +116,8 @@ class LeadIngestionService
             ]);
             $ingestion->refresh();
             event(new LeadIngested($ingestion, $order));
+            event(new LeadPoolChanged);
+            event(new SaleWorkspaceChanged($saleUser->id));
             $this->notifyNewLead($ingestion, $order, $campaign);
 
             return $ingestion;

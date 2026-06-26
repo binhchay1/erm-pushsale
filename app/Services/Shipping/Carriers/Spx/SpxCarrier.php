@@ -36,7 +36,7 @@ class SpxCarrier extends AbstractShippingCarrier
     public function createFromOrder(Order $order): Shipment
     {
         if (! $this->isReady()) {
-            throw new RuntimeException('SPX chưa bật hoặc thiếu thông tin cấu hình (base url, user_id, secret_key).');
+            throw new RuntimeException(__('carriers.not_configured', ['provider' => 'SPX']));
         }
 
         $order->loadMissing(['items', 'warehouse']);
@@ -47,7 +47,7 @@ class SpxCarrier extends AbstractShippingCarrier
 
         $response = $this->client->createOrder($payload, $order->id);
         if (! ($response['success'] ?? false)) {
-            $this->markFailed($shipment, $response['message'] ?? 'SPX từ chối tạo đơn.', $response['raw'] ?? null);
+            $this->markFailed($shipment, $response['message'] ?? __('carriers.create_rejected', ['provider' => 'SPX']), $response['raw'] ?? null);
         }
 
         $data = is_array($response['data'] ?? null) ? $response['data'] : [];
@@ -57,7 +57,7 @@ class SpxCarrier extends AbstractShippingCarrier
             'tracking_number' => (string) ($data['tracking_number'] ?? $data['waybill_no'] ?? ''),
             'fee' => (int) ($data['fee'] ?? $data['shipping_fee'] ?? 0),
             'insurance_fee' => (int) ($data['insurance_fee'] ?? 0),
-            'status_text' => (string) ($data['status_text'] ?? 'Đã tạo trên SPX'),
+            'status_text' => (string) ($data['status_text'] ?? __('carriers.created_status', ['provider' => 'SPX'])),
             'response_payload' => $data,
         ], DeliveryStatus::PickingUp);
     }
@@ -67,7 +67,7 @@ class SpxCarrier extends AbstractShippingCarrier
         $shipment ??= $this->requireShipment($order);
 
         if (! $shipment->tracking_number && ! $shipment->partner_order_id) {
-            throw new RuntimeException('Chưa có mã vận đơn/mã đối tác SPX để đồng bộ trạng thái.');
+            throw new RuntimeException(__('carriers.no_waybill', ['provider' => 'SPX']));
         }
 
         $payload = array_filter([
@@ -77,7 +77,7 @@ class SpxCarrier extends AbstractShippingCarrier
 
         $response = $this->client->getOrderDetail($payload, $order->id);
         if (! ($response['success'] ?? false)) {
-            throw new RuntimeException($response['message'] ?? 'Không lấy được trạng thái SPX.');
+            throw new RuntimeException($response['message'] ?? __('carriers.status_failed', ['provider' => 'SPX']));
         }
 
         $data = is_array($response['data'] ?? null) ? $response['data'] : [];
@@ -113,10 +113,10 @@ class SpxCarrier extends AbstractShippingCarrier
 
         $response = $this->client->cancelOrder($payload, $order->id);
         if (! ($response['success'] ?? false)) {
-            throw new RuntimeException($response['message'] ?? 'Không hủy được đơn SPX.');
+            throw new RuntimeException($response['message'] ?? __('carriers.cancel_failed', ['provider' => 'SPX']));
         }
 
-        return $this->markCancelled($shipment, $order, 'Đã hủy trên SPX');
+        return $this->markCancelled($shipment, $order, __('carriers.cancelled_status', ['provider' => 'SPX']));
     }
 
     public function printLabel(Order $order, ?Shipment $shipment = null): array
@@ -124,7 +124,7 @@ class SpxCarrier extends AbstractShippingCarrier
         $shipment ??= $this->requireShipment($order);
 
         if (! $shipment->tracking_number) {
-            throw new RuntimeException('Chưa có mã vận đơn SPX.');
+            throw new RuntimeException(__('carriers.no_waybill', ['provider' => 'SPX']));
         }
 
         return $this->client->printLabel([
@@ -146,7 +146,7 @@ class SpxCarrier extends AbstractShippingCarrier
         return match ($action) {
             'connection' => $this->client->testConnection(),
             'fee' => $this->calculateFee(new Order),
-            default => throw new RuntimeException("Action SPX [{$action}] không hỗ trợ."),
+            default => throw new RuntimeException(__('carriers.action_unsupported', ['provider' => 'SPX', 'action' => $action])),
         };
     }
 

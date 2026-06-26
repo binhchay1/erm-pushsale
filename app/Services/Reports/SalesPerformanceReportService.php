@@ -58,13 +58,13 @@ class SalesPerformanceReportService
     public function columns(): array
     {
         return [
-            ['key' => 'saleName', 'label' => 'Tên Sales'],
-            ['key' => 'totalLeads', 'label' => 'Tổng lead nhận'],
-            ['key' => 'actualCalls', 'label' => 'Cuộc gọi thực tế'],
-            ['key' => 'answerRate', 'label' => 'Tỷ lệ bắt máy (%)'],
-            ['key' => 'closedOrders', 'label' => 'Đơn chốt'],
-            ['key' => 'closeRate', 'label' => 'Tỷ lệ chốt (%)'],
-            ['key' => 'totalRevenue', 'label' => 'Doanh thu'],
+            ['key' => 'saleName', 'label' => __('reports.sales_performance.sale_name')],
+            ['key' => 'totalLeads', 'label' => __('reports.sales_performance.total_leads')],
+            ['key' => 'actualCalls', 'label' => __('reports.sales_performance.actual_calls')],
+            ['key' => 'answerRate', 'label' => __('reports.sales_performance.answer_rate')],
+            ['key' => 'closedOrders', 'label' => __('reports.sales_performance.closed_orders')],
+            ['key' => 'closeRate', 'label' => __('reports.sales_performance.close_rate')],
+            ['key' => 'totalRevenue', 'label' => __('reports.sales_performance.total_revenue')],
         ];
     }
 

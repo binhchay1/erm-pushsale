@@ -9,6 +9,7 @@ return [
         'products' => 'Danh sách sản phẩm',
         'solutions' => 'Giải pháp Gam',
         'login' => 'Đăng nhập / kiểm tra token',
+        'connection' => 'Kiểm tra kết nối',
     ],
     'providers' => [
         'viettel_post' => [

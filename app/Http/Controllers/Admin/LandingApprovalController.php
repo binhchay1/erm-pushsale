@@ -20,18 +20,7 @@ class LandingApprovalController extends Controller
         MarketingSourceRepository $sources,
     ): Response {
         $campaigns = $sources->rootCampaignsForApproval()
-            ->map(fn (MarketingSource $c) => [
-                'id' => $c->id,
-                'name' => $c->name,
-                'product' => $c->product?->name,
-                'marketer' => $c->marketer?->name,
-                'creator' => $c->creator?->name,
-                'utm_campaign' => $c->utm_campaign,
-                'webhook_url' => $c->webhook_token ? $landing->webhookUrl($c) : null,
-                'is_approved' => (bool) $c->is_approved,
-                'is_active' => (bool) $c->is_active,
-                'created_at' => $c->created_at?->format('d/m/Y H:i'),
-            ])
+            ->map(fn (MarketingSource $c) => $this->presentForApproval($c, $landing))
             ->values();
 
         $highlightId = $request->integer('campaign') ?: null;
@@ -39,6 +28,7 @@ class LandingApprovalController extends Controller
         return Inertia::render('Admin/Landing/Approvals', [
             'campaigns' => $campaigns,
             'highlightCampaignId' => $highlightId,
+            'fieldMapping' => $this->fieldMappingGuide(),
         ]);
     }
 
@@ -50,5 +40,41 @@ class LandingApprovalController extends Controller
         NotificationService::notifyLandingApproved($campaign->fresh());
 
         return back()->with('success', __('messages.landing_approved'));
+    }
+
+    /** @return array<string, mixed> */
+    private function presentForApproval(MarketingSource $c, CampaignLandingService $landing): array
+    {
+        return [
+            'id' => $c->id,
+            'name' => $c->name,
+            'product' => $c->product?->name,
+            'product_sku' => $c->product?->sku,
+            'product_unit_price' => (int) ($c->product?->unit_price ?? 0),
+            'marketer' => $c->marketer?->name,
+            'creator' => $c->creator?->name,
+            'ad_channel' => $c->ad_channel,
+            'utm_source' => $c->utm_source,
+            'utm_campaign' => $c->utm_campaign,
+            'webhook_url' => $c->webhook_token ? $landing->webhookUrl($c) : null,
+            'budget' => (int) $c->budget,
+            'is_approved' => (bool) $c->is_approved,
+            'is_active' => (bool) $c->is_active,
+            'created_at' => $c->created_at?->format('d/m/Y H:i'),
+        ];
+    }
+
+    /** @return list<array{ladipage: string, system: string}> */
+    private function fieldMappingGuide(): array
+    {
+        return [
+            ['ladipage' => 'name', 'system' => 'name'],
+            ['ladipage' => 'phone', 'system' => 'phone'],
+            ['ladipage' => 'message', 'system' => 'message'],
+            ['ladipage' => 'products', 'system' => 'products'],
+            ['ladipage' => 'quantity', 'system' => 'quantity'],
+            ['ladipage' => 'utm_source', 'system' => 'utm_source (tùy chọn)'],
+            ['ladipage' => 'utm_campaign', 'system' => 'utm_campaign (tự điền theo tên chiến dịch)'],
+        ];
     }
 }

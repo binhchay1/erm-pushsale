@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 import { getEcho } from '@/lib/echo';
 import { getNotificationText } from '@/lib/notification-text';
-import { useT } from '@/providers/I18nProvider';
+import { useI18n } from '@/providers/I18nProvider';
 
 function shouldShowToast(type, prefs) {
     if (prefs.desktop === false) {
@@ -26,7 +26,7 @@ function shouldShowToast(type, prefs) {
  * Listen for real-time notifications on the user channel (Reverb) — shared across roles.
  */
 export function useRealtimeNotifications() {
-    const t = useT();
+    const { t, locale } = useI18n();
     const { auth, reverb, preferences } = usePage().props;
     const prefs = preferences?.notifications ?? {};
 
@@ -46,7 +46,7 @@ export function useRealtimeNotifications() {
             .private(channelName)
             .listen('.notification.created', (payload) => {
                 if (shouldShowToast(payload.type, prefs)) {
-                    const { title, message } = getNotificationText(payload, t);
+                    const { title, message } = getNotificationText(payload, t, locale);
 
                     toast.info(title, {
                         description: message || undefined,
@@ -71,5 +71,5 @@ export function useRealtimeNotifications() {
             channel.stopListening('.notification.created');
             echo.leave(channelName);
         };
-    }, [auth?.user?.id, reverb?.key, prefs.desktop, prefs.new_lead, prefs.landing_approval, t]);
+    }, [auth?.user?.id, reverb?.key, prefs.desktop, prefs.new_lead, prefs.landing_approval, t, locale]);
 }

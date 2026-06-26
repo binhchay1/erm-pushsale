@@ -47,6 +47,36 @@ return [
     'product_has_variants' => 'Sản phẩm còn biến thể con — xóa các biến thể trước.',
     'lead_recorded' => 'Lead đã được ghi nhận',
     'lead_queued' => 'Lead đã được đưa vào hàng đợi xử lý.',
+    'auth' => [
+        'invalid_credentials' => 'Email hoặc mật khẩu không đúng.',
+    ],
+    'profile' => [
+        'password_required' => 'Vui lòng nhập mật khẩu mới.',
+        'password_confirmed' => 'Xác nhận mật khẩu không khớp.',
+        'password_min' => 'Mật khẩu phải có ít nhất :min ký tự.',
+    ],
+    'lead_allocation' => [
+        'only_telesale' => 'Chỉ được phân bổ cho nhân viên telesale.',
+        'select_one' => 'Chọn ít nhất một lead.',
+        'invalid_status' => 'Một hoặc nhiều lead không ở trạng thái Chờ xử lý hoặc đã được phân bổ.',
+        'invalid_phone' => 'Số điện thoại không hợp lệ',
+    ],
+    'inventory' => [
+        'approver_required' => 'Chọn trưởng kho ký duyệt.',
+    ],
+    'shipping_actions' => [
+        'order_not_closed' => 'Đơn chưa chốt.',
+        'out_of_stock' => 'Hết hàng trong kho.',
+        'out_of_stock_create' => 'Hết hàng trong kho — không thể tạo vận đơn.',
+        'no_carrier_configured' => 'Chưa có đơn vị vận chuyển nào được bật và cấu hình.',
+        'carrier_undetermined' => 'Không xác định được đơn vị vận chuyển của đơn.',
+        'waybill_created' => 'Đã tạo vận đơn.',
+        'waybill_created_status' => 'Đã tạo vận đơn',
+        'waybill_code' => 'Mã vận đơn',
+        'status_synced' => 'Đã đồng bộ trạng thái từ hãng vận chuyển.',
+        'waybill_cancelled' => 'Đã hủy vận đơn.',
+        'label_failed' => 'Không in được nhãn.',
+    ],
     'webhook' => [
         'platform_unsupported' => 'Nền tảng không hỗ trợ',
         'verify_token_invalid' => 'Verify token không hợp lệ',

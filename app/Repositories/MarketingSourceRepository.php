@@ -37,7 +37,7 @@ class MarketingSourceRepository
     {
         return MarketingSource::query()
             ->whereNull('parent_id')
-            ->with(['product:id,name', 'marketer:id,name', 'creator:id,name'])
+            ->with(['product:id,name,sku,unit_price', 'marketer:id,name', 'creator:id,name'])
             ->latest('id')
             ->get();
     }

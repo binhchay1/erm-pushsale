@@ -36,7 +36,7 @@ class GhtkCarrier extends AbstractShippingCarrier
     public function createFromOrder(Order $order): Shipment
     {
         if (! $this->isReady()) {
-            throw new RuntimeException('GHTK chưa bật hoặc thiếu Token.');
+            throw new RuntimeException(__('carriers.not_configured', ['provider' => 'GHTK']));
         }
 
         $order->loadMissing(['items', 'warehouse']);
@@ -51,7 +51,7 @@ class GhtkCarrier extends AbstractShippingCarrier
         $response = $this->client->createOrder($payload, $order->id);
 
         if (! $response['success']) {
-            $error = $response['message'] ?? 'GHTK từ chối tạo đơn.';
+            $error = $response['message'] ?? __('carriers.create_rejected', ['provider' => 'GHTK']);
             $errorPayload = $response['order'] ?? Arr::get($response, 'data.error');
             if (is_array($errorPayload) && isset($errorPayload['ghtk_label'])) {
                 return $this->finalizeSuccess($shipment, $order, $errorPayload);
@@ -70,7 +70,7 @@ class GhtkCarrier extends AbstractShippingCarrier
         $response = $this->client->getOrderStatus($trackingKey, $order->id);
 
         if (! $response['success']) {
-            throw new RuntimeException($response['message'] ?? 'Không lấy được trạng thái GHTK.');
+            throw new RuntimeException($response['message'] ?? __('carriers.status_failed', ['provider' => 'GHTK']));
         }
 
         $data = is_array($response['data']) ? $response['data'] : [];
@@ -119,10 +119,10 @@ class GhtkCarrier extends AbstractShippingCarrier
         $response = $this->client->cancelOrder($trackingKey, $order->id);
 
         if (! $response['success']) {
-            throw new RuntimeException($response['message'] ?? 'Không hủy được đơn GHTK.');
+            throw new RuntimeException($response['message'] ?? __('carriers.cancel_failed', ['provider' => 'GHTK']));
         }
 
-        return $this->markCancelled($shipment, $order, 'Đã hủy trên GHTK');
+        return $this->markCancelled($shipment, $order, __('carriers.cancelled_status', ['provider' => 'GHTK']));
     }
 
     public function printLabel(Order $order, ?Shipment $shipment = null): array
@@ -130,7 +130,7 @@ class GhtkCarrier extends AbstractShippingCarrier
         $shipment ??= $this->requireShipment($order);
 
         if (! $shipment->tracking_number) {
-            throw new RuntimeException('Chưa có mã vận đơn GHTK.');
+            throw new RuntimeException(__('carriers.no_waybill', ['provider' => 'GHTK']));
         }
 
         return $this->client->printLabel($shipment->tracking_number, [
@@ -167,7 +167,7 @@ class GhtkCarrier extends AbstractShippingCarrier
                 'value' => 1000000,
                 'transport' => 'road',
             ]),
-            default => throw new RuntimeException("Thao tác GHTK [{$action}] không được hỗ trợ."),
+            default => throw new RuntimeException(__('carriers.action_unsupported', ['provider' => 'GHTK', 'action' => $action])),
         };
     }
 

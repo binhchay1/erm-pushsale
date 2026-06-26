@@ -47,6 +47,36 @@ return [
     'product_has_variants' => 'Product has child variants — delete variants first.',
     'lead_recorded' => 'Lead recorded',
     'lead_queued' => 'Lead queued for processing.',
+    'auth' => [
+        'invalid_credentials' => 'Incorrect email or password.',
+    ],
+    'profile' => [
+        'password_required' => 'Please enter a new password.',
+        'password_confirmed' => 'Password confirmation does not match.',
+        'password_min' => 'Password must be at least :min characters.',
+    ],
+    'lead_allocation' => [
+        'only_telesale' => 'Leads can only be allocated to telesales staff.',
+        'select_one' => 'Select at least one lead.',
+        'invalid_status' => 'One or more leads are not pending or have already been allocated.',
+        'invalid_phone' => 'Invalid phone number',
+    ],
+    'inventory' => [
+        'approver_required' => 'Select a warehouse lead to approve.',
+    ],
+    'shipping_actions' => [
+        'order_not_closed' => 'Order is not closed yet.',
+        'out_of_stock' => 'Out of stock.',
+        'out_of_stock_create' => 'Out of stock — cannot create waybill.',
+        'no_carrier_configured' => 'No shipping carrier is enabled and configured.',
+        'carrier_undetermined' => 'Could not determine the order\'s shipping carrier.',
+        'waybill_created' => 'Waybill created.',
+        'waybill_created_status' => 'Waybill created',
+        'waybill_code' => 'Waybill code',
+        'status_synced' => 'Status synced from the carrier.',
+        'waybill_cancelled' => 'Waybill cancelled.',
+        'label_failed' => 'Could not print label.',
+    ],
     'webhook' => [
         'platform_unsupported' => 'Platform not supported',
         'verify_token_invalid' => 'Invalid verify token',

@@ -35,7 +35,7 @@ class JntCarrier extends AbstractShippingCarrier
     public function createFromOrder(Order $order): Shipment
     {
         if (! $this->isReady()) {
-            throw new RuntimeException('J&T chưa bật hoặc thiếu API key/secret.');
+            throw new RuntimeException(__('carriers.not_configured', ['provider' => 'J&T']));
         }
 
         $order->loadMissing(['items', 'warehouse']);
@@ -47,7 +47,7 @@ class JntCarrier extends AbstractShippingCarrier
         $response = $this->client->signedRequest('/order/create', $payload, 'create_order', $order->id);
 
         if (! $response['success']) {
-            $this->markFailed($shipment, $response['message'] ?? 'J&T từ chối tạo đơn.', $response['raw'] ?? null);
+            $this->markFailed($shipment, $response['message'] ?? __('carriers.create_rejected', ['provider' => 'J&T']), $response['raw'] ?? null);
         }
 
         $data = is_array($response['data']) ? $response['data'] : [];
@@ -55,32 +55,32 @@ class JntCarrier extends AbstractShippingCarrier
         return $this->applySuccess($shipment, $order, [
             'partner_order_id' => $order->order_code,
             'tracking_number' => (string) ($data['billcode'] ?? $data['mailno'] ?? ''),
-            'status_text' => 'Đã tạo trên J&T',
+            'status_text' => __('carriers.created_status', ['provider' => 'J&T']),
             'response_payload' => $data,
         ], DeliveryStatus::PickingUp);
     }
 
     public function syncStatus(Order $order, ?Shipment $shipment = null): Shipment
     {
-        throw new RuntimeException('J&T: đồng bộ trạng thái qua webhook hoặc API tracking — đang dùng webhook SaleOps.');
+        throw new RuntimeException(__('carriers.jnt.sync_via_webhook'));
     }
 
     public function calculateFee(Order $order): array
     {
         return [
             'success' => false,
-            'message' => 'J&T: tính phí qua portal hoặc bổ sung API fee sau.',
+            'message' => __('carriers.jnt.fee_via_portal'),
         ];
     }
 
     public function cancel(Order $order, ?Shipment $shipment = null): Shipment
     {
-        throw new RuntimeException('J&T: hủy đơn qua API riêng — liên hệ vận hành để bật endpoint.');
+        throw new RuntimeException(__('carriers.jnt.cancel_via_api'));
     }
 
     public function printLabel(Order $order, ?Shipment $shipment = null): array
     {
-        return ['success' => false, 'message' => 'J&T: in nhãn qua portal.'];
+        return ['success' => false, 'message' => __('carriers.jnt.label_via_portal')];
     }
 
     public function testActions(): array
@@ -92,7 +92,7 @@ class JntCarrier extends AbstractShippingCarrier
     {
         return match ($action) {
             'connection' => $this->client->testConnection(),
-            default => throw new RuntimeException("Action J&T [{$action}] không hỗ trợ."),
+            default => throw new RuntimeException(__('carriers.action_unsupported', ['provider' => 'J&T', 'action' => $action])),
         };
     }
 

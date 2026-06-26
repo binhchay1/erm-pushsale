@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils';
 import { getNotificationText } from '@/lib/notification-text';
-import { useT } from '@/providers/I18nProvider';
+import { useI18n } from '@/providers/I18nProvider';
 
 export function NotificationRow({ notification, onClick, dense = false }) {
-    const t = useT();
-    const { title, message } = getNotificationText(notification, t);
+    const { t, locale } = useI18n();
+    const { title, message } = getNotificationText(notification, t, locale);
 
     return (
         <button

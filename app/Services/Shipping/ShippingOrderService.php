@@ -71,8 +71,8 @@ class ShippingOrderService
             $events[] = [
                 'at' => $activeShipment->submitted_at->toIso8601String(),
                 'provider' => $activeShipment->provider,
-                'statusText' => 'Đã tạo vận đơn',
-                'note' => $activeShipment->tracking_number ? 'Mã vận đơn: '.$activeShipment->tracking_number : null,
+                'statusText' => __('messages.shipping_actions.waybill_created_status'),
+                'note' => $activeShipment->tracking_number ? __('messages.shipping_actions.waybill_code').': '.$activeShipment->tracking_number : null,
                 'isCurrent' => false,
             ];
         }

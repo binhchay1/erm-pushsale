@@ -10,18 +10,27 @@ export default [
         intro: 'A quick company-wide snapshot for the selected day or period, for leadership.',
         sections: [
             {
-                heading: 'What does this page show?',
+                heading: 'Top metric cards',
                 items: [
-                    'New leads received, closed orders, and recorded revenue in near real time.',
-                    'Revenue trend charts help spot unusually high or low days.',
-                    'Recent activity across departments (order closing, stock movements, landing approvals…).',
+                    'New leads: leads received from landing pages / ads in the filtered period.',
+                    'Closed orders: orders successfully closed by sales, before cancellations / returns.',
+                    'Recorded revenue: total value of closed orders after discounts in the period.',
+                    'Close rate: closed orders / leads received — gauges lead quality and the sales team.',
+                ],
+            },
+            {
+                heading: 'Charts & activity',
+                items: [
+                    'Daily revenue trend chart: spot unusually high or low days.',
+                    'Lead source breakdown: which source brings in the most leads.',
+                    'Recent activity feed: order closing, stock in / out, landing approvals… in near real time.',
                 ],
             },
             {
                 heading: 'How to use it',
                 items: [
                     'Start your day here for the big picture, then drill into individual reports under Reports.',
-                    'Figures filter by date range — change filters to compare periods.',
+                    'Switch This week / This month / This quarter to compare periods.',
                 ],
             },
         ],
@@ -32,16 +41,25 @@ export default [
         intro: 'Track orders from lead intake through successful delivery and spot bottlenecks.',
         sections: [
             {
-                heading: 'What does this page show?',
+                heading: 'Operations funnel (stages)',
                 items: [
-                    'Orders at each stage: awaiting allocation → calling → closed → awaiting shipment → in transit → completed.',
-                    'Conversion rates between stages — low rates indicate where to act.',
+                    'Awaiting allocation → Calling → Closed → Awaiting shipment → In transit → Completed.',
+                    'Each stage shows how many orders are stuck there — a bulging stage is a bottleneck.',
+                    'Conversion rate between adjacent stages: the one losing the most needs attention first.',
+                ],
+            },
+            {
+                heading: 'Reading conversion metrics',
+                items: [
+                    'Low lead → close rate: poor lead quality or slow sales follow-up.',
+                    'Low close → delivered rate: many cancellations / failed deliveries.',
+                    'Percentage cells are color-coded: green = good, yellow = watch, red = act now.',
                 ],
             },
             {
                 heading: 'Notes',
                 items: [
-                    'Orders stuck in "awaiting shipment" are often because the warehouse has not created a shipping label — follow up with warehouse.',
+                    'Orders stuck in "Awaiting shipment" usually mean the warehouse has not created a label — follow up.',
                     'Unusually high return rates should be cross-checked against detailed sales revenue reports.',
                 ],
             },
@@ -53,11 +71,20 @@ export default [
         intro: 'High-level summary: revenue, marketing spend, and performance by department.',
         sections: [
             {
-                heading: 'What does this page show?',
+                heading: 'Revenue by status',
                 items: [
-                    'Revenue by status: closed, in transit, delivered, collected.',
-                    'Performance comparison across sales and marketing teams.',
-                    'Revenue share by product and by warehouse.',
+                    'Closed: just closed by sales, not yet shipped.',
+                    'In transit: handed to the carrier, on the way.',
+                    'Delivered: carrier reports success, COD pending / collected.',
+                    'Paid: COD received and reconciled — actual recognized revenue.',
+                ],
+            },
+            {
+                heading: 'Comparison & breakdown',
+                items: [
+                    'Compare performance across sales and marketing teams in the same period.',
+                    'Revenue share by product: flagship vs underperforming products.',
+                    'Revenue share by warehouse: balance stock and delivery capacity by region.',
                 ],
             },
         ],
@@ -68,15 +95,23 @@ export default [
         intro: 'Detailed reports by department. Use the tabs at the top to switch between reports.',
         sections: [
             {
-                heading: 'Report groups',
+                heading: 'Telesales group',
                 items: [
-                    'Telesales: operational workload, closing summary, detailed revenue, KPI, callback schedule.',
+                    'Operational workload: which call step each contact is on and how many are pending.',
+                    'Closing summary: orders, revenue, close rate per employee.',
+                    'Detailed revenue: each order with product, value, and status.',
+                    'Sales KPI & callback schedule: expected vs actual, customers to call within 7 days.',
+                ],
+            },
+            {
+                heading: 'Marketing & Warehouse groups',
+                items: [
                     'Marketing: revenue by marketer, order close rate by product.',
                     'Warehouse / system: revenue by warehouse, system sales (new vs returning customers).',
                 ],
             },
             {
-                heading: 'Access rules',
+                heading: 'Access rules & colors',
                 items: [
                     'Admins see everything; department heads / team leads see their team\'s data.',
                     'Staff only see their own figures on permitted reports.',
@@ -94,7 +129,15 @@ export default [
                 heading: 'How it is calculated',
                 items: [
                     'Revenue is based on orders closed in the selected date range, after discounts.',
+                    'Choose "Before/After discount" to change how the leaderboard sums revenue.',
+                    'Quick period filter: This week / This month / This quarter or a custom range.',
+                ],
+            },
+            {
+                heading: 'Filtering & scope',
+                items: [
                     'Filter by team or team lead to view internal team rankings.',
+                    'Ranks reflect the active filter — changing it re-ranks the list.',
                 ],
             },
         ],
@@ -111,6 +154,14 @@ export default [
                 items: [
                     'Leads by source / campaign and conversion to orders.',
                     'Budget spent vs revenue generated per campaign.',
+                    'Cost per closed order (CPO) — which campaigns are expensive.',
+                ],
+            },
+            {
+                heading: 'How to use it',
+                items: [
+                    'Shift budget toward campaigns with low CPO and high close rate.',
+                    'A sudden drop in leads usually means a broken landing page or exhausted ad budget.',
                 ],
             },
         ],
@@ -118,14 +169,30 @@ export default [
     {
         path: '/admin/landing-approvals',
         title: 'Landing page approvals',
-        intro: 'Approve marketing landing pages before ads go live.',
+        intro: 'Approve marketing landing / campaign connections before they receive leads.',
         sections: [
             {
-                heading: 'Workflow',
+                heading: 'Approval workflow',
                 items: [
-                    'Marketing creates campaign + landing → status "Pending approval".',
-                    'Admin reviews content and linked products, then clicks Approve.',
-                    'Only approved campaigns start receiving leads into the system.',
+                    'Marketing creates a campaign + landing → status "Pending approval".',
+                    'Click a row (or the Details button) to open the full campaign detail popup.',
+                    'Click Approve after review — only approved campaigns get leads routed to sales.',
+                ],
+            },
+            {
+                heading: 'Info in the detail popup',
+                items: [
+                    'Campaign: creator, marketer, ad channel, lead intake status, budget.',
+                    'Product & price: product name, SKU, current selling price.',
+                    'Tracking & webhook: utm_campaign, utm_source, lead intake URL (paste into Ladipage).',
+                    'Ladipage → system field mapping table to configure the form correctly.',
+                ],
+            },
+            {
+                heading: 'Notes',
+                items: [
+                    'Before approval, test leads go to Admin only, not to sales.',
+                    'Opening from a notification auto-scrolls to and opens the campaign popup.',
                 ],
             },
         ],
@@ -139,7 +206,15 @@ export default [
                 heading: 'Key metrics',
                 items: [
                     'Leads received and close rate per campaign.',
+                    'Revenue generated vs budget spent.',
                     'Cost per closed order — expensive campaigns stand out immediately.',
+                ],
+            },
+            {
+                heading: 'Notes',
+                items: [
+                    'Cost per order above average order value means the campaign is losing money.',
+                    'Cross-check valid lead rate to know whether a source has many junk leads.',
                 ],
             },
         ],
@@ -154,8 +229,16 @@ export default [
             {
                 heading: 'Key metrics',
                 items: [
-                    'Calls made, contacts handled, and outcome per call (closed, callback, declined…).',
-                    'Close rate over total assigned contacts.',
+                    'Calls made and contacts handled per employee.',
+                    'Outcome per call: closed, callback, no answer, declined, wrong number…',
+                    'Close rate = closed orders / total assigned contacts.',
+                ],
+            },
+            {
+                heading: 'How to use it',
+                items: [
+                    'High call volume but low close rate → coach on the script.',
+                    'Many untouched contacts → forgotten leads, prompt action.',
                 ],
             },
         ],
@@ -166,11 +249,21 @@ export default [
         intro: 'All leads from platforms and their allocation status to sales.',
         sections: [
             {
+                heading: 'Main columns',
+                items: [
+                    'Time: when the lead arrived in the system.',
+                    'Source: the platform / campaign that generated the lead.',
+                    'Phone / Name: customer info; duplicates are flagged.',
+                    'Status: order created, duplicate, or data error.',
+                    'Sales: the rep the lead was assigned to (if any).',
+                ],
+            },
+            {
                 heading: 'Business flow',
                 items: [
-                    'Leads from landing pages / ad platforms are recorded here.',
-                    'Valid leads are auto-assigned or manually allocated ("Manual allocation").',
-                    'Status shows whether the lead became an order, is a duplicate, or has data errors.',
+                    'Leads from landing pages / ads are recorded here.',
+                    'Valid leads are auto-assigned or manually allocated via "Manual allocation".',
+                    'Faulty leads (bad phone, missing info) need source fixes or to be skipped.',
                 ],
             },
         ],
@@ -183,10 +276,19 @@ export default [
         intro: 'Configure webhooks to receive leads from external platforms (landing pages, ad forms…).',
         sections: [
             {
-                heading: 'How to use',
+                heading: 'How to connect',
                 items: [
                     'Each platform has its own webhook URL — paste it into that platform\'s settings.',
+                    'Enter credentials (verify token / webhook secret / API key) and Save.',
+                    'Turn on the "Receive webhook" switch so the system accepts incoming leads.',
+                ],
+            },
+            {
+                heading: 'Testing & monitoring',
+                items: [
                     'The "Send test" button creates a sample lead to verify the connection.',
+                    'Check "Last received" to know whether a platform is still sending leads.',
+                    'Stat cards: leads today, pending processing, platforms enabled.',
                 ],
             },
         ],
@@ -194,13 +296,21 @@ export default [
     {
         path: '/admin/shipping-partners',
         title: 'Shipping partners',
-        intro: 'Set up carrier API accounts (GHN, GHTK, VTP…) for automatic shipping label creation.',
+        intro: 'Set up carrier API accounts (GHN, GHTK, VTP, J&T, SPX…) for automatic label creation.',
         sections: [
             {
-                heading: 'How to use',
+                heading: 'How to configure',
                 items: [
-                    'Enter the token / shop ID provided by the carrier and save.',
-                    'Use test buttons to verify the connection before going live.',
+                    'Enter the token / shop ID / secret provided by the carrier and Save.',
+                    'Turn on "Activate partner" so the system may call the API to create labels.',
+                    'Set a webhook secret to receive delivery status callbacks from the carrier.',
+                ],
+            },
+            {
+                heading: 'Test before going live',
+                items: [
+                    'Use the test buttons (verify token, pickup list, sample fee…) to confirm the connection.',
+                    'Only fully configured and enabled carriers appear when creating a label in the warehouse screen.',
                 ],
             },
         ],
@@ -219,10 +329,18 @@ export default [
                 ],
             },
             {
+                heading: 'Order detail (open each order)',
+                items: [
+                    'Choose a carrier and preview the cost via "Calculate fee" before creating a label.',
+                    'The delivery timeline (tracking) updates by milestone from the carrier.',
+                    'Customer, COD, and order total are shown for label printing / reconciliation.',
+                ],
+            },
+            {
                 heading: 'Notes',
                 items: [
                     'Delivery status syncs from the carrier via webhook or when you click "Sync".',
-                    'Returned goods must be confirmed with "Receive return" to restore inventory.',
+                    'Returned goods must be confirmed as received to restore inventory.',
                 ],
             },
         ],
@@ -235,9 +353,16 @@ export default [
             {
                 heading: 'Issue types',
                 items: [
-                    'COD mismatch: carrier amount differs from system — review the order.',
+                    'COD mismatch: carrier amount differs from system — review the order value.',
                     'Order not found: carrier tracking number not in the system.',
-                    'Matched: reconciliation complete, funds received in full.',
+                    'Matched: reconciliation complete, funds received — can be marked as paid.',
+                ],
+            },
+            {
+                heading: 'How to read the table',
+                items: [
+                    'Each row is a carrier callback with tracking number, partner COD, and system COD.',
+                    'Prioritize rows with COD mismatch and callbacks that could not be matched to an order.',
                 ],
             },
         ],
@@ -254,7 +379,15 @@ export default [
                 items: [
                     'Sales see only their customers / orders; team leads see the whole team.',
                     'Marketing see campaigns and revenue they own.',
-                    'Warehouse, accounting, and allocation have their own workspaces.',
+                    'Warehouse, accounting, and allocation have their own role-based workspaces.',
+                ],
+            },
+            {
+                heading: 'Level & management',
+                items: [
+                    'Level (department head / supervisor / staff) widens the data scope.',
+                    'Assign a team and direct manager so the org chart and access are accurate.',
+                    'You cannot delete your own account or the last admin.',
                 ],
             },
         ],
@@ -265,10 +398,18 @@ export default [
         intro: 'Define departments, teams, and team leads — directly affects data access.',
         sections: [
             {
+                heading: 'Structure',
+                items: [
+                    'Each team has a type (sales / marketing / warehouse / allocation / accounting) and one lead.',
+                    'Teams can be nested (parent department → child teams) to mirror the org.',
+                ],
+            },
+            {
                 heading: 'Notes',
                 items: [
                     'Team leads can view data for all members in their team.',
                     'The org chart is built automatically from the structure defined here.',
+                    'A team with members or child teams cannot be deleted.',
                 ],
             },
         ],
@@ -279,10 +420,18 @@ export default [
         intro: 'Product catalog: base products and variants, selling price, SKU.',
         sections: [
             {
+                heading: 'Catalog structure',
+                items: [
+                    'A base product groups its child variants (size, color, combo…).',
+                    'Each variant has its own SKU and selling price.',
+                ],
+            },
+            {
                 heading: 'Notes',
                 items: [
                     'Every order links to a product — revenue-by-product reports use this data.',
                     'Stock is tracked per SKU under Product inventory.',
+                    'A product with child variants must have its variants deleted first.',
                 ],
             },
         ],
@@ -296,7 +445,14 @@ export default [
                 heading: 'How to read it',
                 items: [
                     'Each block is a department; leaders appear above their teams.',
-                    'The chart reflects data access: superiors see subordinates\' data.',
+                    'Each person card may show close rate / revenue metrics if you have access.',
+                ],
+            },
+            {
+                heading: 'Visibility scope',
+                items: [
+                    'Admins see the whole company; department heads see their entire division.',
+                    'Team leads and staff only see their own team.',
                 ],
             },
         ],
@@ -309,10 +465,18 @@ export default [
         intro: 'Track order cash flow: delivered, COD collected, pending reconciliation, returns.',
         sections: [
             {
-                heading: 'Business flow',
+                heading: 'Cash flow',
                 items: [
-                    'Successful delivery → await carrier COD transfer → reconcile → mark paid.',
+                    'Successful delivery → await carrier COD transfer.',
+                    'Funds received and reconciled → mark "paid" (actual recognized revenue).',
                     'Returns / errors need a reason note for accurate revenue adjustment.',
+                ],
+            },
+            {
+                heading: 'Notes',
+                items: [
+                    'Track uncollected COD against delivered orders to follow up with partners in time.',
+                    'Cross-check with Shipping reconciliation to handle COD-mismatch orders.',
                 ],
             },
         ],
@@ -326,6 +490,7 @@ export default [
                 heading: 'Notes',
                 items: [
                     'Each order ships from one warehouse — revenue-by-warehouse uses this.',
+                    'Assign warehouse staff / leads to approve stock vouchers.',
                     'A warehouse can only be deleted when it has no stock or related orders.',
                 ],
             },
@@ -340,8 +505,16 @@ export default [
                 heading: 'Stock in / out workflow',
                 items: [
                     'Stock in: select warehouse, product, quantity — voucher needs warehouse lead approval to take effect.',
-                    'Manual stock out for transfers / write-offs; sales stock out auto-deducts when the order is handed to shipping.',
+                    'Manual stock out for transfers / write-offs.',
+                    'Sales stock out auto-deducts when the order gets a shipping label.',
                     'Returns add stock back when warehouse confirms receipt.',
+                ],
+            },
+            {
+                heading: 'Notes',
+                items: [
+                    'The on-hand column shows real stock; SKUs below threshold trigger a low-stock alert.',
+                    'All changes are logged under Stock movement history.',
                 ],
             },
         ],
@@ -356,6 +529,7 @@ export default [
                 items: [
                     'Each row is a movement: stock in, sales out, other out, return.',
                     'The "Approver" column confirms the voucher was signed off by the warehouse lead.',
+                    'Filter by warehouse / product / date range to trace a specific SKU.',
                 ],
             },
         ],
@@ -369,7 +543,8 @@ export default [
                 heading: 'How to resolve',
                 items: [
                     'See the error reason per row (bad address, missing phone, product mismatch…).',
-                    'Fix source data and re-sync, or delete if junk.',
+                    'Fix source data and re-sync.',
+                    'Delete the row if it is junk / duplicate not worth keeping.',
                 ],
             },
         ],
@@ -382,10 +557,18 @@ export default [
         intro: 'Your personal figures for the day: assigned contacts, closed orders, revenue.',
         sections: [
             {
+                heading: 'What does this page show?',
+                items: [
+                    'Contacts assigned today and how many you have handled.',
+                    'Your closed orders and revenue against your KPI.',
+                    'Callbacks due now — prioritize them first.',
+                ],
+            },
+            {
                 heading: 'How to use it',
                 items: [
                     'Track personal KPI progress and today\'s to-do list.',
-                    'Callbacks due now appear here — prioritize them first.',
+                    'Click a due callback to jump straight into the call & close workspace.',
                 ],
             },
         ],
@@ -404,6 +587,13 @@ export default [
                     'Close order: choose product, quantity, delivery address — order goes to warehouse.',
                 ],
             },
+            {
+                heading: 'Operating tips',
+                items: [
+                    'Read call history / notes before calling to grasp the customer\'s context.',
+                    'For duplicate-phone (returning) customers, confirm the old order for better care.',
+                ],
+            },
         ],
     },
     {
@@ -412,10 +602,11 @@ export default [
         intro: 'Your results (team leads see the whole team): calls, close rate, revenue.',
         sections: [
             {
-                heading: 'Notes',
+                heading: 'Key metrics',
                 items: [
-                    'Revenue is based on orders closed in the selected date range.',
+                    'Calls made and contacts handled in the period.',
                     'Close rate = closed orders / total assigned contacts.',
+                    'Revenue is based on orders closed in the selected date range.',
                 ],
             },
         ],
@@ -446,6 +637,7 @@ export default [
                 items: [
                     'Customers with multiple orders are marked "returning" — prioritize follow-up.',
                     'Call history and notes help handoffs get context quickly.',
+                    'Open a profile to see all orders and each order\'s delivery status.',
                 ],
             },
         ],
@@ -461,6 +653,7 @@ export default [
                 heading: 'How to use it',
                 items: [
                     'Compare leads and revenue across campaigns to reallocate budget.',
+                    'Track cost per closed order to drop underperforming campaigns.',
                     'A sudden drop in leads often means a broken landing page or exhausted ad budget.',
                 ],
             },
@@ -475,6 +668,7 @@ export default [
                 heading: 'Notes',
                 items: [
                     'Watch valid lead rate — many duplicates / bad phones signal a poor source.',
+                    'Compare which source yields the most closed orders to optimize budget.',
                 ],
             },
         ],
@@ -487,8 +681,16 @@ export default [
             {
                 heading: 'Workflow',
                 items: [
-                    'Create campaign, attach product and budget → submit for admin approval.',
-                    'After approval, the landing starts receiving leads into the system.',
+                    'Create a campaign, attach product and budget → the system issues a lead intake URL.',
+                    'Paste the lead intake URL into the API settings of Ladipage / your landing.',
+                    'Submit for admin approval — after approval, the landing starts receiving leads.',
+                ],
+            },
+            {
+                heading: 'Notes',
+                items: [
+                    'The campaign name generates utm_campaign — Ladipage must send this exact field.',
+                    'The field mapping table helps align form data with the system.',
                 ],
             },
         ],
@@ -502,6 +704,7 @@ export default [
                 heading: 'Notes',
                 items: [
                     'Cost per order above average order value means the campaign is losing money.',
+                    'High leads but low close rate → check source quality / landing content.',
                 ],
             },
         ],
@@ -515,6 +718,7 @@ export default [
                 heading: 'Notes',
                 items: [
                     'Revenue is counted when sales closes an order from the campaign\'s lead.',
+                    'Revenue by delivery status shows how much is actually collected vs at risk of return.',
                 ],
             },
         ],
@@ -544,6 +748,7 @@ export default [
                 heading: 'How to use it',
                 items: [
                     'Prioritize orders awaiting shipping labels so goods ship early.',
+                    'Receive returns to add stock back and close the orders.',
                     'Low stock alerts help plan replenishment.',
                 ],
             },
@@ -557,10 +762,17 @@ export default [
             {
                 heading: 'Workflow',
                 items: [
-                    'Closed sales orders arrive here as "Awaiting label".',
+                    'Closed sales orders arrive here as "Awaiting waybill".',
                     'Open order details → choose carrier → "Calculate fee" for a quote → "Create label".',
                     'Successful label creation auto-deducts stock and moves the order to "Picking / In transit".',
                     'Returns: click "Receive return" to add stock back.',
+                ],
+            },
+            {
+                heading: 'Status tabs',
+                items: [
+                    'Awaiting waybill, Pickup, Delivering, Delivered, Paid, Returns, Cancelled.',
+                    'Click a tab to quickly filter the group of orders to handle.',
                 ],
             },
             {
@@ -597,6 +809,7 @@ export default [
                 items: [
                     'Stock in / out vouchers need warehouse lead approval before affecting balance.',
                     'Sales stock out is automatic when a label is created — no manual step.',
+                    'SKUs below the stock threshold trigger a replenishment alert.',
                 ],
             },
         ],
@@ -626,6 +839,7 @@ export default [
                 heading: 'How to use it',
                 items: [
                     'Track uncollected COD against delivered orders to follow up with partners in time.',
+                    'Know the return rate to forecast cash flow accurately.',
                 ],
             },
         ],
@@ -670,6 +884,7 @@ export default [
                 heading: 'Notes',
                 items: [
                     'Leads waiting too long hurt close rate — assign as soon as leads arrive.',
+                    'Track the unassigned lead backlog to balance load across sales reps.',
                 ],
             },
         ],
@@ -684,6 +899,7 @@ export default [
                 items: [
                     'Select unassigned leads → choose receiving sales rep → confirm.',
                     'Duplicate phone numbers should go back to the sales rep who handled the customer before.',
+                    'Balance the number of leads per rep so no one is overloaded or idle.',
                 ],
             },
         ],

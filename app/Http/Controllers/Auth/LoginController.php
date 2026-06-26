@@ -33,7 +33,7 @@ class LoginController extends Controller
 
         if (! Auth::attempt($credentials, $remember)) {
             throw ValidationException::withMessages([
-                'email' => 'Email hoặc mật khẩu không đúng.',
+                'email' => __('messages.auth.invalid_credentials'),
             ]);
         }
 

@@ -24,9 +24,9 @@ class ProfileUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'password.required' => 'Vui lòng nhập mật khẩu mới.',
-            'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
-            'password.min' => 'Mật khẩu phải có ít nhất :min ký tự.',
+            'password.required' => __('messages.profile.password_required'),
+            'password.confirmed' => __('messages.profile.password_confirmed'),
+            'password.min' => __('messages.profile.password_min'),
         ];
     }
 }

@@ -33,7 +33,6 @@ class ShippingOrderController extends Controller
                     'total' => $paginator->total(),
                 ],
             ],
-            'pageTitle' => 'Đơn vận chuyển',
             'routeUrl' => '/admin/shipping/orders',
         ]));
     }
@@ -47,12 +46,12 @@ class ShippingOrderController extends Controller
 
     public function createShipment(Request $request, Order $order, CreateShipmentService $service): JsonResponse
     {
-        abort_unless($order->closed_at, 422, 'Đơn chưa chốt.');
+        abort_unless($order->closed_at, 422, __('messages.shipping_actions.order_not_closed'));
 
         if (! $order->inventory_deducted_at && ! app(InventoryDeductionService::class)->hasSufficientStock($order)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Hết hàng trong kho.',
+                'message' => __('messages.shipping_actions.out_of_stock'),
             ], 422);
         }
 
@@ -60,7 +59,7 @@ class ShippingOrderController extends Controller
         $service->createForOrder($order->fresh(['items', 'warehouse']), $provider);
 
         return response()->json(array_merge(
-            ['success' => true, 'message' => 'Đã tạo vận đơn.'],
+            ['success' => true, 'message' => __('messages.shipping_actions.waybill_created')],
             app(ShippingOrderService::class)->detail($order->fresh()),
         ));
     }
@@ -71,7 +70,7 @@ class ShippingOrderController extends Controller
         $service->sync($order, $provider);
 
         return response()->json(array_merge(
-            ['success' => true, 'message' => 'Đã đồng bộ trạng thái từ hãng vận chuyển.'],
+            ['success' => true, 'message' => __('messages.shipping_actions.status_synced')],
             $presenter->detail($order->fresh()),
         ));
     }
@@ -89,7 +88,7 @@ class ShippingOrderController extends Controller
         $service->cancel($order, $provider);
 
         return response()->json(array_merge(
-            ['success' => true, 'message' => 'Đã hủy vận đơn.'],
+            ['success' => true, 'message' => __('messages.shipping_actions.waybill_cancelled')],
             $presenter->detail($order->fresh()),
         ));
     }
@@ -102,7 +101,7 @@ class ShippingOrderController extends Controller
         if (! ($result['success'] ?? false) || empty($result['binary'])) {
             return response()->json([
                 'success' => false,
-                'message' => $result['message'] ?? 'Không in được nhãn.',
+                'message' => $result['message'] ?? __('messages.shipping_actions.label_failed'),
                 'data' => $result['data'] ?? null,
             ], 422);
         }

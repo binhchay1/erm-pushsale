@@ -54,7 +54,7 @@ class InventoryMovementController extends Controller
             'note' => ['nullable', 'string', 'max:500'],
             'approved_by_user_id' => ['required', 'integer', 'exists:users,id'],
         ], [
-            'approved_by_user_id.required' => 'Chọn trưởng kho ký duyệt.',
+            'approved_by_user_id.required' => __('messages.inventory.approver_required'),
         ]);
     }
 }

@@ -88,12 +88,12 @@ class MarketingCampaignReportService
     public function columns(): array
     {
         return [
-            ['key' => 'campaignName', 'label' => 'Tên chiến dịch'],
-            ['key' => 'marketerName', 'label' => 'Người phụ trách'],
-            ['key' => 'leadsGenerated', 'label' => 'Số lead'],
-            ['key' => 'junkLeadRate', 'label' => 'Tỷ lệ lead rác (%)'],
-            ['key' => 'adCost', 'label' => 'Chi phí QC (VND)'],
-            ['key' => 'actualRevenue', 'label' => 'Doanh thu thực tế'],
+            ['key' => 'campaignName', 'label' => __('reports.campaign_report.campaign_name')],
+            ['key' => 'marketerName', 'label' => __('reports.campaign_report.marketer_name')],
+            ['key' => 'leadsGenerated', 'label' => __('reports.campaign_report.leads_generated')],
+            ['key' => 'junkLeadRate', 'label' => __('reports.campaign_report.junk_lead_rate')],
+            ['key' => 'adCost', 'label' => __('reports.campaign_report.ad_cost')],
+            ['key' => 'actualRevenue', 'label' => __('reports.campaign_report.actual_revenue')],
         ];
     }
 

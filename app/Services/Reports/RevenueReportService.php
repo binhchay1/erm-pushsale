@@ -61,13 +61,13 @@ class RevenueReportService
     private function formulaLegend(): array
     {
         return [
-            ['key' => '1', 'label' => 'Đơn chốt'],
-            ['key' => '2', 'label' => 'Xác nhận giao hàng'],
-            ['key' => '3', 'label' => 'Hủy vận đơn'],
-            ['key' => '4', 'label' => 'Chuyển ĐVGH'],
-            ['key' => '5', 'label' => 'Đã hoàn'],
-            ['key' => '10', 'label' => '% Đã hoàn = (5)/(4)'],
-            ['key' => '15', 'label' => 'Tỷ lệ chốt = Đơn chốt / Contact'],
+            ['key' => '1', 'label' => __('reports.revenue_legend.closed')],
+            ['key' => '2', 'label' => __('reports.revenue_legend.delivery_confirmed')],
+            ['key' => '3', 'label' => __('reports.revenue_legend.cancel_waybill')],
+            ['key' => '4', 'label' => __('reports.revenue_legend.transferred')],
+            ['key' => '5', 'label' => __('reports.revenue_legend.returned')],
+            ['key' => '10', 'label' => __('reports.revenue_legend.return_pct')],
+            ['key' => '15', 'label' => __('reports.revenue_legend.close_rate')],
         ];
     }
 }

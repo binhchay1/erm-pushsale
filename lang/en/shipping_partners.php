@@ -9,6 +9,7 @@ return [
         'products' => 'Product list',
         'solutions' => 'Gam solutions',
         'login' => 'Login / verify token',
+        'connection' => 'Test connection',
     ],
     'providers' => [
         'viettel_post' => [

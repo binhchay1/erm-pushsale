@@ -3,13 +3,18 @@
 namespace App\Services;
 
 use App\Enums\UserRole;
-use App\Events\UserNotificationCreated;
+use App\Jobs\Notifications\SendUserNotification;
 use App\Models\MarketingSource;
 use App\Models\User;
-use App\Models\UserNotification;
 
 class NotificationService
 {
+    /**
+     * Queue a notification for a single user. Persisting + broadcasting happens
+     * asynchronously on the `notifications` queue.
+     *
+     * @param  array<string, mixed>|null  $data
+     */
     public static function push(
         int $userId,
         string $type,
@@ -17,19 +22,8 @@ class NotificationService
         ?string $message = null,
         ?string $url = null,
         ?array $data = null,
-    ): UserNotification {
-        $notification = UserNotification::query()->create([
-            'user_id' => $userId,
-            'type' => $type,
-            'title' => $data !== null ? '' : ($title ?? ''),
-            'message' => $data !== null ? null : $message,
-            'data' => $data,
-            'url' => $url,
-        ]);
-
-        event(new UserNotificationCreated($notification));
-
-        return $notification;
+    ): void {
+        SendUserNotification::dispatch($userId, $type, $title, $message, $url, $data);
     }
 
     /** Gửi cùng một thông báo tới tất cả user theo (các) vai trò. */

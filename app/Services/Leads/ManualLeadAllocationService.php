@@ -4,6 +4,8 @@ namespace App\Services\Leads;
 
 use App\Enums\LeadIngestionStatus;
 use App\Enums\UserRole;
+use App\Events\LeadPoolChanged;
+use App\Events\SaleWorkspaceChanged;
 use App\Models\LeadIngestion;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -23,7 +25,7 @@ class ManualLeadAllocationService
     {
         if ($saleUser->role !== UserRole::Sales) {
             throw ValidationException::withMessages([
-                'sale_user_id' => 'Chỉ được phân bổ cho nhân viên telesale.',
+                'sale_user_id' => __('messages.lead_allocation.only_telesale'),
             ]);
         }
 
@@ -31,7 +33,7 @@ class ManualLeadAllocationService
 
         if ($leadIds === []) {
             throw ValidationException::withMessages([
-                'lead_ids' => 'Chọn ít nhất một lead.',
+                'lead_ids' => __('messages.lead_allocation.select_one'),
             ]);
         }
 
@@ -43,7 +45,7 @@ class ManualLeadAllocationService
 
         if ($leads->count() !== count($leadIds)) {
             throw ValidationException::withMessages([
-                'lead_ids' => 'Một hoặc nhiều lead không ở trạng thái Chờ xử lý hoặc đã được phân bổ.',
+                'lead_ids' => __('messages.lead_allocation.invalid_status'),
             ]);
         }
 
@@ -76,6 +78,11 @@ class ManualLeadAllocationService
                 $allocated++;
             }
         });
+
+        if ($allocated > 0) {
+            event(new SaleWorkspaceChanged($saleUser->id));
+            event(new LeadPoolChanged);
+        }
 
         return $allocated;
     }

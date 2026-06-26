@@ -117,7 +117,7 @@ class OrgStructureService
 
                 $teams[] = [
                     'id' => (int) $teamId,
-                    'name' => $team?->name ?? 'Team chưa đặt tên',
+                    'name' => $team?->name ?? __('org.unnamed_team'),
                     'member_count' => $teamMembers->count(),
                     'leader' => $leader ? $this->person($leader, $viewerId, $metrics) : null,
                     'members' => $rest->map(fn (User $u) => $this->person($u, $viewerId, $metrics))->all(),
@@ -135,7 +135,7 @@ class OrgStructureService
 
             $departments[] = [
                 'key' => (string) $typeValue,
-                'name' => $type?->label() ?? 'Bộ phận khác',
+                'name' => $type?->label() ?? __('org.other_department'),
                 'member_count' => $members->count(),
                 'head' => $head ? $this->person($head, $viewerId, $metrics) : null,
                 'teams' => $teams,
@@ -212,10 +212,10 @@ class OrgStructureService
     private function chartScopeLabel(string $scope): string
     {
         return match ($scope) {
-            'admin' => 'Toàn công ty',
-            'department' => 'Bộ phận của bạn',
-            'team' => 'Team của bạn',
-            default => 'Team của bạn',
+            'admin' => __('org.scope.company'),
+            'department' => __('org.scope.department'),
+            'team' => __('org.scope.team'),
+            default => __('org.scope.team'),
         };
     }
 
