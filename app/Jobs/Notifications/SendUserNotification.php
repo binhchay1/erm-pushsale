@@ -6,6 +6,8 @@ use App\Events\UserNotificationCreated;
 use App\Models\UserNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Persists a single notification and broadcasts it. Runs on the dedicated
@@ -70,6 +72,15 @@ class SendUserNotification implements ShouldQueue
             TranslateNotificationJob::dispatch($notification->id);
         }
 
-        event(new UserNotificationCreated($notification));
+        // Broadcast là tác dụng phụ — đã lưu DB rồi nên broadcast lỗi (Reverb
+        // chưa chạy / sai cấu hình) không được làm fail job → tránh tạo trùng.
+        try {
+            event(new UserNotificationCreated($notification));
+        } catch (Throwable $e) {
+            Log::warning('Notification broadcast failed', [
+                'notification_id' => $notification->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

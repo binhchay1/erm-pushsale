@@ -5,7 +5,7 @@ namespace App\Events;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -13,8 +13,9 @@ use Illuminate\Queue\SerializesModels;
  * Ping a specific telesales rep that their workspace data changed (new lead
  * assigned to them). Broadcast on the shared sales channel; the client filters
  * by `sale_user_id` so we avoid touching the per-user notification channel.
+ * Queued (ShouldBroadcast) so a broadcaster outage never blocks the request.
  */
-class SaleWorkspaceChanged implements ShouldBroadcastNow
+class SaleWorkspaceChanged implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

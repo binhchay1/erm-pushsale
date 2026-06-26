@@ -37,14 +37,17 @@ class FacebookLeadDriver implements LeadPayloadNormalizer
 
     public function verifyWebhook(Request $request): bool
     {
+        $connection = IntegrationConnection::forPlatform(IntegrationPlatform::Facebook);
+
         if ($request->isMethod('GET')) {
-            $verify = IntegrationConnection::forPlatform(IntegrationPlatform::Facebook);
             $token = $request->query('hub_verify_token');
             $challenge = $request->query('hub_challenge');
+            // Ưu tiên token admin nhập ở UI (DB) → env (khớp giá trị hiển thị trong màn Tích hợp).
+            $expectedToken = $connection->verify_token ?? env('FACEBOOK_VERIFY_TOKEN');
 
-            return $challenge && $token && hash_equals(
-                (string) ($verify->verify_token ?? config('integrations.platforms.facebook.verify_token')),
-                (string) $token
+            return $challenge && $token && $expectedToken && hash_equals(
+                (string) $expectedToken,
+                (string) $token,
             );
         }
 
@@ -53,8 +56,9 @@ class FacebookLeadDriver implements LeadPayloadNormalizer
             return false;
         }
 
-        $secret = config('integrations.platforms.facebook.app_secret')
-            ?? env('FACEBOOK_APP_SECRET');
+        // App Secret dùng để xác thực chữ ký theo tài liệu Facebook (X-Hub-Signature-256).
+        // Ưu tiên giá trị admin nhập ở UI (credentials.app_secret) → env.
+        $secret = ($connection->credentials['app_secret'] ?? null) ?: env('FACEBOOK_APP_SECRET');
         if (! $secret) {
             return app()->environment('local');
         }

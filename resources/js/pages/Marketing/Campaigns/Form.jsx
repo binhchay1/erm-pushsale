@@ -93,6 +93,9 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                             <CardDescription>{t('pages.campaigns.connect_desc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-5 text-sm">
+                            <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
+                                {t('pages.campaigns.connect_per_landing')}
+                            </p>
                             <div className="flex gap-3">
                                 <StepBadge n={1} />
                                 <div className="space-y-1">
@@ -108,16 +111,28 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                                     <p className="text-xs text-muted-foreground">{t('pages.campaigns.connect_step2_desc')}</p>
                                     <div className="space-y-1.5">
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <span className="w-40 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.api_url')}</span>
-                                            <CopyValue value={campaign.webhook_url} />
-                                        </div>
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <span className="w-40 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.connection_name')}</span>
+                                            <span className="w-44 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.connection_name')}</span>
                                             <CopyValue value={campaign.name} mono={false} />
                                         </div>
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <span className="w-40 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.content_type')}</span>
+                                            <span className="w-44 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.api_url')}</span>
+                                            <CopyValue value={campaign.webhook_url} />
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="w-44 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.content_type')}</span>
                                             <CopyValue value="x-www-form-urlencoded" />
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="w-44 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.send_via_label')}</span>
+                                            <span className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                                                {t('pages.campaigns.send_via_value')}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="w-44 shrink-0 text-xs text-muted-foreground">{t('pages.campaigns.header_label')}</span>
+                                            <span className="rounded-md border bg-muted px-2 py-1 text-xs text-muted-foreground">
+                                                {t('pages.campaigns.header_value')}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

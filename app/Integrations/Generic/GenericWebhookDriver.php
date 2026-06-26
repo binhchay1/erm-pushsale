@@ -38,22 +38,53 @@ class GenericWebhookDriver implements LeadPayloadNormalizer
     public function verifyWebhook(Request $request): bool
     {
         $connection = IntegrationConnection::query()->where('platform', $this->platform)->first();
-        $secret = $connection?->webhook_secret ?? config('integrations.webhook.global_secret');
 
-        if (! $secret) {
+        // Tập hợp các khóa hợp lệ: webhook_secret riêng → khóa bí mật admin nhập ở UI → secret chung.
+        $secrets = $this->candidateSecrets($connection);
+
+        if ($secrets === []) {
             return app()->environment('local');
         }
 
         $signature = $request->header('X-SaleOps-Signature')
             ?? $request->header('X-Webhook-Signature');
         $payload = $request->getContent();
-
-        if ($signature && hash_equals(hash_hmac('sha256', $payload, $secret), $signature)) {
-            return true;
-        }
-
         $apiKey = $request->header('X-Api-Key') ?? $request->query('api_key');
 
-        return $apiKey && hash_equals((string) $secret, (string) $apiKey);
+        foreach ($secrets as $secret) {
+            if ($signature && hash_equals(hash_hmac('sha256', $payload, $secret), $signature)) {
+                return true;
+            }
+
+            if ($apiKey && hash_equals($secret, (string) $apiKey)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function candidateSecrets(?IntegrationConnection $connection): array
+    {
+        $candidates = [
+            $connection?->webhook_secret,
+            // Khóa bí mật theo từng nền tảng admin nhập ở UI (đúng theo tài liệu mỗi sàn).
+            $connection?->credentials['secret_key'] ?? null,
+            $connection?->credentials['app_secret'] ?? null,
+            $connection?->credentials['partner_key'] ?? null,
+            $connection?->credentials['webhook_key'] ?? null,
+            $connection?->credentials['access_token'] ?? null,
+            config('integrations.webhook.global_secret'),
+        ];
+
+        return collect($candidates)
+            ->filter(fn ($value) => filled($value))
+            ->map(fn ($value) => (string) $value)
+            ->unique()
+            ->values()
+            ->all();
     }
 }

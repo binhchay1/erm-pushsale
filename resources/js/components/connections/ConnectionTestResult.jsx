@@ -16,7 +16,9 @@ export function ConnectionTestResult({ result, actionLabel }) {
         result.data?.message ??
         (failed ? t('integrations.test_failed') : t('integrations.test_success'));
 
-    if (display && (display.lines?.length || display.options?.length)) {
+    // ShippingFeeResult chỉ dành cho kết quả tính phí ship (có danh sách dịch vụ `options`).
+    // Kết quả test tích hợp/lead chỉ có `lines` → dùng renderer chung bên dưới cho đúng ngữ cảnh.
+    if (display && display.options?.length) {
         return (
             <div className="mt-3 space-y-2">
                 {actionLabel && (

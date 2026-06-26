@@ -13,6 +13,7 @@ use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class LeadIngestionService
 {
@@ -130,8 +131,7 @@ class LeadIngestionService
         ]);
 
         if ($duplicateOrder) {
-            event(new LeadIngested($ingestion));
-            event(new LeadPoolChanged);
+            $this->broadcastSafe(new LeadIngested($ingestion), new LeadPoolChanged);
 
             return $ingestion;
         }
@@ -140,8 +140,7 @@ class LeadIngestionService
         $saleUser = $assignToSale ? $this->routing->assignSalesUser() : null;
 
         if (! $saleUser) {
-            event(new LeadIngested($ingestion));
-            event(new LeadPoolChanged);
+            $this->broadcastSafe(new LeadIngested($ingestion), new LeadPoolChanged);
 
             return $ingestion;
         }
@@ -154,13 +153,34 @@ class LeadIngestionService
                 'processed_at' => now(),
             ]);
             $ingestion->refresh();
-            event(new LeadIngested($ingestion, $order));
-            event(new LeadPoolChanged);
-            event(new SaleWorkspaceChanged($saleUser->id));
+            $this->broadcastSafe(
+                new LeadIngested($ingestion, $order),
+                new LeadPoolChanged,
+                new SaleWorkspaceChanged($saleUser->id),
+            );
             $this->notifyNewLead($ingestion, $order, $campaign);
 
             return $ingestion;
         });
+    }
+
+    /**
+     * Dispatch realtime/broadcast events without ever letting a broadcaster
+     * outage break lead intake. Events are queued (ShouldBroadcast) but we still
+     * guard the dispatch for the sync-queue edge case.
+     */
+    protected function broadcastSafe(object ...$events): void
+    {
+        foreach ($events as $event) {
+            try {
+                event($event);
+            } catch (\Throwable $e) {
+                Log::warning('Realtime broadcast failed (lead intake)', [
+                    'event' => $event::class,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     protected function notifyNewLead(

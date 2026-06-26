@@ -6,12 +6,17 @@ use App\Enums\UserRole;
 use App\Jobs\Notifications\SendUserNotification;
 use App\Models\MarketingSource;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class NotificationService
 {
     /**
      * Queue a notification for a single user. Persisting + broadcasting happens
      * asynchronously on the `notifications` queue.
+     *
+     * Fail-safe: thông báo là tác dụng phụ — nếu queue/broadcast lỗi cũng
+     * KHÔNG được làm hỏng nghiệp vụ chính (tạo chiến dịch, chia lead...).
      *
      * @param  array<string, mixed>|null  $data
      */
@@ -23,7 +28,15 @@ class NotificationService
         ?string $url = null,
         ?array $data = null,
     ): void {
-        SendUserNotification::dispatch($userId, $type, $title, $message, $url, $data);
+        try {
+            SendUserNotification::dispatch($userId, $type, $title, $message, $url, $data);
+        } catch (Throwable $e) {
+            Log::warning('Notification dispatch failed', [
+                'user_id' => $userId,
+                'type' => $type,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /** Gửi cùng một thông báo tới tất cả user theo (các) vai trò. */

@@ -5,15 +5,16 @@ namespace App\Events;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 /**
  * Lightweight ping: the unallocated lead pool changed (new lead / allocation).
  * Admin & allocator lead tables reload their `leads` prop on receipt.
+ * Queued (ShouldBroadcast) so a broadcaster outage never blocks the request.
  */
-class LeadPoolChanged implements ShouldBroadcastNow
+class LeadPoolChanged implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

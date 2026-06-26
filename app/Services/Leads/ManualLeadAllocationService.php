@@ -10,7 +10,9 @@ use App\Models\LeadIngestion;
 use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class ManualLeadAllocationService
 {
@@ -80,8 +82,13 @@ class ManualLeadAllocationService
         });
 
         if ($allocated > 0) {
-            event(new SaleWorkspaceChanged($saleUser->id));
-            event(new LeadPoolChanged);
+            // Realtime ping — không để lỗi broadcaster làm hỏng việc chia lead.
+            try {
+                event(new SaleWorkspaceChanged($saleUser->id));
+                event(new LeadPoolChanged);
+            } catch (Throwable $e) {
+                Log::warning('Realtime broadcast failed (allocation)', ['error' => $e->getMessage()]);
+            }
         }
 
         return $allocated;

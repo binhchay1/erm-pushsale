@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
-import { disconnectEcho, getEcho } from '@/lib/echo';
+import { getEcho } from '@/lib/echo';
 
 /**
  * Listen for WebSocket dashboard stat updates.
@@ -76,8 +76,6 @@ export function useRealtimeDashboard(channelRole, initialStats, onUpdate) {
             echo.leave(channelName);
         };
     }, [auth?.user?.id, channelRole, reverb?.key, noti.desktop]);
-
-    useEffect(() => () => disconnectEcho(), []);
 
     return { stats, connected, isReady };
 }

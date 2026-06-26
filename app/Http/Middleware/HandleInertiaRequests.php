@@ -69,12 +69,14 @@ class HandleInertiaRequests extends Middleware
                 'tagline' => __('brand.tagline'),
             ]),
             'themes' => config('saleops.themes'),
-            'reverb' => [
+            // Đọc từ config (an toàn khi `php artisan config:cache` — env() sẽ null sau khi cache).
+            // Chỉ bật realtime khi broadcaster là reverb; nếu không, client bỏ qua socket.
+            'reverb' => config('broadcasting.default') === 'reverb' ? [
                 'key' => config('broadcasting.connections.reverb.key'),
-                'host' => env('REVERB_HOST', 'localhost'),
-                'port' => (int) env('REVERB_PORT', 8080),
-                'scheme' => env('REVERB_SCHEME', 'http'),
-            ],
+                'host' => config('broadcasting.connections.reverb.options.host'),
+                'port' => (int) (config('broadcasting.connections.reverb.options.port') ?: 443),
+                'scheme' => config('broadcasting.connections.reverb.options.scheme', 'https'),
+            ] : null,
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
