@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\LeadAllocationMode;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Leads\LeadAllocationModeService;
 use App\Services\Leads\ManualLeadAllocationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,5 +29,19 @@ class ManualLeadAllocationController extends Controller
         $count = $service->allocate($validated['lead_ids'], $saleUser, $request->user());
 
         return back()->with('success', __('messages.leads_allocated', ['count' => $count, 'name' => $saleUser->name]));
+    }
+
+    public function updateMode(Request $request, LeadAllocationModeService $modeService): RedirectResponse
+    {
+        $validated = $request->validate([
+            'mode' => ['required', Rule::enum(LeadAllocationMode::class)],
+        ]);
+
+        $mode = LeadAllocationMode::from($validated['mode']);
+        $modeService->set($mode);
+
+        $key = $mode->isAuto() ? 'messages.lead_allocation.mode_auto_on' : 'messages.lead_allocation.mode_manual_on';
+
+        return back()->with('success', __($key));
     }
 }

@@ -30,6 +30,10 @@ return [
         'duplicate' => 'Duplicate phone',
         'failed' => 'Failed',
     ],
+    'lead_allocation_mode' => [
+        'auto' => 'Auto distribution',
+        'manual' => 'Manual only',
+    ],
     'operation_stage' => [
         'new_customer' => 'New customer',
         'call_2' => 'Call 2',

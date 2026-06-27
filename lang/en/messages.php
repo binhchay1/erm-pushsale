@@ -60,6 +60,8 @@ return [
         'select_one' => 'Select at least one lead.',
         'invalid_status' => 'One or more leads are not pending or have already been allocated.',
         'invalid_phone' => 'Invalid phone number',
+        'mode_auto_on' => 'Auto distribution is ON. New leads are auto-assigned to sales.',
+        'mode_manual_on' => 'Manual-only mode is ON. Auto distribution is paused; new leads wait in the pool.',
     ],
     'lead_intake' => [
         'invalid_phone' => 'Invalid phone number (not a valid VN mobile format).',

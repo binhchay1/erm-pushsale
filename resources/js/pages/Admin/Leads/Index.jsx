@@ -7,6 +7,7 @@ import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import { leadTone } from '@/lib/status-tones';
@@ -23,6 +24,8 @@ export default function LeadsIndex({
     listUrl = '/admin/leads',
     canDelete = true,
     realtimeChannel = 'dashboard.admin',
+    allocationMode = 'auto',
+    allocationModeUrl = '/admin/leads/allocation-mode',
 }) {
     const t = useT();
 
@@ -30,6 +33,25 @@ export default function LeadsIndex({
     const [selected, setSelected] = useState([]);
     const [saleUserId, setSaleUserId] = useState('');
     const [allocating, setAllocating] = useState(false);
+    const [savingMode, setSavingMode] = useState(false);
+
+    const manualOnly = allocationMode === 'manual';
+
+    const toggleMode = (next) => {
+        setSavingMode(true);
+        router.post(
+            allocationModeUrl,
+            { mode: next ? 'manual' : 'auto' },
+            {
+                preserveScroll: true,
+                preserveState: false,
+                onSuccess: () =>
+                    toast.success(next ? t('pages.leads.mode_manual_on') : t('pages.leads.mode_auto_on')),
+                onError: () => toast.error(t('pages.leads.mode_failed')),
+                onFinish: () => setSavingMode(false),
+            },
+        );
+    };
 
     const search = (overrides) => {
         router.get(listUrl, { ...filters, ...overrides }, { preserveState: true });
@@ -98,27 +120,49 @@ export default function LeadsIndex({
                     )}
                 </div>
 
-                <div className="flex flex-wrap items-end gap-3 rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
-                    <div className="min-w-[200px] flex-1 space-y-1">
-                        <p className="text-xs font-medium text-muted-foreground">{t('pages.leads.manual_allocate_label')}</p>
-                        <select
-                            className="input-soft h-9 w-full max-w-xs px-2"
-                            value={saleUserId}
-                            onChange={(e) => setSaleUserId(e.target.value)}
-                        >
-                            <option value="">{t('pages.leads.select_telesale')}</option>
-                            {salesUsers.map((u) => (
-                                <option key={u.id} value={u.id}>
-                                    {u.name}
-                                </option>
-                            ))}
-                        </select>
+                <div className="space-y-3 rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-amber-200/60 pb-3 dark:border-amber-900/30">
+                        <div className="flex items-center gap-3">
+                            <Switch
+                                id="allocation-mode"
+                                checked={manualOnly}
+                                onCheckedChange={toggleMode}
+                                disabled={savingMode}
+                            />
+                            <label htmlFor="allocation-mode" className="cursor-pointer select-none">
+                                <span className="block text-sm font-medium">{t('pages.leads.mode_toggle_label')}</span>
+                                <span className="block text-xs text-muted-foreground">
+                                    {manualOnly ? t('pages.leads.mode_manual_hint') : t('pages.leads.mode_auto_hint')}
+                                </span>
+                            </label>
+                        </div>
+                        <StatusBadge tone={manualOnly ? 'warning' : 'success'}>
+                            {manualOnly ? t('pages.leads.mode_manual_badge') : t('pages.leads.mode_auto_badge')}
+                        </StatusBadge>
                     </div>
-                    <Button size="sm" onClick={allocate} disabled={allocating || !selected.length}>
-                        <UserPlus className="size-4" />
-                        {t('pages.leads.allocate_btn', { count: selected.length })}
-                    </Button>
-                    <p className="text-xs text-muted-foreground">{t('pages.leads.allocate_hint')}</p>
+
+                    <div className="flex flex-wrap items-end gap-3">
+                        <div className="min-w-[200px] flex-1 space-y-1">
+                            <p className="text-xs font-medium text-muted-foreground">{t('pages.leads.manual_allocate_label')}</p>
+                            <select
+                                className="input-soft h-9 w-full max-w-xs px-2"
+                                value={saleUserId}
+                                onChange={(e) => setSaleUserId(e.target.value)}
+                            >
+                                <option value="">{t('pages.leads.select_telesale')}</option>
+                                {salesUsers.map((u) => (
+                                    <option key={u.id} value={u.id}>
+                                        {u.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <Button size="sm" onClick={allocate} disabled={allocating || !selected.length}>
+                            <UserPlus className="size-4" />
+                            {t('pages.leads.allocate_btn', { count: selected.length })}
+                        </Button>
+                        <p className="text-xs text-muted-foreground">{t('pages.leads.allocate_hint')}</p>
+                    </div>
                 </div>
 
                 <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">

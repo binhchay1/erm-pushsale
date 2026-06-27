@@ -30,6 +30,10 @@ return [
         'duplicate' => 'Trùng số',
         'failed' => 'Lỗi',
     ],
+    'lead_allocation_mode' => [
+        'auto' => 'Chia tự động',
+        'manual' => 'Chỉ chia tay',
+    ],
     'operation_stage' => [
         'new_customer' => 'Khách mới',
         'call_2' => 'Gọi lần 2',

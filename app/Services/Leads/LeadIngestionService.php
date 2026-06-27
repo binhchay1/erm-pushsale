@@ -21,6 +21,7 @@ class LeadIngestionService
         protected LeadRoutingService $routing,
         protected LeadOrderFactory $orderFactory,
         protected LeadSanitizer $sanitizer,
+        protected LeadAllocationModeService $allocationMode,
     ) {}
 
     /**
@@ -131,7 +132,11 @@ class LeadIngestionService
             return $ingestion;
         }
 
-        $assignToSale = $campaign === null || $campaign->is_approved;
+        // Chỉ chia tự động khi mode = auto. Mode được đọc tại thời điểm job chạy nên
+        // mọi lead đang nằm trong queue cũng tuân theo chế độ hiện tại (bật chia tay
+        // → lead vào pool chờ chia tay, không bị auto-assign nữa).
+        $assignToSale = ($campaign === null || $campaign->is_approved)
+            && $this->allocationMode->isAuto();
         $saleUser = $assignToSale ? $this->routing->assignSalesUser() : null;
 
         if (! $saleUser) {

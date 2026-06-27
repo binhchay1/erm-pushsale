@@ -60,6 +60,8 @@ return [
         'select_one' => 'Chọn ít nhất một lead.',
         'invalid_status' => 'Một hoặc nhiều lead không ở trạng thái Chờ xử lý hoặc đã được phân bổ.',
         'invalid_phone' => 'Số điện thoại không hợp lệ',
+        'mode_auto_on' => 'Đã bật chia tự động. Lead mới sẽ tự động chia cho sales.',
+        'mode_manual_on' => 'Đã bật chế độ chỉ chia tay. Chia tự động tạm dừng; lead mới sẽ chờ trong pool.',
     ],
     'lead_intake' => [
         'invalid_phone' => 'Số điện thoại không hợp lệ (không đúng định dạng di động VN).',

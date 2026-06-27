@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LeadIngestion;
 use App\Repositories\LeadIngestionRepository;
 use App\Repositories\UserRepository;
+use App\Services\Leads\LeadAllocationModeService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,6 +19,7 @@ class LeadsLogController extends Controller
         Request $request,
         LeadIngestionRepository $leadRepo,
         UserRepository $users,
+        LeadAllocationModeService $modeService,
     ): Response {
         $platform = $request->query('platform');
         $status = $request->query('status');
@@ -62,6 +64,10 @@ class LeadsLogController extends Controller
                 : '/admin/leads',
             'canDelete' => ! $request->is('allocator/*'),
             'realtimeChannel' => $request->is('allocator/*') ? 'dashboard.allocator' : 'dashboard.admin',
+            'allocationMode' => $modeService->current()->value,
+            'allocationModeUrl' => $request->is('allocator/*')
+                ? '/allocator/leads/allocation-mode'
+                : '/admin/leads/allocation-mode',
         ]);
     }
 }

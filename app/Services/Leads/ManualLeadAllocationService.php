@@ -39,21 +39,24 @@ class ManualLeadAllocationService
             ]);
         }
 
-        $leads = LeadIngestion::query()
-            ->whereIn('id', $leadIds)
-            ->where('status', LeadIngestionStatus::Pending)
-            ->whereNull('order_id')
-            ->get();
-
-        if ($leads->count() !== count($leadIds)) {
-            throw ValidationException::withMessages([
-                'lead_ids' => __('messages.lead_allocation.invalid_status'),
-            ]);
-        }
-
         $allocated = 0;
 
-        DB::transaction(function () use ($leads, $saleUser, &$allocated) {
+        DB::transaction(function () use ($leadIds, $saleUser, &$allocated) {
+            // Khoá hàng lead để tránh đua với chia tự động / phiên chia tay khác.
+            $leads = LeadIngestion::query()
+                ->whereIn('id', $leadIds)
+                ->where('status', LeadIngestionStatus::Pending)
+                ->whereNull('order_id')
+                ->lockForUpdate()
+                ->get();
+
+            // Chỉ cần 1 lead đã bị xử lý (auto-assign / người khác chia) → huỷ cả lô để đồng bộ.
+            if ($leads->count() !== count($leadIds)) {
+                throw ValidationException::withMessages([
+                    'lead_ids' => __('messages.lead_allocation.invalid_status'),
+                ]);
+            }
+
             foreach ($leads as $lead) {
                 $normalized = $this->orderFactory->normalizedFromLead($lead);
                 $order = $this->orderFactory->createFromLead($lead, $normalized, $saleUser);

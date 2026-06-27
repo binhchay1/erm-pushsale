@@ -134,6 +134,7 @@ Route::middleware('auth')->group(function () {
         Route::post('integrations/{platform}/test', [IntegrationsController::class, 'testWebhook'])->name('integrations.test');
         Route::get('leads', LeadsLogController::class)->name('leads.index');
         Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
+        Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
         Route::get('shipping-partners', [ShippingPartnersController::class, 'index'])->name('shipping-partners.index');
         Route::put('shipping-partners/{provider}', [ShippingPartnersController::class, 'update'])->name('shipping-partners.update');
         Route::get('shipping/reconciliation', ShippingReconciliationController::class)->name('shipping.reconciliation');
@@ -203,5 +204,6 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', AllocatorDashboardController::class)->name('dashboard');
         Route::get('workspace', LeadsLogController::class)->name('workspace');
         Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
+        Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
     });
 });
