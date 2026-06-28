@@ -26,6 +26,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // EC2 sau Nginx/ELB: tin proxy để Laravel nhận đúng HTTPS (X-Forwarded-*).
+        // Sai bước này → cookie session lệch scheme → đăng nhập xong bị đá về login.
+        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_FOR
+            | Request::HEADER_X_FORWARDED_HOST
+            | Request::HEADER_X_FORWARDED_PORT
+            | Request::HEADER_X_FORWARDED_PROTO);
+
         $middleware->web(prepend: [
             SetLocale::class,
         ]);
