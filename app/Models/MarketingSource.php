@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MarketingSource extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
         'parent_id', 'name', 'product_id', 'marketer_user_id', 'created_by_user_id', 'ad_channel',
         'utm_source', 'utm_campaign', 'webhook_token', 'budget', 'interactions', 'contacts',

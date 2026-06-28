@@ -32,6 +32,7 @@ export default function Login() {
                     </CardHeader>
                     <CardContent>
                         <LoginForm />
+                        <p className="mt-4 text-center text-xs text-muted-foreground">{t('auth.contact_hint')}</p>
                     </CardContent>
                 </Card>
 

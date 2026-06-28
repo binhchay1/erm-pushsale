@@ -54,5 +54,9 @@ export default {
         accounting_workspace: 'Orders & cash flow',
         business_report: 'Business report',
         allocator_workspace: 'Lead allocation',
+        allocation_report: 'Lead allocation report',
+        allocator_load_report: 'Telesale load & performance',
+        platform_companies: 'Companies',
+        platform_settings: 'Platform settings',
     },
 };

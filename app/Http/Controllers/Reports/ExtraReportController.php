@@ -2,22 +2,26 @@
 
 namespace App\Http\Controllers\Reports;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ExportsReportData;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
+use App\Http\Controllers\Controller;
 use App\Services\Reports\ExtraReportService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExtraReportController extends Controller
 {
+    use ExportsReportData;
     use InteractsWithReportFilters;
 
     public function __construct(
         private readonly ExtraReportService $reports,
     ) {}
 
-    public function __invoke(Request $request, string $report): Response
+    public function __invoke(Request $request, string $report): Response|StreamedResponse|HttpResponse
     {
         $user = $request->user();
 
@@ -26,6 +30,26 @@ class ExtraReportController extends Controller
 
         $filter = $this->reportFilters($request);
         $data = $this->reports->build($report, $user, $filter);
+
+        $exportRows = $data['rows'];
+        if ($data['totals']) {
+            $exportRows[] = array_merge($data['totals'], ['_is_total' => true]);
+        }
+
+        if ($exported = $this->maybeExportReport(
+            $request,
+            $exportRows,
+            $data['columns'],
+            'bao-cao-'.$report,
+            [
+                'title' => $data['meta']['title'],
+                'subtitle' => $data['meta']['description'] ?? '',
+                'date_from' => $filter->dateFrom?->toDateString(),
+                'date_to' => $filter->dateTo?->toDateString(),
+            ],
+        )) {
+            return $exported;
+        }
 
         return Inertia::render('Reports/ExtraReport', array_merge(
             $this->reportPageProps($request),
@@ -36,7 +60,6 @@ class ExtraReportController extends Controller
                 'totals' => $data['totals'],
                 'reportNav' => $this->reports->availableFor($user),
                 'routeUrl' => $this->reports->basePathFor($user).'/'.$report,
-                // Mỗi báo cáo chỉ hiển thị bộ lọc phù hợp với nghiệp vụ của nó
                 'filterFields' => $data['meta']['filterFields'],
             ],
         ));

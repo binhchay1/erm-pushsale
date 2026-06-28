@@ -1,3 +1,5 @@
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 
 export function ScrollDataTable({ children, className }) {
@@ -17,7 +19,30 @@ export function ScrollDataTable({ children, className }) {
     );
 }
 
-export function Th({ children, className, colSpan }) {
+export function Th({ children, className, colSpan, sortable, sortKey, sort, onSort }) {
+    if (sortable && sortKey && onSort) {
+        const active = sort?.key === sortKey;
+        const Icon = active ? (sort.dir === 'asc' ? ArrowUp : ArrowDown) : ArrowUpDown;
+
+        return (
+            <th
+                colSpan={colSpan}
+                className={cn(
+                    'whitespace-nowrap border-b-2 border-border bg-muted/80 px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-foreground/70',
+                    'cursor-pointer select-none transition-colors hover:bg-muted',
+                    active && 'text-primary',
+                    className
+                )}
+                onClick={() => onSort(sortKey)}
+            >
+                <span className="inline-flex items-center gap-1">
+                    {children}
+                    <Icon className={cn('size-3 shrink-0', active ? 'text-primary' : 'text-muted-foreground/50')} />
+                </span>
+            </th>
+        );
+    }
+
     return (
         <th
             colSpan={colSpan}

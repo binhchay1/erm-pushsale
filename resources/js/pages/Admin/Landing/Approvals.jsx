@@ -9,6 +9,7 @@ import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { copyToClipboard } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
 import AppLayout from '@/layouts/AppLayout';
@@ -57,6 +58,7 @@ export default function LandingApprovals({ campaigns, highlightCampaignId, field
     };
 
     const pending = campaigns.filter((c) => !c.is_approved);
+    const { sortedRows, sort, toggleSort } = useTableSort(campaigns, { defaultKey: 'created_at', defaultDir: 'desc' });
 
     useEffect(() => {
         if (!highlightCampaignId) return;
@@ -92,18 +94,18 @@ export default function LandingApprovals({ campaigns, highlightCampaignId, field
                     <table className="w-full min-w-[1000px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>{t('pages.landing.col_campaign')}</Th>
-                                <Th>{t('pages.landing.col_creator')}</Th>
-                                <Th>{t('pages.landing.col_marketer')}</Th>
-                                <Th>utm_campaign</Th>
-                                <Th>{t('pages.landing.col_created')}</Th>
-                                <Th>{t('pages.landing.col_status')}</Th>
+                                <Th sortable sortKey="name" sort={sort} onSort={toggleSort}>{t('pages.landing.col_campaign')}</Th>
+                                <Th sortable sortKey="creator" sort={sort} onSort={toggleSort}>{t('pages.landing.col_creator')}</Th>
+                                <Th sortable sortKey="marketer" sort={sort} onSort={toggleSort}>{t('pages.landing.col_marketer')}</Th>
+                                <Th sortable sortKey="utm_campaign" sort={sort} onSort={toggleSort}>utm_campaign</Th>
+                                <Th sortable sortKey="created_at" sort={sort} onSort={toggleSort}>{t('pages.landing.col_created')}</Th>
+                                <Th sortable sortKey="is_approved" sort={sort} onSort={toggleSort}>{t('pages.landing.col_status')}</Th>
                                 <Th />
                             </tr>
                         </thead>
                         <tbody>
-                            {campaigns.length ? (
-                                campaigns.map((row) => (
+                            {sortedRows.length ? (
+                                sortedRows.map((row) => (
                                     <tr
                                         key={row.id}
                                         ref={(el) => {

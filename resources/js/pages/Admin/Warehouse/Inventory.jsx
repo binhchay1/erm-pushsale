@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { cn } from '@/lib/utils';
 import { formatNumber } from '@/lib/format';
 import { movementTone } from '@/lib/status-tones';
@@ -26,6 +27,7 @@ export default function Inventory({
     const f = report.filters ?? {};
     const rows = report.rows?.data ?? [];
     const recentMovements = report.recentIntakes ?? [];
+    const { sortedRows, sort, toggleSort } = useTableSort(rows, { defaultKey: 'productName' });
 
     const [mode, setMode] = useState('intake');
     const [warehouseId, setWarehouseId] = useState('');
@@ -36,6 +38,8 @@ export default function Inventory({
     const [submitting, setSubmitting] = useState(false);
 
     const isIntake = mode === 'intake';
+    const canSubmitMovement =
+        !!warehouseId && !!productId && Number(quantity) > 0 && !!approverId && !submitting;
 
     const search = (overrides) => {
         router.get(window.location.pathname, { ...f, ...overrides }, { preserveState: true });
@@ -198,10 +202,20 @@ export default function Inventory({
                             />
                         </div>
                     </div>
-                    <div className="mt-3">
-                        <Button size="sm" onClick={submitMovement} disabled={submitting}>
+                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                        <Button
+                            size="sm"
+                            onClick={submitMovement}
+                            disabled={!canSubmitMovement}
+                            title={canSubmitMovement ? undefined : t('operations.inventory.fill_required')}
+                        >
                             {isIntake ? t('operations.inventory.submit_intake') : t('operations.inventory.submit_export')}
                         </Button>
+                        {!canSubmitMovement && (
+                            <span className="text-xs text-muted-foreground">
+                                {t('operations.inventory.fill_required')}
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -294,18 +308,18 @@ export default function Inventory({
                         <thead>
                             <tr>
                                 <Th>#</Th>
-                                <Th>{t('operations.inventory.warehouse')}</Th>
-                                <Th>{t('operations.inventory.product')}</Th>
-                                <Th>{t('operations.inventory.col_batch')}</Th>
-                                <Th>{t('operations.inventory.col_location')}</Th>
-                                <Th className="text-right">{t('operations.inventory.col_on_hand')}</Th>
-                                <Th className="text-right">{t('operations.inventory.col_pending')}</Th>
-                                <Th>{t('operations.inventory.col_stopped')}</Th>
+                                <Th sortable sortKey="warehouseName" sort={sort} onSort={toggleSort}>{t('operations.inventory.warehouse')}</Th>
+                                <Th sortable sortKey="productName" sort={sort} onSort={toggleSort}>{t('operations.inventory.product')}</Th>
+                                <Th sortable sortKey="batchCode" sort={sort} onSort={toggleSort}>{t('operations.inventory.col_batch')}</Th>
+                                <Th sortable sortKey="locationCode" sort={sort} onSort={toggleSort}>{t('operations.inventory.col_location')}</Th>
+                                <Th sortable sortKey="stockQuantity" sort={sort} onSort={toggleSort} className="text-right">{t('operations.inventory.col_on_hand')}</Th>
+                                <Th sortable sortKey="pendingSalesQuantity" sort={sort} onSort={toggleSort} className="text-right">{t('operations.inventory.col_pending')}</Th>
+                                <Th sortable sortKey="isDiscontinued" sort={sort} onSort={toggleSort}>{t('operations.inventory.col_stopped')}</Th>
                                 <Th />
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.map((r) => (
+                            {sortedRows.map((r) => (
                                 <tr key={r.id}>
                                     <Td>{r.id}</Td>
                                     <Td>{r.warehouseName}</Td>

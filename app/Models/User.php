@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\OrgLevel;
 use App\Enums\UserRole;
+use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -15,12 +16,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'role', 'avatar_path', 'phone', 'job_title', 'team_id', 'manager_user_id', 'is_team_leader', 'org_level'])]
+#[Fillable(['company_id', 'name', 'email', 'password', 'role', 'is_owner', 'is_platform_admin', 'avatar_path', 'phone', 'job_title', 'team_id', 'manager_user_id', 'is_team_leader', 'org_level'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use BelongsToTenant, HasApiTokens, HasFactory, Notifiable;
 
     public const ROLE_ADMIN = 'admin';
 
@@ -41,6 +42,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => UserRole::class,
             'is_team_leader' => 'boolean',
+            'is_owner' => 'boolean',
+            'is_platform_admin' => 'boolean',
             'org_level' => OrgLevel::class,
         ];
     }
@@ -88,6 +91,16 @@ class User extends Authenticatable
     public function isSales(): bool
     {
         return $this->role === UserRole::Sales;
+    }
+
+    public function isOwner(): bool
+    {
+        return (bool) $this->is_owner;
+    }
+
+    public function isPlatformAdmin(): bool
+    {
+        return (bool) $this->is_platform_admin;
     }
 
     public function roleLabel(): string

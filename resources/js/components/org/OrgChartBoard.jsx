@@ -1,6 +1,7 @@
 import { Crown, UserRound } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useRoleLabel } from '@/hooks/use-labels';
 import { formatCurrency, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { useT } from '@/providers/I18nProvider';
@@ -16,6 +17,7 @@ const DEPT_ACCENTS = {
 
 function PersonRow({ person, badge }) {
     const t = useT();
+    const roleLabel = useRoleLabel(person.role);
 
     return (
         <div
@@ -43,7 +45,7 @@ function PersonRow({ person, badge }) {
                     )}
                 </p>
                 <p className="truncate text-[11px] text-muted-foreground">
-                    {person.job_title ?? person.role_label}
+                    {person.job_title ?? roleLabel}
                 </p>
             </div>
             {person.show_metrics && (

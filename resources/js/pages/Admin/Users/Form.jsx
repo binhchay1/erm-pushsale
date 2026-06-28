@@ -6,11 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { useLabels } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
 export default function UserForm({ user, roles, teams, managers, orgLevels }) {
     const t = useT();
+    const labels = useLabels();
     const isEdit = Boolean(user?.id);
     const { data, setData, post, put, processing, errors } = useForm({
         name: user?.name ?? '',
@@ -88,7 +90,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                                 >
                                     {roles.map((r) => (
                                         <option key={r.value} value={r.value}>
-                                            {r.label}
+                                            {labels.user_role?.[r.value] ?? r.label}
                                         </option>
                                     ))}
                                 </select>

@@ -7,6 +7,7 @@ use App\Integrations\IntegrationDriverFactory;
 use App\Models\MarketingSource;
 use App\Services\Integrations\IntegrationConfigService;
 use App\Services\Leads\LeadIngestionService;
+use App\Support\TenantManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -26,9 +27,19 @@ class ProcessLeadIngestionJob implements ShouldQueue
         public string $platform,
         public array $payload,
         public ?int $campaignId = null,
+        public ?int $companyId = null,
     ) {}
 
     public function handle(
+        LeadIngestionService $ingestionService,
+        IntegrationConfigService $configService,
+    ): void {
+        app(TenantManager::class)->forCompany($this->companyId, function () use ($ingestionService, $configService) {
+            $this->process($ingestionService, $configService);
+        });
+    }
+
+    private function process(
         LeadIngestionService $ingestionService,
         IntegrationConfigService $configService,
     ): void {

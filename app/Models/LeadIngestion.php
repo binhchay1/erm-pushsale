@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Enums\LeadIngestionStatus;
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LeadIngestion extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
         'platform',
         'external_id',

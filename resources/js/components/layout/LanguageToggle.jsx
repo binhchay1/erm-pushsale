@@ -1,4 +1,4 @@
-import { Languages } from 'lucide-react';
+import { Globe2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -31,7 +31,7 @@ export function LanguageToggle() {
                     className="gap-1.5 px-2 font-medium"
                     title={current.label}
                 >
-                    <Languages className="size-4 shrink-0" />
+                    <Globe2 className="size-4 shrink-0" />
                     <span className="text-xs">{current.short}</span>
                 </Button>
             </DropdownMenuTrigger>

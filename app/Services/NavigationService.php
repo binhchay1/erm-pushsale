@@ -15,6 +15,15 @@ class NavigationService
             return [];
         }
 
+        if ($user->isPlatformAdmin()) {
+            return $this->grouped([
+                $this->group(null, [
+                    $this->item('platform_companies', '/platform/companies', 'building-2'),
+                    $this->item('platform_settings', '/platform/settings', 'settings-2'),
+                ]),
+            ]);
+        }
+
         return match ($user->role) {
             UserRole::Admin => $this->adminNavigation(),
             UserRole::Sales => $this->grouped([
@@ -30,7 +39,7 @@ class NavigationService
                 $this->group(null, $this->accountingItems()),
             ]),
             UserRole::Allocator => $this->grouped([
-                $this->group(null, $this->allocatorItems()),
+                $this->group(null, $this->allocatorItems($user)),
             ]),
         };
     }
@@ -154,14 +163,22 @@ class NavigationService
     }
 
     /** @return list<array{title_key: string, url: string, icon: string}> */
-    private function allocatorItems(): array
+    private function allocatorItems(User $user): array
     {
-        return [
+        $items = [
             $this->item('overview', '/allocator/dashboard', 'home'),
             $this->item('allocator_workspace', '/allocator/workspace', 'user-plus'),
+            $this->item('allocation_report', '/allocator/reports/allocation', 'file-bar-chart'),
+        ];
+
+        if ($user->is_team_leader || in_array($user->org_level, [OrgLevel::Head, OrgLevel::Supervisor], true)) {
+            $items[] = $this->item('allocator_load_report', '/allocator/reports/load', 'gauge');
+        }
+
+        return array_merge($items, [
             $this->item('org_chart', '/org-chart', 'git-branch'),
             $this->item('settings', '/settings', 'settings'),
-        ];
+        ]);
     }
 
     /** @return array{title_key: string, url: string, icon: string} */
@@ -194,4 +211,3 @@ class NavigationService
         return $groups;
     }
 }
-

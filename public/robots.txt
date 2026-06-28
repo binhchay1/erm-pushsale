@@ -1,2 +1,20 @@
 User-agent: *
-Disallow:
+Allow: /$
+Allow: /features
+Allow: /solutions
+Allow: /about
+Allow: /contact
+Allow: /login
+Disallow: /admin
+Disallow: /sales
+Disallow: /marketing
+Disallow: /warehouse
+Disallow: /accounting
+Disallow: /allocator
+Disallow: /platform
+Disallow: /profile
+Disallow: /settings
+Disallow: /notifications
+Disallow: /org-chart
+
+Sitemap: /sitemap.xml

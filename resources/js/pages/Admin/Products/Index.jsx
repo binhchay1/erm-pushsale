@@ -5,12 +5,14 @@ import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { formatCurrency } from '@/lib/format';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
 export default function ProductsIndex({ products }) {
     const t = useT();
+    const { sortedRows, sort, toggleSort } = useTableSort(products, { defaultKey: 'name' });
 
     return (
         <AppLayout>
@@ -34,22 +36,22 @@ export default function ProductsIndex({ products }) {
                     <table className="w-full min-w-[900px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>{t('pages.products.col_name')}</Th>
-                                <Th>{t('pages.products.col_sku')}</Th>
-                                <Th>{t('pages.products.col_price')}</Th>
-                                <Th>{t('pages.products.col_parent')}</Th>
-                                <Th>{t('pages.products.col_variants')}</Th>
-                                <Th>{t('pages.products.col_status')}</Th>
+                                <Th sortable sortKey="name" sort={sort} onSort={toggleSort}>{t('pages.products.col_name')}</Th>
+                                <Th sortable sortKey="sku" sort={sort} onSort={toggleSort}>{t('pages.products.col_sku')}</Th>
+                                <Th sortable sortKey="unit_price" sort={sort} onSort={toggleSort} className="text-right">{t('pages.products.col_price')}</Th>
+                                <Th sortable sortKey="parent_name" sort={sort} onSort={toggleSort}>{t('pages.products.col_parent')}</Th>
+                                <Th sortable sortKey="variants_count" sort={sort} onSort={toggleSort}>{t('pages.products.col_variants')}</Th>
+                                <Th sortable sortKey="is_active" sort={sort} onSort={toggleSort}>{t('pages.products.col_status')}</Th>
                                 <Th>{t('pages.actions')}</Th>
                             </tr>
                         </thead>
                         <tbody>
-                            {products.length ? (
-                                products.map((row) => (
+                            {sortedRows.length ? (
+                                sortedRows.map((row) => (
                                     <tr key={row.id} className="hover:bg-muted/30">
                                         <Td className="font-medium">{row.name}</Td>
                                         <Td className="font-mono">{row.sku ?? '—'}</Td>
-                                        <Td className="tabular-nums">{formatCurrency(row.unit_price)}</Td>
+                                        <Td className="tabular-nums text-right">{formatCurrency(row.unit_price)}</Td>
                                         <Td>{row.parent_name ?? '—'}</Td>
                                         <Td>{row.variants_count || '—'}</Td>
                                         <Td>{row.is_active ? t('pages.selling') : t('pages.stopped_short')}</Td>

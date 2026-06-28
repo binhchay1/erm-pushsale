@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { formatCurrency } from '@/lib/format';
 import { copyToClipboard } from '@/lib/clipboard';
 import AppLayout from '@/layouts/AppLayout';
@@ -14,6 +15,7 @@ import { useT } from '@/providers/I18nProvider';
 export default function CampaignIndex({ campaigns }) {
     const t = useT();
     const { ask, ConfirmDialogPortal } = useConfirm();
+    const { sortedRows, sort, toggleSort } = useTableSort(campaigns, { defaultKey: 'name' });
 
     const remove = async (id, name) => {
         const ok = await ask({
@@ -53,18 +55,18 @@ export default function CampaignIndex({ campaigns }) {
                     <table className="w-full min-w-[1100px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>{t('pages.campaigns.col_campaign')}</Th>
+                                <Th sortable sortKey="name" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_campaign')}</Th>
                                 <Th>{t('pages.campaigns.col_webhook')}</Th>
-                                <Th>{t('pages.campaigns.col_utm_code')}</Th>
-                                <Th>{t('pages.campaigns.col_product')}</Th>
-                                <Th>{t('pages.campaigns.col_orders_revenue')}</Th>
-                                <Th>{t('pages.campaigns.col_approval')}</Th>
+                                <Th sortable sortKey="utm_campaign" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_utm_code')}</Th>
+                                <Th sortable sortKey="product" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_product')}</Th>
+                                <Th sortable sortKey="orders_count" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_orders_revenue')}</Th>
+                                <Th sortable sortKey="is_approved" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_approval')}</Th>
                                 <Th>{t('pages.actions')}</Th>
                             </tr>
                         </thead>
                         <tbody>
-                            {campaigns.length ? (
-                                campaigns.map((row) => (
+                            {sortedRows.length ? (
+                                sortedRows.map((row) => (
                                     <tr key={row.id} className="hover:bg-muted/30">
                                         <Td className="font-medium">{row.name}</Td>
                                         <Td>

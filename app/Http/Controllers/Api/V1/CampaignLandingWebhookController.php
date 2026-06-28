@@ -29,7 +29,7 @@ class CampaignLandingWebhookController extends Controller
             return $this->error(__('messages.webhook.campaign_paused'), 403);
         }
 
-        ProcessLeadIngestionJob::dispatch('landing', $request->all(), $campaign->id);
+        ProcessLeadIngestionJob::dispatch('landing', $request->all(), $campaign->id, $campaign->company_id);
 
         return $this->success(
             ['queued' => true],

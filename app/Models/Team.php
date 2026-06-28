@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use App\Enums\TeamType;
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Team extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = ['name', 'type', 'leader_user_id', 'parent_id'];
 
     protected function casts(): array

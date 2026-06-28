@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useRoleLabel } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
@@ -22,6 +23,7 @@ function ReadOnlyField({ label, value }) {
 
 export default function ProfileIndex({ profile }) {
     const t = useT();
+    const roleLabel = useRoleLabel(profile.role);
     const fileRef = useRef(null);
     const [preview, setPreview] = useState(null);
     const { ask, ConfirmDialogPortal } = useConfirm();
@@ -120,7 +122,7 @@ export default function ProfileIndex({ profile }) {
                     <CardHeader>
                         <CardTitle>{t('profile.account_title')}</CardTitle>
                         <CardDescription>
-                            {profile.role_label}
+                            {roleLabel}
                             {profile.team_name ? ` · ${profile.team_name}` : ''}
                             {profile.org_level_label ? ` · ${profile.org_level_label}` : ''}
                         </CardDescription>

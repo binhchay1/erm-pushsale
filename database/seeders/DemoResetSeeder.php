@@ -36,6 +36,7 @@ class DemoResetSeeder extends Seeder
         'personal_access_tokens',
         'sessions',
         'users',
+        'companies',
     ];
 
     public function run(): void

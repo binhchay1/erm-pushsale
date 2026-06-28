@@ -68,4 +68,17 @@ return [
 
     'default_locale' => 'vi',
 
+    /*
+    | Đa doanh nghiệp — quy ước email (giống pushsale.vn):
+    | - Nội bộ ERM: admin@saleops.local, sales@saleops.local …
+    | - Khách hàng: admin@{slug}.saleops.local, sales@{slug}.saleops.local …
+    | Doanh nghiệp mới chỉ do super admin tạo, không tự đăng ký.
+    */
+    'tenant' => [
+        'internal_slug' => 'internal',
+        'internal_name' => 'ERM SaleOps (Nội bộ)',
+        'email_domain' => env('SALEOPS_EMAIL_DOMAIN', 'saleops.local'),
+        'default_password' => env('SALEOPS_DEFAULT_PASSWORD', 'password'),
+    ],
+
 ];

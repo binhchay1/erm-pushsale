@@ -7,6 +7,7 @@ import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { ShippingOrderDetailModal } from '@/components/shipping/ShippingOrderDetailModal';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { deliveryTone, shipmentTone } from '@/lib/status-tones';
 import { formatCurrency } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
@@ -16,6 +17,7 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
     const [selectedId, setSelectedId] = useState(null);
     const apiBase = routeUrl?.replace(/\/$/, '') ?? '/admin/shipping/orders';
     const title = pageTitle ?? t('shipping.orders_title');
+    const { sortedRows, sort, toggleSort } = useTableSort(orders?.data ?? [], { defaultKey: 'closedAt', defaultDir: 'desc' });
 
     return (
         <AppLayout>
@@ -33,20 +35,20 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
                     <table className="min-w-[1100px] w-full border-collapse text-sm">
                         <thead>
                             <tr>
-                                <Th>{t('shipping.col_order')}</Th>
-                                <Th>{t('shipping.col_carrier')}</Th>
-                                <Th>{t('shipping.col_customer')}</Th>
-                                <Th>{t('shipping.col_sale')}</Th>
-                                <Th>{t('shipping.col_closed_at')}</Th>
-                                <Th>{t('shipping.col_delivery')}</Th>
-                                <Th>{t('shipping.col_waybill')}</Th>
-                                <Th>{t('shipping.col_fee')}</Th>
+                                <Th sortable sortKey="orderCode" sort={sort} onSort={toggleSort}>{t('shipping.col_order')}</Th>
+                                <Th sortable sortKey="shippingProviderLabel" sort={sort} onSort={toggleSort}>{t('shipping.col_carrier')}</Th>
+                                <Th sortable sortKey="customerName" sort={sort} onSort={toggleSort}>{t('shipping.col_customer')}</Th>
+                                <Th sortable sortKey="saleName" sort={sort} onSort={toggleSort}>{t('shipping.col_sale')}</Th>
+                                <Th sortable sortKey="closedAt" sort={sort} onSort={toggleSort}>{t('shipping.col_closed_at')}</Th>
+                                <Th sortable sortKey="deliveryStatus" sort={sort} onSort={toggleSort}>{t('shipping.col_delivery')}</Th>
+                                <Th sortable sortKey="trackingNumber" sort={sort} onSort={toggleSort}>{t('shipping.col_waybill')}</Th>
+                                <Th sortable sortKey="carrierFee" sort={sort} onSort={toggleSort}>{t('shipping.col_fee')}</Th>
                                 <Th />
                             </tr>
                         </thead>
                         <tbody>
-                            {orders?.data?.length ? (
-                                orders.data.map((row) => (
+                            {sortedRows.length ? (
+                                sortedRows.map((row) => (
                                     <tr key={row.id} className="align-top hover:bg-muted/30">
                                         <Td className="font-mono text-primary">{row.orderCode}</Td>
                                         <Td className="text-xs">{row.shippingProviderLabel ?? '—'}</Td>

@@ -4,12 +4,14 @@ import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useTableSort } from '@/hooks/use-table-sort';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
 export default function WarehouseIndex({ warehouses }) {
     const t = useT();
     const { ask, ConfirmDialogPortal } = useConfirm();
+    const { sortedRows, sort, toggleSort } = useTableSort(warehouses, { defaultKey: 'name' });
 
     const removeWarehouse = async (id, name) => {
         const ok = await ask({
@@ -41,18 +43,18 @@ export default function WarehouseIndex({ warehouses }) {
                     <table className="w-full min-w-[980px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>{t('pages.warehouse.col_name')}</Th>
-                                <Th>{t('pages.warehouse.col_phone')}</Th>
-                                <Th>{t('pages.warehouse.col_address')}</Th>
-                                <Th>{t('pages.warehouse.col_manager')}</Th>
-                                <Th>{t('pages.warehouse.col_vtp')}</Th>
-                                <Th>{t('pages.warehouse.col_products_count')}</Th>
+                                <Th sortable sortKey="name" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_name')}</Th>
+                                <Th sortable sortKey="phone" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_phone')}</Th>
+                                <Th sortable sortKey="address" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_address')}</Th>
+                                <Th sortable sortKey="manager_name" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_manager')}</Th>
+                                <Th sortable sortKey="vtp_code" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_vtp')}</Th>
+                                <Th sortable sortKey="products_count" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_products_count')}</Th>
                                 <Th>{t('pages.actions')}</Th>
                             </tr>
                         </thead>
                         <tbody>
-                            {warehouses.length ? (
-                                warehouses.map((row) => (
+                            {sortedRows.length ? (
+                                sortedRows.map((row) => (
                                     <tr key={row.id} className="hover:bg-muted/30">
                                         <Td className="font-medium">{row.name}</Td>
                                         <Td>{row.phone ?? '—'}</Td>

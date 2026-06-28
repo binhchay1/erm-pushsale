@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ShippingApiLog extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
         'provider', 'order_id', 'shipment_id', 'action', 'method', 'endpoint',
         'http_status', 'success', 'message', 'request_payload', 'response_payload', 'log_id',

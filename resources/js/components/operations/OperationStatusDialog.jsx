@@ -222,7 +222,14 @@ export function OperationStatusDialog({ order, options = [] }) {
                             type="button"
                             variant={showStockWarning && confirmInsufficient ? 'destructive' : 'default'}
                             onClick={submit}
-                            disabled={processing}
+                            disabled={processing || !result || (needsSchedule && !nextAt)}
+                            title={
+                                !result
+                                    ? t('operations.status_dialog.select_result')
+                                    : needsSchedule && !nextAt
+                                      ? t('operations.status_dialog.select_schedule')
+                                      : undefined
+                            }
                         >
                             {processing && <Loader2 className="mr-1 size-4 animate-spin" />}
                             {showStockWarning && !confirmInsufficient

@@ -3,18 +3,23 @@
 namespace App\Models;
 
 use App\Enums\IntegrationPlatform;
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 class IntegrationConnection extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
         'platform',
         'is_enabled',
         'credentials',
         'webhook_secret',
         'verify_token',
+        'webhook_token',
         'last_synced_at',
     ];
 
@@ -41,9 +46,21 @@ class IntegrationConnection extends Model
 
     public static function forPlatform(IntegrationPlatform $platform): self
     {
-        return static::query()->firstOrCreate(
+        $connection = static::query()->firstOrCreate(
             ['platform' => $platform->value],
             ['is_enabled' => false, 'credentials' => []],
         );
+
+        if (! $connection->webhook_token) {
+            $connection->forceFill(['webhook_token' => Str::random(32)])->save();
+        }
+
+        return $connection;
+    }
+
+    /** Đường dẫn webhook riêng cho doanh nghiệp (kèm token để phân biệt giữa các công ty). */
+    public function webhookUrl(): string
+    {
+        return url('/api/v1/webhooks/'.$this->platform.'/'.$this->webhook_token);
     }
 }

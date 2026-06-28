@@ -2,9 +2,11 @@ import { Head, Link } from '@inertiajs/react';
 import { BarChart3 } from 'lucide-react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
+import { ReportExportButton } from '@/components/reports/ReportExportButton';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { useLabels } from '@/hooks/use-labels';
+import { useTableSort } from '@/hooks/use-table-sort';
 import AppLayout from '@/layouts/AppLayout';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -97,6 +99,7 @@ export default function ExtraReport({
     const t = useT();
     const labels = useLabels();
     const hasFilters = filterFields.length > 0;
+    const { sortedRows, sort, toggleSort } = useTableSort(rows);
 
     const title = reportText(t, meta.key, 'title', meta.title);
     const description = reportText(t, meta.key, 'description', meta.description);
@@ -127,13 +130,20 @@ export default function ExtraReport({
                     </div>
                 )}
 
-                {hasFilters && (
-                    <ReportFilterBar
-                        routeUrl={routeUrl}
-                        filters={filters}
-                        filterOptions={filterOptions}
-                        filterFields={filterFields}
-                    />
+                {hasFilters ? (
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                        <ReportFilterBar
+                            routeUrl={routeUrl}
+                            filters={filters}
+                            filterOptions={filterOptions}
+                            filterFields={filterFields}
+                        />
+                        <ReportExportButton routeUrl={routeUrl} filters={filters} />
+                    </div>
+                ) : (
+                    <div className="flex justify-end">
+                        <ReportExportButton routeUrl={routeUrl} filters={filters} />
+                    </div>
                 )}
 
                 <ScrollDataTable>
@@ -144,6 +154,10 @@ export default function ExtraReport({
                                 {columns.map((col) => (
                                     <Th
                                         key={col.key}
+                                        sortable
+                                        sortKey={col.key}
+                                        sort={sort}
+                                        onSort={toggleSort}
                                         className={col.format === 'text' ? '' : 'text-right'}
                                     >
                                         {resolveColumnLabel(col, t, labels)}
@@ -162,7 +176,7 @@ export default function ExtraReport({
                                     </Td>
                                 </tr>
                             )}
-                            {rows.map((row, index) => (
+                            {sortedRows.map((row, index) => (
                                 <tr key={index}>
                                     <Td className="text-center text-muted-foreground">
                                         {index + 1}

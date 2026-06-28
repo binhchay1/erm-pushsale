@@ -245,25 +245,43 @@ export default [
     },
     {
         path: '/admin/leads',
-        title: 'Nhật ký lead về',
-        intro: 'Toàn bộ lead đổ về từ các nền tảng và tình trạng phân bổ cho sale.',
+        title: 'Nhật ký lead về & chia số',
+        intro: 'Toàn bộ lead đổ về từ các nền tảng, trạng thái xử lý và nơi chia số (tự động / chia tay) cho sale.',
         sections: [
             {
                 heading: 'Các cột chính',
                 items: [
                     'Thời gian: lúc lead đổ về hệ thống.',
-                    'Nguồn: nền tảng / chiến dịch sinh ra lead.',
-                    'SĐT / Tên: thông tin khách; trùng số sẽ được đánh dấu.',
-                    'Trạng thái: đã tạo đơn, trùng số, hay lỗi dữ liệu.',
-                    'Sale: nhân viên đã được chia lead (nếu có).',
+                    'Nền tảng: nguồn sinh lead (Facebook, Google, Zalo, TikTok, Landing…).',
+                    'Khách hàng / SĐT: thông tin khách, đã được làm sạch & chuẩn hoá số.',
+                    'Trạng thái: "Chờ xử lý" (chưa tạo đơn, có thể chia tay), "Đã tạo lead" (đã thành đơn & gán sale), "Trùng số" (đã có đơn cùng SĐT trong 30 ngày → không tạo đơn), "Lỗi" (sai SĐT/spam/thiếu dữ liệu).',
+                    'Mã đơn: mã đơn được tạo khi lead đã chia cho sale.',
                 ],
             },
             {
-                heading: 'Luồng nghiệp vụ',
+                heading: 'Hai chế độ chia số',
                 items: [
-                    'Lead về từ landing / quảng cáo → hệ thống ghi nhận tại đây.',
-                    'Lead hợp lệ được chia tự động hoặc chia tay qua "Phân bổ thủ công".',
-                    'Lead lỗi (sai SĐT, thiếu thông tin) cần sửa nguồn hoặc bỏ qua.',
+                    'Chia tự động (mặc định): lead hợp lệ được chia ngay cho sale theo vòng (round-robin / ít tải nhất). Sale nhận đơn tức thì trong "Tác nghiệp".',
+                    'Chỉ chia tay: bật công tắc "Chế độ chỉ chia tay" → dừng toàn bộ chia tự động; mọi lead mới rơi vào hàng chờ (Chờ xử lý) để bạn tự chia.',
+                    'Công tắc áp dụng cho cả lead đang nằm trong hàng đợi xử lý — đổi chế độ là có hiệu lực ngay, dùng chung cho mọi admin/người chia số.',
+                ],
+            },
+            {
+                heading: 'Cách chia tay (thủ công)',
+                items: [
+                    'Bước 1 — Chọn telesale sẽ nhận lead ở ô chọn phía trên.',
+                    'Bước 2 — Tích chọn các lead "Chờ xử lý" ở cột đầu mỗi dòng (hoặc tích ô đầu bảng để chọn tất cả lead chờ trên trang).',
+                    'Nút "Phân bổ" chỉ sáng khi đã chọn cả telesale lẫn ít nhất 1 lead. Dòng gợi ý dưới nút luôn cho biết còn thiếu bước nào.',
+                    'Chia tay luôn dùng được kể cả khi đang ở chế độ tự động — dùng để chia thủ công những lead còn tồn trong pool.',
+                ],
+            },
+            {
+                heading: 'Quy tắc dữ liệu & an toàn',
+                items: [
+                    'Chống trùng: lead cùng SĐT đã có đơn trong 30 ngày sẽ bị đánh dấu "Trùng số" và không tạo đơn mới.',
+                    'Khách cũ: nếu SĐT từng mua trước đó, đơn mới được gắn cờ "khách cũ" để vào đúng báo cáo khách mới/cũ.',
+                    'Lead lỗi (sai SĐT, nghi spam, thiếu thông tin) được giữ lại để truy vết — cần sửa nguồn form thay vì chia.',
+                    'Khi chia tay đồng thời, hệ thống khoá lead đang xử lý để tránh 2 người (hoặc auto) chia trùng một lead.',
                 ],
             },
         ],
@@ -895,11 +913,50 @@ export default [
         intro: 'Phân bổ lead mới về cho từng sale theo năng lực và khối lượng hiện tại.',
         sections: [
             {
-                heading: 'Cách dùng',
+                heading: 'Hai chế độ chia số',
                 items: [
-                    'Chọn các lead chưa phân bổ → chọn sale nhận → xác nhận.',
-                    'Lead trùng số điện thoại với khách cũ nên chia lại cho sale đã chăm trước đó.',
+                    'Chia tự động: lead hợp lệ tự chia cho sale theo vòng — bạn không cần thao tác.',
+                    'Chỉ chia tay: bật công tắc "Chế độ chỉ chia tay" để dừng tự động; lead mới dồn vào hàng chờ cho bạn tự chia.',
+                    'Đổi chế độ có hiệu lực ngay cả với lead đang trong hàng đợi.',
+                ],
+            },
+            {
+                heading: 'Cách chia tay theo 2 bước',
+                items: [
+                    'Bước 1 — Chọn telesale nhận lead ở ô phía trên.',
+                    'Bước 2 — Tích chọn lead "Chờ xử lý" ở cột đầu bảng (hoặc ô đầu bảng để chọn tất cả).',
+                    'Nút "Phân bổ" chỉ sáng khi đã đủ telesale + ít nhất 1 lead; dòng gợi ý dưới nút cho biết còn thiếu gì.',
+                ],
+            },
+            {
+                heading: 'Mẹo cân tải',
+                items: [
+                    'Lead trùng SĐT với khách cũ nên chia lại cho sale đã chăm trước đó.',
                     'Cân đối số lead mỗi sale để không ai quá tải hoặc thiếu việc.',
+                    'Chia ngay khi lead về — để lâu làm giảm tỷ lệ chốt.',
+                ],
+            },
+        ],
+    },
+    {
+        path: '/allocator/reports',
+        title: 'Báo cáo chia số',
+        intro: 'Đo lường tốc độ & chất lượng chia số: lead về, đã chia, còn tồn, và tải theo từng telesale.',
+        sections: [
+            {
+                heading: 'Báo cáo phân bổ lead (mọi nhân viên chia số)',
+                items: [
+                    'Theo từng ngày: tổng lead về, số đã chia cho sale, số còn chờ chia, số trùng số, số lỗi.',
+                    'Tỷ lệ chia = lead đã chia / lead chia được (đã loại trùng số & lỗi) — đo tốc độ xử lý.',
+                    'Còn "Chờ chia" nhiều hoặc tỷ lệ thấp → cần chia nhanh hơn hoặc tăng người.',
+                ],
+            },
+            {
+                heading: 'Tải & hiệu suất telesale (chỉ trưởng bộ phận)',
+                items: [
+                    'Số lead đã chia cho từng telesale trong kỳ và tỷ lệ chốt tương ứng → đánh giá chia có công bằng & hiệu quả không.',
+                    'Sale nhận nhiều mà tỷ lệ chốt thấp → cân nhắc giảm tải hoặc xem lại chất lượng nguồn.',
+                    'Báo cáo này ẩn với nhân viên thường, chỉ trưởng bộ phận chia số đọc được.',
                 ],
             },
         ],

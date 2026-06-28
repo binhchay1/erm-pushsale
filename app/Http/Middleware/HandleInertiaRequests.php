@@ -26,7 +26,7 @@ class HandleInertiaRequests extends Middleware
 
         if ($user) {
             $preferences = $user->ensurePreferences()->toFrontendArray();
-            $user->loadMissing(['team:id,name', 'manager:id,name']);
+            $user->loadMissing(['team:id,name', 'manager:id,name', 'company:id,name,slug']);
 
             $recent = UserNotification::query()
                 ->where('user_id', $user->id)
@@ -58,6 +58,13 @@ class HandleInertiaRequests extends Middleware
                     'team' => $user->team?->name,
                     'manager' => $user->manager?->name,
                     'is_team_leader' => (bool) $user->is_team_leader,
+                    'is_owner' => $user->isOwner(),
+                    'is_platform_admin' => $user->isPlatformAdmin(),
+                    'company' => $user->company ? [
+                        'id' => $user->company->id,
+                        'name' => $user->company->name,
+                        'slug' => $user->company->slug,
+                    ] : null,
                     'avatar_url' => $user->avatarUrl(),
                     'initials' => $user->initials(),
                     'org_level_label' => $user->orgLevelLabel(),
@@ -80,6 +87,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
+                'provisioned' => fn () => $request->session()->get('provisioned'),
             ],
             'notifications' => $notifications,
             'notificationsUnread' => $notificationsUnread,

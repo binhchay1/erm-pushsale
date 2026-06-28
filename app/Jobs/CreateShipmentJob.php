@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Order;
 use App\Services\Shipping\CreateShipmentService;
+use App\Support\TenantManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +27,7 @@ class CreateShipmentJob implements ShouldQueue
         }
 
         try {
-            $service->createForOrder($order, $this->provider);
+            app(TenantManager::class)->forCompany($order->company_id, fn () => $service->createForOrder($order, $this->provider));
         } catch (\Throwable $e) {
             Log::warning('[Shipping] Không tạo được vận đơn', [
                 'order_id' => $order->id,

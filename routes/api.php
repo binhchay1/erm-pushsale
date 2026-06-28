@@ -18,13 +18,18 @@ Route::prefix('v1')->group(function () {
         ->where('token', '[a-z0-9]{16,64}')
         ->middleware('throttle:lead-intake');
 
+    Route::match(['get', 'post'], 'webhooks/{platform}/{token}', [WebhookController::class, 'handle'])
+        ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada')
+        ->where('token', '[A-Za-z0-9]{16,64}')
+        ->middleware('throttle:lead-intake');
+
     Route::match(['get', 'post'], 'webhooks/{platform}', [WebhookController::class, 'handle'])
         ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada')
         ->middleware('throttle:lead-intake');
     Route::post('shipping/webhooks/{provider}', [ShippingWebhookController::class, 'handle'])
         ->where('provider', 'viettel_post|ghn|ghtk|jnt|spx');
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
         Route::get('auth/me', [AuthController::class, 'me']);
         Route::delete('auth/token', [AuthController::class, 'logout']);
 

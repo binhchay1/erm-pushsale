@@ -49,6 +49,20 @@ return [
     'lead_queued' => 'Lead đã được đưa vào hàng đợi xử lý.',
     'auth' => [
         'invalid_credentials' => 'Email hoặc mật khẩu không đúng.',
+        'throttle' => 'Quá nhiều lần đăng nhập. Vui lòng thử lại sau :seconds giây.',
+    ],
+    'tenant' => [
+        'company_inactive' => 'Doanh nghiệp của bạn đang bị tạm khoá hoặc hết hạn. Vui lòng liên hệ quản trị.',
+        'owner_title' => 'Chủ sở hữu doanh nghiệp',
+    ],
+    'platform' => [
+        'company_created' => 'Đã tạo doanh nghiệp và tài khoản admin tổng.',
+        'company_updated' => 'Đã cập nhật thông tin doanh nghiệp.',
+        'company_status_changed' => 'Đã đổi trạng thái doanh nghiệp.',
+        'slug_reserved' => 'Mã doanh nghiệp này dành cho hệ thống nội bộ.',
+        'cannot_suspend_internal' => 'Không thể tạm khoá công ty nội bộ.',
+        'settings_saved' => 'Đã lưu cấu hình hệ thống.',
+        'invalid_domain' => 'Domain email không hợp lệ (ví dụ: saleops.local hoặc congty.com).',
     ],
     'profile' => [
         'password_required' => 'Vui lòng nhập mật khẩu mới.',

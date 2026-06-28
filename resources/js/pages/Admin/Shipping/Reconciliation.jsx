@@ -14,6 +14,7 @@ import {
 import { formatCurrency } from '@/lib/format';
 import AppLayout from '@/layouts/AppLayout';
 import { useLabels } from '@/hooks/use-labels';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { useT } from '@/providers/I18nProvider';
 
 function issueType(row) {
@@ -25,6 +26,11 @@ function issueType(row) {
 export default function ShippingReconciliation({ stats, issues }) {
     const t = useT();
     const labels = useLabels();
+    const { sortedRows, sort, toggleSort } = useTableSort(issues, {
+        defaultKey: 'received_at',
+        defaultDir: 'desc',
+        accessors: { issue_type: (row) => issueType(row) },
+    });
 
     const issueLabel = (row) => {
         const type = issueType(row);
@@ -80,22 +86,22 @@ export default function ShippingReconciliation({ stats, issues }) {
                             <table className="w-full border-collapse text-xs">
                                 <thead>
                                     <tr>
-                                        <Th>{t('shipping.reconciliation.col_id')}</Th>
-                                        <Th>{t('shipping.reconciliation.col_time')}</Th>
-                                        <Th>{t('shipping.reconciliation.col_partner')}</Th>
-                                        <Th>{t('shipping.reconciliation.col_tracking')}</Th>
-                                        <Th>{t('shipping.reconciliation.col_partner_order')}</Th>
-                                        <Th>{t('shipping.reconciliation.col_system_order')}</Th>
-                                        <Th>{t('shipping.reconciliation.col_delivery')}</Th>
-                                        <Th>{t('shipping.reconciliation.col_issue_type')}</Th>
-                                        <Th>{t('shipping.reconciliation.col_partner_cod')}</Th>
-                                        <Th>{t('shipping.reconciliation.col_system_cod')}</Th>
+                                        <Th sortable sortKey="id" sort={sort} onSort={toggleSort}>{t('shipping.reconciliation.col_id')}</Th>
+                                        <Th sortable sortKey="received_at" sort={sort} onSort={toggleSort}>{t('shipping.reconciliation.col_time')}</Th>
+                                        <Th sortable sortKey="provider" sort={sort} onSort={toggleSort}>{t('shipping.reconciliation.col_partner')}</Th>
+                                        <Th sortable sortKey="tracking_number" sort={sort} onSort={toggleSort}>{t('shipping.reconciliation.col_tracking')}</Th>
+                                        <Th sortable sortKey="partner_order_code" sort={sort} onSort={toggleSort}>{t('shipping.reconciliation.col_partner_order')}</Th>
+                                        <Th sortable sortKey="order_code" sort={sort} onSort={toggleSort}>{t('shipping.reconciliation.col_system_order')}</Th>
+                                        <Th sortable sortKey="mapped_status" sort={sort} onSort={toggleSort}>{t('shipping.reconciliation.col_delivery')}</Th>
+                                        <Th sortable sortKey="issue_type" sort={sort} onSort={toggleSort}>{t('shipping.reconciliation.col_issue_type')}</Th>
+                                        <Th sortable sortKey="partner_cod" sort={sort} onSort={toggleSort}>{t('shipping.reconciliation.col_partner_cod')}</Th>
+                                        <Th sortable sortKey="system_cod" sort={sort} onSort={toggleSort}>{t('shipping.reconciliation.col_system_cod')}</Th>
                                         <Th>{t('shipping.reconciliation.col_note')}</Th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {issues.length ? (
-                                        issues.map((row) => (
+                                    {sortedRows.length ? (
+                                        sortedRows.map((row) => (
                                             <tr key={row.id} className="hover:bg-muted/30">
                                                 <Td>{row.id}</Td>
                                                 <Td>{row.received_at ?? '—'}</Td>

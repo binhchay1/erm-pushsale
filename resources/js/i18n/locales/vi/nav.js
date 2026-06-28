@@ -54,5 +54,9 @@ export default {
         accounting_workspace: 'Theo dõi đơn & dòng tiền',
         business_report: 'Báo cáo kinh doanh',
         allocator_workspace: 'Chia số cho sale',
+        allocation_report: 'Báo cáo phân bổ lead',
+        allocator_load_report: 'Tải & hiệu suất telesale',
+        platform_companies: 'Doanh nghiệp',
+        platform_settings: 'Cấu hình hệ thống',
     },
 };

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { cn } from '@/lib/utils';
 import { formatNumber } from '@/lib/format';
 import { movementTone } from '@/lib/status-tones';
@@ -16,6 +17,7 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
     const t = useT();
     const data = rows?.data ?? [];
     const f = filters ?? {};
+    const { sortedRows, sort, toggleSort } = useTableSort(data, { defaultKey: 'createdAt', defaultDir: 'desc' });
 
     const search = (overrides) => {
         router.get('/admin/warehouse/movements', { ...f, ...overrides }, { preserveState: true });
@@ -111,20 +113,20 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
                     <table className="w-full min-w-[1000px] border-collapse text-xs">
                         <thead>
                             <tr>
-                                <Th>{t('operations.movement_history.col_time')}</Th>
-                                <Th>{t('operations.movement_history.col_type')}</Th>
-                                <Th>{t('operations.inventory.warehouse')}</Th>
-                                <Th>{t('operations.movement_history.col_product')}</Th>
-                                <Th className="text-right">{t('operations.movement_history.col_qty')}</Th>
-                                <Th className="text-right">{t('operations.inventory.col_stock_after')}</Th>
-                                <Th>{t('operations.movement_history.col_actor')}</Th>
-                                <Th>{t('operations.movement_history.col_approver')}</Th>
+                                <Th sortable sortKey="createdAt" sort={sort} onSort={toggleSort}>{t('operations.movement_history.col_time')}</Th>
+                                <Th sortable sortKey="typeLabel" sort={sort} onSort={toggleSort}>{t('operations.movement_history.col_type')}</Th>
+                                <Th sortable sortKey="warehouseName" sort={sort} onSort={toggleSort}>{t('operations.inventory.warehouse')}</Th>
+                                <Th sortable sortKey="productName" sort={sort} onSort={toggleSort}>{t('operations.movement_history.col_product')}</Th>
+                                <Th sortable sortKey="quantity" sort={sort} onSort={toggleSort} className="text-right">{t('operations.movement_history.col_qty')}</Th>
+                                <Th sortable sortKey="stockAfter" sort={sort} onSort={toggleSort} className="text-right">{t('operations.inventory.col_stock_after')}</Th>
+                                <Th sortable sortKey="userName" sort={sort} onSort={toggleSort}>{t('operations.movement_history.col_actor')}</Th>
+                                <Th sortable sortKey="approverName" sort={sort} onSort={toggleSort}>{t('operations.movement_history.col_approver')}</Th>
                                 <Th>{t('operations.movement_history.col_note')}</Th>
                             </tr>
                         </thead>
                         <tbody>
-                            {data.length ? (
-                                data.map((m) => (
+                            {sortedRows.length ? (
+                                sortedRows.map((m) => (
                                     <tr key={m.id}>
                                         <Td>{m.createdAt}</Td>
                                         <Td>

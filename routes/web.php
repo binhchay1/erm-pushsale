@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Accounting\DashboardController as AccountingDashboardController;
-use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\Admin\Accounting\OperationsController as AccountingOperationsController;
 use App\Http\Controllers\Admin\BusinessOverviewController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -36,12 +35,17 @@ use App\Http\Controllers\Admin\Warehouse\OperationsController as WarehouseOperat
 use App\Http\Controllers\Admin\Warehouse\WarehouseController;
 use App\Http\Controllers\Admin\WarehouseInventoryController;
 use App\Http\Controllers\Allocator\DashboardController as AllocatorDashboardController;
+use App\Http\Controllers\Allocator\ReportController as AllocatorReportController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\Marketing\CampaignReportController as MarketingCampaignReportController;
 use App\Http\Controllers\Marketing\DashboardController as RoleMarketingDashboardController;
 use App\Http\Controllers\Marketing\RankingController as MarketingRankingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrgChartController;
+use App\Http\Controllers\Platform\CompanyController as PlatformCompanyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Reports\ExtraReportController;
 use App\Http\Controllers\Sales\CustomerProfileController;
@@ -53,30 +57,32 @@ use App\Http\Controllers\Sales\RankingController as SalesRankingController;
 use App\Http\Controllers\Sales\SaleOperationCallController;
 use App\Http\Controllers\Sales\SaleOperationStatusController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Warehouse\DashboardController as WarehouseDashboardController;
 use App\Http\Controllers\Warehouse\OrderReturnController;
 use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
-Broadcast::routes(['middleware' => ['web', 'auth']]);
+Broadcast::routes(['middleware' => ['web', 'auth', 'tenant']]);
 
 Route::post('locale', [LocaleController::class, 'update'])->name('locale.update');
 
-Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect(LoginController::homeFor(auth()->user()));
-    }
+Route::get('/', HomeController::class)->name('home');
 
-    return redirect()->route('login');
-});
+// Trang vệ tinh công khai (SEO) — không cần đăng nhập.
+Route::get('features', [MarketingController::class, 'features'])->name('marketing.features');
+Route::get('solutions', [MarketingController::class, 'solutions'])->name('marketing.solutions');
+Route::get('about', [MarketingController::class, 'about'])->name('marketing.about');
+Route::get('contact', [MarketingController::class, 'contact'])->name('marketing.contact');
+Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
     Route::post('login', [LoginController::class, 'store']);
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'tenant'])->group(function () {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 
     // Sơ đồ tổ chức — test RBAC: /org-chart (xem OrgChartController)
@@ -205,5 +211,16 @@ Route::middleware('auth')->group(function () {
         Route::get('workspace', LeadsLogController::class)->name('workspace');
         Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
         Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
+        Route::get('reports/{report}', AllocatorReportController::class)->where('report', '[a-z0-9\-]+')->name('reports');
+    });
+
+    Route::middleware('platform')->prefix('platform')->name('platform.')->group(function () {
+        Route::get('companies', [PlatformCompanyController::class, 'index'])->name('companies.index');
+        Route::post('companies', [PlatformCompanyController::class, 'store'])->name('companies.store');
+        Route::get('companies/{company}/accounts', [PlatformCompanyController::class, 'accounts'])->name('companies.accounts');
+        Route::put('companies/{company}', [PlatformCompanyController::class, 'update'])->name('companies.update');
+        Route::post('companies/{company}/toggle', [PlatformCompanyController::class, 'toggle'])->name('companies.toggle');
+        Route::get('settings', [App\Http\Controllers\Platform\SettingsController::class, 'index'])->name('settings.index');
+        Route::put('settings', [App\Http\Controllers\Platform\SettingsController::class, 'update'])->name('settings.update');
     });
 });

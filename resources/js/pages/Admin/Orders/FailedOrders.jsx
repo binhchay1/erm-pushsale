@@ -6,12 +6,17 @@ import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { useT } from '@/providers/I18nProvider';
 
 export default function FailedOrders({ report, filterOptions }) {
     const t = useT();
     const f = report.filters ?? {};
     const rows = report.rows?.data ?? [];
+    const { sortedRows, sort, toggleSort } = useTableSort(rows, {
+        defaultKey: 'partnerOrderId',
+        accessors: { warehouseName: (r) => r.warehouseName ?? '' },
+    });
 
     const search = (overrides) => {
         router.get('/admin/orders/failed', { ...f, ...overrides }, { preserveState: true });
@@ -66,16 +71,16 @@ export default function FailedOrders({ report, filterOptions }) {
                         <thead>
                             <tr>
                                 <Th>{t('pages.stt')}</Th>
-                                <Th>{t('pages.failed_orders.col_partner_order')}</Th>
-                                <Th>{t('pages.failed_orders.col_platform')}</Th>
-                                <Th>{t('pages.failed_orders.col_warehouse')}</Th>
-                                <Th>{t('pages.failed_orders.col_error_desc')}</Th>
+                                <Th sortable sortKey="partnerOrderId" sort={sort} onSort={toggleSort}>{t('pages.failed_orders.col_partner_order')}</Th>
+                                <Th sortable sortKey="platform" sort={sort} onSort={toggleSort}>{t('pages.failed_orders.col_platform')}</Th>
+                                <Th sortable sortKey="warehouseName" sort={sort} onSort={toggleSort}>{t('pages.failed_orders.col_warehouse')}</Th>
+                                <Th sortable sortKey="errorDescription" sort={sort} onSort={toggleSort}>{t('pages.failed_orders.col_error_desc')}</Th>
                                 <Th />
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.length ? (
-                                rows.map((r) => (
+                            {sortedRows.length ? (
+                                sortedRows.map((r) => (
                                     <tr key={r.stt} className="hover:bg-muted/30">
                                         <Td>{r.stt}</Td>
                                         <Td className="font-mono">{r.partnerOrderId}</Td>

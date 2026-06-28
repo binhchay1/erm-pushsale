@@ -49,6 +49,20 @@ return [
     'lead_queued' => 'Lead queued for processing.',
     'auth' => [
         'invalid_credentials' => 'Incorrect email or password.',
+        'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
+    ],
+    'tenant' => [
+        'company_inactive' => 'Your company is suspended or expired. Please contact your administrator.',
+        'owner_title' => 'Company owner',
+    ],
+    'platform' => [
+        'company_created' => 'Company and owner admin account created.',
+        'company_updated' => 'Company details updated.',
+        'company_status_changed' => 'Company status changed.',
+        'slug_reserved' => 'This company code is reserved for the internal system.',
+        'cannot_suspend_internal' => 'The internal company cannot be suspended.',
+        'settings_saved' => 'Platform settings saved.',
+        'invalid_domain' => 'Invalid email domain (e.g. saleops.local or company.com).',
     ],
     'profile' => [
         'password_required' => 'Please enter a new password.',

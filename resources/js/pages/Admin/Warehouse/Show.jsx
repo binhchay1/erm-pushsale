@@ -4,6 +4,7 @@ import { ArrowLeft, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { formatNumber } from '@/lib/format';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import AppLayout from '@/layouts/AppLayout';
@@ -11,6 +12,7 @@ import { useT } from '@/providers/I18nProvider';
 
 export default function WarehouseShow({ warehouse, filters, rows }) {
     const t = useT();
+    const { sortedRows, sort, toggleSort } = useTableSort(rows, { defaultKey: 'product_name' });
 
     const search = (value) => {
         router.get(`/admin/warehouses/${warehouse.id}`, { search: value }, { preserveState: true });
@@ -55,18 +57,18 @@ export default function WarehouseShow({ warehouse, filters, rows }) {
                         <thead>
                             <tr>
                                 <Th>#</Th>
-                                <Th>{t('operations.inventory.product')}</Th>
-                                <Th>{t('pages.warehouse.col_batch')}</Th>
-                                <Th>{t('pages.warehouse.col_location')}</Th>
-                                <Th>{t('pages.warehouse.col_stock')}</Th>
-                                <Th>{t('pages.warehouse.col_pending')}</Th>
-                                <Th>{t('pages.warehouse.col_discontinued')}</Th>
+                                <Th sortable sortKey="product_name" sort={sort} onSort={toggleSort}>{t('operations.inventory.product')}</Th>
+                                <Th sortable sortKey="batch_code" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_batch')}</Th>
+                                <Th sortable sortKey="location_code" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_location')}</Th>
+                                <Th sortable sortKey="stock_quantity" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_stock')}</Th>
+                                <Th sortable sortKey="pending_sales_quantity" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_pending')}</Th>
+                                <Th sortable sortKey="is_discontinued" sort={sort} onSort={toggleSort}>{t('pages.warehouse.col_discontinued')}</Th>
                                 <Th />
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.length ? (
-                                rows.map((r) => (
+                            {sortedRows.length ? (
+                                sortedRows.map((r) => (
                                     <tr key={r.id} className="hover:bg-muted/30">
                                         <Td>{r.id}</Td>
                                         <Td>

@@ -13,6 +13,8 @@ use App\Services\Shipping\Carriers\Jnt\JntCarrier;
 use App\Services\Shipping\Carriers\Spx\SpxCarrier;
 use App\Services\Shipping\Carriers\ViettelPost\ViettelPostCarrier;
 use App\Services\Shipping\Support\PartnerCredentialResolver;
+use App\Support\Seo;
+use App\Support\TenantManager;
 use Carbon\Carbon;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -25,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(TenantManager::class);
+        $this->app->singleton(Seo::class);
+
         $this->app->bind(OrderRepositoryInterface::class, EloquentOrderRepository::class);
 
         $this->app->singleton(CarrierRegistry::class, function ($app) {

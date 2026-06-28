@@ -245,25 +245,43 @@ export default [
     },
     {
         path: '/admin/leads',
-        title: 'Lead intake log',
-        intro: 'All leads from platforms and their allocation status to sales.',
+        title: 'Lead intake & distribution',
+        intro: 'All incoming leads, their processing status, and where you distribute them (auto / manual) to sales.',
         sections: [
             {
                 heading: 'Main columns',
                 items: [
                     'Time: when the lead arrived in the system.',
-                    'Source: the platform / campaign that generated the lead.',
-                    'Phone / Name: customer info; duplicates are flagged.',
-                    'Status: order created, duplicate, or data error.',
-                    'Sales: the rep the lead was assigned to (if any).',
+                    'Platform: lead source (Facebook, Google, Zalo, TikTok, Landing…).',
+                    'Customer / Phone: customer info, already cleaned and normalized.',
+                    'Status: "Pending" (no order yet, can be allocated), "Lead created" (order made & assigned), "Duplicate phone" (an order with the same phone exists within 30 days → no new order), "Failed" (bad phone / spam / missing data).',
+                    'Order code: created once the lead is allocated to a sales rep.',
                 ],
             },
             {
-                heading: 'Business flow',
+                heading: 'Two distribution modes',
                 items: [
-                    'Leads from landing pages / ads are recorded here.',
-                    'Valid leads are auto-assigned or manually allocated via "Manual allocation".',
-                    'Faulty leads (bad phone, missing info) need source fixes or to be skipped.',
+                    'Auto distribution (default): valid leads are assigned to sales immediately in turn (round-robin / least-load). Reps get the order instantly in their workspace.',
+                    'Manual-only: flip the "Manual-only mode" switch → all auto distribution stops; every new lead waits as Pending for you to assign.',
+                    'The switch also applies to leads already sitting in the processing queue — changing mode takes effect immediately and is shared across all admins/allocators.',
+                ],
+            },
+            {
+                heading: 'Manual allocation steps',
+                items: [
+                    'Step 1 — Choose the telesale who will receive the leads in the selector above.',
+                    'Step 2 — Tick the "Pending" leads in the first column (or the header checkbox to select all pending on the page).',
+                    'The "Allocate" button only lights up once BOTH a telesale and at least one lead are selected. The hint under the button always tells you what is missing.',
+                    'Manual allocation works even in auto mode — use it to hand-assign leads still waiting in the pool.',
+                ],
+            },
+            {
+                heading: 'Data & safety rules',
+                items: [
+                    'De-duplication: a lead whose phone already has an order within 30 days is flagged "Duplicate phone" and creates no new order.',
+                    'Returning customer: if the phone purchased before, the new order is flagged as returning to feed the new/returning customer reports.',
+                    'Faulty leads (bad phone, suspected spam, missing info) are kept for tracing — fix the form source instead of allocating them.',
+                    'During concurrent manual allocation, leads being processed are locked to prevent two people (or auto) from grabbing the same lead.',
                 ],
             },
         ],
@@ -895,11 +913,50 @@ export default [
         intro: 'Distribute new leads to sales based on capacity and current workload.',
         sections: [
             {
-                heading: 'How to use',
+                heading: 'Two distribution modes',
                 items: [
-                    'Select unassigned leads → choose receiving sales rep → confirm.',
-                    'Duplicate phone numbers should go back to the sales rep who handled the customer before.',
+                    'Auto distribution: valid leads are assigned to sales in turn — no action needed from you.',
+                    'Manual-only: flip the "Manual-only mode" switch to stop auto; new leads pile up as Pending for you to assign.',
+                    'Mode changes apply even to leads already in the queue.',
+                ],
+            },
+            {
+                heading: 'Manual allocation in 2 steps',
+                items: [
+                    'Step 1 — Choose the telesale to receive the leads in the selector above.',
+                    'Step 2 — Tick "Pending" leads in the first column (or the header checkbox to select all).',
+                    'The "Allocate" button only lights up with a telesale + at least one lead; the hint under it shows what is missing.',
+                ],
+            },
+            {
+                heading: 'Load-balancing tips',
+                items: [
+                    'Leads with a phone matching an existing customer should go back to the rep who handled them before.',
                     'Balance the number of leads per rep so no one is overloaded or idle.',
+                    'Assign as soon as leads arrive — delays lower the close rate.',
+                ],
+            },
+        ],
+    },
+    {
+        path: '/allocator/reports',
+        title: 'Allocation reports',
+        intro: 'Measure distribution speed & quality: leads in, assigned, pending, and load per telesale.',
+        sections: [
+            {
+                heading: 'Lead allocation report (all allocator staff)',
+                items: [
+                    'Per day: total leads in, assigned to sales, still pending, duplicates, failures.',
+                    'Allocation rate = assigned / allocatable leads (excluding duplicates & failures) — measures processing speed.',
+                    'Many "Pending" or a low rate → assign faster or add capacity.',
+                ],
+            },
+            {
+                heading: 'Telesale load & performance (leaders only)',
+                items: [
+                    'Leads assigned to each telesale in the period and their close rate → check distribution is fair and effective.',
+                    'A rep receiving many leads but closing few → consider rebalancing or reviewing source quality.',
+                    'This report is hidden from regular staff; only the allocation team leader can read it.',
                 ],
             },
         ],

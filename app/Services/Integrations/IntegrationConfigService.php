@@ -143,7 +143,7 @@ class IntegrationConfigService
             'description' => __("integrations.platforms.{$key}.description"),
             'is_enabled' => $connection->is_enabled,
             'is_configured' => collect($fields)->every(fn ($f) => $f['is_set']),
-            'webhook_url' => url("/api/v1/webhooks/{$meta['webhook_path']}"),
+            'webhook_url' => $connection->webhookUrl(),
             'api_leads_url' => url('/api/v1/leads'),
             'last_synced_at' => $connection->last_synced_at?->toIso8601String(),
             'docs_url' => $meta['docs'] ?? null,

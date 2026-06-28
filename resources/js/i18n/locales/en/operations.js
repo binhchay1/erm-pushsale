@@ -120,6 +120,7 @@ export default {
         export_failed: 'Export failed.',
         validation: 'Select warehouse, product and quantity.',
         approver_required: 'Select warehouse manager for approval.',
+        fill_required: 'Pick warehouse, product, quantity (>0) and approver to enable.',
         inventory_title: 'Product inventory',
         inventory_desc: 'Track stock per warehouse, intake or export — requires manager approval',
         intake_form: 'Intake into warehouse',

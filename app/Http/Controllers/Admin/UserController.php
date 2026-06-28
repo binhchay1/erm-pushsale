@@ -34,6 +34,7 @@ class UserController extends Controller
                 'team_name' => $u->team?->name,
                 'manager_name' => $u->manager?->name,
                 'is_team_leader' => (bool) $u->is_team_leader,
+                'org_level' => $u->org_level?->value,
                 'org_level_label' => $u->orgLevelLabel(),
                 'job_title' => $u->job_title,
             ])

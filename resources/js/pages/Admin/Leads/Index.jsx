@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Plug, Search, UserPlus } from 'lucide-react';
+import { CheckCircle2, Info, Plug, Search, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { useRealtimeReload } from '@/hooks/useRealtimeReload';
+import { useLabels } from '@/hooks/use-labels';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { leadTone } from '@/lib/status-tones';
 import { useT } from '@/providers/I18nProvider';
 
@@ -28,6 +30,9 @@ export default function LeadsIndex({
     allocationModeUrl = '/admin/leads/allocation-mode',
 }) {
     const t = useT();
+    const labels = useLabels();
+    const pageRows = leads.data ?? [];
+    const { sortedRows, sort, toggleSort } = useTableSort(pageRows, { defaultKey: 'created_at', defaultDir: 'desc' });
 
     useRealtimeReload(realtimeChannel, '.leads.changed', ['leads']);
     const [selected, setSelected] = useState([]);
@@ -62,7 +67,7 @@ export default function LeadsIndex({
     };
 
     const toggleAllPending = () => {
-        const pendingOnPage = (leads.data ?? []).filter((r) => r.status === 'pending').map((r) => r.id);
+        const pendingOnPage = pageRows.filter((r) => r.status === 'pending').map((r) => r.id);
         const allSelected = pendingOnPage.length > 0 && pendingOnPage.every((id) => selected.includes(id));
         setSelected(allSelected ? selected.filter((id) => !pendingOnPage.includes(id)) : [...new Set([...selected, ...pendingOnPage])]);
     };
@@ -99,6 +104,16 @@ export default function LeadsIndex({
     const pendingOnPage = (leads.data ?? []).filter((r) => r.status === 'pending');
     const allPendingSelected =
         pendingOnPage.length > 0 && pendingOnPage.every((r) => selected.includes(r.id));
+
+    const selectedSale = salesUsers.find((u) => String(u.id) === String(saleUserId));
+    const canAllocate = selected.length > 0 && !!saleUserId && !allocating;
+    const allocateGuide = canAllocate
+        ? t('pages.leads.ready_to_allocate', { count: selected.length, name: selectedSale?.name ?? '' })
+        : saleUserId
+          ? t('pages.leads.need_pick_leads', { name: selectedSale?.name ?? '' })
+          : selected.length
+            ? t('pages.leads.need_choose_sale', { count: selected.length })
+            : t('pages.leads.allocate_steps');
 
     return (
         <AppLayout>
@@ -143,7 +158,12 @@ export default function LeadsIndex({
 
                     <div className="flex flex-wrap items-end gap-3">
                         <div className="min-w-[200px] flex-1 space-y-1">
-                            <p className="text-xs font-medium text-muted-foreground">{t('pages.leads.manual_allocate_label')}</p>
+                            <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                                <span className="inline-flex size-4 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
+                                    1
+                                </span>
+                                {t('pages.leads.step_choose_sale')}
+                            </p>
                             <select
                                 className="input-soft h-9 w-full max-w-xs px-2"
                                 value={saleUserId}
@@ -157,12 +177,35 @@ export default function LeadsIndex({
                                 ))}
                             </select>
                         </div>
-                        <Button size="sm" onClick={allocate} disabled={allocating || !selected.length}>
-                            <UserPlus className="size-4" />
-                            {t('pages.leads.allocate_btn', { count: selected.length })}
-                        </Button>
-                        <p className="text-xs text-muted-foreground">{t('pages.leads.allocate_hint')}</p>
+                        <div className="space-y-1">
+                            <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                                <span className="inline-flex size-4 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
+                                    2
+                                </span>
+                                {t('pages.leads.step_allocate')}
+                            </p>
+                            <Button
+                                size="sm"
+                                onClick={allocate}
+                                disabled={!canAllocate}
+                                title={canAllocate ? undefined : allocateGuide}
+                            >
+                                <UserPlus className="size-4" />
+                                {t('pages.leads.allocate_btn', { count: selected.length })}
+                            </Button>
+                        </div>
                     </div>
+
+                    <p
+                        className={
+                            canAllocate
+                                ? 'flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400'
+                                : 'flex items-center gap-1.5 text-xs text-muted-foreground'
+                        }
+                    >
+                        {canAllocate ? <CheckCircle2 className="size-3.5" /> : <Info className="size-3.5" />}
+                        {allocateGuide}
+                    </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">
@@ -209,20 +252,20 @@ export default function LeadsIndex({
                                         title={t('pages.leads.select_all_pending')}
                                     />
                                 </Th>
-                                <Th>{t('pages.leads.col_id')}</Th>
-                                <Th>{t('pages.leads.col_time')}</Th>
-                                <Th>{t('pages.leads.col_platform')}</Th>
-                                <Th>{t('pages.leads.col_customer')}</Th>
-                                <Th>{t('pages.leads.col_phone')}</Th>
-                                <Th>{t('pages.leads.col_status')}</Th>
-                                <Th>{t('pages.leads.col_order')}</Th>
-                                <Th>{t('pages.leads.col_note')}</Th>
+                                <Th sortable sortKey="id" sort={sort} onSort={toggleSort}>{t('pages.leads.col_id')}</Th>
+                                <Th sortable sortKey="created_at" sort={sort} onSort={toggleSort}>{t('pages.leads.col_time')}</Th>
+                                <Th sortable sortKey="platform" sort={sort} onSort={toggleSort}>{t('pages.leads.col_platform')}</Th>
+                                <Th sortable sortKey="customer_name" sort={sort} onSort={toggleSort}>{t('pages.leads.col_customer')}</Th>
+                                <Th sortable sortKey="customer_phone" sort={sort} onSort={toggleSort}>{t('pages.leads.col_phone')}</Th>
+                                <Th sortable sortKey="status" sort={sort} onSort={toggleSort}>{t('pages.leads.col_status')}</Th>
+                                <Th sortable sortKey="order_code" sort={sort} onSort={toggleSort}>{t('pages.leads.col_order')}</Th>
+                                <Th sortable sortKey="note" sort={sort} onSort={toggleSort}>{t('pages.leads.col_note')}</Th>
                                 {canDelete && <Th />}
                             </tr>
                         </thead>
                         <tbody>
-                            {leads.data?.length ? (
-                                leads.data.map((row) => (
+                            {sortedRows.length ? (
+                                sortedRows.map((row) => (
                                     <tr key={row.id} className="hover:bg-muted/30">
                                         <Td>
                                             {row.status === 'pending' ? (
@@ -240,7 +283,7 @@ export default function LeadsIndex({
                                         <Td className="font-mono">{row.customer_phone ?? '—'}</Td>
                                         <Td>
                                             <StatusBadge tone={leadTone(row.status)}>
-                                                {row.status_label}
+                                                {labels.lead_ingestion_status?.[row.status] ?? row.status_label}
                                             </StatusBadge>
                                         </Td>
                                         <Td className="font-mono">{row.order_code ?? '—'}</Td>

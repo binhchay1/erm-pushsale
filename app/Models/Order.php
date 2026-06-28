@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Data\ReportFilterData;
 use App\Enums\DateType;
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
         'order_code', 'sale_user_id', 'marketer_user_id', 'team_id', 'marketing_source_id',
         'warehouse_id', 'product_id', 'customer_name', 'customer_phone', 'phone_carrier',

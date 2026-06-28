@@ -4,7 +4,33 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title inertia>{{ config('app.name', 'ERM SaleOps') }}</title>
+        @php($seo = app(\App\Support\Seo::class)->resolved())
+        <title inertia>{{ $seo['title'] }}</title>
+        <meta name="description" content="{{ $seo['description'] }}">
+        @if(!empty($seo['keywords']))<meta name="keywords" content="{{ $seo['keywords'] }}">@endif
+        <link rel="canonical" href="{{ $seo['canonical'] }}">
+        <meta name="theme-color" content="#2563eb">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="{{ $seo['site_name'] }}">
+        <meta property="og:title" content="{{ $seo['title'] }}">
+        <meta property="og:description" content="{{ $seo['description'] }}">
+        <meta property="og:url" content="{{ $seo['canonical'] }}">
+        <meta property="og:image" content="{{ $seo['image'] }}">
+        <meta property="og:locale" content="{{ $seo['locale'] }}">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $seo['title'] }}">
+        <meta name="twitter:description" content="{{ $seo['description'] }}">
+        <meta name="twitter:image" content="{{ $seo['image'] }}">
+        <script type="application/ld+json">
+            @json([
+                '@context' => 'https://schema.org',
+                '@type' => 'Organization',
+                'name' => $seo['site_name'],
+                'url' => url('/'),
+                'logo' => url('/favicon.svg'),
+                'description' => $seo['description'],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        </script>
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">

@@ -4,6 +4,7 @@ import { OperationCallButton } from '@/components/operations/OperationCallButton
 import { OperationStatusDialog } from '@/components/operations/OperationStatusDialog';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { useTableSort } from '@/hooks/use-table-sort';
 import { formatCurrency } from '@/lib/format';
 import { closingTone, deliveryTone } from '@/lib/status-tones';
 import { useT } from '@/providers/I18nProvider';
@@ -31,30 +32,32 @@ export function OperationOrderTable({
     const actionCols =
         (enableSaleActions ? 1 : 0) + (enableCloseOrder ? 1 : 0) + (enableDeleteOrder ? 1 : 0);
     const baseCols = 10;
+    // Realtime-safe: sort recomputes on prop refresh, chosen column persists.
+    const { sortedRows, sort, toggleSort } = useTableSort(rows ?? [], { defaultKey: 'dataArrivedAt', defaultDir: 'desc' });
 
     return (
         <ScrollDataTable>
             <table className="min-w-[1800px] w-full border-collapse">
                 <thead>
                     <tr>
-                        <Th>{t('operations.order_table.order_code')}</Th>
-                        <Th>{t('operations.order_table.source_date')}</Th>
-                        <Th>{t('operations.order_table.sale_assigned')}</Th>
-                        <Th>{t('operations.order_table.customer')}</Th>
+                        <Th sortable sortKey="orderCode" sort={sort} onSort={toggleSort}>{t('operations.order_table.order_code')}</Th>
+                        <Th sortable sortKey="dataArrivedAt" sort={sort} onSort={toggleSort}>{t('operations.order_table.source_date')}</Th>
+                        <Th sortable sortKey="saleName" sort={sort} onSort={toggleSort}>{t('operations.order_table.sale_assigned')}</Th>
+                        <Th sortable sortKey="customerName" sort={sort} onSort={toggleSort}>{t('operations.order_table.customer')}</Th>
                         <Th>{t('operations.order_table.message')}</Th>
-                        <Th>{t('operations.order_table.operation')}</Th>
+                        <Th sortable sortKey="currentOperation" sort={sort} onSort={toggleSort}>{t('operations.order_table.operation')}</Th>
                         <Th>{t('operations.order_table.products')}</Th>
-                        <Th>{t('operations.order_table.finance')}</Th>
-                        <Th>{t('operations.order_table.closing')}</Th>
-                        <Th>{t('operations.order_table.delivery')}</Th>
+                        <Th sortable sortKey="total" sort={sort} onSort={toggleSort}>{t('operations.order_table.finance')}</Th>
+                        <Th sortable sortKey="closingStatusLabel" sort={sort} onSort={toggleSort}>{t('operations.order_table.closing')}</Th>
+                        <Th sortable sortKey="deliveryStatus" sort={sort} onSort={toggleSort}>{t('operations.order_table.delivery')}</Th>
                         {enableSaleActions && <Th>{t('operations.order_table.actions')}</Th>}
                         {enableCloseOrder && <Th>{t('operations.order_table.close')}</Th>}
                         {enableDeleteOrder && <Th />}
                     </tr>
                 </thead>
                 <tbody>
-                    {rows?.length ? (
-                        rows.map((row) => (
+                    {sortedRows.length ? (
+                        sortedRows.map((row) => (
                             <tr key={row.id} className="align-top hover:bg-muted/30">
                                 <Td className="font-mono text-primary">{row.orderCode}</Td>
                                 <Td>

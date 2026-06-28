@@ -3,7 +3,9 @@
 namespace App\Jobs\Notifications;
 
 use App\Events\UserNotificationCreated;
+use App\Models\User;
 use App\Models\UserNotification;
+use App\Support\TenantManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -36,6 +38,15 @@ class SendUserNotification implements ShouldQueue
     }
 
     public function handle(): void
+    {
+        $companyId = User::query()->whereKey($this->userId)->value('company_id');
+
+        app(TenantManager::class)->forCompany($companyId, function (): void {
+            $this->persist();
+        });
+    }
+
+    private function persist(): void
     {
         $data = $this->data;
         $title = $this->title ?? '';
