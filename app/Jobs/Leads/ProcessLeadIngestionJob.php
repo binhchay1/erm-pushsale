@@ -4,6 +4,7 @@ namespace App\Jobs\Leads;
 
 use App\Enums\IntegrationPlatform;
 use App\Integrations\IntegrationDriverFactory;
+use App\Models\InboundEvent;
 use App\Models\MarketingSource;
 use App\Services\Integrations\IntegrationConfigService;
 use App\Services\Leads\LeadIngestionService;
@@ -11,6 +12,7 @@ use App\Support\TenantManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class ProcessLeadIngestionJob implements ShouldQueue
 {
@@ -28,6 +30,7 @@ class ProcessLeadIngestionJob implements ShouldQueue
         public array $payload,
         public ?int $campaignId = null,
         public ?int $companyId = null,
+        public ?int $inboundEventId = null,
     ) {}
 
     public function handle(
@@ -37,6 +40,17 @@ class ProcessLeadIngestionJob implements ShouldQueue
         app(TenantManager::class)->forCompany($this->companyId, function () use ($ingestionService, $configService) {
             $this->process($ingestionService, $configService);
         });
+
+        if ($this->inboundEventId) {
+            InboundEvent::query()->find($this->inboundEventId)?->markProcessed();
+        }
+    }
+
+    public function failed(?Throwable $e): void
+    {
+        if ($this->inboundEventId) {
+            InboundEvent::query()->find($this->inboundEventId)?->markFailed($e?->getMessage() ?? 'Job failed');
+        }
     }
 
     private function process(

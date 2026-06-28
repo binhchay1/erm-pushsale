@@ -63,7 +63,7 @@ export default {
         password: 'Mật khẩu',
         remember: 'Ghi nhớ đăng nhập',
         logging_in: 'Đang đăng nhập…',
-        demo_hint: 'Nội bộ ERM: admin@saleops.local · sales@saleops.local … (mật khẩu demo bên dưới)',
+        demo_hint: 'Đăng nhập nội bộ: admin@saleops.local (quản trị nền tảng), sales@saleops.local …',
         demo_password: 'Mật khẩu',
         contact_hint: 'Doanh nghiệp muốn dùng hệ thống? Liên hệ quản trị để được cấp tài khoản.',
     },

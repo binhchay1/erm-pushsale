@@ -12,20 +12,17 @@ use Illuminate\Database\Seeder;
 /**
  * Bộ dữ liệu demo đồng bộ toàn hệ thống (đa doanh nghiệp).
  *
- * Tài khoản (mật khẩu chung `password`):
- * - super@saleops.local        → super admin nền tảng (tạo doanh nghiệp khách).
- * - admin@saleops.local …      → công ty nội bộ ERM (email @saleops.local).
+ * Tài khoản chính (mật khẩu chung `password`):
+ * - admin@saleops.local — admin công ty nội bộ + quản trị nền tảng (menu Doanh nghiệp, Cấu hình, Giám sát).
+ * - sales@saleops.local, marketing@saleops.local, … — nhân sự nội bộ.
  *
- * Doanh nghiệp khách: super admin tạo qua /platform/companies
- * → email dạng admin@{slug}.saleops.local
+ * Doanh nghiệp khách: tạo qua /platform/companies → email admin@{slug}.saleops.local
  */
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         $this->call([DemoResetSeeder::class]);
-
-        $this->makePlatformAdmin();
 
         $company = CompanyProvisioningService::internalCompany();
 
@@ -46,21 +43,12 @@ class DatabaseSeeder extends Seeder
             ->first();
 
         if ($owner) {
-            $owner->update(['is_owner' => true, 'company_id' => $company->id]);
+            $owner->update([
+                'is_owner' => true,
+                'is_platform_admin' => true,
+                'company_id' => $company->id,
+            ]);
             $company->update(['owner_user_id' => $owner->id, 'contact_email' => 'admin@saleops.local']);
         }
-    }
-
-    private function makePlatformAdmin(): void
-    {
-        $admin = User::query()->create([
-            'name' => 'Super Admin',
-            'email' => 'super@saleops.local',
-            'password' => 'password',
-            'role' => UserRole::Admin,
-            'is_platform_admin' => true,
-        ]);
-
-        $admin->ensurePreferences();
     }
 }

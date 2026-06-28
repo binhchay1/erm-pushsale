@@ -26,8 +26,7 @@ class HandleInertiaRequests extends Middleware
 
         if ($user) {
             $preferences = $user->ensurePreferences()->toFrontendArray();
-            // company cần status + expires_at để SetTenant::isActive() hoạt động đúng
-            // (loadMissing chạy trước SetTenant; thiếu 2 cột này sẽ khiến isActive()=false → logout oan).
+            // company cần status + expires_at cho SetTenant::isActive()
             $user->loadMissing(['team:id,name', 'manager:id,name', 'company:id,name,slug,status,expires_at']);
 
             $recent = UserNotification::query()
@@ -62,6 +61,7 @@ class HandleInertiaRequests extends Middleware
                     'is_team_leader' => (bool) $user->is_team_leader,
                     'is_owner' => $user->isOwner(),
                     'is_platform_admin' => $user->isPlatformAdmin(),
+                    'can_manage_platform' => $user->canManagePlatform(),
                     'company' => $user->company ? [
                         'id' => $user->company->id,
                         'name' => $user->company->name,

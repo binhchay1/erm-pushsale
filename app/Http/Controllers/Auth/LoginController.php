@@ -80,10 +80,6 @@ class LoginController extends Controller
 
     public static function homeFor(User $user): string
     {
-        if ($user->isPlatformAdmin()) {
-            return route('platform.companies.index');
-        }
-
         return match ($user->role->value) {
             User::ROLE_ADMIN => route('admin.dashboard'),
             User::ROLE_MARKETING => route('marketing.dashboard'),

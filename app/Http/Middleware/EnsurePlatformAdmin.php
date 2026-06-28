@@ -12,7 +12,7 @@ class EnsurePlatformAdmin
     {
         $user = $request->user();
 
-        abort_unless($user && $user->isPlatformAdmin(), 403);
+        abort_unless($user && $user->canManagePlatform(), 403);
 
         return $next($request);
     }

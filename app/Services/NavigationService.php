@@ -15,17 +15,8 @@ class NavigationService
             return [];
         }
 
-        if ($user->isPlatformAdmin()) {
-            return $this->grouped([
-                $this->group(null, [
-                    $this->item('platform_companies', '/platform/companies', 'building-2'),
-                    $this->item('platform_settings', '/platform/settings', 'settings-2'),
-                ]),
-            ]);
-        }
-
         return match ($user->role) {
-            UserRole::Admin => $this->adminNavigation(),
+            UserRole::Admin => $this->adminNavigation($user),
             UserRole::Sales => $this->grouped([
                 $this->group(null, $this->salesItems()),
             ]),
@@ -45,9 +36,9 @@ class NavigationService
     }
 
     /** @return list<array{label_key?: string, items: list<array{title_key: string, url: string, icon: string}>}> */
-    private function adminNavigation(): array
+    private function adminNavigation(User $user): array
     {
-        return $this->grouped([
+        $groups = [
             $this->group('operations', [
                 $this->item('executive_dashboard', '/admin/dashboard', 'home'),
                 $this->item('rankings', '/admin/rankings', 'trophy'),
@@ -93,10 +84,21 @@ class NavigationService
                 $this->item('movements', '/admin/warehouse/movements', 'arrow-right-left'),
                 $this->item('failed_orders', '/admin/orders/failed', 'alert-triangle'),
             ]),
-            $this->group(null, [
-                $this->item('settings', '/settings', 'settings'),
-            ]),
+        ];
+
+        if ($user->canManagePlatform()) {
+            $groups[] = $this->group('platform', [
+                $this->item('platform_companies', '/platform/companies', 'building-2'),
+                $this->item('platform_settings', '/platform/settings', 'settings-2'),
+                $this->item('system_monitor', '/admin/system-monitor', 'activity'),
+            ]);
+        }
+
+        $groups[] = $this->group(null, [
+            $this->item('settings', '/settings', 'settings'),
         ]);
+
+        return $this->grouped($groups);
     }
 
     /** @return list<array{title_key: string, url: string, icon: string}> */

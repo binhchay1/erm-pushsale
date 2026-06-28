@@ -37,6 +37,7 @@ class DemoResetSeeder extends Seeder
         'sessions',
         'users',
         'companies',
+        'inbound_events',
     ];
 
     public function run(): void

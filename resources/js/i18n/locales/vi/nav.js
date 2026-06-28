@@ -7,6 +7,7 @@ export default {
         connections: 'Kết nối & Đối soát',
         hr_catalog: 'Nhân sự & Danh mục',
         warehouse_finance: 'Kho & Tài chính',
+        platform: 'Nền tảng',
     },
     items: {
         executive_dashboard: 'Tổng quan điều hành',
@@ -58,5 +59,6 @@ export default {
         allocator_load_report: 'Tải & hiệu suất telesale',
         platform_companies: 'Doanh nghiệp',
         platform_settings: 'Cấu hình hệ thống',
+        system_monitor: 'Giám sát hệ thống',
     },
 };

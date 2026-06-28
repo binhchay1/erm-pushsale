@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\ShippingOrderController;
 use App\Http\Controllers\Admin\ShippingPartnersController;
 use App\Http\Controllers\Admin\ShippingPartnerTestController;
 use App\Http\Controllers\Admin\ShippingReconciliationController;
+use App\Http\Controllers\Admin\SystemMonitorController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\Warehouse\InventoryController;
@@ -138,6 +139,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('integrations', [IntegrationsController::class, 'index'])->name('integrations.index');
         Route::put('integrations/{platform}', [IntegrationsController::class, 'update'])->name('integrations.update');
         Route::post('integrations/{platform}/test', [IntegrationsController::class, 'testWebhook'])->name('integrations.test');
+        Route::get('system-monitor', [SystemMonitorController::class, 'index'])->name('system-monitor.index');
+        Route::get('system-monitor/events/{inboundEvent}', [SystemMonitorController::class, 'show'])->name('system-monitor.show');
         Route::get('leads', LeadsLogController::class)->name('leads.index');
         Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
         Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');

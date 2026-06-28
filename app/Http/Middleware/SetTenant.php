@@ -20,8 +20,7 @@ class SetTenant
             return $next($request);
         }
 
-        // Super admin nền tảng: không gắn công ty → thấy toàn hệ thống.
-        if ($user->isPlatformAdmin()) {
+        if ($user->isPlatformAdmin() && $user->company_id === null) {
             $this->tenant->set(null);
 
             return $next($request);

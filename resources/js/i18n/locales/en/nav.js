@@ -7,6 +7,7 @@ export default {
         connections: 'Integrations & Reconciliation',
         hr_catalog: 'HR & Catalog',
         warehouse_finance: 'Warehouse & Finance',
+        platform: 'Platform',
     },
     items: {
         executive_dashboard: 'Executive dashboard',
@@ -58,5 +59,6 @@ export default {
         allocator_load_report: 'Telesale load & performance',
         platform_companies: 'Companies',
         platform_settings: 'Platform settings',
+        system_monitor: 'System monitor',
     },
 };

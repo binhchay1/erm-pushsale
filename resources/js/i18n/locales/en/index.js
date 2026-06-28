@@ -12,6 +12,7 @@ import rankings from './rankings.js';
 import profile from './profile.js';
 import charts from './charts.js';
 import nav from './nav.js';
+import system_monitor from './system_monitor.js';
 import labels from './labels.js';
 import { mergeLocales } from '../../merge.js';
 
@@ -30,4 +31,5 @@ export default mergeLocales(base, {
     rankings,
     profile,
     charts,
+    system_monitor,
 });

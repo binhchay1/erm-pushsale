@@ -103,6 +103,33 @@ class User extends Authenticatable
         return (bool) $this->is_platform_admin;
     }
 
+    /** Quản trị nền tảng: super admin hoặc admin công ty nội bộ. */
+    public function canManagePlatform(): bool
+    {
+        if ($this->isPlatformAdmin()) {
+            return true;
+        }
+
+        if (! $this->isAdmin()) {
+            return false;
+        }
+
+        return $this->belongsToInternalCompany();
+    }
+
+    public function belongsToInternalCompany(): bool
+    {
+        if (! $this->company_id) {
+            return false;
+        }
+
+        $company = $this->relationLoaded('company')
+            ? $this->company
+            : $this->company()->first(['id', 'slug']);
+
+        return $company?->isInternal() ?? false;
+    }
+
     public function roleLabel(): string
     {
         return $this->role->label();

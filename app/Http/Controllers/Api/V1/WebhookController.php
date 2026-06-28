@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\InboundEventSource;
 use App\Enums\IntegrationPlatform;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponds;
@@ -10,6 +11,7 @@ use App\Integrations\IntegrationDriverFactory;
 use App\Jobs\Leads\ProcessLeadIngestionJob;
 use App\Models\IntegrationConnection;
 use App\Models\Scopes\TenantScope;
+use App\Services\Inbound\InboundEventRecorder;
 use App\Support\TenantManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,18 +33,8 @@ class WebhookController extends Controller
             return $this->error(__('messages.webhook.platform_unsupported'), 404);
         }
 
-        $connection = $this->resolveConnection($enum, $token);
-
-        if (! $connection) {
-            return $this->error(__('messages.webhook.platform_unsupported'), 404);
-        }
-
-        // Gắn ngữ cảnh công ty để driver/forPlatform đọc đúng kết nối của doanh nghiệp.
-        app(TenantManager::class)->set($connection->company_id);
-
-        $driver = IntegrationDriverFactory::make($enum);
-
         if ($request->isMethod('GET') && $enum === IntegrationPlatform::Facebook) {
+            $driver = IntegrationDriverFactory::make($enum);
             $fb = $driver instanceof FacebookLeadDriver ? $driver : new FacebookLeadDriver;
             $challenge = $fb->challengeResponse($request);
 
@@ -51,27 +43,57 @@ class WebhookController extends Controller
                 : $this->error(__('messages.webhook.verify_token_invalid'), 403);
         }
 
+        $event = app(InboundEventRecorder::class)->record(
+            $request,
+            InboundEventSource::LeadWebhook,
+            $enum->value,
+            null,
+            $request->all(),
+        );
+
+        $connection = $this->resolveConnection($enum, $token);
+
+        if (! $connection) {
+            $event->markRejected(404, __('messages.webhook.platform_unsupported'));
+
+            return $this->error(__('messages.webhook.platform_unsupported'), 404);
+        }
+
+        $event->update(['company_id' => $connection->company_id]);
+
+        app(TenantManager::class)->set($connection->company_id);
+
+        $driver = IntegrationDriverFactory::make($enum);
+
         if (! $connection->is_enabled && ! app()->environment('local')) {
+            $event->markRejected(503, __('messages.webhook.platform_disabled'));
+
             return $this->error(__('messages.webhook.platform_disabled'), 503);
         }
 
         if (! $driver->verifyWebhook($request)) {
+            $event->markRejected(401, __('messages.webhook.unauthorized'));
+
             return $this->error(__('messages.webhook.unauthorized'), 401);
         }
 
-        ProcessLeadIngestionJob::dispatch($enum->value, $request->all(), null, $connection->company_id);
+        $event->markQueued();
+
+        ProcessLeadIngestionJob::dispatch(
+            $enum->value,
+            $request->all(),
+            null,
+            $connection->company_id,
+            $event->id,
+        );
 
         $message = $enum === IntegrationPlatform::Facebook
             ? __('messages.webhook.facebook_queued')
             : __('messages.webhook.queued');
 
-        return $this->success(['queued' => true], $message, 202);
+        return $this->success(['queued' => true, 'correlation_id' => $event->correlation_id], $message, 202);
     }
 
-    /**
-     * Webhook không có phiên đăng nhập → tìm kết nối theo token (đa doanh nghiệp)
-     * hoặc tự suy ra khi chỉ có duy nhất 1 doanh nghiệp cấu hình nền tảng đó.
-     */
     private function resolveConnection(IntegrationPlatform $enum, ?string $token): ?IntegrationConnection
     {
         if ($token) {

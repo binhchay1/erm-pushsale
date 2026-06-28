@@ -63,7 +63,7 @@ export default {
         password: 'Password',
         remember: 'Remember me',
         logging_in: 'Signing in…',
-        demo_hint: 'Internal ERM: admin@saleops.local · sales@saleops.local … (demo password below)',
+        demo_hint: 'Internal login: admin@saleops.local (platform admin), sales@saleops.local …',
         demo_password: 'Password',
         contact_hint: 'Want to use the system for your business? Contact the operator to get accounts.',
     },
