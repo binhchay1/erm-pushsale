@@ -26,7 +26,9 @@ class HandleInertiaRequests extends Middleware
 
         if ($user) {
             $preferences = $user->ensurePreferences()->toFrontendArray();
-            $user->loadMissing(['team:id,name', 'manager:id,name', 'company:id,name,slug']);
+            // company cần status + expires_at để SetTenant::isActive() hoạt động đúng
+            // (loadMissing chạy trước SetTenant; thiếu 2 cột này sẽ khiến isActive()=false → logout oan).
+            $user->loadMissing(['team:id,name', 'manager:id,name', 'company:id,name,slug,status,expires_at']);
 
             $recent = UserNotification::query()
                 ->where('user_id', $user->id)

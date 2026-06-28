@@ -51,18 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'platform' => EnsurePlatformAdmin::class,
         ]);
 
-        $middleware->redirectGuestsTo(function (Request $request) {
-            // ===== [AUTH-DEBUG] START — gỡ sau khi tìm ra lỗi =====
-            \Illuminate\Support\Facades\Log::debug('[AUTH-DEBUG] redirectGuestsTo (auth FAIL → /login)', [
-                'path' => $request->path(),
-                'session_id' => $request->hasSession() ? $request->session()->getId() : null,
-                'cookies' => array_keys($request->cookies->all()),
-                'session_keys' => $request->hasSession() ? array_keys($request->session()->all()) : [],
-            ]);
-            // ===== [AUTH-DEBUG] END =====
-
-            return route('login');
-        });
+        $middleware->redirectGuestsTo(fn () => route('login'));
 
         $middleware->redirectUsersTo(function (Request $request) {
             return LoginController::homeFor($request->user());
