@@ -22,14 +22,14 @@
         <meta name="twitter:description" content="{{ $seo['description'] }}">
         <meta name="twitter:image" content="{{ $seo['image'] }}">
         <script type="application/ld+json">
-            @json([
+            {!! json_encode([
                 '@context' => 'https://schema.org',
                 '@type' => 'Organization',
                 'name' => $seo['site_name'],
                 'url' => url('/'),
                 'logo' => url('/favicon.svg'),
                 'description' => $seo['description'],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
         </script>
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
