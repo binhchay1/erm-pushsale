@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
+import { useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +11,7 @@ import { useLabels } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
-export default function UserForm({ user, roles, teams, managers, orgLevels }) {
+export default function UserForm({ user, roles, teams, managers, managerPool = [], orgLevels }) {
     const t = useT();
     const labels = useLabels();
     const isEdit = Boolean(user?.id);
@@ -27,6 +28,44 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
         password: '',
         password_confirmation: '',
     });
+
+    const hierarchyRoles = ['sales', 'marketing', 'warehouse'];
+    const usesHierarchy = hierarchyRoles.includes(data.role);
+    const isAdmin = data.role === 'admin';
+    const isHead = data.org_level === 'head';
+    const managerRequired = usesHierarchy && !isHead;
+
+    const filteredManagers = useMemo(() => {
+        const pool = managerPool.length ? managerPool : managers;
+        if (isAdmin || !usesHierarchy) {
+            return [];
+        }
+        if (isHead) {
+            return pool.filter((m) => m.role === 'admin');
+        }
+        return pool.filter(
+            (m) =>
+                m.role === 'admin' ||
+                (m.role === data.role &&
+                    (m.org_level === 'head' || m.org_level === 'supervisor' || m.is_team_leader)),
+        );
+    }, [managerPool, managers, data.role, data.org_level, isAdmin, usesHierarchy, isHead]);
+
+    const onRoleChange = (role) => {
+        setData((prev) => ({
+            ...prev,
+            role,
+            ...(role === 'admin' ? { manager_user_id: '', org_level: '', team_id: '' } : {}),
+        }));
+    };
+
+    const onOrgLevelChange = (orgLevel) => {
+        setData((prev) => ({
+            ...prev,
+            org_level: orgLevel,
+            ...(orgLevel === 'head' ? { manager_user_id: '' } : {}),
+        }));
+    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -86,7 +125,7 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                                     id="role"
                                     className="input-soft flex h-9 w-full px-3"
                                     value={data.role}
-                                    onChange={(e) => setData('role', e.target.value)}
+                                    onChange={(e) => onRoleChange(e.target.value)}
                                 >
                                     {roles.map((r) => (
                                         <option key={r.value} value={r.value}>
@@ -117,65 +156,93 @@ export default function UserForm({ user, roles, teams, managers, orgLevels }) {
                             </div>
 
                             <div className="grid gap-4 sm:grid-cols-2">
+                                {!isAdmin && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="team_id">{t('pages.users.col_team')}</Label>
+                                        <select
+                                            id="team_id"
+                                            className="input-soft flex h-9 w-full px-3"
+                                            value={data.team_id}
+                                            onChange={(e) => setData('team_id', e.target.value || '')}
+                                        >
+                                            <option value="">{t('pages.users.no_select')}</option>
+                                            {teams.map((team) => (
+                                                <option key={team.id} value={team.id}>
+                                                    {team.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                                {usesHierarchy && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="manager_user_id">
+                                            {t('pages.users.direct_manager')}
+                                            {managerRequired && (
+                                                <span className="text-destructive"> *</span>
+                                            )}
+                                        </Label>
+                                        <select
+                                            id="manager_user_id"
+                                            className="input-soft flex h-9 w-full px-3"
+                                            value={data.manager_user_id}
+                                            onChange={(e) => setData('manager_user_id', e.target.value || '')}
+                                        >
+                                            <option value="">
+                                                {managerRequired
+                                                    ? t('pages.users.select_manager')
+                                                    : t('pages.users.no_select')}
+                                            </option>
+                                            {filteredManagers.map((m) => (
+                                                <option key={m.id} value={m.id}>
+                                                    {m.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {errors.manager_user_id && (
+                                            <p className="text-xs text-destructive">{errors.manager_user_id}</p>
+                                        )}
+                                        {isHead && (
+                                            <p className="text-xs text-muted-foreground">
+                                                {t('pages.users.head_manager_hint')}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {usesHierarchy && (
                                 <div className="space-y-2">
-                                    <Label htmlFor="team_id">{t('pages.users.col_team')}</Label>
+                                    <Label htmlFor="org_level">{t('pages.users.org_level')}</Label>
                                     <select
-                                        id="team_id"
+                                        id="org_level"
                                         className="input-soft flex h-9 w-full px-3"
-                                        value={data.team_id}
-                                        onChange={(e) => setData('team_id', e.target.value || '')}
+                                        value={data.org_level}
+                                        onChange={(e) => onOrgLevelChange(e.target.value || '')}
                                     >
                                         <option value="">{t('pages.users.no_select')}</option>
-                                        {teams.map((team) => (
-                                            <option key={team.id} value={team.id}>
-                                                {team.name}
+                                        {(orgLevels ?? []).map((l) => (
+                                            <option key={l.value} value={l.value}>
+                                                {l.label}
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.org_level && (
+                                        <p className="text-xs text-destructive">{errors.org_level}</p>
+                                    )}
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="manager_user_id">{t('pages.users.direct_manager')}</Label>
-                                    <select
-                                        id="manager_user_id"
-                                        className="input-soft flex h-9 w-full px-3"
-                                        value={data.manager_user_id}
-                                        onChange={(e) => setData('manager_user_id', e.target.value || '')}
-                                    >
-                                        <option value="">{t('pages.users.no_select')}</option>
-                                        {managers.map((m) => (
-                                            <option key={m.id} value={m.id}>
-                                                {m.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                            )}
+
+                            {usesHierarchy && !isHead && (
+                                <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                                    <Label htmlFor="is_team_leader">{t('pages.users.team_lead_legacy')}</Label>
+                                    <Switch
+                                        id="is_team_leader"
+                                        checked={data.is_team_leader}
+                                        onCheckedChange={(v) => setData('is_team_leader', v)}
+                                    />
                                 </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="org_level">{t('pages.users.org_level')}</Label>
-                                <select
-                                    id="org_level"
-                                    className="input-soft flex h-9 w-full px-3"
-                                    value={data.org_level}
-                                    onChange={(e) => setData('org_level', e.target.value || '')}
-                                >
-                                    <option value="">{t('pages.users.no_select')}</option>
-                                    {(orgLevels ?? []).map((l) => (
-                                        <option key={l.value} value={l.value}>
-                                            {l.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="flex items-center justify-between rounded-lg border px-4 py-3">
-                                <Label htmlFor="is_team_leader">{t('pages.users.team_lead_legacy')}</Label>
-                                <Switch
-                                    id="is_team_leader"
-                                    checked={data.is_team_leader}
-                                    onCheckedChange={(v) => setData('is_team_leader', v)}
-                                />
-                            </div>
+                            )}
 
                             <div className="space-y-2">
                                 <Label htmlFor="password">

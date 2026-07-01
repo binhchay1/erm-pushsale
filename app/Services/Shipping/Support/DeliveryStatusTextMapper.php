@@ -23,6 +23,10 @@ final class DeliveryStatusTextMapper
             str_contains($value, 'delivered'),
             str_contains($value, 'hoàn tất') => DeliveryStatus::Delivered,
 
+            str_contains($value, 'thanh toán'),
+            str_contains($value, 'đối soát'),
+            str_contains($value, 'paid') => DeliveryStatus::Paid,
+
             str_contains($value, 'đang giao'),
             str_contains($value, 'delivering') => DeliveryStatus::Delivering,
 

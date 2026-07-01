@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Enums\DeliveryStatus;
 use App\Models\Order;
+use App\Support\OrderRevenue;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 
@@ -28,10 +29,13 @@ class OrderRepository
 
     public function revenueOnDay(Carbon $day): int
     {
+        $amount = OrderRevenue::netAmountSql();
+
         return (int) Order::query()
-            ->whereDate('created_at', $day)
             ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
-            ->sum('total');
+            ->whereDate('updated_at', $day)
+            ->selectRaw("SUM({$amount}) as revenue")
+            ->value('revenue');
     }
 
     public function arrivedSinceCount(Carbon $since, ?int $saleUserId = null): int

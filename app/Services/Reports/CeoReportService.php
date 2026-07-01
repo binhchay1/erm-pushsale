@@ -36,7 +36,7 @@ class CeoReportService
                 $oldContact = (int) $oldCustomers->sum('contact_count');
                 $newClosed = $newCustomers->count();
                 $oldClosed = $oldCustomers->count();
-                $totalRev = (int) $mine->sum(fn ($o) => $o->effectiveRevenue());
+                $totalRev = (int) $mine->sum(fn ($o) => $o->netRevenue());
                 $kpi = (float) ($user->id === 1 ? 50_000_000 : 30_000_000);
 
                 return [
@@ -48,12 +48,12 @@ class CeoReportService
                     'newClosed' => $newClosed,
                     'newCloseRate' => $newContact > 0 ? round($newClosed / $newContact * 100, 1) : 0,
                     'newProductQty' => (int) $newCustomers->sum(fn ($o) => $o->items->sum('quantity')),
-                    'newEstRevenue' => (int) $newCustomers->sum(fn ($o) => $o->effectiveRevenue()),
+                    'newEstRevenue' => (int) $newCustomers->sum(fn ($o) => $o->netRevenue()),
                     'oldContact' => $oldContact,
                     'oldClosed' => $oldClosed,
                     'oldCloseRate' => $oldContact > 0 ? round($oldClosed / $oldContact * 100, 1) : 0,
                     'oldProductQty' => (int) $oldCustomers->sum(fn ($o) => $o->items->sum('quantity')),
-                    'oldEstRevenue' => (int) $oldCustomers->sum(fn ($o) => $o->effectiveRevenue()),
+                    'oldEstRevenue' => (int) $oldCustomers->sum(fn ($o) => $o->netRevenue()),
                     'totalEstRevenue' => $totalRev,
                     'codFee' => (int) $mine->sum('cod_fee'),
                     'codSupport' => (int) $mine->sum('cod_support'),
@@ -74,8 +74,8 @@ class CeoReportService
                 $sourceOrders = (clone $orders)->where('marketing_source_id', $source->id)->get();
                 $budget = $source->budget;
                 $contacts = max($source->contacts, (int) $sourceOrders->sum('contact_count'));
-                $newRev = (int) $sourceOrders->where('is_returning_customer', false)->sum(fn ($o) => $o->effectiveRevenue());
-                $totalRev = (int) $sourceOrders->sum(fn ($o) => $o->effectiveRevenue());
+                $newRev = (int) $sourceOrders->where('is_returning_customer', false)->sum(fn ($o) => $o->netRevenue());
+                $totalRev = (int) $sourceOrders->sum(fn ($o) => $o->netRevenue());
 
                 return [
                     'stt' => $index + 1,

@@ -79,7 +79,22 @@ class LeadOrderFactory
             ]);
         }
 
-        return $order;
+        return $this->syncTotals($order->fresh(['items']));
+    }
+
+    public function syncTotals(Order $order): Order
+    {
+        $order->loadMissing('items');
+        $subtotal = (int) $order->items->sum(fn ($item) => (int) $item->unit_price * (int) $item->quantity);
+
+        if ($subtotal > 0) {
+            $order->update([
+                'subtotal' => $subtotal,
+                'total' => max(0, $subtotal - (int) $order->discount),
+            ]);
+        }
+
+        return $order->fresh(['items']);
     }
 
     /**

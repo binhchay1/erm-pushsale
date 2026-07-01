@@ -112,7 +112,7 @@ class AllocatorReportService
             $received = $orders->count();
             $closed = $orders->filter(fn (Order $o) => $this->isClosed($o));
             $closedCount = $closed->count();
-            $revenue = $closed->sum(fn (Order $o) => $o->effectiveRevenue());
+            $revenue = $closed->sum(fn (Order $o) => $o->netRevenue());
 
             return [
                 'sale_id' => (int) $sale->id,

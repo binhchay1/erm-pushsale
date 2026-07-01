@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Repositories\TeamRepository;
 use App\Repositories\UserRepository;
 use App\Services\OrgStructureService;
+use App\Services\Users\UserOrgRules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -52,6 +53,7 @@ class UserController extends Controller
             'roles' => $this->roleOptions(),
             'teams' => $this->teamOptions(),
             'managers' => $this->managerOptions(),
+            'managerPool' => $this->managerPool(),
             'orgLevels' => OrgStructureService::orgLevelOptions(),
         ]);
     }
@@ -83,7 +85,8 @@ class UserController extends Controller
             ],
             'roles' => $this->roleOptions(),
             'teams' => $this->teamOptions(),
-            'managers' => $this->managerOptions(excludeId: $user->id),
+            'managers' => $this->managerOptions(excludeId: $user->id, role: $user->role->value, orgLevel: $user->org_level?->value),
+            'managerPool' => $this->managerPool(),
             'orgLevels' => OrgStructureService::orgLevelOptions(),
         ]);
     }
@@ -151,8 +154,35 @@ class UserController extends Controller
     }
 
     /** @return list<array{id: int, name: string}> */
-    private function managerOptions(?int $excludeId = null): array
+    private function managerOptions(?int $excludeId = null, ?string $role = null, ?string $orgLevel = null): array
     {
-        return $this->users->nameOptions($excludeId);
+        if (! $role) {
+            return $this->users->nameOptions($excludeId);
+        }
+
+        $ids = UserOrgRules::managerCandidateIds($role, $orgLevel, $excludeId);
+
+        return User::query()
+            ->whereIn('id', $ids)
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (User $u) => ['id' => $u->id, 'name' => $u->name])
+            ->all();
+    }
+
+    /** @return list<array{id: int, name: string, role: string, org_level: ?string, is_team_leader: bool}> */
+    private function managerPool(): array
+    {
+        return User::query()
+            ->orderBy('name')
+            ->get(['id', 'name', 'role', 'org_level', 'is_team_leader'])
+            ->map(fn (User $u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'role' => $u->role->value,
+                'org_level' => $u->org_level?->value,
+                'is_team_leader' => (bool) $u->is_team_leader,
+            ])
+            ->all();
     }
 }

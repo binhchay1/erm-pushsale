@@ -34,6 +34,36 @@ export function formatNumber(value, locale) {
     return new Intl.NumberFormat(resolveLocale(locale)).format(value);
 }
 
+/** Chuỗi hiển thị khi nhập tiền (giữ số 0, có dấu phân cách hàng nghìn). */
+export function formatMoneyInput(value, locale) {
+    if (value == null || value === '') {
+        return '';
+    }
+
+    const numeric = Number(value);
+
+    if (Number.isNaN(numeric)) {
+        return '';
+    }
+
+    return formatNumber(numeric, locale);
+}
+
+/** Parse ô nhập tiền → số nguyên VND. */
+export function parseMoneyInput(value) {
+    if (value == null || value === '') {
+        return 0;
+    }
+
+    const digits = String(value).replace(/[^\d]/g, '');
+
+    if (digits === '') {
+        return 0;
+    }
+
+    return parseInt(digits, 10);
+}
+
 export function formatPercent(value) {
     if (value == null) return '—';
 

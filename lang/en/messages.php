@@ -24,6 +24,16 @@ return [
     'user_deleted' => 'Employee deleted.',
     'user_cannot_delete_self' => 'Cannot delete your own account.',
     'user_cannot_delete_last_admin' => 'Cannot delete the last admin.',
+
+    'user_org' => [
+        'admin_no_manager' => 'Admin accounts cannot have a direct manager.',
+        'admin_no_org_level' => 'Admin accounts cannot have a department level.',
+        'manager_required' => 'Staff and supervisors must select a direct manager.',
+        'manager_not_self' => 'You cannot select yourself as manager.',
+        'manager_invalid' => 'Direct manager must be a head, supervisor, or admin.',
+        'head_manager_admin_only' => 'Department heads may only report to an admin.',
+        'supervisor_reports_to_head' => 'Supervisors must report to a department head or admin.',
+    ],
     'landing_approved' => 'Landing source approved — new leads will be routed to sales.',
     'password_changed' => 'Password changed.',
     'avatar_updated' => 'Avatar updated.',
@@ -131,5 +141,11 @@ return [
         'unauthorized' => 'Invalid shipping webhook',
         'processed' => 'Shipping webhook processed.',
         'queued' => 'Shipping webhook queued.',
+    ],
+    'settlement' => [
+        'file_unreadable' => 'Cannot read settlement file.',
+        'empty_file' => 'Settlement file has no data rows.',
+        'import_success' => 'COD statement imported: :matched/:total lines matched.',
+        'sync_success' => 'Cash flow synced: :matched/:total lines matched.',
     ],
 ];

@@ -94,7 +94,7 @@ class SalesPerformanceReportService
         $closed = $orders->whereNotNull('closed_at')->count();
         $revenue = (int) $orders
             ->whereNotNull('closed_at')
-            ->sum(fn (Order $o) => $o->effectiveRevenue());
+            ->sum(fn (Order $o) => $o->netRevenue());
 
         return [
             'totalLeads' => $totalLeads,

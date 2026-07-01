@@ -20,7 +20,7 @@ final class RevenueMetricsCalculator
     {
         $closed = new MetricPairData(
             $orders->count(),
-            (int) $orders->sum(fn (Order $o) => $o->effectiveRevenue()),
+            (int) $orders->sum(fn (Order $o) => $o->netRevenue()),
         );
 
         $confirmed = self::pairForStatuses($orders, [
@@ -94,7 +94,7 @@ final class RevenueMetricsCalculator
 
         return new MetricPairData(
             $subset->count(),
-            (int) $subset->sum(fn (Order $o) => $o->effectiveRevenue()),
+            (int) $subset->sum(fn (Order $o) => $o->netRevenue()),
         );
     }
 

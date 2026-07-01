@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout';
@@ -121,11 +122,9 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                                 </div>
                                 <div className="space-y-2">
                                     <Label>{t('pages.campaigns.budget_vnd')}</Label>
-                                    <Input
-                                        type="number"
-                                        min={0}
+                                    <CurrencyInput
                                         value={data.budget}
-                                        onChange={(e) => setData('budget', e.target.value)}
+                                        onChange={(amount) => setData('budget', amount)}
                                     />
                                 </div>
                             </div>

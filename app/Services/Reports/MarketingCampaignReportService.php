@@ -3,6 +3,7 @@
 namespace App\Services\Reports;
 
 use App\Data\ReportFilterData;
+use App\Enums\DeliveryStatus;
 use App\Enums\LeadIngestionStatus;
 use App\Enums\OperationResult;
 use App\Enums\UserRole;
@@ -40,8 +41,8 @@ class MarketingCampaignReportService
             $junkCount = $this->countJunkOrders($campaignOrders);
             $leadCount = max($leads->count(), $campaignOrders->count());
             $revenue = (int) $campaignOrders
-                ->whereNotNull('closed_at')
-                ->sum(fn (Order $o) => $o->effectiveRevenue());
+                ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
+                ->sum(fn (Order $o) => $o->netRevenue());
 
             $row = [
                 'stt' => $index + 1,

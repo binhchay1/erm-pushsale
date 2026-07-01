@@ -38,6 +38,8 @@ class DemoResetSeeder extends Seeder
         'users',
         'companies',
         'inbound_events',
+        'carrier_settlement_lines',
+        'carrier_settlement_batches',
     ];
 
     public function run(): void

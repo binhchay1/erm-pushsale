@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
 
 function BudgetCell({ row, budgetUpdateUrl, canEditBudget }) {
     const t = useT();
-    const [value, setValue] = useState(String(row.adCost ?? 0));
+    const [value, setValue] = useState(row.adCost ?? 0);
     const [saving, setSaving] = useState(false);
 
     if (row.isTotalRow || !canEditBudget) {
@@ -34,12 +34,10 @@ function BudgetCell({ row, budgetUpdateUrl, canEditBudget }) {
 
     return (
         <div className="flex min-w-[140px] items-center gap-1">
-            <Input
-                type="number"
-                min={0}
+            <CurrencyInput
                 className="h-7 px-2 text-xs"
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={setValue}
             />
             <Button type="button" size="icon" variant="ghost" className="size-7" onClick={save} disabled={saving}>
                 {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}

@@ -4,9 +4,11 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\OrgLevel;
 use App\Enums\UserRole;
+use App\Services\Users\UserOrgRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Validator;
 
 class UserRequest extends FormRequest
 {
@@ -41,5 +43,12 @@ class UserRequest extends FormRequest
             'job_title' => ['nullable', 'string', 'max:120'],
             'password' => [$userId ? 'nullable' : 'required', 'confirmed', Password::defaults()],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $v): void {
+            UserOrgRules::validate($v);
+        });
     }
 }

@@ -105,4 +105,15 @@ return [
         'month' => 'Tháng này',
         'quarter' => 'Quý này',
     ],
+    'reconciliation_status' => [
+        'pending' => 'Chờ đối soát',
+        'in_transit' => 'Đang luân chuyển',
+        'settled' => 'Đã trả đủ tiền',
+        'short_paid' => 'Trả thiếu tiền',
+        'over_paid' => 'Trả thừa tiền',
+        'returned' => 'Đơn hoàn',
+        'mismatch' => 'Lệch COD',
+        'missing_settlement' => 'Thiếu dòng tiền hãng',
+        'reconciled' => 'Đã đối soát',
+    ],
 ];

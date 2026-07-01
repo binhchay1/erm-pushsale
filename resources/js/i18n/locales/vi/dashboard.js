@@ -1,6 +1,6 @@
 export default {
     revenue_7d: 'Doanh thu 7 ngày',
-    revenue_7d_desc: 'Doanh thu từ đơn đã giao / đã thanh toán',
+    revenue_7d_desc: 'Doanh thu ròng từ đơn đã giao / đã thanh toán (sau phí VC)',
     orders_7d: 'Đơn phát sinh 7 ngày',
     orders_7d_desc: 'Số đơn tạo mới theo ngày',
     leads_7d: 'Lead 7 ngày',
@@ -29,9 +29,9 @@ export default {
     disconnected: 'Mất kết nối',
     kpi: {
         revenue_today: 'Doanh thu hôm nay',
-        revenue_today_hint: 'Đơn đã giao / đã thanh toán trong ngày',
+        revenue_today_hint: 'Thu đơn giao/thanh toán − phí VC − ngân sách campaign liên quan',
         orders_closed: 'Đơn đã chốt',
-        orders_closed_hint: 'Đơn phát sinh hôm nay',
+        orders_closed_hint: 'Đơn chốt trong ngày (closed_at)',
         leads_today: 'Lead hôm nay',
         leads_today_hint: 'Từ webhook/landing/platform',
         delivery_rate: 'Tỷ lệ giao thành công',

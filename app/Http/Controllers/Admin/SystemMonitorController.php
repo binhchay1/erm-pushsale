@@ -13,17 +13,9 @@ use Inertia\Response;
 
 class SystemMonitorController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            abort_unless($request->user()?->canManagePlatform(), 403);
-
-            return $next($request);
-        });
-    }
-
     public function index(Request $request, SystemLogReader $logReader): Response
     {
+        abort_unless($request->user()?->canManagePlatform(), 403);
         $source = $request->query('source');
         $status = $request->query('status');
         $level = $request->query('level');
@@ -85,8 +77,10 @@ class SystemMonitorController extends Controller
         ]);
     }
 
-    public function show(InboundEvent $inboundEvent): Response
+    public function show(Request $request, InboundEvent $inboundEvent): Response
     {
+        abort_unless($request->user()?->canManagePlatform(), 403);
+
         $inboundEvent->load('company:id,name,slug');
 
         return Inertia::render('Admin/SystemMonitor/Show', [

@@ -1,6 +1,6 @@
 export default {
     revenue_7d: 'Revenue (7 days)',
-    revenue_7d_desc: 'Revenue from delivered / paid orders',
+    revenue_7d_desc: 'Net revenue from delivered / paid orders (after shipping fees)',
     orders_7d: 'New orders (7 days)',
     orders_7d_desc: 'Orders created per day',
     leads_7d: 'Leads (7 days)',
@@ -29,9 +29,9 @@ export default {
     disconnected: 'Disconnected',
     kpi: {
         revenue_today: 'Revenue today',
-        revenue_today_hint: 'Delivered / paid orders today',
+        revenue_today_hint: 'Order revenue − shipping fees − linked campaign budgets',
         orders_closed: 'Closed orders',
-        orders_closed_hint: 'Orders created today',
+        orders_closed_hint: 'Orders closed today (closed_at)',
         leads_today: 'Leads today',
         leads_today_hint: 'From webhook/landing/platform',
         delivery_rate: 'Delivery success rate',

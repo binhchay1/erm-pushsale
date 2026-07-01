@@ -24,7 +24,8 @@ class Order extends Model
         'shipping_method', 'shipping_provider', 'carrier_name', 'tracking_number',
         'reconciliation_status', 'is_returning_customer', 'is_duplicate_phone',
         'subtotal', 'discount', 'vat', 'shipping_fee_collected', 'total', 'deposit',
-        'amount_to_collect', 'carrier_service_fee', 'shipping_support_fee',
+        'amount_to_collect', 'settled_cod_amount', 'settlement_matched_at',
+        'carrier_service_fee', 'shipping_support_fee',
         'cod_fee', 'cod_support', 'contact_count',
     ];
 
@@ -38,6 +39,7 @@ class Order extends Model
             'return_restocked_at' => 'datetime',
             'desired_delivery_at' => 'datetime',
             'next_operation_at' => 'datetime',
+            'settlement_matched_at' => 'datetime',
             'is_returning_customer' => 'boolean',
             'is_duplicate_phone' => 'boolean',
             'shipping_geo' => 'array',
@@ -84,6 +86,11 @@ class Order extends Model
         return $this->hasMany(Shipment::class);
     }
 
+    public function settlementLines(): HasMany
+    {
+        return $this->hasMany(CarrierSettlementLine::class);
+    }
+
     public function shippingApiLogs(): HasMany
     {
         return $this->hasMany(ShippingApiLog::class);
@@ -94,6 +101,22 @@ class Order extends Model
         $base = $this->total > 0 ? $this->total : $this->subtotal;
 
         return (int) max(0, $base - $this->discount);
+    }
+
+    public function shippingCost(): int
+    {
+        return (int) (
+            $this->carrier_service_fee
+            + $this->cod_fee
+            + $this->shipping_support_fee
+            + $this->cod_support
+        );
+    }
+
+    /** Doanh thu ròng cấp đơn (sau phí VC, chưa trừ ngân sách campaign). */
+    public function netRevenue(): int
+    {
+        return (int) max(0, $this->effectiveRevenue() - $this->shippingCost());
     }
 
     public function scopeApplyReportFilter(Builder $query, ReportFilterData $filter): Builder

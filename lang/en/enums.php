@@ -105,4 +105,15 @@ return [
         'month' => 'This month',
         'quarter' => 'This quarter',
     ],
+    'reconciliation_status' => [
+        'pending' => 'Pending reconciliation',
+        'in_transit' => 'In transit',
+        'settled' => 'Fully settled',
+        'short_paid' => 'Underpaid',
+        'over_paid' => 'Overpaid',
+        'returned' => 'Returned',
+        'mismatch' => 'COD mismatch',
+        'missing_settlement' => 'Missing carrier settlement',
+        'reconciled' => 'Reconciled',
+    ],
 ];

@@ -24,6 +24,16 @@ return [
     'user_deleted' => 'Đã xóa nhân viên.',
     'user_cannot_delete_self' => 'Không thể xóa tài khoản đang đăng nhập.',
     'user_cannot_delete_last_admin' => 'Không thể xóa quản trị viên cuối cùng.',
+
+    'user_org' => [
+        'admin_no_manager' => 'Quản trị viên không có quản lý trực tiếp.',
+        'admin_no_org_level' => 'Quản trị viên không gán cấp bậc phòng ban.',
+        'manager_required' => 'Nhân viên / giám sát phải chọn quản lý trực tiếp.',
+        'manager_not_self' => 'Không thể chọn chính mình làm quản lý.',
+        'manager_invalid' => 'Quản lý trực tiếp phải là trưởng bộ phận, giám sát hoặc quản trị.',
+        'head_manager_admin_only' => 'Trưởng bộ phận chỉ được báo cáo lên quản trị viên.',
+        'supervisor_reports_to_head' => 'Giám sát phải báo cáo lên trưởng bộ phận hoặc quản trị.',
+    ],
     'landing_approved' => 'Đã duyệt nguồn Landing — lead mới sẽ được chia số cho Sale.',
     'password_changed' => 'Đã đổi mật khẩu.',
     'avatar_updated' => 'Đã cập nhật ảnh đại diện.',
@@ -131,5 +141,11 @@ return [
         'unauthorized' => 'Webhook vận chuyển không hợp lệ',
         'processed' => 'Đã xử lý webhook vận chuyển.',
         'queued' => 'Webhook vận chuyển đã được đưa vào hàng đợi.',
+    ],
+    'settlement' => [
+        'file_unreadable' => 'Không đọc được file đối soát.',
+        'empty_file' => 'File đối soát không có dòng dữ liệu.',
+        'import_success' => 'Đã import bảng kê COD: :matched/:total dòng khớp đơn.',
+        'sync_success' => 'Đã đồng bộ dòng tiền: :matched/:total dòng khớp đơn.',
     ],
 ];

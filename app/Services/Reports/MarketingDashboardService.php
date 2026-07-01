@@ -61,7 +61,7 @@ class MarketingDashboardService
         $parents = array_filter($rows, fn ($r) => ! ($r['isChild'] ?? false));
         $contacts = max(array_sum(array_column($parents, 'contacts')), 1);
         $closed = (int) $orders->count();
-        $revenue = (int) $orders->sum(fn (Order $o) => $o->effectiveRevenue());
+        $revenue = (int) $orders->sum(fn (Order $o) => $o->netRevenue());
         $productQty = (int) $orders->sum(fn (Order $o) => $o->items->sum('quantity'));
 
         return [
@@ -85,7 +85,7 @@ class MarketingDashboardService
         $closed = $sourceOrders->count();
         $budget = $source->budget;
         $productQty = (int) $sourceOrders->sum(fn ($o) => $o->items->sum('quantity'));
-        $totalRevenue = (int) $sourceOrders->sum(fn ($o) => $o->effectiveRevenue());
+        $totalRevenue = (int) $sourceOrders->sum(fn (Order $o) => $o->netRevenue());
         $revenueAfterDiscount = $totalRevenue;
 
         return [

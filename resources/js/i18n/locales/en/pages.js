@@ -75,6 +75,8 @@ export default {
         org_level: 'Department level',
         password_confirm: 'Confirm password',
         no_select: '— No selection —',
+        select_manager: '— Select manager —',
+        head_manager_hint: 'Department heads do not require a direct manager; if set, only Admin is allowed.',
     },
     warehouse: {
         title: 'Warehouses',

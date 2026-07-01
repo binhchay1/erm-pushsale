@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\WarehouseInventory;
 use App\Services\Reports\ReportMetricService;
 use App\Services\Reports\ReportQueryService;
+use App\Support\OrderRevenue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -406,10 +407,14 @@ class DashboardStatsService
     private static function marketerRevenueSeries(Builder $orders, int $days): array
     {
         $paidOrders = (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible());
+        $amount = OrderRevenue::netAmountSql();
 
         return self::days($days)->map(fn (Carbon $day) => [
             'label' => $day->format('d/m'),
-            'value' => (int) (clone $paidOrders)->whereDate('created_at', $day)->sum('total'),
+            'value' => (int) (clone $paidOrders)
+                ->whereDate('created_at', $day)
+                ->selectRaw("SUM({$amount}) as revenue")
+                ->value('revenue'),
         ])->values()->all();
     }
 
@@ -460,13 +465,24 @@ class DashboardStatsService
     /** @return array<string, int|float> */
     private static function todaySummary(): array
     {
-        $todayOrders = Order::query()->whereDate('created_at', today());
-        $deliveredTotal = Order::query()->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count();
+        $revenueEligible = DeliveryStatus::revenueEligible();
+
+        $closedToday = Order::query()->whereDate('closed_at', today())->count();
+        $arrivedToday = Order::query()->whereDate('data_arrived_at', today())->count();
+        $deliveredTotal = Order::query()->whereIn('delivery_status', $revenueEligible)->count();
         $ordersTotal = Order::query()->count();
 
+        $todayRevenueOrders = Order::query()
+            ->whereIn('delivery_status', $revenueEligible)
+            ->whereDate('updated_at', today());
+
+        $revenueBreakdown = OrderRevenue::aggregate($todayRevenueOrders);
+
         return [
-            'revenue_today' => (int) (clone $todayOrders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->sum('total'),
-            'orders_closed' => (int) (clone $todayOrders)->count(),
+            'revenue_today' => $revenueBreakdown['net'],
+            'revenue_breakdown' => $revenueBreakdown,
+            'orders_closed' => $closedToday,
+            'orders_arrived_today' => $arrivedToday,
             'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
             'delivery_rate' => self::percentage($deliveredTotal, $ordersTotal),
             'failed_orders' => Order::query()->whereIn('delivery_status', ['failed', 'cancelled', 'returned'])->count(),
@@ -477,9 +493,16 @@ class DashboardStatsService
     /** @return list<array{label: string, value: int}> */
     private static function revenueSeries(int $days = 7): array
     {
+        $revenueEligible = DeliveryStatus::revenueEligible();
+        $amount = OrderRevenue::netAmountSql();
+
         return self::days($days)->map(fn (Carbon $day) => [
             'label' => $day->format('d/m'),
-            'value' => (int) Order::query()->whereDate('created_at', $day)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->sum('total'),
+            'value' => (int) Order::query()
+                ->whereIn('delivery_status', $revenueEligible)
+                ->whereDate('updated_at', $day)
+                ->selectRaw("SUM({$amount}) as revenue")
+                ->value('revenue'),
         ])->values()->all();
     }
 
@@ -513,7 +536,10 @@ class DashboardStatsService
     /** @return list<array{name: string, orders: int, revenue: int, conversion_rate: float}> */
     private static function topSales(): array
     {
-        return User::query()->where('role', UserRole::Sales->value)->leftJoin('orders', 'orders.sale_user_id', '=', 'users.id')->select('users.id', 'users.name')->selectRaw('count(orders.id) as orders_count')->selectRaw("sum(case when orders.delivery_status in ('delivered', 'paid') then orders.total else 0 end) as revenue")->selectRaw('sum(case when orders.closed_at is not null then 1 else 0 end) as closed_count')->groupBy('users.id', 'users.name')->orderByDesc('revenue')->orderByDesc('orders_count')->limit(5)->get()->map(fn (User $user) => [
+        $eligible = "orders.delivery_status in ('delivered', 'paid')";
+        $net = OrderRevenue::netAmountSql('orders');
+
+        return User::query()->where('role', UserRole::Sales->value)->leftJoin('orders', 'orders.sale_user_id', '=', 'users.id')->select('users.id', 'users.name')->selectRaw('count(orders.id) as orders_count')->selectRaw("sum(case when {$eligible} then ({$net}) else 0 end) as revenue")->selectRaw('sum(case when orders.closed_at is not null then 1 else 0 end) as closed_count')->groupBy('users.id', 'users.name')->orderByDesc('revenue')->orderByDesc('orders_count')->limit(5)->get()->map(fn (User $user) => [
             'name' => $user->name,
             'orders' => (int) $user->orders_count,
             'revenue' => (int) $user->revenue,
@@ -526,7 +552,9 @@ class DashboardStatsService
     {
         $leadCounts = LeadIngestion::query()->selectRaw('platform, count(*) as leads_count')->groupBy('platform')->pluck('leads_count', 'platform');
         $other = '__other__';
-        $sourceRows = Order::query()->leftJoin('marketing_sources', 'marketing_sources.id', '=', 'orders.marketing_source_id')->selectRaw("coalesce(marketing_sources.utm_source, marketing_sources.ad_channel, marketing_sources.name, '{$other}') as source_name")->selectRaw('count(orders.id) as orders_count')->selectRaw("sum(case when orders.delivery_status in ('delivered', 'paid') then orders.total else 0 end) as revenue")->groupBy('source_name')->orderByDesc('revenue')->orderByDesc('orders_count')->limit(5)->get();
+        $eligible = "orders.delivery_status in ('delivered', 'paid')";
+        $net = OrderRevenue::netAmountSql('orders');
+        $sourceRows = Order::query()->leftJoin('marketing_sources', 'marketing_sources.id', '=', 'orders.marketing_source_id')->selectRaw("coalesce(marketing_sources.utm_source, marketing_sources.ad_channel, marketing_sources.name, '{$other}') as source_name")->selectRaw('count(orders.id) as orders_count')->selectRaw("sum(case when {$eligible} then ({$net}) else 0 end) as revenue")->groupBy('source_name')->orderByDesc('revenue')->orderByDesc('orders_count')->limit(5)->get();
 
         return $sourceRows->map(fn (object $row) => ['name' => $row->source_name === $other ? __('dashboard_data.other') : $row->source_name, 'leads' => (int) ($leadCounts[$row->source_name] ?? $leadCounts['Khác'] ?? 0), 'orders' => (int) $row->orders_count, 'revenue' => (int) $row->revenue])->values()->all();
     }

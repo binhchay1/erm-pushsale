@@ -338,7 +338,7 @@ class OrgStructureService
             $closed = $userOrders->whereNotNull('closed_at')->count();
             $revenue = (int) $userOrders
                 ->whereNotNull('closed_at')
-                ->sum(fn (Order $order) => $order->effectiveRevenue());
+                ->sum(fn (Order $order) => $order->netRevenue());
 
             $metrics[$userId] = [
                 'conversionRate' => round($closed / $contacts * 100, 1),

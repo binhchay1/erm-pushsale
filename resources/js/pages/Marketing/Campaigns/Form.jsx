@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { copyToClipboard } from '@/lib/clipboard';
@@ -245,11 +246,9 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
 
                             <div className="space-y-2">
                                 <Label>{t('pages.campaigns.budget_vnd')}</Label>
-                                <Input
-                                    type="number"
-                                    min={0}
+                                <CurrencyInput
                                     value={data.budget}
-                                    onChange={(e) => setData('budget', e.target.value)}
+                                    onChange={(amount) => setData('budget', amount)}
                                 />
                             </div>
 

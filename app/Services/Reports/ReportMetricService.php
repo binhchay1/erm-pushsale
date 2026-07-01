@@ -9,9 +9,12 @@ use App\Enums\OperationStage;
 use App\Enums\UserRole;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
+use App\Models\Order;
 use App\Models\ShippingWebhookEvent;
 use App\Models\User;
 use App\Models\WarehouseInventory;
+use App\Repositories\ShippingWebhookEventRepository;
+use App\Support\OrderRevenue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -26,10 +29,11 @@ class ReportMetricService
     public function kpiSummary(User $user, ReportFilterData $filter): array
     {
         $orders = $this->queries->orders($user, $filter);
-        $revenueOrders = $this->queries->orders($user, $filter);
         $leads = $this->queries->leads($user, $filter);
         $closedOrders = (clone $orders)->whereNotNull('closed_at')->count();
         $ordersCount = (clone $orders)->count();
+
+        $revenueBreakdown = OrderRevenue::aggregate($orders);
 
         return [
             'leads' => (clone $leads)->count(),
@@ -38,15 +42,8 @@ class ReportMetricService
             'duplicate_leads' => (clone $leads)->where('status', LeadIngestionStatus::Duplicate->value)->count(),
             'orders' => $ordersCount,
             'closed_orders' => $closedOrders,
-            'revenue' => (int) (clone $revenueOrders)
-                ->where(function (Builder $q) use ($filter) {
-                    $dateColumn = $this->queries->dateColumn($filter);
-                    $q->whereIn('delivery_status', DeliveryStatus::revenueEligible())
-                        ->orWhereDate('created_at', today())
-                        ->orWhereDate($dateColumn, today());
-                })
-                ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
-                ->sum('total'),
+            'revenue' => $revenueBreakdown['net'],
+            'revenue_breakdown' => $revenueBreakdown,
             'conversion_rate' => $this->percentage($closedOrders, $ordersCount),
         ];
     }
@@ -71,15 +68,17 @@ class ReportMetricService
     public function revenueSeries(User $user, ReportFilterData $filter): array
     {
         $orders = $this->queries->orders($user, $filter);
-        $dateColumn = $this->queries->dateColumn($filter);
 
-        return $this->days($filter)->map(function (Carbon $day) use ($orders, $dateColumn) {
+        return $this->days($filter)->map(function (Carbon $day) use ($orders) {
+            $amount = OrderRevenue::netAmountSql();
+
             return [
                 'label' => $day->format('d/m'),
                 'value' => (int) (clone $orders)
-                    ->whereDate($dateColumn, $day)
                     ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
-                    ->sum('total'),
+                    ->whereDate('updated_at', $day)
+                    ->selectRaw("SUM({$amount}) as revenue")
+                    ->value('revenue'),
             ];
         })->values()->all();
     }
@@ -138,11 +137,12 @@ class ReportMetricService
                 $mine = (clone $orders)->where('sale_user_id', $sale->id);
                 $ordersCount = (clone $mine)->count();
                 $closedCount = (clone $mine)->whereNotNull('closed_at')->count();
+                $eligible = (clone $mine)->whereIn('delivery_status', DeliveryStatus::revenueEligible());
 
                 return [
                     'name' => $sale->name,
                     'orders' => $ordersCount,
-                    'revenue' => (int) (clone $mine)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->sum('total'),
+                    'revenue' => (int) $eligible->get()->sum(fn (Order $o) => $o->netRevenue()),
                     'conversion_rate' => $this->percentage($closedCount, $ordersCount),
                 ];
             })
@@ -172,7 +172,10 @@ class ReportMetricService
                     'name' => $name,
                     'leads' => (int) ($leadCounts[$name] ?? $leadCounts[$source->ad_channel] ?? 0),
                     'orders' => (clone $sourceOrders)->count(),
-                    'revenue' => (int) (clone $sourceOrders)->whereIn('delivery_status', DeliveryStatus::revenueEligible())->sum('total'),
+                    'revenue' => (int) (clone $sourceOrders)
+                        ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
+                        ->get()
+                        ->sum(fn (Order $o) => $o->netRevenue()),
                 ];
             })
             ->sortByDesc('revenue')

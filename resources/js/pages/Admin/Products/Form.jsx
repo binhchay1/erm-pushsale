@@ -3,6 +3,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -73,12 +74,10 @@ export default function ProductForm({ product, parents }) {
 
                             <div className="space-y-2">
                                 <Label htmlFor="unit_price">{t('pages.products.unit_price')}</Label>
-                                <Input
+                                <CurrencyInput
                                     id="unit_price"
-                                    type="number"
-                                    min={0}
                                     value={data.unit_price}
-                                    onChange={(e) => setData('unit_price', Number(e.target.value))}
+                                    onChange={(amount) => setData('unit_price', amount)}
                                 />
                                 {errors.unit_price && (
                                     <p className="text-xs text-destructive">{errors.unit_price}</p>

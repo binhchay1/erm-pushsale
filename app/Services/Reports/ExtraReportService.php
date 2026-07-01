@@ -211,7 +211,7 @@ class ExtraReportService
 
         $rows = $orders->groupBy('sale_user_id')->map(function (Collection $group) {
             $closed = $this->closed($group);
-            $net = (int) $closed->sum('total');
+            $net = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
             $discount = (int) $closed->sum('discount');
 
             return [
@@ -261,7 +261,7 @@ class ExtraReportService
 
         $rows = $orders->groupBy($groupKey)->map(function (Collection $group) use ($bySale) {
             $closed = $this->closed($group);
-            $closedRev = (int) $closed->sum('total');
+            $closedRev = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
             $delivering = $this->bucket($closed, self::DELIVERING);
             $delivered = $this->bucket($closed, self::DELIVERED);
             $paid = $this->bucket($closed, self::PAID);
@@ -274,13 +274,13 @@ class ExtraReportService
                 'closed_qty' => $closed->count(),
                 'closed_rev' => $closedRev,
                 'delivering_qty' => $delivering->count(),
-                'delivering_rev' => (int) $delivering->sum('total'),
+                'delivering_rev' => (int) $delivering->sum(fn (Order $o) => $o->netRevenue()),
                 'delivered_qty' => $delivered->count(),
-                'delivered_rev' => (int) $delivered->sum('total'),
+                'delivered_rev' => (int) $delivered->sum(fn (Order $o) => $o->netRevenue()),
                 'paid_qty' => $paid->count(),
-                'paid_rev' => (int) $paid->sum('total'),
+                'paid_rev' => (int) $paid->sum(fn (Order $o) => $o->netRevenue()),
                 'returned_qty' => $returned->count(),
-                'returned_rev' => (int) $returned->sum('total'),
+                'returned_rev' => (int) $returned->sum(fn (Order $o) => $o->netRevenue()),
                 'cancelled_qty' => $cancelled->count(),
                 'return_rate' => self::pct($returned->count(), $closed->count()),
                 'close_rate' => self::pct($closed->count(), $group->count()),
@@ -333,8 +333,8 @@ class ExtraReportService
                 'old_closed' => $oldClosed->count(),
                 'old_rate' => self::pct($oldClosed->count(), $old->count()),
                 'total_closed' => $closed->count(),
-                'expected_rev' => (int) $closed->sum('total'),
-                'actual_rev' => (int) $actual->sum('total'),
+                'expected_rev' => (int) $closed->sum(fn (Order $o) => $o->netRevenue()),
+                'actual_rev' => (int) $actual->sum(fn (Order $o) => $o->netRevenue()),
             ];
         })->sortByDesc('expected_rev')->values()->all();
 
@@ -405,7 +405,7 @@ class ExtraReportService
 
         $rows = $orders->groupBy('product_id')->map(function (Collection $group) {
             $closed = $this->closed($group);
-            $revenue = (int) $closed->sum('total');
+            $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
 
             return [
                 'name' => $group->first()->product?->name ?? '—',
@@ -454,13 +454,13 @@ class ExtraReportService
             return [
                 'name' => $group->first()->warehouse?->name ?? '—',
                 'closed_qty' => $closed->count(),
-                'closed_rev' => (int) $closed->sum('total'),
+                'closed_rev' => (int) $closed->sum(fn (Order $o) => $o->netRevenue()),
                 'confirmed_qty' => $confirmed->count(),
-                'confirmed_rev' => (int) $confirmed->sum('total'),
+                'confirmed_rev' => (int) $confirmed->sum(fn (Order $o) => $o->netRevenue()),
                 'delivering_qty' => $delivering->count(),
-                'delivering_rev' => (int) $delivering->sum('total'),
+                'delivering_rev' => (int) $delivering->sum(fn (Order $o) => $o->netRevenue()),
                 'returned_qty' => $returned->count(),
-                'returned_rev' => (int) $returned->sum('total'),
+                'returned_rev' => (int) $returned->sum(fn (Order $o) => $o->netRevenue()),
                 'discount' => (int) $closed->sum('discount'),
             ];
         })->sortByDesc('closed_rev')->values()->all();
@@ -488,11 +488,11 @@ class ExtraReportService
 
         $rows = $orders->groupBy('warehouse_id')->map(function (Collection $group) {
             $closed = $this->closed($group);
-            $revenue = (int) $closed->sum('total');
+            $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
             $new = $closed->where('is_returning_customer', false);
             $old = $closed->where('is_returning_customer', true);
-            $newRev = (int) $new->sum('total');
-            $oldRev = (int) $old->sum('total');
+            $newRev = (int) $new->sum(fn (Order $o) => $o->netRevenue());
+            $oldRev = (int) $old->sum(fn (Order $o) => $o->netRevenue());
 
             return [
                 'name' => $group->first()->warehouse?->name ?? '—',

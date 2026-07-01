@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\Sales\RevenueReportController as SaleRevenueRepor
 use App\Http\Controllers\Admin\ShippingOrderController;
 use App\Http\Controllers\Admin\ShippingPartnersController;
 use App\Http\Controllers\Admin\ShippingPartnerTestController;
+use App\Http\Controllers\Admin\CarrierSettlementController;
 use App\Http\Controllers\Admin\ShippingReconciliationController;
 use App\Http\Controllers\Admin\SystemMonitorController;
 use App\Http\Controllers\Admin\TeamController;
@@ -147,6 +148,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('shipping-partners', [ShippingPartnersController::class, 'index'])->name('shipping-partners.index');
         Route::put('shipping-partners/{provider}', [ShippingPartnersController::class, 'update'])->name('shipping-partners.update');
         Route::get('shipping/reconciliation', ShippingReconciliationController::class)->name('shipping.reconciliation');
+        Route::post('shipping/reconciliation/import', [CarrierSettlementController::class, 'import'])->name('shipping.reconciliation.import');
+        Route::post('shipping/reconciliation/sync', [CarrierSettlementController::class, 'syncApi'])->name('shipping.reconciliation.sync');
         Route::get('shipping/orders', [ShippingOrderController::class, 'index'])->name('shipping.orders');
         Route::get('shipping/orders/{order}/detail', [ShippingOrderController::class, 'detail'])->name('shipping.orders.detail');
         Route::post('shipping/orders/{order}/create-shipment', [ShippingOrderController::class, 'createShipment'])->name('shipping.orders.create-shipment');

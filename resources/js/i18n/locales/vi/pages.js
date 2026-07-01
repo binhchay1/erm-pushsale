@@ -75,6 +75,8 @@ export default {
         org_level: 'Cấp trong phòng ban',
         password_confirm: 'Xác nhận mật khẩu',
         no_select: '— Không chọn —',
+        select_manager: '— Chọn quản lý —',
+        head_manager_hint: 'Trưởng bộ phận không bắt buộc quản lý trực tiếp; nếu chọn chỉ được gán Admin.',
     },
     warehouse: {
         title: 'Danh sách kho',

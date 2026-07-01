@@ -133,7 +133,7 @@ class MarketingTeamTreeService
             1
         );
         $closed = $marketerOrders->count();
-        $revenue = (int) $marketerOrders->sum(fn (Order $o) => $o->effectiveRevenue());
+        $revenue = (int) $marketerOrders->sum(fn (Order $o) => $o->netRevenue());
         $productQty = (int) $marketerOrders->sum(fn (Order $o) => $o->items->sum('quantity'));
 
         return [
