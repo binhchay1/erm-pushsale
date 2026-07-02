@@ -138,11 +138,7 @@ class MarketingTeamTreeService
             1
         );
         $closed = $marketerOrders->count();
-        $revenueEligible = $marketerOrders->filter(fn (Order $o) => in_array(
-            $o->delivery_status,
-            array_map(fn (DeliveryStatus $s) => $s->value, DeliveryStatus::revenueEligible()),
-            true,
-        ));
+        $revenueEligible = $marketerOrders->whereIn('delivery_status', DeliveryStatus::revenueEligible());
         $kpi = MarketingMetrics::summarize(
             $revenueEligible,
             $marketerSources->filter(fn (MarketingSource $s) => $s->parent_id === null),
