@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\InboundEventSource;
+use App\Http\Controllers\Concerns\ValidatesIncomingLead;
 use App\Http\Controllers\Controller;
-use App\Http\Traits\ApiResponds;
+use App\Integrations\IntegrationDriverFactory;
 use App\Jobs\Leads\ProcessLeadIngestionJob;
 use App\Repositories\MarketingSourceRepository;
 use App\Services\Inbound\InboundEventRecorder;
@@ -13,7 +14,7 @@ use Illuminate\Http\Request;
 
 class CampaignLandingWebhookController extends Controller
 {
-    use ApiResponds;
+    use ValidatesIncomingLead;
 
     public function __construct(
         protected MarketingSourceRepository $sources,
@@ -43,6 +44,12 @@ class CampaignLandingWebhookController extends Controller
             $event->markRejected(403, __('messages.webhook.campaign_paused'));
 
             return $this->error(__('messages.webhook.campaign_paused'), 403);
+        }
+
+        $driver = IntegrationDriverFactory::make('landing');
+
+        if ($response = $this->validateIncomingLeadOrError($driver, $request->all(), $event)) {
+            return $response;
         }
 
         $event->markQueued();

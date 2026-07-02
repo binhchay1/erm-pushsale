@@ -2,6 +2,8 @@
 
 namespace App\Services\Leads;
 
+use App\Support\VietnamesePhone;
+
 /**
  * Làm sạch & kiểm tra dữ liệu lead trước khi vào hệ thống.
  * Mục tiêu: chống rác / spam / bot, chuẩn hóa SĐT Việt Nam, giới hạn độ dài.
@@ -13,26 +15,7 @@ class LeadSanitizer
      */
     public function normalizePhone(?string $raw): ?string
     {
-        $digits = preg_replace('/\D+/', '', (string) $raw);
-
-        if ($digits === '') {
-            return null;
-        }
-
-        // +84 / 0084 / 84 → 0
-        if (str_starts_with($digits, '0084')) {
-            $digits = '0'.substr($digits, 4);
-        } elseif (str_starts_with($digits, '84') && strlen($digits) >= 11) {
-            $digits = '0'.substr($digits, 2);
-        }
-
-        // Thiếu số 0 đầu (vd 9xxxxxxxx)
-        if (strlen($digits) === 9 && $digits[0] !== '0') {
-            $digits = '0'.$digits;
-        }
-
-        // Di động VN: 0 + đầu số (3,5,7,8,9) + 8 số = 10 chữ số
-        return preg_match('/^0[35789]\d{8}$/', $digits) ? $digits : null;
+        return VietnamesePhone::normalize($raw);
     }
 
     /**

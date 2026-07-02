@@ -94,7 +94,8 @@ return [
         'mode_manual_on' => 'Đã bật chế độ chỉ chia tay. Chia tự động tạm dừng; lead mới sẽ chờ trong pool.',
     ],
     'lead_intake' => [
-        'invalid_phone' => 'Số điện thoại không hợp lệ (không đúng định dạng di động VN).',
+        'phone_required' => 'Vui lòng nhập số điện thoại.',
+        'invalid_phone' => 'Số điện thoại di động VN không hợp lệ. Dùng 9 số (912345678), 10 số (0912345678) hoặc +84.',
         'honeypot' => 'Bị chặn: nghi ngờ bot (honeypot).',
         'spam_detected' => 'Bị chặn: nội dung nghi ngờ spam.',
         'payload_too_large' => 'Dữ liệu gửi lên quá lớn — đã bị từ chối.',
@@ -140,6 +141,7 @@ return [
         'lead_received_allocated' => 'Lead đã nhận và chia số cho Sale',
         'lead_received_pending' => 'Lead đã nhận — chờ Admin duyệt chiến dịch mới chia số Sale',
         'landing_queued' => 'Lead Landing đã được đưa vào hàng đợi.',
+        'validation_failed' => 'Dữ liệu lead không hợp lệ.',
     ],
     'shipping' => [
         'provider_unsupported' => 'Đơn vị vận chuyển không hỗ trợ',

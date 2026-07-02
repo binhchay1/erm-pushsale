@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\InboundEventSource;
 use App\Enums\IntegrationPlatform;
+use App\Http\Controllers\Concerns\ValidatesIncomingLead;
 use App\Http\Controllers\Controller;
-use App\Http\Traits\ApiResponds;
 use App\Integrations\Facebook\FacebookLeadDriver;
 use App\Integrations\IntegrationDriverFactory;
 use App\Jobs\Leads\ProcessLeadIngestionJob;
 use App\Models\IntegrationConnection;
 use App\Models\Scopes\TenantScope;
 use App\Services\Inbound\InboundEventRecorder;
+use App\Services\Leads\LeadPayloadValidator;
 use App\Support\TenantManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ use Illuminate\Http\Response;
 
 class WebhookController extends Controller
 {
-    use ApiResponds;
+    use ValidatesIncomingLead;
 
     public function handle(Request $request, string $platform, ?string $token = null): JsonResponse|Response
     {
@@ -75,6 +76,12 @@ class WebhookController extends Controller
             $event->markRejected(401, __('messages.webhook.unauthorized'));
 
             return $this->error(__('messages.webhook.unauthorized'), 401);
+        }
+
+        if (app(LeadPayloadValidator::class)->requiresSyncValidation($enum)) {
+            if ($response = $this->validateIncomingLeadOrError($driver, $request->all(), $event)) {
+                return $response;
+            }
         }
 
         $event->markQueued();

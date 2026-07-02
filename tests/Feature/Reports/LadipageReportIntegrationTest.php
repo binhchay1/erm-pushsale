@@ -42,7 +42,7 @@ class LadipageReportIntegrationTest extends TestCase
             'product' => 'Áo thun',
             'utm_source' => 'ladipage',
             'utm_campaign' => 'summer-shirt',
-        ])->assertCreated();
+        ])->assertAccepted();
 
         $filter = ReportFilterData::fromRequest(Request::create('/reports', 'GET', ['preset' => 'today']), $admin);
         $summary = app(ReportMetricService::class)->kpiSummary($admin, $filter);
@@ -68,7 +68,7 @@ class LadipageReportIntegrationTest extends TestCase
                 ['name' => 'san_pham', 'value' => 'Quần jeans'],
                 ['name' => 'utm_campaign', 'value' => 'denim'],
             ],
-        ])->assertCreated();
+        ])->assertAccepted();
 
         $this->assertDatabaseHas('lead_ingestions', [
             'external_id' => 'lp-fields-1',
@@ -90,7 +90,7 @@ class LadipageReportIntegrationTest extends TestCase
             'f2' => '0988887777',
             'f3' => 'Váy công sở',
             'utm_source' => 'ladipage',
-        ])->assertCreated();
+        ])->assertAccepted();
 
         $lead = LeadIngestion::query()->where('external_id', 'lp-f-1')->firstOrFail();
 
@@ -121,7 +121,7 @@ class LadipageReportIntegrationTest extends TestCase
             'message' => 'Ghi chú test',
             'products' => 'Serum',
             'quantity' => 2,
-        ])->assertCreated();
+        ])->assertAccepted();
 
         $order = Order::query()->where('customer_phone', '0901111222')->first();
         $this->assertNotNull($order);
@@ -147,11 +147,15 @@ class LadipageReportIntegrationTest extends TestCase
             'submission_id' => 'lp-pending-1',
             'name' => 'Khách Pending',
             'phone' => '0903333444',
-        ])->assertCreated();
+        ])->assertAccepted();
 
-        $order = Order::query()->where('customer_phone', '0903333444')->first();
-        $this->assertNotNull($order);
-        $this->assertNull($order->sale_user_id);
+        $this->assertDatabaseHas('lead_ingestions', [
+            'external_id' => 'lp-pending-1',
+            'customer_phone' => '0903333444',
+            'status' => LeadIngestionStatus::Pending->value,
+            'order_id' => null,
+        ]);
+        $this->assertNull(Order::query()->where('customer_phone', '0903333444')->first());
     }
 
     private function enableLandingIntegration(): void

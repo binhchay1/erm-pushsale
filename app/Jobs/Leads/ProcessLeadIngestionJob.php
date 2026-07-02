@@ -3,8 +3,10 @@
 namespace App\Jobs\Leads;
 
 use App\Enums\IntegrationPlatform;
+use App\Enums\LeadIngestionStatus;
 use App\Integrations\IntegrationDriverFactory;
 use App\Models\InboundEvent;
+use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Services\Integrations\IntegrationConfigService;
 use App\Services\Leads\LeadIngestionService;
@@ -37,14 +39,24 @@ class ProcessLeadIngestionJob implements ShouldQueue
         LeadIngestionService $ingestionService,
         IntegrationConfigService $configService,
     ): void {
+        $this->lastIngestion = null;
+
         app(TenantManager::class)->forCompany($this->companyId, function () use ($ingestionService, $configService) {
             $this->process($ingestionService, $configService);
         });
 
         if ($this->inboundEventId) {
-            InboundEvent::query()->find($this->inboundEventId)?->markProcessed();
+            $event = InboundEvent::query()->find($this->inboundEventId);
+
+            if ($this->lastIngestion?->status === LeadIngestionStatus::Failed) {
+                $event?->markFailed($this->lastIngestion->error_message ?? __('messages.webhook.validation_failed'));
+            } else {
+                $event?->markProcessed();
+            }
         }
     }
+
+    private ?LeadIngestion $lastIngestion = null;
 
     public function failed(?Throwable $e): void
     {
@@ -85,7 +97,7 @@ class ProcessLeadIngestionJob implements ShouldQueue
                 }
             }
         } else {
-            $ingestionService->ingest($driver, $this->payload);
+            $this->lastIngestion = $ingestionService->ingest($driver, $this->payload);
         }
 
         $configService->touchSynced($enum);
@@ -102,6 +114,6 @@ class ProcessLeadIngestionJob implements ShouldQueue
         }
 
         $driver = IntegrationDriverFactory::make(IntegrationPlatform::Landing);
-        $ingestionService->ingestForCampaign($driver, $campaign, $this->payload);
+        $this->lastIngestion = $ingestionService->ingestForCampaign($driver, $campaign, $this->payload);
     }
 }

@@ -41,7 +41,9 @@ class LeadController extends Controller
     /** POST /api/v1/leads — nguồn landing / tool nội bộ (Bearer token). */
     public function store(StoreLeadRequest $request): JsonResponse
     {
-        ProcessLeadIngestionJob::dispatch('landing', $request->validated());
+        $validated = $request->validated();
+
+        ProcessLeadIngestionJob::dispatch('landing', $validated);
 
         return $this->success(
             ['queued' => true],

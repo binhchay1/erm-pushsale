@@ -94,7 +94,8 @@ return [
         'mode_manual_on' => 'Manual-only mode is ON. Auto distribution is paused; new leads wait in the pool.',
     ],
     'lead_intake' => [
-        'invalid_phone' => 'Invalid phone number (not a valid VN mobile format).',
+        'phone_required' => 'Phone number is required.',
+        'invalid_phone' => 'Invalid Vietnamese mobile number. Use 9 digits (912345678), 10 digits (0912345678), or +84 format.',
         'honeypot' => 'Blocked: suspected bot (honeypot).',
         'spam_detected' => 'Blocked: content flagged as spam.',
         'payload_too_large' => 'Submitted payload too large — rejected.',
@@ -140,6 +141,7 @@ return [
         'lead_received_allocated' => 'Lead received and routed to sales',
         'lead_received_pending' => 'Lead received — waiting for admin approval before routing',
         'landing_queued' => 'Landing lead queued.',
+        'validation_failed' => 'Lead payload validation failed.',
     ],
     'shipping' => [
         'provider_unsupported' => 'Shipping provider not supported',
