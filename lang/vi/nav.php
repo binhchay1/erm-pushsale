@@ -34,6 +34,7 @@ return [
         'shipping_orders' => 'Đơn vận chuyển',
         'shipping_reconciliation' => 'Đối soát vận chuyển',
         'users' => 'Nhân viên',
+        'activity_logs' => 'Nhật ký hoạt động',
         'teams' => 'Phòng ban & Team',
         'org_chart' => 'Sơ đồ nhân sự',
         'products' => 'Sản phẩm',

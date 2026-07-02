@@ -35,6 +35,7 @@ return [
         'supervisor_reports_to_head' => 'Giám sát phải báo cáo lên trưởng bộ phận hoặc quản trị.',
     ],
     'landing_approved' => 'Đã duyệt nguồn Landing — lead mới sẽ được chia số cho Sale.',
+    'landing_rejected' => 'Đã từ chối kết nối Landing.',
     'password_changed' => 'Đã đổi mật khẩu.',
     'avatar_updated' => 'Đã cập nhật ảnh đại diện.',
     'avatar_removed' => 'Đã xóa ảnh đại diện.',
@@ -49,6 +50,10 @@ return [
     'campaign_created' => 'Đã tạo kết nối Landing — copy URL API sang Ladipage và chờ Admin duyệt.',
     'campaign_updated' => 'Đã cập nhật kết nối Landing.',
     'campaign_deleted' => 'Đã xóa kết nối Landing.',
+    'campaign_approval' => [
+        'incomplete' => 'Chiến dịch thiếu sản phẩm hoặc webhook — không thể duyệt.',
+        'reason_required' => 'Vui lòng nhập lý do từ chối.',
+    ],
     'call_logged' => 'Đã ghi nhận cuộc gọi.',
     'failed_order_deleted' => 'Đã xóa đơn lỗi.',
     'product_created' => 'Đã tạo sản phẩm.',

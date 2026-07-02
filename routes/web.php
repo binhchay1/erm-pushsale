@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\BusinessOverviewController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FailedPartnerOrderController;
 use App\Http\Controllers\Admin\IntegrationsController;
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\LandingApprovalController;
 use App\Http\Controllers\Admin\LeadIngestionController;
 use App\Http\Controllers\Admin\LeadsLogController;
@@ -110,6 +111,9 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('marketing/dashboard', MarketingDashboardController::class)->name('marketing.dashboard');
         Route::get('landing-approvals', [LandingApprovalController::class, 'index'])->name('landing-approvals.index');
         Route::post('landing-approvals/{campaign}/approve', [LandingApprovalController::class, 'approve'])->name('landing-approvals.approve');
+        Route::post('landing-approvals/{campaign}/reject', [LandingApprovalController::class, 'reject'])->name('landing-approvals.reject');
+        Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::get('activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
         Route::get('marketing/revenue', MarketingRevenueReportController::class)->name('marketing.revenue');
         Route::get('marketing/campaign-report', CampaignReportController::class)->name('marketing.campaign-report');
         Route::patch('marketing/campaigns/{campaign}/budget', [CampaignBudgetController::class, 'update'])->name('marketing.campaigns.budget');
@@ -183,6 +187,9 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('campaigns/{campaign}/edit', [CampaignController::class, 'edit'])->name('campaigns.edit');
         Route::put('campaigns/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
         Route::delete('campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
+        Route::get('landing-approvals', [LandingApprovalController::class, 'index'])->name('landing-approvals.index');
+        Route::post('landing-approvals/{campaign}/approve', [LandingApprovalController::class, 'approve'])->name('landing-approvals.approve');
+        Route::post('landing-approvals/{campaign}/reject', [LandingApprovalController::class, 'reject'])->name('landing-approvals.reject');
         Route::get('revenue', MarketingRevenueReportController::class)->name('revenue');
         Route::get('campaign-report', MarketingCampaignReportController::class)->name('campaign-report');
         Route::patch('campaigns/{campaign}/budget', [CampaignBudgetController::class, 'update'])->name('campaigns.budget');

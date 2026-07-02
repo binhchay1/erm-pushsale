@@ -3,8 +3,11 @@
 namespace App\Services\Reports;
 
 use App\Data\ReportFilterData;
+use App\Enums\DeliveryStatus;
 use App\Enums\UserRole;
+use App\Models\MarketingSource;
 use App\Models\User;
+use App\Support\MarketingMetrics;
 use App\Support\RevenueMetricsCalculator;
 use Illuminate\Support\Collection;
 
@@ -40,21 +43,78 @@ class RevenueReportService
     {
         $allQuery = $this->queries->orders($viewer, $filter)->with('items');
         $totalMetrics = RevenueMetricsCalculator::build((clone $allQuery)->get());
-        $rows = [array_merge(['stt' => 0, $idKey => 'total', $nameKey => 'Tổng', 'isTotalRow' => true], $totalMetrics)];
+        $totalRow = array_merge(['stt' => 0, $idKey => 'total', $nameKey => 'Tổng', 'isTotalRow' => true], $totalMetrics);
+
+        if ($foreignKey === 'marketer_user_id') {
+            $totalRow = array_merge($totalRow, $this->marketingKpiForUserIds(
+                (clone $allQuery)->get(),
+                User::query()->where('role', UserRole::Marketing)->pluck('id')->all(),
+            ));
+        }
+
+        $rows = [$totalRow];
 
         foreach ($users as $index => $user) {
             $subset = (clone $allQuery)->where($foreignKey, $user->id)->get();
             $metrics = RevenueMetricsCalculator::build($subset);
-            $rows[] = array_merge([
+            $row = array_merge([
                 'stt' => $index + 1,
                 $idKey => (string) $user->id,
                 $nameKey => $user->name,
                 'saleUsername' => strstr($user->email, '@', true),
                 'isTotalRow' => false,
             ], $metrics);
+
+            if ($foreignKey === 'marketer_user_id') {
+                $row = array_merge($row, $this->marketingKpiForUserIds($subset, [$user->id]));
+            }
+
+            $rows[] = $row;
         }
 
-        return ['rows' => $rows, 'formulaLegend' => $this->formulaLegend()];
+        return [
+            'rows' => $rows,
+            'formulaLegend' => $this->formulaLegend(),
+            'marketingKpiLegend' => $foreignKey === 'marketer_user_id' ? $this->marketingKpiLegend() : null,
+        ];
+    }
+
+    /**
+     * @param  Collection<int, Order>  $orders
+     * @param  list<int>  $marketerIds
+     * @return array<string, int|float>
+     */
+    private function marketingKpiForUserIds($orders, array $marketerIds): array
+    {
+        $eligible = $orders->whereIn('delivery_status', array_map(
+            fn (DeliveryStatus $s) => $s->value,
+            DeliveryStatus::revenueEligible(),
+        ));
+
+        $campaigns = MarketingSource::query()
+            ->whereNull('parent_id')
+            ->whereIn('marketer_user_id', $marketerIds)
+            ->get();
+
+        $summary = MarketingMetrics::summarize($eligible, $campaigns);
+
+        return [
+            'attributedRevenue' => $summary['attributed_revenue'],
+            'adSpend' => $summary['ad_spend'],
+            'roas' => $summary['roas'],
+            'netContribution' => $summary['net_contribution'],
+        ];
+    }
+
+    /** @return list<array{key: string, label: string}> */
+    private function marketingKpiLegend(): array
+    {
+        return [
+            ['key' => 'attributedRevenue', 'label' => __('reports.marketing_kpi.attributed_revenue')],
+            ['key' => 'adSpend', 'label' => __('reports.marketing_kpi.ad_spend')],
+            ['key' => 'roas', 'label' => __('reports.marketing_kpi.roas')],
+            ['key' => 'netContribution', 'label' => __('reports.marketing_kpi.net_contribution')],
+        ];
     }
 
     /** @return list<array{key: string, label: string}> */

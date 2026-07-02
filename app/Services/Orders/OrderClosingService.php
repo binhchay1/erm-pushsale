@@ -10,6 +10,7 @@ use App\Events\OrderClosed;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\Inventory\InventoryDeductionService;
+use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -49,7 +50,7 @@ class OrderClosingService
         $confirmInsufficient = (bool) ($payload['confirm_insufficient_stock'] ?? false);
         $this->inventory->assertCanClose($order, $confirmInsufficient);
 
-        return DB::transaction(function () use ($order, $payload) {
+        return DB::transaction(function () use ($order, $payload, $actor) {
             $amountToCollect = (int) ($payload['amount_to_collect']
                 ?? max(0, (int) $order->total - (int) $order->deposit));
 
@@ -74,7 +75,20 @@ class OrderClosingService
 
             event(new OrderClosed($order->fresh()));
 
-            return $order->fresh(['items', 'warehouse']);
+            $fresh = $order->fresh(['items', 'warehouse']);
+
+            ActivityLogger::log(
+                ActivityLogger::ORDER_CLOSED,
+                $fresh,
+                [
+                    'amount_to_collect' => $fresh->amount_to_collect,
+                    'delivery_status' => $fresh->delivery_status,
+                ],
+                $fresh->order_code ?? ('#'.$fresh->id),
+                $actor,
+            );
+
+            return $fresh;
         });
     }
 }

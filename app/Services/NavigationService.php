@@ -5,9 +5,14 @@ namespace App\Services;
 use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Services\Marketing\CampaignApprovalService;
 
 class NavigationService
 {
+    public function __construct(
+        private readonly CampaignApprovalService $campaignApproval,
+    ) {}
+
     /** @return list<array{label_key?: string, items: list<array{title_key: string, url: string, icon: string}>}> */
     public function forUser(?User $user): array
     {
@@ -21,7 +26,7 @@ class NavigationService
                 $this->group(null, $this->salesItems()),
             ]),
             UserRole::Marketing => $this->grouped([
-                $this->group(null, $this->marketingItems()),
+                $this->group(null, $this->marketingItems($user)),
             ]),
             UserRole::Warehouse => $this->grouped([
                 $this->group(null, $this->warehouseItems($user)),
@@ -74,6 +79,7 @@ class NavigationService
             $this->group('hr_catalog', [
                 $this->item('users', '/admin/users', 'users'),
                 $this->item('teams', '/admin/teams', 'network'),
+                $this->item('activity_logs', '/admin/activity-logs', 'scroll-text'),
                 $this->item('org_chart', '/org-chart', 'git-branch'),
                 $this->item('products', '/admin/products', 'box'),
             ]),
@@ -117,9 +123,9 @@ class NavigationService
     }
 
     /** @return list<array{title_key: string, url: string, icon: string}> */
-    private function marketingItems(): array
+    private function marketingItems(User $user): array
     {
-        return [
+        $items = [
             $this->item('overview', '/marketing/dashboard', 'home'),
             $this->item('marketing_workspace', '/marketing/workspace', 'share2'),
             $this->item('campaign_report', '/marketing/campaign-report', 'pie-chart'),
@@ -127,9 +133,16 @@ class NavigationService
             $this->item('revenue_report', '/marketing/revenue', 'trending-up'),
             $this->item('extra_report', '/marketing/reports/marketing-1', 'file-bar-chart'),
             $this->item('rankings', '/marketing/rankings', 'trophy'),
+        ];
+
+        if ($this->campaignApproval->canViewApprovals($user)) {
+            $items[] = $this->item('landing_approvals', '/marketing/landing-approvals', 'layout-template');
+        }
+
+        return array_merge($items, [
             $this->item('org_chart', '/org-chart', 'git-branch'),
             $this->item('settings', '/settings', 'settings'),
-        ];
+        ]);
     }
 
     /** @return list<array{title_key: string, url: string, icon: string}> */

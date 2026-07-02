@@ -16,7 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['company_id', 'name', 'email', 'password', 'role', 'is_owner', 'is_platform_admin', 'avatar_path', 'phone', 'job_title', 'team_id', 'manager_user_id', 'is_team_leader', 'org_level'])]
+#[Fillable(['company_id', 'name', 'email', 'password', 'role', 'is_owner', 'is_platform_admin', 'avatar_path', 'phone', 'job_title', 'team_id', 'manager_user_id', 'created_by_user_id', 'is_team_leader', 'org_level'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -143,6 +143,11 @@ class User extends Authenticatable
     public function manager(): BelongsTo
     {
         return $this->belongsTo(self::class, 'manager_user_id');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'created_by_user_id');
     }
 
     public function members(): HasMany

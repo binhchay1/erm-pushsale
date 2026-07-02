@@ -33,7 +33,7 @@ export default function UsersIndex({ users }) {
                 />
 
                 <ScrollDataTable>
-                    <table className="w-full min-w-[900px] border-collapse text-xs">
+                    <table className="w-full min-w-[980px] border-collapse text-xs">
                         <thead>
                             <tr>
                                 <Th sortable sortKey="name" sort={sort} onSort={toggleSort}>{t('pages.users.col_name')}</Th>
@@ -42,6 +42,7 @@ export default function UsersIndex({ users }) {
                                 <Th sortable sortKey="team_name" sort={sort} onSort={toggleSort}>{t('pages.users.col_team')}</Th>
                                 <Th sortable sortKey="org_level" sort={sort} onSort={toggleSort}>{t('pages.users.col_level')}</Th>
                                 <Th sortable sortKey="manager_name" sort={sort} onSort={toggleSort}>{t('pages.users.col_manager')}</Th>
+                                <Th sortable sortKey="creator_name" sort={sort} onSort={toggleSort}>{t('pages.users.col_creator')}</Th>
                                 <Th>{t('pages.actions')}</Th>
                             </tr>
                         </thead>
@@ -52,7 +53,7 @@ export default function UsersIndex({ users }) {
                                 ))
                             ) : (
                                 <tr>
-                                    <Td colSpan={7} className="py-8 text-center text-muted-foreground">
+                                    <Td colSpan={8} className="py-8 text-center text-muted-foreground">
                                         {t('pages.users.empty')}
                                     </Td>
                                 </tr>
@@ -77,6 +78,7 @@ function UserRow({ row, t }) {
             <Td>{row.team_name ?? '—'}</Td>
             <Td>{orgLevelLabel ?? '—'}</Td>
             <Td>{row.manager_name ?? '—'}</Td>
+            <Td>{row.creator_name ?? '—'}</Td>
             <Td>
                 <div className="flex gap-1">
                     <Button variant="outline" size="icon-sm" asChild>

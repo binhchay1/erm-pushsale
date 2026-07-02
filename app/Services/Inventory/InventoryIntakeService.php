@@ -8,6 +8,7 @@ use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
 use App\Models\WarehouseInventoryMovement;
 use App\Repositories\WarehouseMovementRepository;
+use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -139,7 +140,7 @@ class InventoryIntakeService
         ?string $note,
         ?int $approvedByUserId,
     ): WarehouseInventoryMovement {
-        return WarehouseInventoryMovement::query()->create([
+        $movement = WarehouseInventoryMovement::query()->create([
             'warehouse_inventory_id' => $inventory->id,
             'warehouse_id' => $inventory->warehouse_id,
             'product_id' => $inventory->product_id,
@@ -150,5 +151,22 @@ class InventoryIntakeService
             'stock_after' => $inventory->stock_quantity,
             'note' => $note,
         ]);
+
+        if ($approvedByUserId) {
+            ActivityLogger::log(
+                ActivityLogger::INVENTORY_MOVEMENT_APPROVED,
+                $movement,
+                [
+                    'type' => $type,
+                    'quantity' => $quantity,
+                    'warehouse_id' => $inventory->warehouse_id,
+                    'product_id' => $inventory->product_id,
+                ],
+                WarehouseInventoryMovement::typeLabel($type),
+                User::query()->find($approvedByUserId),
+            );
+        }
+
+        return $movement;
     }
 }

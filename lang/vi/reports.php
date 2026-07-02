@@ -45,7 +45,16 @@ return [
         'leads_generated' => 'Số lead',
         'junk_lead_rate' => 'Tỷ lệ lead rác (%)',
         'ad_cost' => 'Chi phí QC (VND)',
-        'actual_revenue' => 'Doanh thu thực tế',
+        'actual_revenue' => 'Doanh thu gán (sau phí VC)',
+        'creator_name' => 'Người tạo',
+        'roas' => 'ROAS',
+        'net_contribution' => 'Đóng góp ròng (DT − QC)',
+    ],
+    'marketing_kpi' => [
+        'attributed_revenue' => 'Doanh thu gán cho MKT (sau phí VC, không trừ ngân sách QC)',
+        'ad_spend' => 'Chi phí quảng cáo (ngân sách campaign)',
+        'roas' => 'ROAS = Doanh thu gán / Chi phí QC',
+        'net_contribution' => 'Đóng góp ròng = Doanh thu gán − Chi phí QC',
     ],
     'sales_performance' => [
         'sale_name' => 'Tên Sales',

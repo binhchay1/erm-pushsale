@@ -12,6 +12,7 @@ use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Services\NotificationService;
+use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -159,6 +160,17 @@ class LeadIngestionService
                 new SaleWorkspaceChanged($saleUser->id),
             );
             $this->notifyNewLead($ingestion, $order, $campaign);
+
+            ActivityLogger::log(
+                ActivityLogger::LEAD_INGESTED,
+                $ingestion,
+                [
+                    'order_id' => $order->id,
+                    'campaign_id' => $campaign?->id,
+                    'customer_phone' => $ingestion->customer_phone,
+                ],
+                $ingestion->customer_name ?? $ingestion->customer_phone,
+            );
 
             return $ingestion;
         });

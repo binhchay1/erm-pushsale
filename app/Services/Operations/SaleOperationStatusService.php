@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Orders\OrderClosingService;
+use App\Support\ActivityLogger;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -33,7 +34,17 @@ class SaleOperationStatusService
             'contact_count' => (int) $order->contact_count + 1,
         ]);
 
-        return $order->fresh();
+        $fresh = $order->fresh();
+
+        ActivityLogger::log(
+            ActivityLogger::ORDER_CALL_LOGGED,
+            $fresh,
+            ['contact_count' => $fresh->contact_count],
+            $fresh->order_code ?? ('#'.$fresh->id),
+            $actor,
+        );
+
+        return $fresh;
     }
 
     /**

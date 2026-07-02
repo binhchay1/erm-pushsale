@@ -27,6 +27,7 @@ export default {
         warehouse_report_2: 'System business',
         marketing_dashboard: 'Marketing dashboard',
         landing_approvals: 'Landing approvals',
+        activity_logs: 'Activity log',
         leads_log: 'Lead ingestion log',
         integrations: 'Platform integrations',
         shipping_partners: 'Shipping partners',

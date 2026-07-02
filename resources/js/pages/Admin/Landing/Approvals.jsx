@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { CheckCircle2, Clock, Copy, Eye } from 'lucide-react';
+import { CheckCircle2, Clock, Copy, Eye, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { CampaignApprovalDetailModal } from '@/components/marketing/CampaignApprovalDetailModal';
@@ -15,13 +15,19 @@ import { cn } from '@/lib/utils';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
-export default function LandingApprovals({ campaigns, highlightCampaignId, fieldMapping }) {
+export default function LandingApprovals({
+    campaigns,
+    highlightCampaignId,
+    fieldMapping,
+    approveBaseUrl = '/admin/landing-approvals',
+}) {
     const t = useT();
     const rowRefs = useRef({});
     const { ask, ConfirmDialogPortal } = useConfirm();
     const [selectedCampaign, setSelectedCampaign] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [approving, setApproving] = useState(false);
+    const [rejecting, setRejecting] = useState(false);
 
     const openDetail = (campaign) => {
         setSelectedCampaign(campaign);
@@ -38,7 +44,7 @@ export default function LandingApprovals({ campaigns, highlightCampaignId, field
 
         setApproving(true);
         router.post(
-            `/admin/landing-approvals/${campaign.id}/approve`,
+            `${approveBaseUrl}/${campaign.id}/approve`,
             {},
             {
                 preserveScroll: true,
@@ -51,13 +57,29 @@ export default function LandingApprovals({ campaigns, highlightCampaignId, field
         );
     };
 
+    const reject = async (campaign, reason) => {
+        setRejecting(true);
+        router.post(
+            `${approveBaseUrl}/${campaign.id}/reject`,
+            { reason },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setModalOpen(false);
+                    setSelectedCampaign(null);
+                },
+                onFinish: () => setRejecting(false),
+            },
+        );
+    };
+
     const copyUrl = async (url, e) => {
         e?.stopPropagation();
         const ok = await copyToClipboard(url);
         ok ? toast.success(t('pages.landing.copy_url_success')) : toast.error(t('pages.landing.copy_url_failed'));
     };
 
-    const pending = campaigns.filter((c) => !c.is_approved);
+    const pending = campaigns.filter((c) => !c.is_approved && !c.rejected_at);
     const { sortedRows, sort, toggleSort } = useTableSort(campaigns, { defaultKey: 'created_at', defaultDir: 'desc' });
 
     useEffect(() => {
@@ -91,7 +113,7 @@ export default function LandingApprovals({ campaigns, highlightCampaignId, field
                 />
 
                 <ScrollDataTable>
-                    <table className="w-full min-w-[1000px] border-collapse text-xs">
+                    <table className="w-full min-w-[1100px] border-collapse text-xs">
                         <thead>
                             <tr>
                                 <Th sortable sortKey="name" sort={sort} onSort={toggleSort}>{t('pages.landing.col_campaign')}</Th>
@@ -126,6 +148,8 @@ export default function LandingApprovals({ campaigns, highlightCampaignId, field
                                         <Td>
                                             {row.is_approved ? (
                                                 <StatusBadge tone="success">{t('pages.approved')}</StatusBadge>
+                                            ) : row.rejected_at ? (
+                                                <StatusBadge tone="destructive">{t('pages.landing.reject')}</StatusBadge>
                                             ) : (
                                                 <StatusBadge tone="warning">{t('pages.pending_approval')}</StatusBadge>
                                             )}
@@ -152,15 +176,26 @@ export default function LandingApprovals({ campaigns, highlightCampaignId, field
                                                         URL
                                                     </Button>
                                                 )}
-                                                {!row.is_approved && (
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        onClick={() => approve(row)}
-                                                    >
-                                                        <CheckCircle2 className="size-3.5" />
-                                                        {t('pages.landing.approve')}
-                                                    </Button>
+                                                {!row.is_approved && !row.rejected_at && (
+                                                    <>
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            onClick={() => approve(row)}
+                                                        >
+                                                            <CheckCircle2 className="size-3.5" />
+                                                            {t('pages.landing.approve')}
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="destructive"
+                                                            onClick={() => openDetail(row)}
+                                                        >
+                                                            <XCircle className="size-3.5" />
+                                                            {t('pages.landing.reject')}
+                                                        </Button>
+                                                    </>
                                                 )}
                                             </div>
                                         </Td>
@@ -185,7 +220,9 @@ export default function LandingApprovals({ campaigns, highlightCampaignId, field
                 onOpenChange={setModalOpen}
                 fieldMapping={fieldMapping}
                 onApprove={approve}
+                onReject={reject}
                 approving={approving}
+                rejecting={rejecting}
             />
 
             <ConfirmDialogPortal />

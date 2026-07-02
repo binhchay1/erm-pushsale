@@ -11,6 +11,7 @@ use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
+use App\Support\MarketingMetrics;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -33,6 +34,8 @@ class MarketingCampaignReportService
             'junkLeads' => 0,
             'adCost' => 0,
             'actualRevenue' => 0,
+            'roas' => 0,
+            'netContribution' => 0,
         ];
 
         foreach ($campaigns as $index => $campaign) {
@@ -40,42 +43,52 @@ class MarketingCampaignReportService
             $leads = $this->leadsForCampaign($campaign, $filter, $viewer);
             $junkCount = $this->countJunkOrders($campaignOrders);
             $leadCount = max($leads->count(), $campaignOrders->count());
-            $revenue = (int) $campaignOrders
-                ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
-                ->sum(fn (Order $o) => $o->netRevenue());
+            $revenueEligible = $campaignOrders->whereIn('delivery_status', DeliveryStatus::revenueEligible());
+            $metrics = MarketingMetrics::summarize($revenueEligible, collect([$campaign]));
+            $revenue = $metrics['attributed_revenue'];
 
             $row = [
                 'stt' => $index + 1,
                 'campaignId' => (string) $campaign->id,
                 'campaignName' => $campaign->name,
                 'marketerName' => $campaign->marketer?->name ?? '—',
+                'creatorName' => $campaign->creator?->name ?? '—',
                 'leadsGenerated' => $leadCount,
                 'junkLeadRate' => $leadCount > 0 ? round($junkCount / $leadCount * 100, 1) : 0,
                 'junkLeads' => $junkCount,
-                'adCost' => (int) $campaign->budget,
+                'adCost' => $metrics['ad_spend'],
                 'actualRevenue' => $revenue,
+                'roas' => $metrics['roas'],
+                'netContribution' => $metrics['net_contribution'],
                 'isTotalRow' => false,
             ];
 
             $rows[] = $row;
             $totals['leadsGenerated'] += $leadCount;
             $totals['junkLeads'] += $junkCount;
-            $totals['adCost'] += (int) $campaign->budget;
+            $totals['adCost'] += $metrics['ad_spend'];
             $totals['actualRevenue'] += $revenue;
+            $totals['netContribution'] += $metrics['net_contribution'];
         }
 
         $totalLeads = max(1, $totals['leadsGenerated']);
+        $totalRoas = $totals['adCost'] > 0
+            ? round($totals['actualRevenue'] / $totals['adCost'], 2)
+            : 0.0;
 
         array_unshift($rows, [
             'stt' => 0,
             'campaignId' => 'total',
             'campaignName' => __('reports.total'),
             'marketerName' => '—',
+            'creatorName' => '—',
             'leadsGenerated' => $totals['leadsGenerated'],
             'junkLeadRate' => round($totals['junkLeads'] / $totalLeads * 100, 1),
             'junkLeads' => $totals['junkLeads'],
             'adCost' => $totals['adCost'],
             'actualRevenue' => $totals['actualRevenue'],
+            'roas' => $totalRoas,
+            'netContribution' => $totals['netContribution'],
             'isTotalRow' => true,
         ]);
 
@@ -91,10 +104,13 @@ class MarketingCampaignReportService
         return [
             ['key' => 'campaignName', 'label' => __('reports.campaign_report.campaign_name')],
             ['key' => 'marketerName', 'label' => __('reports.campaign_report.marketer_name')],
+            ['key' => 'creatorName', 'label' => __('reports.campaign_report.creator_name')],
             ['key' => 'leadsGenerated', 'label' => __('reports.campaign_report.leads_generated')],
             ['key' => 'junkLeadRate', 'label' => __('reports.campaign_report.junk_lead_rate')],
             ['key' => 'adCost', 'label' => __('reports.campaign_report.ad_cost')],
             ['key' => 'actualRevenue', 'label' => __('reports.campaign_report.actual_revenue')],
+            ['key' => 'roas', 'label' => __('reports.campaign_report.roas')],
+            ['key' => 'netContribution', 'label' => __('reports.campaign_report.net_contribution')],
         ];
     }
 
@@ -102,7 +118,7 @@ class MarketingCampaignReportService
     private function campaigns(User $viewer, ReportFilterData $filter): Collection
     {
         $query = MarketingSource::query()
-            ->with('marketer:id,name')
+            ->with(['marketer:id,name', 'creator:id,name'])
             ->whereNull('parent_id')
             ->orderBy('name');
 

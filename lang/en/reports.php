@@ -45,7 +45,16 @@ return [
         'leads_generated' => 'Leads',
         'junk_lead_rate' => 'Junk lead rate (%)',
         'ad_cost' => 'Ad cost (VND)',
-        'actual_revenue' => 'Actual revenue',
+        'actual_revenue' => 'Attributed revenue (after shipping)',
+        'creator_name' => 'Created by',
+        'roas' => 'ROAS',
+        'net_contribution' => 'Net contribution (rev − ad)',
+    ],
+    'marketing_kpi' => [
+        'attributed_revenue' => 'Attributed MKT revenue (after shipping, ad budget not deducted)',
+        'ad_spend' => 'Ad spend (campaign budget)',
+        'roas' => 'ROAS = Attributed revenue / Ad spend',
+        'net_contribution' => 'Net contribution = Attributed revenue − Ad spend',
     ],
     'sales_performance' => [
         'sale_name' => 'Sales name',

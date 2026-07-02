@@ -35,6 +35,7 @@ return [
         'supervisor_reports_to_head' => 'Supervisors must report to a department head or admin.',
     ],
     'landing_approved' => 'Landing source approved — new leads will be routed to sales.',
+    'landing_rejected' => 'Landing connection rejected.',
     'password_changed' => 'Password changed.',
     'avatar_updated' => 'Avatar updated.',
     'avatar_removed' => 'Avatar removed.',
@@ -49,6 +50,10 @@ return [
     'campaign_created' => 'Landing connection created — copy API URL to Ladipage and wait for admin approval.',
     'campaign_updated' => 'Landing connection updated.',
     'campaign_deleted' => 'Landing connection deleted.',
+    'campaign_approval' => [
+        'incomplete' => 'Campaign is missing product or webhook — cannot approve.',
+        'reason_required' => 'Please enter a rejection reason.',
+    ],
     'call_logged' => 'Call logged.',
     'failed_order_deleted' => 'Failed order deleted.',
     'product_created' => 'Product created.',

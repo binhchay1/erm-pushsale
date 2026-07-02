@@ -3,6 +3,7 @@
 namespace App\Services\Reports;
 
 use App\Data\ReportFilterData;
+use App\Enums\DeliveryStatus;
 use App\Enums\OrgLevel;
 use App\Enums\TeamType;
 use App\Enums\UserRole;
@@ -10,6 +11,7 @@ use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\Team;
 use App\Models\User;
+use App\Support\MarketingMetrics;
 use Illuminate\Support\Collection;
 
 class MarketingTeamTreeService
@@ -111,6 +113,9 @@ class MarketingTeamTreeService
             'teamName' => $user->team?->name,
             'conversionRate' => $metrics['conversionRate'],
             'revenue' => $metrics['revenue'],
+            'adSpend' => $metrics['adSpend'],
+            'roas' => $metrics['roas'],
+            'netContribution' => $metrics['netContribution'],
             'productQuantity' => $metrics['productQuantity'],
             'closedOrders' => $metrics['closedOrders'],
             'contacts' => $metrics['contacts'],
@@ -121,7 +126,7 @@ class MarketingTeamTreeService
     /**
      * @param  Collection<int, Order>  $orders
      * @param  Collection<int, MarketingSource>  $sources
-     * @return array{contacts: int, closedOrders: int, revenue: int, productQuantity: int, conversionRate: float}
+     * @return array{contacts: int, closedOrders: int, revenue: int, adSpend: int, roas: float, netContribution: int, productQuantity: int, conversionRate: float}
      */
     private function metricsForMarketer(int $marketerId, Collection $orders, Collection $sources): array
     {
@@ -133,13 +138,25 @@ class MarketingTeamTreeService
             1
         );
         $closed = $marketerOrders->count();
-        $revenue = (int) $marketerOrders->sum(fn (Order $o) => $o->netRevenue());
+        $revenueEligible = $marketerOrders->filter(fn (Order $o) => in_array(
+            $o->delivery_status,
+            array_map(fn (DeliveryStatus $s) => $s->value, DeliveryStatus::revenueEligible()),
+            true,
+        ));
+        $kpi = MarketingMetrics::summarize(
+            $revenueEligible,
+            $marketerSources->filter(fn (MarketingSource $s) => $s->parent_id === null),
+        );
+        $revenue = $kpi['attributed_revenue'];
         $productQty = (int) $marketerOrders->sum(fn (Order $o) => $o->items->sum('quantity'));
 
         return [
             'contacts' => $contacts,
             'closedOrders' => $closed,
             'revenue' => $revenue,
+            'adSpend' => $kpi['ad_spend'],
+            'roas' => $kpi['roas'],
+            'netContribution' => $kpi['net_contribution'],
             'productQuantity' => $productQty,
             'conversionRate' => round($closed / $contacts * 100, 1),
         ];

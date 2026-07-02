@@ -11,6 +11,7 @@ use App\Repositories\TeamRepository;
 use App\Repositories\UserRepository;
 use App\Services\OrgStructureService;
 use App\Services\Users\UserOrgRules;
+use App\Support\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -38,6 +39,7 @@ class UserController extends Controller
                 'org_level' => $u->org_level?->value,
                 'org_level_label' => $u->orgLevelLabel(),
                 'job_title' => $u->job_title,
+                'creator_name' => $u->creator?->name,
             ])
             ->values();
 
@@ -62,8 +64,15 @@ class UserController extends Controller
     {
         $data = $this->normalizeUserData($request->validated());
         $data['password'] = Hash::make($data['password']);
+        $data['created_by_user_id'] = auth()->id();
 
-        User::query()->create($data);
+        $user = User::query()->create($data);
+
+        ActivityLogger::log(
+            ActivityLogger::USER_CREATED,
+            $user,
+            ['role' => $user->role->value, 'email' => $user->email],
+        );
 
         return redirect()->route('admin.users.index')->with('success', __('messages.user_created'));
     }
@@ -102,6 +111,12 @@ class UserController extends Controller
         }
 
         $user->update($data);
+
+        ActivityLogger::log(
+            ActivityLogger::USER_UPDATED,
+            $user->fresh(),
+            ['role' => $user->role->value],
+        );
 
         return redirect()->route('admin.users.index')->with('success', __('messages.user_updated'));
     }

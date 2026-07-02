@@ -11,6 +11,7 @@ use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
 use App\Services\Marketing\CampaignLandingService;
 use App\Services\NotificationService;
+use App\Support\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,12 +30,20 @@ class CampaignController extends Controller
     {
         abort_unless($request->user()?->role === UserRole::Marketing, 403);
 
-        $campaigns = $this->sources->ownedCampaignsWithStats($request->user()->id)
-            ->map(fn (MarketingSource $c) => $this->presentCampaign($c))
+        $ownership = $request->input('ownership', 'all');
+        if (! in_array($ownership, ['all', 'created', 'delegated'], true)) {
+            $ownership = 'all';
+        }
+
+        $user = $request->user();
+        $campaigns = $this->sources->visibleCampaignsWithStats($user, $ownership)
+            ->map(fn (MarketingSource $c) => $this->presentCampaign($c, $user))
             ->values();
 
         return Inertia::render('Marketing/Campaigns/Index', [
             'campaigns' => $campaigns,
+            'ownershipFilter' => $ownership,
+            'currentUserId' => $user->id,
         ]);
     }
 
@@ -56,6 +65,15 @@ class CampaignController extends Controller
         $campaign = MarketingSource::query()->create($data);
         NotificationService::notifyLandingApprovalPending($campaign);
 
+        ActivityLogger::log(
+            ActivityLogger::CAMPAIGN_CREATED,
+            $campaign,
+            [
+                'marketer_user_id' => $campaign->marketer_user_id,
+                'product_id' => $campaign->product_id,
+            ],
+        );
+
         return redirect()->route('marketing.campaigns.index')
             ->with('success', __('messages.campaign_created'));
     }
@@ -66,7 +84,7 @@ class CampaignController extends Controller
         $this->authorizeCampaignOwner($request, $campaign);
 
         return Inertia::render('Marketing/Campaigns/Form', [
-            'campaign' => $this->presentCampaign($campaign, includeEdit: true),
+            'campaign' => $this->presentCampaign($campaign, $request->user(), includeEdit: true),
             'products' => $this->productOptions(),
             'marketers' => $this->marketerOptions(),
             'fieldMapping' => $this->fieldMappingGuide(),
@@ -79,6 +97,15 @@ class CampaignController extends Controller
         $data = $this->landing->prepareForUpdate($campaign, $request->validated());
         $campaign->update($data);
 
+        ActivityLogger::log(
+            ActivityLogger::CAMPAIGN_UPDATED,
+            $campaign->fresh(),
+            [
+                'marketer_user_id' => $campaign->marketer_user_id,
+                'product_id' => $campaign->product_id,
+            ],
+        );
+
         return redirect()->route('marketing.campaigns.index')->with('success', __('messages.campaign_updated'));
     }
 
@@ -86,19 +113,30 @@ class CampaignController extends Controller
     {
         abort_unless($request->user()?->role === UserRole::Marketing, 403);
         $this->authorizeCampaignOwner($request, $campaign);
+
+        ActivityLogger::log(ActivityLogger::CAMPAIGN_DELETED, $campaign, [], $campaign->name);
+
         $campaign->delete();
 
         return redirect()->route('marketing.campaigns.index')->with('success', __('messages.campaign_deleted'));
     }
 
     /** @return array<string, mixed> */
-    private function presentCampaign(MarketingSource $c, bool $includeEdit = false): array
+    private function presentCampaign(MarketingSource $c, \App\Models\User $viewer, bool $includeEdit = false): array
     {
+        $isOwner = (int) $c->created_by_user_id === (int) $viewer->id;
+        $isDelegated = (int) $c->marketer_user_id === (int) $viewer->id && ! $isOwner;
+
         $base = [
             'id' => $c->id,
             'name' => $c->name,
             'product' => $c->product?->name,
+            'creator' => $c->creator?->name,
+            'created_by_user_id' => $c->created_by_user_id,
             'marketer' => $c->marketer?->name,
+            'marketer_user_id' => $c->marketer_user_id,
+            'approver' => $c->approver?->name,
+            'approved_at' => $c->approved_at?->format('d/m/Y H:i'),
             'ad_channel' => $c->ad_channel,
             'utm_campaign' => $c->utm_campaign,
             'webhook_url' => $c->webhook_token ? $this->landing->webhookUrl($c) : null,
@@ -107,11 +145,13 @@ class CampaignController extends Controller
             'is_approved' => (bool) $c->is_approved,
             'orders_count' => (int) ($c->orders_count ?? 0),
             'revenue' => (int) ($c->revenue ?? 0),
+            'ownership' => $isOwner ? 'created' : ($isDelegated ? 'delegated' : 'team'),
+            'can_edit' => $isOwner,
+            'can_delete' => $isOwner,
         ];
 
         if ($includeEdit) {
             $base['product_id'] = $c->product_id;
-            $base['marketer_user_id'] = $c->marketer_user_id;
         }
 
         return $base;

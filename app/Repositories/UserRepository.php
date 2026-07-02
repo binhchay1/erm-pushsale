@@ -74,11 +74,11 @@ class UserRepository
         return User::query()->where('email', $email)->first();
     }
 
-    /** Danh sách nhân viên kèm team + quản lý cho màn quản trị. */
+    /** Danh sách nhân viên kèm team + quản lý + người tạo cho màn quản trị. */
     public function allWithTeamAndManager(): Collection
     {
         return User::query()
-            ->with(['team:id,name', 'manager:id,name'])
+            ->with(['team:id,name', 'manager:id,name', 'creator:id,name'])
             ->orderBy('name')
             ->get();
     }

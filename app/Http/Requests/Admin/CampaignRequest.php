@@ -31,7 +31,11 @@ class CampaignRequest extends FormRequest
                     ->ignore($campaignId),
             ],
             'product_id' => ['nullable', 'exists:products,id'],
-            'marketer_user_id' => ['nullable', 'exists:users,id'],
+            'marketer_user_id' => [
+                'nullable',
+                'exists:users,id',
+                Rule::exists('users', 'id')->where('role', UserRole::Marketing->value),
+            ],
             'ad_channel' => ['nullable', 'string', 'max:80'],
             'budget' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],

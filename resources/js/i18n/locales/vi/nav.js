@@ -27,6 +27,7 @@ export default {
         warehouse_report_2: 'Kinh doanh hệ thống',
         marketing_dashboard: 'Tổng quan Marketing',
         landing_approvals: 'Duyệt trang Landing',
+        activity_logs: 'Nhật ký hoạt động',
         leads_log: 'Nhật ký lead về',
         integrations: 'Kết nối nền tảng',
         shipping_partners: 'Đối tác vận chuyển',

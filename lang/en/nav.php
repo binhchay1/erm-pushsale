@@ -34,6 +34,7 @@ return [
         'shipping_orders' => 'Shipping orders',
         'shipping_reconciliation' => 'Shipping reconciliation',
         'users' => 'Employees',
+        'activity_logs' => 'Activity log',
         'teams' => 'Departments & teams',
         'org_chart' => 'Org chart',
         'products' => 'Products',

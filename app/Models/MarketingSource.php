@@ -14,7 +14,8 @@ class MarketingSource extends Model
     protected $fillable = [
         'parent_id', 'name', 'product_id', 'marketer_user_id', 'created_by_user_id', 'ad_channel',
         'utm_source', 'utm_campaign', 'webhook_token', 'budget', 'interactions', 'contacts',
-        'is_active', 'is_approved',
+        'is_active', 'is_approved', 'approved_by_user_id', 'approved_at',
+        'rejected_by_user_id', 'rejected_at', 'rejection_reason',
     ];
 
     protected function casts(): array
@@ -22,6 +23,8 @@ class MarketingSource extends Model
         return [
             'is_active' => 'boolean',
             'is_approved' => 'boolean',
+            'approved_at' => 'datetime',
+            'rejected_at' => 'datetime',
         ];
     }
 
@@ -38,6 +41,16 @@ class MarketingSource extends Model
     public function marketer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'marketer_user_id');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by_user_id');
+    }
+
+    public function rejector(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by_user_id');
     }
 
     public function children(): HasMany
