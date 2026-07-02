@@ -102,6 +102,13 @@ class LeadOrderFactory
      */
     protected function resolveCampaign(LeadIngestion $lead, array $normalized): MarketingSource
     {
+        if ($lead->marketing_source_id) {
+            $linked = MarketingSource::query()->find($lead->marketing_source_id);
+            if ($linked) {
+                return $linked;
+            }
+        }
+
         $campaign = MarketingSource::query()
             ->when($normalized['utm_campaign'] ?? null, fn ($q, $c) => $q->where('utm_campaign', $c))
             ->when(

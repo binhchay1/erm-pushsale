@@ -34,6 +34,11 @@ return [
         'auto' => 'Auto distribution',
         'manual' => 'Manual only',
     ],
+    'campaign_lead_allocation' => [
+        'inherit' => 'Follow global setting',
+        'auto' => 'Always auto-assign',
+        'manual' => 'Always manual pool',
+    ],
     'operation_stage' => [
         'new_customer' => 'New customer',
         'call_2' => 'Call 2',

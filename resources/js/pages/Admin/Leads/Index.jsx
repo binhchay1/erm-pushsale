@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { CheckCircle2, Info, Plug, Search, UserPlus } from 'lucide-react';
+import { CheckCircle2, Info, Plug, Search, UserPlus, X } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -20,6 +20,7 @@ export default function LeadsIndex({
     filters,
     platforms,
     statuses,
+    campaigns = [],
     salesUsers = [],
     allocateUrl = '/admin/leads/allocate',
     deleteUrlPrefix = '/admin/leads',
@@ -39,6 +40,7 @@ export default function LeadsIndex({
     const [saleUserId, setSaleUserId] = useState('');
     const [allocating, setAllocating] = useState(false);
     const [savingMode, setSavingMode] = useState(false);
+    const [searchDraft, setSearchDraft] = useState(filters.search ?? '');
 
     const manualOnly = allocationMode === 'manual';
 
@@ -60,6 +62,15 @@ export default function LeadsIndex({
 
     const search = (overrides) => {
         router.get(listUrl, { ...filters, ...overrides }, { preserveState: true });
+    };
+
+    const clearFilters = () => {
+        setSearchDraft('');
+        router.get(listUrl, {}, { preserveState: true });
+    };
+
+    const applySearch = () => {
+        search({ search: searchDraft.trim() || null });
     };
 
     const toggleRow = (id) => {
@@ -209,6 +220,25 @@ export default function LeadsIndex({
                 </div>
 
                 <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">
+                    <input
+                        className="input-soft h-8 min-w-[200px] flex-1 px-2"
+                        placeholder={t('pages.leads.filter_search')}
+                        value={searchDraft}
+                        onChange={(e) => setSearchDraft(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && applySearch()}
+                    />
+                    <select
+                        className="input-soft h-8 px-2"
+                        value={filters.marketing_source_id ?? ''}
+                        onChange={(e) => search({ marketing_source_id: e.target.value || null })}
+                    >
+                        <option value="">{t('pages.leads.filter_campaign')}</option>
+                        {campaigns.map((c) => (
+                            <option key={c.id} value={c.id}>
+                                {c.name}
+                            </option>
+                        ))}
+                    </select>
                     <select
                         className="input-soft h-8 px-2"
                         value={filters.platform ?? ''}
@@ -233,9 +263,30 @@ export default function LeadsIndex({
                             </option>
                         ))}
                     </select>
-                    <Button size="sm" onClick={() => search()}>
+                    <input
+                        type="date"
+                        className="input-soft h-8 px-2"
+                        value={filters.date_from ?? ''}
+                        onChange={(e) => search({ date_from: e.target.value || null })}
+                        title={t('pages.leads.filter_date_from')}
+                    />
+                    <input
+                        type="date"
+                        className="input-soft h-8 px-2"
+                        value={filters.date_to ?? ''}
+                        onChange={(e) => search({ date_to: e.target.value || null })}
+                        title={t('pages.leads.filter_date_to')}
+                    />
+                    <Button size="sm" variant="outline" onClick={() => search({ status: 'pending' })}>
+                        {t('pages.leads.filter_pending_only')}
+                    </Button>
+                    <Button size="sm" onClick={applySearch}>
                         <Search className="size-4" />
                         {t('common.filter')}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={clearFilters}>
+                        <X className="size-4" />
+                        {t('pages.leads.clear_filters')}
                     </Button>
                 </div>
 
@@ -255,6 +306,7 @@ export default function LeadsIndex({
                                 <Th sortable sortKey="id" sort={sort} onSort={toggleSort}>{t('pages.leads.col_id')}</Th>
                                 <Th sortable sortKey="created_at" sort={sort} onSort={toggleSort}>{t('pages.leads.col_time')}</Th>
                                 <Th sortable sortKey="platform" sort={sort} onSort={toggleSort}>{t('pages.leads.col_platform')}</Th>
+                                <Th sortable sortKey="campaign_name" sort={sort} onSort={toggleSort}>{t('pages.leads.col_campaign')}</Th>
                                 <Th sortable sortKey="customer_name" sort={sort} onSort={toggleSort}>{t('pages.leads.col_customer')}</Th>
                                 <Th sortable sortKey="customer_phone" sort={sort} onSort={toggleSort}>{t('pages.leads.col_phone')}</Th>
                                 <Th sortable sortKey="status" sort={sort} onSort={toggleSort}>{t('pages.leads.col_status')}</Th>
@@ -279,6 +331,7 @@ export default function LeadsIndex({
                                         <Td>{row.id}</Td>
                                         <Td>{row.created_at}</Td>
                                         <Td className="font-medium">{row.platform}</Td>
+                                        <Td>{row.campaign_name ?? row.utm_campaign ?? '—'}</Td>
                                         <Td>{row.customer_name ?? '—'}</Td>
                                         <Td className="font-mono">{row.customer_phone ?? '—'}</Td>
                                         <Td>
@@ -303,7 +356,7 @@ export default function LeadsIndex({
                             ) : (
                                 <tr>
                                     <Td
-                                        colSpan={canDelete ? 10 : 9}
+                                        colSpan={canDelete ? 11 : 10}
                                         className="py-8 text-center text-muted-foreground"
                                     >
                                         {t('pages.leads.empty')}

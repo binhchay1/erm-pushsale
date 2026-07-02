@@ -48,7 +48,7 @@ function CopyValue({ value, mono = true }) {
     );
 }
 
-export default function CampaignForm({ campaign, products, marketers, fieldMapping }) {
+export default function CampaignForm({ campaign, products, marketers, fieldMapping, allocationOptions = [] }) {
     const t = useT();
     const isEdit = Boolean(campaign?.id);
     const { data, setData, post, put, processing, errors } = useForm({
@@ -58,6 +58,7 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
         ad_channel: campaign?.ad_channel ?? 'landing',
         budget: campaign?.budget ?? 0,
         is_active: campaign?.is_active ?? true,
+        lead_allocation: campaign?.lead_allocation ?? 'inherit',
     });
 
     const utmPreview = slugPreview(data.name) || '…';
@@ -250,6 +251,27 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                                     value={data.budget}
                                     onChange={(amount) => setData('budget', amount)}
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>{t('pages.campaigns.lead_allocation')}</Label>
+                                <select
+                                    className="input-soft h-10 w-full px-3"
+                                    value={data.lead_allocation}
+                                    onChange={(e) => setData('lead_allocation', e.target.value)}
+                                >
+                                    {allocationOptions.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-muted-foreground">
+                                    {t('pages.campaigns.lead_allocation_hint')}
+                                </p>
+                                {errors.lead_allocation && (
+                                    <p className="text-xs text-destructive">{errors.lead_allocation}</p>
+                                )}
                             </div>
 
                             <label className="flex items-center gap-2 text-sm">

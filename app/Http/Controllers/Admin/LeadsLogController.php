@@ -6,6 +6,7 @@ use App\Enums\LeadIngestionStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\LeadIngestion;
+use App\Models\MarketingSource;
 use App\Repositories\LeadIngestionRepository;
 use App\Repositories\UserRepository;
 use App\Services\Leads\LeadAllocationModeService;
@@ -21,10 +22,16 @@ class LeadsLogController extends Controller
         UserRepository $users,
         LeadAllocationModeService $modeService,
     ): Response {
-        $platform = $request->query('platform');
-        $status = $request->query('status');
+        $filters = [
+            'platform' => $request->query('platform'),
+            'status' => $request->query('status'),
+            'marketing_source_id' => $request->query('marketing_source_id'),
+            'search' => $request->query('search'),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+        ];
 
-        $leads = $leadRepo->paginatedLog($platform, $status)
+        $leads = $leadRepo->paginatedLog($filters)
             ->through(fn (LeadIngestion $lead) => [
                 'id' => $lead->id,
                 'platform' => $lead->platform,
@@ -35,6 +42,8 @@ class LeadsLogController extends Controller
                 'customer_phone' => $lead->customer_phone,
                 'product_interest' => $lead->product_interest,
                 'utm_campaign' => $lead->utm_campaign,
+                'campaign_name' => $lead->marketingSource?->name,
+                'marketing_source_id' => $lead->marketing_source_id,
                 'order_code' => $lead->order?->order_code,
                 'error_message' => $lead->error_message,
                 'created_at' => $lead->created_at?->format('d/m/Y H:i'),
@@ -42,13 +51,16 @@ class LeadsLogController extends Controller
 
         return Inertia::render('Admin/Leads/Index', [
             'leads' => $leads,
-            'filters' => [
-                'platform' => $platform,
-                'status' => $status,
-            ],
+            'filters' => $filters,
             'platforms' => array_keys(config('integrations.platforms', [])),
             'statuses' => collect(LeadIngestionStatus::cases())
                 ->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()])
+                ->all(),
+            'campaigns' => MarketingSource::query()
+                ->whereNull('parent_id')
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (MarketingSource $c) => ['id' => (string) $c->id, 'name' => $c->name])
                 ->all(),
             'salesUsers' => collect($users->nameOptionsByRoles([UserRole::Sales]))
                 ->map(fn (array $u) => ['id' => (string) $u['id'], 'name' => $u['name']])

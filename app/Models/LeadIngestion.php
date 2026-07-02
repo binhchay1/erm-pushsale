@@ -20,6 +20,7 @@ class LeadIngestion extends Model
         'product_interest',
         'utm_source',
         'utm_campaign',
+        'marketing_source_id',
         'payload',
         'order_id',
         'error_message',
@@ -38,5 +39,10 @@ class LeadIngestion extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function marketingSource(): BelongsTo
+    {
+        return $this->belongsTo(MarketingSource::class);
     }
 }

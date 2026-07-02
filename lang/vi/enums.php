@@ -34,6 +34,11 @@ return [
         'auto' => 'Chia tự động',
         'manual' => 'Chỉ chia tay',
     ],
+    'campaign_lead_allocation' => [
+        'inherit' => 'Theo cấu hình chung',
+        'auto' => 'Luôn chia tự động',
+        'manual' => 'Luôn chia tay',
+    ],
     'operation_stage' => [
         'new_customer' => 'Khách mới',
         'call_2' => 'Gọi lần 2',

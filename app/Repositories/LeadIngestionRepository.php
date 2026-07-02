@@ -5,20 +5,59 @@ namespace App\Repositories;
 use App\Enums\LeadIngestionStatus;
 use App\Models\LeadIngestion;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class LeadIngestionRepository
 {
-    /** Nhật ký lead về, lọc theo nền tảng / trạng thái. */
-    public function paginatedLog(?string $platform, ?string $status, int $perPage = 25): LengthAwarePaginator
+    /**
+     * @param  array{
+     *     platform?: ?string,
+     *     status?: ?string,
+     *     marketing_source_id?: ?int,
+     *     search?: ?string,
+     *     date_from?: ?string,
+     *     date_to?: ?string,
+     * }  $filters
+     */
+    public function paginatedLog(array $filters, int $perPage = 25): LengthAwarePaginator
     {
-        return LeadIngestion::query()
-            ->with('order:id,order_code,customer_name,sale_user_id')
-            ->when($platform, fn ($q) => $q->where('platform', $platform))
-            ->when($status, fn ($q) => $q->where('status', $status))
-            ->latest()
-            ->paginate($perPage)
-            ->withQueryString();
+        $query = LeadIngestion::query()
+            ->with([
+                'order:id,order_code,customer_name,sale_user_id',
+                'marketingSource:id,name',
+            ]);
+
+        if (! empty($filters['platform'])) {
+            $query->where('platform', $filters['platform']);
+        }
+
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (! empty($filters['marketing_source_id'])) {
+            $query->where('marketing_source_id', (int) $filters['marketing_source_id']);
+        }
+
+        if (! empty($filters['search'])) {
+            $term = '%'.trim((string) $filters['search']).'%';
+            $query->where(function ($q) use ($term) {
+                $q->where('customer_phone', 'like', $term)
+                    ->orWhere('customer_name', 'like', $term)
+                    ->orWhere('product_interest', 'like', $term);
+            });
+        }
+
+        if (! empty($filters['date_from'])) {
+            $query->where('created_at', '>=', Carbon::parse($filters['date_from'])->startOfDay());
+        }
+
+        if (! empty($filters['date_to'])) {
+            $query->where('created_at', '<=', Carbon::parse($filters['date_to'])->endOfDay());
+        }
+
+        return $query->latest()->paginate($perPage)->withQueryString();
     }
 
     /** Danh sách lead cho API. */
@@ -26,8 +65,8 @@ class LeadIngestionRepository
     {
         return LeadIngestion::query()
             ->with('order')
-            ->when($platform, fn ($q, $p) => $q->where('platform', $p))
-            ->when($status, fn ($q, $s) => $q->where('status', $s))
+            ->when($platform, fn ($q) => $q->where('platform', $platform))
+            ->when($status, fn ($q) => $q->where('status', $status))
             ->latest()
             ->paginate($perPage);
     }

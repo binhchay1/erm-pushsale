@@ -41,6 +41,7 @@ class CampaignLandingService
         $data['ad_channel'] = $data['ad_channel'] ?? 'landing';
         $data['is_active'] = true;
         $data['is_approved'] = false;
+        $data['lead_allocation'] = $data['lead_allocation'] ?? 'inherit';
 
         return $data;
     }

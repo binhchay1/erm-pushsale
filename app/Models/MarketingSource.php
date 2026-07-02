@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CampaignLeadAllocation;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,7 @@ class MarketingSource extends Model
     protected $fillable = [
         'parent_id', 'name', 'product_id', 'marketer_user_id', 'created_by_user_id', 'ad_channel',
         'utm_source', 'utm_campaign', 'webhook_token', 'budget', 'interactions', 'contacts',
-        'is_active', 'is_approved', 'approved_by_user_id', 'approved_at',
+        'is_active', 'is_approved', 'lead_allocation', 'approved_by_user_id', 'approved_at',
         'rejected_by_user_id', 'rejected_at', 'rejection_reason',
     ];
 
@@ -23,6 +24,7 @@ class MarketingSource extends Model
         return [
             'is_active' => 'boolean',
             'is_approved' => 'boolean',
+            'lead_allocation' => CampaignLeadAllocation::class,
             'approved_at' => 'datetime',
             'rejected_at' => 'datetime',
         ];

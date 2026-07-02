@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\CampaignLeadAllocation;
 use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -39,6 +40,7 @@ class CampaignRequest extends FormRequest
             'ad_channel' => ['nullable', 'string', 'max:80'],
             'budget' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
+            'lead_allocation' => ['nullable', Rule::enum(CampaignLeadAllocation::class)],
         ];
     }
 
@@ -49,6 +51,7 @@ class CampaignRequest extends FormRequest
             'budget' => $this->input('budget') ?: 0,
             'marketer_user_id' => $this->input('marketer_user_id') ?: $this->user()->id,
             'product_id' => $this->input('product_id') ?: null,
+            'lead_allocation' => $this->input('lead_allocation') ?: CampaignLeadAllocation::Inherit->value,
         ]);
     }
 }

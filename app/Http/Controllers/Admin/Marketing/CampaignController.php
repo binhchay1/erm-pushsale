@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Marketing;
 
+use App\Enums\CampaignLeadAllocation;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CampaignRequest;
@@ -56,6 +57,7 @@ class CampaignController extends Controller
             'products' => $this->productOptions(),
             'marketers' => $this->marketerOptions(),
             'fieldMapping' => $this->fieldMappingGuide(),
+            'allocationOptions' => $this->allocationOptions(),
         ]);
     }
 
@@ -88,6 +90,7 @@ class CampaignController extends Controller
             'products' => $this->productOptions(),
             'marketers' => $this->marketerOptions(),
             'fieldMapping' => $this->fieldMappingGuide(),
+            'allocationOptions' => $this->allocationOptions(),
         ]);
     }
 
@@ -143,6 +146,7 @@ class CampaignController extends Controller
             'budget' => (int) $c->budget,
             'is_active' => (bool) $c->is_active,
             'is_approved' => (bool) $c->is_approved,
+            'lead_allocation' => $c->lead_allocation?->value ?? 'inherit',
             'orders_count' => (int) ($c->orders_count ?? 0),
             'revenue' => (int) ($c->revenue ?? 0),
             'ownership' => $isOwner ? 'created' : ($isDelegated ? 'delegated' : 'team'),
@@ -152,6 +156,7 @@ class CampaignController extends Controller
 
         if ($includeEdit) {
             $base['product_id'] = $c->product_id;
+            $base['lead_allocation'] = $c->lead_allocation?->value ?? 'inherit';
         }
 
         return $base;
@@ -175,6 +180,18 @@ class CampaignController extends Controller
     private function marketerOptions(): array
     {
         return $this->users->nameOptionsByRoles([UserRole::Marketing]);
+    }
+
+    /** @return list<array{value: string, label: string}> */
+    private function allocationOptions(): array
+    {
+        return collect(CampaignLeadAllocation::cases())
+            ->map(fn (CampaignLeadAllocation $mode) => [
+                'value' => $mode->value,
+                'label' => $mode->label(),
+            ])
+            ->values()
+            ->all();
     }
 
     /** @return list<array{key: string, api_name: string, required: bool}> */
