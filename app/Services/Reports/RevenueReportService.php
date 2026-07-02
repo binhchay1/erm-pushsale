@@ -86,10 +86,7 @@ class RevenueReportService
      */
     private function marketingKpiForUserIds($orders, array $marketerIds): array
     {
-        $eligible = $orders->whereIn('delivery_status', array_map(
-            fn (DeliveryStatus $s) => $s->value,
-            DeliveryStatus::revenueEligible(),
-        ));
+        $eligible = $orders->whereIn('delivery_status', DeliveryStatus::revenueEligible());
 
         $campaigns = MarketingSource::query()
             ->whereNull('parent_id')
