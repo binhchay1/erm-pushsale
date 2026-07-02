@@ -4,7 +4,9 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\OrgLevel;
 use App\Enums\UserRole;
+use App\Models\Company;
 use App\Services\Users\UserOrgRules;
+use App\Support\TenantEmail;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -24,6 +26,15 @@ class UserRequest extends FormRequest
             'manager_user_id' => $this->input('manager_user_id') ?: null,
             'org_level' => $this->input('org_level') ?: null,
         ]);
+
+        $company = $this->user()?->company;
+        if ($company instanceof Company && $this->has('email_local')) {
+            $local = TenantEmail::normalizeLocalPart((string) $this->input('email_local', ''));
+            $this->merge([
+                'email_local' => $local,
+                'email' => TenantEmail::build($local, $company),
+            ]);
+        }
     }
 
     /** @return array<string, mixed> */
@@ -33,6 +44,7 @@ class UserRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
+            'email_local' => ['required', 'string', 'min:2', 'max:64', 'regex:/^[a-z0-9]([a-z0-9._-]*[a-z0-9])?$/i'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'role' => ['required', Rule::enum(UserRole::class)],
             'team_id' => ['nullable', 'exists:teams,id'],
@@ -49,6 +61,16 @@ class UserRequest extends FormRequest
     {
         $validator->after(function (Validator $v): void {
             UserOrgRules::validate($v);
+
+            $company = $this->user()?->company;
+            $email = (string) $this->input('email');
+
+            if ($company instanceof Company && $email !== '' && ! TenantEmail::acceptsForCompany($email, $company)) {
+                $v->errors()->add(
+                    'email_local',
+                    __('messages.tenant.invalid_email_suffix', ['suffix' => TenantEmail::suffixFor($company)]),
+                );
+            }
         });
     }
 }

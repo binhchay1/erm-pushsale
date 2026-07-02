@@ -12,6 +12,7 @@ use App\Repositories\UserRepository;
 use App\Services\OrgStructureService;
 use App\Services\Users\UserOrgRules;
 use App\Support\ActivityLogger;
+use App\Support\TenantEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -57,6 +58,7 @@ class UserController extends Controller
             'managers' => $this->managerOptions(),
             'managerPool' => $this->managerPool(),
             'orgLevels' => OrgStructureService::orgLevelOptions(),
+            'emailIdentity' => $this->emailIdentity(),
         ]);
     }
 
@@ -79,11 +81,16 @@ class UserController extends Controller
 
     public function edit(User $user): Response
     {
+        $company = auth()->user()?->company;
+
         return Inertia::render('Admin/Users/Form', [
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'email_local' => $company
+                    ? (TenantEmail::localPartFromEmail($user->email, $company) ?? explode('@', $user->email, 2)[0])
+                    : explode('@', $user->email, 2)[0],
                 'role' => $user->role->value,
                 'team_id' => $user->team_id,
                 'manager_user_id' => $user->manager_user_id,
@@ -97,6 +104,7 @@ class UserController extends Controller
             'managers' => $this->managerOptions(excludeId: $user->id, role: $user->role->value, orgLevel: $user->org_level?->value),
             'managerPool' => $this->managerPool(),
             'orgLevels' => OrgStructureService::orgLevelOptions(),
+            'emailIdentity' => $this->emailIdentity(),
         ]);
     }
 
@@ -199,5 +207,39 @@ class UserController extends Controller
                 'is_team_leader' => (bool) $u->is_team_leader,
             ])
             ->all();
+    }
+
+    /** @return array<string, mixed> */
+    private function emailIdentity(): array
+    {
+        $company = auth()->user()?->company;
+
+        if (! $company) {
+            return [
+                'suffix' => '@'.TenantEmail::domain(),
+                'host' => TenantEmail::domain(),
+                'isInternal' => true,
+                'companySlug' => TenantEmail::internalSlug(),
+                'companyName' => TenantEmail::internalName(),
+                'roleLocalParts' => [],
+            ];
+        }
+
+        $roleLocalParts = [];
+        foreach (UserRole::cases() as $role) {
+            $roleLocalParts[$role->value] = TenantEmail::localPartFromEmail(
+                TenantEmail::forRole($role, $company),
+                $company,
+            ) ?? $role->value;
+        }
+
+        return [
+            'suffix' => TenantEmail::suffixFor($company),
+            'host' => TenantEmail::hostFor($company),
+            'isInternal' => $company->slug === TenantEmail::internalSlug(),
+            'companySlug' => $company->slug,
+            'companyName' => $company->name,
+            'roleLocalParts' => $roleLocalParts,
+        ];
     }
 }

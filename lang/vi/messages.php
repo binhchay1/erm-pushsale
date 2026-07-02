@@ -69,6 +69,7 @@ return [
     'tenant' => [
         'company_inactive' => 'Doanh nghiệp của bạn đang bị tạm khoá hoặc hết hạn. Vui lòng liên hệ quản trị.',
         'owner_title' => 'Chủ sở hữu doanh nghiệp',
+        'invalid_email_suffix' => 'Email phải kết thúc bằng :suffix theo định danh doanh nghiệp.',
     ],
     'platform' => [
         'company_created' => 'Đã tạo doanh nghiệp và tài khoản admin tổng.',

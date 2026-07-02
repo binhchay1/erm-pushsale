@@ -65,11 +65,69 @@ class TenantEmail
             UserRole::Accounting => 'accounting',
         };
 
+        return self::build($local, $company);
+    }
+
+    /** Hậu tố email cố định theo doanh nghiệp: @saleops.local hoặc @{slug}.saleops.local */
+    public static function suffixFor(Company $company): string
+    {
+        return '@'.self::hostFor($company);
+    }
+
+    public static function hostFor(Company $company): string
+    {
+        $domain = self::domain();
+
         if ($company->slug === self::internalSlug()) {
-            return $local.'@'.self::domain();
+            return $domain;
         }
 
-        return $local.'@'.$company->slug.'.'.self::domain();
+        return $company->slug.'.'.$domain;
+    }
+
+    public static function normalizeLocalPart(string $local): string
+    {
+        $local = strtolower(trim($local));
+        $local = preg_replace('/[^a-z0-9._-]+/', '', $local) ?? '';
+        $local = preg_replace('/\.{2,}/', '.', $local) ?? '';
+
+        return trim($local, '.-_');
+    }
+
+    public static function build(string $localPart, Company $company): string
+    {
+        $local = self::normalizeLocalPart($localPart);
+
+        if ($local === '') {
+            return '';
+        }
+
+        return $local.self::suffixFor($company);
+    }
+
+    public static function localPartFromEmail(string $email, Company $company): ?string
+    {
+        $email = strtolower(trim($email));
+        $suffix = self::suffixFor($company);
+
+        if (! str_ends_with($email, $suffix)) {
+            return null;
+        }
+
+        $local = substr($email, 0, -strlen($suffix));
+
+        return $local !== '' ? $local : null;
+    }
+
+    public static function acceptsForCompany(string $email, Company $company): bool
+    {
+        $local = self::localPartFromEmail($email, $company);
+
+        if ($local === null) {
+            return false;
+        }
+
+        return (bool) preg_match('/^[a-z0-9]([a-z0-9._-]*[a-z0-9])?$/', $local);
     }
 
     /** @return list<array{role: string, role_label: string, email: string}> */

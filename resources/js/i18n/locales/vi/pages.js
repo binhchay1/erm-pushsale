@@ -78,6 +78,13 @@ export default {
         no_select: '— Không chọn —',
         select_manager: '— Chọn quản lý —',
         head_manager_hint: 'Trưởng bộ phận không bắt buộc quản lý trực tiếp; nếu chọn chỉ được gán Admin.',
+        email_local: 'Phần đầu email',
+        email_suffix: 'Hậu tố cố định',
+        email_identity_hint: 'Email đăng nhập = phần bạn nhập + @{host}. Hậu tố theo doanh nghiệp, không đổi.',
+        email_identity_internal: 'Công ty nội bộ — email dạng ten@saleops.local',
+        email_identity_tenant: 'Doanh nghiệp «{name}» — email dạng ten@{host}',
+        email_preview: 'Email đăng nhập',
+        email_role_suggest: 'Gợi ý theo vai trò: {local}',
     },
     warehouse: {
         title: 'Danh sách kho',

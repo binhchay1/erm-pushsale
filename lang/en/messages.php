@@ -69,6 +69,7 @@ return [
     'tenant' => [
         'company_inactive' => 'Your company is suspended or expired. Please contact your administrator.',
         'owner_title' => 'Company owner',
+        'invalid_email_suffix' => 'Email must end with :suffix per company identity rules.',
     ],
     'platform' => [
         'company_created' => 'Company and owner admin account created.',

@@ -78,6 +78,13 @@ export default {
         no_select: '— No selection —',
         select_manager: '— Select manager —',
         head_manager_hint: 'Department heads do not require a direct manager; if set, only Admin is allowed.',
+        email_local: 'Email local part',
+        email_suffix: 'Fixed suffix',
+        email_identity_hint: 'Login email = what you type + @{host}. The suffix is fixed per company.',
+        email_identity_internal: 'Internal company — emails look like name@saleops.local',
+        email_identity_tenant: 'Company «{name}» — emails look like name@{host}',
+        email_preview: 'Login email',
+        email_role_suggest: 'Suggested for role: {local}',
     },
     warehouse: {
         title: 'Warehouses',

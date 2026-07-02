@@ -11,13 +11,25 @@ import { useLabels } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
-export default function UserForm({ user, roles, teams, managers, managerPool = [], orgLevels }) {
+export default function UserForm({
+    user,
+    roles,
+    teams,
+    managers,
+    managerPool = [],
+    orgLevels,
+    emailIdentity = {},
+}) {
     const t = useT();
     const labels = useLabels();
     const isEdit = Boolean(user?.id);
+    const suffix = emailIdentity.suffix ?? '@saleops.local';
+    const host = emailIdentity.host ?? 'saleops.local';
+    const roleLocalParts = emailIdentity.roleLocalParts ?? {};
+
     const { data, setData, post, put, processing, errors } = useForm({
         name: user?.name ?? '',
-        email: user?.email ?? '',
+        email_local: user?.email_local ?? roleLocalParts.sales ?? 'sales',
         role: user?.role ?? 'sales',
         team_id: user?.team_id ?? '',
         manager_user_id: user?.manager_user_id ?? '',
@@ -28,6 +40,11 @@ export default function UserForm({ user, roles, teams, managers, managerPool = [
         password: '',
         password_confirmation: '',
     });
+
+    const previewEmail = useMemo(() => {
+        const local = (data.email_local || '').trim().toLowerCase();
+        return local ? `${local}${suffix}` : suffix;
+    }, [data.email_local, suffix]);
 
     const hierarchyRoles = ['sales', 'marketing', 'warehouse'];
     const usesHierarchy = hierarchyRoles.includes(data.role);
@@ -52,10 +69,12 @@ export default function UserForm({ user, roles, teams, managers, managerPool = [
     }, [managerPool, managers, data.role, data.org_level, isAdmin, usesHierarchy, isHead]);
 
     const onRoleChange = (role) => {
+        const suggested = roleLocalParts[role];
         setData((prev) => ({
             ...prev,
             role,
             ...(role === 'admin' ? { manager_user_id: '', org_level: '', team_id: '' } : {}),
+            ...(!isEdit && suggested ? { email_local: suggested } : {}),
         }));
     };
 
@@ -109,14 +128,40 @@ export default function UserForm({ user, roles, teams, managers, managerPool = [
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="email">{t('pages.users.email')}</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    value={data.email}
-                                    onChange={(e) => setData('email', e.target.value)}
-                                />
-                                {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                                <Label htmlFor="email_local">{t('pages.users.email_local')}</Label>
+                                <div className="flex max-w-md">
+                                    <Input
+                                        id="email_local"
+                                        className="rounded-r-none font-mono text-sm"
+                                        value={data.email_local}
+                                        onChange={(e) => setData('email_local', e.target.value)}
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                    />
+                                    <span className="flex h-9 shrink-0 items-center rounded-r-md border border-l-0 border-input bg-muted px-3 font-mono text-xs text-muted-foreground">
+                                        {suffix}
+                                    </span>
+                                </div>
+                                {(errors.email_local || errors.email) && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.email_local || errors.email}
+                                    </p>
+                                )}
+                                <p className="text-xs text-muted-foreground">
+                                    {emailIdentity.isInternal
+                                        ? t('pages.users.email_identity_internal')
+                                        : t('pages.users.email_identity_tenant', {
+                                              name: emailIdentity.companyName ?? emailIdentity.companySlug,
+                                              host,
+                                          })}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    {t('pages.users.email_identity_hint', { host })}
+                                </p>
+                                <p className="text-xs font-medium text-primary">
+                                    {t('pages.users.email_preview')}:{' '}
+                                    <span className="font-mono">{previewEmail}</span>
+                                </p>
                             </div>
 
                             <div className="space-y-2">
@@ -133,6 +178,13 @@ export default function UserForm({ user, roles, teams, managers, managerPool = [
                                         </option>
                                     ))}
                                 </select>
+                                {roleLocalParts[data.role] && (
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('pages.users.email_role_suggest', {
+                                            local: roleLocalParts[data.role],
+                                        })}
+                                    </p>
+                                )}
                                 {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
                             </div>
 
