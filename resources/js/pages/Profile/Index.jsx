@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useRoleLabel } from '@/hooks/use-labels';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
@@ -77,10 +78,7 @@ export default function ProfileIndex({ profile }) {
             <Head title={t('profile.title')} />
 
             <div className="mx-auto max-w-3xl space-y-6 animate-in fade-in-0 duration-300">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{t('profile.title')}</h1>
-                    <p className="text-sm text-muted-foreground">{t('profile.desc')}</p>
-                </div>
+                <PageHeader title={t('profile.title')} description={t('profile.desc')} />
 
                 <Card>
                     <CardHeader>

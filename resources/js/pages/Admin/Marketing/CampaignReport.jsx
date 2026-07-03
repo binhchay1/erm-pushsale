@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { MarketingCampaignTable } from '@/components/reports/MarketingCampaignTable';
 import { ReportExportButton } from '@/components/reports/ReportExportButton';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
@@ -22,13 +23,11 @@ export default function MarketingCampaignReport({
             <Head title={t('reports.campaign_report.title')} />
 
             <div className="space-y-6">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">{t('reports.campaign_report.report_title')}</h1>
-                        <p className="text-sm text-muted-foreground">{t('reports.campaign_report.report_desc')}</p>
-                    </div>
-                    <ReportExportButton routeUrl={routeUrl} filters={filters} />
-                </div>
+                <PageHeader
+                    title={t('reports.campaign_report.report_title')}
+                    description={t('reports.campaign_report.report_desc')}
+                    actions={<ReportExportButton routeUrl={routeUrl} filters={filters} />}
+                />
 
                 <ReportFilterBar
                     routeUrl={routeUrl}

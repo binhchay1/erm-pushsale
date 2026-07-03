@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -90,10 +91,10 @@ export default function Inventory({
             <Head title={t('operations.inventory.inventory_title')} />
 
             <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{t('operations.inventory.inventory_title')}</h1>
-                    <p className="text-sm text-muted-foreground">{t('operations.inventory.inventory_desc')}</p>
-                </div>
+                <PageHeader
+                    title={t('operations.inventory.inventory_title')}
+                    description={t('operations.inventory.inventory_desc')}
+                />
 
                 <div className="rounded-xl border bg-card p-4">
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">

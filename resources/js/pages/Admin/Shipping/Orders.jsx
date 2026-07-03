@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import { PackageSearch } from 'lucide-react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { ShippingOrderDetailModal } from '@/components/shipping/ShippingOrderDetailModal';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
@@ -24,10 +25,7 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
             <Head title={title} />
 
             <div className="space-y-4">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-                    <p className="text-sm text-muted-foreground">{t('shipping.orders_desc')}</p>
-                </div>
+                <PageHeader icon={PackageSearch} title={title} description={t('shipping.orders_desc')} />
 
                 <ReportFilterBar routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} />
 

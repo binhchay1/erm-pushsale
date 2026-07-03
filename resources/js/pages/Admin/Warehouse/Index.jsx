@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { useConfirm } from '@/hooks/use-confirm';
@@ -29,15 +30,17 @@ export default function WarehouseIndex({ warehouses }) {
             <Head title={t('pages.warehouse.title')} />
 
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold tracking-tight">{t('pages.warehouse.title')}</h1>
-                    <Button asChild>
-                        <Link href="/admin/warehouses/create">
-                            <Plus className="size-4" />
-                            {t('pages.warehouse.create')}
-                        </Link>
-                    </Button>
-                </div>
+                <PageHeader
+                    title={t('pages.warehouse.title')}
+                    actions={
+                        <Button asChild>
+                            <Link href="/admin/warehouses/create">
+                                <Plus className="size-4" />
+                                {t('pages.warehouse.create')}
+                            </Link>
+                        </Button>
+                    }
+                />
 
                 <ScrollDataTable>
                     <table className="w-full min-w-[980px] border-collapse text-xs">

@@ -5,6 +5,7 @@ import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { TeamRevenueTable } from '@/components/reports/TeamRevenueTable';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { TableColumnToggle, useMarketingSourceColumns } from '@/components/reports/TableColumnToggle';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
@@ -31,14 +32,10 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
             <Head title={t('dashboard.marketing.title')} />
 
             <div className="space-y-8 pb-8">
-                <div className="space-y-2">
-                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-                        {t('dashboard.marketing.title')}
-                    </h1>
-                    <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                        {t('dashboard.marketing.admin_desc')}
-                    </p>
-                </div>
+                <PageHeader
+                    title={t('dashboard.marketing.title')}
+                    description={t('dashboard.marketing.admin_desc')}
+                />
 
                 <ReportFilterBar
                     routeUrl={routeUrl}

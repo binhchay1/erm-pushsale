@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportExportButton } from '@/components/reports/ReportExportButton';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
@@ -137,14 +138,10 @@ export default function AllocatorReports({ report, data, filters, filterFields, 
             <Head title={t(isLoad ? 'pages.allocator_reports.load_title' : 'pages.allocator_reports.allocation_title')} />
 
             <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">
-                        {t(isLoad ? 'pages.allocator_reports.load_title' : 'pages.allocator_reports.allocation_title')}
-                    </h1>
-                    <p className="text-sm text-muted-foreground">
-                        {t(isLoad ? 'pages.allocator_reports.load_desc' : 'pages.allocator_reports.allocation_desc')}
-                    </p>
-                </div>
+                <PageHeader
+                    title={t(isLoad ? 'pages.allocator_reports.load_title' : 'pages.allocator_reports.allocation_title')}
+                    description={t(isLoad ? 'pages.allocator_reports.load_desc' : 'pages.allocator_reports.allocation_desc')}
+                />
 
                 <div className="flex flex-wrap items-end justify-between gap-3">
                     <ReportFilterBar

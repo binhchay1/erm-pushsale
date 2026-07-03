@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,10 +29,10 @@ export default function MovementHistory({ rows, filters, warehouses, products, t
             <Head title={t('operations.movement_history.title_full')} />
 
             <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{t('operations.movement_history.title_full')}</h1>
-                    <p className="text-sm text-muted-foreground">{t('operations.movement_history.desc_detail')}</p>
-                </div>
+                <PageHeader
+                    title={t('operations.movement_history.title_full')}
+                    description={t('operations.movement_history.desc_detail')}
+                />
 
                 <div className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-2 lg:grid-cols-6">
                     <div className="space-y-1">

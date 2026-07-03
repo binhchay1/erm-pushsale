@@ -1,6 +1,7 @@
 import { Head, usePage } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
 import { StatusTabs } from '@/components/operations/StatusTabs';
@@ -31,12 +32,10 @@ export default function Workspace({
             <Head title={t('pages.workspace.title')} />
 
             <div className="space-y-8 pb-8">
-                <div className="space-y-2">
-                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('pages.workspace.title')}</h1>
-                    <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                        {t('pages.workspace.desc_detail')}
-                    </p>
-                </div>
+                <PageHeader
+                    title={t('pages.workspace.title')}
+                    description={t('pages.workspace.desc_detail')}
+                />
 
                 <ReportFilterBar
                     routeUrl="/sales/workspace"

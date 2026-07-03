@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RankingFilterBar } from '@/components/rankings/RankingFilterBar';
 import { RevenueRankingChart } from '@/components/rankings/RevenueRankingChart';
@@ -26,10 +27,7 @@ export default function RankingsIndex({
             <Head title={t('rankings.title')} />
 
             <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{t('rankings.title')}</h1>
-                    <p className="text-sm text-muted-foreground">{t('rankings.desc')}</p>
-                </div>
+                <PageHeader title={t('rankings.title')} description={t('rankings.desc')} />
 
                 <RankingFilterBar
                     routeUrl={routeUrl}

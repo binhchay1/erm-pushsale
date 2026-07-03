@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -131,20 +132,20 @@ export default function LeadsIndex({
             <Head title={t('pages.leads.title')} />
 
             <div className="space-y-6">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">{t('pages.leads.title')}</h1>
-                        <p className="text-sm text-muted-foreground">{t('pages.leads.desc_detail')}</p>
-                    </div>
-                    {canDelete && (
-                        <Button variant="outline" asChild>
-                            <Link href="/admin/integrations">
-                                <Plug className="size-4" />
-                                {t('pages.leads.configure_platforms')}
-                            </Link>
-                        </Button>
-                    )}
-                </div>
+                <PageHeader
+                    title={t('pages.leads.title')}
+                    description={t('pages.leads.desc_detail')}
+                    actions={
+                        canDelete && (
+                            <Button variant="outline" asChild>
+                                <Link href="/admin/integrations">
+                                    <Plug className="size-4" />
+                                    {t('pages.leads.configure_platforms')}
+                                </Link>
+                            </Button>
+                        )
+                    }
+                />
 
                 <div className="space-y-3 rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-amber-200/60 pb-3 dark:border-amber-900/30">

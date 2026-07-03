@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { RevenueMetricsTable } from '@/components/reports/RevenueMetricsTable';
 import { useT } from '@/providers/I18nProvider';
@@ -13,10 +14,10 @@ export default function SaleRevenueReport({ filters, filterOptions, filterFields
             <Head title={t('reports.revenue_sales.title')} />
 
             <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{t('reports.revenue_sales.report_title')}</h1>
-                    <p className="text-sm text-muted-foreground">{t('reports.revenue_sales.report_desc')}</p>
-                </div>
+                <PageHeader
+                    title={t('reports.revenue_sales.report_title')}
+                    description={t('reports.revenue_sales.report_desc')}
+                />
 
                 <ReportFilterBar
                     routeUrl="/admin/sales/revenue"

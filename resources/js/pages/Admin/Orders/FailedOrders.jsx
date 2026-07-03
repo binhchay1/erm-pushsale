@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +28,7 @@ export default function FailedOrders({ report, filterOptions }) {
             <Head title={t('pages.failed_orders.title')} />
 
             <div className="space-y-6">
-                <h1 className="text-2xl font-bold tracking-tight">{t('pages.failed_orders.list_title')}</h1>
+                <PageHeader title={t('pages.failed_orders.list_title')} />
 
                 <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">
                     <select

@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { StatusTabs } from '@/components/operations/StatusTabs';
 import { WarehouseOrderTable } from '@/components/operations/WarehouseOrderTable';
@@ -24,10 +25,7 @@ export default function WarehouseOperations({
             <Head title={title} />
 
             <div className="space-y-4">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-                    <p className="text-sm text-muted-foreground">{t('pages.warehouse_ops.desc')}</p>
-                </div>
+                <PageHeader title={title} description={t('pages.warehouse_ops.desc')} />
 
                 <ReportFilterBar
                     routeUrl={routeUrl}

@@ -3,6 +3,7 @@ import { Building2, Copy, Search, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -122,17 +123,11 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
             <Head title={t('pages.platform.title')} />
 
             <div className="space-y-6">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                        <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                            <Building2 className="size-5" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight">{t('pages.platform.title')}</h1>
-                            <p className="text-sm text-muted-foreground">{t('pages.platform.desc')}</p>
-                        </div>
-                    </div>
-                </div>
+                <PageHeader
+                    icon={Building2}
+                    title={t('pages.platform.title')}
+                    description={t('pages.platform.desc')}
+                />
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <StatCard label={t('pages.platform.stat_total')} value={formatNumber(stats.total ?? 0)} />
