@@ -35,13 +35,13 @@ export function OperationOrderTable({
     const t = useT();
     const actionCols =
         (enableSaleActions ? 1 : 0) + (enableCloseOrder ? 1 : 0) + (enableDeleteOrder ? 1 : 0);
-    const baseCols = 10;
+    const baseCols = 13;
     // Realtime-safe: sort recomputes on prop refresh, chosen column persists.
     const { sortedRows, sort, toggleSort } = useTableSort(rows ?? [], { defaultKey: 'dataArrivedAt', defaultDir: 'desc' });
 
     return (
         <ScrollDataTable>
-            <table className="min-w-[1800px] w-full border-collapse">
+            <table className="min-w-[2280px] w-full border-collapse">
                 <thead>
                     <tr>
                         <Th sortable sortKey="orderCode" sort={sort} onSort={toggleSort}>{t('operations.order_table.order_code')}</Th>
@@ -50,10 +50,13 @@ export function OperationOrderTable({
                         <Th sortable sortKey="customerName" sort={sort} onSort={toggleSort}>{t('operations.order_table.customer')}</Th>
                         <Th>{t('operations.order_table.message')}</Th>
                         <Th sortable sortKey="currentOperation" sort={sort} onSort={toggleSort}>{t('operations.order_table.operation')}</Th>
+                        <Th sortable sortKey="operationResult" sort={sort} onSort={toggleSort}>{t('operations.order_table.result')}</Th>
                         <Th>{t('operations.order_table.products')}</Th>
                         <Th sortable sortKey="total" sort={sort} onSort={toggleSort}>{t('operations.order_table.finance')}</Th>
+                        <Th>{t('operations.order_table.warehouse_shipping')}</Th>
                         <Th sortable sortKey="closingStatusLabel" sort={sort} onSort={toggleSort}>{t('operations.order_table.closing')}</Th>
                         <Th sortable sortKey="deliveryStatus" sort={sort} onSort={toggleSort}>{t('operations.order_table.delivery')}</Th>
+                        <Th>{t('operations.order_table.internal_recon')}</Th>
                         {enableSaleActions && <Th>{t('operations.order_table.actions')}</Th>}
                         {enableCloseOrder && <Th>{t('operations.order_table.close')}</Th>}
                         {enableDeleteOrder && <Th />}
@@ -89,7 +92,11 @@ export function OperationOrderTable({
                                 </Td>
                                 <Td>
                                     <span className="font-semibold text-destructive">{row.currentOperation}</span>
-                                    <div className="text-muted-foreground">{row.operationResult || '—'}</div>
+                                    {row.closedAt && (
+                                        <div className="text-[11px] text-emerald-700 dark:text-emerald-400">
+                                            {t('operations.order_table.closed_date')} {formatDateTime(row.closedAt)}
+                                        </div>
+                                    )}
                                     {row.nextOperationAt && (
                                         <div className="mt-1 text-[11px] text-amber-700 dark:text-amber-400">
                                             {t('operations.order_table.scheduled')} {formatDateTime(row.nextOperationAt)}
@@ -101,17 +108,49 @@ export function OperationOrderTable({
                                         </div>
                                     )}
                                 </Td>
+                                <Td className="whitespace-normal text-muted-foreground">
+                                    {row.operationResult || '—'}
+                                </Td>
                                 <Td className="whitespace-normal">
                                     {row.products?.map((p) => (
-                                        <div key={p.productName}>
+                                        <div key={p.itemId ?? p.productName}>
                                             {p.productName} x{p.quantity} — {formatCurrency(p.unitPrice)}
+                                            {p.itemType && p.itemType !== 'product' && (
+                                                <span className="ml-1 text-[10px] uppercase text-muted-foreground">
+                                                    [{p.itemType}]
+                                                </span>
+                                            )}
                                         </div>
                                     ))}
                                 </Td>
                                 <Td>
                                     <div>{t('operations.order_table.subtotal')} {formatCurrency(row.subtotal)}</div>
+                                    {row.discount > 0 && (
+                                        <div className="text-rose-600 dark:text-rose-400">
+                                            {t('operations.order_table.discount')} {formatCurrency(row.discount)}
+                                        </div>
+                                    )}
+                                    {row.vat > 0 && (
+                                        <div className="text-muted-foreground">
+                                            {t('operations.order_table.vat')} {formatCurrency(row.vat)}
+                                        </div>
+                                    )}
                                     <div>{t('operations.order_table.shipping_fee')} {formatCurrency(row.shippingFeeCollected)}</div>
                                     <div className="font-semibold">{t('operations.order_table.total')} {formatCurrency(row.total)}</div>
+                                    {row.deposit > 0 && (
+                                        <div className="text-muted-foreground">
+                                            {t('operations.order_table.deposit')} {formatCurrency(row.deposit)}
+                                        </div>
+                                    )}
+                                </Td>
+                                <Td className="whitespace-normal">
+                                    <div>{row.warehouseName || '—'}</div>
+                                    {row.shippingProvider && (
+                                        <div className="text-[11px] text-muted-foreground">{row.shippingProvider}</div>
+                                    )}
+                                    {row.trackingNumber && (
+                                        <div className="font-mono text-[11px] text-primary">{row.trackingNumber}</div>
+                                    )}
                                 </Td>
                                 <Td>
                                     <StatusBadge tone={closingTone(row.closingStatus)}>
@@ -125,6 +164,9 @@ export function OperationOrderTable({
                                     {row.desiredDeliveryAt && (
                                         <div className="mt-1 text-muted-foreground">{row.desiredDeliveryAt}</div>
                                     )}
+                                </Td>
+                                <Td className="max-w-[160px] whitespace-normal text-[11px] text-muted-foreground">
+                                    {row.internalReconNote || '—'}
                                 </Td>
                                 {enableSaleActions && (
                                     <Td>

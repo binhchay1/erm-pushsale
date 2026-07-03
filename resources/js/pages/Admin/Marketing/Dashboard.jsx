@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 
 import { MarketingKpiHero } from '@/components/marketing/MarketingKpiHero';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
+import { ReportRefreshButton } from '@/components/reports/ReportRefreshButton';
 import { TeamRevenueTable } from '@/components/reports/TeamRevenueTable';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { TableColumnToggle, useMarketingSourceColumns } from '@/components/reports/TableColumnToggle';
@@ -21,7 +22,7 @@ function MetricBar({ value, max, color }) {
     );
 }
 
-export default function Dashboard({ filters, filterOptions, filterFields, report, filterRouteUrl }) {
+export default function Dashboard({ filters, filterOptions, filterFields, report, filterRouteUrl, cachedAt }) {
     const t = useT();
     const routeUrl = filterRouteUrl ?? '/admin/marketing/dashboard';
     const { visible, isVisible, toggle, columns } = useMarketingSourceColumns();
@@ -42,6 +43,7 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
                     filters={filters}
                     filterOptions={filterOptions}
                     filterFields={filterFields}
+                    extra={<ReportRefreshButton routeUrl={routeUrl} filters={filters} cachedAt={cachedAt} />}
                 />
 
                 <MarketingKpiHero kpis={report.kpis} />
@@ -77,6 +79,9 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
                                         {isVisible('product') && <Th>{t('reports.marketing_dashboard.product')}</Th>}
                                         {isVisible('channel') && <Th>{t('reports.marketing_dashboard.channel')}</Th>}
                                         {isVisible('budget') && <Th>{t('reports.marketing_dashboard.budget')}</Th>}
+                                        {isVisible('interactions') && (
+                                            <Th>{t('reports.marketing_dashboard.interactions')}</Th>
+                                        )}
                                         {isVisible('contacts') && <Th>{t('reports.marketing_dashboard.contacts')}</Th>}
                                         {isVisible('contactRate') && (
                                             <Th>{t('reports.marketing_dashboard.contact_rate')}</Th>
@@ -89,6 +94,18 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
                                         )}
                                         {isVisible('closingRate') && (
                                             <Th>{t('reports.marketing_dashboard.closing_rate')}</Th>
+                                        )}
+                                        {isVisible('productQuantity') && (
+                                            <Th>{t('reports.marketing_dashboard.product_quantity')}</Th>
+                                        )}
+                                        {isVisible('avgProductPerOrder') && (
+                                            <Th>{t('reports.marketing_dashboard.avg_product_per_order')}</Th>
+                                        )}
+                                        {isVisible('utmSource') && (
+                                            <Th>{t('reports.marketing_dashboard.utm_source')}</Th>
+                                        )}
+                                        {isVisible('utmCampaign') && (
+                                            <Th>{t('reports.marketing_dashboard.utm_campaign')}</Th>
                                         )}
                                         <Th>{t('reports.marketing_dashboard.revenue')}</Th>
                                     </tr>
@@ -110,6 +127,9 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
                                                 {isVisible('product') && <Td>{row.productName}</Td>}
                                                 {isVisible('channel') && <Td>{row.adChannel}</Td>}
                                                 {isVisible('budget') && <Td>{formatCurrency(row.budget)}</Td>}
+                                                {isVisible('interactions') && (
+                                                    <Td>{formatNumber(row.interactions)}</Td>
+                                                )}
                                                 {isVisible('contacts') && <Td>{formatNumber(row.contacts)}</Td>}
                                                 {isVisible('contactRate') && (
                                                     <Td>{formatPercent(row.contactRate)}</Td>
@@ -132,6 +152,14 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
                                                         </div>
                                                     </Td>
                                                 )}
+                                                {isVisible('productQuantity') && (
+                                                    <Td>{formatNumber(row.productQuantity)}</Td>
+                                                )}
+                                                {isVisible('avgProductPerOrder') && (
+                                                    <Td>{formatNumber(row.avgProductPerOrder)}</Td>
+                                                )}
+                                                {isVisible('utmSource') && <Td>{row.utmSource || '—'}</Td>}
+                                                {isVisible('utmCampaign') && <Td>{row.utmCampaign || '—'}</Td>}
                                                 <Td className="font-semibold tabular-nums">
                                                     {formatCurrency(row.totalRevenue)}
                                                 </Td>

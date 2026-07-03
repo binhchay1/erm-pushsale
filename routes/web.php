@@ -51,6 +51,8 @@ use App\Http\Controllers\OrgChartController;
 use App\Http\Controllers\Platform\CompanyController as PlatformCompanyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Reports\ExtraReportController;
+use App\Http\Controllers\Reports\HourlyStatsController;
+use App\Http\Controllers\Reports\TeamLeaderStatsController;
 use App\Http\Controllers\Sales\CustomerProfileController;
 use App\Http\Controllers\Sales\DashboardController as SalesDashboardController;
 use App\Http\Controllers\Sales\OperationController;
@@ -108,6 +110,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
         Route::get('reports/business', BusinessOverviewController::class)->name('reports.business');
         Route::get('reports/ceo', CeoReportController::class)->name('reports.ceo');
+        Route::get('reports/hourly', HourlyStatsController::class)->name('reports.hourly');
+        Route::get('reports/team-leaders', TeamLeaderStatsController::class)->name('reports.team-leaders');
         Route::get('reports/extra/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
         Route::get('marketing/dashboard', MarketingDashboardController::class)->name('marketing.dashboard');
         Route::get('landing-approvals', [LandingApprovalController::class, 'index'])->name('landing-approvals.index');
@@ -199,6 +203,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('revenue', MarketingRevenueReportController::class)->name('revenue');
         Route::get('campaign-report', MarketingCampaignReportController::class)->name('campaign-report');
         Route::patch('campaigns/{campaign}/budget', [CampaignBudgetController::class, 'update'])->name('campaigns.budget');
+        Route::get('reports/hourly', HourlyStatsController::class)->name('reports.hourly');
+        Route::get('reports/team-leaders', TeamLeaderStatsController::class)->name('reports.team-leaders');
         Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
     });
 

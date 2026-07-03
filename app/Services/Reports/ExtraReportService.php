@@ -8,6 +8,7 @@ use App\Enums\OperationStage;
 use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -32,6 +33,21 @@ class ExtraReportService
 
     private const CANCELLED = ['cancel_waybill', 'cancel_closing'];
 
+    /** Xác nhận giao hàng (2): đơn đã lên vận đơn / vào luồng giao (kể cả chờ lấy). */
+    private const XNGH = ['waiting_waybill', 'posted', 'picking_up', 'delivering', 'deliver_now', 'redelivery', 'delivered', 'delivery_complete', 'paid', 'returned', 'returning', 'refund', 'cannot_deliver'];
+
+    /** Chuyển ĐVGH (4): đơn đã bàn giao cho đơn vị vận chuyển (mẫu số của các % giao/hoàn). */
+    private const TRANSFER = ['posted', 'picking_up', 'delivering', 'deliver_now', 'redelivery', 'delivered', 'delivery_complete', 'paid', 'returned', 'returning', 'refund', 'cannot_deliver'];
+
+    /** Đã hoàn (5): hoàn xong. */
+    private const RETURNED_DONE = ['returned', 'refund'];
+
+    /** Đang hoàn (6): đang trên đường hoàn / không giao được. */
+    private const RETURNING = ['returning', 'cannot_deliver'];
+
+    /** Giao thành công (9): đã giao + đã thanh toán. */
+    private const SUCCESS = ['delivered', 'delivery_complete', 'paid'];
+
     public function __construct(
         private readonly ReportScopeResolver $scope,
     ) {}
@@ -49,6 +65,8 @@ class ExtraReportService
             'sale-5' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => []],
             'marketing-1' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
             'marketing-2' => ['roles' => ['marketing', 'sales', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type']],
+            'marketing-3' => ['roles' => ['marketing', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
+            'marketing-4' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
             'kho-1' => ['roles' => ['accounting', 'warehouse', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id', 'warehouse_id']],
             'kho-2' => ['roles' => ['accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'warehouse_id']],
         ];
@@ -122,6 +140,8 @@ class ExtraReportService
             'sale-5' => $this->saleAppointments($user),
             'marketing-1' => $this->revenueDetail($user, $filter, 'marketing'),
             'marketing-2' => $this->productClosing($user, $filter),
+            'marketing-3' => $this->marketingWork($user, $filter),
+            'marketing-4' => $this->upsaleReport($user, $filter),
             'kho-1' => $this->warehouseRevenue($user, $filter),
             'kho-2' => $this->systemBusiness($user, $filter),
         };
@@ -134,7 +154,7 @@ class ExtraReportService
                 $filterFields[] = 'sale_id';
             }
 
-            if ($key === 'marketing-1') {
+            if (in_array($key, ['marketing-1', 'marketing-3'], true)) {
                 $filterFields[] = 'marketer_id';
             }
         }
@@ -231,69 +251,110 @@ class ExtraReportService
         return ['columns' => $columns, 'rows' => $rows, 'totals' => $totals];
     }
 
-    /** Doanh số chi tiết theo telesale hoặc marketer — cùng cấu trúc cột. */
+    /**
+     * Doanh số chi tiết theo telesale hoặc marketer — cùng cấu trúc 19 chỉ số
+     * theo mẫu pushsale: 9 nhóm trạng thái (SL + Doanh số) + các tỷ lệ.
+     */
     private function revenueDetail(User $user, ReportFilterData $filter, string $groupRole): array
     {
         $bySale = $groupRole === 'sale';
-        $orders = $this->fetchOrders($user, $filter, scopeSales: $bySale, scopeMarketing: ! $bySale)
+        $orders = $this->fetchOrdersWithItems($user, $filter, scopeSales: $bySale, scopeMarketing: ! $bySale)
             ->filter(fn (Order $o) => $bySale ? $o->sale_user_id !== null : $o->marketer_user_id !== null);
 
         $columns = [
             ['key' => 'name', 'label_key' => $bySale ? 'telesale' : 'marketer', 'label' => $bySale ? __('reports.columns.telesale') : __('reports.columns.marketer'), 'format' => 'text'],
-            $this->col('contacts', 'contacts', 'number'),
             $this->col('closed_qty', 'closed_qty', 'number'),
             $this->col('closed_rev', 'closed_rev', 'currency'),
-            $this->col('delivering_qty', 'delivering_qty', 'number'),
-            $this->col('delivering_rev', 'delivering_rev', 'currency'),
+            $this->col('xngh_qty', 'xngh_qty', 'number'),
+            $this->col('xngh_rev', 'xngh_rev', 'currency'),
+            $this->col('cancel_qty', 'cancel_qty', 'number'),
+            $this->col('cancel_rev', 'cancel_rev', 'currency'),
+            $this->col('transfer_qty', 'transfer_qty', 'number'),
+            $this->col('transfer_rev', 'transfer_rev', 'currency'),
+            $this->col('returned_qty', 'returned_qty', 'number'),
+            $this->col('returned_rev', 'returned_rev', 'currency'),
+            $this->col('returning_qty', 'returning_qty', 'number'),
+            $this->col('returning_rev', 'returning_rev', 'currency'),
             $this->col('delivered_qty', 'delivered_qty', 'number'),
             $this->col('delivered_rev', 'delivered_rev', 'currency'),
             $this->col('paid_qty', 'paid_qty', 'number'),
             $this->col('paid_rev', 'paid_rev', 'currency'),
-            $this->col('returned_qty', 'returned_qty', 'number'),
-            $this->col('returned_rev', 'returned_rev', 'currency'),
-            $this->col('cancelled_qty', 'cancelled_qty', 'number'),
-            $this->col('return_rate', 'return_rate', 'percent', ['tone' => 'negative']),
+            $this->col('success_qty', 'success_qty', 'number'),
+            $this->col('success_rev', 'success_rev', 'currency'),
+            $this->col('pct_returned', 'pct_returned', 'percent', ['tone' => 'negative']),
+            $this->col('pct_cancel', 'pct_cancel', 'percent', ['tone' => 'negative']),
+            $this->col('pct_xngh', 'pct_xngh', 'percent', ['tone' => 'positive']),
+            $this->col('pct_success', 'pct_success', 'percent', ['tone' => 'positive']),
+            $this->col('contacts', 'contacts', 'number'),
             $this->col('close_rate', 'close_rate', 'percent', ['tone' => 'positive']),
+            $this->col('product_count', 'product_count', 'number'),
             $this->col('avg_order', 'avg_order', 'currency'),
+            $this->col('pct_rev_returned', 'pct_rev_returned', 'percent', ['tone' => 'negative']),
+            $this->col('pct_rev_cancel', 'pct_rev_cancel', 'percent', ['tone' => 'negative']),
         ];
 
         $groupKey = $bySale ? 'sale_user_id' : 'marketer_user_id';
 
         $rows = $orders->groupBy($groupKey)->map(function (Collection $group) use ($bySale) {
             $closed = $this->closed($group);
-            $closedRev = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
-            $delivering = $this->bucket($closed, self::DELIVERING);
+            $rev = fn (Collection $c) => (int) $c->sum(fn (Order $o) => $o->netRevenue());
+
+            $closedRev = $rev($closed);
+            $xngh = $this->bucket($closed, self::XNGH);
+            $cancel = $this->bucket($closed, self::CANCELLED);
+            $transfer = $this->bucket($closed, self::TRANSFER);
+            $returned = $this->bucket($closed, self::RETURNED_DONE);
+            $returning = $this->bucket($closed, self::RETURNING);
             $delivered = $this->bucket($closed, self::DELIVERED);
             $paid = $this->bucket($closed, self::PAID);
-            $returned = $this->bucket($closed, self::RETURNED);
-            $cancelled = $this->bucket($closed, self::CANCELLED);
+            $success = $this->bucket($closed, self::SUCCESS);
+            $cancelRev = $rev($cancel);
+            $returnedRev = $rev($returned);
 
             return [
                 'name' => ($bySale ? $group->first()->saleUser?->name : $group->first()->marketerUser?->name) ?? '—',
-                'contacts' => $group->count(),
                 'closed_qty' => $closed->count(),
                 'closed_rev' => $closedRev,
-                'delivering_qty' => $delivering->count(),
-                'delivering_rev' => (int) $delivering->sum(fn (Order $o) => $o->netRevenue()),
-                'delivered_qty' => $delivered->count(),
-                'delivered_rev' => (int) $delivered->sum(fn (Order $o) => $o->netRevenue()),
-                'paid_qty' => $paid->count(),
-                'paid_rev' => (int) $paid->sum(fn (Order $o) => $o->netRevenue()),
+                'xngh_qty' => $xngh->count(),
+                'xngh_rev' => $rev($xngh),
+                'cancel_qty' => $cancel->count(),
+                'cancel_rev' => $cancelRev,
+                'transfer_qty' => $transfer->count(),
+                'transfer_rev' => $rev($transfer),
                 'returned_qty' => $returned->count(),
-                'returned_rev' => (int) $returned->sum(fn (Order $o) => $o->netRevenue()),
-                'cancelled_qty' => $cancelled->count(),
-                'return_rate' => self::pct($returned->count(), $closed->count()),
+                'returned_rev' => $returnedRev,
+                'returning_qty' => $returning->count(),
+                'returning_rev' => $rev($returning),
+                'delivered_qty' => $delivered->count(),
+                'delivered_rev' => $rev($delivered),
+                'paid_qty' => $paid->count(),
+                'paid_rev' => $rev($paid),
+                'success_qty' => $success->count(),
+                'success_rev' => $rev($success),
+                'pct_returned' => self::pct($returned->count(), $transfer->count()),
+                'pct_cancel' => self::pct($cancel->count(), $closed->count()),
+                'pct_xngh' => self::pct($xngh->count(), $closed->count()),
+                'pct_success' => self::pct($success->count(), $transfer->count()),
+                'contacts' => $group->count(),
                 'close_rate' => self::pct($closed->count(), $group->count()),
+                'product_count' => (int) $closed->sum(fn (Order $o) => $o->items->sum('quantity')),
                 'avg_order' => $closed->count() > 0 ? (int) round($closedRev / $closed->count()) : null,
+                'pct_rev_returned' => self::pct($returnedRev, $closedRev),
+                'pct_rev_cancel' => self::pct($cancelRev, $closedRev),
             ];
         })->sortByDesc('closed_rev')->values()->all();
 
         $totals = $this->sumTotals($columns, $rows);
-        $totals['return_rate'] = self::pct($totals['returned_qty'] ?? 0, $totals['closed_qty'] ?? 0);
+        $totals['pct_returned'] = self::pct($totals['returned_qty'] ?? 0, $totals['transfer_qty'] ?? 0);
+        $totals['pct_cancel'] = self::pct($totals['cancel_qty'] ?? 0, $totals['closed_qty'] ?? 0);
+        $totals['pct_xngh'] = self::pct($totals['xngh_qty'] ?? 0, $totals['closed_qty'] ?? 0);
+        $totals['pct_success'] = self::pct($totals['success_qty'] ?? 0, $totals['transfer_qty'] ?? 0);
         $totals['close_rate'] = self::pct($totals['closed_qty'] ?? 0, $totals['contacts'] ?? 0);
         $totals['avg_order'] = ($totals['closed_qty'] ?? 0) > 0
             ? (int) round(($totals['closed_rev'] ?? 0) / $totals['closed_qty'])
             : null;
+        $totals['pct_rev_returned'] = self::pct($totals['returned_rev'] ?? 0, $totals['closed_rev'] ?? 0);
+        $totals['pct_rev_cancel'] = self::pct($totals['cancel_rev'] ?? 0, $totals['closed_rev'] ?? 0);
 
         return ['columns' => $columns, 'rows' => $rows, 'totals' => $totals];
     }
@@ -427,6 +488,110 @@ class ExtraReportService
         return ['columns' => $columns, 'rows' => $rows, 'totals' => $totals];
     }
 
+    /**
+     * Báo cáo công việc marketing — theo từng nhân viên marketing:
+     * tổng contact tạo ra, contact chưa phân bổ cho sale, đơn chốt, tỷ lệ chốt,
+     * số lượng sản phẩm bán ra & doanh số.
+     */
+    private function marketingWork(User $user, ReportFilterData $filter): array
+    {
+        $orders = $this->fetchOrdersWithItems($user, $filter, scopeMarketing: true)
+            ->filter(fn (Order $o) => $o->marketer_user_id !== null);
+
+        $columns = [
+            $this->col('marketer', 'name', 'text'),
+            $this->col('contacts_total', 'contacts', 'number'),
+            $this->col('unallocated', 'unallocated', 'number'),
+            $this->col('closed', 'closed', 'number'),
+            $this->col('rate', 'rate', 'percent', ['tone' => 'positive']),
+            $this->col('qty_sold', 'qty_sold', 'number'),
+            $this->col('revenue', 'revenue', 'currency'),
+        ];
+
+        $rows = $orders->groupBy('marketer_user_id')->map(function (Collection $group) {
+            $closed = $this->closed($group);
+            $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
+
+            return [
+                'name' => $group->first()->marketerUser?->name ?? '—',
+                'contacts' => $group->count(),
+                'unallocated' => $group->whereNull('sale_user_id')->count(),
+                'closed' => $closed->count(),
+                'rate' => self::pct($closed->count(), $group->count()),
+                'qty_sold' => (int) $closed->sum(fn (Order $o) => $o->items->sum('quantity')),
+                'revenue' => $revenue,
+            ];
+        })->sortByDesc('revenue')->values()->all();
+
+        $totals = $this->sumTotals($columns, $rows);
+        $totals['rate'] = self::pct($totals['closed'] ?? 0, $totals['contacts'] ?? 0);
+
+        return ['columns' => $columns, 'rows' => $rows, 'totals' => $totals];
+    }
+
+    /**
+     * Báo cáo upsale — theo từng NGUỒN DỮ LIỆU (chiến dịch):
+     * contact, đơn chốt, tỷ lệ chốt, số loại & số lượng SP bán ra, doanh số,
+     * giá trị đơn TB, số SP TB/đơn, và riêng phần upsale (SL + doanh số) để đo
+     * hiệu quả bán thêm ở trang cảm ơn.
+     */
+    private function upsaleReport(User $user, ReportFilterData $filter): array
+    {
+        $orders = $this->fetchOrdersWithItems($user, $filter, scopeMarketing: $user->role === UserRole::Marketing)
+            ->filter(fn (Order $o) => $o->marketing_source_id !== null);
+
+        $columns = [
+            $this->col('source', 'name', 'text'),
+            $this->col('channel', 'channel', 'text'),
+            $this->col('contacts', 'contacts', 'number'),
+            $this->col('closed', 'closed', 'number'),
+            $this->col('rate', 'rate', 'percent', ['tone' => 'positive']),
+            $this->col('product_types', 'product_types', 'number'),
+            $this->col('qty_sold', 'qty_sold', 'number'),
+            $this->col('revenue', 'revenue', 'currency'),
+            $this->col('avg_order', 'avg_order', 'currency'),
+            $this->col('items_per_order', 'items_per_order', 'number'),
+            $this->col('upsell_qty', 'upsell_qty', 'number'),
+            $this->col('upsell_rev', 'upsell_rev', 'currency'),
+        ];
+
+        $rows = $orders->groupBy('marketing_source_id')->map(function (Collection $group) {
+            $closed = $this->closed($group);
+            $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
+            $closedItems = $closed->flatMap(fn (Order $o) => $o->items);
+            $qtySold = (int) $closedItems->sum('quantity');
+            $upsellItems = $closedItems->filter(fn (OrderItem $i) => $i->item_type === 'upsell');
+            $source = $group->first()->marketingSource;
+
+            return [
+                'name' => $source?->name ?? '—',
+                'channel' => $source?->ad_channel ?? '—',
+                'contacts' => $group->count(),
+                'closed' => $closed->count(),
+                'rate' => self::pct($closed->count(), $group->count()),
+                'product_types' => $closedItems->map(fn (OrderItem $i) => $i->product_id ?? $i->product_name)->unique()->count(),
+                'qty_sold' => $qtySold,
+                'revenue' => $revenue,
+                'avg_order' => $closed->count() > 0 ? (int) round($revenue / $closed->count()) : null,
+                'items_per_order' => $closed->count() > 0 ? round($qtySold / $closed->count(), 1) : null,
+                'upsell_qty' => (int) $upsellItems->sum('quantity'),
+                'upsell_rev' => (int) $upsellItems->sum(fn (OrderItem $i) => $i->lineTotal()),
+            ];
+        })->sortByDesc('revenue')->values()->all();
+
+        $globalClosed = $this->closed($orders);
+        $globalClosedCount = $globalClosed->count();
+        $globalItems = $globalClosed->flatMap(fn (Order $o) => $o->items);
+
+        $totals = $this->sumTotals($columns, $rows);
+        $totals['rate'] = self::pct($totals['closed'] ?? 0, $totals['contacts'] ?? 0);
+        $totals['product_types'] = $globalItems->map(fn (OrderItem $i) => $i->product_id ?? $i->product_name)->unique()->count();
+        $totals['avg_order'] = $globalClosedCount > 0 ? (int) round(($totals['revenue'] ?? 0) / $globalClosedCount) : null;
+        $totals['items_per_order'] = $globalClosedCount > 0 ? round(($totals['qty_sold'] ?? 0) / $globalClosedCount, 1) : null;
+
+        return ['columns' => $columns, 'rows' => $rows, 'totals' => $totals];
+    }
+
     private function warehouseRevenue(User $user, ReportFilterData $filter): array
     {
         $orders = $this->fetchOrders($user, $filter)
@@ -539,6 +704,37 @@ class ExtraReportService
             ->when($marketerIds !== null, fn ($q) => $q->whereIn('marketer_user_id', $marketerIds))
             ->when($filter->productId, fn ($q) => $q->where('product_id', $filter->productId))
             ->when($filter->warehouseId, fn ($q) => $q->where('warehouse_id', $filter->warehouseId))
+            ->get();
+    }
+
+    /**
+     * Như fetchOrders nhưng eager-load thêm items + nguồn dữ liệu — dùng cho
+     * báo cáo cần đếm số lượng/loại sản phẩm & tách phần upsale.
+     */
+    private function fetchOrdersWithItems(
+        User $user,
+        ReportFilterData $filter,
+        bool $scopeSales = false,
+        bool $scopeMarketing = false,
+    ): Collection {
+        $column = $this->dateColumn($filter);
+        $saleIds = $scopeSales ? $this->visibleSaleIds($user, $filter) : null;
+        $marketerIds = $scopeMarketing ? $this->visibleMarketerIds($user, $filter) : null;
+
+        return Order::query()
+            ->with([
+                'saleUser:id,name',
+                'marketerUser:id,name',
+                'marketingSource:id,name,ad_channel',
+                'items:id,order_id,product_id,product_name,item_type,quantity,unit_price,discount_amount',
+            ])
+            ->when(
+                $filter->dateFrom && $filter->dateTo,
+                fn ($q) => $q->whereBetween($column, [$filter->dateFrom, $filter->dateTo]),
+            )
+            ->when($saleIds !== null, fn ($q) => $q->whereIn('sale_user_id', $saleIds))
+            ->when($marketerIds !== null, fn ($q) => $q->whereIn('marketer_user_id', $marketerIds))
+            ->when($filter->productId, fn ($q) => $q->where('product_id', $filter->productId))
             ->get();
     }
 

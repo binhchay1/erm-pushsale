@@ -4,6 +4,7 @@ import { BarChart3 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportExportButton } from '@/components/reports/ReportExportButton';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
+import { ReportRefreshButton } from '@/components/reports/ReportRefreshButton';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { useLabels } from '@/hooks/use-labels';
 import { useTableSort } from '@/hooks/use-table-sort';
@@ -95,10 +96,12 @@ export default function ExtraReport({
     filterOptions,
     filterFields = [],
     routeUrl,
+    cachedAt,
 }) {
     const t = useT();
     const labels = useLabels();
     const hasFilters = filterFields.length > 0;
+    const useCache = ['sale-3', 'marketing-1', 'marketing-2', 'marketing-3', 'marketing-4'].includes(meta.key);
     const { sortedRows, sort, toggleSort } = useTableSort(rows);
 
     const title = reportText(t, meta.key, 'title', meta.title);
@@ -139,10 +142,16 @@ export default function ExtraReport({
                             filterFields={filterFields}
                         />
                         <ReportExportButton routeUrl={routeUrl} filters={filters} />
+                        {useCache && (
+                            <ReportRefreshButton routeUrl={routeUrl} filters={filters} cachedAt={cachedAt} />
+                        )}
                     </div>
                 ) : (
-                    <div className="flex justify-end">
+                    <div className="flex justify-end gap-2">
                         <ReportExportButton routeUrl={routeUrl} filters={filters} />
+                        {useCache && (
+                            <ReportRefreshButton routeUrl={routeUrl} filters={filters} cachedAt={cachedAt} />
+                        )}
                     </div>
                 )}
 

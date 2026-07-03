@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Concerns\ExportsReportData;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
+use App\Http\Controllers\Concerns\InteractsWithReportSnapshots;
 use App\Http\Controllers\Controller;
 use App\Services\Reports\ExtraReportService;
+use App\Services\Reports\ReportSnapshotCache;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,6 +18,7 @@ class ExtraReportController extends Controller
 {
     use ExportsReportData;
     use InteractsWithReportFilters;
+    use InteractsWithReportSnapshots;
 
     public function __construct(
         private readonly ExtraReportService $reports,
@@ -29,7 +32,14 @@ class ExtraReportController extends Controller
         abort_unless($this->reports->canView($user, $report), 403);
 
         $filter = $this->reportFilters($request);
-        $data = $this->reports->build($report, $user, $filter);
+        $cached = $this->maybeCachedReport(
+            $request,
+            $report,
+            $filter,
+            fn () => $this->reports->build($report, $user, $filter),
+            ReportSnapshotCache::isHeavyExtra($report),
+        );
+        $data = $cached['data'];
 
         $exportRows = $data['rows'];
         if ($data['totals']) {
@@ -61,6 +71,8 @@ class ExtraReportController extends Controller
                 'reportNav' => $this->reports->availableFor($user),
                 'routeUrl' => $this->reports->basePathFor($user).'/'.$report,
                 'filterFields' => $data['meta']['filterFields'],
+                'cachedAt' => $cached['cachedAt'],
+                'fromCache' => $cached['fromCache'],
             ],
         ));
     }

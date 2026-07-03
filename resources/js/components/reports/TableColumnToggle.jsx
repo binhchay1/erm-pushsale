@@ -80,11 +80,16 @@ function marketingSourceColumns(t) {
         { id: 'product', label: t('reports.column_toggle.product'), default: true },
         { id: 'channel', label: t('reports.column_toggle.channel'), default: false },
         { id: 'budget', label: t('reports.column_toggle.budget'), default: false },
+        { id: 'interactions', label: t('reports.column_toggle.interactions'), default: false },
         { id: 'contacts', label: t('reports.column_toggle.contacts'), default: true },
         { id: 'contactRate', label: t('reports.column_toggle.contact_rate'), default: false },
         { id: 'costPerContact', label: t('reports.column_toggle.cost_per_contact'), default: false },
         { id: 'closedOrders', label: t('reports.column_toggle.closed_orders'), default: true },
         { id: 'closingRate', label: t('reports.column_toggle.closing_rate'), default: true },
+        { id: 'productQuantity', label: t('reports.column_toggle.product_quantity'), default: false },
+        { id: 'avgProductPerOrder', label: t('reports.column_toggle.avg_product_per_order'), default: false },
+        { id: 'utmSource', label: t('reports.column_toggle.utm_source'), default: false },
+        { id: 'utmCampaign', label: t('reports.column_toggle.utm_campaign'), default: false },
     ];
 }
 

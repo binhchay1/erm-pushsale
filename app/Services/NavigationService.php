@@ -95,6 +95,10 @@ class NavigationService
                 $this->item('marketing_report_1', '/admin/reports/extra/marketing-1', 'circle-dollar-sign'),
                 $this->item('campaign_report', '/admin/marketing/campaign-report', 'pie-chart'),
                 $this->item('marketing_report_2', '/admin/reports/extra/marketing-2', 'percent'),
+                $this->item('marketing_report_3', '/admin/reports/extra/marketing-3', 'clipboard-list'),
+                $this->item('upsale_report', '/admin/reports/extra/marketing-4', 'trending-up'),
+                $this->item('team_leader_stats', '/admin/reports/team-leaders', 'network'),
+                $this->item('hourly_stats', '/admin/reports/hourly', 'clock'),
             ]),
             $this->group('reports_warehouse', [
                 $this->item('warehouse_report_1', '/admin/reports/extra/kho-1', 'store'),
@@ -170,6 +174,10 @@ class NavigationService
             $this->item('campaigns', '/marketing/campaigns', 'layout-template', 'marketing'),
             $this->item('revenue_report', '/marketing/revenue', 'trending-up', 'reports'),
             $this->item('extra_report', '/marketing/reports/marketing-1', 'file-bar-chart', 'reports'),
+            $this->item('marketing_report_3', '/marketing/reports/marketing-3', 'clipboard-list', 'reports'),
+            $this->item('upsale_report', '/marketing/reports/marketing-4', 'trending-up', 'reports'),
+            $this->item('team_leader_stats', '/marketing/reports/team-leaders', 'network', 'reports'),
+            $this->item('hourly_stats', '/marketing/reports/hourly', 'clock', 'reports'),
             $this->item('rankings', '/marketing/rankings', 'trophy', 'reports'),
         ];
 

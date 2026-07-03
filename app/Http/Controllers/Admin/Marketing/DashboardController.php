@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Marketing;
 
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
+use App\Http\Controllers\Concerns\InteractsWithReportSnapshots;
 use App\Http\Controllers\Controller;
 use App\Services\FilterOptionsService;
 use App\Services\Reports\MarketingDashboardService;
@@ -13,6 +14,7 @@ use Inertia\Response;
 class DashboardController extends Controller
 {
     use InteractsWithReportFilters;
+    use InteractsWithReportSnapshots;
 
     public function __invoke(
         Request $request,
@@ -20,10 +22,18 @@ class DashboardController extends Controller
         FilterOptionsService $filterOptions,
     ): Response {
         $filter = $this->reportFilters($request);
+        $cached = $this->maybeCachedReport(
+            $request,
+            'marketing-dashboard',
+            $filter,
+            fn () => $service->build($filter),
+        );
 
         return Inertia::render('Admin/Marketing/Dashboard', array_merge(
             $this->reportPageProps($request, [
-                'report' => $service->build($filter),
+                'report' => $cached['data'],
+                'cachedAt' => $cached['cachedAt'],
+                'fromCache' => $cached['fromCache'],
             ]),
             [
                 'filterFields' => $filterOptions->marketingDashboardFilterFields($request->user()),
