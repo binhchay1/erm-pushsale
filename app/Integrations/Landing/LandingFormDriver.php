@@ -335,8 +335,8 @@ class LandingFormDriver implements LeadPayloadNormalizer
                     'unit_price' => MoneyParser::parse($row['price'] ?? $row['unit_price'] ?? 0),
                     'quantity' => max(1, (int) ($row['quantity'] ?? $defaultQty)),
                     'discount_amount' => MoneyParser::parse($row['discount'] ?? $row['discount_amount'] ?? 0),
-                    'item_type' => in_array($row['type'] ?? null, ['product', 'combo', 'upsell', 'gift'], true)
-                        ? $row['type']
+                    'item_type' => in_array($row['type'] ?? $row['item_type'] ?? null, ['product', 'combo', 'upsell', 'gift'], true)
+                        ? ($row['type'] ?? $row['item_type'])
                         : 'combo',
                     'origin' => 'landing',
                     'meta' => array_filter([

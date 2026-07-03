@@ -10,6 +10,7 @@ use App\Models\MarketingSource;
 use App\Repositories\MarketingSourceRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
+use App\Services\Marketing\CampaignJsSnippetService;
 use App\Services\Marketing\CampaignLandingService;
 use App\Services\NotificationService;
 use App\Support\ActivityLogger;
@@ -22,6 +23,7 @@ class CampaignController extends Controller
 {
     public function __construct(
         private readonly CampaignLandingService $landing,
+        private readonly CampaignJsSnippetService $jsSnippet,
         private readonly MarketingSourceRepository $sources,
         private readonly ProductRepository $products,
         private readonly UserRepository $users,
@@ -146,6 +148,7 @@ class CampaignController extends Controller
             'budget' => (int) $c->budget,
             'is_active' => (bool) $c->is_active,
             'is_approved' => (bool) $c->is_approved,
+            'js_tracking_enabled' => (bool) $c->js_tracking_enabled,
             'lead_allocation' => $c->lead_allocation?->value ?? 'inherit',
             'orders_count' => (int) ($c->orders_count ?? 0),
             'revenue' => (int) ($c->revenue ?? 0),
@@ -157,6 +160,9 @@ class CampaignController extends Controller
         if ($includeEdit) {
             $base['product_id'] = $c->product_id;
             $base['lead_allocation'] = $c->lead_allocation?->value ?? 'inherit';
+            $base['js_snippet'] = $c->webhook_token && $c->js_tracking_enabled
+                ? $this->jsSnippet->render($c)
+                : null;
         }
 
         return $base;

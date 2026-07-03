@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CampaignLandingSessionController;
 use App\Http\Controllers\Api\V1\CampaignLandingUpsellController;
 use App\Http\Controllers\Api\V1\CampaignLandingWebhookController;
 use App\Http\Controllers\Api\V1\DashboardController;
@@ -20,6 +21,17 @@ Route::prefix('v1')->group(function () {
         ->middleware('throttle:lead-intake');
 
     Route::post('landing/{token}/upsell', [CampaignLandingUpsellController::class, 'receive'])
+        ->where('token', '[a-z0-9]{16,64}')
+        ->middleware('throttle:lead-intake');
+
+    // Vòng đời phiên Landing (JS nhúng trên Ladipage) — giữ số chủ động.
+    Route::post('landing/{token}/session/start', [CampaignLandingSessionController::class, 'start'])
+        ->where('token', '[a-z0-9]{16,64}')
+        ->middleware('throttle:lead-intake');
+    Route::post('landing/{token}/session/ping', [CampaignLandingSessionController::class, 'ping'])
+        ->where('token', '[a-z0-9]{16,64}')
+        ->middleware('throttle:lead-intake');
+    Route::post('landing/{token}/session/close', [CampaignLandingSessionController::class, 'close'])
         ->where('token', '[a-z0-9]{16,64}')
         ->middleware('throttle:lead-intake');
 

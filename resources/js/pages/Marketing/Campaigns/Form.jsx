@@ -58,6 +58,7 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
         ad_channel: campaign?.ad_channel ?? 'landing',
         budget: campaign?.budget ?? 0,
         is_active: campaign?.is_active ?? true,
+        js_tracking_enabled: campaign?.js_tracking_enabled ?? false,
         lead_allocation: campaign?.lead_allocation ?? 'inherit',
     });
 
@@ -183,6 +184,37 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                     </Card>
                 )}
 
+                {isEdit && campaign?.js_snippet && (
+                    <Card className="border-primary/30 bg-primary/5">
+                        <CardHeader>
+                            <CardTitle className="text-base">{t('pages.campaigns.js_snippet_title')}</CardTitle>
+                            <CardDescription>{t('pages.campaigns.js_snippet_desc')}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3 text-sm">
+                            <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-muted-foreground">{t('pages.campaigns.js_snippet_paste_hint')}</p>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={async () => {
+                                        const ok = await copyToClipboard(campaign.js_snippet);
+                                        ok
+                                            ? toast.success(t('pages.campaigns.copied'))
+                                            : toast.error(t('common.copy_failed'));
+                                    }}
+                                >
+                                    <Copy className="mr-1.5 size-3.5" />
+                                    {t('common.copy')}
+                                </Button>
+                            </div>
+                            <pre className="max-h-72 overflow-auto rounded-md border bg-background p-3 text-[11px] leading-relaxed">
+                                <code>{campaign.js_snippet}</code>
+                            </pre>
+                        </CardContent>
+                    </Card>
+                )}
+
                 {!isEdit && (
                     <Card className="border-dashed">
                         <CardContent className="py-4 text-sm text-muted-foreground">
@@ -283,6 +315,23 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                                 />
                                 {t('pages.campaigns.receiving_leads')}
                             </label>
+
+                            <div className="space-y-1.5 rounded-lg border bg-muted/20 px-3 py-3">
+                                <label className="flex items-start gap-2 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={data.js_tracking_enabled}
+                                        onChange={(e) => setData('js_tracking_enabled', e.target.checked)}
+                                        className="mt-0.5 size-4 rounded border"
+                                    />
+                                    <span>
+                                        <span className="font-medium">{t('pages.campaigns.js_tracking_label')}</span>
+                                        <span className="mt-0.5 block text-xs text-muted-foreground">
+                                            {t('pages.campaigns.js_tracking_hint')}
+                                        </span>
+                                    </span>
+                                </label>
+                            </div>
 
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={processing}>

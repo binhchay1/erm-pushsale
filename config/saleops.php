@@ -45,6 +45,19 @@ return [
     ],
 
     /*
+    | Gộp đơn & giữ số cho luồng Landing (form đầu + upsale trang cảm ơn).
+    | Mục tiêu: cùng 1 khách gửi nhiều gói tin → GỘP thành 1 đơn, chia 1 số.
+    | - grouping_window_minutes: cửa sổ coi các gói tin cùng SĐT là cùng 1 đơn.
+    | - hold_seconds: giữ lead "đang gom" trước khi chốt & chia (chờ upsale).
+    | - max_hold_seconds: trần giữ tuyệt đối để lead không kẹt mãi.
+    */
+    'landing' => [
+        'grouping_window_minutes' => (int) env('LEAD_GROUPING_WINDOW_MINUTES', 15),
+        'hold_seconds' => (int) env('LEAD_HOLD_SECONDS', 90),
+        'max_hold_seconds' => (int) env('LEAD_MAX_HOLD_SECONDS', 300),
+    ],
+
+    /*
     | Chống rác / spam khi nhận lead từ Landing & nền tảng ngoài.
     | Mục tiêu: dữ liệu vào hệ thống luôn sạch, đúng định dạng, không spam.
     */

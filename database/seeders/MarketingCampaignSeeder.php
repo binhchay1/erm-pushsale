@@ -58,7 +58,7 @@ class MarketingCampaignSeeder extends Seeder
                 'ad_channel' => $channel,
                 'utm_source' => $utmSource,
                 'utm_campaign' => $this->landing->utmCampaignFromName($name),
-                'webhook_token' => $this->landing->generateToken(),
+                'webhook_token' => $this->landing->stableToken($this->landing->utmCampaignFromName($name)),
                 'budget' => $budget,
                 'interactions' => $interactions,
                 'contacts' => $contacts,

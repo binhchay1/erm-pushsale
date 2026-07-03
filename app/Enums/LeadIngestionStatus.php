@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum LeadIngestionStatus: string
 {
+    case Gathering = 'gathering';
     case Pending = 'pending';
     case Processed = 'processed';
     case Duplicate = 'duplicate';

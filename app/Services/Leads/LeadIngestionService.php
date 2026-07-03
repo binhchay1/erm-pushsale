@@ -8,11 +8,14 @@ use App\Enums\UserRole;
 use App\Events\LeadIngested;
 use App\Events\LeadPoolChanged;
 use App\Events\SaleWorkspaceChanged;
+use App\Jobs\Leads\FinalizeLandingLeadJob;
+use App\Models\LandingSession;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Services\NotificationService;
 use App\Support\ActivityLogger;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -26,7 +29,7 @@ class LeadIngestionService
     ) {}
 
     /**
-     * Lead từ URL API riêng của chiến dịch Landing (Ladipage).
+     * Lead từ URL API riêng của chiến dịch Landing (Ladipage) — form đặt hàng đầu tiên.
      *
      * @param  array<string, mixed>  $rawPayload
      */
@@ -35,19 +38,12 @@ class LeadIngestionService
         MarketingSource $campaign,
         array $rawPayload,
     ): LeadIngestion {
-        $normalized = $driver->normalize($rawPayload);
-        $normalized['utm_campaign'] = $campaign->utm_campaign;
-        $normalized['utm_source'] = $normalized['utm_source'] ?? $campaign->utm_source ?? 'ladipage';
-
-        return $this->ingestNormalized($driver, $rawPayload, $normalized, $campaign);
+        return $this->handleLandingPacket($driver, $campaign, $rawPayload, isUpsell: false);
     }
 
     /**
-     * Upsale từ trang cảm ơn (Ladipage): cộng thêm sản phẩm vào ĐƠN CŨ của khách,
-     * KHÔNG tạo lead/đơn mới để tránh trùng số & lệch chia số.
-     *
-     * Nếu không tìm được đơn gốc (khách chưa từng đặt) → xử lý như lead thường
-     * để không mất dữ liệu mua thêm.
+     * Upsale từ trang cảm ơn (Ladipage): gộp vào ĐƠN/LEAD đang mở của cùng khách,
+     * KHÔNG tạo số mới để tránh trùng & lệch chia số.
      *
      * @param  array<string, mixed>  $rawPayload
      */
@@ -55,6 +51,25 @@ class LeadIngestionService
         LeadPayloadNormalizer $driver,
         MarketingSource $campaign,
         array $rawPayload,
+    ): LeadIngestion {
+        return $this->handleLandingPacket($driver, $campaign, $rawPayload, isUpsell: true);
+    }
+
+    /**
+     * Cửa ngõ chung cho mọi gói tin Landing (form đầu + upsale trang cảm ơn).
+     *
+     * Nguyên tắc gộp: cùng (chiến dịch + SĐT) trong cửa sổ gom → 1 đơn duy nhất.
+     *   1) Có lead "đang gom"/chờ chia (chưa tạo đơn) → cộng dồn vào lead đó.
+     *   2) Có đơn vừa tạo trong cửa sổ gom → cộng dồn vào đơn (upsale muộn).
+     *   3) Chưa có gì → tạo lead mới (giữ số nếu chiến dịch bật theo dõi phiên JS).
+     *
+     * @param  array<string, mixed>  $rawPayload
+     */
+    protected function handleLandingPacket(
+        LeadPayloadNormalizer $driver,
+        MarketingSource $campaign,
+        array $rawPayload,
+        bool $isUpsell,
     ): LeadIngestion {
         $normalized = $driver->normalize($rawPayload);
         $normalized['utm_campaign'] = $campaign->utm_campaign;
@@ -68,88 +83,73 @@ class LeadIngestionService
 
         $normalized['customer_phone'] = $phone;
 
-        $order = $this->findUpsellTargetOrder($normalized, $phone, $campaign);
+        $externalId = (string) ($normalized['external_id'] ?? '');
 
-        // Không có đơn gốc → coi như đơn mới bình thường (chia số như thường lệ).
-        if (! $order) {
-            return $this->ingestForCampaign($driver, $campaign, $rawPayload);
+        // Idempotent: cùng packet gửi lại (retry Ladipage) → không nhân đôi.
+        if ($externalId !== '') {
+            $existing = LeadIngestion::query()
+                ->where('platform', $driver->platform())
+                ->where(fn ($q) => $q->where('external_id', $externalId)->orWhere('external_id', $externalId.':upsell'))
+                ->first();
+
+            if ($existing) {
+                return $existing;
+            }
         }
 
-        $upsellExternalId = ((string) ($normalized['external_id'] ?? uniqid('up_', true))).':upsell';
+        $session = $this->resolveSession($campaign, $rawPayload, $phone);
 
-        $existing = LeadIngestion::query()
-            ->where('platform', $driver->platform())
-            ->where('external_id', $upsellExternalId)
-            ->first();
-
-        if ($existing) {
-            return $existing;
+        // 1) Lead đang gom / chờ chia (chưa có đơn) của cùng khách → cộng dồn.
+        if ($mergeLead = $this->findActiveGatheringLead($campaign, $phone, $session)) {
+            return $this->mergePacketIntoLead($mergeLead, $normalized, $externalId, $session);
         }
 
-        $items = is_array($normalized['items'] ?? null) ? $normalized['items'] : [];
-        $extraDiscount = (int) ($normalized['discount'] ?? 0);
+        // 2) Đơn vừa tạo trong cửa sổ gom → cộng dồn (upsale muộn / khách bấm chậm).
+        if ($order = $this->findRecentOrderForMerge($normalized, $phone, $campaign)) {
+            return $this->mergePacketIntoOrder($driver, $order, $campaign, $normalized, $rawPayload, $externalId, $session);
+        }
 
-        return DB::transaction(function () use (
-            $driver, $rawPayload, $normalized, $campaign, $order, $items, $extraDiscount, $upsellExternalId, $phone
-        ) {
-            if ($items !== [] || $extraDiscount > 0) {
-                $this->orderFactory->appendItems($order, $items, $extraDiscount, 'upsell');
-
-                $summary = collect($items)
-                    ->map(fn ($i) => (string) ($i['product_name'] ?? $i['name'] ?? ''))
-                    ->filter()
-                    ->implode(', ');
-
-                if ($summary !== '') {
-                    $order->customer_note = trim((string) $order->customer_note."\n[Upsale] ".$summary);
-                    $order->save();
-                }
-            }
-
-            $ingestion = LeadIngestion::query()->create([
-                'platform' => $driver->platform(),
-                'external_id' => $upsellExternalId,
-                'status' => LeadIngestionStatus::Processed,
-                'customer_name' => $normalized['customer_name'] ?? $order->customer_name,
-                'customer_phone' => $phone,
-                'product_interest' => $normalized['product_interest'] ?? null,
-                'utm_source' => $normalized['utm_source'],
-                'utm_campaign' => $normalized['utm_campaign'],
-                'marketing_source_id' => $campaign->id,
-                'payload' => $rawPayload,
-                'order_id' => $order->id,
-                'processed_at' => now(),
-            ]);
-
-            if ($order->sale_user_id) {
-                $this->broadcastSafe(new SaleWorkspaceChanged($order->sale_user_id));
-            }
-
-            ActivityLogger::log(
-                ActivityLogger::LEAD_INGESTED,
-                $ingestion,
-                [
-                    'order_id' => $order->id,
-                    'campaign_id' => $campaign->id,
-                    'customer_phone' => $phone,
-                    'upsell' => true,
-                    'order_total' => $order->fresh()->total,
-                ],
-                ($normalized['customer_name'] ?? $order->customer_name).' — upsale',
-            );
-
-            return $ingestion;
-        });
+        // 3) Gói tin đầu tiên → tạo lead mới (giữ số nếu bật theo dõi phiên).
+        return $this->ingestNormalized($driver, $rawPayload, $normalized, $campaign, $session);
     }
 
     /**
-     * Tìm đơn gốc để cộng thêm sản phẩm upsale.
+     * Tìm lead đang gom / chờ chia (CHƯA tạo đơn) của cùng khách để cộng dồn.
+     */
+    protected function findActiveGatheringLead(MarketingSource $campaign, string $phone, ?LandingSession $session): ?LeadIngestion
+    {
+        if ($session?->lead_ingestion_id) {
+            $viaSession = LeadIngestion::query()
+                ->whereKey($session->lead_ingestion_id)
+                ->whereIn('status', [LeadIngestionStatus::Gathering, LeadIngestionStatus::Pending])
+                ->whereNull('order_id')
+                ->first();
+
+            if ($viaSession) {
+                return $viaSession;
+            }
+        }
+
+        $windowMinutes = (int) config('saleops.landing.grouping_window_minutes', 15);
+
+        return LeadIngestion::query()
+            ->where('customer_phone', $phone)
+            ->where('marketing_source_id', $campaign->id)
+            ->whereIn('status', [LeadIngestionStatus::Gathering, LeadIngestionStatus::Pending])
+            ->whereNull('order_id')
+            ->where('created_at', '>=', now()->subMinutes($windowMinutes))
+            ->latest('id')
+            ->first();
+    }
+
+    /**
+     * Tìm đơn vừa tạo (trong cửa sổ gom) để cộng dồn upsale.
      *
      * @param  array<string, mixed>  $normalized
      */
-    protected function findUpsellTargetOrder(array $normalized, string $phone, MarketingSource $campaign): ?Order
+    protected function findRecentOrderForMerge(array $normalized, string $phone, MarketingSource $campaign): ?Order
     {
-        // 1) Tham chiếu tường minh từ trang cảm ơn (mã đơn / submission gốc).
+        // Tham chiếu tường minh từ trang cảm ơn (mã đơn / submission gốc).
         $parentRef = $normalized['parent_ref'] ?? null;
 
         if (filled($parentRef)) {
@@ -169,15 +169,206 @@ class LeadIngestionService
             }
         }
 
-        // 2) Theo SĐT trong cửa sổ chống trùng (mặc định 30 ngày), ưu tiên cùng chiến dịch.
-        $windowDays = (int) config('saleops.lead_routing.duplicate_window_days', 30);
+        // Theo SĐT trong cửa sổ gom (phút), ưu tiên cùng chiến dịch.
+        $windowMinutes = (int) config('saleops.landing.grouping_window_minutes', 15);
 
         return Order::query()
             ->where('customer_phone', $phone)
-            ->where('created_at', '>=', now()->subDays($windowDays))
+            ->where('created_at', '>=', now()->subMinutes($windowMinutes))
             ->orderByRaw('CASE WHEN marketing_source_id = ? THEN 0 ELSE 1 END', [$campaign->id])
             ->latest('id')
             ->first();
+    }
+
+    /**
+     * Cộng dồn 1 gói tin vào lead đang gom (chưa tạo đơn): gộp item + chiết khấu
+     * vào payload để khi CHỐT sẽ tạo đúng 1 đơn đủ hàng.
+     *
+     * @param  array<string, mixed>  $normalized
+     */
+    protected function mergePacketIntoLead(
+        LeadIngestion $lead,
+        array $normalized,
+        string $externalId,
+        ?LandingSession $session,
+    ): LeadIngestion {
+        $payload = is_array($lead->payload) ? $lead->payload : [];
+        $mergedIds = (array) ($payload['merged_ext_ids'] ?? []);
+
+        // Gói tin này đã gộp rồi → bỏ qua (chống nhân đôi item khi gửi lại).
+        if ($externalId !== '' && in_array($externalId, $mergedIds, true)) {
+            return $lead;
+        }
+
+        $incomingItems = is_array($normalized['items'] ?? null) ? $normalized['items'] : [];
+        $existingItems = is_array($payload['items'] ?? null) ? $payload['items'] : [];
+        $payload['items'] = array_merge($existingItems, $incomingItems);
+
+        $extraDiscount = (int) ($normalized['discount'] ?? 0);
+        if ($extraDiscount > 0) {
+            $payload['discount'] = (int) ($payload['discount'] ?? 0) + $extraDiscount;
+        }
+
+        // Bổ sung thông tin còn thiếu (địa chỉ khách thường điền ở form đầu).
+        if (blank($payload['shipping_address'] ?? null) && filled($normalized['shipping_address'] ?? null)) {
+            $payload['shipping_address'] = $normalized['shipping_address'];
+        }
+
+        if ($externalId !== '') {
+            $mergedIds[] = $externalId;
+        }
+        $payload['merged_ext_ids'] = array_values(array_unique($mergedIds));
+
+        $lead->payload = $payload;
+
+        if (blank($lead->customer_name) && filled($normalized['customer_name'] ?? null)) {
+            $lead->customer_name = $normalized['customer_name'];
+        }
+
+        $lead->save();
+
+        // Nhịp hoạt động mới → job giữ số sẽ tự gia hạn thời gian chờ.
+        if ($session) {
+            $session->forceFill(['last_activity_at' => now()])->save();
+        }
+
+        return $lead->refresh();
+    }
+
+    /**
+     * Cộng dồn gói tin vào ĐƠN đã tạo (upsale muộn): thêm dòng hàng + báo sale.
+     *
+     * @param  array<string, mixed>  $normalized
+     * @param  array<string, mixed>  $rawPayload
+     */
+    protected function mergePacketIntoOrder(
+        LeadPayloadNormalizer $driver,
+        Order $order,
+        MarketingSource $campaign,
+        array $normalized,
+        array $rawPayload,
+        string $externalId,
+        ?LandingSession $session,
+    ): LeadIngestion {
+        $items = is_array($normalized['items'] ?? null) ? $normalized['items'] : [];
+        $extraDiscount = (int) ($normalized['discount'] ?? 0);
+
+        return DB::transaction(function () use (
+            $driver, $order, $campaign, $normalized, $rawPayload, $externalId, $session, $items, $extraDiscount
+        ) {
+            if ($items !== [] || $extraDiscount > 0) {
+                $this->orderFactory->appendItems($order, $items, $extraDiscount, 'upsell');
+
+                $summary = collect($items)
+                    ->map(fn ($i) => (string) ($i['product_name'] ?? $i['name'] ?? ''))
+                    ->filter()
+                    ->implode(', ');
+
+                if ($summary !== '') {
+                    $order->customer_note = trim((string) $order->customer_note."\n[Upsale] ".$summary);
+                    $order->save();
+                }
+            }
+
+            $ingestion = LeadIngestion::query()->create([
+                'platform' => $driver->platform(),
+                'external_id' => ($externalId !== '' ? $externalId : uniqid('up_', true)).':upsell',
+                'status' => LeadIngestionStatus::Processed,
+                'customer_name' => $normalized['customer_name'] ?? $order->customer_name,
+                'customer_phone' => $order->customer_phone,
+                'product_interest' => $normalized['product_interest'] ?? null,
+                'utm_source' => $normalized['utm_source'],
+                'utm_campaign' => $normalized['utm_campaign'],
+                'marketing_source_id' => $campaign->id,
+                'payload' => $rawPayload,
+                'order_id' => $order->id,
+                'processed_at' => now(),
+            ]);
+
+            if ($session) {
+                $session->forceFill(['order_id' => $order->id, 'last_activity_at' => now()])->save();
+            }
+
+            if ($order->sale_user_id) {
+                $this->broadcastSafe(new SaleWorkspaceChanged($order->sale_user_id));
+                NotificationService::push($order->sale_user_id, 'lead', null, null, '/sales/workspace', [
+                    'variant' => 'upsell',
+                    'customer_name' => $order->customer_name,
+                    'customer_phone' => $order->customer_phone,
+                ]);
+            }
+
+            ActivityLogger::log(
+                ActivityLogger::LEAD_INGESTED,
+                $ingestion,
+                [
+                    'order_id' => $order->id,
+                    'campaign_id' => $campaign->id,
+                    'customer_phone' => $order->customer_phone,
+                    'upsell' => true,
+                    'order_total' => $order->fresh()->total,
+                ],
+                ($normalized['customer_name'] ?? $order->customer_name).' — upsale',
+            );
+
+            return $ingestion;
+        });
+    }
+
+    /**
+     * Phiên Landing (JS) — tra theo session_key trong payload; tạo mới nếu chưa có.
+     *
+     * @param  array<string, mixed>  $rawPayload
+     */
+    protected function resolveSession(MarketingSource $campaign, array $rawPayload, string $phone): ?LandingSession
+    {
+        $key = $this->extractSessionKey($rawPayload);
+
+        if ($key === null) {
+            return null;
+        }
+
+        $session = LandingSession::query()->where('session_key', $key)->first();
+
+        if (! $session) {
+            $session = LandingSession::query()->create([
+                'company_id' => $campaign->company_id,
+                'marketing_source_id' => $campaign->id,
+                'session_key' => $key,
+                'customer_phone' => $phone,
+                'status' => LandingSession::STATUS_OPEN,
+                'last_activity_at' => now(),
+            ]);
+
+            return $session;
+        }
+
+        $session->forceFill([
+            'customer_phone' => $session->customer_phone ?: $phone,
+            'marketing_source_id' => $session->marketing_source_id ?: $campaign->id,
+            'last_activity_at' => now(),
+        ])->save();
+
+        return $session;
+    }
+
+    /**
+     * @param  array<string, mixed>  $rawPayload
+     */
+    protected function extractSessionKey(array $rawPayload): ?string
+    {
+        $key = Arr::get($rawPayload, 'session_id')
+            ?? Arr::get($rawPayload, 'session_key')
+            ?? Arr::get($rawPayload, 'saleops_session')
+            ?? Arr::get($rawPayload, 'fields.session_id');
+
+        if (! is_scalar($key)) {
+            return null;
+        }
+
+        $key = preg_replace('/[^A-Za-z0-9_\-]/', '', (string) $key) ?? '';
+
+        return $key !== '' ? substr($key, 0, 64) : null;
     }
 
     /**
@@ -199,6 +390,7 @@ class LeadIngestionService
         array $rawPayload,
         array $normalized,
         ?MarketingSource $campaign = null,
+        ?LandingSession $session = null,
     ): LeadIngestion {
         if ($this->sanitizer->exceedsPayloadLimit($rawPayload)) {
             return $this->recordFailed($driver->platform(), ['oversized' => true], __('messages.lead_intake.payload_too_large'));
@@ -260,17 +452,37 @@ class LeadIngestionService
             ->where('created_at', '>=', now()->subDays($windowDays))
             ->exists();
 
+        // Chiến dịch bật theo dõi phiên JS → GIỮ SỐ: gom trước, chốt & chia sau.
+        $hold = $campaign?->js_tracking_enabled && ! $duplicateOrder;
+
+        $status = $duplicateOrder
+            ? LeadIngestionStatus::Duplicate
+            : ($hold ? LeadIngestionStatus::Gathering : LeadIngestionStatus::Pending);
+
+        // Lead Landing lưu kèm item/chiết khấu/địa chỉ ĐÃ chuẩn hoá vào payload để
+        // tự chứa đủ dữ liệu — khi gộp thêm gói sau & khi chốt đơn không bị mất hàng.
+        $storedPayload = $rawPayload;
+        if ($campaign) {
+            $storedPayload['items'] = is_array($normalized['items'] ?? null) ? $normalized['items'] : [];
+            if ((int) ($normalized['discount'] ?? 0) > 0) {
+                $storedPayload['discount'] = (int) $normalized['discount'];
+            }
+            if (filled($normalized['shipping_address'] ?? null)) {
+                $storedPayload['shipping_address'] = $normalized['shipping_address'];
+            }
+        }
+
         $ingestion = LeadIngestion::query()->create([
             'platform' => $driver->platform(),
             'external_id' => $normalized['external_id'],
-            'status' => $duplicateOrder ? LeadIngestionStatus::Duplicate : LeadIngestionStatus::Pending,
+            'status' => $status,
             'customer_name' => $normalized['customer_name'],
             'customer_phone' => $normalized['customer_phone'],
             'product_interest' => $normalized['product_interest'],
             'utm_source' => $normalized['utm_source'],
             'utm_campaign' => $normalized['utm_campaign'],
             'marketing_source_id' => $campaign?->id,
-            'payload' => $rawPayload,
+            'payload' => $storedPayload,
         ]);
 
         if ($duplicateOrder) {
@@ -279,12 +491,41 @@ class LeadIngestionService
             return $ingestion;
         }
 
-        // Chia tự động khi: chiến dịch đã duyệt + cấu hình chiến dịch/hệ thống cho phép auto.
+        // Giữ số: đợi upsale trang cảm ơn rồi mới chốt (job tự chốt khi hết giờ / khách xong phiên).
+        if ($hold) {
+            if ($session) {
+                $session->forceFill(['lead_ingestion_id' => $ingestion->id, 'last_activity_at' => now()])->save();
+            }
+
+            FinalizeLandingLeadJob::dispatch($ingestion->id, $campaign?->company_id)
+                ->delay(now()->addSeconds((int) config('saleops.landing.hold_seconds', 90)));
+
+            $this->broadcastSafe(new LeadIngested($ingestion));
+
+            return $ingestion;
+        }
+
+        return $this->allocateFromNormalized($ingestion, $normalized, $campaign);
+    }
+
+    /**
+     * Chốt & chia số cho 1 lead (auto gán sale, hoặc để vào pool chờ chia tay).
+     *
+     * @param  array<string, mixed>  $normalized
+     */
+    public function allocateFromNormalized(
+        LeadIngestion $ingestion,
+        array $normalized,
+        ?MarketingSource $campaign = null,
+    ): LeadIngestion {
         $assignToSale = ($campaign === null || $campaign->is_approved)
             && $this->allocationResolver->shouldAutoAssign($campaign);
         $saleUser = $assignToSale ? $this->routing->assignSalesUser() : null;
 
         if (! $saleUser) {
+            if ($ingestion->status !== LeadIngestionStatus::Pending) {
+                $ingestion->update(['status' => LeadIngestionStatus::Pending]);
+            }
             $this->broadcastSafe(new LeadIngested($ingestion), new LeadPoolChanged);
 
             return $ingestion;
@@ -321,9 +562,29 @@ class LeadIngestionService
     }
 
     /**
+     * Chốt 1 lead đang gom (gọi từ FinalizeLandingLeadJob hoặc khi đóng phiên).
+     * Dựng lại đơn từ payload đã gộp để đơn có đủ hàng (form đầu + upsale).
+     */
+    public function finalizeGatheringLead(LeadIngestion $lead): LeadIngestion
+    {
+        if ($lead->status !== LeadIngestionStatus::Gathering) {
+            return $lead;
+        }
+
+        $campaign = $lead->marketing_source_id
+            ? MarketingSource::query()->find($lead->marketing_source_id)
+            : null;
+
+        $normalized = $this->orderFactory->normalizedFromLead($lead);
+        $normalized['utm_campaign'] = $lead->utm_campaign;
+        $normalized['utm_source'] = $lead->utm_source;
+
+        return $this->allocateFromNormalized($lead, $normalized, $campaign);
+    }
+
+    /**
      * Dispatch realtime/broadcast events without ever letting a broadcaster
-     * outage break lead intake. Events are queued (ShouldBroadcast) but we still
-     * guard the dispatch for the sync-queue edge case.
+     * outage break lead intake.
      */
     protected function broadcastSafe(object ...$events): void
     {

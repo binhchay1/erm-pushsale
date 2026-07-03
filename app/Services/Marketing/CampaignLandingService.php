@@ -21,6 +21,17 @@ class CampaignLandingService
         return $token;
     }
 
+    /**
+     * Token webhook ổn định theo "seed" (thường là utm_campaign slug).
+     *
+     * Dùng cho seeder/demo: token KHÔNG đổi mỗi lần seed lại DB, tránh việc
+     * Ladipage trỏ token cũ rồi webhook trả 404 sau mỗi lần seed.
+     */
+    public function stableToken(string $seed): string
+    {
+        return substr(hash('sha256', 'saleops-landing|'.Str::lower(trim($seed))), 0, 32);
+    }
+
     public function utmCampaignFromName(string $name): string
     {
         $slug = Str::slug($name, '-', 'vi');

@@ -25,6 +25,7 @@ return [
         'cancelled' => 'Đã hủy / bỏ',
     ],
     'lead_ingestion_status' => [
+        'gathering' => 'Đang gom (chờ upsale)',
         'pending' => 'Chờ xử lý',
         'processed' => 'Đã tạo lead',
         'duplicate' => 'Trùng số',

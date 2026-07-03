@@ -25,6 +25,7 @@ return [
         'cancelled' => 'Cancelled',
     ],
     'lead_ingestion_status' => [
+        'gathering' => 'Gathering (upsell)',
         'pending' => 'Pending',
         'processed' => 'Lead created',
         'duplicate' => 'Duplicate phone',
