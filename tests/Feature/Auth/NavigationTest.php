@@ -24,8 +24,11 @@ class NavigationTest extends TestCase
         $this->assertSame([
             '/sales/dashboard',
             '/sales/workspace',
+            '/sales/performance',
+            '/sales/reports/sale-1',
             '/sales/rankings',
             '/sales/customers',
+            '/org-chart',
             '/settings',
         ], $urls);
 
@@ -58,9 +61,12 @@ class NavigationTest extends TestCase
             ->has('navigation', 1)
             ->where('navigation.0.items.0.url', '/sales/dashboard')
             ->where('navigation.0.items.1.url', '/sales/workspace')
-            ->where('navigation.0.items.2.url', '/sales/rankings')
-            ->where('navigation.0.items.3.url', '/sales/customers')
-            ->where('navigation.0.items.4.url', '/settings')
+            ->where('navigation.0.items.2.url', '/sales/performance')
+            ->where('navigation.0.items.3.url', '/sales/reports/sale-1')
+            ->where('navigation.0.items.4.url', '/sales/rankings')
+            ->where('navigation.0.items.5.url', '/sales/customers')
+            ->where('navigation.0.items.6.url', '/org-chart')
+            ->where('navigation.0.items.7.url', '/settings')
         );
     }
 }

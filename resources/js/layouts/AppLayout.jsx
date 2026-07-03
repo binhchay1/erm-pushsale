@@ -46,18 +46,22 @@ export default function AppLayout({ children }) {
     const shouldShowDashboardSkeleton = Boolean(pendingDashboardRole);
 
     return (
-        <SidebarProvider>
+        <SidebarProvider defaultOpen={false} className="pushsale-wrapper flex min-h-svh flex-col">
             <LocaleSync />
             <TooltipProvider>
-                <AppSidebar />
-                <main className="relative flex min-h-svh min-w-0 w-full flex-1 flex-col overflow-x-hidden bg-background">
-                    <AppHeader />
-                    <div className="min-w-0 flex-1 overflow-x-hidden p-4 md:p-6">
-                        {shouldShowDashboardSkeleton ? (
-                            <DashboardSkeleton role={pendingDashboardRole} />
-                        ) : children}
-                    </div>
-                </main>
+                <AppHeader />
+                <div className="flex min-h-0 w-full flex-1">
+                    <AppSidebar />
+                    <main className="content-wrapper relative flex min-w-0 flex-1 flex-col overflow-x-hidden">
+                        <div className="content-inner min-w-0 flex-1 overflow-x-hidden">
+                            {shouldShowDashboardSkeleton ? (
+                                <DashboardSkeleton role={pendingDashboardRole} />
+                            ) : (
+                                children
+                            )}
+                        </div>
+                    </main>
+                </div>
             </TooltipProvider>
         </SidebarProvider>
     );

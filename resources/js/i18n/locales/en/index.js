@@ -15,6 +15,7 @@ import nav from './nav.js';
 import system_monitor from './system_monitor.js';
 import activity from './activity.js';
 import labels from './labels.js';
+import permissions from './permissions.js';
 import { mergeLocales } from '../../merge.js';
 
 export default mergeLocales(base, {
@@ -34,4 +35,5 @@ export default mergeLocales(base, {
     charts,
     system_monitor,
     activity,
+    permissions,
 });

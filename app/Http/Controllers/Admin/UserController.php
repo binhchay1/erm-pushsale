@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrgLevel;
+use App\Enums\PermissionArea;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserRequest;
 use App\Models\User;
 use App\Repositories\TeamRepository;
 use App\Repositories\UserRepository;
+use App\Support\PermissionCatalog;
 use App\Services\OrgStructureService;
+use App\Services\Users\UserHierarchyService;
 use App\Services\Users\UserOrgRules;
 use App\Support\ActivityLogger;
 use App\Support\TenantEmail;
@@ -23,11 +26,15 @@ class UserController extends Controller
     public function __construct(
         private readonly UserRepository $users,
         private readonly TeamRepository $teams,
+        private readonly UserHierarchyService $hierarchy,
     ) {}
 
     public function index(): Response
     {
+        $actor = auth()->user();
+
         $users = $this->users->allWithTeamAndManager()
+            ->filter(fn (User $u) => $u->id === $actor?->id || ($actor && $this->hierarchy->canManage($actor, $u)))
             ->map(fn (User $u) => [
                 'id' => $u->id,
                 'name' => $u->name,
@@ -41,11 +48,13 @@ class UserController extends Controller
                 'org_level_label' => $u->orgLevelLabel(),
                 'job_title' => $u->job_title,
                 'creator_name' => $u->creator?->name,
+                'can_manage' => $actor ? $this->hierarchy->canManage($actor, $u) : false,
             ])
             ->values();
 
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
+            'canCreate' => (bool) $actor?->allows(PermissionArea::Hr, \App\Enums\PermissionLevel::Full),
         ]);
     }
 
@@ -59,6 +68,7 @@ class UserController extends Controller
             'managerPool' => $this->managerPool(),
             'orgLevels' => OrgStructureService::orgLevelOptions(),
             'emailIdentity' => $this->emailIdentity(),
+            'permissionConfig' => $this->permissionConfig(),
         ]);
     }
 
@@ -67,6 +77,7 @@ class UserController extends Controller
         $data = $this->normalizeUserData($request->validated());
         $data['password'] = Hash::make($data['password']);
         $data['created_by_user_id'] = auth()->id();
+        $data['permissions'] = $this->resolvePermissions($request, $data['role'] ?? null);
 
         $user = User::query()->create($data);
 
@@ -98,6 +109,7 @@ class UserController extends Controller
                 'org_level' => $user->org_level?->value,
                 'phone' => $user->phone,
                 'job_title' => $user->job_title,
+                'permissions' => $user->permissionsMap(),
             ],
             'roles' => $this->roleOptions(),
             'teams' => $this->teamOptions(),
@@ -105,6 +117,7 @@ class UserController extends Controller
             'managerPool' => $this->managerPool(),
             'orgLevels' => OrgStructureService::orgLevelOptions(),
             'emailIdentity' => $this->emailIdentity(),
+            'permissionConfig' => $this->permissionConfig(),
         ]);
     }
 
@@ -117,6 +130,8 @@ class UserController extends Controller
         } else {
             unset($data['password']);
         }
+
+        $data['permissions'] = $this->resolvePermissions($request, $data['role'] ?? $user->role->value);
 
         $user->update($data);
 
@@ -133,6 +148,11 @@ class UserController extends Controller
     {
         if ($user->id === auth()->id()) {
             return back()->with('error', __('messages.user_cannot_delete_self'));
+        }
+
+        $actor = auth()->user();
+        if (! $actor || ! $this->hierarchy->canManage($actor, $user)) {
+            abort(403);
         }
 
         if ($user->role === UserRole::Admin && $this->users->adminCount() <= 1) {
@@ -161,17 +181,68 @@ class UserController extends Controller
     /** @return list<array{value: string, label: string}> */
     private function roleOptions(): array
     {
-        return collect(UserRole::cases())
+        $actor = auth()->user();
+        $assignable = $actor ? $this->hierarchy->assignableRoles($actor) : UserRole::cases();
+
+        return collect($assignable)
             ->map(fn (UserRole $r) => ['value' => $r->value, 'label' => $r->label()])
             ->values()
             ->all();
     }
 
-    /** @return list<array{id: int, name: string}> */
+    /**
+     * Cấu hình phân quyền cho form: danh mục khu vực, mức tối đa actor được cấp,
+     * và mức mặc định theo từng vai trò (để prefill khi đổi vai trò).
+     *
+     * @return array<string, mixed>
+     */
+    private function permissionConfig(): array
+    {
+        $actor = auth()->user();
+
+        $defaultsByRole = [];
+        foreach (UserRole::cases() as $role) {
+            $defaultsByRole[$role->value] = PermissionCatalog::defaultsForRole($role);
+        }
+
+        return [
+            'areas' => array_map(fn (PermissionArea $a) => $a->value, PermissionArea::cases()),
+            'grantable' => $actor ? $this->hierarchy->grantableAreas($actor) : PermissionCatalog::allFull(),
+            'defaultsByRole' => $defaultsByRole,
+        ];
+    }
+
+    /**
+     * @return array<string, string>|null Null cho admin (toàn quyền mặc định).
+     */
+    private function resolvePermissions(UserRequest $request, ?string $role): ?array
+    {
+        if ($role === UserRole::Admin->value) {
+            return null;
+        }
+
+        $actor = auth()->user();
+        if (! $actor) {
+            return null;
+        }
+
+        return $this->hierarchy->sanitizePermissions($actor, (array) $request->input('permissions', []));
+    }
+
+    /** @return list<array{id: int, name: string, permissions: array<string, string>}> */
     private function teamOptions(): array
     {
+        $permById = \App\Models\Team::query()
+            ->get(['id', 'permissions'])
+            ->mapWithKeys(fn ($t) => [$t->id => is_array($t->permissions) ? $t->permissions : []])
+            ->all();
+
         return array_map(
-            fn (array $o) => ['id' => $o['id'], 'name' => $o['name']],
+            fn (array $o) => [
+                'id' => $o['id'],
+                'name' => $o['name'],
+                'permissions' => $permById[$o['id']] ?? [],
+            ],
             $this->teams->indentedOptions(),
         );
     }

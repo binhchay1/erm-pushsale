@@ -91,9 +91,13 @@ class LandingApprovalController extends Controller
         return [
             ['ladipage' => 'name', 'system' => 'name'],
             ['ladipage' => 'phone', 'system' => 'phone'],
+            ['ladipage' => 'address', 'system' => 'address (địa chỉ nhận hàng)'],
             ['ladipage' => 'message', 'system' => 'message'],
             ['ladipage' => 'products', 'system' => 'products'],
             ['ladipage' => 'quantity', 'system' => 'quantity'],
+            ['ladipage' => 'combo', 'system' => 'combo (gói khách chọn, có thể kèm giá "289k")'],
+            ['ladipage' => 'combo_price', 'system' => 'combo_price (giá gói nếu tách riêng)'],
+            ['ladipage' => 'discount', 'system' => 'discount (chiết khấu VND)'],
             ['ladipage' => 'utm_source', 'system' => 'utm_source (tùy chọn)'],
             ['ladipage' => 'utm_campaign', 'system' => 'utm_campaign (tự điền theo tên chiến dịch)'],
         ];

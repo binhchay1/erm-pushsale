@@ -24,6 +24,7 @@ return [
     'user_deleted' => 'Employee deleted.',
     'user_cannot_delete_self' => 'Cannot delete your own account.',
     'user_cannot_delete_last_admin' => 'Cannot delete the last admin.',
+    'user_role_not_allowed' => 'You are not allowed to assign this role.',
 
     'user_org' => [
         'admin_no_manager' => 'Admin accounts cannot have a direct manager.',
@@ -79,6 +80,10 @@ return [
         'cannot_suspend_internal' => 'The internal company cannot be suspended.',
         'settings_saved' => 'Platform settings saved.',
         'invalid_domain' => 'Invalid email domain (e.g. saleops.local or company.com).',
+        'admin_created' => 'Admin created for the company.',
+        'admin_updated' => 'Admin updated.',
+        'admin_deleted' => 'Admin deleted.',
+        'cannot_delete_owner' => 'Cannot delete the company owner admin.',
     ],
     'profile' => [
         'password_required' => 'Please enter a new password.',

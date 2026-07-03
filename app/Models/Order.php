@@ -96,11 +96,19 @@ class Order extends Model
         return $this->hasMany(ShippingApiLog::class);
     }
 
+    /**
+     * Doanh thu gộp cấp đơn = GIÁ TRỊ CUỐI của đơn (đã gồm combo & trừ mọi chiết khấu).
+     *
+     * `total` đã là giá trị cuối (xem LeadOrderFactory::syncTotals). Chỉ khi đơn cũ
+     * chưa có `total` mới fallback về subtotal − discount để không tính trùng chiết khấu.
+     */
     public function effectiveRevenue(): int
     {
-        $base = $this->total > 0 ? $this->total : $this->subtotal;
+        if ((int) $this->total > 0) {
+            return (int) $this->total;
+        }
 
-        return (int) max(0, $base - $this->discount);
+        return (int) max(0, (int) $this->subtotal - (int) $this->discount);
     }
 
     public function shippingCost(): int

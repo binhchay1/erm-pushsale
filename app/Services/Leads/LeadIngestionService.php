@@ -43,6 +43,144 @@ class LeadIngestionService
     }
 
     /**
+     * Upsale từ trang cảm ơn (Ladipage): cộng thêm sản phẩm vào ĐƠN CŨ của khách,
+     * KHÔNG tạo lead/đơn mới để tránh trùng số & lệch chia số.
+     *
+     * Nếu không tìm được đơn gốc (khách chưa từng đặt) → xử lý như lead thường
+     * để không mất dữ liệu mua thêm.
+     *
+     * @param  array<string, mixed>  $rawPayload
+     */
+    public function ingestUpsellForCampaign(
+        LeadPayloadNormalizer $driver,
+        MarketingSource $campaign,
+        array $rawPayload,
+    ): LeadIngestion {
+        $normalized = $driver->normalize($rawPayload);
+        $normalized['utm_campaign'] = $campaign->utm_campaign;
+        $normalized['utm_source'] = $normalized['utm_source'] ?? $campaign->utm_source ?? 'ladipage';
+
+        $phone = $this->sanitizer->normalizePhone($normalized['customer_phone'] ?? null);
+
+        if (! $phone) {
+            return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_intake.invalid_phone'));
+        }
+
+        $normalized['customer_phone'] = $phone;
+
+        $order = $this->findUpsellTargetOrder($normalized, $phone, $campaign);
+
+        // Không có đơn gốc → coi như đơn mới bình thường (chia số như thường lệ).
+        if (! $order) {
+            return $this->ingestForCampaign($driver, $campaign, $rawPayload);
+        }
+
+        $upsellExternalId = ((string) ($normalized['external_id'] ?? uniqid('up_', true))).':upsell';
+
+        $existing = LeadIngestion::query()
+            ->where('platform', $driver->platform())
+            ->where('external_id', $upsellExternalId)
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $items = is_array($normalized['items'] ?? null) ? $normalized['items'] : [];
+        $extraDiscount = (int) ($normalized['discount'] ?? 0);
+
+        return DB::transaction(function () use (
+            $driver, $rawPayload, $normalized, $campaign, $order, $items, $extraDiscount, $upsellExternalId, $phone
+        ) {
+            if ($items !== [] || $extraDiscount > 0) {
+                $this->orderFactory->appendItems($order, $items, $extraDiscount, 'upsell');
+
+                $summary = collect($items)
+                    ->map(fn ($i) => (string) ($i['product_name'] ?? $i['name'] ?? ''))
+                    ->filter()
+                    ->implode(', ');
+
+                if ($summary !== '') {
+                    $order->customer_note = trim((string) $order->customer_note."\n[Upsale] ".$summary);
+                    $order->save();
+                }
+            }
+
+            $ingestion = LeadIngestion::query()->create([
+                'platform' => $driver->platform(),
+                'external_id' => $upsellExternalId,
+                'status' => LeadIngestionStatus::Processed,
+                'customer_name' => $normalized['customer_name'] ?? $order->customer_name,
+                'customer_phone' => $phone,
+                'product_interest' => $normalized['product_interest'] ?? null,
+                'utm_source' => $normalized['utm_source'],
+                'utm_campaign' => $normalized['utm_campaign'],
+                'marketing_source_id' => $campaign->id,
+                'payload' => $rawPayload,
+                'order_id' => $order->id,
+                'processed_at' => now(),
+            ]);
+
+            if ($order->sale_user_id) {
+                $this->broadcastSafe(new SaleWorkspaceChanged($order->sale_user_id));
+            }
+
+            ActivityLogger::log(
+                ActivityLogger::LEAD_INGESTED,
+                $ingestion,
+                [
+                    'order_id' => $order->id,
+                    'campaign_id' => $campaign->id,
+                    'customer_phone' => $phone,
+                    'upsell' => true,
+                    'order_total' => $order->fresh()->total,
+                ],
+                ($normalized['customer_name'] ?? $order->customer_name).' — upsale',
+            );
+
+            return $ingestion;
+        });
+    }
+
+    /**
+     * Tìm đơn gốc để cộng thêm sản phẩm upsale.
+     *
+     * @param  array<string, mixed>  $normalized
+     */
+    protected function findUpsellTargetOrder(array $normalized, string $phone, MarketingSource $campaign): ?Order
+    {
+        // 1) Tham chiếu tường minh từ trang cảm ơn (mã đơn / submission gốc).
+        $parentRef = $normalized['parent_ref'] ?? null;
+
+        if (filled($parentRef)) {
+            $byCode = Order::query()->where('order_code', $parentRef)->latest('id')->first();
+            if ($byCode) {
+                return $byCode;
+            }
+
+            $viaLead = LeadIngestion::query()
+                ->where('external_id', $parentRef)
+                ->whereNotNull('order_id')
+                ->latest('id')
+                ->first();
+
+            if ($viaLead?->order) {
+                return $viaLead->order;
+            }
+        }
+
+        // 2) Theo SĐT trong cửa sổ chống trùng (mặc định 30 ngày), ưu tiên cùng chiến dịch.
+        $windowDays = (int) config('saleops.lead_routing.duplicate_window_days', 30);
+
+        return Order::query()
+            ->where('customer_phone', $phone)
+            ->where('created_at', '>=', now()->subDays($windowDays))
+            ->orderByRaw('CASE WHEN marketing_source_id = ? THEN 0 ELSE 1 END', [$campaign->id])
+            ->latest('id')
+            ->first();
+    }
+
+    /**
      * @param  array<string, mixed>  $rawPayload
      */
     public function ingest(LeadPayloadNormalizer $driver, array $rawPayload): LeadIngestion
@@ -92,6 +230,13 @@ class LeadIngestionService
             $normalized['message'] = $this->sanitizer->cleanText(
                 $normalized['message'],
                 (int) config('saleops.lead_intake.max_message_length', 1000),
+            );
+        }
+
+        if (array_key_exists('shipping_address', $normalized)) {
+            $normalized['shipping_address'] = $this->sanitizer->cleanText(
+                $normalized['shipping_address'],
+                (int) config('saleops.lead_intake.max_address_length', 255),
             );
         }
 

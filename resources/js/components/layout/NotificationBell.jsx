@@ -7,26 +7,37 @@ import { Button } from '@/components/ui/button';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { useT } from '@/providers/I18nProvider';
 
-export function NotificationBell() {
+export function NotificationBell({ pushsaleStyle = false }) {
     const { notifications = [], notificationsUnread = 0 } = usePage().props;
     const t = useT();
     const [open, setOpen] = useState(false);
     const { markAllRead, openItem } = useNotificationActions();
 
+    const triggerClass = pushsaleStyle
+        ? 'nav-item-btn !w-full !h-full'
+        : undefined;
+
     return (
-        <div className="relative">
+        <div className={pushsaleStyle ? 'relative h-full' : 'relative'}>
             <Button
                 type="button"
-                variant="ghost"
-                size="icon-sm"
+                variant={pushsaleStyle ? 'ghost' : 'ghost'}
+                size={pushsaleStyle ? 'icon' : 'icon-sm'}
+                className={triggerClass}
                 onClick={() => setOpen((o) => !o)}
                 title={t('notifications.title')}
                 aria-label={t('notifications.title')}
             >
                 <span className="relative inline-flex">
-                    <Bell className="size-4" />
+                    <Bell className={pushsaleStyle ? 'size-[18px]' : 'size-4'} strokeWidth={2} />
                     {notificationsUnread > 0 && (
-                        <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white">
+                        <span
+                            className={
+                                pushsaleStyle
+                                    ? 'label-warning'
+                                    : 'absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white'
+                            }
+                        >
                             {notificationsUnread > 9 ? '9+' : notificationsUnread}
                         </span>
                     )}

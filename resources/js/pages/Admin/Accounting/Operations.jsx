@@ -1,8 +1,10 @@
 import { Head } from '@inertiajs/react';
+import { Calculator } from 'lucide-react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
-import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
+import { AccountingReconTable } from '@/components/operations/AccountingReconTable';
 import { StatusTabs } from '@/components/operations/StatusTabs';
 import { useT } from '@/providers/I18nProvider';
 
@@ -14,7 +16,7 @@ export default function AccountingOperations({ filters, filterOptions, report })
             <Head title={t('pages.accounting.ops_title')} />
 
             <div className="space-y-4">
-                <h1 className="text-2xl font-bold tracking-tight">{t('pages.accounting.ops_title')}</h1>
+                <PageHeader icon={Calculator} title={t('pages.accounting.ops_title')} />
 
                 <ReportFilterBar
                     routeUrl="/admin/accounting"
@@ -29,7 +31,7 @@ export default function AccountingOperations({ filters, filterOptions, report })
                     filterKey="delivery_status"
                 />
 
-                <OperationOrderTable rows={report.rows} enableDeleteOrder />
+                <AccountingReconTable rows={report.rows} totals={report.totals} enableDeleteOrder />
             </div>
         </AppLayout>
     );

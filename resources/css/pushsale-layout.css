@@ -1,0 +1,238 @@
+/**
+ * Pushsale / AdminLTE 2 skin-blue-light layout shell.
+ * Chỉ áp dụng trong AppLayout — không đổi logic nghiệp vụ.
+ */
+
+.pushsale-wrapper {
+    --topbar-height: 50px;
+    --topbar: #3c8dbc;
+    --topbar-foreground: #ffffff;
+    --topbar-accent: rgba(255, 255, 255, 0.12);
+    --topbar-toggle-border: #1183d6;
+    --content-bg: #ecf0f5;
+    min-height: 100svh;
+    background: var(--content-bg);
+    font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.pushsale-wrapper .main-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: stretch;
+    min-height: var(--topbar-height);
+    margin-left: 0;
+    background-color: var(--topbar);
+    color: var(--topbar-foreground);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.pushsale-wrapper .main-header .sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    min-width: 50px;
+    border: none;
+    border-right: 1px solid var(--topbar-toggle-border);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 0;
+}
+
+.pushsale-wrapper .main-header .sidebar-toggle:hover {
+    background: var(--topbar-accent);
+}
+
+.pushsale-wrapper .main-header .logo {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff !important;
+    text-decoration: none;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+}
+
+.pushsale-wrapper .main-header .header-ticker {
+    display: none;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    font-size: 12px;
+    color: #fff;
+    opacity: 0.95;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+    .pushsale-wrapper .main-header .header-ticker {
+        display: flex;
+    }
+}
+
+.pushsale-wrapper .main-header .navbar-custom-menu {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    padding-right: 4px;
+}
+
+.pushsale-wrapper .main-header .nav-item-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: var(--topbar-height);
+    border: none;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 0;
+    position: relative;
+}
+
+.pushsale-wrapper .main-header .nav-item-btn:hover {
+    background: var(--topbar-accent);
+}
+
+.pushsale-wrapper .main-header .label-warning {
+    position: absolute;
+    top: 8px;
+    right: 6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 3px;
+    background: #f39c12;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+}
+
+.pushsale-wrapper .main-header .user-menu-header-trigger {
+    display: flex;
+    align-items: center;
+    min-width: 70px;
+    height: var(--topbar-height);
+    padding: 0 8px 0 0;
+    border: none;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.pushsale-wrapper .main-header .user-menu-header-trigger:hover {
+    background: var(--topbar-accent);
+}
+
+.pushsale-wrapper .main-header .user-avatar-circle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: transparent;
+    flex-shrink: 0;
+}
+
+.pushsale-wrapper .main-header .user-avatar-initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: transparent;
+    color: #036cb7;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-shadow: none;
+}
+
+.pushsale-wrapper .main-header .user-block {
+    display: inline-block;
+    padding-left: 8px;
+    max-width: 140px;
+    line-height: 1.25;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.pushsale-wrapper .main-header .user-block .user-name {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pushsale-wrapper .main-header .user-block .user-role {
+    font-size: 11px;
+    font-weight: 700;
+    color: #ff00ff;
+}
+
+.pushsale-wrapper .main-header .hidden-xs {
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .pushsale-wrapper .main-header .hidden-xs {
+        display: inline-block;
+    }
+}
+
+.pushsale-wrapper .content-wrapper {
+    flex: 1;
+    min-width: 0;
+    min-height: calc(100svh - var(--topbar-height));
+    background: var(--content-bg);
+}
+
+.pushsale-wrapper .content-inner {
+    padding: 10px 12px 16px;
+}
+
+/* Sidebar light — skin-blue-light */
+.pushsale-wrapper [data-slot='sidebar-inner'] {
+    background: #f9fafc;
+    border-right: 1px solid #d2d6de;
+}
+
+.pushsale-wrapper [data-sidebar='menu-button'] {
+    font-size: 13px;
+    border-radius: 0;
+}
+
+.pushsale-wrapper [data-sidebar='menu-button'][data-active='true'] {
+    background: #3c8dbc;
+    color: #fff;
+}
+
+.pushsale-wrapper [data-sidebar='menu-button']:hover {
+    background: #e1e3e9;
+    color: #444;
+}
+
+.pushsale-wrapper [data-sidebar='menu-button'][data-active='true']:hover {
+    background: #367fa9;
+    color: #fff;
+}
+
+.pushsale-wrapper [data-slot='sidebar-container'] {
+    top: var(--topbar-height) !important;
+    height: calc(100svh - var(--topbar-height)) !important;
+    bottom: auto !important;
+}

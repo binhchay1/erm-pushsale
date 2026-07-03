@@ -26,6 +26,8 @@ final class ActivityLogger
 
     public const ORDER_CLOSED = 'order.closed';
 
+    public const ORDER_UPDATED = 'order.updated';
+
     public const ORDER_CALL_LOGGED = 'order.call_logged';
 
     public const INVENTORY_MOVEMENT_APPROVED = 'inventory.movement_approved';

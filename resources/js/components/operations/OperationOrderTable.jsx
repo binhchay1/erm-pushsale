@@ -27,6 +27,10 @@ export function OperationOrderTable({
     enableDeleteOrder = false,
     enableSaleActions = false,
     operationStatusOptions = [],
+    carrierOptions = [],
+    itemTypeOptions = ['product', 'combo', 'upsell', 'gift'],
+    warehouseOptions = [],
+    productOptions = [],
 }) {
     const t = useT();
     const actionCols =
@@ -129,6 +133,10 @@ export function OperationOrderTable({
                                             <OperationStatusDialog
                                                 order={row}
                                                 options={operationStatusOptions}
+                                                carrierOptions={carrierOptions}
+                                                itemTypeOptions={itemTypeOptions}
+                                                warehouseOptions={warehouseOptions}
+                                                productOptions={productOptions}
                                             />
                                         </div>
                                     </Td>

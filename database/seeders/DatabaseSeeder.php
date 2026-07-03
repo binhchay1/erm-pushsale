@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\UserRole;
 use App\Models\Scopes\TenantScope;
 use App\Models\User;
 use App\Services\Tenant\CompanyProvisioningService;
@@ -13,7 +12,8 @@ use Illuminate\Database\Seeder;
  * Bộ dữ liệu demo đồng bộ toàn hệ thống (đa doanh nghiệp).
  *
  * Tài khoản chính (mật khẩu chung `password`):
- * - admin@saleops.local — admin công ty nội bộ + quản trị nền tảng (menu Doanh nghiệp, Cấu hình, Giám sát).
+ * - admin@saleops.local — super admin (chủ project): full dữ liệu nội bộ + quản trị nền tảng
+ *   (tạo công ty + admin cho doanh nghiệp khác). KHÔNG thấy dữ liệu tenant khác.
  * - sales@saleops.local, marketing@saleops.local, … — nhân sự nội bộ.
  *
  * Doanh nghiệp khách: tạo qua /platform/companies → email admin@{slug}.saleops.local
@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
             ->first();
 
         if ($owner) {
+            // Super admin = chủ project: admin công ty nội bộ + quản trị nền tảng.
             $owner->update([
                 'is_owner' => true,
                 'is_platform_admin' => true,

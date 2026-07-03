@@ -55,6 +55,7 @@ return [
         'max_name_length' => 100,
         'max_message_length' => 1000,
         'max_product_length' => 255,
+        'max_address_length' => 255,
         // Giới hạn kích thước payload thô (bytes) để tránh nhồi dữ liệu.
         'max_payload_bytes' => (int) env('LEAD_MAX_PAYLOAD_BYTES', 65536),
         // Rate limit cổng nhận lead.

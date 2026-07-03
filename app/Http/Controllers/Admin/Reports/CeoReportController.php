@@ -53,9 +53,13 @@ class CeoReportController extends Controller
             return $exported;
         }
 
-        return Inertia::render('Admin/Reports/CeoReport', $this->reportPageProps($request, [
+        $filterOptions = app(\App\Services\FilterOptionsService::class);
+
+        return Inertia::render('Admin/Reports/CeoReport', array_merge($this->reportPageProps($request, [
             'report' => $report,
             'routeUrl' => '/admin/reports/ceo',
+        ]), [
+            'filterFields' => $filterOptions->ceoReportFilterFields(),
         ]));
     }
 }

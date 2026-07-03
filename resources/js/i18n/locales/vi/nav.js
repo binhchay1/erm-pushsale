@@ -2,6 +2,10 @@ export default {
     groups: {
         operations: 'Điều hành',
         reports: 'Báo cáo',
+        reports_executive: 'Báo cáo điều hành',
+        reports_sales: 'Báo cáo Telesale',
+        reports_marketing: 'Báo cáo Marketing',
+        reports_warehouse: 'Báo cáo Kho & Tài chính',
         marketing: 'Marketing',
         telesale: 'Telesale',
         connections: 'Kết nối & Đối soát',

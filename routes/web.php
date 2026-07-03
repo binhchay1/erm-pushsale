@@ -58,6 +58,7 @@ use App\Http\Controllers\Sales\OrderClosingController;
 use App\Http\Controllers\Sales\PerformanceReportController as SalesPerformanceReportController;
 use App\Http\Controllers\Sales\RankingController as SalesRankingController;
 use App\Http\Controllers\Sales\SaleOperationCallController;
+use App\Http\Controllers\Sales\SaleOperationOrderController;
 use App\Http\Controllers\Sales\SaleOperationStatusController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SitemapController;
@@ -85,7 +86,7 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [LoginController::class, 'store']);
 });
 
-Route::middleware(['auth', 'tenant'])->group(function () {
+Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 
     // Sơ đồ tổ chức — test RBAC: /org-chart (xem OrgChartController)
@@ -133,7 +134,6 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::put('warehouses/{warehouse}', [WarehouseController::class, 'update'])->name('warehouses.update');
         Route::delete('warehouses/{warehouse}', [WarehouseController::class, 'destroy'])->name('warehouses.destroy');
         Route::delete('warehouse-inventories/{inventory}', [WarehouseInventoryController::class, 'destroy'])->name('warehouse-inventories.destroy');
-        Route::resource('users', UserController::class)->except(['show']);
         Route::resource('teams', TeamController::class)->except(['show']);
         Route::resource('products', ProductController::class)->except(['show']);
         Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
@@ -165,6 +165,11 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::post('shipping-partners/{provider}/test/{action}', ShippingPartnerTestController::class)->name('shipping-partners.test');
     });
 
+    // Quản lý nhân viên: mở cho nhánh trên có quyền HR (không chỉ admin). Chặn qua middleware permissions + phân cấp.
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::resource('users', UserController::class)->except(['show']);
+    });
+
     Route::middleware('role:'.User::ROLE_SALES)->prefix('sales')->name('sales.')->group(function () {
         Route::get('dashboard', SalesDashboardController::class)->name('dashboard');
         Route::get('rankings', SalesRankingController::class)->name('rankings');
@@ -172,6 +177,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('workspace', OperationController::class)->name('workspace');
         Route::post('orders/{order}/call', [SaleOperationCallController::class, 'store'])->name('orders.call');
         Route::post('orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('orders.operation-status');
+        Route::post('orders/{order}/details', [SaleOperationOrderController::class, 'update'])->name('orders.details');
         Route::post('orders/{order}/close', [OrderClosingController::class, 'store'])->name('orders.close');
         Route::get('customers', CustomerProfileController::class)->name('customers');
         Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
@@ -231,6 +237,10 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('companies', [PlatformCompanyController::class, 'index'])->name('companies.index');
         Route::post('companies', [PlatformCompanyController::class, 'store'])->name('companies.store');
         Route::get('companies/{company}/accounts', [PlatformCompanyController::class, 'accounts'])->name('companies.accounts');
+        Route::get('companies/{company}/admins', [PlatformCompanyController::class, 'admins'])->name('companies.admins');
+        Route::post('companies/{company}/admins', [PlatformCompanyController::class, 'storeAdmin'])->name('companies.admins.store');
+        Route::put('companies/{company}/admins/{admin}', [PlatformCompanyController::class, 'updateAdmin'])->name('companies.admins.update');
+        Route::delete('companies/{company}/admins/{admin}', [PlatformCompanyController::class, 'destroyAdmin'])->name('companies.admins.destroy');
         Route::put('companies/{company}', [PlatformCompanyController::class, 'update'])->name('companies.update');
         Route::post('companies/{company}/toggle', [PlatformCompanyController::class, 'toggle'])->name('companies.toggle');
         Route::get('settings', [App\Http\Controllers\Platform\SettingsController::class, 'index'])->name('settings.index');

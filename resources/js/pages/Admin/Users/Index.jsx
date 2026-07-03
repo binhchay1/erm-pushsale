@@ -10,7 +10,7 @@ import { useTableSort } from '@/hooks/use-table-sort';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
-export default function UsersIndex({ users }) {
+export default function UsersIndex({ users, canCreate = true }) {
     const t = useT();
     const { sortedRows, sort, toggleSort } = useTableSort(users, { defaultKey: 'name' });
 
@@ -23,12 +23,14 @@ export default function UsersIndex({ users }) {
                     title={t('pages.users.title')}
                     description={t('pages.users.desc_index')}
                     actions={
-                        <Button asChild>
-                            <Link href="/admin/users/create">
-                                <Plus className="size-4" />
-                                {t('pages.users.create')}
-                            </Link>
-                        </Button>
+                        canCreate ? (
+                            <Button asChild>
+                                <Link href="/admin/users/create">
+                                    <Plus className="size-4" />
+                                    {t('pages.users.create')}
+                                </Link>
+                            </Button>
+                        ) : null
                     }
                 />
 
@@ -80,18 +82,22 @@ function UserRow({ row, t }) {
             <Td>{row.manager_name ?? '—'}</Td>
             <Td>{row.creator_name ?? '—'}</Td>
             <Td>
-                <div className="flex gap-1">
-                    <Button variant="outline" size="icon-sm" asChild>
-                        <Link href={`/admin/users/${row.id}/edit`}>
-                            <Pencil className="size-4" />
-                        </Link>
-                    </Button>
-                    <DeleteRowButton
-                        url={`/admin/users/${row.id}`}
-                        label={row.name}
-                        confirmMessage={t('pages.users.delete_confirm', { name: row.name })}
-                    />
-                </div>
+                {row.can_manage ? (
+                    <div className="flex gap-1">
+                        <Button variant="outline" size="icon-sm" asChild>
+                            <Link href={`/admin/users/${row.id}/edit`}>
+                                <Pencil className="size-4" />
+                            </Link>
+                        </Button>
+                        <DeleteRowButton
+                            url={`/admin/users/${row.id}`}
+                            label={row.name}
+                            confirmMessage={t('pages.users.delete_confirm', { name: row.name })}
+                        />
+                    </div>
+                ) : (
+                    <span className="text-muted-foreground">—</span>
+                )}
             </Td>
         </tr>
     );

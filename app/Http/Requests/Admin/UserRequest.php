@@ -3,8 +3,12 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\OrgLevel;
+use App\Enums\PermissionArea;
+use App\Enums\PermissionLevel;
 use App\Enums\UserRole;
 use App\Models\Company;
+use App\Models\User;
+use App\Services\Users\UserHierarchyService;
 use App\Services\Users\UserOrgRules;
 use App\Support\TenantEmail;
 use Illuminate\Foundation\Http\FormRequest;
@@ -16,7 +20,18 @@ class UserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isAdmin() ?? false;
+        $actor = $this->user();
+        if (! $actor) {
+            return false;
+        }
+
+        $target = $this->route('user');
+        if ($target instanceof User) {
+            return app(UserHierarchyService::class)->canManage($actor, $target);
+        }
+
+        // Tạo mới: cần quyền toàn phần khu vực Nhân sự.
+        return $actor->allows(PermissionArea::Hr, PermissionLevel::Full);
     }
 
     protected function prepareForValidation(): void
@@ -54,6 +69,12 @@ class UserRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:30'],
             'job_title' => ['nullable', 'string', 'max:120'],
             'password' => [$userId ? 'nullable' : 'required', 'confirmed', Password::defaults()],
+            'permissions' => ['sometimes', 'array'],
+            'permissions.*' => ['nullable', Rule::in([
+                PermissionLevel::None->value,
+                PermissionLevel::View->value,
+                PermissionLevel::Full->value,
+            ])],
         ];
     }
 
@@ -61,6 +82,17 @@ class UserRequest extends FormRequest
     {
         $validator->after(function (Validator $v): void {
             UserOrgRules::validate($v);
+
+            $actor = $this->user();
+            if ($actor) {
+                $assignable = array_map(
+                    fn (UserRole $r) => $r->value,
+                    app(UserHierarchyService::class)->assignableRoles($actor),
+                );
+                if (! in_array((string) $this->input('role'), $assignable, true)) {
+                    $v->errors()->add('role', __('messages.user_role_not_allowed'));
+                }
+            }
 
             $company = $this->user()?->company;
             $email = (string) $this->input('email');

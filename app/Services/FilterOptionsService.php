@@ -112,6 +112,23 @@ class FilterOptionsService
     }
 
     /** @return list<string> */
+    public function ceoReportFilterFields(): array
+    {
+        return [
+            'date_type',
+            'date_from',
+            'date_to',
+            'delivery_status',
+            'reconciliation_status',
+            'parent_product_id',
+            'product_id',
+            'discount_mode',
+            'per_page',
+            'no_closing_date_limit',
+        ];
+    }
+
+    /** @return list<string> */
     public function marketingDashboardFilterFields(?User $user = null): array
     {
         $fields = ['date_from', 'date_to', 'product_id'];

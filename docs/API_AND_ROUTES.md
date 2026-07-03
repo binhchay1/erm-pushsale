@@ -72,7 +72,18 @@
 |--------|------|-------|
 | GET/POST | `/webhooks/{platform}` | Lead từ FB/TikTok/Zalo/Landing/Google/Shopee/Lazada |
 | POST | `/landing/{token}/receive` | Webhook theo campaign token (16–64 ký tự) |
+| POST | `/landing/{token}/upsell` | Upsale trang cảm ơn — cộng SP vào đơn cũ (không tạo trùng số) |
 | POST | `/shipping/webhooks/{provider}` | Trạng thái vận chuyển |
+
+**Field landing hỗ trợ** (map trong màn Chiến dịch / Duyệt landing):
+`name`, `phone` (bắt buộc), `address`, `products`, `quantity`, `combo` (nhãn gói, có thể kèm giá "289k"),
+`combo_price` (nếu tách giá riêng), `discount` (chiết khấu VND), `message`.
+Combo/upsale cũng nhận qua field bắt đầu bằng `combo*`/`goi*` (gói) và `mua_them*`/`upsell*` (mua thêm),
+hoặc mảng cấu trúc `items: [{name, price, quantity, type, discount, variant}]`.
+
+**Upsale trang cảm ơn:** gửi `phone` (+ `parent_submission_id`/`order_ref` nếu có) tới `/landing/{token}/upsell`.
+Hệ thống tìm đơn gốc theo mã đơn hoặc SĐT trong cửa sổ chống trùng rồi cộng dồn sản phẩm, đồng bộ lại
+giá trị cuối đơn. Nếu không tìm thấy đơn gốc → xử lý như lead mới.
 
 **Platform lead:** `facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada`  
 **Provider ship:** `viettel_post|ghn|ghtk|jnt|spx`

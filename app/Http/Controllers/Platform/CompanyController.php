@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Platform;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\Scopes\TenantScope;
@@ -10,6 +11,8 @@ use App\Services\Tenant\CompanyProvisioningService;
 use App\Support\TenantEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -147,5 +150,106 @@ class CompanyController extends Controller
             'suggested_accounts' => TenantEmail::suggestedAccounts($company),
             'default_password' => TenantEmail::defaultPassword(),
         ]);
+    }
+
+    /** Super admin quản lý nhiều admin (giám đốc) cho từng công ty. */
+    public function admins(Company $company): Response
+    {
+        return Inertia::render('Platform/CompanyAdmins', [
+            'company' => [
+                'id' => $company->id,
+                'name' => $company->name,
+                'slug' => $company->slug,
+                'is_internal' => $company->isInternal(),
+            ],
+            'admins' => $this->companyAdmins($company),
+            'suggested_email' => TenantEmail::forRole(UserRole::Admin, $company),
+            'email_suffix' => TenantEmail::suffixFor($company),
+            'default_password' => TenantEmail::defaultPassword(),
+        ]);
+    }
+
+    public function storeAdmin(Request $request, Company $company): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['nullable', 'email', 'max:160', Rule::unique('users', 'email')],
+            'password' => ['nullable', 'string', 'min:8'],
+        ]);
+
+        $email = $data['email'] ?? null;
+        if ($email !== null && ! TenantEmail::acceptsForCompany($email, $company)) {
+            return back()->withErrors([
+                'email' => __('messages.tenant.invalid_email_suffix', ['suffix' => TenantEmail::suffixFor($company)]),
+            ]);
+        }
+
+        $this->provisioning->createCompanyAdmin(
+            company: $company,
+            name: $data['name'],
+            email: $email,
+            password: $data['password'] ?? null,
+        );
+
+        return back()->with('success', __('messages.platform.admin_created'));
+    }
+
+    public function updateAdmin(Request $request, Company $company, User $admin): RedirectResponse
+    {
+        abort_unless($this->isCompanyAdmin($company, $admin), 404);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'password' => ['nullable', 'string', 'min:8'],
+        ]);
+
+        $admin->name = $data['name'];
+        if (! empty($data['password'])) {
+            $admin->password = Hash::make($data['password']);
+        }
+        $admin->save();
+
+        return back()->with('success', __('messages.platform.admin_updated'));
+    }
+
+    public function destroyAdmin(Company $company, User $admin): RedirectResponse
+    {
+        abort_unless($this->isCompanyAdmin($company, $admin), 404);
+
+        if ($admin->is_owner) {
+            return back()->with('error', __('messages.platform.cannot_delete_owner'));
+        }
+
+        $admin->delete();
+
+        return back()->with('success', __('messages.platform.admin_deleted'));
+    }
+
+    private function isCompanyAdmin(Company $company, User $admin): bool
+    {
+        return $admin->company_id === $company->id
+            && $admin->role === UserRole::Admin
+            && ! $admin->is_platform_admin;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function companyAdmins(Company $company): array
+    {
+        return User::query()
+            ->withoutGlobalScope(TenantScope::class)
+            ->where('company_id', $company->id)
+            ->where('role', UserRole::Admin)
+            ->where('is_platform_admin', false)
+            ->orderByDesc('is_owner')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email', 'is_owner', 'created_at'])
+            ->map(fn (User $u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'is_owner' => (bool) $u->is_owner,
+                'created_at' => $u->created_at?->toDateString(),
+            ])
+            ->all();
     }
 }

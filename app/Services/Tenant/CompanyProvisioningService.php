@@ -72,6 +72,37 @@ class CompanyProvisioningService
         });
     }
 
+    /**
+     * Super admin thêm 1 admin (giám đốc) cho công ty đã có.
+     *
+     * @return array{admin: User, default_password: string}
+     */
+    public function createCompanyAdmin(
+        Company $company,
+        string $name,
+        ?string $email = null,
+        ?string $password = null,
+    ): array {
+        $password = $password ?: TenantEmail::defaultPassword();
+        $email = $email ?: TenantEmail::forRole(UserRole::Admin, $company);
+
+        $admin = User::query()->create([
+            'company_id' => $company->id,
+            'name' => $name,
+            'email' => $email,
+            'password' => Hash::make($password),
+            'role' => UserRole::Admin,
+            'is_owner' => false,
+            'org_level' => OrgLevel::Head,
+            'is_team_leader' => true,
+            'job_title' => __('messages.tenant.owner_title'),
+        ]);
+
+        $admin->ensurePreferences();
+
+        return ['admin' => $admin, 'default_password' => $password];
+    }
+
     /** Công ty nội bộ (seed / vận hành ERM) — email dạng admin@saleops.local. */
     public static function internalCompany(): Company
     {

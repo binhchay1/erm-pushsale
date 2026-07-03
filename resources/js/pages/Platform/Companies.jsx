@@ -245,6 +245,9 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                                                 <Td className="px-4 py-3 text-right">
                                                     <div className="flex justify-end gap-1">
                                                         <Button size="sm" variant="outline" asChild>
+                                                            <Link href={`/platform/companies/${c.id}/admins`}>{t('pages.platform.manage_admins')}</Link>
+                                                        </Button>
+                                                        <Button size="sm" variant="outline" asChild>
                                                             <Link href={`/platform/companies/${c.id}/accounts`}>{t('pages.platform.view_accounts')}</Link>
                                                         </Button>
                                                         {!c.is_internal ? (

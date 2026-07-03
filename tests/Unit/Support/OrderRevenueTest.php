@@ -40,8 +40,9 @@ class OrderRevenueTest extends TestCase
         $this->assertSame(1_430_000, $breakdown['net']);
     }
 
-    public function test_net_revenue_on_model_subtracts_shipping_only(): void
+    public function test_net_revenue_uses_final_total_without_double_discount(): void
     {
+        // `total` là GIÁ TRỊ CUỐI của đơn (đã trừ chiết khấu) → không trừ discount lần nữa.
         $order = Order::query()->make([
             'total' => 1_000_000,
             'discount' => 100_000,
@@ -49,8 +50,20 @@ class OrderRevenueTest extends TestCase
             'cod_fee' => 10_000,
         ]);
 
-        $this->assertSame(900_000, $order->effectiveRevenue());
+        $this->assertSame(1_000_000, $order->effectiveRevenue());
         $this->assertSame(40_000, $order->shippingCost());
-        $this->assertSame(860_000, $order->netRevenue());
+        $this->assertSame(960_000, $order->netRevenue());
+    }
+
+    public function test_effective_revenue_falls_back_to_subtotal_minus_discount_for_legacy_orders(): void
+    {
+        // Đơn cũ chưa có total → fallback subtotal − discount.
+        $order = Order::query()->make([
+            'total' => 0,
+            'subtotal' => 800_000,
+            'discount' => 100_000,
+        ]);
+
+        $this->assertSame(700_000, $order->effectiveRevenue());
     }
 }

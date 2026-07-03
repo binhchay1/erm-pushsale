@@ -8,7 +8,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import { useT } from '@/providers/I18nProvider';
 
-export default function Workspace({ filters, filterOptions, filterFields, report, operationStatusOptions }) {
+export default function Workspace({
+    filters,
+    filterOptions,
+    filterFields,
+    report,
+    operationStatusOptions,
+    carrierOptions = [],
+    itemTypeOptions = ['product', 'combo', 'upsell', 'gift'],
+    warehouseOptions = [],
+    productOptions = [],
+}) {
     const t = useT();
     const authId = usePage().props.auth?.user?.id;
 
@@ -51,6 +61,10 @@ export default function Workspace({ filters, filterOptions, filterFields, report
                             enableSaleActions
                             enableCloseOrder
                             operationStatusOptions={operationStatusOptions}
+                            carrierOptions={carrierOptions}
+                            itemTypeOptions={itemTypeOptions}
+                            warehouseOptions={warehouseOptions}
+                            productOptions={productOptions}
                         />
                     </CardContent>
                 </Card>

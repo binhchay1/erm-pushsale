@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import PermissionEditor from '@/components/permissions/PermissionEditor';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
-export default function TeamForm({ team, types, parents, leaders }) {
+export default function TeamForm({ team, types, parents, leaders, permissionAreas = [] }) {
     const t = useT();
     const { url } = usePage();
     const isEdit = Boolean(team?.id);
@@ -19,6 +20,7 @@ export default function TeamForm({ team, types, parents, leaders }) {
         type: team?.type ?? 'marketing',
         parent_id: team?.parent_id ?? parentFromQuery ?? '',
         leader_user_id: team?.leader_user_id ?? '',
+        permissions: team?.permissions ?? {},
     });
 
     const submit = (e) => {
@@ -113,6 +115,14 @@ export default function TeamForm({ team, types, parents, leaders }) {
                                     ))}
                                 </select>
                             </div>
+
+                            <PermissionEditor
+                                areas={permissionAreas}
+                                value={data.permissions}
+                                onChange={(next) => setData('permissions', next)}
+                                title={t('pages.teams.permissions_title')}
+                                hint={t('pages.teams.permissions_hint')}
+                            />
 
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={processing}>

@@ -176,7 +176,8 @@ class SalesPipelineSeeder extends Seeder
         $subtotal = $qty * $unitPrice;
         $discount = $leadIndex % 5 === 0 ? (int) round($subtotal * 0.05) : 0;
         $shipFee = 30_000;
-        $total = $subtotal - $discount + $shipFee;
+        // total = GIÁ TRỊ CUỐI của đơn (sau chiết khấu, KHÔNG gồm phí ship thu hộ).
+        $total = max(0, $subtotal - $discount);
         $deposit = $leadIndex % 9 === 0 ? 50_000 : 0;
 
         [$stage, $result, $closing, $delivery, $contactCount] = $this->funnelState($seq, $arrivedAt);

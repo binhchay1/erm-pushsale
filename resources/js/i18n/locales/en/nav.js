@@ -2,6 +2,10 @@ export default {
     groups: {
         operations: 'Operations',
         reports: 'Reports',
+        reports_executive: 'Executive reports',
+        reports_sales: 'Telesales reports',
+        reports_marketing: 'Marketing reports',
+        reports_warehouse: 'Warehouse & finance reports',
         marketing: 'Marketing',
         telesale: 'Telesales',
         connections: 'Integrations & Reconciliation',

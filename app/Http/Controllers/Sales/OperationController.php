@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Sales;
 use App\Enums\OperationResult;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
 use App\Http\Controllers\Controller;
+use App\Models\Product;
+use App\Models\Warehouse;
 use App\Services\FilterOptionsService;
 use App\Services\Operations\SaleOperationService;
+use App\Support\ShippingProviders;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -26,7 +29,37 @@ class OperationController extends Controller
             [
                 'filterFields' => $filterOptions->saleOperationFilterFields(),
                 'operationStatusOptions' => OperationResult::selectableOptions(),
+                'carrierOptions' => ShippingProviders::options(),
+                'itemTypeOptions' => ['product', 'combo', 'upsell', 'gift'],
+                'warehouseOptions' => $this->warehouseOptions(),
+                'productOptions' => $this->productOptions(),
             ]
         ));
+    }
+
+    /** @return list<array{id: int, name: string}> */
+    private function warehouseOptions(): array
+    {
+        return Warehouse::query()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (Warehouse $w) => ['id' => $w->id, 'name' => $w->name])
+            ->all();
+    }
+
+    /** @return list<array{id: int, name: string, sku: ?string, unit_price: int}> */
+    private function productOptions(): array
+    {
+        return Product::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'sku', 'unit_price'])
+            ->map(fn (Product $p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'sku' => $p->sku,
+                'unit_price' => (int) $p->unit_price,
+            ])
+            ->all();
     }
 }

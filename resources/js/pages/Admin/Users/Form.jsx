@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import PermissionEditor, { capMap } from '@/components/permissions/PermissionEditor';
 import { useLabels } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
@@ -19,6 +20,7 @@ export default function UserForm({
     managerPool = [],
     orgLevels,
     emailIdentity = {},
+    permissionConfig = {},
 }) {
     const t = useT();
     const labels = useLabels();
@@ -27,10 +29,16 @@ export default function UserForm({
     const host = emailIdentity.host ?? 'saleops.local';
     const roleLocalParts = emailIdentity.roleLocalParts ?? {};
 
+    const permAreas = permissionConfig.areas ?? [];
+    const grantable = permissionConfig.grantable ?? {};
+    const defaultsByRole = permissionConfig.defaultsByRole ?? {};
+
+    const initialRole = user?.role ?? 'sales';
+
     const { data, setData, post, put, processing, errors } = useForm({
         name: user?.name ?? '',
         email_local: user?.email_local ?? roleLocalParts.sales ?? 'sales',
-        role: user?.role ?? 'sales',
+        role: initialRole,
         team_id: user?.team_id ?? '',
         manager_user_id: user?.manager_user_id ?? '',
         is_team_leader: user?.is_team_leader ?? false,
@@ -39,6 +47,7 @@ export default function UserForm({
         job_title: user?.job_title ?? '',
         password: '',
         password_confirmation: '',
+        permissions: capMap(user?.permissions ?? defaultsByRole[initialRole] ?? {}, grantable),
     });
 
     const previewEmail = useMemo(() => {
@@ -75,7 +84,21 @@ export default function UserForm({
             role,
             ...(role === 'admin' ? { manager_user_id: '', org_level: '', team_id: '' } : {}),
             ...(!isEdit && suggested ? { email_local: suggested } : {}),
+            permissions: capMap(defaultsByRole[role] ?? {}, grantable),
         }));
+    };
+
+    // Chọn phòng ban -> auto-tick quyền đã setup cho team (gộp với quyền hiện tại).
+    const onTeamChange = (teamId) => {
+        const team = teams.find((tm) => String(tm.id) === String(teamId));
+        setData((prev) => {
+            const next = { ...prev, team_id: teamId || '' };
+            const teamPerms = team?.permissions ?? {};
+            if (teamId && Object.keys(teamPerms).length) {
+                next.permissions = capMap({ ...prev.permissions, ...teamPerms }, grantable);
+            }
+            return next;
+        });
     };
 
     const onOrgLevelChange = (orgLevel) => {
@@ -215,7 +238,7 @@ export default function UserForm({
                                             id="team_id"
                                             className="input-soft flex h-9 w-full px-3"
                                             value={data.team_id}
-                                            onChange={(e) => setData('team_id', e.target.value || '')}
+                                            onChange={(e) => onTeamChange(e.target.value)}
                                         >
                                             <option value="">{t('pages.users.no_select')}</option>
                                             {teams.map((team) => (
@@ -321,6 +344,26 @@ export default function UserForm({
                                     onChange={(e) => setData('password_confirmation', e.target.value)}
                                 />
                             </div>
+
+                            {isAdmin ? (
+                                <div className="rounded-lg border p-4">
+                                    <p className="text-sm font-semibold">
+                                        {t('pages.users.permissions_title')}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('pages.users.permissions_admin_note')}
+                                    </p>
+                                </div>
+                            ) : (
+                                <PermissionEditor
+                                    areas={permAreas}
+                                    value={data.permissions}
+                                    grantable={grantable}
+                                    onChange={(next) => setData('permissions', next)}
+                                    title={t('pages.users.permissions_title')}
+                                    hint={t('pages.users.permissions_hint')}
+                                />
+                            )}
 
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={processing}>

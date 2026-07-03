@@ -16,14 +16,16 @@ final class OrderRevenue
     }
 
     /**
-     * Doanh thu gộp 1 đơn (sau giảm giá): ưu tiên total, fallback subtotal.
+     * Doanh thu gộp 1 đơn = GIÁ TRỊ CUỐI của đơn.
+     *
+     * `total` đã là giá trị cuối (đã gồm combo & trừ chiết khấu). Chỉ fallback
+     * subtotal − discount cho đơn cũ chưa có total, tránh trừ chiết khấu 2 lần.
      */
     public static function grossAmountSql(string $table = 'orders'): string
     {
-        $base = "COALESCE(NULLIF({$table}.total, 0), {$table}.subtotal, 0)";
-        $afterDiscount = "({$base} - COALESCE({$table}.discount, 0))";
+        $fallback = self::maxZero("COALESCE({$table}.subtotal, 0) - COALESCE({$table}.discount, 0)");
 
-        return self::maxZero($afterDiscount);
+        return "(CASE WHEN COALESCE({$table}.total, 0) > 0 THEN {$table}.total ELSE {$fallback} END)";
     }
 
     /** Phí vận chuyển & COD do hãng thu (chi phí). */

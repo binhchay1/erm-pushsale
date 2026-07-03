@@ -10,7 +10,23 @@ class OrderItem extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['order_id', 'product_id', 'product_name', 'quantity', 'unit_price'];
+    protected $fillable = [
+        'order_id', 'product_id', 'product_name', 'item_type', 'origin',
+        'quantity', 'unit_price', 'discount_amount', 'meta',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'meta' => 'array',
+        ];
+    }
+
+    /** Thành tiền của dòng sau chiết khấu dòng. */
+    public function lineTotal(): int
+    {
+        return (int) max(0, ((int) $this->unit_price * (int) $this->quantity) - (int) $this->discount_amount);
+    }
 
     public function order(): BelongsTo
     {

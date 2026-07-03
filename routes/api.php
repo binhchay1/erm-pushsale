@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CampaignLandingUpsellController;
 use App\Http\Controllers\Api\V1\CampaignLandingWebhookController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\IntegrationController;
@@ -15,6 +16,10 @@ Route::prefix('v1')->group(function () {
     Route::post('auth/token', [AuthController::class, 'token']);
 
     Route::post('landing/{token}/receive', [CampaignLandingWebhookController::class, 'receive'])
+        ->where('token', '[a-z0-9]{16,64}')
+        ->middleware('throttle:lead-intake');
+
+    Route::post('landing/{token}/upsell', [CampaignLandingUpsellController::class, 'receive'])
         ->where('token', '[a-z0-9]{16,64}')
         ->middleware('throttle:lead-intake');
 

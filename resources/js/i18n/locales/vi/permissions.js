@@ -1,0 +1,27 @@
+export default {
+    title: 'Phân quyền chức năng',
+    granted_count: 'Đã cấp {count} phần',
+    select_all: 'Chọn tất cả',
+    select_view_all: 'Tất cả: chỉ xem',
+    clear_all: 'Bỏ chọn hết',
+    level: {
+        none: 'Không',
+        view: 'Chỉ xem',
+        full: 'Toàn quyền',
+    },
+    area: {
+        reports: 'Báo cáo',
+        telesale: 'Tác nghiệp telesale',
+        orders: 'Quản lý đơn hàng',
+        marketing: 'Marketing & chiến dịch',
+        leads: 'Data & chia số',
+        warehouse: 'Kho & tồn kho',
+        shipping: 'Vận chuyển & đối soát',
+        accounting: 'Kế toán',
+        customers: 'Khách hàng',
+        products: 'Sản phẩm',
+        hr: 'Nhân sự',
+        integrations: 'Kết nối & tích hợp',
+        activity: 'Nhật ký hoạt động',
+    },
+};

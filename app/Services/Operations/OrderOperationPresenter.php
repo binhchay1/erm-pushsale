@@ -50,13 +50,17 @@ final class OrderOperationPresenter
             'canChangeStatus' => SaleOperationPolicy::canChangeStatus($order),
             'canClose' => SaleOperationPolicy::canClose($order),
             'products' => $order->items->map(fn ($item) => [
-                'productId' => (string) $item->product_id,
+                'itemId' => (string) $item->id,
+                'productId' => $item->product_id !== null ? (string) $item->product_id : null,
                 'productName' => $item->product_name,
+                'itemType' => $item->item_type ?? 'product',
                 'quantity' => $item->quantity,
                 'unitPrice' => $item->unit_price,
+                'discountAmount' => (int) ($item->discount_amount ?? 0),
             ])->values()->all(),
             'subtotal' => $order->subtotal,
             'discount' => $order->discount,
+            'shippingProvider' => $order->shipping_provider,
             'vat' => $order->vat,
             'shippingFeeCollected' => $order->shipping_fee_collected,
             'total' => $order->total,
@@ -64,6 +68,7 @@ final class OrderOperationPresenter
             'deliveryStatus' => DeliveryStatus::tryFrom($order->delivery_status)?->label() ?? $order->delivery_status,
             'deliveryStatusValue' => $order->delivery_status,
             'desiredDeliveryAt' => $order->desired_delivery_at?->toDateString(),
+            'warehouseId' => $order->warehouse_id !== null ? (string) $order->warehouse_id : '',
             'warehouseName' => $order->warehouse?->name,
             'carrierName' => $order->carrier_name,
             'trackingNumber' => $order->tracking_number,
@@ -114,6 +119,28 @@ final class OrderOperationPresenter
         }
 
         return $tabs;
+    }
+
+    /**
+     * Hàng tổng cho bảng đối soát kế toán.
+     *
+     * @param  Collection<int, Order>  $orders
+     * @return array<string, int>
+     */
+    public static function totals(Collection $orders): array
+    {
+        return [
+            'quantity' => (int) $orders->sum(fn (Order $o) => (int) $o->items->sum('quantity')),
+            'subtotal' => (int) $orders->sum('subtotal'),
+            'discount' => (int) $orders->sum('discount'),
+            'vat' => (int) $orders->sum('vat'),
+            'shippingFeeCollected' => (int) $orders->sum('shipping_fee_collected'),
+            'total' => (int) $orders->sum('total'),
+            'deposit' => (int) $orders->sum('deposit'),
+            'amountToCollect' => (int) $orders->sum('amount_to_collect'),
+            'carrierServiceFee' => (int) $orders->sum('carrier_service_fee'),
+            'shippingSupportFee' => (int) $orders->sum('shipping_support_fee'),
+        ];
     }
 
     /**

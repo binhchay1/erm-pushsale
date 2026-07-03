@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Middleware\EnforcePermissions;
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -48,6 +49,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureUserHasRole::class,
             'tenant' => SetTenant::class,
             'platform' => EnsurePlatformAdmin::class,
+            'permissions' => EnforcePermissions::class,
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));

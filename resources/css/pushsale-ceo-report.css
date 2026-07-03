@@ -1,0 +1,423 @@
+/**
+ * Báo cáo CEO — clone giao diện Pushsale (AdminLTE 2 / Bootstrap 3).
+ * Scope: .ceo-report-pushsale
+ */
+
+.ceo-report-pushsale {
+    color: #333;
+    font-size: 13px;
+    line-height: 1.42857143;
+}
+
+.ceo-report-pushsale .m-header-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    margin: -10px -12px 0;
+    padding: 8px 12px 0;
+    background: #ecf0f5;
+    border-bottom: 1px solid #d2d6de;
+}
+
+.ceo-report-pushsale .m-header {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -8px;
+    margin-right: -8px;
+}
+
+.ceo-report-pushsale .m-header .form-group {
+    position: relative;
+    min-height: 34px;
+    margin-bottom: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    flex: 0 0 16.666%;
+    max-width: 16.666%;
+}
+
+@media (max-width: 991px) {
+    .ceo-report-pushsale .m-header .form-group {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 575px) {
+    .ceo-report-pushsale .m-header .form-group {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.ceo-report-pushsale .m-header .module-title {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 34px;
+    color: #444;
+    white-space: nowrap;
+}
+
+.ceo-report-pushsale .ps-select,
+.ceo-report-pushsale .ps-input {
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 10px;
+    font-size: 13px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    border: 1px solid #d2d6de;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.ceo-report-pushsale .ps-select:focus,
+.ceo-report-pushsale .ps-input:focus {
+    border-color: #3c8dbc;
+    outline: 0;
+}
+
+.ceo-report-pushsale .date-range-wrap {
+    display: flex;
+    gap: 4px;
+}
+
+.ceo-report-pushsale .date-range-wrap .ps-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.ceo-report-pushsale .divSearch {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    min-height: 34px;
+}
+
+.ceo-report-pushsale .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #d2d6de;
+    background: #fff;
+    color: #444;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.ceo-report-pushsale .btn-icon:hover {
+    background: #f4f4f4;
+}
+
+.ceo-report-pushsale .btn-ps-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #3c8dbc;
+    border: 1px solid #367fa9;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.ceo-report-pushsale .btn-ps-primary:hover {
+    background-color: #367fa9;
+}
+
+.ceo-report-pushsale .btn-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #0c509a;
+    cursor: pointer;
+}
+
+.ceo-report-pushsale .chkAdvanced {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    font-size: 13px;
+    color: #444;
+    cursor: pointer;
+}
+
+.ceo-report-pushsale .ichucnang {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #d2d6de;
+    background: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.ceo-report-pushsale .dropdown-menu-ps {
+    position: absolute;
+    right: 8px;
+    top: 100%;
+    z-index: 40;
+    display: none;
+    min-width: 200px;
+    margin: 2px 0 0;
+    padding: 4px 0;
+    list-style: none;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}
+
+.ceo-report-pushsale .dropdown-menu-ps.open {
+    display: block;
+}
+
+.ceo-report-pushsale .dropdown-menu-ps a {
+    display: block;
+    padding: 8px 16px;
+    color: #333;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ceo-report-pushsale .dropdown-menu-ps a:hover {
+    background: #f5f5f5;
+}
+
+.ceo-report-pushsale .box-body {
+    padding: 10px 0 0;
+}
+
+.ceo-report-pushsale .row-cards {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -8px;
+    margin-right: -8px;
+}
+
+.ceo-report-pushsale .col-card {
+    flex: 0 0 16.666%;
+    max-width: 16.666%;
+    padding: 0 8px 8px;
+}
+
+@media (max-width: 991px) {
+    .ceo-report-pushsale .col-card {
+        flex: 0 0 33.333%;
+        max-width: 33.333%;
+    }
+}
+
+.ceo-report-pushsale .tabledata {
+    width: 100%;
+    margin-bottom: 0;
+    background: #fff;
+    border-collapse: collapse;
+}
+
+.ceo-report-pushsale .tabledata th,
+.ceo-report-pushsale .tabledata td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.ceo-report-pushsale .tabledata th {
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.ceo-report-pushsale .header_chogiao {
+    background: #f39c12 !important;
+    color: #fff !important;
+}
+
+.ceo-report-pushsale .header_danggiao {
+    background: #00c0ef !important;
+    color: #fff !important;
+}
+
+.ceo-report-pushsale .header_dagiao {
+    background: #00a65a !important;
+    color: #fff !important;
+}
+
+.ceo-report-pushsale .header_thutien {
+    background: #605ca8 !important;
+    color: #fff !important;
+}
+
+.ceo-report-pushsale .header_hoandon {
+    background: #dd4b39 !important;
+    color: #fff !important;
+}
+
+.ceo-report-pushsale .tableFixHead {
+    overflow: auto;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+.ceo-report-pushsale .table_sale,
+.ceo-report-pushsale .table_marketing {
+    height: 570px;
+}
+
+.ceo-report-pushsale .sr-only-export {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.ceo-report-pushsale .mt15 {
+    margin-top: 15px;
+}
+
+.ceo-report-pushsale .table-multi-select {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.ceo-report-pushsale .table-multi-select th,
+.ceo-report-pushsale .table-multi-select td {
+    border: 1px solid #ddd;
+    padding: 6px 8px;
+    vertical-align: middle;
+    font-size: 12px;
+}
+
+.ceo-report-pushsale .table-multi-select thead th {
+    background: #f9f9f9;
+    font-weight: 700;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.ceo-report-pushsale .table-multi-select .rowsum td {
+    background: #f4f4f4;
+    font-weight: 700;
+}
+
+.ceo-report-pushsale .no-wrap {
+    white-space: nowrap;
+}
+
+.ceo-report-pushsale .font-weight-bold {
+    font-weight: 700 !important;
+}
+
+.ceo-report-pushsale .box-progress {
+    position: relative;
+    min-height: 22px;
+}
+
+.ceo-report-pushsale .box-progress .progress {
+    height: 22px;
+    margin-bottom: 0;
+    background-color: #f5f5f5;
+    border-radius: 0;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.ceo-report-pushsale .box-progress .progress-bar {
+    height: 100%;
+    background-color: #3c8dbc;
+    box-shadow: none;
+    transition: width 0.3s ease;
+}
+
+.ceo-report-pushsale .box-progress .progress-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 12px;
+    color: #333;
+    pointer-events: none;
+}
+
+.ceo-report-pushsale .modal-note-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.ceo-report-pushsale .modal-note-panel {
+    width: 100%;
+    max-width: 720px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.ceo-report-pushsale .modal-note-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.ceo-report-pushsale .modal-note-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.ceo-report-pushsale .modal-note-body {
+    padding: 16px;
+    max-height: 50vh;
+    overflow: auto;
+}
+
+.ceo-report-pushsale .modal-note-body table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ceo-report-pushsale .modal-note-body th,
+.ceo-report-pushsale .modal-note-body td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.ceo-report-pushsale .modal-note-body th {
+    background: #f9f9f9;
+}

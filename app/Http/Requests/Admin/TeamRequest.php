@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\PermissionLevel;
 use App\Enums\TeamType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -35,6 +36,12 @@ class TeamRequest extends FormRequest
                 Rule::notIn(array_filter([$teamId])),
             ],
             'leader_user_id' => ['nullable', 'exists:users,id'],
+            'permissions' => ['sometimes', 'array'],
+            'permissions.*' => ['nullable', Rule::in([
+                PermissionLevel::None->value,
+                PermissionLevel::View->value,
+                PermissionLevel::Full->value,
+            ])],
         ];
     }
 }

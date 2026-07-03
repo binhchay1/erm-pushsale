@@ -24,6 +24,7 @@ return [
     'user_deleted' => 'Đã xóa nhân viên.',
     'user_cannot_delete_self' => 'Không thể xóa tài khoản đang đăng nhập.',
     'user_cannot_delete_last_admin' => 'Không thể xóa quản trị viên cuối cùng.',
+    'user_role_not_allowed' => 'Bạn không được phép gán vai trò này.',
 
     'user_org' => [
         'admin_no_manager' => 'Quản trị viên không có quản lý trực tiếp.',
@@ -79,6 +80,10 @@ return [
         'cannot_suspend_internal' => 'Không thể tạm khoá công ty nội bộ.',
         'settings_saved' => 'Đã lưu cấu hình hệ thống.',
         'invalid_domain' => 'Domain email không hợp lệ (ví dụ: saleops.local hoặc congty.com).',
+        'admin_created' => 'Đã tạo admin cho doanh nghiệp.',
+        'admin_updated' => 'Đã cập nhật admin.',
+        'admin_deleted' => 'Đã xoá admin.',
+        'cannot_delete_owner' => 'Không thể xoá admin chủ sở hữu của doanh nghiệp.',
     ],
     'profile' => [
         'password_required' => 'Vui lòng nhập mật khẩu mới.',

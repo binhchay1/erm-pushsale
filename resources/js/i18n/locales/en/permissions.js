@@ -1,0 +1,27 @@
+export default {
+    title: 'Feature permissions',
+    granted_count: '{count} areas granted',
+    select_all: 'Select all',
+    select_view_all: 'All: view only',
+    clear_all: 'Clear all',
+    level: {
+        none: 'None',
+        view: 'View only',
+        full: 'Full',
+    },
+    area: {
+        reports: 'Reports',
+        telesale: 'Telesale operations',
+        orders: 'Order management',
+        marketing: 'Marketing & campaigns',
+        leads: 'Leads & allocation',
+        warehouse: 'Warehouse & stock',
+        shipping: 'Shipping & reconciliation',
+        accounting: 'Accounting',
+        customers: 'Customers',
+        products: 'Products',
+        hr: 'Human resources',
+        integrations: 'Integrations',
+        activity: 'Activity log',
+    },
+};

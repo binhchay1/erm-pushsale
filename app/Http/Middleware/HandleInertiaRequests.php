@@ -61,7 +61,9 @@ class HandleInertiaRequests extends Middleware
                     'is_team_leader' => (bool) $user->is_team_leader,
                     'is_owner' => $user->isOwner(),
                     'is_platform_admin' => $user->isPlatformAdmin(),
+                    'is_super_admin' => $user->isSuperAdmin(),
                     'can_manage_platform' => $user->canManagePlatform(),
+                    'permissions' => $user->permissionsMap(),
                     'company' => $user->company ? [
                         'id' => $user->company->id,
                         'name' => $user->company->name,

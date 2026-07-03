@@ -200,8 +200,11 @@ class CampaignController extends Controller
         return [
             ['key' => 'name', 'api_name' => 'name', 'required' => false],
             ['key' => 'phone', 'api_name' => 'phone', 'required' => true],
+            ['key' => 'address', 'api_name' => 'address', 'required' => false],
             ['key' => 'products', 'api_name' => 'products', 'required' => false],
             ['key' => 'quantity', 'api_name' => 'quantity', 'required' => false],
+            ['key' => 'combo', 'api_name' => 'combo', 'required' => false],
+            ['key' => 'discount', 'api_name' => 'discount', 'required' => false],
             ['key' => 'message', 'api_name' => 'message', 'required' => false],
         ];
     }

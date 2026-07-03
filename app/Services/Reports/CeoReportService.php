@@ -68,26 +68,50 @@ class CeoReportService
 
         $marketingRows = MarketingSource::query()
             ->whereNull('parent_id')
-            ->with('children')
+            ->with(['children', 'marketer'])
             ->get()
-            ->map(function (MarketingSource $source, int $index) use ($orders) {
+            ->map(function (MarketingSource $source) use ($orders) {
                 $sourceOrders = (clone $orders)->where('marketing_source_id', $source->id)->get();
-                $budget = $source->budget;
-                $contacts = max($source->contacts, (int) $sourceOrders->sum('contact_count'));
-                $newRev = (int) $sourceOrders->where('is_returning_customer', false)->sum(fn ($o) => $o->netRevenue());
+                $budget = (int) $source->budget;
+                $contacts = max((int) $source->contacts, (int) $sourceOrders->sum('contact_count'));
+                $closed = $sourceOrders->count();
+                $newOrders = $sourceOrders->where('is_returning_customer', false);
+                $oldOrders = $sourceOrders->where('is_returning_customer', true);
+                $newRev = (int) $newOrders->sum(fn ($o) => $o->netRevenue());
+                $oldRev = (int) $oldOrders->sum(fn ($o) => $o->netRevenue());
                 $totalRev = (int) $sourceOrders->sum(fn ($o) => $o->netRevenue());
+                $kpi = 0.0;
+                $marketer = $source->marketer;
+                $username = $marketer
+                    ? (strstr($marketer->email, '@', true) ?: $marketer->email)
+                    : null;
 
                 return [
-                    'stt' => $index + 1,
-                    'marketerId' => (string) $source->id,
-                    'marketerName' => $source->name,
+                    'marketerId' => (string) ($marketer?->id ?? $source->id),
+                    'marketerName' => $marketer?->name ?? $source->name,
+                    'marketerUsername' => $username,
                     'budget' => $budget,
+                    'contacts' => $contacts,
                     'contactPrice' => $contacts > 0 ? (int) round($budget / $contacts) : 0,
+                    'closed' => $closed,
+                    'closeRate' => $contacts > 0 ? round($closed / $contacts * 100, 1) : 0,
+                    'newEstRevenue' => $newRev,
                     'budgetRevenueRatioNew' => $newRev > 0 ? round($budget / $newRev * 100, 1) : 0,
+                    'budgetRevenueRatioNewAfterDiscount' => $newRev > 0 ? round($budget / $newRev * 100, 1) : 0,
+                    'oldEstRevenue' => $oldRev,
+                    'totalEstRevenue' => $totalRev,
                     'budgetRevenueRatioTotal' => $totalRev > 0 ? round($budget / $totalRev * 100, 1) : 0,
+                    'codFee' => (int) $sourceOrders->sum('cod_fee'),
+                    'codSupport' => (int) $sourceOrders->sum('cod_support'),
+                    'bankTransfer' => (int) $sourceOrders->sum('discount'),
+                    'deposit' => (int) $sourceOrders->sum('deposit'),
+                    'marketingKpi' => $kpi,
+                    'achievementRate' => 0,
                 ];
             })
+            ->sortByDesc('contacts')
             ->values()
+            ->map(fn (array $row, int $index) => array_merge($row, ['stt' => $index + 1]))
             ->all();
 
         return [

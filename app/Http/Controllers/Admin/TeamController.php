@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\PermissionArea;
+use App\Enums\PermissionLevel;
 use App\Enums\TeamType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\TeamRequest;
@@ -38,12 +40,16 @@ class TeamController extends Controller
             'types' => $this->typeOptions(),
             'parents' => $this->parentOptions(),
             'leaders' => $this->leaderOptions(),
+            'permissionAreas' => $this->permissionAreas(),
         ]);
     }
 
     public function store(TeamRequest $request): RedirectResponse
     {
-        Team::query()->create($request->validated());
+        $data = $request->validated();
+        $data['permissions'] = $this->sanitizePermissions($request);
+
+        Team::query()->create($data);
 
         return redirect()->route('admin.teams.index')->with('success', __('messages.team_created'));
     }
@@ -57,10 +63,12 @@ class TeamController extends Controller
                 'type' => $team->type->value,
                 'parent_id' => $team->parent_id,
                 'leader_user_id' => $team->leader_user_id,
+                'permissions' => is_array($team->permissions) ? $team->permissions : [],
             ],
             'types' => $this->typeOptions(),
             'parents' => $this->parentOptions(excludeId: $team->id),
             'leaders' => $this->leaderOptions(),
+            'permissionAreas' => $this->permissionAreas(),
         ]);
     }
 
@@ -74,7 +82,10 @@ class TeamController extends Controller
             return back()->with('error', __('messages.team_child_parent'));
         }
 
-        $team->update($request->validated());
+        $data = $request->validated();
+        $data['permissions'] = $this->sanitizePermissions($request);
+
+        $team->update($data);
 
         return redirect()->route('admin.teams.index')->with('success', __('messages.team_updated'));
     }
@@ -131,5 +142,31 @@ class TeamController extends Controller
     private function leaderOptions(): array
     {
         return $this->users->nameOptions();
+    }
+
+    /** @return list<string> */
+    private function permissionAreas(): array
+    {
+        return array_map(fn (PermissionArea $a) => $a->value, PermissionArea::cases());
+    }
+
+    /**
+     * Chỉ giữ mức view/full; bỏ none và giá trị lạ.
+     *
+     * @return array<string, string>
+     */
+    private function sanitizePermissions(Request $request): array
+    {
+        $input = (array) $request->input('permissions', []);
+        $clean = [];
+
+        foreach (PermissionArea::cases() as $area) {
+            $level = PermissionLevel::fromNullable($input[$area->value] ?? null);
+            if ($level !== PermissionLevel::None) {
+                $clean[$area->value] = $level->value;
+            }
+        }
+
+        return $clean;
     }
 }

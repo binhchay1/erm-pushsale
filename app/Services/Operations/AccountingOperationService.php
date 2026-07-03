@@ -21,6 +21,7 @@ class AccountingOperationService
 
         return [
             'rows' => OrderOperationPresenter::collection($collection),
+            'totals' => OrderOperationPresenter::totals($collection),
             'statusTabs' => OrderOperationPresenter::accountingStatusTabs($all, $filter->hideZeroStatus),
         ];
     }

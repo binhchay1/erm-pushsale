@@ -12,11 +12,14 @@ class Team extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['name', 'type', 'leader_user_id', 'parent_id'];
+    protected $fillable = ['name', 'type', 'leader_user_id', 'parent_id', 'permissions'];
 
     protected function casts(): array
     {
-        return ['type' => TeamType::class];
+        return [
+            'type' => TeamType::class,
+            'permissions' => 'array',
+        ];
     }
 
     public function leader(): BelongsTo

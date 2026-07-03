@@ -33,6 +33,7 @@ class ProcessLeadIngestionJob implements ShouldQueue
         public ?int $campaignId = null,
         public ?int $companyId = null,
         public ?int $inboundEventId = null,
+        public bool $isUpsell = false,
     ) {}
 
     public function handle(
@@ -114,6 +115,9 @@ class ProcessLeadIngestionJob implements ShouldQueue
         }
 
         $driver = IntegrationDriverFactory::make(IntegrationPlatform::Landing);
-        $this->lastIngestion = $ingestionService->ingestForCampaign($driver, $campaign, $this->payload);
+
+        $this->lastIngestion = $this->isUpsell
+            ? $ingestionService->ingestUpsellForCampaign($driver, $campaign, $this->payload)
+            : $ingestionService->ingestForCampaign($driver, $campaign, $this->payload);
     }
 }

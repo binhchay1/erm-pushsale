@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use App\Enums\OrgLevel;
+use App\Enums\PermissionArea;
+use App\Enums\PermissionLevel;
 use App\Enums\UserRole;
 use App\Models\Concerns\BelongsToTenant;
+use App\Support\PermissionCatalog;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -16,7 +19,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['company_id', 'name', 'email', 'password', 'role', 'is_owner', 'is_platform_admin', 'avatar_path', 'phone', 'job_title', 'team_id', 'manager_user_id', 'created_by_user_id', 'is_team_leader', 'org_level'])]
+#[Fillable(['company_id', 'name', 'email', 'password', 'role', 'is_owner', 'is_platform_admin', 'avatar_path', 'phone', 'job_title', 'team_id', 'manager_user_id', 'created_by_user_id', 'is_team_leader', 'org_level', 'permissions'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -45,6 +48,7 @@ class User extends Authenticatable
             'is_owner' => 'boolean',
             'is_platform_admin' => 'boolean',
             'org_level' => OrgLevel::class,
+            'permissions' => 'array',
         ];
     }
 
@@ -103,7 +107,16 @@ class User extends Authenticatable
         return (bool) $this->is_platform_admin;
     }
 
-    /** Quản trị nền tảng: super admin hoặc admin công ty nội bộ. */
+    /**
+     * Super admin = chủ project: xem full dữ liệu công ty nội bộ + quản trị nền tảng.
+     * Chỉ KHÔNG thấy dữ liệu của các doanh nghiệp (tenant) do nó tạo — TenantScope tự chặn.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_platform_admin;
+    }
+
+    /** Quản trị nền tảng (/platform/*): super admin hoặc admin công ty nội bộ. */
     public function canManagePlatform(): bool
     {
         if ($this->isPlatformAdmin()) {
@@ -115,6 +128,49 @@ class User extends Authenticatable
         }
 
         return $this->belongsToInternalCompany();
+    }
+
+    /**
+     * Bản đồ quyền hiệu lực: mặc định theo vai trò, ghi đè bởi cột permissions.
+     *
+     * @return array<string, string>
+     */
+    public function permissionsMap(): array
+    {
+        // Admin công ty = toàn quyền mọi khu vực.
+        if ($this->isAdmin()) {
+            return PermissionCatalog::allFull();
+        }
+
+        $defaults = $this->role instanceof UserRole
+            ? PermissionCatalog::defaultsForRole($this->role)
+            : [];
+
+        $overrides = is_array($this->permissions) ? $this->permissions : [];
+
+        return array_merge($defaults, array_filter(
+            $overrides,
+            fn ($level) => in_array($level, ['none', 'view', 'full'], true),
+        ));
+    }
+
+    public function permissionLevel(PermissionArea|string $area): PermissionLevel
+    {
+        $key = $area instanceof PermissionArea ? $area->value : $area;
+
+        return PermissionLevel::fromNullable($this->permissionsMap()[$key] ?? null);
+    }
+
+    /** Có đủ quyền tối thiểu ở khu vực không (admin luôn true). */
+    public function allows(PermissionArea|string $area, PermissionLevel|string $level = PermissionLevel::View): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        $required = $level instanceof PermissionLevel ? $level : PermissionLevel::fromNullable($level);
+
+        return $this->permissionLevel($area)->allows($required);
     }
 
     public function belongsToInternalCompany(): bool
