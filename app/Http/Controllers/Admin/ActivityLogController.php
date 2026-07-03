@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Repositories\ActivityLogRepository;
 use App\Support\ActivityLogger;
+use App\Support\ActivityLogPresenter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -62,13 +63,17 @@ class ActivityLogController extends Controller
         return [
             'id' => $log->id,
             'action' => $log->action,
-            'action_label' => $log->actionLabel(),
+            'action_label' => ActivityLogPresenter::actionLabel($log->action),
+            'summary' => ActivityLogPresenter::summary($log),
+            'details' => ActivityLogPresenter::details($log),
             'subject_label' => $log->subject_label,
             'subject_type' => $log->subject_type,
             'subject_id' => $log->subject_id,
             'actor_name' => $log->actor?->name ?? __('activity.system_actor'),
             'actor_email' => $log->actor?->email,
-            'created_at' => $log->created_at?->format('d/m/Y H:i:s'),
+            'created_at' => $log->created_at
+                ?->timezone(config('app.timezone'))
+                ->format('d/m/Y H:i:s'),
             'ip_address' => $log->ip_address,
             'properties' => $log->properties ?? [],
         ];
@@ -102,20 +107,16 @@ class ActivityLogController extends Controller
             ActivityLogger::CAMPAIGN_APPROVED,
             ActivityLogger::CAMPAIGN_REJECTED,
             ActivityLogger::ORDER_CLOSED,
+            ActivityLogger::ORDER_UPDATED,
             ActivityLogger::ORDER_CALL_LOGGED,
             ActivityLogger::INVENTORY_MOVEMENT_APPROVED,
             ActivityLogger::LEAD_INGESTED,
         ];
 
-        return collect($actions)->map(function (string $action) {
-            $key = 'activity.actions.'.$action;
-            $label = __($key);
-
-            return [
-                'value' => $action,
-                'label' => $label === $key ? $action : $label,
-            ];
-        })->all();
+        return collect($actions)->map(fn (string $action) => [
+            'value' => $action,
+            'label' => ActivityLogPresenter::actionLabel($action),
+        ])->all();
     }
 
     /** @return list<array{value: string, label: string}> */

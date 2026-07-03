@@ -82,17 +82,11 @@ class LandingFormDriver implements LeadPayloadNormalizer
         $flattened = [];
 
         foreach ((array) Arr::get($payload, 'fields', []) as $field) {
-            $key = Str::of((string) ($field['name'] ?? $field['key'] ?? ''))->lower()->value();
-            if ($key !== '' && isset($field['value'])) {
-                $flattened[$key] = (string) $field['value'];
-            }
+            $this->putField($flattened, (string) ($field['name'] ?? $field['key'] ?? ''), $field['value'] ?? null);
         }
 
         foreach ((array) Arr::get($payload, 'form_data', []) as $item) {
-            $key = Str::of((string) ($item['name'] ?? $item['key'] ?? ''))->lower()->value();
-            if ($key !== '' && isset($item['value'])) {
-                $flattened[$key] = (string) $item['value'];
-            }
+            $this->putField($flattened, (string) ($item['name'] ?? $item['key'] ?? ''), $item['value'] ?? null);
         }
 
         // Ladipage WordPress plugin thường gửi f1, f2, ... theo field order.
@@ -103,6 +97,32 @@ class LandingFormDriver implements LeadPayloadNormalizer
         }
 
         return $flattened;
+    }
+
+    /**
+     * Đưa 1 field vào map với cả key gốc (lower) lẫn key slug không dấu
+     * để khớp được label tiếng Việt có dấu như "Địa chỉ", "Số điện thoại".
+     *
+     * @param  array<string, string>  $flattened
+     */
+    protected function putField(array &$flattened, string $name, mixed $value): void
+    {
+        if ($value === null || ! is_scalar($value)) {
+            return;
+        }
+
+        $lower = Str::of($name)->lower()->trim()->value();
+        if ($lower === '') {
+            return;
+        }
+
+        $flattened[$lower] = (string) $value;
+
+        // "Địa chỉ nhận hàng" -> "dia_chi_nhan_hang"
+        $slug = Str::of($name)->ascii()->lower()->replaceMatches('/[^a-z0-9]+/', '_')->trim('_')->value();
+        if ($slug !== '' && ! array_key_exists($slug, $flattened)) {
+            $flattened[$slug] = (string) $value;
+        }
     }
 
     /**

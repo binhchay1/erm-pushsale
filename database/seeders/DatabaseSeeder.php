@@ -12,9 +12,10 @@ use Illuminate\Database\Seeder;
  * Bộ dữ liệu demo đồng bộ toàn hệ thống (đa doanh nghiệp).
  *
  * Tài khoản chính (mật khẩu chung `password`):
- * - admin@saleops.local — super admin (chủ project): full dữ liệu nội bộ + quản trị nền tảng
+ * - superadmin@saleops.local — super admin (chủ project): full dữ liệu nội bộ + quản trị nền tảng
  *   (tạo công ty + admin cho doanh nghiệp khác). KHÔNG thấy dữ liệu tenant khác.
- * - sales@saleops.local, marketing@saleops.local, … — nhân sự nội bộ.
+ * - admin@saleops.local — quản trị công ty nội bộ.
+ * - sales@saleops.local, marketing@saleops.local, … — trưởng các bộ phận nội bộ.
  *
  * Doanh nghiệp khách: tạo qua /platform/companies → email admin@{slug}.saleops.local
  */
@@ -33,13 +34,14 @@ class DatabaseSeeder extends Seeder
                 InventorySeeder::class,
                 MarketingCampaignSeeder::class,
                 SalesPipelineSeeder::class,
+                LandingFlowSeeder::class,
                 ShippingEventSeeder::class,
                 DemoNotificationSeeder::class,
             ]);
         });
 
         $owner = User::query()->withoutGlobalScope(TenantScope::class)
-            ->where('email', 'admin@saleops.local')
+            ->where('email', 'superadmin@saleops.local')
             ->first();
 
         if ($owner) {
@@ -49,7 +51,7 @@ class DatabaseSeeder extends Seeder
                 'is_platform_admin' => true,
                 'company_id' => $company->id,
             ]);
-            $company->update(['owner_user_id' => $owner->id, 'contact_email' => 'admin@saleops.local']);
+            $company->update(['owner_user_id' => $owner->id, 'contact_email' => 'superadmin@saleops.local']);
         }
     }
 }

@@ -33,20 +33,42 @@ class UserHierarchyService
         return 4; // staff
     }
 
-    /** Actor có được phép chỉnh sửa (thông tin + quyền) target không. */
-    public function canManage(User $actor, User $target): bool
+    /**
+     * Actor có được NHÌN THẤY target trong danh sách nhân sự không.
+     * Tách khỏi canManage (quyền sửa) để đồng bộ đúng với sơ đồ tổ chức:
+     * - Admin & super admin (role Admin): thấy toàn bộ nhân sự công ty.
+     * - Trưởng bộ phận (head): toàn ngành (cùng role).
+     * - Giám sát / trưởng nhóm: cấp dưới trực tiếp hoặc cùng team.
+     * - Nhân viên: chỉ chính mình.
+     */
+    public function canView(User $actor, User $target): bool
     {
-        // Super admin không quản lý nhân sự nghiệp vụ ở đây (làm ở /platform).
-        if ($actor->isSuperAdmin()) {
+        if ($actor->id === $target->id) {
+            return true;
+        }
+
+        // Admin công ty và super admin (đều role Admin) thấy toàn bộ nhân sự.
+        if ($actor->isAdmin()) {
+            return true;
+        }
+
+        // Không lộ super admin cho cấp dưới.
+        if ($target->isSuperAdmin()) {
             return false;
         }
 
+        return $this->inScope($actor, $target);
+    }
+
+    /** Actor có được phép chỉnh sửa (thông tin + quyền) target không. */
+    public function canManage(User $actor, User $target): bool
+    {
         // Không ai chỉnh được super admin qua màn nhân sự công ty.
         if ($target->isSuperAdmin()) {
             return false;
         }
 
-        // Admin công ty: full toàn bộ nhân viên (trừ super admin).
+        // Admin công ty & super admin (đều là admin nội bộ): full toàn bộ nhân viên.
         if ($actor->isAdmin()) {
             return true;
         }

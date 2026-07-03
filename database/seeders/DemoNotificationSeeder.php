@@ -39,7 +39,7 @@ class DemoNotificationSeeder extends Seeder
         $this->notify($users->get('admin@saleops.local'), [
             ['lead', 'Lead mới đang chờ chia số', $pendingLead ? ($pendingLead->customer_name.' · '.($pendingLead->customer_phone ?? 'thiếu SĐT')) : 'Có lead chờ xử lý', '/admin/leads'],
             ['system', 'Chiến dịch Landing chờ duyệt', 'Serum Vitamin C — Zalo Ads đang chờ phê duyệt', '/admin/landing/approvals', true],
-            ['order', 'Doanh số hôm nay đã cập nhật', 'Xem tổng quan kinh doanh mới nhất', '/admin/reports/business', true],
+            ['order', 'Doanh số hôm nay đã cập nhật', 'Xem tổng quan điều hành mới nhất', '/admin/dashboard', true],
         ]);
 
         $sale = $users->get('sales@saleops.local');

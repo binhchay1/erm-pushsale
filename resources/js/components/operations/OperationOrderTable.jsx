@@ -18,6 +18,7 @@ function formatDateTime(value) {
         month: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: 'Asia/Ho_Chi_Minh',
     });
 }
 
@@ -78,7 +79,7 @@ export function OperationOrderTable({
                                         {t('operations.order_table.assigned')} {row.assignedAt?.slice(0, 10) ?? '—'}
                                     </div>
                                 </Td>
-                                <Td>
+                                <Td className="max-w-[220px] whitespace-normal">
                                     <div className="font-medium text-primary">{row.customerName}</div>
                                     <div>{row.customerPhone}</div>
                                     {row.phoneCarrier && (
@@ -86,9 +87,14 @@ export function OperationOrderTable({
                                             [{row.phoneCarrier}]
                                         </span>
                                     )}
+                                    {row.shippingAddress && (
+                                        <div className="mt-1 text-[11px] text-muted-foreground">
+                                            {row.shippingAddress}
+                                        </div>
+                                    )}
                                 </Td>
                                 <Td className="max-w-[200px] whitespace-normal text-muted-foreground">
-                                    {row.customerNote || row.shippingAddress}
+                                    {row.customerNote || '—'}
                                 </Td>
                                 <Td>
                                     <span className="font-semibold text-destructive">{row.currentOperation}</span>

@@ -19,7 +19,7 @@ export function ReportRefreshButton({ routeUrl, filters, cachedAt }) {
             </Button>
             {cachedAt && (
                 <span className="text-[10px] text-muted-foreground">
-                    {t('reports.cached_at', { time: new Date(cachedAt).toLocaleString('vi-VN') })}
+                    {t('reports.cached_at', { time: new Date(cachedAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }) })}
                 </span>
             )}
         </div>

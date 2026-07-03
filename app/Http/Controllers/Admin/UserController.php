@@ -34,7 +34,7 @@ class UserController extends Controller
         $actor = auth()->user();
 
         $users = $this->users->allWithTeamAndManager()
-            ->filter(fn (User $u) => $u->id === $actor?->id || ($actor && $this->hierarchy->canManage($actor, $u)))
+            ->filter(fn (User $u) => $actor && $this->hierarchy->canView($actor, $u))
             ->map(fn (User $u) => [
                 'id' => $u->id,
                 'name' => $u->name,

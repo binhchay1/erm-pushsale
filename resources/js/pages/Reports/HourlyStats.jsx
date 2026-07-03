@@ -34,17 +34,19 @@ export default function HourlyStats({
             <Head title={title} />
 
             <div className="space-y-6">
-                <PageHeader icon={Clock} title={title} description={t('reports.hourly.description')} />
+                <PageHeader
+                    icon={Clock}
+                    title={title}
+                    description={t('reports.hourly.description')}
+                    actions={<ReportExportButton routeUrl={routeUrl} filters={filters} />}
+                />
 
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                    <ReportFilterBar
-                        routeUrl={routeUrl}
-                        filters={filters}
-                        filterOptions={filterOptions}
-                        filterFields={filterFields}
-                    />
-                    <ReportExportButton routeUrl={routeUrl} filters={filters} />
-                </div>
+                <ReportFilterBar
+                    routeUrl={routeUrl}
+                    filters={filters}
+                    filterOptions={filterOptions}
+                    filterFields={filterFields}
+                />
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <StatCard title={t('reports.hourly.total_contacts')} value={formatNumber(totals.contacts ?? 0)} icon={PhoneCall} />

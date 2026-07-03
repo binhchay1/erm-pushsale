@@ -45,6 +45,49 @@ class PermissionSystemTest extends TestCase
             ->assertOk();
     }
 
+    public function test_super_admin_can_view_and_manage_internal_staff(): void
+    {
+        $super = $this->makeSuperAdmin();
+        $hierarchy = app(UserHierarchyService::class);
+
+        $staff = User::factory()->create([
+            'role' => UserRole::Sales,
+            'org_level' => OrgLevel::Staff,
+        ]);
+
+        // Trước đây canManage trả false cho super admin -> danh sách nhân viên chỉ thấy chính mình.
+        $this->assertTrue($hierarchy->canView($super, $staff));
+        $this->assertTrue($hierarchy->canManage($super, $staff));
+
+        $this->actingAs($super)
+            ->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where(
+                'users',
+                fn ($rows) => collect($rows)->contains('id', $staff->id),
+            ));
+    }
+
+    public function test_leader_only_views_own_team(): void
+    {
+        $hierarchy = app(UserHierarchyService::class);
+
+        $teamA = \App\Models\Team::query()->create(['name' => 'Team A', 'type' => \App\Enums\TeamType::Sale]);
+        $teamB = \App\Models\Team::query()->create(['name' => 'Team B', 'type' => \App\Enums\TeamType::Sale]);
+
+        $leader = User::factory()->create([
+            'role' => UserRole::Sales,
+            'org_level' => OrgLevel::Supervisor,
+            'is_team_leader' => true,
+            'team_id' => $teamA->id,
+        ]);
+        $teammate = User::factory()->create(['role' => UserRole::Sales, 'team_id' => $teamA->id]);
+        $outsider = User::factory()->create(['role' => UserRole::Sales, 'team_id' => $teamB->id]);
+
+        $this->assertTrue($hierarchy->canView($leader, $teammate));
+        $this->assertFalse($hierarchy->canView($leader, $outsider));
+    }
+
     public function test_company_admin_has_full_permissions(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);

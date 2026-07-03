@@ -68,9 +68,10 @@ class SalesPipelineSeeder extends Seeder
     {
         mt_srand(20260610); // deterministic — seed lại bao nhiêu lần cũng ra cùng bộ số
 
+        // Gán đơn cho MỌI nhân sự sale (gồm cả trưởng bộ phận) để tài khoản nào
+        // đăng nhập cũng có dữ liệu tác nghiệp; báo cáo theo nhóm vẫn đúng phạm vi.
         $salesPool = User::query()
             ->where('role', UserRole::Sales)
-            ->where('email', '!=', 'head.sale@saleops.local')
             ->orderBy('id')
             ->get()
             ->values();

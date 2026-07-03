@@ -80,7 +80,6 @@ class NavigationService
                 $this->item('rankings', '/admin/rankings', 'trophy'),
             ]),
             $this->group('reports_executive', [
-                $this->item('business_overview', '/admin/reports/business', 'activity'),
                 $this->item('ceo_report', '/admin/reports/ceo', 'bar-chart-3'),
             ]),
             $this->group('reports_sales', [

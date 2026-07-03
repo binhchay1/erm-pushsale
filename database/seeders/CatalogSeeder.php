@@ -46,7 +46,7 @@ class CatalogSeeder extends Seeder
             'unit_price' => 120_000,
         ]);
 
-        $warehouseHead = User::query()->where('email', 'head.warehouse@saleops.local')->first();
+        $warehouseHead = User::query()->where('email', 'warehouse@saleops.local')->first();
 
         Warehouse::query()->create([
             'code' => 'HN',

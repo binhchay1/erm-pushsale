@@ -22,8 +22,9 @@ class InventorySeeder extends Seeder
 
     public function run(): void
     {
-        $staff = User::query()->where('email', 'warehouse@saleops.local')->firstOrFail();
-        $head = User::query()->where('email', 'head.warehouse@saleops.local')->firstOrFail();
+        // Nhân viên kho lập phiếu, trưởng kho (warehouse@) ký duyệt.
+        $staff = User::query()->where('email', 'wh01@saleops.local')->firstOrFail();
+        $head = User::query()->where('email', 'warehouse@saleops.local')->firstOrFail();
         $warehouses = Warehouse::query()->orderBy('id')->get();
         $products = Product::query()->orderBy('id')->get();
 

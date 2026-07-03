@@ -46,9 +46,6 @@ class ActivityLog extends Model
 
     public function actionLabel(): string
     {
-        $key = 'activity.actions.'.$this->action;
-        $label = __($key);
-
-        return $label === $key ? $this->action : $label;
+        return \App\Support\ActivityLogPresenter::actionLabel($this->action);
     }
 }

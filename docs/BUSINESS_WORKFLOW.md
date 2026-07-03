@@ -101,7 +101,7 @@ flowchart TB
 
 Mật khẩu demo: **`password`**
 
-Mỗi bộ phận có chuỗi cấp bậc **Trưởng bộ phận (head) → Trưởng nhóm (supervisor) → Nhân viên (staff)** — tài khoản demo cho từng cấp (vd. `head.sale@`, `leader.sale.a@`) liệt kê tại [README](./README.md) và `database/seeders/AccountSeeder.php`. Trưởng kho (`head.warehouse@saleops.local`) là người ký duyệt mọi phiếu nhập / xuất kho thủ công.
+Mỗi bộ phận có chuỗi cấp bậc **Trưởng bộ phận (head) → Trưởng nhóm (supervisor) → Nhân viên (staff)** — tài khoản demo cho từng cấp (vd. `sales@`, `leader.sale.a@`, `sale01@`) liệt kê tại [README](./README.md), `app/Support/DemoAccounts.php` và ngay trên trang đăng nhập. Trưởng kho (`warehouse@saleops.local`) là người ký duyệt mọi phiếu nhập / xuất kho thủ công.
 
 ### Nguyên tắc phân quyền
 

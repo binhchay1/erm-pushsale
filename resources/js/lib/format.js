@@ -1,3 +1,6 @@
+// Toàn hệ thống hiển thị theo giờ Việt Nam, không phụ thuộc múi giờ trình duyệt.
+export const APP_TIMEZONE = 'Asia/Ho_Chi_Minh';
+
 function resolveLocale(locale) {
     if (locale) {
         return locale;
@@ -78,8 +81,8 @@ export function formatDateTime(value, { withTime = true, locale } = {}) {
     if (Number.isNaN(date.getTime())) return typeof value === 'string' ? value : '—';
 
     return date.toLocaleString(resolveLocale(locale), withTime
-        ? { dateStyle: 'short', timeStyle: 'short' }
-        : { dateStyle: 'short' });
+        ? { dateStyle: 'short', timeStyle: 'short', timeZone: APP_TIMEZONE }
+        : { dateStyle: 'short', timeZone: APP_TIMEZONE });
 }
 
 export function formatDate(value, locale) {

@@ -22,17 +22,20 @@ composer run dev
 
 **Tài khoản demo** (mật khẩu `password`):
 
+> Quy ước: `{vai trò}@saleops.local` là **Trưởng bộ phận**; nhân viên dùng hậu tố số (`sale01@`, `mkt01@`, `wh01@`). Danh sách đầy đủ hiển thị ngay tại trang đăng nhập (nút "Xem danh sách tài khoản demo").
+
 | Role | Email | Vị trí |
 |------|-------|--------|
-| Admin | `admin@saleops.local` | Quản trị hệ thống |
-| Telesale | `sales@saleops.local` | Nhân viên — Nhóm Sale A |
-| Telesale | `head.sale@saleops.local` | Trưởng bộ phận Telesale |
+| Super Admin | `superadmin@saleops.local` | Chủ hệ thống — quản trị nền tảng + full nội bộ |
+| Admin | `admin@saleops.local` | Quản trị công ty |
+| Telesale | `sales@saleops.local` | Trưởng bộ phận Telesale |
 | Telesale | `leader.sale.a@saleops.local` / `leader.sale.b@saleops.local` | Trưởng nhóm Sale A / B |
-| Marketing | `marketing@saleops.local` | Nhân viên — Nhóm Marketing A |
-| Marketing | `head.marketing@saleops.local` | Trưởng bộ phận Marketing |
+| Telesale | `sale01@` … `sale05@saleops.local` | Nhân viên Telesale |
+| Marketing | `marketing@saleops.local` | Trưởng bộ phận Marketing |
 | Marketing | `leader.marketing.a@saleops.local` / `leader.marketing.b@saleops.local` | Trưởng nhóm Marketing A / B |
-| Kho | `warehouse@saleops.local` | Nhân viên kho |
-| Kho | `head.warehouse@saleops.local` | Trưởng kho — ký duyệt nhập/xuất |
+| Marketing | `mkt01@` … `mkt06@saleops.local` | Nhân viên Marketing |
+| Kho | `warehouse@saleops.local` | Trưởng kho — ký duyệt nhập/xuất |
+| Kho | `wh01@` / `wh02@saleops.local` | Nhân viên kho |
 | Chia số | `allocator@saleops.local` | Trưởng bộ phận Chia số |
 | Kế toán | `accounting@saleops.local` | Trưởng bộ phận Kế toán |
 

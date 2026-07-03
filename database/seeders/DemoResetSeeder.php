@@ -18,6 +18,8 @@ class DemoResetSeeder extends Seeder
 {
     /** Thứ tự không quan trọng vì đã tắt kiểm tra khóa ngoại. */
     private const TABLES = [
+        'activity_logs',
+        'landing_sessions',
         'user_notifications',
         'warehouse_inventory_movements',
         'warehouse_inventories',

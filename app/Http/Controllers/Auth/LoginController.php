@@ -17,7 +17,10 @@ class LoginController extends Controller
 {
     public function create(): Response
     {
-        return Inertia::render('Auth/Login');
+        return Inertia::render('Auth/Login', [
+            'demoAccounts' => \App\Support\DemoAccounts::displayGroups(),
+            'demoPassword' => \App\Support\DemoAccounts::PASSWORD,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

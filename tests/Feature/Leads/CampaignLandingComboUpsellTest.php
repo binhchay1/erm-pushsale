@@ -72,6 +72,26 @@ class CampaignLandingComboUpsellTest extends TestCase
         $this->assertSame(269_000, $order->effectiveRevenue());
     }
 
+    public function test_landing_webhook_captures_vietnamese_labeled_address(): void
+    {
+        $campaign = $this->autoCampaign();
+
+        // Ladipage gửi field theo nhãn tiếng Việt có dấu ("Địa chỉ nhận hàng").
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'lp-vn-addr-1',
+            'fields' => [
+                ['name' => 'Họ và tên', 'value' => 'Chị Mai'],
+                ['name' => 'Số điện thoại', 'value' => '0905999888'],
+                ['name' => 'Địa chỉ nhận hàng', 'value' => '45 Lê Lợi, Hải Châu, Đà Nẵng'],
+            ],
+        ])->assertAccepted();
+
+        $order = Order::query()->where('customer_phone', '0905999888')->first();
+
+        $this->assertNotNull($order);
+        $this->assertSame('45 Lê Lợi, Hải Châu, Đà Nẵng', $order->shipping_address);
+    }
+
     public function test_thankyou_upsell_appends_to_existing_order_without_duplicate(): void
     {
         $campaign = $this->autoCampaign();

@@ -18,15 +18,20 @@ import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 import { cn } from '@/lib/utils';
 
-function PropertiesBlock({ data }) {
-    if (!data || Object.keys(data).length === 0) {
-        return <p className="text-sm text-muted-foreground">—</p>;
+function DetailsBlock({ rows, emptyText }) {
+    if (!rows || rows.length === 0) {
+        return <p className="text-sm text-muted-foreground">{emptyText}</p>;
     }
 
     return (
-        <pre className="max-h-80 overflow-auto rounded-lg border bg-muted/30 p-3 text-[11px] leading-relaxed">
-            {JSON.stringify(data, null, 2)}
-        </pre>
+        <dl className="divide-y divide-border/60 rounded-lg border">
+            {rows.map((row, index) => (
+                <div key={index} className="flex items-start justify-between gap-4 px-3 py-2">
+                    <dt className="text-xs font-medium text-muted-foreground">{row.label}</dt>
+                    <dd className="text-right text-sm font-medium">{row.value}</dd>
+                </div>
+            ))}
+        </dl>
     );
 }
 
@@ -128,7 +133,7 @@ export default function ActivityLogsIndex({ logs, filters, actionOptions, subjec
                             <tr>
                                 <Th sortable sortKey="created_at" sort={sort} onSort={toggleSort}>{t('activity.col_time')}</Th>
                                 <Th sortable sortKey="action_label" sort={sort} onSort={toggleSort}>{t('activity.col_action')}</Th>
-                                <Th sortable sortKey="subject_label" sort={sort} onSort={toggleSort}>{t('activity.col_subject')}</Th>
+                                <Th>{t('activity.col_summary')}</Th>
                                 <Th sortable sortKey="actor_name" sort={sort} onSort={toggleSort}>{t('activity.col_actor')}</Th>
                                 <Th sortable sortKey="ip_address" sort={sort} onSort={toggleSort}>{t('activity.col_ip')}</Th>
                                 <Th />
@@ -142,9 +147,11 @@ export default function ActivityLogsIndex({ logs, filters, actionOptions, subjec
                                         className="cursor-pointer hover:bg-muted/30"
                                         onClick={() => setSelected(row)}
                                     >
-                                        <Td>{row.created_at}</Td>
+                                        <Td className="whitespace-nowrap">{row.created_at}</Td>
                                         <Td className="font-medium">{row.action_label}</Td>
-                                        <Td>{row.subject_label ?? '—'}</Td>
+                                        <Td className="max-w-[380px] whitespace-normal text-muted-foreground">
+                                            {row.summary || row.subject_label || '—'}
+                                        </Td>
                                         <Td>{row.actor_name}</Td>
                                         <Td className="font-mono text-[10px]">{row.ip_address ?? '—'}</Td>
                                         <Td>
@@ -189,8 +196,8 @@ export default function ActivityLogsIndex({ logs, filters, actionOptions, subjec
                     {selected && (
                         <>
                             <DialogHeader>
-                                <DialogTitle>{t('activity.detail_title')}</DialogTitle>
-                                <DialogDescription>{selected.action_label}</DialogDescription>
+                                <DialogTitle>{selected.action_label}</DialogTitle>
+                                <DialogDescription>{selected.summary || '—'}</DialogDescription>
                             </DialogHeader>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div>
@@ -212,7 +219,7 @@ export default function ActivityLogsIndex({ logs, filters, actionOptions, subjec
                             </div>
                             <div className="space-y-2">
                                 <p className="text-sm font-semibold">{t('activity.detail_properties')}</p>
-                                <PropertiesBlock data={selected.properties} />
+                                <DetailsBlock rows={selected.details} emptyText={t('activity.detail_empty')} />
                             </div>
                         </>
                     )}

@@ -112,7 +112,19 @@ export default function ExtraReport({
             <Head title={title} />
 
             <div className="space-y-6">
-                <PageHeader icon={BarChart3} title={title} description={description} />
+                <PageHeader
+                    icon={BarChart3}
+                    title={title}
+                    description={description}
+                    actions={
+                        <div className="flex flex-wrap items-center gap-2">
+                            <ReportExportButton routeUrl={routeUrl} filters={filters} />
+                            {useCache && (
+                                <ReportRefreshButton routeUrl={routeUrl} filters={filters} cachedAt={cachedAt} />
+                            )}
+                        </div>
+                    }
+                />
 
                 {reportNav.length > 1 && (
                     <div className="flex flex-wrap gap-2">
@@ -133,26 +145,13 @@ export default function ExtraReport({
                     </div>
                 )}
 
-                {hasFilters ? (
-                    <div className="flex flex-wrap items-end justify-between gap-3">
-                        <ReportFilterBar
-                            routeUrl={routeUrl}
-                            filters={filters}
-                            filterOptions={filterOptions}
-                            filterFields={filterFields}
-                        />
-                        <ReportExportButton routeUrl={routeUrl} filters={filters} />
-                        {useCache && (
-                            <ReportRefreshButton routeUrl={routeUrl} filters={filters} cachedAt={cachedAt} />
-                        )}
-                    </div>
-                ) : (
-                    <div className="flex justify-end gap-2">
-                        <ReportExportButton routeUrl={routeUrl} filters={filters} />
-                        {useCache && (
-                            <ReportRefreshButton routeUrl={routeUrl} filters={filters} cachedAt={cachedAt} />
-                        )}
-                    </div>
+                {hasFilters && (
+                    <ReportFilterBar
+                        routeUrl={routeUrl}
+                        filters={filters}
+                        filterOptions={filterOptions}
+                        filterFields={filterFields}
+                    />
                 )}
 
                 <ScrollDataTable>

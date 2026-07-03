@@ -24,11 +24,11 @@ class MarketingCampaignSeeder extends Seeder
         $marketers = User::query()
             ->whereIn('email', [
                 'marketing@saleops.local',
+                'mkt01@saleops.local',
                 'mkt02@saleops.local',
                 'mkt03@saleops.local',
+                'mkt04@saleops.local',
                 'mkt05@saleops.local',
-                'mkt06@saleops.local',
-                'mkt07@saleops.local',
             ])
             ->orderBy('id')
             ->get()
@@ -39,12 +39,12 @@ class MarketingCampaignSeeder extends Seeder
         $campaigns = [
             // [tên, sku, email marketer, kênh, utm_source, ngân sách, tương tác, liên hệ, đã duyệt]
             ['Gối mây đan — Facebook Ads', 'SP-GOI-01S', 'marketing@saleops.local', 'facebook', 'facebook', 15_000_000, 4200, 520, true],
-            ['Camera mini an ninh — Facebook', 'SP-CAM-01', 'mkt02@saleops.local', 'facebook', 'facebook', 12_000_000, 3100, 380, true],
-            ['Serum Vitamin C — TikTok Shop', 'SP-SRM-01', 'mkt03@saleops.local', 'tiktok', 'tiktok', 9_000_000, 5600, 430, true],
-            ['Bột diệt cỏ — Google Search', 'SP-BDC-01', 'mkt05@saleops.local', 'google', 'google', 7_500_000, 1900, 260, true],
-            ['Gối mây đan — Landing Ladipage', 'SP-GOI-01', 'mkt06@saleops.local', 'landing', 'ladipage', 6_000_000, 1400, 190, true],
+            ['Camera mini an ninh — Facebook', 'SP-CAM-01', 'mkt01@saleops.local', 'facebook', 'facebook', 12_000_000, 3100, 380, true],
+            ['Serum Vitamin C — TikTok Shop', 'SP-SRM-01', 'mkt02@saleops.local', 'tiktok', 'tiktok', 9_000_000, 5600, 430, true],
+            ['Bột diệt cỏ — Google Search', 'SP-BDC-01', 'mkt03@saleops.local', 'google', 'google', 7_500_000, 1900, 260, true],
+            ['Gối mây đan — Landing Ladipage', 'SP-GOI-01', 'mkt04@saleops.local', 'landing', 'ladipage', 6_000_000, 1400, 190, true],
             // 1 chiến dịch chờ admin duyệt — lead về sẽ nằm ở hàng chờ chia số
-            ['Serum Vitamin C — Zalo Ads', 'SP-SRM-01', 'mkt07@saleops.local', 'zalo', 'zalo', 4_000_000, 600, 75, false],
+            ['Serum Vitamin C — Zalo Ads', 'SP-SRM-01', 'mkt05@saleops.local', 'zalo', 'zalo', 4_000_000, 600, 75, false],
         ];
 
         foreach ($campaigns as [$name, $sku, $email, $channel, $utmSource, $budget, $interactions, $contacts, $approved]) {
@@ -64,6 +64,8 @@ class MarketingCampaignSeeder extends Seeder
                 'contacts' => $contacts,
                 'is_active' => true,
                 'is_approved' => $approved,
+                // Chiến dịch Landing bật theo dõi phiên JS để demo luồng gộp đơn + upsale.
+                'js_tracking_enabled' => $channel === 'landing',
             ]);
         }
 

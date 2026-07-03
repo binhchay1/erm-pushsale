@@ -63,18 +63,24 @@ export default function TeamLeaderStats({
             <Head title={title} />
 
             <div className="space-y-6">
-                <PageHeader icon={Network} title={title} description={t('reports.team_leaders.description')} />
+                <PageHeader
+                    icon={Network}
+                    title={title}
+                    description={t('reports.team_leaders.description')}
+                    actions={
+                        <div className="flex flex-wrap items-center gap-2">
+                            <ReportExportButton routeUrl={routeUrl} filters={filters} />
+                            <ReportRefreshButton routeUrl={routeUrl} filters={filters} cachedAt={cachedAt} />
+                        </div>
+                    }
+                />
 
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                    <ReportFilterBar
-                        routeUrl={routeUrl}
-                        filters={filters}
-                        filterOptions={filterOptions}
-                        filterFields={filterFields}
-                    />
-                    <ReportExportButton routeUrl={routeUrl} filters={filters} />
-                    <ReportRefreshButton routeUrl={routeUrl} filters={filters} cachedAt={cachedAt} />
-                </div>
+                <ReportFilterBar
+                    routeUrl={routeUrl}
+                    filters={filters}
+                    filterOptions={filterOptions}
+                    filterFields={filterFields}
+                />
 
                 <ScrollDataTable>
                     <table className="w-full min-w-max text-sm">

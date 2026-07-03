@@ -36,6 +36,7 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
                 <PageHeader
                     title={t('dashboard.marketing.title')}
                     description={t('dashboard.marketing.admin_desc')}
+                    actions={<ReportRefreshButton routeUrl={routeUrl} filters={filters} cachedAt={cachedAt} />}
                 />
 
                 <ReportFilterBar
@@ -43,7 +44,6 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
                     filters={filters}
                     filterOptions={filterOptions}
                     filterFields={filterFields}
-                    extra={<ReportRefreshButton routeUrl={routeUrl} filters={filters} cachedAt={cachedAt} />}
                 />
 
                 <MarketingKpiHero kpis={report.kpis} />

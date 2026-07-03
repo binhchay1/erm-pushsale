@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Accounting\DashboardController as AccountingDashboardController;
 use App\Http\Controllers\Admin\Accounting\OperationsController as AccountingOperationsController;
-use App\Http\Controllers\Admin\BusinessOverviewController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FailedPartnerOrderController;
 use App\Http\Controllers\Admin\IntegrationsController;
@@ -108,7 +107,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
 
     Route::middleware('role:'.User::ROLE_ADMIN)->prefix('admin')->name('admin.')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
-        Route::get('reports/business', BusinessOverviewController::class)->name('reports.business');
+        // "Tổng quan vận hành" đã gộp vào "Tổng quan điều hành" (dashboard). Giữ redirect cho link cũ.
+        Route::get('reports/business', fn () => redirect()->route('admin.dashboard'))->name('reports.business');
         Route::get('reports/ceo', CeoReportController::class)->name('reports.ceo');
         Route::get('reports/hourly', HourlyStatsController::class)->name('reports.hourly');
         Route::get('reports/team-leaders', TeamLeaderStatsController::class)->name('reports.team-leaders');
