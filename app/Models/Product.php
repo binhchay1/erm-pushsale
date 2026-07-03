@@ -11,11 +11,18 @@ class Product extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['parent_id', 'name', 'sku', 'unit_price', 'is_active'];
+    protected $fillable = ['parent_id', 'name', 'type', 'sku', 'unit_price', 'is_active'];
+
+    protected $attributes = ['type' => 'product'];
 
     protected function casts(): array
     {
         return ['is_active' => 'boolean'];
+    }
+
+    public function isCombo(): bool
+    {
+        return $this->type === 'combo';
     }
 
     public function parent(): BelongsTo

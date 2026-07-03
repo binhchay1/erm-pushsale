@@ -37,6 +37,7 @@ export default function ProductsIndex({ products }) {
                         <thead>
                             <tr>
                                 <Th sortable sortKey="name" sort={sort} onSort={toggleSort}>{t('pages.products.col_name')}</Th>
+                                <Th sortable sortKey="type" sort={sort} onSort={toggleSort}>{t('pages.products.col_type')}</Th>
                                 <Th sortable sortKey="sku" sort={sort} onSort={toggleSort}>{t('pages.products.col_sku')}</Th>
                                 <Th sortable sortKey="unit_price" sort={sort} onSort={toggleSort} className="text-right">{t('pages.products.col_price')}</Th>
                                 <Th sortable sortKey="parent_name" sort={sort} onSort={toggleSort}>{t('pages.products.col_parent')}</Th>
@@ -50,6 +51,19 @@ export default function ProductsIndex({ products }) {
                                 sortedRows.map((row) => (
                                     <tr key={row.id} className="hover:bg-muted/30">
                                         <Td className="font-medium">{row.name}</Td>
+                                        <Td>
+                                            <span
+                                                className={`inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                                                    row.type === 'combo'
+                                                        ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300'
+                                                        : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+                                                }`}
+                                            >
+                                                {row.type === 'combo'
+                                                    ? t('pages.products.type_combo')
+                                                    : t('pages.products.type_product')}
+                                            </span>
+                                        </Td>
                                         <Td className="font-mono">{row.sku ?? '—'}</Td>
                                         <Td className="tabular-nums text-right">{formatCurrency(row.unit_price)}</Td>
                                         <Td>{row.parent_name ?? '—'}</Td>
@@ -73,7 +87,7 @@ export default function ProductsIndex({ products }) {
                                 ))
                             ) : (
                                 <tr>
-                                    <Td colSpan={7} className="py-8 text-center text-muted-foreground">
+                                    <Td colSpan={8} className="py-8 text-center text-muted-foreground">
                                         {t('pages.products.empty')}
                                     </Td>
                                 </tr>

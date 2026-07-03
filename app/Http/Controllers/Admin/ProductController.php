@@ -24,6 +24,7 @@ class ProductController extends Controller
             ->map(fn (Product $p) => [
                 'id' => $p->id,
                 'name' => $p->name,
+                'type' => $p->type ?? 'product',
                 'sku' => $p->sku,
                 'unit_price' => (int) $p->unit_price,
                 'is_active' => (bool) $p->is_active,
@@ -61,6 +62,7 @@ class ProductController extends Controller
             'product' => [
                 'id' => $product->id,
                 'name' => $product->name,
+                'type' => $product->type ?? 'product',
                 'sku' => $product->sku,
                 'unit_price' => (int) $product->unit_price,
                 'parent_id' => $product->parent_id,

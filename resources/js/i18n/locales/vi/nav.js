@@ -52,7 +52,7 @@ export default {
         failed_orders: 'Đơn lỗi',
         settings: 'Cài đặt',
         overview: 'Tổng quan',
-        workspace_sales: 'Gọi & chốt đơn',
+        workspace_sales: 'Tác nghiệp sale',
         performance_report: 'Báo cáo hiệu suất',
         extra_report: 'Báo cáo nghiệp vụ',
         customers: 'Hồ sơ khách hàng',

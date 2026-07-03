@@ -52,7 +52,7 @@ export default {
         failed_orders: 'Failed orders',
         settings: 'Settings',
         overview: 'Overview',
-        workspace_sales: 'Calls & closing',
+        workspace_sales: 'Sales operations',
         performance_report: 'Performance report',
         extra_report: 'Operations report',
         customers: 'Customer profiles',

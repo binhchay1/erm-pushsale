@@ -68,6 +68,7 @@ class MarketingDashboardService
             'totalRevenue' => $revenue,
             'productQuantity' => $productQty,
             'conversionRate' => round($closed / $contacts * 100, 1),
+            'averageOrderValue' => $closed > 0 ? (int) round($revenue / $closed) : 0,
             'closedOrders' => $closed,
             'contacts' => $contacts,
         ];

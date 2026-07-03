@@ -26,6 +26,7 @@ class ProductRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::in(['product', 'combo'])],
             'sku' => ['nullable', 'string', 'max:80', Rule::unique('products', 'sku')->ignore($productId)],
             'unit_price' => ['required', 'integer', 'min:0'],
             'parent_id' => ['nullable', 'exists:products,id', Rule::notIn([$productId])],

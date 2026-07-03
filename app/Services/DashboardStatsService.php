@@ -59,6 +59,7 @@ class DashboardStatsService
         return [
             'leads_pending' => self::activePipeline($orders)->count(),
             'orders_today' => (clone $orders)->whereDate('closed_at', today())->count(),
+            'aov' => self::averageOrderValue($orders),
             'reminders' => self::reminderOrders($orders)->count(),
             'calls_series' => self::dailyOrderSeries($orders, 'contact_count', 7),
             'conversion_series' => self::dailyConversionSeries($orders, 7),
@@ -89,6 +90,7 @@ class DashboardStatsService
             'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
             'contacts_today' => (int) (clone $sources)->sum('contacts'),
             'orders_closed' => (clone $orders)->whereNotNull('closed_at')->whereDate('closed_at', today())->count(),
+            'aov' => self::averageOrderValue($orders),
             'budget_total' => (int) (clone $sources)->sum('budget'),
             'lead_series' => self::dailyLeadSeries(7),
             'conversion_series' => self::dailyConversionSeries($orders, 7),
@@ -211,6 +213,7 @@ class DashboardStatsService
             'sales' => array_merge($base, [
                 'leads_pending' => $summary['orders'],
                 'orders_today' => $summary['closed_orders'],
+                'aov' => $summary['aov'],
                 'reminders' => $summary['orders'] - $summary['closed_orders'],
                 'calls_series' => $this->metrics->orderSeries($user, $filter, 'contact_count'),
                 'conversion_series' => $this->metrics->orderSeries($user, $filter),
@@ -224,6 +227,7 @@ class DashboardStatsService
                 'active_campaigns' => MarketingSource::query()->where('marketer_user_id', $user->id)->where('is_active', true)->count(),
                 'leads_today' => $summary['leads'],
                 'orders_closed' => $summary['closed_orders'],
+                'aov' => $summary['aov'],
                 'budget_total' => (int) MarketingSource::query()->where('marketer_user_id', $user->id)->sum('budget'),
                 'top_sources' => $this->metrics->topSources($user, $filter),
             ]),
@@ -255,6 +259,26 @@ class DashboardStatsService
             ]),
             default => $base,
         };
+    }
+
+    /**
+     * Giá trị đơn trung bình (AOV) = doanh thu net / số đơn đã chốt.
+     *
+     * @param  Builder<Order>  $orders
+     */
+    private static function averageOrderValue(Builder $orders): int
+    {
+        $closedCount = (clone $orders)->whereNotNull('closed_at')->count();
+
+        if ($closedCount === 0) {
+            return 0;
+        }
+
+        $revenueNet = OrderRevenue::aggregate(
+            (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible()),
+        )['net'];
+
+        return (int) round($revenueNet / $closedCount);
     }
 
     /** @return Builder<Order> */

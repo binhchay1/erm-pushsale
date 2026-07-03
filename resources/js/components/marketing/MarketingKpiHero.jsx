@@ -1,4 +1,4 @@
-import { Percent, Package, Wallet } from 'lucide-react';
+import { Percent, Package, ShoppingBag, Wallet } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -33,10 +33,18 @@ export function MarketingKpiHero({ kpis }) {
             accent: 'text-violet-600 dark:text-violet-400',
             bg: 'from-violet-500/10 to-transparent',
         },
+        {
+            key: 'averageOrderValue',
+            title: t('dashboard.marketing.kpi_aov'),
+            icon: ShoppingBag,
+            format: formatCurrency,
+            accent: 'text-amber-600 dark:text-amber-400',
+            bg: 'from-amber-500/10 to-transparent',
+        },
     ];
 
     return (
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {items.map(({ key, title, icon: Icon, format, accent, bg }) => (
                 <Card
                     key={key}

@@ -10,7 +10,11 @@
     --topbar-accent: rgba(255, 255, 255, 0.12);
     --topbar-toggle-border: #1183d6;
     --content-bg: #ecf0f5;
+    /* App-shell: khung cố định theo viewport, chỉ vùng nội dung cuộn.
+       Nhờ vậy header + sidebar luôn đứng yên khi cuộn trang. */
+    height: 100svh;
     min-height: 100svh;
+    overflow: hidden;
     background: var(--content-bg);
     font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -209,7 +213,9 @@
 .pushsale-wrapper .content-wrapper {
     flex: 1;
     min-width: 0;
-    min-height: calc(100svh - var(--topbar-height));
+    /* Vùng cuộn nội dung — header/sidebar nằm ngoài vùng này nên cố định. */
+    min-height: 0;
+    overflow-y: auto;
     background: var(--content-bg);
 }
 

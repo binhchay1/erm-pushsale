@@ -46,6 +46,28 @@ class CatalogSeeder extends Seeder
             'unit_price' => 120_000,
         ]);
 
+        // Combo bán kèm — hiển thị trong danh mục và cho phép chọn nhanh khi chốt đơn.
+        Product::query()->create([
+            'sku' => 'CB-GOI-02',
+            'name' => 'Combo 2 Gối mây đan cao cấp',
+            'type' => 'combo',
+            'unit_price' => 549_000,
+        ]);
+
+        Product::query()->create([
+            'sku' => 'CB-SRM-CAM',
+            'name' => 'Combo Serum Vitamin C + Camera an ninh',
+            'type' => 'combo',
+            'unit_price' => 1_150_000,
+        ]);
+
+        Product::query()->create([
+            'sku' => 'CB-BDC-03',
+            'name' => 'Combo 3 Bột diệt cỏ sinh học',
+            'type' => 'combo',
+            'unit_price' => 320_000,
+        ]);
+
         $warehouseHead = User::query()->where('email', 'warehouse@saleops.local')->first();
 
         Warehouse::query()->create([

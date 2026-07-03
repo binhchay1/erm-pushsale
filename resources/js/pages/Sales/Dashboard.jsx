@@ -1,4 +1,4 @@
-import { Bell, PhoneCall, Target, TrendingUp } from 'lucide-react';
+import { Bell, PhoneCall, ShoppingBag, Target, TrendingUp } from 'lucide-react';
 
 import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
 import { RevenueAreaChart } from '@/components/charts/RevenueAreaChart';
@@ -8,7 +8,7 @@ import { RoleDashboardShell } from '@/components/dashboard/RoleDashboardShell';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
-import { formatNumber } from '@/lib/format';
+import { formatCurrency, formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
 
 function SalesDashboardContent({ stats: initialStats }) {
@@ -36,6 +36,12 @@ function SalesDashboardContent({ stats: initialStats }) {
             icon: Bell,
         },
         {
+            title: t('dashboard.sales.aov'),
+            value: formatCurrency(stats.aov ?? stats.summary?.aov ?? 0),
+            hint: t('dashboard.sales.aov_hint'),
+            icon: ShoppingBag,
+        },
+        {
             title: t('dashboard.sales.orders_period'),
             value: formatNumber(stats.summary?.orders ?? stats.orders_today),
             hint: t('dashboard.sales.orders_period_hint'),
@@ -51,7 +57,7 @@ function SalesDashboardContent({ stats: initialStats }) {
                 actions={<RealtimeBadge connected={connected} />}
             />
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
                 {kpis.map((card) => (
                     <StatCard key={card.title} {...card} className="min-h-[132px]" />
                 ))}

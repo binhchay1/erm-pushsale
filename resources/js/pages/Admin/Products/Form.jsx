@@ -15,6 +15,7 @@ export default function ProductForm({ product, parents }) {
     const isEdit = Boolean(product?.id);
     const { data, setData, post, put, processing, errors } = useForm({
         name: product?.name ?? '',
+        type: product?.type ?? 'product',
         sku: product?.sku ?? '',
         unit_price: product?.unit_price ?? 0,
         parent_id: product?.parent_id ?? '',
@@ -60,6 +61,20 @@ export default function ProductForm({ product, parents }) {
                                     onChange={(e) => setData('name', e.target.value)}
                                 />
                                 {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="type">{t('pages.products.type')}</Label>
+                                <select
+                                    id="type"
+                                    className="input-soft flex h-9 w-full px-3"
+                                    value={data.type}
+                                    onChange={(e) => setData('type', e.target.value)}
+                                >
+                                    <option value="product">{t('pages.products.type_product')}</option>
+                                    <option value="combo">{t('pages.products.type_combo')}</option>
+                                </select>
+                                {errors.type && <p className="text-xs text-destructive">{errors.type}</p>}
                             </div>
 
                             <div className="space-y-2">

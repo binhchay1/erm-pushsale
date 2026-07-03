@@ -1,3 +1,5 @@
+import { Heart } from 'lucide-react';
+
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { CloseOrderButton } from '@/components/operations/CloseOrderButton';
 import { OperationCallButton } from '@/components/operations/OperationCallButton';
@@ -8,6 +10,25 @@ import { useTableSort } from '@/hooks/use-table-sort';
 import { formatCurrency } from '@/lib/format';
 import { closingTone, deliveryTone } from '@/lib/status-tones';
 import { useT } from '@/providers/I18nProvider';
+
+const CARRIER_STYLES = {
+    viettel: 'bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300',
+    vinaphone: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',
+    mobifone: 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300',
+    vietnamobile: 'bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300',
+    gmobile: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300',
+    itel: 'bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300',
+};
+
+function CarrierBadge({ carrier, carrierKey }) {
+    if (!carrier) return null;
+    const style = CARRIER_STYLES[carrierKey] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+    return (
+        <span className={`mt-0.5 inline-flex w-fit items-center rounded px-1.5 py-0.5 text-[10px] font-semibold ${style}`}>
+            {carrier}
+        </span>
+    );
+}
 
 function formatDateTime(value) {
     if (!value) return null;
@@ -80,12 +101,20 @@ export function OperationOrderTable({
                                     </div>
                                 </Td>
                                 <Td className="max-w-[220px] whitespace-normal">
-                                    <div className="font-medium text-primary">{row.customerName}</div>
+                                    <div className="flex items-center gap-1 font-medium text-primary">
+                                        <span>{row.customerName}</span>
+                                        {row.isReturningCustomer && (
+                                            <span title={t('operations.order_table.returning_customer')} className="inline-flex">
+                                                <Heart className="size-3.5 shrink-0 fill-rose-500 text-rose-500" />
+                                            </span>
+                                        )}
+                                    </div>
                                     <div>{row.customerPhone}</div>
-                                    {row.phoneCarrier && (
-                                        <span className="text-[10px] text-muted-foreground">
-                                            [{row.phoneCarrier}]
-                                        </span>
+                                    <CarrierBadge carrier={row.phoneCarrier} carrierKey={row.phoneCarrierKey} />
+                                    {row.isReturningCustomer && (
+                                        <div className="mt-0.5 text-[10px] font-medium text-rose-600 dark:text-rose-400">
+                                            {t('operations.order_table.returning_customer')}
+                                        </div>
                                     )}
                                     {row.shippingAddress && (
                                         <div className="mt-1 text-[11px] text-muted-foreground">

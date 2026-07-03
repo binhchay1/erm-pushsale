@@ -1,4 +1,4 @@
-import { Megaphone, MousePointerClick, Target, Wallet } from 'lucide-react';
+import { Megaphone, MousePointerClick, ShoppingBag, Target, Wallet } from 'lucide-react';
 
 import { LeadSourcePieChart } from '@/components/charts/LeadSourcePieChart';
 import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
@@ -35,6 +35,12 @@ function MarketingDashboardContent({ stats: initialStats }) {
             value: formatNumber(stats.orders_closed),
             hint: t('dashboard.marketing.orders_closed_hint'),
             icon: Target,
+        },
+        {
+            title: t('dashboard.marketing.aov'),
+            value: formatCurrency(stats.aov ?? stats.summary?.aov ?? 0),
+            hint: t('dashboard.marketing.aov_hint'),
+            icon: ShoppingBag,
             accent: true,
         },
         {
@@ -46,14 +52,14 @@ function MarketingDashboardContent({ stats: initialStats }) {
     ];
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             <PageHeader
                 title={t('dashboard.marketing.title')}
                 description={t('dashboard.marketing.desc')}
                 actions={<RealtimeBadge connected={connected} />}
             />
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
                 {kpis.map((card) => (
                     <StatCard key={card.title} {...card} className="min-h-[132px]" />
                 ))}

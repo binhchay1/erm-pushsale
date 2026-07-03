@@ -58,7 +58,6 @@ export function OperationStatusDialog({
     order,
     options = [],
     carrierOptions = [],
-    itemTypeOptions = ['product', 'combo', 'upsell', 'gift'],
     warehouseOptions = [],
     productOptions = [],
 }) {
@@ -84,7 +83,17 @@ export function OperationStatusDialog({
     const [warehouseId, setWarehouseId] = useState(order.warehouseId ?? '');
     const [shippingFee, setShippingFee] = useState(Number(order.shippingFeeCollected ?? 0) || 0);
     const [deposit, setDeposit] = useState(Number(order.deposit ?? 0) || 0);
-    const [productPick, setProductPick] = useState('');
+
+    const catalog = useMemo(() => {
+        const products = [];
+        const combos = [];
+        (productOptions ?? []).forEach((p) => {
+            (p.type === 'combo' ? combos : products).push(p);
+        });
+        return { products, combos };
+    }, [productOptions]);
+
+    const optionsForType = (itemType) => (itemType === 'combo' ? catalog.combos : catalog.products);
 
     const quickNoAnswer = useMemo(
         () => ({
@@ -141,7 +150,6 @@ export function OperationStatusDialog({
         setWarehouseId(order.warehouseId ?? '');
         setShippingFee(Number(order.shippingFeeCollected ?? 0) || 0);
         setDeposit(Number(order.deposit ?? 0) || 0);
-        setProductPick('');
     };
 
     const submitStatus = () => {
@@ -192,8 +200,8 @@ export function OperationStatusDialog({
     };
 
     const submitOrder = () => {
-        if (items.some((it) => !it.productName.trim())) {
-            toast.error(t('operations.order_edit.name_required'));
+        if (items.some((it) => !it.productId)) {
+            toast.error(t('operations.order_edit.select_product_required'));
             return;
         }
 
@@ -245,26 +253,18 @@ export function OperationStatusDialog({
         ]);
     };
 
-    const addProductFromCatalog = (id) => {
-        if (!id) {
+    const selectCatalogItem = (index, id) => {
+        const current = items[index];
+        const found = optionsForType(current?.itemType).find((p) => String(p.id) === String(id));
+        if (!found) {
+            updateItem(index, { productId: null, productName: '', unitPrice: 0 });
             return;
         }
-        const product = productOptions.find((p) => String(p.id) === String(id));
-        if (!product) {
-            return;
-        }
-        setItems((prev) => [
-            ...prev,
-            {
-                productId: product.id,
-                productName: product.sku ? `${product.name} (${product.sku})` : product.name,
-                itemType: 'product',
-                quantity: 1,
-                unitPrice: Number(product.unit_price) || 0,
-                discountAmount: 0,
-            },
-        ]);
-        setProductPick('');
+        updateItem(index, {
+            productId: found.id,
+            productName: found.sku ? `${found.name} (${found.sku})` : found.name,
+            unitPrice: Number(found.unit_price) || 0,
+        });
     };
 
     const removeItem = (index) => {
@@ -438,38 +438,20 @@ export function OperationStatusDialog({
 
                                 {/* Cột phải: kho, chọn sản phẩm, bảng SP, tổng tiền */}
                                 <div className="space-y-3">
-                                    <div className="grid gap-2 sm:grid-cols-2">
-                                        <div className="space-y-1">
-                                            <Label className="text-xs">{t('operations.order_edit.warehouse')}</Label>
-                                            <select
-                                                className="input-soft flex h-9 w-full px-3"
-                                                value={warehouseId}
-                                                onChange={(e) => setWarehouseId(e.target.value)}
-                                            >
-                                                <option value="">{t('operations.order_edit.warehouse_placeholder')}</option>
-                                                {warehouseOptions.map((w) => (
-                                                    <option key={w.id} value={w.id}>
-                                                        {w.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Label className="text-xs">{t('operations.order_edit.pick_product')}</Label>
-                                            <select
-                                                className="input-soft flex h-9 w-full px-3"
-                                                value={productPick}
-                                                onChange={(e) => addProductFromCatalog(e.target.value)}
-                                            >
-                                                <option value="">{t('operations.order_edit.pick_product_placeholder')}</option>
-                                                {productOptions.map((p) => (
-                                                    <option key={p.id} value={p.id}>
-                                                        {p.name}
-                                                        {p.sku ? ` (${p.sku})` : ''}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">{t('operations.order_edit.warehouse')}</Label>
+                                        <select
+                                            className="input-soft flex h-9 w-full px-3"
+                                            value={warehouseId}
+                                            onChange={(e) => setWarehouseId(e.target.value)}
+                                        >
+                                            <option value="">{t('operations.order_edit.warehouse_placeholder')}</option>
+                                            {warehouseOptions.map((w) => (
+                                                <option key={w.id} value={w.id}>
+                                                    {w.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
 
                                     <div className="flex items-center justify-between">
@@ -509,23 +491,38 @@ export function OperationStatusDialog({
                                                     items.map((it, index) => (
                                                         <tr key={index} className="border-t border-border/60 align-top">
                                                             <td className="px-2 py-1.5">
-                                                                <Input
-                                                                    className="h-8"
-                                                                    value={it.productName}
-                                                                    placeholder={t('operations.order_edit.product_name')}
-                                                                    onChange={(e) => updateItem(index, { productName: e.target.value })}
-                                                                />
                                                                 <select
-                                                                    className="input-soft mt-1 h-7 w-full px-2 text-xs"
-                                                                    value={it.itemType}
-                                                                    onChange={(e) => updateItem(index, { itemType: e.target.value })}
+                                                                    className="input-soft h-8 w-full px-2 text-sm"
+                                                                    value={it.productId ?? ''}
+                                                                    onChange={(e) => selectCatalogItem(index, e.target.value)}
                                                                 >
-                                                                    {itemTypeOptions.map((type) => (
-                                                                        <option key={type} value={type}>
-                                                                            {t(`operations.order_edit.type_${type}`)}
+                                                                    <option value="">
+                                                                        {it.itemType === 'combo'
+                                                                            ? t('operations.order_edit.pick_combo_placeholder')
+                                                                            : t('operations.order_edit.pick_item_placeholder')}
+                                                                    </option>
+                                                                    {optionsForType(it.itemType).map((p) => (
+                                                                        <option key={p.id} value={p.id}>
+                                                                            {p.name}
+                                                                            {p.sku ? ` (${p.sku})` : ''}
                                                                         </option>
                                                                     ))}
+                                                                    {it.productId &&
+                                                                        !optionsForType(it.itemType).some(
+                                                                            (p) => String(p.id) === String(it.productId),
+                                                                        ) && (
+                                                                            <option value={it.productId}>{it.productName}</option>
+                                                                        )}
                                                                 </select>
+                                                                <span
+                                                                    className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                                                                        it.itemType === 'combo'
+                                                                            ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300'
+                                                                            : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+                                                                    }`}
+                                                                >
+                                                                    {t(`operations.order_edit.type_${it.itemType}`)}
+                                                                </span>
                                                             </td>
                                                             <td className="px-2 py-1.5">
                                                                 <Input

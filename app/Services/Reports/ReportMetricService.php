@@ -44,6 +44,7 @@ class ReportMetricService
             'closed_orders' => $closedOrders,
             'revenue' => $revenueBreakdown['net'],
             'revenue_breakdown' => $revenueBreakdown,
+            'aov' => $closedOrders > 0 ? (int) round($revenueBreakdown['net'] / $closedOrders) : 0,
             'conversion_rate' => $this->percentage($closedOrders, $ordersCount),
         ];
     }
