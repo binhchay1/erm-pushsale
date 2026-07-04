@@ -101,6 +101,39 @@ class CampaignDelegationAndApprovalTest extends TestCase
         ]);
     }
 
+    public function test_approve_without_product_fails_but_succeeds_when_product_supplied(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $product = Product::query()->create(['name' => 'SP C', 'sku' => 'SKU-C', 'unit_price' => 90000, 'is_active' => true]);
+
+        $campaign = MarketingSource::query()->create([
+            'name' => 'Campaign no product',
+            'product_id' => null,
+            'created_by_user_id' => $admin->id,
+            'marketer_user_id' => $admin->id,
+            'utm_campaign' => 'camp-noproduct',
+            'webhook_token' => 'tok-noproduct',
+            'budget' => 100000,
+            'is_active' => true,
+        ]);
+
+        // Không có sản phẩm → duyệt thất bại, có lỗi validation.
+        $this->actingAs($admin)
+            ->post("/admin/landing-approvals/{$campaign->id}/approve")
+            ->assertSessionHasErrors('campaign');
+
+        $this->assertFalse($campaign->fresh()->is_approved);
+
+        // Gán sản phẩm ngay lúc duyệt → thành công.
+        $this->actingAs($admin)
+            ->post("/admin/landing-approvals/{$campaign->id}/approve", ['product_id' => $product->id])
+            ->assertRedirect();
+
+        $campaign->refresh();
+        $this->assertTrue($campaign->is_approved);
+        $this->assertSame($product->id, $campaign->product_id);
+    }
+
     public function test_admin_can_view_activity_logs(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);

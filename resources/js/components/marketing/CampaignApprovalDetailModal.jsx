@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckCircle2, Copy, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -31,6 +31,7 @@ export function CampaignApprovalDetailModal({
     open,
     onOpenChange,
     fieldMapping,
+    products = [],
     onApprove,
     onReject,
     approving = false,
@@ -39,6 +40,11 @@ export function CampaignApprovalDetailModal({
     const t = useT();
     const [rejectOpen, setRejectOpen] = useState(false);
     const [reason, setReason] = useState('');
+    const [pickedProductId, setPickedProductId] = useState('');
+
+    useEffect(() => {
+        setPickedProductId('');
+    }, [campaign?.id]);
 
     const copyUrl = async (url) => {
         const ok = await copyToClipboard(url);
@@ -81,9 +87,27 @@ export function CampaignApprovalDetailModal({
 
                     <div className="space-y-5">
                         {missingProduct && (
-                            <div className="flex items-start gap-2 rounded-lg border border-rose-200/80 bg-rose-50/60 p-3 text-xs text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
-                                <XCircle className="mt-0.5 size-4 shrink-0" />
-                                <span>{t('pages.landing.incomplete_hint')}</span>
+                            <div className="space-y-2 rounded-lg border border-rose-200/80 bg-rose-50/60 p-3 text-xs text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
+                                <div className="flex items-start gap-2">
+                                    <XCircle className="mt-0.5 size-4 shrink-0" />
+                                    <span>{t('pages.landing.incomplete_hint')}</span>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="font-medium text-foreground">{t('pages.landing.pick_product_label')}</label>
+                                    <select
+                                        className="input-soft h-9 w-full px-2 text-sm text-foreground"
+                                        value={pickedProductId}
+                                        onChange={(e) => setPickedProductId(e.target.value)}
+                                    >
+                                        <option value="">{t('pages.landing.pick_product_placeholder')}</option>
+                                        {products.map((p) => (
+                                            <option key={p.id} value={p.id}>
+                                                {p.name}
+                                                {p.sku ? ` (${p.sku})` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                         )}
 
@@ -227,9 +251,9 @@ export function CampaignApprovalDetailModal({
                                 </Button>
                                 <Button
                                     type="button"
-                                    disabled={approving || missingProduct}
-                                    title={missingProduct ? t('pages.landing.incomplete_hint') : undefined}
-                                    onClick={() => onApprove(campaign)}
+                                    disabled={approving || (missingProduct && !pickedProductId)}
+                                    title={missingProduct && !pickedProductId ? t('pages.landing.incomplete_hint') : undefined}
+                                    onClick={() => onApprove(campaign, missingProduct ? Number(pickedProductId) : null)}
                                 >
                                     <CheckCircle2 className="size-4" />
                                     {t('pages.landing.approve')}
