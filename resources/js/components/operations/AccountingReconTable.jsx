@@ -165,12 +165,18 @@ export function AccountingReconTable({ rows, totals, enableDeleteOrder = false }
                                             <Copy className="size-3 text-destructive" aria-label={t('operations.recon_table.duplicate_phone')} />
                                         )}
                                     </div>
+                                    {row.hasDifferentReceiver && (
+                                        <div className="mt-0.5 text-[11px] text-amber-700 dark:text-amber-400">
+                                            {t('operations.recon_table.receiver_label')} {row.effectiveReceiverName}
+                                            {row.effectiveReceiverPhone ? ` · ${row.effectiveReceiverPhone}` : ''}
+                                        </div>
+                                    )}
                                     {row.desiredDeliveryAt && (
                                         <div className="text-[11px] text-muted-foreground">{formatDate(row.desiredDeliveryAt)}</div>
                                     )}
                                 </Td>
                                 <Td className="max-w-[220px] whitespace-normal">
-                                    <div>{row.shippingAddress}</div>
+                                    <div>{row.effectiveShippingAddress || row.shippingAddress}</div>
                                     {row.customerNote && (
                                         <div className="mt-0.5 text-[11px] text-fuchsia-600 dark:text-fuchsia-400">
                                             {row.customerNote}

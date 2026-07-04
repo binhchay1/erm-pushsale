@@ -58,19 +58,20 @@ export function OperationOrderTable({
     const t = useT();
     const actionCols =
         (enableSaleActions ? 1 : 0) + (enableCloseOrder ? 1 : 0) + (enableDeleteOrder ? 1 : 0);
-    const baseCols = 13;
+    const baseCols = 14;
     // Realtime-safe: sort recomputes on prop refresh, chosen column persists.
     const { sortedRows, sort, toggleSort } = useTableSort(rows ?? [], { defaultKey: 'dataArrivedAt', defaultDir: 'desc' });
 
     return (
         <ScrollDataTable>
-            <table className="min-w-[2280px] w-full border-collapse">
+            <table className="min-w-[2440px] w-full border-collapse">
                 <thead>
                     <tr>
                         <Th sortable sortKey="orderCode" sort={sort} onSort={toggleSort}>{t('operations.order_table.order_code')}</Th>
                         <Th sortable sortKey="dataArrivedAt" sort={sort} onSort={toggleSort}>{t('operations.order_table.source_date')}</Th>
                         <Th sortable sortKey="saleName" sort={sort} onSort={toggleSort}>{t('operations.order_table.sale_assigned')}</Th>
                         <Th sortable sortKey="customerName" sort={sort} onSort={toggleSort}>{t('operations.order_table.customer')}</Th>
+                        <Th>{t('operations.order_table.receiver')}</Th>
                         <Th>{t('operations.order_table.message')}</Th>
                         <Th sortable sortKey="currentOperation" sort={sort} onSort={toggleSort}>{t('operations.order_table.operation')}</Th>
                         <Th sortable sortKey="operationResult" sort={sort} onSort={toggleSort}>{t('operations.order_table.result')}</Th>
@@ -126,6 +127,21 @@ export function OperationOrderTable({
                                                 </span>
                                             )}
                                         </div>
+                                    )}
+                                </Td>
+                                <Td className="max-w-[180px] whitespace-normal">
+                                    {row.hasDifferentReceiver ? (
+                                        <>
+                                            <div className="font-medium">{row.effectiveReceiverName || '—'}</div>
+                                            <div className="text-muted-foreground">{row.effectiveReceiverPhone}</div>
+                                            <span className="mt-0.5 inline-flex w-fit rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                                                {t('operations.order_table.receiver_other')}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="text-[11px] text-muted-foreground">
+                                            {t('operations.order_table.receiver_same')}
+                                        </span>
                                     )}
                                 </Td>
                                 <Td className="max-w-[200px] whitespace-normal text-muted-foreground">

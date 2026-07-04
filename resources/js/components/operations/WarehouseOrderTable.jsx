@@ -188,6 +188,13 @@ export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
                                     <Td className="max-w-[260px] whitespace-normal">
                                         <div className="font-medium">{row.customerName}</div>
                                         <div className="tabular-nums">{row.customerPhone}</div>
+                                        {row.hasDifferentReceiver && (
+                                            <div className="mt-1 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] leading-snug text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                                                {t('operations.warehouse_table.receiver_label')}{' '}
+                                                <span className="font-medium">{row.effectiveReceiverName}</span>
+                                                {row.effectiveReceiverPhone ? ` · ${row.effectiveReceiverPhone}` : ''}
+                                            </div>
+                                        )}
                                         <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
                                             {row.shippingAddress || t('operations.warehouse_table.no_address')}
                                         </div>
