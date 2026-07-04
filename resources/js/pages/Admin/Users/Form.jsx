@@ -1,14 +1,17 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useMemo } from 'react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FieldError, RequiredMark } from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import PermissionEditor, { capMap } from '@/components/permissions/PermissionEditor';
 import { useLabels } from '@/hooks/use-labels';
+import { validate } from '@/lib/validate';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
@@ -35,7 +38,7 @@ export default function UserForm({
 
     const initialRole = user?.role ?? 'sales';
 
-    const { data, setData, post, put, processing, errors } = useForm({
+    const { data, setData, post, put, processing, errors, setError, clearErrors } = useForm({
         name: user?.name ?? '',
         email_local: user?.email_local ?? roleLocalParts.sales ?? 'sales',
         role: initialRole,
@@ -111,6 +114,28 @@ export default function UserForm({
 
     const submit = (e) => {
         e.preventDefault();
+
+        const clientErrors = validate(data, {
+            name: [{ required: true, label: t('pages.users.name') }],
+            email_local: [{ required: true, label: t('pages.users.email_local') }],
+            role: [{ required: true, label: t('pages.users.role') }],
+            ...(isEdit ? {} : { password: [{ required: true, label: t('pages.users.password') }] }),
+        });
+
+        if (managerRequired && !data.manager_user_id) {
+            clientErrors.manager_user_id = t('pages.users.select_manager');
+        }
+        if (data.password && data.password !== data.password_confirmation) {
+            clientErrors.password_confirmation = t('pages.users.password_mismatch');
+        }
+
+        if (Object.keys(clientErrors).length > 0) {
+            clearErrors();
+            Object.entries(clientErrors).forEach(([field, message]) => setError(field, message));
+            toast.error(t('common.validation.fix_errors'));
+            return;
+        }
+
         if (isEdit) {
             put(`/admin/users/${user.id}`);
         } else {
@@ -141,17 +166,27 @@ export default function UserForm({
                     <CardContent>
                         <form onSubmit={submit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">{t('pages.users.name')}</Label>
+                                <Label htmlFor="name">
+                                    {t('pages.users.name')}
+                                    <RequiredMark />
+                                </Label>
                                 <Input
                                     id="name"
                                     value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
+                                    aria-invalid={!!errors.name}
+                                    onChange={(e) => {
+                                        setData('name', e.target.value);
+                                        clearErrors('name');
+                                    }}
                                 />
-                                {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                                <FieldError message={errors.name} />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="email_local">{t('pages.users.email_local')}</Label>
+                                <Label htmlFor="email_local">
+                                    {t('pages.users.email_local')}
+                                    <RequiredMark />
+                                </Label>
                                 <div className="flex max-w-md">
                                     <Input
                                         id="email_local"
@@ -188,7 +223,10 @@ export default function UserForm({
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="role">{t('pages.users.role')}</Label>
+                                <Label htmlFor="role">
+                                    {t('pages.users.role')}
+                                    <RequiredMark />
+                                </Label>
                                 <select
                                     id="role"
                                     className="input-soft flex h-9 w-full px-3"
@@ -322,17 +360,19 @@ export default function UserForm({
                             <div className="space-y-2">
                                 <Label htmlFor="password">
                                     {t('pages.users.password')}
-                                    {isEdit && ` (${t('pages.users.password_hint')})`}
+                                    {isEdit ? ` (${t('pages.users.password_hint')})` : <RequiredMark />}
                                 </Label>
                                 <Input
                                     id="password"
                                     type="password"
                                     value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
+                                    aria-invalid={!!errors.password}
+                                    onChange={(e) => {
+                                        setData('password', e.target.value);
+                                        clearErrors('password');
+                                    }}
                                 />
-                                {errors.password && (
-                                    <p className="text-xs text-destructive">{errors.password}</p>
-                                )}
+                                <FieldError message={errors.password} />
                             </div>
 
                             <div className="space-y-2">
@@ -341,8 +381,13 @@ export default function UserForm({
                                     id="password_confirmation"
                                     type="password"
                                     value={data.password_confirmation}
-                                    onChange={(e) => setData('password_confirmation', e.target.value)}
+                                    aria-invalid={!!errors.password_confirmation}
+                                    onChange={(e) => {
+                                        setData('password_confirmation', e.target.value);
+                                        clearErrors('password_confirmation');
+                                    }}
                                 />
+                                <FieldError message={errors.password_confirmation} />
                             </div>
 
                             {isAdmin ? (

@@ -5,9 +5,11 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CurrencyInput } from '@/components/ui/currency-input';
+import { FieldError, RequiredMark } from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { copyToClipboard } from '@/lib/clipboard';
+import { validate } from '@/lib/validate';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
@@ -51,7 +53,7 @@ function CopyValue({ value, mono = true }) {
 export default function CampaignForm({ campaign, products, marketers, fieldMapping, allocationOptions = [] }) {
     const t = useT();
     const isEdit = Boolean(campaign?.id);
-    const { data, setData, post, put, processing, errors } = useForm({
+    const { data, setData, post, put, processing, errors, setError, clearErrors } = useForm({
         name: campaign?.name ?? '',
         product_id: campaign?.product_id ?? '',
         marketer_user_id: campaign?.marketer_user_id ?? '',
@@ -66,6 +68,19 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
 
     const submit = (e) => {
         e.preventDefault();
+
+        const clientErrors = validate(data, {
+            name: [{ required: true, label: t('pages.campaigns.landing_name') }],
+            product_id: [{ selectRequired: true, label: t('pages.campaigns.product') }],
+        });
+
+        if (Object.keys(clientErrors).length > 0) {
+            clearErrors();
+            Object.entries(clientErrors).forEach(([field, message]) => setError(field, message));
+            toast.error(t('common.validation.fix_errors'));
+            return;
+        }
+
         if (isEdit) {
             put(`/marketing/campaigns/${campaign.id}`);
         } else {
@@ -230,13 +245,17 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                     <CardContent>
                         <form onSubmit={submit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label>{t('pages.campaigns.landing_name')}</Label>
+                                <Label>
+                                    {t('pages.campaigns.landing_name')}
+                                    <RequiredMark />
+                                </Label>
                                 <Input
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
                                     placeholder={t('pages.campaigns.landing_name_placeholder')}
+                                    aria-invalid={!!errors.name}
                                 />
-                                {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                                <FieldError message={errors.name} />
                                 <p className="text-xs text-muted-foreground">{t('pages.campaigns.name_unique_hint')}</p>
                             </div>
 
@@ -247,11 +266,18 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
 
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label>{t('pages.campaigns.product')}</Label>
+                                    <Label>
+                                        {t('pages.campaigns.product')}
+                                        <RequiredMark />
+                                    </Label>
                                     <select
                                         className="input-soft h-10 w-full px-3"
                                         value={data.product_id}
-                                        onChange={(e) => setData('product_id', e.target.value)}
+                                        aria-invalid={!!errors.product_id}
+                                        onChange={(e) => {
+                                            setData('product_id', e.target.value);
+                                            clearErrors('product_id');
+                                        }}
                                     >
                                         <option value="">{t('pages.select_placeholder')}</option>
                                         {products.map((p) => (
@@ -260,6 +286,8 @@ export default function CampaignForm({ campaign, products, marketers, fieldMappi
                                             </option>
                                         ))}
                                     </select>
+                                    <FieldError message={errors.product_id} />
+                                    <p className="text-xs text-muted-foreground">{t('pages.campaigns.product_required_hint')}</p>
                                 </div>
                                 <div className="space-y-2">
                                     <Label>{t('pages.campaigns.marketer_label')}</Label>

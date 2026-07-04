@@ -1,17 +1,21 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FieldError, RequiredMark } from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { validate } from '@/lib/validate';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
 export default function WarehouseForm({ warehouse, managers }) {
     const t = useT();
     const isEdit = Boolean(warehouse?.id);
-    const { data, setData, post, put, processing, errors } = useForm({
+    const { data, setData, post, put, processing, errors, setError, clearErrors } = useForm({
         name: warehouse?.name ?? '',
         phone: warehouse?.phone ?? '',
         address: warehouse?.address ?? '',
@@ -21,6 +25,18 @@ export default function WarehouseForm({ warehouse, managers }) {
 
     const submit = (e) => {
         e.preventDefault();
+
+        const clientErrors = validate(data, {
+            name: [{ required: true, label: t('pages.warehouse.name') }],
+        });
+
+        if (Object.keys(clientErrors).length > 0) {
+            clearErrors();
+            Object.entries(clientErrors).forEach(([field, message]) => setError(field, message));
+            toast.error(t('common.validation.fix_errors'));
+            return;
+        }
+
         if (isEdit) {
             put(`/admin/warehouses/${warehouse.id}`);
         } else {
@@ -51,13 +67,20 @@ export default function WarehouseForm({ warehouse, managers }) {
                     <CardContent>
                         <form onSubmit={submit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label>{t('pages.warehouse.name')}</Label>
+                                <Label>
+                                    {t('pages.warehouse.name')}
+                                    <RequiredMark />
+                                </Label>
                                 <Input
                                     value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
+                                    aria-invalid={!!errors.name}
+                                    onChange={(e) => {
+                                        setData('name', e.target.value);
+                                        clearErrors('name');
+                                    }}
                                     placeholder={t('pages.warehouse.name_placeholder')}
                                 />
-                                {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                                <FieldError message={errors.name} />
                             </div>
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">

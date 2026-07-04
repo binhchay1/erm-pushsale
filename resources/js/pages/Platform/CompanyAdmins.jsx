@@ -1,10 +1,13 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 
+import { toast } from 'sonner';
+
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
+import { FieldError, RequiredMark } from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -55,16 +58,18 @@ export default function CompanyAdmins({
                     <CardContent className="space-y-6">
                         <form onSubmit={create} className="grid gap-4 sm:grid-cols-3">
                             <div className="space-y-1.5">
-                                <Label htmlFor="name">{t('pages.platform.admin_name')}</Label>
+                                <Label htmlFor="name">
+                                    {t('pages.platform.admin_name')}
+                                    <RequiredMark />
+                                </Label>
                                 <Input
                                     id="name"
                                     value={createForm.data.name}
+                                    aria-invalid={!!createForm.errors.name}
                                     onChange={(e) => createForm.setData('name', e.target.value)}
                                     required
                                 />
-                                {createForm.errors.name && (
-                                    <p className="text-xs text-destructive">{createForm.errors.name}</p>
-                                )}
+                                <FieldError message={createForm.errors.name} />
                             </div>
                             <div className="space-y-1.5">
                                 <Label htmlFor="email">{t('pages.platform.admin_email')}</Label>
@@ -135,7 +140,15 @@ function AdminRow({ company, admin, t }) {
     const editForm = useForm({ name: admin.name, password: '' });
 
     const save = () => {
-        editForm.put(`/platform/companies/${company.id}/admins/${admin.id}`, { preserveScroll: true });
+        if (!editForm.data.name.trim()) {
+            editForm.setError('name', t('common.validation.required'));
+            toast.error(t('common.validation.fix_errors'));
+            return;
+        }
+        editForm.put(`/platform/companies/${company.id}/admins/${admin.id}`, {
+            preserveScroll: true,
+            onError: (errs) => toast.error(errs.name ?? errs.password ?? t('common.request_failed')),
+        });
     };
 
     return (
@@ -144,8 +157,13 @@ function AdminRow({ company, admin, t }) {
                 <Input
                     className="h-8"
                     value={editForm.data.name}
-                    onChange={(e) => editForm.setData('name', e.target.value)}
+                    aria-invalid={!!editForm.errors.name}
+                    onChange={(e) => {
+                        editForm.setData('name', e.target.value);
+                        editForm.clearErrors('name');
+                    }}
                 />
+                <FieldError message={editForm.errors.name} />
             </Td>
             <Td>
                 <code className="text-xs">{admin.email}</code>

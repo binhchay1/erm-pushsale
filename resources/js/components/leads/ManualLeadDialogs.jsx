@@ -12,6 +12,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { FieldError, RequiredMark } from '@/components/ui/field-error';
+import { validate } from '@/lib/validate';
 import { useT } from '@/providers/I18nProvider';
 
 const FIELD_LABELS = {
@@ -29,7 +31,7 @@ const FIELD_LABELS = {
 
 const EMPTY_FORM = { name: '', phone: '', address: '', product_id: '', quantity: 1, note: '', utm_source: '' };
 
-function AllocationPicker({ mode, setMode, salesUsers, selected, toggle }) {
+function AllocationPicker({ mode, setMode, salesUsers, selected, toggle, error }) {
     const t = useT();
 
     return (
@@ -64,6 +66,7 @@ function AllocationPicker({ mode, setMode, salesUsers, selected, toggle }) {
                     </div>
                 </div>
             )}
+            <FieldError message={error} />
         </div>
     );
 }
@@ -79,6 +82,8 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
     const [saving, setSaving] = useState(false);
     const [importing, setImporting] = useState(false);
     const [file, setFile] = useState(null);
+    const [errors, setErrors] = useState({});
+    const [importErrors, setImportErrors] = useState({});
     const fileRef = useRef(null);
     const lastShownResult = useRef(null);
 
@@ -106,17 +111,30 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
         }
     }, [importResult, t]);
 
-    const setField = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+    const setField = (key, value) => {
+        setForm((prev) => ({ ...prev, [key]: value }));
+        setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+    };
 
     const submitSingle = () => {
-        if (!form.phone.trim()) {
-            toast.error(t('pages.leads.phone_required'));
-            return;
-        }
+        const clientErrors = validate(form, {
+            phone: [
+                { required: true, label: t('pages.leads.field_phone') },
+                { phone: true },
+            ],
+            quantity: [{ positive: true, message: t('common.validation.positive_number') }],
+        });
         if (addMode === 'manual' && addSales.length === 0) {
-            toast.error(t('pages.leads.alloc_need_sale'));
+            clientErrors.sale_user_ids = t('pages.leads.alloc_need_sale');
+        }
+
+        if (Object.keys(clientErrors).length > 0) {
+            setErrors(clientErrors);
+            toast.error(t('common.validation.fix_errors'));
             return;
         }
+
+        setErrors({});
         setSaving(true);
         router.post(
             manualUrl,
@@ -128,22 +146,33 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                     setForm(EMPTY_FORM);
                     setAddMode('default');
                     setAddSales([]);
+                    setErrors({});
                 },
-                onError: (errors) => toast.error(errors.phone ?? errors.product_id ?? errors.sale_user_ids ?? t('pages.leads.manual_failed')),
+                onError: (serverErrors) => {
+                    setErrors(serverErrors);
+                    toast.error(serverErrors.phone ?? serverErrors.product_id ?? serverErrors.sale_user_ids ?? t('pages.leads.manual_failed'));
+                },
                 onFinish: () => setSaving(false),
             },
         );
     };
 
     const submitImport = () => {
+        const clientErrors = {};
         if (!file) {
-            toast.error(t('pages.leads.import_pick_file'));
-            return;
+            clientErrors.file = t('pages.leads.import_pick_file');
         }
         if (importMode === 'manual' && importSales.length === 0) {
-            toast.error(t('pages.leads.alloc_need_sale'));
+            clientErrors.sale_user_ids = t('pages.leads.alloc_need_sale');
+        }
+
+        if (Object.keys(clientErrors).length > 0) {
+            setImportErrors(clientErrors);
+            toast.error(t('common.validation.fix_errors'));
             return;
         }
+
+        setImportErrors({});
         setImporting(true);
         router.post(
             importUrl,
@@ -155,8 +184,12 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                     setImportOpen(false);
                     setFile(null);
                     if (fileRef.current) fileRef.current.value = '';
+                    setImportErrors({});
                 },
-                onError: (errors) => toast.error(errors.file ?? errors.sale_user_ids ?? t('pages.leads.import_failed')),
+                onError: (serverErrors) => {
+                    setImportErrors(serverErrors);
+                    toast.error(serverErrors.file ?? serverErrors.sale_user_ids ?? t('pages.leads.import_failed'));
+                },
                 onFinish: () => setImporting(false),
             },
         );
@@ -165,11 +198,11 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
     return (
         <>
             <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
+                <Button size="sm" variant="outline" onClick={() => { setErrors({}); setAddOpen(true); }}>
                     <UserPlus className="size-4" />
                     {t('pages.leads.manual_add')}
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+                <Button size="sm" variant="outline" onClick={() => { setImportErrors({}); setImportOpen(true); }}>
                     <FileUp className="size-4" />
                     {t('pages.leads.import_csv')}
                 </Button>
@@ -234,9 +267,16 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                         </label>
                         <label className="space-y-1 text-xs">
                             <span className="font-medium text-muted-foreground">
-                                {t('pages.leads.field_phone')} <span className="text-rose-500">*</span>
+                                {t('pages.leads.field_phone')}
+                                <RequiredMark />
                             </span>
-                            <input className="input-soft h-9 w-full px-2" value={form.phone} onChange={(e) => setField('phone', e.target.value)} />
+                            <input
+                                className="input-soft h-9 w-full px-2"
+                                value={form.phone}
+                                aria-invalid={!!errors.phone}
+                                onChange={(e) => setField('phone', e.target.value)}
+                            />
+                            <FieldError message={errors.phone} />
                         </label>
                         <label className="space-y-1 text-xs sm:col-span-2">
                             <span className="font-medium text-muted-foreground">{t('pages.leads.field_address')}</span>
@@ -255,7 +295,15 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                         </label>
                         <label className="space-y-1 text-xs">
                             <span className="font-medium text-muted-foreground">{t('pages.leads.field_quantity')}</span>
-                            <input type="number" min={1} className="input-soft h-9 w-full px-2" value={form.quantity} onChange={(e) => setField('quantity', e.target.value)} />
+                            <input
+                                type="number"
+                                min={1}
+                                className="input-soft h-9 w-full px-2"
+                                value={form.quantity}
+                                aria-invalid={!!errors.quantity}
+                                onChange={(e) => setField('quantity', e.target.value)}
+                            />
+                            <FieldError message={errors.quantity} />
                         </label>
                         <label className="space-y-1 text-xs sm:col-span-2">
                             <span className="font-medium text-muted-foreground">{t('pages.leads.field_source')}</span>
@@ -272,6 +320,7 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                                 salesUsers={salesUsers}
                                 selected={addSales}
                                 toggle={toggleIn(setAddSales)}
+                                error={errors.sale_user_ids}
                             />
                         </div>
                     </div>
@@ -297,13 +346,20 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                     </DialogHeader>
 
                     <div className="space-y-3">
-                        <input
-                            ref={fileRef}
-                            type="file"
-                            accept=".csv,.txt,.xls,.xlsx,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                            className="input-soft w-full px-2 py-1.5 text-sm"
-                            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                        />
+                        <div>
+                            <input
+                                ref={fileRef}
+                                type="file"
+                                accept=".csv,.txt,.xls,.xlsx,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                className="input-soft w-full px-2 py-1.5 text-sm"
+                                aria-invalid={!!importErrors.file}
+                                onChange={(e) => {
+                                    setFile(e.target.files?.[0] ?? null);
+                                    setImportErrors((prev) => (prev.file ? { ...prev, file: undefined } : prev));
+                                }}
+                            />
+                            <FieldError message={importErrors.file} className="mt-1" />
+                        </div>
                         <div className="rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">
                             <p className="mb-1 font-medium text-foreground">{t('pages.leads.import_columns_hint')}</p>
                             <p>{t('pages.leads.import_columns_examples')}</p>
@@ -314,6 +370,7 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                             salesUsers={salesUsers}
                             selected={importSales}
                             toggle={toggleIn(setImportSales)}
+                            error={importErrors.sale_user_ids}
                         />
                     </div>
 

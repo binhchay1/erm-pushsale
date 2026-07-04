@@ -50,7 +50,11 @@ export function PlatformCard({ platform }) {
 
     const save = (e) => {
         e.preventDefault();
-        put(`/admin/integrations/${platform.platform}`, { preserveScroll: true });
+        put(`/admin/integrations/${platform.platform}`, {
+            preserveScroll: true,
+            onSuccess: () => toast.success(t('integrations.saved')),
+            onError: (errs) => toast.error(Object.values(errs)[0] ?? t('common.request_failed')),
+        });
     };
 
     const testWebhook = async () => {

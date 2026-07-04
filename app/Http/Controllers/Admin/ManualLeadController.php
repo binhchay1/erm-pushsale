@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Rules\VietnameseMobilePhone;
 use App\Services\Leads\ManualLeadImportService;
 use App\Support\SpreadsheetLeadReader;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +22,7 @@ class ManualLeadController extends Controller
     {
         $validated = $request->validate([
             'name' => ['nullable', 'string', 'max:150'],
-            'phone' => ['required', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', new VietnameseMobilePhone],
             'address' => ['nullable', 'string', 'max:255'],
             'product_id' => ['nullable', 'integer', 'exists:products,id'],
             'product' => ['nullable', 'string', 'max:255'],

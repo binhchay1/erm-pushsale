@@ -1,6 +1,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, Bell, Monitor, Palette } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -35,7 +36,10 @@ export default function SettingsIndex({ preferences, settingsBackUrl }) {
 
     const submit = (e) => {
         e.preventDefault();
-        put('/settings', { preserveScroll: true });
+        put('/settings', {
+            preserveScroll: true,
+            onError: (errs) => toast.error(Object.values(errs)[0] ?? t('common.request_failed')),
+        });
     };
 
     return (

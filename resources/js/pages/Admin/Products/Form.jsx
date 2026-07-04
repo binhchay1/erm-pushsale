@@ -1,19 +1,23 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
 
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CurrencyInput } from '@/components/ui/currency-input';
+import { FieldError, RequiredMark } from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { validate } from '@/lib/validate';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
 export default function ProductForm({ product, parents }) {
     const t = useT();
     const isEdit = Boolean(product?.id);
-    const { data, setData, post, put, processing, errors } = useForm({
+    const { data, setData, post, put, processing, errors, setError, clearErrors } = useForm({
         name: product?.name ?? '',
         type: product?.type ?? 'product',
         sku: product?.sku ?? '',
@@ -24,6 +28,19 @@ export default function ProductForm({ product, parents }) {
 
     const submit = (e) => {
         e.preventDefault();
+
+        const clientErrors = validate(data, {
+            name: [{ required: true, label: t('pages.products.name') }],
+            unit_price: [{ nonNegative: true }],
+        });
+
+        if (Object.keys(clientErrors).length > 0) {
+            clearErrors();
+            Object.entries(clientErrors).forEach(([field, message]) => setError(field, message));
+            toast.error(t('common.validation.fix_errors'));
+            return;
+        }
+
         if (isEdit) {
             put(`/admin/products/${product.id}`);
         } else {
@@ -54,17 +71,27 @@ export default function ProductForm({ product, parents }) {
                     <CardContent>
                         <form onSubmit={submit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">{t('pages.products.name')}</Label>
+                                <Label htmlFor="name">
+                                    {t('pages.products.name')}
+                                    <RequiredMark />
+                                </Label>
                                 <Input
                                     id="name"
                                     value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
+                                    aria-invalid={!!errors.name}
+                                    onChange={(e) => {
+                                        setData('name', e.target.value);
+                                        clearErrors('name');
+                                    }}
                                 />
-                                {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                                <FieldError message={errors.name} />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="type">{t('pages.products.type')}</Label>
+                                <Label htmlFor="type">
+                                    {t('pages.products.type')}
+                                    <RequiredMark />
+                                </Label>
                                 <select
                                     id="type"
                                     className="input-soft flex h-9 w-full px-3"
@@ -74,7 +101,7 @@ export default function ProductForm({ product, parents }) {
                                     <option value="product">{t('pages.products.type_product')}</option>
                                     <option value="combo">{t('pages.products.type_combo')}</option>
                                 </select>
-                                {errors.type && <p className="text-xs text-destructive">{errors.type}</p>}
+                                <FieldError message={errors.type} />
                             </div>
 
                             <div className="space-y-2">
@@ -82,21 +109,23 @@ export default function ProductForm({ product, parents }) {
                                 <Input
                                     id="sku"
                                     value={data.sku}
+                                    aria-invalid={!!errors.sku}
                                     onChange={(e) => setData('sku', e.target.value)}
                                 />
-                                {errors.sku && <p className="text-xs text-destructive">{errors.sku}</p>}
+                                <FieldError message={errors.sku} />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="unit_price">{t('pages.products.unit_price')}</Label>
+                                <Label htmlFor="unit_price">
+                                    {t('pages.products.unit_price')}
+                                    <RequiredMark />
+                                </Label>
                                 <CurrencyInput
                                     id="unit_price"
                                     value={data.unit_price}
                                     onChange={(amount) => setData('unit_price', amount)}
                                 />
-                                {errors.unit_price && (
-                                    <p className="text-xs text-destructive">{errors.unit_price}</p>
-                                )}
+                                <FieldError message={errors.unit_price} />
                             </div>
 
                             <div className="space-y-2">

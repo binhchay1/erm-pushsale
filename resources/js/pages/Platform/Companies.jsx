@@ -13,6 +13,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { FieldError, RequiredMark } from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -145,9 +146,12 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                     <CardContent>
                         <form onSubmit={create} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
-                                <Label htmlFor="name">{t('pages.platform.field_name')}</Label>
-                                <Input id="name" value={createForm.data.name} onChange={(e) => createForm.setData('name', e.target.value)} required />
-                                {createForm.errors.name && <p className="text-xs text-destructive">{createForm.errors.name}</p>}
+                                <Label htmlFor="name">
+                                    {t('pages.platform.field_name')}
+                                    <RequiredMark />
+                                </Label>
+                                <Input id="name" value={createForm.data.name} aria-invalid={!!createForm.errors.name} onChange={(e) => createForm.setData('name', e.target.value)} required />
+                                <FieldError message={createForm.errors.name} />
                             </div>
                             <div className="space-y-1.5">
                                 <Label htmlFor="slug">{t('pages.platform.field_slug')}</Label>
@@ -158,8 +162,12 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                                 {createForm.errors.slug && <p className="text-xs text-destructive">{createForm.errors.slug}</p>}
                             </div>
                             <div className="space-y-1.5">
-                                <Label htmlFor="owner_name">{t('pages.platform.field_owner_name')}</Label>
-                                <Input id="owner_name" value={createForm.data.owner_name} onChange={(e) => createForm.setData('owner_name', e.target.value)} required />
+                                <Label htmlFor="owner_name">
+                                    {t('pages.platform.field_owner_name')}
+                                    <RequiredMark />
+                                </Label>
+                                <Input id="owner_name" value={createForm.data.owner_name} aria-invalid={!!createForm.errors.owner_name} onChange={(e) => createForm.setData('owner_name', e.target.value)} required />
+                                <FieldError message={createForm.errors.owner_name} />
                             </div>
                             <div className="space-y-1.5">
                                 <Label htmlFor="owner_email">{t('pages.platform.field_owner_email')}</Label>

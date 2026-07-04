@@ -1,10 +1,12 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { Camera, KeyRound, Save, Trash2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { FieldError } from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useConfirm } from '@/hooks/use-confirm';
@@ -29,7 +31,7 @@ export default function ProfileIndex({ profile }) {
     const [preview, setPreview] = useState(null);
     const { ask, ConfirmDialogPortal } = useConfirm();
 
-    const { data, setData, put, processing, errors, recentlySuccessful, reset } = useForm({
+    const { data, setData, put, processing, errors, recentlySuccessful, reset, setError, clearErrors } = useForm({
         password: '',
         password_confirmation: '',
     });
@@ -46,9 +48,11 @@ export default function ProfileIndex({ profile }) {
             {
                 forceFormData: true,
                 preserveScroll: true,
+                onError: (errs) => toast.error(errs.avatar ?? t('common.request_failed')),
                 onFinish: () => {
                     if (preview) URL.revokeObjectURL(preview);
                     setPreview(null);
+                    if (fileRef.current) fileRef.current.value = '';
                 },
             }
         );
@@ -67,9 +71,22 @@ export default function ProfileIndex({ profile }) {
 
     const submitPassword = (e) => {
         e.preventDefault();
+
+        if (!data.password) {
+            setError('password', t('common.validation.required'));
+            toast.error(t('common.validation.fix_errors'));
+            return;
+        }
+        if (data.password !== data.password_confirmation) {
+            setError('password_confirmation', t('pages.users.password_mismatch'));
+            toast.error(t('common.validation.fix_errors'));
+            return;
+        }
+
         put('/profile', {
             preserveScroll: true,
             onSuccess: () => reset('password', 'password_confirmation'),
+            onError: (errs) => toast.error(errs.password ?? t('common.request_failed')),
         });
     };
 
@@ -157,11 +174,13 @@ export default function ProfileIndex({ profile }) {
                                         type="password"
                                         autoComplete="new-password"
                                         value={data.password}
-                                        onChange={(e) => setData('password', e.target.value)}
+                                        aria-invalid={!!errors.password}
+                                        onChange={(e) => {
+                                            setData('password', e.target.value);
+                                            clearErrors('password');
+                                        }}
                                     />
-                                    {errors.password && (
-                                        <p className="text-xs text-destructive">{errors.password}</p>
-                                    )}
+                                    <FieldError message={errors.password} />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="password_confirmation">{t('profile.confirm_password')}</Label>
@@ -170,8 +189,13 @@ export default function ProfileIndex({ profile }) {
                                         type="password"
                                         autoComplete="new-password"
                                         value={data.password_confirmation}
-                                        onChange={(e) => setData('password_confirmation', e.target.value)}
+                                        aria-invalid={!!errors.password_confirmation}
+                                        onChange={(e) => {
+                                            setData('password_confirmation', e.target.value);
+                                            clearErrors('password_confirmation');
+                                        }}
                                     />
+                                    <FieldError message={errors.password_confirmation} />
                                 </div>
                             </div>
 

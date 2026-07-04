@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { CheckCircle2, Copy, ExternalLink, Save, Unplug } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { CredentialField, SecretField } from '@/components/connections/CredentialField';
 import { CarrierApiTestPanel } from '@/components/shipping/CarrierApiTestPanel';
@@ -49,7 +50,11 @@ export function ShippingPartnerCard({ provider }) {
 
     const submit = (e) => {
         e.preventDefault();
-        put(`/admin/shipping-partners/${provider.provider}`, { preserveScroll: true });
+        put(`/admin/shipping-partners/${provider.provider}`, {
+            preserveScroll: true,
+            onSuccess: () => toast.success(t('integrations.saved')),
+            onError: (errs) => toast.error(Object.values(errs)[0] ?? t('common.request_failed')),
+        });
     };
 
     return (

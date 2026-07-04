@@ -16,6 +16,9 @@ npm run build
 echo "=== MIGRATE ==="
 php artisan migrate --force
 
+echo "=== DATA AUDIT (fix dữ liệu cũ không khớp business logic) ==="
+php artisan data:audit-business --fix
+
 echo "=== CACHE ==="
 php artisan optimize:clear
 php artisan config:cache
