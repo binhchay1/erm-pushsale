@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { Loader2, Plus, RefreshCw, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { formatCurrency, formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
 
@@ -43,6 +44,26 @@ function StockWarningBlock({ warnings = [] }) {
     );
 }
 
+async function fetchJson(url) {
+    try {
+        const r = await fetch(url, { headers: { Accept: 'application/json' } });
+        return r.ok ? await r.json() : [];
+    } catch {
+        return [];
+    }
+}
+
+// Cache danh sách tỉnh theo từng chế độ (old/new) để không gọi lại nhiều lần.
+const provincesCache = {};
+
+function fetchProvinces(mode) {
+    const key = mode === 'new' ? 'new' : 'old';
+    if (!provincesCache[key]) {
+        provincesCache[key] = fetchJson(key === 'new' ? '/geo/provinces?mode=new' : '/geo/provinces');
+    }
+    return provincesCache[key];
+}
+
 function mapInitialItems(order) {
     return (order.products ?? []).map((p) => ({
         productId: p.productId ?? null,
@@ -58,6 +79,7 @@ export function OperationStatusDialog({
     order,
     options = [],
     carrierOptions = [],
+    shippingServiceOptions = {},
     warehouseOptions = [],
     productOptions = [],
 }) {
@@ -83,6 +105,59 @@ export function OperationStatusDialog({
     const [warehouseId, setWarehouseId] = useState(order.warehouseId ?? '');
     const [shippingFee, setShippingFee] = useState(Number(order.shippingFeeCollected ?? 0) || 0);
     const [deposit, setDeposit] = useState(Number(order.deposit ?? 0) || 0);
+
+    // Địa chỉ giao đã xác nhận (Tỉnh/Huyện/Xã + số nhà) + dịch vụ vận chuyển.
+    const initialGeo = order.shippingGeo ?? {};
+    const [addressModeNew, setAddressModeNew] = useState((order.addressMode ?? 'old') === 'new');
+    const [receiverIsCustomer, setReceiverIsCustomer] = useState(!order.receiverName && !order.receiverPhone);
+    const [receiverName, setReceiverName] = useState(order.receiverName ?? '');
+    const [receiverPhone, setReceiverPhone] = useState(order.receiverPhone ?? '');
+    const [shippingService, setShippingService] = useState(order.shippingService ?? '');
+    const [addressDetail, setAddressDetail] = useState(initialGeo.address_detail ?? '');
+    const [provinceCode, setProvinceCode] = useState(initialGeo.province_code ? String(initialGeo.province_code) : '');
+    const [districtCode, setDistrictCode] = useState(initialGeo.district_code ? String(initialGeo.district_code) : '');
+    const [wardCode, setWardCode] = useState(initialGeo.ward_code ? String(initialGeo.ward_code) : '');
+    const [provinces, setProvinces] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [wards, setWards] = useState([]);
+
+    const serviceList = shippingServiceOptions?.[carrier] ?? [];
+    const provinceOpts = useMemo(() => provinces.map((p) => ({ value: String(p.code), label: p.name })), [provinces]);
+    const districtOpts = useMemo(() => districts.map((d) => ({ value: String(d.code), label: d.name })), [districts]);
+    const wardOpts = useMemo(() => wards.map((w) => ({ value: String(w.code), label: w.name })), [wards]);
+
+    // Tỉnh/TP theo chế độ (đơn vị cũ hoặc đơn vị 2 cấp 2025).
+    useEffect(() => {
+        if (open && tab === 'order') {
+            fetchProvinces(addressModeNew ? 'new' : 'old').then(setProvinces);
+        }
+    }, [open, tab, addressModeNew]);
+
+    // Quận/Huyện chỉ tồn tại ở đơn vị cũ.
+    useEffect(() => {
+        if (addressModeNew || !provinceCode) {
+            setDistricts([]);
+            return;
+        }
+        fetchJson(`/geo/provinces/${provinceCode}/districts`).then(setDistricts);
+    }, [provinceCode, addressModeNew]);
+
+    // Phường/Xã: đơn vị mới trực thuộc Tỉnh; đơn vị cũ trực thuộc Quận/Huyện.
+    useEffect(() => {
+        if (addressModeNew) {
+            if (!provinceCode) {
+                setWards([]);
+                return;
+            }
+            fetchJson(`/geo/provinces/${provinceCode}/wards`).then(setWards);
+            return;
+        }
+        if (!districtCode) {
+            setWards([]);
+            return;
+        }
+        fetchJson(`/geo/districts/${districtCode}/wards`).then(setWards);
+    }, [provinceCode, districtCode, addressModeNew]);
 
     const catalog = useMemo(() => {
         const products = [];
@@ -150,6 +225,15 @@ export function OperationStatusDialog({
         setWarehouseId(order.warehouseId ?? '');
         setShippingFee(Number(order.shippingFeeCollected ?? 0) || 0);
         setDeposit(Number(order.deposit ?? 0) || 0);
+        setShippingService(order.shippingService ?? '');
+        setAddressModeNew((order.addressMode ?? 'old') === 'new');
+        setReceiverIsCustomer(!order.receiverName && !order.receiverPhone);
+        setReceiverName(order.receiverName ?? '');
+        setReceiverPhone(order.receiverPhone ?? '');
+        setAddressDetail(initialGeo.address_detail ?? '');
+        setProvinceCode(initialGeo.province_code ? String(initialGeo.province_code) : '');
+        setDistrictCode(initialGeo.district_code ? String(initialGeo.district_code) : '');
+        setWardCode(initialGeo.ward_code ? String(initialGeo.ward_code) : '');
     };
 
     const submitStatus = () => {
@@ -219,9 +303,18 @@ export function OperationStatusDialog({
                 })),
                 discount: Number(orderDiscount) || 0,
                 shipping_provider: carrier || null,
+                shipping_service: shippingService || null,
                 customer_name: customerName.trim() || null,
                 customer_phone: customerPhone.trim() || null,
                 shipping_address: shippingAddress.trim() || null,
+                address_mode: addressModeNew ? 'new' : 'old',
+                address_detail: addressDetail.trim() || null,
+                province_code: provinceCode || null,
+                district_code: addressModeNew ? null : districtCode || null,
+                ward_code: wardCode || null,
+                receiver_is_customer: receiverIsCustomer,
+                receiver_name: receiverIsCustomer ? null : receiverName.trim() || null,
+                receiver_phone: receiverIsCustomer ? null : receiverPhone.trim() || null,
                 customer_note: customerNote.trim() || null,
                 warehouse_id: warehouseId ? Number(warehouseId) : null,
                 shipping_fee_collected: Number(shippingFee) || 0,
@@ -403,14 +496,116 @@ export function OperationStatusDialog({
                                         <Label className="text-xs">{t('operations.order_edit.customer_phone')}</Label>
                                         <Input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
                                     </div>
+
+                                    <label className="flex cursor-pointer items-center gap-2 text-xs font-medium">
+                                        <input
+                                            type="checkbox"
+                                            className="size-4 accent-primary"
+                                            checked={receiverIsCustomer}
+                                            onChange={(e) => setReceiverIsCustomer(e.target.checked)}
+                                        />
+                                        {t('operations.order_edit.receiver_is_customer')}
+                                    </label>
+                                    {!receiverIsCustomer && (
+                                        <div className="grid grid-cols-2 gap-2 rounded-lg border border-dashed border-border/70 p-2.5">
+                                            <div className="space-y-1">
+                                                <Label className="text-xs">{t('operations.order_edit.receiver_name')}</Label>
+                                                <Input
+                                                    value={receiverName}
+                                                    onChange={(e) => setReceiverName(e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label className="text-xs">{t('operations.order_edit.receiver_phone')}</Label>
+                                                <Input
+                                                    value={receiverPhone}
+                                                    onChange={(e) => setReceiverPhone(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="space-y-2">
                                         <Label className="text-xs">{t('operations.order_edit.shipping_address')}</Label>
                                         <textarea
-                                            className="input-soft min-h-[64px] w-full px-3 py-2 text-sm"
+                                            className="input-soft min-h-[56px] w-full px-3 py-2 text-sm"
                                             value={shippingAddress}
                                             onChange={(e) => setShippingAddress(e.target.value)}
                                         />
+                                        <p className="text-[10px] text-muted-foreground">
+                                            {t('operations.order_edit.shipping_address_hint')}
+                                        </p>
                                     </div>
+
+                                    {/* Địa chỉ giao đã xác nhận (ưu tiên dùng cho vận chuyển) */}
+                                    <div className="space-y-2 rounded-lg border border-dashed border-border/70 p-2.5">
+                                        <Label className="text-xs font-semibold">
+                                            {t('operations.order_edit.confirmed_address')}
+                                        </Label>
+
+                                        <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-amber-700 dark:text-amber-400">
+                                            <input
+                                                type="checkbox"
+                                                className="size-4 accent-amber-500"
+                                                checked={addressModeNew}
+                                                onChange={(e) => {
+                                                    setAddressModeNew(e.target.checked);
+                                                    setProvinceCode('');
+                                                    setDistrictCode('');
+                                                    setWardCode('');
+                                                }}
+                                            />
+                                            {t('operations.order_edit.address_mode_new')}
+                                        </label>
+
+                                        <Input
+                                            value={addressDetail}
+                                            placeholder={t('operations.order_edit.address_detail_placeholder')}
+                                            maxLength={200}
+                                            onChange={(e) => setAddressDetail(e.target.value)}
+                                        />
+
+                                        <SearchableSelect
+                                            value={provinceCode}
+                                            onChange={(v) => {
+                                                setProvinceCode(v);
+                                                setDistrictCode('');
+                                                setWardCode('');
+                                            }}
+                                            options={provinceOpts}
+                                            placeholder={t('operations.order_edit.province_placeholder')}
+                                            searchPlaceholder={t('operations.order_edit.search_placeholder')}
+                                            emptyText={t('operations.order_edit.search_empty')}
+                                        />
+
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {!addressModeNew && (
+                                                <SearchableSelect
+                                                    value={districtCode}
+                                                    onChange={(v) => {
+                                                        setDistrictCode(v);
+                                                        setWardCode('');
+                                                    }}
+                                                    options={districtOpts}
+                                                    disabled={!provinceCode}
+                                                    placeholder={t('operations.order_edit.district_placeholder')}
+                                                    searchPlaceholder={t('operations.order_edit.search_placeholder')}
+                                                    emptyText={t('operations.order_edit.search_empty')}
+                                                />
+                                            )}
+                                            <SearchableSelect
+                                                className={addressModeNew ? 'col-span-2' : ''}
+                                                value={wardCode}
+                                                onChange={setWardCode}
+                                                options={wardOpts}
+                                                disabled={addressModeNew ? !provinceCode : !districtCode}
+                                                placeholder={t('operations.order_edit.ward_placeholder')}
+                                                searchPlaceholder={t('operations.order_edit.search_placeholder')}
+                                                emptyText={t('operations.order_edit.search_empty')}
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div className="space-y-2">
                                         <Label className="text-xs">{t('operations.order_edit.customer_note')}</Label>
                                         <textarea
@@ -424,12 +619,31 @@ export function OperationStatusDialog({
                                         <select
                                             className="input-soft flex h-9 w-full px-3"
                                             value={carrier}
-                                            onChange={(e) => setCarrier(e.target.value)}
+                                            onChange={(e) => {
+                                                setCarrier(e.target.value);
+                                                setShippingService('');
+                                            }}
                                         >
                                             <option value="">{t('operations.order_edit.carrier_placeholder')}</option>
                                             {carrierOptions.map((c) => (
                                                 <option key={c.value} value={c.value}>
                                                     {c.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs">{t('operations.order_edit.service_title')}</Label>
+                                        <select
+                                            className="input-soft flex h-9 w-full px-3"
+                                            value={shippingService}
+                                            disabled={!carrier || serviceList.length === 0}
+                                            onChange={(e) => setShippingService(e.target.value)}
+                                        >
+                                            <option value="">{t('operations.order_edit.service_placeholder')}</option>
+                                            {serviceList.map((s) => (
+                                                <option key={s.value} value={s.value}>
+                                                    {s.label}
                                                 </option>
                                             ))}
                                         </select>

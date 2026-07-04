@@ -30,6 +30,7 @@ class OperationController extends Controller
                 'filterFields' => $filterOptions->saleOperationFilterFields(),
                 'operationStatusOptions' => OperationResult::selectableOptions(),
                 'carrierOptions' => ShippingProviders::options(),
+                'shippingServiceOptions' => ShippingProviders::serviceOptions(),
                 'itemTypeOptions' => ['product', 'combo', 'upsell', 'gift'],
                 'warehouseOptions' => $this->warehouseOptions(),
                 'productOptions' => $this->productOptions(),

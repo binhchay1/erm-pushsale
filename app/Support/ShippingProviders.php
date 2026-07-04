@@ -31,4 +31,36 @@ final class ShippingProviders
 
         return config("shipping_partners.providers.{$value}.label", $value);
     }
+
+    /**
+     * Danh sách dịch vụ vận chuyển theo từng đơn vị (dùng cho select "Dịch vụ vận chuyển").
+     *
+     * @return array<string, list<array{value: string, label: string}>>
+     */
+    public static function serviceOptions(): array
+    {
+        return collect(config('shipping_partners.providers', []))
+            ->mapWithKeys(fn ($provider, $key) => [
+                (string) $key => collect($provider['services'] ?? [])
+                    ->map(fn ($s) => ['value' => (string) $s['code'], 'label' => (string) $s['label']])
+                    ->values()
+                    ->all(),
+            ])
+            ->all();
+    }
+
+    public static function serviceLabel(?string $provider, ?string $code): ?string
+    {
+        if (! $provider || ! $code) {
+            return null;
+        }
+
+        foreach (config("shipping_partners.providers.{$provider}.services", []) as $service) {
+            if ((string) $service['code'] === (string) $code) {
+                return (string) $service['label'];
+            }
+        }
+
+        return $code;
+    }
 }

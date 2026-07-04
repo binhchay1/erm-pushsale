@@ -16,6 +16,7 @@ export default function Workspace({
     report,
     operationStatusOptions,
     carrierOptions = [],
+    shippingServiceOptions = {},
     itemTypeOptions = ['product', 'combo', 'upsell', 'gift'],
     warehouseOptions = [],
     productOptions = [],
@@ -61,6 +62,7 @@ export default function Workspace({
                             enableCloseOrder
                             operationStatusOptions={operationStatusOptions}
                             carrierOptions={carrierOptions}
+                            shippingServiceOptions={shippingServiceOptions}
                             itemTypeOptions={itemTypeOptions}
                             warehouseOptions={warehouseOptions}
                             productOptions={productOptions}

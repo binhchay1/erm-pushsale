@@ -118,7 +118,11 @@ class WarehouseOperationService
             'closedAt' => $order->closed_at?->toIso8601String(),
             'customerName' => $order->customer_name,
             'customerPhone' => $order->customer_phone,
-            'shippingAddress' => $order->shipping_address,
+            'receiverName' => $order->receiver_name,
+            'receiverPhone' => $order->receiver_phone,
+            'shippingAddress' => $order->effectiveShippingAddress(),
+            'shippingAddressRaw' => $order->shipping_address,
+            'shippingAddress2' => $order->shipping_address_2,
             'customerNote' => $order->customer_note,
             'warehouseName' => $order->warehouse?->name,
             'products' => $order->items->map(fn ($item) => [

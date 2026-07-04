@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\Leads\LeadOrderFactory;
 use App\Support\ActivityLogger;
 use App\Support\ShippingProviders;
+use App\Support\VietnamDivisions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -90,6 +91,9 @@ class SaleOrderEditService
                 $order->carrier_name = $payload['carrier_name'];
             }
 
+            // Chạy sau khi đã set shipping_provider để lấy đúng nhãn dịch vụ vận chuyển.
+            $this->applyDeliveryAddress($order, $payload);
+
             $order->save();
 
             $fresh = $this->factory->syncTotals($order->fresh(['items']));
@@ -109,5 +113,90 @@ class SaleOrderEditService
 
             return $fresh->fresh(['items', 'saleUser', 'team', 'marketingSource', 'warehouse']);
         });
+    }
+
+    /**
+     * Địa chỉ giao đã xác nhận: lưu cấu trúc Tỉnh/Huyện/Xã + số nhà vào shipping_geo,
+     * đồng thời dựng shipping_address_2 (địa chỉ đầy đủ) để dùng cho vận chuyển/hiển thị.
+     * Dịch vụ vận chuyển (shipping_service) lưu kèm trong shipping_geo.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function applyDeliveryAddress(Order $order, array $payload): void
+    {
+        // Người nhận hàng khác khách hàng.
+        if (array_key_exists('receiver_is_customer', $payload)) {
+            if ($payload['receiver_is_customer']) {
+                $order->receiver_name = null;
+                $order->receiver_phone = null;
+            } else {
+                if (array_key_exists('receiver_name', $payload)) {
+                    $order->receiver_name = $payload['receiver_name'] ?: null;
+                }
+                if (array_key_exists('receiver_phone', $payload)) {
+                    $order->receiver_phone = $payload['receiver_phone'] ?: null;
+                }
+            }
+        }
+
+        $geoKeys = ['province_code', 'district_code', 'ward_code', 'address_detail', 'shipping_service', 'address_mode'];
+        $hasGeoInput = (bool) array_intersect($geoKeys, array_keys($payload));
+
+        if (! $hasGeoInput) {
+            return;
+        }
+
+        $geo = is_array($order->shipping_geo) ? $order->shipping_geo : [];
+
+        $mode = ($payload['address_mode'] ?? null) === VietnamDivisions::MODE_NEW
+            ? VietnamDivisions::MODE_NEW
+            : VietnamDivisions::MODE_OLD;
+
+        $provinceCode = $payload['province_code'] ?? null;
+        $districtCode = $payload['district_code'] ?? null;
+        $wardCode = $payload['ward_code'] ?? null;
+        $detail = trim((string) ($payload['address_detail'] ?? ''));
+
+        if ($mode === VietnamDivisions::MODE_NEW) {
+            // 2 cấp: Tỉnh → Phường/Xã (không có Quận/Huyện).
+            $districtCode = null;
+            $districtName = null;
+            $provinceName = $provinceCode ? VietnamDivisions::newProvinceName($provinceCode) : null;
+            $wardName = ($provinceCode && $wardCode)
+                ? VietnamDivisions::newWardName($provinceCode, $wardCode) : null;
+        } else {
+            $provinceName = $provinceCode ? VietnamDivisions::provinceName($provinceCode) : null;
+            $districtName = ($provinceCode && $districtCode)
+                ? VietnamDivisions::districtName($provinceCode, $districtCode) : null;
+            $wardName = ($districtCode && $wardCode)
+                ? VietnamDivisions::wardName($districtCode, $wardCode) : null;
+        }
+
+        $geo = array_merge($geo, [
+            'mode' => $mode,
+            'address' => $detail !== '' ? $detail : ($geo['address'] ?? null),
+            'address_detail' => $detail,
+            'province_code' => $provinceCode,
+            'province' => $provinceName,
+            'district_code' => $districtCode,
+            'district' => $districtName,
+            'ward_code' => $wardCode,
+            'ward' => $wardName,
+        ]);
+
+        if (array_key_exists('shipping_service', $payload)) {
+            $service = $payload['shipping_service'] ?: null;
+            $geo['service_code'] = $service;
+            $geo['service'] = \App\Support\ShippingProviders::serviceLabel($order->shipping_provider, $service);
+        }
+
+        $order->shipping_geo = $geo;
+
+        // Dựng địa chỉ đầy đủ: số nhà, [Xã], [Huyện], Tỉnh.
+        $full = collect([$detail, $wardName, $districtName, $provinceName])
+            ->filter(fn ($p) => filled($p))
+            ->implode(', ');
+
+        $order->shipping_address_2 = $full !== '' ? $full : null;
     }
 }

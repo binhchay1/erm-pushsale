@@ -16,7 +16,13 @@ class ShippingAddressHelper
             'district' => (string) ($geo['district'] ?? config('shipping_partners.default_geo.district')),
             'ward' => (string) ($geo['ward'] ?? config('shipping_partners.default_geo.ward')),
             'hamlet' => (string) ($geo['hamlet'] ?? 'Khác'),
-            'address' => (string) ($geo['address'] ?? $order->shipping_address ?? 'Chưa cập nhật địa chỉ'),
+            // Ưu tiên số nhà/địa chỉ chi tiết đã xác nhận, sau đó tới địa chỉ giao hiệu lực.
+            'address' => (string) (
+                ($geo['address_detail'] ?? null)
+                ?: ($geo['address'] ?? null)
+                ?: $order->effectiveShippingAddress()
+                ?: 'Chưa cập nhật địa chỉ'
+            ),
         ];
     }
 

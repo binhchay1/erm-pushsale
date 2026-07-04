@@ -46,6 +46,7 @@ use App\Http\Controllers\Marketing\CampaignReportController as MarketingCampaign
 use App\Http\Controllers\Marketing\DashboardController as RoleMarketingDashboardController;
 use App\Http\Controllers\Marketing\RankingController as MarketingRankingController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\GeoController;
 use App\Http\Controllers\OrgChartController;
 use App\Http\Controllers\Platform\CompanyController as PlatformCompanyController;
 use App\Http\Controllers\ProfileController;
@@ -92,6 +93,12 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
 
     // Sơ đồ tổ chức — test RBAC: /org-chart (xem OrgChartController)
     Route::get('org-chart', [OrgChartController::class, 'index'])->name('org-chart.index');
+
+    // Địa giới hành chính cho ô chọn Tỉnh/Huyện/Xã (cascading).
+    Route::get('geo/provinces', [GeoController::class, 'provinces'])->name('geo.provinces');
+    Route::get('geo/provinces/{province}/districts', [GeoController::class, 'districts'])->name('geo.districts');
+    Route::get('geo/provinces/{province}/wards', [GeoController::class, 'provinceWards'])->name('geo.province-wards');
+    Route::get('geo/districts/{district}/wards', [GeoController::class, 'wards'])->name('geo.wards');
 
     Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');

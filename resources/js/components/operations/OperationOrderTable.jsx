@@ -50,6 +50,7 @@ export function OperationOrderTable({
     enableSaleActions = false,
     operationStatusOptions = [],
     carrierOptions = [],
+    shippingServiceOptions = {},
     itemTypeOptions = ['product', 'combo', 'upsell', 'gift'],
     warehouseOptions = [],
     productOptions = [],
@@ -116,9 +117,14 @@ export function OperationOrderTable({
                                             {t('operations.order_table.returning_customer')}
                                         </div>
                                     )}
-                                    {row.shippingAddress && (
+                                    {(row.effectiveShippingAddress || row.shippingAddress) && (
                                         <div className="mt-1 text-[11px] text-muted-foreground">
-                                            {row.shippingAddress}
+                                            {row.effectiveShippingAddress || row.shippingAddress}
+                                            {row.shippingAddress2 && (
+                                                <span className="ml-1 rounded bg-emerald-100 px-1 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                                                    {t('operations.order_table.address_confirmed')}
+                                                </span>
+                                            )}
                                         </div>
                                     )}
                                 </Td>
@@ -211,6 +217,7 @@ export function OperationOrderTable({
                                                 order={row}
                                                 options={operationStatusOptions}
                                                 carrierOptions={carrierOptions}
+                                                shippingServiceOptions={shippingServiceOptions}
                                                 itemTypeOptions={itemTypeOptions}
                                                 warehouseOptions={warehouseOptions}
                                                 productOptions={productOptions}

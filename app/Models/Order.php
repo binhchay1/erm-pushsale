@@ -17,7 +17,7 @@ class Order extends Model
     protected $fillable = [
         'order_code', 'sale_user_id', 'marketer_user_id', 'team_id', 'marketing_source_id',
         'warehouse_id', 'product_id', 'customer_name', 'customer_phone', 'phone_carrier',
-        'customer_note',         'shipping_address', 'shipping_notes', 'accounting_notes',
+        'customer_note',         'shipping_address', 'shipping_address_2', 'receiver_name', 'receiver_phone', 'shipping_notes', 'accounting_notes',
         'internal_recon_note', 'shipping_geo', 'data_arrived_at', 'assigned_at', 'closed_at', 'inventory_deducted_at',
         'desired_delivery_at', 'next_operation_at', 'operation_stage', 'operation_result', 'closing_status',
         'delivery_status', 'return_reason', 'return_restocked_at',
@@ -44,6 +44,32 @@ class Order extends Model
             'is_duplicate_phone' => 'boolean',
             'shipping_geo' => 'array',
         ];
+    }
+
+    /**
+     * Địa chỉ giao dùng cho vận chuyển / xuất dữ liệu:
+     * ưu tiên địa chỉ sale đã xác nhận (shipping_address_2), nếu trống dùng địa chỉ gốc từ landing.
+     */
+    public function effectiveShippingAddress(): ?string
+    {
+        $confirmed = trim((string) ($this->shipping_address_2 ?? ''));
+
+        return $confirmed !== '' ? $confirmed : $this->shipping_address;
+    }
+
+    /** Người nhận hàng thực tế: người nhận riêng nếu có, ngược lại là khách hàng. */
+    public function effectiveReceiverName(): ?string
+    {
+        $name = trim((string) ($this->receiver_name ?? ''));
+
+        return $name !== '' ? $name : $this->customer_name;
+    }
+
+    public function effectiveReceiverPhone(): ?string
+    {
+        $phone = trim((string) ($this->receiver_phone ?? ''));
+
+        return $phone !== '' ? $phone : $this->customer_phone;
     }
 
     public function saleUser(): BelongsTo

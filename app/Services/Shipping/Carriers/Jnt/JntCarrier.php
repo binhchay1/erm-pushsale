@@ -114,8 +114,8 @@ class JntCarrier extends AbstractShippingCarrier
                 'address' => $pickup['pick_address'],
             ],
             'receiver' => [
-                'name' => $order->customer_name,
-                'mobile' => $order->customer_phone,
+                'name' => $order->effectiveReceiverName(),
+                'mobile' => $order->effectiveReceiverPhone(),
                 'prov' => $delivery['province'],
                 'city' => $delivery['district'],
                 'area' => $delivery['ward'],

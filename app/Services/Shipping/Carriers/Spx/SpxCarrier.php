@@ -168,8 +168,8 @@ class SpxCarrier extends AbstractShippingCarrier
                 'address' => $pickup['pick_address'],
             ],
             'receiver' => [
-                'name' => $order->customer_name,
-                'phone' => $order->customer_phone,
+                'name' => $order->effectiveReceiverName(),
+                'phone' => $order->effectiveReceiverPhone(),
                 'province' => $delivery['province'],
                 'district' => $delivery['district'],
                 'ward' => $delivery['ward'],
