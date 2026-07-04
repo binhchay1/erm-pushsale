@@ -54,6 +54,7 @@ return [
     'campaign_approval' => [
         'incomplete' => 'Chiến dịch thiếu sản phẩm hoặc webhook — không thể duyệt.',
         'reason_required' => 'Vui lòng nhập lý do từ chối.',
+        'product_required' => 'Vui lòng chọn sản phẩm cho chiến dịch Landing.',
     ],
     'call_logged' => 'Đã ghi nhận cuộc gọi.',
     'failed_order_deleted' => 'Đã xóa đơn lỗi.',
@@ -105,6 +106,16 @@ return [
         'spam_detected' => 'Bị chặn: nội dung nghi ngờ spam.',
         'payload_too_large' => 'Dữ liệu gửi lên quá lớn — đã bị từ chối.',
         'guest_name' => 'Khách Landing',
+        'duplicate_reason' => 'Trùng số: SĐT đã có đơn :code trong :days ngày. Gói tin đến muộn/ngoài phiên nên KHÔNG tự gộp — cần kiểm tra & xử lý tay.',
+    ],
+    'manual_lead' => [
+        'created' => 'Đã thêm lead thủ công.',
+        'duplicate' => 'SĐT đã có đơn gần đây — lead được lưu vào mục ngoại lệ để kiểm soát.',
+        'create_failed' => 'Không tạo được lead. Kiểm tra lại số điện thoại.',
+        'csv_empty' => 'File rỗng hoặc chỉ có dòng tiêu đề.',
+        'no_phone_column' => 'Không tìm thấy cột số điện thoại trong file. Cần có cột như "SĐT", "Số điện thoại" hoặc "phone".',
+        'bad_file' => 'Định dạng file không hỗ trợ. Chỉ nhận .csv, .txt, .xls hoặc .xlsx.',
+        'read_failed' => 'Không đọc được file. Kiểm tra lại file có đúng định dạng Excel/CSV không.',
     ],
     'inventory' => [
         'approver_required' => 'Chọn trưởng kho ký duyệt.',

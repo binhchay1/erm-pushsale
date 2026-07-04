@@ -31,7 +31,8 @@ class CampaignRequest extends FormRequest
                     })
                     ->ignore($campaignId),
             ],
-            'product_id' => ['nullable', 'exists:products,id'],
+            // Landing bắt buộc có sản phẩm — thiếu thì không duyệt & không chia số được.
+            'product_id' => ['required', 'exists:products,id'],
             'marketer_user_id' => [
                 'nullable',
                 'exists:users,id',
@@ -42,6 +43,15 @@ class CampaignRequest extends FormRequest
             'is_active' => ['boolean'],
             'js_tracking_enabled' => ['boolean'],
             'lead_allocation' => ['nullable', Rule::enum(CampaignLeadAllocation::class)],
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'product_id.required' => __('messages.campaign_approval.product_required'),
+            'product_id.exists' => __('messages.campaign_approval.product_required'),
         ];
     }
 

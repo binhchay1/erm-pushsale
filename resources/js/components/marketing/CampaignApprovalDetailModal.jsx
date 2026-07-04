@@ -57,6 +57,7 @@ export function CampaignApprovalDetailModal({
     }
 
     const canDecide = !campaign.is_approved && !campaign.rejected_at;
+    const missingProduct = !!campaign.missing_product && !campaign.is_approved;
 
     return (
         <>
@@ -79,6 +80,13 @@ export function CampaignApprovalDetailModal({
                     </DialogHeader>
 
                     <div className="space-y-5">
+                        {missingProduct && (
+                            <div className="flex items-start gap-2 rounded-lg border border-rose-200/80 bg-rose-50/60 p-3 text-xs text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
+                                <XCircle className="mt-0.5 size-4 shrink-0" />
+                                <span>{t('pages.landing.incomplete_hint')}</span>
+                            </div>
+                        )}
+
                         <section className="space-y-3">
                             <p className="text-sm font-semibold">{t('pages.landing.section_campaign')}</p>
                             <div className="grid gap-4 rounded-lg border p-4 sm:grid-cols-2">
@@ -217,7 +225,12 @@ export function CampaignApprovalDetailModal({
                                     <XCircle className="size-4" />
                                     {t('pages.landing.reject')}
                                 </Button>
-                                <Button type="button" disabled={approving} onClick={() => onApprove(campaign)}>
+                                <Button
+                                    type="button"
+                                    disabled={approving || missingProduct}
+                                    title={missingProduct ? t('pages.landing.incomplete_hint') : undefined}
+                                    onClick={() => onApprove(campaign)}
+                                >
                                     <CheckCircle2 className="size-4" />
                                     {t('pages.landing.approve')}
                                 </Button>

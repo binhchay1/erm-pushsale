@@ -13,11 +13,11 @@ use Illuminate\Foundation\Queue\Queueable;
 /**
  * Chốt 1 lead Landing "đang gom" sau thời gian giữ số (chờ upsale trang cảm ơn).
  *
- * Cơ chế giữ số CHỦ ĐỘNG:
- *  - Khách còn thao tác (còn nhịp hoạt động phiên trong hold_seconds) → job tự
+ * Áp dụng cho CẢ luồng có JS lẫn không JS (cùng mốc hold_seconds / max_hold_seconds):
+ *  - Còn hoạt động (nhịp phiên JS, hoặc vừa có gói mới trong hold_seconds) → job tự
  *    gia hạn (re-dispatch) tới trần max_hold_seconds.
- *  - Khách đóng phiên (session.close) → chốt ngay.
- *  - Hết trần → chốt để lead không kẹt.
+ *  - Khách đóng phiên (session.close, chỉ có khi gắn JS) → chốt ngay.
+ *  - Hết giờ chờ / chạm trần → chốt để lead không kẹt.
  */
 class FinalizeLandingLeadJob implements ShouldQueue
 {
@@ -46,17 +46,26 @@ class FinalizeLandingLeadJob implements ShouldQueue
                 ->latest('id')
                 ->first();
 
+            $now = now();
             $holdSeconds = (int) config('saleops.landing.hold_seconds', 90);
             $maxHold = (int) config('saleops.landing.max_hold_seconds', 300);
-            $ageSeconds = $lead->created_at ? now()->diffInSeconds($lead->created_at) : $maxHold;
+            // diffInSeconds theo thứ tự (mốc_cũ)->diffInSeconds(now) để luôn ra số DƯƠNG
+            // trên cả Carbon 2 & 3 (Carbon 3 trả giá trị có dấu).
+            $ageSeconds = $lead->created_at ? $lead->created_at->diffInSeconds($now) : $maxHold;
 
             $sessionClosed = $session?->isClosed() ?? false;
             $lastActivity = $session?->last_activity_at ?? $lead->updated_at;
-            $stillActive = $lastActivity && now()->diffInSeconds($lastActivity) < $holdSeconds;
+            $idleSeconds = $lastActivity ? $lastActivity->diffInSeconds($now) : $holdSeconds;
+            $stillActive = $idleSeconds < $holdSeconds;
+
+            // Job chạy SỚM hơn lịch (queue sync khi chạy test/seed) → chốt luôn, không
+            // gia hạn để tránh lặp vô hạn. Trên production (queue thật) delay được tôn
+            // trọng nên age luôn ≥ hold khi job chạy.
+            $delayHonored = $ageSeconds >= max(1, $holdSeconds - 5);
 
             // Chưa đóng phiên, còn hoạt động, chưa chạm trần → chờ thêm.
-            if (! $sessionClosed && $stillActive && $ageSeconds < $maxHold) {
-                self::dispatch($this->leadId, $this->companyId)->delay(now()->addSeconds($holdSeconds));
+            if (! $sessionClosed && $stillActive && $ageSeconds < $maxHold && $delayHonored) {
+                self::dispatch($this->leadId, $this->companyId)->delay($now->copy()->addSeconds($holdSeconds));
 
                 return;
             }

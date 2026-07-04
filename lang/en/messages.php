@@ -52,6 +52,7 @@ return [
     'campaign_updated' => 'Landing connection updated.',
     'campaign_deleted' => 'Landing connection deleted.',
     'campaign_approval' => [
+        'product_required' => 'Please choose a product for the landing campaign.',
         'incomplete' => 'Campaign is missing product or webhook — cannot approve.',
         'reason_required' => 'Please enter a rejection reason.',
     ],
@@ -105,6 +106,16 @@ return [
         'spam_detected' => 'Blocked: content flagged as spam.',
         'payload_too_large' => 'Submitted payload too large — rejected.',
         'guest_name' => 'Landing guest',
+        'duplicate_reason' => 'Duplicate: phone already has order :code within :days days. Packet arrived late/out of session so it was NOT auto-merged — needs manual review.',
+    ],
+    'manual_lead' => [
+        'created' => 'Manual lead added.',
+        'duplicate' => 'Phone already has a recent order — lead saved to exceptions for review.',
+        'create_failed' => 'Could not create lead. Please check the phone number.',
+        'csv_empty' => 'CSV file is empty or only has a header row.',
+        'no_phone_column' => 'No phone column found in the file. Include a column like "Phone", "SĐT" or "Số điện thoại".',
+        'bad_file' => 'Unsupported file type. Only .csv, .txt, .xls or .xlsx are accepted.',
+        'read_failed' => 'Could not read the file. Please check it is a valid Excel/CSV file.',
     ],
     'inventory' => [
         'approver_required' => 'Select a warehouse lead to approve.',

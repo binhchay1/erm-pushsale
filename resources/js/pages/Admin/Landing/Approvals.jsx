@@ -51,6 +51,10 @@ export default function LandingApprovals({
                 onSuccess: () => {
                     setModalOpen(false);
                     setSelectedCampaign(null);
+                    toast.success(t('pages.landing.approve_success', { name: campaign.name }));
+                },
+                onError: (errors) => {
+                    toast.error(errors.campaign ?? errors.message ?? t('pages.landing.approve_failed'));
                 },
                 onFinish: () => setApproving(false),
             },
@@ -67,6 +71,10 @@ export default function LandingApprovals({
                 onSuccess: () => {
                     setModalOpen(false);
                     setSelectedCampaign(null);
+                    toast.success(t('pages.landing.reject_success'));
+                },
+                onError: (errors) => {
+                    toast.error(errors.reason ?? errors.campaign ?? errors.message ?? t('pages.landing.reject_failed'));
                 },
                 onFinish: () => setRejecting(false),
             },
@@ -146,13 +154,20 @@ export default function LandingApprovals({
                                         <Td className="font-mono">{row.utm_campaign}</Td>
                                         <Td>{row.created_at}</Td>
                                         <Td>
-                                            {row.is_approved ? (
-                                                <StatusBadge tone="success">{t('pages.approved')}</StatusBadge>
-                                            ) : row.rejected_at ? (
-                                                <StatusBadge tone="destructive">{t('pages.landing.reject')}</StatusBadge>
-                                            ) : (
-                                                <StatusBadge tone="warning">{t('pages.pending_approval')}</StatusBadge>
-                                            )}
+                                            <div className="flex flex-wrap items-center gap-1">
+                                                {row.is_approved ? (
+                                                    <StatusBadge tone="success">{t('pages.approved')}</StatusBadge>
+                                                ) : row.rejected_at ? (
+                                                    <StatusBadge tone="destructive">{t('pages.landing.reject')}</StatusBadge>
+                                                ) : (
+                                                    <StatusBadge tone="warning">{t('pages.pending_approval')}</StatusBadge>
+                                                )}
+                                                {!row.is_approved && row.missing_product && (
+                                                    <StatusBadge tone="danger" title={t('pages.landing.incomplete_hint')}>
+                                                        {t('pages.landing.incomplete_badge')}
+                                                    </StatusBadge>
+                                                )}
+                                            </div>
                                         </Td>
                                         <Td>
                                             <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>

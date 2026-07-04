@@ -1,10 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { CheckCircle2, Info, Plug, Search, UserPlus, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, Plug, Search, UserPlus, X } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { ManualLeadDialogs } from '@/components/leads/ManualLeadDialogs';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ import { useT } from '@/providers/I18nProvider';
 export default function LeadsIndex({
     leads,
     filters,
+    exceptionCount = 0,
     platforms,
     statuses,
     campaigns = [],
@@ -30,6 +32,10 @@ export default function LeadsIndex({
     realtimeChannel = 'dashboard.admin',
     allocationMode = 'auto',
     allocationModeUrl = '/admin/leads/allocation-mode',
+    manualUrl = '/admin/leads/manual',
+    importUrl = '/admin/leads/import',
+    products = [],
+    importFields = [],
 }) {
     const t = useT();
     const labels = useLabels();
@@ -44,6 +50,11 @@ export default function LeadsIndex({
     const [searchDraft, setSearchDraft] = useState(filters.search ?? '');
 
     const manualOnly = allocationMode === 'manual';
+    const exceptionsOnly = filters.bucket === 'exceptions';
+
+    const viewExceptions = () => {
+        router.get(listUrl, { bucket: 'exceptions' }, { preserveState: true });
+    };
 
     const toggleMode = (next) => {
         setSavingMode(true);
@@ -146,6 +157,40 @@ export default function LeadsIndex({
                         )
                     }
                 />
+
+                <ManualLeadDialogs
+                    manualUrl={manualUrl}
+                    importUrl={importUrl}
+                    products={products}
+                    importFields={importFields}
+                    salesUsers={salesUsers}
+                />
+
+                {exceptionCount > 0 && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200/80 bg-rose-50/60 p-4 dark:border-rose-900/40 dark:bg-rose-950/20">
+                        <div className="flex items-start gap-3">
+                            <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400">
+                                <AlertTriangle className="size-4" />
+                            </span>
+                            <div>
+                                <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
+                                    {t('pages.leads.exceptions_title')}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    {t('pages.leads.exceptions_hint', { count: exceptionCount })}
+                                </p>
+                            </div>
+                        </div>
+                        {exceptionsOnly ? (
+                            <StatusBadge tone="danger">{t('pages.leads.exceptions_only_badge')}</StatusBadge>
+                        ) : (
+                            <Button size="sm" variant="outline" onClick={viewExceptions}>
+                                <AlertTriangle className="size-4" />
+                                {t('pages.leads.exceptions_view')}
+                            </Button>
+                        )}
+                    </div>
+                )}
 
                 <div className="space-y-3 rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-amber-200/60 pb-3 dark:border-amber-900/30">
@@ -278,7 +323,7 @@ export default function LeadsIndex({
                         onChange={(e) => search({ date_to: e.target.value || null })}
                         title={t('pages.leads.filter_date_to')}
                     />
-                    <Button size="sm" variant="outline" onClick={() => search({ status: 'pending' })}>
+                    <Button size="sm" variant="outline" onClick={() => search({ status: 'pending', bucket: null })}>
                         {t('pages.leads.filter_pending_only')}
                     </Button>
                     <Button size="sm" onClick={applySearch}>
@@ -312,6 +357,7 @@ export default function LeadsIndex({
                                 <Th sortable sortKey="customer_phone" sort={sort} onSort={toggleSort}>{t('pages.leads.col_phone')}</Th>
                                 <Th sortable sortKey="status" sort={sort} onSort={toggleSort}>{t('pages.leads.col_status')}</Th>
                                 <Th sortable sortKey="order_code" sort={sort} onSort={toggleSort}>{t('pages.leads.col_order')}</Th>
+                                <Th sortable sortKey="incoming" sort={sort} onSort={toggleSort}>{t('pages.leads.col_incoming')}</Th>
                                 <Th sortable sortKey="note" sort={sort} onSort={toggleSort}>{t('pages.leads.col_note')}</Th>
                                 {canDelete && <Th />}
                             </tr>
@@ -319,7 +365,14 @@ export default function LeadsIndex({
                         <tbody>
                             {sortedRows.length ? (
                                 sortedRows.map((row) => (
-                                    <tr key={row.id} className="hover:bg-muted/30">
+                                    <tr
+                                        key={row.id}
+                                        className={
+                                            row.is_exception
+                                                ? 'bg-rose-50/50 hover:bg-rose-50 dark:bg-rose-950/20 dark:hover:bg-rose-950/30'
+                                                : 'hover:bg-muted/30'
+                                        }
+                                    >
                                         <Td>
                                             {row.status === 'pending' ? (
                                                 <input
@@ -340,9 +393,19 @@ export default function LeadsIndex({
                                                 {labels.lead_ingestion_status?.[row.status] ?? row.status_label}
                                             </StatusBadge>
                                         </Td>
-                                        <Td className="font-mono">{row.order_code ?? '—'}</Td>
-                                        <Td className="max-w-xs truncate text-muted-foreground">
-                                            {row.error_message ?? row.product_interest ?? '—'}
+                                        <Td className="font-mono">
+                                            {row.order_code ?? (row.conflict_order_code
+                                                ? <span className="text-rose-600 dark:text-rose-400" title={t('pages.leads.conflict_order')}>{row.conflict_order_code}</span>
+                                                : '—')}
+                                        </Td>
+                                        <Td className="max-w-[200px] truncate text-muted-foreground" title={row.incoming ?? undefined}>
+                                            {row.incoming ?? '—'}
+                                        </Td>
+                                        <Td
+                                            className={`max-w-xs truncate ${row.is_exception ? 'text-rose-600 dark:text-rose-400' : 'text-muted-foreground'}`}
+                                            title={row.error_message ?? undefined}
+                                        >
+                                            {row.error_message ?? '—'}
                                         </Td>
                                         {canDelete && (
                                             <Td>
@@ -357,7 +420,7 @@ export default function LeadsIndex({
                             ) : (
                                 <tr>
                                     <Td
-                                        colSpan={canDelete ? 11 : 10}
+                                        colSpan={canDelete ? 12 : 11}
                                         className="py-8 text-center text-muted-foreground"
                                     >
                                         {t('pages.leads.empty')}

@@ -355,7 +355,12 @@ class LandingFormDriver implements LeadPayloadNormalizer
                 if ($name === '') {
                     continue;
                 }
+                // Giữ nguyên meta gốc (vd detected_qty) khi payload đã có sẵn items
+                // đã chuẩn hoá — xảy ra khi chốt lead "đang gom" (dựng lại từ payload).
+                $existingMeta = is_array($row['meta'] ?? null) ? $row['meta'] : [];
+
                 $items[] = [
+                    'product_id' => $row['product_id'] ?? null,
                     'product_name' => $name,
                     'unit_price' => MoneyParser::parse($row['price'] ?? $row['unit_price'] ?? 0),
                     'quantity' => max(1, (int) ($row['quantity'] ?? $defaultQty)),
@@ -363,11 +368,11 @@ class LandingFormDriver implements LeadPayloadNormalizer
                     'item_type' => in_array($row['type'] ?? $row['item_type'] ?? null, ['product', 'combo', 'upsell', 'gift'], true)
                         ? ($row['type'] ?? $row['item_type'])
                         : 'combo',
-                    'origin' => 'landing',
-                    'meta' => array_filter([
-                        'variant' => $row['variant'] ?? $row['phan_loai'] ?? null,
+                    'origin' => $row['origin'] ?? 'landing',
+                    'meta' => array_filter(array_merge($existingMeta, [
+                        'variant' => $row['variant'] ?? $row['phan_loai'] ?? ($existingMeta['variant'] ?? null),
                         'raw_label' => $name,
-                    ]),
+                    ])),
                 ];
             }
 

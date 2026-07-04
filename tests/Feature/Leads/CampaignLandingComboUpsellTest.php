@@ -170,6 +170,62 @@ class CampaignLandingComboUpsellTest extends TestCase
         $this->assertSame(238_000, (int) $order->total);
     }
 
+    public function test_non_js_campaign_also_holds_lead_for_upsell_window(): void
+    {
+        // Chặn job chốt tự chạy để quan sát trạng thái "đang gom" của luồng KHÔNG JS.
+        Queue::fake([FinalizeLandingLeadJob::class]);
+
+        $campaign = $this->autoCampaign(jsTracking: false);
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'nojs-hold-1',
+            'name' => 'Anh Chờ',
+            'phone' => '0906555000',
+            'combo' => 'Mua 1 Thỏi : 149k',
+        ])->assertAccepted();
+
+        // Không JS vẫn GIỮ SỐ: chưa tạo đơn, lead đang gom, đã hẹn job chốt (cùng mốc thời gian).
+        $this->assertSame(0, Order::query()->where('customer_phone', '0906555000')->count());
+        $lead = LeadIngestion::query()->where('customer_phone', '0906555000')->firstOrFail();
+        $this->assertSame(LeadIngestionStatus::Gathering, $lead->status);
+        Queue::assertPushed(FinalizeLandingLeadJob::class);
+    }
+
+    public function test_duplicate_lead_stores_reason_and_conflict_order(): void
+    {
+        $campaign = $this->autoCampaign();
+
+        // Đơn đầu của khách.
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'dupe-base-1',
+            'name' => 'Chị Trùng',
+            'phone' => '0906666111',
+            'combo' => 'Mua 1 Thỏi : 149k',
+        ])->assertAccepted();
+
+        $order = Order::query()->where('customer_phone', '0906666111')->firstOrFail();
+        // Đẩy đơn ra ngoài cửa sổ gộp → gói tin sau KHÔNG tự gộp được.
+        $order->forceFill(['created_at' => now()->subMinutes(60)])->save();
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'dupe-late-1',
+            'name' => 'Chị Trùng',
+            'phone' => '0906666111',
+            'combo' => 'Mua 2 Thỏi : 289k',
+        ])->assertAccepted();
+
+        // Case ngoại lệ được LƯU lại kèm lý do + đơn liên quan để kiểm soát.
+        $dup = LeadIngestion::query()
+            ->where('customer_phone', '0906666111')
+            ->where('status', LeadIngestionStatus::Duplicate)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($dup, 'Gói tin trùng phải được lưu lại để kiểm soát.');
+        $this->assertNotEmpty($dup->error_message);
+        $this->assertSame($order->order_code, $dup->payload['conflict_order_code'] ?? null);
+    }
+
     public function test_js_tracking_holds_lead_then_finalizes_as_single_order(): void
     {
         // Chặn job chốt tự chạy để mô phỏng "đang gom" trong lúc chờ upsale.

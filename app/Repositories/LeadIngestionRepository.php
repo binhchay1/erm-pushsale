@@ -14,6 +14,7 @@ class LeadIngestionRepository
      * @param  array{
      *     platform?: ?string,
      *     status?: ?string,
+     *     bucket?: ?string,
      *     marketing_source_id?: ?int,
      *     search?: ?string,
      *     date_from?: ?string,
@@ -30,6 +31,11 @@ class LeadIngestionRepository
 
         if (! empty($filters['platform'])) {
             $query->where('platform', $filters['platform']);
+        }
+
+        // Nhóm "ngoại lệ cần kiểm soát": các case hệ thống không tự xử lý được.
+        if (($filters['bucket'] ?? null) === 'exceptions') {
+            $query->whereIn('status', self::exceptionStatuses());
         }
 
         if (! empty($filters['status'])) {
@@ -69,6 +75,25 @@ class LeadIngestionRepository
             ->when($status, fn ($q) => $q->where('status', $status))
             ->latest()
             ->paginate($perPage);
+    }
+
+    /**
+     * Trạng thái lead thuộc nhóm "ngoại lệ" — hệ thống không tự xử lý được,
+     * cần bộ phận vận hành xem & xử lý tay.
+     *
+     * @return list<string>
+     */
+    public static function exceptionStatuses(): array
+    {
+        return [LeadIngestionStatus::Duplicate->value, LeadIngestionStatus::Failed->value];
+    }
+
+    /** Đếm số lead ngoại lệ (trùng số / lỗi) để cảnh báo trên giao diện. */
+    public function exceptionCount(): int
+    {
+        return LeadIngestion::query()
+            ->whereIn('status', self::exceptionStatuses())
+            ->count();
     }
 
     public function countToday(): int

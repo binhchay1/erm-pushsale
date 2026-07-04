@@ -63,6 +63,9 @@ class LandingApprovalController extends Controller
             'id' => $c->id,
             'name' => $c->name,
             'product' => $c->product?->name,
+            // Điều kiện tối thiểu để duyệt: phải có sản phẩm + webhook token.
+            'can_be_approved' => $c->product_id !== null && $c->webhook_token !== null,
+            'missing_product' => $c->product_id === null,
             'product_sku' => $c->product?->sku,
             'product_unit_price' => (int) ($c->product?->unit_price ?? 0),
             'marketer' => $c->marketer?->name,

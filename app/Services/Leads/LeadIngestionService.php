@@ -13,6 +13,7 @@ use App\Models\LandingSession;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
+use App\Models\User;
 use App\Services\NotificationService;
 use App\Support\ActivityLogger;
 use Illuminate\Support\Arr;
@@ -61,7 +62,7 @@ class LeadIngestionService
      * Nguyên tắc gộp: cùng (chiến dịch + SĐT) trong cửa sổ gom → 1 đơn duy nhất.
      *   1) Có lead "đang gom"/chờ chia (chưa tạo đơn) → cộng dồn vào lead đó.
      *   2) Có đơn vừa tạo trong cửa sổ gom → cộng dồn vào đơn (upsale muộn).
-     *   3) Chưa có gì → tạo lead mới (giữ số nếu chiến dịch bật theo dõi phiên JS).
+     *   3) Chưa có gì → tạo lead mới & GIỮ SỐ (áp dụng cho cả có/không JS) để chờ upsale.
      *
      * @param  array<string, mixed>  $rawPayload
      */
@@ -109,7 +110,7 @@ class LeadIngestionService
             return $this->mergePacketIntoOrder($driver, $order, $campaign, $normalized, $rawPayload, $externalId, $session);
         }
 
-        // 3) Gói tin đầu tiên → tạo lead mới (giữ số nếu bật theo dõi phiên).
+        // 3) Gói tin đầu tiên → tạo lead mới & giữ số (chờ upsale trang cảm ơn).
         return $this->ingestNormalized($driver, $rawPayload, $normalized, $campaign, $session);
     }
 
@@ -397,6 +398,20 @@ class LeadIngestionService
     }
 
     /**
+     * Nhập lead THỦ CÔNG (form lẻ / CSV).
+     * - $forceSale = null → chia theo cấu hình mặc định của hệ thống (auto route hoặc vào pool).
+     * - $forceSale != null → CHIA THỦ CÔNG: gán thẳng cho sale được chọn, bỏ qua auto route.
+     *
+     * @param  array<string, mixed>  $rawPayload
+     */
+    public function ingestManual(LeadPayloadNormalizer $driver, array $rawPayload, ?User $forceSale = null): LeadIngestion
+    {
+        $normalized = $driver->normalize($rawPayload);
+
+        return $this->ingestNormalized($driver, $rawPayload, $normalized, null, null, $forceSale);
+    }
+
+    /**
      * @param  array<string, mixed>  $rawPayload
      * @param  array<string, mixed>  $normalized
      */
@@ -406,6 +421,7 @@ class LeadIngestionService
         array $normalized,
         ?MarketingSource $campaign = null,
         ?LandingSession $session = null,
+        ?User $forceSale = null,
     ): LeadIngestion {
         if ($this->sanitizer->exceedsPayloadLimit($rawPayload)) {
             return $this->recordFailed($driver->platform(), ['oversized' => true], __('messages.lead_intake.payload_too_large'));
@@ -462,33 +478,54 @@ class LeadIngestionService
 
         $windowDays = (int) config('saleops.lead_routing.duplicate_window_days', 30);
 
-        $duplicateOrder = Order::query()
+        $duplicateOrderModel = Order::query()
             ->where('customer_phone', $normalized['customer_phone'])
             ->where('created_at', '>=', now()->subDays($windowDays))
-            ->exists();
+            ->latest('id')
+            ->first();
+        $duplicateOrder = $duplicateOrderModel !== null;
 
-        // Chiến dịch bật theo dõi phiên JS → GIỮ SỐ: gom trước, chốt & chia sau.
-        $hold = $campaign?->js_tracking_enabled && ! $duplicateOrder;
+        // Luồng Landing LUÔN giữ số để khách có thời gian xem trang cảm ơn & chọn upsale.
+        // - Có JS: chủ động hơn (đóng phiên sớm khi khách rời, tự gia hạn theo hoạt động).
+        // - Không JS: chờ theo hold_seconds, gia hạn khi có gói mới, tối đa max_hold_seconds.
+        // Hai luồng dùng CHUNG mốc thời gian; khác biệt chỉ là mức chủ động.
+        $hold = $campaign !== null && ! $duplicateOrder;
 
         $status = $duplicateOrder
             ? LeadIngestionStatus::Duplicate
             : ($hold ? LeadIngestionStatus::Gathering : LeadIngestionStatus::Pending);
 
-        // Lead Landing lưu kèm item/chiết khấu/địa chỉ ĐÃ chuẩn hoá vào payload để
-        // tự chứa đủ dữ liệu — khi gộp thêm gói sau & khi chốt đơn không bị mất hàng.
+        // Case ngoại lệ không thể tự xử lý (trùng số / upsale muộn quá cửa sổ gộp):
+        // lưu lý do + đơn liên quan để bộ phận vận hành kiểm soát & xử lý tay.
+        $exceptionReason = $duplicateOrder
+            ? __('messages.lead_intake.duplicate_reason', [
+                'code' => $duplicateOrderModel->order_code,
+                'days' => $windowDays,
+            ])
+            : null;
+
+        // Lead lưu kèm item/chiết khấu/địa chỉ ĐÃ chuẩn hoá vào payload để tự chứa đủ
+        // dữ liệu — khi gộp thêm gói sau, khi chốt đơn, hoặc khi chia tay từ pool (lead
+        // nhập tay/CSV) không bị mất hàng.
         $storedPayload = $rawPayload;
-        if ($campaign) {
-            $storedPayload['items'] = is_array($normalized['items'] ?? null) ? $normalized['items'] : [];
-            if ((int) ($normalized['discount'] ?? 0) > 0) {
-                $storedPayload['discount'] = (int) $normalized['discount'];
-            }
-            if (filled($normalized['shipping_address'] ?? null)) {
-                $storedPayload['shipping_address'] = $normalized['shipping_address'];
-            }
-            $clientRef = $this->extractClientRef($rawPayload);
-            if ($clientRef) {
-                $storedPayload['client_ref'] = $clientRef;
-            }
+        $normalizedItems = is_array($normalized['items'] ?? null) ? $normalized['items'] : [];
+        if ($campaign || $normalizedItems !== []) {
+            $storedPayload['items'] = $normalizedItems;
+        }
+        if ((int) ($normalized['discount'] ?? 0) > 0) {
+            $storedPayload['discount'] = (int) $normalized['discount'];
+        }
+        if (filled($normalized['shipping_address'] ?? null)) {
+            $storedPayload['shipping_address'] = $normalized['shipping_address'];
+        }
+        $clientRef = $this->extractClientRef($rawPayload);
+        if ($clientRef) {
+            $storedPayload['client_ref'] = $clientRef;
+        }
+
+        if ($duplicateOrder) {
+            $storedPayload['conflict_order_code'] = $duplicateOrderModel->order_code;
+            $storedPayload['conflict_order_id'] = $duplicateOrderModel->id;
         }
 
         $ingestion = LeadIngestion::query()->create([
@@ -502,6 +539,7 @@ class LeadIngestionService
             'utm_campaign' => $normalized['utm_campaign'],
             'marketing_source_id' => $campaign?->id,
             'payload' => $storedPayload,
+            'error_message' => $exceptionReason,
         ]);
 
         if ($duplicateOrder) {
@@ -524,7 +562,7 @@ class LeadIngestionService
             return $ingestion;
         }
 
-        return $this->allocateFromNormalized($ingestion, $normalized, $campaign, $session);
+        return $this->allocateFromNormalized($ingestion, $normalized, $campaign, $session, $forceSale);
     }
 
     /**
@@ -537,10 +575,16 @@ class LeadIngestionService
         array $normalized,
         ?MarketingSource $campaign = null,
         ?LandingSession $session = null,
+        ?User $forceSale = null,
     ): LeadIngestion {
-        $assignToSale = ($campaign === null || $campaign->is_approved)
-            && $this->allocationResolver->shouldAutoAssign($campaign);
-        $saleUser = $assignToSale ? $this->routing->assignSalesUser() : null;
+        // Chia thủ công: gán thẳng cho sale được chọn (không qua auto route / pool).
+        if ($forceSale !== null) {
+            $saleUser = $forceSale;
+        } else {
+            $assignToSale = ($campaign === null || $campaign->is_approved)
+                && $this->allocationResolver->shouldAutoAssign($campaign);
+            $saleUser = $assignToSale ? $this->routing->assignSalesUser() : null;
+        }
 
         if (! $saleUser) {
             if ($ingestion->status !== LeadIngestionStatus::Pending) {

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\LandingApprovalController;
 use App\Http\Controllers\Admin\LeadIngestionController;
 use App\Http\Controllers\Admin\LeadsLogController;
+use App\Http\Controllers\Admin\ManualLeadController;
 use App\Http\Controllers\Admin\ManualLeadAllocationController;
 use App\Http\Controllers\Admin\Marketing\CampaignBudgetController;
 use App\Http\Controllers\Admin\Marketing\CampaignController;
@@ -160,6 +161,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('leads', LeadsLogController::class)->name('leads.index');
         Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
         Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
+        Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
+        Route::post('leads/import', [ManualLeadController::class, 'import'])->name('leads.import');
         Route::get('shipping-partners', [ShippingPartnersController::class, 'index'])->name('shipping-partners.index');
         Route::put('shipping-partners/{provider}', [ShippingPartnersController::class, 'update'])->name('shipping-partners.update');
         Route::get('shipping/reconciliation', ShippingReconciliationController::class)->name('shipping.reconciliation');
@@ -243,6 +246,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('workspace', LeadsLogController::class)->name('workspace');
         Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
         Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
+        Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
+        Route::post('leads/import', [ManualLeadController::class, 'import'])->name('leads.import');
         Route::get('reports/{report}', AllocatorReportController::class)->where('report', '[a-z0-9\-]+')->name('reports');
     });
 
