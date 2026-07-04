@@ -309,9 +309,14 @@ class LandingFormDriver implements LeadPayloadNormalizer
     protected function findParentRef(array $payload, array $flatFields): ?string
     {
         $candidates = [
+            Arr::get($payload, 'parent_ref'),
             Arr::get($payload, 'parent_submission_id'),
+            Arr::get($payload, 'saleops_client_ref'),
             Arr::get($payload, 'order_ref'),
             Arr::get($payload, 'order_code'),
+            Arr::get($flatFields, 'parent_ref'),
+            Arr::get($flatFields, 'parent_submission_id'),
+            Arr::get($flatFields, 'saleops_client_ref'),
             Arr::get($flatFields, 'order_ref'),
             Arr::get($flatFields, 'ma_don'),
         ];

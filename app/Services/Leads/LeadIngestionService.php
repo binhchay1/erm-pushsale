@@ -105,7 +105,7 @@ class LeadIngestionService
         }
 
         // 2) Đơn vừa tạo trong cửa sổ gom → cộng dồn (upsale muộn / khách bấm chậm).
-        if ($order = $this->findRecentOrderForMerge($normalized, $phone, $campaign)) {
+        if ($order = $this->findRecentOrderForMerge($normalized, $phone, $campaign, $session)) {
             return $this->mergePacketIntoOrder($driver, $order, $campaign, $normalized, $rawPayload, $externalId, $session);
         }
 
@@ -147,9 +147,21 @@ class LeadIngestionService
      *
      * @param  array<string, mixed>  $normalized
      */
-    protected function findRecentOrderForMerge(array $normalized, string $phone, MarketingSource $campaign): ?Order
-    {
-        // Tham chiếu tường minh từ trang cảm ơn (mã đơn / submission gốc).
+    protected function findRecentOrderForMerge(
+        array $normalized,
+        string $phone,
+        MarketingSource $campaign,
+        ?LandingSession $session = null,
+    ): ?Order {
+        // Cùng phiên JS (session_id) → luôn gộp vào đơn của phiên, không phụ thuộc cửa sổ 15 phút.
+        if ($session?->order_id) {
+            $viaSession = Order::query()->find($session->order_id);
+            if ($viaSession) {
+                return $viaSession;
+            }
+        }
+
+        // Tham chiếu tường minh từ trang cảm ơn (mã đơn / submission gốc / client_ref JS).
         $parentRef = $normalized['parent_ref'] ?? null;
 
         if (filled($parentRef)) {
@@ -159,7 +171,10 @@ class LeadIngestionService
             }
 
             $viaLead = LeadIngestion::query()
-                ->where('external_id', $parentRef)
+                ->where(function ($q) use ($parentRef) {
+                    $q->where('external_id', $parentRef)
+                        ->orWhere('payload->client_ref', $parentRef);
+                })
                 ->whereNotNull('order_id')
                 ->latest('id')
                 ->first();
@@ -470,6 +485,10 @@ class LeadIngestionService
             if (filled($normalized['shipping_address'] ?? null)) {
                 $storedPayload['shipping_address'] = $normalized['shipping_address'];
             }
+            $clientRef = $this->extractClientRef($rawPayload);
+            if ($clientRef) {
+                $storedPayload['client_ref'] = $clientRef;
+            }
         }
 
         $ingestion = LeadIngestion::query()->create([
@@ -505,7 +524,7 @@ class LeadIngestionService
             return $ingestion;
         }
 
-        return $this->allocateFromNormalized($ingestion, $normalized, $campaign);
+        return $this->allocateFromNormalized($ingestion, $normalized, $campaign, $session);
     }
 
     /**
@@ -517,6 +536,7 @@ class LeadIngestionService
         LeadIngestion $ingestion,
         array $normalized,
         ?MarketingSource $campaign = null,
+        ?LandingSession $session = null,
     ): LeadIngestion {
         $assignToSale = ($campaign === null || $campaign->is_approved)
             && $this->allocationResolver->shouldAutoAssign($campaign);
@@ -531,7 +551,7 @@ class LeadIngestionService
             return $ingestion;
         }
 
-        return DB::transaction(function () use ($ingestion, $normalized, $saleUser, $campaign) {
+        return DB::transaction(function () use ($ingestion, $normalized, $saleUser, $campaign, $session) {
             $order = $this->orderFactory->createFromLead($ingestion, $normalized, $saleUser);
             $ingestion->update([
                 'status' => LeadIngestionStatus::Processed,
@@ -539,6 +559,15 @@ class LeadIngestionService
                 'processed_at' => now(),
             ]);
             $ingestion->refresh();
+
+            if ($session) {
+                $session->forceFill([
+                    'order_id' => $order->id,
+                    'lead_ingestion_id' => $ingestion->id,
+                    'last_activity_at' => now(),
+                ])->save();
+            }
+
             $this->broadcastSafe(
                 new LeadIngested($ingestion, $order),
                 new LeadPoolChanged,
@@ -579,7 +608,32 @@ class LeadIngestionService
         $normalized['utm_campaign'] = $lead->utm_campaign;
         $normalized['utm_source'] = $lead->utm_source;
 
-        return $this->allocateFromNormalized($lead, $normalized, $campaign);
+        $session = LandingSession::query()
+            ->where('lead_ingestion_id', $lead->id)
+            ->latest('id')
+            ->first();
+
+        return $this->allocateFromNormalized($lead, $normalized, $campaign, $session);
+    }
+
+    /**
+     * Mã tham chiếu gói tin do JS SaleOps sinh (localStorage) — dùng để upsell trang cảm ơn
+     * trỏ về đơn gốc kể cả khi quá cửa sổ gom 15 phút.
+     *
+     * @param  array<string, mixed>  $rawPayload
+     */
+    protected function extractClientRef(array $rawPayload): ?string
+    {
+        $key = Arr::get($rawPayload, 'saleops_client_ref')
+            ?? Arr::get($rawPayload, 'client_ref');
+
+        if (! is_scalar($key)) {
+            return null;
+        }
+
+        $key = preg_replace('/[^A-Za-z0-9_\-]/', '', (string) $key) ?? '';
+
+        return $key !== '' ? substr($key, 0, 64) : null;
     }
 
     /**

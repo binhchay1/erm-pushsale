@@ -212,4 +212,62 @@ class CampaignLandingComboUpsellTest extends TestCase
         $this->assertSame(238_000, (int) $order->total);
         $this->assertNotNull($order->sale_user_id);
     }
+
+    public function test_upsell_merges_via_session_after_grouping_window(): void
+    {
+        $campaign = $this->autoCampaign();
+        $sessionId = 'sess-late-upsell-'.uniqid();
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'base-session-1',
+            'name' => 'Anh Session',
+            'phone' => '0906333444',
+            'combo' => 'Mua 1 Thỏi : 149k',
+            'session_id' => $sessionId,
+            'saleops_client_ref' => 'cref-session-abc',
+        ])->assertAccepted();
+
+        $order = Order::query()->where('customer_phone', '0906333444')->firstOrFail();
+        $order->forceFill(['created_at' => now()->subMinutes(20)])->save();
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/upsell', [
+            'submission_id' => 'upsell-session-1',
+            'phone' => '0906333444',
+            'mua_them_1' => 'Mua Thêm 1 Má Hồng Kem: 89K',
+            'session_id' => $sessionId,
+        ])->assertAccepted();
+
+        $this->assertSame(1, Order::query()->where('customer_phone', '0906333444')->count());
+        $order->refresh()->load('items');
+        $this->assertCount(2, $order->items);
+        $this->assertSame(238_000, (int) $order->total);
+    }
+
+    public function test_upsell_merges_via_client_ref_after_grouping_window(): void
+    {
+        $campaign = $this->autoCampaign();
+        $clientRef = 'cref-late-'.uniqid();
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'base-cref-1',
+            'name' => 'Chị Ref',
+            'phone' => '0906444555',
+            'combo' => 'Mua 1 Thỏi : 149k',
+            'saleops_client_ref' => $clientRef,
+        ])->assertAccepted();
+
+        $order = Order::query()->where('customer_phone', '0906444555')->firstOrFail();
+        $order->forceFill(['created_at' => now()->subMinutes(20)])->save();
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/upsell', [
+            'submission_id' => 'upsell-cref-1',
+            'phone' => '0906444555',
+            'parent_submission_id' => $clientRef,
+            'mua_them_1' => 'Mua Thêm 1 Má Hồng Kem: 89K',
+        ])->assertAccepted();
+
+        $this->assertSame(1, Order::query()->where('customer_phone', '0906444555')->count());
+        $order->refresh()->load('items');
+        $this->assertCount(2, $order->items);
+    }
 }

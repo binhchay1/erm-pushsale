@@ -29,11 +29,18 @@ class CampaignJsSnippetService
 /* ERM SaleOps — theo dõi phiên Landing (chiến dịch: {$campaign->name}) */
 (function(){
   var BASE={$baseJson}, TOKEN={$tokenJson};
-  var SKEY="saleops_sid_"+TOKEN, TKEY="saleops_submit_"+TOKEN, IDLE={$idleMs};
+  var SKEY="saleops_sid_"+TOKEN, PREFKEY="saleops_pref_"+TOKEN, TKEY="saleops_submit_"+TOKEN, IDLE={$idleMs};
   function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,10);}
-  var sid;
+  var sid, pref;
   try{sid=localStorage.getItem(SKEY);}catch(e){}
   if(!sid){sid=uid();try{localStorage.setItem(SKEY,sid);}catch(e){}}
+  try{pref=localStorage.getItem(PREFKEY);}catch(e){}
+  function ensurePref(){if(!pref){pref=uid();try{localStorage.setItem(PREFKEY,pref);}catch(e){}}return pref;}
+  function hidden(f,name,val){
+    var el=f.querySelector('input[name="'+name+'"]');
+    if(!el){el=document.createElement("input");el.type="hidden";el.name=name;f.appendChild(el);}
+    el.value=val;
+  }
   function post(path,body,beacon){
     try{
       var data=JSON.stringify(Object.assign({session_id:sid},body||{}));
@@ -43,12 +50,17 @@ class CampaignJsSnippetService
   }
   function attach(){
     var forms=document.querySelectorAll("form");
+    var isThankYou=/cam[-_ ]?on|thank|thankyou|cam_on/i.test(location.href);
     for(var i=0;i<forms.length;i++){(function(f){
       if(f.__saleops)return; f.__saleops=1;
       f.addEventListener("submit",function(){
-        var el=f.querySelector('input[name="session_id"]');
-        if(!el){el=document.createElement("input");el.type="hidden";el.name="session_id";f.appendChild(el);}
-        el.value=sid;
+        var p=ensurePref();
+        hidden(f,"session_id",sid);
+        hidden(f,"saleops_client_ref",p);
+        if(isThankYou){
+          hidden(f,"parent_submission_id",p);
+          hidden(f,"parent_ref",p);
+        }
         try{localStorage.setItem(TKEY,String(Date.now()));}catch(e){}
       },true);
     })(forms[i]);}
