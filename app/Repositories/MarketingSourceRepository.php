@@ -86,6 +86,7 @@ class MarketingSourceRepository
                 'creator:id,name',
                 'approver:id,name',
                 'rejector:id,name',
+                'product:id,name,sku,unit_price',
             ])
             ->latest('id');
 

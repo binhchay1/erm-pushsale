@@ -262,6 +262,10 @@ export default function CampaignForm({ campaign, marketers, fieldMapping, alloca
                                 <span className="font-mono font-medium">{utmPreview}</span>
                             </div>
 
+                            <p className="rounded-md border border-blue-500/30 bg-blue-500/5 px-3 py-2 text-xs text-muted-foreground">
+                                {t('pages.campaigns.product_at_approval_hint')}
+                            </p>
+
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label>{t('pages.campaigns.marketer_label')}</Label>

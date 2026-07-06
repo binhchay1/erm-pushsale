@@ -52,7 +52,7 @@ return [
     'campaign_updated' => 'Đã cập nhật kết nối Landing.',
     'campaign_deleted' => 'Đã xóa kết nối Landing.',
     'campaign_approval' => [
-        'incomplete' => 'Chiến dịch thiếu webhook — không thể duyệt.',
+        'incomplete' => 'Chiến dịch thiếu sản phẩm hoặc webhook — không thể duyệt.',
         'reason_required' => 'Vui lòng nhập lý do từ chối.',
         'product_required' => 'Vui lòng chọn sản phẩm cho chiến dịch Landing.',
     ],

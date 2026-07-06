@@ -191,6 +191,7 @@ export default {
         landing_name_placeholder: 'e.g. Vitamin C Serum - Ladipage Jun',
         name_unique_hint: 'Name must not duplicate an existing campaign.',
         product_required_hint: 'A product is required so the campaign can be approved and receive leads.',
+        product_at_approval_hint: 'No product needed when creating — Admin or your team lead will assign a product when approving the source.',
         utm_auto: 'utm_campaign (auto-generated):',
         receiving_leads: 'Receiving leads',
         js_tracking_label: 'Enable session tracking (JS) — merge orders & hold number',

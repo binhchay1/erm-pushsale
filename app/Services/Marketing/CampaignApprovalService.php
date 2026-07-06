@@ -64,11 +64,16 @@ class CampaignApprovalService
             || $user->is_team_leader;
     }
 
-    public function approve(User $actor, MarketingSource $campaign): MarketingSource
+    public function approve(User $actor, MarketingSource $campaign, ?int $productId = null): MarketingSource
     {
         abort_unless($this->canApprove($actor, $campaign), 403);
 
-        if (! $campaign->webhook_token) {
+        // Cho phép người duyệt gán sản phẩm ngay lúc duyệt nếu MKT tạo nguồn chưa chọn SP.
+        if ($productId && ! $campaign->product_id) {
+            $campaign->update(['product_id' => $productId]);
+        }
+
+        if (! $campaign->product_id || ! $campaign->webhook_token) {
             throw ValidationException::withMessages([
                 'campaign' => __('messages.campaign_approval.incomplete'),
             ]);

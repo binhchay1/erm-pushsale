@@ -190,6 +190,7 @@ export default {
         landing_name_placeholder: 'VD: Serum Vitamin C - Ladipage T6',
         name_unique_hint: 'Tên không trùng với chiến dịch bạn đã tạo trước đó.',
         product_required_hint: 'Bắt buộc chọn sản phẩm thì chiến dịch mới duyệt & nhận lead được.',
+        product_at_approval_hint: 'Sản phẩm không cần chọn lúc tạo — Admin hoặc trưởng phòng sẽ gắn sản phẩm khi duyệt nguồn.',
         utm_auto: 'utm_campaign (tự sinh):',
         receiving_leads: 'Đang nhận lead',
         js_tracking_label: 'Bật theo dõi phiên (JS) — gộp đơn & giữ số',

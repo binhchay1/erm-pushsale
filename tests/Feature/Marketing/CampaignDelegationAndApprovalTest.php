@@ -6,6 +6,7 @@ use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use App\Models\ActivityLog;
 use App\Models\MarketingSource;
+use App\Models\Product;
 use App\Models\User;
 use App\Support\ActivityLogger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,8 +21,11 @@ class CampaignDelegationAndApprovalTest extends TestCase
         $creator = User::factory()->create(['role' => UserRole::Marketing]);
         $delegate = User::factory()->create(['role' => UserRole::Marketing]);
 
+        $product = Product::query()->create(['name' => 'SP A', 'sku' => 'SKU-A', 'unit_price' => 100000, 'is_active' => true]);
+
         MarketingSource::query()->create([
             'name' => 'Campaign delegated',
+            'product_id' => $product->id,
             'created_by_user_id' => $creator->id,
             'marketer_user_id' => $delegate->id,
             'utm_campaign' => 'camp-delegated',
@@ -56,8 +60,11 @@ class CampaignDelegationAndApprovalTest extends TestCase
             'manager_user_id' => $head->id,
         ]);
 
+        $product = Product::query()->create(['name' => 'SP B', 'sku' => 'SKU-B', 'unit_price' => 120000, 'is_active' => true]);
+
         $ownCampaign = MarketingSource::query()->create([
             'name' => 'Own campaign',
+            'product_id' => $product->id,
             'created_by_user_id' => $head->id,
             'marketer_user_id' => $head->id,
             'utm_campaign' => 'camp-own',
@@ -68,6 +75,7 @@ class CampaignDelegationAndApprovalTest extends TestCase
 
         $teamCampaign = MarketingSource::query()->create([
             'name' => 'Team campaign',
+            'product_id' => $product->id,
             'created_by_user_id' => $member->id,
             'marketer_user_id' => $member->id,
             'utm_campaign' => 'camp-team',
@@ -95,9 +103,10 @@ class CampaignDelegationAndApprovalTest extends TestCase
         ]);
     }
 
-    public function test_approve_without_product_succeeds_when_webhook_exists(): void
+    public function test_approve_without_product_fails_but_succeeds_when_product_supplied(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $product = Product::query()->create(['name' => 'SP C', 'sku' => 'SKU-C', 'unit_price' => 90000, 'is_active' => true]);
 
         $campaign = MarketingSource::query()->create([
             'name' => 'Campaign no product',
@@ -112,9 +121,17 @@ class CampaignDelegationAndApprovalTest extends TestCase
 
         $this->actingAs($admin)
             ->post("/admin/landing-approvals/{$campaign->id}/approve")
+            ->assertSessionHasErrors('campaign');
+
+        $this->assertFalse($campaign->fresh()->is_approved);
+
+        $this->actingAs($admin)
+            ->post("/admin/landing-approvals/{$campaign->id}/approve", ['product_id' => $product->id])
             ->assertRedirect();
 
-        $this->assertTrue($campaign->fresh()->is_approved);
+        $campaign->refresh();
+        $this->assertTrue($campaign->is_approved);
+        $this->assertSame($product->id, $campaign->product_id);
     }
 
     public function test_admin_can_view_activity_logs(): void
