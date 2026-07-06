@@ -84,11 +84,15 @@ class DashboardStatsService
             fn (Builder $q) => $q->where('marketer_user_id', $user->id),
         );
         $sources = MarketingSource::query()->where('marketer_user_id', $user->id);
+        $leadsTodayQuery = LeadIngestion::query()->whereDate('created_at', today());
+        if ($sourceIds->isNotEmpty()) {
+            $leadsTodayQuery->whereIn('marketing_source_id', $sourceIds);
+        }
 
         return [
             'active_campaigns' => (clone $sources)->where('is_active', true)->count(),
             'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
-            'contacts_today' => (int) (clone $sources)->sum('contacts'),
+            'contacts_today' => (int) $leadsTodayQuery->count(),
             'orders_closed' => (clone $orders)->whereNotNull('closed_at')->whereDate('closed_at', today())->count(),
             'aov' => self::averageOrderValue($orders),
             'budget_total' => (int) (clone $sources)->sum('budget'),
@@ -318,9 +322,25 @@ class DashboardStatsService
     /** @return list<array{name: string, contacts: int, orders: int}> */
     private static function marketingTopSources(User $user): array
     {
-        return MarketingSource::query()->where('marketer_user_id', $user->id)->withCount(['orders'])->orderByDesc('orders_count')->limit(5)->get()->map(fn (MarketingSource $source) => [
+        $sources = MarketingSource::query()
+            ->where('marketer_user_id', $user->id)
+            ->withCount(['orders'])
+            ->orderByDesc('orders_count')
+            ->limit(5)
+            ->get();
+
+        $sourceIds = $sources->pluck('id');
+        $leadCounts = $sourceIds->isEmpty()
+            ? collect()
+            : LeadIngestion::query()
+                ->whereIn('marketing_source_id', $sourceIds)
+                ->selectRaw('marketing_source_id, COUNT(*) as aggregate')
+                ->groupBy('marketing_source_id')
+                ->pluck('aggregate', 'marketing_source_id');
+
+        return $sources->map(fn (MarketingSource $source) => [
             'name' => $source->name,
-            'contacts' => (int) $source->contacts,
+            'contacts' => (int) ($leadCounts[$source->id] ?? 0),
             'orders' => (int) $source->orders_count,
         ])->all();
     }

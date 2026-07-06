@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Enums\LeadAllocationMode;
 use App\Enums\ReconciliationStatus;
 use App\Enums\UserRole;
-use App\Http\Controllers\Admin\LandingApprovalController;
 use App\Http\Controllers\Sales\OrderClosingController;
 use App\Http\Controllers\Sales\SaleOperationCallController;
 use App\Http\Controllers\Sales\SaleOperationStatusController;
@@ -15,6 +14,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Leads\LeadAllocationModeService;
+use App\Services\Marketing\CampaignApprovalService;
 use App\Services\Marketing\CampaignLandingService;
 use App\Services\Shipping\ShippingWebhookService;
 use App\Support\TenantManager;
@@ -84,8 +84,11 @@ class LiveUiFlowCommand extends Command
         $webhookUrl = rtrim(config('app.url'), '/').'/api/v1/landing/'.$campaign->webhook_token.'/receive';
         $this->line("✓ Marketing tạo chiến dịch #{$campaign->id} — chờ duyệt");
 
-        // ── Admin: duyệt chiến dịch (giống LandingApprovalController@approve) ──
-        app(LandingApprovalController::class)->approve($campaign->fresh());
+        // ── Admin: duyệt chiến dịch ──
+        $this->actAs($admin, function () use ($admin, $campaign, $product) {
+            app(CampaignApprovalService::class)->approve($admin, $campaign->fresh(), $product->id);
+        });
+        $campaign->refresh();
         $this->line('✓ Admin duyệt chiến dịch');
 
         // ── Ladipage: gửi lead qua HTTP thật ──

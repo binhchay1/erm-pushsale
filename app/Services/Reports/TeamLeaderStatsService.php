@@ -7,6 +7,7 @@ use App\Enums\DateType;
 use App\Enums\DeliveryStatus;
 use App\Enums\OrgLevel;
 use App\Enums\UserRole;
+use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
@@ -47,6 +48,7 @@ class TeamLeaderStatsService
         $ids = $marketers->pluck('id')->all();
         $sources = MarketingSource::query()->whereIn('marketer_user_id', $ids)->get();
         $orders = $this->fetchOrders($ids, $filter);
+        $leadCountsByMarketer = $this->leadCountsByMarketer($ids, $filter);
 
         $teamGroups = $marketers->groupBy(fn (User $u) => $u->team_id ?? 0);
         $rows = [];
@@ -57,7 +59,7 @@ class TeamLeaderStatsService
             $team = $members->first()->team;
 
             $memberRows = $members
-                ->map(fn (User $m) => $this->marketerRow($m, $orders, $sources))
+                ->map(fn (User $m) => $this->marketerRow($m, $orders, $sources, $leadCountsByMarketer))
                 ->sortByDesc('revenueTotal')
                 ->values()
                 ->all();
@@ -80,13 +82,14 @@ class TeamLeaderStatsService
     /** @param  Collection<int, Order>  $orders
      * @param  Collection<int, MarketingSource>  $sources
      * @return array<string, mixed> */
-    private function marketerRow(User $user, Collection $orders, Collection $sources): array
+    private function marketerRow(User $user, Collection $orders, Collection $sources, Collection $leadCountsByMarketer): array
     {
         $mineOrders = $orders->where('marketer_user_id', $user->id);
         $mineSources = $sources->where('marketer_user_id', $user->id);
 
         $budget = (int) $mineSources->sum('budget');
-        $contacts = max((int) $mineSources->sum('contacts'), (int) $mineOrders->sum('contact_count'), $mineOrders->count());
+        $periodLeads = (int) ($leadCountsByMarketer->get($user->id) ?? 0);
+        $contacts = max($periodLeads, (int) $mineOrders->sum('contact_count'));
 
         $closedOrders = $mineOrders->filter(fn (Order $o) => (string) $o->closing_status === 'closed');
         $closed = $closedOrders->count();
@@ -188,5 +191,22 @@ class TeamLeaderStatsService
         }
 
         return $this->scope->allowedMarketerIds($user);
+    }
+
+    /** @return \Illuminate\Support\Collection<int, int> marketer_user_id => lead count */
+    private function leadCountsByMarketer(array $marketerIds, ReportFilterData $filter): Collection
+    {
+        $query = LeadIngestion::query()
+            ->join('marketing_sources', 'lead_ingestions.marketing_source_id', '=', 'marketing_sources.id')
+            ->selectRaw('marketing_sources.marketer_user_id as marketer_id, COUNT(*) as aggregate')
+            ->whereIn('marketing_sources.marketer_user_id', $marketerIds)
+            ->whereNotNull('lead_ingestions.marketing_source_id')
+            ->groupBy('marketing_sources.marketer_user_id');
+
+        if ($filter->dateFrom && $filter->dateTo) {
+            $query->whereBetween('lead_ingestions.created_at', [$filter->dateFrom, $filter->dateTo]);
+        }
+
+        return $query->pluck('aggregate', 'marketer_id');
     }
 }

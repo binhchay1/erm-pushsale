@@ -83,9 +83,9 @@ class MarketingDashboardService
     private function mapSourceRow(MarketingSource $source, $orders, Collection $leadCountsBySource, int $stt, ?int $parentId): array
     {
         $sourceOrders = $orders->where('marketing_source_id', $source->id);
-        $interactions = max($source->interactions, 1);
         $periodLeads = (int) ($leadCountsBySource->get($source->id) ?? 0);
         $contacts = max($periodLeads, (int) $sourceOrders->sum('contact_count'));
+        $interactions = max($contacts, 1);
         $closed = $sourceOrders->count();
         $budget = $source->budget;
         $productQty = (int) $sourceOrders->sum(fn ($o) => $o->items->sum('quantity'));

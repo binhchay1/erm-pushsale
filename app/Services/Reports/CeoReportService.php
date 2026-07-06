@@ -5,6 +5,7 @@ namespace App\Services\Reports;
 use App\Data\ReportFilterData;
 use App\Enums\DeliveryStatus;
 use App\Enums\UserRole;
+use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\User;
 
@@ -66,14 +67,22 @@ class CeoReportService
             ->values()
             ->all();
 
+        $leadCountsBySource = LeadIngestion::query()
+            ->when($filter->dateFrom && $filter->dateTo, fn ($q) => $q->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo]))
+            ->whereNotNull('marketing_source_id')
+            ->selectRaw('marketing_source_id, COUNT(*) as aggregate')
+            ->groupBy('marketing_source_id')
+            ->pluck('aggregate', 'marketing_source_id');
+
         $marketingRows = MarketingSource::query()
             ->whereNull('parent_id')
             ->with(['children', 'marketer'])
             ->get()
-            ->map(function (MarketingSource $source) use ($orders) {
+            ->map(function (MarketingSource $source) use ($orders, $leadCountsBySource) {
                 $sourceOrders = (clone $orders)->where('marketing_source_id', $source->id)->get();
                 $budget = (int) $source->budget;
-                $contacts = max((int) $source->contacts, (int) $sourceOrders->sum('contact_count'));
+                $periodLeads = (int) ($leadCountsBySource->get($source->id) ?? 0);
+                $contacts = max($periodLeads, (int) $sourceOrders->sum('contact_count'));
                 $closed = $sourceOrders->count();
                 $newOrders = $sourceOrders->where('is_returning_customer', false);
                 $oldOrders = $sourceOrders->where('is_returning_customer', true);
