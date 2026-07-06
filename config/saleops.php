@@ -53,7 +53,7 @@ return [
     */
     'landing' => [
         'grouping_window_minutes' => (int) env('LEAD_GROUPING_WINDOW_MINUTES', 15),
-        'hold_seconds' => (int) env('LEAD_HOLD_SECONDS', 90),
+        'hold_seconds' => (int) env('LEAD_HOLD_SECONDS', 5),
         'max_hold_seconds' => (int) env('LEAD_MAX_HOLD_SECONDS', 300),
     ],
 

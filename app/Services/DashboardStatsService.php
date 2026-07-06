@@ -87,11 +87,13 @@ class DashboardStatsService
         $leadsTodayQuery = LeadIngestion::query()->whereDate('created_at', today());
         if ($sourceIds->isNotEmpty()) {
             $leadsTodayQuery->whereIn('marketing_source_id', $sourceIds);
+        } else {
+            $leadsTodayQuery->whereRaw('1 = 0');
         }
 
         return [
             'active_campaigns' => (clone $sources)->where('is_active', true)->count(),
-            'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
+            'leads_today' => (int) $leadsTodayQuery->count(),
             'contacts_today' => (int) $leadsTodayQuery->count(),
             'orders_closed' => (clone $orders)->whereNotNull('closed_at')->whereDate('closed_at', today())->count(),
             'aov' => self::averageOrderValue($orders),

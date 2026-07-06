@@ -16,6 +16,7 @@ class LeadIngestionRepository
      *     status?: ?string,
      *     bucket?: ?string,
      *     marketing_source_id?: ?int,
+     *     marketer_user_id?: ?int,
      *     search?: ?string,
      *     date_from?: ?string,
      *     date_to?: ?string,
@@ -44,6 +45,11 @@ class LeadIngestionRepository
 
         if (! empty($filters['marketing_source_id'])) {
             $query->where('marketing_source_id', (int) $filters['marketing_source_id']);
+        }
+
+        if (! empty($filters['marketer_user_id'])) {
+            $marketerId = (int) $filters['marketer_user_id'];
+            $query->whereHas('marketingSource', fn ($q) => $q->where('marketer_user_id', $marketerId));
         }
 
         if (! empty($filters['search'])) {

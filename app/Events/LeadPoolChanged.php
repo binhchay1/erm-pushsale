@@ -24,6 +24,7 @@ class LeadPoolChanged implements ShouldBroadcast
         return [
             new PrivateChannel('dashboard.admin'),
             new PrivateChannel('dashboard.allocator'),
+            new PrivateChannel('dashboard.marketing'),
         ];
     }
 

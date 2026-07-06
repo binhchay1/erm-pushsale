@@ -77,6 +77,8 @@ export default {
         active_campaigns_hint: 'Active sources / campaigns',
         leads_today: 'Leads today',
         leads_today_hint: 'Leads from landing/platform in period',
+        contacts_today: 'Contacts today',
+        contacts_today_hint: 'Leads from your campaigns (independent of sale assignment)',
         orders_closed: 'Closed today',
         orders_closed_hint: 'Closed orders from assigned campaigns',
         budget: 'Budget',

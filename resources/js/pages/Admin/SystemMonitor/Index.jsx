@@ -45,11 +45,29 @@ export default function SystemMonitorIndex({ tab, events, logs, stats, filters, 
             <div className="space-y-6">
                 <PageHeader title={t('system_monitor.title')} description={t('system_monitor.desc')} />
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <StatCard icon={Inbox} title={t('system_monitor.stats_received_today')} value={stats.received_today} />
+                    <StatCard icon={Activity} title={t('system_monitor.stats_processed_today')} value={stats.processed_today ?? 0} />
                     <StatCard icon={AlertTriangle} title={t('system_monitor.stats_failed_today')} value={stats.failed_today} />
                     <StatCard icon={Clock} title={t('system_monitor.stats_pending')} value={stats.pending} />
                 </div>
+
+                {stats.top_errors?.length > 0 && (
+                    <Card className="border-destructive/30">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-base">{t('system_monitor.top_errors_title')}</CardTitle>
+                            <CardDescription>{t('system_monitor.top_errors_desc')}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-2 text-sm">
+                            {stats.top_errors.map((row) => (
+                                <div key={row.message} className="flex items-start justify-between gap-4 border-b border-border/60 pb-2 last:border-0">
+                                    <span className="text-muted-foreground">{row.message}</span>
+                                    <span className="shrink-0 font-semibold text-destructive">{row.count}</span>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                )}
 
                 <div className="flex flex-wrap gap-1 rounded-lg border bg-muted/40 p-1">
                     {['events', 'logs'].map((id) => (

@@ -48,19 +48,32 @@ class SystemMonitorController extends Controller
 
         $today = now()->startOfDay();
 
+        $todayQuery = InboundEvent::query()->where('created_at', '>=', $today);
+
         return Inertia::render('Admin/SystemMonitor/Index', [
             'tab' => $tab,
             'events' => $events,
             'logs' => $tab === 'logs' ? $logReader->tail(250, $level ?: null) : [],
             'stats' => [
-                'received_today' => InboundEvent::query()->where('created_at', '>=', $today)->count(),
-                'failed_today' => InboundEvent::query()
-                    ->where('created_at', '>=', $today)
+                'received_today' => (clone $todayQuery)->count(),
+                'processed_today' => (clone $todayQuery)->where('status', InboundEventStatus::Processed)->count(),
+                'failed_today' => (clone $todayQuery)
                     ->whereIn('status', [InboundEventStatus::Failed, InboundEventStatus::Rejected])
                     ->count(),
+                'rejected_today' => (clone $todayQuery)->where('status', InboundEventStatus::Rejected)->count(),
                 'pending' => InboundEvent::query()
                     ->whereIn('status', [InboundEventStatus::Received, InboundEventStatus::Queued])
                     ->count(),
+                'top_errors' => (clone $todayQuery)
+                    ->whereIn('status', [InboundEventStatus::Failed, InboundEventStatus::Rejected])
+                    ->whereNotNull('error_message')
+                    ->selectRaw('error_message, COUNT(*) as cnt')
+                    ->groupBy('error_message')
+                    ->orderByDesc('cnt')
+                    ->limit(5)
+                    ->get()
+                    ->map(fn ($row) => ['message' => $row->error_message, 'count' => (int) $row->cnt])
+                    ->all(),
             ],
             'filters' => [
                 'source' => $source,

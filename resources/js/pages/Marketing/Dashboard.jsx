@@ -31,23 +31,23 @@ function MarketingDashboardContent({ stats: initialStats }) {
             icon: MousePointerClick,
         },
         {
+            title: t('dashboard.marketing.contacts_today'),
+            value: formatNumber(stats.contacts_today ?? stats.leads_today),
+            hint: t('dashboard.marketing.contacts_today_hint'),
+            icon: Target,
+        },
+        {
             title: t('dashboard.marketing.orders_closed'),
             value: formatNumber(stats.orders_closed),
             hint: t('dashboard.marketing.orders_closed_hint'),
-            icon: Target,
+            icon: ShoppingBag,
         },
         {
             title: t('dashboard.marketing.aov'),
             value: formatCurrency(stats.aov ?? stats.summary?.aov ?? 0),
             hint: t('dashboard.marketing.aov_hint'),
-            icon: ShoppingBag,
-            accent: true,
-        },
-        {
-            title: t('dashboard.marketing.budget'),
-            value: formatCurrency(stats.budget_total),
-            hint: t('dashboard.marketing.budget_hint'),
             icon: Wallet,
+            accent: true,
         },
     ];
 

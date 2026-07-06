@@ -38,7 +38,15 @@ class BroadcastDashboardStatsCommand extends Command
                 ));
             }
 
-            $this->line('['.now()->format('H:i:s').'] Broadcast admin + sales');
+            $marketingUsers = User::query()->where('role', UserRole::Marketing)->get();
+            foreach ($marketingUsers as $marketer) {
+                event(new DashboardStatsUpdated(
+                    'marketing',
+                    DashboardStatsService::marketingSnapshot($marketer),
+                ));
+            }
+
+            $this->line('['.now()->format('H:i:s').'] Broadcast admin + sales + marketing');
 
             if ($this->option('once')) {
                 break;

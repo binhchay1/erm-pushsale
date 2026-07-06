@@ -25,6 +25,7 @@ class LeadIngested implements ShouldBroadcast
     {
         return [
             new PrivateChannel('dashboard.admin'),
+            new PrivateChannel('dashboard.marketing'),
             new PrivateChannel('dashboard.sales'),
         ];
     }

@@ -35,6 +35,10 @@ class LeadsLogController extends Controller
 
         $exceptionStatuses = LeadIngestionRepository::exceptionStatuses();
 
+        if ($request->is('marketing/*') && $request->user()?->role === UserRole::Marketing) {
+            $filters['marketer_user_id'] = $request->user()->id;
+        }
+
         $leads = $leadRepo->paginatedLog($filters)
             ->through(fn (LeadIngestion $lead) => [
                 'id' => $lead->id,

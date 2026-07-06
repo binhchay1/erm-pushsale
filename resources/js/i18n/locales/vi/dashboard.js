@@ -77,6 +77,8 @@ export default {
         active_campaigns_hint: 'Nguồn / campaign đang active',
         leads_today: 'Lead hôm nay',
         leads_today_hint: 'Lead từ landing/platform trong kỳ',
+        contacts_today: 'Contact hôm nay',
+        contacts_today_hint: 'Lead về từ chiến dịch (không phụ thuộc chia số sale)',
         orders_closed: 'Đơn chốt hôm nay',
         orders_closed_hint: 'Đơn chốt từ campaign phụ trách',
         budget: 'Ngân sách',

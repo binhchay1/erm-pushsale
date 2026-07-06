@@ -51,6 +51,8 @@ class ProcessLeadIngestionJob implements ShouldQueue
 
             if ($this->lastIngestion?->status === LeadIngestionStatus::Failed) {
                 $event?->markFailed($this->lastIngestion->error_message ?? __('messages.webhook.validation_failed'));
+            } elseif ($this->lastIngestion === null && $this->campaignId !== null) {
+                $event?->markFailed(__('messages.webhook.landing_not_found'));
             } else {
                 $event?->markProcessed();
             }

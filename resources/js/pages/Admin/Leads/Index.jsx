@@ -44,6 +44,7 @@ export default function LeadsIndex({
     const { sortedRows, sort, toggleSort } = useTableSort(pageRows, { defaultKey: 'created_at', defaultDir: 'desc' });
 
     useRealtimeReload(realtimeChannel, '.leads.changed', ['leads']);
+    useRealtimeReload(realtimeChannel, '.lead.ingested', ['leads']);
     const [selected, setSelected] = useState([]);
     const [saleUserId, setSaleUserId] = useState('');
     const [allocating, setAllocating] = useState(false);

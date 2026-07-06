@@ -14,6 +14,7 @@ use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Marketing\MarketingStatsBroadcaster;
 use App\Services\NotificationService;
 use App\Support\ActivityLogger;
 use Illuminate\Support\Arr;
@@ -28,6 +29,7 @@ class LeadIngestionService
         protected LeadSanitizer $sanitizer,
         protected LeadAllocationResolver $allocationResolver,
         protected LandingUpsellService $landingUpsell,
+        protected MarketingStatsBroadcaster $marketingStats,
     ) {}
 
     /**
@@ -349,6 +351,8 @@ class LeadIngestionService
                 ($normalized['customer_name'] ?? $order->customer_name).' — upsale',
             );
 
+            $this->pingMarketingDashboard($campaign);
+
             return $ingestion;
         });
     }
@@ -573,6 +577,7 @@ class LeadIngestionService
 
         if ($duplicateOrder) {
             $this->broadcastSafe(new LeadIngested($ingestion), new LeadPoolChanged);
+            $this->pingMarketingDashboard($campaign);
 
             return $ingestion;
         }
@@ -599,10 +604,15 @@ class LeadIngestionService
             FinalizeLandingLeadJob::dispatch($ingestion->id, $campaign?->company_id)
                 ->delay(now()->addSeconds($this->landingUpsell->holdSeconds()));
 
+            $this->pingMarketingDashboard($campaign);
+
             return $ingestion;
         }
 
-        return $this->allocateFromNormalized($ingestion, $normalized, $campaign, $session, $forceSale);
+        $result = $this->allocateFromNormalized($ingestion, $normalized, $campaign, $session, $forceSale);
+        $this->pingMarketingDashboard($campaign);
+
+        return $result;
     }
 
     /**
@@ -631,6 +641,7 @@ class LeadIngestionService
                 $ingestion->update(['status' => LeadIngestionStatus::Pending]);
             }
             $this->broadcastSafe(new LeadIngested($ingestion), new LeadPoolChanged);
+            $this->pingMarketingDashboard($campaign);
 
             return $ingestion;
         }
@@ -669,6 +680,8 @@ class LeadIngestionService
                 ],
                 $ingestion->customer_name ?? $ingestion->customer_phone,
             );
+
+            $this->pingMarketingDashboard($campaign);
 
             return $ingestion;
         });
@@ -757,6 +770,13 @@ class LeadIngestionService
                     'error' => $e->getMessage(),
                 ]);
             }
+        }
+    }
+
+    protected function pingMarketingDashboard(?MarketingSource $campaign): void
+    {
+        if ($campaign) {
+            $this->marketingStats->broadcastForCampaign($campaign);
         }
     }
 

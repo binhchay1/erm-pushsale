@@ -10,6 +10,7 @@ import { TableColumnToggle, useMarketingSourceColumns } from '@/components/repor
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout';
+import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { useT } from '@/providers/I18nProvider';
@@ -26,8 +27,12 @@ function MetricBar({ value, max, color }) {
 export default function Dashboard({ filters, filterOptions, filterFields, report, filterRouteUrl, cachedAt }) {
     const t = useT();
     const routeUrl = filterRouteUrl ?? '/admin/marketing/dashboard';
+    const isMarketingWorkspace = routeUrl.startsWith('/marketing/');
     const { visible, isVisible, toggle, columns } = useMarketingSourceColumns();
     const maxClose = Math.max(...(report.rows?.map((r) => r.closingRate) ?? [1]), 1);
+
+    useRealtimeReload(isMarketingWorkspace ? 'dashboard.marketing' : null, '.lead.ingested', ['report'], { debounce: 800 });
+    useRealtimeReload(isMarketingWorkspace ? 'dashboard.marketing' : null, '.leads.changed', ['report'], { debounce: 800 });
 
     return (
         <AppLayout>
