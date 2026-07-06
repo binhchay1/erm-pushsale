@@ -7,6 +7,7 @@ use App\Enums\DeliveryStatus;
 use App\Enums\OrgLevel;
 use App\Enums\TeamType;
 use App\Enums\UserRole;
+use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\Team;
@@ -25,6 +26,8 @@ class MarketingTeamTreeService
         $sources = MarketingSource::query()
             ->when($filter->marketerId, fn ($q) => $q->where('marketer_user_id', $filter->marketerId))
             ->get();
+
+        $leadCountsByMarketer = $this->leadCountsByMarketer($filter);
 
         $marketers = User::query()
             ->where('role', UserRole::Marketing)
@@ -51,7 +54,7 @@ class MarketingTeamTreeService
         foreach ($teamGroups as $teamId => $members) {
             $team = $teams->firstWhere('id', (int) $teamId);
             $memberNodes = $members
-                ->map(fn (User $user) => $this->marketerNode($user, $orders, $sources))
+                ->map(fn (User $user) => $this->marketerNode($user, $orders, $sources, $leadCountsByMarketer))
                 ->values()
                 ->all();
 
@@ -101,9 +104,9 @@ class MarketingTeamTreeService
      * @param  Collection<int, MarketingSource>  $sources
      * @return array<string, mixed>
      */
-    private function marketerNode(User $user, Collection $orders, Collection $sources): array
+    private function marketerNode(User $user, Collection $orders, Collection $sources, Collection $leadCountsByMarketer): array
     {
-        $metrics = $this->metricsForMarketer($user->id, $orders, $sources);
+        $metrics = $this->metricsForMarketer($user->id, $orders, $sources, $leadCountsByMarketer);
 
         return [
             'id' => 'marketer-'.$user->id,
@@ -128,14 +131,14 @@ class MarketingTeamTreeService
      * @param  Collection<int, MarketingSource>  $sources
      * @return array{contacts: int, closedOrders: int, revenue: int, adSpend: int, roas: float, netContribution: int, productQuantity: int, conversionRate: float}
      */
-    private function metricsForMarketer(int $marketerId, Collection $orders, Collection $sources): array
+    private function metricsForMarketer(int $marketerId, Collection $orders, Collection $sources, Collection $leadCountsByMarketer): array
     {
         $marketerOrders = $orders->where('marketer_user_id', $marketerId);
         $marketerSources = $sources->where('marketer_user_id', $marketerId);
+        $periodLeads = (int) ($leadCountsByMarketer->get($marketerId) ?? 0);
         $contacts = max(
-            (int) $marketerSources->sum('contacts'),
+            $periodLeads,
             (int) $marketerOrders->sum('contact_count'),
-            1
         );
         $closed = $marketerOrders->count();
         $revenueEligible = $marketerOrders->whereIn('delivery_status', DeliveryStatus::revenueEligible());
@@ -154,8 +157,25 @@ class MarketingTeamTreeService
             'roas' => $kpi['roas'],
             'netContribution' => $kpi['net_contribution'],
             'productQuantity' => $productQty,
-            'conversionRate' => round($closed / $contacts * 100, 1),
+            'conversionRate' => $contacts > 0 ? round($closed / $contacts * 100, 1) : 0,
         ];
+    }
+
+    /** @return Collection<int, int> marketer_user_id => lead count trong kỳ lọc */
+    private function leadCountsByMarketer(ReportFilterData $filter): Collection
+    {
+        $query = LeadIngestion::query()
+            ->join('marketing_sources', 'lead_ingestions.marketing_source_id', '=', 'marketing_sources.id')
+            ->selectRaw('marketing_sources.marketer_user_id as marketer_id, COUNT(*) as aggregate')
+            ->whereNotNull('lead_ingestions.marketing_source_id')
+            ->whereNotNull('marketing_sources.marketer_user_id')
+            ->groupBy('marketing_sources.marketer_user_id');
+
+        if ($filter->dateFrom && $filter->dateTo) {
+            $query->whereBetween('lead_ingestions.created_at', [$filter->dateFrom, $filter->dateTo]);
+        }
+
+        return $query->pluck('aggregate', 'marketer_id');
     }
 
     /**
@@ -168,14 +188,13 @@ class MarketingTeamTreeService
         $closed = array_sum(array_column($nodes, 'closedOrders'));
         $revenue = array_sum(array_column($nodes, 'revenue'));
         $productQty = array_sum(array_column($nodes, 'productQuantity'));
-        $contacts = max($contacts, 1);
 
         return [
             'contacts' => $contacts,
             'closedOrders' => $closed,
             'revenue' => $revenue,
             'productQuantity' => $productQty,
-            'conversionRate' => round($closed / $contacts * 100, 1),
+            'conversionRate' => $contacts > 0 ? round($closed / $contacts * 100, 1) : 0,
         ];
     }
 

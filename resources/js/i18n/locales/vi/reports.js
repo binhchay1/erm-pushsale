@@ -68,6 +68,12 @@ export default {
         grand_total: 'Tổng cộng',
         empty: 'Chưa có dữ liệu team',
     },
+    marketer_table: {
+        title: 'Doanh số từng nhân viên Marketing',
+        desc: 'Contact, đơn chốt, tỷ lệ chốt và doanh thu theo từng marketer trong kỳ lọc',
+        marketer: 'Nhân viên MKT',
+        empty: 'Chưa có dữ liệu marketer trong kỳ đã chọn',
+    },
     sales_performance: {
         stt: 'STT',
         name: 'Tên Sales',

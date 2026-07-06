@@ -29,6 +29,7 @@ export default function LeadsIndex({
     deleteUrlPrefix = '/admin/leads',
     listUrl = '/admin/leads',
     canDelete = true,
+    showAllocationTools = true,
     realtimeChannel = 'dashboard.admin',
     allocationMode = 'auto',
     allocationModeUrl = '/admin/leads/allocation-mode',
@@ -192,6 +193,7 @@ export default function LeadsIndex({
                     </div>
                 )}
 
+                {showAllocationTools && (
                 <div className="space-y-3 rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-amber-200/60 pb-3 dark:border-amber-900/30">
                         <div className="flex items-center gap-3">
@@ -264,6 +266,7 @@ export default function LeadsIndex({
                         {allocateGuide}
                     </p>
                 </div>
+                )}
 
                 <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">
                     <input
@@ -340,6 +343,7 @@ export default function LeadsIndex({
                     <table className="w-full border-collapse text-xs">
                         <thead>
                             <tr>
+                                {showAllocationTools && (
                                 <Th className="w-10">
                                     <input
                                         type="checkbox"
@@ -349,6 +353,7 @@ export default function LeadsIndex({
                                         title={t('pages.leads.select_all_pending')}
                                     />
                                 </Th>
+                                )}
                                 <Th sortable sortKey="id" sort={sort} onSort={toggleSort}>{t('pages.leads.col_id')}</Th>
                                 <Th sortable sortKey="created_at" sort={sort} onSort={toggleSort}>{t('pages.leads.col_time')}</Th>
                                 <Th sortable sortKey="platform" sort={sort} onSort={toggleSort}>{t('pages.leads.col_platform')}</Th>
@@ -373,6 +378,7 @@ export default function LeadsIndex({
                                                 : 'hover:bg-muted/30'
                                         }
                                     >
+                                        {showAllocationTools && (
                                         <Td>
                                             {row.status === 'pending' ? (
                                                 <input
@@ -382,6 +388,7 @@ export default function LeadsIndex({
                                                 />
                                             ) : null}
                                         </Td>
+                                        )}
                                         <Td>{row.id}</Td>
                                         <Td>{row.created_at}</Td>
                                         <Td className="font-medium">{row.platform}</Td>

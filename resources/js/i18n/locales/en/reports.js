@@ -68,6 +68,12 @@ export default {
         grand_total: 'Grand total',
         empty: 'No team data',
     },
+    marketer_table: {
+        title: 'Revenue by marketer',
+        desc: 'Contacts, closed orders, closing rate and revenue per marketer for the selected period',
+        marketer: 'Marketer',
+        empty: 'No marketer data for the selected period',
+    },
     sales_performance: {
         stt: '#',
         name: 'Sales rep',

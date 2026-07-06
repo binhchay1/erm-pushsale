@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { CheckCircle2, Clock, Copy, Eye, Pencil, Plus, Target, Trash2 } from 'lucide-react';
+import { CheckCircle2, Clock, Copy, Eye, Pencil, Plus, Target, Trash2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -143,6 +143,21 @@ export default function CampaignIndex({ campaigns, ownershipFilter = 'all' }) {
                                                 <span className="inline-flex items-center gap-1 text-emerald-600">
                                                     <CheckCircle2 className="size-3.5" />
                                                     {t('pages.approved')}
+                                                </span>
+                                            ) : row.rejected_at ? (
+                                                <span
+                                                    className="inline-flex max-w-[200px] flex-col gap-0.5 text-rose-600"
+                                                    title={row.rejection_reason ?? undefined}
+                                                >
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <XCircle className="size-3.5 shrink-0" />
+                                                        {t('pages.landing.reject')}
+                                                    </span>
+                                                    {row.rejection_reason && (
+                                                        <span className="truncate text-[10px] font-normal text-muted-foreground">
+                                                            {row.rejection_reason}
+                                                        </span>
+                                                    )}
                                                 </span>
                                             ) : (
                                                 <span className="inline-flex items-center gap-1 text-amber-600">

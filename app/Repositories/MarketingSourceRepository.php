@@ -27,7 +27,7 @@ class MarketingSourceRepository
 
         $query = MarketingSource::query()
             ->whereNull('parent_id')
-            ->with(['marketer:id,name', 'creator:id,name', 'approver:id,name'])
+            ->with(['marketer:id,name', 'creator:id,name', 'approver:id,name', 'rejector:id,name'])
             ->withCount('orders')
             ->select('marketing_sources.*')
             ->selectRaw("COALESCE((

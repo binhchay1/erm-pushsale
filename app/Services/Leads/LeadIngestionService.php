@@ -542,6 +542,10 @@ class LeadIngestionService
             'error_message' => $exceptionReason,
         ]);
 
+        if ($campaign) {
+            MarketingSource::query()->whereKey($campaign->id)->increment('contacts');
+        }
+
         if ($duplicateOrder) {
             $this->broadcastSafe(new LeadIngested($ingestion), new LeadPoolChanged);
 

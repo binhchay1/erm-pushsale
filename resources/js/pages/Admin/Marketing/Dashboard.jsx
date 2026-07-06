@@ -4,6 +4,7 @@ import { MarketingKpiHero } from '@/components/marketing/MarketingKpiHero';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { ReportRefreshButton } from '@/components/reports/ReportRefreshButton';
 import { TeamRevenueTable } from '@/components/reports/TeamRevenueTable';
+import { MarketerRevenueTable } from '@/components/reports/MarketerRevenueTable';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { TableColumnToggle, useMarketingSourceColumns } from '@/components/reports/TableColumnToggle';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -57,6 +58,19 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
                         <TeamRevenueTable
                             roots={report.teamTree?.roots}
                             emptyText={t('reports.marketing_dashboard.team_empty')}
+                        />
+                    </CardContent>
+                </Card>
+
+                <Card className="border-border/80 shadow-sm">
+                    <CardHeader className="pb-2">
+                        <CardTitle>{t('reports.marketer_table.title')}</CardTitle>
+                        <CardDescription>{t('reports.marketer_table.desc')}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-2">
+                        <MarketerRevenueTable
+                            roots={report.teamTree?.roots}
+                            emptyText={t('reports.marketer_table.empty')}
                         />
                     </CardContent>
                 </Card>

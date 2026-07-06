@@ -7,6 +7,7 @@ use App\Enums\DateType;
 use App\Enums\OperationStage;
 use App\Enums\OrgLevel;
 use App\Enums\UserRole;
+use App\Models\LeadIngestion;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
@@ -154,6 +155,10 @@ class ExtraReportService
                 $filterFields[] = 'sale_id';
             }
 
+            if (in_array($key, ['marketing-1', 'marketing-3'], true)) {
+                $filterFields[] = 'marketer_id';
+            }
+        } elseif ($user->role === UserRole::Marketing && $this->isElevated($user)) {
             if (in_array($key, ['marketing-1', 'marketing-3'], true)) {
                 $filterFields[] = 'marketer_id';
             }
@@ -498,6 +503,24 @@ class ExtraReportService
         $orders = $this->fetchOrdersWithItems($user, $filter, scopeMarketing: true)
             ->filter(fn (Order $o) => $o->marketer_user_id !== null);
 
+        $marketerIds = $this->visibleMarketerIds($user, $filter);
+
+        $leadsQuery = LeadIngestion::query()
+            ->with(['marketingSource:id,marketer_user_id,name', 'marketingSource.marketer:id,name'])
+            ->whereNotNull('marketing_source_id')
+            ->when(
+                $filter->dateFrom && $filter->dateTo,
+                fn ($q) => $q->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo]),
+            )
+            ->when($marketerIds !== null, function ($q) use ($marketerIds) {
+                $q->whereHas('marketingSource', fn ($sq) => $sq->whereIn('marketer_user_id', $marketerIds));
+            })
+            ->when($filter->marketerId, function ($q) use ($filter) {
+                $q->whereHas('marketingSource', fn ($sq) => $sq->where('marketer_user_id', $filter->marketerId));
+            });
+
+        $leads = $leadsQuery->get();
+
         $columns = [
             $this->col('marketer', 'name', 'text'),
             $this->col('contacts_total', 'contacts', 'number'),
@@ -508,16 +531,34 @@ class ExtraReportService
             $this->col('revenue', 'revenue', 'currency'),
         ];
 
-        $rows = $orders->groupBy('marketer_user_id')->map(function (Collection $group) {
+        $marketerIdsInScope = $orders->pluck('marketer_user_id')
+            ->merge($leads->map(fn (LeadIngestion $l) => $l->marketingSource?->marketer_user_id))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $rows = $marketerIdsInScope->map(function (int $marketerId) use ($orders, $leads) {
+            $group = $orders->where('marketer_user_id', $marketerId);
+            $marketerLeads = $leads->filter(fn (LeadIngestion $l) => (int) $l->marketingSource?->marketer_user_id === $marketerId);
             $closed = $this->closed($group);
             $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
+            $contactCount = max($marketerLeads->count(), $group->count());
+            $unallocated = $marketerLeads->filter(
+                fn (LeadIngestion $l) => $l->order_id === null
+                    && in_array($l->status->value, ['pending', 'gathering'], true),
+            )->count() + $group->whereNull('sale_user_id')->count();
+
+            $name = $group->first()?->marketerUser?->name
+                ?? $marketerLeads->first()?->marketingSource?->marketer?->name
+                ?? User::query()->find($marketerId)?->name
+                ?? '—';
 
             return [
-                'name' => $group->first()->marketerUser?->name ?? '—',
-                'contacts' => $group->count(),
-                'unallocated' => $group->whereNull('sale_user_id')->count(),
+                'name' => $name,
+                'contacts' => $contactCount,
+                'unallocated' => $unallocated,
                 'closed' => $closed->count(),
-                'rate' => self::pct($closed->count(), $group->count()),
+                'rate' => self::pct($closed->count(), $contactCount),
                 'qty_sold' => (int) $closed->sum(fn (Order $o) => $o->items->sum('quantity')),
                 'revenue' => $revenue,
             ];

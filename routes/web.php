@@ -216,6 +216,9 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('reports/hourly', HourlyStatsController::class)->name('reports.hourly');
         Route::get('reports/team-leaders', TeamLeaderStatsController::class)->name('reports.team-leaders');
         Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
+        Route::get('leads', LeadsLogController::class)->name('leads.index');
+        Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
+        Route::post('leads/import', [ManualLeadController::class, 'import'])->name('leads.import');
     });
 
     Route::middleware('role:'.User::ROLE_WAREHOUSE)->prefix('warehouse')->name('warehouse.')->group(function () {

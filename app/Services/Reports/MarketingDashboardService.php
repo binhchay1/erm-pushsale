@@ -4,6 +4,7 @@ namespace App\Services\Reports;
 
 use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Data\ReportFilterData;
+use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use Illuminate\Support\Collection;
@@ -19,6 +20,7 @@ class MarketingDashboardService
     public function build(ReportFilterData $filter): array
     {
         $orderCollection = $this->orders->allFiltered($filter);
+        $leadCountsBySource = $this->leadCountsBySource($filter);
 
         $sources = MarketingSource::query()
             ->with(['children'])
@@ -31,10 +33,10 @@ class MarketingDashboardService
 
         foreach ($sources as $source) {
             $stt++;
-            $rows[] = $this->mapSourceRow($source, $orderCollection, $stt, null);
+            $rows[] = $this->mapSourceRow($source, $orderCollection, $leadCountsBySource, $stt, null);
 
             foreach ($source->children as $child) {
-                $rows[] = $this->mapSourceRow($child, $orderCollection, $stt, $source->id);
+                $rows[] = $this->mapSourceRow($child, $orderCollection, $leadCountsBySource, $stt, $source->id);
             }
         }
 
@@ -59,7 +61,7 @@ class MarketingDashboardService
     private function buildKpis($orders, array $rows): array
     {
         $parents = array_filter($rows, fn ($r) => ! ($r['isChild'] ?? false));
-        $contacts = max(array_sum(array_column($parents, 'contacts')), 1);
+        $contacts = max(array_sum(array_column($parents, 'contacts')), 0);
         $closed = (int) $orders->count();
         $revenue = (int) $orders->sum(fn (Order $o) => $o->netRevenue());
         $productQty = (int) $orders->sum(fn (Order $o) => $o->items->sum('quantity'));
@@ -67,7 +69,7 @@ class MarketingDashboardService
         return [
             'totalRevenue' => $revenue,
             'productQuantity' => $productQty,
-            'conversionRate' => round($closed / $contacts * 100, 1),
+            'conversionRate' => $contacts > 0 ? round($closed / $contacts * 100, 1) : 0,
             'averageOrderValue' => $closed > 0 ? (int) round($revenue / $closed) : 0,
             'closedOrders' => $closed,
             'contacts' => $contacts,
@@ -78,11 +80,12 @@ class MarketingDashboardService
      * @param  Collection<int, Order>  $orders
      * @return array<string, mixed>
      */
-    private function mapSourceRow(MarketingSource $source, $orders, int $stt, ?int $parentId): array
+    private function mapSourceRow(MarketingSource $source, $orders, Collection $leadCountsBySource, int $stt, ?int $parentId): array
     {
         $sourceOrders = $orders->where('marketing_source_id', $source->id);
         $interactions = max($source->interactions, 1);
-        $contacts = max($source->contacts, (int) $sourceOrders->sum('contact_count'), 1);
+        $periodLeads = (int) ($leadCountsBySource->get($source->id) ?? 0);
+        $contacts = max($periodLeads, (int) $sourceOrders->sum('contact_count'));
         $closed = $sourceOrders->count();
         $budget = $source->budget;
         $productQty = (int) $sourceOrders->sum(fn ($o) => $o->items->sum('quantity'));
@@ -101,10 +104,10 @@ class MarketingDashboardService
             'budget' => $budget,
             'interactions' => $interactions,
             'contacts' => $contacts,
-            'contactRate' => round($contacts / $interactions * 100, 1),
-            'costPerContact' => (int) round($budget / $contacts),
+            'contactRate' => $interactions > 0 ? round($contacts / $interactions * 100, 1) : 0,
+            'costPerContact' => $contacts > 0 ? (int) round($budget / $contacts) : 0,
             'closedOrders' => $closed,
-            'closingRate' => round($closed / $contacts * 100, 1),
+            'closingRate' => $contacts > 0 ? round($closed / $contacts * 100, 1) : 0,
             'productQuantity' => $productQty,
             'avgProductPerOrder' => $closed > 0 ? round($productQty / $closed, 1) : 0,
             'totalRevenue' => $totalRevenue,
@@ -129,5 +132,20 @@ class MarketingDashboardService
             'closedOrders' => array_sum(array_column($parents, 'closedOrders')),
             'totalRevenue' => array_sum(array_column($parents, 'totalRevenue')),
         ];
+    }
+
+  /** @return Collection<int, int> marketing_source_id => lead count trong kỳ lọc */
+    private function leadCountsBySource(ReportFilterData $filter): Collection
+    {
+        $query = LeadIngestion::query()
+            ->selectRaw('marketing_source_id, COUNT(*) as aggregate')
+            ->whereNotNull('marketing_source_id')
+            ->groupBy('marketing_source_id');
+
+        if ($filter->dateFrom && $filter->dateTo) {
+            $query->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo]);
+        }
+
+        return $query->pluck('aggregate', 'marketing_source_id');
     }
 }

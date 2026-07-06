@@ -28,7 +28,7 @@ export function Th({ children, className, colSpan, sortable, sortKey, sort, onSo
             <th
                 colSpan={colSpan}
                 className={cn(
-                    'whitespace-nowrap border-b-2 border-border bg-muted/80 px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-foreground/70',
+                    'whitespace-nowrap border-b-2 border-border bg-muted px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-foreground',
                     'cursor-pointer select-none transition-colors hover:bg-muted',
                     active && 'text-primary',
                     className
@@ -47,7 +47,7 @@ export function Th({ children, className, colSpan, sortable, sortKey, sort, onSo
         <th
             colSpan={colSpan}
             className={cn(
-                'whitespace-nowrap border-b-2 border-border bg-muted/80 px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-foreground/70',
+                'whitespace-nowrap border-b-2 border-border bg-muted px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-foreground',
                 className
             )}
         >

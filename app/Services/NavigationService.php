@@ -171,6 +171,7 @@ class NavigationService
             $this->item('marketing_workspace', '/marketing/workspace', 'share2', 'marketing'),
             $this->item('campaign_report', '/marketing/campaign-report', 'pie-chart', 'reports'),
             $this->item('campaigns', '/marketing/campaigns', 'layout-template', 'marketing'),
+            $this->item('leads_log', '/marketing/leads', 'inbox', 'leads'),
             $this->item('revenue_report', '/marketing/revenue', 'trending-up', 'reports'),
             $this->item('extra_report', '/marketing/reports/marketing-1', 'file-bar-chart', 'reports'),
             $this->item('marketing_report_3', '/marketing/reports/marketing-3', 'clipboard-list', 'reports'),

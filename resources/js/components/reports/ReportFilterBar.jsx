@@ -43,7 +43,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
             case 'date_from':
                 return (
                     <div key={key} className="space-y-1.5">
-                        <Label className="text-xs font-medium text-muted-foreground">{t('filters.date_from')}</Label>
+                        <Label className="text-xs font-medium text-foreground/80">{t('filters.date_from')}</Label>
                         <Input
                             type="date"
                             value={filters.date_from ?? ''}
@@ -54,7 +54,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
             case 'date_to':
                 return (
                     <div key={key} className="space-y-1.5">
-                        <Label className="text-xs font-medium text-muted-foreground">{t('filters.date_to')}</Label>
+                        <Label className="text-xs font-medium text-foreground/80">{t('filters.date_to')}</Label>
                         <Input
                             type="date"
                             value={filters.date_to ?? ''}
@@ -76,7 +76,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
             case 'search':
                 return (
                     <div key={key} className="space-y-1.5 sm:col-span-2">
-                        <Label className="text-xs font-medium text-muted-foreground">
+                        <Label className="text-xs font-medium text-foreground/80">
                             {t('filters.search_label')}
                         </Label>
                         <Input
@@ -185,7 +185,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
 
     const checkboxField = (key, label) =>
         fields.has(key) && (
-            <label key={key} className="flex items-center gap-2 text-xs text-muted-foreground">
+            <label key={key} className="flex items-center gap-2 text-xs text-foreground/80">
                 <input
                     type="checkbox"
                     className="accent-primary"
@@ -202,7 +202,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
     );
 
     return (
-        <div className="rounded-lg bg-card p-5 shadow-sm sm:p-6">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap gap-2">
                     {PRESET_KEYS.map((value) => (

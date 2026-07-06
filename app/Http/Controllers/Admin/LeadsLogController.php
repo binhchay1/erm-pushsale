@@ -73,27 +73,45 @@ class LeadsLogController extends Controller
             'salesUsers' => collect($users->nameOptionsByRoles([UserRole::Sales]))
                 ->map(fn (array $u) => ['id' => (string) $u['id'], 'name' => $u['name']])
                 ->all(),
-            'allocateUrl' => $request->is('allocator/*')
-                ? '/allocator/leads/allocate'
-                : '/admin/leads/allocate',
-            'deleteUrlPrefix' => $request->is('allocator/*')
-                ? '/allocator/leads'
-                : '/admin/leads',
-            'listUrl' => $request->is('allocator/*')
-                ? '/allocator/workspace'
-                : '/admin/leads',
-            'canDelete' => ! $request->is('allocator/*'),
-            'realtimeChannel' => $request->is('allocator/*') ? 'dashboard.allocator' : 'dashboard.admin',
+            'allocateUrl' => match (true) {
+                $request->is('allocator/*') => '/allocator/leads/allocate',
+                $request->is('marketing/*') => '/marketing/leads/allocate',
+                default => '/admin/leads/allocate',
+            },
+            'deleteUrlPrefix' => match (true) {
+                $request->is('allocator/*') => '/allocator/leads',
+                $request->is('marketing/*') => '/marketing/leads',
+                default => '/admin/leads',
+            },
+            'listUrl' => match (true) {
+                $request->is('allocator/*') => '/allocator/workspace',
+                $request->is('marketing/*') => '/marketing/leads',
+                default => '/admin/leads',
+            },
+            'canDelete' => ! $request->is('allocator/*') && ! $request->is('marketing/*'),
+            'canAllocate' => ! $request->is('marketing/*'),
+            'showAllocationTools' => ! $request->is('marketing/*'),
+            'realtimeChannel' => match (true) {
+                $request->is('allocator/*') => 'dashboard.allocator',
+                $request->is('marketing/*') => 'dashboard.marketing',
+                default => 'dashboard.admin',
+            },
             'allocationMode' => $modeService->current()->value,
-            'allocationModeUrl' => $request->is('allocator/*')
-                ? '/allocator/leads/allocation-mode'
-                : '/admin/leads/allocation-mode',
-            'manualUrl' => $request->is('allocator/*')
-                ? '/allocator/leads/manual'
-                : '/admin/leads/manual',
-            'importUrl' => $request->is('allocator/*')
-                ? '/allocator/leads/import'
-                : '/admin/leads/import',
+            'allocationModeUrl' => match (true) {
+                $request->is('allocator/*') => '/allocator/leads/allocation-mode',
+                $request->is('marketing/*') => '/marketing/leads/allocation-mode',
+                default => '/admin/leads/allocation-mode',
+            },
+            'manualUrl' => match (true) {
+                $request->is('allocator/*') => '/allocator/leads/manual',
+                $request->is('marketing/*') => '/marketing/leads/manual',
+                default => '/admin/leads/manual',
+            },
+            'importUrl' => match (true) {
+                $request->is('allocator/*') => '/allocator/leads/import',
+                $request->is('marketing/*') => '/marketing/leads/import',
+                default => '/admin/leads/import',
+            },
             'products' => Product::query()
                 ->where('is_active', true)
                 ->orderBy('name')

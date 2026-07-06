@@ -141,13 +141,16 @@ class CampaignController extends Controller
             'budget' => (int) $c->budget,
             'is_active' => (bool) $c->is_active,
             'is_approved' => (bool) $c->is_approved,
+            'rejected_at' => $c->rejected_at?->format('d/m/Y H:i'),
+            'rejection_reason' => $c->rejection_reason,
+            'rejected_by' => $c->rejector?->name,
             'js_tracking_enabled' => (bool) $c->js_tracking_enabled,
             'lead_allocation' => $c->lead_allocation?->value ?? 'inherit',
             'orders_count' => (int) ($c->orders_count ?? 0),
             'revenue' => (int) ($c->revenue ?? 0),
             'ownership' => $isOwner ? 'created' : ($isDelegated ? 'delegated' : 'team'),
-            'can_edit' => $isOwner,
-            'can_delete' => $isOwner,
+            'can_edit' => $isOwner && ! $c->rejected_at,
+            'can_delete' => $isOwner && ! $c->is_approved,
         ];
 
         if ($includeEdit) {
