@@ -12,7 +12,7 @@ php artisan tinker --execute="
   'allocator' => ['/allocator/dashboard', '/allocator/workspace'],
 ];
 foreach (\$roles as \$role => \$paths) {
-  \$user = App\Models\User::query()->where('role', \$role)->where('is_active', true)->first();
+  \$user = App\Models\User::query()->where('role', \$role)->first();
   if (!\$user) { \$checks[] = 'skip_' . \$role; continue; }
   foreach (\$paths as \$path) {
     try {
