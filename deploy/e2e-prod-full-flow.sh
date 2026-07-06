@@ -16,7 +16,7 @@ info() { echo "=== $* ==="; }
 info "PREFLIGHT"
 git log -1 --oneline || true
 
-HOLD=$(php artisan tinker --execute="echo (int) config('saleops.landing_upsell.hold_seconds');" 2>/dev/null | tail -1)
+HOLD=$(php artisan tinker --execute="echo (int) config('saleops.landing.hold_seconds');" 2>/dev/null | tail -1)
 if [ "$HOLD" = "5" ]; then ok "hold_seconds=5"; else bad "hold_seconds=$HOLD (expected 5)"; fi
 
 if grep -q "dashboard.marketing" routes/channels.php 2>/dev/null; then
@@ -44,11 +44,10 @@ HTTP=$(curl -s -o /tmp/e2e_recv.json -w '%{http_code}' -X POST \
 echo "HTTP $HTTP — $(cat /tmp/e2e_recv.json)"
 [ "$HTTP" = "202" ] && ok "receive HTTP 202" || bad "receive HTTP $HTTP"
 
-for i in 1 2 3 4 5; do
-  sudo -u www-data php artisan queue:work database --once --quiet 2>/dev/null || true
-done
+# Chỉ chạy 1 job ngay — giữ hold chưa release để verify
+sudo -u www-data php artisan queue:work database --once --quiet 2>/dev/null || true
 
-info "VERIFY RECEIVE"
+info "VERIFY RECEIVE (ngay sau job đầu — hold còn active)"
 php artisan tinker --execute="
 \$phone = '$PHONE';
 \$fail = 0;
@@ -102,6 +101,10 @@ exit(\$fail > 0 ? 1 : 0);
 TINKER_RC=$?
 [ $TINKER_RC -eq 0 ] && ok "receive data checks" || bad "receive data checks (exit $TINKER_RC)"
 
+for i in 1 2 3; do
+  sudo -u www-data php artisan queue:work database --once --quiet 2>/dev/null || true
+done
+
 info "WEBHOOK UPSELL"
 HTTP2=$(curl -s -o /tmp/e2e_up.json -w '%{http_code}' -X POST \
   "$BASE/api/v1/landing/$TOKEN/upsell" \
@@ -119,11 +122,15 @@ php artisan tinker --execute="
 if (!\$order) { echo 'FAIL no order after upsell'.PHP_EOL; exit(1); }
 \$order->load('items');
 echo 'items='.\$order->items->count().' total='.\$order->total.PHP_EOL;
-\$order->items->count() >= 2 ? print('PASS upsell merged items'.PHP_EOL) : print('FAIL upsell items='.\$order->items->count().PHP_EOL);
-\$order->total >= 378000 ? print('PASS total merged'.PHP_EOL) : print('FAIL total='.\$order->total.PHP_EOL);
-exit(\$order->items->count() < 2 ? 1 : 0);
+if (\$order->items->count() >= 2 && \$order->total >= 378000) {
+  echo 'PASS upsell merged'.PHP_EOL;
+  exit(0);
+}
+echo 'FAIL upsell merge'.PHP_EOL;
+exit(1);
 " 2>/dev/null
-[ $? -eq 0 ] && ok "upsell merge" || bad "upsell merge"
+UPSELL_RC=$?
+[ $UPSELL_RC -eq 0 ] && ok "upsell merge" || bad "upsell merge"
 
 info "HOLD RELEASE (wait ${HOLD}s + buffer)"
 sleep $((HOLD + 3))
@@ -176,7 +183,9 @@ foreach (\$roles as \$role => \$paths) {
         }
       }
       \$resp = app()->call([\$ctrl, \$method], array_merge(\$params, ['request' => \$req]));
-      \$ok = \$resp instanceof Inertia\Response || \$resp instanceof Illuminate\Http\Response || \$resp instanceof Illuminate\Http\RedirectResponse;
+      \$ok = \$resp instanceof \Inertia\Response
+        || \$resp instanceof Illuminate\Http\Response
+        || \$resp instanceof Illuminate\Http\RedirectResponse;
       \$checks[] = (\$ok ? 'pass' : 'fail') . \"_{\$role}:\" . \$path;
     } catch (Throwable \$e) {
       \$checks[] = 'fail_' . \$role . ':' . \$path . '=' . substr(str_replace(\"\\n\", ' ', \$e->getMessage()), 0, 120);
