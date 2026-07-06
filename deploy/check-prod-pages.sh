@@ -21,12 +21,17 @@ foreach (\$roles as \$role => \$paths) {
       Illuminate\Support\Facades\Auth::login(\$user);
       \$route = app('router')->getRoutes()->match(\$req);
       \$req->setRouteResolver(fn () => \$route);
-      \$action = \$route->getAction('controller');
-      if (!\$action || !str_contains(\$action, '@')) {
-        \$checks[] = 'fail:' . \$role . \$path . '=no_action';
+      \$action = \$route->getAction('controller') ?? \$route->getAction('uses');
+      if (!\$action) {
+        \$checks[] = 'fail:' . \$role . ':' . \$path . '=no_action';
         continue;
       }
-      [\$class, \$method] = explode('@', \$action, 2);
+      if (str_contains(\$action, '@')) {
+        [\$class, \$method] = explode('@', \$action, 2);
+      } else {
+        \$class = \$action;
+        \$method = '__invoke';
+      }
       \$ctrl = app(\$class);
       \$params = ['request' => \$req];
       foreach (\$route->parameterNames() as \$name) {
@@ -39,9 +44,9 @@ foreach (\$roles as \$role => \$paths) {
       \$ok = \$resp instanceof \Inertia\Response
         || \$resp instanceof Illuminate\Http\Response
         || \$resp instanceof Illuminate\Http\RedirectResponse;
-      \$checks[] = (\$ok ? 'pass' : 'fail') . ':' . \$role . \$path;
+      \$checks[] = (\$ok ? 'pass' : 'fail') . ':' . \$role . ':' . \$path;
     } catch (Throwable \$e) {
-      \$checks[] = 'fail:' . \$role . \$path . '=' . str_replace([\"\\n\", \"\\r\"], ' ', \$e->getMessage());
+      \$checks[] = 'fail:' . \$role . ':' . \$path . '=' . str_replace([\"\\n\", \"\\r\"], ' ', \$e->getMessage());
     }
   }
 }

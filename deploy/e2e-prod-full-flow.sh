@@ -144,20 +144,21 @@ echo 'awaiting_upsell='.(\$order->isAwaitingLandingUpsell()?'yes':'no').' hold_u
 " 2>/dev/null
 
 info "PAGE SERVICES (backend smoke)"
-bash deploy/smoke-reports.sh 2>/dev/null | while read -r line; do
+while read -r line; do
   if echo "$line" | grep -q "_ok"; then ok "$line"
   elif echo "$line" | grep -q "_fail"; then bad "$line"
   else echo "  $line"; fi
-done
+done < <(bash deploy/smoke-reports.sh 2>/dev/null)
 
 info "AUTHENTICATED PAGE RENDER"
-bash deploy/check-prod-pages.sh 2>/tmp/e2e_pages_err.txt | while read -r line; do
-  if echo "$line" | grep -q "^pass:"; then ok "${line#pass:}"
-  elif echo "$line" | grep -q "^fail:"; then bad "${line#fail:}"
-  elif echo "$line" | grep -q "^skip_"; then echo "  [SKIP] ${line#skip_}"
-  fi
-done
-if [ -s /tmp/e2e_pages_err.txt ]; then echo "  page_check_stderr:"; cat /tmp/e2e_pages_err.txt | head -5; fi
+while read -r line; do
+  case "$line" in
+    pass:*) ok "${line#pass:}" ;;
+    fail:*) bad "${line#fail:}" ;;
+    skip_*) echo "  [SKIP] ${line#skip_}" ;;
+  esac
+done < <(bash deploy/check-prod-pages.sh 2>/tmp/e2e_pages_err.txt)
+if [ -s /tmp/e2e_pages_err.txt ]; then echo "  page_check_stderr:"; head -5 /tmp/e2e_pages_err.txt; fi
 
 info "HTTPS ROUTES (unauthenticated — expect 302 login or 401)"
 for path in \
@@ -184,7 +185,7 @@ echo 'inbound_status='.(\$inbound?->status->value ?? 'none').' correlation='.(\$
 \$lead && is_array(\$lead->payload) ? print('PASS lead payload stored'.PHP_EOL) : print('FAIL lead payload'.PHP_EOL);
 " 2>/dev/null
 
-info "SUMMARY phone=$PHONE"
+echo "=== SUMMARY phone=$PHONE ==="
 echo "  PASSED: $PASS"
 echo "  FAILED: $FAIL"
 [ "$FAIL" -eq 0 ] && echo "=== ALL E2E CHECKS PASSED ===" && exit 0
