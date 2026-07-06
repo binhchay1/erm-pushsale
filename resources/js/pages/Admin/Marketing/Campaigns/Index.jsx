@@ -49,7 +49,6 @@ export default function CampaignIndex({ baseUrl, campaigns }) {
                         <thead>
                             <tr>
                                 <Th sortable sortKey="name" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_campaign')}</Th>
-                                <Th sortable sortKey="product" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_product')}</Th>
                                 <Th sortable sortKey="marketer" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_marketer')}</Th>
                                 <Th sortable sortKey="ad_channel" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_channel')}</Th>
                                 <Th sortable sortKey="utm_campaign" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_utm')}</Th>
@@ -65,7 +64,6 @@ export default function CampaignIndex({ baseUrl, campaigns }) {
                                 sortedRows.map((row) => (
                                     <tr key={row.id} className="hover:bg-muted/30">
                                         <Td className="font-medium">{row.name}</Td>
-                                        <Td>{row.product ?? '—'}</Td>
                                         <Td>{row.marketer ?? <span className="text-destructive">{t('pages.unassigned')}</span>}</Td>
                                         <Td>{row.ad_channel ?? '—'}</Td>
                                         <Td className="font-mono">{row.utm_campaign ?? '—'}</Td>

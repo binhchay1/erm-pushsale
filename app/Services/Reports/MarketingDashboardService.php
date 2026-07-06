@@ -21,7 +21,7 @@ class MarketingDashboardService
         $orderCollection = $this->orders->allFiltered($filter);
 
         $sources = MarketingSource::query()
-            ->with(['children.product', 'product'])
+            ->with(['children'])
             ->whereNull('parent_id')
             ->orderBy('name')
             ->get();
@@ -95,7 +95,6 @@ class MarketingDashboardService
             'parentId' => $parentId ? (string) $parentId : null,
             'isChild' => $parentId !== null,
             'sourceName' => $source->name,
-            'productName' => $source->product?->name ?? '—',
             'adChannel' => $source->ad_channel ?? '—',
             'utmSource' => $source->utm_source,
             'utmCampaign' => $source->utm_campaign,
@@ -110,6 +109,7 @@ class MarketingDashboardService
             'avgProductPerOrder' => $closed > 0 ? round($productQty / $closed, 1) : 0,
             'totalRevenue' => $totalRevenue,
             'revenueAfterDiscount' => $revenueAfterDiscount,
+            'averageOrderValue' => $closed > 0 ? (int) round($totalRevenue / $closed) : 0,
             'budgetRevenueRatio' => $totalRevenue > 0 ? round($budget / $totalRevenue * 100, 1) : 0,
             'budgetNetRevenueRatio' => $revenueAfterDiscount > 0 ? round($budget / $revenueAfterDiscount * 100, 1) : 0,
         ];

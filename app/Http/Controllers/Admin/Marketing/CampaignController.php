@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CampaignRequest;
 use App\Models\MarketingSource;
 use App\Repositories\MarketingSourceRepository;
-use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
 use App\Services\Marketing\CampaignJsSnippetService;
 use App\Services\Marketing\CampaignLandingService;
@@ -25,7 +24,6 @@ class CampaignController extends Controller
         private readonly CampaignLandingService $landing,
         private readonly CampaignJsSnippetService $jsSnippet,
         private readonly MarketingSourceRepository $sources,
-        private readonly ProductRepository $products,
         private readonly UserRepository $users,
     ) {}
 
@@ -56,7 +54,6 @@ class CampaignController extends Controller
 
         return Inertia::render('Marketing/Campaigns/Form', [
             'campaign' => null,
-            'products' => $this->productOptions(),
             'marketers' => $this->marketerOptions(),
             'fieldMapping' => $this->fieldMappingGuide(),
             'allocationOptions' => $this->allocationOptions(),
@@ -74,7 +71,6 @@ class CampaignController extends Controller
             $campaign,
             [
                 'marketer_user_id' => $campaign->marketer_user_id,
-                'product_id' => $campaign->product_id,
             ],
         );
 
@@ -89,7 +85,6 @@ class CampaignController extends Controller
 
         return Inertia::render('Marketing/Campaigns/Form', [
             'campaign' => $this->presentCampaign($campaign, $request->user(), includeEdit: true),
-            'products' => $this->productOptions(),
             'marketers' => $this->marketerOptions(),
             'fieldMapping' => $this->fieldMappingGuide(),
             'allocationOptions' => $this->allocationOptions(),
@@ -107,7 +102,6 @@ class CampaignController extends Controller
             $campaign->fresh(),
             [
                 'marketer_user_id' => $campaign->marketer_user_id,
-                'product_id' => $campaign->product_id,
             ],
         );
 
@@ -135,7 +129,6 @@ class CampaignController extends Controller
         $base = [
             'id' => $c->id,
             'name' => $c->name,
-            'product' => $c->product?->name,
             'creator' => $c->creator?->name,
             'created_by_user_id' => $c->created_by_user_id,
             'marketer' => $c->marketer?->name,
@@ -158,7 +151,6 @@ class CampaignController extends Controller
         ];
 
         if ($includeEdit) {
-            $base['product_id'] = $c->product_id;
             $base['lead_allocation'] = $c->lead_allocation?->value ?? 'inherit';
             $base['js_snippet'] = $c->webhook_token && $c->js_tracking_enabled
                 ? $this->jsSnippet->render($c)
@@ -174,12 +166,6 @@ class CampaignController extends Controller
             $campaign->parent_id === null && $campaign->created_by_user_id === $request->user()->id,
             403,
         );
-    }
-
-    /** @return list<array{id:int,name:string}> */
-    private function productOptions(): array
-    {
-        return $this->products->optionsWithSkuLabel();
     }
 
     /** @return list<array{id:int,name:string}> */

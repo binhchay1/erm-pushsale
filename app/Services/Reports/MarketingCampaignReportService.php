@@ -123,7 +123,7 @@ class MarketingCampaignReportService
             ->orderBy('name');
 
         if ($filter->productId) {
-            $query->where('product_id', $filter->productId);
+            $query->whereHas('orders', fn (Builder $order) => $order->where('product_id', $filter->productId));
         }
 
         if ($filter->marketerId) {
@@ -154,13 +154,7 @@ class MarketingCampaignReportService
             });
 
         if ($filter->productId) {
-            $query->where(function (Builder $q) use ($filter, $campaign) {
-                $q->whereHas('order', fn (Builder $order) => $order->where('product_id', $filter->productId));
-
-                if ((int) $campaign->product_id === (int) $filter->productId) {
-                    $q->orWhereNull('order_id');
-                }
-            });
+            $query->whereHas('order', fn (Builder $order) => $order->where('product_id', $filter->productId));
         }
 
         if ($viewer->role === UserRole::Marketing) {

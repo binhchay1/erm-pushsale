@@ -76,7 +76,7 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
                                     <tr>
                                         <Th>{t('reports.marketing_dashboard.stt')}</Th>
                                         <Th>{t('reports.marketing_dashboard.source')}</Th>
-                                        {isVisible('product') && <Th>{t('reports.marketing_dashboard.product')}</Th>}
+                                        {isVisible('aov') && <Th>{t('reports.marketing_dashboard.aov')}</Th>}
                                         {isVisible('channel') && <Th>{t('reports.marketing_dashboard.channel')}</Th>}
                                         {isVisible('budget') && <Th>{t('reports.marketing_dashboard.budget')}</Th>}
                                         {isVisible('interactions') && (
@@ -124,7 +124,9 @@ export default function Dashboard({ filters, filterOptions, filterFields, report
                                                 <Td className={cn('font-medium', row.isChild && 'pl-6')}>
                                                     {row.sourceName}
                                                 </Td>
-                                                {isVisible('product') && <Td>{row.productName}</Td>}
+                                                {isVisible('aov') && (
+                                                    <Td className="tabular-nums">{formatCurrency(row.averageOrderValue)}</Td>
+                                                )}
                                                 {isVisible('channel') && <Td>{row.adChannel}</Td>}
                                                 {isVisible('budget') && <Td>{formatCurrency(row.budget)}</Td>}
                                                 {isVisible('interactions') && (

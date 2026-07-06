@@ -11,12 +11,11 @@ import { useT } from '@/providers/I18nProvider';
 
 const channels = ['facebook', 'tiktok', 'google', 'zalo', 'landing', 'shopee', 'lazada'];
 
-export default function CampaignForm({ baseUrl, campaign, products, marketers }) {
+export default function CampaignForm({ baseUrl, campaign, marketers }) {
     const t = useT();
     const isEdit = Boolean(campaign?.id);
     const { data, setData, post, put, processing, errors } = useForm({
         name: campaign?.name ?? '',
-        product_id: campaign?.product_id ?? '',
         marketer_user_id: campaign?.marketer_user_id ?? '',
         ad_channel: campaign?.ad_channel ?? 'landing',
         utm_source: campaign?.utm_source ?? '',
@@ -67,24 +66,6 @@ export default function CampaignForm({ baseUrl, campaign, products, marketers })
                             </div>
 
                             <div className="grid gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>{t('pages.campaigns.product_in_stock')}</Label>
-                                    <select
-                                        className="input-soft h-10 w-full px-3"
-                                        value={data.product_id}
-                                        onChange={(e) => setData('product_id', e.target.value)}
-                                    >
-                                        <option value="">{t('pages.campaigns.select_product')}</option>
-                                        {products.map((p) => (
-                                            <option key={p.id} value={p.id}>
-                                                {p.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.product_id && (
-                                        <p className="text-xs text-destructive">{errors.product_id}</p>
-                                    )}
-                                </div>
                                 <div className="space-y-2">
                                     <Label>{t('pages.campaigns.marketer_label')}</Label>
                                     <select

@@ -17,7 +17,6 @@ import { useT } from '@/providers/I18nProvider';
 
 export default function LandingApprovals({
     campaigns,
-    products = [],
     highlightCampaignId,
     fieldMapping,
     approveBaseUrl = '/admin/landing-approvals',
@@ -35,7 +34,7 @@ export default function LandingApprovals({
         setModalOpen(true);
     };
 
-    const approve = async (campaign, productId = null) => {
+    const approve = async (campaign) => {
         const ok = await ask({
             title: t('pages.landing.approve_title'),
             description: t('pages.landing.approve_desc', { name: campaign.name }),
@@ -46,7 +45,7 @@ export default function LandingApprovals({
         setApproving(true);
         router.post(
             `${approveBaseUrl}/${campaign.id}/approve`,
-            productId ? { product_id: productId } : {},
+            {},
             {
                 preserveScroll: true,
                 onSuccess: () => {
@@ -163,11 +162,6 @@ export default function LandingApprovals({
                                                 ) : (
                                                     <StatusBadge tone="warning">{t('pages.pending_approval')}</StatusBadge>
                                                 )}
-                                                {!row.is_approved && row.missing_product && (
-                                                    <StatusBadge tone="danger" title={t('pages.landing.incomplete_hint')}>
-                                                        {t('pages.landing.incomplete_badge')}
-                                                    </StatusBadge>
-                                                )}
                                             </div>
                                         </Td>
                                         <Td>
@@ -197,7 +191,7 @@ export default function LandingApprovals({
                                                         <Button
                                                             type="button"
                                                             size="sm"
-                                                            onClick={() => (row.missing_product ? openDetail(row) : approve(row))}
+                                                            onClick={() => approve(row)}
                                                         >
                                                             <CheckCircle2 className="size-3.5" />
                                                             {t('pages.landing.approve')}
@@ -235,7 +229,6 @@ export default function LandingApprovals({
                 open={modalOpen}
                 onOpenChange={setModalOpen}
                 fieldMapping={fieldMapping}
-                products={products}
                 onApprove={approve}
                 onReject={reject}
                 approving={approving}

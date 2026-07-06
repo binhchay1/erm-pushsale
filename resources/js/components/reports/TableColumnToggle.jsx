@@ -77,7 +77,7 @@ export function TableColumnToggle({ columns, visible, onToggle }) {
 
 function marketingSourceColumns(t) {
     return [
-        { id: 'product', label: t('reports.column_toggle.product'), default: true },
+        { id: 'aov', label: t('reports.column_toggle.aov'), default: true },
         { id: 'channel', label: t('reports.column_toggle.channel'), default: false },
         { id: 'budget', label: t('reports.column_toggle.budget'), default: false },
         { id: 'interactions', label: t('reports.column_toggle.interactions'), default: false },

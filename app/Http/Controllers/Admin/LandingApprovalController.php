@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\RejectCampaignRequest;
 use App\Models\MarketingSource;
-use App\Models\Product;
 use App\Repositories\MarketingSourceRepository;
 use App\Services\Marketing\CampaignApprovalService;
 use App\Services\Marketing\CampaignLandingService;
@@ -34,7 +33,6 @@ class LandingApprovalController extends Controller
 
         return Inertia::render('Admin/Landing/Approvals', [
             'campaigns' => $campaigns,
-            'products' => Product::query()->orderBy('name')->get(['id', 'name', 'sku', 'unit_price']),
             'highlightCampaignId' => $request->integer('campaign') ?: null,
             'fieldMapping' => $this->fieldMappingGuide(),
             'canApprove' => true,
@@ -46,11 +44,7 @@ class LandingApprovalController extends Controller
 
     public function approve(Request $request, MarketingSource $campaign): RedirectResponse
     {
-        $validated = $request->validate([
-            'product_id' => ['nullable', 'integer', 'exists:products,id'],
-        ]);
-
-        $this->approval->approve($request->user(), $campaign, $validated['product_id'] ?? null);
+        $this->approval->approve($request->user(), $campaign);
 
         return back()->with('success', __('messages.landing_approved'));
     }
@@ -68,12 +62,7 @@ class LandingApprovalController extends Controller
         return [
             'id' => $c->id,
             'name' => $c->name,
-            'product' => $c->product?->name,
-            // Điều kiện tối thiểu để duyệt: phải có sản phẩm + webhook token.
-            'can_be_approved' => $c->product_id !== null && $c->webhook_token !== null,
-            'missing_product' => $c->product_id === null,
-            'product_sku' => $c->product?->sku,
-            'product_unit_price' => (int) ($c->product?->unit_price ?? 0),
+            'can_be_approved' => $c->webhook_token !== null,
             'marketer' => $c->marketer?->name,
             'marketer_user_id' => $c->marketer_user_id,
             'creator' => $c->creator?->name,

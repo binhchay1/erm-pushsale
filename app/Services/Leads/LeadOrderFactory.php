@@ -8,7 +8,6 @@ use App\Integrations\Landing\LandingFormDriver;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
-use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -63,7 +62,7 @@ class LeadOrderFactory
             'sale_user_id' => $saleUser?->id,
             'marketer_user_id' => $source->marketer_user_id,
             'marketing_source_id' => $source->id,
-            'product_id' => $source->product_id,
+            'product_id' => null,
             'customer_name' => $normalized['customer_name'],
             'customer_phone' => $normalized['customer_phone'],
             'customer_note' => $noteParts !== [] ? implode("\n", $noteParts) : null,
@@ -84,17 +83,6 @@ class LeadOrderFactory
             foreach ($comboItems as $row) {
                 $order->items()->create($row);
             }
-        } elseif ($source->product_id) {
-            $product = Product::query()->find($source->product_id);
-            $qty = max(1, (int) ($normalized['quantity'] ?? 1));
-            $order->items()->create([
-                'product_id' => $product?->id,
-                'product_name' => $product?->name ?? ($normalized['product_interest'] ?? 'Sản phẩm'),
-                'item_type' => 'product',
-                'origin' => 'landing',
-                'quantity' => $qty,
-                'unit_price' => $product?->unit_price ?? 0,
-            ]);
         }
 
         return $this->syncTotals($order->fresh(['items']));

@@ -53,7 +53,7 @@ return [
     'campaign_deleted' => 'Landing connection deleted.',
     'campaign_approval' => [
         'product_required' => 'Please choose a product for the landing campaign.',
-        'incomplete' => 'Campaign is missing product or webhook — cannot approve.',
+        'incomplete' => 'Campaign is missing webhook — cannot approve.',
         'reason_required' => 'Please enter a rejection reason.',
     ],
     'call_logged' => 'Call logged.',

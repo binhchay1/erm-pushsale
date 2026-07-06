@@ -27,7 +27,7 @@ class MarketingSourceRepository
 
         $query = MarketingSource::query()
             ->whereNull('parent_id')
-            ->with(['product:id,name,sku', 'marketer:id,name', 'creator:id,name', 'approver:id,name'])
+            ->with(['marketer:id,name', 'creator:id,name', 'approver:id,name'])
             ->withCount('orders')
             ->select('marketing_sources.*')
             ->selectRaw("COALESCE((
@@ -82,7 +82,6 @@ class MarketingSourceRepository
         $query = MarketingSource::query()
             ->whereNull('parent_id')
             ->with([
-                'product:id,name,sku,unit_price',
                 'marketer:id,name',
                 'creator:id,name',
                 'approver:id,name',

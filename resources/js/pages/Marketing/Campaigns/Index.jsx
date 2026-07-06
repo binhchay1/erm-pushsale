@@ -102,7 +102,6 @@ export default function CampaignIndex({ campaigns, ownershipFilter = 'all' }) {
                                 <Th sortable sortKey="marketer" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_marketer')}</Th>
                                 <Th>{t('pages.campaigns.col_webhook')}</Th>
                                 <Th sortable sortKey="utm_campaign" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_utm_code')}</Th>
-                                <Th sortable sortKey="product" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_product')}</Th>
                                 <Th sortable sortKey="orders_count" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_orders_revenue')}</Th>
                                 <Th sortable sortKey="is_approved" sort={sort} onSort={toggleSort}>{t('pages.campaigns.col_approval')}</Th>
                                 <Th>{t('pages.actions')}</Th>
@@ -136,7 +135,6 @@ export default function CampaignIndex({ campaigns, ownershipFilter = 'all' }) {
                                             )}
                                         </Td>
                                         <Td className="font-mono">{row.utm_campaign}</Td>
-                                        <Td>{row.product ?? '—'}</Td>
                                         <Td className="text-right">
                                             {row.orders_count} / {formatCurrency(row.revenue)}
                                         </Td>
