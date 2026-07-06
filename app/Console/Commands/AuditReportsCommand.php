@@ -171,7 +171,7 @@ class AuditReportsCommand extends Command
         $mktSnap = DashboardStatsService::marketingSnapshot($marketer, $filter);
         $rows[] = $this->row(
             'Marketing dashboard snapshot (filtered)',
-            ($mktSnap['orders_closed'] ?? 0) >= 0,
+            ($mktSnap['orders_closed'] ?? 0) >= 1 || ($adminKpi['closed_orders'] ?? 0) >= 1,
             'orders_closed='.($mktSnap['orders_closed'] ?? 0),
         );
 

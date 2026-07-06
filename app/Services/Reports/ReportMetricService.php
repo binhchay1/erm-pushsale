@@ -15,8 +15,8 @@ use App\Models\User;
 use App\Models\WarehouseInventory;
 use App\Repositories\ShippingWebhookEventRepository;
 use App\Support\OrderRevenue;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class ReportMetricService
@@ -55,7 +55,7 @@ class ReportMetricService
         $orders = $this->queries->orders($user, $filter);
         $dateColumn = $this->queries->dateColumn($filter);
 
-        return $this->days($filter)->map(function (Carbon $day) use ($orders, $dateColumn, $sumColumn) {
+        return $this->days($filter)->map(function (CarbonInterface $day) use ($orders, $dateColumn, $sumColumn) {
             $dayQuery = (clone $orders)->whereDate($dateColumn, $day);
 
             return [
@@ -70,7 +70,7 @@ class ReportMetricService
     {
         $orders = $this->queries->orders($user, $filter);
 
-        return $this->days($filter)->map(function (Carbon $day) use ($orders) {
+        return $this->days($filter)->map(function (CarbonInterface $day) use ($orders) {
             $amount = OrderRevenue::netAmountSql();
 
             return [
@@ -89,7 +89,7 @@ class ReportMetricService
     {
         $leads = $this->queries->leads($user, $filter);
 
-        return $this->days($filter)->map(fn (Carbon $day) => [
+        return $this->days($filter)->map(fn (CarbonInterface $day) => [
             'label' => $day->format('d/m'),
             'value' => (clone $leads)->whereDate('created_at', $day)->count(),
         ])->values()->all();
@@ -222,7 +222,7 @@ class ReportMetricService
         ];
     }
 
-    /** @return Collection<int, Carbon> */
+    /** @return Collection<int, CarbonInterface> */
     private function days(ReportFilterData $filter)
     {
         $from = $filter->dateFrom?->copy()->startOfDay() ?? today();
