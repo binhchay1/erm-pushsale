@@ -50,6 +50,7 @@ export default {
         receiver: 'Receiver',
         receiver_same: 'Customer receives',
         receiver_other: 'Other receiver',
+        awaiting_upsell: 'Awaiting upsell',
     },
     recon_table: {
         seq: 'No.',

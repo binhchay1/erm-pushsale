@@ -94,6 +94,8 @@ final class OrderOperationPresenter
             'carePersonName' => $order->saleUser?->name,
             'stockWarnings' => app(InventoryDeductionService::class)->checkOrderStock($order),
             'hasInsufficientStock' => ! app(InventoryDeductionService::class)->hasSufficientStock($order),
+            'awaitingLandingUpsell' => $order->isAwaitingLandingUpsell(),
+            'landingUpsellHoldUntil' => $order->landing_upsell_hold_until?->toIso8601String(),
         ];
     }
 

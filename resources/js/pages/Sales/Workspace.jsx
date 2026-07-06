@@ -7,6 +7,7 @@ import { OperationOrderTable } from '@/components/operations/OperationOrderTable
 import { StatusTabs } from '@/components/operations/StatusTabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRealtimeReload } from '@/hooks/useRealtimeReload';
+import { useLandingUpsellHoldRefresh } from '@/hooks/useLandingUpsellHoldRefresh';
 import { useT } from '@/providers/I18nProvider';
 
 export default function Workspace({
@@ -27,6 +28,8 @@ export default function Workspace({
     useRealtimeReload('dashboard.sales', '.workspace.changed', ['report'], {
         shouldReload: (payload) => Number(payload?.sale_user_id) === Number(authId),
     });
+
+    useLandingUpsellHoldRefresh(report?.rows);
 
     return (
         <AppLayout>

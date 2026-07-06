@@ -118,15 +118,7 @@ class LiveUiFlowCommand extends Command
         }
 
         Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-jobs' => 20]);
-        $this->line('✓ Webhook landing → queue xử lý (lần 1)');
-
-        $holdSeconds = (int) config('saleops.landing.hold_seconds', 90);
-        if ($holdSeconds > 0) {
-            $this->line("… chờ {$holdSeconds}s để chốt lead landing (upsale/hold) …");
-            sleep($holdSeconds + 5);
-            Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-jobs' => 20]);
-            $this->line('✓ Queue xử lý sau hold — chốt lead');
-        }
+        $this->line('✓ Webhook landing → đơn tạo & chia số ngay (cửa sổ upsale trên tác nghiệp)');
 
         $order = Order::query()
             ->where('customer_phone', $phone)

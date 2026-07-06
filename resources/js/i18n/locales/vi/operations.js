@@ -50,6 +50,7 @@ export default {
         receiver: 'Người nhận',
         receiver_same: 'Khách tự nhận',
         receiver_other: 'Người nhận khác',
+        awaiting_upsell: 'Đang chờ upsale',
     },
     recon_table: {
         seq: 'STT',

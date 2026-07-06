@@ -10,6 +10,7 @@ use App\Events\OrderClosed;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\Inventory\InventoryDeductionService;
+use App\Services\Leads\LandingUpsellService;
 use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -18,6 +19,7 @@ class OrderClosingService
 {
     public function __construct(
         private readonly InventoryDeductionService $inventory,
+        private readonly LandingUpsellService $landingUpsell,
     ) {}
 
     /**
@@ -49,6 +51,7 @@ class OrderClosingService
 
         $confirmInsufficient = (bool) ($payload['confirm_insufficient_stock'] ?? false);
         $this->inventory->assertCanClose($order, $confirmInsufficient);
+        $this->landingUpsell->lockFromSaleAction($order);
 
         return DB::transaction(function () use ($order, $payload, $actor) {
             $amountToCollect = (int) ($payload['amount_to_collect']

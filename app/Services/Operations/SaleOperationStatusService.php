@@ -7,6 +7,7 @@ use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Leads\LandingUpsellService;
 use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Orders\OrderClosingService;
 use App\Support\ActivityLogger;
@@ -18,6 +19,7 @@ class SaleOperationStatusService
     public function __construct(
         private readonly OrderClosingService $closing,
         private readonly InventoryDeductionService $inventory,
+        private readonly LandingUpsellService $landingUpsell,
     ) {}
 
     public function logCall(Order $order, User $actor): Order
@@ -33,6 +35,8 @@ class SaleOperationStatusService
         $order->update([
             'contact_count' => (int) $order->contact_count + 1,
         ]);
+
+        $this->landingUpsell->lockFromSaleAction($order);
 
         $fresh = $order->fresh();
 
@@ -111,6 +115,8 @@ class SaleOperationStatusService
         if (! empty($payload['note'])) {
             $updates['customer_note'] = trim($order->customer_note."\n".$payload['note']);
         }
+
+        $this->landingUpsell->lockFromSaleAction($order);
 
         $order->update($updates);
 

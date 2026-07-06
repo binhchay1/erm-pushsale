@@ -4,6 +4,7 @@ namespace App\Services\Operations;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Leads\LandingUpsellService;
 use App\Services\Leads\LeadOrderFactory;
 use App\Support\ActivityLogger;
 use App\Support\ShippingProviders;
@@ -19,6 +20,7 @@ class SaleOrderEditService
 {
     public function __construct(
         private readonly LeadOrderFactory $factory,
+        private readonly LandingUpsellService $landingUpsell,
     ) {}
 
     /**
@@ -37,6 +39,8 @@ class SaleOrderEditService
                 'order' => __('messages.sale_ops.cannot_change_status'),
             ]);
         }
+
+        $this->landingUpsell->lockFromSaleAction($order);
 
         return DB::transaction(function () use ($order, $actor, $payload) {
             if (array_key_exists('items', $payload) && is_array($payload['items'])) {

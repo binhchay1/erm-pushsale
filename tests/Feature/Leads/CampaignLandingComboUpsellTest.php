@@ -172,7 +172,6 @@ class CampaignLandingComboUpsellTest extends TestCase
 
     public function test_non_js_campaign_also_holds_lead_for_upsell_window(): void
     {
-        // Chặn job chốt tự chạy để quan sát trạng thái "đang gom" của luồng KHÔNG JS.
         Queue::fake([FinalizeLandingLeadJob::class]);
 
         $campaign = $this->autoCampaign(jsTracking: false);
@@ -184,10 +183,14 @@ class CampaignLandingComboUpsellTest extends TestCase
             'combo' => 'Mua 1 Thỏi : 149k',
         ])->assertAccepted();
 
-        // Không JS vẫn GIỮ SỐ: chưa tạo đơn, lead đang gom, đã hẹn job chốt (cùng mốc thời gian).
-        $this->assertSame(0, Order::query()->where('customer_phone', '0906555000')->count());
+        // Chia số ngay; đơn giữ cửa sổ upsale (không chờ job mới có data).
+        $order = Order::query()->where('customer_phone', '0906555000')->first();
+        $this->assertNotNull($order);
+        $this->assertTrue($order->isAwaitingLandingUpsell());
+
         $lead = LeadIngestion::query()->where('customer_phone', '0906555000')->firstOrFail();
-        $this->assertSame(LeadIngestionStatus::Gathering, $lead->status);
+        $this->assertSame(LeadIngestionStatus::Processed, $lead->status);
+        $this->assertSame($order->id, $lead->order_id);
         Queue::assertPushed(FinalizeLandingLeadJob::class);
     }
 
@@ -228,12 +231,10 @@ class CampaignLandingComboUpsellTest extends TestCase
 
     public function test_js_tracking_holds_lead_then_finalizes_as_single_order(): void
     {
-        // Chặn job chốt tự chạy để mô phỏng "đang gom" trong lúc chờ upsale.
         Queue::fake([FinalizeLandingLeadJob::class]);
 
         $campaign = $this->autoCampaign(jsTracking: true);
 
-        // Gói 1: form đầu → lead "đang gom", CHƯA tạo đơn / CHƯA chia số.
         $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
             'submission_id' => 'hold-1',
             'name' => 'Anh Hold',
@@ -242,12 +243,14 @@ class CampaignLandingComboUpsellTest extends TestCase
             'session_id' => 'sess-hold-abc',
         ])->assertAccepted();
 
-        $this->assertSame(0, Order::query()->where('customer_phone', '0906111222')->count());
+        $order = Order::query()->where('customer_phone', '0906111222')->first();
+        $this->assertNotNull($order);
+        $this->assertTrue($order->isAwaitingLandingUpsell());
+
         $lead = LeadIngestion::query()->where('customer_phone', '0906111222')->firstOrFail();
-        $this->assertSame(LeadIngestionStatus::Gathering, $lead->status);
+        $this->assertSame(LeadIngestionStatus::Processed, $lead->status);
         Queue::assertPushed(FinalizeLandingLeadJob::class);
 
-        // Gói 2: upsale trang cảm ơn → gộp vào lead đang gom, không tạo đơn mới.
         $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/upsell', [
             'submission_id' => 'hold-2',
             'phone' => '0906111222',
@@ -255,17 +258,15 @@ class CampaignLandingComboUpsellTest extends TestCase
             'session_id' => 'sess-hold-abc',
         ])->assertAccepted();
 
-        $this->assertSame(0, Order::query()->where('customer_phone', '0906111222')->count());
-        $this->assertSame(1, LeadIngestion::query()->where('customer_phone', '0906111222')->count());
-
-        // Khách xong phiên → chốt: đúng 1 đơn đủ 2 dòng hàng, chia 1 số.
-        app(LeadIngestionService::class)->finalizeGatheringLead($lead->fresh());
-
-        $orders = Order::query()->where('customer_phone', '0906111222')->get();
-        $this->assertCount(1, $orders);
-        $order = $orders->first()->load('items');
+        $this->assertSame(1, Order::query()->where('customer_phone', '0906111222')->count());
+        $order->refresh()->load('items');
         $this->assertCount(2, $order->items);
         $this->assertSame(238_000, (int) $order->total);
+
+        app(LeadIngestionService::class)->releaseLandingUpsellHold($lead->fresh());
+
+        $order->refresh();
+        $this->assertFalse($order->isAwaitingLandingUpsell());
         $this->assertNotNull($order->sale_user_id);
     }
 
@@ -325,5 +326,37 @@ class CampaignLandingComboUpsellTest extends TestCase
         $this->assertSame(1, Order::query()->where('customer_phone', '0906444555')->count());
         $order->refresh()->load('items');
         $this->assertCount(2, $order->items);
+    }
+
+    public function test_sale_edit_locks_order_from_landing_upsell_merge(): void
+    {
+        $campaign = $this->autoCampaign();
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'lock-base-1',
+            'name' => 'Chị Khóa',
+            'phone' => '0907888999',
+            'combo' => 'Mua 1 Thỏi : 149k',
+        ])->assertAccepted();
+
+        $order = Order::query()->where('customer_phone', '0907888999')->firstOrFail();
+        $this->assertTrue($order->isAwaitingLandingUpsell());
+
+        $sale = User::query()->findOrFail($order->sale_user_id);
+        app(\App\Services\Operations\SaleOperationStatusService::class)->logCall($order, $sale);
+
+        $order->refresh();
+        $this->assertFalse($order->isAwaitingLandingUpsell());
+        $this->assertTrue($order->isLandingUpsellLocked());
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/upsell', [
+            'submission_id' => 'lock-upsell-1',
+            'phone' => '0907888999',
+            'mua_them_1' => 'Mua Thêm 1 Má Hồng Kem: 89K',
+        ])->assertAccepted();
+
+        $order->refresh()->load('items');
+        $this->assertCount(1, $order->items);
+        $this->assertSame(149_000, (int) $order->total);
     }
 }

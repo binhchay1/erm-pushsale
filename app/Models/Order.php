@@ -18,7 +18,8 @@ class Order extends Model
         'order_code', 'sale_user_id', 'marketer_user_id', 'team_id', 'marketing_source_id',
         'warehouse_id', 'product_id', 'customer_name', 'customer_phone', 'phone_carrier',
         'customer_note',         'shipping_address', 'shipping_address_2', 'receiver_name', 'receiver_phone', 'shipping_notes', 'accounting_notes',
-        'internal_recon_note', 'shipping_geo', 'data_arrived_at', 'assigned_at', 'closed_at', 'inventory_deducted_at',
+        'internal_recon_note', 'shipping_geo', 'data_arrived_at', 'landing_upsell_hold_until', 'landing_upsell_locked',
+        'assigned_at', 'closed_at', 'inventory_deducted_at',
         'desired_delivery_at', 'next_operation_at', 'operation_stage', 'operation_result', 'closing_status',
         'delivery_status', 'return_reason', 'return_restocked_at',
         'shipping_method', 'shipping_provider', 'carrier_name', 'tracking_number',
@@ -33,6 +34,8 @@ class Order extends Model
     {
         return [
             'data_arrived_at' => 'datetime',
+            'landing_upsell_hold_until' => 'datetime',
+            'landing_upsell_locked' => 'boolean',
             'assigned_at' => 'datetime',
             'closed_at' => 'datetime',
             'inventory_deducted_at' => 'datetime',
@@ -70,6 +73,19 @@ class Order extends Model
         $phone = trim((string) ($this->receiver_phone ?? ''));
 
         return $phone !== '' ? $phone : $this->customer_phone;
+    }
+
+    /** Đơn landing vẫn đang chờ upsale trang cảm ơn (đã chia số cho sale). */
+    public function isAwaitingLandingUpsell(): bool
+    {
+        return ! $this->isLandingUpsellLocked()
+            && $this->landing_upsell_hold_until !== null
+            && $this->landing_upsell_hold_until->isFuture();
+    }
+
+    public function isLandingUpsellLocked(): bool
+    {
+        return (bool) $this->landing_upsell_locked;
     }
 
     public function saleUser(): BelongsTo

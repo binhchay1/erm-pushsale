@@ -8,6 +8,7 @@ use App\Http\Traits\ApiResponds;
 use App\Jobs\Leads\FinalizeLandingLeadJob;
 use App\Models\LandingSession;
 use App\Models\LeadIngestion;
+use App\Models\Order;
 use App\Repositories\MarketingSourceRepository;
 use App\Support\TenantManager;
 use Illuminate\Http\JsonResponse;
@@ -117,8 +118,14 @@ class CampaignLandingSessionController extends Controller
                 'last_activity_at' => now(),
             ])->save();
 
-            // Có lead đang gom → chốt & chia ngay (không chờ hết giờ giữ số).
-            if ($session->lead_ingestion_id) {
+            // Có đơn đang chờ upsale hoặc lead legacy đang gom → chốt ngay (không chờ hết giờ).
+            if ($session->order_id) {
+                $order = Order::query()->find($session->order_id);
+
+                if ($order?->landing_upsell_hold_until && $session->lead_ingestion_id) {
+                    FinalizeLandingLeadJob::dispatch($session->lead_ingestion_id, $session->company_id);
+                }
+            } elseif ($session->lead_ingestion_id) {
                 $lead = LeadIngestion::query()->find($session->lead_ingestion_id);
 
                 if ($lead && $lead->status === LeadIngestionStatus::Gathering) {

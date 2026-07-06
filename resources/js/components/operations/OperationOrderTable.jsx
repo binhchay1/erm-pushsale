@@ -149,6 +149,11 @@ export function OperationOrderTable({
                                 </Td>
                                 <Td>
                                     <span className="font-semibold text-destructive">{row.currentOperation}</span>
+                                    {row.awaitingLandingUpsell && (
+                                        <div className="mt-1 inline-flex w-fit rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-800 dark:bg-sky-950/50 dark:text-sky-300">
+                                            {t('operations.order_table.awaiting_upsell')}
+                                        </div>
+                                    )}
                                     {row.closedAt && (
                                         <div className="text-[11px] text-emerald-700 dark:text-emerald-400">
                                             {t('operations.order_table.closed_date')} {formatDateTime(row.closedAt)}

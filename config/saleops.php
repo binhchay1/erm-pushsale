@@ -48,7 +48,7 @@ return [
     | Gộp đơn & giữ số cho luồng Landing (form đầu + upsale trang cảm ơn).
     | Mục tiêu: cùng 1 khách gửi nhiều gói tin → GỘP thành 1 đơn, chia 1 số.
     | - grouping_window_minutes: cửa sổ coi các gói tin cùng SĐT là cùng 1 đơn.
-    | - hold_seconds: giữ lead "đang gom" trước khi chốt & chia (chờ upsale).
+    | - hold_seconds: cửa sổ chờ upsale trên đơn (đã chia số; sale thấy badge "chờ upsale").
     | - max_hold_seconds: trần giữ tuyệt đối để lead không kẹt mãi.
     */
     'landing' => [

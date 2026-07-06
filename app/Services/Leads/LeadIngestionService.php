@@ -27,6 +27,7 @@ class LeadIngestionService
         protected LeadOrderFactory $orderFactory,
         protected LeadSanitizer $sanitizer,
         protected LeadAllocationResolver $allocationResolver,
+        protected LandingUpsellService $landingUpsell,
     ) {}
 
     /**
@@ -60,9 +61,9 @@ class LeadIngestionService
      * Cửa ngõ chung cho mọi gói tin Landing (form đầu + upsale trang cảm ơn).
      *
      * Nguyên tắc gộp: cùng (chiến dịch + SĐT) trong cửa sổ gom → 1 đơn duy nhất.
-     *   1) Có lead "đang gom"/chờ chia (chưa tạo đơn) → cộng dồn vào lead đó.
-     *   2) Có đơn vừa tạo trong cửa sổ gom → cộng dồn vào đơn (upsale muộn).
-     *   3) Chưa có gì → tạo lead mới & GIỮ SỐ (áp dụng cho cả có/không JS) để chờ upsale.
+     *   1) Có lead chờ chia (chưa tạo đơn, chia tay) → cộng dồn vào lead đó.
+     *   2) Có đơn vừa tạo trong cửa sổ gom / đang chờ upsale → cộng dồn vào đơn.
+     *   3) Chưa có gì → tạo lead + chia số ngay; đơn giữ cửa sổ upsale trên tác nghiệp.
      *
      * @param  array<string, mixed>  $rawPayload
      */
@@ -188,6 +189,21 @@ class LeadIngestionService
         // Theo SĐT trong cửa sổ gom (phút), ưu tiên cùng chiến dịch.
         $windowMinutes = (int) config('saleops.landing.grouping_window_minutes', 15);
 
+        // Đơn đang chờ upsale (trong cửa sổ gom) → gộp upsale vào đó.
+        $awaitingUpsell = Order::query()
+            ->where('customer_phone', $phone)
+            ->where('marketing_source_id', $campaign->id)
+            ->where('landing_upsell_locked', false)
+            ->whereNotNull('landing_upsell_hold_until')
+            ->where('landing_upsell_hold_until', '>', now())
+            ->where('created_at', '>=', now()->subMinutes($windowMinutes))
+            ->latest('id')
+            ->first();
+
+        if ($awaitingUpsell) {
+            return $awaitingUpsell;
+        }
+
         return Order::query()
             ->where('customer_phone', $phone)
             ->where('created_at', '>=', now()->subMinutes($windowMinutes))
@@ -272,7 +288,9 @@ class LeadIngestionService
         return DB::transaction(function () use (
             $driver, $order, $campaign, $normalized, $rawPayload, $externalId, $session, $items, $extraDiscount
         ) {
-            if ($items !== [] || $extraDiscount > 0) {
+            $order = $order->fresh();
+
+            if (! $order->isLandingUpsellLocked() && ($items !== [] || $extraDiscount > 0)) {
                 $this->orderFactory->appendItems($order, $items, $extraDiscount, 'upsell');
 
                 $summary = collect($items)
@@ -283,6 +301,10 @@ class LeadIngestionService
                 if ($summary !== '') {
                     $order->customer_note = trim((string) $order->customer_note."\n[Upsale] ".$summary);
                     $order->save();
+                }
+
+                if ($order->landing_upsell_hold_until) {
+                    $this->landingUpsell->extendHold($order->fresh());
                 }
             }
 
@@ -485,15 +507,18 @@ class LeadIngestionService
             ->first();
         $duplicateOrder = $duplicateOrderModel !== null;
 
-        // Luồng Landing LUÔN giữ số để khách có thời gian xem trang cảm ơn & chọn upsale.
-        // - Có JS: chủ động hơn (đóng phiên sớm khi khách rời, tự gia hạn theo hoạt động).
+        // Luồng Landing: chia số ngay, giữ cửa sổ upsale trên đơn (hoặc payload lead nếu chia tay).
+        // - Có JS: đóng phiên sớm khi khách rời, tự gia hạn theo hoạt động.
         // - Không JS: chờ theo hold_seconds, gia hạn khi có gói mới, tối đa max_hold_seconds.
-        // Hai luồng dùng CHUNG mốc thời gian; khác biệt chỉ là mức chủ động.
         $hold = $campaign !== null && ! $duplicateOrder;
+
+        $willAutoAssign = $hold
+            && ($campaign === null || $campaign->is_approved)
+            && $this->allocationResolver->shouldAutoAssign($campaign);
 
         $status = $duplicateOrder
             ? LeadIngestionStatus::Duplicate
-            : ($hold ? LeadIngestionStatus::Gathering : LeadIngestionStatus::Pending);
+            : LeadIngestionStatus::Pending;
 
         // Case ngoại lệ không thể tự xử lý (trùng số / upsale muộn quá cửa sổ gộp):
         // lưu lý do + đơn liên quan để bộ phận vận hành kiểm soát & xử lý tay.
@@ -552,16 +577,27 @@ class LeadIngestionService
             return $ingestion;
         }
 
-        // Giữ số: đợi upsale trang cảm ơn rồi mới chốt (job tự chốt khi hết giờ / khách xong phiên).
+        // Chia số ngay (auto) hoặc vào pool (manual); job chỉ kết thúc cửa sổ upsale trên đơn.
         if ($hold) {
             if ($session) {
                 $session->forceFill(['lead_ingestion_id' => $ingestion->id, 'last_activity_at' => now()])->save();
             }
 
-            FinalizeLandingLeadJob::dispatch($ingestion->id, $campaign?->company_id)
-                ->delay(now()->addSeconds((int) config('saleops.landing.hold_seconds', 90)));
+            if ($willAutoAssign || $forceSale !== null) {
+                $ingestion = $this->allocateFromNormalized($ingestion, $normalized, $campaign, $session, $forceSale);
 
-            $this->broadcastSafe(new LeadIngested($ingestion));
+                if ($ingestion->order_id) {
+                    $order = Order::query()->find($ingestion->order_id);
+                    if ($order) {
+                        $this->landingUpsell->startHold($order);
+                    }
+                }
+            } else {
+                $this->broadcastSafe(new LeadIngested($ingestion), new LeadPoolChanged);
+            }
+
+            FinalizeLandingLeadJob::dispatch($ingestion->id, $campaign?->company_id)
+                ->delay(now()->addSeconds($this->landingUpsell->holdSeconds()));
 
             return $ingestion;
         }
@@ -639,8 +675,30 @@ class LeadIngestionService
     }
 
     /**
-     * Chốt 1 lead đang gom (gọi từ FinalizeLandingLeadJob hoặc khi đóng phiên).
-     * Dựng lại đơn từ payload đã gộp để đơn có đủ hàng (form đầu + upsale).
+     * Kết thúc cửa sổ upsale trên đơn (gọi từ FinalizeLandingLeadJob / đóng phiên JS).
+     */
+    public function releaseLandingUpsellHold(LeadIngestion $lead): void
+    {
+        if (! $lead->order_id) {
+            return;
+        }
+
+        $order = Order::query()->find($lead->order_id);
+
+        if (! $order || ! $order->landing_upsell_hold_until) {
+            return;
+        }
+
+        $saleUserId = $order->sale_user_id;
+        $this->landingUpsell->releaseHold($order);
+
+        if ($saleUserId) {
+            $this->broadcastSafe(new SaleWorkspaceChanged($saleUserId));
+        }
+    }
+
+    /**
+     * Chốt 1 lead đang gom (legacy / chia tay) — dựng đơn từ payload đã gộp.
      */
     public function finalizeGatheringLead(LeadIngestion $lead): LeadIngestion
     {
