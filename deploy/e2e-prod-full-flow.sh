@@ -97,9 +97,8 @@ if (\$marketer) {
 }
 
 exit(\$fail > 0 ? 1 : 0);
-" 2>/dev/null
-TINKER_RC=$?
-[ $TINKER_RC -eq 0 ] && ok "receive data checks" || bad "receive data checks (exit $TINKER_RC)"
+" 2>/dev/null | tee /tmp/e2e_verify_recv.txt
+if grep -q "FAIL" /tmp/e2e_verify_recv.txt; then bad "receive data checks"; else ok "receive data checks"; fi
 
 for i in 1 2 3; do
   sudo -u www-data php artisan queue:work database --once --quiet 2>/dev/null || true
@@ -128,9 +127,8 @@ if (\$order->items->count() >= 2 && \$order->total >= 378000) {
 }
 echo 'FAIL upsell merge'.PHP_EOL;
 exit(1);
-" 2>/dev/null
-UPSELL_RC=$?
-[ $UPSELL_RC -eq 0 ] && ok "upsell merge" || bad "upsell merge"
+" 2>/dev/null | tee /tmp/e2e_verify_up.txt
+grep -q "PASS upsell merged" /tmp/e2e_verify_up.txt && ok "upsell merge" || bad "upsell merge"
 
 info "HOLD RELEASE (wait ${HOLD}s + buffer)"
 sleep $((HOLD + 3))
@@ -153,52 +151,13 @@ bash deploy/smoke-reports.sh 2>/dev/null | while read -r line; do
 done
 
 info "AUTHENTICATED PAGE RENDER"
-php artisan tinker --execute="
-\$checks = [];
-\$roles = [
-  'admin' => ['/admin/dashboard', '/admin/leads', '/admin/system-monitor', '/admin/marketing/dashboard'],
-  'marketing' => ['/marketing/dashboard', '/marketing/leads', '/marketing/workspace', '/marketing/campaigns'],
-  'sales' => ['/sales/dashboard', '/sales/workspace', '/sales/customers'],
-  'allocator' => ['/allocator/dashboard', '/allocator/workspace'],
-];
-foreach (\$roles as \$role => \$paths) {
-  \$user = App\Models\User::query()->where('role', \$role)->where('is_active', true)->first();
-  if (!\$user) { \$checks[] = \"skip_\$role=no_user\"; continue; }
-  foreach (\$paths as \$path) {
-    try {
-      \$req = Illuminate\Http\Request::create(\$path, 'GET');
-      \$req->setUserResolver(fn () => \$user);
-      app()->instance('request', \$req);
-      Illuminate\Support\Facades\Auth::login(\$user);
-      \$route = app('router')->getRoutes()->match(\$req);
-      \$req->setRouteResolver(fn () => \$route);
-      \$action = \$route->getAction('controller');
-      if (!\$action) { \$checks[] = \"fail_{\$path}=no_controller\"; continue; }
-      [\$class, \$method] = explode('@', \$action);
-      \$ctrl = app(\$class);
-      \$params = [];
-      foreach (\$route->parameterNames() as \$name) {
-        if (\$route->parameter(\$name) instanceof Illuminate\Database\Eloquent\Model) {
-          \$params[\$name] = \$route->parameter(\$name);
-        }
-      }
-      \$resp = app()->call([\$ctrl, \$method], array_merge(\$params, ['request' => \$req]));
-      \$ok = \$resp instanceof \Inertia\Response
-        || \$resp instanceof Illuminate\Http\Response
-        || \$resp instanceof Illuminate\Http\RedirectResponse;
-      \$checks[] = (\$ok ? 'pass' : 'fail') . \"_{\$role}:\" . \$path;
-    } catch (Throwable \$e) {
-      \$checks[] = 'fail_' . \$role . ':' . \$path . '=' . substr(str_replace(\"\\n\", ' ', \$e->getMessage()), 0, 120);
-    }
-  }
-}
-foreach (\$checks as \$c) echo \$c . PHP_EOL;
-" 2>/dev/null | while read -r line; do
-  if echo "$line" | grep -q "^pass_"; then ok "${line#pass_}"
-  elif echo "$line" | grep -q "^fail_"; then bad "${line#fail_}"
+bash deploy/check-prod-pages.sh 2>/tmp/e2e_pages_err.txt | while read -r line; do
+  if echo "$line" | grep -q "^pass:"; then ok "${line#pass:}"
+  elif echo "$line" | grep -q "^fail:"; then bad "${line#fail:}"
   elif echo "$line" | grep -q "^skip_"; then echo "  [SKIP] ${line#skip_}"
   fi
 done
+if [ -s /tmp/e2e_pages_err.txt ]; then echo "  page_check_stderr:"; cat /tmp/e2e_pages_err.txt | head -5; fi
 
 info "HTTPS ROUTES (unauthenticated — expect 302 login or 401)"
 for path in \
