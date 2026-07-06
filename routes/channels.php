@@ -18,3 +18,7 @@ Broadcast::channel('dashboard.sales', function ($user) {
 Broadcast::channel('dashboard.allocator', function ($user) {
     return in_array($user->role->value, [User::ROLE_ADMIN, User::ROLE_ALLOCATOR], true);
 });
+
+Broadcast::channel('dashboard.marketing', function ($user) {
+    return in_array($user->role->value, [User::ROLE_ADMIN, User::ROLE_MARKETING], true);
+});
