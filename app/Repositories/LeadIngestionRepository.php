@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Enums\LeadIngestionStatus;
+use App\Models\LeadIngestion;
 use App\Support\LeadContactMetrics;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;

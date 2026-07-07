@@ -16,6 +16,7 @@ use App\Models\WarehouseInventory;
 use App\Services\Reports\ReportMetricService;
 use App\Services\Reports\ReportQueryService;
 use App\Support\LeadContactMetrics;
+use App\Support\OrderRevenue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
