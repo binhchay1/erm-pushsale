@@ -6,6 +6,7 @@ use App\Data\ReportFilterData;
 use App\Enums\DateType;
 use App\Models\LeadIngestion;
 use App\Models\Order;
+use App\Support\LeadContactMetrics;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -27,8 +28,7 @@ class ReportQueryService
     /** @return Builder<LeadIngestion> */
     public function leads(User $user, ReportFilterData $filter): Builder
     {
-        $query = LeadIngestion::query()
-            ->when($filter->dateFrom && $filter->dateTo, fn (Builder $q) => $q->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo]))
+        $query = LeadContactMetrics::countableQuery($filter)
             ->when($filter->sourceType, fn (Builder $q) => $q->where('platform', $filter->sourceType))
             ->when($filter->search, function (Builder $q) use ($filter) {
                 $term = '%'.$filter->search.'%';
@@ -40,6 +40,16 @@ class ReportQueryService
                         ->orWhere('utm_campaign', 'like', $term);
                 });
             });
+
+        return $this->scopeResolver->applyLeadScope($query, $user, $filter);
+    }
+
+    /** @return Builder<LeadIngestion> — mọi dòng log (kể cả duplicate/failed) trong kỳ. */
+    public function rawLeads(User $user, ReportFilterData $filter): Builder
+    {
+        $query = LeadIngestion::query()
+            ->when($filter->dateFrom && $filter->dateTo, fn (Builder $q) => $q->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo]))
+            ->when($filter->sourceType, fn (Builder $q) => $q->where('platform', $filter->sourceType));
 
         return $this->scopeResolver->applyLeadScope($query, $user, $filter);
     }

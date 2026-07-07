@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Enums\LeadIngestionStatus;
-use App\Models\LeadIngestion;
+use App\Support\LeadContactMetrics;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -104,7 +104,7 @@ class LeadIngestionRepository
 
     public function countToday(): int
     {
-        return LeadIngestion::query()->where('created_at', '>=', now()->startOfDay())->count();
+        return LeadContactMetrics::countToday();
     }
 
     public function countPending(): int
@@ -115,8 +115,10 @@ class LeadIngestionRepository
     /** Top nguồn lead trong ngày (cho biểu đồ). */
     public function todaySourceBreakdown(int $limit = 4): Collection
     {
-        return LeadIngestion::query()
-            ->whereDate('created_at', today())
+        return LeadContactMetrics::countableQuery(new \App\Data\ReportFilterData(
+            dateFrom: now()->startOfDay(),
+            dateTo: now()->endOfDay(),
+        ))
             ->selectRaw('platform as name, count(*) as value')
             ->groupBy('platform')
             ->orderByDesc('value')

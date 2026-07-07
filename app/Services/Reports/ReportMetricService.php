@@ -30,6 +30,7 @@ class ReportMetricService
     {
         $orders = $this->queries->orders($user, $filter);
         $leads = $this->queries->leads($user, $filter);
+        $rawLeads = $this->queries->rawLeads($user, $filter);
         $closedOrders = (clone $orders)->whereNotNull('closed_at')->count();
         $ordersCount = (clone $orders)->count();
 
@@ -38,8 +39,8 @@ class ReportMetricService
         return [
             'leads' => (clone $leads)->count(),
             'processed_leads' => (clone $leads)->where('status', LeadIngestionStatus::Processed->value)->count(),
-            'failed_leads' => (clone $leads)->where('status', LeadIngestionStatus::Failed->value)->count(),
-            'duplicate_leads' => (clone $leads)->where('status', LeadIngestionStatus::Duplicate->value)->count(),
+            'failed_leads' => (clone $rawLeads)->where('status', LeadIngestionStatus::Failed->value)->count(),
+            'duplicate_leads' => (clone $rawLeads)->where('status', LeadIngestionStatus::Duplicate->value)->count(),
             'orders' => $ordersCount,
             'closed_orders' => $closedOrders,
             'revenue' => $revenueBreakdown['net'],

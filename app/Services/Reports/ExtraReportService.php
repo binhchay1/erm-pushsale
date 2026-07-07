@@ -11,6 +11,7 @@ use App\Models\LeadIngestion;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
+use App\Support\LeadContactMetrics;
 use Illuminate\Support\Collection;
 
 /**
@@ -505,13 +506,9 @@ class ExtraReportService
 
         $marketerIds = $this->visibleMarketerIds($user, $filter);
 
-        $leadsQuery = LeadIngestion::query()
+        $leadsQuery = LeadContactMetrics::countableQuery($filter)
             ->with(['marketingSource:id,marketer_user_id,name', 'marketingSource.marketer:id,name'])
             ->whereNotNull('marketing_source_id')
-            ->when(
-                $filter->dateFrom && $filter->dateTo,
-                fn ($q) => $q->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo]),
-            )
             ->when($marketerIds !== null, function ($q) use ($marketerIds) {
                 $q->whereHas('marketingSource', fn ($sq) => $sq->whereIn('marketer_user_id', $marketerIds));
             })

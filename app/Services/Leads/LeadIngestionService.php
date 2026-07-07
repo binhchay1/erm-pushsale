@@ -571,7 +571,7 @@ class LeadIngestionService
             'error_message' => $exceptionReason,
         ]);
 
-        if ($campaign) {
+        if ($campaign && ! $duplicateOrder) {
             MarketingSource::query()->whereKey($campaign->id)->increment('contacts');
         }
 

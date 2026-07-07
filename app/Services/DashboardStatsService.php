@@ -15,7 +15,7 @@ use App\Models\User;
 use App\Models\WarehouseInventory;
 use App\Services\Reports\ReportMetricService;
 use App\Services\Reports\ReportQueryService;
-use App\Support\OrderRevenue;
+use App\Support\LeadContactMetrics;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -84,17 +84,12 @@ class DashboardStatsService
             fn (Builder $q) => $q->where('marketer_user_id', $user->id),
         );
         $sources = MarketingSource::query()->where('marketer_user_id', $user->id);
-        $leadsTodayQuery = LeadIngestion::query()->whereDate('created_at', today());
-        if ($sourceIds->isNotEmpty()) {
-            $leadsTodayQuery->whereIn('marketing_source_id', $sourceIds);
-        } else {
-            $leadsTodayQuery->whereRaw('1 = 0');
-        }
+        $contactCount = LeadContactMetrics::countToday($user->id, $sourceIds->all());
 
         return [
             'active_campaigns' => (clone $sources)->where('is_active', true)->count(),
-            'leads_today' => (int) $leadsTodayQuery->count(),
-            'contacts_today' => (int) $leadsTodayQuery->count(),
+            'leads_today' => $contactCount,
+            'contacts_today' => $contactCount,
             'orders_closed' => (clone $orders)->whereNotNull('closed_at')->whereDate('closed_at', today())->count(),
             'aov' => self::averageOrderValue($orders),
             'budget_total' => (int) (clone $sources)->sum('budget'),
@@ -158,7 +153,7 @@ class DashboardStatsService
         }
 
         return [
-            'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
+            'leads_today' => LeadContactMetrics::countToday(),
             'pending_routing' => LeadIngestion::query()->where('status', LeadIngestionStatus::Pending->value)->count(),
             'processed_today' => LeadIngestion::query()->where('status', LeadIngestionStatus::Processed->value)->whereDate('updated_at', today())->count(),
             'failed_leads' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(),
@@ -334,7 +329,10 @@ class DashboardStatsService
         $sourceIds = $sources->pluck('id');
         $leadCounts = $sourceIds->isEmpty()
             ? collect()
-            : LeadIngestion::query()
+            : LeadContactMetrics::countableQuery(new ReportFilterData(
+                dateFrom: now()->startOfDay(),
+                dateTo: now()->endOfDay(),
+            ))
                 ->whereIn('marketing_source_id', $sourceIds)
                 ->selectRaw('marketing_source_id, COUNT(*) as aggregate')
                 ->groupBy('marketing_source_id')
@@ -375,7 +373,10 @@ class DashboardStatsService
     /** @return list<array{label: string, value: int}> */
     private static function dailyLeadSeries(int $days): array
     {
-        return self::days($days)->map(fn (Carbon $day) => ['label' => $day->format('d/m'), 'value' => LeadIngestion::query()->whereDate('created_at', $day)->count()])->values()->all();
+        return self::days($days)->map(fn (Carbon $day) => [
+            'label' => $day->format('d/m'),
+            'value' => LeadContactMetrics::countOnDay($day),
+        ])->values()->all();
     }
 
     /** @param Builder<Order> $query
@@ -431,10 +432,15 @@ class DashboardStatsService
     private static function marketerLeadSources(User $user): array
     {
         $sourceIds = MarketingSource::query()->where('marketer_user_id', $user->id)->pluck('id');
-        $query = LeadIngestion::query()->whereDate('created_at', today());
+        $query = LeadContactMetrics::countableQuery(new ReportFilterData(
+            dateFrom: now()->startOfDay(),
+            dateTo: now()->endOfDay(),
+        ));
 
         if ($sourceIds->isNotEmpty()) {
             $query->whereIn('marketing_source_id', $sourceIds);
+        } else {
+            $query->whereRaw('1 = 0');
         }
 
         return $query->selectRaw('platform as name, count(*) as value')
@@ -529,7 +535,7 @@ class DashboardStatsService
             'revenue_breakdown' => $revenueBreakdown,
             'orders_closed' => $closedToday,
             'orders_arrived_today' => $arrivedToday,
-            'leads_today' => LeadIngestion::query()->whereDate('created_at', today())->count(),
+            'leads_today' => LeadContactMetrics::countToday(),
             'delivery_rate' => self::percentage($deliveredTotal, $ordersTotal),
             'failed_orders' => Order::query()->whereIn('delivery_status', ['failed', 'cancelled', 'returned'])->count(),
             'shipping_mismatch' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(),

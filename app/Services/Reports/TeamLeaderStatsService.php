@@ -7,7 +7,7 @@ use App\Enums\DateType;
 use App\Enums\DeliveryStatus;
 use App\Enums\OrgLevel;
 use App\Enums\UserRole;
-use App\Models\LeadIngestion;
+use App\Support\LeadContactMetrics;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
@@ -48,7 +48,7 @@ class TeamLeaderStatsService
         $ids = $marketers->pluck('id')->all();
         $sources = MarketingSource::query()->whereIn('marketer_user_id', $ids)->get();
         $orders = $this->fetchOrders($ids, $filter);
-        $leadCountsByMarketer = $this->leadCountsByMarketer($ids, $filter);
+        $leadCountsByMarketer = LeadContactMetrics::countsByMarketer($filter)->only($ids);
 
         $teamGroups = $marketers->groupBy(fn (User $u) => $u->team_id ?? 0);
         $rows = [];
@@ -191,22 +191,5 @@ class TeamLeaderStatsService
         }
 
         return $this->scope->allowedMarketerIds($user);
-    }
-
-    /** @return \Illuminate\Support\Collection<int, int> marketer_user_id => lead count */
-    private function leadCountsByMarketer(array $marketerIds, ReportFilterData $filter): Collection
-    {
-        $query = LeadIngestion::query()
-            ->join('marketing_sources', 'lead_ingestions.marketing_source_id', '=', 'marketing_sources.id')
-            ->selectRaw('marketing_sources.marketer_user_id as marketer_id, COUNT(*) as aggregate')
-            ->whereIn('marketing_sources.marketer_user_id', $marketerIds)
-            ->whereNotNull('lead_ingestions.marketing_source_id')
-            ->groupBy('marketing_sources.marketer_user_id');
-
-        if ($filter->dateFrom && $filter->dateTo) {
-            $query->whereBetween('lead_ingestions.created_at', [$filter->dateFrom, $filter->dateTo]);
-        }
-
-        return $query->pluck('aggregate', 'marketer_id');
     }
 }

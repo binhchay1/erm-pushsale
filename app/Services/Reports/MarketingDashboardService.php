@@ -4,7 +4,7 @@ namespace App\Services\Reports;
 
 use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Data\ReportFilterData;
-use App\Models\LeadIngestion;
+use App\Support\LeadContactMetrics;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use Illuminate\Support\Collection;
@@ -20,7 +20,7 @@ class MarketingDashboardService
     public function build(ReportFilterData $filter): array
     {
         $orderCollection = $this->orders->allFiltered($filter);
-        $leadCountsBySource = $this->leadCountsBySource($filter);
+        $leadCountsBySource = LeadContactMetrics::countsBySource($filter);
 
         $sources = MarketingSource::query()
             ->with(['children'])
@@ -132,20 +132,5 @@ class MarketingDashboardService
             'closedOrders' => array_sum(array_column($parents, 'closedOrders')),
             'totalRevenue' => array_sum(array_column($parents, 'totalRevenue')),
         ];
-    }
-
-  /** @return Collection<int, int> marketing_source_id => lead count trong kỳ lọc */
-    private function leadCountsBySource(ReportFilterData $filter): Collection
-    {
-        $query = LeadIngestion::query()
-            ->selectRaw('marketing_source_id, COUNT(*) as aggregate')
-            ->whereNotNull('marketing_source_id')
-            ->groupBy('marketing_source_id');
-
-        if ($filter->dateFrom && $filter->dateTo) {
-            $query->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo]);
-        }
-
-        return $query->pluck('aggregate', 'marketing_source_id');
     }
 }

@@ -5,9 +5,9 @@ namespace App\Services\Reports;
 use App\Data\ReportFilterData;
 use App\Enums\DeliveryStatus;
 use App\Enums\UserRole;
-use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\User;
+use App\Support\LeadContactMetrics;
 
 class CeoReportService
 {
@@ -67,12 +67,7 @@ class CeoReportService
             ->values()
             ->all();
 
-        $leadCountsBySource = LeadIngestion::query()
-            ->when($filter->dateFrom && $filter->dateTo, fn ($q) => $q->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo]))
-            ->whereNotNull('marketing_source_id')
-            ->selectRaw('marketing_source_id, COUNT(*) as aggregate')
-            ->groupBy('marketing_source_id')
-            ->pluck('aggregate', 'marketing_source_id');
+        $leadCountsBySource = LeadContactMetrics::countsBySource($filter);
 
         $marketingRows = MarketingSource::query()
             ->whereNull('parent_id')
