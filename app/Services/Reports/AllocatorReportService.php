@@ -10,6 +10,7 @@ use App\Models\LeadIngestion;
 use App\Models\Order;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class AllocatorReportService
@@ -44,8 +45,11 @@ class AllocatorReportService
     /** @return array<string, mixed> */
     private function allocationReport(Carbon $from, Carbon $to): array
     {
+        // Giữ duplicate/failed (báo cáo phân bổ cần tách cột), nhưng loại dòng audit upsell
+        // (:upsell) vì đó không phải lead thật đổ về.
         $leads = LeadIngestion::query()
             ->whereBetween('created_at', [$from, $to])
+            ->where(fn (Builder $q) => $q->whereNull('external_id')->orWhere('external_id', 'not like', '%:upsell'))
             ->get(['status', 'created_at']);
 
         $byDay = $leads->groupBy(fn (LeadIngestion $l) => $l->created_at->toDateString());

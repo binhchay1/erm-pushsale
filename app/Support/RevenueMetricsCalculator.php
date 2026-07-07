@@ -46,7 +46,8 @@ final class RevenueMetricsCalculator
         $paid = self::pairForStatuses($orders, [DeliveryStatus::Paid]);
         $successful = self::mergePairs($delivered, $paid);
 
-        $contacts = (int) $orders->sum('contact_count');
+        // 1 contact = 1 khách/đơn trong kỳ, KHÔNG cộng số lần gọi (contact_count).
+        $contacts = (int) $orders->count();
 
         return [
             'closedOrders' => $closed->toArray(),

@@ -42,7 +42,7 @@ class BroadcastDashboardStatsCommand extends Command
             foreach ($marketingUsers as $marketer) {
                 event(new DashboardStatsUpdated(
                     'marketing',
-                    DashboardStatsService::marketingSnapshot($marketer),
+                    DashboardStatsService::marketingSnapshot($marketer, new ReportFilterData),
                 ));
             }
 

@@ -2,6 +2,7 @@
 
 namespace App\Services\Marketing;
 
+use App\Data\ReportFilterData;
 use App\Events\DashboardStatsUpdated;
 use App\Models\MarketingSource;
 use App\Models\User;
@@ -27,7 +28,7 @@ final class MarketingStatsBroadcaster
         try {
             event(new DashboardStatsUpdated(
                 'marketing',
-                DashboardStatsService::marketingSnapshot($marketer),
+                DashboardStatsService::marketingSnapshot($marketer, new ReportFilterData),
             ));
         } catch (\Throwable) {
             // Không chặn luồng nhận lead.
@@ -39,7 +40,7 @@ final class MarketingStatsBroadcaster
         try {
             event(new DashboardStatsUpdated(
                 'marketing',
-                DashboardStatsService::marketingSnapshot($marketer),
+                DashboardStatsService::marketingSnapshot($marketer, new ReportFilterData),
             ));
         } catch (\Throwable) {
         }

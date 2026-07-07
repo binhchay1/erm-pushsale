@@ -190,18 +190,25 @@ class DashboardStatsService
     {
         $summary = $this->metrics->kpiSummary($user, $filter);
         $legacyToday = self::todaySummary();
+
+        // KPI card + donut mang nhãn "hôm nay" -> luôn tính đúng ngày hiện tại
+        // (cùng scope role/marketer với filter), độc lập với preset kỳ báo cáo bên dưới.
+        $todayFilter = $filter->forToday();
+        $leadsToday = (int) app(ReportQueryService::class)->leads($user, $todayFilter)->count();
+        $todaySummary = $role === 'allocator' ? $this->metrics->kpiSummary($user, $todayFilter) : [];
+
         $base = [
             'summary' => $summary,
             'revenue_today' => $legacyToday['revenue_today'],
             'orders_closed' => $legacyToday['orders_closed'],
-            'leads_today' => $summary['leads'],
+            'leads_today' => $leadsToday,
             'delivery_rate' => $legacyToday['delivery_rate'],
             'failed_orders' => $legacyToday['failed_orders'],
             'shipping_mismatch' => $legacyToday['shipping_mismatch'],
             'revenue_series' => $this->metrics->revenueSeries($user, $filter),
             'orders_series' => $this->metrics->orderSeries($user, $filter),
             'lead_series' => $this->metrics->leadSeries($user, $filter),
-            'lead_sources' => $this->metrics->leadSourceBreakdown($user, $filter),
+            'lead_sources' => $this->metrics->leadSourceBreakdown($user, $todayFilter),
             'funnel' => $this->metrics->funnel($user, $filter),
             'updated_at' => now()->toIso8601String(),
         ];
@@ -227,7 +234,8 @@ class DashboardStatsService
             ]),
             'marketing' => array_merge($base, [
                 'active_campaigns' => MarketingSource::query()->where('marketer_user_id', $user->id)->where('is_active', true)->count(),
-                'leads_today' => $summary['leads'],
+                'leads_today' => $leadsToday,
+                'contacts_today' => $leadsToday,
                 'orders_closed' => $summary['closed_orders'],
                 'aov' => $summary['aov'],
                 'budget_total' => (int) MarketingSource::query()->where('marketer_user_id', $user->id)->sum('budget'),
@@ -245,17 +253,17 @@ class DashboardStatsService
                 'paid_orders_series' => self::dailyPaidOrderSeries(7),
             ]),
             'allocator' => array_merge($base, [
-                'leads_today' => $summary['leads'],
-                'pending_routing' => $summary['leads'] - $summary['processed_leads'],
-                'processed_today' => $summary['processed_leads'],
-                'failed_leads' => $summary['failed_leads'],
-                'duplicate_leads' => $summary['duplicate_leads'],
-                'platform_breakdown' => $this->metrics->leadSourceBreakdown($user, $filter),
+                'leads_today' => $leadsToday,
+                'pending_routing' => max(0, $leadsToday - ($todaySummary['processed_leads'] ?? 0)),
+                'processed_today' => $todaySummary['processed_leads'] ?? 0,
+                'failed_leads' => $todaySummary['failed_leads'] ?? 0,
+                'duplicate_leads' => $todaySummary['duplicate_leads'] ?? 0,
+                'platform_breakdown' => $this->metrics->leadSourceBreakdown($user, $todayFilter),
                 'processed_series' => self::dailyProcessedLeadSeries(7),
                 'routing_status_breakdown' => self::routingStatusBreakdown(
-                    $summary['leads'] - $summary['processed_leads'],
-                    $summary['failed_leads'],
-                    $summary['duplicate_leads'],
+                    max(0, $leadsToday - ($todaySummary['processed_leads'] ?? 0)),
+                    $todaySummary['failed_leads'] ?? 0,
+                    $todaySummary['duplicate_leads'] ?? 0,
                 ),
                 'funnel' => self::allocatorFunnel(),
             ]),
@@ -477,10 +485,12 @@ class DashboardStatsService
     private static function marketerFunnel(User $user, Builder $orders): array
     {
         $sourceIds = MarketingSource::query()->where('marketer_user_id', $user->id)->pluck('id');
-        $leadQuery = LeadIngestion::query();
+        $leadQuery = LeadContactMetrics::applyCountableScope(LeadIngestion::query());
 
         if ($sourceIds->isNotEmpty()) {
             $leadQuery->whereIn('marketing_source_id', $sourceIds);
+        } else {
+            $leadQuery->whereRaw('1 = 0');
         }
 
         return [

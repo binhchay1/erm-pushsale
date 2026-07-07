@@ -89,7 +89,8 @@ class TeamLeaderStatsService
 
         $budget = (int) $mineSources->sum('budget');
         $periodLeads = (int) ($leadCountsByMarketer->get($user->id) ?? 0);
-        $contacts = max($periodLeads, (int) $mineOrders->sum('contact_count'));
+        // 1 contact = 1 khách để lại SĐT (= 1 lead / 1 đơn), KHÔNG cộng số lần gọi (contact_count).
+        $contacts = max($periodLeads, (int) $mineOrders->count());
 
         $closedOrders = $mineOrders->filter(fn (Order $o) => (string) $o->closing_status === 'closed');
         $closed = $closedOrders->count();

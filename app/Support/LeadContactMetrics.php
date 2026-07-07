@@ -14,7 +14,10 @@ use Illuminate\Support\Collection;
  * Định nghĩa thống nhất "contact" trên mọi dashboard/báo cáo:
  * - 1 lần khách để lại SĐT (form đầu / nguồn ads) = 1 contact.
  * - Không cộng dòng audit upsell (:upsell), duplicate, failed.
- * - Lọc ngày theo date_type (mặc định: ngày data về trên đơn).
+ * - Lọc ngày theo date_type:
+ *   + Mặc định (ngày data về) = thời điểm lead đổ về = lead_ingestions.created_at.
+ *   + Ngày chốt / ngày sale nhận = theo mốc tương ứng trên đơn.
+ *   Dùng chung 1 mốc created_at cho toàn bộ báo cáo để mọi con số khớp tuyệt đối.
  */
 final class LeadContactMetrics
 {
@@ -60,15 +63,7 @@ final class LeadContactMetrics
                 'order',
                 fn (Builder $q) => $q->whereBetween('assigned_at', [$filter->dateFrom, $filter->dateTo]),
             ),
-            default => $query->where(function (Builder $q) use ($filter) {
-                $q->whereHas(
-                    'order',
-                    fn (Builder $oq) => $oq->whereBetween('data_arrived_at', [$filter->dateFrom, $filter->dateTo]),
-                )->orWhere(function (Builder $q2) use ($filter) {
-                    $q2->whereNull('order_id')
-                        ->whereBetween('lead_ingestions.created_at', [$filter->dateFrom, $filter->dateTo]);
-                });
-            }),
+            default => $query->whereBetween('lead_ingestions.created_at', [$filter->dateFrom, $filter->dateTo]),
         };
     }
 

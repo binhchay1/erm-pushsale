@@ -4,13 +4,13 @@ namespace App\Services\Reports;
 
 use App\Data\ReportFilterData;
 use App\Enums\DeliveryStatus;
-use App\Enums\LeadIngestionStatus;
 use App\Enums\OperationResult;
 use App\Enums\UserRole;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
+use App\Support\LeadContactMetrics;
 use App\Support\MarketingMetrics;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -142,9 +142,8 @@ class MarketingCampaignReportService
             return collect();
         }
 
-        $query = LeadIngestion::query()
+        $query = LeadContactMetrics::applyCountableScope(LeadIngestion::query())
             ->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo])
-            ->whereNotIn('status', [LeadIngestionStatus::Failed->value])
             ->where(function (Builder $q) use ($campaign) {
                 $q->whereHas('order', fn (Builder $order) => $order->where('marketing_source_id', $campaign->id));
 

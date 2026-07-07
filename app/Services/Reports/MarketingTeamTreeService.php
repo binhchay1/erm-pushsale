@@ -136,9 +136,10 @@ class MarketingTeamTreeService
         $marketerOrders = $orders->where('marketer_user_id', $marketerId);
         $marketerSources = $sources->where('marketer_user_id', $marketerId);
         $periodLeads = (int) ($leadCountsByMarketer->get($marketerId) ?? 0);
+        // 1 contact = 1 khách để lại SĐT (= 1 lead / 1 đơn), KHÔNG cộng số lần gọi (contact_count).
         $contacts = max(
             $periodLeads,
-            (int) $marketerOrders->sum('contact_count'),
+            (int) $marketerOrders->count(),
         );
         $closed = $marketerOrders->count();
         $revenueEligible = $marketerOrders->whereIn('delivery_status', DeliveryStatus::revenueEligible());

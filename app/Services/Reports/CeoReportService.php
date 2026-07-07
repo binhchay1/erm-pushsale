@@ -77,7 +77,8 @@ class CeoReportService
                 $sourceOrders = (clone $orders)->where('marketing_source_id', $source->id)->get();
                 $budget = (int) $source->budget;
                 $periodLeads = (int) ($leadCountsBySource->get($source->id) ?? 0);
-                $contacts = max($periodLeads, (int) $sourceOrders->sum('contact_count'));
+                // 1 contact = 1 khách để lại SĐT (= 1 lead / 1 đơn), KHÔNG cộng số lần gọi.
+                $contacts = max($periodLeads, (int) $sourceOrders->count());
                 $closed = $sourceOrders->count();
                 $newOrders = $sourceOrders->where('is_returning_customer', false);
                 $oldOrders = $sourceOrders->where('is_returning_customer', true);

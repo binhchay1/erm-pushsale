@@ -100,6 +100,24 @@ readonly class ReportFilterData
         return new self(...array_merge(get_object_vars($this), ['deliveryStatus' => null]));
     }
 
+    /**
+     * Giữ nguyên mọi scope (marketer, team, product…) nhưng ép khoảng ngày mới.
+     * Dùng cho các KPI "hôm nay" trên dashboard: cùng phạm vi dữ liệu nhưng chỉ tính ngày hiện tại.
+     */
+    public function withDateRange(Carbon $from, Carbon $to): self
+    {
+        return new self(...array_merge(get_object_vars($this), [
+            'preset' => ReportDateRange::PRESET_CUSTOM,
+            'dateFrom' => $from,
+            'dateTo' => $to,
+        ]));
+    }
+
+    public function forToday(): self
+    {
+        return $this->withDateRange(Carbon::now()->startOfDay(), Carbon::now()->endOfDay());
+    }
+
     /** @return array<string, mixed> */
     public function toInertia(): array
     {
