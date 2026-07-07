@@ -49,6 +49,8 @@ class CompanyController extends Controller
                 ] : null,
                 'expires_at' => $company->expires_at?->toDateString(),
                 'created_at' => $company->created_at?->toDateString(),
+                'lead_import_template_name' => $company->lead_import_template_name,
+                'has_lead_import_template' => filled($company->lead_import_template_path),
             ]);
 
         return Inertia::render('Platform/Companies', [
@@ -115,11 +117,45 @@ class CompanyController extends Controller
             'plan' => ['nullable', 'string', 'max:40'],
             'max_users' => ['nullable', 'integer', 'min:1'],
             'expires_at' => ['nullable', 'date'],
+            'lead_import_template' => ['nullable', 'file', 'max:5120', 'mimes:csv,txt,xls,xlsx'],
+            'remove_lead_import_template' => ['nullable', 'boolean'],
         ]);
 
-        $company->update($data);
+        $attributes = [
+            'name' => $data['name'],
+            'plan' => $data['plan'] ?? $company->plan,
+            'max_users' => $data['max_users'] ?? $company->max_users,
+            'expires_at' => $data['expires_at'] ?? $company->expires_at,
+        ];
+
+        if ($request->boolean('remove_lead_import_template')) {
+            $this->deleteTemplate($company);
+            $attributes['lead_import_template_path'] = null;
+            $attributes['lead_import_template_name'] = null;
+        }
+
+        if ($request->hasFile('lead_import_template')) {
+            $this->deleteTemplate($company);
+            $file = $request->file('lead_import_template');
+            $ext = strtolower($file->getClientOriginalExtension() ?: 'xlsx');
+            $path = $file->storeAs('lead-templates', 'company-'.$company->id.'.'.$ext, 'local');
+
+            $attributes['lead_import_template_path'] = $path;
+            $attributes['lead_import_template_name'] = $file->getClientOriginalName();
+        }
+
+        $company->update($attributes);
 
         return back()->with('success', __('messages.platform.company_updated'));
+    }
+
+    private function deleteTemplate(Company $company): void
+    {
+        if ($company->lead_import_template_path
+            && \Illuminate\Support\Facades\Storage::disk('local')->exists($company->lead_import_template_path)
+        ) {
+            \Illuminate\Support\Facades\Storage::disk('local')->delete($company->lead_import_template_path);
+        }
     }
 
     public function toggle(Company $company): RedirectResponse

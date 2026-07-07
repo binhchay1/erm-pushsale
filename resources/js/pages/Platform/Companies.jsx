@@ -1,6 +1,6 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Building2, Copy, Search, UserPlus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Building2, Copy, FileUp, Pencil, Search, UserPlus } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -76,6 +76,14 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
     const { flash } = usePage().props;
     const [provisionOpen, setProvisionOpen] = useState(false);
     const [provisioned, setProvisioned] = useState(null);
+    const [editOpen, setEditOpen] = useState(false);
+    const [editing, setEditing] = useState(null);
+    const [editData, setEditData] = useState({ name: '', plan: '', max_users: '', expires_at: '' });
+    const [editFile, setEditFile] = useState(null);
+    const [removeTemplate, setRemoveTemplate] = useState(false);
+    const [editErrors, setEditErrors] = useState({});
+    const [editProcessing, setEditProcessing] = useState(false);
+    const editFileRef = useRef(null);
     const { sortedRows, sort, toggleSort } = useTableSort(companies, {
         defaultKey: 'name',
         accessors: {
@@ -117,6 +125,47 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
     const toggle = (company) => {
         if (company.is_internal) return;
         router.post(`/platform/companies/${company.id}/toggle`, {}, { preserveScroll: true });
+    };
+
+    const openEdit = (company) => {
+        setEditing(company);
+        setEditData({
+            name: company.name ?? '',
+            plan: company.plan ?? '',
+            max_users: company.max_users ?? '',
+            expires_at: company.expires_at ?? '',
+        });
+        setEditFile(null);
+        setRemoveTemplate(false);
+        setEditErrors({});
+        if (editFileRef.current) editFileRef.current.value = '';
+        setEditOpen(true);
+    };
+
+    const submitEdit = (e) => {
+        e.preventDefault();
+        setEditProcessing(true);
+        setEditErrors({});
+
+        const formData = new FormData();
+        formData.append('_method', 'PUT');
+        formData.append('name', editData.name);
+        formData.append('plan', editData.plan);
+        if (editData.max_users !== '') formData.append('max_users', String(editData.max_users));
+        if (editData.expires_at) formData.append('expires_at', editData.expires_at);
+        if (editFile) formData.append('lead_import_template', editFile);
+        if (removeTemplate) formData.append('remove_lead_import_template', '1');
+
+        router.post(`/platform/companies/${editing.id}`, formData, {
+            preserveScroll: true,
+            forceFormData: true,
+            onSuccess: () => {
+                setEditOpen(false);
+                setEditing(null);
+            },
+            onError: (errs) => setEditErrors(errs),
+            onFinish: () => setEditProcessing(false),
+        });
     };
 
     return (
@@ -247,6 +296,10 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                                                 <Td className="px-4 py-3 text-muted-foreground">{c.expires_at ?? t('pages.platform.no_expiry')}</Td>
                                                 <Td className="px-4 py-3 text-right">
                                                     <div className="flex justify-end gap-1">
+                                                        <Button size="sm" variant="outline" onClick={() => openEdit(c)}>
+                                                            <Pencil className="size-3.5" />
+                                                            {t('pages.platform.edit_btn')}
+                                                        </Button>
                                                         <Button size="sm" variant="outline" asChild>
                                                             <Link href={`/platform/companies/${c.id}/admins`}>{t('pages.platform.manage_admins')}</Link>
                                                         </Button>
@@ -316,6 +369,104 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                                 </tbody>
                             </table>
                         </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>{t('pages.platform.edit_title')}</DialogTitle>
+                        <DialogDescription>{t('pages.platform.edit_desc')}</DialogDescription>
+                    </DialogHeader>
+                    {editing && (
+                        <form onSubmit={submitEdit} className="space-y-4">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="edit_name">{t('pages.platform.field_name')}</Label>
+                                <Input
+                                    id="edit_name"
+                                    value={editData.name}
+                                    onChange={(e) => setEditData((d) => ({ ...d, name: e.target.value }))}
+                                    required
+                                />
+                                <FieldError message={editErrors.name} />
+                            </div>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="edit_plan">{t('pages.platform.col_plan')}</Label>
+                                    <Input
+                                        id="edit_plan"
+                                        value={editData.plan}
+                                        onChange={(e) => setEditData((d) => ({ ...d, plan: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="edit_max_users">{t('pages.platform.col_users')}</Label>
+                                    <Input
+                                        id="edit_max_users"
+                                        type="number"
+                                        min={1}
+                                        value={editData.max_users}
+                                        onChange={(e) => setEditData((d) => ({ ...d, max_users: e.target.value }))}
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="edit_expires">{t('pages.platform.col_expires')}</Label>
+                                <Input
+                                    id="edit_expires"
+                                    type="date"
+                                    value={editData.expires_at ?? ''}
+                                    onChange={(e) => setEditData((d) => ({ ...d, expires_at: e.target.value }))}
+                                />
+                            </div>
+
+                            <div className="space-y-2 rounded-lg border bg-muted/20 p-3">
+                                <p className="text-sm font-medium">{t('pages.platform.template_section_title')}</p>
+                                <p className="text-xs text-muted-foreground">{t('pages.platform.template_section_desc')}</p>
+                                {editing.has_lead_import_template && editing.lead_import_template_name ? (
+                                    <p className="text-xs">
+                                        {t('pages.platform.template_current')}:{' '}
+                                        <span className="font-medium">{editing.lead_import_template_name}</span>
+                                    </p>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground">{t('pages.platform.template_none')}</p>
+                                )}
+                                <input
+                                    ref={editFileRef}
+                                    type="file"
+                                    accept=".csv,.txt,.xls,.xlsx"
+                                    className="input-soft w-full px-2 py-1.5 text-sm"
+                                    onChange={(e) => {
+                                        setEditFile(e.target.files?.[0] ?? null);
+                                        setRemoveTemplate(false);
+                                    }}
+                                />
+                                {editing.has_lead_import_template ? (
+                                    <label className="flex items-center gap-2 text-xs">
+                                        <input
+                                            type="checkbox"
+                                            checked={removeTemplate}
+                                            onChange={(e) => {
+                                                setRemoveTemplate(e.target.checked);
+                                                if (e.target.checked) setEditFile(null);
+                                            }}
+                                        />
+                                        {t('pages.platform.template_remove')}
+                                    </label>
+                                ) : null}
+                                <FieldError message={editErrors.lead_import_template} />
+                            </div>
+
+                            <div className="flex justify-end gap-2">
+                                <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>
+                                    {t('common.cancel')}
+                                </Button>
+                                <Button type="submit" disabled={editProcessing}>
+                                    {editProcessing ? t('common.saving') : t('common.save')}
+                                </Button>
+                            </div>
+                        </form>
                     )}
                 </DialogContent>
             </Dialog>

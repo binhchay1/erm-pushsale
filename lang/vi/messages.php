@@ -117,6 +117,10 @@ return [
         'bad_file' => 'Định dạng file không hỗ trợ. Chỉ nhận .csv, .txt, .xls hoặc .xlsx.',
         'read_failed' => 'Không đọc được file. Kiểm tra lại file có đúng định dạng Excel/CSV không.',
     ],
+    'company' => [
+        'template_uploaded' => 'Đã cập nhật file mẫu import lead.',
+        'template_removed' => 'Đã xóa file mẫu import lead.',
+    ],
     'inventory' => [
         'approver_required' => 'Chọn trưởng kho ký duyệt.',
     ],

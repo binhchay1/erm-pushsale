@@ -1,8 +1,9 @@
 import { router, usePage } from '@inertiajs/react';
-import { FileUp, Loader2, UserPlus } from 'lucide-react';
+import { Download, FileUp, Loader2, UserPlus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { ManualLeadProductItems } from '@/components/leads/ManualLeadProductItems';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -29,49 +30,27 @@ const FIELD_LABELS = {
     utm_campaign: 'field_campaign',
 };
 
-const EMPTY_FORM = { name: '', phone: '', address: '', product_id: '', quantity: 1, note: '', utm_source: '' };
+const EMPTY_FORM = {
+    name: '',
+    phone: '',
+    address: '',
+    note: '',
+    marketing_source_id: '',
+    items: [],
+};
 
-function AllocationPicker({ mode, setMode, salesUsers, selected, toggle, error }) {
-    const t = useT();
-
-    return (
-        <div className="space-y-2 rounded-lg border bg-muted/20 p-3 text-xs">
-            <p className="font-medium text-foreground">{t('pages.leads.alloc_title')}</p>
-            <label className="flex items-center gap-2">
-                <input type="radio" checked={mode === 'default'} onChange={() => setMode('default')} />
-                <span>{t('pages.leads.alloc_default')}</span>
-            </label>
-            <label className="flex items-center gap-2">
-                <input type="radio" checked={mode === 'manual'} onChange={() => setMode('manual')} />
-                <span>{t('pages.leads.alloc_manual')}</span>
-            </label>
-            {mode === 'manual' && (
-                <div className="mt-1 space-y-1 rounded-md border bg-background p-2">
-                    <p className="text-[11px] text-muted-foreground">{t('pages.leads.alloc_pick_sales')}</p>
-                    <div className="max-h-40 space-y-1 overflow-auto">
-                        {salesUsers.length ? (
-                            salesUsers.map((u) => (
-                                <label key={u.id} className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={selected.includes(String(u.id))}
-                                        onChange={() => toggle(String(u.id))}
-                                    />
-                                    <span>{u.name}</span>
-                                </label>
-                            ))
-                        ) : (
-                            <p className="text-muted-foreground">{t('pages.leads.alloc_no_sales')}</p>
-                        )}
-                    </div>
-                </div>
-            )}
-            <FieldError message={error} />
-        </div>
-    );
-}
-
-export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importFields = [], salesUsers = [] }) {
+export function ManualLeadDialogs({
+    manualUrl,
+    importUrl,
+    templateUrl,
+    productOptions = [],
+    sources = [],
+    importFields = [],
+    canManageTemplate = false,
+    companyTemplate = null,
+    templateUploadUrl = '',
+    templateRemoveUrl = '',
+}) {
     const t = useT();
     const { props } = usePage();
     const importResult = props?.flash?.importResult ?? null;
@@ -84,16 +63,11 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
     const [file, setFile] = useState(null);
     const [errors, setErrors] = useState({});
     const [importErrors, setImportErrors] = useState({});
+    const [templateFile, setTemplateFile] = useState(null);
+    const [uploadingTemplate, setUploadingTemplate] = useState(false);
+    const templateFileRef = useRef(null);
     const fileRef = useRef(null);
     const lastShownResult = useRef(null);
-
-    const [addMode, setAddMode] = useState('default');
-    const [addSales, setAddSales] = useState([]);
-    const [importMode, setImportMode] = useState('default');
-    const [importSales, setImportSales] = useState([]);
-
-    const toggleIn = (setter) => (id) =>
-        setter((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
     useEffect(() => {
         if (!importResult || importResult === lastShownResult.current) return;
@@ -122,11 +96,9 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                 { required: true, label: t('pages.leads.field_phone') },
                 { phone: true },
             ],
-            quantity: [{ positive: true, message: t('common.validation.positive_number') }],
         });
-        if (addMode === 'manual' && addSales.length === 0) {
-            clientErrors.sale_user_ids = t('pages.leads.alloc_need_sale');
-        }
+
+        const validItems = (form.items ?? []).filter((it) => it.productId);
 
         if (Object.keys(clientErrors).length > 0) {
             setErrors(clientErrors);
@@ -138,19 +110,31 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
         setSaving(true);
         router.post(
             manualUrl,
-            { ...form, allocation_mode: addMode, sale_user_ids: addMode === 'manual' ? addSales : [] },
+            {
+                name: form.name,
+                phone: form.phone,
+                address: form.address,
+                note: form.note,
+                marketing_source_id: form.marketing_source_id || null,
+                items: validItems.map((it) => ({
+                    product_id: Number(it.productId),
+                    item_type: it.itemType,
+                    quantity: Number(it.quantity) || 1,
+                    unit_price: Number(it.unitPrice) || 0,
+                })),
+                allocation_mode: 'default',
+                sale_user_ids: [],
+            },
             {
                 preserveScroll: true,
                 onSuccess: () => {
                     setAddOpen(false);
                     setForm(EMPTY_FORM);
-                    setAddMode('default');
-                    setAddSales([]);
                     setErrors({});
                 },
                 onError: (serverErrors) => {
                     setErrors(serverErrors);
-                    toast.error(serverErrors.phone ?? serverErrors.product_id ?? serverErrors.sale_user_ids ?? t('pages.leads.manual_failed'));
+                    toast.error(serverErrors.phone ?? serverErrors.items ?? t('pages.leads.manual_failed'));
                 },
                 onFinish: () => setSaving(false),
             },
@@ -161,9 +145,6 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
         const clientErrors = {};
         if (!file) {
             clientErrors.file = t('pages.leads.import_pick_file');
-        }
-        if (importMode === 'manual' && importSales.length === 0) {
-            clientErrors.sale_user_ids = t('pages.leads.alloc_need_sale');
         }
 
         if (Object.keys(clientErrors).length > 0) {
@@ -176,7 +157,7 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
         setImporting(true);
         router.post(
             importUrl,
-            { file, allocation_mode: importMode, sale_user_ids: importMode === 'manual' ? importSales : [] },
+            { file, allocation_mode: 'default', sale_user_ids: [] },
             {
                 forceFormData: true,
                 preserveScroll: true,
@@ -188,11 +169,44 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                 },
                 onError: (serverErrors) => {
                     setImportErrors(serverErrors);
-                    toast.error(serverErrors.file ?? serverErrors.sale_user_ids ?? t('pages.leads.import_failed'));
+                    toast.error(serverErrors.file ?? t('pages.leads.import_failed'));
                 },
                 onFinish: () => setImporting(false),
             },
         );
+    };
+
+    const uploadTemplate = () => {
+        if (!templateFile) {
+            toast.error(t('pages.leads.import_pick_file'));
+            return;
+        }
+        setUploadingTemplate(true);
+        router.post(
+            templateUploadUrl,
+            { lead_import_template: templateFile },
+            {
+                forceFormData: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    setTemplateFile(null);
+                    if (templateFileRef.current) templateFileRef.current.value = '';
+                    toast.success(t('pages.leads.template_uploaded'));
+                },
+                onError: () => toast.error(t('pages.leads.template_upload_failed')),
+                onFinish: () => setUploadingTemplate(false),
+            },
+        );
+    };
+
+    const removeTemplate = () => {
+        setUploadingTemplate(true);
+        router.delete(templateRemoveUrl, {
+            preserveScroll: true,
+            onSuccess: () => toast.success(t('pages.leads.template_removed')),
+            onError: () => toast.error(t('pages.leads.template_upload_failed')),
+            onFinish: () => setUploadingTemplate(false),
+        });
     };
 
     return (
@@ -208,7 +222,6 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                 </Button>
             </div>
 
-            {/* Kết quả import gần nhất */}
             {importResult && importResult.ok && (
                 <div className="mt-3 space-y-2 rounded-xl border bg-card p-4 text-xs">
                     <p className="text-sm font-semibold">{t('pages.leads.import_result_title')}</p>
@@ -252,9 +265,8 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                 </div>
             )}
 
-            {/* Dialog: thêm 1 lead lẻ */}
             <Dialog open={addOpen} onOpenChange={setAddOpen}>
-                <DialogContent className="max-w-lg">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>{t('pages.leads.manual_add_title')}</DialogTitle>
                         <DialogDescription>{t('pages.leads.manual_add_desc')}</DialogDescription>
@@ -282,47 +294,33 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                             <span className="font-medium text-muted-foreground">{t('pages.leads.field_address')}</span>
                             <input className="input-soft h-9 w-full px-2" value={form.address} onChange={(e) => setField('address', e.target.value)} />
                         </label>
-                        <label className="space-y-1 text-xs">
-                            <span className="font-medium text-muted-foreground">{t('pages.leads.field_product')}</span>
-                            <select className="input-soft h-9 w-full px-2" value={form.product_id} onChange={(e) => setField('product_id', e.target.value)}>
-                                <option value="">{t('pages.leads.select_product_placeholder')}</option>
-                                {products.map((p) => (
-                                    <option key={p.id} value={p.id}>
-                                        {p.name}
+                        <label className="space-y-1 text-xs sm:col-span-2">
+                            <span className="font-medium text-muted-foreground">{t('pages.leads.field_source')}</span>
+                            <select
+                                className="input-soft h-9 w-full px-2"
+                                value={form.marketing_source_id}
+                                onChange={(e) => setField('marketing_source_id', e.target.value)}
+                            >
+                                <option value="">{t('pages.leads.select_source_placeholder')}</option>
+                                {sources.map((s) => (
+                                    <option key={s.id} value={s.id}>
+                                        {s.name}
                                     </option>
                                 ))}
                             </select>
                         </label>
-                        <label className="space-y-1 text-xs">
-                            <span className="font-medium text-muted-foreground">{t('pages.leads.field_quantity')}</span>
-                            <input
-                                type="number"
-                                min={1}
-                                className="input-soft h-9 w-full px-2"
-                                value={form.quantity}
-                                aria-invalid={!!errors.quantity}
-                                onChange={(e) => setField('quantity', e.target.value)}
+                        <div className="sm:col-span-2">
+                            <ManualLeadProductItems
+                                productOptions={productOptions}
+                                items={form.items}
+                                onChange={(items) => setField('items', items)}
+                                error={errors.items}
                             />
-                            <FieldError message={errors.quantity} />
-                        </label>
-                        <label className="space-y-1 text-xs sm:col-span-2">
-                            <span className="font-medium text-muted-foreground">{t('pages.leads.field_source')}</span>
-                            <input className="input-soft h-9 w-full px-2" value={form.utm_source} onChange={(e) => setField('utm_source', e.target.value)} />
-                        </label>
+                        </div>
                         <label className="space-y-1 text-xs sm:col-span-2">
                             <span className="font-medium text-muted-foreground">{t('pages.leads.field_note')}</span>
                             <textarea className="input-soft w-full px-2 py-1.5" rows={2} value={form.note} onChange={(e) => setField('note', e.target.value)} />
                         </label>
-                        <div className="sm:col-span-2">
-                            <AllocationPicker
-                                mode={addMode}
-                                setMode={setAddMode}
-                                salesUsers={salesUsers}
-                                selected={addSales}
-                                toggle={toggleIn(setAddSales)}
-                                error={errors.sale_user_ids}
-                            />
-                        </div>
                     </div>
 
                     <DialogFooter>
@@ -337,7 +335,6 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                 </DialogContent>
             </Dialog>
 
-            {/* Dialog: import CSV */}
             <Dialog open={importOpen} onOpenChange={setImportOpen}>
                 <DialogContent className="max-w-lg">
                     <DialogHeader>
@@ -346,6 +343,17 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                     </DialogHeader>
 
                     <div className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <a
+                                href={templateUrl}
+                                className="inline-flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted"
+                            >
+                                <Download className="size-4" />
+                                {t('pages.leads.template_download')}
+                            </a>
+                            <span className="text-xs text-muted-foreground">{t('pages.leads.template_download_hint')}</span>
+                        </div>
+
                         <div>
                             <input
                                 ref={fileRef}
@@ -360,18 +368,44 @@ export function ManualLeadDialogs({ manualUrl, importUrl, products = [], importF
                             />
                             <FieldError message={importErrors.file} className="mt-1" />
                         </div>
+
                         <div className="rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">
                             <p className="mb-1 font-medium text-foreground">{t('pages.leads.import_columns_hint')}</p>
                             <p>{t('pages.leads.import_columns_examples')}</p>
                         </div>
-                        <AllocationPicker
-                            mode={importMode}
-                            setMode={setImportMode}
-                            salesUsers={salesUsers}
-                            selected={importSales}
-                            toggle={toggleIn(setImportSales)}
-                            error={importErrors.sale_user_ids}
-                        />
+
+                        {canManageTemplate && (
+                            <div className="space-y-2 rounded-lg border border-dashed bg-muted/10 p-3 text-xs">
+                                <p className="font-medium text-foreground">{t('pages.leads.template_manage_title')}</p>
+                                <p className="text-muted-foreground">{t('pages.leads.template_manage_desc')}</p>
+                                {companyTemplate?.has && companyTemplate?.name ? (
+                                    <p>
+                                        {t('pages.platform.template_current')}:{' '}
+                                        <span className="font-medium">{companyTemplate.name}</span>
+                                    </p>
+                                ) : (
+                                    <p className="text-muted-foreground">{t('pages.platform.template_none')}</p>
+                                )}
+                                <input
+                                    ref={templateFileRef}
+                                    type="file"
+                                    accept=".csv,.txt,.xls,.xlsx"
+                                    className="input-soft w-full px-2 py-1.5 text-sm"
+                                    onChange={(e) => setTemplateFile(e.target.files?.[0] ?? null)}
+                                />
+                                <div className="flex flex-wrap gap-2">
+                                    <Button type="button" size="sm" variant="secondary" disabled={uploadingTemplate} onClick={uploadTemplate}>
+                                        {uploadingTemplate && <Loader2 className="size-3.5 animate-spin" />}
+                                        {t('pages.leads.template_upload_btn')}
+                                    </Button>
+                                    {companyTemplate?.has ? (
+                                        <Button type="button" size="sm" variant="outline" disabled={uploadingTemplate} onClick={removeTemplate}>
+                                            {t('pages.platform.template_remove')}
+                                        </Button>
+                                    ) : null}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <DialogFooter>

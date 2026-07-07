@@ -117,6 +117,10 @@ return [
         'bad_file' => 'Unsupported file type. Only .csv, .txt, .xls or .xlsx are accepted.',
         'read_failed' => 'Could not read the file. Please check it is a valid Excel/CSV file.',
     ],
+    'company' => [
+        'template_uploaded' => 'Lead import template updated.',
+        'template_removed' => 'Lead import template removed.',
+    ],
     'inventory' => [
         'approver_required' => 'Select a warehouse lead to approve.',
     ],

@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\LandingApprovalController;
 use App\Http\Controllers\Admin\LeadIngestionController;
 use App\Http\Controllers\Admin\LeadsLogController;
 use App\Http\Controllers\Admin\ManualLeadController;
+use App\Http\Controllers\Admin\CompanySettingsController;
 use App\Http\Controllers\Admin\ManualLeadAllocationController;
 use App\Http\Controllers\Admin\Marketing\CampaignBudgetController;
 use App\Http\Controllers\Admin\Marketing\CampaignController;
@@ -163,6 +164,9 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
         Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
         Route::post('leads/import', [ManualLeadController::class, 'import'])->name('leads.import');
+        Route::get('leads/import-template', [ManualLeadController::class, 'template'])->name('leads.import-template');
+        Route::post('company/lead-template', [CompanySettingsController::class, 'updateLeadTemplate'])->name('company.lead-template');
+        Route::delete('company/lead-template', [CompanySettingsController::class, 'destroyLeadTemplate'])->name('company.lead-template.destroy');
         Route::get('shipping-partners', [ShippingPartnersController::class, 'index'])->name('shipping-partners.index');
         Route::put('shipping-partners/{provider}', [ShippingPartnersController::class, 'update'])->name('shipping-partners.update');
         Route::get('shipping/reconciliation', ShippingReconciliationController::class)->name('shipping.reconciliation');
@@ -219,6 +223,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('leads', LeadsLogController::class)->name('leads.index');
         Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
         Route::post('leads/import', [ManualLeadController::class, 'import'])->name('leads.import');
+        Route::get('leads/import-template', [ManualLeadController::class, 'template'])->name('leads.import-template');
     });
 
     Route::middleware('role:'.User::ROLE_WAREHOUSE)->prefix('warehouse')->name('warehouse.')->group(function () {
@@ -251,6 +256,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
         Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
         Route::post('leads/import', [ManualLeadController::class, 'import'])->name('leads.import');
+        Route::get('leads/import-template', [ManualLeadController::class, 'template'])->name('leads.import-template');
         Route::get('reports/{report}', AllocatorReportController::class)->where('report', '[a-z0-9\-]+')->name('reports');
     });
 

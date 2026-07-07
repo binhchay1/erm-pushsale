@@ -434,7 +434,12 @@ class LeadIngestionService
     {
         $normalized = $driver->normalize($rawPayload);
 
-        return $this->ingestNormalized($driver, $rawPayload, $normalized, null, null, $forceSale);
+        $campaign = null;
+        if (! empty($rawPayload['marketing_source_id'])) {
+            $campaign = MarketingSource::query()->find((int) $rawPayload['marketing_source_id']);
+        }
+
+        return $this->ingestNormalized($driver, $rawPayload, $normalized, $campaign, null, $forceSale);
     }
 
     /**

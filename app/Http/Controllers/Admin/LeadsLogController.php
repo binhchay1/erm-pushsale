@@ -116,19 +116,34 @@ class LeadsLogController extends Controller
                 $request->is('marketing/*') => '/marketing/leads/import',
                 default => '/admin/leads/import',
             },
+            'templateUrl' => match (true) {
+                $request->is('allocator/*') => '/allocator/leads/import-template',
+                $request->is('marketing/*') => '/marketing/leads/import-template',
+                default => '/admin/leads/import-template',
+            },
             'products' => Product::query()
                 ->where('is_active', true)
+                ->orderBy('type')
                 ->orderBy('name')
-                ->get(['id', 'name', 'unit_price'])
+                ->get(['id', 'name', 'type', 'sku', 'unit_price'])
                 ->map(fn (Product $p) => [
-                    'id' => (string) $p->id,
+                    'id' => $p->id,
                     'name' => $p->name,
+                    'type' => $p->type ?? 'product',
+                    'sku' => $p->sku,
                     'unit_price' => (int) $p->unit_price,
                 ])
                 ->all(),
             'importFields' => [
                 'name', 'phone', 'address', 'product', 'quantity', 'unit_price', 'discount', 'note', 'utm_source', 'utm_campaign',
             ],
+            'canManageTemplate' => $request->user()?->role === UserRole::Admin,
+            'companyTemplate' => [
+                'name' => $request->user()?->company?->lead_import_template_name,
+                'has' => filled($request->user()?->company?->lead_import_template_path),
+            ],
+            'templateUploadUrl' => '/admin/company/lead-template',
+            'templateRemoveUrl' => '/admin/company/lead-template',
         ]);
     }
 

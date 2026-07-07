@@ -35,8 +35,13 @@ export default function LeadsIndex({
     allocationModeUrl = '/admin/leads/allocation-mode',
     manualUrl = '/admin/leads/manual',
     importUrl = '/admin/leads/import',
+    templateUrl = '/admin/leads/import-template',
     products = [],
     importFields = [],
+    canManageTemplate = false,
+    companyTemplate = null,
+    templateUploadUrl = '/admin/company/lead-template',
+    templateRemoveUrl = '/admin/company/lead-template',
 }) {
     const t = useT();
     const labels = useLabels();
@@ -163,9 +168,14 @@ export default function LeadsIndex({
                 <ManualLeadDialogs
                     manualUrl={manualUrl}
                     importUrl={importUrl}
-                    products={products}
+                    templateUrl={templateUrl}
+                    productOptions={products}
+                    sources={campaigns}
                     importFields={importFields}
-                    salesUsers={salesUsers}
+                    canManageTemplate={canManageTemplate}
+                    companyTemplate={companyTemplate}
+                    templateUploadUrl={templateUploadUrl}
+                    templateRemoveUrl={templateRemoveUrl}
                 />
 
                 {exceptionCount > 0 && (

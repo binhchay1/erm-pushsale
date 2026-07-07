@@ -203,18 +203,118 @@ class ManualLeadImportService
             'source_label' => 'Nhập tay',
         ];
 
-        $items = $this->resolveItems(
-            productId: isset($data['product_id']) ? (int) $data['product_id'] : null,
-            productName: $payload['product'],
-            price: (int) MoneyParser::parse($data['unit_price'] ?? 0),
-            quantity: $payload['quantity'],
-        );
+        // Form nhập tay: nhiều dòng sản phẩm/gói từ danh mục. Import CSV: 1 sản phẩm theo cột.
+        $items = [];
+        if (! empty($data['items']) && is_array($data['items'])) {
+            $items = $this->resolveItemsFromForm($data['items']);
+        } else {
+            $productIds = array_values(array_filter(array_map(
+                'intval',
+                (array) ($data['product_ids'] ?? []),
+            )));
+
+            if ($productIds !== []) {
+                $items = $this->resolveItemsFromIds($productIds);
+            } else {
+                $items = $this->resolveItems(
+                    productId: isset($data['product_id']) ? (int) $data['product_id'] : null,
+                    productName: $payload['product'],
+                    price: (int) MoneyParser::parse($data['unit_price'] ?? 0),
+                    quantity: $payload['quantity'],
+                );
+            }
+        }
 
         if ($items !== []) {
             $payload['items'] = $items;
+            $names = array_column($items, 'product_name');
+            if ($names !== []) {
+                $payload['product'] = implode(', ', $names);
+            }
+        }
+
+        if (! empty($data['marketing_source_id'])) {
+            $payload['marketing_source_id'] = (int) $data['marketing_source_id'];
         }
 
         return $this->leads->ingestManual(new ManualLeadDriver, $payload, $forceSale);
+    }
+
+    /**
+     * Dựng nhiều dòng hàng từ danh sách product_id (form nhập tay chọn multi sản phẩm).
+     * Mỗi sản phẩm 1 dòng, số lượng 1, giá theo danh mục.
+     *
+     * @param  list<int>  $productIds
+     * @return list<array<string, mixed>>
+     */
+    protected function resolveItemsFromIds(array $productIds): array
+    {
+        if ($productIds === []) {
+            return [];
+        }
+
+        $products = Product::query()->whereIn('id', array_unique($productIds))->get()->keyBy('id');
+        $items = [];
+
+        foreach (array_unique($productIds) as $id) {
+            $product = $products->get($id);
+            if (! $product) {
+                continue;
+            }
+
+            $items[] = [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'name' => $product->name,
+                'unit_price' => max(0, (int) $product->unit_price),
+                'quantity' => 1,
+                'item_type' => $product->type ?? 'product',
+                'origin' => 'manual',
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * Dựng dòng hàng từ form nhập tay (chọn SP/gói + số lượng + đơn giá).
+     *
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<array<string, mixed>>
+     */
+    protected function resolveItemsFromForm(array $rows): array
+    {
+        $ids = array_values(array_filter(array_map(
+            fn (array $row) => (int) ($row['product_id'] ?? 0),
+            $rows,
+        )));
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $products = Product::query()->whereIn('id', array_unique($ids))->get()->keyBy('id');
+        $items = [];
+
+        foreach ($rows as $row) {
+            $id = (int) ($row['product_id'] ?? 0);
+            $product = $products->get($id);
+            if (! $product) {
+                continue;
+            }
+
+            $items[] = [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'name' => $product->name,
+                'unit_price' => max(0, (int) ($row['unit_price'] ?? $product->unit_price)),
+                'quantity' => max(1, (int) ($row['quantity'] ?? 1)),
+                'item_type' => $row['item_type'] ?? $product->type ?? 'product',
+                'origin' => 'manual',
+            ];
+        }
+
+        return $items;
     }
 
     /**
