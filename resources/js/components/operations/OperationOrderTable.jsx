@@ -58,52 +58,74 @@ export function OperationOrderTable({
             <table className="min-w-[2720px] w-full border-collapse">
                 <thead className="bg-[#3782dc] text-white">
                     <tr>
-                        <Th sortable sortKey="orderCode" sort={sort} onSort={toggleSort}>Mã đơn</Th>
-                        <Th sortable sortKey="dataArrivedAt" sort={sort} onSort={toggleSort}>
-                            <div>Nguồn dữ liệu</div>
-                            <div className="font-normal text-xs mt-0.5">Ngày data về</div>
+                        <Th className="text-center" sortable sortKey="orderCode" sort={sort} onSort={toggleSort}>Mã đơn</Th>
+                        <Th className="text-center" sortable sortKey="dataArrivedAt" sort={sort} onSort={toggleSort}>
+                            <div className="flex flex-col gap-1 text-center">
+                                <div>Nguồn dữ liệu</div>
+                                <div>Ngày data về</div>
+                            </div>
                         </Th>
-                        <Th sortable sortKey="customerName" sort={sort} onSort={toggleSort}>
-                            <div>Họ tên</div>
-                            <div className="font-normal text-xs mt-0.5">Số điện thoại</div>
+                        <Th className="text-center" sortable sortKey="customerName" sort={sort} onSort={toggleSort}>
+                            <div className="flex flex-col gap-1 text-center">
+                                <div>Họ tên</div>
+                                <div>Số điện thoại</div>
+                            </div>
                         </Th>
-                        <Th>
-                            <div>Địa chỉ</div>
-                            <div className="font-normal text-xs mt-0.5">Địa chỉ nhận hàng</div>
+                        <Th className="text-center">
+                            <div className="flex flex-col gap-1 text-center">
+                                <div>Địa chỉ</div>
+                                <div>Địa chỉ nhận hàng</div>
+                            </div>
                         </Th>
-                        <Th>
-                            <div>Tin nhắn</div>
-                            <div className="font-normal text-xs mt-0.5">Ghi chú khách hàng</div>
+                        <Th className="text-center">
+                            <div className="flex flex-col gap-1 text-center">
+                                <div>Tin nhắn</div>
+                                <div>Ghi chú khách hàng</div>
+                            </div>
                         </Th>
-                        <Th sortable sortKey="saleName" sort={sort} onSort={toggleSort}>
-                            <div>Sale</div>
-                            <div className="font-normal text-xs mt-0.5">Ngày nhận data</div>
+                        <Th className="text-center" sortable sortKey="saleName" sort={sort} onSort={toggleSort}>
+                            <div className="flex flex-col gap-1 text-center">
+                                <div>Sale</div>
+                                <div>Ngày nhận data</div>
+                            </div>
                         </Th>
                         <Th sortable sortKey="currentOperation" sort={sort} onSort={toggleSort}>
-                            <div>Tác nghiệp</div>
-                            <div className="font-normal text-xs mt-0.5">Ngày chốt đơn</div>
+                            <div className="flex flex-col gap-1 text-center">
+                                <div>Tác nghiệp</div>
+                                <div>Ngày chốt đơn</div>
+                            </div>
                         </Th>
-                        <Th>
-                            <div>Kết quả</div>
-                            <div className="font-normal text-xs mt-0.5">Ngày sale tác nghiệp</div>
+                        <Th className="text-center">
+                            <div className="flex flex-col gap-1 text-center">
+                                <div>Kết quả</div>
+                                <div>Ngày sale tác nghiệp</div>
+                            </div>
                         </Th>
-                        <Th>Sản phẩm - Số lượng - Đơn giá</Th>
+                        <Th className="text-center w-80">
+                            <div>Sản phẩm - Số lượng - Đơn giá</div>
+                        </Th>
                         <Th sortable sortKey="total" sort={sort} onSort={toggleSort} className="text-right">
-                            <div>Thành tiền</div>
-                            <div className="font-normal text-xs mt-0.5">CK/VAT</div>
-                            <div className="font-normal text-xs mt-0.5">Phí VC/Tổng tiền</div>
+                            <div className="flex flex-col gap-1 text-center">
+                                <div>Thành tiền</div>
+                                <div className="font-normal text-xs">CK/VAT</div>
+                                <div className="font-normal text-xs">Phí VC/Tổng tiền</div>
+                            </div>
                         </Th>
-                        <Th>Khách đặt cọc</Th>
-                        <Th>
-                            <div>Kho</div>
-                            <div className="font-normal text-xs mt-0.5">PTGH</div>
-                            <div className="font-normal text-xs mt-0.5">Mã giao vận</div>
+                        <Th className="text-center">Khách đặt cọc</Th>
+                        <Th className="text-center">
+                            <div className="flex flex-col gap-1 text-center">
+                                <div>Kho</div>
+                                <div className="font-normal text-xs">PTGH</div>
+                                <div className="font-normal text-xs">Mã giao vận</div>
+                            </div>
                         </Th>
                         <Th sortable sortKey="deliveryStatus" sort={sort} onSort={toggleSort}>
-                            <div>Trạng thái giao hàng</div>
-                            <div className="font-normal text-xs mt-0.5">Ngày muốn nhận hàng</div>
+                            <div className="flex flex-col gap-1 text-center">
+                                <div>Trạng thái giao hàng</div>
+                                <div className="font-normal text-xs">Ngày muốn nhận hàng</div>
+                            </div>
                         </Th>
-                        <Th>ĐSNB</Th>
+                        <Th className="text-center">ĐSNB</Th>
 
                         {enableSaleActions && <Th>Thao tác</Th>}
                         {enableCloseOrder && <Th>Đóng đơn</Th>}
@@ -114,6 +136,9 @@ export function OperationOrderTable({
                     {sortedRows.length ? (
                         sortedRows.map((row) => (
                             <tr key={row.id} className="align-middle hover:bg-muted/30 border-b">
+
+                                <Td className="text-center font-medium">{row.orderCode}</Td>
+
                                 <Td className="text-center text-sm">
                                     <div className="text-blue-500 hover:underline cursor-pointer">{row.sourceName}</div>
                                     <div className="text-muted-foreground mt-1 text-[11px]">{formatDateTime(row.dataArrivedAt)}</div>
