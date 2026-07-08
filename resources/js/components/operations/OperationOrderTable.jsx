@@ -58,7 +58,6 @@ export function OperationOrderTable({
             <table className="min-w-[2720px] w-full border-collapse">
                 <thead className="bg-[#3782dc] text-white">
                     <tr>
-                        <Th className="w-10 text-center"><input type="checkbox" className="size-4 rounded border-white/50" /></Th>
                         <Th sortable sortKey="orderCode" sort={sort} onSort={toggleSort}>Mã đơn</Th>
                         <Th sortable sortKey="dataArrivedAt" sort={sort} onSort={toggleSort}>
                             <div>Nguồn dữ liệu</div>
@@ -113,12 +112,8 @@ export function OperationOrderTable({
                 </thead>
                 <tbody>
                     {sortedRows.length ? (
-                        sortedRows.map((row, index) => (
+                        sortedRows.map((row) => (
                             <tr key={row.id} className="align-middle hover:bg-muted/30 border-b">
-                                <Td className="text-center"><input type="checkbox" className="size-4" /></Td>
-
-                                <Td className="text-center font-medium">{index + 1}</Td>
-
                                 <Td className="text-center text-sm">
                                     <div className="text-blue-500 hover:underline cursor-pointer">{row.sourceName}</div>
                                     <div className="text-muted-foreground mt-1 text-[11px]">{formatDateTime(row.dataArrivedAt)}</div>
