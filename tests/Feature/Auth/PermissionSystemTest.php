@@ -170,4 +170,20 @@ class PermissionSystemTest extends TestCase
             ->get(route('admin.users.create'))
             ->assertForbidden();
     }
+    public function test_default_customer_permissions_match_operational_roles(): void
+    {
+        $sales = User::factory()->create(['role' => UserRole::Sales]);
+        $warehouse = User::factory()->create(['role' => UserRole::Warehouse]);
+        $marketing = User::factory()->create(['role' => UserRole::Marketing]);
+        $accounting = User::factory()->create(['role' => UserRole::Accounting]);
+        $allocator = User::factory()->create(['role' => UserRole::Allocator]);
+
+        $this->assertTrue($sales->allows(PermissionArea::Customers, PermissionLevel::Full));
+        $this->assertTrue($warehouse->allows(PermissionArea::Customers, PermissionLevel::Full));
+        $this->assertTrue($marketing->allows(PermissionArea::Customers, PermissionLevel::View));
+        $this->assertFalse($marketing->allows(PermissionArea::Customers, PermissionLevel::Full));
+        $this->assertTrue($accounting->allows(PermissionArea::Customers, PermissionLevel::View));
+        $this->assertTrue($allocator->allows(PermissionArea::Customers, PermissionLevel::View));
+    }
+
 }

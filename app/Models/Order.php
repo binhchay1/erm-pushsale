@@ -138,6 +138,17 @@ class Order extends Model
         return $this->hasMany(ShippingApiLog::class);
     }
 
+
+    public function operationHistories(): HasMany
+    {
+        return $this->hasMany(OrderOperationHistory::class);
+    }
+
+    public function internalMessages(): HasMany
+    {
+        return $this->hasMany(CustomerInternalMessage::class);
+    }
+
     /**
      * Doanh thu gộp cấp đơn = GIÁ TRỊ CUỐI của đơn (đã gồm combo & trừ mọi chiết khấu).
      *

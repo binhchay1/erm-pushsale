@@ -1,14 +1,17 @@
-import { Heart } from 'lucide-react';
+import { Copy, Heart } from 'lucide-react';
 
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { CloseOrderButton } from '@/components/operations/CloseOrderButton';
 import { OperationCallButton } from '@/components/operations/OperationCallButton';
 import { OperationStatusDialog } from '@/components/operations/OperationStatusDialog';
+import { CustomerMessagesDialog } from '@/components/customers/CustomerMessagesDialog';
+import { OrderOperationHistoryDialog } from '@/components/customers/OrderOperationHistoryDialog';
+import { CustomerPurchaseHistoryDialog } from '@/components/customers/CustomerPurchaseHistoryDialog';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useTableSort } from '@/hooks/use-table-sort';
-import { formatCurrency } from '@/lib/format';
-import { closingTone, deliveryTone } from '@/lib/status-tones';
+import { formatCurrency, formatDateTime } from '@/lib/format';
+import { deliveryTone } from '@/lib/status-tones';
 import { useT } from '@/providers/I18nProvider';
 
 const CARRIER_STYLES = {
@@ -30,18 +33,6 @@ function CarrierBadge({ carrier, carrierKey }) {
     );
 }
 
-function formatDateTime(value) {
-    if (!value) return null;
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
-    return date.toLocaleString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'Asia/Ho_Chi_Minh',
-    });
-}
 
 export function OperationOrderTable({
     rows,
@@ -58,178 +49,174 @@ export function OperationOrderTable({
     const t = useT();
     const actionCols =
         (enableSaleActions ? 1 : 0) + (enableCloseOrder ? 1 : 0) + (enableDeleteOrder ? 1 : 0);
-    const baseCols = 14;
-    // Realtime-safe: sort recomputes on prop refresh, chosen column persists.
+    const baseCols = 15;
+
     const { sortedRows, sort, toggleSort } = useTableSort(rows ?? [], { defaultKey: 'dataArrivedAt', defaultDir: 'desc' });
 
     return (
         <ScrollDataTable>
-            <table className="min-w-[2440px] w-full border-collapse">
-                <thead>
+            <table className="min-w-[2720px] w-full border-collapse">
+                <thead className="bg-[#3782dc] text-white">
                     <tr>
-                        <Th sortable sortKey="orderCode" sort={sort} onSort={toggleSort}>{t('operations.order_table.order_code')}</Th>
-                        <Th sortable sortKey="dataArrivedAt" sort={sort} onSort={toggleSort}>{t('operations.order_table.source_date')}</Th>
-                        <Th sortable sortKey="saleName" sort={sort} onSort={toggleSort}>{t('operations.order_table.sale_assigned')}</Th>
-                        <Th sortable sortKey="customerName" sort={sort} onSort={toggleSort}>{t('operations.order_table.customer')}</Th>
-                        <Th>{t('operations.order_table.receiver')}</Th>
-                        <Th>{t('operations.order_table.message')}</Th>
-                        <Th sortable sortKey="currentOperation" sort={sort} onSort={toggleSort}>{t('operations.order_table.operation')}</Th>
-                        <Th sortable sortKey="operationResult" sort={sort} onSort={toggleSort}>{t('operations.order_table.result')}</Th>
-                        <Th>{t('operations.order_table.products')}</Th>
-                        <Th sortable sortKey="total" sort={sort} onSort={toggleSort}>{t('operations.order_table.finance')}</Th>
-                        <Th>{t('operations.order_table.warehouse_shipping')}</Th>
-                        <Th sortable sortKey="closingStatusLabel" sort={sort} onSort={toggleSort}>{t('operations.order_table.closing')}</Th>
-                        <Th sortable sortKey="deliveryStatus" sort={sort} onSort={toggleSort}>{t('operations.order_table.delivery')}</Th>
-                        <Th>{t('operations.order_table.internal_recon')}</Th>
-                        {enableSaleActions && <Th>{t('operations.order_table.actions')}</Th>}
-                        {enableCloseOrder && <Th>{t('operations.order_table.close')}</Th>}
+                        <Th className="w-10 text-center"><input type="checkbox" className="size-4 rounded border-white/50" /></Th>
+                        <Th sortable sortKey="orderCode" sort={sort} onSort={toggleSort}>Mã đơn</Th>
+                        <Th sortable sortKey="dataArrivedAt" sort={sort} onSort={toggleSort}>
+                            <div>Nguồn dữ liệu</div>
+                            <div className="font-normal text-xs mt-0.5">Ngày data về</div>
+                        </Th>
+                        <Th sortable sortKey="customerName" sort={sort} onSort={toggleSort}>
+                            <div>Họ tên</div>
+                            <div className="font-normal text-xs mt-0.5">Số điện thoại</div>
+                        </Th>
+                        <Th>
+                            <div>Địa chỉ</div>
+                            <div className="font-normal text-xs mt-0.5">Địa chỉ nhận hàng</div>
+                        </Th>
+                        <Th>
+                            <div>Tin nhắn</div>
+                            <div className="font-normal text-xs mt-0.5">Ghi chú khách hàng</div>
+                        </Th>
+                        <Th sortable sortKey="saleName" sort={sort} onSort={toggleSort}>
+                            <div>Sale</div>
+                            <div className="font-normal text-xs mt-0.5">Ngày nhận data</div>
+                        </Th>
+                        <Th sortable sortKey="currentOperation" sort={sort} onSort={toggleSort}>
+                            <div>Tác nghiệp</div>
+                            <div className="font-normal text-xs mt-0.5">Ngày chốt đơn</div>
+                        </Th>
+                        <Th>
+                            <div>Kết quả</div>
+                            <div className="font-normal text-xs mt-0.5">Ngày sale tác nghiệp</div>
+                        </Th>
+                        <Th>Sản phẩm - Số lượng - Đơn giá</Th>
+                        <Th sortable sortKey="total" sort={sort} onSort={toggleSort} className="text-right">
+                            <div>Thành tiền</div>
+                            <div className="font-normal text-xs mt-0.5">CK/VAT</div>
+                            <div className="font-normal text-xs mt-0.5">Phí VC/Tổng tiền</div>
+                        </Th>
+                        <Th>Khách đặt cọc</Th>
+                        <Th>
+                            <div>Kho</div>
+                            <div className="font-normal text-xs mt-0.5">PTGH</div>
+                            <div className="font-normal text-xs mt-0.5">Mã giao vận</div>
+                        </Th>
+                        <Th sortable sortKey="deliveryStatus" sort={sort} onSort={toggleSort}>
+                            <div>Trạng thái giao hàng</div>
+                            <div className="font-normal text-xs mt-0.5">Ngày muốn nhận hàng</div>
+                        </Th>
+                        <Th>ĐSNB</Th>
+
+                        {enableSaleActions && <Th>Thao tác</Th>}
+                        {enableCloseOrder && <Th>Đóng đơn</Th>}
                         {enableDeleteOrder && <Th />}
                     </tr>
                 </thead>
                 <tbody>
                     {sortedRows.length ? (
-                        sortedRows.map((row) => (
-                            <tr key={row.id} className="align-top hover:bg-muted/30">
-                                <Td className="font-mono text-primary">{row.orderCode}</Td>
-                                <Td>
-                                    <div className="font-medium">{row.sourceName}</div>
-                                    <div className="text-muted-foreground">{row.dataArrivedAt?.slice(0, 10)}</div>
+                        sortedRows.map((row, index) => (
+                            <tr key={row.id} className="align-middle hover:bg-muted/30 border-b">
+                                <Td className="text-center"><input type="checkbox" className="size-4" /></Td>
+
+                                <Td className="text-center font-medium">{index + 1}</Td>
+
+                                <Td className="text-center text-sm">
+                                    <div className="text-blue-500 hover:underline cursor-pointer">{row.sourceName}</div>
+                                    <div className="text-muted-foreground mt-1 text-[11px]">{formatDateTime(row.dataArrivedAt)}</div>
                                 </Td>
+
                                 <Td>
-                                    <div>{row.saleName}</div>
-                                    <div className="text-muted-foreground">{row.saleGroup}</div>
-                                    <div className="text-[11px] text-muted-foreground">
-                                        {t('operations.order_table.assigned')} {row.assignedAt?.slice(0, 10) ?? '—'}
+                                    <div className="text-blue-500 font-medium">{row.customerName}</div>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-blue-500">{row.customerPhone}</span>
+                                        <Copy className="size-3.5 text-red-500 cursor-pointer" />
+                                        {row.isReturningCustomer && <Heart className="size-3.5 fill-red-500 text-red-500" />}
                                     </div>
-                                </Td>
-                                <Td className="max-w-[220px] whitespace-normal">
-                                    <div className="flex items-center gap-1 font-medium text-primary">
-                                        <span>{row.customerName}</span>
-                                        {row.isReturningCustomer && (
-                                            <span title={t('operations.order_table.returning_customer')} className="inline-flex">
-                                                <Heart className="size-3.5 shrink-0 fill-rose-500 text-rose-500" />
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div>{row.customerPhone}</div>
                                     <CarrierBadge carrier={row.phoneCarrier} carrierKey={row.phoneCarrierKey} />
-                                    {row.isReturningCustomer && (
-                                        <div className="mt-0.5 text-[10px] font-medium text-rose-600 dark:text-rose-400">
-                                            {t('operations.order_table.returning_customer')}
-                                        </div>
-                                    )}
-                                    {(row.effectiveShippingAddress || row.shippingAddress) && (
+                                </Td>
+
+                                <Td className="max-w-[320px] whitespace-normal text-sm leading-relaxed">
+                                    <div className="font-medium text-foreground">
+                                        {row.effectiveShippingAddress || row.shippingAddress || '—'}
+                                    </div>
+                                    {row.hasDifferentReceiver && (
                                         <div className="mt-1 text-[11px] text-muted-foreground">
-                                            {row.effectiveShippingAddress || row.shippingAddress}
-                                            {row.shippingAddress2 && (
-                                                <span className="ml-1 rounded bg-emerald-100 px-1 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
-                                                    {t('operations.order_table.address_confirmed')}
-                                                </span>
-                                            )}
+                                            Người nhận: {[row.effectiveReceiverName, row.effectiveReceiverPhone].filter(Boolean).join(' · ')}
                                         </div>
                                     )}
                                 </Td>
-                                <Td className="max-w-[180px] whitespace-normal">
-                                    {row.hasDifferentReceiver ? (
-                                        <>
-                                            <div className="font-medium">{row.effectiveReceiverName || '—'}</div>
-                                            <div className="text-muted-foreground">{row.effectiveReceiverPhone}</div>
-                                            <span className="mt-0.5 inline-flex w-fit rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
-                                                {t('operations.order_table.receiver_other')}
-                                            </span>
-                                        </>
-                                    ) : (
-                                        <span className="text-[11px] text-muted-foreground">
-                                            {t('operations.order_table.receiver_same')}
-                                        </span>
-                                    )}
-                                </Td>
-                                <Td className="max-w-[200px] whitespace-normal text-muted-foreground">
+
+                                <Td className="max-w-[300px] whitespace-normal text-sm leading-relaxed">
                                     {row.customerNote || '—'}
                                 </Td>
-                                <Td>
-                                    <span className="font-semibold text-destructive">{row.currentOperation}</span>
-                                    {row.awaitingLandingUpsell && (
-                                        <div className="mt-1 inline-flex w-fit rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-800 dark:bg-sky-950/50 dark:text-sky-300">
-                                            {t('operations.order_table.awaiting_upsell')}
-                                        </div>
-                                    )}
+
+                                <Td className="text-center text-sm">
+                                    <div className="font-medium">{row.saleName}</div>
+                                    <div className="text-muted-foreground text-[11px] mt-1">{formatDateTime(row.assignedAt)}</div>
+                                </Td>
+
+                                <Td className="text-center text-sm">
+                                    <div className="font-medium">{row.currentOperation || 'Khách mới'}</div>
                                     {row.closedAt && (
-                                        <div className="text-[11px] text-emerald-700 dark:text-emerald-400">
-                                            {t('operations.order_table.closed_date')} {formatDateTime(row.closedAt)}
-                                        </div>
+                                        <div className="text-muted-foreground text-[11px] mt-1">{formatDateTime(row.closedAt)}</div>
                                     )}
+                                </Td>
+
+                                <Td className="text-center">
+                                    <div className="mb-1 flex items-center justify-center gap-1">
+                                        <CustomerMessagesDialog order={row} />
+                                        <OrderOperationHistoryDialog order={row} />
+                                        <CustomerPurchaseHistoryDialog order={row} />
+                                    </div>
+                                    <div className="text-sm">{row.operationResult}</div>
                                     {row.nextOperationAt && (
-                                        <div className="mt-1 text-[11px] text-amber-700 dark:text-amber-400">
-                                            {t('operations.order_table.scheduled')} {formatDateTime(row.nextOperationAt)}
-                                        </div>
-                                    )}
-                                    {row.contactCount > 0 && (
-                                        <div className="text-[11px] text-muted-foreground">
-                                            {t('operations.order_table.called', { count: row.contactCount })}
-                                        </div>
+                                        <div className="text-muted-foreground text-[11px] mt-1">{formatDateTime(row.nextOperationAt)}</div>
                                     )}
                                 </Td>
-                                <Td className="whitespace-normal text-muted-foreground">
-                                    {row.operationResult || '—'}
-                                </Td>
-                                <Td className="whitespace-normal">
+
+                                <Td className="whitespace-normal text-sm">
                                     {row.products?.map((p) => (
-                                        <div key={p.itemId ?? p.productName}>
-                                            {p.productName} x{p.quantity} — {formatCurrency(p.unitPrice)}
-                                            {p.itemType && p.itemType !== 'product' && (
-                                                <span className="ml-1 text-[10px] uppercase text-muted-foreground">
-                                                    [{p.itemType}]
-                                                </span>
-                                            )}
+                                        <div key={p.itemId ?? p.productName} className="flex justify-between items-center gap-4 border-b border-dashed border-gray-200 last:border-0 pb-1 mb-1 last:pb-0 last:mb-0">
+                                            <span className="flex-1">{p.productName}</span>
+                                            <span className="w-10 text-center">x{p.quantity}</span>
+                                            <span className="w-20 text-right">{formatCurrency(p.unitPrice)}</span>
                                         </div>
                                     ))}
                                 </Td>
-                                <Td>
-                                    <div>{t('operations.order_table.subtotal')} {formatCurrency(row.subtotal)}</div>
-                                    {row.discount > 0 && (
-                                        <div className="text-rose-600 dark:text-rose-400">
-                                            {t('operations.order_table.discount')} {formatCurrency(row.discount)}
-                                        </div>
-                                    )}
-                                    {row.vat > 0 && (
-                                        <div className="text-muted-foreground">
-                                            {t('operations.order_table.vat')} {formatCurrency(row.vat)}
-                                        </div>
-                                    )}
-                                    <div>{t('operations.order_table.shipping_fee')} {formatCurrency(row.shippingFeeCollected)}</div>
-                                    <div className="font-semibold">{t('operations.order_table.total')} {formatCurrency(row.total)}</div>
-                                    {row.deposit > 0 && (
-                                        <div className="text-muted-foreground">
-                                            {t('operations.order_table.deposit')} {formatCurrency(row.deposit)}
-                                        </div>
-                                    )}
+
+                                <Td className="text-right text-sm font-medium">
+                                    <div>{formatCurrency(row.subtotal)}</div>
+                                    <div className="text-muted-foreground font-normal">
+                                        {row.discount > 0 ? `-${formatCurrency(row.discount)}` : '0'}
+                                    </div>
+                                    <div className="text-muted-foreground font-normal">
+                                        {row.shippingFeeCollected > 0 ? formatCurrency(row.shippingFeeCollected) : '0'}
+                                    </div>
+                                    <div className="font-bold mt-1 text-black">{formatCurrency(row.total)}</div>
                                 </Td>
-                                <Td className="whitespace-normal">
-                                    <div>{row.warehouseName || '—'}</div>
-                                    {row.shippingProvider && (
-                                        <div className="text-[11px] text-muted-foreground">{row.shippingProvider}</div>
-                                    )}
-                                    {row.trackingNumber && (
-                                        <div className="font-mono text-[11px] text-primary">{row.trackingNumber}</div>
-                                    )}
+
+                                <Td className="text-center text-sm">
+                                    {row.deposit > 0 ? formatCurrency(row.deposit) : ''}
                                 </Td>
-                                <Td>
-                                    <StatusBadge tone={closingTone(row.closingStatus)}>
-                                        {row.closingStatusLabel}
-                                    </StatusBadge>
+
+                                <Td className="whitespace-normal text-center text-sm">
+                                    <div>{row.warehouseName}</div>
+                                    {row.shippingProvider && <div className="text-muted-foreground">{row.shippingProvider}</div>}
+                                    {row.trackingNumber && <div className="font-mono text-primary">{row.trackingNumber}</div>}
                                 </Td>
-                                <Td>
+
+                                <Td className="text-center">
                                     <StatusBadge tone={deliveryTone(row.deliveryStatusValue)}>
                                         {row.deliveryStatus}
                                     </StatusBadge>
                                     {row.desiredDeliveryAt && (
-                                        <div className="mt-1 text-muted-foreground">{row.desiredDeliveryAt}</div>
+                                        <div className="mt-1 text-muted-foreground text-[11px]">{formatDateTime(row.desiredDeliveryAt, { withTime: false })}</div>
                                     )}
                                 </Td>
-                                <Td className="max-w-[160px] whitespace-normal text-[11px] text-muted-foreground">
-                                    {row.internalReconNote || '—'}
+
+                                <Td className="max-w-[120px] whitespace-normal text-center text-sm text-muted-foreground">
+                                    {row.internalReconNote}
                                 </Td>
+
                                 {enableSaleActions && (
                                     <Td>
                                         <div className="flex flex-col gap-1.5">
@@ -247,9 +234,7 @@ export function OperationOrderTable({
                                     </Td>
                                 )}
                                 {enableCloseOrder && (
-                                    <Td>
-                                        <CloseOrderButton order={row} />
-                                    </Td>
+                                    <Td><CloseOrderButton order={row} /></Td>
                                 )}
                                 {enableDeleteOrder && (
                                     <Td>
@@ -264,10 +249,7 @@ export function OperationOrderTable({
                         ))
                     ) : (
                         <tr>
-                            <Td
-                                colSpan={baseCols + actionCols}
-                                className="py-8 text-center text-muted-foreground"
-                            >
+                            <Td colSpan={baseCols + actionCols} className="py-8 text-center text-muted-foreground">
                                 {t('operations.order_table.no_data')}
                             </Td>
                         </tr>

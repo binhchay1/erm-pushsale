@@ -3,7 +3,9 @@
 namespace App\Services\Operations;
 
 use App\Models\Order;
+use App\Models\OrderOperationHistory;
 use App\Models\User;
+use App\Services\CustomerInteractions\OrderOperationHistoryService;
 use App\Services\Leads\LandingUpsellService;
 use App\Services\Leads\LeadOrderFactory;
 use App\Support\ActivityLogger;
@@ -21,6 +23,7 @@ class SaleOrderEditService
     public function __construct(
         private readonly LeadOrderFactory $factory,
         private readonly LandingUpsellService $landingUpsell,
+        private readonly OrderOperationHistoryService $history,
     ) {}
 
     /**
@@ -43,6 +46,8 @@ class SaleOrderEditService
         $this->landingUpsell->lockFromSaleAction($order);
 
         return DB::transaction(function () use ($order, $actor, $payload) {
+            $before = $this->history->snapshot($order);
+
             if (array_key_exists('items', $payload) && is_array($payload['items'])) {
                 $order->items()->delete();
                 foreach ($this->factory->buildItemRows($payload['items'], 'telesale') as $row) {
@@ -102,17 +107,29 @@ class SaleOrderEditService
 
             $fresh = $this->factory->syncTotals($order->fresh(['items']));
 
+            $metadata = [
+                'changed_fields' => array_values(array_keys($payload)),
+                'total' => (int) $fresh->total,
+                'discount' => (int) $fresh->discount,
+                'items' => $fresh->items->count(),
+                'shipping_provider' => $fresh->shipping_provider,
+            ];
+
             ActivityLogger::log(
                 ActivityLogger::ORDER_UPDATED,
                 $fresh,
-                [
-                    'total' => $fresh->total,
-                    'discount' => $fresh->discount,
-                    'items' => $fresh->items->count(),
-                    'shipping_provider' => $fresh->shipping_provider,
-                ],
+                $metadata,
                 $fresh->order_code ?? ('#'.$fresh->id),
                 $actor,
+            );
+
+            $this->history->record(
+                $fresh,
+                $actor,
+                OrderOperationHistory::ACTION_ORDER_UPDATED,
+                $before,
+                $this->history->snapshot($fresh),
+                metadata: $metadata,
             );
 
             return $fresh->fresh(['items', 'saleUser', 'team', 'marketingSource', 'warehouse']);

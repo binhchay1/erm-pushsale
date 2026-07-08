@@ -22,21 +22,11 @@ class NavigationService
 
         $groups = match ($user->role) {
             UserRole::Admin => $this->adminNavigation($user),
-            UserRole::Sales => $this->grouped([
-                $this->group(null, $this->salesItems()),
-            ]),
-            UserRole::Marketing => $this->grouped([
-                $this->group(null, $this->marketingItems($user)),
-            ]),
-            UserRole::Warehouse => $this->grouped([
-                $this->group(null, $this->warehouseItems($user)),
-            ]),
-            UserRole::Accounting => $this->grouped([
-                $this->group(null, $this->accountingItems()),
-            ]),
-            UserRole::Allocator => $this->grouped([
-                $this->group(null, $this->allocatorItems($user)),
-            ]),
+            UserRole::Sales => $this->salesNavigation(),
+            UserRole::Marketing => $this->marketingNavigation($user),
+            UserRole::Warehouse => $this->warehouseNavigation($user),
+            UserRole::Accounting => $this->accountingNavigation(),
+            UserRole::Allocator => $this->allocatorNavigation($user),
         };
 
         return $this->filterByPermission($user, $groups);
@@ -109,6 +99,7 @@ class NavigationService
             ]),
             $this->group('telesale', [
                 $this->item('leads_log', '/admin/leads', 'inbox'),
+                $this->item('customers', '/customers', 'book-user', 'customers'),
             ]),
             $this->group('connections', [
                 $this->item('integrations', '/admin/integrations', 'plug'),
@@ -147,102 +138,159 @@ class NavigationService
         return $this->grouped($groups);
     }
 
-    /** @return list<array{title_key: string, url: string, icon: string}> */
-    private function salesItems(): array
+    /** @return list<array{label_key?: string, items: list<array<string, string>>}> */
+    private function salesNavigation(): array
     {
-        return [
-            $this->item('overview', '/sales/dashboard', 'home'),
-            $this->item('workspace_sales', '/sales/workspace', 'phone-call', 'telesale'),
-            $this->item('performance_report', '/sales/performance', 'bar-chart-3', 'reports'),
-            $this->item('extra_report', '/sales/reports/sale-1', 'file-bar-chart', 'reports'),
-            $this->item('rankings', '/sales/rankings', 'trophy', 'reports'),
-            $this->item('customers', '/sales/customers', 'book-user', 'customers'),
-            $this->item('users', '/admin/users', 'users', 'hr'),
-            $this->item('org_chart', '/org-chart', 'git-branch'),
-            $this->item('settings', '/settings', 'settings'),
-        ];
+        return $this->grouped([
+            $this->group('operations', [
+                $this->item('overview', '/sales/dashboard', 'home'),
+                $this->item('workspace_sales', '/sales/workspace', 'phone-call', 'telesale'),
+            ]),
+            $this->group('reports_sales', [
+                $this->item('performance_report', '/sales/performance', 'bar-chart-3', 'reports'),
+                $this->item('extra_report', '/sales/reports/sale-1', 'file-bar-chart', 'reports'),
+                $this->item('rankings', '/sales/rankings', 'trophy', 'reports'),
+            ]),
+            $this->group('telesale', [
+                $this->item('customers', '/customers', 'book-user', 'customers'),
+            ]),
+            $this->group('hr_catalog', [
+                $this->item('users', '/admin/users', 'users', 'hr'),
+                $this->item('org_chart', '/org-chart', 'git-branch'),
+            ]),
+            $this->group('platform', [
+                $this->item('settings', '/settings', 'settings'),
+            ]),
+        ]);
     }
 
-    /** @return list<array{title_key: string, url: string, icon: string}> */
-    private function marketingItems(User $user): array
+    /** @return list<array{label_key?: string, items: list<array<string, string>>}> */
+    private function marketingNavigation(User $user): array
     {
-        $items = [
-            $this->item('overview', '/marketing/dashboard', 'home'),
+        $marketingItems = [
             $this->item('marketing_workspace', '/marketing/workspace', 'share2', 'marketing'),
-            $this->item('campaign_report', '/marketing/campaign-report', 'pie-chart', 'reports'),
             $this->item('campaigns', '/marketing/campaigns', 'layout-template', 'marketing'),
-            $this->item('leads_log', '/marketing/leads', 'inbox', 'leads'),
-            $this->item('revenue_report', '/marketing/revenue', 'trending-up', 'reports'),
-            $this->item('extra_report', '/marketing/reports/marketing-1', 'file-bar-chart', 'reports'),
-            $this->item('marketing_report_3', '/marketing/reports/marketing-3', 'clipboard-list', 'reports'),
-            $this->item('upsale_report', '/marketing/reports/marketing-4', 'trending-up', 'reports'),
-            $this->item('team_leader_stats', '/marketing/reports/team-leaders', 'network', 'reports'),
-            $this->item('hourly_stats', '/marketing/reports/hourly', 'clock', 'reports'),
-            $this->item('rankings', '/marketing/rankings', 'trophy', 'reports'),
         ];
 
         if ($this->campaignApproval->canViewApprovals($user)) {
-            $items[] = $this->item('landing_approvals', '/marketing/landing-approvals', 'layout-template', 'marketing');
+            $marketingItems[] = $this->item('landing_approvals', '/marketing/landing-approvals', 'layout-template', 'marketing');
         }
 
-        return array_merge($items, [
-            $this->item('users', '/admin/users', 'users', 'hr'),
-            $this->item('org_chart', '/org-chart', 'git-branch'),
-            $this->item('settings', '/settings', 'settings'),
+        return $this->grouped([
+            $this->group('operations', [
+                $this->item('overview', '/marketing/dashboard', 'home'),
+            ]),
+            $this->group('reports_marketing', [
+                $this->item('campaign_report', '/marketing/campaign-report', 'pie-chart', 'reports'),
+                $this->item('revenue_report', '/marketing/revenue', 'trending-up', 'reports'),
+                $this->item('extra_report', '/marketing/reports/marketing-1', 'file-bar-chart', 'reports'),
+                $this->item('marketing_report_3', '/marketing/reports/marketing-3', 'clipboard-list', 'reports'),
+                $this->item('upsale_report', '/marketing/reports/marketing-4', 'trending-up', 'reports'),
+                $this->item('team_leader_stats', '/marketing/reports/team-leaders', 'network', 'reports'),
+                $this->item('hourly_stats', '/marketing/reports/hourly', 'clock', 'reports'),
+                $this->item('rankings', '/marketing/rankings', 'trophy', 'reports'),
+            ]),
+            $this->group('marketing', $marketingItems),
+            $this->group('telesale', [
+                $this->item('leads_log', '/marketing/leads', 'inbox', 'leads'),
+                $this->item('customers', '/customers', 'book-user', 'customers'),
+            ]),
+            $this->group('hr_catalog', [
+                $this->item('users', '/admin/users', 'users', 'hr'),
+                $this->item('org_chart', '/org-chart', 'git-branch'),
+            ]),
+            $this->group('platform', [
+                $this->item('settings', '/settings', 'settings'),
+            ]),
         ]);
     }
 
-    /** @return list<array{title_key: string, url: string, icon: string}> */
-    private function warehouseItems(User $user): array
+    /** @return list<array{label_key?: string, items: list<array<string, string>>}> */
+    private function warehouseNavigation(User $user): array
     {
-        $items = [
-            $this->item('overview', '/warehouse/dashboard', 'home'),
-            $this->item('warehouse_workspace', '/warehouse/workspace', 'truck', 'warehouse'),
-            $this->item('shipping_orders', '/warehouse/shipping/orders', 'package', 'shipping'),
-            $this->item('inventory', '/warehouse/inventory', 'boxes', 'warehouse'),
-        ];
-
+        $reportItems = [];
         if ($user->is_team_leader || in_array($user->org_level, [OrgLevel::Head, OrgLevel::Supervisor], true)) {
-            $items[] = $this->item('warehouse_report', '/warehouse/reports/kho-1', 'chart-area', 'reports');
+            $reportItems[] = $this->item('warehouse_report', '/warehouse/reports/kho-1', 'chart-area', 'reports');
         }
 
-        return array_merge($items, [
-            $this->item('users', '/admin/users', 'users', 'hr'),
-            $this->item('org_chart', '/org-chart', 'git-branch'),
-            $this->item('settings', '/settings', 'settings'),
+        return $this->grouped([
+            $this->group('operations', [
+                $this->item('overview', '/warehouse/dashboard', 'home'),
+                $this->item('warehouse_workspace', '/warehouse/workspace', 'truck', 'warehouse'),
+            ]),
+            $this->group('reports_warehouse', $reportItems),
+            $this->group('telesale', [
+                $this->item('customers', '/customers', 'book-user', 'customers'),
+            ]),
+            $this->group('connections', [
+                $this->item('shipping_orders', '/warehouse/shipping/orders', 'package', 'shipping'),
+            ]),
+            $this->group('warehouse_finance', [
+                $this->item('inventory', '/warehouse/inventory', 'boxes', 'warehouse'),
+            ]),
+            $this->group('hr_catalog', [
+                $this->item('users', '/admin/users', 'users', 'hr'),
+                $this->item('org_chart', '/org-chart', 'git-branch'),
+            ]),
+            $this->group('platform', [
+                $this->item('settings', '/settings', 'settings'),
+            ]),
         ]);
     }
 
-    /** @return list<array{title_key: string, url: string, icon: string}> */
-    private function accountingItems(): array
+    /** @return list<array{label_key?: string, items: list<array<string, string>>}> */
+    private function accountingNavigation(): array
     {
-        return [
-            $this->item('overview', '/accounting/dashboard', 'home'),
-            $this->item('accounting_workspace', '/accounting/workspace', 'wallet', 'accounting'),
-            $this->item('business_report', '/accounting/reports/kho-1', 'receipt', 'reports'),
-            $this->item('users', '/admin/users', 'users', 'hr'),
-            $this->item('org_chart', '/org-chart', 'git-branch'),
-            $this->item('settings', '/settings', 'settings'),
-        ];
+        return $this->grouped([
+            $this->group('operations', [
+                $this->item('overview', '/accounting/dashboard', 'home'),
+            ]),
+            $this->group('reports_warehouse', [
+                $this->item('business_report', '/accounting/reports/kho-1', 'receipt', 'reports'),
+            ]),
+            $this->group('telesale', [
+                $this->item('customers', '/customers', 'book-user', 'customers'),
+            ]),
+            $this->group('warehouse_finance', [
+                $this->item('accounting_workspace', '/accounting/workspace', 'wallet', 'accounting'),
+            ]),
+            $this->group('hr_catalog', [
+                $this->item('users', '/admin/users', 'users', 'hr'),
+                $this->item('org_chart', '/org-chart', 'git-branch'),
+            ]),
+            $this->group('platform', [
+                $this->item('settings', '/settings', 'settings'),
+            ]),
+        ]);
     }
 
-    /** @return list<array{title_key: string, url: string, icon: string}> */
-    private function allocatorItems(User $user): array
+    /** @return list<array{label_key?: string, items: list<array<string, string>>}> */
+    private function allocatorNavigation(User $user): array
     {
-        $items = [
-            $this->item('overview', '/allocator/dashboard', 'home'),
-            $this->item('allocator_workspace', '/allocator/workspace', 'user-plus', 'leads'),
+        $reportItems = [
             $this->item('allocation_report', '/allocator/reports/allocation', 'file-bar-chart', 'reports'),
         ];
 
         if ($user->is_team_leader || in_array($user->org_level, [OrgLevel::Head, OrgLevel::Supervisor], true)) {
-            $items[] = $this->item('allocator_load_report', '/allocator/reports/load', 'gauge', 'reports');
+            $reportItems[] = $this->item('allocator_load_report', '/allocator/reports/load', 'gauge', 'reports');
         }
 
-        return array_merge($items, [
-            $this->item('users', '/admin/users', 'users', 'hr'),
-            $this->item('org_chart', '/org-chart', 'git-branch'),
-            $this->item('settings', '/settings', 'settings'),
+        return $this->grouped([
+            $this->group('operations', [
+                $this->item('overview', '/allocator/dashboard', 'home'),
+                $this->item('allocator_workspace', '/allocator/workspace', 'user-plus', 'leads'),
+            ]),
+            $this->group('reports_sales', $reportItems),
+            $this->group('telesale', [
+                $this->item('customers', '/customers', 'book-user', 'customers'),
+            ]),
+            $this->group('hr_catalog', [
+                $this->item('users', '/admin/users', 'users', 'hr'),
+                $this->item('org_chart', '/org-chart', 'git-branch'),
+            ]),
+            $this->group('platform', [
+                $this->item('settings', '/settings', 'settings'),
+            ]),
         ]);
     }
 

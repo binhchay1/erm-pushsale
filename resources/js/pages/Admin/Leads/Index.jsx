@@ -14,6 +14,7 @@ import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import { useLabels } from '@/hooks/use-labels';
 import { useTableSort } from '@/hooks/use-table-sort';
+import { formatCurrency, formatDateTime } from '@/lib/format';
 import { leadTone } from '@/lib/status-tones';
 import { useT } from '@/providers/I18nProvider';
 
@@ -137,6 +138,7 @@ export default function LeadsIndex({
 
     const selectedSale = salesUsers.find((u) => String(u.id) === String(saleUserId));
     const canAllocate = selected.length > 0 && !!saleUserId && !allocating;
+    const leadTableColumns = 10 + (showAllocationTools ? 1 : 0) + (canDelete ? 1 : 0);
     const allocateGuide = canAllocate
         ? t('pages.leads.ready_to_allocate', { count: selected.length, name: selectedSale?.name ?? '' })
         : saleUserId
@@ -351,30 +353,57 @@ export default function LeadsIndex({
                 </div>
 
                 <ScrollDataTable>
-                    <table className="w-full border-collapse text-xs">
+                    <table className="min-w-[2100px] w-full border-collapse text-xs">
                         <thead>
                             <tr>
                                 {showAllocationTools && (
-                                <Th className="w-10">
-                                    <input
-                                        type="checkbox"
-                                        checked={allPendingSelected}
-                                        onChange={toggleAllPending}
-                                        disabled={!pendingOnPage.length}
-                                        title={t('pages.leads.select_all_pending')}
-                                    />
-                                </Th>
+                                    <Th className="w-10 text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={allPendingSelected}
+                                            onChange={toggleAllPending}
+                                            disabled={!pendingOnPage.length}
+                                            title={t('pages.leads.select_all_pending')}
+                                        />
+                                    </Th>
                                 )}
-                                <Th sortable sortKey="id" sort={sort} onSort={toggleSort}>{t('pages.leads.col_id')}</Th>
-                                <Th sortable sortKey="created_at" sort={sort} onSort={toggleSort}>{t('pages.leads.col_time')}</Th>
-                                <Th sortable sortKey="platform" sort={sort} onSort={toggleSort}>{t('pages.leads.col_platform')}</Th>
-                                <Th sortable sortKey="campaign_name" sort={sort} onSort={toggleSort}>{t('pages.leads.col_campaign')}</Th>
-                                <Th sortable sortKey="customer_name" sort={sort} onSort={toggleSort}>{t('pages.leads.col_customer')}</Th>
-                                <Th sortable sortKey="customer_phone" sort={sort} onSort={toggleSort}>{t('pages.leads.col_phone')}</Th>
-                                <Th sortable sortKey="status" sort={sort} onSort={toggleSort}>{t('pages.leads.col_status')}</Th>
-                                <Th sortable sortKey="order_code" sort={sort} onSort={toggleSort}>{t('pages.leads.col_order')}</Th>
-                                <Th sortable sortKey="incoming" sort={sort} onSort={toggleSort}>{t('pages.leads.col_incoming')}</Th>
-                                <Th sortable sortKey="note" sort={sort} onSort={toggleSort}>{t('pages.leads.col_note')}</Th>
+                                <Th sortable sortKey="id" sort={sort} onSort={toggleSort}>#</Th>
+                                <Th sortable sortKey="created_at" sort={sort} onSort={toggleSort}>
+                                    <div>Nguồn dữ liệu</div>
+                                    <div className="mt-0.5 text-xs font-normal">Ngày data về</div>
+                                </Th>
+                                <Th sortable sortKey="customer_name" sort={sort} onSort={toggleSort}>
+                                    <div>Họ tên</div>
+                                    <div className="mt-0.5 text-xs font-normal">Số điện thoại</div>
+                                </Th>
+                                <Th>
+                                    <div>Địa chỉ</div>
+                                    <div className="mt-0.5 text-xs font-normal">Địa chỉ nhận hàng</div>
+                                </Th>
+                                <Th>
+                                    <div>Tin nhắn</div>
+                                    <div className="mt-0.5 text-xs font-normal">Ghi chú khách hàng</div>
+                                </Th>
+                                <Th>
+                                    <div>Sản phẩm</div>
+                                    <div className="mt-0.5 text-xs font-normal">Số lượng · Đơn giá</div>
+                                </Th>
+                                <Th sortable sortKey="sale_name" sort={sort} onSort={toggleSort}>
+                                    <div>Sale</div>
+                                    <div className="mt-0.5 text-xs font-normal">Ngày nhận data</div>
+                                </Th>
+                                <Th>
+                                    <div>Tác nghiệp</div>
+                                    <div className="mt-0.5 text-xs font-normal">Kết quả · Ngày chốt</div>
+                                </Th>
+                                <Th sortable sortKey="status" sort={sort} onSort={toggleSort}>
+                                    <div>Trạng thái lead</div>
+                                    <div className="mt-0.5 text-xs font-normal">Mã đơn</div>
+                                </Th>
+                                <Th>
+                                    <div>Lỗi / Ghi chú</div>
+                                    <div className="mt-0.5 text-xs font-normal">Thời gian xử lý</div>
+                                </Th>
                                 {canDelete && <Th />}
                             </tr>
                         </thead>
@@ -390,40 +419,77 @@ export default function LeadsIndex({
                                         }
                                     >
                                         {showAllocationTools && (
-                                        <Td>
-                                            {row.status === 'pending' ? (
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selected.includes(row.id)}
-                                                    onChange={() => toggleRow(row.id)}
-                                                />
-                                            ) : null}
-                                        </Td>
+                                            <Td className="text-center">
+                                                {row.status === 'pending' ? (
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selected.includes(row.id)}
+                                                        onChange={() => toggleRow(row.id)}
+                                                    />
+                                                ) : null}
+                                            </Td>
                                         )}
-                                        <Td>{row.id}</Td>
-                                        <Td>{row.created_at}</Td>
-                                        <Td className="font-medium">{row.platform}</Td>
-                                        <Td>{row.campaign_name ?? row.utm_campaign ?? '—'}</Td>
-                                        <Td>{row.customer_name ?? '—'}</Td>
-                                        <Td className="font-mono">{row.customer_phone ?? '—'}</Td>
-                                        <Td>
+                                        <Td className="text-center font-medium">{row.id}</Td>
+                                        <Td className="min-w-52 whitespace-normal text-center">
+                                            <div className="font-semibold text-[#2467b5]">{row.campaign_name ?? row.utm_campaign ?? row.platform ?? '—'}</div>
+                                            <div className="mt-1 text-[11px] text-muted-foreground">{row.platform || '—'}</div>
+                                            <div className="mt-1 text-[11px] text-muted-foreground">{formatDateTime(row.created_at)}</div>
+                                        </Td>
+                                        <Td className="min-w-48 whitespace-normal">
+                                            <div className="font-semibold text-[#2467b5]">{row.customer_name ?? '—'}</div>
+                                            <div className="mt-1 font-mono text-[#2467b5]">{row.customer_phone ?? '—'}</div>
+                                        </Td>
+                                        <Td className="min-w-72 max-w-[340px] whitespace-normal leading-relaxed">
+                                            {row.address ?? '—'}
+                                        </Td>
+                                        <Td className="min-w-64 max-w-[320px] whitespace-normal leading-relaxed text-muted-foreground">
+                                            {row.message ?? '—'}
+                                        </Td>
+                                        <Td className="min-w-72 whitespace-normal">
+                                            {row.products?.length ? row.products.map((product, index) => (
+                                                <div
+                                                    key={`${row.id}-${product.name}-${index}`}
+                                                    className="flex items-start justify-between gap-3 border-b border-dashed py-1.5 last:border-b-0"
+                                                >
+                                                    <span className="min-w-0 flex-1 font-medium">{product.name}</span>
+                                                    <span className="shrink-0">x{product.quantity}</span>
+                                                    <span className="w-20 shrink-0 text-right">
+                                                        {Number(product.unit_price) > 0 ? formatCurrency(product.unit_price) : '—'}
+                                                    </span>
+                                                </div>
+                                            )) : (
+                                                <span className="text-muted-foreground">{row.incoming ?? '—'}</span>
+                                            )}
+                                        </Td>
+                                        <Td className="min-w-48 whitespace-normal text-center">
+                                            <div className="font-semibold">{row.sale_name ?? '—'}</div>
+                                            {row.sale_team && <div className="mt-1 text-[11px] text-muted-foreground">{row.sale_team}</div>}
+                                            <div className="mt-1 text-[11px] text-muted-foreground">{formatDateTime(row.assigned_at)}</div>
+                                        </Td>
+                                        <Td className="min-w-52 whitespace-normal text-center">
+                                            <div className="font-semibold">{row.operation_stage ?? '—'}</div>
+                                            <div className="mt-1 text-muted-foreground">{row.operation_result ?? '—'}</div>
+                                            {row.closed_at && (
+                                                <div className="mt-1 text-[11px] text-muted-foreground">{formatDateTime(row.closed_at)}</div>
+                                            )}
+                                        </Td>
+                                        <Td className="min-w-44 whitespace-normal text-center">
                                             <StatusBadge tone={leadTone(row.status)}>
                                                 {labels.lead_ingestion_status?.[row.status] ?? row.status_label}
                                             </StatusBadge>
-                                        </Td>
-                                        <Td className="font-mono">
-                                            {row.order_code ?? (row.conflict_order_code
-                                                ? <span className="text-rose-600 dark:text-rose-400" title={t('pages.leads.conflict_order')}>{row.conflict_order_code}</span>
-                                                : '—')}
-                                        </Td>
-                                        <Td className="max-w-[200px] truncate text-muted-foreground" title={row.incoming ?? undefined}>
-                                            {row.incoming ?? '—'}
+                                            <div className="mt-2 font-mono font-semibold">
+                                                {row.order_code ?? (row.conflict_order_code
+                                                    ? <span className="text-rose-600 dark:text-rose-400" title={t('pages.leads.conflict_order')}>{row.conflict_order_code}</span>
+                                                    : '—')}
+                                            </div>
                                         </Td>
                                         <Td
-                                            className={`max-w-xs truncate ${row.is_exception ? 'text-rose-600 dark:text-rose-400' : 'text-muted-foreground'}`}
-                                            title={row.error_message ?? undefined}
+                                            className={`min-w-72 max-w-[360px] whitespace-normal leading-relaxed ${row.is_exception ? 'text-rose-600 dark:text-rose-400' : 'text-muted-foreground'}`}
                                         >
-                                            {row.error_message ?? '—'}
+                                            <div>{row.error_message ?? '—'}</div>
+                                            {row.processed_at && (
+                                                <div className="mt-2 text-[11px]">{formatDateTime(row.processed_at)}</div>
+                                            )}
                                         </Td>
                                         {canDelete && (
                                             <Td>
@@ -437,10 +503,7 @@ export default function LeadsIndex({
                                 ))
                             ) : (
                                 <tr>
-                                    <Td
-                                        colSpan={canDelete ? 12 : 11}
-                                        className="py-8 text-center text-muted-foreground"
-                                    >
+                                    <Td colSpan={leadTableColumns} className="py-8 text-center text-muted-foreground">
                                         {t('pages.leads.empty')}
                                     </Td>
                                 </tr>

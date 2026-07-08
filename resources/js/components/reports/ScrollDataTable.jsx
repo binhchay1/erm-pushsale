@@ -11,6 +11,8 @@ export function ScrollDataTable({ children, className }) {
                 '[&_tbody_tr]:border-b [&_tbody_tr]:border-border/50',
                 '[&_tbody_tr:last-child]:border-b-0',
                 '[&_tbody_tr]:transition-colors [&_tbody_tr:hover]:bg-primary/[0.04]',
+                '[&_thead_th]:!border-[#2f72c4] [&_thead_th]:!bg-[#3782dc] [&_thead_th]:!text-white',
+                '[&_thead_th_svg]:!text-white/80',
                 className
             )}
         >
@@ -28,16 +30,16 @@ export function Th({ children, className, colSpan, sortable, sortKey, sort, onSo
             <th
                 colSpan={colSpan}
                 className={cn(
-                    'whitespace-nowrap border-b-2 border-border bg-muted px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-foreground',
-                    'cursor-pointer select-none transition-colors hover:bg-muted',
-                    active && 'text-primary',
+                    'whitespace-nowrap border-b-2 border-[#2f72c4] bg-[#3782dc] px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-white',
+                    'cursor-pointer select-none transition-colors hover:bg-[#2f72c4]',
+                    active && 'text-white',
                     className
                 )}
                 onClick={() => onSort(sortKey)}
             >
                 <span className="inline-flex items-center gap-1">
                     {children}
-                    <Icon className={cn('size-3 shrink-0', active ? 'text-primary' : 'text-muted-foreground/50')} />
+                    <Icon className={cn('size-3 shrink-0', active ? 'text-white' : 'text-white/70')} />
                 </span>
             </th>
         );
@@ -47,7 +49,7 @@ export function Th({ children, className, colSpan, sortable, sortKey, sort, onSo
         <th
             colSpan={colSpan}
             className={cn(
-                'whitespace-nowrap border-b-2 border-border bg-muted px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-foreground',
+                'whitespace-nowrap border-b-2 border-[#2f72c4] bg-[#3782dc] px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-white',
                 className
             )}
         >

@@ -41,6 +41,9 @@ use App\Http\Controllers\Admin\WarehouseInventoryController;
 use App\Http\Controllers\Allocator\DashboardController as AllocatorDashboardController;
 use App\Http\Controllers\Allocator\ReportController as AllocatorReportController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CustomerInteractions\CustomerInternalMessageController;
+use App\Http\Controllers\CustomerInteractions\CustomerPurchaseHistoryController;
+use App\Http\Controllers\CustomerInteractions\OrderOperationHistoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MarketingController;
@@ -109,6 +112,21 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
 
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
+
+
+    // Hồ sơ khách hàng dùng chung cho các vai trò có quyền customers:view.
+    Route::get('customers', CustomerProfileController::class)->name('customers.index');
+
+    // Dialog lịch sử tác nghiệp và trao đổi nội bộ theo khách hàng.
+    // customers:view được xem; customers:full được gửi tin nhắn (mặc định Admin, Sales và Kho).
+    Route::get('customers/orders/{order}/operation-history', [OrderOperationHistoryController::class, 'index'])
+        ->name('customers.orders.operation-history');
+    Route::get('customers/orders/{order}/purchase-history', [CustomerPurchaseHistoryController::class, 'index'])
+        ->name('customers.orders.purchase-history');
+    Route::get('customers/orders/{order}/messages', [CustomerInternalMessageController::class, 'index'])
+        ->name('customers.orders.messages.index');
+    Route::post('customers/orders/{order}/messages', [CustomerInternalMessageController::class, 'store'])
+        ->name('customers.orders.messages.store');
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');

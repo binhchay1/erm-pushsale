@@ -73,16 +73,30 @@ export function formatPercent(value) {
     return `${value}%`;
 }
 
-export function formatDateTime(value, { withTime = true, locale } = {}) {
+export function formatDateTime(value, { withTime = true, withSeconds = true, locale } = {}) {
     if (!value) return '—';
 
     const date = value instanceof Date ? value : new Date(value);
 
     if (Number.isNaN(date.getTime())) return typeof value === 'string' ? value : '—';
 
-    return date.toLocaleString(resolveLocale(locale), withTime
-        ? { dateStyle: 'short', timeStyle: 'short', timeZone: APP_TIMEZONE }
-        : { dateStyle: 'short', timeZone: APP_TIMEZONE });
+    const formatter = new Intl.DateTimeFormat(resolveLocale(locale), {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        ...(withTime
+            ? {
+                hour: '2-digit',
+                minute: '2-digit',
+                ...(withSeconds ? { second: '2-digit' } : {}),
+                hourCycle: 'h23',
+            }
+            : {}),
+        timeZone: APP_TIMEZONE,
+    });
+
+    // vi-VN trả về đúng dạng quen thuộc: 08/07/2026 07:01:58.
+    return formatter.format(date).replace(',', '');
 }
 
 export function formatDate(value, locale) {

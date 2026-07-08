@@ -19,6 +19,7 @@ class CustomerProfileController extends Controller
 
         return Inertia::render('Sales/CustomerProfile', $this->reportPageProps($request, [
             'report' => $service->build($filter),
+            'routeUrl' => '/'.$request->path(),
         ]));
     }
 }

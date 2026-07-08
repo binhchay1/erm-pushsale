@@ -6,7 +6,7 @@ import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
 import { useT } from '@/providers/I18nProvider';
 
-export default function CustomerProfile({ filters, filterOptions, filterFields, report }) {
+export default function CustomerProfile({ filters, filterOptions, filterFields, report, routeUrl = '/customers' }) {
     const t = useT();
 
     return (
@@ -20,7 +20,7 @@ export default function CustomerProfile({ filters, filterOptions, filterFields, 
                 />
 
                 <ReportFilterBar
-                    routeUrl="/sales/customers"
+                    routeUrl={routeUrl}
                     filters={filters}
                     filterOptions={filterOptions}
                     filterFields={filterFields}

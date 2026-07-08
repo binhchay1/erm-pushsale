@@ -27,7 +27,10 @@ class LeadIngestionRepository
     {
         $query = LeadIngestion::query()
             ->with([
-                'order:id,order_code,customer_name,sale_user_id',
+                'order.saleUser:id,name',
+                'order.team:id,name',
+                'order.items:id,order_id,product_name,quantity,unit_price',
+                'order.marketingSource:id,name',
                 'marketingSource:id,name',
             ]);
 

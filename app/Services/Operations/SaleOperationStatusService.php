@@ -10,8 +10,11 @@ use App\Models\User;
 use App\Services\Leads\LandingUpsellService;
 use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Orders\OrderClosingService;
+use App\Models\OrderOperationHistory;
+use App\Services\CustomerInteractions\OrderOperationHistoryService;
 use App\Support\ActivityLogger;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class SaleOperationStatusService
@@ -20,6 +23,7 @@ class SaleOperationStatusService
         private readonly OrderClosingService $closing,
         private readonly InventoryDeductionService $inventory,
         private readonly LandingUpsellService $landingUpsell,
+        private readonly OrderOperationHistoryService $history,
     ) {}
 
     public function logCall(Order $order, User $actor): Order
@@ -32,23 +36,36 @@ class SaleOperationStatusService
             ]);
         }
 
-        $order->update([
-            'contact_count' => (int) $order->contact_count + 1,
-        ]);
+        return DB::transaction(function () use ($order, $actor) {
+            $before = $this->history->snapshot($order);
 
-        $this->landingUpsell->lockFromSaleAction($order);
+            $order->update([
+                'contact_count' => (int) $order->contact_count + 1,
+            ]);
 
-        $fresh = $order->fresh();
+            $this->landingUpsell->lockFromSaleAction($order);
 
-        ActivityLogger::log(
-            ActivityLogger::ORDER_CALL_LOGGED,
-            $fresh,
-            ['contact_count' => $fresh->contact_count],
-            $fresh->order_code ?? ('#'.$fresh->id),
-            $actor,
-        );
+            $fresh = $order->fresh();
 
-        return $fresh;
+            ActivityLogger::log(
+                ActivityLogger::ORDER_CALL_LOGGED,
+                $fresh,
+                ['contact_count' => $fresh->contact_count],
+                $fresh->order_code ?? ('#'.$fresh->id),
+                $actor,
+            );
+
+            $this->history->record(
+                $fresh,
+                $actor,
+                OrderOperationHistory::ACTION_CALL,
+                $before,
+                $this->history->snapshot($fresh),
+                metadata: ['contact_count' => (int) $fresh->contact_count],
+            );
+
+            return $fresh;
+        });
     }
 
     /**
@@ -64,6 +81,7 @@ class SaleOperationStatusService
             ]);
         }
 
+        $before = $this->history->snapshot($order);
         $resultValue = $payload['operation_result'];
 
         if ($resultValue === 'no_answer_auto') {
@@ -92,6 +110,7 @@ class SaleOperationStatusService
             return $this->closing->close($order, $actor, [
                 'operation_result' => $result->value,
                 'confirm_insufficient_stock' => $confirm,
+                'note' => $payload['note'] ?? null,
             ]);
         }
 
@@ -116,11 +135,24 @@ class SaleOperationStatusService
             $updates['customer_note'] = trim($order->customer_note."\n".$payload['note']);
         }
 
-        $this->landingUpsell->lockFromSaleAction($order);
+        return DB::transaction(function () use ($order, $actor, $updates, $before, $payload) {
+            $this->landingUpsell->lockFromSaleAction($order);
 
-        $order->update($updates);
+            $order->update($updates);
 
-        return $order->fresh(['items', 'saleUser', 'team', 'marketingSource', 'warehouse']);
+            $fresh = $order->fresh(['items', 'saleUser', 'team', 'marketingSource', 'warehouse']);
+
+            $this->history->record(
+                $fresh,
+                $actor,
+                OrderOperationHistory::ACTION_STATUS_UPDATED,
+                $before,
+                $this->history->snapshot($fresh),
+                $payload['note'] ?? null,
+            );
+
+            return $fresh;
+        });
     }
 
     private function resolveNextStage(Order $order, OperationResult $result): OperationStage

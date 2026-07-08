@@ -27,7 +27,7 @@ class NavigationTest extends TestCase
             '/sales/performance',
             '/sales/reports/sale-1',
             '/sales/rankings',
-            '/sales/customers',
+            '/customers',
             '/org-chart',
             '/settings',
         ], $urls);
@@ -45,6 +45,7 @@ class NavigationTest extends TestCase
             ->all();
 
         $this->assertContains('/admin/dashboard', $urls);
+        $this->assertContains('/customers', $urls);
         $this->assertNotContains('/sales/workspace', $urls);
     }
 
@@ -58,15 +59,29 @@ class NavigationTest extends TestCase
         $response->assertInertia(fn ($page) => $page
             ->component('Sales/Workspace')
             ->where('auth.user.role', 'sales')
-            ->has('navigation', 1)
+            ->has('navigation', 5)
+            ->where('navigation.0.label_key', 'operations')
             ->where('navigation.0.items.0.url', '/sales/dashboard')
             ->where('navigation.0.items.1.url', '/sales/workspace')
-            ->where('navigation.0.items.2.url', '/sales/performance')
-            ->where('navigation.0.items.3.url', '/sales/reports/sale-1')
-            ->where('navigation.0.items.4.url', '/sales/rankings')
-            ->where('navigation.0.items.5.url', '/sales/customers')
-            ->where('navigation.0.items.6.url', '/org-chart')
-            ->where('navigation.0.items.7.url', '/settings')
+            ->where('navigation.1.label_key', 'reports_sales')
+            ->where('navigation.2.label_key', 'telesale')
+            ->where('navigation.2.items.0.url', '/customers')
+            ->where('navigation.3.label_key', 'hr_catalog')
+            ->where('navigation.3.items.0.url', '/org-chart')
+            ->where('navigation.4.label_key', 'platform')
+            ->where('navigation.4.items.0.url', '/settings')
         );
     }
+    public function test_customer_profile_is_available_in_every_role_navigation_by_default(): void
+    {
+        foreach (UserRole::cases() as $role) {
+            $user = User::factory()->create(['role' => $role]);
+            $urls = collect(app(NavigationService::class)->forUser($user))
+                ->flatMap(fn (array $group) => collect($group['items'])->pluck('url'))
+                ->all();
+
+            $this->assertContains('/customers', $urls, "Role {$role->value} is missing customer profile menu.");
+        }
+    }
+
 }

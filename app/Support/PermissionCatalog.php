@@ -39,15 +39,19 @@ final class PermissionCatalog
             UserRole::Warehouse => [
                 PermissionArea::Warehouse->value => $f,
                 PermissionArea::Shipping->value => $f,
+                // Kho là bộ phận trực tiếp xử lý đơn nên mặc định được trao đổi nội bộ với khách hàng.
+                PermissionArea::Customers->value => $f,
                 PermissionArea::Reports->value => $v,
             ],
             UserRole::Accounting => [
                 PermissionArea::Accounting->value => $f,
                 PermissionArea::Shipping->value => $v,
+                PermissionArea::Customers->value => $v,
                 PermissionArea::Reports->value => $v,
             ],
             UserRole::Allocator => [
                 PermissionArea::Leads->value => $f,
+                PermissionArea::Customers->value => $v,
                 PermissionArea::Reports->value => $v,
             ],
         };

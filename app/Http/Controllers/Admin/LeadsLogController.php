@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\LeadIngestionStatus;
+use App\Enums\OperationResult;
+use App\Enums\OperationStage;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\LeadIngestion;
@@ -40,25 +42,46 @@ class LeadsLogController extends Controller
         }
 
         $leads = $leadRepo->paginatedLog($filters)
-            ->through(fn (LeadIngestion $lead) => [
-                'id' => $lead->id,
-                'platform' => $lead->platform,
-                'external_id' => $lead->external_id,
-                'status' => $lead->status->value,
-                'status_label' => $lead->status->label(),
-                'is_exception' => in_array($lead->status->value, $exceptionStatuses, true),
-                'customer_name' => $lead->customer_name,
-                'customer_phone' => $lead->customer_phone,
-                'product_interest' => $lead->product_interest,
-                'incoming' => $this->incomingSummary($lead),
-                'utm_campaign' => $lead->utm_campaign,
-                'campaign_name' => $lead->marketingSource?->name,
-                'marketing_source_id' => $lead->marketing_source_id,
-                'order_code' => $lead->order?->order_code,
-                'conflict_order_code' => is_array($lead->payload) ? ($lead->payload['conflict_order_code'] ?? null) : null,
-                'error_message' => $lead->error_message,
-                'created_at' => $lead->created_at?->format('d/m/Y H:i'),
-            ]);
+            ->through(function (LeadIngestion $lead) use ($exceptionStatuses): array {
+                $order = $lead->order;
+                $stage = $order ? OperationStage::tryFrom((string) $order->operation_stage) : null;
+                $result = $order ? OperationResult::tryFromStored($order->operation_result) : null;
+
+                return [
+                    'id' => $lead->id,
+                    'platform' => $lead->platform,
+                    'external_id' => $lead->external_id,
+                    'status' => $lead->status->value,
+                    'status_label' => $lead->status->label(),
+                    'is_exception' => in_array($lead->status->value, $exceptionStatuses, true),
+                    'customer_name' => $lead->customer_name,
+                    'customer_phone' => $lead->customer_phone,
+                    'address' => $order?->effectiveShippingAddress() ?: $this->payloadString($lead, [
+                        'shipping_address', 'address', 'customer_address',
+                    ]),
+                    'message' => $order?->customer_note ?: $this->payloadString($lead, [
+                        'message', 'note', 'customer_note', 'content',
+                    ]),
+                    'product_interest' => $lead->product_interest,
+                    'incoming' => $this->incomingSummary($lead),
+                    'products' => $this->leadProducts($lead),
+                    'utm_campaign' => $lead->utm_campaign,
+                    'campaign_name' => $lead->marketingSource?->name ?? $order?->marketingSource?->name,
+                    'marketing_source_id' => $lead->marketing_source_id,
+                    'order_id' => $order?->id ? (string) $order->id : null,
+                    'order_code' => $order?->order_code,
+                    'conflict_order_code' => is_array($lead->payload) ? ($lead->payload['conflict_order_code'] ?? null) : null,
+                    'sale_name' => $order?->saleUser?->name,
+                    'sale_team' => $order?->team?->name,
+                    'assigned_at' => $order?->assigned_at?->toIso8601String(),
+                    'operation_stage' => $stage?->label() ?? $order?->operation_stage,
+                    'operation_result' => $result?->label() ?? $order?->operation_result,
+                    'closed_at' => $order?->closed_at?->toIso8601String(),
+                    'error_message' => $lead->error_message,
+                    'created_at' => $lead->created_at?->toIso8601String(),
+                    'processed_at' => $lead->processed_at?->toIso8601String(),
+                ];
+            });
 
         return Inertia::render('Admin/Leads/Index', [
             'leads' => $leads,
@@ -168,4 +191,63 @@ class LeadsLogController extends Controller
 
         return $lead->product_interest;
     }
+    /** @param list<string> $keys */
+    private function payloadString(LeadIngestion $lead, array $keys): ?string
+    {
+        $payload = is_array($lead->payload) ? $lead->payload : [];
+
+        foreach ($keys as $key) {
+            $value = $payload[$key] ?? null;
+            if (is_scalar($value) && trim((string) $value) !== '') {
+                return trim((string) $value);
+            }
+        }
+
+        return null;
+    }
+
+    /** @return list<array{name: string, quantity: int, unit_price: int}> */
+    private function leadProducts(LeadIngestion $lead): array
+    {
+        if ($lead->order?->items?->isNotEmpty()) {
+            return $lead->order->items->map(fn ($item) => [
+                'name' => (string) $item->product_name,
+                'quantity' => (int) $item->quantity,
+                'unit_price' => (int) $item->unit_price,
+            ])->values()->all();
+        }
+
+        $payload = is_array($lead->payload) ? $lead->payload : [];
+        $items = $payload['items'] ?? [];
+
+        if (! is_array($items)) {
+            return [];
+        }
+
+        return collect($items)
+            ->map(function ($item): ?array {
+                if (is_string($item) && trim($item) !== '') {
+                    return ['name' => trim($item), 'quantity' => 1, 'unit_price' => 0];
+                }
+
+                if (! is_array($item)) {
+                    return null;
+                }
+
+                $name = trim((string) ($item['product_name'] ?? $item['name'] ?? ''));
+                if ($name === '') {
+                    return null;
+                }
+
+                return [
+                    'name' => $name,
+                    'quantity' => max(1, (int) ($item['quantity'] ?? 1)),
+                    'unit_price' => max(0, (int) ($item['unit_price'] ?? $item['price'] ?? 0)),
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+
 }

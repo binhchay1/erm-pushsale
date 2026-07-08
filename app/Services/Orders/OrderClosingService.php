@@ -8,7 +8,9 @@ use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Events\OrderClosed;
 use App\Models\Order;
+use App\Models\OrderOperationHistory;
 use App\Models\User;
+use App\Services\CustomerInteractions\OrderOperationHistoryService;
 use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Leads\LandingUpsellService;
 use App\Support\ActivityLogger;
@@ -20,6 +22,7 @@ class OrderClosingService
     public function __construct(
         private readonly InventoryDeductionService $inventory,
         private readonly LandingUpsellService $landingUpsell,
+        private readonly OrderOperationHistoryService $history,
     ) {}
 
     /**
@@ -54,6 +57,7 @@ class OrderClosingService
         $this->landingUpsell->lockFromSaleAction($order);
 
         return DB::transaction(function () use ($order, $payload, $actor) {
+            $before = $this->history->snapshot($order);
             $amountToCollect = (int) ($payload['amount_to_collect']
                 ?? max(0, (int) $order->total - (int) $order->deposit));
 
@@ -61,6 +65,11 @@ class OrderClosingService
                 ?? (in_array($order->shipping_method, array_keys(config('shipping_partners.providers', [])), true)
                     ? $order->shipping_method
                     : null);
+
+            $customerNote = $order->customer_note;
+            if (filled($payload['note'] ?? null)) {
+                $customerNote = trim(($customerNote ? $customerNote."\n" : '').$payload['note']);
+            }
 
             $order->update([
                 'closed_at' => now(),
@@ -74,6 +83,7 @@ class OrderClosingService
                 'warehouse_id' => $payload['warehouse_id'] ?? $order->warehouse_id,
                 'shipping_provider' => $shippingProvider,
                 'shipping_method' => $payload['shipping_method'] ?? $order->shipping_method,
+                'customer_note' => $customerNote,
             ]);
 
             event(new OrderClosed($order->fresh()));
@@ -89,6 +99,19 @@ class OrderClosingService
                 ],
                 $fresh->order_code ?? ('#'.$fresh->id),
                 $actor,
+            );
+
+            $this->history->record(
+                $fresh,
+                $actor,
+                OrderOperationHistory::ACTION_ORDER_CLOSED,
+                $before,
+                $this->history->snapshot($fresh),
+                $payload['note'] ?? null,
+                [
+                    'amount_to_collect' => (int) $fresh->amount_to_collect,
+                    'delivery_status' => $fresh->delivery_status,
+                ],
             );
 
             return $fresh;
