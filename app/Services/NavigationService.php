@@ -99,7 +99,7 @@ class NavigationService
             ]),
             $this->group('telesale', [
                 $this->item('leads_log', '/admin/leads', 'inbox'),
-                $this->item('customers', '/customers', 'book-user', 'customers'),
+                $this->item('customers', '/admin/customers', 'book-user', 'customers'),
             ]),
             $this->group('connections', [
                 $this->item('integrations', '/admin/integrations', 'plug'),
@@ -152,7 +152,7 @@ class NavigationService
                 $this->item('rankings', '/sales/rankings', 'trophy', 'reports'),
             ]),
             $this->group('telesale', [
-                $this->item('customers', '/customers', 'book-user', 'customers'),
+                $this->item('customers', '/sales/customers', 'book-user', 'customers'),
             ]),
             $this->group('hr_catalog', [
                 $this->item('users', '/admin/users', 'users', 'hr'),
@@ -193,7 +193,7 @@ class NavigationService
             $this->group('marketing', $marketingItems),
             $this->group('telesale', [
                 $this->item('leads_log', '/marketing/leads', 'inbox', 'leads'),
-                $this->item('customers', '/customers', 'book-user', 'customers'),
+                $this->item('customers', '/marketing/customers', 'book-user', 'customers'),
             ]),
             $this->group('hr_catalog', [
                 $this->item('users', '/admin/users', 'users', 'hr'),
@@ -220,7 +220,7 @@ class NavigationService
             ]),
             $this->group('reports_warehouse', $reportItems),
             $this->group('telesale', [
-                $this->item('customers', '/customers', 'book-user', 'customers'),
+                $this->item('customers', '/warehouse/customers', 'book-user', 'customers'),
             ]),
             $this->group('connections', [
                 $this->item('shipping_orders', '/warehouse/shipping/orders', 'package', 'shipping'),
@@ -249,7 +249,7 @@ class NavigationService
                 $this->item('business_report', '/accounting/reports/kho-1', 'receipt', 'reports'),
             ]),
             $this->group('telesale', [
-                $this->item('customers', '/customers', 'book-user', 'customers'),
+                $this->item('customers', '/accounting/customers', 'book-user', 'customers'),
             ]),
             $this->group('warehouse_finance', [
                 $this->item('accounting_workspace', '/accounting/workspace', 'wallet', 'accounting'),
@@ -282,7 +282,7 @@ class NavigationService
             ]),
             $this->group('reports_sales', $reportItems),
             $this->group('telesale', [
-                $this->item('customers', '/customers', 'book-user', 'customers'),
+                $this->item('customers', '/allocator/customers', 'book-user', 'customers'),
             ]),
             $this->group('hr_catalog', [
                 $this->item('users', '/admin/users', 'users', 'hr'),

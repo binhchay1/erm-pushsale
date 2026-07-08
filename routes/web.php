@@ -178,6 +178,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('system-monitor', [SystemMonitorController::class, 'index'])->name('system-monitor.index');
         Route::get('system-monitor/events/{inboundEvent}', [SystemMonitorController::class, 'show'])->name('system-monitor.show');
         Route::get('leads', LeadsLogController::class)->name('leads.index');
+        Route::get('customers', CustomerProfileController::class)->name('customers.index');
         Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
         Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
         Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
@@ -208,6 +209,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
 
     Route::middleware('role:'.User::ROLE_SALES)->prefix('sales')->name('sales.')->group(function () {
         Route::get('dashboard', SalesDashboardController::class)->name('dashboard');
+        Route::get('customers', CustomerProfileController::class)->name('customers');
         Route::get('rankings', SalesRankingController::class)->name('rankings');
         Route::get('performance', SalesPerformanceReportController::class)->name('performance');
         Route::get('workspace', OperationController::class)->name('workspace');
@@ -221,6 +223,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
 
     Route::middleware('role:'.User::ROLE_MARKETING)->prefix('marketing')->name('marketing.')->group(function () {
         Route::get('dashboard', RoleMarketingDashboardController::class)->name('dashboard');
+        Route::get('customers', CustomerProfileController::class)->name('customers');
         Route::get('rankings', MarketingRankingController::class)->name('rankings');
         Route::get('workspace', MarketingDashboardController::class)->name('workspace');
         Route::get('campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
@@ -248,6 +251,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('dashboard', WarehouseDashboardController::class)->name('dashboard');
         Route::get('workspace', WarehouseOperationsController::class)->name('workspace');
         Route::get('inventory', InventoryController::class)->name('inventory');
+        Route::get('customers', CustomerProfileController::class)->name('customers.index');
         Route::post('inventory/intake', [InventoryMovementController::class, 'intake'])->name('inventory.intake');
         Route::post('inventory/export', [InventoryMovementController::class, 'export'])->name('inventory.export');
         Route::get('shipping/orders', [App\Http\Controllers\Warehouse\ShippingOrderController::class, 'index'])->name('shipping.orders');
@@ -264,6 +268,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::middleware('role:'.User::ROLE_ACCOUNTING)->prefix('accounting')->name('accounting.')->group(function () {
         Route::get('dashboard', AccountingDashboardController::class)->name('dashboard');
         Route::get('workspace', AccountingOperationsController::class)->name('workspace');
+        Route::get('customers', CustomerProfileController::class)->name('customers.index');
         Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
     });
 
@@ -275,6 +280,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
         Route::post('leads/import', [ManualLeadController::class, 'import'])->name('leads.import');
         Route::get('leads/import-template', [ManualLeadController::class, 'template'])->name('leads.import-template');
+        Route::get('customers', CustomerProfileController::class)->name('customers.index');
         Route::get('reports/{report}', AllocatorReportController::class)->where('report', '[a-z0-9\-]+')->name('reports');
     });
 
