@@ -8,6 +8,7 @@ return [
     'source_lead' => 'Webhook lead',
     'source_landing' => 'Landing chiến dịch',
     'source_shipping' => 'Webhook vận chuyển',
+    'source_pancake_chat' => 'Webhook chat Pancake',
     'status_received' => 'Đã nhận',
     'status_queued' => 'Đã xếp hàng',
     'status_processed' => 'Đã xử lý',

@@ -19,6 +19,7 @@ export default {
         shipping: 'Shipping & reconciliation',
         accounting: 'Accounting',
         customers: 'Customers',
+        customer_chat: 'Pancake customer chat',
         products: 'Products',
         hr: 'Human resources',
         integrations: 'Integrations',

@@ -11,6 +11,7 @@ enum IntegrationPlatform: string
     case Google = 'google';
     case Shopee = 'shopee';
     case Lazada = 'lazada';
+    case Pancake = 'pancake';
     case Manual = 'manual';
 
     public function label(): string

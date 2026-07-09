@@ -32,7 +32,9 @@ class FinalizeLandingLeadJob implements ShouldQueue
     public function __construct(
         public int $leadId,
         public ?int $companyId = null,
-    ) {}
+    ) {
+        $this->onQueue(config('saleops.queues.webhooks', 'webhooks'));
+    }
 
     public function handle(LeadIngestionService $service, LandingUpsellService $landingUpsell): void
     {

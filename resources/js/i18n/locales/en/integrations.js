@@ -57,6 +57,7 @@ export default {
         social: 'Social & chat',
         landing: 'Landing page / website',
         marketplace: 'Marketplace',
+        pos: 'POS / Omnichannel',
     },
     fields: {
         app_id: 'App ID',
@@ -71,6 +72,10 @@ export default {
         partner_key: 'Partner key',
         shop_id: 'Shop ID',
         app_key: 'App key',
+        extension_token: 'Extension token',
+        default_marketing_source_id: 'Default source ID',
+        default_warehouse_id: 'Default warehouse ID',
+        default_shipping_provider: 'Default shipping provider',
     },
     platforms: {
         facebook: {
@@ -101,6 +106,10 @@ export default {
         lazada: {
             label: 'Lazada',
             description: 'Lazada orders — webhook from Open Platform.',
+        },
+        pancake: {
+            label: 'Pancake POS / Extension',
+            description: 'Receive Pancake POS orders/leads via webhook, Open API, or Chrome extension.',
         },
     },
 };

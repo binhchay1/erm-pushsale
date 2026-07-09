@@ -33,8 +33,12 @@ class LeadOrderFactory
             'message' => $payload['message'] ?? $payload['note'] ?? null,
             'quantity' => $payload['quantity'] ?? 1,
             'shipping_address' => $extra['shipping_address'] ?? null,
+            'shipping_notes' => $payload['shipping_notes'] ?? null,
             'discount' => (int) ($extra['discount'] ?? 0),
+            'deposit' => (int) ($payload['deposit'] ?? 0),
+            'shipping_fee_collected' => (int) ($payload['shipping_fee_collected'] ?? 0),
             'items' => $extra['items'] ?? [],
+            'item_origin' => $payload['item_origin'] ?? 'landing',
         ];
     }
 
@@ -56,7 +60,7 @@ class LeadOrderFactory
                 : null,
         ]);
 
-        $comboItems = $this->buildItemRows($normalized['items'] ?? [], 'landing');
+        $comboItems = $this->buildItemRows($normalized['items'] ?? [], $normalized['item_origin'] ?? 'landing');
 
         $order = Order::query()->create([
             'order_code' => 'PS'.strtoupper(Str::random(10)),
@@ -68,7 +72,10 @@ class LeadOrderFactory
             'customer_phone' => $normalized['customer_phone'],
             'customer_note' => $noteParts !== [] ? implode("\n", $noteParts) : null,
             'shipping_address' => $normalized['shipping_address'] ?? null,
+            'shipping_notes' => $normalized['shipping_notes'] ?? null,
             'discount' => (int) ($normalized['discount'] ?? 0),
+            'deposit' => (int) ($normalized['deposit'] ?? 0),
+            'shipping_fee_collected' => (int) ($normalized['shipping_fee_collected'] ?? 0),
             'data_arrived_at' => now(),
             'assigned_at' => $saleUser ? now() : null,
             'operation_stage' => OperationStage::NewCustomer->value,
@@ -91,7 +98,7 @@ class LeadOrderFactory
                 'product_id' => $product?->id,
                 'product_name' => $product?->name ?? ($normalized['product_interest'] ?? 'Sản phẩm'),
                 'item_type' => 'product',
-                'origin' => 'landing',
+                'origin' => $normalized['item_origin'] ?? 'landing',
                 'quantity' => $qty,
                 'unit_price' => $product?->unit_price ?? 0,
             ]);
@@ -167,10 +174,12 @@ class LeadOrderFactory
 
         // Giá trị cuối đơn = tổng dòng − chiết khấu theo dòng − chiết khấu cấp đơn.
         $total = max(0, $subtotal - $itemsDiscount - (int) $order->discount);
+        $amountToCollect = max(0, $total + (int) $order->shipping_fee_collected - (int) $order->deposit);
 
         $order->update([
             'subtotal' => $subtotal,
             'total' => $total,
+            'amount_to_collect' => $amountToCollect,
         ]);
 
         return $order->fresh(['items']);

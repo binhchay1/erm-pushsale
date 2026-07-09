@@ -8,13 +8,15 @@ use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\IntegrationController;
 use App\Http\Controllers\Api\V1\LeadController;
 use App\Http\Controllers\Api\V1\OrderController;
+use App\Http\Controllers\Api\V1\Pancake\PancakeExtensionController;
+use App\Http\Controllers\Api\V1\Pancake\PancakeMessageWebhookController;
 use App\Http\Controllers\Api\V1\ShippingWebhookController;
 use App\Http\Controllers\Api\V1\WebhookController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    Route::post('auth/token', [AuthController::class, 'token']);
+    Route::post('auth/token', [AuthController::class, 'token'])->middleware('throttle:api-auth');
 
     Route::post('landing/{token}/receive', [CampaignLandingWebhookController::class, 'receive'])
         ->where('token', '[a-z0-9]{16,64}')
@@ -35,13 +37,18 @@ Route::prefix('v1')->group(function () {
         ->where('token', '[a-z0-9]{16,64}')
         ->middleware('throttle:lead-intake');
 
+
+    Route::post('pancake/messages/{token}', PancakeMessageWebhookController::class)
+        ->where('token', '[A-Za-z0-9]{16,64}')
+        ->middleware('throttle:pancake-chat-webhook');
+
     Route::match(['get', 'post'], 'webhooks/{platform}/{token}', [WebhookController::class, 'handle'])
-        ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada')
+        ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada|pancake')
         ->where('token', '[A-Za-z0-9]{16,64}')
         ->middleware('throttle:lead-intake');
 
     Route::match(['get', 'post'], 'webhooks/{platform}', [WebhookController::class, 'handle'])
-        ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada')
+        ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada|pancake')
         ->middleware('throttle:lead-intake');
     Route::post('shipping/webhooks/{provider}', [ShippingWebhookController::class, 'handle'])
         ->where('provider', 'viettel_post|ghn|ghtk|jnt|spx');
@@ -53,6 +60,7 @@ Route::prefix('v1')->group(function () {
         Route::get('dashboard/summary', [DashboardController::class, 'summary']);
 
         Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
+        Route::post('pancake/extension/orders', [PancakeExtensionController::class, 'storeOrder'])->middleware('throttle:extension-intake');
         Route::apiResource('leads', LeadController::class)->only(['index', 'show']);
         Route::post('leads', [LeadController::class, 'store']);
 

@@ -54,6 +54,8 @@ final class PermissionMap
         'customers.orders.purchase-history' => 'customers:view',
         'customers.orders.messages.index' => 'customers:view',
         'customers.orders.messages.store' => 'customers:full',
+        'customers.orders.pancake-messages.index' => 'customer_chat:view',
+        'customers.orders.pancake-messages.store' => 'customer_chat:full',
         'sales.customers' => 'customers:view',
         'sales.workspace' => 'telesale:full',
         'sales.orders.' => 'telesale:full',

@@ -30,6 +30,7 @@ return [
         'social' => 'Mạng xã hội & Chat',
         'landing' => 'Landing Page / Website',
         'marketplace' => 'Sàn thương mại điện tử',
+        'pos' => 'POS / Bán hàng đa kênh',
     ],
     'fields' => [
         'app_id' => 'Mã ứng dụng (App ID)',
@@ -43,7 +44,12 @@ return [
         'partner_id' => 'Mã đối tác',
         'partner_key' => 'Khóa đối tác',
         'shop_id' => 'Mã cửa hàng',
+        'base_url' => 'Pancake API Base URL',
         'app_key' => 'Mã ứng dụng',
+        'extension_token' => 'Token riêng cho Extension',
+        'default_marketing_source_id' => 'ID nguồn mặc định',
+        'default_warehouse_id' => 'ID kho mặc định',
+        'default_shipping_provider' => 'Đơn vị giao mặc định',
     ],
     'platforms' => [
         'facebook' => [
@@ -73,6 +79,10 @@ return [
         'lazada' => [
             'label' => 'Lazada',
             'description' => 'Đơn Lazada — webhook từ Open Platform.',
+        ],
+        'pancake' => [
+            'label' => 'Pancake POS / Extension',
+            'description' => 'Nhận đơn/lead từ Pancake POS qua Webhook, Open API hoặc Chrome Extension giống luồng Pushsale.',
         ],
     ],
     'test' => [

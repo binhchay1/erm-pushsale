@@ -44,6 +44,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CustomerInteractions\CustomerInternalMessageController;
 use App\Http\Controllers\CustomerInteractions\CustomerPurchaseHistoryController;
 use App\Http\Controllers\CustomerInteractions\OrderOperationHistoryController;
+use App\Http\Controllers\CustomerInteractions\PancakeCustomerMessageController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MarketingController;
@@ -117,8 +118,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     // Hồ sơ khách hàng dùng chung cho các vai trò có quyền customers:view.
     Route::get('customers', CustomerProfileController::class)->name('customers.index');
 
-    // Dialog lịch sử tác nghiệp và trao đổi nội bộ theo khách hàng.
-    // customers:view được xem; customers:full được gửi tin nhắn (mặc định Admin, Sales và Kho).
+    // Dialog lịch sử tác nghiệp, mua hàng, tin nội bộ và chat Pancake theo khách hàng.
+    // customers:full gửi tin nội bộ; customer_chat:full gửi trực tiếp qua Pancake.
     Route::get('customers/orders/{order}/operation-history', [OrderOperationHistoryController::class, 'index'])
         ->name('customers.orders.operation-history');
     Route::get('customers/orders/{order}/purchase-history', [CustomerPurchaseHistoryController::class, 'index'])
@@ -127,6 +128,10 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         ->name('customers.orders.messages.index');
     Route::post('customers/orders/{order}/messages', [CustomerInternalMessageController::class, 'store'])
         ->name('customers.orders.messages.store');
+    Route::get('customers/orders/{order}/pancake-messages', [PancakeCustomerMessageController::class, 'index'])
+        ->name('customers.orders.pancake-messages.index');
+    Route::post('customers/orders/{order}/pancake-messages', [PancakeCustomerMessageController::class, 'store'])
+        ->name('customers.orders.pancake-messages.store');
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');

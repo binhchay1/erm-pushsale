@@ -18,6 +18,7 @@ enum PermissionArea: string
     case Shipping = 'shipping';
     case Accounting = 'accounting';
     case Customers = 'customers';
+    case CustomerChat = 'customer_chat';
     case Products = 'products';
     case Hr = 'hr';
     case Integrations = 'integrations';

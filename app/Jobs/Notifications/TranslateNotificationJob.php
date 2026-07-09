@@ -23,7 +23,7 @@ class TranslateNotificationJob implements ShouldQueue
 
     public function __construct(public int $notificationId)
     {
-        $this->onQueue('translations');
+        $this->onQueue(config('saleops.queues.translations', 'translations'));
     }
 
     public function handle(TranslationService $translator): void

@@ -130,6 +130,12 @@ export function PlatformCard({ platform }) {
                                 <code className="rounded bg-muted px-1">{platform.api_leads_url}</code>
                             </p>
                         )}
+                        {platform.platform === 'pancake' && platform.pancake_extension_url && (
+                            <p className="text-xs text-muted-foreground">
+                                Extension POST Bearer token tới:{' '}
+                                <code className="rounded bg-muted px-1">{platform.pancake_extension_url}</code>
+                            </p>
+                        )}
                     </div>
 
                     {platform.platform === 'facebook' && (

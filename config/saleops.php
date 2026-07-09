@@ -75,6 +75,30 @@ return [
         'rate_limit_per_minute' => (int) env('LEAD_RATE_LIMIT_PER_MINUTE', 60),
     ],
 
+
+    /*
+    | Tách queue theo luồng nghiệp vụ để webhook, tin nhắn, notification,
+    | shipping và báo cáo không nghẽn chung một hàng đợi.
+    */
+    'queues' => [
+        'webhooks' => env('QUEUE_WEBHOOKS', 'webhooks'),
+        'shipping_webhooks' => env('QUEUE_SHIPPING_WEBHOOKS', 'shipping-webhooks'),
+        'shipments' => env('QUEUE_SHIPMENTS', 'shipments'),
+        'messages' => env('QUEUE_MESSAGES', 'messages'),
+        'internal_chat_broadcasts' => env('QUEUE_INTERNAL_CHAT_BROADCASTS', 'broadcasts-internal-chat'),
+        'pancake_chat_sync' => env('QUEUE_PANCAKE_CHAT_SYNC', 'pancake-chat'),
+        'pancake_chat_broadcasts' => env('QUEUE_PANCAKE_CHAT_BROADCASTS', 'broadcasts-pancake-chat'),
+        'notifications' => env('QUEUE_NOTIFICATIONS', 'notifications'),
+        'translations' => env('QUEUE_TRANSLATIONS', 'translations'),
+        'reports' => env('QUEUE_REPORTS', 'reports'),
+        'exports' => env('QUEUE_EXPORTS', 'exports'),
+        'default' => env('QUEUE_DEFAULT_NAMED', 'default'),
+    ],
+
+    'pancake_chat' => [
+        'webhook_rate_limit_per_minute' => (int) env('PANCAKE_CHAT_WEBHOOK_RATE_LIMIT_PER_MINUTE', 120),
+    ],
+
     'locales' => [
         'vi' => ['label' => 'Tiếng Việt', 'short' => 'VI'],
         'en' => ['label' => 'English', 'short' => 'EN'],

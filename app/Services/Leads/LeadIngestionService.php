@@ -443,6 +443,23 @@ class LeadIngestionService
     }
 
     /**
+     * Import từ nền tảng ngoài nhưng cần ép chia cho một sale cụ thể
+     * (ví dụ Pancake Extension đang đăng nhập bằng tài khoản SaleOps của sale).
+     *
+     * @param  array<string, mixed>  $rawPayload
+     */
+    public function ingestWithForceSale(
+        LeadPayloadNormalizer $driver,
+        array $rawPayload,
+        ?User $forceSale = null,
+        ?MarketingSource $campaign = null,
+    ): LeadIngestion {
+        $normalized = $driver->normalize($rawPayload);
+
+        return $this->ingestNormalized($driver, $rawPayload, $normalized, $campaign, null, $forceSale);
+    }
+
+    /**
      * @param  array<string, mixed>  $rawPayload
      * @param  array<string, mixed>  $normalized
      */
@@ -551,6 +568,11 @@ class LeadIngestionService
         }
         if (filled($normalized['shipping_address'] ?? null)) {
             $storedPayload['shipping_address'] = $normalized['shipping_address'];
+        }
+        foreach (['shipping_notes', 'deposit', 'shipping_fee_collected', 'item_origin'] as $normalizedKey) {
+            if (array_key_exists($normalizedKey, $normalized) && filled($normalized[$normalizedKey])) {
+                $storedPayload[$normalizedKey] = $normalized[$normalizedKey];
+            }
         }
         $clientRef = $this->extractClientRef($rawPayload);
         if ($clientRef) {

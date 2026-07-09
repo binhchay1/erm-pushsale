@@ -19,6 +19,7 @@ export default {
         shipping: 'Vận chuyển & đối soát',
         accounting: 'Kế toán',
         customers: 'Khách hàng',
+        customer_chat: 'Chat khách hàng Pancake',
         products: 'Sản phẩm',
         hr: 'Nhân sự',
         integrations: 'Kết nối & tích hợp',

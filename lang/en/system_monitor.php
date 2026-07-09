@@ -8,6 +8,7 @@ return [
     'source_lead' => 'Lead webhook',
     'source_landing' => 'Campaign landing',
     'source_shipping' => 'Shipping webhook',
+    'source_pancake_chat' => 'Pancake chat webhook',
     'status_received' => 'Received',
     'status_queued' => 'Queued',
     'status_processed' => 'Processed',

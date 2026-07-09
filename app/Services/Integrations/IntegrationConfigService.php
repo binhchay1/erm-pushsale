@@ -110,6 +110,7 @@ class IntegrationConfigService
             ]))
             ->map(function (array $row) {
                 $row['required_env'] = collect(config("integrations.platforms.{$row['platform']}.fields", []))
+                    ->filter(fn ($def) => (bool) ($def['required'] ?? true))
                     ->pluck('env')
                     ->values()
                     ->all();
@@ -142,9 +143,12 @@ class IntegrationConfigService
             'category_label' => __("integrations.categories.{$meta['category']}"),
             'description' => __("integrations.platforms.{$key}.description"),
             'is_enabled' => $connection->is_enabled,
-            'is_configured' => collect($fields)->every(fn ($f) => $f['is_set']),
+            'is_configured' => collect($fields)
+                ->filter(fn ($f) => $f['is_required'])
+                ->every(fn ($f) => $f['is_set']),
             'webhook_url' => $connection->webhookUrl(),
             'api_leads_url' => url('/api/v1/leads'),
+            'pancake_extension_url' => $key === 'pancake' ? url('/api/v1/pancake/extension/orders') : null,
             'last_synced_at' => $connection->last_synced_at?->toIso8601String(),
             'docs_url' => $meta['docs'] ?? null,
             'verify_token_set' => filled($verifyValue),
@@ -181,6 +185,7 @@ class IntegrationConfigService
                 'env' => $envVar,
                 'is_secret' => $isSecret,
                 'is_set' => $isSet,
+                'is_required' => (bool) ($def['required'] ?? true),
                 'source' => $fromDb ? 'db' : ($fromEnv ? 'env' : null),
             ];
 

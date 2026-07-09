@@ -21,6 +21,7 @@ class IntegrationConnection extends Model
         'verify_token',
         'webhook_token',
         'last_synced_at',
+        'metadata',
     ];
 
     protected function casts(): array
@@ -28,6 +29,7 @@ class IntegrationConnection extends Model
         return [
             'is_enabled' => 'boolean',
             'last_synced_at' => 'datetime',
+            'metadata' => 'array',
         ];
     }
 

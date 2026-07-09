@@ -9,6 +9,7 @@ use App\Integrations\IntegrationDriverFactory;
 use App\Repositories\LeadIngestionRepository;
 use App\Services\Integrations\IntegrationConfigService;
 use App\Services\Leads\LeadIngestionService;
+use App\Services\Pancake\PancakeConnectionResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,6 +55,7 @@ class IntegrationsController extends Controller
         string $platform,
         LeadIngestionService $ingestionService,
         IntegrationConfigService $config,
+        PancakeConnectionResolver $pancakeConnections,
     ): JsonResponse {
         $enum = IntegrationPlatform::tryFrom($platform);
 
@@ -65,6 +67,26 @@ class IntegrationsController extends Controller
         }
 
         try {
+            if ($enum === IntegrationPlatform::Pancake) {
+                $result = $pancakeConnections->client()->test();
+                $config->touchSynced($enum);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => $result['message'],
+                    'display' => [
+                        'success' => true,
+                        'message' => $result['message'],
+                        'lines' => [
+                            ['label' => __('integrations.test.platform'), 'value' => $enum->label(), 'highlight' => true],
+                            ['label' => 'Shop kiểm tra', 'value' => json_encode($result['shops'] ?? [], JSON_UNESCAPED_UNICODE)],
+                        ],
+                        'items' => [],
+                        'options' => [],
+                    ],
+                ]);
+            }
+
             $phone = '09'.random_int(10000000, 99999999);
             $sampleName = __('integrations.test.sample_name');
             $sampleProduct = __('integrations.test.sample_product');

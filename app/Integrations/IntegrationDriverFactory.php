@@ -7,6 +7,7 @@ use App\Enums\IntegrationPlatform;
 use App\Integrations\Facebook\FacebookLeadDriver;
 use App\Integrations\Generic\GenericWebhookDriver;
 use App\Integrations\Landing\LandingFormDriver;
+use App\Integrations\Pancake\PancakeLeadDriver;
 use InvalidArgumentException;
 
 class IntegrationDriverFactory
@@ -23,6 +24,7 @@ class IntegrationDriverFactory
         return match ($key) {
             IntegrationPlatform::Facebook->value => new FacebookLeadDriver,
             IntegrationPlatform::Landing->value => new LandingFormDriver,
+            IntegrationPlatform::Pancake->value => new PancakeLeadDriver,
             default => new GenericWebhookDriver($key),
         };
     }

@@ -149,6 +149,11 @@ class Order extends Model
         return $this->hasMany(CustomerInternalMessage::class);
     }
 
+    public function pancakeCustomerMessages(): HasMany
+    {
+        return $this->hasMany(PancakeCustomerMessage::class);
+    }
+
     /**
      * Doanh thu gộp cấp đơn = GIÁ TRỊ CUỐI của đơn (đã gồm combo & trừ mọi chiết khấu).
      *

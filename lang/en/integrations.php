@@ -43,7 +43,12 @@ return [
         'partner_id' => 'Partner ID',
         'partner_key' => 'Partner key',
         'shop_id' => 'Shop ID',
+        'base_url' => 'Pancake API Base URL',
         'app_key' => 'App key',
+        'extension_token' => 'Extension token',
+        'default_marketing_source_id' => 'Default source ID',
+        'default_warehouse_id' => 'Default warehouse ID',
+        'default_shipping_provider' => 'Default shipping provider',
     ],
     'platforms' => [
         'facebook' => [
@@ -73,6 +78,10 @@ return [
         'lazada' => [
             'label' => 'Lazada',
             'description' => 'Lazada orders — webhook from Open Platform.',
+        ],
+        'pancake' => [
+            'label' => 'Pancake POS / Extension',
+            'description' => 'Receive Pancake POS orders/leads via webhook, Open API, or Chrome extension.',
         ],
     ],
     'test' => [

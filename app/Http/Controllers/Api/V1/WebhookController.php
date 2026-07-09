@@ -34,6 +34,10 @@ class WebhookController extends Controller
             return $this->error(__('messages.webhook.platform_unsupported'), 404);
         }
 
+        if ($request->getContentLength() > (int) config('security.webhook.max_payload_kb', 512) * 1024) {
+            return $this->error(__('messages.webhook.payload_too_large'), 413);
+        }
+
         if ($request->isMethod('GET') && $enum === IntegrationPlatform::Facebook) {
             $driver = IntegrationDriverFactory::make($enum);
             $fb = $driver instanceof FacebookLeadDriver ? $driver : new FacebookLeadDriver;

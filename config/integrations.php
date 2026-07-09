@@ -3,6 +3,7 @@
 use App\Integrations\Facebook\FacebookLeadDriver;
 use App\Integrations\Generic\GenericWebhookDriver;
 use App\Integrations\Landing\LandingFormDriver;
+use App\Integrations\Pancake\PancakeLeadDriver;
 
 /**
  * Cấu hình tích hợp nền tảng — giá trị nhạy cảm đặt trong .env hoặc lưu DB (admin).
@@ -40,6 +41,7 @@ return [
         'social' => 'Mạng xã hội & Chat',
         'landing' => 'Landing Page / Website',
         'marketplace' => 'Sàn thương mại điện tử',
+        'pos' => 'POS / Bán hàng đa kênh',
     ],
 
     'webhook' => [
@@ -109,6 +111,27 @@ return [
             ],
             'webhook_path' => 'landing',
             'docs' => null,
+        ],
+
+        'pancake' => [
+            'label' => 'Pancake POS / Extension',
+            'category' => 'pos',
+            'description' => 'Nhận đơn/lead từ Pancake POS qua Webhook, Open API hoặc Chrome Extension giống luồng Pushsale.',
+            'driver' => PancakeLeadDriver::class,
+            'fields' => [
+                'shop_id' => ['label' => 'Shop ID Pancake POS', 'env' => 'PANCAKE_SHOP_ID', 'default' => env('PANCAKE_SHOP_ID')],
+                'base_url' => ['label' => 'Pancake POS API Base URL', 'env' => 'PANCAKE_API_BASE_URL', 'default' => env('PANCAKE_API_BASE_URL', 'https://pos.pages.fm/api/v1'), 'required' => false],
+                'api_key' => ['label' => 'API Key Pancake POS', 'env' => 'PANCAKE_API_KEY', 'secret' => true, 'default' => env('PANCAKE_API_KEY')],
+                'page_api_base_url' => ['label' => 'Pancake Page API Base URL', 'env' => 'PANCAKE_PAGE_API_BASE_URL', 'default' => env('PANCAKE_PAGE_API_BASE_URL', 'https://pages.fm/api/public_api/v1'), 'required' => false],
+                'page_id' => ['label' => 'Page ID để chat', 'env' => 'PANCAKE_PAGE_ID', 'default' => env('PANCAKE_PAGE_ID'), 'required' => false],
+                'page_access_token' => ['label' => 'Page Access Token để chat', 'env' => 'PANCAKE_PAGE_ACCESS_TOKEN', 'secret' => true, 'default' => env('PANCAKE_PAGE_ACCESS_TOKEN'), 'required' => false],
+                'extension_token' => ['label' => 'Token riêng cho Extension', 'env' => 'PANCAKE_EXTENSION_TOKEN', 'secret' => true, 'default' => env('PANCAKE_EXTENSION_TOKEN'), 'required' => false],
+                'default_marketing_source_id' => ['label' => 'ID nguồn mặc định', 'env' => 'PANCAKE_DEFAULT_SOURCE_ID', 'default' => env('PANCAKE_DEFAULT_SOURCE_ID'), 'required' => false],
+                'default_warehouse_id' => ['label' => 'ID kho mặc định', 'env' => 'PANCAKE_DEFAULT_WAREHOUSE_ID', 'default' => env('PANCAKE_DEFAULT_WAREHOUSE_ID'), 'required' => false],
+                'default_shipping_provider' => ['label' => 'Đơn vị giao mặc định', 'env' => 'PANCAKE_DEFAULT_SHIPPING_PROVIDER', 'default' => env('PANCAKE_DEFAULT_SHIPPING_PROVIDER', 'viettel_post'), 'required' => false],
+            ],
+            'webhook_path' => 'pancake',
+            'docs' => 'https://api-docs.pancake.vn/',
         ],
         'shopee' => [
             'label' => 'Shopee',

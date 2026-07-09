@@ -34,7 +34,7 @@ class SendUserNotification implements ShouldQueue
         public ?string $url = null,
         public ?array $data = null,
     ) {
-        $this->onQueue('notifications');
+        $this->onQueue(config('saleops.queues.notifications', 'notifications'));
     }
 
     public function handle(): void

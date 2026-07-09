@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\CustomerInteractions;
 
+use App\Events\CustomerInteractions\CustomerInternalMessageCreated;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerInternalMessage;
+use App\Jobs\CustomerMessages\NotifyCustomerInternalMessageJob;
 use App\Models\Order;
 use App\Enums\PermissionArea;
 use App\Enums\PermissionLevel;
 use App\Models\User;
 use App\Services\CustomerInteractions\CustomerIdentity;
+use App\Services\CustomerInteractions\CustomerConversationChannel;
 use App\Services\CustomerInteractions\CustomerInternalMessagePresenter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -40,6 +43,11 @@ class CustomerInternalMessageController extends Controller
             ],
             'messages' => CustomerInternalMessagePresenter::collection($messages, $request->user()),
             'canWrite' => $this->canWrite($request->user()),
+            'realtime' => [
+                'channel' => CustomerConversationChannel::internalForOrder($order),
+                'event' => '.customer.internal-message.created',
+                'pollMs' => 15000,
+            ],
         ]);
     }
 
@@ -70,6 +78,9 @@ class CustomerInternalMessageController extends Controller
             'customer_phone' => CustomerIdentity::phoneKey($order),
             'message' => $content,
         ]);
+
+        NotifyCustomerInternalMessageJob::dispatch($message->id);
+        event(new CustomerInternalMessageCreated($message));
 
         $message->load(['author:id,name,role,org_level', 'order:id,order_code']);
 

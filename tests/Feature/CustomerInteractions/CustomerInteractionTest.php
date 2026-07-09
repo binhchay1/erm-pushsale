@@ -153,6 +153,44 @@ class CustomerInteractionTest extends TestCase
             ->assertForbidden();
     }
 
+
+    public function test_pancake_customer_chat_uses_separate_custom_permission(): void
+    {
+        $sales = User::factory()->create(['role' => UserRole::Sales]);
+        $warehouse = User::factory()->create(['role' => UserRole::Warehouse]);
+        $marketingFull = User::factory()->create([
+            'role' => UserRole::Marketing,
+            'permissions' => [PermissionArea::CustomerChat->value => PermissionLevel::Full->value],
+        ]);
+        $marketingNone = User::factory()->create([
+            'role' => UserRole::Marketing,
+            'permissions' => [PermissionArea::CustomerChat->value => PermissionLevel::None->value],
+        ]);
+        $order = $this->makeOrder($sales);
+
+        $this->actingAs($warehouse)
+            ->getJson("/customers/orders/{$order->id}/pancake-messages")
+            ->assertOk()
+            ->assertJsonPath('connected', false)
+            ->assertJsonPath('canWrite', false);
+
+        $this->actingAs($warehouse)
+            ->postJson("/customers/orders/{$order->id}/pancake-messages", ['message' => 'Kho không được gửi trực tiếp cho khách.'])
+            ->assertForbidden();
+
+        $this->actingAs($marketingNone)
+            ->getJson("/customers/orders/{$order->id}/pancake-messages")
+            ->assertForbidden();
+
+        $this->actingAs($sales)
+            ->postJson("/customers/orders/{$order->id}/pancake-messages", ['message' => 'Sale được quyền gửi nhưng đơn thiếu conversation.'])
+            ->assertStatus(422);
+
+        $this->actingAs($marketingFull)
+            ->postJson("/customers/orders/{$order->id}/pancake-messages", ['message' => 'Marketing được cấp quyền tùy chỉnh.'])
+            ->assertStatus(422);
+    }
+
     public function test_purchase_history_returns_orders_grouped_by_normalized_customer_phone(): void
     {
         $sales = User::factory()->create(['role' => UserRole::Sales]);

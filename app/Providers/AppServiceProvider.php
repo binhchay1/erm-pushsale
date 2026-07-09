@@ -62,5 +62,25 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(max(1, $perMinute))->by($key.'|'.$request->ip());
         });
+
+
+        RateLimiter::for('api-auth', function (Request $request) {
+            return Limit::perMinute(20)->by($request->ip());
+        });
+
+
+
+        RateLimiter::for('pancake-chat-webhook', function (Request $request) {
+            $key = $request->route('token') ?: $request->ip();
+
+            return Limit::perMinute((int) config('saleops.pancake_chat.webhook_rate_limit_per_minute', 120))
+                ->by($key.'|'.$request->ip());
+        });
+
+        RateLimiter::for('extension-intake', function (Request $request) {
+            $userId = $request->user()?->id ?: 'guest';
+
+            return Limit::perMinute(120)->by($userId.'|'.$request->ip());
+        });
     }
 }

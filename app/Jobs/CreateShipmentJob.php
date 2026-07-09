@@ -13,10 +13,16 @@ class CreateShipmentJob implements ShouldQueue
 {
     use Queueable;
 
+    public int $tries = 3;
+
+    public int $timeout = 120;
+
     public function __construct(
         public int $orderId,
         public ?string $provider = null,
-    ) {}
+    ) {
+        $this->onQueue(config('saleops.queues.shipments', 'shipments'));
+    }
 
     public function handle(CreateShipmentService $service): void
     {

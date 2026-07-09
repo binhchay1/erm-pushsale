@@ -7,19 +7,21 @@ use App\Enums\InboundEventStatus;
 use App\Http\Controllers\Controller;
 use App\Models\InboundEvent;
 use App\Services\System\SystemLogReader;
+use App\Services\System\SystemHealthSnapshotService;
+use App\Services\Reports\ReportConsistencyAuditService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class SystemMonitorController extends Controller
 {
-    public function index(Request $request, SystemLogReader $logReader): Response
+    public function index(Request $request, SystemLogReader $logReader, SystemHealthSnapshotService $systemHealth, ReportConsistencyAuditService $reportAudit): Response
     {
         abort_unless($request->user()?->canManagePlatform(), 403);
         $source = $request->query('source');
         $status = $request->query('status');
         $level = $request->query('level');
-        $tab = $request->query('tab', 'events');
+        $tab = $request->query('tab', 'overview');
 
         $eventsQuery = InboundEvent::query()
             ->with('company:id,name,slug')
@@ -52,6 +54,8 @@ class SystemMonitorController extends Controller
 
         return Inertia::render('Admin/SystemMonitor/Index', [
             'tab' => $tab,
+            'system' => in_array($tab, ['overview', 'queues'], true) ? $systemHealth->snapshot() : null,
+            'reportAudit' => $tab === 'reports' ? $reportAudit->snapshot($request->user()) : null,
             'events' => $events,
             'logs' => $tab === 'logs' ? $logReader->tail(250, $level ?: null) : [],
             'stats' => [

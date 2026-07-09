@@ -24,7 +24,9 @@ class ProcessShippingWebhookJob implements ShouldQueue
         public string $provider,
         public array $payload,
         public ?int $inboundEventId = null,
-    ) {}
+    ) {
+        $this->onQueue(config('saleops.queues.shipping_webhooks', 'shipping-webhooks'));
+    }
 
     public function handle(ShippingWebhookService $service): void
     {

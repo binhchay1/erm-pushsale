@@ -10,6 +10,7 @@ use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Services\Integrations\IntegrationConfigService;
 use App\Services\Leads\LeadIngestionService;
+use App\Services\Pancake\PancakeOrderImportService;
 use App\Support\TenantManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -34,16 +35,19 @@ class ProcessLeadIngestionJob implements ShouldQueue
         public ?int $companyId = null,
         public ?int $inboundEventId = null,
         public bool $isUpsell = false,
-    ) {}
+    ) {
+        $this->onQueue(config('saleops.queues.webhooks', 'webhooks'));
+    }
 
     public function handle(
         LeadIngestionService $ingestionService,
         IntegrationConfigService $configService,
+        PancakeOrderImportService $pancakeImporter,
     ): void {
         $this->lastIngestion = null;
 
-        app(TenantManager::class)->forCompany($this->companyId, function () use ($ingestionService, $configService) {
-            $this->process($ingestionService, $configService);
+        app(TenantManager::class)->forCompany($this->companyId, function () use ($ingestionService, $configService, $pancakeImporter) {
+            $this->process($ingestionService, $configService, $pancakeImporter);
         });
 
         if ($this->inboundEventId) {
@@ -71,6 +75,7 @@ class ProcessLeadIngestionJob implements ShouldQueue
     private function process(
         LeadIngestionService $ingestionService,
         IntegrationConfigService $configService,
+        PancakeOrderImportService $pancakeImporter,
     ): void {
         if ($this->campaignId) {
             $this->processCampaign($ingestionService);
@@ -83,6 +88,14 @@ class ProcessLeadIngestionJob implements ShouldQueue
 
         if (! $enum) {
             Log::warning('[Lead] Bỏ qua job — nền tảng không hợp lệ', ['platform' => $this->platform]);
+
+            return;
+        }
+
+        if ($enum === IntegrationPlatform::Pancake) {
+            $result = $pancakeImporter->import($this->payload);
+            $this->lastIngestion = $result['lead'];
+            $configService->touchSynced($enum);
 
             return;
         }

@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "SaleOps Pancake Connector",
+  "description": "Đẩy lead/đơn từ Pancake POS về SaleOps ERM.",
+  "version": "1.0.0",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "https://*.pancake.vn/*",
+    "https://*.pages.fm/*",
+    "https://pos.pages.fm/*",
+    "https://*/*",
+    "http://localhost/*"
+  ],
+  "action": {
+    "default_title": "SaleOps Pancake",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.pancake.vn/*",
+        "https://*.pages.fm/*",
+        "https://pos.pages.fm/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

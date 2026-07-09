@@ -160,6 +160,7 @@ return [
         'campaign_paused' => 'Chiến dịch đã tạm dừng nhận lead',
         'lead_received_allocated' => 'Lead đã nhận và chia số cho Sale',
         'lead_received_pending' => 'Lead đã nhận — chờ Admin duyệt chiến dịch mới chia số Sale',
+        'payload_too_large' => 'Payload webhook quá lớn.',
         'landing_queued' => 'Lead Landing đã được đưa vào hàng đợi.',
         'validation_failed' => 'Dữ liệu lead không hợp lệ.',
     ],

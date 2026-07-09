@@ -160,6 +160,7 @@ return [
         'campaign_paused' => 'Campaign is paused — not accepting leads',
         'lead_received_allocated' => 'Lead received and routed to sales',
         'lead_received_pending' => 'Lead received — waiting for admin approval before routing',
+        'payload_too_large' => 'Webhook payload is too large.',
         'landing_queued' => 'Landing lead queued.',
         'validation_failed' => 'Lead payload validation failed.',
     ],

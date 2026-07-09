@@ -56,3 +56,15 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Operational update
+
+Bản này bổ sung màn hình giám sát hệ thống, audit báo cáo theo bản ghi gốc, queue lanes tách biệt và security headers/rate limit. Xem chi tiết trong `docs/OPERATIONS_AUDIT_SECURITY.md`.
+
+Các lệnh hữu ích:
+
+```bash
+php artisan audit:report-consistency
+php artisan audit:report-consistency --role=sales
+php artisan audit:report-consistency --role=warehouse
+```
