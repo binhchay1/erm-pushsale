@@ -50,6 +50,14 @@ export default {
         appearance_light: 'Light',
         appearance_dark: 'Dark',
         appearance_system: 'System',
+        pagination: {
+            showing: 'Showing :from–:to of :total records',
+            rows_per_page: 'Rows per page',
+            first_page: 'First page',
+            previous_page: 'Previous page',
+            next_page: 'Next page',
+            last_page: 'Last page',
+        },
         validation: {
             required: 'This field is required',
             required_field: 'Please enter :field',

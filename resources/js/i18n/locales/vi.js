@@ -50,6 +50,14 @@ export default {
         appearance_light: 'Sáng',
         appearance_dark: 'Tối',
         appearance_system: 'Theo hệ thống',
+        pagination: {
+            showing: 'Hiển thị :from–:to trong tổng số :total bản ghi',
+            rows_per_page: 'Số dòng mỗi trang',
+            first_page: 'Trang đầu',
+            previous_page: 'Trang trước',
+            next_page: 'Trang sau',
+            last_page: 'Trang cuối',
+        },
         validation: {
             required: 'Không được để trống',
             required_field: 'Vui lòng nhập :field',

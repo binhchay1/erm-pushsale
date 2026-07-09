@@ -18,7 +18,7 @@ class CustomerProfileController extends Controller
         $filter = $this->reportFilters($request);
 
         return Inertia::render('Sales/CustomerProfile', $this->reportPageProps($request, [
-            'report' => $service->build($filter),
+            'report' => $service->buildPaginated($filter),
             'routeUrl' => '/'.$request->path(),
         ]));
     }

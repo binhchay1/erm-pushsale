@@ -4,10 +4,13 @@ import AppLayout from '@/layouts/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
+import { ReportPagination } from '@/components/reports/ReportPagination';
 import { useT } from '@/providers/I18nProvider';
 
 export default function CustomerProfile({ filters, filterOptions, filterFields, report, routeUrl = '/customers' }) {
     const t = useT();
+    const rows = report?.rows?.data ?? report?.rows ?? [];
+    const pagination = report?.rows?.meta ?? null;
 
     return (
         <AppLayout>
@@ -26,7 +29,16 @@ export default function CustomerProfile({ filters, filterOptions, filterFields, 
                     filterFields={filterFields}
                 />
 
-                <OperationOrderTable rows={report.rows} />
+                <div id="customer-profile-table" className="scroll-mt-4">
+                    <OperationOrderTable rows={rows} />
+                </div>
+
+                <ReportPagination
+                    routeUrl={routeUrl}
+                    filters={filters}
+                    meta={pagination}
+                    scrollTargetId="customer-profile-table"
+                />
             </div>
         </AppLayout>
     );
