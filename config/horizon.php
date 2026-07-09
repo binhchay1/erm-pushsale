@@ -128,21 +128,7 @@ return [
     'fast_termination' => (bool) env('HORIZON_FAST_TERMINATION', true),
     'memory_limit' => (int) env('HORIZON_MEMORY_LIMIT', 128),
 
-    'defaults' => [
-        'connection' => 'redis',
-        'balance' => 'auto',
-        'autoScalingStrategy' => 'time',
-        'minProcesses' => 1,
-        'maxProcesses' => 1,
-        'balanceMaxShift' => 1,
-        'balanceCooldown' => 3,
-        'maxTime' => 3600,
-        'maxJobs' => 1000,
-        'memory' => 128,
-        'tries' => 3,
-        'timeout' => 180,
-        'nice' => 0,
-    ],
+    'defaults' => [],
 
     'environments' => [
         'production' => $production,
