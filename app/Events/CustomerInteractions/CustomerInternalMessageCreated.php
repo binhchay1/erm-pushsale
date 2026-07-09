@@ -16,6 +16,8 @@ class CustomerInternalMessageCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public string $connection = 'redis';
+
     public function __construct(public CustomerInternalMessage $message) {}
 
     /** @return array<int, Channel> */

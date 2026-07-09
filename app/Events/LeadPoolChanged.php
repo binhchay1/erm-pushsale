@@ -18,6 +18,8 @@ class LeadPoolChanged implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public string $connection = 'redis';
+
     /** @return array<int, Channel> */
     public function broadcastOn(): array
     {
@@ -26,6 +28,11 @@ class LeadPoolChanged implements ShouldBroadcast
             new PrivateChannel('dashboard.allocator'),
             new PrivateChannel('dashboard.marketing'),
         ];
+    }
+
+    public function broadcastQueue(): string
+    {
+        return (string) config('saleops.queues.dashboard_broadcasts', 'broadcasts-dashboard');
     }
 
     public function broadcastAs(): string

@@ -25,15 +25,15 @@ else
   bad "dashboard.marketing channel missing in routes/channels.php"
 fi
 
-PENDING=$(php artisan tinker --execute="echo DB::table('jobs')->count();" 2>/dev/null | tail -1)
+PENDING=$(php artisan tinker --execute="\$redis=Redis::connection(config('queue.connections.redis.connection','queue')); echo collect(config('saleops.queues'))->sum(fn(\$q)=>(int)\$redis->llen('queues:'.\$q)+(int)\$redis->zcard('queues:'.\$q.':delayed')+(int)\$redis->zcard('queues:'.\$q.':reserved'));" 2>/dev/null | tail -1)
 FAILED=$(php artisan tinker --execute="echo DB::table('failed_jobs')->count();" 2>/dev/null | tail -1)
 info "queue pending=$PENDING failed=$FAILED"
 if [ "${FAILED:-0}" -eq 0 ] 2>/dev/null; then ok "no failed_jobs"; else bad "failed_jobs=$FAILED"; fi
 
-if sudo supervisorctl status 2>/dev/null | grep -q RUNNING; then
-  ok "supervisor queue worker running"
+if sudo -u www-data php artisan horizon:status 2>/dev/null | grep -qi running; then
+  ok "Laravel Horizon running"
 else
-  bad "supervisor queue worker not RUNNING"
+  bad "Laravel Horizon not running"
 fi
 
 info "WEBHOOK RECEIVE phone=$PHONE"
@@ -45,7 +45,7 @@ echo "HTTP $HTTP — $(cat /tmp/e2e_recv.json)"
 [ "$HTTP" = "202" ] && ok "receive HTTP 202" || bad "receive HTTP $HTTP"
 
 # Chỉ chạy 1 job ngay — giữ hold chưa release để verify
-sudo -u www-data php artisan queue:work database --once --quiet 2>/dev/null || true
+sudo -u www-data php artisan queue:wait-empty --queue=webhooks --timeout=60
 
 info "VERIFY RECEIVE (ngay sau job đầu — hold còn active)"
 php artisan tinker --execute="
@@ -100,9 +100,7 @@ exit(\$fail > 0 ? 1 : 0);
 " 2>/dev/null | tee /tmp/e2e_verify_recv.txt
 if grep -q "FAIL" /tmp/e2e_verify_recv.txt; then bad "receive data checks"; else ok "receive data checks"; fi
 
-for i in 1 2 3; do
-  sudo -u www-data php artisan queue:work database --once --quiet 2>/dev/null || true
-done
+sudo -u www-data php artisan queue:wait-empty --queue=webhooks --timeout=60
 
 info "WEBHOOK UPSELL"
 HTTP2=$(curl -s -o /tmp/e2e_up.json -w '%{http_code}' -X POST \
@@ -112,9 +110,7 @@ HTTP2=$(curl -s -o /tmp/e2e_up.json -w '%{http_code}' -X POST \
 echo "HTTP $HTTP2 — $(cat /tmp/e2e_up.json)"
 [ "$HTTP2" = "202" ] && ok "upsell HTTP 202" || bad "upsell HTTP $HTTP2"
 
-for i in 1 2 3; do
-  sudo -u www-data php artisan queue:work database --once --quiet 2>/dev/null || true
-done
+sudo -u www-data php artisan queue:wait-empty --queue=webhooks --timeout=60
 
 php artisan tinker --execute="
 \$order = App\Models\Order::query()->where('customer_phone', '$PHONE')->latest('id')->first();
@@ -132,9 +128,7 @@ grep -q "PASS upsell merged" /tmp/e2e_verify_up.txt && ok "upsell merge" || bad 
 
 info "HOLD RELEASE (wait ${HOLD}s + buffer)"
 sleep $((HOLD + 3))
-for i in 1 2 3 4 5; do
-  sudo -u www-data php artisan queue:work database --once --quiet 2>/dev/null || true
-done
+sudo -u www-data php artisan queue:wait-empty --queue=webhooks --timeout=60 --include-delayed
 
 php artisan tinker --execute="
 \$order = App\Models\Order::query()->where('customer_phone', '$PHONE')->latest('id')->first();

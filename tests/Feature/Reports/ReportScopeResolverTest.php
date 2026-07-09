@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Reports\ReportScopeResolver;
+use App\Services\Reports\ReportMetricService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\TestCase;
@@ -69,6 +70,28 @@ class ReportScopeResolverTest extends TestCase
             ->all();
 
         $this->assertSame([$ownedBySource->id, $ownedByMarketer->id], $ids);
+    }
+
+
+    public function test_allocator_daily_order_series_respects_the_report_date_range(): void
+    {
+        $allocator = User::factory()->create(['role' => UserRole::Allocator]);
+
+        $this->createOrder('ORD-ALLOCATOR-1', ['data_arrived_at' => now()->subDays(2)->setTime(9, 0)]);
+        $this->createOrder('ORD-ALLOCATOR-2', ['data_arrived_at' => now()->subDay()->setTime(11, 30)]);
+        $this->createOrder('ORD-ALLOCATOR-3', ['data_arrived_at' => now()->setTime(15, 0)]);
+        $this->createOrder('ORD-ALLOCATOR-OUTSIDE', ['data_arrived_at' => now()->subDays(45)]);
+
+        $filter = ReportFilterData::fromRequest(Request::create('/reports', 'GET', [
+            'date_from' => now()->subDays(2)->toDateString(),
+            'date_to' => now()->toDateString(),
+            'date_type' => 'data_arrived',
+        ]), $allocator);
+
+        $series = app(ReportMetricService::class)->orderSeries($allocator, $filter);
+
+        $this->assertSame(3, collect($series)->sum('value'));
+        $this->assertSame([1, 1, 1], collect($series)->pluck('value')->all());
     }
 
     public function test_lead_scope_follows_order_scope_for_sales(): void

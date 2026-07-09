@@ -28,9 +28,9 @@ php artisan view:cache
 echo "=== RESTART PHP-FPM ==="
 sudo systemctl restart php8.5-fpm
 
-echo "=== QUEUE WORKERS (drain pending) ==="
-for i in 1 2 3 4 5; do
-  sudo -u www-data php artisan queue:work database --once --quiet || true
-done
+echo "=== RELOAD HORIZON ==="
+# Supervisor restarts Horizon with the new code/config after graceful termination.
+sudo -u www-data php artisan horizon:terminate || true
+sudo supervisorctl status erm-saleops-horizon || true
 
 echo "=== DEPLOY DONE ==="

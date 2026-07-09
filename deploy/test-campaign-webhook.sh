@@ -29,9 +29,7 @@ echo "HTTP $HTTP"
 cat /tmp/wh_recv.json
 echo ""
 
-for i in 1 2 3 4 5; do
-  sudo -u www-data php artisan queue:work database --once --quiet 2>/dev/null || true
-done
+sudo -u www-data php artisan queue:wait-empty --queue=webhooks --timeout=60
 
 echo ""
 echo "=== SAU RECEIVE ==="
@@ -60,9 +58,7 @@ echo "HTTP $HTTP2"
 cat /tmp/wh_up.json
 echo ""
 
-for i in 1 2 3; do
-  sudo -u www-data php artisan queue:work database --once --quiet 2>/dev/null || true
-done
+sudo -u www-data php artisan queue:wait-empty --queue=webhooks --timeout=60
 
 echo ""
 echo "=== SAU UPSELL ==="

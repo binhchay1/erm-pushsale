@@ -24,6 +24,7 @@ class NotifyCustomerInternalMessageJob implements ShouldQueue
 
     public function __construct(public int $messageId)
     {
+        $this->onConnection('redis');
         $this->onQueue(config('saleops.queues.messages', 'messages'));
     }
 

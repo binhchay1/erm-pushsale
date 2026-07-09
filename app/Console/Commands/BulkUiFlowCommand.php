@@ -183,7 +183,7 @@ class BulkUiFlowCommand extends Command
             $this->warn("{$webhookFail} webhook lỗi — cần `php artisan serve` đang chạy.");
         }
 
-        Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-jobs' => 500]);
+        Artisan::call('queue:wait-empty', ['--queue' => ['webhooks'], '--timeout' => 120]);
         $this->info("Queue xử lý xong — {$webhookOk} lead đã gửi.");
 
         $orders = Order::query()->orderBy('id')->get();

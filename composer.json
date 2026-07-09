@@ -9,12 +9,13 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^13.8",
+        "laravel/horizon": "^5.47",
         "laravel/reverb": "*",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
+        "php": "^8.3",
         "phpoffice/phpspreadsheet": "*",
         "predis/predis": "*",
         "tightenco/ziggy": "^2.0"
@@ -53,7 +54,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74,#86efac\" \"php artisan serve\" \"php artisan reverb:start\" \"php artisan dashboard:broadcast\" \"php artisan queue:listen --tries=1 --queue=notifications,default,translations\" \"npm run dev\" --names='server,reverb,stats,queue,vite'"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74,#86efac\" \"php artisan serve\" \"php artisan reverb:start\" \"php artisan dashboard:broadcast\" \"php artisan horizon\" \"npm run dev\" --names='server,reverb,stats,queue,vite'"
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",

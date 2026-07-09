@@ -16,6 +16,8 @@ class PancakeCustomerMessageCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public string $connection = 'redis';
+
     public function __construct(public PancakeCustomerMessage $message) {}
 
     /** @return array<int, Channel> */

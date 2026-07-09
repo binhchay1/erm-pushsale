@@ -179,6 +179,37 @@ return [
             'backoff_cap' => env('REDIS_BACKOFF_CAP', 1000),
         ],
 
+        // Dedicated logical database for Laravel queues. Keeping queue data
+        // separate from cache avoids accidental cache flushes deleting jobs.
+        'queue' => [
+            'url' => env('REDIS_QUEUE_URL', env('REDIS_URL')),
+            'host' => env('REDIS_QUEUE_HOST', env('REDIS_HOST', '127.0.0.1')),
+            'username' => env('REDIS_QUEUE_USERNAME', env('REDIS_USERNAME')),
+            'password' => env('REDIS_QUEUE_PASSWORD', env('REDIS_PASSWORD')),
+            'port' => env('REDIS_QUEUE_PORT', env('REDIS_PORT', '6379')),
+            'database' => env('REDIS_QUEUE_DB', '2'),
+            'max_retries' => env('REDIS_MAX_RETRIES', 3),
+            'backoff_algorithm' => env('REDIS_BACKOFF_ALGORITHM', 'decorrelated_jitter'),
+            'backoff_base' => env('REDIS_BACKOFF_BASE', 100),
+            'backoff_cap' => env('REDIS_BACKOFF_CAP', 1000),
+        ],
+
+        // Horizon metadata is isolated from both application cache and queue
+        // payloads. Do not name this connection "horizon"; that name is
+        // reserved internally by Laravel Horizon.
+        'horizon_meta' => [
+            'url' => env('REDIS_HORIZON_URL', env('REDIS_URL')),
+            'host' => env('REDIS_HORIZON_HOST', env('REDIS_HOST', '127.0.0.1')),
+            'username' => env('REDIS_HORIZON_USERNAME', env('REDIS_USERNAME')),
+            'password' => env('REDIS_HORIZON_PASSWORD', env('REDIS_PASSWORD')),
+            'port' => env('REDIS_HORIZON_PORT', env('REDIS_PORT', '6379')),
+            'database' => env('REDIS_HORIZON_DB', '3'),
+            'max_retries' => env('REDIS_MAX_RETRIES', 3),
+            'backoff_algorithm' => env('REDIS_BACKOFF_ALGORITHM', 'decorrelated_jitter'),
+            'backoff_base' => env('REDIS_BACKOFF_BASE', 100),
+            'backoff_cap' => env('REDIS_BACKOFF_CAP', 1000),
+        ],
+
     ],
 
 ];

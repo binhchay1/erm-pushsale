@@ -21,6 +21,7 @@ class CreateShipmentJob implements ShouldQueue
         public int $orderId,
         public ?string $provider = null,
     ) {
+        $this->onConnection('redis');
         $this->onQueue(config('saleops.queues.shipments', 'shipments'));
     }
 

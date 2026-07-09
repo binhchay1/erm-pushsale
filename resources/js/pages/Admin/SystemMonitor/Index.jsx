@@ -6,6 +6,7 @@ import {
     Clock,
     Cpu,
     Database,
+    ExternalLink,
     HardDrive,
     Inbox,
     MemoryStick,
@@ -209,47 +210,129 @@ function OverviewTab({ system }) {
     );
 }
 
-function QueueTab({ system }) {
+function QueueTab({ system, t }) {
     if (!system) return null;
+
+    const horizon = system.queues?.horizon ?? {};
+    const supervisors = horizon.supervisors ?? [];
+    const supervisorForQueue = (queue) => supervisors.find((item) => item.queues?.includes(queue));
+
     return (
         <div className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-3">
-                <StatCard icon={Activity} title="Pending jobs" value={formatNumber(system.queues?.pending_total ?? 0)} />
-                <StatCard icon={AlertTriangle} title="Failed jobs" value={system.queues?.failed_total ?? '—'} />
-                <StatCard icon={Server} title="Queue workers" value={system.queues?.workers ?? 0} />
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <StatCard icon={Activity} title={t('system_monitor.queue_pending')} value={formatNumber(system.queues?.pending_total ?? 0)} />
+                <StatCard icon={AlertTriangle} title={t('system_monitor.queue_failed')} value={system.queues?.failed_total ?? '—'} />
+                <StatCard icon={Server} title={t('system_monitor.queue_workers')} value={system.queues?.workers ?? 0} />
+                <StatCard
+                    icon={ShieldCheck}
+                    title="Horizon"
+                    value={horizon.running ? t('system_monitor.horizon_running') : t('system_monitor.horizon_inactive')}
+                />
             </div>
+
+            <Card className={cn(horizon.installed && !horizon.running && 'border-destructive/40')}>
+                <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <CardTitle className="flex items-center gap-2">
+                            <Server className="size-4" /> Laravel Horizon
+                        </CardTitle>
+                        <CardDescription>{t('system_monitor.horizon_desc')}</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <StatusBadge tone={horizon.running ? 'success' : 'danger'}>
+                            {(horizon.status ?? 'inactive').toUpperCase()}
+                        </StatusBadge>
+                        {horizon.dashboard_url && (
+                            <Button variant="outline" size="sm" asChild>
+                                <a href={horizon.dashboard_url} target="_blank" rel="noreferrer">
+                                    {t('system_monitor.open_horizon')} <ExternalLink className="ml-2 size-3.5" />
+                                </a>
+                            </Button>
+                        )}
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    {!horizon.installed ? (
+                        <p className="text-sm text-destructive">{t('system_monitor.horizon_not_installed')}</p>
+                    ) : supervisors.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">{t('system_monitor.horizon_no_supervisors')}</p>
+                    ) : (
+                        <ScrollDataTable>
+                            <table className="w-full border-collapse text-xs">
+                                <thead>
+                                    <tr>
+                                        <Th>{t('system_monitor.supervisor')}</Th>
+                                        <Th>{t('system_monitor.queue')}</Th>
+                                        <Th>{t('system_monitor.status')}</Th>
+                                        <Th className="text-right">{t('system_monitor.processes')}</Th>
+                                        <Th className="text-right">Min / Max</Th>
+                                        <Th className="text-right">Timeout</Th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {supervisors.map((item) => (
+                                        <tr key={item.name}>
+                                            <Td className="font-mono text-[11px]">{item.name}</Td>
+                                            <Td className="font-mono text-[11px]">{item.queues?.join(', ') || '—'}</Td>
+                                            <Td><StatusBadge tone={item.status === 'running' ? 'success' : 'warning'}>{item.status?.toUpperCase()}</StatusBadge></Td>
+                                            <Td className="text-right">{item.processes}</Td>
+                                            <Td className="text-right">{item.min_processes} / {item.max_processes}</Td>
+                                            <Td className="text-right">{item.timeout}s</Td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </ScrollDataTable>
+                    )}
+                </CardContent>
+            </Card>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Queue lanes</CardTitle>
-                    <CardDescription>Webhook, shipping, tin nhắn, notification và report nên chạy bằng worker riêng.</CardDescription>
+                    <CardTitle>{t('system_monitor.queue_lanes')}</CardTitle>
+                    <CardDescription>{t('system_monitor.queue_lanes_desc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ScrollDataTable>
                         <table className="w-full border-collapse text-xs">
                             <thead>
                                 <tr>
-                                    <Th>Queue</Th>
-                                    <Th>Pending</Th>
-                                    <Th>Job cũ nhất</Th>
-                                    <Th>Gợi ý worker</Th>
+                                    <Th>{t('system_monitor.queue')}</Th>
+                                    <Th className="text-right">{t('system_monitor.ready')}</Th>
+                                    <Th className="text-right">{t('system_monitor.delayed')}</Th>
+                                    <Th className="text-right">{t('system_monitor.reserved')}</Th>
+                                    <Th>{t('system_monitor.oldest_job')}</Th>
+                                    <Th>{t('system_monitor.supervisor')}</Th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {(system.queues?.expected_queues ?? []).map((queue) => {
                                     const row = system.queues?.queues?.find((item) => item.queue === queue);
+                                    const supervisor = supervisorForQueue(queue);
                                     return (
                                         <tr key={queue}>
                                             <Td className="font-mono font-semibold">{queue}</Td>
-                                            <Td>{formatNumber(row?.count ?? 0)}</Td>
+                                            <Td className="text-right">{formatNumber(row?.ready ?? 0)}</Td>
+                                            <Td className="text-right">{formatNumber(row?.delayed ?? 0)}</Td>
+                                            <Td className="text-right">{formatNumber(row?.reserved ?? 0)}</Td>
                                             <Td>{row?.oldest_human ?? '—'}</Td>
-                                            <Td className="font-mono text-[11px] text-muted-foreground">php artisan queue:work --queue={queue} --tries=3</Td>
+                                            <Td className="font-mono text-[11px] text-muted-foreground">{supervisor?.name ?? '—'}</Td>
                                         </tr>
                                     );
                                 })}
                             </tbody>
                         </table>
                     </ScrollDataTable>
+                    {system.queues?.legacy_workers > 0 && (
+                        <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">
+                            {t('system_monitor.legacy_workers_warning', { count: system.queues.legacy_workers })}
+                        </p>
+                    )}
+                    {system.queues?.database_pending > 0 && (
+                        <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                            {t('system_monitor.database_queue_pending_warning', { count: system.queues.database_pending })}
+                        </p>
+                    )}
                 </CardContent>
             </Card>
         </div>
@@ -322,7 +405,7 @@ export default function SystemMonitorIndex({ tab, events, logs, stats, filters, 
 
     const tabs = [
         ['overview', 'Tổng quan hệ thống'],
-        ['queues', 'Queue workers'],
+        ['queues', t('system_monitor.tab_queues')],
         ['reports', 'Đối soát báo cáo'],
         ['events', t('system_monitor.tab_events')],
         ['logs', t('system_monitor.tab_logs')],
@@ -384,7 +467,7 @@ export default function SystemMonitorIndex({ tab, events, logs, stats, filters, 
                 </div>
 
                 {tab === 'overview' && <OverviewTab system={system} />}
-                {tab === 'queues' && <QueueTab system={system} />}
+                {tab === 'queues' && <QueueTab system={system} t={t} />}
                 {tab === 'reports' && <ReportsAuditTab reportAudit={reportAudit} />}
 
                 {tab === 'events' && (

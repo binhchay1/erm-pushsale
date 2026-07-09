@@ -33,6 +33,7 @@ class FinalizeLandingLeadJob implements ShouldQueue
         public int $leadId,
         public ?int $companyId = null,
     ) {
+        $this->onConnection('redis');
         $this->onQueue(config('saleops.queues.webhooks', 'webhooks'));
     }
 

@@ -19,6 +19,8 @@ class SaleWorkspaceChanged implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public string $connection = 'redis';
+
     public function __construct(public int $saleUserId) {}
 
     /** @return array<int, Channel> */
@@ -27,6 +29,11 @@ class SaleWorkspaceChanged implements ShouldBroadcast
         return [
             new PrivateChannel('dashboard.sales'),
         ];
+    }
+
+    public function broadcastQueue(): string
+    {
+        return (string) config('saleops.queues.dashboard_broadcasts', 'broadcasts-dashboard');
     }
 
     public function broadcastAs(): string

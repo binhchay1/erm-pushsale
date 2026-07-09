@@ -58,7 +58,7 @@ class ReportConsistencyAuditService
             'generated_at' => now()->format('d/m/Y H:i:s'),
             'date_range' => [
                 'from' => $filter->dateFrom?->format('d/m/Y'),
-                'to' => $filter->dateTo?->copy()->subSecond()->format('d/m/Y'),
+                'to' => $filter->dateTo?->format('d/m/Y'),
                 'date_type' => $filter->dateType->value,
             ],
             'status' => $failed > 0 ? 'fail' : ($warning > 0 ? 'warning' : 'pass'),

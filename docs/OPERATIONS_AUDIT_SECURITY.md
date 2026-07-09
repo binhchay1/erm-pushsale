@@ -68,29 +68,7 @@ Các job đã được đưa vào queue riêng:
 - Notification: `notifications`
 - Translation: `translations`
 
-Khuyến nghị Supervisor production:
-
-```ini
-[program:saleops-webhooks]
-command=php /path/artisan queue:work --queue=webhooks --sleep=1 --tries=3 --timeout=120
-numprocs=2
-
-[program:saleops-shipping-webhooks]
-command=php /path/artisan queue:work --queue=shipping-webhooks --sleep=1 --tries=3 --timeout=120
-numprocs=1
-
-[program:saleops-shipments]
-command=php /path/artisan queue:work --queue=shipments --sleep=2 --tries=3 --timeout=120
-numprocs=1
-
-[program:saleops-notifications]
-command=php /path/artisan queue:work --queue=notifications,translations --sleep=2 --tries=3 --timeout=60
-numprocs=1
-
-[program:saleops-default]
-command=php /path/artisan queue:work --queue=reports,exports,default --sleep=2 --tries=3 --timeout=180
-numprocs=1
-```
+Production queue processes are managed by one Supervisor program running `php artisan horizon`. Per-lane process limits are defined in `config/horizon.php`; use `deploy/supervisor/horizon.conf.example` and follow `HORIZON_REDIS_OPERATIONS.md`.
 
 ## 4. Bảo mật đã thêm
 
@@ -141,3 +119,7 @@ php artisan queue:failed
 php artisan audit:report-consistency
 curl -I https://your-domain.com/login
 ```
+
+## Horizon / Redis queue operations
+
+All production queues now use Redis and are managed by Laravel Horizon with one supervisor per business lane. Do not run legacy `queue:work`/`queue:listen` processes for the same queues. Deployment and zero-loss migration steps are documented in [`HORIZON_REDIS_OPERATIONS.md`](HORIZON_REDIS_OPERATIONS.md).

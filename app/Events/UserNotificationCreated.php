@@ -14,6 +14,8 @@ class UserNotificationCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public string $connection = 'redis';
+
     public function __construct(public UserNotification $notification) {}
 
     /** @return array<int, Channel> */
@@ -22,6 +24,11 @@ class UserNotificationCreated implements ShouldBroadcast
         return [
             new PrivateChannel('App.Models.User.'.$this->notification->user_id),
         ];
+    }
+
+    public function broadcastQueue(): string
+    {
+        return (string) config('saleops.queues.notification_broadcasts', 'broadcasts-notifications');
     }
 
     public function broadcastAs(): string

@@ -25,6 +25,7 @@ class ProcessPancakeMessageWebhookJob implements ShouldQueue
         public array $payload,
         public ?string $correlationId = null,
     ) {
+        $this->onConnection('redis');
         $this->onQueue(config('saleops.queues.pancake_chat_sync', 'pancake-chat'));
     }
 

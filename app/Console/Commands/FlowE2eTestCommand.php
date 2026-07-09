@@ -88,7 +88,7 @@ class FlowE2eTestCommand extends Command
             $response = Http::timeout(15)->post($webhookUrl, $payload);
             if ($response->successful() || $response->status() === 202) {
                 $usedHttp = true;
-                Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-jobs' => 10]);
+                Artisan::call('queue:wait-empty', ['--queue' => ['webhooks'], '--timeout' => 60]);
             } else {
                 $this->warn('  HTTP '.$response->status().' — fallback dispatch sync');
             }
@@ -152,7 +152,7 @@ class FlowE2eTestCommand extends Command
         // ── Bước 5: Tạo vận đơn (nếu GHTK sẵn sàng) ──
         $tracking = 'E2E'.strtoupper(Str::random(8));
         try {
-            Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-jobs' => 5]);
+            Artisan::call('queue:wait-empty', ['--queue' => ['shipments'], '--timeout' => 60]);
             $order->refresh();
             if ($order->tracking_number) {
                 $tracking = $order->tracking_number;

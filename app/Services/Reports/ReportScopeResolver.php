@@ -131,6 +131,10 @@ class ReportScopeResolver
     /** @param  Builder<Order>  $query */
     private function scopeAllocatorOrders(Builder $query): Builder
     {
-        return $query->whereNotNull('sale_user_id')->orWhereNull('sale_user_id');
+        // Allocator may see all orders in the tenant. Returning the original
+        // builder is intentional: `whereNotNull(...)->orWhereNull(...)` is a
+        // tautology and, when appended without grouping, lets the OR bypass
+        // date/product filters added before or after this scope.
+        return $query;
     }
 }

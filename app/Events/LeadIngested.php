@@ -15,6 +15,8 @@ class LeadIngested implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public string $connection = 'redis';
+
     public function __construct(
         public LeadIngestion $ingestion,
         public ?Order $order = null,
@@ -28,6 +30,11 @@ class LeadIngested implements ShouldBroadcast
             new PrivateChannel('dashboard.marketing'),
             new PrivateChannel('dashboard.sales'),
         ];
+    }
+
+    public function broadcastQueue(): string
+    {
+        return (string) config('saleops.queues.dashboard_broadcasts', 'broadcasts-dashboard');
     }
 
     public function broadcastAs(): string

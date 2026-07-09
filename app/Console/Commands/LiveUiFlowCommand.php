@@ -117,7 +117,7 @@ class LiveUiFlowCommand extends Command
             return self::FAILURE;
         }
 
-        Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-jobs' => 20]);
+        Artisan::call('queue:wait-empty', ['--queue' => ['webhooks'], '--timeout' => 60]);
         $this->line('✓ Webhook landing → đơn tạo & chia số ngay (cửa sổ upsale trên tác nghiệp)');
 
         $order = Order::query()
@@ -177,7 +177,7 @@ class LiveUiFlowCommand extends Command
             );
         });
 
-        Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-jobs' => 10]);
+        Artisan::call('queue:wait-empty', ['--queue' => ['shipments', 'notifications'], '--timeout' => 60]);
         $order->refresh();
         $this->line("✓ Telesale chốt đơn — COD {$order->amount_to_collect} — delivery={$order->delivery_status}");
 

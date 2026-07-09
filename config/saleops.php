@@ -87,6 +87,8 @@ return [
         'shipments' => env('QUEUE_SHIPMENTS', 'shipments'),
         'messages' => env('QUEUE_MESSAGES', 'messages'),
         'internal_chat_broadcasts' => env('QUEUE_INTERNAL_CHAT_BROADCASTS', 'broadcasts-internal-chat'),
+        'dashboard_broadcasts' => env('QUEUE_DASHBOARD_BROADCASTS', 'broadcasts-dashboard'),
+        'notification_broadcasts' => env('QUEUE_NOTIFICATION_BROADCASTS', 'broadcasts-notifications'),
         'pancake_chat_sync' => env('QUEUE_PANCAKE_CHAT_SYNC', 'pancake-chat'),
         'pancake_chat_broadcasts' => env('QUEUE_PANCAKE_CHAT_BROADCASTS', 'broadcasts-pancake-chat'),
         'notifications' => env('QUEUE_NOTIFICATIONS', 'notifications'),

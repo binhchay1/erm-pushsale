@@ -1,0 +1,23 @@
+[program:erm-saleops-horizon]
+process_name=%(program_name)s
+command=/usr/bin/php /var/www/erm-saleops/artisan horizon
+directory=/var/www/erm-saleops
+autostart=true
+autorestart=true
+user=www-data
+redirect_stderr=true
+stdout_logfile=/var/www/erm-saleops/storage/logs/horizon.log
+stdout_logfile_maxbytes=50MB
+stdout_logfile_backups=10
+stopwaitsecs=1800
+stopasgroup=true
+killasgroup=true
+environment=APP_ENV="production"
+
+[program:pushsale-reverb]
+command=php /var/www/erm-pushsale/artisan reverb:start --host=0.0.0.0 --port=8080
+autostart=true
+autorestart=true
+user=www-data
+redirect_stderr=true
+stdout_logfile=/var/www/erm-pushsale/storage/logs/reverb.log

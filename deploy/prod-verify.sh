@@ -3,16 +3,20 @@ set -euo pipefail
 
 cd /var/www/erm-pushsale
 
-echo "=== PROCESS PENDING QUEUE JOBS ==="
-before=$(php artisan tinker --execute="echo \Illuminate\Support\Facades\DB::table('jobs')->count();")
-echo "pending_before=${before}"
-for i in 1 2 3 4 5 6 7 8; do
-  sudo -u www-data php artisan queue:work database --once --quiet || true
-done
-after=$(php artisan tinker --execute="echo \Illuminate\Support\Facades\DB::table('jobs')->count();")
-echo "pending_after=${after}"
-failed=$(php artisan tinker --execute="echo \Illuminate\Support\Facades\DB::table('failed_jobs')->count();")
-echo "failed_jobs=${failed}"
+echo "=== HORIZON / REDIS QUEUE HEALTH ==="
+sudo -u www-data php artisan horizon:status
+sudo -u www-data php artisan queue:wait-empty --timeout=60 || true
+php artisan tinker --execute="
+\$redis = Redis::connection(config('queue.connections.redis.connection', 'queue'));
+foreach (collect(config('saleops.queues'))->unique() as \$queue) {
+    \$key = 'queues:'.\$queue;
+    echo \$queue.': ready='.(int) \$redis->llen(\$key)
+        .' delayed='.(int) \$redis->zcard(\$key.':delayed')
+        .' reserved='.(int) \$redis->zcard(\$key.':reserved').PHP_EOL;
+}
+echo 'legacy_database_jobs='.(Schema::hasTable('jobs') ? DB::table('jobs')->count() : 0).PHP_EOL;
+echo 'failed_jobs='.(Schema::hasTable('failed_jobs') ? DB::table('failed_jobs')->count() : 0).PHP_EOL;
+"
 
 echo "=== APP HEALTH ==="
 php artisan about --only=environment,cache,drivers | head -20

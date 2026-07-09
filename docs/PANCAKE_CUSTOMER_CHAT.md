@@ -96,10 +96,9 @@ Grant `customer_chat:full` to any non-admin/non-sales user when they need to sen
 Recommended production workers:
 
 ```bash
-php artisan queue:work database --queue=messages,broadcasts-internal-chat,pancake-chat,broadcasts-pancake-chat --sleep=1 --tries=3
-php artisan queue:work database --queue=notifications --sleep=1 --tries=3
-php artisan queue:work database --queue=default,reports,exports,translations --sleep=3 --tries=3
+php artisan horizon
+# Production: run this through Supervisor using deploy/supervisor/horizon.conf.example.
 php artisan reverb:start --host=0.0.0.0 --port=8080
 ```
 
-The supervisor sample in `deploy/supervisor/pushsale-worker.conf` already follows this split.
+Use `deploy/supervisor/horizon.conf.example`; Horizon starts the dedicated chat, broadcast, notification, and supporting supervisors declared in `config/horizon.php`.

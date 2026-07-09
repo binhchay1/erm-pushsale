@@ -40,6 +40,7 @@ class ProcessLeadIngestionJob implements ShouldQueue
             ? config('saleops.queues.pancake_orders', 'pancake-orders')
             : config('saleops.queues.webhooks', 'webhooks');
 
+        $this->onConnection('redis');
         $this->onQueue($queue);
     }
 

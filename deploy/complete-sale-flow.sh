@@ -69,6 +69,4 @@ if (!\$order->tracking_number) {
 echo 'order='.\$order->order_code.' delivery='.\$order->delivery_status.' recon='.\$order->reconciliation_status.PHP_EOL;
 "
 
-for i in 1 2 3; do
-  sudo -u www-data php artisan queue:work database --once --quiet || true
-done
+sudo -u www-data php artisan queue:wait-empty --timeout=60

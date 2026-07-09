@@ -238,7 +238,8 @@ class SystemHealthSnapshotService
             ['key' => 'mysql', 'label' => 'MySQL/MariaDB', 'patterns' => ['mysqld', 'mariadbd']],
             ['key' => 'redis', 'label' => 'Redis', 'patterns' => ['redis-server']],
             ['key' => 'supervisor', 'label' => 'Supervisor', 'patterns' => ['supervisord']],
-            ['key' => 'queue', 'label' => 'Laravel Queue Worker', 'patterns' => ['queue:work', 'queue:listen']],
+            ['key' => 'horizon', 'label' => 'Laravel Horizon', 'patterns' => ['artisan horizon', 'horizon:supervisor', 'horizon:work']],
+            ['key' => 'queue', 'label' => 'Legacy Queue Worker', 'patterns' => ['queue:work', 'queue:listen']],
             ['key' => 'reverb', 'label' => 'Laravel Reverb', 'patterns' => ['reverb:start']],
             ['key' => 'node', 'label' => 'Node/PM2/Vite', 'patterns' => ['node', 'pm2', 'vite']],
         ];
@@ -271,11 +272,18 @@ class SystemHealthSnapshotService
     /** @return array<string, mixed> */
     private function queueSnapshot(array $processes): array
     {
+        $expectedQueues = array_values(config('saleops.queues', [
+            'webhooks', 'shipping-webhooks', 'messages', 'notifications', 'exports', 'reports', 'default',
+        ]));
+
         $byQueue = [];
         $failed = null;
+        $databasePending = 0;
 
         try {
-            if (Schema::hasTable('jobs')) {
+            if (config('queue.default') === 'redis') {
+                $byQueue = $this->redisQueueRows($expectedQueues);
+            } elseif (Schema::hasTable('jobs')) {
                 $byQueue = DB::table('jobs')
                     ->selectRaw('queue, COUNT(*) as count, MIN(created_at) as oldest')
                     ->groupBy('queue')
@@ -283,12 +291,22 @@ class SystemHealthSnapshotService
                     ->get()
                     ->map(fn ($row) => [
                         'queue' => (string) $row->queue,
+                        'ready' => (int) $row->count,
+                        'delayed' => 0,
+                        'reserved' => 0,
                         'count' => (int) $row->count,
                         'oldest_seconds' => $row->oldest ? max(0, now()->timestamp - (int) $row->oldest) : null,
                         'oldest_human' => $row->oldest ? $this->duration(max(0, now()->timestamp - (int) $row->oldest)) : '—',
                     ])
                     ->values()
                     ->all();
+            }
+
+            // A deployment may switch QUEUE_CONNECTION from database to Redis while
+            // old database-backed jobs are still waiting. Keep surfacing that count so
+            // operators can drain them instead of silently abandoning work.
+            if (Schema::hasTable('jobs')) {
+                $databasePending = (int) DB::table('jobs')->count();
             }
 
             if (Schema::hasTable('failed_jobs')) {
@@ -298,20 +316,140 @@ class SystemHealthSnapshotService
             $byQueue = [];
         }
 
-        $workers = array_filter($processes, fn ($p) => str_contains($p['cmd'], 'queue:work') || str_contains($p['cmd'], 'queue:listen'));
+        $horizon = $this->horizonSnapshot();
+        $legacyWorkers = array_filter($processes, fn ($p) => str_contains($p['cmd'], 'queue:work') || str_contains($p['cmd'], 'queue:listen'));
         $totalPending = array_sum(array_map(fn ($row) => (int) $row['count'], $byQueue));
+        $workers = (int) ($horizon['processes'] ?? 0) + count($legacyWorkers);
 
         return [
             'connection' => config('queue.default'),
+            'redis_connection' => config('queue.connections.redis.connection'),
             'pending_total' => $totalPending,
             'failed_total' => $failed,
-            'workers' => count($workers),
+            'workers' => $workers,
+            'legacy_workers' => count($legacyWorkers),
+            'database_pending' => $databasePending,
             'queues' => $byQueue,
-            'expected_queues' => array_values(config('saleops.queues', [
-                'webhooks', 'shipping-webhooks', 'messages', 'notifications', 'exports', 'reports', 'default',
-            ])),
-            'status' => $this->queueStatus($totalPending, $failed, count($workers)),
+            'expected_queues' => $expectedQueues,
+            'horizon' => $horizon,
+            'status' => $this->queueStatus($totalPending, $failed, $workers, $horizon, $databasePending),
         ];
+    }
+
+    /** @param list<string> $queues @return list<array<string, mixed>> */
+    private function redisQueueRows(array $queues): array
+    {
+        $connection = (string) config('queue.connections.redis.connection', 'queue');
+        $redis = Redis::connection($connection);
+
+        return collect($queues)->map(function (string $queue) use ($redis): array {
+            $key = 'queues:'.$queue;
+            $ready = (int) $redis->llen($key);
+            $delayed = (int) $redis->zcard($key.':delayed');
+            $reserved = (int) $redis->zcard($key.':reserved');
+            $oldestTimestamp = $this->queuePayloadTimestamp($redis->lindex($key, 0));
+
+            return [
+                'queue' => $queue,
+                'ready' => $ready,
+                'delayed' => $delayed,
+                'reserved' => $reserved,
+                'count' => $ready + $delayed,
+                'oldest_seconds' => $oldestTimestamp ? max(0, now()->timestamp - $oldestTimestamp) : null,
+                'oldest_human' => $oldestTimestamp ? $this->duration(max(0, now()->timestamp - $oldestTimestamp)) : '—',
+            ];
+        })->values()->all();
+    }
+
+    private function queuePayloadTimestamp(mixed $payload): ?int
+    {
+        if (! is_string($payload) || $payload === '') {
+            return null;
+        }
+
+        $decoded = json_decode($payload, true);
+        if (! is_array($decoded)) {
+            return null;
+        }
+
+        foreach (['pushedAt', 'createdAt', 'created_at'] as $key) {
+            if (isset($decoded[$key]) && is_numeric($decoded[$key])) {
+                return (int) $decoded[$key];
+            }
+        }
+
+        return null;
+    }
+
+    /** @return array<string, mixed> */
+    private function horizonSnapshot(): array
+    {
+        if (! class_exists(\Laravel\Horizon\Horizon::class)) {
+            return [
+                'installed' => false,
+                'running' => false,
+                'status' => 'not_installed',
+                'masters' => [],
+                'supervisors' => [],
+                'processes' => 0,
+                'dashboard_url' => null,
+            ];
+        }
+
+        try {
+            $masters = app(\Laravel\Horizon\Contracts\MasterSupervisorRepository::class)->all();
+            $supervisors = app(\Laravel\Horizon\Contracts\SupervisorRepository::class)->all();
+
+            $supervisorRows = collect($supervisors)->map(function (object $supervisor): array {
+                $processes = is_array($supervisor->processes ?? null) ? $supervisor->processes : [];
+                $options = is_array($supervisor->options ?? null) ? $supervisor->options : [];
+
+                return [
+                    'name' => (string) ($supervisor->name ?? ''),
+                    'master' => (string) ($supervisor->master ?? ''),
+                    'pid' => (int) ($supervisor->pid ?? 0),
+                    'status' => (string) ($supervisor->status ?? 'unknown'),
+                    'processes' => array_sum(array_map('intval', $processes)),
+                    'processes_by_queue' => $processes,
+                    'queues' => array_values((array) ($options['queue'] ?? [])),
+                    'balance' => $options['balance'] ?? null,
+                    'min_processes' => (int) ($options['minProcesses'] ?? 0),
+                    'max_processes' => (int) ($options['maxProcesses'] ?? 0),
+                    'timeout' => (int) ($options['timeout'] ?? 0),
+                ];
+            })->values()->all();
+
+            $masterRows = collect($masters)->map(fn (object $master) => [
+                'name' => (string) ($master->name ?? ''),
+                'environment' => (string) ($master->environment ?? ''),
+                'pid' => (int) ($master->pid ?? 0),
+                'status' => (string) ($master->status ?? 'unknown'),
+                'supervisors' => array_values((array) ($master->supervisors ?? [])),
+            ])->values()->all();
+
+            $running = collect($masterRows)->contains(fn (array $master) => $master['status'] === 'running');
+
+            return [
+                'installed' => true,
+                'running' => $running,
+                'status' => $running ? 'running' : 'inactive',
+                'masters' => $masterRows,
+                'supervisors' => $supervisorRows,
+                'processes' => collect($supervisorRows)->sum('processes'),
+                'dashboard_url' => url('/'.trim((string) config('horizon.path', 'horizon'), '/')),
+            ];
+        } catch (Throwable $e) {
+            return [
+                'installed' => true,
+                'running' => false,
+                'status' => 'unavailable',
+                'masters' => [],
+                'supervisors' => [],
+                'processes' => 0,
+                'dashboard_url' => url('/'.trim((string) config('horizon.path', 'horizon'), '/')),
+                'error' => app()->isProduction() ? null : $e->getMessage(),
+            ];
+        }
     }
 
     /** @return array<string, mixed> */
@@ -333,6 +471,22 @@ class SystemHealthSnapshotService
                 }
                 Redis::connection()->ping();
             }, optional: true),
+            $this->check('redis_queue', 'Redis queue connection', function () {
+                if (config('queue.default') !== 'redis') {
+                    throw new \RuntimeException('QUEUE_CONNECTION phải là redis khi sử dụng Horizon.');
+                }
+
+                Redis::connection((string) config('queue.connections.redis.connection', 'queue'))->ping();
+            }),
+            [
+                'key' => 'horizon_package',
+                'label' => 'Laravel Horizon package',
+                'ok' => class_exists(\Laravel\Horizon\Horizon::class),
+                'status' => class_exists(\Laravel\Horizon\Horizon::class) ? 'ok' : 'critical',
+                'message' => class_exists(\Laravel\Horizon\Horizon::class)
+                    ? 'Đã cài đặt'
+                    : 'Chưa có laravel/horizon trong vendor.',
+            ],
             $this->check('storage', 'Storage writable', function () {
                 $path = storage_path('framework/cache/system-monitor-'.uniqid('', true).'.tmp');
                 File::ensureDirectoryExists(dirname($path));
@@ -405,12 +559,24 @@ class SystemHealthSnapshotService
         return $rows;
     }
 
-    private function queueStatus(int $pending, ?int $failed, int $workers): string
+    /** @param array<string, mixed> $horizon */
+    private function queueStatus(
+        int $pending,
+        ?int $failed,
+        int $workers,
+        array $horizon = [],
+        int $databasePending = 0,
+    ): string
     {
+        if (($horizon['installed'] ?? false) && ! ($horizon['running'] ?? false)) {
+            return 'critical';
+        }
+
         if ($pending > 0 && $workers === 0) {
             return 'critical';
         }
-        if (($failed ?? 0) > 0 || $pending > 500) {
+
+        if ($databasePending > 0 || ($failed ?? 0) > 0 || $pending > 500) {
             return 'warning';
         }
 

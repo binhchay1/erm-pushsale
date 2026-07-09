@@ -34,6 +34,7 @@ class SendUserNotification implements ShouldQueue
         public ?string $url = null,
         public ?array $data = null,
     ) {
+        $this->onConnection('redis');
         $this->onQueue(config('saleops.queues.notifications', 'notifications'));
     }
 
