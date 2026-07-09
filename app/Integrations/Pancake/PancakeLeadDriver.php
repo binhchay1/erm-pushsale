@@ -105,6 +105,19 @@ class PancakeLeadDriver implements LeadPayloadNormalizer
                 'source_label' => $sourceLabel,
                 'sale_email' => Arr::get($packet, 'sale_email') ?? Arr::get($packet, 'assignee.email'),
                 'sale_name' => Arr::get($packet, 'sale_name') ?? Arr::get($packet, 'assignee.name'),
+                'pancake_user_id' => Arr::get($packet, 'pancake_user_id')
+                    ?? Arr::get($packet, 'pancake_user.id')
+                    ?? Arr::get($packet, 'assignee.id')
+                    ?? Arr::get($packet, 'creator.id')
+                    ?? Arr::get($packet, 'user.id'),
+                'pancake_user_email' => Arr::get($packet, 'pancake_user_email')
+                    ?? Arr::get($packet, 'pancake_user.email')
+                    ?? Arr::get($packet, 'assignee.email')
+                    ?? Arr::get($packet, 'creator.email'),
+                'pancake_user_name' => Arr::get($packet, 'pancake_user_name')
+                    ?? Arr::get($packet, 'pancake_user.name')
+                    ?? Arr::get($packet, 'assignee.name')
+                    ?? Arr::get($packet, 'creator.name'),
                 'raw_status' => Arr::get($packet, 'status'),
                 'raw_inserted_at' => Arr::get($packet, 'inserted_at') ?? Arr::get($packet, 'created_at'),
             ],

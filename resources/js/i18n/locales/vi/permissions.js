@@ -23,6 +23,7 @@ export default {
         products: 'Sản phẩm',
         hr: 'Nhân sự',
         integrations: 'Kết nối & tích hợp',
+        pancake: 'Pancake / Extension',
         activity: 'Nhật ký hoạt động',
     },
 };

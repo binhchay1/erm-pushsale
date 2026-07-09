@@ -36,7 +36,11 @@ class ProcessLeadIngestionJob implements ShouldQueue
         public ?int $inboundEventId = null,
         public bool $isUpsell = false,
     ) {
-        $this->onQueue(config('saleops.queues.webhooks', 'webhooks'));
+        $queue = $platform === IntegrationPlatform::Pancake->value
+            ? config('saleops.queues.pancake_orders', 'pancake-orders')
+            : config('saleops.queues.webhooks', 'webhooks');
+
+        $this->onQueue($queue);
     }
 
     public function handle(

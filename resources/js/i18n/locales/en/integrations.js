@@ -71,6 +71,8 @@ export default {
         partner_id: 'Partner ID',
         partner_key: 'Partner key',
         shop_id: 'Shop ID',
+        allowed_shop_ids: 'Allowed Shop IDs',
+        allowed_page_ids: 'Allowed Page IDs',
         app_key: 'App key',
         extension_token: 'Extension token',
         default_marketing_source_id: 'Default source ID',

@@ -6,7 +6,7 @@
   <style>
     body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; max-width: 720px; }
     label { display: block; margin-top: 14px; font-weight: 600; }
-    input { box-sizing: border-box; width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #ccd2d8; border-radius: 8px; }
+    input, select { box-sizing: border-box; width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #ccd2d8; border-radius: 8px; }
     button { margin-top: 18px; padding: 10px 14px; border: 0; border-radius: 8px; background: #3782dc; color: white; cursor: pointer; }
     .hint { color: #64748b; font-size: 13px; line-height: 1.45; }
     .status { margin-top: 12px; font-size: 13px; }
@@ -14,13 +14,28 @@
 </head>
 <body>
   <h1>SaleOps Pancake Connector</h1>
-  <p class="hint">Dùng token API của tài khoản SaleOps. Tài khoản sale sẽ tạo đơn gán cho chính sale đó; admin/marketing có thể truyền sale_user_id từ payload nếu cần.</p>
+  <p class="hint">
+    Dùng token API của tài khoản SaleOps. Sale thường sẽ tạo đơn về chính mình.
+    Admin/trưởng nhóm/người có quyền Pancake toàn quyền có thể chỉ định sale nhận số.
+  </p>
 
   <label>SaleOps Base URL</label>
   <input id="baseUrl" placeholder="https://erm.yourdomain.com" />
 
   <label>Bearer token</label>
   <input id="token" type="password" placeholder="Token tạo từ /api/v1/auth/token" />
+
+  <label>Kiểu chia số khi đẩy từ Extension</label>
+  <select id="assignmentMode">
+    <option value="self">Chia về chính tài khoản SaleOps đang đăng nhập extension</option>
+    <option value="selected_sale">Chỉ định sale nhận số</option>
+    <option value="auto_routing">Chia theo rule tự động của hệ thống</option>
+    <option value="pending_pool">Đưa về pool chờ chia thủ công</option>
+  </select>
+
+  <label>ID sale nhận số khi chọn “Chỉ định sale”</label>
+  <input id="selectedSaleUserId" inputmode="numeric" placeholder="Ví dụ: 15" />
+  <p class="hint">Backend vẫn kiểm tra quyền; sale thường không thể tự gán cho người khác.</p>
 
   <button id="save">Lưu cấu hình</button>
   <div id="status" class="status"></div>

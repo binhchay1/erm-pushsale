@@ -13,9 +13,9 @@ class StorePancakeOrderRequest extends FormRequest
         $user = $this->user();
 
         return $user !== null && (
-            $user->isSales()
-            || $user->allows(PermissionArea::Leads, PermissionLevel::Full)
-            || $user->allows(PermissionArea::Telesale, PermissionLevel::Full)
+            $user->isAdmin()
+            || $user->isSales()
+            || $user->allows(PermissionArea::Pancake, PermissionLevel::Full)
         );
     }
 
@@ -40,8 +40,31 @@ class StorePancakeOrderRequest extends FormRequest
             'message' => ['nullable', 'string', 'max:5000'],
             'note' => ['nullable', 'string', 'max:5000'],
             'shipping_notes' => ['nullable', 'string', 'max:1000'],
+
+            // Assignment: backend vẫn tự validate quyền, không tin frontend một cách mù quáng.
+            'assignment_mode' => ['nullable', 'string', 'in:self,selected_sale,pancake_user_mapping,existing_conversation_owner,auto_routing,pending_pool'],
+            'saleops' => ['nullable', 'array'],
+            'saleops.assignment_mode' => ['nullable', 'string', 'in:self,selected_sale,pancake_user_mapping,existing_conversation_owner,auto_routing,pending_pool'],
+            'saleops.selected_sale_user_id' => ['nullable', 'integer'],
+            'selected_sale_user_id' => ['nullable', 'integer'],
+            'assigned_sale_user_id' => ['nullable', 'integer'],
             'sale_user_id' => ['nullable', 'integer'],
             'sale_email' => ['nullable', 'email'],
+            'pancake_user_id' => ['nullable', 'string', 'max:255'],
+            'pancake_user_email' => ['nullable', 'email'],
+            'pancake_user' => ['nullable', 'array'],
+            'pancake_user.id' => ['nullable', 'string', 'max:255'],
+            'pancake_user.email' => ['nullable', 'email'],
+            'pancake_user.name' => ['nullable', 'string', 'max:255'],
+            'assignee' => ['nullable', 'array'],
+            'assignee.id' => ['nullable', 'string', 'max:255'],
+            'assignee.email' => ['nullable', 'email'],
+            'assignee.name' => ['nullable', 'string', 'max:255'],
+            'creator' => ['nullable', 'array'],
+            'creator.id' => ['nullable', 'string', 'max:255'],
+            'creator.email' => ['nullable', 'email'],
+            'creator.name' => ['nullable', 'string', 'max:255'],
+
             'marketing_source_id' => ['nullable', 'integer'],
             'items' => ['nullable', 'array'],
             'items.*.name' => ['nullable', 'string', 'max:255'],

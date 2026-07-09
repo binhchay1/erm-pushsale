@@ -453,10 +453,11 @@ class LeadIngestionService
         array $rawPayload,
         ?User $forceSale = null,
         ?MarketingSource $campaign = null,
+        bool $forcePending = false,
     ): LeadIngestion {
         $normalized = $driver->normalize($rawPayload);
 
-        return $this->ingestNormalized($driver, $rawPayload, $normalized, $campaign, null, $forceSale);
+        return $this->ingestNormalized($driver, $rawPayload, $normalized, $campaign, null, $forceSale, $forcePending);
     }
 
     /**
@@ -470,6 +471,7 @@ class LeadIngestionService
         ?MarketingSource $campaign = null,
         ?LandingSession $session = null,
         ?User $forceSale = null,
+        bool $forcePending = false,
     ): LeadIngestion {
         if ($this->sanitizer->exceedsPayloadLimit($rawPayload)) {
             return $this->recordFailed($driver->platform(), ['oversized' => true], __('messages.lead_intake.payload_too_large'));
@@ -538,7 +540,8 @@ class LeadIngestionService
         // - Không JS: chờ theo hold_seconds, gia hạn khi có gói mới, tối đa max_hold_seconds.
         $hold = $campaign !== null && ! $duplicateOrder;
 
-        $willAutoAssign = $hold
+        $willAutoAssign = ! $forcePending
+            && $hold
             && ($campaign === null || $campaign->is_approved)
             && $this->allocationResolver->shouldAutoAssign($campaign);
 
@@ -636,6 +639,13 @@ class LeadIngestionService
             return $ingestion;
         }
 
+        if ($forcePending && $forceSale === null) {
+            $this->broadcastSafe(new LeadIngested($ingestion), new LeadPoolChanged);
+            $this->pingMarketingDashboard($campaign);
+
+            return $ingestion;
+        }
+
         $result = $this->allocateFromNormalized($ingestion, $normalized, $campaign, $session, $forceSale);
         $this->pingMarketingDashboard($campaign);
 
@@ -653,6 +663,7 @@ class LeadIngestionService
         ?MarketingSource $campaign = null,
         ?LandingSession $session = null,
         ?User $forceSale = null,
+        bool $forcePending = false,
     ): LeadIngestion {
         // Chia thủ công: gán thẳng cho sale được chọn (không qua auto route / pool).
         if ($forceSale !== null) {

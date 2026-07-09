@@ -22,6 +22,7 @@ enum PermissionArea: string
     case Products = 'products';
     case Hr = 'hr';
     case Integrations = 'integrations';
+    case Pancake = 'pancake';
     case Activity = 'activity';
 
     /** Key i18n frontend cho nhãn khu vực. */

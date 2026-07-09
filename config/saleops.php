@@ -82,6 +82,7 @@ return [
     */
     'queues' => [
         'webhooks' => env('QUEUE_WEBHOOKS', 'webhooks'),
+        'pancake_orders' => env('QUEUE_PANCAKE_ORDERS', 'pancake-orders'),
         'shipping_webhooks' => env('QUEUE_SHIPPING_WEBHOOKS', 'shipping-webhooks'),
         'shipments' => env('QUEUE_SHIPMENTS', 'shipments'),
         'messages' => env('QUEUE_MESSAGES', 'messages'),

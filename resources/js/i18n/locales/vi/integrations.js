@@ -71,6 +71,8 @@ export default {
         partner_id: 'Mã đối tác',
         partner_key: 'Khóa đối tác',
         shop_id: 'Mã cửa hàng',
+        allowed_shop_ids: 'Shop ID được phép',
+        allowed_page_ids: 'Page ID được phép',
         base_url: 'Pancake API Base URL',
         app_key: 'Mã ứng dụng',
         extension_token: 'Token riêng cho Extension',

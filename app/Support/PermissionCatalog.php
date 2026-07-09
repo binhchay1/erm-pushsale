@@ -29,6 +29,7 @@ final class PermissionCatalog
                 PermissionArea::Telesale->value => $f,
                 PermissionArea::Customers->value => $f,
                 PermissionArea::CustomerChat->value => $f,
+                PermissionArea::Pancake->value => $v,
                 PermissionArea::Reports->value => $v,
             ],
             UserRole::Marketing => [
@@ -36,6 +37,7 @@ final class PermissionCatalog
                 PermissionArea::Leads->value => $v,
                 PermissionArea::Customers->value => $v,
                 PermissionArea::CustomerChat->value => $v,
+                PermissionArea::Pancake->value => $v,
                 PermissionArea::Reports->value => $v,
             ],
             UserRole::Warehouse => [
@@ -44,6 +46,7 @@ final class PermissionCatalog
                 // Kho là bộ phận trực tiếp xử lý đơn nên mặc định được trao đổi nội bộ với khách hàng.
                 PermissionArea::Customers->value => $f,
                 PermissionArea::CustomerChat->value => $v,
+                PermissionArea::Pancake->value => $v,
                 PermissionArea::Reports->value => $v,
             ],
             UserRole::Accounting => [
@@ -51,12 +54,14 @@ final class PermissionCatalog
                 PermissionArea::Shipping->value => $v,
                 PermissionArea::Customers->value => $v,
                 PermissionArea::CustomerChat->value => $v,
+                PermissionArea::Pancake->value => $v,
                 PermissionArea::Reports->value => $v,
             ],
             UserRole::Allocator => [
                 PermissionArea::Leads->value => $f,
                 PermissionArea::Customers->value => $v,
                 PermissionArea::CustomerChat->value => $v,
+                PermissionArea::Pancake->value => $v,
                 PermissionArea::Reports->value => $v,
             ],
         };

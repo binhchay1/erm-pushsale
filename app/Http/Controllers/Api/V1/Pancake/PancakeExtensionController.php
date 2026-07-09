@@ -37,6 +37,7 @@ class PancakeExtensionController extends Controller
                 'url' => $order->sale_user_id ? '/sales/workspace' : '/admin/leads',
             ] : null,
             'sync_record_id' => $result['sync_record']->id,
-        ], $order ? 'Đã tạo đơn từ Pancake.' : 'Đã tạo lead từ Pancake, đang chờ chia số.', 201);
+            'assignment' => $result['assignment'],
+        ], $order ? __('integrations.pancake_extension.order_created') : __('integrations.pancake_extension.lead_created'), 201);
     }
 }

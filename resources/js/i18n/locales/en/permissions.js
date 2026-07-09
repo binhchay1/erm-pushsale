@@ -23,6 +23,7 @@ export default {
         products: 'Products',
         hr: 'Human resources',
         integrations: 'Integrations',
+        pancake: 'Pancake / Extension',
         activity: 'Activity log',
     },
 };
