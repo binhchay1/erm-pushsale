@@ -102,6 +102,7 @@ return [
     'lead_intake' => [
         'phone_required' => 'Phone number is required.',
         'invalid_phone' => 'Invalid Vietnamese mobile number. Use 9 digits (912345678), 10 digits (0912345678), or +84 format.',
+        'upsell_identity_required' => 'Upsell payload requires a phone number or an original session/order reference.',
         'honeypot' => 'Blocked: suspected bot (honeypot).',
         'spam_detected' => 'Blocked: content flagged as spam.',
         'payload_too_large' => 'Submitted payload too large — rejected.',

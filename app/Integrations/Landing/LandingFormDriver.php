@@ -42,6 +42,7 @@ class LandingFormDriver implements LeadPayloadNormalizer
             'message' => $message,
             'quantity' => $quantity,
             'shipping_address' => $this->findAddress($payload, $flatFields),
+            'shipping_fee_collected' => $this->findShippingFee($payload, $flatFields),
             'discount' => $this->findDiscount($payload, $flatFields),
             'items' => $this->findItems($payload, $flatFields, $quantity),
             'parent_ref' => $this->findParentRef($payload, $flatFields),
@@ -301,6 +302,51 @@ class LandingFormDriver implements LeadPayloadNormalizer
     }
 
     /**
+     * Phí ship khách trả. Hỗ trợ field riêng và nhãn combo kiểu
+     * "149k + 30k Ship" / "Miễn Ship".
+     *
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, string>  $flatFields
+     */
+    protected function findShippingFee(array $payload, array $flatFields): int
+    {
+        $candidates = [
+            Arr::get($payload, 'shipping_fee_collected'),
+            Arr::get($payload, 'shipping_fee'),
+            Arr::get($payload, 'ship_fee'),
+            Arr::get($payload, 'phi_ship'),
+            Arr::get($payload, 'phi_van_chuyen'),
+            Arr::get($flatFields, 'shipping_fee_collected'),
+            Arr::get($flatFields, 'shipping_fee'),
+            Arr::get($flatFields, 'phi_ship'),
+            Arr::get($flatFields, 'phi_van_chuyen'),
+        ];
+
+        foreach ($candidates as $candidate) {
+            if ($candidate !== null && $candidate !== '') {
+                return max(0, MoneyParser::parse($candidate));
+            }
+        }
+
+        $labels = array_merge(
+            array_values(array_filter($flatFields, 'is_string')),
+            array_values(array_filter($payload, 'is_string')),
+        );
+
+        foreach ($labels as $label) {
+            if (preg_match('/miễn\s*(?:phí\s*)?(?:ship|shipping|vận\s*chuyển)/iu', $label)) {
+                continue;
+            }
+
+            if (preg_match('/([0-9][0-9.,]*)\s*(k|nghìn|nghin|ngàn|ngan|đ|vnđ|vnd)\s*(?:phí\s*)?(?:ship|shipping|vận\s*chuyển)/iu', $label, $match)) {
+                return max(0, MoneyParser::parse($match[1].$match[2]));
+            }
+        }
+
+        return 0;
+    }
+
+    /**
      * Tham chiếu đơn gốc cho luồng upsale ở trang cảm ơn.
      *
      * @param  array<string, mixed>  $payload
@@ -426,6 +472,23 @@ class LandingFormDriver implements LeadPayloadNormalizer
             $item = $this->itemFromLabel((string) $comboLabel, 'combo', is_string($variant) ? $variant : null);
             $item['unit_price'] = MoneyParser::parse($comboPrice);
             $items[] = $item;
+        }
+
+        // Một số form LadiPage đặt tên field chung là product/san_pham thay vì
+        // mua_them_*. JS trang cảm ơn gắn item_type=upsell để không mất dòng hàng.
+        if ($items === []) {
+            $generic = Arr::get($scan, 'products')
+                ?? Arr::get($scan, 'product')
+                ?? Arr::get($scan, 'product_interest')
+                ?? Arr::get($scan, 'san_pham')
+                ?? Arr::get($scan, 'ten_san_pham');
+            $requestedType = Arr::get($scan, 'item_type');
+            $isUpsellPacket = in_array(strtolower((string) Arr::get($scan, 'is_upsell')), ['1', 'true', 'yes'], true);
+            $type = $requestedType === 'upsell' || $isUpsellPacket ? 'upsell' : 'product';
+
+            if (is_scalar($generic) && filled($generic)) {
+                $items[] = $this->itemFromLabel((string) $generic, $type, is_string($variant) ? $variant : null);
+            }
         }
 
         return $items;

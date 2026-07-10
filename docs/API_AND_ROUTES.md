@@ -81,9 +81,12 @@
 Combo/upsale cũng nhận qua field bắt đầu bằng `combo*`/`goi*` (gói) và `mua_them*`/`upsell*` (mua thêm),
 hoặc mảng cấu trúc `items: [{name, price, quantity, type, discount, variant}]`.
 
-**Upsale trang cảm ơn:** gửi `phone` (+ `parent_submission_id`/`order_ref` nếu có) tới `/landing/{token}/upsell`.
-Hệ thống tìm đơn gốc theo mã đơn hoặc SĐT trong cửa sổ chống trùng rồi cộng dồn sản phẩm, đồng bộ lại
-giá trị cuối đơn. Nếu không tìm thấy đơn gốc → xử lý như lead mới.
+**Upsale trang cảm ơn:** gửi `phone` hoặc opaque reference (`session_id`, `saleops_client_ref`,
+`parent_submission_id`, `order_ref`) tới `/landing/{token}/upsell`. Đơn được tạo/chia sale ngay từ gói
+đầu và chỉ mở gộp upsell trong **90 giây** (`LEAD_HOLD_SECONDS=90`, `LEAD_MAX_HOLD_SECONDS=90`).
+Gói đến trong cửa sổ được cộng sản phẩm và tính lại giá trị trên cùng order; gói đến muộn không được
+append vào order cũ. Hai trang khác domain phải dán JS campaign ở cả hai trang và bật Auto Funnel.
+Chi tiết: `docs/LANDING_UPSELL_90S_FLOW.md`.
 
 **Platform lead:** `facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada`  
 **Provider ship:** `viettel_post|ghn|ghtk|jnt|spx`

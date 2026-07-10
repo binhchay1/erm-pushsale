@@ -45,16 +45,17 @@ return [
     ],
 
     /*
-    | Gộp đơn & giữ số cho luồng Landing (form đầu + upsale trang cảm ơn).
-    | Mục tiêu: cùng 1 khách gửi nhiều gói tin → GỘP thành 1 đơn, chia 1 số.
-    | - grouping_window_minutes: cửa sổ coi các gói tin cùng SĐT là cùng 1 đơn.
-    | - hold_seconds: cửa sổ chờ upsale trên đơn (đã chia số; sale thấy badge "chờ upsale").
-    | - max_hold_seconds: trần giữ tuyệt đối để lead không kẹt mãi.
+    | Gộp đơn Landing (form đầu + upsale trang cảm ơn).
+    | Đơn được tạo/chia sale ngay; hold_seconds chỉ là khoảng thời gian đơn còn
+    | MỞ để nhận thêm upsell. Hết hạn hoặc sale tác nghiệp thì không gộp nữa.
+    | - grouping_window_minutes: chỉ dùng cho lead chưa có đơn / fallback cũ.
+    | - hold_seconds: cửa sổ gộp upsell của đơn (mặc định 90 giây).
+    | - max_hold_seconds: trần tuyệt đối; mặc định bằng hold_seconds.
     */
     'landing' => [
         'grouping_window_minutes' => (int) env('LEAD_GROUPING_WINDOW_MINUTES', 15),
-        'hold_seconds' => (int) env('LEAD_HOLD_SECONDS', 5),
-        'max_hold_seconds' => (int) env('LEAD_MAX_HOLD_SECONDS', 300),
+        'hold_seconds' => (int) env('LEAD_HOLD_SECONDS', 90),
+        'max_hold_seconds' => (int) env('LEAD_MAX_HOLD_SECONDS', 90),
     ],
 
     /*

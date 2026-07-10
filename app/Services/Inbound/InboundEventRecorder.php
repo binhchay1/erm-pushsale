@@ -23,12 +23,16 @@ class InboundEventRecorder
         ?int $companyId,
         array $payload,
     ): InboundEvent {
+        $storedPayload = app(\App\Services\Leads\LeadSanitizer::class)->exceedsPayloadLimit($payload)
+            ? ['_truncated' => true, '_keys' => array_slice(array_keys($payload), 0, 100)]
+            : $payload;
+
         return InboundEvent::query()->create([
             'company_id' => $companyId,
             'source' => $source,
             'channel' => $channel,
             'status' => InboundEventStatus::Received,
-            'payload' => $payload,
+            'payload' => $storedPayload,
             'headers' => $this->captureHeaders($request),
             'ip_address' => $request->ip(),
             'correlation_id' => (string) Str::uuid(),
@@ -39,8 +43,12 @@ class InboundEventRecorder
     private function captureHeaders(Request $request): array
     {
         $headers = [];
+        $sensitive = ['authorization', 'cookie', 'set-cookie', 'x-api-key', 'x-signature', 'x-webhook-signature'];
+
         foreach ($request->headers->all() as $key => $values) {
-            $headers[$key] = is_array($values) ? ($values[0] ?? '') : (string) $values;
+            $headers[$key] = in_array(strtolower($key), $sensitive, true)
+                ? '[REDACTED]'
+                : (is_array($values) ? ($values[0] ?? '') : (string) $values);
         }
 
         return $headers;

@@ -15,11 +15,9 @@ use Illuminate\Foundation\Queue\Queueable;
 /**
  * Kết thúc cửa sổ upsale trang cảm ơn sau khi đơn đã được tạo & chia số.
  *
- * Áp dụng cho CẢ luồng có JS lẫn không JS (cùng mốc hold_seconds / max_hold_seconds):
- *  - Còn hoạt động (nhịp phiên JS, hoặc vừa có gói mới trong hold_seconds) → job tự
- *    gia hạn (re-dispatch) tới trần max_hold_seconds.
- *  - Khách đóng phiên (session.close, chỉ có khi gắn JS) → chốt ngay.
- *  - Hết giờ chờ / chạm trần → bỏ trạng thái "chờ upsale" trên đơn.
+ * Đơn đã được tạo và chia sale trước khi job này chạy. Job chỉ đóng cửa sổ
+ * gộp đúng tại deadline tuyệt đối (mặc định 90 giây). Heartbeat/session.close
+ * dùng để liên kết phiên và quan sát hành vi, không kéo dài hoặc rút ngắn deadline.
  */
 class FinalizeLandingLeadJob implements ShouldQueue
 {
@@ -107,41 +105,35 @@ class FinalizeLandingLeadJob implements ShouldQueue
         LeadIngestionService $service,
         LandingUpsellService $landingUpsell,
     ): void {
-        $session = LandingSession::query()
-            ->where('lead_ingestion_id', $lead->id)
-            ->latest('id')
-            ->first();
-
         $now = now();
-        $holdSeconds = $landingUpsell->holdSeconds();
-        $maxHold = $landingUpsell->maxHoldSeconds();
-        $ageSeconds = $lead->created_at ? $lead->created_at->diffInSeconds($now) : $maxHold;
+        $deadline = $order->landing_upsell_hold_until;
 
-        $sessionClosed = $session?->isClosed() ?? false;
-        $lastActivity = $session?->last_activity_at ?? $order->updated_at ?? $lead->updated_at;
-        $idleSeconds = $lastActivity ? $lastActivity->diffInSeconds($now) : $holdSeconds;
-        $stillActive = $idleSeconds < $holdSeconds;
-        $delayHonored = $ageSeconds >= max(1, $holdSeconds - 5);
-
-        // Queue sync (test/local): job có thể chạy trước delay → không làm gì, chờ lần chạy đúng hạn.
-        if (! $delayHonored) {
+        if (! $deadline) {
             return;
         }
 
-        if (! $sessionClosed && $stillActive && $ageSeconds < $maxHold) {
-            self::dispatch($this->leadId, $this->companyId)->delay($now->copy()->addSeconds($holdSeconds));
+        // Queue sync/test hoặc clock drift có thể làm job chạy sớm. Không đóng sớm:
+        // đưa chính job về đúng deadline còn lại.
+        if ($deadline->isAfter($now)) {
+            self::dispatch($this->leadId, $this->companyId)->delay($deadline);
 
             return;
         }
 
         $service->releaseLandingUpsellHold($lead);
 
+        $session = LandingSession::query()
+            ->where('lead_ingestion_id', $lead->id)
+            ->latest('id')
+            ->first();
+
         if ($session && ! $session->isClosed()) {
             $session->forceFill([
                 'status' => LandingSession::STATUS_CLOSED,
-                'closed_at' => now(),
+                'closed_at' => $now,
                 'order_id' => $order->id,
             ])->save();
         }
     }
 }
+

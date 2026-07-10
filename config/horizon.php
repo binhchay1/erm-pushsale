@@ -128,6 +128,8 @@ return [
     'fast_termination' => (bool) env('HORIZON_FAST_TERMINATION', true),
     'memory_limit' => (int) env('HORIZON_MEMORY_LIMIT', 128),
 
+    // Mỗi environment đã chứa cấu hình supervisor đầy đủ. Horizon 5.x không
+    // chấp nhận defaults dạng option phẳng (sẽ hiểu từng key là supervisor).
     'defaults' => [],
 
     'environments' => [

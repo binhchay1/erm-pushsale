@@ -36,7 +36,7 @@ class LeadOrderFactory
             'shipping_notes' => $payload['shipping_notes'] ?? null,
             'discount' => (int) ($extra['discount'] ?? 0),
             'deposit' => (int) ($payload['deposit'] ?? 0),
-            'shipping_fee_collected' => (int) ($payload['shipping_fee_collected'] ?? 0),
+            'shipping_fee_collected' => (int) ($payload['shipping_fee_collected'] ?? $extra['shipping_fee_collected'] ?? 0),
             'items' => $extra['items'] ?? [],
             'item_origin' => $payload['item_origin'] ?? 'landing',
         ];

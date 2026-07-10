@@ -102,6 +102,7 @@ return [
     'lead_intake' => [
         'phone_required' => 'Vui lòng nhập số điện thoại.',
         'invalid_phone' => 'Số điện thoại di động VN không hợp lệ. Dùng 9 số (912345678), 10 số (0912345678) hoặc +84.',
+        'upsell_identity_required' => 'Gói upsell cần số điện thoại hoặc mã phiên/tham chiếu đơn gốc.',
         'honeypot' => 'Bị chặn: nghi ngờ bot (honeypot).',
         'spam_detected' => 'Bị chặn: nội dung nghi ngờ spam.',
         'payload_too_large' => 'Dữ liệu gửi lên quá lớn — đã bị từ chối.',

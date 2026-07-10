@@ -270,62 +270,68 @@ class CampaignLandingComboUpsellTest extends TestCase
         $this->assertNotNull($order->sale_user_id);
     }
 
-    public function test_upsell_merges_via_session_after_grouping_window(): void
+    public function test_session_cannot_bypass_expired_90_second_merge_window(): void
     {
         $campaign = $this->autoCampaign();
-        $sessionId = 'sess-late-upsell-'.uniqid();
+        $sessionId = 'sess-expired-upsell-'.uniqid();
 
         $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
-            'submission_id' => 'base-session-1',
+            'submission_id' => 'base-session-expired-1',
             'name' => 'Anh Session',
             'phone' => '0906333444',
             'combo' => 'Mua 1 Thỏi : 149k',
             'session_id' => $sessionId,
-            'saleops_client_ref' => 'cref-session-abc',
+            'saleops_client_ref' => 'cref-session-expired',
         ])->assertAccepted();
 
         $order = Order::query()->where('customer_phone', '0906333444')->firstOrFail();
-        $order->forceFill(['created_at' => now()->subMinutes(20)])->save();
+        $order->forceFill([
+            'created_at' => now()->subSeconds(120),
+            'landing_upsell_hold_until' => now()->subSecond(),
+        ])->save();
 
         $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/upsell', [
-            'submission_id' => 'upsell-session-1',
+            'submission_id' => 'upsell-session-expired-1',
             'phone' => '0906333444',
             'mua_them_1' => 'Mua Thêm 1 Má Hồng Kem: 89K',
             'session_id' => $sessionId,
         ])->assertAccepted();
 
-        $this->assertSame(1, Order::query()->where('customer_phone', '0906333444')->count());
         $order->refresh()->load('items');
-        $this->assertCount(2, $order->items);
-        $this->assertSame(238_000, (int) $order->total);
+        $this->assertCount(1, $order->items, 'Hết 90 giây thì session cũ không được gộp thêm hàng.');
+        $this->assertSame(149_000, (int) $order->total);
     }
 
-    public function test_upsell_merges_via_client_ref_after_grouping_window(): void
+    public function test_cross_domain_upsell_can_merge_by_client_ref_without_phone(): void
     {
         $campaign = $this->autoCampaign();
-        $clientRef = 'cref-late-'.uniqid();
+        $clientRef = 'cref-cross-domain-'.uniqid();
 
         $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
-            'submission_id' => 'base-cref-1',
+            'submission_id' => 'base-cref-cross-domain-1',
             'name' => 'Chị Ref',
             'phone' => '0906444555',
             'combo' => 'Mua 1 Thỏi : 149k',
             'saleops_client_ref' => $clientRef,
         ])->assertAccepted();
 
-        $order = Order::query()->where('customer_phone', '0906444555')->firstOrFail();
-        $order->forceFill(['created_at' => now()->subMinutes(20)])->save();
-
+        // Trang cảm ơn khác domain chỉ cần opaque client-ref; không phải lộ SĐT trên URL.
         $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/upsell', [
-            'submission_id' => 'upsell-cref-1',
-            'phone' => '0906444555',
+            'submission_id' => 'upsell-cref-cross-domain-1',
             'parent_submission_id' => $clientRef,
             'mua_them_1' => 'Mua Thêm 1 Má Hồng Kem: 89K',
         ])->assertAccepted();
 
         $this->assertSame(1, Order::query()->where('customer_phone', '0906444555')->count());
-        $order->refresh()->load('items');
+        $order = Order::query()->where('customer_phone', '0906444555')->with('items')->firstOrFail();
         $this->assertCount(2, $order->items);
+        $this->assertSame(238_000, (int) $order->total);
+    }
+
+    public function test_landing_merge_window_defaults_to_90_seconds(): void
+    {
+        $this->assertSame(90, app(\App\Services\Leads\LandingUpsellService::class)->holdSeconds());
+        $this->assertSame(90, app(\App\Services\Leads\LandingUpsellService::class)->maxHoldSeconds());
     }
 
     public function test_sale_edit_locks_order_from_landing_upsell_merge(): void
@@ -359,4 +365,96 @@ class CampaignLandingComboUpsellTest extends TestCase
         $this->assertCount(1, $order->items);
         $this->assertSame(149_000, (int) $order->total);
     }
+    public function test_main_and_upsell_can_share_same_submission_id_without_losing_upsell(): void
+    {
+        $campaign = $this->autoCampaign();
+        $sameReference = 'autofunnel-reference-1';
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => $sameReference,
+            'name' => 'Chị Auto Funnel',
+            'phone' => '0906123123',
+            'combo' => 'Mua 1 Thỏi : 149k',
+            'saleops_client_ref' => 'client-auto-funnel-1',
+        ])->assertAccepted();
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/upsell', [
+            'submission_id' => $sameReference,
+            'phone' => '0906123123',
+            'mua_them_1' => '1 hộp Bàn Chải (8 chiếc): 69k',
+        ])->assertAccepted();
+
+        $order = Order::query()->where('customer_phone', '0906123123')->with('items')->firstOrFail();
+        $this->assertCount(2, $order->items);
+        $this->assertSame(218_000, (int) $order->total);
+        $this->assertDatabaseHas('lead_ingestions', ['external_id' => $sameReference]);
+        $this->assertDatabaseHas('lead_ingestions', ['external_id' => $sameReference.':upsell']);
+    }
+
+    public function test_upsell_without_phone_or_reference_is_rejected(): void
+    {
+        $campaign = $this->autoCampaign();
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/upsell', [
+            'submission_id' => 'orphan-no-identity',
+            'mua_them_1' => '1 hộp Bàn Chải (8 chiếc): 69k',
+        ])->assertUnprocessable();
+    }
+
+    public function test_session_close_does_not_shorten_the_90_second_order_window(): void
+    {
+        Queue::fake([FinalizeLandingLeadJob::class]);
+        $campaign = $this->autoCampaign(jsTracking: true);
+        $sessionId = 'session-close-does-not-shortcut';
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'base-close-window',
+            'name' => 'Anh Window',
+            'phone' => '0906767676',
+            'combo' => 'Mua 1 Thỏi : 149k',
+            'session_id' => $sessionId,
+        ])->assertAccepted();
+
+        $order = Order::query()->where('customer_phone', '0906767676')->firstOrFail();
+        $deadline = $order->landing_upsell_hold_until;
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/session/close', [
+            'session_id' => $sessionId,
+        ])->assertAccepted();
+
+        $order->refresh();
+        $this->assertTrue($order->isAwaitingLandingUpsell());
+        $this->assertTrue($order->landing_upsell_hold_until->equalTo($deadline));
+    }
+
+    public function test_landing_parses_shipping_fee_and_generic_thankyou_product(): void
+    {
+        $campaign = $this->autoCampaign();
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/receive', [
+            'submission_id' => 'shipping-base-1',
+            'name' => 'Chị Ship',
+            'phone' => '0906989898',
+            'combo' => 'Mua 1 Thỏi : 149k + 30k Ship',
+            'saleops_client_ref' => 'shipping-client-ref-1',
+        ])->assertAccepted();
+
+        $order = Order::query()->where('customer_phone', '0906989898')->firstOrFail();
+        $this->assertSame(30_000, (int) $order->shipping_fee_collected);
+        $this->assertSame(179_000, (int) $order->amount_to_collect);
+
+        $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/upsell', [
+            'submission_id' => 'shipping-upsell-1',
+            'parent_submission_id' => 'shipping-client-ref-1',
+            'product' => '1 hộp Bàn Chải (8 chiếc): 69k',
+            'item_type' => 'upsell',
+            'is_upsell' => '1',
+        ])->assertAccepted();
+
+        $order->refresh()->load('items');
+        $this->assertCount(2, $order->items);
+        $this->assertNotNull($order->items->firstWhere('item_type', 'upsell'));
+        $this->assertSame(248_000, (int) $order->amount_to_collect);
+    }
+
 }

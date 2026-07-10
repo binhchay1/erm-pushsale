@@ -72,3 +72,7 @@ php artisan audit:report-consistency --role=warehouse
 ## Horizon / Redis queues
 
 Queue production được quản lý bởi Laravel Horizon, tách riêng từng lane cho webhook, Pancake, shipping, chat, broadcast, notification, report và export. Xem hướng dẫn triển khai/cutover không mất job tại [`docs/HORIZON_REDIS_OPERATIONS.md`](docs/HORIZON_REDIS_OPERATIONS.md).
+
+## Landing + upsell 90 giây
+
+Luồng form chính → trang cảm ơn khác domain → gộp upsell vào cùng đơn được mô tả tại [`docs/LANDING_UPSELL_90S_FLOW.md`](docs/LANDING_UPSELL_90S_FLOW.md).

@@ -32,4 +32,24 @@ trait ValidatesIncomingLead
 
         return $this->error($message, 422, $result['errors']);
     }
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function validateIncomingUpsellOrError(
+        LeadPayloadNormalizer $driver,
+        array $payload,
+        ?InboundEvent $event = null,
+    ): ?JsonResponse {
+        $result = app(LeadPayloadValidator::class)->validateUpsell($driver, $payload);
+
+        if ($result['valid']) {
+            return null;
+        }
+
+        $message = __('messages.webhook.validation_failed');
+        $event?->markRejected(422, $message);
+
+        return $this->error($message, 422, $result['errors']);
+    }
+
 }

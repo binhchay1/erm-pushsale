@@ -18,8 +18,9 @@ use Illuminate\Support\Str;
 /**
  * Vòng đời PHIÊN Landing (do JS nhúng trên Ladipage gọi).
  *
- * Mục tiêu: giữ số CHỦ ĐỘNG — biết khi nào khách bắt đầu / còn đang xem trang
- * cảm ơn / đã đóng phiên, để không phải chờ cứng 60–120s cho mọi lead.
+ * Mục tiêu: liên kết form chính và trang cảm ơn (kể cả khác domain), ghi nhận
+ * trạng thái phiên. Việc tạo/chia đơn diễn ra ngay; phiên không kéo dài hoặc rút
+ * ngắn cửa sổ gộp tuyệt đối 90 giây.
  */
 class CampaignLandingSessionController extends Controller
 {
@@ -90,7 +91,7 @@ class CampaignLandingSessionController extends Controller
         return $this->success(['ok' => true], 'ok', 202);
     }
 
-    /** Khách đóng tab / rời trang / hết phân vân → chốt phiên ngay. */
+    /** Khách đóng tab / rời trang → đóng phiên quan sát, không đóng sớm cửa sổ gộp đơn. */
     public function close(Request $request, string $token): JsonResponse
     {
         $campaign = $this->sources->findRootByWebhookToken($token);
@@ -118,14 +119,10 @@ class CampaignLandingSessionController extends Controller
                 'last_activity_at' => now(),
             ])->save();
 
-            // Có đơn đang chờ upsale hoặc lead legacy đang gom → chốt ngay (không chờ hết giờ).
-            if ($session->order_id) {
-                $order = Order::query()->find($session->order_id);
-
-                if ($order?->landing_upsell_hold_until && $session->lead_ingestion_id) {
-                    FinalizeLandingLeadJob::dispatch($session->lead_ingestion_id, $session->company_id);
-                }
-            } elseif ($session->lead_ingestion_id) {
+            // Không dispatch finalize sớm cho đơn đã tạo: đơn phải giữ nguyên cửa sổ
+            // gộp 90 giây kể cả pagehide/beforeunload bắn close không ổn định.
+            // Chỉ giữ nhánh legacy cho lead Gathering chưa có đơn.
+            if (! $session->order_id && $session->lead_ingestion_id) {
                 $lead = LeadIngestion::query()->find($session->lead_ingestion_id);
 
                 if ($lead && $lead->status === LeadIngestionStatus::Gathering) {

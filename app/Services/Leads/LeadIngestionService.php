@@ -75,25 +75,32 @@ class LeadIngestionService
         array $rawPayload,
         bool $isUpsell,
     ): LeadIngestion {
+        // Defense in depth: đường merge vào đơn cũng phải chịu cùng giới hạn với
+        // lead mới, không được bỏ qua payload limit/honeypot chỉ vì tìm thấy order.
+        if ($this->sanitizer->exceedsPayloadLimit($rawPayload)) {
+            return $this->recordFailed($driver->platform(), ['oversized' => true], __('messages.lead_intake.payload_too_large'));
+        }
+
+        if ($this->sanitizer->hasHoneypot($rawPayload)) {
+            return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_intake.honeypot'));
+        }
+
         $normalized = $driver->normalize($rawPayload);
         $normalized['utm_campaign'] = $campaign->utm_campaign;
         $normalized['utm_source'] = $normalized['utm_source'] ?? $campaign->utm_source ?? 'ladipage';
 
-        $phone = $this->sanitizer->normalizePhone($normalized['customer_phone'] ?? null);
-
-        if (! $phone) {
-            return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_intake.invalid_phone'));
-        }
-
-        $normalized['customer_phone'] = $phone;
-
         $externalId = (string) ($normalized['external_id'] ?? '');
+        $packetExternalId = $isUpsell && $externalId !== ''
+            ? $externalId.':upsell'
+            : $externalId;
 
-        // Idempotent: cùng packet gửi lại (retry Ladipage) → không nhân đôi.
+        // Idempotent theo đúng loại packet. Form chính và form upsell có thể dùng
+        // cùng reference/submission ID do Auto Funnel chuyển tiếp; chúng vẫn là hai
+        // nghiệp vụ khác nhau. Chỉ retry của CHÍNH endpoint mới bị bỏ qua.
         if ($externalId !== '') {
             $existing = LeadIngestion::query()
                 ->where('platform', $driver->platform())
-                ->where(fn ($q) => $q->where('external_id', $externalId)->orWhere('external_id', $externalId.':upsell'))
+                ->where('external_id', $packetExternalId)
                 ->first();
 
             if ($existing) {
@@ -101,19 +108,68 @@ class LeadIngestionService
             }
         }
 
+        $phone = $this->sanitizer->normalizePhone($normalized['customer_phone'] ?? null);
         $session = $this->resolveSession($campaign, $rawPayload, $phone);
+
+        /*
+         * Form upsell trên trang cảm ơn có thể không hỏi lại SĐT. Khi đó chỉ
+         * chấp nhận nếu session/client-ref trỏ tới một đơn còn mở cửa sổ gộp;
+         * không dò mơ hồ bằng khách gần nhất.
+         */
+        if (! $phone && $isUpsell) {
+            $referencedOrder = $this->findRecentOrderForMerge($normalized, null, $campaign, $session);
+
+            if ($referencedOrder) {
+                $phone = $referencedOrder->customer_phone;
+                $normalized['customer_phone'] = $phone;
+                $normalized['customer_name'] = $normalized['customer_name'] ?: $referencedOrder->customer_name;
+
+                if ($merged = $this->mergePacketIntoOrder(
+                    $driver,
+                    $referencedOrder,
+                    $campaign,
+                    $normalized,
+                    $rawPayload,
+                    $packetExternalId,
+                    $session,
+                )) {
+                    return $merged;
+                }
+            }
+        }
+
+        if (! $phone) {
+            return $this->recordFailed($driver->platform(), $rawPayload, __('messages.lead_intake.invalid_phone'));
+        }
+
+        $normalized['customer_phone'] = $phone;
 
         // 1) Lead đang gom / chờ chia (chưa có đơn) của cùng khách → cộng dồn.
         if ($mergeLead = $this->findActiveGatheringLead($campaign, $phone, $session)) {
-            return $this->mergePacketIntoLead($mergeLead, $normalized, $externalId, $session);
+            return $this->mergePacketIntoLead($mergeLead, $normalized, $packetExternalId, $session);
         }
 
-        // 2) Đơn vừa tạo trong cửa sổ gom → cộng dồn (upsale muộn / khách bấm chậm).
+        // 2) Chỉ gộp vào đơn còn mở cửa sổ upsell 90s và chưa bị sale khóa.
         if ($order = $this->findRecentOrderForMerge($normalized, $phone, $campaign, $session)) {
-            return $this->mergePacketIntoOrder($driver, $order, $campaign, $normalized, $rawPayload, $externalId, $session);
+            if ($merged = $this->mergePacketIntoOrder(
+                $driver,
+                $order,
+                $campaign,
+                $normalized,
+                $rawPayload,
+                $packetExternalId,
+                $session,
+            )) {
+                return $merged;
+            }
         }
 
-        // 3) Gói tin đầu tiên → tạo lead mới & giữ số (chờ upsale trang cảm ơn).
+        // 3) Hết cửa sổ/không có đơn gốc → ghi nhận như lead mới/duplicate để
+        // vận hành xử lý, tuyệt đối không âm thầm cộng vào đơn cũ.
+        $normalized['external_id'] = $packetExternalId !== ''
+            ? $packetExternalId
+            : (string) ($normalized['external_id'] ?? '');
+
         return $this->ingestNormalized($driver, $rawPayload, $normalized, $campaign, $session);
     }
 
@@ -153,24 +209,26 @@ class LeadIngestionService
      */
     protected function findRecentOrderForMerge(
         array $normalized,
-        string $phone,
+        ?string $phone,
         MarketingSource $campaign,
         ?LandingSession $session = null,
     ): ?Order {
-        // Cùng phiên JS (session_id) → luôn gộp vào đơn của phiên, không phụ thuộc cửa sổ 15 phút.
+        // Cùng phiên JS: chỉ dùng khi đúng chiến dịch/SĐT và cửa sổ vẫn mở.
         if ($session?->order_id) {
             $viaSession = Order::query()->find($session->order_id);
-            if ($viaSession) {
+
+            if ($this->isMergeCandidate($viaSession, $campaign, $phone)) {
                 return $viaSession;
             }
         }
 
-        // Tham chiếu tường minh từ trang cảm ơn (mã đơn / submission gốc / client_ref JS).
+        // Tham chiếu tường minh do JS/Auto Funnel chuyển sang trang cảm ơn.
         $parentRef = $normalized['parent_ref'] ?? null;
 
         if (filled($parentRef)) {
             $byCode = Order::query()->where('order_code', $parentRef)->latest('id')->first();
-            if ($byCode) {
+
+            if ($this->isMergeCandidate($byCode, $campaign, $phone)) {
                 return $byCode;
             }
 
@@ -183,35 +241,44 @@ class LeadIngestionService
                 ->latest('id')
                 ->first();
 
-            if ($viaLead?->order) {
+            if ($this->isMergeCandidate($viaLead?->order, $campaign, $phone)) {
                 return $viaLead->order;
             }
         }
 
-        // Theo SĐT trong cửa sổ gom (phút), ưu tiên cùng chiến dịch.
-        $windowMinutes = (int) config('saleops.landing.grouping_window_minutes', 15);
+        if (! $phone) {
+            return null;
+        }
 
-        // Đơn đang chờ upsale (trong cửa sổ gom) → gộp upsale vào đó.
-        $awaitingUpsell = Order::query()
+        // Fallback an toàn: cùng SĐT + cùng chiến dịch + hold còn hiệu lực.
+        $candidate = Order::query()
             ->where('customer_phone', $phone)
             ->where('marketing_source_id', $campaign->id)
             ->where('landing_upsell_locked', false)
             ->whereNotNull('landing_upsell_hold_until')
             ->where('landing_upsell_hold_until', '>', now())
-            ->where('created_at', '>=', now()->subMinutes($windowMinutes))
             ->latest('id')
             ->first();
 
-        if ($awaitingUpsell) {
-            return $awaitingUpsell;
+        return $this->isMergeCandidate($candidate, $campaign, $phone)
+            ? $candidate
+            : null;
+    }
+
+    protected function isMergeCandidate(
+        ?Order $order,
+        MarketingSource $campaign,
+        ?string $phone,
+    ): bool {
+        if (! $order || (int) $order->marketing_source_id !== (int) $campaign->id) {
+            return false;
         }
 
-        return Order::query()
-            ->where('customer_phone', $phone)
-            ->where('created_at', '>=', now()->subMinutes($windowMinutes))
-            ->orderByRaw('CASE WHEN marketing_source_id = ? THEN 0 ELSE 1 END', [$campaign->id])
-            ->latest('id')
-            ->first();
+        if ($phone && $order->customer_phone !== $phone) {
+            return false;
+        }
+
+        return $this->landingUpsell->canMerge($order);
     }
 
     /**
@@ -261,7 +328,7 @@ class LeadIngestionService
 
         $lead->save();
 
-        // Nhịp hoạt động mới → job giữ số sẽ tự gia hạn thời gian chờ.
+        // Ghi nhận hoạt động phiên; không kéo dài trần gộp tuyệt đối 90 giây.
         if ($session) {
             $session->forceFill(['last_activity_at' => now()])->save();
         }
@@ -283,16 +350,20 @@ class LeadIngestionService
         array $rawPayload,
         string $externalId,
         ?LandingSession $session,
-    ): LeadIngestion {
+    ): ?LeadIngestion {
         $items = is_array($normalized['items'] ?? null) ? $normalized['items'] : [];
         $extraDiscount = (int) ($normalized['discount'] ?? 0);
 
         return DB::transaction(function () use (
             $driver, $order, $campaign, $normalized, $rawPayload, $externalId, $session, $items, $extraDiscount
         ) {
-            $order = $order->fresh();
+            $order = Order::query()->whereKey($order->id)->lockForUpdate()->first();
 
-            if (! $order->isLandingUpsellLocked() && ($items !== [] || $extraDiscount > 0)) {
+            if (! $order || ! $this->landingUpsell->canMerge($order)) {
+                return null;
+            }
+
+            if ($items !== [] || $extraDiscount > 0) {
                 $this->orderFactory->appendItems($order, $items, $extraDiscount, 'upsell');
 
                 $summary = collect($items)
@@ -312,7 +383,7 @@ class LeadIngestionService
 
             $ingestion = LeadIngestion::query()->create([
                 'platform' => $driver->platform(),
-                'external_id' => ($externalId !== '' ? $externalId : uniqid('up_', true)).':upsell',
+                'external_id' => $externalId !== '' ? $externalId : uniqid('up_', true).':upsell',
                 'status' => LeadIngestionStatus::Processed,
                 'customer_name' => $normalized['customer_name'] ?? $order->customer_name,
                 'customer_phone' => $order->customer_phone,
@@ -362,7 +433,7 @@ class LeadIngestionService
      *
      * @param  array<string, mixed>  $rawPayload
      */
-    protected function resolveSession(MarketingSource $campaign, array $rawPayload, string $phone): ?LandingSession
+    protected function resolveSession(MarketingSource $campaign, array $rawPayload, ?string $phone): ?LandingSession
     {
         $key = $this->extractSessionKey($rawPayload);
 
@@ -535,9 +606,8 @@ class LeadIngestionService
             ->first();
         $duplicateOrder = $duplicateOrderModel !== null;
 
-        // Luồng Landing: chia số ngay, giữ cửa sổ upsale trên đơn (hoặc payload lead nếu chia tay).
-        // - Có JS: đóng phiên sớm khi khách rời, tự gia hạn theo hoạt động.
-        // - Không JS: chờ theo hold_seconds, gia hạn khi có gói mới, tối đa max_hold_seconds.
+        // Luồng Landing: tạo/chia đơn ngay. Job chỉ đóng trạng thái mở gộp khi
+        // hết 90 giây; tuyệt đối không trì hoãn tạo đơn hay phân sale.
         $hold = $campaign !== null && ! $duplicateOrder;
 
         $willAutoAssign = ! $forcePending
@@ -774,8 +844,8 @@ class LeadIngestionService
     }
 
     /**
-     * Mã tham chiếu gói tin do JS SaleOps sinh (localStorage) — dùng để upsell trang cảm ơn
-     * trỏ về đơn gốc kể cả khi quá cửa sổ gom 15 phút.
+     * Mã tham chiếu opaque do JS SaleOps sinh — dùng để trang cảm ơn trỏ về
+     * đúng đơn gốc giữa hai domain. Ref chỉ hợp lệ khi đơn còn mở cửa sổ 90 giây.
      *
      * @param  array<string, mixed>  $rawPayload
      */
