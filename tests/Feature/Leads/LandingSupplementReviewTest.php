@@ -10,6 +10,7 @@ use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
+use App\Http\Middleware\SetTenant;
 use App\Services\Leads\LeadSupplementReviewService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
@@ -127,6 +128,76 @@ class LandingSupplementReviewTest extends TestCase
         $service->resolve($packet->fresh(), $admin, LeadSupplementReviewService::MERGE_ORIGINAL);
 
         $this->assertCount(2, $order->fresh()->items);
+    }
+
+
+    public function test_customer_packet_endpoint_returns_detailed_action_safe_payload(): void
+    {
+        [$admin, $sale, , $order, $packet] = $this->fixtures();
+        $this->withoutMiddleware(SetTenant::class);
+
+        $response = $this->actingAs($admin)->getJson(
+            route('customers.orders.supplement-packets.index', $order),
+        );
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('order.order_code', $order->order_code)
+            ->assertJsonPath('order.sale_name', $sale->name)
+            ->assertJsonPath('order.can_accept_merge', true)
+            ->assertJsonPath('summary.pending_count', 1)
+            ->assertJsonPath('summary.pending_value', 69_000)
+            ->assertJsonPath('packets.0.id', (string) $packet->id)
+            ->assertJsonPath('packets.0.item_quantity', 1)
+            ->assertJsonPath('packets.0.subtotal', 69_000)
+            ->assertJsonPath('packets.0.total', 69_000)
+            ->assertJsonPath('packets.0.items.0.line_total', 69_000)
+            ->assertJsonPath('packets.0.can_merge_original', true)
+            ->assertJsonPath('packets.0.can_create_supplemental_order', true)
+            ->assertJsonPath('packets.0.merge_block_reason', null);
+    }
+
+    public function test_customer_packet_endpoint_explains_when_original_order_cannot_be_merged(): void
+    {
+        [$admin, , , $order] = $this->fixtures();
+        $order->forceFill([
+            'closing_status' => ClosingStatus::Closed->value,
+            'closed_at' => now(),
+        ])->save();
+        $this->withoutMiddleware(SetTenant::class);
+
+        $this->actingAs($admin)
+            ->getJson(route('customers.orders.supplement-packets.index', $order))
+            ->assertOk()
+            ->assertJsonPath('order.can_accept_merge', false)
+            ->assertJsonPath('order.merge_block_reason', 'order_closed')
+            ->assertJsonPath('packets.0.can_merge_original', false)
+            ->assertJsonPath('packets.0.can_create_supplemental_order', true)
+            ->assertJsonPath('packets.0.merge_block_reason', 'order_closed');
+    }
+
+    public function test_customer_packet_review_endpoint_persists_audit_note_and_returns_pending_count(): void
+    {
+        [$admin, , , $order, $packet] = $this->fixtures();
+        $this->withoutMiddleware(SetTenant::class);
+
+        $this->actingAs($admin)
+            ->postJson(
+                route('customers.orders.supplement-packets.review', [$order, $packet]),
+                [
+                    'resolution' => LeadSupplementReviewService::ACKNOWLEDGE,
+                    'note' => 'Khách xác nhận không lấy thêm sản phẩm.',
+                ],
+            )
+            ->assertOk()
+            ->assertJsonPath('pending_count', 0)
+            ->assertJsonPath('packet.review_resolution', LeadSupplementReviewService::ACKNOWLEDGE)
+            ->assertJsonPath('packet.review_note', 'Khách xác nhận không lấy thêm sản phẩm.')
+            ->assertJsonPath('packet.requires_review', false);
+
+        $packet->refresh();
+        $this->assertSame('Khách xác nhận không lấy thêm sản phẩm.', $packet->review_note);
+        $this->assertNotNull($packet->reviewed_at);
     }
 
     /** @return array{User, User, MarketingSource, Order, LeadIngestion} */

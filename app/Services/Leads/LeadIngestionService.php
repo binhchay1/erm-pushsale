@@ -80,10 +80,10 @@ class LeadIngestionService
         bool $isUpsell,
     ): LeadIngestion {
         $normalized = $driver->normalize($rawPayload);
+        $isSupplemental = $isUpsell || $this->looksLikeSupplementalPacket($rawPayload, $normalized);
 
-        $isSupplemental = $isUpsell
-            || $this->looksLikeSupplementalPacket($rawPayload, $normalized);
-
+        // Chỉ lead chính mới dùng tên mặc định. Packet upsell/follow-up để trống
+        // để khi liên kết đơn có thể kế thừa chính xác tên khách từ đơn gốc.
         if (! $isSupplemental && blank($normalized['customer_name'] ?? null)) {
             $normalized['customer_name'] = __('messages.lead_intake.guest_name');
         }
@@ -371,7 +371,7 @@ class LeadIngestionService
                 $duplicate = LeadIngestion::query()
                     ->where('platform', $driver->platform())
                     ->where('external_id', $externalId)
-                    ->when($existingPacket, fn($query) => $query->where('id', '!=', $existingPacket->id))
+                    ->when($existingPacket, fn ($query) => $query->where('id', '!=', $existingPacket->id))
                     ->lockForUpdate()
                     ->first();
 
@@ -522,7 +522,7 @@ class LeadIngestionService
                 $duplicate = LeadIngestion::query()
                     ->where('platform', $driver->platform())
                     ->where('external_id', $externalId)
-                    ->when($existingPacket, fn($query) => $query->where('id', '!=', $existingPacket->id))
+                    ->when($existingPacket, fn ($query) => $query->where('id', '!=', $existingPacket->id))
                     ->lockForUpdate()
                     ->first();
 
@@ -613,7 +613,7 @@ class LeadIngestionService
                     'counts_as_lead' => false,
                     'order_total' => $order->fresh()->total,
                 ],
-                ($normalized['customer_name'] ?? $order->customer_name) . ' — ' . $packetType->label(),
+                ($normalized['customer_name'] ?? $order->customer_name).' — '.$packetType->label(),
             );
 
             $this->pingMarketingDashboard($campaign);
@@ -665,10 +665,9 @@ class LeadIngestionService
 
         return $candidates
             ->filter()
-            ->first(
-                fn(Order $order): bool =>
+            ->first(fn (Order $order): bool =>
                 (int) $order->marketing_source_id === (int) $campaign->id
-                    && (! $phone || $order->customer_phone === $phone)
+                && (! $phone || $order->customer_phone === $phone)
             );
     }
 
@@ -705,7 +704,7 @@ class LeadIngestionService
                 $duplicate = LeadIngestion::query()
                     ->where('platform', $driver->platform())
                     ->where('external_id', $externalId)
-                    ->when($existingPacket, fn($query) => $query->where('id', '!=', $existingPacket->id))
+                    ->when($existingPacket, fn ($query) => $query->where('id', '!=', $existingPacket->id))
                     ->lockForUpdate()
                     ->first();
 
@@ -1071,7 +1070,7 @@ class LeadIngestionService
         };
 
         return $suffix !== '' && ! str_ends_with($externalId, $suffix)
-            ? $externalId . $suffix
+            ? $externalId.$suffix
             : $externalId;
     }
 
@@ -1095,7 +1094,7 @@ class LeadIngestionService
             'metadata' => [
                 'lead_ingestion_id' => $packet->id,
                 'packet_type' => $packet->packet_type?->value,
-                'items' => collect($items)->map(fn(array $item): array => [
+                'items' => collect($items)->map(fn (array $item): array => [
                     'name' => $item['product_name'] ?? $item['name'] ?? null,
                     'quantity' => (int) ($item['quantity'] ?? 1),
                     'unit_price' => (int) ($item['unit_price'] ?? 0),
@@ -1116,7 +1115,7 @@ class LeadIngestionService
         ];
 
         if ($order->sale_user_id) {
-            NotificationService::push($order->sale_user_id, 'lead', null, null, '/sales/customers?search=' . $order->customer_phone, $data);
+            NotificationService::push($order->sale_user_id, 'lead', null, null, '/sales/customers?search='.$order->customer_phone, $data);
         }
         NotificationService::pushToRole(UserRole::Admin, 'lead', null, null, '/admin/leads?bucket=exceptions', $data);
         NotificationService::pushToRole(UserRole::Allocator, 'lead', null, null, '/allocator/workspace?bucket=exceptions', $data);
@@ -1133,7 +1132,7 @@ class LeadIngestionService
         ];
 
         if ($order->sale_user_id) {
-            NotificationService::push($order->sale_user_id, 'lead', null, null, '/sales/customers?search=' . $order->customer_phone, $data);
+            NotificationService::push($order->sale_user_id, 'lead', null, null, '/sales/customers?search='.$order->customer_phone, $data);
         }
         NotificationService::pushToRole(UserRole::Admin, 'lead', null, null, '/admin/leads?bucket=exceptions', $data);
         NotificationService::pushToRole(UserRole::Allocator, 'lead', null, null, '/allocator/workspace?bucket=exceptions', $data);
@@ -1762,7 +1761,7 @@ class LeadIngestionService
         ?MarketingSource $campaign = null,
     ): void {
         $adminUrl = $campaign && ! $campaign->is_approved
-            ? '/admin/landing-approvals?campaign=' . $campaign->id
+            ? '/admin/landing-approvals?campaign='.$campaign->id
             : '/admin/leads';
 
         $data = [

@@ -355,6 +355,7 @@ export default {
         review_action_hint: 'Chọn cách xử lý phù hợp. Hệ thống không tự chia sale lại.',
         review_merge_confirm: 'Gộp các sản phẩm của gói này vào đơn gốc? Chỉ thực hiện được khi đơn chưa chốt/xuất kho/tạo vận đơn.',
         review_create_confirm: 'Tạo một đơn bổ sung mới và giữ nguyên sale của đơn gốc?',
+        review_ack_confirm: 'Packet sẽ được đánh dấu đã kiểm tra nhưng không gộp sản phẩm hoặc tạo đơn mới.',
         review_done: 'Đã đánh dấu gói tin là đã kiểm tra.',
         review_failed: 'Không cập nhật được trạng thái kiểm tra.',
         filter_campaign: '— Chiến dịch —',

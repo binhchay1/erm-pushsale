@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import { useLabels } from '@/hooks/use-labels';
+import { useConfirm } from '@/hooks/use-confirm';
 import { useTableSort } from '@/hooks/use-table-sort';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { leadTone } from '@/lib/status-tones';
@@ -49,6 +50,7 @@ export default function LeadsIndex({
 }) {
     const t = useT();
     const labels = useLabels();
+    const { ask, ConfirmDialogPortal } = useConfirm();
     const pageRows = leads.data ?? [];
     const { sortedRows, sort, toggleSort } = useTableSort(pageRows, { defaultKey: 'created_at', defaultDir: 'desc' });
 
@@ -135,16 +137,26 @@ export default function LeadsIndex({
         );
     };
 
-    const markReviewed = (row, resolution = 'acknowledge') => {
-        const confirmation = resolution === 'merge_original'
+    const markReviewed = async (row, resolution = 'acknowledge') => {
+        const title = resolution === 'merge_original'
+            ? t('pages.leads.merge_original_order')
+            : resolution === 'create_supplemental_order'
+              ? t('pages.leads.create_supplemental_order')
+              : t('pages.leads.mark_reviewed');
+        const description = resolution === 'merge_original'
             ? t('pages.leads.review_merge_confirm')
             : resolution === 'create_supplemental_order'
               ? t('pages.leads.review_create_confirm')
-              : null;
+              : t('pages.leads.review_ack_confirm');
 
-        if (confirmation && !window.confirm(confirmation)) {
-            return;
-        }
+        const confirmed = await ask({
+            title,
+            description,
+            confirmLabel: title,
+            variant: resolution === 'acknowledge' ? 'default' : 'default',
+        });
+
+        if (!confirmed) return;
 
         router.patch(
             `${reviewUrlPrefix}/${row.id}/review`,
@@ -626,6 +638,7 @@ export default function LeadsIndex({
                     </div>
                 )}
             </div>
+            <ConfirmDialogPortal />
         </AppLayout>
     );
 }

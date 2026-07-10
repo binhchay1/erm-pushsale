@@ -4,6 +4,19 @@ export function getCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 }
 
+function createApiError(response, data = {}) {
+    const firstValidationError = Object.values(data.errors ?? {})
+        .flat()
+        .find((message) => typeof message === 'string' && message.trim() !== '');
+    const error = new Error(firstValidationError ?? data.message ?? translate('common.request_failed'));
+
+    error.status = response.status;
+    error.errors = data.errors ?? {};
+    error.payload = data;
+
+    return error;
+}
+
 export async function apiPost(url, body = {}) {
     const response = await fetch(url, {
         method: 'POST',
@@ -20,7 +33,7 @@ export async function apiPost(url, body = {}) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw new Error(data.message ?? translate('common.request_failed'));
+        throw createApiError(response, data);
     }
 
     return data;
@@ -38,7 +51,7 @@ export async function apiGet(url) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw new Error(data.message ?? translate('common.request_failed'));
+        throw createApiError(response, data);
     }
 
     return data;

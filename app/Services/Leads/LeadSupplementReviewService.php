@@ -318,19 +318,46 @@ final class LeadSupplementReviewService
         return $newOrder->fresh(['items']);
     }
 
-    public function canSafelyMerge(Order $order): bool
+    /**
+     * Mã lý do khiến đơn gốc không còn an toàn để gộp packet mua thêm.
+     *
+     * Frontend chỉ dùng mã này để giải thích quyết định cho người vận hành;
+     * quyền và điều kiện cuối cùng vẫn luôn được kiểm tra lại trong transaction.
+     */
+    public function mergeBlockReason(Order $order): ?string
     {
         $closingStatus = (string) ($order->closing_status ?? ClosingStatus::Open->value);
+
+        if ($order->closed_at !== null || $closingStatus === ClosingStatus::Closed->value) {
+            return 'order_closed';
+        }
+
+        if ($closingStatus === ClosingStatus::Cancelled->value) {
+            return 'order_cancelled';
+        }
+
+        if ($order->inventory_deducted_at !== null) {
+            return 'inventory_deducted';
+        }
+
+        if (filled($order->tracking_number)) {
+            return 'tracking_created';
+        }
+
         $hasShipments = $order->relationLoaded('shipments')
             ? $order->shipments->isNotEmpty()
             : $order->shipments()->exists();
 
-        return $order->closed_at === null
-            && $closingStatus !== ClosingStatus::Closed->value
-            && $closingStatus !== ClosingStatus::Cancelled->value
-            && $order->inventory_deducted_at === null
-            && blank($order->tracking_number)
-            && ! $hasShipments;
+        if ($hasShipments) {
+            return 'shipment_created';
+        }
+
+        return null;
+    }
+
+    public function canSafelyMerge(Order $order): bool
+    {
+        return $this->mergeBlockReason($order) === null;
     }
 
     /** @param list<array<string, mixed>> $items */

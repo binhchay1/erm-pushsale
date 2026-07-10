@@ -356,6 +356,7 @@ export default {
         review_action_hint: 'Choose the appropriate resolution. The system will not re-route the sale owner.',
         review_merge_confirm: "Merge this packet's items into the original order? This is only allowed before closing, fulfillment, or shipment.",
         review_create_confirm: "Create a new supplemental order and retain the original order's sale owner?",
+        review_ack_confirm: 'The packet will be marked as reviewed without merging products or creating a new order.',
         review_done: 'Packet marked as reviewed.',
         review_failed: 'Could not update review status.',
         filter_campaign: '— Campaign —',
