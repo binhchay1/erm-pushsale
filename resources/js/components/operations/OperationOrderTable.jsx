@@ -7,6 +7,7 @@ import { OperationStatusDialog } from '@/components/operations/OperationStatusDi
 import { CustomerMessagesDialog } from '@/components/customers/CustomerMessagesDialog';
 import { OrderOperationHistoryDialog } from '@/components/customers/OrderOperationHistoryDialog';
 import { CustomerPurchaseHistoryDialog } from '@/components/customers/CustomerPurchaseHistoryDialog';
+import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useTableSort } from '@/hooks/use-table-sort';
@@ -49,7 +50,7 @@ export function OperationOrderTable({
     const t = useT();
     const actionCols =
         (enableSaleActions ? 1 : 0) + (enableCloseOrder ? 1 : 0) + (enableDeleteOrder ? 1 : 0);
-    const baseCols = 15;
+    const baseCols = 14;
 
     const { sortedRows, sort, toggleSort } = useTableSort(rows ?? [], { defaultKey: 'dataArrivedAt', defaultDir: 'desc' });
 
@@ -137,7 +138,23 @@ export function OperationOrderTable({
                         sortedRows.map((row) => (
                             <tr key={row.id} className="align-middle hover:bg-muted/30 border-b">
 
-                                <Td className="text-center font-medium">{row.orderCode}</Td>
+                                <Td className="text-center font-medium">
+                                    <div>{row.orderCode}</div>
+                                    {row.isSupplementalOrder && (
+                                        <div
+                                            className="mx-auto mt-1 w-fit rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:bg-violet-950/50 dark:text-violet-300"
+                                            title={t('operations.order_table.supplemental_order_hint', {
+                                                code: row.supplementalOriginalOrderCode || '—',
+                                            })}
+                                        >
+                                            {t('operations.order_table.supplemental_order')}
+                                            {row.supplementalOriginalOrderCode ? ` · ${row.supplementalOriginalOrderCode}` : ''}
+                                        </div>
+                                    )}
+                                    {row.pendingSupplementCount > 0 && (
+                                        <CustomerSupplementPacketsDialog order={row} count={row.pendingSupplementCount} />
+                                    )}
+                                </Td>
 
                                 <Td className="text-center text-sm">
                                     <div className="text-blue-500 hover:underline cursor-pointer">{row.sourceName}</div>

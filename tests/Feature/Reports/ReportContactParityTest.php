@@ -3,7 +3,10 @@
 namespace Tests\Feature\Reports;
 
 use App\Data\ReportFilterData;
+use App\Enums\ClosingStatus;
+use App\Enums\DeliveryStatus;
 use App\Enums\LeadIngestionStatus;
+use App\Enums\LeadPacketType;
 use App\Enums\UserRole;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
@@ -26,6 +29,107 @@ use Tests\TestCase;
 class ReportContactParityTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_parent_campaign_aggregates_child_source_without_counting_supplemental_order_as_lead(): void
+    {
+        Carbon::setTestNow('2026-07-08 10:00:00');
+
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $marketer = User::factory()->create(['role' => UserRole::Marketing]);
+        $parent = MarketingSource::query()->create([
+            'name' => 'Parent campaign',
+            'marketer_user_id' => $marketer->id,
+            'creator_user_id' => $admin->id,
+            'webhook_token' => 'parent-campaign-token',
+            'is_active' => true,
+            'budget' => 500_000,
+        ]);
+        $child = MarketingSource::query()->create([
+            'parent_id' => $parent->id,
+            'name' => 'Child landing',
+            'marketer_user_id' => $marketer->id,
+            'creator_user_id' => $admin->id,
+            'webhook_token' => 'child-campaign-token',
+            'is_active' => true,
+            'budget' => 200_000,
+        ]);
+
+        $baseOrder = Order::query()->create([
+            'order_code' => 'ORD-FAMILY-BASE',
+            'marketer_user_id' => $marketer->id,
+            'marketing_source_id' => $child->id,
+            'customer_name' => 'Family customer',
+            'customer_phone' => '0900111222',
+            'data_arrived_at' => now(),
+            'closed_at' => now(),
+            'closing_status' => ClosingStatus::Closed->value,
+            'delivery_status' => DeliveryStatus::Delivered->value,
+            'total' => 100_000,
+        ]);
+        $baseLead = LeadIngestion::query()->create([
+            'platform' => 'landing',
+            'external_id' => 'family-base',
+            'status' => LeadIngestionStatus::Processed,
+            'packet_type' => LeadPacketType::Lead,
+            'counts_as_lead' => true,
+            'customer_phone' => $baseOrder->customer_phone,
+            'marketing_source_id' => $child->id,
+            'order_id' => $baseOrder->id,
+            'payload' => [],
+            'processed_at' => now(),
+        ]);
+
+        $supplementalOrder = Order::query()->create([
+            'order_code' => 'ORD-FAMILY-SUPPLEMENT',
+            'marketer_user_id' => $marketer->id,
+            'marketing_source_id' => $child->id,
+            'customer_name' => 'Family customer',
+            'customer_phone' => '0900111222',
+            'data_arrived_at' => now(),
+            'closed_at' => now(),
+            'closing_status' => ClosingStatus::Closed->value,
+            'delivery_status' => DeliveryStatus::Delivered->value,
+            'is_returning_customer' => true,
+            'total' => 50_000,
+        ]);
+        LeadIngestion::query()->create([
+            'platform' => 'landing',
+            'external_id' => 'family-supplement:upsell',
+            'status' => LeadIngestionStatus::Processed,
+            'packet_type' => LeadPacketType::LateUpsell,
+            'counts_as_lead' => false,
+            'customer_phone' => $baseOrder->customer_phone,
+            'marketing_source_id' => $child->id,
+            'parent_ingestion_id' => $baseLead->id,
+            'order_id' => $supplementalOrder->id,
+            'related_order_id' => $baseOrder->id,
+            'payload' => [],
+            'processed_at' => now(),
+        ]);
+
+        $filter = new ReportFilterData(
+            dateFrom: now()->startOfDay(),
+            dateTo: now()->endOfDay(),
+        );
+
+        $dashboard = app(MarketingDashboardService::class)->build($filter);
+        $parentRow = collect($dashboard['rows'])->firstWhere('id', (string) $parent->id);
+        $childRow = collect($dashboard['rows'])->firstWhere('id', (string) $child->id);
+
+        $this->assertSame(1, (int) $parentRow['contacts']);
+        $this->assertSame(1, (int) $childRow['contacts']);
+        $this->assertSame(1, (int) $dashboard['filterTotal']['contacts']);
+        $this->assertSame(150_000, (int) $parentRow['totalRevenue']);
+
+        $campaign = app(MarketingCampaignReportService::class)->build($filter, $admin);
+        $campaignRow = collect($campaign['rows'])->firstWhere('campaignId', (string) $parent->id);
+        $this->assertSame(1, (int) $campaignRow['leadsGenerated']);
+        $this->assertSame(150_000, (int) $campaignRow['actualRevenue']);
+
+        $ceo = app(CeoReportService::class)->build($filter, $admin);
+        $this->assertSame(1, (int) ($ceo['marketingRows'][0]['contacts'] ?? 0));
+        $this->assertSame(150_000, (int) ($ceo['marketingRows'][0]['totalEstRevenue'] ?? 0));
+    }
 
     public function test_all_reports_report_identical_contact_count(): void
     {
@@ -73,6 +177,8 @@ class ReportContactParityTest extends TestCase
             'platform' => 'landing',
             'external_id' => 'sub-1:upsell',
             'status' => LeadIngestionStatus::Processed,
+            'packet_type' => LeadPacketType::Upsell,
+            'counts_as_lead' => false,
             'customer_phone' => '0900000001',
             'marketing_source_id' => $source->id,
             'order_id' => Order::query()->where('order_code', 'ORD-P1')->value('id'),
@@ -85,6 +191,8 @@ class ReportContactParityTest extends TestCase
             'platform' => 'landing',
             'external_id' => 'sub-dup',
             'status' => LeadIngestionStatus::Duplicate,
+            'packet_type' => LeadPacketType::Lead,
+            'counts_as_lead' => true,
             'customer_phone' => '0900000009',
             'marketing_source_id' => $source->id,
             'payload' => [],

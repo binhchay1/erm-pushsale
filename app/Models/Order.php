@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
@@ -152,6 +153,39 @@ class Order extends Model
     public function pancakeCustomerMessages(): HasMany
     {
         return $this->hasMany(PancakeCustomerMessage::class);
+    }
+
+    /** Mọi packet landing đã gộp trực tiếp vào đơn. */
+    public function leadPackets(): HasMany
+    {
+        return $this->hasMany(LeadIngestion::class, 'order_id');
+    }
+
+    /** Packet đến muộn/orphan được liên kết tới đơn để vận hành xử lý tay. */
+    public function relatedLeadPackets(): HasMany
+    {
+        return $this->hasMany(LeadIngestion::class, 'related_order_id');
+    }
+
+    /** Packet upsell đang chờ admin/allocator quyết định. */
+    public function pendingSupplementPackets(): HasMany
+    {
+        return $this->relatedLeadPackets()
+            ->where('counts_as_lead', false)
+            ->where('requires_review', true)
+            ->whereNull('reviewed_at');
+    }
+
+    /**
+     * Packet đã tạo ra chính đơn bổ sung này. Dùng để phân biệt một đơn upsell
+     * tách hợp lệ với lỗi trùng đơn ngoài ý muốn trên mọi workspace.
+     */
+    public function supplementalOriginPacket(): HasOne
+    {
+        return $this->hasOne(LeadIngestion::class, 'order_id')
+            ->where('counts_as_lead', false)
+            ->whereNotNull('related_order_id')
+            ->latestOfMany();
     }
 
     /**

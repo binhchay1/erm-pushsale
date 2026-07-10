@@ -11,6 +11,11 @@ return [
         'system_actor' => 'System',
         'history_before_tracking' => 'This current-state snapshot predates detailed operation-history tracking.',
         'history_actions' => [
+            'landing_upsell_added' => 'Landing upsell merged',
+            'landing_upsell_requires_review' => 'Landing upsell needs review',
+            'landing_late_upsell_manually_merged' => 'Late upsell manually merged',
+            'landing_late_upsell_created_order' => 'Supplemental order created from late upsell',
+            'landing_supplemental_order_created' => 'Landing supplemental order',
             'initial_snapshot' => 'Current state',
             'call' => 'Call logged',
             'status_updated' => 'Operation updated',

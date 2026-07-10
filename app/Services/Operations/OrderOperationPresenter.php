@@ -96,6 +96,9 @@ final class OrderOperationPresenter
             'hasInsufficientStock' => ! app(InventoryDeductionService::class)->hasSufficientStock($order),
             'awaitingLandingUpsell' => $order->isAwaitingLandingUpsell(),
             'landingUpsellHoldUntil' => $order->landing_upsell_hold_until?->toIso8601String(),
+            'pendingSupplementCount' => (int) ($order->pending_supplement_packets_count ?? 0),
+            'isSupplementalOrder' => $order->supplementalOriginPacket !== null,
+            'supplementalOriginalOrderCode' => $order->supplementalOriginPacket?->relatedOrder?->order_code,
         ];
     }
 

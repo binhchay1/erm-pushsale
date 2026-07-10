@@ -26,6 +26,7 @@ export default {
         pending: 'Chờ xử lý',
         processed: 'Đã tạo lead',
         duplicate: 'Trùng số',
+        needs_review: 'Cần kiểm tra',
         failed: 'Lỗi',
     },
     operation_stage: {

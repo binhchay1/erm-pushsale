@@ -1,36 +1,44 @@
-# Landing → trang cảm ơn → gộp upsell trong 90 giây
+# Landing → trang cảm ơn → gộp upsell tuyệt đối trong 90 giây
 
-## Mục tiêu nghiệp vụ
+## Quy tắc nghiệp vụ đã chốt
 
-- Form chính tạo lead, chia sale và tạo order **ngay khi worker xử lý gói đầu**.
-- Order được đánh dấu `landing_upsell_hold_until` trong 90 giây.
-- Form upsell gửi gói thứ hai đến endpoint `/upsell`.
-- Nếu gói thứ hai xác định đúng order gốc và order còn mở thì sản phẩm được append vào **cùng order**.
-- Hết 90 giây, hoặc sale đã gọi/cập nhật/chốt/sửa order, order không nhận gộp nữa.
-- Không trì hoãn tạo order 90 giây. Queue delay chỉ dùng để đóng cờ `open merge` đúng deadline.
+1. **Gói form đầu tiên** là một lead thật (`packet_type=lead`, `counts_as_lead=true`). Hệ thống chia sale đúng một lần và tạo order ngay khi worker xử lý.
+2. Order mở một cửa sổ gộp tuyệt đối 90 giây tính từ lúc lead chính được tạo. Heartbeat, reload trang hoặc packet bổ sung không kéo dài deadline.
+3. Mọi packet mua thêm/follow-up trong cửa sổ chỉ append `order_items` vào cùng order, giữ nguyên sale, và được lưu thành audit packet (`counts_as_lead=false`).
+4. Packet đến sau deadline không tự gộp, không chia sale lại, không tạo contact mới. Nó được liên kết với order gốc và đưa vào trạng thái **Cần kiểm tra**.
+5. Packet upsell đến trước packet chính do queue chạy lệch thứ tự được giữ ở trạng thái gathering trong thời gian ngắn. Khi base tới, backend tự reconcile; nếu base không tới thì trở thành orphan upsell cần kiểm tra.
+6. `customer_note` chỉ chứa nội dung khách nhập/ghi chú giao hàng. Tên sản phẩm luôn nằm ở `order_items`, không được nối vào cột Tin nhắn.
+7. Nhật ký lead hiển thị mỗi packet để audit. Dashboard và toàn bộ báo cáo chỉ đếm `counts_as_lead=true`, vì vậy năm packet của cùng khách vẫn chỉ là một lead/contact.
 
-## Hai landing dùng để kiểm thử
+## Cross-domain và CORS
 
-- Form chính: `https://www.tienichgiadinh2.click/dasdsdasdada`
-- Trang cảm ơn/upsell: `https://www.hangngon23.click/camonphanbatsang`
+Hệ thống nhận dữ liệu từ nhiều landing nên endpoint dùng:
 
-Hai trang khác origin. Không được chỉ dựa vào `localStorage`, vì storage không được chia sẻ giữa hai domain. JS campaign dùng ba lớp hand-off:
+```php
+'allowed_origins' => ['*'],
+'supports_credentials' => false,
+```
+
+CORS chỉ cho phép JavaScript trình duyệt đọc response; nó **không phải cơ chế xác thực webhook**. Các lớp bảo vệ thật gồm campaign token khó đoán, rate limit, giới hạn payload, validation, honeypot, idempotency, row lock và audit log.
+
+Hai trang khác origin không chia sẻ localStorage. JS campaign hand-off opaque reference theo thứ tự:
 
 1. query/hidden field (`session_id`, `saleops_client_ref`, `parent_ref`),
-2. `window.name` chứa opaque ID (không chứa PII),
-3. localStorage chỉ làm fallback trong cùng origin.
+2. `window.name` trong cùng tab,
+3. localStorage chỉ là fallback trên trang cảm ơn cùng origin.
 
-## Cấu hình server
+Landing chính luôn sinh session/reference mới cho mỗi lượt mở, không tái sử dụng storage của khách trước. Điều này ngăn hai khách dùng cùng máy bị gộp nhầm.
+
+## Cấu hình
 
 ```dotenv
 LEAD_HOLD_SECONDS=90
 LEAD_MAX_HOLD_SECONDS=90
 LEAD_GROUPING_WINDOW_MINUTES=15
-LANDING_ALLOWED_ORIGINS=https://www.tienichgiadinh2.click,https://www.hangngon23.click
 QUEUE_CONNECTION=redis
 ```
 
-Sau khi đổi `.env`:
+Sau khi đổi cấu hình:
 
 ```bash
 php artisan optimize:clear
@@ -38,74 +46,66 @@ php artisan config:cache
 php artisan horizon:terminate
 ```
 
-## Cấu hình LadiPage
+## Endpoint LadiPage
 
-### Form chính
-
-Webhook:
+Form chính:
 
 ```text
 POST {APP_URL}/api/v1/landing/{CAMPAIGN_TOKEN}/receive
 ```
 
-Bật **Auto Funnel**, redirect đến trang cảm ơn và dán JS được sinh trong màn Chiến dịch vào custom JS của trang.
-
-Tên field nên ổn định:
-
-```text
-name
-phone
-address
-combo
-mua_them_1
-mua_them_2
-message
-```
-
-### Form trang cảm ơn
-
-Webhook:
+Trang cảm ơn/upsell:
 
 ```text
 POST {APP_URL}/api/v1/landing/{CAMPAIGN_TOKEN}/upsell
 ```
 
-Dùng **cùng campaign token** với form chính và dán cùng JS campaign. Các hidden field sau được JS tự gắn:
+Hai form phải dùng cùng campaign token và cùng JS được sinh từ màn Chiến dịch. JS tự thêm:
 
 ```text
 session_id
 saleops_client_ref
 parent_submission_id
 parent_ref
+is_upsell=1
+item_type=upsell
 ```
 
-Form upsell không bắt buộc hỏi lại SĐT nếu có một trong các reference trên.
+Endpoint `/receive` cũng tự nhận diện packet bổ sung qua `mua_them_*`, `upsell_*`, `addon_*`, `is_upsell` hoặc `item_type=upsell`; vì vậy cấu hình nhầm endpoint không làm packet bị đếm thành lead mới.
 
-## Luồng backend chi tiết
+## Trạng thái packet
 
-1. Request được rate limit và lưu `inbound_events` (header nhạy cảm được mask, payload quá lớn không lưu nguyên bản).
-2. Controller kiểm tra campaign token, trạng thái campaign, payload size, honeypot và identity.
-3. `ProcessLeadIngestionJob` chạy queue `webhooks`.
-4. Driver chuẩn hóa tên, SĐT, địa chỉ, combo, add-on, giá và discount.
-5. Gói form chính:
-   - chống retry bằng `external_id`;
-   - tạo `lead_ingestions`;
-   - chia sale/tạo order ngay;
-   - ghi `landing_upsell_hold_until = now + 90s`;
-   - dispatch `FinalizeLandingLeadJob` tại deadline.
-6. Gói upsell:
-   - chống retry bằng namespace `external_id:upsell`;
-   - tìm order theo session, parent/client ref, sau cùng là cùng campaign + SĐT;
-   - bắt buộc order chưa bị sale lock và deadline còn tương lai;
-   - lock row `FOR UPDATE`, kiểm tra deadline lần nữa;
-   - append `order_items`, tính lại subtotal/discount/total;
-   - tạo một ingestion audit trỏ về cùng order;
-   - broadcast/notification cho sale.
-7. Job finalize chạy ở deadline và xóa trạng thái mở gộp. Nếu queue chạy sớm do sync/clock drift, job tự đặt lại đúng deadline thay vì đóng sớm.
+| packet_type | counts_as_lead | Ý nghĩa |
+|---|---:|---|
+| `lead` | true | Form chính, được tính trong dashboard/báo cáo |
+| `follow_up` | false | Gói bổ sung gửi qua `/receive` |
+| `upsell` | false | Gói đã gộp thành công vào order |
+| `late_upsell` | false | Đến sau deadline, liên kết order gốc, cần review |
+| `orphan_upsell` | false | Không tìm được base/order, cần review |
 
-## Quy tắc sau 90 giây
+`duplicate`, `failed`, `needs_review` không được tính là contact.
 
-Gói upsell không được append vào order cũ. Nếu có SĐT hợp lệ, hệ thống ghi nhận theo luồng lead mới/duplicate để vận hành kiểm tra. Nếu không có SĐT và reference không còn trỏ tới order mở, gói bị ghi Failed thay vì đoán nhầm khách.
+## Xử lý late/orphan upsell
+
+Trang Nhật ký lead và dialog ở Hồ sơ khách hàng cho phép người có quyền:
+
+- **Gộp vào đơn gốc** nếu đơn chưa chốt, chưa trừ kho, chưa có vận đơn/shipment.
+- **Tạo đơn mua thêm** nếu đơn gốc không còn an toàn để sửa. Đơn mới giữ nguyên sale/team/source và có badge liên kết mã đơn gốc.
+- **Đã kiểm tra/không xử lý** để đóng cảnh báo mà không làm mất payload.
+
+Quyền xử lý:
+
+- Admin và Allocator/`leads:full`: mọi packet.
+- Sale đang phụ trách order: packet của order đó.
+- Trưởng nhóm/trưởng bộ phận sale: order cùng team.
+- Kho, Marketing, Kế toán và sale không liên quan: chỉ xem.
+
+## Tác động lên các bộ phận
+
+- **Sale/Hồ sơ khách hàng:** trong 90 giây chỉ thấy một order với nhiều item. Đơn mua thêm tạo thủ công sau deadline có badge và mã đơn gốc.
+- **Nhật ký lead:** có nhiều dòng packet là đúng để audit; cột loại gói và “Có tính lead” cho biết dòng nào ảnh hưởng báo cáo.
+- **Marketing/Dashboard/CEO/Campaign/Allocator:** contact lấy từ `counts_as_lead=true`; đơn supplemental vẫn cộng doanh thu/sản lượng nhưng không tăng lead.
+- **Kho/Kế toán/Vận chuyển:** chỉ nhận order mới khi người có quyền chủ động chọn “Tạo đơn mua thêm”; không có order ngầm sinh từ packet muộn.
 
 ## Payload mẫu
 
@@ -117,7 +117,8 @@ Form chính:
   "name": "Nguyễn Văn A",
   "phone": "0912345678",
   "address": "Hà Nội",
-  "combo": "Mua 1 Thỏi : 149k + 30k Ship",
+  "message": "Giao giờ hành chính",
+  "combo": "Mua 1 Thỏi: 149k + 30k Ship",
   "session_id": "opaque-session-id",
   "saleops_client_ref": "opaque-client-ref"
 }
@@ -130,42 +131,48 @@ Upsell:
   "submission_id": "upsell-001",
   "parent_submission_id": "opaque-client-ref",
   "session_id": "opaque-session-id",
+  "is_upsell": 1,
   "mua_them_1": "1 hộp Bàn Chải (8 chiếc): 69k"
 }
 ```
 
-## Checklist test thật
-
-1. Mở DevTools → Network ở form chính.
-2. Submit số điện thoại test và một combo.
-3. Xác nhận `/receive` trả HTTP 202 và lấy `correlation_id`.
-4. Xác nhận URL chuyển trang hoặc form trang cảm ơn có hidden `session_id` + `parent_ref`.
-5. Trong vòng 90 giây chọn bàn chải, submit.
-6. Xác nhận `/upsell` trả HTTP 202.
-7. DB phải có đúng một `orders`, hai `lead_ingestions` và ít nhất hai `order_items`.
-8. Lặp lại cùng `submission_id` upsell: item không được nhân đôi.
-9. Test khách mới, chờ hơn 90 giây rồi submit upsell: order ban đầu không đổi.
-10. Sale gọi/cập nhật order trong 90 giây rồi submit upsell: order ban đầu không đổi vì đã lock.
-
-SQL kiểm tra nhanh:
+## Đối soát DB
 
 ```sql
-SELECT id, order_code, customer_phone, total,
-       landing_upsell_hold_until, landing_upsell_locked
-FROM orders
-WHERE customer_phone = '0912345678'
-ORDER BY id DESC;
-
-SELECT id, external_id, status, order_id, error_message
+SELECT id, external_id, status, packet_type, counts_as_lead,
+       parent_ingestion_id, order_id, related_order_id,
+       requires_review, reviewed_at
 FROM lead_ingestions
 WHERE customer_phone = '0912345678'
-ORDER BY id DESC;
+ORDER BY id;
+
+SELECT id, order_code, sale_user_id, customer_phone, customer_note,
+       total, landing_upsell_hold_until, landing_upsell_locked
+FROM orders
+WHERE customer_phone = '0912345678'
+ORDER BY id;
 
 SELECT order_id, product_name, quantity, unit_price, item_type
 FROM order_items
-WHERE order_id = :ORDER_ID;
+WHERE order_id IN (:ORDER_IDS)
+ORDER BY order_id, id;
 ```
 
-## Điểm cần sửa trực tiếp trên landing mẫu
+Kết quả mong đợi trong 90 giây: một row `counts_as_lead=true`, các packet còn lại false, một order, nhiều order item, và sale không đổi.
 
-Trang cảm ơn hiện đang hiển thị literal `::name::`. Với LadiPage, hãy bật Auto Funnel ở form nguồn và dùng đúng biến theo `Tên lấy dữ liệu`, ví dụ `{{name}}`. Điều này cũng là dấu hiệu nên kiểm tra lại việc chuyển dữ liệu/reference từ form chính sang trang cảm ơn.
+## Deploy
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+
+php artisan migrate --force
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan horizon:terminate
+```
+
+Migration có backfill dữ liệu Landing cũ, dọn các dòng `[Upsale]`/`SP:` từng bị nối vào `customer_note`, và tính lại `marketing_sources.contacts` theo lead chính.

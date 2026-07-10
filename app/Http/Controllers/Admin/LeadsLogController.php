@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\LeadIngestionStatus;
+use App\Enums\LeadPacketType;
 use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Enums\UserRole;
@@ -13,6 +14,7 @@ use App\Models\Product;
 use App\Repositories\LeadIngestionRepository;
 use App\Repositories\UserRepository;
 use App\Services\Leads\LeadAllocationModeService;
+use App\Services\Leads\LeadSupplementReviewService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -24,11 +26,14 @@ class LeadsLogController extends Controller
         LeadIngestionRepository $leadRepo,
         UserRepository $users,
         LeadAllocationModeService $modeService,
+        LeadSupplementReviewService $reviewService,
     ): Response {
         $filters = [
             'platform' => $request->query('platform'),
             'status' => $request->query('status'),
             'bucket' => $request->query('bucket'),
+            'packet_type' => $request->query('packet_type'),
+            'review' => $request->query('review'),
             'marketing_source_id' => $request->query('marketing_source_id'),
             'search' => $request->query('search'),
             'date_from' => $request->query('date_from'),
@@ -42,10 +47,13 @@ class LeadsLogController extends Controller
         }
 
         $leads = $leadRepo->paginatedLog($filters)
-            ->through(function (LeadIngestion $lead) use ($exceptionStatuses): array {
-                $order = $lead->order;
+            ->through(function (LeadIngestion $lead) use ($exceptionStatuses, $reviewService): array {
+                $order = $lead->effectiveOrder();
                 $stage = $order ? OperationStage::tryFrom((string) $order->operation_stage) : null;
                 $result = $order ? OperationResult::tryFromStored($order->operation_result) : null;
+                $packetAddress = $this->payloadString($lead, ['shipping_address', 'address', 'customer_address']);
+                $packetMessage = $this->payloadString($lead, ['message', 'note', 'customer_note', 'content']);
+                $isSupplemental = $lead->isSupplementalPacket();
 
                 return [
                     'id' => $lead->id,
@@ -53,24 +61,42 @@ class LeadsLogController extends Controller
                     'external_id' => $lead->external_id,
                     'status' => $lead->status->value,
                     'status_label' => $lead->status->label(),
-                    'is_exception' => in_array($lead->status->value, $exceptionStatuses, true),
+                    'packet_type' => $lead->packet_type?->value ?? LeadPacketType::Lead->value,
+                    'packet_type_label' => ($lead->packet_type ?? LeadPacketType::Lead)->label(),
+                    'counts_as_lead' => (bool) $lead->counts_as_lead,
+                    'is_supplemental' => $isSupplemental,
+                    'requires_review' => (bool) $lead->requires_review,
+                    'reviewed_at' => $lead->reviewed_at?->toIso8601String(),
+                    'review_resolution' => $lead->review_resolution,
+                    'review_note' => $lead->review_note,
+                    'can_merge_original' => $lead->requires_review
+                        && $lead->related_order_id
+                        && $order
+                        && $reviewService->canSafelyMerge($order),
+                    'can_create_supplemental_order' => $lead->requires_review
+                        && $lead->related_order_id
+                        && $order !== null
+                        && $this->leadProducts($lead) !== [],
+                    'is_exception' => ($lead->requires_review && ! $lead->reviewed_at) || in_array($lead->status->value, $exceptionStatuses, true),
                     'customer_name' => $lead->customer_name,
                     'customer_phone' => $lead->customer_phone,
-                    'address' => $order?->effectiveShippingAddress() ?: $this->payloadString($lead, [
-                        'shipping_address', 'address', 'customer_address',
-                    ]),
-                    'message' => $order?->customer_note ?: $this->payloadString($lead, [
-                        'message', 'note', 'customer_note', 'content',
-                    ]),
+                    'address' => $packetAddress ?: $order?->effectiveShippingAddress(),
+                    'address_inherited' => ! $packetAddress && filled($order?->effectiveShippingAddress()),
+                    'message' => $packetMessage ?: $order?->customer_note,
+                    'message_inherited' => ! $packetMessage && filled($order?->customer_note),
                     'product_interest' => $lead->product_interest,
                     'incoming' => $this->incomingSummary($lead),
                     'products' => $this->leadProducts($lead),
                     'utm_campaign' => $lead->utm_campaign,
                     'campaign_name' => $lead->marketingSource?->name ?? $order?->marketingSource?->name,
                     'marketing_source_id' => $lead->marketing_source_id,
-                    'order_id' => $order?->id ? (string) $order->id : null,
+                    'order_id' => $lead->order_id ? (string) $lead->order_id : null,
+                    'related_order_id' => $lead->related_order_id ? (string) $lead->related_order_id : null,
                     'order_code' => $order?->order_code,
-                    'conflict_order_code' => is_array($lead->payload) ? ($lead->payload['conflict_order_code'] ?? null) : null,
+                    'order_relation' => $lead->order_id ? 'merged' : ($lead->related_order_id ? 'related' : null),
+                    'parent_ingestion_id' => $lead->parent_ingestion_id,
+                    'conflict_order_code' => $order?->order_code
+                        ?? (is_array($lead->payload) ? ($lead->payload['conflict_order_code'] ?? null) : null),
                     'sale_name' => $order?->saleUser?->name,
                     'sale_team' => $order?->team?->name,
                     'assigned_at' => $order?->assigned_at?->toIso8601String(),
@@ -90,6 +116,9 @@ class LeadsLogController extends Controller
             'platforms' => array_keys(config('integrations.platforms', [])),
             'statuses' => collect(LeadIngestionStatus::cases())
                 ->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()])
+                ->all(),
+            'packetTypes' => collect(LeadPacketType::cases())
+                ->map(fn ($type) => ['value' => $type->value, 'label' => $type->label()])
                 ->all(),
             'campaigns' => MarketingSource::query()
                 ->whereNull('parent_id')
@@ -116,6 +145,11 @@ class LeadsLogController extends Controller
                 default => '/admin/leads',
             },
             'canDelete' => ! $request->is('allocator/*') && ! $request->is('marketing/*'),
+            'canReview' => ! $request->is('marketing/*'),
+            'reviewUrlPrefix' => match (true) {
+                $request->is('allocator/*') => '/allocator/leads',
+                default => '/admin/leads',
+            },
             'canAllocate' => ! $request->is('marketing/*'),
             'showAllocationTools' => ! $request->is('marketing/*'),
             'realtimeChannel' => match (true) {
@@ -209,7 +243,12 @@ class LeadsLogController extends Controller
     /** @return list<array{name: string, quantity: int, unit_price: int}> */
     private function leadProducts(LeadIngestion $lead): array
     {
-        if ($lead->order?->items?->isNotEmpty()) {
+        /*
+         * Nhật ký lead hiển thị sản phẩm của CHÍNH packet. Chỉ packet lead chính
+         * đã tạo order mới hiển thị toàn bộ item của order; late/upsell không được
+         * lấy nhầm toàn bộ đơn cũ.
+         */
+        if ($lead->counts_as_lead && $lead->order_id && $lead->order?->items?->isNotEmpty()) {
             return $lead->order->items->map(fn ($item) => [
                 'name' => (string) $item->product_name,
                 'quantity' => (int) $item->quantity,
@@ -249,5 +288,6 @@ class LeadsLogController extends Controller
             ->values()
             ->all();
     }
+
 
 }

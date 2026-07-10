@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Data\MetricPairData;
+use App\Enums\ClosingStatus;
 use App\Enums\DeliveryStatus;
 use App\Models\Order;
 use Illuminate\Support\Collection;
@@ -18,12 +19,17 @@ final class RevenueMetricsCalculator
      */
     public static function build(Collection $orders): array
     {
-        $closed = new MetricPairData(
-            $orders->count(),
-            (int) $orders->sum(fn (Order $o) => $o->netRevenue()),
+        $closedOrders = $orders->filter(
+            static fn (Order $order): bool => $order->closed_at !== null
+                || (string) $order->closing_status === ClosingStatus::Closed->value,
         );
 
-        $confirmed = self::pairForStatuses($orders, [
+        $closed = new MetricPairData(
+            $closedOrders->count(),
+            (int) $closedOrders->sum(fn (Order $order): int => $order->netRevenue()),
+        );
+
+        $confirmed = self::pairForStatuses($closedOrders, [
             DeliveryStatus::WaitingWaybill,
             DeliveryStatus::Delivering,
             DeliveryStatus::Delivered,
@@ -32,22 +38,26 @@ final class RevenueMetricsCalculator
             DeliveryStatus::PickingUp,
         ]);
 
-        $canceled = self::pairForStatuses($orders, [DeliveryStatus::CancelWaybill]);
-        $transferred = self::pairForStatuses($orders, [
+        $canceled = self::pairForStatuses($closedOrders, [DeliveryStatus::CancelWaybill]);
+        $transferred = self::pairForStatuses($closedOrders, [
             DeliveryStatus::Delivering,
             DeliveryStatus::Delivered,
             DeliveryStatus::Paid,
             DeliveryStatus::Returning,
             DeliveryStatus::Returned,
         ]);
-        $returned = self::pairForStatuses($orders, [DeliveryStatus::Returned]);
-        $returning = self::pairForStatuses($orders, [DeliveryStatus::Returning]);
-        $delivered = self::pairForStatuses($orders, [DeliveryStatus::Delivered]);
-        $paid = self::pairForStatuses($orders, [DeliveryStatus::Paid]);
+        $returned = self::pairForStatuses($closedOrders, [DeliveryStatus::Returned]);
+        $returning = self::pairForStatuses($closedOrders, [DeliveryStatus::Returning]);
+        $delivered = self::pairForStatuses($closedOrders, [DeliveryStatus::Delivered]);
+        $paid = self::pairForStatuses($closedOrders, [DeliveryStatus::Paid]);
         $successful = self::mergePairs($delivered, $paid);
 
-        // 1 contact = 1 khách/đơn trong kỳ, KHÔNG cộng số lần gọi (contact_count).
-        $contacts = (int) $orders->count();
+        $contactOrders = $orders->whereIn('id', LeadContactMetrics::contactOrderIds($orders));
+        $contacts = $contactOrders->count();
+        $convertedContacts = $contactOrders->filter(
+            static fn (Order $order): bool => $order->closed_at !== null
+                || (string) $order->closing_status === ClosingStatus::Closed->value,
+        )->count();
 
         return [
             'closedOrders' => $closed->toArray(),
@@ -64,8 +74,8 @@ final class RevenueMetricsCalculator
             'confirmRate' => self::rate($confirmed->qty, $closed->qty),
             'successRate' => self::rate($successful->qty, $transferred->qty),
             'contacts' => $contacts,
-            'closingRate' => self::rate($closed->qty, $contacts),
-            'productCount' => (int) $orders->sum(fn (Order $o) => $o->items->sum('quantity')),
+            'closingRate' => self::rate($convertedContacts, $contacts),
+            'productCount' => (int) $closedOrders->sum(fn (Order $order) => $order->items->sum('quantity')),
             'averageOrderValue' => $closed->qty > 0 ? (int) round($closed->revenue / $closed->qty) : 0,
             'revenueReturnRate' => self::rate($returned->revenue, $confirmed->revenue),
             'revenueCancelRate' => self::rate($canceled->revenue, $closed->revenue),

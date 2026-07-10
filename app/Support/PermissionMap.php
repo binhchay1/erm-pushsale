@@ -56,6 +56,11 @@ final class PermissionMap
         'customers.orders.messages.store' => 'customers:full',
         'customers.orders.pancake-messages.index' => 'customer_chat:view',
         'customers.orders.pancake-messages.store' => 'customer_chat:full',
+        'customers.orders.supplement-packets.index' => 'customers:view',
+        // Quyền resolve được kiểm tra động trong service: admin/allocator,
+        // sale phụ trách hoặc leader cùng team. Middleware chỉ yêu cầu có thể
+        // xem hồ sơ để không chặn sales không có khu vực Leads.
+        'customers.orders.supplement-packets.review' => 'customers:view',
         'sales.customers' => 'customers:view',
         'sales.workspace' => 'telesale:full',
         'sales.orders.' => 'telesale:full',

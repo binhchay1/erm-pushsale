@@ -24,12 +24,15 @@ export default function LeadsIndex({
     exceptionCount = 0,
     platforms,
     statuses,
+    packetTypes = [],
     campaigns = [],
     salesUsers = [],
     allocateUrl = '/admin/leads/allocate',
     deleteUrlPrefix = '/admin/leads',
     listUrl = '/admin/leads',
     canDelete = true,
+    canReview = false,
+    reviewUrlPrefix = '/admin/leads',
     showAllocationTools = true,
     realtimeChannel = 'dashboard.admin',
     allocationMode = 'auto',
@@ -98,7 +101,7 @@ export default function LeadsIndex({
     };
 
     const toggleAllPending = () => {
-        const pendingOnPage = pageRows.filter((r) => r.status === 'pending').map((r) => r.id);
+        const pendingOnPage = pageRows.filter((r) => r.status === 'pending' && r.counts_as_lead).map((r) => r.id);
         const allSelected = pendingOnPage.length > 0 && pendingOnPage.every((id) => selected.includes(id));
         setSelected(allSelected ? selected.filter((id) => !pendingOnPage.includes(id)) : [...new Set([...selected, ...pendingOnPage])]);
     };
@@ -132,7 +135,29 @@ export default function LeadsIndex({
         );
     };
 
-    const pendingOnPage = (leads.data ?? []).filter((r) => r.status === 'pending');
+    const markReviewed = (row, resolution = 'acknowledge') => {
+        const confirmation = resolution === 'merge_original'
+            ? t('pages.leads.review_merge_confirm')
+            : resolution === 'create_supplemental_order'
+              ? t('pages.leads.review_create_confirm')
+              : null;
+
+        if (confirmation && !window.confirm(confirmation)) {
+            return;
+        }
+
+        router.patch(
+            `${reviewUrlPrefix}/${row.id}/review`,
+            { resolution },
+            {
+                preserveScroll: true,
+                onSuccess: () => toast.success(t('pages.leads.review_done')),
+                onError: (errors) => toast.error(errors.resolution ?? t('pages.leads.review_failed')),
+            },
+        );
+    };
+
+    const pendingOnPage = (leads.data ?? []).filter((r) => r.status === 'pending' && r.counts_as_lead);
     const allPendingSelected =
         pendingOnPage.length > 0 && pendingOnPage.every((r) => selected.includes(r.id));
 
@@ -325,6 +350,27 @@ export default function LeadsIndex({
                             </option>
                         ))}
                     </select>
+                    <select
+                        className="input-soft h-8 px-2"
+                        value={filters.packet_type ?? ''}
+                        onChange={(e) => search({ packet_type: e.target.value || null })}
+                    >
+                        <option value="">{t('pages.leads.filter_packet_type')}</option>
+                        {packetTypes.map((type) => (
+                            <option key={type.value} value={type.value}>
+                                {type.label}
+                            </option>
+                        ))}
+                    </select>
+                    <select
+                        className="input-soft h-8 px-2"
+                        value={filters.review ?? ''}
+                        onChange={(e) => search({ review: e.target.value || null })}
+                    >
+                        <option value="">{t('pages.leads.filter_review')}</option>
+                        <option value="pending">{t('pages.leads.review_pending')}</option>
+                        <option value="reviewed">{t('pages.leads.reviewed')}</option>
+                    </select>
                     <input
                         type="date"
                         className="input-soft h-8 px-2"
@@ -420,7 +466,7 @@ export default function LeadsIndex({
                                     >
                                         {showAllocationTools && (
                                             <Td className="text-center">
-                                                {row.status === 'pending' ? (
+                                                {row.status === 'pending' && row.counts_as_lead ? (
                                                     <input
                                                         type="checkbox"
                                                         checked={selected.includes(row.id)}
@@ -433,6 +479,16 @@ export default function LeadsIndex({
                                         <Td className="min-w-52 whitespace-normal text-center">
                                             <div className="font-semibold text-[#2467b5]">{row.campaign_name ?? row.utm_campaign ?? row.platform ?? '—'}</div>
                                             <div className="mt-1 text-[11px] text-muted-foreground">{row.platform || '—'}</div>
+                                            <div className="mt-1 flex flex-wrap justify-center gap-1">
+                                                <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${row.counts_as_lead ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'}`}>
+                                                    {row.packet_type_label}
+                                                </span>
+                                                {!row.counts_as_lead && (
+                                                    <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
+                                                        {t('pages.leads.not_counted_as_lead')}
+                                                    </span>
+                                                )}
+                                            </div>
                                             <div className="mt-1 text-[11px] text-muted-foreground">{formatDateTime(row.created_at)}</div>
                                         </Td>
                                         <Td className="min-w-48 whitespace-normal">
@@ -440,10 +496,12 @@ export default function LeadsIndex({
                                             <div className="mt-1 font-mono text-[#2467b5]">{row.customer_phone ?? '—'}</div>
                                         </Td>
                                         <Td className="min-w-72 max-w-[340px] whitespace-normal leading-relaxed">
-                                            {row.address ?? '—'}
+                                            <div>{row.address ?? '—'}</div>
+                                            {row.address_inherited && <div className="mt-1 text-[10px] text-muted-foreground">{t('pages.leads.inherited_from_order')}</div>}
                                         </Td>
                                         <Td className="min-w-64 max-w-[320px] whitespace-normal leading-relaxed text-muted-foreground">
-                                            {row.message ?? '—'}
+                                            <div>{row.message ?? '—'}</div>
+                                            {row.message_inherited && <div className="mt-1 text-[10px]">{t('pages.leads.inherited_from_order')}</div>}
                                         </Td>
                                         <Td className="min-w-72 whitespace-normal">
                                             {row.products?.length ? row.products.map((product, index) => (
@@ -482,6 +540,12 @@ export default function LeadsIndex({
                                                     ? <span className="text-rose-600 dark:text-rose-400" title={t('pages.leads.conflict_order')}>{row.conflict_order_code}</span>
                                                     : '—')}
                                             </div>
+                                            {row.order_relation === 'related' && (
+                                                <div className="mt-1 text-[10px] text-amber-700">{t('pages.leads.related_order_only')}</div>
+                                            )}
+                                            {row.reviewed_at && (
+                                                <div className="mt-1 text-[10px] text-emerald-700">{t('pages.leads.reviewed')} · {formatDateTime(row.reviewed_at)}</div>
+                                            )}
                                         </Td>
                                         <Td
                                             className={`min-w-72 max-w-[360px] whitespace-normal leading-relaxed ${row.is_exception ? 'text-rose-600 dark:text-rose-400' : 'text-muted-foreground'}`}
@@ -489,6 +553,41 @@ export default function LeadsIndex({
                                             <div>{row.error_message ?? '—'}</div>
                                             {row.processed_at && (
                                                 <div className="mt-2 text-[11px]">{formatDateTime(row.processed_at)}</div>
+                                            )}
+                                            {canReview && row.requires_review && !row.reviewed_at && (
+                                                <div className="mt-2 space-y-2">
+                                                    <div className="text-[10px] text-muted-foreground">
+                                                        {t('pages.leads.review_action_hint')}
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {row.can_merge_original && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => markReviewed(row, 'merge_original')}
+                                                            >
+                                                                {t('pages.leads.merge_original_order')}
+                                                            </Button>
+                                                        )}
+                                                        {row.can_create_supplemental_order && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => markReviewed(row, 'create_supplemental_order')}
+                                                            >
+                                                                {t('pages.leads.create_supplemental_order')}
+                                                            </Button>
+                                                        )}
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() => markReviewed(row, 'acknowledge')}
+                                                        >
+                                                            <CheckCircle2 className="size-3.5" />
+                                                            {t('pages.leads.mark_reviewed')}
+                                                        </Button>
+                                                    </div>
+                                                </div>
                                             )}
                                         </Td>
                                         {canDelete && (

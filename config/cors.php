@@ -1,19 +1,18 @@
 <?php
 
-$landingOrigins = array_values(array_filter(array_map(
-    static fn (string $origin): string => rtrim(trim($origin), '/'),
-    explode(',', (string) env('LANDING_ALLOWED_ORIGINS', '')),
-)));
-
-$landingOrigins = ['*'];
-
 return [
     'paths' => [
         'api/v1/landing/*',
     ],
 
     'allowed_methods' => ['POST', 'OPTIONS'],
-    'allowed_origins' => $landingOrigins,
+
+    /*
+     * Hệ thống nhận lead từ nhiều custom-domain Landing. Endpoint không dùng
+     * cookie/session (`supports_credentials=false`), vì vậy wildcard origin là
+     * phù hợp. CORS không thay thế token, rate-limit hay validation webhook.
+     */
+    'allowed_origins' => ['*'],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['Content-Type', 'Accept', 'X-Requested-With', 'X-Request-Id'],
     'exposed_headers' => ['X-Request-Id'],

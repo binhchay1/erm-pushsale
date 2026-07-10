@@ -27,7 +27,7 @@ class MarketingTeamTreeService
             ->when($filter->marketerId, fn ($q) => $q->where('marketer_user_id', $filter->marketerId))
             ->get();
 
-        $leadCountsByMarketer = LeadContactMetrics::countsByMarketer($filter);
+        $leadCountsByMarketer = LeadContactMetrics::effectiveCountsByMarketer($filter, $orders);
 
         $marketers = User::query()
             ->where('role', UserRole::Marketing)
@@ -135,12 +135,7 @@ class MarketingTeamTreeService
     {
         $marketerOrders = $orders->where('marketer_user_id', $marketerId);
         $marketerSources = $sources->where('marketer_user_id', $marketerId);
-        $periodLeads = (int) ($leadCountsByMarketer->get($marketerId) ?? 0);
-        // 1 contact = 1 khách để lại SĐT (= 1 lead / 1 đơn), KHÔNG cộng số lần gọi (contact_count).
-        $contacts = max(
-            $periodLeads,
-            (int) $marketerOrders->count(),
-        );
+        $contacts = (int) ($leadCountsByMarketer->get($marketerId) ?? 0);
         $closed = $marketerOrders->count();
         $revenueEligible = $marketerOrders->whereIn('delivery_status', DeliveryStatus::revenueEligible());
         $kpi = MarketingMetrics::summarize(

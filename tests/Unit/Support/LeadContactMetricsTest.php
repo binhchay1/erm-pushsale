@@ -4,6 +4,7 @@ namespace Tests\Unit\Support;
 
 use App\Data\ReportFilterData;
 use App\Enums\LeadIngestionStatus;
+use App\Enums\LeadPacketType;
 use App\Enums\UserRole;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
@@ -44,6 +45,8 @@ class LeadContactMetricsTest extends TestCase
             'platform' => 'landing',
             'external_id' => 'sub-1',
             'status' => LeadIngestionStatus::Processed,
+            'packet_type' => LeadPacketType::Lead,
+            'counts_as_lead' => true,
             'customer_phone' => '0900111222',
             'marketing_source_id' => $source->id,
             'order_id' => $order->id,
@@ -55,6 +58,8 @@ class LeadContactMetricsTest extends TestCase
             'platform' => 'landing',
             'external_id' => 'sub-1:upsell',
             'status' => LeadIngestionStatus::Processed,
+            'packet_type' => LeadPacketType::Upsell,
+            'counts_as_lead' => false,
             'customer_phone' => '0900111222',
             'marketing_source_id' => $source->id,
             'order_id' => $order->id,
@@ -66,9 +71,25 @@ class LeadContactMetricsTest extends TestCase
             'platform' => 'landing',
             'external_id' => 'sub-dup',
             'status' => LeadIngestionStatus::Duplicate,
+            'packet_type' => LeadPacketType::Lead,
+            'counts_as_lead' => true,
             'customer_phone' => '0900333444',
             'marketing_source_id' => $source->id,
             'payload' => [],
+        ]);
+
+        // Follow-up bắn lại /receive không có hậu tố :upsell vẫn không được tính lead.
+        LeadIngestion::query()->create([
+            'platform' => 'landing',
+            'external_id' => 'sub-follow-up-no-suffix',
+            'status' => LeadIngestionStatus::Processed,
+            'packet_type' => LeadPacketType::FollowUp,
+            'counts_as_lead' => false,
+            'customer_phone' => '0900111222',
+            'marketing_source_id' => $source->id,
+            'order_id' => $order->id,
+            'payload' => [],
+            'processed_at' => now(),
         ]);
 
         $filter = new ReportFilterData(

@@ -53,11 +53,10 @@ class LeadOrderFactory
         $isReturningCustomer = filled($normalized['customer_phone'] ?? null)
             && Order::query()->where('customer_phone', $normalized['customer_phone'])->exists();
 
+        // Cột customer_note chỉ chứa nội dung khách nhập. Tên/SL/giá sản
+        // phẩm đã có cấu trúc riêng trong order_items, không được trộn vào tin nhắn.
         $noteParts = array_filter([
             filled($normalized['message'] ?? null) ? (string) $normalized['message'] : null,
-            filled($normalized['product_interest'] ?? null)
-                ? 'SP: '.$normalized['product_interest'].(isset($normalized['quantity']) ? ' x'.$normalized['quantity'] : '')
-                : null,
         ]);
 
         $comboItems = $this->buildItemRows($normalized['items'] ?? [], $normalized['item_origin'] ?? 'landing');

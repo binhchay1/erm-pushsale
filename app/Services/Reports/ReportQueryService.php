@@ -44,10 +44,11 @@ class ReportQueryService
         return $this->scopeResolver->applyLeadScope($query, $user, $filter);
     }
 
-    /** @return Builder<LeadIngestion> — mọi dòng log (kể cả duplicate/failed) trong kỳ. */
+    /** @return Builder<LeadIngestion> — mọi lead chính (kể cả duplicate/failed), không gồm packet bổ sung. */
     public function rawLeads(User $user, ReportFilterData $filter): Builder
     {
         $query = LeadIngestion::query()
+            ->where('counts_as_lead', true)
             ->when($filter->dateFrom && $filter->dateTo, fn (Builder $q) => $q->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo]))
             ->when($filter->sourceType, fn (Builder $q) => $q->where('platform', $filter->sourceType));
 

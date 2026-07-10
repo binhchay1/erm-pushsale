@@ -8,6 +8,7 @@ enum LeadIngestionStatus: string
     case Pending = 'pending';
     case Processed = 'processed';
     case Duplicate = 'duplicate';
+    case NeedsReview = 'needs_review';
     case Failed = 'failed';
 
     public function label(): string

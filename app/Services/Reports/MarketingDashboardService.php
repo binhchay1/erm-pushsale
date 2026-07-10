@@ -4,9 +4,10 @@ namespace App\Services\Reports;
 
 use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Data\ReportFilterData;
-use App\Support\LeadContactMetrics;
+use App\Enums\ClosingStatus;
 use App\Models\MarketingSource;
 use App\Models\Order;
+use App\Support\LeadContactMetrics;
 use Illuminate\Support\Collection;
 
 class MarketingDashboardService
@@ -20,7 +21,7 @@ class MarketingDashboardService
     public function build(ReportFilterData $filter): array
     {
         $orderCollection = $this->orders->allFiltered($filter);
-        $leadCountsBySource = LeadContactMetrics::countsBySource($filter);
+        $leadCountsBySource = LeadContactMetrics::effectiveCountsBySource($filter, $orderCollection);
 
         $sources = MarketingSource::query()
             ->with(['children'])
@@ -33,10 +34,25 @@ class MarketingDashboardService
 
         foreach ($sources as $source) {
             $stt++;
-            $rows[] = $this->mapSourceRow($source, $orderCollection, $leadCountsBySource, $stt, null);
+            $family = collect([$source])->merge($source->children)->unique('id')->values();
+            $rows[] = $this->mapSourceRow(
+                source: $source,
+                sourceFamily: $family,
+                orders: $orderCollection,
+                leadCountsBySource: $leadCountsBySource,
+                stt: $stt,
+                parentId: null,
+            );
 
             foreach ($source->children as $child) {
-                $rows[] = $this->mapSourceRow($child, $orderCollection, $leadCountsBySource, $stt, $source->id);
+                $rows[] = $this->mapSourceRow(
+                    source: $child,
+                    sourceFamily: collect([$child]),
+                    orders: $orderCollection,
+                    leadCountsBySource: $leadCountsBySource,
+                    stt: $stt,
+                    parentId: $source->id,
+                );
             }
         }
 
@@ -54,17 +70,20 @@ class MarketingDashboardService
     }
 
     /**
-     * @param  Collection<int, Order>  $orders
-     * @param  list<array<string, mixed>>  $rows
+     * @param Collection<int, Order> $orders
+     * @param list<array<string, mixed>> $rows
      * @return array<string, int|float>
      */
-    private function buildKpis($orders, array $rows): array
+    private function buildKpis(Collection $orders, array $rows): array
     {
-        $parents = array_filter($rows, fn ($r) => ! ($r['isChild'] ?? false));
+        $parents = array_filter($rows, fn (array $row): bool => ! ($row['isChild'] ?? false));
         $contacts = max(array_sum(array_column($parents, 'contacts')), 0);
-        $closed = (int) $orders->count();
-        $revenue = (int) $orders->sum(fn (Order $o) => $o->netRevenue());
-        $productQty = (int) $orders->sum(fn (Order $o) => $o->items->sum('quantity'));
+        $contactOrderIds = LeadContactMetrics::contactOrderIds($orders);
+        $closed = (int) $orders->whereIn('id', $contactOrderIds)
+            ->filter(fn (Order $order): bool => $this->isClosed($order))
+            ->count();
+        $revenue = (int) $orders->sum(fn (Order $order): int => $order->netRevenue());
+        $productQty = (int) $orders->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
 
         return [
             'totalRevenue' => $revenue,
@@ -77,26 +96,41 @@ class MarketingDashboardService
     }
 
     /**
-     * @param  Collection<int, Order>  $orders
+     * Parent source là dòng tổng của cả family (parent + children); child chỉ
+     * phản ánh chính source con. Nhờ vậy KPI/tổng không bỏ sót lead của source
+     * con nhưng UI vẫn có thể drill-down mà không bị double-count.
+     *
+     * @param Collection<int, MarketingSource> $sourceFamily
+     * @param Collection<int, Order> $orders
+     * @param Collection<int, int> $leadCountsBySource
      * @return array<string, mixed>
      */
-    private function mapSourceRow(MarketingSource $source, $orders, Collection $leadCountsBySource, int $stt, ?int $parentId): array
-    {
-        $sourceOrders = $orders->where('marketing_source_id', $source->id);
-        $periodLeads = (int) ($leadCountsBySource->get($source->id) ?? 0);
-        // 1 contact = 1 khách để lại SĐT (= 1 lead / 1 đơn), KHÔNG cộng số lần gọi (contact_count).
-        $contacts = max($periodLeads, (int) $sourceOrders->count());
+    private function mapSourceRow(
+        MarketingSource $source,
+        Collection $sourceFamily,
+        Collection $orders,
+        Collection $leadCountsBySource,
+        int $stt,
+        ?int $parentId,
+    ): array {
+        $sourceIds = $sourceFamily->pluck('id')->map(static fn ($id): int => (int) $id)->all();
+        $sourceOrders = $orders->whereIn('marketing_source_id', $sourceIds);
+        $contacts = (int) collect($sourceIds)
+            ->sum(fn (int $sourceId): int => (int) $leadCountsBySource->get($sourceId, 0));
         $interactions = max($contacts, 1);
-        $closed = $sourceOrders->count();
-        $budget = $source->budget;
-        $productQty = (int) $sourceOrders->sum(fn ($o) => $o->items->sum('quantity'));
-        $totalRevenue = (int) $sourceOrders->sum(fn (Order $o) => $o->netRevenue());
+        $contactOrderIds = LeadContactMetrics::contactOrderIds($sourceOrders);
+        $closed = $sourceOrders->whereIn('id', $contactOrderIds)
+            ->filter(fn (Order $order): bool => $this->isClosed($order))
+            ->count();
+        $budget = (int) $sourceFamily->sum('budget');
+        $productQty = (int) $sourceOrders->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
+        $totalRevenue = (int) $sourceOrders->sum(fn (Order $order): int => $order->netRevenue());
         $revenueAfterDiscount = $totalRevenue;
 
         return [
             'id' => (string) $source->id,
-            'stt' => $parentId ? $stt : $stt,
-            'parentId' => $parentId ? (string) $parentId : null,
+            'stt' => $stt,
+            'parentId' => $parentId !== null ? (string) $parentId : null,
             'isChild' => $parentId !== null,
             'sourceName' => $source->name,
             'adChannel' => $source->ad_channel ?? '—',
@@ -119,13 +153,19 @@ class MarketingDashboardService
         ];
     }
 
+    private function isClosed(Order $order): bool
+    {
+        return $order->closed_at !== null
+            || (string) $order->closing_status === ClosingStatus::Closed->value;
+    }
+
     /**
-     * @param  list<array<string, mixed>>  $rows
+     * @param list<array<string, mixed>> $rows
      * @return array<string, mixed>
      */
     private function aggregateTotals(array $rows): array
     {
-        $parents = array_filter($rows, fn ($r) => ! ($r['isChild'] ?? false));
+        $parents = array_filter($rows, fn (array $row): bool => ! ($row['isChild'] ?? false));
 
         return [
             'budget' => array_sum(array_column($parents, 'budget')),

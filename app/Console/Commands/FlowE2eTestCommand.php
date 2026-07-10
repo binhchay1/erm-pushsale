@@ -106,7 +106,11 @@ class FlowE2eTestCommand extends Command
         }
 
         $normalizedPhone = preg_replace('/\D+/', '', $phone);
-        $lead = LeadIngestion::query()->where('customer_phone', $normalizedPhone)->latest('id')->first();
+        $lead = LeadIngestion::query()
+            ->where('counts_as_lead', true)
+            ->where('customer_phone', $normalizedPhone)
+            ->latest('id')
+            ->first();
 
         $inbound = InboundEvent::query()->latest('id')->first();
 

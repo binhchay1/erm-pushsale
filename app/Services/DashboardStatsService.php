@@ -155,17 +155,17 @@ class DashboardStatsService
 
         return [
             'leads_today' => LeadContactMetrics::countToday(),
-            'pending_routing' => LeadIngestion::query()->where('status', LeadIngestionStatus::Pending->value)->count(),
-            'processed_today' => LeadIngestion::query()->where('status', LeadIngestionStatus::Processed->value)->whereDate('updated_at', today())->count(),
-            'failed_leads' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(),
-            'duplicate_leads' => LeadIngestion::query()->where('status', LeadIngestionStatus::Duplicate->value)->count(),
+            'pending_routing' => LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Pending->value)->count(),
+            'processed_today' => LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Processed->value)->whereDate('updated_at', today())->count(),
+            'failed_leads' => LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Failed->value)->count(),
+            'duplicate_leads' => LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Duplicate->value)->count(),
             'lead_series' => self::dailyLeadSeries(7),
             'processed_series' => self::dailyProcessedLeadSeries(7),
             'platform_breakdown' => self::platformBreakdown(),
             'routing_status_breakdown' => self::routingStatusBreakdown(
-                LeadIngestion::query()->where('status', LeadIngestionStatus::Pending->value)->count(),
-                LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(),
-                LeadIngestion::query()->where('status', LeadIngestionStatus::Duplicate->value)->count(),
+                LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Pending->value)->count(),
+                LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Failed->value)->count(),
+                LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Duplicate->value)->count(),
             ),
             'funnel' => self::allocatorFunnel(),
             'updated_at' => now()->toIso8601String(),
@@ -413,7 +413,7 @@ class DashboardStatsService
     {
         return self::days($days)->map(fn (Carbon $day) => [
             'label' => $day->format('d/m'),
-            'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Processed->value)->whereDate('updated_at', $day)->count(),
+            'value' => LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Processed->value)->whereDate('updated_at', $day)->count(),
         ])->values()->all();
     }
 
@@ -518,10 +518,10 @@ class DashboardStatsService
     private static function allocatorFunnel(): array
     {
         return [
-            ['label' => __('dashboard_data.funnel.lead_ingest'), 'value' => LeadIngestion::query()->count()],
-            ['label' => __('dashboard_data.routing.pending'), 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Pending->value)->count()],
-            ['label' => __('dashboard_data.funnel.processed'), 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Processed->value)->count()],
-            ['label' => __('dashboard_data.funnel.failed_leads'), 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count()],
+            ['label' => __('dashboard_data.funnel.lead_ingest'), 'value' => LeadIngestion::query()->where('counts_as_lead', true)->count()],
+            ['label' => __('dashboard_data.routing.pending'), 'value' => LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Pending->value)->count()],
+            ['label' => __('dashboard_data.funnel.processed'), 'value' => LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Processed->value)->count()],
+            ['label' => __('dashboard_data.funnel.failed_leads'), 'value' => LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Failed->value)->count()],
         ];
     }
 
@@ -578,7 +578,7 @@ class DashboardStatsService
     /** @return list<array{name: string, value: int}> */
     private static function leadSources(): array
     {
-        return LeadIngestion::query()->whereDate('created_at', today())->selectRaw('platform as name, count(*) as value')->groupBy('platform')->orderByDesc('value')->limit(4)->get()->map(fn (LeadIngestion $lead) => [
+        return LeadContactMetrics::applyCountableScope(LeadIngestion::query())->whereDate('created_at', today())->selectRaw('platform as name, count(*) as value')->groupBy('platform')->orderByDesc('value')->limit(4)->get()->map(fn (LeadIngestion $lead) => [
             'name' => $lead->name ?: __('dashboard_data.other'),
             'value' => (int) $lead->value,
         ])->values()->all();
@@ -588,7 +588,7 @@ class DashboardStatsService
     private static function funnel(): array
     {
         return [
-            ['label' => __('dashboard_data.funnel.lead'), 'value' => LeadIngestion::query()->count()],
+            ['label' => __('dashboard_data.funnel.lead'), 'value' => LeadContactMetrics::applyCountableScope(LeadIngestion::query())->count()],
             ['label' => __('dashboard_data.funnel.order'), 'value' => Order::query()->count()],
             ['label' => __('dashboard_data.funnel.closed'), 'value' => Order::query()->whereNotNull('closed_at')->count()],
             ['label' => __('dashboard_data.funnel.delivered'), 'value' => Order::query()->whereIn('delivery_status', DeliveryStatus::revenueEligible())->count()],
@@ -613,8 +613,13 @@ class DashboardStatsService
     /** @return list<array{name: string, leads: int, orders: int, revenue: int}> */
     private static function topSources(): array
     {
-        $leadCounts = LeadIngestion::query()->selectRaw('platform, count(*) as leads_count')->groupBy('platform')->pluck('leads_count', 'platform');
         $other = '__other__';
+        $leadCounts = LeadContactMetrics::applyCountableScope(LeadIngestion::query())
+            ->leftJoin('marketing_sources', 'marketing_sources.id', '=', 'lead_ingestions.marketing_source_id')
+            ->selectRaw("coalesce(marketing_sources.utm_source, marketing_sources.ad_channel, marketing_sources.name, '{$other}') as source_name")
+            ->selectRaw('count(lead_ingestions.id) as leads_count')
+            ->groupBy('source_name')
+            ->pluck('leads_count', 'source_name');
         $eligible = "orders.delivery_status in ('delivered', 'paid')";
         $net = OrderRevenue::netAmountSql('orders');
         $sourceRows = Order::query()->leftJoin('marketing_sources', 'marketing_sources.id', '=', 'orders.marketing_source_id')->selectRaw("coalesce(marketing_sources.utm_source, marketing_sources.ad_channel, marketing_sources.name, '{$other}') as source_name")->selectRaw('count(orders.id) as orders_count')->selectRaw("sum(case when {$eligible} then ({$net}) else 0 end) as revenue")->groupBy('source_name')->orderByDesc('revenue')->orderByDesc('orders_count')->limit(5)->get();
@@ -628,7 +633,7 @@ class DashboardStatsService
         return collect([
             ['type' => 'danger', 'title' => __('dashboard_data.alerts.failed_orders'), 'value' => Order::query()->whereIn('delivery_status', ['failed', 'cancelled', 'returned'])->count(), 'description' => __('dashboard_data.alerts.failed_orders_desc')],
             ['type' => 'warning', 'title' => __('dashboard_data.alerts.cod_mismatch'), 'value' => ShippingWebhookEvent::query()->where('is_cod_mismatch', true)->count(), 'description' => __('dashboard_data.alerts.cod_mismatch_desc')],
-            ['type' => 'warning', 'title' => __('dashboard_data.alerts.failed_leads'), 'value' => LeadIngestion::query()->where('status', LeadIngestionStatus::Failed->value)->count(), 'description' => __('dashboard_data.alerts.failed_leads_desc')],
+            ['type' => 'warning', 'title' => __('dashboard_data.alerts.failed_leads'), 'value' => LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Failed->value)->count(), 'description' => __('dashboard_data.alerts.failed_leads_desc')],
             ['type' => 'info', 'title' => __('dashboard_data.alerts.waiting_waybill'), 'value' => Order::query()->where('delivery_status', 'waiting_waybill')->count(), 'description' => __('dashboard_data.alerts.waiting_waybill_desc')],
         ])->filter(fn (array $alert) => $alert['value'] > 0)->values()->all();
     }
@@ -646,7 +651,7 @@ class DashboardStatsService
     /** @return list<array{name: string, value: int}> */
     private static function platformBreakdown(): array
     {
-        return LeadIngestion::query()->selectRaw('platform as name, count(*) as value')->groupBy('platform')->orderByDesc('value')->limit(5)->get()->map(fn (LeadIngestion $row) => ['name' => $row->name ?: __('dashboard_data.other'), 'value' => (int) $row->value])->values()->all();
+        return LeadContactMetrics::applyCountableScope(LeadIngestion::query())->selectRaw('platform as name, count(*) as value')->groupBy('platform')->orderByDesc('value')->limit(5)->get()->map(fn (LeadIngestion $row) => ['name' => $row->name ?: __('dashboard_data.other'), 'value' => (int) $row->value])->values()->all();
     }
 
     /** @return Collection<int, Carbon> */

@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use App\Models\Order;
 use App\Models\Team;
 use App\Models\User;
+use App\Support\LeadContactMetrics;
 use Illuminate\Support\Collection;
 
 /**
@@ -95,8 +96,9 @@ class SalesTeamTreeService
     private function saleNode(User $user, Collection $orders): array
     {
         $mine = $orders->where('sale_user_id', $user->id);
-        $contacts = max($mine->count(), 1);
-        $closed = $mine->whereNotNull('closed_at')->count();
+        $contactOrders = $mine->whereIn('id', LeadContactMetrics::contactOrderIds($mine));
+        $contacts = $contactOrders->count();
+        $closed = $contactOrders->whereNotNull('closed_at')->count();
         $revenue = (int) $mine
             ->whereNotNull('closed_at')
             ->sum(fn (Order $o) => $o->netRevenue());
@@ -107,7 +109,7 @@ class SalesTeamTreeService
             'roleLabel' => $user->orgLevelLabel() ?? 'Telesale',
             'type' => 'sale',
             'teamName' => $user->team?->name,
-            'conversionRate' => round($closed / $contacts * 100, 1),
+            'conversionRate' => $contacts > 0 ? round($closed / $contacts * 100, 1) : 0.0,
             'revenue' => $revenue,
             'closedOrders' => $closed,
             'contacts' => $contacts,
@@ -121,7 +123,7 @@ class SalesTeamTreeService
      */
     private function aggregateMetrics(array $nodes): array
     {
-        $contacts = max(array_sum(array_column($nodes, 'contacts')), 1);
+        $contacts = array_sum(array_column($nodes, 'contacts'));
         $closed = array_sum(array_column($nodes, 'closedOrders'));
         $revenue = array_sum(array_column($nodes, 'revenue'));
 
@@ -129,7 +131,7 @@ class SalesTeamTreeService
             'contacts' => $contacts,
             'closedOrders' => $closed,
             'revenue' => $revenue,
-            'conversionRate' => round($closed / $contacts * 100, 1),
+            'conversionRate' => $contacts > 0 ? round($closed / $contacts * 100, 1) : 0.0,
         ];
     }
 

@@ -14,7 +14,8 @@ class EloquentOrderRepository implements OrderRepositoryInterface
     public function queryFiltered(ReportFilterData $filter): Builder
     {
         return Order::query()
-            ->with(['items', 'saleUser', 'marketerUser', 'marketingSource.product', 'warehouse', 'team'])
+            ->with(['items', 'saleUser', 'marketerUser', 'marketingSource.product', 'warehouse', 'team', 'supplementalOriginPacket.relatedOrder:id,order_code'])
+            ->withCount('pendingSupplementPackets')
             ->applyReportFilter($filter)
             ->latest('data_arrived_at');
     }

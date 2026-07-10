@@ -29,7 +29,15 @@ return [
         'pending' => 'Chờ xử lý',
         'processed' => 'Đã tạo lead',
         'duplicate' => 'Trùng số',
+        'needs_review' => 'Cần kiểm tra',
         'failed' => 'Lỗi',
+    ],
+    'lead_packet_type' => [
+        'lead' => 'Lead chính',
+        'follow_up' => 'Gói bổ sung',
+        'upsell' => 'Upsell',
+        'late_upsell' => 'Upsell đến muộn',
+        'orphan_upsell' => 'Upsell chưa có đơn gốc',
     ],
     'lead_allocation_mode' => [
         'auto' => 'Chia tự động',

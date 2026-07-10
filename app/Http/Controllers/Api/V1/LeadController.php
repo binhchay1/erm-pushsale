@@ -33,7 +33,7 @@ class LeadController extends Controller
 
     public function show(LeadIngestion $lead): JsonResponse
     {
-        $lead->load('order');
+        $lead->load(['order', 'relatedOrder', 'parentIngestion:id,external_id,order_id']);
 
         return $this->success(new LeadIngestionResource($lead));
     }

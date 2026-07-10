@@ -5,8 +5,10 @@ namespace Tests\Feature\Leads;
 use App\Enums\CampaignLeadAllocation;
 use App\Enums\LeadAllocationMode;
 use App\Enums\LeadIngestionStatus;
+use App\Enums\LeadPacketType;
 use App\Enums\UserRole;
 use App\Jobs\Leads\FinalizeLandingLeadJob;
+use App\Jobs\Leads\FinalizeLandingSupplementPacketJob;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
@@ -125,10 +127,20 @@ class CampaignLandingComboUpsellTest extends TestCase
 
         // Giá trị cuối đơn cập nhật: 149.000 + 89.000.
         $this->assertSame(238_000, (int) $order->total);
+
+        $packets = LeadIngestion::query()->where('customer_phone', '0906222333')->orderBy('id')->get();
+        $this->assertCount(2, $packets);
+        $this->assertTrue($packets->first()->counts_as_lead);
+        $this->assertFalse($packets->last()->counts_as_lead);
+        $this->assertSame(LeadPacketType::Upsell, $packets->last()->packet_type);
+        $this->assertSame($packets->first()->id, $packets->last()->parent_ingestion_id);
+        $this->assertSame($order->id, $packets->last()->order_id);
+        $this->assertStringNotContainsString('[Upsale]', (string) $order->customer_note);
     }
 
-    public function test_upsell_creates_new_lead_when_no_prior_order(): void
+    public function test_orphan_upsell_never_creates_or_routes_a_standalone_order(): void
     {
+        Queue::fake([FinalizeLandingSupplementPacketJob::class]);
         $campaign = $this->autoCampaign();
 
         $this->postJson('/api/v1/landing/'.$campaign->webhook_token.'/upsell', [
@@ -138,9 +150,22 @@ class CampaignLandingComboUpsellTest extends TestCase
             'mua_them_1' => 'Mua Thêm 1 Kem Thoa Tay: 79K',
         ])->assertAccepted();
 
-        // Không có đơn gốc → xử lý như lead thường (tạo đơn mới).
-        $order = Order::query()->where('customer_phone', '0907999888')->first();
-        $this->assertNotNull($order);
+        $this->assertDatabaseMissing('orders', ['customer_phone' => '0907999888']);
+
+        $packet = LeadIngestion::query()->where('customer_phone', '0907999888')->firstOrFail();
+        $this->assertFalse($packet->counts_as_lead);
+        $this->assertSame(LeadIngestionStatus::Gathering, $packet->status);
+        Queue::assertPushed(FinalizeLandingSupplementPacketJob::class);
+
+        // Hết cửa sổ chờ form chính: chuyển hàng cần kiểm tra, vẫn không tạo/chia đơn.
+        $packet->forceFill(['created_at' => now()->subSeconds(95)])->save();
+        app(LeadIngestionService::class)->resolvePendingSupplementPacket($packet->fresh());
+
+        $packet->refresh();
+        $this->assertSame(LeadIngestionStatus::NeedsReview, $packet->status);
+        $this->assertSame(LeadPacketType::OrphanUpsell, $packet->packet_type);
+        $this->assertTrue($packet->requires_review);
+        $this->assertDatabaseMissing('orders', ['customer_phone' => '0907999888']);
     }
 
     public function test_two_receive_packets_same_phone_merge_into_single_order(): void
@@ -168,6 +193,12 @@ class CampaignLandingComboUpsellTest extends TestCase
         $order = $orders->first()->load('items');
         $this->assertCount(2, $order->items);
         $this->assertSame(238_000, (int) $order->total);
+
+        $packets = LeadIngestion::query()->where('customer_phone', '0905777888')->orderBy('id')->get();
+        $this->assertCount(2, $packets);
+        $this->assertSame(1, $packets->where('counts_as_lead', true)->count());
+        $this->assertSame(LeadPacketType::FollowUp, $packets->last()->packet_type);
+        $this->assertSame($order->id, $packets->last()->order_id);
     }
 
     public function test_non_js_campaign_also_holds_lead_for_upsell_window(): void
@@ -300,6 +331,18 @@ class CampaignLandingComboUpsellTest extends TestCase
         $order->refresh()->load('items');
         $this->assertCount(1, $order->items, 'Hết 90 giây thì session cũ không được gộp thêm hàng.');
         $this->assertSame(149_000, (int) $order->total);
+        $this->assertSame(1, Order::query()->where('customer_phone', '0906333444')->count());
+
+        $late = LeadIngestion::query()
+            ->where('customer_phone', '0906333444')
+            ->where('counts_as_lead', false)
+            ->latest('id')
+            ->firstOrFail();
+        $this->assertSame(LeadIngestionStatus::NeedsReview, $late->status);
+        $this->assertSame(LeadPacketType::LateUpsell, $late->packet_type);
+        $this->assertSame($order->id, $late->related_order_id);
+        $this->assertSame($order->sale_user_id, $late->relatedOrder?->sale_user_id);
+        $this->assertTrue($late->requires_review);
     }
 
     public function test_cross_domain_upsell_can_merge_by_client_ref_without_phone(): void

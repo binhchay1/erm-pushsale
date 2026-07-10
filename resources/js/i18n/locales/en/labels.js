@@ -26,6 +26,7 @@ export default {
         pending: 'Pending',
         processed: 'Lead created',
         duplicate: 'Duplicate phone',
+        needs_review: 'Needs review',
         failed: 'Failed',
     },
     operation_stage: {

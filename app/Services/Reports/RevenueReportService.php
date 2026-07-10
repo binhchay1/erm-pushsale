@@ -88,8 +88,9 @@ class RevenueReportService
     {
         $eligible = $orders->whereIn('delivery_status', DeliveryStatus::revenueEligible());
 
+        // Ngân sách có thể nằm ở campaign cha hoặc nguồn con; cộng toàn
+        // bộ source thuộc marketer để KPI không bỏ sót chi phí quảng cáo.
         $campaigns = MarketingSource::query()
-            ->whereNull('parent_id')
             ->whereIn('marketer_user_id', $marketerIds)
             ->get();
 

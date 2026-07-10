@@ -6,7 +6,6 @@ use App\Data\ReportFilterData;
 use App\Enums\DeliveryStatus;
 use App\Enums\OperationResult;
 use App\Enums\UserRole;
-use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
@@ -27,6 +26,7 @@ class MarketingCampaignReportService
     {
         $orders = $this->queries->orders($viewer, $filter)->with('items')->get();
         $campaigns = $this->campaigns($viewer, $filter);
+        $leadCountsBySource = LeadContactMetrics::effectiveCountsBySource($filter, $orders);
 
         $rows = [];
         $totals = [
@@ -39,12 +39,21 @@ class MarketingCampaignReportService
         ];
 
         foreach ($campaigns as $index => $campaign) {
-            $campaignOrders = $orders->where('marketing_source_id', $campaign->id);
-            $leads = $this->leadsForCampaign($campaign, $filter, $viewer);
-            $junkCount = $this->countJunkOrders($campaignOrders);
-            $leadCount = max($leads->count(), $campaignOrders->count());
+            $family = collect([$campaign])->merge($campaign->children)->unique('id')->values();
+            $sourceIds = $family->pluck('id')->map(static fn ($id): int => (int) $id)->all();
+            $campaignOrders = $orders->whereIn('marketing_source_id', $sourceIds);
+
+            // Contact chỉ lấy từ packet lead chính. Đơn bổ sung tạo từ late
+            // upsell vẫn được cộng doanh thu nhưng không được làm tăng lead.
+            $leadCount = (int) collect($sourceIds)
+                ->sum(fn (int $sourceId): int => (int) $leadCountsBySource->get($sourceId, 0));
+
+            // Junk-rate là tỷ lệ trên khách/lead thật, không phải trên mọi order.
+            $contactOrderIds = LeadContactMetrics::contactOrderIds($campaignOrders);
+            $junkCount = $this->countJunkOrders($campaignOrders->whereIn('id', $contactOrderIds));
+
             $revenueEligible = $campaignOrders->whereIn('delivery_status', DeliveryStatus::revenueEligible());
-            $metrics = MarketingMetrics::summarize($revenueEligible, collect([$campaign]));
+            $metrics = MarketingMetrics::summarize($revenueEligible, $family);
             $revenue = $metrics['attributed_revenue'];
 
             $row = [
@@ -118,65 +127,42 @@ class MarketingCampaignReportService
     private function campaigns(User $viewer, ReportFilterData $filter): Collection
     {
         $query = MarketingSource::query()
-            ->with(['marketer:id,name', 'creator:id,name'])
+            ->with([
+                'marketer:id,name,email',
+                'creator:id,name',
+                'children.marketer:id,name,email',
+                'children.creator:id,name',
+            ])
             ->whereNull('parent_id')
             ->orderBy('name');
 
         if ($filter->productId) {
-            $query->whereHas('orders', fn (Builder $order) => $order->where('product_id', $filter->productId));
+            $query->where(function (Builder $family) use ($filter): void {
+                $family->whereHas('orders', fn (Builder $order) => $order->where('product_id', $filter->productId))
+                    ->orWhereHas('children.orders', fn (Builder $order) => $order->where('product_id', $filter->productId));
+            });
         }
 
         if ($filter->marketerId) {
-            $query->where('marketer_user_id', $filter->marketerId);
+            $query->where(function (Builder $family) use ($filter): void {
+                $family->where('marketer_user_id', $filter->marketerId)
+                    ->orWhereHas('children', fn (Builder $child) => $child->where('marketer_user_id', $filter->marketerId));
+            });
         } elseif ($viewer->role === UserRole::Marketing) {
-            $query->whereIn('marketer_user_id', $this->scope->allowedMarketerIds($viewer));
-        }
-
-        return $query->get();
-    }
-
-    /** @return Collection<int, LeadIngestion> */
-    private function leadsForCampaign(MarketingSource $campaign, ReportFilterData $filter, User $viewer): Collection
-    {
-        if (! $filter->dateFrom || ! $filter->dateTo) {
-            return collect();
-        }
-
-        $query = LeadContactMetrics::applyCountableScope(LeadIngestion::query())
-            ->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo])
-            ->where(function (Builder $q) use ($campaign) {
-                $q->whereHas('order', fn (Builder $order) => $order->where('marketing_source_id', $campaign->id));
-
-                if ($campaign->utm_campaign) {
-                    $q->orWhere('utm_campaign', $campaign->utm_campaign);
-                }
-            });
-
-        if ($filter->productId) {
-            $query->whereHas('order', fn (Builder $order) => $order->where('product_id', $filter->productId));
-        }
-
-        if ($viewer->role === UserRole::Marketing) {
             $marketerIds = $this->scope->allowedMarketerIds($viewer);
-            $sourceIds = MarketingSource::query()
-                ->whereIn('marketer_user_id', $marketerIds)
-                ->pluck('id');
-
-            $query->where(function (Builder $q) use ($marketerIds, $sourceIds) {
-                $q->whereHas('order', fn (Builder $order) => $order->whereIn('marketer_user_id', $marketerIds))
-                    ->orWhereIn('utm_campaign', MarketingSource::query()->whereIn('id', $sourceIds)->pluck('utm_campaign'));
+            $query->where(function (Builder $family) use ($marketerIds): void {
+                $family->whereIn('marketer_user_id', $marketerIds)
+                    ->orWhereHas('children', fn (Builder $child) => $child->whereIn('marketer_user_id', $marketerIds));
             });
         }
 
         return $query->get();
     }
 
-    /**
-     * @param  Collection<int, Order>  $orders
-     */
+    /** @param Collection<int, Order> $orders */
     private function countJunkOrders(Collection $orders): int
     {
-        return $orders->filter(function (Order $order) {
+        return $orders->filter(function (Order $order): bool {
             $result = OperationResult::tryFromStored($order->operation_result);
 
             return $result?->isJunkLead() ?? false;

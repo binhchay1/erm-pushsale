@@ -11,6 +11,11 @@ return [
         'system_actor' => 'Hệ thống',
         'history_before_tracking' => 'Dữ liệu hiện tại được tạo trước khi hệ thống bắt đầu lưu lịch sử chi tiết.',
         'history_actions' => [
+            'landing_upsell_added' => 'Gộp upsell Landing',
+            'landing_upsell_requires_review' => 'Upsell Landing cần kiểm tra',
+            'landing_late_upsell_manually_merged' => 'Gộp thủ công upsell đến muộn',
+            'landing_late_upsell_created_order' => 'Tạo đơn bổ sung từ upsell đến muộn',
+            'landing_supplemental_order_created' => 'Đơn bổ sung từ Landing',
             'initial_snapshot' => 'Trạng thái hiện tại',
             'call' => 'Ghi nhận cuộc gọi',
             'status_updated' => 'Cập nhật tác nghiệp',

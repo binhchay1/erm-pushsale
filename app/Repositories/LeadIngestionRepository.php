@@ -15,6 +15,8 @@ class LeadIngestionRepository
      * @param  array{
      *     platform?: ?string,
      *     status?: ?string,
+     *     packet_type?: ?string,
+     *     review?: ?string,
      *     bucket?: ?string,
      *     marketing_source_id?: ?int,
      *     marketer_user_id?: ?int,
@@ -31,6 +33,13 @@ class LeadIngestionRepository
                 'order.team:id,name',
                 'order.items:id,order_id,product_name,quantity,unit_price',
                 'order.marketingSource:id,name',
+                'order.shipments:id,order_id',
+                'relatedOrder.saleUser:id,name',
+                'relatedOrder.team:id,name',
+                'relatedOrder.items:id,order_id,product_name,quantity,unit_price',
+                'relatedOrder.marketingSource:id,name',
+                'relatedOrder.shipments:id,order_id',
+                'parentIngestion:id,external_id,order_id',
                 'marketingSource:id,name',
             ]);
 
@@ -40,11 +49,24 @@ class LeadIngestionRepository
 
         // Nhóm "ngoại lệ cần kiểm soát": các case hệ thống không tự xử lý được.
         if (($filters['bucket'] ?? null) === 'exceptions') {
-            $query->whereIn('status', self::exceptionStatuses());
+            $query->where(function ($exception): void {
+                $exception->whereIn('status', self::exceptionStatuses())
+                    ->orWhere(fn ($review) => $review->where('requires_review', true)->whereNull('reviewed_at'));
+            });
         }
 
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
+        }
+
+        if (! empty($filters['packet_type'])) {
+            $query->where('packet_type', $filters['packet_type']);
+        }
+
+        if (($filters['review'] ?? null) === 'pending') {
+            $query->where('requires_review', true)->whereNull('reviewed_at');
+        } elseif (($filters['review'] ?? null) === 'reviewed') {
+            $query->whereNotNull('reviewed_at');
         }
 
         if (! empty($filters['marketing_source_id'])) {
@@ -61,7 +83,11 @@ class LeadIngestionRepository
             $query->where(function ($q) use ($term) {
                 $q->where('customer_phone', 'like', $term)
                     ->orWhere('customer_name', 'like', $term)
-                    ->orWhere('product_interest', 'like', $term);
+                    ->orWhere('product_interest', 'like', $term)
+                    ->orWhere('external_id', 'like', $term)
+                    ->orWhere('packet_type', 'like', $term)
+                    ->orWhereHas('order', fn ($order) => $order->where('order_code', 'like', $term))
+                    ->orWhereHas('relatedOrder', fn ($order) => $order->where('order_code', 'like', $term));
             });
         }
 
@@ -80,7 +106,7 @@ class LeadIngestionRepository
     public function paginatedApiList(?string $platform, ?string $status, int $perPage): LengthAwarePaginator
     {
         return LeadIngestion::query()
-            ->with('order')
+            ->with(['order', 'relatedOrder', 'parentIngestion:id,external_id,order_id'])
             ->when($platform, fn ($q) => $q->where('platform', $platform))
             ->when($status, fn ($q) => $q->where('status', $status))
             ->latest()
@@ -102,7 +128,14 @@ class LeadIngestionRepository
     public function exceptionCount(): int
     {
         return LeadIngestion::query()
-            ->whereIn('status', self::exceptionStatuses())
+            ->where(function ($outer): void {
+                $outer->where(function ($query): void {
+                    $query->whereIn('status', [LeadIngestionStatus::Duplicate->value, LeadIngestionStatus::Failed->value])
+                        ->where('counts_as_lead', true);
+                })->orWhere(function ($review): void {
+                    $review->where('requires_review', true)->whereNull('reviewed_at');
+                });
+            })
             ->count();
     }
 
@@ -113,7 +146,7 @@ class LeadIngestionRepository
 
     public function countPending(): int
     {
-        return LeadIngestion::query()->where('status', LeadIngestionStatus::Pending)->count();
+        return LeadIngestion::query()->where('counts_as_lead', true)->where('status', LeadIngestionStatus::Pending)->count();
     }
 
     /** Top nguồn lead trong ngày (cho biểu đồ). */

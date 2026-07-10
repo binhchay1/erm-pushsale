@@ -87,7 +87,7 @@ class AuditReportsCommand extends Command
             $this->line("Chiến dịch: {$campaign->name} (#{$campaign->id}) · seed contacts={$campaign->contacts}");
         }
 
-        $leadCount = LeadIngestion::query()
+        $leadCount = \App\Support\LeadContactMetrics::applyCountableScope(LeadIngestion::query())
             ->where('customer_phone', $order->customer_phone)
             ->when($campaign, fn ($q) => $q->where('marketing_source_id', $campaign->id))
             ->count();

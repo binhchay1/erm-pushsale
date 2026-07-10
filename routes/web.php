@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\IntegrationsController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\LandingApprovalController;
 use App\Http\Controllers\Admin\LeadIngestionController;
+use App\Http\Controllers\Admin\LeadReviewController;
 use App\Http\Controllers\Admin\LeadsLogController;
 use App\Http\Controllers\Admin\ManualLeadController;
 use App\Http\Controllers\Admin\CompanySettingsController;
@@ -43,6 +44,7 @@ use App\Http\Controllers\Allocator\ReportController as AllocatorReportController
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CustomerInteractions\CustomerInternalMessageController;
 use App\Http\Controllers\CustomerInteractions\CustomerPurchaseHistoryController;
+use App\Http\Controllers\CustomerInteractions\CustomerSupplementPacketController;
 use App\Http\Controllers\CustomerInteractions\OrderOperationHistoryController;
 use App\Http\Controllers\CustomerInteractions\PancakeCustomerMessageController;
 use App\Http\Controllers\HomeController;
@@ -132,6 +134,12 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         ->name('customers.orders.pancake-messages.index');
     Route::post('customers/orders/{order}/pancake-messages', [PancakeCustomerMessageController::class, 'store'])
         ->name('customers.orders.pancake-messages.store');
+    Route::get('customers/orders/{order}/supplement-packets', [CustomerSupplementPacketController::class, 'index'])
+        ->name('customers.orders.supplement-packets.index');
+    Route::post(
+        'customers/orders/{order}/supplement-packets/{leadIngestion}/review',
+        [CustomerSupplementPacketController::class, 'store'],
+    )->name('customers.orders.supplement-packets.review');
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
@@ -174,6 +182,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::resource('products', ProductController::class)->except(['show']);
         Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
         Route::delete('leads/{leadIngestion}', [LeadIngestionController::class, 'destroy'])->name('leads.destroy');
+        Route::patch('leads/{leadIngestion}/review', [LeadReviewController::class, 'update'])->name('leads.review');
         Route::delete('failed-orders/{failedPartnerOrder}', [FailedPartnerOrderController::class, 'destroy'])->name('failed-orders.destroy');
         Route::get('orders/failed', FailedOrdersController::class)->name('orders.failed');
         Route::get('rankings', RankingController::class)->name('rankings');
@@ -281,6 +290,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('dashboard', AllocatorDashboardController::class)->name('dashboard');
         Route::get('workspace', LeadsLogController::class)->name('workspace');
         Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
+        Route::patch('leads/{leadIngestion}/review', [LeadReviewController::class, 'update'])->name('leads.review');
         Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
         Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
         Route::post('leads/import', [ManualLeadController::class, 'import'])->name('leads.import');

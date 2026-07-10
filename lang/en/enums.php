@@ -29,7 +29,15 @@ return [
         'pending' => 'Pending',
         'processed' => 'Lead created',
         'duplicate' => 'Duplicate phone',
+        'needs_review' => 'Needs review',
         'failed' => 'Failed',
+    ],
+    'lead_packet_type' => [
+        'lead' => 'Primary lead',
+        'follow_up' => 'Follow-up packet',
+        'upsell' => 'Upsell',
+        'late_upsell' => 'Late upsell',
+        'orphan_upsell' => 'Upsell without base order',
     ],
     'lead_allocation_mode' => [
         'auto' => 'Auto distribution',

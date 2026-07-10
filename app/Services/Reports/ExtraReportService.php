@@ -202,14 +202,15 @@ class ExtraReportService
         ], $stages));
 
         $rows = $orders->groupBy('sale_user_id')->map(function (Collection $group) use ($stages) {
+            $contacts = $this->contactOrders($group);
             $row = [
                 'name' => $group->first()->saleUser?->name ?? '—',
-                'contacts' => $group->count(),
-                'untouched' => $group->where('contact_count', 0)->count(),
+                'contacts' => $contacts->count(),
+                'untouched' => $contacts->where('contact_count', 0)->count(),
             ];
 
             foreach ($stages as $stage) {
-                $row['stage_'.$stage->value] = $group
+                $row['stage_'.$stage->value] = $contacts
                     ->filter(fn (Order $o) => (string) $o->operation_stage === $stage->value)
                     ->count();
             }
@@ -237,14 +238,16 @@ class ExtraReportService
 
         $rows = $orders->groupBy('sale_user_id')->map(function (Collection $group) {
             $closed = $this->closed($group);
+            $contactOrders = $this->contactOrders($group);
+            $closedContacts = $this->closed($contactOrders);
             $net = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
             $discount = (int) $closed->sum('discount');
 
             return [
                 'name' => $group->first()->saleUser?->name ?? '—',
-                'contacts' => $group->count(),
-                'closed' => $closed->count(),
-                'rate' => self::pct($closed->count(), $group->count()),
+                'contacts' => $contactOrders->count(),
+                'closed' => $closedContacts->count(),
+                'rate' => self::pct($closedContacts->count(), $contactOrders->count()),
                 'gross' => $net + $discount,
                 'discount' => $discount,
                 'net' => $net,
@@ -300,8 +303,11 @@ class ExtraReportService
         ];
 
         $groupKey = $bySale ? 'sale_user_id' : 'marketer_user_id';
+        $contactCounts = $bySale
+            ? collect()
+            : LeadContactMetrics::effectiveCountsByMarketer($filter, $orders);
 
-        $rows = $orders->groupBy($groupKey)->map(function (Collection $group) use ($bySale) {
+        $rows = $orders->groupBy($groupKey)->map(function (Collection $group, int|string $groupId) use ($bySale, $contactCounts) {
             $closed = $this->closed($group);
             $rev = fn (Collection $c) => (int) $c->sum(fn (Order $o) => $o->netRevenue());
 
@@ -316,6 +322,11 @@ class ExtraReportService
             $success = $this->bucket($closed, self::SUCCESS);
             $cancelRev = $rev($cancel);
             $returnedRev = $rev($returned);
+            $contactOrders = $this->contactOrders($group);
+            $closedContacts = $this->closed($contactOrders);
+            $contacts = $bySale
+                ? $contactOrders->count()
+                : (int) $contactCounts->get((int) $groupId, 0);
 
             return [
                 'name' => ($bySale ? $group->first()->saleUser?->name : $group->first()->marketerUser?->name) ?? '—',
@@ -341,8 +352,8 @@ class ExtraReportService
                 'pct_cancel' => self::pct($cancel->count(), $closed->count()),
                 'pct_xngh' => self::pct($xngh->count(), $closed->count()),
                 'pct_success' => self::pct($success->count(), $transfer->count()),
-                'contacts' => $group->count(),
-                'close_rate' => self::pct($closed->count(), $group->count()),
+                'contacts' => $contacts,
+                'close_rate' => self::pct($closedContacts->count(), $contacts),
                 'product_count' => (int) $closed->sum(fn (Order $o) => $o->items->sum('quantity')),
                 'avg_order' => $closed->count() > 0 ? (int) round($closedRev / $closed->count()) : null,
                 'pct_rev_returned' => self::pct($returnedRev, $closedRev),
@@ -472,14 +483,16 @@ class ExtraReportService
 
         $rows = $orders->groupBy('product_id')->map(function (Collection $group) {
             $closed = $this->closed($group);
+            $contactOrders = $this->contactOrders($group);
+            $closedContacts = $this->closed($contactOrders);
             $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
 
             return [
                 'name' => $group->first()->product?->name ?? '—',
                 'sku' => $group->first()->product?->sku,
-                'contacts' => $group->count(),
-                'closed' => $closed->count(),
-                'rate' => self::pct($closed->count(), $group->count()),
+                'contacts' => $contactOrders->count(),
+                'closed' => $closedContacts->count(),
+                'rate' => self::pct($closedContacts->count(), $contactOrders->count()),
                 'revenue' => $revenue,
                 'avg' => $closed->count() > 0 ? (int) round($revenue / $closed->count()) : null,
             ];
@@ -517,6 +530,7 @@ class ExtraReportService
             });
 
         $leads = $leadsQuery->get();
+        $contactCountsByMarketer = LeadContactMetrics::effectiveCountsByMarketer($filter, $orders);
 
         $columns = [
             $this->col('marketer', 'name', 'text'),
@@ -534,12 +548,13 @@ class ExtraReportService
             ->unique()
             ->values();
 
-        $rows = $marketerIdsInScope->map(function (int $marketerId) use ($orders, $leads) {
+        $rows = $marketerIdsInScope->map(function (int $marketerId) use ($orders, $leads, $contactCountsByMarketer) {
             $group = $orders->where('marketer_user_id', $marketerId);
             $marketerLeads = $leads->filter(fn (LeadIngestion $l) => (int) $l->marketingSource?->marketer_user_id === $marketerId);
             $closed = $this->closed($group);
+            $closedContacts = $this->closed($this->contactOrders($group));
             $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
-            $contactCount = max($marketerLeads->count(), $group->count());
+            $contactCount = (int) $contactCountsByMarketer->get($marketerId, 0);
             $unallocated = $marketerLeads->filter(
                 fn (LeadIngestion $l) => $l->order_id === null
                     && in_array($l->status->value, ['pending', 'gathering'], true),
@@ -554,8 +569,8 @@ class ExtraReportService
                 'name' => $name,
                 'contacts' => $contactCount,
                 'unallocated' => $unallocated,
-                'closed' => $closed->count(),
-                'rate' => self::pct($closed->count(), $contactCount),
+                'closed' => $closedContacts->count(),
+                'rate' => self::pct($closedContacts->count(), $contactCount),
                 'qty_sold' => (int) $closed->sum(fn (Order $o) => $o->items->sum('quantity')),
                 'revenue' => $revenue,
             ];
@@ -577,6 +592,7 @@ class ExtraReportService
     {
         $orders = $this->fetchOrdersWithItems($user, $filter, scopeMarketing: $user->role === UserRole::Marketing)
             ->filter(fn (Order $o) => $o->marketing_source_id !== null);
+        $contactCountsBySource = LeadContactMetrics::effectiveCountsBySource($filter, $orders);
 
         $columns = [
             $this->col('source', 'name', 'text'),
@@ -593,20 +609,22 @@ class ExtraReportService
             $this->col('upsell_rev', 'upsell_rev', 'currency'),
         ];
 
-        $rows = $orders->groupBy('marketing_source_id')->map(function (Collection $group) {
+        $rows = $orders->groupBy('marketing_source_id')->map(function (Collection $group, int|string $sourceId) use ($contactCountsBySource) {
             $closed = $this->closed($group);
+            $closedContacts = $this->closed($this->contactOrders($group));
             $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
             $closedItems = $closed->flatMap(fn (Order $o) => $o->items);
             $qtySold = (int) $closedItems->sum('quantity');
             $upsellItems = $closedItems->filter(fn (OrderItem $i) => $i->item_type === 'upsell');
             $source = $group->first()->marketingSource;
+            $contacts = (int) $contactCountsBySource->get((int) $sourceId, 0);
 
             return [
                 'name' => $source?->name ?? '—',
                 'channel' => $source?->ad_channel ?? '—',
-                'contacts' => $group->count(),
-                'closed' => $closed->count(),
-                'rate' => self::pct($closed->count(), $group->count()),
+                'contacts' => $contacts,
+                'closed' => $closedContacts->count(),
+                'rate' => self::pct($closedContacts->count(), $contacts),
                 'product_types' => $closedItems->map(fn (OrderItem $i) => $i->product_id ?? $i->product_name)->unique()->count(),
                 'qty_sold' => $qtySold,
                 'revenue' => $revenue,
@@ -826,6 +844,12 @@ class ExtraReportService
             DateType::Closing => 'closed_at',
             default => 'data_arrived_at',
         };
+    }
+
+    /** Chỉ các order đại diện cho lead/contact thật; loại đơn supplemental. */
+    private function contactOrders(Collection $orders): Collection
+    {
+        return $orders->whereIn('id', LeadContactMetrics::contactOrderIds($orders));
     }
 
     private function closed(Collection $orders): Collection

@@ -45,11 +45,11 @@ class AllocatorReportService
     /** @return array<string, mixed> */
     private function allocationReport(Carbon $from, Carbon $to): array
     {
-        // Giữ duplicate/failed (báo cáo phân bổ cần tách cột), nhưng loại dòng audit upsell
-        // (:upsell) vì đó không phải lead thật đổ về.
+        // Giữ duplicate/failed của packet lead chính để báo cáo phân bổ có đủ
+        // bucket; mọi packet upsell/follow-up đều counts_as_lead = false.
         $leads = LeadIngestion::query()
+            ->where('counts_as_lead', true)
             ->whereBetween('created_at', [$from, $to])
-            ->where(fn (Builder $q) => $q->whereNull('external_id')->orWhere('external_id', 'not like', '%:upsell'))
             ->get(['status', 'created_at']);
 
         $byDay = $leads->groupBy(fn (LeadIngestion $l) => $l->created_at->toDateString());
@@ -75,10 +75,12 @@ class AllocatorReportService
     private function allocationRow(string $date, Collection $leads, bool $isTotal = false): array
     {
         $total = $leads->count();
-        $assigned = $leads->where('status', LeadIngestionStatus::Processed->value)->count();
-        $pending = $leads->where('status', LeadIngestionStatus::Pending->value)->count();
-        $duplicate = $leads->where('status', LeadIngestionStatus::Duplicate->value)->count();
-        $failed = $leads->where('status', LeadIngestionStatus::Failed->value)->count();
+        // `status` được cast sang enum trên model; Collection::where với chuỗi
+        // có thể trả sai 0. So sánh enum trực tiếp để báo cáo khớp từng bản ghi.
+        $assigned = $leads->filter(fn (LeadIngestion $lead): bool => $lead->status === LeadIngestionStatus::Processed)->count();
+        $pending = $leads->filter(fn (LeadIngestion $lead): bool => $lead->status === LeadIngestionStatus::Pending)->count();
+        $duplicate = $leads->filter(fn (LeadIngestion $lead): bool => $lead->status === LeadIngestionStatus::Duplicate)->count();
+        $failed = $leads->filter(fn (LeadIngestion $lead): bool => $lead->status === LeadIngestionStatus::Failed)->count();
 
         // Tỷ lệ chia = lead đã chia / lead chia được (loại trùng & lỗi).
         $allocatable = max(0, $total - $duplicate - $failed);

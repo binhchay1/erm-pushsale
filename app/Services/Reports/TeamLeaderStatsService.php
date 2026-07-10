@@ -48,7 +48,7 @@ class TeamLeaderStatsService
         $ids = $marketers->pluck('id')->all();
         $sources = MarketingSource::query()->whereIn('marketer_user_id', $ids)->get();
         $orders = $this->fetchOrders($ids, $filter);
-        $leadCountsByMarketer = LeadContactMetrics::countsByMarketer($filter)->only($ids);
+        $leadCountsByMarketer = LeadContactMetrics::effectiveCountsByMarketer($filter, $orders)->only($ids);
 
         $teamGroups = $marketers->groupBy(fn (User $u) => $u->team_id ?? 0);
         $rows = [];
@@ -88,12 +88,11 @@ class TeamLeaderStatsService
         $mineSources = $sources->where('marketer_user_id', $user->id);
 
         $budget = (int) $mineSources->sum('budget');
-        $periodLeads = (int) ($leadCountsByMarketer->get($user->id) ?? 0);
-        // 1 contact = 1 khách để lại SĐT (= 1 lead / 1 đơn), KHÔNG cộng số lần gọi (contact_count).
-        $contacts = max($periodLeads, (int) $mineOrders->count());
+        $contacts = (int) ($leadCountsByMarketer->get($user->id) ?? 0);
 
         $closedOrders = $mineOrders->filter(fn (Order $o) => (string) $o->closing_status === 'closed');
-        $closed = $closedOrders->count();
+        $contactOrderIds = LeadContactMetrics::contactOrderIds($mineOrders);
+        $closed = $closedOrders->whereIn('id', $contactOrderIds)->count();
         $revenueTotal = (int) $closedOrders->sum(fn (Order $o) => $o->netRevenue());
         $revenueNew = (int) $closedOrders->where('is_returning_customer', false)->sum(fn (Order $o) => $o->netRevenue());
         $revenueOld = (int) $closedOrders->where('is_returning_customer', true)->sum(fn (Order $o) => $o->netRevenue());

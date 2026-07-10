@@ -14,12 +14,27 @@ use Illuminate\Support\Carbon;
  */
 final class LandingUpsellService
 {
-    public function startHold(Order $order): void
+    public function startHold(Order $order, ?Carbon $startedAt = null): bool
     {
+        $deadline = $this->nextDeadline($order, $startedAt);
+
+        // Chia thủ công có thể xảy ra sau khi cửa sổ 90 giây tính từ lúc lead
+        // về đã hết. Không được mở lại một cửa sổ mới chỉ vì order vừa được tạo.
+        if (! $deadline->isAfter(now())) {
+            $order->update([
+                'landing_upsell_hold_until' => null,
+                'landing_upsell_locked' => false,
+            ]);
+
+            return false;
+        }
+
         $order->update([
-            'landing_upsell_hold_until' => $this->nextDeadline($order),
+            'landing_upsell_hold_until' => $deadline,
             'landing_upsell_locked' => false,
         ]);
+
+        return true;
     }
 
     public function extendHold(Order $order): void
@@ -82,17 +97,17 @@ final class LandingUpsellService
         return max($this->holdSeconds(), (int) config('saleops.landing.max_hold_seconds', 90));
     }
 
-    public function absoluteDeadline(Order $order): Carbon
+    public function absoluteDeadline(Order $order, ?Carbon $startedAt = null): Carbon
     {
-        $startedAt = $order->created_at?->copy() ?? now();
+        $startedAt = $startedAt?->copy() ?? $order->created_at?->copy() ?? now();
 
         return $startedAt->addSeconds($this->maxHoldSeconds());
     }
 
-    private function nextDeadline(Order $order): Carbon
+    private function nextDeadline(Order $order, ?Carbon $startedAt = null): Carbon
     {
         $rollingDeadline = now()->addSeconds($this->holdSeconds());
-        $absoluteDeadline = $this->absoluteDeadline($order);
+        $absoluteDeadline = $this->absoluteDeadline($order, $startedAt);
 
         return $rollingDeadline->lessThan($absoluteDeadline)
             ? $rollingDeadline

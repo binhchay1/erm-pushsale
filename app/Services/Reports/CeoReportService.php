@@ -3,9 +3,11 @@
 namespace App\Services\Reports;
 
 use App\Data\ReportFilterData;
+use App\Enums\ClosingStatus;
 use App\Enums\DeliveryStatus;
 use App\Enums\UserRole;
 use App\Models\MarketingSource;
+use App\Models\Order;
 use App\Models\User;
 use App\Support\LeadContactMetrics;
 
@@ -29,15 +31,24 @@ class CeoReportService
         $saleRows = User::query()
             ->where('role', UserRole::Sales)
             ->get()
-            ->map(function (User $user, int $index) use ($orders) {
+            ->map(function (User $user, int $index) use ($orders): array {
                 $mine = (clone $orders)->where('sale_user_id', $user->id)->get();
-                $newCustomers = $mine->where('is_returning_customer', false);
-                $oldCustomers = $mine->where('is_returning_customer', true);
-                $newContact = (int) $newCustomers->sum('contact_count');
-                $oldContact = (int) $oldCustomers->sum('contact_count');
-                $newClosed = $newCustomers->count();
-                $oldClosed = $oldCustomers->count();
-                $totalRev = (int) $mine->sum(fn ($o) => $o->netRevenue());
+
+                // Chỉ order đại diện cho lead thật mới được dùng làm mẫu số và
+                // số chốt. Đơn supplemental vẫn góp doanh thu/sản lượng nhưng
+                // không tạo thêm một contact hay làm tỷ lệ chốt vượt 100%.
+                $contactOrderIds = LeadContactMetrics::contactOrderIds($mine);
+                $contactOrders = $mine->whereIn('id', $contactOrderIds);
+                $newContactOrders = $contactOrders->where('is_returning_customer', false);
+                $oldContactOrders = $contactOrders->where('is_returning_customer', true);
+                $newOrders = $mine->where('is_returning_customer', false);
+                $oldOrders = $mine->where('is_returning_customer', true);
+
+                $newContact = $newContactOrders->count();
+                $oldContact = $oldContactOrders->count();
+                $newClosed = $newContactOrders->filter(fn (Order $order): bool => $this->isClosed($order))->count();
+                $oldClosed = $oldContactOrders->filter(fn (Order $order): bool => $this->isClosed($order))->count();
+                $totalRev = (int) $mine->sum(fn (Order $order): int => $order->netRevenue());
                 $kpi = (float) ($user->id === 1 ? 50_000_000 : 30_000_000);
 
                 return [
@@ -48,13 +59,13 @@ class CeoReportService
                     'newContact' => $newContact,
                     'newClosed' => $newClosed,
                     'newCloseRate' => $newContact > 0 ? round($newClosed / $newContact * 100, 1) : 0,
-                    'newProductQty' => (int) $newCustomers->sum(fn ($o) => $o->items->sum('quantity')),
-                    'newEstRevenue' => (int) $newCustomers->sum(fn ($o) => $o->netRevenue()),
+                    'newProductQty' => (int) $newOrders->sum(fn (Order $order): int => (int) $order->items->sum('quantity')),
+                    'newEstRevenue' => (int) $newOrders->sum(fn (Order $order): int => $order->netRevenue()),
                     'oldContact' => $oldContact,
                     'oldClosed' => $oldClosed,
                     'oldCloseRate' => $oldContact > 0 ? round($oldClosed / $oldContact * 100, 1) : 0,
-                    'oldProductQty' => (int) $oldCustomers->sum(fn ($o) => $o->items->sum('quantity')),
-                    'oldEstRevenue' => (int) $oldCustomers->sum(fn ($o) => $o->netRevenue()),
+                    'oldProductQty' => (int) $oldOrders->sum(fn (Order $order): int => (int) $order->items->sum('quantity')),
+                    'oldEstRevenue' => (int) $oldOrders->sum(fn (Order $order): int => $order->netRevenue()),
                     'totalEstRevenue' => $totalRev,
                     'codFee' => (int) $mine->sum('cod_fee'),
                     'codSupport' => (int) $mine->sum('cod_support'),
@@ -67,24 +78,29 @@ class CeoReportService
             ->values()
             ->all();
 
-        $leadCountsBySource = LeadContactMetrics::countsBySource($filter);
+        $allOrders = (clone $orders)->get();
+        $leadCountsBySource = LeadContactMetrics::effectiveCountsBySource($filter, $allOrders);
 
         $marketingRows = MarketingSource::query()
             ->whereNull('parent_id')
             ->with(['children', 'marketer'])
             ->get()
-            ->map(function (MarketingSource $source) use ($orders, $leadCountsBySource) {
-                $sourceOrders = (clone $orders)->where('marketing_source_id', $source->id)->get();
-                $budget = (int) $source->budget;
-                $periodLeads = (int) ($leadCountsBySource->get($source->id) ?? 0);
-                // 1 contact = 1 khách để lại SĐT (= 1 lead / 1 đơn), KHÔNG cộng số lần gọi.
-                $contacts = max($periodLeads, (int) $sourceOrders->count());
-                $closed = $sourceOrders->count();
+            ->map(function (MarketingSource $source) use ($allOrders, $leadCountsBySource): array {
+                $family = collect([$source])->merge($source->children)->unique('id')->values();
+                $sourceIds = $family->pluck('id')->map(static fn ($id): int => (int) $id)->all();
+                $sourceOrders = $allOrders->whereIn('marketing_source_id', $sourceIds);
+                $budget = (int) $family->sum('budget');
+                $contacts = (int) collect($sourceIds)
+                    ->sum(fn (int $sourceId): int => (int) $leadCountsBySource->get($sourceId, 0));
+                $contactOrderIds = LeadContactMetrics::contactOrderIds($sourceOrders);
+                $closed = $sourceOrders->whereIn('id', $contactOrderIds)
+                    ->filter(fn (Order $order): bool => $this->isClosed($order))
+                    ->count();
                 $newOrders = $sourceOrders->where('is_returning_customer', false);
                 $oldOrders = $sourceOrders->where('is_returning_customer', true);
-                $newRev = (int) $newOrders->sum(fn ($o) => $o->netRevenue());
-                $oldRev = (int) $oldOrders->sum(fn ($o) => $o->netRevenue());
-                $totalRev = (int) $sourceOrders->sum(fn ($o) => $o->netRevenue());
+                $newRev = (int) $newOrders->sum(fn (Order $order): int => $order->netRevenue());
+                $oldRev = (int) $oldOrders->sum(fn (Order $order): int => $order->netRevenue());
+                $totalRev = (int) $sourceOrders->sum(fn (Order $order): int => $order->netRevenue());
                 $kpi = 0.0;
                 $marketer = $source->marketer;
                 $username = $marketer
@@ -116,7 +132,7 @@ class CeoReportService
             })
             ->sortByDesc('contacts')
             ->values()
-            ->map(fn (array $row, int $index) => array_merge($row, ['stt' => $index + 1]))
+            ->map(fn (array $row, int $index): array => array_merge($row, ['stt' => $index + 1]))
             ->all();
 
         return [
@@ -125,4 +141,10 @@ class CeoReportService
             'marketingRows' => $marketingRows,
         ];
     }
+    private function isClosed(Order $order): bool
+    {
+        return $order->closed_at !== null
+            || (string) $order->closing_status === ClosingStatus::Closed->value;
+    }
+
 }

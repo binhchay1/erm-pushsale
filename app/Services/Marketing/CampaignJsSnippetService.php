@@ -7,9 +7,10 @@ use App\Models\MarketingSource;
 /**
  * Sinh JS theo dõi phiên Landing cho từng chiến dịch.
  *
- * Đoạn này được dán vào cả form chính và form upsell trang cảm ơn. Nó ưu tiên
- * session/client-ref do URL hoặc Auto Funnel chuyển sang, sau đó mới dùng
- * window.name/localStorage. Vì vậy vẫn hoạt động khi hai trang khác domain.
+ * Đoạn này được dán vào cả form chính và form upsell trang cảm ơn. Landing
+ * chính luôn khởi tạo reference mới; chỉ trang cảm ơn mới được kế thừa opaque
+ * reference qua URL/hidden field, window.name hoặc localStorage. Cách này vừa
+ * hỗ trợ cross-domain vừa ngăn gộp nhầm hai khách dùng cùng trình duyệt.
  */
 class CampaignJsSnippetService
 {
@@ -62,13 +63,27 @@ class CampaignJsSnippetService
     try{window.name="saleops:"+JSON.stringify({token:TOKEN,sid:sid,pref:pref,ts:Date.now()});}catch(e){}
   }
   function hydrate(root){
+    var explicitSid=getParam(["saleops_session","session_id","session_key"])
+      ||getField(["session_id","session_key","saleops_session"],root);
+    var explicitPref=getParam(["saleops_ref","saleops_client_ref","parent_ref","parent_submission_id"])
+      ||getField(["saleops_client_ref","parent_ref","parent_submission_id"],root);
+
+    /*
+     * Mỗi lượt mở landing chính là một khách/lần submit mới. Tuyệt đối không
+     * tái sử dụng localStorage/window.name của lượt trước, nếu không khách mới
+     * có thể bị gộp nhầm vào đơn cũ trên cùng trình duyệt/quầy nhập liệu.
+     */
+    if(!isThankYou){
+      sid=explicitSid||sid||uid();
+      pref=explicitPref||pref||uid();
+      persist();
+      return;
+    }
+
+    /* Trang cảm ơn được phép kế thừa opaque reference từ form chính. */
     var w=readWindowName()||{};
-    sid=getParam(["saleops_session","session_id","session_key"])
-      ||getField(["session_id","session_key","saleops_session"],root)
-      ||clean(w.sid)||sid;
-    pref=getParam(["saleops_ref","saleops_client_ref","parent_ref","parent_submission_id"])
-      ||getField(["saleops_client_ref","parent_ref","parent_submission_id"],root)
-      ||clean(w.pref)||pref;
+    sid=explicitSid||clean(w.sid)||sid;
+    pref=explicitPref||clean(w.pref)||pref;
     if(!sid){try{sid=clean(localStorage.getItem(SKEY));}catch(e){}}
     if(!pref){try{pref=clean(localStorage.getItem(PREFKEY));}catch(e){}}
     if(!sid)sid=uid();

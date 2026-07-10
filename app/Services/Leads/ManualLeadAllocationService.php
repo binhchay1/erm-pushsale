@@ -7,6 +7,8 @@ use App\Enums\UserRole;
 use App\Events\LeadPoolChanged;
 use App\Events\SaleWorkspaceChanged;
 use App\Models\LeadIngestion;
+use App\Models\MarketingSource;
+use App\Models\Order;
 use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +20,7 @@ class ManualLeadAllocationService
 {
     public function __construct(
         private readonly LeadOrderFactory $orderFactory,
+        private readonly LeadIngestionService $ingestionService,
     ) {}
 
     /**
@@ -40,11 +43,13 @@ class ManualLeadAllocationService
         }
 
         $allocated = 0;
+        $landingOrders = [];
 
-        DB::transaction(function () use ($leadIds, $saleUser, &$allocated) {
+        DB::transaction(function () use ($leadIds, $saleUser, &$allocated, &$landingOrders) {
             // Khoá hàng lead để tránh đua với chia tự động / phiên chia tay khác.
             $leads = LeadIngestion::query()
                 ->whereIn('id', $leadIds)
+                ->where('counts_as_lead', true)
                 ->where('status', LeadIngestionStatus::Pending)
                 ->whereNull('order_id')
                 ->lockForUpdate()
@@ -67,6 +72,14 @@ class ManualLeadAllocationService
                     'processed_at' => now(),
                 ]);
 
+                if ($lead->platform === 'landing' && $lead->marketing_source_id) {
+                    $landingOrders[] = [
+                        'lead_id' => (int) $lead->id,
+                        'order_id' => (int) $order->id,
+                        'campaign_id' => (int) $lead->marketing_source_id,
+                    ];
+                }
+
                 NotificationService::push(
                     $saleUser->id,
                     'lead',
@@ -83,6 +96,26 @@ class ManualLeadAllocationService
                 $allocated++;
             }
         });
+
+        // Gộp/review packet landing sau khi transaction chia số đã commit.
+        // Chia tay sau 90 giây không mở lại cửa sổ; packet đến muộn vẫn liên kết
+        // đúng order và sale thay vì trở thành một dòng thiếu thông tin.
+        foreach ($landingOrders as $link) {
+            try {
+                $lead = LeadIngestion::query()->find($link['lead_id']);
+                $order = Order::query()->find($link['order_id']);
+                $campaign = MarketingSource::query()->find($link['campaign_id']);
+
+                if ($lead && $order && $campaign) {
+                    $this->ingestionService->reconcileLandingOrder($lead, $order, $campaign);
+                }
+            } catch (Throwable $e) {
+                Log::error('Landing packet reconciliation failed after manual allocation', [
+                    ...$link,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         if ($allocated > 0) {
             // Realtime ping — không để lỗi broadcaster làm hỏng việc chia lead.
