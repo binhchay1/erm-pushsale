@@ -36,7 +36,7 @@ class LandingFormDriver implements LeadPayloadNormalizer
 
         return [
             'external_id' => (string) $externalId,
-            'customer_name' => $name ?: 'Khách Landing',
+            'customer_name' => $name,
             'customer_phone' => preg_replace('/\D+/', '', (string) $phone),
             'product_interest' => $products,
             'message' => $message,
