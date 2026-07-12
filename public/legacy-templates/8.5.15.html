@@ -1,0 +1,223 @@
+<div class="legacy-template-fragment legacy-page-fragment" data-template-code="8.5.15"><div class="content-wrapper" style="min-height: 737px;">
+<div class="contentPane legacy-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1712"><a name="1712"></a><div class="legacy-template-inner" id="dnn_ctr1712_ContentPane"><!-- Start_Module_1712 --><div class="legacy-template-inner" id="dnn_ctr1712_ModuleContent">
+<style type="text/css">
+    .ltc-hidden {
+        display: none;
+    }
+
+    .ltc-show11 {
+        display: inherit;
+    }
+
+    .ltc-show22 {
+        display: inherit;
+    }
+
+    .table-line {
+        font-size: 12px;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table-line th {
+            text-align: left;
+            padding: 8px;
+            font-size: 11px;
+            font-style: italic;
+            vertical-align: bottom;
+        }
+
+        .table-line td {
+            text-align: left;
+            border-top: 1px solid #aaa;
+            padding: 2px;
+        }
+
+    .w25pc {
+        width: 25%;
+    }
+
+    .w14pc {
+        width: 12%;
+    }
+
+    .textbox-invisible {
+        border: none;
+    }
+
+    .w14pc .chosen-container {
+        border: none;
+    }
+
+    .form-control {
+        display: unset;
+    }
+
+    tr.r-caption {
+    }
+
+        tr.r-caption td {
+            background-color: orange;
+        }
+
+    tr.r-caption-m {
+    }
+
+        tr.r-caption-m td {
+            background-color: yellowgreen;
+        }
+
+    .table-info th {
+        background-color: #dfdfdf !important;
+        color: #000 !important;
+        border: 2px solid #dfdfdf !important;
+    }
+
+        .table-info th:last-child {
+            border-color: #dfdfdf !important;
+        }
+
+    .table-info td {
+        border: 2px solid #dfdfdf !important;
+    }
+
+    .table-info tr:nth-child(odd) td {
+        background-color: transparent;
+    }
+
+    .tt1 {
+        color: #1be61b;
+        font-weight: bold;
+    }
+
+    .tt0 {
+        color: #ff3333;
+        font-weight: bold;
+    }
+
+    .span-col {
+        display: inline-block;
+    }
+
+    .cm1 {
+        display: inline-block;
+        width: 30px;
+    }
+
+    .cm2 {
+        display: inline-block;
+        width: 50px;
+        font-size: 11px;
+    }
+
+    .wave_count {
+        color: #007bff;
+    }
+
+    .total_count {
+        color: #00c900;
+    }
+
+    .wave_count {
+        color: #007bff;
+    }
+
+    .last_user_count {
+        color: darkorange;
+    }
+
+    .fallback_count {
+        color: magenta;
+    }
+</style>
+<div id="dnn_ctr1712_Main_BangTongHopChiaSo2_pnlMain">
+<div class="m-header-wrap">
+<div class="m-header" style="top: 0px;">
+<div class="col-sm-12 form-group">
+<span class="text" id="dnn_ctr1712_Main_BangTongHopChiaSo2_lblModuleTitle">Bảng tổng hợp chia data trong ngày v2</span>
+</div>
+</div>
+</div>
+<div class="box-body">
+<div id="dnn_ctr1712_Main_BangTongHopChiaSo2_pnl">
+<div class="row">
+<div class="col-sm-5 form-group">
+<div class="row">
+<div class="col-sm-4 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1712_Main_BangTongHopChiaSo2_ddlIdCauHinhChiaSo" name="dnn$ctr1712$Main$BangTongHopChiaSo2$ddlIdCauHinhChiaSo" style="" title="">
+<option selected="selected" value="-1">--Chọn cấu hình chia số--</option>
+</select>
+</div>
+<div class="col-sm-4 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1712_Main_BangTongHopChiaSo2_ddlUserType" name="dnn$ctr1712$Main$BangTongHopChiaSo2$ddlUserType" style="" title="">
+<option value="Sale">Sale</option>
+<option value="CSKH">CSKH</option>
+</select>
+</div>
+<div class="col-sm-4 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1712_Main_BangTongHopChiaSo2_ddlSapXep" name="dnn$ctr1712$Main$BangTongHopChiaSo2$ddlSapXep" style="" title="">
+<option selected="selected" value="-1">--Sắp xếp--</option>
+<option value="Username">Tài khoản</option>
+<option value="SM_SoLuongTheoDinhMuc">Số mới - Số lượng đã nhận theo định mức</option>
+<option value="SM_ThoiGianNhanSoDinhMuc">Số mới - Thời gian nhận số định mức</option>
+<option value="SMT_SoLuongTheoDinhMuc">Số mới trùng - Số lượng đã nhận theo định mức</option>
+<option value="SMT_ThoiGianNhanSoDinhMuc">Số mới trùng - Thời gian nhận số định mức</option>
+<option value="SKC_SoLuongTheoDinhMuc">Số khách cũ - Số lượng đã nhận theo định mức</option>
+<option value="SKC_ThoiGianNhanSoDinhMuc">Số khách cũ - Thời gian nhận số định mức</option>
+<option value="SKCT_SoLuongTheoDinhMuc">Số khách cũ trùng - Số lượng đã nhận theo định mức</option>
+<option value="SKCT_ThoiGianNhanSoDinhMuc">Số khách cũ trùng - Thời gian nhận số định mức</option>
+<option value="SKCT_SoLuongTheoDinhMuc">Số CSKH - Số lượng đã nhận theo định mức</option>
+<option value="SKCT_ThoiGianNhanSoDinhMuc">Số CSKH - Thời gian nhận số định mức</option>
+</select>
+</div>
+</div>
+</div>
+<div class="col-sm-5 form-group">
+<div class="row">
+<div class="col-sm-4 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1712_Main_BangTongHopChiaSo2_ddlNhanDuLieu" name="dnn$ctr1712$Main$BangTongHopChiaSo2$ddlNhanDuLieu" style="" title="">
+<option selected="selected" value="-1">--Tất cả--</option>
+<option value="1">Nhận dữ liệu</option>
+<option value="0">Không nhận dữ liệu</option>
+</select>
+</div>
+<div class="col-sm-4 form-group">
+<input class="form-control legacy-input" data-provide="datepicker" id="dnn_ctr1712_Main_BangTongHopChiaSo2_txtNgayThang" name="dnn$ctr1712$Main$BangTongHopChiaSo2$txtNgayThang" type="text" value="12/07/2026"/>
+</div>
+<div class="col-sm-4 form-group">
+<input class="form-control legacy-input" id="dnn_ctr1712_Main_BangTongHopChiaSo2_txtTuKhoa" name="dnn$ctr1712$Main$BangTongHopChiaSo2$txtTuKhoa" placeholder="Tìm kiếm theo tài khoản" type="text"/>
+</div>
+</div>
+</div>
+<div class="col-sm-2 form-group">
+<a class="btn btn-sm btn-primary" data-legacy-action="search" href="#" id="dnn_ctr1712_Main_BangTongHopChiaSo2_btnSearch" role="button">
+<i class="fa fa-search"></i> Tìm kiếm
+                        </a>
+<a class="btn btn-sm btn-primary hidden btn-reload" data-legacy-action="reload" href="#" id="dnn_ctr1712_Main_BangTongHopChiaSo2_btnReload" role="button">
+<i class="fa fa-refresh"></i> Reload
+                        </a>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-xs-12">
+<div data-legacy-grid-anchor="1"></div>
+</div>
+<div class="col-xs-12">
+<span class="small-tip" style="color: red; font-size: 13px;">
+<div class="wave_count"> 1: Số lượng data nhận trong một đợt chia theo định mức</div>
+<div class="total_count"> 2: Số lượng tổng cộng data nhận được theo hình thức chia theo định mức</div>
+<div class="last_user_count"> 3: Số lượng data nhận theo hình thức chia user gần nhất</div>
+<div class="fallback_count"> 4: Số lượng data nhận theo hình thức chia user gần nhất --&gt; chia user khác</div>
+                        ** Lưu trữ dữ liệu 30 ngày gần nhất, tự động xóa lịch sử cũ hơn 30 ngày <br/>
+                        ** Kiểu ngày mặc định là sale ngày nhận data
+                    </span>
+</div>
+</div>
+</div>
+<div style="height: 100px;"></div>
+</div>
+
+</div><!-- End_Module_1712 --></div>
+</div></div>
+</div></div>

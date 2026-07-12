@@ -1,0 +1,238 @@
+<div class="legacy-template-fragment legacy-page-fragment" data-template-code="5.8.2"><div class="content-wrapper" style="min-height: 737px;">
+<div class="contentPane legacy-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1766"><a name="1766"></a><div class="legacy-template-inner" id="dnn_ctr1766_ContentPane"><!-- Start_Module_1766 --><div class="legacy-template-inner" id="dnn_ctr1766_ModuleContent">
+<div id="dnn_ctr1766_Main_RedistributeContactWarehouse_pgbBase_up1">
+<span class="server-time hidden" id="dnn_ctr1766_Main_RedistributeContactWarehouse_pgbBase_lblTime">2026,07,12,18,26,35</span>
+<input class="txt-pgb-continue hidden legacy-input" id="dnn_ctr1766_Main_RedistributeContactWarehouse_pgbBase_txtButtonContinue" name="dnn$ctr1766$Main$RedistributeContactWarehouse$pgbBase$txtButtonContinue" type="text"/>
+<input class="txt-cancel hidden legacy-input" id="dnn_ctr1766_Main_RedistributeContactWarehouse_pgbBase_txtCancel" name="dnn$ctr1766$Main$RedistributeContactWarehouse$pgbBase$txtCancel" type="text"/>
+<input class="hidden txt-pgb-label legacy-input" id="dnn_ctr1766_Main_RedistributeContactWarehouse_pgbBase_txtLabel" name="dnn$ctr1766$Main$RedistributeContactWarehouse$pgbBase$txtLabel" type="text"/>
+<input class="hidden legacy-input" id="dnn_ctr1766_Main_RedistributeContactWarehouse_pgbBase_txtLabelWorking" name="dnn$ctr1766$Main$RedistributeContactWarehouse$pgbBase$txtLabelWorking" type="text"/>
+<input class="hidden legacy-input" id="dnn_ctr1766_Main_RedistributeContactWarehouse_pgbBase_txtTotalCount" name="dnn$ctr1766$Main$RedistributeContactWarehouse$pgbBase$txtTotalCount" type="text"/>
+<input class="hidden legacy-input" id="dnn_ctr1766_Main_RedistributeContactWarehouse_pgbBase_txtProcessedCount" name="dnn$ctr1766$Main$RedistributeContactWarehouse$pgbBase$txtProcessedCount" type="text"/>
+</div>
+<div class="progress-box" style="display: none; background-color: rgba(0,0,0,0.3); position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; padding-top: 20%; padding-left: 30%; padding-right: 30%;">
+<div style="background-color: white; padding: 20px; border-radius: 4px">
+<div class="row">
+<div class="col-xs-8 text-left">
+<span class="progress-label" style="font-size: 13px"></span>
+</div>
+<div class="col-xs-4 text-right">
+<span class="progress-value" style="font-size: 12px; color: #007bff"></span>
+</div>
+<div class="col-xs-12 text-center">
+<div class="pgb progress progress-sm active" style="height: 24px; margin-bottom: 5px; margin-top: 5px; border-radius: 4px;">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="20" class="pgb-prog progress-bar progress-bar-success progress-bar-striped" role="progressbar" style="width: 0%">
+<span class="sr-only pgb-text" style="font-size: 12px; margin-top: 0px; font-weight: bold; line-height: 24px; clip: unset; width: auto; height: auto;"></span>
+</div>
+</div>
+</div>
+<div class="col-xs-12 text-center">
+<span class="flag-cancel hidden"></span>
+<div class="pgb-warning" style="display:none;color:red;">
+                    Xảy ra vấn đề trong quá trình xử lý. Đừng lo lắng, bạn không cần làm gì cả, hệ thống đang tự sửa chữa... 
+                </div>
+<a class="btn-cancel" href="#" style="border: 1px solid #ddd; padding: 2px 20px; display: inline-block; border-radius: 16px; color: #333; margin-top: 6px; padding-top: 4px; font-size: 13px; font-weight: 500;">Hủy</a>
+</div>
+</div>
+</div>
+</div>
+
+<style type="text/css">
+    .tip { font-style: italic; display: inline-block; min-width: 30px; }
+    .dm-tac-nghiep { display: inline-block; width: 180px; font-size: 11px; color: #333; padding: 6px; transition: ease 3s all; }
+        .dm-tac-nghiep:hover, .dm-tac-nghiep.selected { box-shadow: inset 0 0 4px orange; }
+        .dm-tac-nghiep .flag { width: 20px; background-color: #C1E2F4; display: inline-block; height: 14px; float: left; }
+        .dm-tac-nghiep .text { display: inline-block; height: 16px; line-height: 16px; float: left; margin-left: 10px; }
+        .dm-tac-nghiep .count { font-weight: bold; margin-left: 6px; color: orange; float: left; line-height: 16px; transition: ease 3s all; }
+        .dm-tac-nghiep .level-1 { background-color: #a6ffa8 }
+        .dm-tac-nghiep .level-2 { background-color: #8ad6ff }
+        .dm-tac-nghiep .level-3 { background-color: #ffc0cb }
+        .dm-tac-nghiep .level-4 { background-color: orangered; }
+        .dm-tac-nghiep .flash-bg { background-color: red; }
+        .dm-tac-nghiep .live-stream { float: left; width: 5px; height: 5px; border-radius: 50%; background-color: red; margin-left: 5px; margin-top: 6px; display: none; }
+        .dm-tac-nghiep .count.flash-bg { color: white; }
+    tr.contact-row .selected { color: orange; }
+
+    tr.contact-row { transition: ease 3s all; }
+        tr.contact-row.high-light { box-shadow: inset 0 0 15px green; }
+            tr.contact-row.high-light td { background-color: transparent; }
+        tr.contact-row input.form-control, tr.contact-row select { font-size: 11px; }
+
+    .hoa-don-area td, .hoa-don-area th, .sale-area td, .sale-area th, .kh-area td, .kh-area th { transition: ease 0.5s all; }
+    .hide-hoa-don-area .hoa-don-area, .hide-sale-area .sale-area, .hide-kh-area .kh-area { width: 0px !important; padding: 0 !important; }
+        .hide-hoa-don-area .hoa-don-area *, .hide-sale-area .sale-area *, .hide-kh-area .kh-area * { display: none; }
+
+    .table-info th { background-color: #eee !important; }
+    .table-info td { }
+    .tb-giao-hang, .tb-giao-hang td { border: 1px solid transparent !important; }
+        .tb-giao-hang td { width: 110px; padding: 0px !important; }
+    .table-bordered tr:nth-child(odd) td { background-color: white; }
+</style>
+<div ng-app="myApp" ng-controller="myCtrl">
+<div id="dnn_ctr1766_Main_RedistributeContactWarehouse_up1">
+<span class="hidden" id="dnn_ctr1766_Main_RedistributeContactWarehouse_lblDownLoad"></span>
+<div id="dnn_ctr1766_Main_RedistributeContactWarehouse_pnSearch">
+<div class="m-header-wrap">
+<div class="m-header">
+<div class="col-sm-3 form-group">
+<span class="text" id="dnn_ctr1766_Main_RedistributeContactWarehouse_lblModuleTitle">Phân bổ data care đơn</span>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen ddlpb legacy-select" id="dnn_ctr1766_Main_RedistributeContactWarehouse_ddlNhomVanDon" name="dnn$ctr1766$Main$RedistributeContactWarehouse$ddlNhomVanDon" style="" title="">
+<option selected="selected" value="-1">--Nhóm Vận đơn--</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1766_Main_RedistributeContactWarehouse_ddlCareDonUserId" name="dnn$ctr1766$Main$RedistributeContactWarehouse$ddlCareDonUserId" style="" title="">
+<option value="0">Chưa có user care đơn</option>
+<option selected="selected" value="-1">Đã có user care đơn</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1766_Main_RedistributeContactWarehouse_ddlKieuNgay" name="dnn$ctr1766$Main$RedistributeContactWarehouse$ddlKieuNgay" style="" title="">
+<option selected="selected" value="CareDonNgayNhan">Ngày nhận care</option>
+<option value="NgayTao">Ngày tạo</option>
+<option value="DonHangNgayChot">Ngày chốt đơn</option>
+</select>
+</div>
+<div class="col-sm-3 form-group">
+<div style="width: calc(100% - 175px); float: left;">
+<input class="form-control date-range legacy-input" id="dnn_ctr1766_Main_RedistributeContactWarehouse__TuNgay_DenNgay" name="dnn$ctr1766$Main$RedistributeContactWarehouse$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+</div>
+<div style="width: 175px; float: right; text-align: right;">
+<a class="btn btn-sm btn-primary mb10" data-legacy-action="search" href="#" id="dnn_ctr1766_Main_RedistributeContactWarehouse_btnSearch" role="button">
+<i class="fa fa-search"></i> Tìm kiếm
+                                </a>
+<a class="btn btn-sm btn-primary hidden btn-reload" data-legacy-action="reload" href="#" id="dnn_ctr1766_Main_RedistributeContactWarehouse_btnReload" role="button">
+<i class="fa fa-refresh"></i> Reload
+                                </a>
+</div>
+<div style="clear: both;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="box-body">
+<div id="dnn_ctr1766_Main_RedistributeContactWarehouse_up3">
+<div class="row">
+<div class="col-xs-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1766_Main_RedistributeContactWarehouse_ddlTheoDoiDonId" name="dnn$ctr1766$Main$RedistributeContactWarehouse$ddlTheoDoiDonId" style="" title="">
+<option selected="selected" value="-1">--Theo dõi đơn--</option>
+<option value="1">1. Quá 1 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="2">2. Quá 2 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="3">3. Quá 3 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="4">4. Quá 4 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="5">5. Quá 5 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="6">6. Quá 6 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="7">7. Quá 7 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="11">11. Quá 1 ngày chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="12">12. Quá 2 ngày chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="13">13. Quá 3 ngày chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="14">14. Quá 4 ngày chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="15">15. Quá 5 ngày chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="16">16. Quá 6 ngày chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="17">17. Quá 7 ngày chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="21">21. Quá 1 ngày chưa đăng đơn (từ khi chốt đơn)</option>
+<option value="22">22. Quá 2 ngày chưa đăng đơn (từ khi chốt đơn)</option>
+<option value="23">23. Quá 3 ngày chưa đăng đơn (từ khi chốt đơn)</option>
+<option value="24">24. Quá 4 ngày chưa đăng đơn (từ khi chốt đơn)</option>
+<option value="25">25. Quá 5 ngày chưa đăng đơn (từ khi chốt đơn)</option>
+<option value="26">26. Quá 6 ngày chưa đăng đơn (từ khi chốt đơn)</option>
+<option value="27">27. Quá 7 ngày chưa đăng đơn (từ khi chốt đơn)</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1766_Main_RedistributeContactWarehouse_ddlIdTacNghiepCareDon" name="dnn$ctr1766$Main$RedistributeContactWarehouse$ddlIdTacNghiepCareDon" style="" title="">
+<option selected="selected" value="-1">--Trạng thái care--</option>
+<option value="0">Chờ care đơn</option>
+<option value="1">Giao ngay</option>
+<option value="2">Chờ giao</option>
+<option value="3">Hoãn giao hàng</option>
+<option value="4">Sale vừa cứu đơn</option>
+<option value="5">Khách hàng khiếu nại</option>
+<option value="6">Hoàn tất xử lý khiếu nại</option>
+<option value="7">Phát lại</option>
+<option value="8">Lưu kho</option>
+<option value="9">Không nghe máy</option>
+<option value="10">Đã yêu cầu giao lại</option>
+<option value="11">Khách từ chối nhận</option>
+<option value="12">Báo hoàn đơn</option>
+<option value="13">Cần check lại</option>
+</select>
+</div>
+<div class="col-xs-6 form-group" id="dnn_ctr1766_Main_RedistributeContactWarehouse_pnlTTGHAdmin">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1766_Main_RedistributeContactWarehouse_ddlTrangThaiGiaoHang" multiple="multiple" name="dnn$ctr1766$Main$RedistributeContactWarehouse$ddlTrangThaiGiaoHang" size="4" style="">
+<option value="50">Bồi hoàn</option>
+<option value="41">Đã hoàn</option>
+<option value="40">Đang hoàn</option>
+<option value="35">Giao hàng một phần</option>
+<option value="34">Yêu cầu giao lại</option>
+<option value="33">Không giao được</option>
+<option value="32">Đã thanh toán</option>
+<option value="31">Đã giao hàng</option>
+<option value="30">Đang giao hàng</option>
+<option value="23">Đang lấy hàng</option>
+<option value="22">Không lấy được hàng</option>
+<option value="21">Đã lấy hàng</option>
+<option value="20">Đã đăng</option>
+<option value="5">Hủy đăng đơn</option>
+<option value="4">Hủy vận đơn</option>
+<option value="3">Hoãn giao hàng</option>
+<option value="2">Giao ngay</option>
+<option value="1">Chờ vận đơn</option>
+</select>
+<div style="padding-top: 8px;"></div>
+<a href="#" id="dnn_ctr1766_Main_RedistributeContactWarehouse_btnChonToanBoTTGH" style="margin-right: 16px;">Chọn toàn bộ</a>
+<a href="#" id="dnn_ctr1766_Main_RedistributeContactWarehouse_btnXoaToanBoTTGH" style="margin-right: 16px;">Xóa toàn bộ</a>
+<a href="#" id="dnn_ctr1766_Main_RedistributeContactWarehouse_btnTTGH">Lưu</a>
+</div>
+<div class="col-xs-12 form-form-group">
+<div class="notice">
+                            - Mỗi lần phân bổ tối data 5.000 bản ghi<br/>
+                            - Khi chọn trạng thái giao hàng sẽ chỉ hiển thị user care đơn được phân quyền đối với sản phẩm đó<br/>
+                            - Mặc định user care đơn sẽ được lấy theo cấu hình. Hoặc bạn có thể tùy chọn bằng cách nhập thủ công các tài khoản care đơn<br/>
+                            - Trạng thái được nhận data của user care đơn --&gt; <a href="/ld/unit-admin/cau-hinh-chia-so-caredon">Xem cấu hình</a>
+</div>
+</div>
+<div class="col-lg-3 col-md-6">
+<div class="row">
+<div class="col-xs-12">
+<div class="pu-caption">
+                                    Danh sách data theo trạng thái giao hàng
+                                </div>
+</div>
+</div>
+<div id="dnn_ctr1766_Main_RedistributeContactWarehouse_pnlSanPham">
+<table class="table table-bordered table-multi-select table-sale">
+<tbody><tr class="drags-area">
+<th class="text-center hidden" style="width: 50px;">
+<span class="chk-all"><input id="dnn_ctr1766_Main_RedistributeContactWarehouse_chkAll" name="dnn$ctr1766$Main$RedistributeContactWarehouse$chkAll" type="checkbox"/><label for="dnn_ctr1766_Main_RedistributeContactWarehouse_chkAll"> </label></span></th>
+<th class="text-center" style="width: 60px;">#</th>
+<th class="text-center no-wrap"><span>Trạng thái giao hàng</span></th>
+<th class="text-center no-wrap">Số contact</th>
+<th class="text-center no-wrap">SL Phân bổ</th>
+</tr>
+</tbody></table>
+</div>
+</div>
+<div class="col-lg-6 col-md-6">
+<div class="row">
+<div class="col-xs-12">
+<div class="pu-caption">
+                                    Danh sách care đơn được phân bổ
+                                </div>
+</div>
+</div>
+<div id="dnn_ctr1766_Main_RedistributeContactWarehouse_pnlSale">
+<div data-legacy-grid-anchor="1"></div>
+</div>
+</div>
+</div>
+<div style="height: 100px;"></div>
+</div>
+</div>
+</div>
+
+</div><!-- End_Module_1766 --></div>
+</div></div>
+</div></div>

@@ -1,0 +1,1232 @@
+<div class="legacy-template-fragment legacy-page-fragment" data-template-code="8.5.9"><div class="content-wrapper" style="min-height: 737px;">
+<div class="contentPane legacy-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1507"><a name="1507"></a><div class="legacy-template-inner" id="dnn_ctr1507_ContentPane"><!-- Start_Module_1507 --><div class="legacy-template-inner" id="dnn_ctr1507_ModuleContent">
+
+<style>
+    .box-body table td { font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tabledata { border-radius: 0px !important; }
+    .table-white { background-color: #fff !important; border-top: none !important; }
+        .table-white th { border: 1px solid #e0e0e0 !important; border-top: none !important; color: #000; background-color: #fff !important; vertical-align: middle !important; font-weight: bold; height: 50px; }
+            .table-white th:last-child { border-color: #e0e0e0 !important; border-top: none !important; }
+    .panel { height: 470px; border-bottom-width: 8px; position: relative; margin-top: 25px; }
+        .panel .panel-heading { position: absolute; width: 88%; top: -19px; left: 6%; }
+        .panel .panel-body { padding: 5px 0px; margin-top: 19px; }
+        .panel .panel-body { height: 420px; padding: 0; overflow: hidden; overflow-x: auto; overflow-y: auto; }
+        .panel .table tr th { background-color: #fff; padding: 5px !important; vertical-align: middle !important; font-weight: bold; }
+    .panel-warning .panel-heading, tr.warning td { background-color: #eeb11c; }
+    .panel-warning { border-color: #eeb11c; }
+        .panel-warning .panel-heading b { color: #fff; }
+        .panel-warning .panel-body table tr.trTong td { background-color: #eddaad !important; }
+
+    .panel-primary .panel-heading, tr.info td { background-color: #117bfb; }
+    .panel-primary { border-color: #117bfb; }
+        .panel-primary .panel-heading b { color: #fff; }
+        .panel-primary .panel-body table tr.trTong td { background-color: #aacdf8 !important; }
+
+    .panel-success .panel-heading, tr.success td { background-color: #1f7d6f; }
+    .panel-success { border-color: #1f7d6f; }
+        .panel-success .panel-heading b { color: #fff; }
+        .panel-success .panel-body table tr.trTong td { background-color: #c3dac7 !important; }
+
+    .panel-danger .panel-heading, tr.danger td { background-color: #f68f31; }
+    .panel-danger { border-color: #f68f31; }
+        .panel-danger .panel-heading b { color: #fff; }
+        .panel-danger .panel-body table tr.trTong td { background-color: #fbd4b1 !important; }
+
+    .tdHeadMARKETING, .tdHeadTELESALE, .tdHeadGIAOHANG, .tdHeadCSKH { border-radius: 15px 0 0 15px; border: none !important; font-size: 12px !important; }
+    .tdHeadMARKETING, tr:hover .tdHeadMARKETING { background-color: #eeb11c !important; }
+    .tdHeadTELESALE, tr:hover .tdHeadTELESALE { background-color: #117bfb !important; }
+    .tdHeadGIAOHANG, tr:hover .tdHeadGIAOHANG { background-color: #1f7d6f !important; }
+    .tdHeadCSKH, tr:hover .tdHeadCSKH { background-color: #f68f31 !important; }
+    .writing-mode-bt { transform: rotate(180deg); writing-mode: vertical-rl; text-orientation: mixed; width: 100%; padding: 0 15px; color: #fff; }
+    .tdHeadMARKETING .writing-mode-bt { background-color: #eeb11c; }
+    .tdHeadTELESALE .writing-mode-bt { background-color: #117bfb; }
+    .tdHeadGIAOHANG .writing-mode-bt { background-color: #1f7d6f; }
+    .tdHeadCSKH .writing-mode-bt { background-color: #f68f31; }
+
+    .box-progress .progress-text { position: absolute; height: 50%; width: 100%; text-align: center; top: 8px; left: 0; vertical-align: middle; line-height: 50%; }
+    .tdTang .progress-bar { background-color: #8dfd06 !important; }
+    .tdGiam .progress-bar { background-color: #de5b5b !important }
+    .tdInc { background-color: #f5fbf6 !important; color: #1f8806 !important; font-weight: 600; font-style: italic; }
+    .tdDec { background-color: #fcf5f5 !important; color: #eb5d5d !important; font-weight: 600; font-style: italic; }
+    .tdZero { font-weight: 600; font-style: italic; }
+    .tdData { background-color: #e7f2fe !important; color: #1d4a81 !important; font-weight: bold; }
+
+    .lblTongTuanNay { font-size: 26px; color: #078eef; }
+    .lblTangTien { font-size: 26px; color: #22d47b; }
+    .lblGiamTien { font-size: 26px; color: #d73d33; }
+    .info-box-icon { float: right !important; height: 90px !important; width: 70px !important; }
+    .header_box_content { margin-left: 0 !important; margin-right: 50px !important; text-align: center !important; }
+    .info-box-text { text-transform: uppercase !important; font-weight: bold !important; font-size: 18px !important; }
+    .info-box-icon { position: relative; }
+    .header_icon { position: absolute; top: 25px; left: 25px; }
+    div.header_phan_tram { font-size: 14px; margin-top: 28px; text-align: center; }
+
+    .max-1-row { word-break: break-word; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; height: 20px; line-height: 19px; }
+
+    @media only screen and (min-width: 768px) {
+        .pd-r-5 { padding-right: 5px; }
+        .pd-l-5 { padding-left: 5px; }
+        .pd-lr-5 { padding-left: 5px; padding-right: 5px; }
+    }
+</style>
+<div id="dnn_ctr1507_Main_PowerDashboard_pnlMain">
+<span class="hidden" id="dnn_ctr1507_Main_PowerDashboard_lblDownLoad"></span>
+<div id="dnn_ctr1507_Main_PowerDashboard_pnSearch">
+<div class="m-header-wrap">
+<div class="m-header">
+<div class="col-xs-12 col-sm-12 col-md-2 form-group">
+<select class="chosen ddlpb legacy-select" id="dnn_ctr1507_Main_PowerDashboard_ddlThoiGian" name="dnn$ctr1507$Main$PowerDashboard$ddlThoiGian" style="" title="">
+<option selected="selected" value="1">Ngày</option>
+<option value="3">Tháng</option>
+</select>
+</div>
+<div class="col-xs-12 col-sm-12 col-md-2 form-group">
+<div class="row">
+<div class="col-xs-6 col-sm-6">
+<input class="form-control legacy-input" data-provide="datepicker" id="dnn_ctr1507_Main_PowerDashboard_txtTuNgay" name="dnn$ctr1507$Main$PowerDashboard$txtTuNgay" placeholder="Từ ngày" type="text" value="12/07/2026"/>
+</div>
+<div class="col-xs-6 col-sm-6">
+<input class="aspNetDisabled form-control legacy-input" data-provide="datepicker" disabled="disabled" id="dnn_ctr1507_Main_PowerDashboard_txtDenNgay" name="dnn$ctr1507$Main$PowerDashboard$txtDenNgay" placeholder="Đến ngày" type="text" value="12/07/2026"/>
+</div>
+</div>
+<div class="row hidden">
+<div class="col-xs-6 col-sm-6">
+<input class="aspNetDisabled form-control legacy-input" data-provide="datepicker" disabled="disabled" id="dnn_ctr1507_Main_PowerDashboard_txtTuNgaySoSanh" name="dnn$ctr1507$Main$PowerDashboard$txtTuNgaySoSanh" placeholder="Từ ngày so sánh" type="text" value="11/07/2026"/>
+</div>
+<div class="col-xs-6 col-sm-6">
+<input class="aspNetDisabled form-control legacy-input" data-provide="datepicker" disabled="disabled" id="dnn_ctr1507_Main_PowerDashboard_txtDenNgaySoSanh" name="dnn$ctr1507$Main$PowerDashboard$txtDenNgaySoSanh" placeholder="Đến ngày so sánh" type="text" value="11/07/2026"/>
+</div>
+</div>
+</div>
+<div class="col-xs-12 col-sm-12 col-md-2 form-group hidden">
+<select class="chosen legacy-select" id="dnn_ctr1507_Main_PowerDashboard_ddlSanPham" name="dnn$ctr1507$Main$PowerDashboard$ddlSanPham" style="" title="">
+<option selected="selected" value="-1">-- Tất cả sản phầm --</option>
+</select>
+</div>
+<div class="col-xs-12 col-sm-12 col-md-2 form-group hidden">
+<select class="chosen hidden legacy-select" id="dnn_ctr1507_Main_PowerDashboard_ddlDoiSoatNoiBo" name="dnn$ctr1507$Main$PowerDashboard$ddlDoiSoatNoiBo" style="" title="">
+<option selected="selected" value="-1">-- Tất cả --</option>
+<option value="0">Chưa đối soát</option>
+<option value="1">Đã đối soát</option>
+</select>
+</div>
+<div class="col-xs-12 col-sm-12 col-md-7 form-group">
+<div class="col-xs-12 col-md-4">
+<div class="info-box">
+<div class="info-box-content" style="text-align: center!important; margin-left: 0px!important;">
+<span class="info-box-text">
+<span id="dnn_ctr1507_Main_PowerDashboard_lblHeaderTextDoanhSoTuanNay">DOANH SỐ NGÀY N</span></span>
+<span class="info-box-number">
+<span class="lblTongTuanNay" id="dnn_ctr1507_Main_PowerDashboard_lblDoanhSoTuanNay">239,328,000</span>
+</span>
+</div>
+<!-- /.info-box-content -->
+</div>
+</div>
+<div class="col-xs-12 col-md-4">
+<div class="info-box">
+<span class="info-box-icon bg-red">
+<i class="fa fa-long-arrow-down header_icon"></i>
+<div class="header_phan_tram">
+<span id="dnn_ctr1507_Main_PowerDashboard_lblPhanTramTuanTruoc">-18.69 %</span>
+</div>
+</span>
+<div class="info-box-content header_box_content">
+<span class="info-box-text">
+<span id="dnn_ctr1507_Main_PowerDashboard_lblHeaderTextSoVoiTuanTruoc">SO VỚI NGÀY N - 1</span></span>
+<span class="info-box-number lblGiamTien">
+<span class="lblTongTuanTruoc" id="dnn_ctr1507_Main_PowerDashboard_lblDoanhSoTuanTruoc">294,358,000</span>
+</span>
+</div>
+<!-- /.info-box-content -->
+</div>
+</div>
+<div class="col-xs-12 col-md-4">
+<div class="info-box">
+<span class="info-box-icon bg-red">
+<i class="fa fa-long-arrow-down header_icon"></i>
+<div class="header_phan_tram">
+<span id="dnn_ctr1507_Main_PowerDashboard_lblPhanTramTrungBinh">-20.92 %</span>
+</div>
+</span>
+<div class="info-box-content header_box_content">
+<span class="info-box-text">
+<span id="dnn_ctr1507_Main_PowerDashboard_lblHeaderTextSoVoiTrungBinh">SO VỚI TRUNG BÌNH</span></span>
+<span class="info-box-number lblGiamTien">
+<span class="lblTongTrungBinh" id="dnn_ctr1507_Main_PowerDashboard_lblDoanhSoTrungBinh">302,622,250</span>
+</span>
+</div>
+<!-- /.info-box-content -->
+</div>
+</div>
+</div>
+<div class="col-xs-12 col-sm-12 col-md-1 form-group">
+<div style="width: 100px; float: right;">
+<a class="btn btn-sm btn-primary mb10" data-legacy-action="search" href="#" id="dnn_ctr1507_Main_PowerDashboard_btnSearch" role="button">
+<i class="fa fa-search"></i> Tìm kiếm
+                            </a>
+<a class="btn btn-sm btn-primary hidden btn-reload" data-legacy-action="reload" href="#" id="dnn_ctr1507_Main_PowerDashboard_btnReload" role="button">
+<i class="fa fa-refresh"></i> Reload
+                            </a>
+</div>
+</div>
+</div>
+<div style="clear: both; border-bottom: 1px solid #ddd;"></div>
+</div>
+</div>
+<div class="box-body">
+<div class="row">
+<div class="col-md-3 col-sm-12 col-xs-12 pd-r-5">
+<div class="panel panel-warning">
+<div class="panel-heading text-center"><b>MARKETING</b></div>
+<div class="panel-body">
+<table class="table table-bordered table-multi-select tabledata table-white">
+<tbody><tr>
+<th class="text-center" style="width: 20%;"></th>
+<th class="text-center" colspan="2" style="width: 15%;">Số contact</th>
+<th class="text-center" colspan="2" style="width: 15%;">Giá contact</th>
+<th class="text-center" colspan="2" style="width: 15%;">Ngân sách/DS</th>
+<th class="text-center" colspan="3" style="width: 35%;">Doanh số</th>
+</tr>
+</tbody><tbody>
+<tr class="trTong">
+<td class="text-center" style="width: 10%;"><span class="max-1-row">Tổng</span></td>
+<td class="text-center" style="width: 7%;">906</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-16.2%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="239,328,000">239.33</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-18.7%</td>
+<td class="text-center trTong" style="width: 90px; min-width: 90px;" title="-55,030,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-55.03</span>
+</div>
+</td>
+</tr>
+<tr class="">
+<td class="text-center" style="width: 10%;"><span class="max-1-row">TB</span></td>
+<td class="text-center" style="width: 7%;">47.68</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-16.2%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="12,596,210.53">12.6</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-18.7%</td>
+<td class="text-center" style="width: 90px; min-width: 90px;" title="-2,896,315.79">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-2.9</span>
+</div>
+</td>
+</tr>
+</tbody>
+<tbody><tr>
+<td colspan="100"></td>
+</tr>
+</tbody><tbody style="height: 150px; overflow: scroll; width: 100%;">
+<tr class="tdTang">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Ngọc Ánh</span></td>
+<td class="text-center" style="width: 7%;">51</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">2%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="12,320,000">12.32</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">85.2%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="5,667,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">5.67</span>
+</div>
+</td>
+</tr>
+<tr class="tdTang">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Phương Quỳnh</span></td>
+<td class="text-center" style="width: 7%;">10</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-41.2%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="3,381,000">3.38</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">52.4%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="1,162,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 20.5%"></div>
+</div>
+<span class="progress-text">1.16</span>
+</div>
+</td>
+</tr>
+</tbody>
+<tbody><tr>
+<td colspan="100"></td>
+</tr>
+</tbody><tbody style="height: 150px; overflow: scroll; width: 100%;">
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Nguyễn Dương</span></td>
+<td class="text-center" style="width: 7%;">418</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-6.5%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="133,144,000">133.14</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-11.1%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-16,690,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">-16.69</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Ngọc Huyền</span></td>
+<td class="text-center" style="width: 7%;">76</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-30.3%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="16,828,000">16.83</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-40.6%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-11,495,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 68.9%"></div>
+</div>
+<span class="progress-text">-11.5</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Trần Lan</span></td>
+<td class="text-center" style="width: 7%;">82</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-10.9%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="18,957,000">18.96</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-18.2%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-4,211,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 25.2%"></div>
+</div>
+<span class="progress-text">-4.21</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Phương Anh</span></td>
+<td class="text-center" style="width: 7%;">69</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-14.8%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="12,166,000">12.17</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-24.8%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-4,013,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 24%"></div>
+</div>
+<span class="progress-text">-4.01</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Phạm Tú</span></td>
+<td class="text-center" style="width: 7%;">71</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-16.5%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="17,231,000">17.23</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-18.2%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-3,840,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 23%"></div>
+</div>
+<span class="progress-text">-3.84</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Kim Hồng</span></td>
+<td class="text-center" style="width: 7%;">31</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-43.6%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="6,160,000">6.16</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-38%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-3,772,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 22.6%"></div>
+</div>
+<span class="progress-text">-3.77</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Linh Chi</span></td>
+<td class="text-center" style="width: 7%;">4</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-88.6%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="1,749,000">1.75</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-67.5%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-3,630,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 21.7%"></div>
+</div>
+<span class="progress-text">-3.63</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Khánh Linh</span></td>
+<td class="text-center" style="width: 7%;">6</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-53.8%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="1,416,000">1.42</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-71.6%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-3,563,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 21.3%"></div>
+</div>
+<span class="progress-text">-3.56</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Hà Phương</span></td>
+<td class="text-center" style="width: 7%;">6</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-40%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="636,000">0.64</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-84%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-3,351,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 20.1%"></div>
+</div>
+<span class="progress-text">-3.35</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Đỗ Ngân</span></td>
+<td class="text-center" style="width: 7%;">4</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-33.3%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="776,000">0.78</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-79.8%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-3,057,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 18.3%"></div>
+</div>
+<span class="progress-text">-3.06</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Khánh Ly</span></td>
+<td class="text-center" style="width: 7%;">17</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-5.6%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="3,631,000">3.63</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-33.7%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-1,845,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 11.1%"></div>
+</div>
+<span class="progress-text">-1.85</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Trần Dung</span></td>
+<td class="text-center" style="width: 7%;">53</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">6%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="9,820,000">9.82</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-9.7%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-1,051,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 6.3%"></div>
+</div>
+<span class="progress-text">-1.05</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Khánh Chi</span></td>
+<td class="text-center" style="width: 7%;">3</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-40%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="507,000">0.51</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-59.5%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-744,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 4.5%"></div>
+</div>
+<span class="progress-text">-0.74</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Thùy Dương</span></td>
+<td class="text-center" style="width: 7%;">1</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-66.7%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-100%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-537,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 3.2%"></div>
+</div>
+<span class="progress-text">-0.54</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Hải Vân</span></td>
+<td class="text-center" style="width: 7%;">4</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-20%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="606,000">0.61</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-9%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-60,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0.4%"></div>
+</div>
+<span class="progress-text">-0.06</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Phan Văn Minh</span></td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;"><span class="max-1-row">Vy Thảo</span></td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="col-md-4 col-sm-12 col-xs-12 pd-lr-5">
+<div class="panel panel-primary">
+<div class="panel-heading text-center"><b>TELESALE</b></div>
+<div class="panel-body">
+<table class="table table-bordered table-multi-select tabledata table-white">
+<tbody><tr>
+<th class="text-center" style="width: 10%;"></th>
+<th class="text-center" colspan="2" style="width: 15%;">Số contact</th>
+<th class="text-center" colspan="2" style="width: 15%;">Số đơn chốt</th>
+<th class="text-center" colspan="2" style="width: 15%;">Tỉ lệ chốt</th>
+<th class="text-center" colspan="2" style="width: 15%;">Số sp/đơn</th>
+<th class="text-center" colspan="3" style="width: 30%;">Doanh số</th>
+</tr>
+<tr class="trTong">
+<td class="text-center" style="width: 10%;">Tổng</td>
+<td class="text-center" style="width: 7%;">912</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-16.6%</td>
+<td class="text-center" style="width: 7%;">735</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-18.4%</td>
+<td class="text-center" style="width: 7%;">80.59%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-1.8%</td>
+<td class="text-center" style="width: 7%;">1.67</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">0.2%</td>
+<td class="text-center" style="width: 7%;" title="219,674,000">219.67</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-19.5%</td>
+<td class="text-center trTong" style="width: 90px; min-width: 90px;" title="-53,274,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-53.27</span>
+</div>
+</td>
+</tr>
+<tr class="">
+<td class="text-center" style="width: 10%;">TB</td>
+<td class="text-center" style="width: 7%;">114</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">25.3%</td>
+<td class="text-center" style="width: 7%;">91</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">21.3%</td>
+<td class="text-center" style="width: 7%;">80.59%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-1.8%</td>
+<td class="text-center" style="width: 7%;">1.67</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">0.2%</td>
+<td class="text-center" style="width: 7%;" title="27,459,250">27.46</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">20.7%</td>
+<td class="text-center" style="width: 90px; min-width: 90px;" title="4,713,583.33">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">4.71</span>
+</div>
+</td>
+</tr>
+<tr>
+<td colspan="100"></td>
+</tr>
+<tr class="tdTang">
+<td class="text-center" style="width: 10%;">Chu Thủy</td>
+<td class="text-center" style="width: 7%;">112</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">96.5%</td>
+<td class="text-center" style="width: 7%;">81</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center" style="width: 7%;">72.32%</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">72.3%</td>
+<td class="text-center" style="width: 7%;">1.83</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center" style="width: 7%;" title="23,224,000">23.22</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="23,224,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">23.22</span>
+</div>
+</td>
+</tr>
+<tr class="tdTang">
+<td class="text-center" style="width: 10%;">Sale part 1</td>
+<td class="text-center" style="width: 7%;">166</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">155.4%</td>
+<td class="text-center" style="width: 7%;">128</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">116.9%</td>
+<td class="text-center" style="width: 7%;">77.11%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-13.7%</td>
+<td class="text-center" style="width: 7%;">1.73</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">18.5%</td>
+<td class="text-center" style="width: 7%;" title="37,101,000">37.1</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">167.3%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="23,223,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">23.22</span>
+</div>
+</td>
+</tr>
+<tr class="tdTang">
+<td class="text-center" style="width: 10%;">Lan Anh</td>
+<td class="text-center" style="width: 7%;">185</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">5.7%</td>
+<td class="text-center" style="width: 7%;">175</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">41.1%</td>
+<td class="text-center" style="width: 7%;">94.59%</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">23.7%</td>
+<td class="text-center" style="width: 7%;">1.62</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-10.5%</td>
+<td class="text-center" style="width: 7%;" title="51,468,000">51.47</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">31.1%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="12,221,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 52.6%"></div>
+</div>
+<span class="progress-text">12.22</span>
+</div>
+</td>
+</tr>
+<tr class="tdTang">
+<td class="text-center" style="width: 10%;">Hoài Thu</td>
+<td class="text-center" style="width: 7%;">184</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">5.1%</td>
+<td class="text-center" style="width: 7%;">169</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">36.3%</td>
+<td class="text-center" style="width: 7%;">91.85%</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">21%</td>
+<td class="text-center" style="width: 7%;">1.67</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-7.2%</td>
+<td class="text-center" style="width: 7%;" title="50,466,000">50.47</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">27%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="10,719,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 46.2%"></div>
+</div>
+<span class="progress-text">10.72</span>
+</div>
+</td>
+</tr>
+<tr class="tdTang">
+<td class="text-center" style="width: 10%;">Khánh Ly</td>
+<td class="text-center" style="width: 7%;">169</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-1.7%</td>
+<td class="text-center" style="width: 7%;">132</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">13.8%</td>
+<td class="text-center" style="width: 7%;">78.11%</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">10.7%</td>
+<td class="text-center" style="width: 7%;">1.72</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">4.4%</td>
+<td class="text-center" style="width: 7%;" title="43,011,000">43.01</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">28.9%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="9,631,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 41.5%"></div>
+</div>
+<span class="progress-text">9.63</span>
+</div>
+</td>
+</tr>
+<tr>
+<td colspan="100"></td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 10%;">Phạm Lý</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-100%</td>
+<td class="text-center" style="width: 7%;">12</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-87%</td>
+<td class="text-center" style="width: 7%;">0%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-116.5%</td>
+<td class="text-center" style="width: 7%;">1.17</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-31.2%</td>
+<td class="text-center" style="width: 7%;" title="2,986,000">2.99</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-89.7%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-25,988,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">-25.99</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 10%;">Hồng Vân</td>
+<td class="text-center" style="width: 7%;">96</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">77.8%</td>
+<td class="text-center" style="width: 7%;">38</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-2.6%</td>
+<td class="text-center" style="width: 7%;">39.58%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-32.6%</td>
+<td class="text-center" style="width: 7%;">1.42</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-1%</td>
+<td class="text-center" style="width: 7%;" title="11,418,000">11.42</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-4.4%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-526,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 2%"></div>
+</div>
+<span class="progress-text">-0.53</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 10%;">SALE ADMIN</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0%</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</div>
+<div class="col-md-2 col-sm-12 col-xs-12 pd-lr-5">
+<div class="panel panel-success">
+<div class="panel-heading text-center"><b>GIAO HÀNG</b></div>
+<div class="panel-body">
+<table class="table table-bordered table-multi-select tabledata table-white">
+<tbody><tr>
+<th class="text-center" style="width: 20%;"></th>
+<th class="text-center" colspan="2" style="width: 30%;">Tỉ lệ TC</th>
+<th class="text-center" colspan="3" style="width: 50%;">Doanh số</th>
+</tr>
+<tr class="trTong">
+<td class="text-center" style="width: 20%;">Tổng</td>
+<td class="text-center" style="width: 15%;">0%</td>
+<td class="text-center tdZero" style="width: 15%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 10%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 10%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center trTong" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+<tr class="">
+<td class="text-center" style="width: 20%;">TB</td>
+<td class="text-center" style="width: 15%;">0%</td>
+<td class="text-center tdZero" style="width: 15%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 10%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 10%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+<tr>
+<td colspan="100"></td>
+</tr>
+<tr>
+<td colspan="100"></td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;">Lan Anh</td>
+<td class="text-center" style="width: 15%;">0%</td>
+<td class="text-center tdZero" style="width: 15%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 10%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 10%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;">Sale part 1</td>
+<td class="text-center" style="width: 15%;">0%</td>
+<td class="text-center tdZero" style="width: 15%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 10%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 10%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;">Hoài Thu</td>
+<td class="text-center" style="width: 15%;">0%</td>
+<td class="text-center tdZero" style="width: 15%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 10%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 10%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;">Khánh Ly</td>
+<td class="text-center" style="width: 15%;">0%</td>
+<td class="text-center tdZero" style="width: 15%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 10%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 10%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;">Chu Thủy</td>
+<td class="text-center" style="width: 15%;">0%</td>
+<td class="text-center tdZero" style="width: 15%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 10%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 10%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;">Hồng Vân</td>
+<td class="text-center" style="width: 15%;">0%</td>
+<td class="text-center tdZero" style="width: 15%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 10%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 10%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;">Phạm Lý</td>
+<td class="text-center" style="width: 15%;">0%</td>
+<td class="text-center tdZero" style="width: 15%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 10%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 10%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 20%;">SALE ADMIN</td>
+<td class="text-center" style="width: 15%;">0%</td>
+<td class="text-center tdZero" style="width: 15%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 10%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 10%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</div>
+<div class="col-md-3 col-sm-12 col-xs-12 pd-l-5">
+<div class="panel panel-danger">
+<div class="panel-heading text-center"><b>CHĂM SÓC KHÁCH HÀNG</b></div>
+<div class="panel-body">
+<table class="table table-bordered table-multi-select tabledata table-white">
+<tbody><tr>
+<th class="text-center" style="width: 20%;"></th>
+<th class="text-center" colspan="2" style="width: 15%;">Tỉ lệ chốt</th>
+<th class="text-center" colspan="2" style="width: 15%;">Số đơn</th>
+<th class="text-center" colspan="2" style="width: 15%;">Số sp/đơn</th>
+<th class="text-center" colspan="3" style="width: 35%;">Doanh số</th>
+</tr>
+<tr class="trTong">
+<td class="text-center" style="width: 15%;">Tổng</td>
+<td class="text-center" style="width: 7%;">62.5%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-18.6%</td>
+<td class="text-center" style="width: 7%;">88</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-2.2%</td>
+<td class="text-center" style="width: 7%;">2.02</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">15.1%</td>
+<td class="text-center" style="width: 7%;" title="19,654,000">19.65</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center trTong" style="width: 90px; min-width: 90px;" title="-1,756,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-1.76</span>
+</div>
+</td>
+</tr>
+<tr class="">
+<td class="text-center" style="width: 15%;">TB</td>
+<td class="text-center" style="width: 7%;">62.5%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-18.6%</td>
+<td class="text-center" style="width: 7%;">11</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">57.1%</td>
+<td class="text-center" style="width: 7%;">2.02</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">15.1%</td>
+<td class="text-center" style="width: 7%;" title="2,456,750">2.46</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center" style="width: 90px; min-width: 90px;" title="672,583.33">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0.67</span>
+</div>
+</td>
+</tr>
+<tr>
+<td colspan="100"></td>
+</tr>
+<tr class="tdTang">
+<td class="text-center" style="width: 15%;">Sale part 1</td>
+<td class="text-center" style="width: 7%;">73.68%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-9.6%</td>
+<td class="text-center" style="width: 7%;">19</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">216.7%</td>
+<td class="text-center" style="width: 7%;">1.93</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">20.5%</td>
+<td class="text-center" style="width: 7%;" title="5,103,000">5.1</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="3,771,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">3.77</span>
+</div>
+</td>
+</tr>
+<tr class="tdTang">
+<td class="text-center" style="width: 15%;">Lan Anh</td>
+<td class="text-center" style="width: 7%;">77.27%</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">22.3%</td>
+<td class="text-center" style="width: 7%;">22</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">10%</td>
+<td class="text-center" style="width: 7%;">2.06</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">25.8%</td>
+<td class="text-center" style="width: 7%;" title="7,445,000">7.45</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="3,613,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 95.8%"></div>
+</div>
+<span class="progress-text">3.61</span>
+</div>
+</td>
+</tr>
+<tr class="tdTang">
+<td class="text-center" style="width: 15%;">Chu Thủy</td>
+<td class="text-center" style="width: 7%;">55.56%</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">55.56%</td>
+<td class="text-center" style="width: 7%;">9</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">80%</td>
+<td class="text-center" style="width: 7%;">3.4</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center" style="width: 7%;" title="1,986,000">1.99</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="1,986,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 52.7%"></div>
+</div>
+<span class="progress-text">1.99</span>
+</div>
+</td>
+</tr>
+<tr class="tdTang">
+<td class="text-center" style="width: 15%;">Khánh Ly</td>
+<td class="text-center" style="width: 7%;">45.45%</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">1%</td>
+<td class="text-center" style="width: 7%;">11</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">22.2%</td>
+<td class="text-center" style="width: 7%;">1.6</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">6.7%</td>
+<td class="text-center" style="width: 7%;" title="1,292,000">1.29</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center tdTang" style="width: 90px; min-width: 90px;" title="710,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 18.8%"></div>
+</div>
+<span class="progress-text">0.71</span>
+</div>
+</td>
+</tr>
+<tr>
+<td colspan="100"></td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 15%;">Hoài Thu</td>
+<td class="text-center" style="width: 7%;">47.06%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-86.3%</td>
+<td class="text-center" style="width: 7%;">17</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">88.9%</td>
+<td class="text-center" style="width: 7%;">1.38</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-34%</td>
+<td class="text-center" style="width: 7%;" title="1,551,000">1.55</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-3,344,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">-3.34</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 15%;">Phạm Lý</td>
+<td class="text-center" style="width: 7%;">0%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-83.3%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-100%</td>
+<td class="text-center" style="width: 7%;">2</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-9.1%</td>
+<td class="text-center" style="width: 7%;" title="766,000">0.77</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-2,345,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 70.1%"></div>
+</div>
+<span class="progress-text">-2.35</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 15%;">Hồng Vân</td>
+<td class="text-center" style="width: 7%;">44.44%</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-22.2%</td>
+<td class="text-center" style="width: 7%;">9</td>
+<td class="text-center tdDec" style="width: 8%;" title="So với cùng kỳ trước">-25%</td>
+<td class="text-center" style="width: 7%;">2.25</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">80%</td>
+<td class="text-center" style="width: 7%;" title="1,511,000">1.51</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="-349,000">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 10.4%"></div>
+</div>
+<span class="progress-text">-0.35</span>
+</div>
+</td>
+</tr>
+<tr class="tdGiam">
+<td class="text-center" style="width: 15%;">SALE ADMIN</td>
+<td class="text-center" style="width: 7%;">0%</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;">1</td>
+<td class="text-center tdInc" style="width: 8%;" title="So với cùng kỳ trước">100%</td>
+<td class="text-center" style="width: 7%;">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center" style="width: 7%;" title="0">0</td>
+<td class="text-center tdZero" style="width: 8%;" title="So với cùng kỳ trước">0%</td>
+<td class="text-center tdGiam" style="width: 90px; min-width: 90px;" title="0">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</div>
+</div>
+<div style="clear: both;"></div>
+<div style="width: 100%; overflow: hidden; overflow-x: auto; overflow-y: auto; /*height: 450px; */">
+<div data-legacy-grid-anchor="1"></div>
+</div>
+<div style="height: 5px;"></div>
+</div>
+</div>
+
+</div><!-- End_Module_1507 --></div>
+</div></div>
+</div></div>

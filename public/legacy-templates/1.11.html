@@ -1,0 +1,82 @@
+<div class="legacy-template-fragment legacy-page-fragment" data-template-code="1.11"><div class="content-wrapper" style="min-height: 737px;">
+<div class="contentPane legacy-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1515"><a name="1515"></a><div class="legacy-template-inner" id="dnn_ctr1515_ContentPane"><!-- Start_Module_1515 --><div class="legacy-template-inner" id="dnn_ctr1515_ModuleContent">
+
+
+
+
+
+<style>
+    .avatar_image_small { border-radius: 50%; width: 45px; height: 45px; }
+    .no-pd-lr { padding-left: 0px; padding-right: 0px; }
+    .m-header { display: flex; }
+    .opacity-1 a { opacity: 1; }
+    .max-1-row { word-break: break-word; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; height: 20px; line-height: 19px; }
+    .max-4-row { word-break: break-word; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; height: 80px; line-height: 19px; }
+    .chosen-container.chosen-container-single { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; border-radius: 0px !important; }
+        .chosen-container.chosen-container-single .chosen-single { margin: 0; position: relative; zoom: 1; vertical-align: middle; border: 1px solid #d2d6de; width: 100%; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; height: 26px; box-shadow: none; border-radius: 0px !important; border: none; }
+</style>
+<div class="ng-scope" id="app2" ng-app="app" ng-controller="ctrl" ng-init="init()">
+
+<div class="col-xs-12 col-md-12 no-pd-lr">
+<div class="m-header-wrap">
+<div class="m-header">
+<div class="col-sm-12 form-group">
+<span class="text form-group">Cấu hình Facebook của đơn vị</span>
+</div>
+</div>
+</div>
+<div class="col-xs-12">
+<div class="box box-toggle">
+<div class="box-body ibody">
+<div class="row">
+<div>
+<div class="box-body row">
+<div class="col-xs-6 col-sm-3">
+<input class="form-control text-center ng-pristine ng-untouched ng-valid ng-empty legacy-input" ng-enter="seach()" ng-model="keyword" placeholder="Tìm PageID, Tên Fanpage" type="text"/>
+</div>
+<div class="col-xs-6 col-sm-3">
+<a class="btn btn-sm btn-primary mr15" data-legacy-action="search" href="#" ng-click="seach()" role="button">
+<i class="fa fa-search"></i>Tìm kiếm
+                                    </a>
+</div>
+</div>
+</div>
+<div style="clear: both; border-bottom: 1px solid #ddd;"></div>
+<div class="box-body">
+<div class="row">
+<div class="col-sm-7">
+<table class="table table-bordered">
+<tbody><tr>
+<th class="text-left no-wrap">Fanpage</th>
+<th class="text-left no-wrap">FB Creator</th>
+<th class="text-left no-wrap">Pushsale User</th>
+<th class="text-center"></th>
+</tr>
+<!-- ngRepeat: item in listCreatorConfig track by $index -->
+</tbody></table>
+<div class="row">
+<div class="hidden-print" style="padding-top: 20px;">
+<ul boundary-link-numbers="true" class="ng-pristine ng-untouched ng-valid ng-isolate-scope pagination ng-not-empty" items-per-page="paging.pageSize" max-size="5" next-text="›" ng-change="pageChanged()" ng-model="paging.currentPage" previous-text="‹" role="menu" total-items="paging.totalItems" uib-pagination=""><!-- ngIf: ::boundaryLinks -->
+<!-- ngIf: ::directionLinks --><li class="pagination-prev ng-scope disabled" ng-class="{disabled: noPrevious()||ngDisabled}" ng-if="::directionLinks" role="menuitem"><a class="ng-binding" disabled="disabled" href="" ng-click="selectPage(page - 1, $event)" ng-disabled="noPrevious()||ngDisabled" tabindex="-1" uib-tabindex-toggle="">‹</a></li><!-- end ngIf: ::directionLinks -->
+<!-- ngRepeat: page in pages track by $index --><li class="pagination-page ng-scope active" ng-class="{active: page.active,disabled: ngDisabled&amp;&amp;!page.active}" ng-repeat="page in pages track by $index" role="menuitem"><a class="ng-binding" href="" ng-click="selectPage(page.number, $event)" ng-disabled="ngDisabled&amp;&amp;!page.active" uib-tabindex-toggle="">1</a></li><!-- end ngRepeat: page in pages track by $index -->
+<!-- ngIf: ::directionLinks --><li class="pagination-next ng-scope disabled" ng-class="{disabled: noNext()||ngDisabled}" ng-if="::directionLinks" role="menuitem"><a class="ng-binding" disabled="disabled" href="" ng-click="selectPage(page + 1, $event)" ng-disabled="noNext()||ngDisabled" tabindex="-1" uib-tabindex-toggle="">›</a></li><!-- end ngIf: ::directionLinks -->
+<!-- ngIf: ::boundaryLinks -->
+</ul>
+</div>
+</div>
+</div>
+<div class="col-sm-5">
+<div data-legacy-grid-anchor="1"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div><!-- End_Module_1515 --></div>
+</div></div>
+</div></div>

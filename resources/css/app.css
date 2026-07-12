@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 @import "./pushsale-layout.css";
+@import "./legacy-pages.css";
 @import "./public-shell.css";
 @import "./pushsale-ceo-report.css";
 

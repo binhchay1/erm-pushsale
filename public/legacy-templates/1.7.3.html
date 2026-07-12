@@ -1,0 +1,118 @@
+<div class="legacy-template-fragment legacy-page-fragment" data-template-code="1.7.3"><div class="content-wrapper" style="min-height: 737px;">
+<div class="contentPane legacy-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1745"><a name="1745"></a><div class="legacy-template-inner" id="dnn_ctr1745_ContentPane"><!-- Start_Module_1745 --><div class="legacy-template-inner" id="dnn_ctr1745_ModuleContent">
+<style type="text/css">
+    .dm-tac-nghiep { display: inline-block; font-size: 11px; color: #333; padding: 6px 30px 6px 6px; transition: ease 3s all; white-space: nowrap; }
+        .dm-tac-nghiep:hover, .dm-tac-nghiep.selected { box-shadow: inset 0 0 4px orange; }
+        .dm-tac-nghiep .flag { width: 20px; background-color: #C1E2F4; display: inline-block; height: 14px; float: left; }
+        .dm-tac-nghiep .text { display: inline-block; height: 16px; line-height: 16px; float: left; margin-left: 10px; }
+        .dm-tac-nghiep .count { font-weight: bold; margin-left: 6px; color: orange; float: left; line-height: 16px; transition: ease 3s all; }
+        .dm-tac-nghiep .level-1 { background-color: #a6ffa8 }
+        .dm-tac-nghiep .level-2 { background-color: #8ad6ff }
+        .dm-tac-nghiep .level-3 { background-color: #ffc0cb }
+        .dm-tac-nghiep .level-4 { background-color: orangered; }
+        .dm-tac-nghiep .flash-bg { background-color: red; }
+        .dm-tac-nghiep .live-stream { float: left; width: 5px; height: 5px; border-radius: 50%; background-color: red; margin-left: 5px; margin-top: 6px; display: none; }
+        .dm-tac-nghiep .count.flash-bg { color: white; }
+        .dm-tac-nghiep:hover .aoh { opacity: 1; }
+</style>
+<div id="dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain">
+<div class="m-header-wrap">
+<div class="m-header">
+<div class="col-sm-8">
+<span class="text form-group" id="dnn_ctr1745_Main_SearchFilterDataChotDonLog_lblModuleTitle">Lịch sử lọc data chốt đơn </span>
+</div>
+</div>
+</div>
+<div class="box-body">
+<div class="row">
+<div>
+<div class="col-sm-4 form-group">
+<input class="form-control date-range legacy-input" id="dnn_ctr1745_Main_SearchFilterDataChotDonLog__TuNgay_DenNgay" name="dnn$ctr1745$Main$SearchFilterDataChotDonLog$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+</div>
+<div class="col-sm-2 form-group">
+<input class="form-control legacy-input" id="dnn_ctr1745_Main_SearchFilterDataChotDonLog_txtUsername" name="dnn$ctr1745$Main$SearchFilterDataChotDonLog$txtUsername" placeholder="Username" type="text"/>
+</div>
+<div class="col-sm-2 form-group">
+<a class="btn btn-sm btn-primary mr15" data-legacy-action="search" href="#" id="dnn_ctr1745_Main_SearchFilterDataChotDonLog_btnSearch" role="button">
+<i class="fa fa-search"></i> Tìm kiếm
+                        </a>
+</div>
+</div>
+<div class="col-sm-12 hidden">
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1745_Main_SearchFilterDataChotDonLog_ddlKieuNgay" name="dnn$ctr1745$Main$SearchFilterDataChotDonLog$ddlKieuNgay" style="" title="">
+<option value="-1">--Kiểu ngày--</option>
+<option value="SaleNgayNhanData">Ngày sale nhận data</option>
+<option value="NgayTao">Ngày data về hệ thống</option>
+<option value="SaleTacNghiepNgayCapNhat">Ngày sale tác nghiệp</option>
+<option value="DonHangNgayChot">Ngày sale chốt đơn</option>
+<option value="NgayDangDon">Ngày đăng đơn</option>
+<option value="NgayChoXuat">Ngày sale tác nghiệp tiếp</option>
+<option value="NgayCapNhatTrangThaiGiaoHang">Ngày cập nhật trạng thái giao hàng</option>
+<option value="DoiSoatNoiBoNgayCapNhat">Ngày đối soát</option>
+<option value="CareDonNgayNhan">Ngày nhận care đơn</option>
+<option value="NgayTacNghiepCareDon">Ngày cập nhật care đơn</option>
+</select>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1745_Main_SearchFilterDataChotDonLog_ddlIdTrangThaiGiaoHang" name="dnn$ctr1745$Main$SearchFilterDataChotDonLog$ddlIdTrangThaiGiaoHang" style="" title="">
+<option value="-1">--Chọn trạng thái giao hàng--</option>
+<option value="50">Bồi hoàn</option>
+<option value="41">Đã hoàn</option>
+<option value="40">Đang hoàn</option>
+<option value="35">Giao hàng một phần</option>
+<option value="34">Yêu cầu giao lại</option>
+<option value="33">Không giao được</option>
+<option value="32">Đã thanh toán</option>
+<option value="31">Đã giao hàng</option>
+<option value="30">Đang giao hàng</option>
+<option value="23">Đang lấy hàng</option>
+<option value="22">Không lấy được hàng</option>
+<option value="21">Đã lấy hàng</option>
+<option value="20">Đã đăng</option>
+<option value="5">Hủy đăng đơn</option>
+<option value="4">Hủy vận đơn</option>
+<option value="3">Hoãn giao hàng</option>
+<option value="2">Giao ngay</option>
+<option value="1">Chờ vận đơn</option>
+</select>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1745_Main_SearchFilterDataChotDonLog_ddlTrangThaiChotDon" name="dnn$ctr1745$Main$SearchFilterDataChotDonLog$ddlTrangThaiChotDon" style="" title="">
+<option value="-1">--Trạng thái chốt đơn--</option>
+<option value="1">Đã chốt đơn</option>
+<option value="0">Chưa chốt đơn</option>
+</select>
+</div>
+</div>
+<div class="col-sm-8">
+<div data-legacy-grid-anchor="1"></div>
+<div class="form-group"></div>
+<div class="row">
+<div class="col-xs-12">
+<span class="small-tip" style="color: red; font-size: 13px;">* Hệ thống chỉ lưu lịch sử 30 ngày gần nhất</span>
+</div>
+<div class="col-xs-6">
+</div>
+<div class="col-xs-6 text-right">
+</div>
+</div>
+</div>
+<div class="col-sm-4">
+<table class="table table-bordered">
+<tbody><tr>
+<th class="text-center" style="width: 30px;">#</th>
+<th class="text-center no-wrap">User</th>
+<th class="text-center no-wrap">Count</th>
+<th class="text-center no-wrap" style="width: 80px;"></th>
+</tr>
+</tbody></table>
+</div>
+</div>
+</div>
+</div>
+<div style="height: 150px;"></div>
+
+</div><!-- End_Module_1745 --></div>
+</div></div>
+</div></div>

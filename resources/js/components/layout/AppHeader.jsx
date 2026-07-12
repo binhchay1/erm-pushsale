@@ -1,5 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 
+import { LanguageToggle } from '@/components/layout/LanguageToggle';
+import { NotificationBell } from '@/components/layout/NotificationBell';
 import { UserMenu } from '@/components/layout/UserMenu';
 
 function brandTitle(brand) {
@@ -10,7 +12,7 @@ function brandTitle(brand) {
 }
 
 export function AppHeader({ onToggleSidebar }) {
-    const { auth, brand } = usePage().props;
+    const { brand } = usePage().props;
 
     return (
         <header className="main-header pushsale-main-header">
@@ -32,14 +34,11 @@ export function AppHeader({ onToggleSidebar }) {
 
             <div className="pushsale-header-tools">
                 <span className="pushsale-security-score">Điểm bảo mật: 1/18</span>
-                <Link
-                    href="/notifications"
-                    className="pushsale-header-icon"
-                    aria-label="Thông báo"
-                    title="Thông báo"
-                >
-                    <i className="fa fa-bullhorn" aria-hidden="true" />
-                </Link>
+                <LanguageToggle pushsaleStyle />
+                <NotificationBell pushsaleStyle />
+                <span className="pushsale-header-icon" aria-hidden="true" title="Thông báo hệ thống">
+                    <i className="fa fa-bullhorn" />
+                </span>
                 <UserMenu variant="pushsale" />
             </div>
         </header>

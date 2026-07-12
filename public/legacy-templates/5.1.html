@@ -1,0 +1,682 @@
+<div class="legacy-template-fragment legacy-page-fragment" data-template-code="5.1"><div class="content-wrapper" style="min-height: 737px;">
+<div class="contentPane legacy-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1474"><a name="1474"></a><div class="legacy-template-inner" id="dnn_ctr1474_ContentPane"><!-- Start_Module_1474 --><div class="legacy-template-inner" id="dnn_ctr1474_ModuleContent">
+<style type="text/css">
+    .tip { font-style: italic; display: inline-block; min-width: 30px; }
+    .dm-tac-nghiep { display: inline-block; width: 180px; font-size: 11px; color: #333; padding: 6px 15px 6px 6px; transition: ease 3s all; white-space: nowrap; }
+        .dm-tac-nghiep:hover, .dm-tac-nghiep.selected { box-shadow: inset 0 0 4px orange; }
+        .dm-tac-nghiep .flag { width: 20px; background-color: #C1E2F4; display: inline-block; height: 14px; float: left; }
+        .dm-tac-nghiep .text { display: inline-block; height: 16px; line-height: 16px; float: left; margin-left: 10px; }
+        .dm-tac-nghiep .count { font-weight: bold; margin-left: 6px; color: orange; float: left; line-height: 16px; transition: ease 3s all; }
+        .dm-tac-nghiep .level-1 { background-color: #a6ffa8 }
+        .dm-tac-nghiep .level-2 { background-color: #8ad6ff }
+        .dm-tac-nghiep .level-3 { background-color: #ffc0cb }
+        .dm-tac-nghiep .level-4 { background-color: orangered; }
+        .dm-tac-nghiep .flash-bg { background-color: red; }
+        .dm-tac-nghiep .live-stream { float: left; width: 5px; height: 5px; border-radius: 50%; background-color: red; margin-left: 5px; margin-top: 6px; display: none; }
+        .dm-tac-nghiep .count.flash-bg { color: white; }
+
+    tr.contact-row { transition: ease 3s all; }
+        tr.contact-row.high-light { box-shadow: inset 0 0 15px green; }
+            tr.contact-row.high-light td { background-color: transparent; }
+        tr.contact-row input.form-control, tr.contact-row select { font-size: 11px; }
+
+    .hoa-don-area td, .hoa-don-area th, .sale-area td, .sale-area th, .kh-area td, .kh-area th { transition: ease 0.5s all; }
+    .hide-hoa-don-area .hoa-don-area, .hide-sale-area .sale-area, .hide-kh-area .kh-area { width: 0px !important; padding: 0 !important; }
+        .hide-hoa-don-area .hoa-don-area *, .hide-sale-area .sale-area *, .hide-kh-area .kh-area * { display: none; }
+
+    .table-info th { background-color: #eee !important; }
+    .table-info td { }
+    .tb-giao-hang, .tb-giao-hang td { border: 1px solid transparent !important; }
+        .tb-giao-hang td { width: 110px; padding: 0px !important; }
+    .txt-dotted { border-bottom: none !important; }
+    .mof-container { position: relative; height: 30px; width: 100%; float: left; }
+    .mof-container, .txt-mof { background-color: transparent; height: 45px; }
+        .txt-mof:focus, .txt-mof:focus, .txt-mof:hover { background-color: white; }
+    textarea.txt-mof { height: 48px; border: 1px dotted #ddd !important; line-height: 15px; }
+    .form-control[readonly] { background-color: white; }
+    .small-tip { font-size: 11px; color: #999; }
+
+    .ttgh { }
+    .ttgh2, .ttgh20, .ttgh21, .ttgh30, .ttgh34 { color: #007bff; }
+    .ttgh3, .ttgh5 { color: #f7a300; }
+    .ttgh4 { color: gray; text-decoration: line-through; }
+    .ttgh31, .ttgh32 { color: #0b7f16 }
+    .ttgh22, .ttgh33, .ttgh40, .ttgh41 { color: #ff0000 }
+    .ttgh35 { color: magenta }
+
+    .span-col { display: inline-block; }
+    .row-sp { border-bottom: 1px dashed #ccc }
+
+    @media(max-width:768px) {
+        .contact-row .fa { font-size: 20px; }
+        .dm-tac-nghiep { width: 48%; }
+    }
+
+    .fam-container { width: 200px; margin: 0; margin-bottom: 1em; padding-top: 30px; }
+        .fam-container:hover .buttons:not(:last-child) { margin-left: 22px; }
+        .fam-container .buttons { margin-left: 15px; }
+    .tb-in-sp { border: none !important; width: 100%; font-size: 11px; }
+        .tb-in-sp td { border: none !important; background-color: transparent !important; padding: 3px 0px !important; }
+    tr.row-selected .tb-in-sp td:first-child { border-left: none !important; }
+    .black-phone { color: darkorange !important; }
+    .cbvd, i.khkn { color: darkorange; font-size: 14px; }
+    .khkn { color: darkorange }
+    .sline { padding-top: 3px; padding-bottom: 3px; }
+    .strikethrough { text-decoration: line-through; font-size: 11px !important; }
+    .nha-mang { color: magenta; font-size: 9px; font-weight: bold; display: block; }
+    .ps-ddl .ps-ddl-selected-item { margin-top: 5px; }
+
+    /* menu mới nhathl viết*/
+    .action-container { padding-right: 100px; padding-left: 20px; padding-top: 50px; position: static; bottom: 0px; left: 0px; display: flex; flex-direction: column; align-items: flex-start; z-index: 100; }
+    /* Nút chính luôn hiển thị */
+    .main-action { font-size: 24px; text-decoration: none; color: white; background-color: #007bff; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: background-color 0.3s, transform 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); margin-bottom: 15px; cursor: pointer; }
+        .main-action:hover { background-color: #0056b3; transform: scale(1.1); }
+    /* Các nút ẩn */
+    .hidden-actions { display: none; /* Ẩn các nút khi không có class 'show' */ flex-direction: column; align-items: flex-start; gap: 10px; /* Khoảng cách giữa các nút */ opacity: 0; pointer-events: none; /* Không cho phép click khi ẩn */ transition: opacity 0.3s ease, visibility 0.3s ease; }
+        /* Khi các nút được hiển thị */
+        .hidden-actions .icon-row { display: flex; gap: 10px; }
+    .n-button { margin-bottom: 10px; font-size: 24px }
+    .hidden-actions a { text-decoration: none; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: background-color 0.3s, transform 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); }
+        .hidden-actions a:hover { background-color: #006400; transform: scale(1.1); }
+    /* end menu mới nhathl viết*/
+    .action-container:hover .hidden-actions { display: flex; opacity: 1; pointer-events: auto; margin-left: 5px; /* Cho phép click khi hiển thị */ }
+</style>
+<div>
+<div id="dnn_ctr1474_Main_WarehouseTacNghiep_up1">
+<span class="hidden" id="dnn_ctr1474_Main_WarehouseTacNghiep_lblDownLoad"></span>
+<input class="id-tac-nghiep hidden legacy-input" id="dnn_ctr1474_Main_WarehouseTacNghiep__CurrentIdTrangThaiGiaoHang" name="dnn$ctr1474$Main$WarehouseTacNghiep$_CurrentIdTrangThaiGiaoHang" type="text" value="0"/>
+<input class="list-id-hl hidden legacy-input" id="dnn_ctr1474_Main_WarehouseTacNghiep__HighLightListId" name="dnn$ctr1474$Main$WarehouseTacNghiep$_HighLightListId" type="text"/>
+<input class="item-one-id hidden legacy-input" id="dnn_ctr1474_Main_WarehouseTacNghiep__OneItemId" name="dnn$ctr1474$Main$WarehouseTacNghiep$_OneItemId" type="text"/>
+<a class="btn-item-one-reload hidden" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnReloadOneItem">
+<i class="fa fa-refresh"></i>
+</a>
+<a class="btn-continue hidden" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnContinueGetTicket">Continue get ticket</a>
+<div id="dnn_ctr1474_Main_WarehouseTacNghiep_pnSearch">
+<div class="m-header-wrap">
+<div class="m-header">
+<div class="row">
+<div class="col-xs-12">
+<div class="col-sm-6 form-group">
+<span class="text" id="dnn_ctr1474_Main_WarehouseTacNghiep_lblModuleTitle">Thủ kho tác nghiệp</span>
+</div>
+<div class="col-sm-2 form-group text-right">
+<input id="dnn_ctr1474_Main_WarehouseTacNghiep_chkHideNoCount" name="dnn$ctr1474$Main$WarehouseTacNghiep$chkHideNoCount" type="checkbox"/><label for="dnn_ctr1474_Main_WarehouseTacNghiep_chkHideNoCount">Ẩn trạng thái không số</label>
+</div>
+<div class="col-sm-4 form-group">
+<div style="width: calc(100% - 145px); float: left;">
+<input class="form-control legacy-input" id="dnn_ctr1474_Main_WarehouseTacNghiep_txtTuKhoa" name="dnn$ctr1474$Main$WarehouseTacNghiep$txtTuKhoa" placeholder="Họ tên, số điện thoại" type="text"/>
+</div>
+<div style="width: 125px; float: right;">
+<a class="btn btn-sm btn-primary" data-legacy-action="search" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnSearch" role="button">
+<i class="fa fa-search"></i> Tìm kiếm
+                                        </a>
+<a class="btn btn-sm btn-primary hidden btn-reload" data-legacy-action="reload" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnReload" role="button">
+<i class="fa fa-refresh"></i> Reload
+                                        </a>
+<a class="btn-icon" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnToggleSummary"><i class="fa fa-angle-double-up"></i></a>
+</div>
+<div style="clear: both;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="box-body" style="padding-bottom: 0px;">
+<div class="row">
+<div class="col-sm-4 form-group">
+<input class="form-control date-range legacy-input" id="dnn_ctr1474_Main_WarehouseTacNghiep__TuNgay_DenNgay" name="dnn$ctr1474$Main$WarehouseTacNghiep$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlKieuNgay" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlKieuNgay" style="" title="">
+<option selected="selected" value="-1">--Kiểu ngày--</option>
+<option value="NgayTao">Ngày data về hệ thống</option>
+<option value="NgayDangDon">Ngày đăng đơn</option>
+<option value="DonHangNgayChot">Ngày chốt đơn</option>
+<option value="DoiSoatNoiBoNgayCapNhat">Ngày đối soát</option>
+<option value="CareDonNgayNhan">Ngày nhận care đơn</option>
+<option value="NgayTacNghiepCareDon">Ngày cập nhật care đơn</option>
+<option value="NgayCapNhatTrangThaiGiaoHang">Ngày cập nhật trạng thái giao hàng</option>
+<option value="NgayGiaoHang">Ngày muốn nhận hàng</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdTacNghiepInDon" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdTacNghiepInDon" style="" title="">
+<option selected="selected" value="-1">--In đơn--</option>
+<option value="1">Đã in</option>
+<option value="0">Chưa in</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdTacNghiepCareDon" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdTacNghiepCareDon" style="" title="">
+<option selected="selected" value="-1">--Trạng thái care--</option>
+<option value="0">Chờ care đơn</option>
+<option value="1">Giao ngay</option>
+<option value="2">Chờ giao</option>
+<option value="3">Hoãn giao hàng</option>
+<option value="4">Sale vừa cứu đơn</option>
+<option value="5">Khách hàng khiếu nại</option>
+<option value="6">Hoàn tất xử lý khiếu nại</option>
+<option value="7">Phát lại</option>
+<option value="8">Lưu kho</option>
+<option value="9">Không nghe máy</option>
+<option value="10">Đã yêu cầu giao lại</option>
+<option value="11">Khách từ chối nhận</option>
+<option value="12">Báo hoàn đơn</option>
+<option value="13">Cần check lại</option>
+<option value="14">In đơn</option>
+<option value="15">Xuất giao tiếp</option>
+<option value="16">Xuất giao tiếp đã nhận</option>
+<option value="17">Xuất giao tiếp đơn hoàn</option>
+<option value="18">Đã nhận</option>
+<option value="19">Đơn Hoàn</option>
+<option value="20">Trùng đơn</option>
+<option value="21">Hẹn giao</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlCareDonUserId" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlCareDonUserId" style="" title="">
+<option selected="selected" value="-1">--Chọn care đơn--</option>
+<option value="0"> (Chưa care đơn)</option>
+<option value="87360">Thắm (tt.kho1)</option>
+</select>
+</div>
+</div>
+<div class="row hidden-xs">
+<div class="col-sm-2 form-group">
+<div class="ps-ddl" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdSanPham">
+<div class="ps-ddl-display-text"><span class="ps-ddl-selected-item" item-id="-1">--Chọn sản phẩm-- </span></div>
+<div class="ps-ddl-arow">
+<i class="fa fa-angle-down"></i>
+</div>
+<div class="ps-ddl-search-area hidden">
+<input class="ps-ddl-search-box legacy-input" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdSanPham_tnt_SearchBox" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdSanPham$tnt_SearchBox" placeholder="Nhập từ khóa để tìm kiếm" style="height:30px;" type="text"/>
+<a class="ps-ddl-on-change hidden" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdSanPham_btnOnChanged">On changed</a>
+<div class="result-not-found hidden" style="height:30px;line-height:30px;">Không tìm thấy</div>
+<div class="result-items hidden"></div>
+</div>
+<input class="ps-ddl-selected-json hidden legacy-input" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdSanPham_tnt_DataJson" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdSanPham$tnt_DataJson" type="text" value='[{"Id":"-1","Name":"--Chọn sản phẩm--","ImageUrl":""}]'/>
+<input class="ps-ddl-setting-json hidden legacy-input" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdSanPham_tnt_SettingJson" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdSanPham$tnt_SettingJson" type="text" value='{"ShowLog":false,"SearchMinLength":0,"SearchDelay":500,"SearchMaxResultCount":20,"MultiSelect":false,"AutoPostBack":false,"DisplayItemId":false,"Enabled":true,"DefaultId":"-1","DefaultName":"--Chọn sản phẩm--","RemoteUrl":"/sp/act.aspx?act=ld_san_pham&amp;ttkd=0","OptionalParams":{}}'/>
+<input class="ps-ddl-optinal-param hidden legacy-input" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdSanPham_tnt_OptinalParams" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdSanPham$tnt_OptinalParams" type="text"/>
+</div>
+
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x id-loai-tac-nghiep legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdDoiSoatNoiBo" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdDoiSoatNoiBo" style="" title="">
+<option selected="selected" value="-1">--Chọn đối soát nội bộ--</option>
+<option value="1">Đã đối soát</option>
+<option value="0">Chưa đối soát</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdPhuongThucGiaoHang" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdPhuongThucGiaoHang" style="" title="">
+<option selected="selected" value="-1">--Chọn PTGH--</option>
+<option value="20">SPX Express</option>
+<option value="19">TikTok</option>
+<option value="18">NinjaVan</option>
+<option value="17">Shopee</option>
+<option value="16">AhaMove</option>
+<option value="15">HolaShip</option>
+<option value="14">Ship60</option>
+<option value="12">BoxMe</option>
+<option value="10">Best</option>
+<option value="9">SuperShip</option>
+<option value="8">EMS</option>
+<option value="7">JNT</option>
+<option value="6">VNPOST</option>
+<option value="4">Giao hàng nhanh</option>
+<option value="3">Viettel Post</option>
+<option value="2">Thủ công</option>
+<option value="1">Giao hàng tiết kiệm</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdKho" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdKho" style="" title="">
+<option selected="selected" value="-1">--Chọn kho--</option>
+<option value="5456">Kho HB Thủ công</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlDatCocId" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlDatCocId" style="" title="">
+<option selected="selected" value="-1">--Đặt cọc--</option>
+<option value="1">Có đặt cọc</option>
+<option value="0">Không đặt cọc</option>
+</select>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-2 form-group" id="dnn_ctr1474_Main_WarehouseTacNghiep_div1">
+<select class="chosen ddlpb legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlLeaderSale" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlLeaderSale" style="" title="">
+<option selected="selected" value="-1">--Chọn trưởng nhóm sale--</option>
+<option value="87343">SALE ADMIN (ttgroup.saleadmin2)</option>
+</select>
+</div>
+<div class="col-sm-2 form-group" id="dnn_ctr1474_Main_WarehouseTacNghiep_div2">
+<select class="chosen ddlpb legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlNhomSale" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlNhomSale" style="" title="">
+<option selected="selected" value="-1">--Chọn nhóm sale--</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlSaleUserId" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlSaleUserId" style="" title="">
+<option selected="selected" value="-1">--Chọn sale--</option>
+<option value="87343">SALE ADMIN (ttgroup.saleadmin2)</option>
+<option value="87344">Hoài Thu (tt.sale01)</option>
+<option value="87345">Thu Hường (tt.sale02)</option>
+<option value="87346">Lan Anh (tt.sale03)</option>
+<option value="87347">Trần Hằng (tt.sale04)</option>
+<option value="87348">Chu Thủy (tt.sale05)</option>
+<option value="87355">Sale part 1 (tt.sale06)</option>
+<option value="87370">Hồng Vân (tt.sale07)</option>
+<option value="87376">Quỳnh Anh (tt.sale08)</option>
+<option value="87529">Khánh Ly (tt.sale09)</option>
+<option value="87741">Mai Lan (tt.sale10)</option>
+<option value="87743">Phạm Lý (tt.sale11)</option>
+<option value="87744">Lại Giang (tt.sale12)</option>
+</select>
+</div>
+<div class="col-sm-2 form-group" id="dnn_ctr1474_Main_WarehouseTacNghiep_divLeaderMkt">
+<select class="chosen ddlpb legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlLeaderMKt" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlLeaderMKt" style="" title="">
+<option selected="selected" value="-1">--Chọn trưởng nhóm marketing--</option>
+<option value="87325">Phan Văn Minh (ttgroup2.marketing01)</option>
+</select>
+</div>
+<div class="col-sm-2 form-group" id="dnn_ctr1474_Main_WarehouseTacNghiep_divNhomMkt">
+<select class="chosen ddlpb legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlNhomMkt" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlNhomMkt" style="" title="">
+<option selected="selected" value="-1">--Chọn nhóm marketing--</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlMarketingUserId" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlMarketingUserId" style="" title="">
+<option selected="selected" value="-1">--Chọn marketing--</option>
+<option value="87325">Phan Văn Minh (ttgroup2.marketing01)</option>
+<option value="87326">Nguyễn Dương (ttgroup2.marketing02)</option>
+<option value="87327">Phạm Tú (ttgroup2.marketing03)</option>
+<option value="87328">Trần Dung (ttgroup2.marketing04)</option>
+<option value="87329">Kim Hồng (ttgroup2.marketing05)</option>
+<option value="87330">Ngọc Huyền (ttgroup2.marketing06)</option>
+<option value="87331">Trần Lan (ttgroup2.marketing07)</option>
+<option value="87332">Khánh Ly (ttgroup2.marketing08)</option>
+<option value="87333">Khánh Linh (ttgroup2.marketing09)</option>
+<option value="87334">Ngọc Ánh (ttgroup2.marketing10)</option>
+<option value="87335">Linh Chi (ttgroup2.marketing11)</option>
+<option value="87336">Vy Thảo (ttgroup2.marketing12)</option>
+<option value="87337">Hà Phương (ttgroup2.marketing13)</option>
+<option value="87338">Phương Anh (ttgroup2.marketing14)</option>
+<option value="87368">Thùy Dương (ttgroup2.marketing15)</option>
+<option value="87517">Khánh Chi (ttgroup2.marketing16)</option>
+<option value="87548">Hải Vân (ttgroup2.marketing17)</option>
+<option value="87549">Đỗ Ngân (ttgroup2.marketing18)</option>
+<option value="87680">Phương Quỳnh (ttgroup2.marketing19)</option>
+</select>
+</div>
+</div>
+<div class="row hidden-xs">
+<div class="col-xs-12 col-sm-6 col-md-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlTheoDoiDonId" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlTheoDoiDonId" style="" title="">
+<option selected="selected" value="-1">--Theo dõi đơn--</option>
+<option value="1">1. Quá 24h chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="2">2. Quá 36h chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="3">3. Quá 48h chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="4">4. Quá 72h chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="5">5. Quá 4 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="6">6. Quá 5 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="7">7. Quá 6 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="8">8. Quá 7 ngày chưa hoàn tất giao hàng (từ khi đăng đơn)</option>
+<option value="11">11. Quá 24h chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="12">12. Quá 36h chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="13">13. Quá 48h chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="14">14. Quá 72h chưa lấy hàng (từ khi đăng đơn)</option>
+<option value="21">21. Quá 24h chưa đăng đơn (từ khi chốt đơn)</option>
+<option value="22">22. Quá 36h chưa đăng đơn (từ khi chốt đơn)</option>
+<option value="23">23. Quá 48h chưa đăng đơn (từ khi chốt đơn)</option>
+<option value="24">24. Quá 72h chưa đăng đơn (từ khi chốt đơn)</option>
+<option value="100">100. Đơn chỉ có một loại sản phẩm</option>
+</select>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-2 hidden-xs form-group">
+<select class="chosen legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlSoLuongSanPhamTu" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlSoLuongSanPhamTu" style="" title="">
+<option selected="selected" value="-1">--Toàn bộ số lượng--</option>
+<option value="1">Tổng số lượng sản phẩm từ 1</option>
+<option value="2">Tổng số lượng sản phẩm từ 2</option>
+<option value="3">Tổng số lượng sản phẩm từ 3</option>
+<option value="4">Tổng số lượng sản phẩm từ 4</option>
+<option value="5">Tổng số lượng sản phẩm từ 5</option>
+<option value="6">Tổng số lượng sản phẩm từ 6</option>
+<option value="7">Tổng số lượng sản phẩm từ 7</option>
+<option value="8">Tổng số lượng sản phẩm từ 8</option>
+<option value="9">Tổng số lượng sản phẩm từ 9</option>
+<option value="10">Tổng số lượng sản phẩm từ 10</option>
+<option value="20">Tổng số lượng sản phẩm từ 20</option>
+<option value="30">Tổng số lượng sản phẩm từ 30</option>
+<option value="40">Tổng số lượng sản phẩm từ 40</option>
+<option value="50">Tổng số lượng sản phẩm từ 50</option>
+<option value="60">Tổng số lượng sản phẩm từ 60</option>
+<option value="70">Tổng số lượng sản phẩm từ 70</option>
+<option value="80">Tổng số lượng sản phẩm từ 80</option>
+<option value="90">Tổng số lượng sản phẩm từ 90</option>
+<option value="100">Tổng số lượng sản phẩm từ 100</option>
+</select>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-2 hidden-xs form-group">
+<select class="chosen legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlSoLuongSanPhamDen" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlSoLuongSanPhamDen" style="" title="">
+<option selected="selected" value="-1">--Toàn bộ số lượng--</option>
+<option value="1">Tổng số lượng sản phẩm đến 1</option>
+<option value="2">Tổng số lượng sản phẩm đến 2</option>
+<option value="3">Tổng số lượng sản phẩm đến 3</option>
+<option value="4">Tổng số lượng sản phẩm đến 4</option>
+<option value="5">Tổng số lượng sản phẩm đến 5</option>
+<option value="6">Tổng số lượng sản phẩm đến 6</option>
+<option value="7">Tổng số lượng sản phẩm đến 7</option>
+<option value="8">Tổng số lượng sản phẩm đến 8</option>
+<option value="9">Tổng số lượng sản phẩm đến 9</option>
+<option value="10">Tổng số lượng sản phẩm đến 10</option>
+<option value="20">Tổng số lượng sản phẩm đến 20</option>
+<option value="30">Tổng số lượng sản phẩm đến 30</option>
+<option value="40">Tổng số lượng sản phẩm đến 40</option>
+<option value="50">Tổng số lượng sản phẩm đến 50</option>
+<option value="60">Tổng số lượng sản phẩm đến 60</option>
+<option value="70">Tổng số lượng sản phẩm đến 70</option>
+<option value="80">Tổng số lượng sản phẩm đến 80</option>
+<option value="90">Tổng số lượng sản phẩm đến 90</option>
+<option value="100">Tổng số lượng sản phẩm đến 100</option>
+<option value="999999">Tổng số lượng sản phẩm không giới hạn</option>
+</select>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-2 hidden-xs form-group">
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen chosen-x legacy-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlXuatHDDT" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlXuatHDDT" style="" title="">
+<option selected="selected" value="-1">--Xuất HĐĐT--</option>
+<option value="1">Đã xuất HĐĐT</option>
+<option value="0">Chưa xuất HĐĐT</option>
+</select>
+</div>
+</div>
+<div class="row ttgh-acc">
+<div class="col-sm-12">
+<a class="dm-tac-nghiep dm-tac-nghiep1" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl00_btnChonTrangThaiGiaoHang">
+<span class="flag level-4"></span>
+<span class="text">Chờ vận đơn</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_0">(720)</span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep2" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl01_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Giao ngay</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_1"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep3" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl02_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Hoãn giao hàng</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_2"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep4" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl03_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Hủy vận đơn</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_3"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep5" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl04_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Hủy đăng đơn</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_4"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep20" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl05_btnChonTrangThaiGiaoHang">
+<span class="flag level-4"></span>
+<span class="text">Đã đăng</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_5">(779)</span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep23" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl06_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Đang lấy hàng</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_6"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep21" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl07_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Đã lấy hàng</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_7"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep22" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl08_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Không lấy được hàng</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_8"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep30" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl09_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Đang giao hàng</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_9"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep33" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl10_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Không giao được</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_10"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep34" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl11_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Yêu cầu giao lại</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_11"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep31" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl12_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Đã giao hàng</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_12"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep35" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl13_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Giao hàng một phần</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_13"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep32" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl14_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Đã thanh toán</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_14"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep40" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl15_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Đang hoàn</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_15"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep41" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl16_btnChonTrangThaiGiaoHang">
+<span class="flag level-4"></span>
+<span class="text">Đã hoàn</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_16">(117)</span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep50" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl17_btnChonTrangThaiGiaoHang">
+<span class="flag level-1"></span>
+<span class="text">Bồi hoàn</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_17"></span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+<a class="dm-tac-nghiep dm-tac-nghiep0 selected" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang_ctl18_btnChonTrangThaiGiaoHang">
+<span class="flag level-"></span>
+<span class="text">Tất cả</span>
+<span class="count" id="dnn_ctr1474_Main_WarehouseTacNghiep_rptTrangThaiGiaoHang__CountText_18">(1,616)</span>
+<span class="live-stream"></span>
+<i class="fa fa-angle-double-right" style="float: right;"></i>
+<span style="clear: both;"></span>
+</a>
+</div>
+</div>
+</div>
+<div style="clear: both; border-bottom: 1px solid #ddd;"></div>
+</div>
+</div>
+<div class="box-body">
+<div class="dragscroll1 tableFixHead" style="height: 845px;">
+<div id="dnn_ctr1474_Main_WarehouseTacNghiep_up2">
+<div data-legacy-grid-anchor="1"></div>
+</div>
+</div>
+<div id="dnn_ctr1474_Main_WarehouseTacNghiep_UpdatePanel3">
+<div class="row">
+<div class="col-xs-12 text-left form-group"></div>
+<div class="col-xs-12 text-center form-group">
+<span class="mr15" style="display: inline-block;">
+<div class="btn-group pull-left">
+<button class="btn btn-default btn-sm" role="button" type="button">
+<i class="fa fa-spinner fa-spin hidden spwait"></i>
+<span id="dnn_ctr1474_Main_WarehouseTacNghiep_tnShortPager_lblRecordInfo">1 - 20 <span style="font-weight:normal;"> / </span> 1,616</span>
+</button>
+<a class="aspNetDisabled btn btn-default btn-sm" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnShortPager_btnPrev" role="button" title="Trang trước">
+<i class="fa fa-caret-left" style="margin-right:0;"></i>
+</a>
+<a class="btn btn-default btn-sm" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnShortPager_btnNext" role="button" style="padding-right:10px;" title="Trang sau">
+<i class="fa fa-caret-right" style="margin-right:0;"></i>
+</a>
+</div>
+</span>
+<span class="mr15" style="display: inline-block;">
+<ul "="" class="pagination pagination-sm no-margin pull-left">
+<li><a class="aspNetDisabled" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_pre" title="Trang trước">«</a></li>
+<li class="active"><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_rptPagger_btnPage_0">1</a></li>
+<li class=""><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_rptPagger_btnPage_1">2</a></li>
+<li class=""><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_rptPagger_btnPage_2">3</a></li>
+<li class=""><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_rptPagger_btnPage_3">4</a></li>
+<li class=""><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_rptPagger_btnPage_4">5</a></li>
+<li class=""><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_rptPagger_btnPage_5">6</a></li>
+<li class=""><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_rptPagger_btnPage_6">7</a></li>
+<li class=""><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_rptPagger_btnPage_7">8</a></li>
+<li class=""><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_rptPagger_btnPage_8">9</a></li>
+<li class=""><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_rptPagger_btnPage_9">10</a></li>
+<li><a href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_tnPager_nextx" title="Trang sau">»</a></li>
+</ul>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="dnn_ctr1474_Main_WarehouseTacNghiep_UpdatePanel1">
+<nav class="action-container">
+<div class="hidden-actions" id="hiddenActions">
+<div class="icon-row">
+<a class="n-button fam-primary" fam-tooltip="Đăng đơn" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnDangDonGiaoVan" title="Đăng đơn">
+<i class="fa fa-calendar-check-o"></i>
+</a>
+<a class="n-button fam-warning" fam-tooltip="Hủy đăng đơn" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnHuyDonGiaoVan">
+<i class="fa fa-calendar-times-o"></i>
+</a>
+</div>
+<div class="icon-row">
+<a class="n-button fam-success" fam-tooltip="Cập nhật trạng thái giao hàng" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnCapNhatDonNhieu">
+<i class="fa fa-truck"></i>
+</a>
+<a class="n-button fam-warning" fam-tooltip="Cập nhật trạng thái giao hàng excel" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnCapNhatDonExcel">
+<i class="fa fa-truck"></i>
+</a>
+</div>
+<div class="icon-row">
+<a class="n-button fam-success" fam-tooltip="In đơn" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnInDonThuNghiem">
+<i class="fa fa-print"></i>
+</a>
+<a class="n-button fam-warning" fam-tooltip="In đơn mẫu Shopee" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnInDonShopee">
+<i class="fa fa-print"></i>
+</a>
+<a class="n-button fam-warning" fam-tooltip="In đơn mẫu TikTok" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnInDonTiktok">
+<i class="fa fa-print"></i>
+</a>
+<a class="n-button fam-success" fam-tooltip="In đơn mẫu GHTK" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnInDonGHTK">
+<i class="fa fa-print"></i>
+</a>
+<a class="n-button fam-success" fam-tooltip="In đơn mẫu J&amp;T" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnInDonJNT">
+<i class="fa fa-print"></i>
+</a>
+<a class="n-button fam-success" fam-tooltip="In đơn mẫu SPX" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnInDonSPX">
+<i class="fa fa-print"></i>
+</a>
+</div>
+<div class="icon-row">
+<a class="n-button fam-primary" fam-tooltip="Xuất Excel kiểu 1" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnExport">
+<i class="fa fa-file-excel-o"></i>
+</a>
+<a class="n-button fam-success" fam-tooltip="Xuất Excel  kiểu 2" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnExport1">
+<i class="fa fa-file-excel-o"></i>
+</a>
+<a class="n-button fam-warning" fam-tooltip="Xuất Excel  kiểu 3" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnExport2">
+<i class="fa fa-file-excel-o"></i>
+</a>
+</div>
+<div class="icon-row">
+<a class="n-button fam-success" fam-tooltip="Thêm đơn vào biên bản" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnThemContactBienBan">
+<i class="fa fa-file-text-o"></i>
+</a>
+<a class="n-button fam-success" fam-tooltip="Xuất hóa đơn điện tử theo mã đơn" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnCapNhatHDDT">
+<i class="fa fa-barcode"></i>
+</a>
+</div>
+<div class="icon-row">
+<a class="n-button fam-success" fam-tooltip="Cập nhật nhiều đơn theo mã pushsale" href="#" id="dnn_ctr1474_Main_WarehouseTacNghiep_btnCapNhatNhieuDonTheoMaPS">
+<i class="fa fa-gears"></i>
+</a>
+</div>
+</div>
+<a class="main-action" id="menuToggle" tooltip="Share"><i class="fa fa-bars"></i></a>
+</nav>
+</div>
+<button class="open-button hidden" role="button"></button>
+<div class="chat-popup fStartCall" id="fStartCall" style="overflow-y: auto;">
+<button aria-label="Close" class="close" role="button" type="button"><span aria-hidden="true">×</span></button>
+
+</div>
+<div class="chat-popup fStartCallOmi hidden" id="fStartCallOmi">
+
+
+<button aria-label="Close" class="close" role="button" type="button"><span aria-hidden="true">×</span></button>
+
+</div>
+<div style="height: 200px;"></div>
+
+
+</div><!-- End_Module_1474 --></div>
+</div></div>
+</div></div>

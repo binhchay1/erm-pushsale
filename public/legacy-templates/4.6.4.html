@@ -1,0 +1,138 @@
+<div class="legacy-template-fragment legacy-page-fragment" data-template-code="4.6.4"><div class="content-wrapper" style="min-height: 737px;">
+<div class="contentPane legacy-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1542"><a name="1542"></a><div class="legacy-template-inner" id="dnn_ctr1542_ContentPane"><!-- Start_Module_1542 --><div class="legacy-template-inner" id="dnn_ctr1542_ModuleContent">
+
+<style>
+    .table-bordered th.col_pushsale {
+        background-color: #8f0bb5 !important;
+    }
+
+    .col_pushsale_text {
+    }
+</style>
+<div id="dnn_ctr1542_Main_BaoCaoDataSale_pnlMain">
+<span class="hidden" id="dnn_ctr1542_Main_BaoCaoDataSale_lblDownLoad"></span>
+<div id="dnn_ctr1542_Main_BaoCaoDataSale_pnSearch">
+<div class="m-header-wrap">
+<div class="m-header">
+<div class="col-sm-2 form-group">
+<span class="text form-group" id="dnn_ctr1542_Main_BaoCaoDataSale_lblModuleTitle">Báo cáo data sale
+                        </span>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1542_Main_BaoCaoDataSale_ddlKieuNgay" name="dnn$ctr1542$Main$BaoCaoDataSale$ddlKieuNgay" style="" title="">
+<option value="-1">--Chuẩn Pushsale--</option>
+<option value="4">Ngày sale chốt đơn</option>
+<option value="1">Ngày sale tác nghiệp</option>
+<option value="2">Ngày data về hệ thống</option>
+<option selected="selected" value="3">Ngày sale nhận data</option>
+<option value="5">Ngày đăng đơn</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<input class="form-control date-range legacy-input" id="dnn_ctr1542_Main_BaoCaoDataSale__TuNgay_DenNgay" name="dnn$ctr1542$Main$BaoCaoDataSale$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+</div>
+<div class="col-sm-1 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1542_Main_BaoCaoDataSale_ddlKhachCuMoi" name="dnn$ctr1542$Main$BaoCaoDataSale$ddlKhachCuMoi" style="" title="">
+<option value="-1">-- Tất cả --</option>
+<option selected="selected" value="0">Khách mới</option>
+<option value="1">Khách cũ</option>
+</select>
+</div>
+<div class="col-sm-5 form-group">
+<a class="btn-icon" href="#" id="dnn_ctr1542_Main_BaoCaoDataSale_btnToggleSummary"><i class="fa fa-angle-double-up"></i></a>
+<a class="btn btn-sm btn-primary" data-legacy-action="search" href="#" id="dnn_ctr1542_Main_BaoCaoDataSale_btnSearch" role="button">
+<i class="fa fa-search"></i> Tìm kiếm
+                        </a>
+<a class="btn btn-sm btn-primary" data-legacy-action="export" href="#" id="dnn_ctr1542_Main_BaoCaoDataSale_btnExport" role="button" title="Xuất Exel">
+<i class="fa fa-file-excel-o"></i> Xuất Excel 
+                            </a>
+<a class="btn btn-sm btn-default ml15" data-legacy-action="save" href="#" id="dnn_ctr1542_Main_BaoCaoDataSale_LinkButton2" role="button">
+<i class="fa fa-gears"></i> Cập nhật nhận dữ liệu
+                        </a>
+<a class="btn btn-sm btn-primary hidden btn-reload" data-legacy-action="reload" href="#" id="dnn_ctr1542_Main_BaoCaoDataSale_btnReload" role="button">
+<i class="fa fa-refresh"></i> Reload
+                        </a>
+<a href="#" id="dnn_ctr1542_Main_BaoCaoDataSale_btnNote" style="height: 30px; padding: 7px 0 0 0; vertical-align: middle;" title="Chú thích">
+<i class="fa fa-question-circle" style="font-size:30px;color:#0c509a;margin-left:15px;cursor:pointer;"></i>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class="box-body" style="padding-bottom: 0px;">
+<div class="row">
+<div class="hidden" id="dnn_ctr1542_Main_BaoCaoDataSale_divSuDungCauHinhReports">
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen ddlpb legacy-select" id="dnn_ctr1542_Main_BaoCaoDataSale_ddlLeaderSale" name="dnn$ctr1542$Main$BaoCaoDataSale$ddlLeaderSale" style="" title="">
+<option selected="selected" value="-1">--Trưởng nhóm--</option>
+<option value="87343">SALE ADMIN (ttgroup.saleadmin2)</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1542_Main_BaoCaoDataSale_ddlNhom" name="dnn$ctr1542$Main$BaoCaoDataSale$ddlNhom" style="" title="">
+<option selected="selected" value="-1">--Chọn nhóm--</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1542_Main_BaoCaoDataSale_ddlChietKhau" name="dnn$ctr1542$Main$BaoCaoDataSale$ddlChietKhau" style="" title="">
+<option selected="selected" value="1">Sau chiết khấu</option>
+<option value="0">Trước chiết khấu</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1542_Main_BaoCaoDataSale_ddlSoLuongHienThi" name="dnn$ctr1542$Main$BaoCaoDataSale$ddlSoLuongHienThi" style="" title="">
+<option selected="selected" value="20">20</option>
+<option value="50">50</option>
+<option value="100">100</option>
+<option value="200">200</option>
+<option value="500">500</option>
+<option value="1000">1000</option>
+<option value="999999">--Hiển thị tất--</option>
+</select>
+</div>
+<div class="col-sm-2 form-group" id="dnn_ctr1542_Main_BaoCaoDataSale_divContactChuaChia">
+<a href="/ld/unit-admin/redistribute-contact">Số contact chưa chia (<span id="dnn_ctr1542_Main_BaoCaoDataSale_lblSoContactChuaChia" style="color: #ff6a00">0</span>)</a>
+</div>
+</div>
+</div>
+<div style="clear: both; border-bottom: 1px solid #ddd;"></div>
+<div class="box">
+<div class="box-body" style="padding-top: 0px;">
+<div class="row">
+<div class="col-xs-6 form-group">
+</div>
+<div class="col-xs-6 text-right form-group" style="padding-right: 0px;">
+<div class="btn-group">
+<button class="btn btn-default btn-sm" role="button" type="button">
+<i class="fa fa-spinner fa-spin hidden spwait"></i>
+<span id="dnn_ctr1542_Main_BaoCaoDataSale_tnShortPager_lblRecordInfo">1 - 6 <span style="font-weight:normal;"> / </span> 6</span>
+</button>
+<a class="aspNetDisabled btn btn-default btn-sm" id="dnn_ctr1542_Main_BaoCaoDataSale_tnShortPager_btnPrev" role="button" title="Trang trước">
+<i class="fa fa-caret-left" style="margin-right:0;"></i>
+</a>
+<a class="aspNetDisabled btn btn-default btn-sm" id="dnn_ctr1542_Main_BaoCaoDataSale_tnShortPager_btnNext" role="button" style="padding-right:10px;" title="Trang sau">
+<i class="fa fa-caret-right" style="margin-right:0;"></i>
+</a>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="dragscroll1 tableFixHead" style="height: 715px;">
+<div data-legacy-grid-anchor="1"></div>
+<ul "="" class="pagination pagination-sm no-margin">
+<li><a class="aspNetDisabled" id="dnn_ctr1542_Main_BaoCaoDataSale_tnPager_pre" title="Trang trước">«</a></li>
+<li class="active"><a href="#" id="dnn_ctr1542_Main_BaoCaoDataSale_tnPager_rptPagger_btnPage_0">1</a></li>
+<li><a class="aspNetDisabled" id="dnn_ctr1542_Main_BaoCaoDataSale_tnPager_nextx" title="Trang sau">»</a></li>
+</ul>
+</div>
+</div>
+<div style="height: 5px;"></div>
+</div>
+</div>
+</div>
+
+
+</div><!-- End_Module_1542 --></div>
+</div></div>
+</div></div>

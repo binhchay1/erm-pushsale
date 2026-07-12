@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\FailedPartnerOrderController;
 use App\Http\Controllers\Admin\IntegrationsController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\LandingApprovalController;
+use App\Http\Controllers\Admin\Legacy\LegacyPageController;
 use App\Http\Controllers\Admin\LeadIngestionController;
 use App\Http\Controllers\Admin\LeadReviewController;
 use App\Http\Controllers\Admin\LeadsLogController;
@@ -147,6 +148,18 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
 
     Route::middleware('role:'.User::ROLE_ADMIN)->prefix('admin')->name('admin.')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
+        Route::get('legacy/{page}', [LegacyPageController::class, 'index'])
+            ->where('page', '[0-9.]+')
+            ->name('legacy.index');
+        Route::post('legacy/{page}', [LegacyPageController::class, 'store'])
+            ->where('page', '[0-9.]+')
+            ->name('legacy.store');
+        Route::match(['put', 'patch'], 'legacy/{page}/{record}', [LegacyPageController::class, 'update'])
+            ->where(['page' => '[0-9.]+', 'record' => '[0-9]+'])
+            ->name('legacy.update');
+        Route::delete('legacy/{page}/{record}', [LegacyPageController::class, 'destroy'])
+            ->where(['page' => '[0-9.]+', 'record' => '[0-9]+'])
+            ->name('legacy.destroy');
         // "Tổng quan vận hành" đã gộp vào "Tổng quan điều hành" (dashboard). Giữ redirect cho link cũ.
         Route::get('reports/business', fn () => redirect()->route('admin.dashboard'))->name('reports.business');
         Route::get('reports/ceo', CeoReportController::class)->name('reports.ceo');

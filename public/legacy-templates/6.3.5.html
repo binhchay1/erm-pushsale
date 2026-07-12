@@ -1,0 +1,214 @@
+<div class="legacy-template-fragment legacy-page-fragment" data-template-code="6.3.5"><div class="content-wrapper" style="min-height: 737px;">
+<div class="contentPane legacy-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1444"><a name="1444"></a><div class="legacy-template-inner" id="dnn_ctr1444_ContentPane"><!-- Start_Module_1444 --><div class="legacy-template-inner" id="dnn_ctr1444_ModuleContent">
+<style>
+    .rowsum {
+        background-color: #4b719e !important;
+        color: white;
+    }
+
+    .fs15 {
+        font-size: 20px;
+        margin-right: 10px;
+    }
+
+    .toogle_hidden {
+        display: none;
+    }
+
+    .cv.cv43 {
+        display: none;
+    }
+
+    .cv.cv34 {
+        display: none;
+    }
+
+    tr.error {
+        background-color: lightpink;
+    }
+</style>
+<div id="dnn_ctr1444_Main_TongKetKeHoach_pnlMain">
+<span class="hidden" id="dnn_ctr1444_Main_TongKetKeHoach_lblDownLoad"></span>
+<span class="hidden" id="dnn_ctr1444_Main_TongKetKeHoach_lblDownLoad1"></span>
+<div id="dnn_ctr1444_Main_TongKetKeHoach_pnSearch">
+<div class="m-header-wrap">
+<div class="m-header">
+<div class="col-sm-2 form-group">
+<span class="text" id="dnn_ctr1444_Main_TongKetKeHoach_lblModuleTitle">Tổng kết kế hoạch tháng</span>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1444_Main_TongKetKeHoach_ddlThang" name="dnn$ctr1444$Main$TongKetKeHoach$ddlThang" style="" title="">
+<option value="-1">--Chọn Tháng--</option>
+<option selected="selected" value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen legacy-select" id="dnn_ctr1444_Main_TongKetKeHoach_ddlNam" name="dnn$ctr1444$Main$TongKetKeHoach$ddlNam" style="" title="">
+<option selected="selected" value="2026">Năm 2026</option>
+<option value="2025">Năm 2025</option>
+<option value="2024">Năm 2024</option>
+<option value="2023">Năm 2023</option>
+<option value="2022">Năm 2022</option>
+<option value="2021">Năm 2021</option>
+<option value="2020">Năm 2020</option>
+<option value="2019">Năm 2019</option>
+</select>
+</div>
+<div class="col-sm-6 form-group">
+<div style="width:120px; float: left;">
+<select class="chosen legacy-select" id="dnn_ctr1444_Main_TongKetKeHoach_ddlIdChucVu" name="dnn$ctr1444$Main$TongKetKeHoach$ddlIdChucVu" style="" title="">
+<option selected="selected" value="4">Marketing</option>
+<option value="3">Sale</option>
+</select>
+</div>
+<div style="width: 400px; float: right;">
+<a class="btn btn-sm btn-primary mb10" data-legacy-action="search" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_btnSearch" role="button">
+<i class="fa fa-search"></i> Tìm kiếm
+                            </a>
+<a class="btn btn-sm btn-primary mb10" data-legacy-action="export" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_btnExport" role="button" title="Xuất Exel 1">
+<i class="fa fa-file-excel-o"></i> Xuất Excel 1
+                            </a>
+<a class="btn btn-sm btn-primary mb10" data-legacy-action="export" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_LinkButton2" role="button" title="Xuất Exel 2">
+<i class="fa fa-file-excel-o"></i> Xuất Excel 2
+                            </a>
+<a class="btn btn-sm btn-primary hidden btn-reload" data-legacy-action="reload" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_btnReload" role="button">
+<i class="fa fa-refresh"></i> Reload
+                            </a>
+</div>
+<div style="clear: both;"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="box">
+<div class="box-body">
+<div class="row hidden">
+<div class="col-xs-6 form-group">
+<a class="btn btn-sm btn-primary mr15" data-legacy-action="save" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_btnLuu" role="button">
+<i class="fa fa-save"></i> Lưu
+                        </a>
+<div class="btn-group ml15 hidden" style="" title="Chức năng">
+<i aria-expanded="false" class="fa fa-gear dropdown-toggle" data-toggle="dropdown" style="font-size: 16px;"></i>
+<ul class="dropdown-menu" role="menu">
+<li>
+<a href="#" id="dnn_ctr1444_Main_TongKetKeHoach_btnXuatExcel" title="Xuất Excel">
+<i class="fa fa-cloud-download"></i> Xuất Excel
+                                    </a>
+</li>
+</ul>
+</div>
+</div>
+<div class="col-xs-6 text-right form-group hidden">
+<div class="btn-group">
+<button class="btn btn-default btn-sm" role="button" type="button">
+<i class="fa fa-spinner fa-spin hidden spwait"></i>
+<span id="dnn_ctr1444_Main_TongKetKeHoach_tnShortPager_lblRecordInfo"></span>
+</button>
+<a class="btn btn-default btn-sm" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_tnShortPager_btnPrev" role="button" title="Trang trước">
+<i class="fa fa-caret-left" style="margin-right:0;"></i>
+</a>
+<a class="btn btn-default btn-sm" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_tnShortPager_btnNext" role="button" style="padding-right:10px;" title="Trang sau">
+<i class="fa fa-caret-right" style="margin-right:0;"></i>
+</a>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-xs-12">
+<div class="pu-caption">
+                            Số liệu kế hoạch KPI
+                        </div>
+</div>
+</div>
+<div style="width: 100%; overflow: hidden; overflow-x: auto;">
+<div data-legacy-grid-anchor="1"></div>
+<div class="hidden">
+<ul "="" class="pagination pagination-sm no-margin">
+<li><a href="#" id="dnn_ctr1444_Main_TongKetKeHoach_tnPager_pre" title="Trang trước">«</a></li>
+<li><a href="#" id="dnn_ctr1444_Main_TongKetKeHoach_tnPager_nextx" title="Trang sau">»</a></li>
+</ul>
+</div>
+<div style="height: 20px;"></div>
+</div>
+<div class="row">
+<div class="col-xs-12">
+<div class="pu-caption">
+                            Số liệu tháng thực tế
+                        </div>
+</div>
+</div>
+<div style="width: 100%; overflow: hidden; overflow-x: auto;">
+<table class="table table-bordered table-multi-select" id="tblData2">
+<tbody><tr>
+<th class="text-center" style="width: 30px;">STT</th>
+<th class="text-center no-wrap">Tài khoản </th>
+<th class="text-center no-wrap">Chức vụ </th>
+<th class="text-center no-wrap" style="width: 90px;">Tên KPI </th>
+<th class="text-center cv cv44" style="width: 80px;">Ngân sách/tháng </th>
+<th class="text-center cv cv44" style="width: 80px;">Số click/tháng </th>
+<th class="text-center cv cv44" style="width: 80px;">Số contact/tháng </th>
+<th class="text-center cv cv44" style="width: 100px;">Doanh số/tháng </th>
+<th class="text-center cv cv34" style="width: 60px;">Số contact mới tháng </th>
+<th class="text-center cv cv34" style="width: 60px;">Số contact cũ/tháng </th>
+<th class="text-center cv cv34" style="width: 60px;">Chốt đơn mới/tháng </th>
+<th class="text-center cv cv34" style="width: 60px;">Chốt đơn cũ/tháng </th>
+<th class="text-center cv cv34" style="width: 100px;">Doanh số  thực tế/ tháng </th>
+<th class="text-center" style="width: 60px;">Số ngày làm việc/tháng</th>
+<th class="text-center" style="width: 60px;">Số ngày làm việc thực tế</th>
+<th class="text-center" style="width: 80px;">Lương cứng</th>
+<th class="text-center" style="width: 100px;">Tiền thưởng (%  Doanh số)</th>
+<th class="text-center" style="width: 100px;">Tổng thu nhập</th>
+<th class="text-center" style="width: 80px;">Chốt dữ liệu</th>
+<th class="text-center no-wrap" style="width: 100px;">Cập nhật thực tế</th>
+</tr>
+<tr>
+<td class="text-left" colspan="13"></td>
+<td class="text-center">
+<a class="btn-icon" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_btnChotDuLieuThangNay">
+<i class="fa fa-check"></i> <span class="text">Chốt dữ liệu</span>
+</a>
+<a class="btn-icon" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_btnHuyChotDuLieuThangNay">
+<i class="fa fa-close"></i> <span class="text">Hủy chốt dữ liệu</span>
+</a>
+</td>
+<td class="text-center">
+<a class="btn-icon" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_LinkButton1" title="Lưu">
+<i class="fa fa-save"></i> <span class="text">Lưu</span>
+</a>
+</td>
+</tr>
+</tbody></table>
+<div class="hidden">
+<ul "="" class="pagination pagination-sm no-margin">
+<li><a href="#" id="dnn_ctr1444_Main_TongKetKeHoach_Pager1_pre" title="Trang trước">«</a></li>
+<li><a href="#" id="dnn_ctr1444_Main_TongKetKeHoach_Pager1_nextx" title="Trang sau">»</a></li>
+</ul>
+</div>
+<div style="height: 20px;"></div>
+</div>
+<div class="row text-center">
+<a class="btn-icon" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_btnChot">
+<i class="fa fa-check mr10"></i> <span class="text">Chốt dữ liệu</span>
+</a>
+<a class="btn-icon" href="#" id="dnn_ctr1444_Main_TongKetKeHoach_btnHuyChot">
+<i class="fa fa-close"></i> <span class="text">Hủy chốt dữ liệu</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+
+</div><!-- End_Module_1444 --></div>
+</div></div>
+</div></div>
