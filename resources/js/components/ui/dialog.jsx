@@ -49,7 +49,7 @@ function DialogContent({ className, children, showClose = true, ...props }) {
                 {children}
                 {showClose && (
                     <DialogPrimitive.Close asChild>
-                        <Button variant="ghost" className="absolute top-3 right-3" size="icon-sm">
+                        <Button variant="ghost" className="pushsale-dialog-close absolute top-3 right-3" size="icon-sm">
                             <XIcon />
                             <span className="sr-only">Close</span>
                         </Button>
@@ -61,16 +61,17 @@ function DialogContent({ className, children, showClose = true, ...props }) {
 }
 
 function DialogHeader({ className, ...props }) {
-    return <div className={cn('flex flex-col gap-1.5', className)} {...props} />;
+    return <div data-slot="dialog-header" className={cn('flex flex-col gap-1.5', className)} {...props} />;
 }
 
 function DialogFooter({ className, ...props }) {
-    return <div className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)} {...props} />;
+    return <div data-slot="dialog-footer" className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)} {...props} />;
 }
 
 function DialogTitle({ className, ...props }) {
     return (
         <DialogPrimitive.Title
+            data-slot="dialog-title"
             className={cn('text-lg font-semibold leading-none', className)}
             {...props}
         />
@@ -80,6 +81,7 @@ function DialogTitle({ className, ...props }) {
 function DialogDescription({ className, ...props }) {
     return (
         <DialogPrimitive.Description
+            data-slot="dialog-description"
             className={cn('text-sm text-muted-foreground', className)}
             {...props}
         />

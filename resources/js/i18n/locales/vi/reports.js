@@ -157,8 +157,8 @@ export default {
         m19: '% DS hủy (19)',
     },
     ceo_report: {
-        title: 'Báo cáo điều hành CEO',
-        module_title: 'Báo cáo CEO',
+        title: 'Báo cáo CEO V2',
+        module_title: 'Báo cáo CEO V2',
         desc: 'ERM SaleOps — tổng hợp Sale & Marketing',
         sale_section: 'Hiệu suất Sale',
         marketing_section: 'Hiệu suất Marketing',
@@ -299,6 +299,14 @@ export default {
         'marketing-2': {
             title: 'Tỉ lệ chốt đơn sản phẩm',
             description: 'Contact, đơn chốt, tỷ lệ chốt và giá trị trung bình của từng sản phẩm.',
+        },
+        'marketing-3': {
+            title: 'Báo cáo công việc marketing',
+            description: 'Tổng contact, contact chưa phân bổ, đơn chốt và doanh số theo từng nhân viên marketing.',
+        },
+        'marketing-4': {
+            title: 'Báo cáo upsale',
+            description: 'Hiệu quả theo nguồn dữ liệu, số lượng sản phẩm, doanh số và phần bán thêm.',
         },
         'kho-1': {
             title: 'Báo cáo doanh số theo kho',

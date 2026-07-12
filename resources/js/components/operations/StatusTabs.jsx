@@ -6,17 +6,15 @@ export function StatusTabs({ routeUrl, filters, tabs, filterKey = 'operation_sta
     const active = filters[filterKey] ?? 'all';
 
     return (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="pushsale-status-tabs">
             {tabs?.map((tab) => (
                 <button
                     key={tab.status}
                     type="button"
                     onClick={() => search({ [filterKey]: tab.status === 'all' ? null : tab.status })}
                     className={cn(
-                        'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
-                        active === tab.status
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : 'border-border bg-background hover:bg-muted'
+                        'pushsale-status-tab',
+                        active === tab.status ? 'is-active' : ''
                     )}
                 >
                     {tab.label}

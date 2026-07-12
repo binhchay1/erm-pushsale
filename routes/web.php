@@ -164,6 +164,12 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::patch('marketing/campaigns/{campaign}/budget', [CampaignBudgetController::class, 'update'])->name('marketing.campaigns.budget');
         Route::get('sales/revenue', SaleRevenueReportController::class)->name('sales.revenue');
         Route::get('sales/performance', AdminSalesPerformanceReportController::class)->name('sales.performance');
+        Route::get('sales/workspace', OperationController::class)->name('sales.workspace');
+        Route::post('sales/orders/{order}/call', [SaleOperationCallController::class, 'store'])->name('sales.orders.call');
+        Route::post('sales/orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('sales.orders.operation-status');
+        Route::post('sales/orders/{order}/details', [SaleOperationOrderController::class, 'update'])->name('sales.orders.details');
+        Route::post('sales/orders/{order}/close', [OrderClosingController::class, 'store'])->name('sales.orders.close');
+        Route::post('sales/leads/manual', [ManualLeadController::class, 'store'])->name('sales.leads.manual');
         Route::get('accounting', AccountingOperationsController::class)->name('accounting');
         Route::get('warehouse/operations', WarehouseOperationsController::class)->name('warehouse.operations');
         Route::get('warehouse/inventory', InventoryController::class)->name('warehouse.inventory');
@@ -227,6 +233,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('rankings', SalesRankingController::class)->name('rankings');
         Route::get('performance', SalesPerformanceReportController::class)->name('performance');
         Route::get('workspace', OperationController::class)->name('workspace');
+        Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
         Route::post('orders/{order}/call', [SaleOperationCallController::class, 'store'])->name('orders.call');
         Route::post('orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('orders.operation-status');
         Route::post('orders/{order}/details', [SaleOperationOrderController::class, 'update'])->name('orders.details');

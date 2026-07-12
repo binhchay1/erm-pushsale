@@ -398,7 +398,7 @@ export default {
         validation: 'Chọn kho, sản phẩm và số lượng.',
         approver_required: 'Chọn trưởng kho ký duyệt.',
         fill_required: 'Chọn đủ kho, sản phẩm, số lượng (>0) và người duyệt để bật nút.',
-        inventory_title: 'Tồn kho sản phẩm',
+        inventory_title: 'Danh sách sản phẩm kho',
         inventory_desc: 'Theo dõi số lượng hàng từng kho, nhập thêm hoặc xuất bớt hàng — có trưởng kho ký duyệt',
         intake_form: 'Nhập hàng vào kho',
         export_form: 'Xuất hàng khỏi kho',

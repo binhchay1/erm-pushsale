@@ -4,7 +4,7 @@ import { Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useT } from '@/providers/I18nProvider';
 
-export function OperationCallButton({ order }) {
+export function OperationCallButton({ order, actionBaseUrl = '/sales' }) {
     const t = useT();
 
     if (!order?.canCall) {
@@ -15,7 +15,7 @@ export function OperationCallButton({ order }) {
 
     const onCall = () => {
         router.post(
-            `/sales/orders/${order.id}/call`,
+            `${actionBaseUrl}/orders/${order.id}/call`,
             {},
             {
                 preserveScroll: true,

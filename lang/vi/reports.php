@@ -181,7 +181,7 @@ return [
         'generated' => 'Xuất lúc',
     ],
     'ceo_report' => [
-        'title' => 'Báo cáo điều hành CEO',
+        'title' => 'Báo cáo CEO V2',
         'sale' => 'Sale',
         'new_contact' => 'Tiếp xúc (mới)',
         'new_closed' => 'Chốt (mới)',

@@ -77,6 +77,7 @@ function mapInitialItems(order) {
 
 export function OperationStatusDialog({
     order,
+    actionBaseUrl = '/sales',
     options = [],
     carrierOptions = [],
     shippingServiceOptions = {},
@@ -252,7 +253,7 @@ export function OperationStatusDialog({
 
         setProcessing(true);
         router.post(
-            `/sales/orders/${order.id}/operation-status`,
+            `${actionBaseUrl}/orders/${order.id}/operation-status`,
             {
                 operation_result: result,
                 next_operation_at: needsSchedule ? nextAt : null,
@@ -291,7 +292,7 @@ export function OperationStatusDialog({
 
         setProcessing(true);
         router.post(
-            `/sales/orders/${order.id}/details`,
+            `${actionBaseUrl}/orders/${order.id}/details`,
             {
                 items: items.map((it) => ({
                     product_id: it.productId ? Number(it.productId) : null,

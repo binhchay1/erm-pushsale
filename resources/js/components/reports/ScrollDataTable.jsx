@@ -2,11 +2,11 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
-export function ScrollDataTable({ children, className }) {
+export function ScrollDataTable({ children, className, ...props }) {
     return (
         <div
             className={cn(
-                'max-w-full overflow-hidden rounded-xl border border-border bg-card shadow-sm',
+                'pushsale-table-frame max-w-full overflow-hidden border border-border bg-card',
                 '[&_tbody_tr:nth-child(even)]:bg-muted/30',
                 '[&_tbody_tr]:border-b [&_tbody_tr]:border-border/50',
                 '[&_tbody_tr:last-child]:border-b-0',
@@ -15,8 +15,9 @@ export function ScrollDataTable({ children, className }) {
                 '[&_thead_th_svg]:!text-white/80',
                 className
             )}
+            {...props}
         >
-            <div className="max-w-full overflow-x-auto">{children}</div>
+            <div data-pushsale-table="true" className="max-w-full overflow-x-auto">{children}</div>
         </div>
     );
 }

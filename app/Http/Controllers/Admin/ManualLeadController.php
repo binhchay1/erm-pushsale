@@ -32,6 +32,13 @@ class ManualLeadController extends Controller
             'items.*.item_type' => ['nullable', Rule::in(['product', 'combo'])],
             'items.*.quantity' => ['nullable', 'integer', 'min:1', 'max:9999'],
             'items.*.unit_price' => ['nullable', 'integer', 'min:0'],
+            'items.*.discount_amount' => ['nullable', 'integer', 'min:0'],
+            'discount' => ['nullable', 'integer', 'min:0'],
+            'message' => ['nullable', 'string', 'max:1000'],
+            'shipping_address' => ['nullable', 'string', 'max:500'],
+            'shipping_notes' => ['nullable', 'string', 'max:1000'],
+            'deposit' => ['nullable', 'integer', 'min:0'],
+            'shipping_fee_collected' => ['nullable', 'integer', 'min:0'],
             'note' => ['nullable', 'string', 'max:1000'],
         ] + $this->allocationRules($request));
 

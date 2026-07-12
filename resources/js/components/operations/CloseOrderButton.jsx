@@ -41,7 +41,7 @@ function StockWarningBlock({ warnings = [] }) {
     );
 }
 
-export function CloseOrderButton({ order, disabled }) {
+export function CloseOrderButton({ order, disabled, actionBaseUrl = '/sales' }) {
     const t = useT();
     const [open, setOpen] = useState(false);
     const [processing, setProcessing] = useState(false);
@@ -60,7 +60,7 @@ export function CloseOrderButton({ order, disabled }) {
 
         setProcessing(true);
         router.post(
-            `/sales/orders/${order.id}/close`,
+            `${actionBaseUrl}/orders/${order.id}/close`,
             { confirm_insufficient_stock: confirmInsufficient },
             {
                 preserveScroll: true,

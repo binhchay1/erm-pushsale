@@ -9,7 +9,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useSidebar } from '@/components/ui/sidebar';
 import { useI18n, useT } from '@/providers/I18nProvider';
 
 function brandTitle(auth, brand) {
@@ -19,9 +18,8 @@ function brandTitle(auth, brand) {
     return `${short}.ADMIN`.toUpperCase();
 }
 
-export function AppHeader() {
+export function AppHeader({ onToggleSidebar }) {
     const { auth, brand, locales: localeMeta } = usePage().props;
-    const { toggleSidebar } = useSidebar();
     const { locale, setLocale } = useI18n();
     const t = useT();
 
@@ -36,7 +34,7 @@ export function AppHeader() {
             <button
                 type="button"
                 className="sidebar-toggle"
-                onClick={toggleSidebar}
+                onClick={onToggleSidebar}
                 aria-label="Toggle navigation"
             >
                 <span className="sr-only">Toggle navigation</span>

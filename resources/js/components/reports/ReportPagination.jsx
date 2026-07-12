@@ -88,7 +88,7 @@ export function ReportPagination({
     };
 
     return (
-        <div className="flex flex-col gap-3 rounded-lg border bg-card px-4 py-3 text-sm shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="pushsale-pagination">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
                 <span>
                     {t('common.pagination.showing', {

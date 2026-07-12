@@ -2,331 +2,213 @@
 
 namespace App\Services;
 
-use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use App\Models\User;
-use App\Services\Marketing\CampaignApprovalService;
 
+/**
+ * Navigation theo đúng cây menu của Pushsale.vn (AdminLTE 2).
+ *
+ * Cây gốc nằm tại config/pushsale_navigation.php để có thể đối chiếu từng tên
+ * menu với file template. Service chỉ làm hai việc: chọn module theo vai trò và
+ * đổi route admin sang route tương ứng của vai trò hiện tại.
+ */
 class NavigationService
 {
-    public function __construct(
-        private readonly CampaignApprovalService $campaignApproval,
-    ) {}
-
-    /** @return list<array{label_key?: string, items: list<array{title_key: string, url: string, icon: string}>}> */
+    /** @return list<array<string, mixed>> */
     public function forUser(?User $user): array
     {
         if (! $user) {
             return [];
         }
 
-        $groups = match ($user->role) {
-            UserRole::Admin => $this->adminNavigation($user),
-            UserRole::Sales => $this->salesNavigation(),
-            UserRole::Marketing => $this->marketingNavigation($user),
-            UserRole::Warehouse => $this->warehouseNavigation($user),
-            UserRole::Accounting => $this->accountingNavigation(),
-            UserRole::Allocator => $this->allocatorNavigation($user),
-        };
+        /** @var list<array<string, mixed>> $tree */
+        $tree = config('pushsale_navigation', []);
+        $allowedTopLevels = $this->topLevelsForRole($user->role);
 
-        return $this->filterByPermission($user, $groups);
-    }
+        $tree = array_values(array_filter($tree, function (array $item) use ($allowedTopLevels): bool {
+            $number = $this->menuNumber((string) ($item['title'] ?? ''));
 
-    /**
-     * Ẩn item mà user không đủ quyền xem; bỏ group rỗng. Admin luôn thấy hết.
-     *
-     * @param  list<array{label_key?: string, items: list<array<string, string>>}>  $groups
-     * @return list<array{label_key?: string, items: list<array<string, string>>}>
-     */
-    private function filterByPermission(User $user, array $groups): array
-    {
-        $result = [];
-        foreach ($groups as $group) {
-            $items = array_values(array_filter($group['items'], function (array $item) use ($user) {
-                if (empty($item['area'])) {
-                    return true;
-                }
+            return $number !== null && in_array($number, $allowedTopLevels, true);
+        }));
 
-                return $user->allows($item['area']);
-            }));
+        $tree = array_map(fn (array $item): array => $this->adaptRoutes($item, $user->role), $tree);
+        $tree = $this->filterTreeByPermission($user, $tree);
 
-            if ($items === []) {
-                continue;
-            }
-
-            $group['items'] = $items;
-            $result[] = $group;
-        }
-
-        return $result;
-    }
-
-    /** @return list<array{label_key?: string, items: list<array{title_key: string, url: string, icon: string}>}> */
-    private function adminNavigation(User $user): array
-    {
-        $groups = [
-            $this->group('operations', [
-                $this->item('executive_dashboard', '/admin/dashboard', 'home'),
-                $this->item('rankings', '/admin/rankings', 'trophy'),
-            ]),
-            $this->group('reports_executive', [
-                $this->item('ceo_report', '/admin/reports/ceo', 'bar-chart-3'),
-            ]),
-            $this->group('reports_sales', [
-                $this->item('sales_performance', '/admin/sales/performance', 'gauge'),
-                $this->item('sale_report_1', '/admin/reports/extra/sale-1', 'phone-call'),
-                $this->item('sale_report_2', '/admin/reports/extra/sale-2', 'table-2'),
-                $this->item('sale_report_3', '/admin/reports/extra/sale-3', 'trending-up'),
-                $this->item('sale_report_4', '/admin/reports/extra/sale-4', 'award'),
-                $this->item('sale_report_5', '/admin/reports/extra/sale-5', 'calendar-clock'),
-            ]),
-            $this->group('reports_marketing', [
-                $this->item('marketing_report_1', '/admin/reports/extra/marketing-1', 'circle-dollar-sign'),
-                $this->item('campaign_report', '/admin/marketing/campaign-report', 'pie-chart'),
-                $this->item('marketing_report_2', '/admin/reports/extra/marketing-2', 'percent'),
-                $this->item('marketing_report_3', '/admin/reports/extra/marketing-3', 'clipboard-list'),
-                $this->item('upsale_report', '/admin/reports/extra/marketing-4', 'trending-up'),
-                $this->item('team_leader_stats', '/admin/reports/team-leaders', 'network'),
-                $this->item('hourly_stats', '/admin/reports/hourly', 'clock'),
-            ]),
-            $this->group('reports_warehouse', [
-                $this->item('warehouse_report_1', '/admin/reports/extra/kho-1', 'store'),
-                $this->item('warehouse_report_2', '/admin/reports/extra/kho-2', 'landmark'),
-            ]),
-            $this->group('marketing', [
-                $this->item('marketing_dashboard', '/admin/marketing/dashboard', 'megaphone'),
-                $this->item('landing_approvals', '/admin/landing-approvals', 'layout-template'),
-            ]),
-            $this->group('telesale', [
-                $this->item('leads_log', '/admin/leads', 'inbox'),
-                $this->item('customers', '/admin/customers', 'book-user', 'customers'),
-            ]),
-            $this->group('connections', [
-                $this->item('integrations', '/admin/integrations', 'plug'),
-                $this->item('shipping_partners', '/admin/shipping-partners', 'truck'),
-                $this->item('shipping_orders', '/admin/shipping/orders', 'package'),
-                $this->item('shipping_reconciliation', '/admin/shipping/reconciliation', 'file-check'),
-            ]),
-            $this->group('hr_catalog', [
-                $this->item('users', '/admin/users', 'users'),
-                $this->item('teams', '/admin/teams', 'network'),
-                $this->item('activity_logs', '/admin/activity-logs', 'scroll-text'),
-                $this->item('org_chart', '/org-chart', 'git-branch'),
-                $this->item('products', '/admin/products', 'box'),
-            ]),
-            $this->group('warehouse_finance', [
-                $this->item('accounting', '/admin/accounting', 'wallet'),
-                $this->item('warehouses', '/admin/warehouses', 'warehouse'),
-                $this->item('inventory', '/admin/warehouse/inventory', 'boxes'),
-                $this->item('movements', '/admin/warehouse/movements', 'arrow-right-left'),
-                $this->item('failed_orders', '/admin/orders/failed', 'alert-triangle'),
-            ]),
-        ];
-
+        // Super admin có thêm màn quản trị nền tảng nhưng vẫn giữ nguyên 9 nhóm
+        // chuẩn Pushsale; mục này được gắn vào nhóm Quản trị đơn vị.
         if ($user->canManagePlatform()) {
-            $groups[] = $this->group('platform', [
-                $this->item('platform_companies', '/platform/companies', 'building-2'),
-                $this->item('platform_settings', '/platform/settings', 'settings-2'),
-                $this->item('system_monitor', '/admin/system-monitor', 'activity'),
-            ]);
+            $tree = $this->appendPlatformItems($tree);
         }
 
-        $groups[] = $this->group(null, [
-            $this->item('settings', '/settings', 'settings'),
-        ]);
-
-        return $this->grouped($groups);
+        return $tree;
     }
 
-    /** @return list<array{label_key?: string, items: list<array<string, string>>}> */
-    private function salesNavigation(): array
+    /** @return list<int> */
+    private function topLevelsForRole(UserRole $role): array
     {
-        return $this->grouped([
-            $this->group('operations', [
-                $this->item('overview', '/sales/dashboard', 'home'),
-                $this->item('workspace_sales', '/sales/workspace', 'phone-call', 'telesale'),
-            ]),
-            $this->group('reports_sales', [
-                $this->item('performance_report', '/sales/performance', 'bar-chart-3', 'reports'),
-                $this->item('extra_report', '/sales/reports/sale-1', 'file-bar-chart', 'reports'),
-                $this->item('rankings', '/sales/rankings', 'trophy', 'reports'),
-            ]),
-            $this->group('telesale', [
-                $this->item('customers', '/sales/customers', 'book-user', 'customers'),
-            ]),
-            $this->group('hr_catalog', [
-                $this->item('users', '/admin/users', 'users', 'hr'),
-                $this->item('org_chart', '/org-chart', 'git-branch'),
-            ]),
-            $this->group('platform', [
-                $this->item('settings', '/settings', 'settings'),
-            ]),
-        ]);
+        return match ($role) {
+            UserRole::Admin => [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            UserRole::Sales => [3, 4, 8],
+            UserRole::Marketing => [2, 3, 8],
+            UserRole::Warehouse => [3, 5, 8],
+            UserRole::Accounting => [3, 6, 8],
+            UserRole::Allocator => [1, 2, 3, 8],
+        };
     }
 
-    /** @return list<array{label_key?: string, items: list<array<string, string>>}> */
-    private function marketingNavigation(User $user): array
+    private function menuNumber(string $title): ?int
     {
-        $marketingItems = [
-            $this->item('marketing_workspace', '/marketing/workspace', 'share2', 'marketing'),
-            $this->item('campaigns', '/marketing/campaigns', 'layout-template', 'marketing'),
-        ];
-
-        if ($this->campaignApproval->canViewApprovals($user)) {
-            $marketingItems[] = $this->item('landing_approvals', '/marketing/landing-approvals', 'layout-template', 'marketing');
+        if (preg_match('/^(\d+)\./', trim($title), $matches) !== 1) {
+            return null;
         }
 
-        return $this->grouped([
-            $this->group('operations', [
-                $this->item('overview', '/marketing/dashboard', 'home'),
-            ]),
-            $this->group('reports_marketing', [
-                $this->item('campaign_report', '/marketing/campaign-report', 'pie-chart', 'reports'),
-                $this->item('revenue_report', '/marketing/revenue', 'trending-up', 'reports'),
-                $this->item('extra_report', '/marketing/reports/marketing-1', 'file-bar-chart', 'reports'),
-                $this->item('marketing_report_3', '/marketing/reports/marketing-3', 'clipboard-list', 'reports'),
-                $this->item('upsale_report', '/marketing/reports/marketing-4', 'trending-up', 'reports'),
-                $this->item('team_leader_stats', '/marketing/reports/team-leaders', 'network', 'reports'),
-                $this->item('hourly_stats', '/marketing/reports/hourly', 'clock', 'reports'),
-                $this->item('rankings', '/marketing/rankings', 'trophy', 'reports'),
-            ]),
-            $this->group('marketing', $marketingItems),
-            $this->group('telesale', [
-                $this->item('leads_log', '/marketing/leads', 'inbox', 'leads'),
-                $this->item('customers', '/marketing/customers', 'book-user', 'customers'),
-            ]),
-            $this->group('hr_catalog', [
-                $this->item('users', '/admin/users', 'users', 'hr'),
-                $this->item('org_chart', '/org-chart', 'git-branch'),
-            ]),
-            $this->group('platform', [
-                $this->item('settings', '/settings', 'settings'),
-            ]),
-        ]);
+        return (int) $matches[1];
     }
 
-    /** @return list<array{label_key?: string, items: list<array<string, string>>}> */
-    private function warehouseNavigation(User $user): array
+    /** @param array<string, mixed> $item @return array<string, mixed> */
+    private function adaptRoutes(array $item, UserRole $role): array
     {
-        $reportItems = [];
-        if ($user->is_team_leader || in_array($user->org_level, [OrgLevel::Head, OrgLevel::Supervisor], true)) {
-            $reportItems[] = $this->item('warehouse_report', '/warehouse/reports/kho-1', 'chart-area', 'reports');
+        if (isset($item['url']) && is_string($item['url'])) {
+            $url = $this->routeForRole($item['url'], $role);
+            if ($url === null) {
+                unset($item['url']);
+                $item['disabled'] = true;
+            } else {
+                $item['url'] = $url;
+            }
         }
 
-        return $this->grouped([
-            $this->group('operations', [
-                $this->item('overview', '/warehouse/dashboard', 'home'),
-                $this->item('warehouse_workspace', '/warehouse/workspace', 'truck', 'warehouse'),
-            ]),
-            $this->group('reports_warehouse', $reportItems),
-            $this->group('telesale', [
-                $this->item('customers', '/warehouse/customers', 'book-user', 'customers'),
-            ]),
-            $this->group('connections', [
-                $this->item('shipping_orders', '/warehouse/shipping/orders', 'package', 'shipping'),
-            ]),
-            $this->group('warehouse_finance', [
-                $this->item('inventory', '/warehouse/inventory', 'boxes', 'warehouse'),
-            ]),
-            $this->group('hr_catalog', [
-                $this->item('users', '/admin/users', 'users', 'hr'),
-                $this->item('org_chart', '/org-chart', 'git-branch'),
-            ]),
-            $this->group('platform', [
-                $this->item('settings', '/settings', 'settings'),
-            ]),
-        ]);
-    }
-
-    /** @return list<array{label_key?: string, items: list<array<string, string>>}> */
-    private function accountingNavigation(): array
-    {
-        return $this->grouped([
-            $this->group('operations', [
-                $this->item('overview', '/accounting/dashboard', 'home'),
-            ]),
-            $this->group('reports_warehouse', [
-                $this->item('business_report', '/accounting/reports/kho-1', 'receipt', 'reports'),
-            ]),
-            $this->group('telesale', [
-                $this->item('customers', '/accounting/customers', 'book-user', 'customers'),
-            ]),
-            $this->group('warehouse_finance', [
-                $this->item('accounting_workspace', '/accounting/workspace', 'wallet', 'accounting'),
-            ]),
-            $this->group('hr_catalog', [
-                $this->item('users', '/admin/users', 'users', 'hr'),
-                $this->item('org_chart', '/org-chart', 'git-branch'),
-            ]),
-            $this->group('platform', [
-                $this->item('settings', '/settings', 'settings'),
-            ]),
-        ]);
-    }
-
-    /** @return list<array{label_key?: string, items: list<array<string, string>>}> */
-    private function allocatorNavigation(User $user): array
-    {
-        $reportItems = [
-            $this->item('allocation_report', '/allocator/reports/allocation', 'file-bar-chart', 'reports'),
-        ];
-
-        if ($user->is_team_leader || in_array($user->org_level, [OrgLevel::Head, OrgLevel::Supervisor], true)) {
-            $reportItems[] = $this->item('allocator_load_report', '/allocator/reports/load', 'gauge', 'reports');
-        }
-
-        return $this->grouped([
-            $this->group('operations', [
-                $this->item('overview', '/allocator/dashboard', 'home'),
-                $this->item('allocator_workspace', '/allocator/workspace', 'user-plus', 'leads'),
-            ]),
-            $this->group('reports_sales', $reportItems),
-            $this->group('telesale', [
-                $this->item('customers', '/allocator/customers', 'book-user', 'customers'),
-            ]),
-            $this->group('hr_catalog', [
-                $this->item('users', '/admin/users', 'users', 'hr'),
-                $this->item('org_chart', '/org-chart', 'git-branch'),
-            ]),
-            $this->group('platform', [
-                $this->item('settings', '/settings', 'settings'),
-            ]),
-        ]);
-    }
-
-    /** @return array{title_key: string, url: string, icon: string, area?: string} */
-    private function item(string $titleKey, string $url, string $icon, ?string $area = null): array
-    {
-        $item = ['title_key' => $titleKey, 'url' => $url, 'icon' => $icon];
-
-        if ($area !== null) {
-            $item['area'] = $area;
+        if (! empty($item['children']) && is_array($item['children'])) {
+            $item['children'] = array_map(
+                fn (array $child): array => $this->adaptRoutes($child, $role),
+                $item['children'],
+            );
         }
 
         return $item;
     }
 
-    /**
-     * @param  list<array{title_key: string, url: string, icon: string}>  $items
-     * @return array{label_key?: string, items: list<array{title_key: string, url: string, icon: string}>}
-     */
-    private function group(?string $labelKey, array $items): array
+    private function routeForRole(string $url, UserRole $role): ?string
     {
-        $group = ['items' => $items];
-
-        if ($labelKey !== null) {
-            $group['label_key'] = $labelKey;
+        if ($role === UserRole::Admin) {
+            return $url;
         }
 
-        return $group;
+        $exact = match ($role) {
+            UserRole::Sales => [
+                '/admin/sales/workspace' => '/sales/workspace',
+                '/admin/customers' => '/sales/customers',
+                '/admin/rankings' => '/sales/rankings',
+                '/admin/sales/performance' => '/sales/performance',
+                '/admin/sales/revenue' => '/sales/reports/sale-3',
+                '/admin/reports/ceo' => '/sales/reports/sale-3',
+                '/admin/reports/team-leaders' => '/sales/performance',
+            ],
+            UserRole::Marketing => [
+                '/admin/marketing/dashboard' => '/marketing/workspace',
+                '/admin/customers' => '/marketing/customers',
+                '/admin/rankings' => '/marketing/rankings',
+                '/admin/landing-approvals' => '/marketing/landing-approvals',
+                '/admin/leads' => '/marketing/leads',
+                '/admin/integrations' => '/marketing/campaigns',
+                '/admin/marketing/revenue' => '/marketing/revenue',
+                '/admin/marketing/campaign-report' => '/marketing/campaign-report',
+                '/admin/reports/hourly' => '/marketing/reports/hourly',
+                '/admin/reports/team-leaders' => '/marketing/reports/team-leaders',
+                '/admin/reports/ceo' => '/marketing/reports/marketing-1',
+            ],
+            UserRole::Warehouse => [
+                '/admin/warehouse/operations' => '/warehouse/workspace',
+                '/admin/warehouse/inventory' => '/warehouse/inventory',
+                '/admin/warehouse/movements' => '/warehouse/inventory',
+                '/admin/warehouses' => '/warehouse/inventory',
+                '/admin/customers' => '/warehouse/customers',
+                '/admin/shipping/orders' => '/warehouse/shipping/orders',
+            ],
+            UserRole::Accounting => [
+                '/admin/accounting' => '/accounting/workspace',
+                '/admin/customers' => '/accounting/customers',
+                '/admin/reports/ceo' => '/accounting/reports/kho-1',
+            ],
+            UserRole::Allocator => [
+                '/admin/leads' => '/allocator/workspace',
+                '/admin/customers' => '/allocator/customers',
+                '/admin/reports/team-leaders' => '/allocator/reports/allocation',
+                '/admin/reports/hourly' => '/allocator/reports/load',
+            ],
+            default => [],
+        };
+
+        if (array_key_exists($url, $exact)) {
+            return $exact[$url];
+        }
+
+        if (preg_match('#^/admin/reports/extra/([a-z0-9-]+)$#', $url, $matches) === 1) {
+            return match ($role) {
+                UserRole::Sales => '/sales/reports/'.$matches[1],
+                UserRole::Marketing => '/marketing/reports/'.$matches[1],
+                UserRole::Warehouse => '/warehouse/reports/'.$matches[1],
+                UserRole::Accounting => '/accounting/reports/'.$matches[1],
+                UserRole::Allocator => '/allocator/reports/allocation',
+                default => null,
+            };
+        }
+
+        // Các route dùng chung ngoài prefix admin.
+        if (in_array($url, ['/settings', '/notifications', '/org-chart'], true)) {
+            return $url;
+        }
+
+        return null;
     }
 
     /**
-     * @param  list<array{label_key?: string, items: list<array{title_key: string, url: string, icon: string}>}>  $groups
-     * @return list<array{label_key?: string, items: list<array{title_key: string, url: string, icon: string}>}>
+     * @param list<array<string, mixed>> $items
+     * @return list<array<string, mixed>>
      */
-    private function grouped(array $groups): array
+    private function filterTreeByPermission(User $user, array $items): array
     {
-        return $groups;
+        $result = [];
+
+        foreach ($items as $item) {
+            if (! $user->isAdmin() && ! empty($item['area']) && ! $user->allows((string) $item['area'])) {
+                continue;
+            }
+
+            if (! empty($item['children']) && is_array($item['children'])) {
+                $item['children'] = $this->filterTreeByPermission($user, $item['children']);
+
+                if ($item['children'] === [] && empty($item['url'])) {
+                    continue;
+                }
+            }
+
+            $result[] = $item;
+        }
+
+        return $result;
+    }
+
+    /** @param list<array<string, mixed>> $tree @return list<array<string, mixed>> */
+    private function appendPlatformItems(array $tree): array
+    {
+        foreach ($tree as &$top) {
+            if ($this->menuNumber((string) ($top['title'] ?? '')) !== 1) {
+                continue;
+            }
+
+            $top['children'][] = [
+                'title' => '1.16 Quản trị nền tảng',
+                'children' => [
+                    ['title' => '1. Danh sách doanh nghiệp', 'url' => '/platform/companies', 'icon' => 'building'],
+                    ['title' => '2. Cấu hình nền tảng', 'url' => '/platform/settings', 'icon' => 'sliders'],
+                    ['title' => '3. Giám sát hệ thống', 'url' => '/admin/system-monitor', 'icon' => 'heartbeat'],
+                ],
+            ];
+            break;
+        }
+        unset($top);
+
+        return $tree;
     }
 }

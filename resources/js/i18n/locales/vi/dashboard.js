@@ -70,7 +70,7 @@ export default {
         vs_prev: ':rate so với bước trước',
     },
     marketing: {
-        title: 'Dashboard Marketing',
+        title: 'Marketing dashboard',
         desc: 'Theo dõi hiệu quả campaign, lead source, conversion và doanh thu theo nguồn.',
         admin_desc: 'Theo dõi hiệu suất team, tỷ lệ chốt và doanh thu theo nguồn chiến dịch',
         active_campaigns: 'Chiến dịch đang chạy',

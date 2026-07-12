@@ -46,6 +46,7 @@ export function OperationOrderTable({
     itemTypeOptions = ['product', 'combo', 'upsell', 'gift'],
     warehouseOptions = [],
     productOptions = [],
+    actionBaseUrl = '/sales',
 }) {
     const t = useT();
     const actionCols =
@@ -257,9 +258,10 @@ export function OperationOrderTable({
                                 {enableSaleActions && (
                                     <Td>
                                         <div className="flex flex-col gap-1.5">
-                                            <OperationCallButton order={row} />
+                                            <OperationCallButton order={row} actionBaseUrl={actionBaseUrl} />
                                             <OperationStatusDialog
                                                 order={row}
+                                                actionBaseUrl={actionBaseUrl}
                                                 options={operationStatusOptions}
                                                 carrierOptions={carrierOptions}
                                                 shippingServiceOptions={shippingServiceOptions}
@@ -271,7 +273,7 @@ export function OperationOrderTable({
                                     </Td>
                                 )}
                                 {enableCloseOrder && (
-                                    <Td><CloseOrderButton order={row} /></Td>
+                                    <Td><CloseOrderButton order={row} actionBaseUrl={actionBaseUrl} /></Td>
                                 )}
                                 {enableDeleteOrder && (
                                     <Td>

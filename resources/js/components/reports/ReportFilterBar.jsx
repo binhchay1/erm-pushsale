@@ -202,8 +202,8 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
     );
 
     return (
-        <div className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="pushsale-filter-bar">
+            <div className="pushsale-filter-presets flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap gap-2">
                     {PRESET_KEYS.map((value) => (
                         <Button
@@ -247,7 +247,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
 
             {extra}
 
-            <div className="mt-5 flex flex-wrap items-center gap-4">
+            <div className="mt-3 flex flex-wrap items-center gap-4">
                 <Button size="sm" onClick={() => search()}>
                     <Search className="size-4" />
                     {t('common.search')}

@@ -26,10 +26,27 @@ class WarehouseInventoryService
 
         if ($request->filled('search')) {
             $term = '%'.$request->input('search').'%';
-            $query->whereHas('product', fn ($q) => $q->where('name', 'like', $term));
+            $query->whereHas('product', fn ($q) => $q
+                ->where('name', 'like', $term)
+                ->orWhere('sku', 'like', $term));
         }
 
-        $rows = $query->latest()->paginate(20)->withQueryString();
+        if ($request->filled('location_code')) {
+            $query->where('location_code', 'like', '%'.$request->input('location_code').'%');
+        }
+
+        if ($request->filled('batch_code')) {
+            $query->where('batch_code', 'like', '%'.$request->input('batch_code').'%');
+        }
+
+        if ($request->input('business_status') === 'active') {
+            $query->where('is_discontinued', false);
+        } elseif ($request->input('business_status') === 'stopped') {
+            $query->where('is_discontinued', true);
+        }
+
+        $perPage = max(10, min(100, $request->integer('per_page', 20)));
+        $rows = $query->latest()->paginate($perPage)->withQueryString();
 
         return [
             'rows' => $rows->through(fn (WarehouseInventory $inv) => [
@@ -50,6 +67,10 @@ class WarehouseInventoryService
                 'warehouse_id' => $request->input('warehouse_id'),
                 'product_id' => $request->input('product_id'),
                 'search' => $request->input('search'),
+                'location_code' => $request->input('location_code'),
+                'batch_code' => $request->input('batch_code'),
+                'business_status' => $request->input('business_status'),
+                'per_page' => $perPage,
             ],
             'recentIntakes' => $this->intakeService->recentMovements(),
         ];

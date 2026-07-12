@@ -1,14 +1,14 @@
 import { Head, usePage } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { CreateSaleOrderDialog } from '@/components/operations/CreateSaleOrderDialog';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
 import { OperationOrderTable } from '@/components/operations/OperationOrderTable';
 import { StatusTabs } from '@/components/operations/StatusTabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import { useLandingUpsellHoldRefresh } from '@/hooks/useLandingUpsellHoldRefresh';
-import { useT } from '@/providers/I18nProvider';
 
 export default function Workspace({
     filters,
@@ -21,8 +21,11 @@ export default function Workspace({
     itemTypeOptions = ['product', 'combo', 'upsell', 'gift'],
     warehouseOptions = [],
     productOptions = [],
+    sourceOptions = [],
+    routeUrl = '/sales/workspace',
+    actionBaseUrl = '/sales',
+    manualUrl = '/sales/leads/manual',
 }) {
-    const t = useT();
     const authId = usePage().props.auth?.user?.id;
 
     useRealtimeReload('dashboard.sales', '.workspace.changed', ['report'], {
@@ -33,29 +36,22 @@ export default function Workspace({
 
     return (
         <AppLayout>
-            <Head title={t('pages.workspace.title')} />
+            <Head title="Sale tác nghiệp" />
 
             <div className="space-y-8 pb-8">
-                <PageHeader
-                    title={t('pages.workspace.title')}
-                    description={t('pages.workspace.desc_detail')}
-                />
+                <PageHeader title="Sale tác nghiệp" />
 
                 <ReportFilterBar
-                    routeUrl="/sales/workspace"
+                    routeUrl={routeUrl}
                     filters={filters}
                     filterOptions={filterOptions}
                     filterFields={filterFields}
                 />
 
-                <Card className="border-border/80 shadow-sm">
-                    <CardHeader className="pb-3">
-                        <CardTitle>{t('pages.workspace.pipeline')}</CardTitle>
-                        <CardDescription>{t('pages.workspace.pipeline_desc')}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-5">
+                <Card>
+                    <CardContent>
                         <StatusTabs
-                            routeUrl="/sales/workspace"
+                            routeUrl={routeUrl}
                             filters={filters}
                             tabs={report.statusTabs}
                         />
@@ -69,9 +65,17 @@ export default function Workspace({
                             itemTypeOptions={itemTypeOptions}
                             warehouseOptions={warehouseOptions}
                             productOptions={productOptions}
+                            actionBaseUrl={actionBaseUrl}
                         />
                     </CardContent>
                 </Card>
+
+                <CreateSaleOrderDialog
+                    manualUrl={manualUrl}
+                    sources={sourceOptions}
+                    productOptions={productOptions}
+                    warehouseOptions={warehouseOptions}
+                />
             </div>
         </AppLayout>
     );

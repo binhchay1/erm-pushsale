@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Sales;
 use App\Enums\OperationResult;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
 use App\Http\Controllers\Controller;
+use App\Models\MarketingSource;
 use App\Models\Product;
 use App\Models\Warehouse;
 use App\Services\FilterOptionsService;
@@ -34,8 +35,24 @@ class OperationController extends Controller
                 'itemTypeOptions' => ['product', 'combo', 'upsell', 'gift'],
                 'warehouseOptions' => $this->warehouseOptions(),
                 'productOptions' => $this->productOptions(),
+                'sourceOptions' => $this->sourceOptions(),
+                'routeUrl' => $request->is('admin/*') ? '/admin/sales/workspace' : '/sales/workspace',
+                'actionBaseUrl' => $request->is('admin/*') ? '/admin/sales' : '/sales',
+                'manualUrl' => $request->is('admin/*') ? '/admin/sales/leads/manual' : '/sales/leads/manual',
             ]
         ));
+    }
+
+    /** @return list<array{id: int, name: string}> */
+    private function sourceOptions(): array
+    {
+        return MarketingSource::query()
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (MarketingSource $source) => ['id' => $source->id, 'name' => $source->name])
+            ->all();
     }
 
     /** @return list<array{id: int, name: string}> */

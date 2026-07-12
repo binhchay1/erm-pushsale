@@ -127,17 +127,12 @@ export default function ExtraReport({
                 />
 
                 {reportNav.length > 1 && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="pushsale-report-nav">
                         {reportNav.map((item) => (
                             <Link
                                 key={item.key}
                                 href={item.url}
-                                className={cn(
-                                    'rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors',
-                                    item.key === meta.key
-                                        ? 'border-primary bg-primary text-primary-foreground'
-                                        : 'border-border bg-card text-muted-foreground hover:bg-muted',
-                                )}
+                                className={cn(item.key === meta.key && 'is-active')}
                             >
                                 {reportText(t, item.key, 'title', item.title)}
                             </Link>

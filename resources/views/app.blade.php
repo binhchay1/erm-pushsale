@@ -34,11 +34,19 @@
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        {{-- Pushsale.vn đang dùng AdminLTE 2.3 + Bootstrap 3 + Font Awesome 4.
+             Chỉ nạp CSS/theme assets; tương tác được React quản lý, không cần jQuery. --}}
+        <link rel="stylesheet" href="/vendor/adminlte2/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/vendor/font-awesome/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/vendor/adminlte2/dist/css/AdminLTE.min.css">
+        <link rel="stylesheet" href="/vendor/adminlte2/dist/css/skins/skin-blue-light.min.css">
+        <link rel="stylesheet" href="/vendor/adminlte2/plugins/select2/select2.min.css">
+        <link rel="stylesheet" href="/vendor/adminlte2/plugins/datepicker/datepicker3.css">
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.jsx'])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased">
+    <body class="hold-transition skin-blue-light sidebar-mini fixed font-sans antialiased">
         <script>
             (function () {
                 try {

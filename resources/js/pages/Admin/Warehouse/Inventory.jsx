@@ -1,21 +1,33 @@
 import { Head, router } from '@inertiajs/react';
-import { PackageMinus, PackagePlus, Search } from 'lucide-react';
+import { FileSpreadsheet, MapPin, PackageMinus, PackagePlus, Search } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { PageHeader } from '@/components/layout/PageHeader';
-import AppLayout from '@/layouts/AppLayout';
+import { ReportPagination } from '@/components/reports/ReportPagination';
+import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
+import { DeleteRowButton } from '@/components/ui/delete-row-button';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useTableSort } from '@/hooks/use-table-sort';
-import { cn } from '@/lib/utils';
+import AppLayout from '@/layouts/AppLayout';
 import { formatNumber } from '@/lib/format';
 import { movementTone } from '@/lib/status-tones';
+import { cn } from '@/lib/utils';
 import { useT } from '@/providers/I18nProvider';
+
+function csvCell(value) {
+    return `"${String(value ?? '').replaceAll('"', '""')}"`;
+}
 
 export default function Inventory({
     report,
@@ -25,11 +37,14 @@ export default function Inventory({
     approverOptions = [],
 }) {
     const t = useT();
+    const routeUrl = typeof window !== 'undefined' ? window.location.pathname : '/admin/warehouse/inventory';
     const f = report.filters ?? {};
     const rows = report.rows?.data ?? [];
     const recentMovements = report.recentIntakes ?? [];
     const { sortedRows, sort, toggleSort } = useTableSort(rows, { defaultKey: 'productName' });
 
+    const [query, setQuery] = useState(f.search ?? '');
+    const [movementOpen, setMovementOpen] = useState(false);
     const [mode, setMode] = useState('intake');
     const [warehouseId, setWarehouseId] = useState('');
     const [productId, setProductId] = useState('');
@@ -42,8 +57,17 @@ export default function Inventory({
     const canSubmitMovement =
         !!warehouseId && !!productId && Number(quantity) > 0 && !!approverId && !submitting;
 
-    const search = (overrides) => {
-        router.get(window.location.pathname, { ...f, ...overrides }, { preserveState: true });
+    const search = (overrides = {}) => {
+        router.get(
+            routeUrl,
+            { ...f, search: query || null, page: 1, ...overrides },
+            { preserveState: true, preserveScroll: true, replace: true },
+        );
+    };
+
+    const openMovement = (nextMode = 'intake') => {
+        setMode(nextMode);
+        setMovementOpen(true);
     };
 
     const submitMovement = () => {
@@ -71,6 +95,7 @@ export default function Inventory({
                 onSuccess: () => {
                     setQuantity('');
                     setNote('');
+                    setMovementOpen(false);
                     toast.success(isIntake ? t('operations.inventory.intake_success') : t('operations.inventory.export_success'));
                 },
                 onError: (errors) => {
@@ -78,7 +103,7 @@ export default function Inventory({
                         errors.quantity ??
                             errors.approved_by_user_id ??
                             errors.warehouse_id ??
-                            (isIntake ? t('operations.inventory.intake_failed') : t('operations.inventory.export_failed'))
+                            (isIntake ? t('operations.inventory.intake_failed') : t('operations.inventory.export_failed')),
                     );
                 },
                 onFinish: () => setSubmitting(false),
@@ -86,273 +111,163 @@ export default function Inventory({
         );
     };
 
+    const exportCsv = () => {
+        const headers = [
+            '#', 'Kho', 'Sản phẩm', 'SKU', 'Đơn vị tính', 'Mã lô', 'Ngày hết hạn', 'Vị trí',
+            'Tồn kho', 'Chờ xuất bán hàng', 'Ngừng KD',
+        ];
+        const lines = sortedRows.map((row) => [
+            row.id,
+            row.warehouseName,
+            row.productName,
+            row.sku,
+            row.uom,
+            row.batchCode,
+            row.expiryDate,
+            row.locationCode,
+            row.stockQuantity,
+            row.pendingSalesQuantity,
+            row.isDiscontinued ? 'Có' : 'Không',
+        ].map(csvCell).join(','));
+        const blob = new Blob([`\uFEFF${headers.map(csvCell).join(',')}\r\n${lines.join('\r\n')}`], {
+            type: 'text/csv;charset=utf-8',
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `danh-sach-san-pham-kho-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <AppLayout>
             <Head title={t('operations.inventory.inventory_title')} />
 
-            <div className="space-y-6">
+            <div className="pushsale-inventory-page">
                 <PageHeader
                     title={t('operations.inventory.inventory_title')}
-                    description={t('operations.inventory.inventory_desc')}
+                    actions={(
+                        <div className="pushsale-title-search">
+                            <Input
+                                value={query}
+                                onChange={(event) => setQuery(event.target.value)}
+                                onKeyDown={(event) => event.key === 'Enter' && search()}
+                                placeholder="Tên sản phẩm"
+                            />
+                            <Button type="button" onClick={() => search()}>
+                                <Search /> Tìm kiếm
+                            </Button>
+                        </div>
+                    )}
                 />
 
-                <div className="rounded-xl border bg-card p-4">
-                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                            {isIntake ? (
-                                <PackagePlus className="size-4 text-emerald-600" />
-                            ) : (
-                                <PackageMinus className="size-4 text-amber-600" />
-                            )}
-                            <h2 className="text-sm font-semibold">
-                                {isIntake ? t('operations.inventory.intake_form') : t('operations.inventory.export_form')}
-                            </h2>
-                        </div>
-                        <div className="flex rounded-lg bg-muted p-0.5">
-                            <button
-                                type="button"
-                                onClick={() => setMode('intake')}
-                                className={cn(
-                                    'rounded-md px-3 py-1 text-xs font-medium transition-colors',
-                                    isIntake ? 'bg-card shadow-sm' : 'text-muted-foreground'
-                                )}
-                            >
-                                {t('operations.inventory.intake')}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setMode('export')}
-                                className={cn(
-                                    'rounded-md px-3 py-1 text-xs font-medium transition-colors',
-                                    !isIntake ? 'bg-card shadow-sm' : 'text-muted-foreground'
-                                )}
-                            >
-                                {t('operations.inventory.export')}
-                            </button>
-                        </div>
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-                        <div className="space-y-1">
-                            <Label htmlFor="move-warehouse">{t('operations.inventory.warehouse')}</Label>
-                            <select
-                                id="move-warehouse"
-                                className="input-soft flex h-9 w-full px-2"
-                                value={warehouseId}
-                                onChange={(e) => setWarehouseId(e.target.value)}
-                            >
-                                <option value="">{t('operations.inventory.select_warehouse')}</option>
-                                {filterOptions?.warehouses?.map((w) => (
-                                    <option key={w.id} value={w.id}>
-                                        {w.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="move-product">{t('operations.inventory.product')}</Label>
-                            <select
-                                id="move-product"
-                                className="input-soft flex h-9 w-full px-2"
-                                value={productId}
-                                onChange={(e) => setProductId(e.target.value)}
-                            >
-                                <option value="">{t('operations.inventory.select_product')}</option>
-                                {filterOptions?.products?.map((p) => (
-                                    <option key={p.id} value={p.id}>
-                                        {p.name}
-                                        {p.sku ? ` (${p.sku})` : ''}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="move-qty">{t('operations.inventory.quantity')}</Label>
-                            <Input
-                                id="move-qty"
-                                type="number"
-                                min={1}
-                                value={quantity}
-                                onChange={(e) => setQuantity(e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="move-approver">{t('operations.inventory.approver')}</Label>
-                            <select
-                                id="move-approver"
-                                className="input-soft flex h-9 w-full px-2"
-                                value={approverId}
-                                onChange={(e) => setApproverId(e.target.value)}
-                            >
-                                <option value="">{t('operations.inventory.select_approver')}</option>
-                                {approverOptions.map((u) => (
-                                    <option key={u.id} value={u.id}>
-                                        {u.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="space-y-1 lg:col-span-2">
-                            <Label htmlFor="move-note">{t('operations.inventory.note')}</Label>
-                            <Input
-                                id="move-note"
-                                value={note}
-                                onChange={(e) => setNote(e.target.value)}
-                                placeholder={
-                                    isIntake ? t('operations.inventory.note_intake_ph') : t('operations.inventory.note_export_ph')
-                                }
-                            />
-                        </div>
-                    </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-3">
-                        <Button
-                            size="sm"
-                            onClick={submitMovement}
-                            disabled={!canSubmitMovement}
-                            title={canSubmitMovement ? undefined : t('operations.inventory.fill_required')}
-                        >
-                            {isIntake ? t('operations.inventory.submit_intake') : t('operations.inventory.submit_export')}
-                        </Button>
-                        {!canSubmitMovement && (
-                            <span className="text-xs text-muted-foreground">
-                                {t('operations.inventory.fill_required')}
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                {recentMovements.length > 0 && (
-                    <div className="rounded-xl border bg-card p-4">
-                        <h2 className="mb-3 text-sm font-semibold">{t('operations.inventory.recent_movements')}</h2>
-                        <ScrollDataTable>
-                            <table className="w-full border-collapse text-xs">
-                                <thead>
-                                    <tr>
-                                        <Th>{t('operations.movement_history.col_time')}</Th>
-                                        <Th>{t('operations.movement_history.col_type')}</Th>
-                                        <Th>{t('operations.inventory.warehouse')}</Th>
-                                        <Th>{t('operations.inventory.product')}</Th>
-                                        <Th className="text-right">{t('operations.inventory.quantity')}</Th>
-                                        <Th className="text-right">{t('operations.inventory.col_stock_after')}</Th>
-                                        <Th>{t('operations.movement_history.col_actor')}</Th>
-                                        <Th>{t('operations.movement_history.col_approver')}</Th>
-                                        <Th>{t('operations.movement_history.col_note')}</Th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {recentMovements.map((m) => (
-                                        <tr key={m.id}>
-                                            <Td>{m.createdAt}</Td>
-                                            <Td>
-                                                <StatusBadge tone={movementTone(m.type)}>
-                                                    {m.typeLabel}
-                                                </StatusBadge>
-                                            </Td>
-                                            <Td>{m.warehouseName}</Td>
-                                            <Td>
-                                                {m.productName}
-                                                {m.sku && (
-                                                    <span className="text-muted-foreground"> ({m.sku})</span>
-                                                )}
-                                            </Td>
-                                            <Td
-                                                className={cn(
-                                                    'text-right font-semibold tabular-nums',
-                                                    m.quantity >= 0 ? 'text-emerald-600' : 'text-amber-600'
-                                                )}
-                                            >
-                                                {m.quantity >= 0 ? '+' : ''}
-                                                {formatNumber(m.quantity)}
-                                            </Td>
-                                            <Td className="text-right tabular-nums">
-                                                {formatNumber(m.stockAfter)}
-                                            </Td>
-                                            <Td>{m.userName}</Td>
-                                            <Td>{m.approverName ?? '—'}</Td>
-                                            <Td className="max-w-xs truncate text-muted-foreground">
-                                                {m.note ?? '—'}
-                                            </Td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </ScrollDataTable>
-                    </div>
-                )}
-
-                <div className="flex flex-wrap gap-3 rounded-xl border bg-card p-4">
-                    <Input
-                        placeholder={t('operations.inventory.search_product')}
-                        value={f.search ?? ''}
-                        onChange={(e) => search({ search: e.target.value })}
-                        className="max-w-xs"
-                    />
+                <div className="pushsale-inventory-filters">
                     <select
-                        className="input-soft h-9 px-2"
                         value={f.warehouse_id ?? ''}
-                        onChange={(e) => search({ warehouse_id: e.target.value || null })}
+                        onChange={(event) => search({ warehouse_id: event.target.value || null })}
                     >
-                        <option value="">{t('operations.inventory.all_warehouses')}</option>
-                        {filterOptions?.warehouses?.map((w) => (
-                            <option key={w.id} value={w.id}>
-                                {w.name}
+                        <option value="">--Chọn kho--</option>
+                        {filterOptions?.warehouses?.map((warehouse) => (
+                            <option key={warehouse.id} value={warehouse.id}>{warehouse.name}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={f.product_id ?? ''}
+                        onChange={(event) => search({ product_id: event.target.value || null })}
+                    >
+                        <option value="">--Chọn sản phẩm--</option>
+                        {filterOptions?.products?.map((product) => (
+                            <option key={product.id} value={product.id}>
+                                {product.name}{product.sku ? ` (${product.sku})` : ''}
                             </option>
                         ))}
                     </select>
-                    <Button size="sm" onClick={() => search()}>
-                        <Search className="size-4" />
-                        {t('common.search')}
+                    <Input
+                        placeholder="Mã vị trí"
+                        value={f.location_code ?? ''}
+                        onChange={(event) => search({ location_code: event.target.value || null })}
+                    />
+                    <Input
+                        placeholder="Mã lô"
+                        value={f.batch_code ?? ''}
+                        onChange={(event) => search({ batch_code: event.target.value || null })}
+                    />
+                    <select
+                        value={f.business_status ?? ''}
+                        onChange={(event) => search({ business_status: event.target.value || null })}
+                    >
+                        <option value="">--Trạng thái kinh doanh--</option>
+                        <option value="active">Đang kinh doanh</option>
+                        <option value="stopped">Ngừng kinh doanh</option>
+                    </select>
+                </div>
+
+                <div className="pushsale-inventory-actions">
+                    <Button type="button" onClick={() => openMovement('intake')}>
+                        <PackagePlus /> Xuất / nhập kho
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        title="Vị trí được cập nhật trong phiếu nhập/xuất kho"
+                        onClick={() => openMovement('intake')}
+                    >
+                        <MapPin /> Cập nhật vị trí
+                    </Button>
+                    <Button type="button" variant="outline" onClick={exportCsv}>
+                        <FileSpreadsheet /> Xuất Excel
                     </Button>
                 </div>
 
-                <ScrollDataTable>
-                    <table className="w-full min-w-[900px] border-collapse text-xs">
+                <ScrollDataTable id="inventory-table">
+                    <table className="w-full min-w-[1320px] border-collapse text-xs">
                         <thead>
                             <tr>
                                 <Th>#</Th>
-                                <Th sortable sortKey="warehouseName" sort={sort} onSort={toggleSort}>{t('operations.inventory.warehouse')}</Th>
-                                <Th sortable sortKey="productName" sort={sort} onSort={toggleSort}>{t('operations.inventory.product')}</Th>
-                                <Th sortable sortKey="batchCode" sort={sort} onSort={toggleSort}>{t('operations.inventory.col_batch')}</Th>
-                                <Th sortable sortKey="locationCode" sort={sort} onSort={toggleSort}>{t('operations.inventory.col_location')}</Th>
-                                <Th sortable sortKey="stockQuantity" sort={sort} onSort={toggleSort} className="text-right">{t('operations.inventory.col_on_hand')}</Th>
-                                <Th sortable sortKey="pendingSalesQuantity" sort={sort} onSort={toggleSort} className="text-right">{t('operations.inventory.col_pending')}</Th>
-                                <Th sortable sortKey="isDiscontinued" sort={sort} onSort={toggleSort}>{t('operations.inventory.col_stopped')}</Th>
+                                <Th sortable sortKey="warehouseName" sort={sort} onSort={toggleSort}>Kho</Th>
+                                <Th sortable sortKey="productName" sort={sort} onSort={toggleSort}>Sản phẩm</Th>
+                                <Th>Đơn vị tính</Th>
+                                <Th sortable sortKey="batchCode" sort={sort} onSort={toggleSort}>Mã lô</Th>
+                                <Th sortable sortKey="expiryDate" sort={sort} onSort={toggleSort}>Ngày hết hạn</Th>
+                                <Th sortable sortKey="locationCode" sort={sort} onSort={toggleSort}>Vị trí</Th>
+                                <Th sortable sortKey="stockQuantity" sort={sort} onSort={toggleSort} className="text-right">Tồn kho</Th>
+                                <Th sortable sortKey="pendingSalesQuantity" sort={sort} onSort={toggleSort} className="text-right">Chờ xuất bán hàng</Th>
+                                <Th sortable sortKey="isDiscontinued" sort={sort} onSort={toggleSort}>Ngừng KD</Th>
+                                <Th>Cập nhật</Th>
                                 <Th />
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedRows.map((r) => (
-                                <tr key={r.id}>
-                                    <Td>{r.id}</Td>
-                                    <Td>{r.warehouseName}</Td>
+                            {sortedRows.map((row) => (
+                                <tr key={row.id}>
+                                    <Td>{row.id}</Td>
+                                    <Td className="font-semibold">{row.warehouseName}</Td>
                                     <Td className="font-medium">
-                                        {r.productName}
-                                        {r.sku && (
-                                            <span className="font-normal text-muted-foreground">
-                                                {' '}
-                                                ({r.sku})
-                                            </span>
-                                        )}
+                                        {row.productName}
+                                        {row.sku && <span className="pushsale-muted"> ({row.sku})</span>}
                                     </Td>
-                                    <Td>{r.batchCode ?? '—'}</Td>
-                                    <Td>{r.locationCode ?? '—'}</Td>
-                                    <Td className="text-right font-semibold tabular-nums">
-                                        {formatNumber(r.stockQuantity)}
-                                    </Td>
-                                    <Td className="text-right tabular-nums">
-                                        {formatNumber(r.pendingSalesQuantity)}
-                                    </Td>
-                                    <Td>{r.isDiscontinued ? '✓' : ''}</Td>
+                                    <Td>{row.uom ?? ''}</Td>
+                                    <Td>{row.batchCode ?? ''}</Td>
+                                    <Td>{row.expiryDate ?? ''}</Td>
+                                    <Td>{row.locationCode ?? ''}</Td>
+                                    <Td className="text-right font-semibold tabular-nums">{formatNumber(row.stockQuantity)}</Td>
+                                    <Td className="text-right font-semibold tabular-nums">{formatNumber(row.pendingSalesQuantity)}</Td>
+                                    <Td className="text-center"><input type="checkbox" checked={!!row.isDiscontinued} readOnly /></Td>
+                                    <Td />
                                     <Td>
                                         <DeleteRowButton
-                                            url={`/admin/warehouse-inventories/${r.id}`}
-                                            label={r.productName}
+                                            url={`/admin/warehouse-inventories/${row.id}`}
+                                            label={row.productName}
                                         />
                                     </Td>
                                 </tr>
                             ))}
                             {!rows.length && (
                                 <tr>
-                                    <Td colSpan={9} className="py-8 text-center text-muted-foreground">
+                                    <Td colSpan={12} className="py-8 text-center text-muted-foreground">
                                         {t('operations.inventory.no_stock')}
                                     </Td>
                                 </tr>
@@ -360,7 +275,120 @@ export default function Inventory({
                         </tbody>
                     </table>
                 </ScrollDataTable>
+
+                <ReportPagination
+                    routeUrl={routeUrl}
+                    filters={f}
+                    meta={report.rows}
+                    scrollTargetId="inventory-table"
+                />
             </div>
+
+            <Dialog open={movementOpen} onOpenChange={setMovementOpen}>
+                <DialogContent className="pushsale-inventory-movement-dialog">
+                    <DialogHeader>
+                        <DialogTitle>Xuất / nhập kho</DialogTitle>
+                    </DialogHeader>
+
+                    <div data-slot="dialog-body" className="pushsale-dialog-body">
+                        <div className="pushsale-movement-tabs">
+                            <button
+                                type="button"
+                                className={cn(isIntake && 'is-active')}
+                                onClick={() => setMode('intake')}
+                            >
+                                <PackagePlus /> Nhập kho
+                            </button>
+                            <button
+                                type="button"
+                                className={cn(!isIntake && 'is-active')}
+                                onClick={() => setMode('export')}
+                            >
+                                <PackageMinus /> Xuất kho
+                            </button>
+                        </div>
+
+                        <div className="pushsale-movement-form">
+                            <div>
+                                <Label htmlFor="move-warehouse">Kho (*)</Label>
+                                <select id="move-warehouse" value={warehouseId} onChange={(event) => setWarehouseId(event.target.value)}>
+                                    <option value="">--Chọn kho--</option>
+                                    {filterOptions?.warehouses?.map((warehouse) => (
+                                        <option key={warehouse.id} value={warehouse.id}>{warehouse.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <Label htmlFor="move-product">Sản phẩm (*)</Label>
+                                <select id="move-product" value={productId} onChange={(event) => setProductId(event.target.value)}>
+                                    <option value="">--Chọn sản phẩm--</option>
+                                    {filterOptions?.products?.map((product) => (
+                                        <option key={product.id} value={product.id}>
+                                            {product.name}{product.sku ? ` (${product.sku})` : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <Label htmlFor="move-qty">Số lượng (*)</Label>
+                                <Input id="move-qty" type="number" min={1} value={quantity} onChange={(event) => setQuantity(event.target.value)} />
+                            </div>
+                            <div>
+                                <Label htmlFor="move-approver">Người duyệt (*)</Label>
+                                <select id="move-approver" value={approverId} onChange={(event) => setApproverId(event.target.value)}>
+                                    <option value="">--Chọn người duyệt--</option>
+                                    {approverOptions.map((user) => <option key={user.id} value={user.id}>{user.name}</option>)}
+                                </select>
+                            </div>
+                            <div className="pushsale-movement-note">
+                                <Label htmlFor="move-note">Ghi chú</Label>
+                                <Input
+                                    id="move-note"
+                                    value={note}
+                                    onChange={(event) => setNote(event.target.value)}
+                                    placeholder={isIntake ? 'Lô hàng, nhà cung cấp…' : 'Lý do xuất, nơi nhận…'}
+                                />
+                            </div>
+                        </div>
+
+                        {recentMovements.length > 0 && (
+                            <div className="pushsale-recent-movements">
+                                <strong>Phiếu nhập / xuất gần đây</strong>
+                                <ScrollDataTable>
+                                    <table className="w-full min-w-[760px] border-collapse text-xs">
+                                        <thead>
+                                            <tr>
+                                                <Th>Thời gian</Th><Th>Loại</Th><Th>Kho</Th><Th>Sản phẩm</Th>
+                                                <Th className="text-right">Số lượng</Th><Th className="text-right">Tồn sau</Th><Th>Người duyệt</Th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {recentMovements.map((movement) => (
+                                                <tr key={movement.id}>
+                                                    <Td>{movement.createdAt}</Td>
+                                                    <Td><StatusBadge tone={movementTone(movement.type)}>{movement.typeLabel}</StatusBadge></Td>
+                                                    <Td>{movement.warehouseName}</Td>
+                                                    <Td>{movement.productName}</Td>
+                                                    <Td className="text-right">{movement.quantity >= 0 ? '+' : ''}{formatNumber(movement.quantity)}</Td>
+                                                    <Td className="text-right">{formatNumber(movement.stockAfter)}</Td>
+                                                    <Td>{movement.approverName ?? '—'}</Td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </ScrollDataTable>
+                            </div>
+                        )}
+                    </div>
+
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setMovementOpen(false)}>Đóng</Button>
+                        <Button type="button" onClick={submitMovement} disabled={!canSubmitMovement}>
+                            {isIntake ? 'Nhập kho' : 'Xuất kho'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
