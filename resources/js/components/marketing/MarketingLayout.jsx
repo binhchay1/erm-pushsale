@@ -36,10 +36,10 @@ export function MarketingLayout({ children }) {
     const [open, setOpen] = useState(false);
 
     return (
-        <div className="flex min-h-screen flex-col bg-background text-foreground">
+        <div className="public-site-shell flex min-h-screen flex-col bg-background text-foreground">
             <LocaleSync />
 
-            <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <header className="public-site-header sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/80">
                 <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5">
                     <BrandMark name={name} />
 
@@ -106,9 +106,9 @@ export function MarketingLayout({ children }) {
                 )}
             </header>
 
-            <main className="flex-1">{children}</main>
+            <main className="public-site-main flex-1">{children}</main>
 
-            <footer className="border-t border-border/60 bg-muted/30">
+            <footer className="public-site-footer border-t border-border/60 bg-muted/30">
                 <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="space-y-3">
                         <BrandMark name={name} />

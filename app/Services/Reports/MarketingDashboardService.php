@@ -24,7 +24,7 @@ class MarketingDashboardService
         $leadCountsBySource = LeadContactMetrics::effectiveCountsBySource($filter, $orderCollection);
 
         $sources = MarketingSource::query()
-            ->with(['children'])
+            ->with(['product:id,name', 'children.product:id,name'])
             ->whereNull('parent_id')
             ->orderBy('name')
             ->get();
@@ -133,6 +133,7 @@ class MarketingDashboardService
             'parentId' => $parentId !== null ? (string) $parentId : null,
             'isChild' => $parentId !== null,
             'sourceName' => $source->name,
+            'productName' => $source->product?->name ?? '—',
             'adChannel' => $source->ad_channel ?? '—',
             'utmSource' => $source->utm_source,
             'utmCampaign' => $source->utm_campaign,

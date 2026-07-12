@@ -502,7 +502,7 @@ return [
                 'children' => [
                     [
                         'title' => '1. Báo cáo nhập, xuất theo ngày',
-                        'url' => '/admin/reports/extra/kho-1',
+                        'url' => '/admin/warehouse/movements',
                         'area' => 'reports',
                     ],
                     [
@@ -725,7 +725,7 @@ return [
                 'children' => [
                     [
                         'title' => '1. Báo cáo nhập, xuất theo ngày',
-                        'url' => '/admin/reports/extra/kho-1',
+                        'url' => '/admin/warehouse/movements',
                         'area' => 'reports',
                     ],
                     [

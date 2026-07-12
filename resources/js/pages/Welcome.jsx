@@ -66,6 +66,7 @@ export default function Welcome({ seo }) {
     return (
         <MarketingLayout>
             <Seo seo={seo} />
+            <div className="public-home-page">
 
             {/* Hero */}
             <section className="relative overflow-hidden">
@@ -193,6 +194,7 @@ export default function Welcome({ seo }) {
                     </div>
                 </div>
             </section>
+            </div>
         </MarketingLayout>
     );
 }

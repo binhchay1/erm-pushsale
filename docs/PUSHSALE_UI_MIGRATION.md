@@ -44,6 +44,23 @@ Tài nguyên tĩnh đã được đưa vào `public/vendor/adminlte2` và `publi
 | Kết nối Facebook | `/admin/integrations` |
 | Danh sách sản phẩm kho | `/admin/warehouse/inventory` |
 
+
+## Tách biệt giao diện công khai và giao diện nội bộ
+
+`resources/views/app.blade.php` chỉ nạp Bootstrap 3/AdminLTE 2/Font Awesome ở các route nội bộ. Trang chủ công khai và trang đăng nhập dùng `public-app-body` cùng `resources/css/public-shell.css`, vì vậy CSS bảng, modal, input và reset của AdminLTE không còn ghi đè Tailwind ở bên ngoài hệ thống.
+
+Header nội bộ dùng đúng cấu trúc ảnh tham chiếu: thương hiệu `TTGROUP2.ADMIN`, điểm bảo mật, biểu tượng thông báo, tên tài khoản/Premium và dropdown gồm Thông tin cá nhân, Thay đổi mật khẩu, Thoát.
+
+## Các báo cáo dựng riêng theo ảnh
+
+Các trang có ảnh/HTML tham chiếu không đi qua một bảng generic duy nhất nữa:
+
+- Marketing dashboard: hai hàng bộ lọc, hai nhóm cột, tổng bộ lọc/tổng theo trang, conditional data bar và phân trang.
+- Báo cáo công việc sale: hai hàng toolbar, nhóm cột Gọi lần 1–6, Chăm sóc lần 1–3 và Bỏ qua.
+- Sale KPI 2: ma trận KPI bên trái và bảng Tiến độ thời gian bên phải.
+- Danh sách sản phẩm kho: đúng thứ tự bộ lọc, nút tác vụ và cột bảng.
+- Bảng tổng hợp chờ xuất theo ngày: title bar, filter bar và bảng Đầu kỳ/Chờ xuất/Xuất bán hàng/Cuối kỳ.
+
 ## Popup “Nhập đơn mới”
 
 Popup mới nằm tại `resources/js/components/operations/CreateSaleOrderDialog.jsx` và được gắn vào màn Sale tác nghiệp. Form gửi qua luồng nhập lead/đơn thủ công hiện có, không tạo endpoint song song.
@@ -68,8 +85,8 @@ Dữ liệu được lưu đúng trường nghiệp vụ:
 
 `resources/css/pushsale-layout.css` là lớp adapter chính, bao gồm:
 
-- header cao 50px, sidebar 230px/collapse 50px;
-- menu sáng `skin-blue-light`, ba cấp, dấu cộng/trừ và active branch;
+- header cao 50px, sidebar 252px/collapse 42px;
+- menu sáng `skin-blue-light`, cấp 2 mở trong sidebar và cấp 3 mở flyout xanh bên phải đúng ảnh mẫu;
 - bảng 11–12px, header xanh, đường viền và zebra row giống mẫu;
 - filter bar, button, input, select, pagination kiểu Bootstrap 3;
 - card/box vuông, bỏ radius/shadow kiểu dashboard hiện đại;
@@ -90,4 +107,4 @@ php -l routes/web.php
 npm run build
 ```
 
-Vite production build hoàn tất với 3.364 module. Môi trường đóng gói không có `composer`/`vendor`, vì vậy route runtime và PHPUnit cần chạy tiếp trên máy deploy sau `composer install`.
+Vite production build hoàn tất với 3.361 module. Môi trường đóng gói không có `composer`/`vendor`, vì vậy route runtime và PHPUnit cần chạy tiếp trên máy deploy sau `composer install`.

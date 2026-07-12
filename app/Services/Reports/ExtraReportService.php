@@ -11,6 +11,7 @@ use App\Models\LeadIngestion;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
+use App\Models\WarehouseInventory;
 use App\Support\LeadContactMetrics;
 use Illuminate\Support\Collection;
 
@@ -144,7 +145,7 @@ class ExtraReportService
             'marketing-2' => $this->productClosing($user, $filter),
             'marketing-3' => $this->marketingWork($user, $filter),
             'marketing-4' => $this->upsaleReport($user, $filter),
-            'kho-1' => $this->warehouseRevenue($user, $filter),
+            'kho-1' => $this->warehousePending($filter),
             'kho-2' => $this->systemBusiness($user, $filter),
         };
 
@@ -210,8 +211,11 @@ class ExtraReportService
             ];
 
             foreach ($stages as $stage) {
-                $row['stage_'.$stage->value] = $contacts
-                    ->filter(fn (Order $o) => (string) $o->operation_stage === $stage->value)
+                $stageContacts = $contacts
+                    ->filter(fn (Order $o) => (string) $o->operation_stage === $stage->value);
+                $row['stage_'.$stage->value] = $stageContacts->count();
+                $row['stage_'.$stage->value.'_untouched'] = $stageContacts
+                    ->where('contact_count', 0)
                     ->count();
             }
 
@@ -646,6 +650,49 @@ class ExtraReportService
         $totals['items_per_order'] = $globalClosedCount > 0 ? round(($totals['qty_sold'] ?? 0) / $globalClosedCount, 1) : null;
 
         return ['columns' => $columns, 'rows' => $rows, 'totals' => $totals];
+    }
+
+    /**
+     * Bảng tổng hợp chờ xuất theo ngày — bám đúng cấu trúc màn hình Pushsale.
+     * Dữ liệu lấy trực tiếp từ tồn kho hiện tại để bảng luôn đồng bộ với trang
+     * "Danh sách sản phẩm kho".
+     */
+    private function warehousePending(ReportFilterData $filter): array
+    {
+        $inventories = WarehouseInventory::query()
+            ->with(['warehouse:id,name', 'product:id,name,sku'])
+            ->when($filter->warehouseId, fn ($query) => $query->where('warehouse_id', $filter->warehouseId))
+            ->when($filter->productId, fn ($query) => $query->where('product_id', $filter->productId))
+            ->orderBy('warehouse_id')
+            ->orderBy('product_id')
+            ->get();
+
+        $columns = [
+            $this->col('warehouse', 'warehouse', 'text'),
+            $this->col('product', 'product', 'text'),
+            ['key' => 'batch', 'label_key' => 'batch', 'label' => 'Mã lô', 'format' => 'text'],
+            ['key' => 'opening', 'label_key' => 'opening', 'label' => 'Đầu kỳ', 'format' => 'number'],
+            ['key' => 'pending', 'label_key' => 'pending', 'label' => 'Chờ xuất', 'format' => 'number'],
+            ['key' => 'sales_export', 'label_key' => 'sales_export', 'label' => 'Xuất bán hàng', 'format' => 'number'],
+            ['key' => 'ending', 'label_key' => 'ending', 'label' => 'Cuối kỳ', 'format' => 'number'],
+        ];
+
+        $rows = $inventories->map(function (WarehouseInventory $inventory): array {
+            $opening = (int) $inventory->stock_quantity;
+            $pending = (int) $inventory->pending_sales_quantity;
+
+            return [
+                'warehouse' => $inventory->warehouse?->name ?? '—',
+                'product' => trim(($inventory->product?->name ?? '—').' '.($inventory->product?->sku ? '('.$inventory->product->sku.')' : '')),
+                'batch' => $inventory->batch_code,
+                'opening' => $opening,
+                'pending' => $pending,
+                'sales_export' => 0,
+                'ending' => $opening + $pending,
+            ];
+        })->all();
+
+        return ['columns' => $columns, 'rows' => $rows, 'totals' => null];
     }
 
     private function warehouseRevenue(User $user, ReportFilterData $filter): array

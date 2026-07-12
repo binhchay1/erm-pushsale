@@ -1,9 +1,8 @@
 import { Link, usePage } from '@inertiajs/react';
+import { createPortal } from 'react-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useRoleLabel } from '@/hooks/use-labels';
 import { cn } from '@/lib/utils';
-import { useT } from '@/providers/I18nProvider';
 
 function cleanPath(url = '') {
     return String(url).split('?')[0].split('#')[0] || '/';
@@ -11,32 +10,13 @@ function cleanPath(url = '') {
 
 function isNavActive(itemUrl, currentUrl) {
     if (!itemUrl || itemUrl === '#') return false;
-
     const itemPath = cleanPath(itemUrl);
     const currentPath = cleanPath(currentUrl);
-
-    if (itemPath === '/') return currentPath === '/';
-
-    return currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
+    return itemPath === '/' ? currentPath === '/' : currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
 }
 
 function nodeIsActive(item, currentUrl) {
-    if (isNavActive(item.url, currentUrl)) return true;
-
-    return (item.children ?? []).some((child) => nodeIsActive(child, currentUrl));
-}
-
-function branchKeys(items, currentUrl, parentKey = 'root') {
-    const keys = [];
-
-    items.forEach((item, index) => {
-        const key = `${parentKey}.${index}`;
-        if ((item.children?.length ?? 0) > 0 && nodeIsActive(item, currentUrl)) {
-            keys.push(key, ...branchKeys(item.children, currentUrl, key));
-        }
-    });
-
-    return keys;
+    return isNavActive(item.url, currentUrl) || (item.children ?? []).some((child) => nodeIsActive(child, currentUrl));
 }
 
 const defaultIcons = {
@@ -44,7 +24,7 @@ const defaultIcons = {
     2: 'trophy',
     3: 'user',
     4: 'tty',
-    5: 'cubes',
+    5: 'tags',
     6: 'calculator',
     7: 'user-secret',
     8: 'dashboard',
@@ -56,153 +36,193 @@ function menuNumber(title = '') {
     return match ? Number(match[1]) : null;
 }
 
-function MenuNode({ item, level, nodeKey, currentUrl, openNodes, toggleNode, onNavigate }) {
-    const hasChildren = (item.children?.length ?? 0) > 0;
-    const isOpen = openNodes.has(nodeKey);
-    const isActive = nodeIsActive(item, currentUrl);
-    const number = menuNumber(item.title);
-    const icon = item.icon ?? (level === 1 ? defaultIcons[number] : null);
-    const levelClass = level === 1 ? 'li1' : level === 2 ? 'li2' : 'li3';
-    const anchorClass = level === 1 ? 'a1' : level === 2 ? 'a2' : 'a3';
-
-    if (hasChildren) {
+function LeafLink({ item, className, onNavigate, children }) {
+    if (item.url && !item.disabled) {
         return (
-            <li className={cn('treeview', levelClass, isOpen && 'menu-open', isActive && 'active')}>
-                <button
-                    type="button"
-                    className={cn('pushsale-menu-link', anchorClass)}
-                    onClick={() => toggleNode(nodeKey)}
-                    aria-expanded={isOpen}
-                    title={item.title}
-                >
-                    {level === 1 && <i className={`fa fa-${icon || 'circle-o'}`} aria-hidden="true" />}
-                    {level > 1 && <i className="fa fa-angle-right pushsale-submenu-arrow" aria-hidden="true" />}
-                    <span>{item.title}</span>
-                    <i
-                        className={cn(
-                            'fa pull-right pushsale-expand-icon',
-                            isOpen ? 'fa-minus' : 'fa-plus',
-                        )}
-                        aria-hidden="true"
-                    />
-                </button>
-                <ul
-                    className={cn(
-                        'treeview-menu',
-                        level === 1 ? 'ul2' : 'ul3',
-                        isOpen && 'is-open',
-                    )}
-                >
-                    {item.children.map((child, index) => (
-                        <MenuNode
-                            key={`${nodeKey}.${index}`}
-                            item={child}
-                            level={level + 1}
-                            nodeKey={`${nodeKey}.${index}`}
-                            currentUrl={currentUrl}
-                            openNodes={openNodes}
-                            toggleNode={toggleNode}
-                            onNavigate={onNavigate}
-                        />
-                    ))}
-                </ul>
-            </li>
+            <Link href={item.url} className={className} title={item.title} onClick={onNavigate}>
+                {children}
+            </Link>
         );
     }
 
-    const content = (
-        <>
-            {level === 1 && <i className={`fa fa-${icon || 'circle-o'}`} aria-hidden="true" />}
-            {level === 2 && <i className="fa fa-angle-right pushsale-submenu-arrow" aria-hidden="true" />}
-            {level >= 3 && <i className="fa fa-circle-o pushsale-leaf-dot" aria-hidden="true" />}
-            <span>{item.title}</span>
-        </>
-    );
-
     return (
-        <li className={cn(levelClass, isActive && 'active', item.disabled && 'is-disabled')}>
-            {item.url && !item.disabled ? (
-                <Link
-                    href={item.url}
-                    className={cn('pushsale-menu-link', anchorClass)}
-                    onClick={onNavigate}
-                    title={item.title}
-                >
-                    {content}
-                </Link>
-            ) : (
-                <span
-                    className={cn('pushsale-menu-link', anchorClass, 'pushsale-menu-disabled')}
-                    title={`${item.title} — chưa có màn hình tương ứng trong dự án`}
-                >
-                    {content}
-                </span>
-            )}
-        </li>
+        <span className={cn(className, 'is-disabled')} title={`${item.title} — chưa có màn hình tương ứng`}>
+            {children}
+        </span>
+    );
+}
+
+function ThirdLevelFlyout({ flyout, currentUrl, onNavigate, onClose }) {
+    if (!flyout || typeof document === 'undefined') return null;
+
+    return createPortal(
+        <div
+            className="pushsale-third-menu"
+            style={{ top: flyout.top }}
+            role="menu"
+            aria-label={flyout.item.title}
+        >
+            {(flyout.item.children ?? []).map((child, index) => {
+                const active = nodeIsActive(child, currentUrl);
+                return (
+                    <div key={`${flyout.key}.${index}`} className={cn('pushsale-third-item', active && 'active')}>
+                        <LeafLink
+                            item={child}
+                            className="pushsale-third-link"
+                            onNavigate={() => {
+                                onClose();
+                                onNavigate?.();
+                            }}
+                        >
+                            <span>{child.title}</span>
+                            {(child.children?.length ?? 0) > 0 && <i className="fa fa-angle-right" aria-hidden="true" />}
+                        </LeafLink>
+                    </div>
+                );
+            })}
+        </div>,
+        document.body,
     );
 }
 
 export function AppSidebar({ collapsed = false, onNavigate }) {
-    const t = useT();
     const { props, url } = usePage();
-    const { auth, navigation = [] } = props;
-    const roleLabel = useRoleLabel(auth.user?.role) || t('dashboard.sidebar.user_fallback');
-    const contentRef = useRef(null);
+    const { navigation = [] } = props;
+    const sidebarRef = useRef(null);
 
-    const activeBranchKeys = useMemo(() => branchKeys(navigation, url), [navigation, url]);
-    const [openNodes, setOpenNodes] = useState(() => new Set(activeBranchKeys));
+    const activeRootIndex = useMemo(
+        () => navigation.findIndex((item) => nodeIsActive(item, url)),
+        [navigation, url],
+    );
+    const [openRoot, setOpenRoot] = useState(activeRootIndex >= 0 ? activeRootIndex : null);
+    const [flyout, setFlyout] = useState(null);
 
     useEffect(() => {
-        setOpenNodes((current) => new Set([...current, ...activeBranchKeys]));
-    }, [activeBranchKeys]);
+        if (activeRootIndex >= 0) setOpenRoot(activeRootIndex);
+        setFlyout(null);
+    }, [activeRootIndex, url]);
 
     useEffect(() => {
-        const frame = requestAnimationFrame(() => {
-            contentRef.current?.querySelector('li.active > a')?.scrollIntoView({ block: 'nearest' });
-        });
+        const close = (event) => {
+            const target = event.target;
+            if (target.closest?.('.pushsale-third-menu') || target.closest?.('[data-pushsale-second-parent="true"]')) return;
+            setFlyout(null);
+        };
+        const closeOnViewportChange = () => setFlyout(null);
+        document.addEventListener('mousedown', close);
+        window.addEventListener('resize', closeOnViewportChange);
+        sidebarRef.current?.addEventListener('scroll', closeOnViewportChange, { passive: true });
+        return () => {
+            document.removeEventListener('mousedown', close);
+            window.removeEventListener('resize', closeOnViewportChange);
+            sidebarRef.current?.removeEventListener('scroll', closeOnViewportChange);
+        };
+    }, []);
 
-        return () => cancelAnimationFrame(frame);
-    }, [url]);
+    const toggleRoot = (index) => {
+        setFlyout(null);
+        setOpenRoot((current) => (current === index ? null : index));
+    };
 
-    const toggleNode = (key) => {
-        setOpenNodes((current) => {
-            const next = new Set(current);
-            if (next.has(key)) next.delete(key);
-            else next.add(key);
-            return next;
-        });
+    const toggleFlyout = (event, item, key) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const estimatedHeight = Math.max(61, (item.children?.length ?? 1) * 61);
+        const top = Math.max(42, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
+        setFlyout((current) => (current?.key === key ? null : { item, key, top }));
     };
 
     return (
-        <aside className="main-sidebar" aria-label="Điều hướng chính">
-            <section className="sidebar" ref={contentRef}>
-                <div className="pushsale-sidebar-caption">
-                    <i className="fa fa-bars" aria-hidden="true" />
-                    <span>MENU CHỨC NĂNG</span>
-                </div>
+        <>
+            <aside className="main-sidebar pushsale-main-sidebar" aria-label="Điều hướng chính">
+                <section className="sidebar pushsale-sidebar" ref={sidebarRef}>
+                    <ul className="sidebar-menu ul1">
+                        {navigation.map((root, rootIndex) => {
+                            const rootOpen = openRoot === rootIndex;
+                            const rootActive = nodeIsActive(root, url);
+                            const icon = root.icon ?? defaultIcons[menuNumber(root.title)] ?? 'circle-o';
+                            const hasChildren = (root.children?.length ?? 0) > 0;
 
-                <ul className="sidebar-menu ul1">
-                    {navigation.map((item, index) => (
-                        <MenuNode
-                            key={`root.${index}`}
-                            item={item}
-                            level={1}
-                            nodeKey={`root.${index}`}
-                            currentUrl={url}
-                            openNodes={openNodes}
-                            toggleNode={toggleNode}
-                            onNavigate={onNavigate}
-                        />
-                    ))}
-                </ul>
+                            return (
+                                <li
+                                    key={`root.${rootIndex}`}
+                                    className={cn('treeview li1', rootOpen && 'menu-open', rootActive && 'active')}
+                                >
+                                    {hasChildren ? (
+                                        <button
+                                            type="button"
+                                            className="a1 pushsale-menu-link"
+                                            onClick={() => toggleRoot(rootIndex)}
+                                            aria-expanded={rootOpen}
+                                            title={root.title}
+                                        >
+                                            <i className={`fa fa-${icon}`} aria-hidden="true" />
+                                            <span>{root.title}</span>
+                                            <i className={cn('i1 fa pull-right', rootOpen ? 'fa-minus' : 'fa-plus')} aria-hidden="true" />
+                                        </button>
+                                    ) : (
+                                        <LeafLink item={root} className="a1 pushsale-menu-link" onNavigate={onNavigate}>
+                                            <i className={`fa fa-${icon}`} aria-hidden="true" />
+                                            <span>{root.title}</span>
+                                        </LeafLink>
+                                    )}
 
-                {!collapsed && (
-                    <div className="pushsale-sidebar-footer">
-                        <i className="fa fa-circle text-success" aria-hidden="true" />
-                        <span>{roleLabel}</span>
-                    </div>
-                )}
-            </section>
-        </aside>
+                                    {hasChildren && (
+                                        <ul className={cn('treeview-menu ul2', rootOpen && 'is-open')}>
+                                            {root.children.map((child, childIndex) => {
+                                                const key = `root.${rootIndex}.${childIndex}`;
+                                                const hasGrandchildren = (child.children?.length ?? 0) > 0;
+                                                const childActive = nodeIsActive(child, url);
+                                                const flyoutOpen = flyout?.key === key;
+
+                                                return (
+                                                    <li
+                                                        key={key}
+                                                        className={cn('li2', childActive && 'active', flyoutOpen && 'flyout-open')}
+                                                    >
+                                                        {hasGrandchildren ? (
+                                                            <button
+                                                                type="button"
+                                                                className="a2 pushsale-menu-link"
+                                                                data-pushsale-second-parent="true"
+                                                                onClick={(event) => toggleFlyout(event, child, key)}
+                                                                aria-expanded={flyoutOpen}
+                                                                title={child.title}
+                                                            >
+                                                                <span>{child.title}</span>
+                                                                <i className="fa fa-angle-right pull-right" aria-hidden="true" />
+                                                            </button>
+                                                        ) : (
+                                                            <LeafLink
+                                                                item={child}
+                                                                className="a2 pushsale-menu-link"
+                                                                onNavigate={() => {
+                                                                    setFlyout(null);
+                                                                    onNavigate?.();
+                                                                }}
+                                                            >
+                                                                <span>{child.title}</span>
+                                                            </LeafLink>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </section>
+            </aside>
+
+            {!collapsed && (
+                <ThirdLevelFlyout
+                    flyout={flyout}
+                    currentUrl={url}
+                    onNavigate={onNavigate}
+                    onClose={() => setFlyout(null)}
+                />
+            )}
+        </>
     );
 }

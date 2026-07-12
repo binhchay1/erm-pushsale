@@ -39,8 +39,8 @@ return [
             'description' => 'Hiệu quả theo nguồn dữ liệu: contact, tỷ lệ chốt, số loại & số lượng sản phẩm bán ra, doanh số và phần bán thêm (upsale).',
         ],
         'kho-1' => [
-            'title' => 'Báo cáo doanh số theo kho',
-            'description' => 'Doanh số chốt, xác nhận giao, đang giao và hàng hoàn của từng kho.',
+            'title' => 'Bảng tổng hợp chờ xuất theo ngày',
+            'description' => 'Tổng hợp tồn đầu kỳ, số lượng chờ xuất bán hàng và tồn cuối kỳ theo kho, sản phẩm.',
         ],
         'kho-2' => [
             'title' => 'Báo cáo kinh doanh hệ thống',

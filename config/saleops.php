@@ -6,6 +6,7 @@ return [
         'name' => 'ERM SaleOps',
         'tagline' => 'Hệ thống điều hành bán hàng & vận hành',
         'short' => 'SaleOps',
+        'admin_name' => env('PUSHSALE_ADMIN_NAME', 'TTGROUP2.ADMIN'),
     ],
 
     'themes' => [

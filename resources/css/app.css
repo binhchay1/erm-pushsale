@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 @import "./pushsale-layout.css";
+@import "./public-shell.css";
 @import "./pushsale-ceo-report.css";
 
 @custom-variant dark (&:is(.dark *));
@@ -183,13 +184,13 @@
 }
 @layer components {
   /* Chuẩn màu header bảng dùng chung toàn hệ thống. Bảng đặc biệt có thể opt-out bằng data-table-theme="neutral". */
-  table:not([data-table-theme='neutral']) > thead > tr > th {
+  body.pushsale-app-body table:not([data-table-theme='neutral']) > thead > tr > th {
     background-color: #3782dc !important;
     border-color: #2f72c4 !important;
     color: #ffffff !important;
   }
 
-  table:not([data-table-theme='neutral']) > thead > tr > th svg {
+  body.pushsale-app-body table:not([data-table-theme='neutral']) > thead > tr > th svg {
     color: rgba(255, 255, 255, 0.85) !important;
   }
 }

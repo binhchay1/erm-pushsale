@@ -1,22 +1,38 @@
+import { Link, usePage } from '@inertiajs/react';
+import { BarChart3, CheckCircle2, ShieldCheck, UsersRound } from 'lucide-react';
+
 import { LanguageToggle } from '@/components/layout/LanguageToggle';
 import { LocaleSync } from '@/components/layout/LocaleSync';
 
 export default function GuestLayout({ children }) {
+    const { brand } = usePage().props;
+    const name = brand?.name ?? 'ERM SaleOps';
+
     return (
-        <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/40 to-slate-100 px-4 py-10">
+        <div className="public-auth-shell">
             <LocaleSync />
-            <div className="absolute right-4 top-4 z-20">
-                <LanguageToggle />
-            </div>
-            <div
-                className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-blue-400/20 blur-3xl"
-                aria-hidden
-            />
-            <div
-                className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-indigo-300/20 blur-3xl"
-                aria-hidden
-            />
-            {children}
+            <aside className="public-auth-intro">
+                <Link href="/" className="public-auth-brand">
+                    <span><BarChart3 /></span>
+                    <strong>{name}</strong>
+                </Link>
+                <div className="public-auth-message">
+                    <p className="public-auth-eyebrow">HỆ THỐNG ĐIỀU HÀNH BÁN HÀNG &amp; VẬN HÀNH</p>
+                    <h1>Quản trị dữ liệu, đơn hàng và hiệu suất trên một nền tảng.</h1>
+                    <p>Theo dõi toàn bộ quy trình từ marketing, telesale, kho, giao hàng đến kế toán theo thời gian thực.</p>
+                    <ul>
+                        <li><CheckCircle2 /> Phân quyền theo đơn vị và vai trò</li>
+                        <li><UsersRound /> Quản lý khách hàng và lịch sử tác nghiệp</li>
+                        <li><ShieldCheck /> Nhật ký và bảo mật dữ liệu tập trung</li>
+                    </ul>
+                </div>
+                <small>© {new Date().getFullYear()} {name}</small>
+            </aside>
+
+            <main className="public-auth-main">
+                <div className="public-auth-language"><LanguageToggle /></div>
+                {children}
+            </main>
         </div>
     );
 }

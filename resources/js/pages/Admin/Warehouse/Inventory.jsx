@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { FileSpreadsheet, MapPin, PackageMinus, PackagePlus, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -44,6 +44,11 @@ export default function Inventory({
     const { sortedRows, sort, toggleSort } = useTableSort(rows, { defaultKey: 'productName' });
 
     const [query, setQuery] = useState(f.search ?? '');
+    const [warehouseFilter, setWarehouseFilter] = useState(String(f.warehouse_id ?? ''));
+    const [productFilter, setProductFilter] = useState(String(f.product_id ?? ''));
+    const [locationFilter, setLocationFilter] = useState(f.location_code ?? '');
+    const [batchFilter, setBatchFilter] = useState(f.batch_code ?? '');
+    const [businessStatusFilter, setBusinessStatusFilter] = useState(f.business_status ?? '');
     const [movementOpen, setMovementOpen] = useState(false);
     const [mode, setMode] = useState('intake');
     const [warehouseId, setWarehouseId] = useState('');
@@ -57,10 +62,29 @@ export default function Inventory({
     const canSubmitMovement =
         !!warehouseId && !!productId && Number(quantity) > 0 && !!approverId && !submitting;
 
+    useEffect(() => {
+        setQuery(f.search ?? '');
+        setWarehouseFilter(String(f.warehouse_id ?? ''));
+        setProductFilter(String(f.product_id ?? ''));
+        setLocationFilter(f.location_code ?? '');
+        setBatchFilter(f.batch_code ?? '');
+        setBusinessStatusFilter(f.business_status ?? '');
+    }, [f.search, f.warehouse_id, f.product_id, f.location_code, f.batch_code, f.business_status]);
+
     const search = (overrides = {}) => {
         router.get(
             routeUrl,
-            { ...f, search: query || null, page: 1, ...overrides },
+            {
+                ...f,
+                search: query || null,
+                warehouse_id: warehouseFilter || null,
+                product_id: productFilter || null,
+                location_code: locationFilter || null,
+                batch_code: batchFilter || null,
+                business_status: businessStatusFilter || null,
+                page: 1,
+                ...overrides,
+            },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
@@ -166,8 +190,8 @@ export default function Inventory({
 
                 <div className="pushsale-inventory-filters">
                     <select
-                        value={f.warehouse_id ?? ''}
-                        onChange={(event) => search({ warehouse_id: event.target.value || null })}
+                        value={warehouseFilter}
+                        onChange={(event) => setWarehouseFilter(event.target.value)}
                     >
                         <option value="">--Chọn kho--</option>
                         {filterOptions?.warehouses?.map((warehouse) => (
@@ -175,8 +199,8 @@ export default function Inventory({
                         ))}
                     </select>
                     <select
-                        value={f.product_id ?? ''}
-                        onChange={(event) => search({ product_id: event.target.value || null })}
+                        value={productFilter}
+                        onChange={(event) => setProductFilter(event.target.value)}
                     >
                         <option value="">--Chọn sản phẩm--</option>
                         {filterOptions?.products?.map((product) => (
@@ -187,17 +211,19 @@ export default function Inventory({
                     </select>
                     <Input
                         placeholder="Mã vị trí"
-                        value={f.location_code ?? ''}
-                        onChange={(event) => search({ location_code: event.target.value || null })}
+                        value={locationFilter}
+                        onChange={(event) => setLocationFilter(event.target.value)}
+                        onKeyDown={(event) => event.key === 'Enter' && search()}
                     />
                     <Input
                         placeholder="Mã lô"
-                        value={f.batch_code ?? ''}
-                        onChange={(event) => search({ batch_code: event.target.value || null })}
+                        value={batchFilter}
+                        onChange={(event) => setBatchFilter(event.target.value)}
+                        onKeyDown={(event) => event.key === 'Enter' && search()}
                     />
                     <select
-                        value={f.business_status ?? ''}
-                        onChange={(event) => search({ business_status: event.target.value || null })}
+                        value={businessStatusFilter}
+                        onChange={(event) => setBusinessStatusFilter(event.target.value)}
                     >
                         <option value="">--Trạng thái kinh doanh--</option>
                         <option value="active">Đang kinh doanh</option>
