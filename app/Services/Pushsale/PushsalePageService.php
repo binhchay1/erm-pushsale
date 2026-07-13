@@ -55,7 +55,8 @@ class PushsalePageService
     /** @return array<string, mixed> */
     public function schema(string $code): array
     {
-        $schema = config("pushsale_pages.{$code}");
+        $pages = config('pushsale_pages', []);
+        $schema = is_array($pages) ? ($pages[$code] ?? null) : null;
         abort_unless(is_array($schema), 404);
 
         return array_merge([
@@ -1801,7 +1802,9 @@ class PushsalePageService
     /** @param array<string, mixed> $overrides @return array<string, mixed> */
     private function formPayload(string $resourceKey, Model $model, array $overrides = []): array
     {
-        $fields = collect((array) config("pushsale_resources.{$resourceKey}.fields"))
+        $resources = config('pushsale_resources', []);
+        $resource = is_array($resources) ? ($resources[$resourceKey] ?? []) : [];
+        $fields = collect((array) ($resource['fields'] ?? []))
             ->pluck('key')
             ->filter(fn ($key) => is_string($key) && $key !== '')
             ->values()
@@ -1815,7 +1818,7 @@ class PushsalePageService
             $payload['access_token'] = '';
         }
 
-        foreach ((array) config("pushsale_resources.{$resourceKey}.fields") as $field) {
+        foreach ((array) ($resource['fields'] ?? []) as $field) {
             $key = (string) ($field['key'] ?? '');
             if ($key === '' || ! array_key_exists($key, $payload)) continue;
             $type = (string) ($field['type'] ?? 'text');

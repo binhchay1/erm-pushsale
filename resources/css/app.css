@@ -195,3 +195,51 @@
     color: rgba(255, 255, 255, 0.85) !important;
   }
 }
+
+/* Company information page — scoped so it does not affect legacy report templates. */
+.pushsale-company-profile {
+    min-height: calc(100vh - 42px);
+    background: #f5f7fa;
+    padding: 14px;
+}
+.pushsale-page-titlebar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    border-top: 3px solid #1684d6;
+    border-bottom: 1px solid #d9dee5;
+    background: #fff;
+    padding: 13px 15px;
+}
+.pushsale-page-titlebar h1 {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: #1d2733;
+}
+.pushsale-page-titlebar p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #687383;
+}
+.pushsale-company-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px 16px;
+    font-size: 12px;
+    color: #657180;
+}
+.pushsale-company-card {
+    margin-top: 12px;
+    border-radius: 0;
+    box-shadow: none;
+}
+@media (max-width: 767px) {
+    .pushsale-page-titlebar { flex-direction: column; }
+    .pushsale-company-meta { justify-content: flex-start; }
+}

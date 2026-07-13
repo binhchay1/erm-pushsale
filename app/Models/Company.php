@@ -15,7 +15,8 @@ class Company extends Model
 
     protected $fillable = [
         'name', 'slug', 'status', 'plan', 'max_users',
-        'owner_user_id', 'contact_email', 'contact_phone', 'expires_at',
+        'owner_user_id', 'contact_email', 'contact_phone', 'tax_code', 'address', 'website',
+        'representative_name', 'representative_title', 'expires_at',
         'lead_import_template_path', 'lead_import_template_name',
     ];
 

@@ -94,10 +94,13 @@ class NavigationService
             return $url;
         }
 
-        // Các màn hình được dựng từ template Pushsale có URL tĩnh riêng và
-        // được dùng chung giữa các vai trò. Cây menu + permission quyết định
-        // người dùng có nhìn thấy và được phép mở mã màn hình nào.
-        if (preg_match('#^/admin/pages/[a-z0-9-]+$#', $url) === 1) {
+        // Các màn hình Pushsale có URL nghiệp vụ rõ nghĩa (không dùng mã menu
+        // trong URL). Cây menu và permission vẫn quyết định vai trò nào được thấy.
+        $pushsaleUrls = array_map(
+            static fn (array $route): string => '/admin/'.ltrim((string) ($route['uri'] ?? ''), '/'),
+            (array) config('pushsale_routes', []),
+        );
+        if (in_array($url, $pushsaleUrls, true)) {
             return $url;
         }
 

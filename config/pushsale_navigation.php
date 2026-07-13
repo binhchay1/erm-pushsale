@@ -15,12 +15,13 @@ return array (
           0 => 
           array (
             'title' => '1.1.1 Thông tin',
-            'url' => '/settings',
+            'url' => '/admin/company/profile',
+            'code' => '1.1.1',
           ),
           1 => 
           array (
             'title' => '1.1.2 Lịch sử đăng ký gói dịch vụ',
-            'url' => '/admin/pages/1-1-2-lich-su-dang-ky-goi-dich-vu',
+            'url' => '/admin/company/subscription-history',
             'code' => '1.1.2',
           ),
         ),
@@ -33,40 +34,40 @@ return array (
           0 => 
           array (
             'title' => '1. Danh sách nhân viên',
-            'url' => '/admin/pages/1-2-1-danh-sach-nhan-vien',
+            'url' => '/admin/hr/employees',
             'area' => 'hr',
             'code' => '1.2.1',
           ),
           1 => 
           array (
             'title' => '2. Quản lý đội nhóm',
-            'url' => '/admin/pages/1-2-2-quan-ly-doi-nhom',
+            'url' => '/admin/hr/teams',
             'area' => 'hr',
             'code' => '1.2.2',
           ),
           2 => 
           array (
             'title' => '3. Ca làm việc',
-            'url' => '/admin/pages/1-2-3-ca-lam-viec',
+            'url' => '/admin/hr/work-shifts',
             'code' => '1.2.3',
           ),
           3 => 
           array (
             'title' => '4. Cấu hình chia số',
-            'url' => '/admin/pages/1-2-4-danh-sach-cau-hinh-chia-so',
+            'url' => '/admin/hr/lead-distribution-rules',
             'area' => 'leads',
             'code' => '1.2.4',
           ),
           4 => 
           array (
             'title' => '5. Cấu hình tài khoản xem báo cáo',
-            'url' => '/admin/pages/1-2-5-cau-hinh-tai-khoan-xem-bao-cao',
+            'url' => '/admin/hr/report-access-rules',
             'code' => '1.2.5',
           ),
           5 => 
           array (
             'title' => '6. Cấu hình chia số care đơn',
-            'url' => '/admin/pages/1-2-6-danh-sach-cau-hinh-chia-so-care-don',
+            'url' => '/admin/hr/care-distribution-rules',
             'area' => 'leads',
             'code' => '1.2.6',
           ),
@@ -80,14 +81,14 @@ return array (
           0 => 
           array (
             'title' => '1. Danh sách sản phẩm',
-            'url' => '/admin/pages/1-3-1-quan-ly-san-pham',
+            'url' => '/admin/catalog/products',
             'area' => 'products',
             'code' => '1.3.1',
           ),
           1 => 
           array (
             'title' => '2. Quản lý combo',
-            'url' => '/admin/pages/1-3-2-danh-sach-combo',
+            'url' => '/admin/catalog/combos',
             'area' => 'products',
             'code' => '1.3.2',
           ),
@@ -118,20 +119,20 @@ return array (
           0 => 
           array (
             'title' => '1. Lịch sử đăng nhập',
-            'url' => '/admin/pages/1-7-1-lich-su-dang-nhap',
+            'url' => '/admin/security/login-history',
             'code' => '1.7.1',
           ),
           1 => 
           array (
             'title' => '2. Quản lý đăng nhập',
-            'url' => '/admin/pages/1-7-2-quan-ly-cho-phep-tai-khoan-dang-nhap',
+            'url' => '/admin/security/login-access',
             'area' => 'hr',
             'code' => '1.7.2',
           ),
           2 => 
           array (
             'title' => '3. Lịch sử lọc data chốt đơn',
-            'url' => '/admin/pages/1-7-3-lich-su-loc-data-chot-don',
+            'url' => '/admin/security/lead-filter-history',
             'code' => '1.7.3',
           ),
         ),
@@ -144,13 +145,13 @@ return array (
           0 => 
           array (
             'title' => '1. Khai báo danh mục tác nghiệp',
-            'url' => '/admin/pages/1-8-1-quan-ly-danh-muc-tac-nghiep',
+            'url' => '/admin/sales/operation-categories',
             'code' => '1.8.1',
           ),
           1 => 
           array (
             'title' => '2. Thiết lập luồng tác nghiệp',
-            'url' => '/admin/pages/1-8-2-thiet-lap-tac-nghiep',
+            'url' => '/admin/sales/operation-workflows',
             'code' => '1.8.2',
           ),
         ),
@@ -158,20 +159,20 @@ return array (
       8 => 
       array (
         'title' => '1.9 Thiết lập chiết khấu, COD',
-        'url' => '/admin/pages/1-9-thiet-lap-chiet-khau-cod',
+        'url' => '/admin/sales/discount-cod-rules',
         'code' => '1.9',
       ),
       9 => 
       array (
         'title' => '1.10 Import excel',
-        'url' => '/admin/pages/1-10-import-contact',
+        'url' => '/admin/leads/import',
         'area' => 'leads',
         'code' => '1.10',
       ),
       10 => 
       array (
         'title' => '1.11 Cấu hình Facebook đơn vị',
-        'url' => '/admin/pages/1-11-cau-hinh-facebook-cua-don-vi',
+        'url' => '/admin/integrations/facebook-pages',
         'area' => 'connections',
         'code' => '1.11',
       ),
@@ -183,7 +184,7 @@ return array (
           0 => 
           array (
             'title' => '1. Quản lý số blacklist',
-            'url' => '/admin/pages/1-13-1-quan-ly-so-blacklist',
+            'url' => '/admin/security/phone-blacklist',
             'code' => '1.13.1',
           ),
         ),
@@ -246,7 +247,7 @@ return array (
       2 => 
       array (
         'title' => '2.3 Hồ sơ khách hàng',
-        'url' => '/admin/pages/2-3-ho-so-khach-hang',
+        'url' => '/admin/marketing/customers',
         'area' => 'customers',
         'code' => '2.3',
       ),
@@ -258,13 +259,13 @@ return array (
           0 => 
           array (
             'title' => '1. Kết nối landing',
-            'url' => '/admin/pages/2-4-1-ket-noi-du-lieu',
+            'url' => '/admin/marketing/landing-connections',
             'code' => '2.4.1',
           ),
           1 => 
           array (
             'title' => '2. Kết nối website',
-            'url' => '/admin/pages/2-4-2-ket-noi-du-lieu',
+            'url' => '/admin/marketing/website-connections',
             'area' => 'connections',
             'code' => '2.4.2',
           ),
@@ -304,28 +305,28 @@ return array (
           0 => 
           array (
             'title' => '1. Import excel',
-            'url' => '/admin/pages/2-6-1-import-contact',
+            'url' => '/admin/marketing/leads/import',
             'area' => 'leads',
             'code' => '2.6.1',
           ),
           1 => 
           array (
             'title' => '2. Nhập data thủ công',
-            'url' => '/admin/pages/2-6-2-nhap-data-thu-cong',
+            'url' => '/admin/marketing/leads/manual',
             'area' => 'leads',
             'code' => '2.6.2',
           ),
           2 => 
           array (
             'title' => '3. Kết nối phần mềm thứ 3',
-            'url' => '/admin/pages/2-6-3-ket-noi-cac-don-vi-doi-tac',
+            'url' => '/admin/marketing/partner-connections',
             'area' => 'connections',
             'code' => '2.6.3',
           ),
           3 => 
           array (
             'title' => '4. Quản lý số seeding',
-            'url' => '/admin/pages/2-6-4-kho-so-seeding-toi-da-1000',
+            'url' => '/admin/marketing/seeding-numbers',
             'code' => '2.6.4',
           ),
         ),
@@ -434,14 +435,14 @@ return array (
       0 => 
       array (
         'title' => '3.1 Quản lý khách hàng',
-        'url' => '/admin/pages/3-1-quan-ly-khach-hang',
+        'url' => '/admin/customer-management',
         'area' => 'customers',
         'code' => '3.1',
       ),
       1 => 
       array (
         'title' => '3.2 Chiến dịch chăm sóc',
-        'url' => '/admin/pages/3-2-quan-ly-chien-dich-cham-soc',
+        'url' => '/admin/customers/care-campaigns',
         'code' => '3.2',
       ),
       2 => 
@@ -452,14 +453,14 @@ return array (
           0 => 
           array (
             'title' => '1. Thống kê khách hàng đa chiều',
-            'url' => '/admin/pages/3-3-1-thong-ke-khach-hang-da-chieu',
+            'url' => '/admin/customers/reports/multidimensional',
             'area' => 'reports',
             'code' => '3.3.1',
           ),
           1 => 
           array (
             'title' => '2. Thống kê khách hàng chi trả',
-            'url' => '/admin/pages/3-3-2-thong-ke-khach-hang-chi-tra',
+            'url' => '/admin/customers/reports/spending',
             'area' => 'reports',
             'code' => '3.3.2',
           ),
@@ -482,14 +483,14 @@ return array (
       1 => 
       array (
         'title' => '4.2 Hồ sơ khách hàng',
-        'url' => '/admin/pages/4-2-ho-so-khach-hang',
+        'url' => '/admin/sales/customers',
         'area' => 'customers',
         'code' => '4.2',
       ),
       2 => 
       array (
         'title' => '4.3 Bảng xếp hạng',
-        'url' => '/admin/pages/4-3-bang-xep-hang-sales',
+        'url' => '/admin/sales/rankings',
         'code' => '4.3',
       ),
       3 => 
@@ -566,34 +567,34 @@ return array (
           0 => 
           array (
             'title' => '1. Thống kê tỉ lệ chốt đơn',
-            'url' => '/admin/pages/4-6-1-bao-cao-ti-le-chot-don-theo-tac-nghiep',
+            'url' => '/admin/sales/reports/operation-conversion',
             'area' => 'reports',
             'code' => '4.6.1',
           ),
           1 => 
           array (
             'title' => '2. Thống kê công việc sale',
-            'url' => '/admin/pages/4-6-2-bao-cao-cong-viec-sale',
+            'url' => '/admin/sales/reports/work',
             'area' => 'reports',
             'code' => '4.6.2',
           ),
           2 => 
           array (
             'title' => '3. Thống kê nhóm',
-            'url' => '/admin/pages/4-6-3-bao-cao-nhom-sale',
+            'url' => '/admin/sales/reports/teams',
             'area' => 'reports',
             'code' => '4.6.3',
           ),
           3 => 
           array (
             'title' => '4. Báo cáo data sale',
-            'url' => '/admin/pages/4-6-4-bao-cao-data-sale',
+            'url' => '/admin/sales/reports/data',
             'code' => '4.6.4',
           ),
           4 => 
           array (
             'title' => '5. Tối ưu sale',
-            'url' => '/admin/pages/4-6-5-bao-cao-toi-uu-sale',
+            'url' => '/admin/sales/reports/optimization',
             'code' => '4.6.5',
           ),
         ),
@@ -609,7 +610,7 @@ return array (
       0 => 
       array (
         'title' => '5.1 Đăng đơn',
-        'url' => '/admin/pages/5-1-tac-nghiep-van-don',
+        'url' => '/admin/warehouse/shipping-operations',
         'area' => 'warehouse',
         'code' => '5.1',
       ),
@@ -622,14 +623,14 @@ return array (
           0 => 
           array (
             'title' => '1. Danh sách kho',
-            'url' => '/admin/pages/5-2-1-danh-sach-kho',
+            'url' => '/admin/warehouse/list',
             'area' => 'warehouse',
             'code' => '5.2.1',
           ),
           1 => 
           array (
             'title' => '2. Danh sách sản phẩm kho',
-            'url' => '/admin/pages/5-2-2-danh-sach-san-pham-kho',
+            'url' => '/admin/warehouse/products',
             'area' => 'warehouse',
             'code' => '5.2.2',
           ),
@@ -643,19 +644,19 @@ return array (
           0 => 
           array (
             'title' => '1. Phiếu xuất / nhập kho',
-            'url' => '/admin/pages/5-3-1-phieu-nhap-xuat-kho',
+            'url' => '/admin/warehouse/vouchers/entry',
             'code' => '5.3.1',
           ),
           1 => 
           array (
             'title' => '2. Danh sách phiếu xuất / nhập kho',
-            'url' => '/admin/pages/5-3-2-danh-sach-phieu-xuat-nhap-kho',
+            'url' => '/admin/warehouse/vouchers',
             'code' => '5.3.2',
           ),
           2 => 
           array (
             'title' => '3. Lịch sử nhập, xuất kho',
-            'url' => '/admin/pages/5-3-3-lich-su-nhap-xuat-kho-the-kho',
+            'url' => '/admin/warehouse/movement-history',
             'area' => 'warehouse',
             'code' => '5.3.3',
           ),
@@ -664,7 +665,7 @@ return array (
       3 => 
       array (
         'title' => '5.4 Quản lý biên bản',
-        'url' => '/admin/pages/5-4-danh-sach-bien-ban',
+        'url' => '/admin/warehouse/incidents',
         'code' => '5.4',
       ),
       4 => 
@@ -675,14 +676,14 @@ return array (
           0 => 
           array (
             'title' => '1. Báo cáo nhập, xuất theo ngày',
-            'url' => '/admin/pages/5-5-1-bang-tong-hop-san-pham-nhap-xuat-theo-ngay',
+            'url' => '/admin/warehouse/reports/daily-stock',
             'area' => 'reports',
             'code' => '5.5.1',
           ),
           1 => 
           array (
             'title' => '2. Bảng tổng hợp chờ xuất theo ngày',
-            'url' => '/admin/pages/5-5-2-bang-tong-hop-cho-xuat-theo-ngay',
+            'url' => '/admin/warehouse/reports/pending-export',
             'area' => 'reports',
             'code' => '5.5.2',
           ),
@@ -695,32 +696,32 @@ return array (
           3 => 
           array (
             'title' => '4. Báo cáo tổng hợp phát sinh kho',
-            'url' => '/admin/pages/5-5-4-bao-cao-tong-hop-phat-sinh-kho',
+            'url' => '/admin/warehouse/reports/movement-summary',
             'area' => 'reports',
             'code' => '5.5.4',
           ),
           4 => 
           array (
             'title' => '5. Báo cáo care đơn',
-            'url' => '/admin/pages/5-5-5-bao-cao-care-don',
+            'url' => '/admin/warehouse/reports/care-orders',
             'code' => '5.5.5',
           ),
           5 => 
           array (
             'title' => '6. Báo cáo sửa số giao hàng',
-            'url' => '/admin/pages/5-5-6-bao-cao-sua-so-dien-thoai-giao-hang',
+            'url' => '/admin/warehouse/reports/phone-corrections',
             'code' => '5.5.6',
           ),
           6 => 
           array (
             'title' => '7. Tổng hợp trạng thái giao hàng theo TK vận đơn',
-            'url' => '/admin/pages/5-5-7-tong-hop-trang-thai-giao-hang-theo-van-don',
+            'url' => '/admin/warehouse/reports/delivery-status',
             'code' => '5.5.7',
           ),
           7 => 
           array (
             'title' => '8. Báo cáo care đơn tác nghiệp',
-            'url' => '/admin/pages/5-5-8-bao-cao-tac-nghiep-care-don',
+            'url' => '/admin/warehouse/reports/care-operations',
             'code' => '5.5.8',
           ),
         ),
@@ -751,7 +752,7 @@ return array (
           1 => 
           array (
             'title' => '2. Phân bổ data care đơn',
-            'url' => '/admin/pages/5-8-2-phan-bo-data-care-don',
+            'url' => '/admin/warehouse/care-distribution',
             'code' => '5.8.2',
           ),
         ),
@@ -778,25 +779,25 @@ return array (
           0 => 
           array (
             'title' => '1. Nhập chi phí',
-            'url' => '/admin/pages/6-2-1-quan-ly-chi-phi-don-vi',
+            'url' => '/admin/accounting/expenses',
             'code' => '6.2.1',
           ),
           1 => 
           array (
             'title' => '2. Khai báo danh mục chi phí',
-            'url' => '/admin/pages/6-2-2-danh-muc-chi-phi',
+            'url' => '/admin/accounting/expense-categories',
             'code' => '6.2.2',
           ),
           2 => 
           array (
             'title' => '3. Khai báo nhóm chi phí',
-            'url' => '/admin/pages/6-2-3-danh-muc-nhom-chi-phi',
+            'url' => '/admin/accounting/expense-groups',
             'code' => '6.2.3',
           ),
           3 => 
           array (
             'title' => '4. Khai báo đơn vị tính',
-            'url' => '/admin/pages/6-2-4-danh-muc-don-vi-tinh',
+            'url' => '/admin/accounting/expense-units',
             'code' => '6.2.4',
           ),
         ),
@@ -833,7 +834,7 @@ return array (
           4 => 
           array (
             'title' => '5. Tổng kết lương tháng',
-            'url' => '/admin/pages/6-3-5-tong-ket-ke-hoach-thang',
+            'url' => '/admin/accounting/reports/monthly-plan',
             'code' => '6.3.5',
           ),
           5 => 
@@ -865,7 +866,7 @@ return array (
       3 => 
       array (
         'title' => '6.4 Danh sách xử lý HĐĐT',
-        'url' => '/admin/pages/6-4-danh-sach-xu-ly-xuat-hoa-don-dien-tu',
+        'url' => '/admin/accounting/electronic-invoices',
         'code' => '6.4',
       ),
     ),
@@ -1031,13 +1032,13 @@ return array (
           3 => 
           array (
             'title' => '4. Biểu đồ xu hướng',
-            'url' => '/admin/pages/8-5-4-bieu-do-xu-huong',
+            'url' => '/admin/reports/trends',
             'code' => '8.5.4',
           ),
           4 => 
           array (
             'title' => '5. Bảng tổng hợp chia data',
-            'url' => '/admin/pages/8-5-5-bang-tong-hop-ket-qua-chia-data-trong-ngay',
+            'url' => '/admin/reports/data-allocation',
             'code' => '8.5.5',
           ),
           5 => 
@@ -1060,20 +1061,20 @@ return array (
           8 => 
           array (
             'title' => '9. Power dashboard',
-            'url' => '/admin/pages/8-5-9-power-dashboard',
+            'url' => '/admin/reports/power-dashboard',
             'code' => '8.5.9',
           ),
           9 => 
           array (
             'title' => '10. Thống kê khách hàng mua lại',
-            'url' => '/admin/pages/8-5-10-thong-ke-mua-lai',
+            'url' => '/admin/reports/repurchase',
             'area' => 'reports',
             'code' => '8.5.10',
           ),
           10 => 
           array (
             'title' => '11. Thống kê KH mua lại theo số sp',
-            'url' => '/admin/pages/8-5-11-thong-ke-mua-lai-theo-so-san-pham',
+            'url' => '/admin/reports/repurchase-products',
             'area' => 'reports',
             'code' => '8.5.11',
           ),
@@ -1098,19 +1099,19 @@ return array (
           14 => 
           array (
             'title' => '15. Bảng tổng hợp chia data V2',
-            'url' => '/admin/pages/8-5-15-bang-tong-hop-chia-data-trong-ngay-v2',
+            'url' => '/admin/reports/data-allocation-v2',
             'code' => '8.5.15',
           ),
           15 => 
           array (
             'title' => '16. Báo cáo care đơn',
-            'url' => '/admin/pages/8-5-16-bao-cao-care-don',
+            'url' => '/admin/reports/care-orders',
             'code' => '8.5.16',
           ),
           16 => 
           array (
             'title' => '17. Báo cáo chia số care đơn',
-            'url' => '/admin/pages/8-5-17-bang-tong-hop-chia-so-care-don-trong-ngay',
+            'url' => '/admin/reports/care-allocation',
             'code' => '8.5.17',
           ),
         ),

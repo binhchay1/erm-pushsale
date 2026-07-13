@@ -148,6 +148,11 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     // Mỗi mã menu là một màn hình nghiệp vụ với controller và route tĩnh riêng.
     // Các file template chỉ cung cấp content + dialog; header/sidebar do AppLayout quản lý.
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('company/profile', [\App\Http\Controllers\Admin\CompanyProfileController::class, 'index'])
+            ->name('company.profile');
+        Route::put('company/profile', [\App\Http\Controllers\Admin\CompanyProfileController::class, 'update'])
+            ->name('company.profile.update');
+
         require __DIR__.'/pushsale_pages.php';
     });
 

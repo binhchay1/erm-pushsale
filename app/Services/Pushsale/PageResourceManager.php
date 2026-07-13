@@ -22,7 +22,8 @@ class PageResourceManager
     /** @return array<string, mixed>|null */
     public function definition(string $resourceKey): ?array
     {
-        $definition = config("pushsale_resources.{$resourceKey}");
+        $resources = config('pushsale_resources', []);
+        $definition = is_array($resources) ? ($resources[$resourceKey] ?? null) : null;
 
         return is_array($definition) ? $definition : null;
     }
