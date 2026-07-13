@@ -1,0 +1,517 @@
+/* Customer profile page reconstructed from the supplied Pushsale HTML/CSS. */
+body.pushsale-app-body .ps-customer-profile-page {
+    position: relative;
+    min-width: 1500px;
+    padding-bottom: 78px;
+    overflow: visible;
+}
+
+body.pushsale-app-body .ps-customer-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 53px;
+    padding: 8px 15px;
+    border-top: 2px solid #007bff;
+    border-bottom: 1px solid #d1d5da;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.16);
+}
+
+body.pushsale-app-body .ps-customer-titlebar h1 {
+    margin: 0;
+    color: #111;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 32px;
+}
+
+body.pushsale-app-body .ps-customer-title-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+body.pushsale-app-body .ps-header-search {
+    width: 250px;
+}
+
+body.pushsale-app-body .ps-filter-toggle {
+    width: 32px;
+    min-width: 32px;
+    padding: 5px 8px;
+    color: #1681cf;
+}
+
+body.pushsale-app-body .ps-customer-filter-panel {
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid #d6d9dc;
+    background: #fff;
+}
+
+body.pushsale-app-body .ps-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(190px, 1fr));
+    gap: 10px 28px;
+    align-items: center;
+}
+
+body.pushsale-app-body .ps-filter-control {
+    width: 100%;
+    min-width: 0;
+    cursor: pointer;
+}
+
+body.pushsale-app-body .ps-date-range-control {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
+    align-items: center;
+    gap: 4px;
+}
+
+body.pushsale-app-body .ps-date-range-control > span {
+    color: #777;
+    text-align: center;
+}
+
+body.pushsale-app-body .ps-filter-search,
+body.pushsale-app-body .ps-filter-reset {
+    justify-self: end;
+    min-width: 92px;
+}
+
+body.pushsale-app-body .ps-customer-table-scroll {
+    position: relative;
+    width: 100%;
+    overflow: auto;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+}
+
+body.pushsale-app-body .ps-customer-profile-table {
+    width: max-content;
+    min-width: 100%;
+    table-layout: auto;
+    border: 0;
+    font-size: 11px;
+}
+
+body.pushsale-app-body .ps-customer-profile-table > thead > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    height: 58px;
+    padding: 4px 5px;
+    border-color: #2b70bd !important;
+    background: #3782dc !important;
+    color: #fff !important;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 15px;
+    vertical-align: middle;
+}
+
+body.pushsale-app-body .ps-customer-profile-table > tbody > tr > td {
+    height: 73px;
+    padding: 4px 5px;
+    border-color: #ddd;
+    color: #111;
+    line-height: 15px;
+    vertical-align: middle;
+}
+
+body.pushsale-app-body .ps-customer-profile-table > tbody > tr:nth-child(even) > td {
+    background: #f1f1f1;
+}
+
+body.pushsale-app-body .ps-customer-profile-table > tbody > tr:nth-child(odd) > td {
+    background: #fff;
+}
+
+body.pushsale-app-body .ps-customer-profile-table > tbody > tr:hover > td,
+body.pushsale-app-body .ps-customer-profile-table > tbody > tr.ps-row-selected > td {
+    background: #e8f3ff !important;
+}
+
+body.pushsale-app-body .ps-col-check { width: 50px; min-width: 50px; }
+body.pushsale-app-body .ps-col-code { width: 72px; min-width: 72px; }
+body.pushsale-app-body .ps-col-source { width: 160px; min-width: 130px; max-width: 200px; }
+body.pushsale-app-body .ps-col-customer { width: 160px; min-width: 150px; }
+body.pushsale-app-body .ps-col-message { width: 190px; min-width: 150px; max-width: 240px; }
+body.pushsale-app-body .ps-col-sale { width: 150px; min-width: 130px; }
+body.pushsale-app-body .ps-col-operation { width: 120px; min-width: 110px; }
+body.pushsale-app-body .ps-col-result { width: 180px; min-width: 160px; max-width: 210px; }
+body.pushsale-app-body .ps-col-products { width: 270px; min-width: 230px; }
+body.pushsale-app-body .ps-col-money { width: 115px; min-width: 110px; }
+body.pushsale-app-body .ps-col-deposit { width: 92px; min-width: 92px; }
+body.pushsale-app-body .ps-col-shipping { width: 140px; min-width: 130px; }
+body.pushsale-app-body .ps-col-delivery { width: 150px; min-width: 140px; }
+body.pushsale-app-body .ps-col-recon { width: 100px; min-width: 90px; }
+
+body.pushsale-app-body .chk-all,
+body.pushsale-app-body .chk-item {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    min-height: 22px;
+}
+
+body.pushsale-app-body .chk-all input,
+body.pushsale-app-body .chk-item input {
+    position: absolute;
+    left: 0;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    opacity: 1;
+    cursor: pointer;
+}
+
+body.pushsale-app-body .chk-item label {
+    min-width: 18px;
+    margin: 0 0 0 18px;
+    color: #333;
+    font-weight: 400;
+    cursor: pointer;
+}
+body.pushsale-app-body .chk-all label { margin: 0; }
+
+body.pushsale-app-body .ps-customer-profile-table a,
+body.pushsale-app-body .ps-phone-link {
+    color: #167bd5;
+    text-decoration: none;
+}
+
+body.pushsale-app-body .ps-customer-profile-table a:hover,
+body.pushsale-app-body .ps-phone-link:hover {
+    color: #23527c;
+    text-decoration: underline;
+}
+
+body.pushsale-app-body .ps-phone-link {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+}
+
+body.pushsale-app-body .ps-phone-line {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 3px;
+}
+
+body.pushsale-app-body .span-col {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+body.pushsale-app-body .span-col-width { min-width: 110px; max-width: 160px; }
+body.pushsale-app-body .ps-customer-name { max-width: 150px; }
+body.pushsale-app-body .item-md { display: block; color: #007bff; font-weight: 700; }
+body.pushsale-app-body .item-md:empty { min-height: 4px; }
+
+body.pushsale-app-body .ps-message-cell {
+    max-width: 240px;
+    white-space: pre-line;
+    word-break: break-word;
+}
+body.pushsale-app-body .ps-receiver-note { display: block; margin-top: 3px; }
+
+body.pushsale-app-body .ps-row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 20px;
+    gap: 1px;
+}
+body.pushsale-app-body .ps-result-cell { min-width: 160px; max-width: 210px; }
+body.pushsale-app-body .item-noidung-other { margin-top: 2px; color: #777; font-size: 10px; text-align: left; }
+
+body.pushsale-app-body .tb-in-sp {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    border-collapse: collapse;
+    background: transparent;
+    font-size: 11px;
+}
+body.pushsale-app-body .tb-in-sp td {
+    padding: 2px 4px !important;
+    border: 0 !important;
+    background: transparent !important;
+    vertical-align: top;
+}
+body.pushsale-app-body .tb-in-sp .row-sp + .row-sp td { border-top: 1px dashed #d8d8d8 !important; }
+body.pushsale-app-body .tb-in-sp .ten-sp { display: block; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: normal; }
+body.pushsale-app-body .ps-order-total { font-size: 13px; font-weight: 700; }
+body.pushsale-app-body .item-mdgv { color: darkorange !important; }
+body.pushsale-app-body .ps-warehouse-name { color: green; font-weight: 700; line-height: 20px; }
+
+body.pushsale-app-body .ps-carrier {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 1px 5px;
+    border-radius: 2px;
+    background: #edf3f8;
+    color: #53687a;
+    font-size: 9px;
+}
+body.pushsale-app-body .ps-carrier-viettel { background: #ffe9eb; color: #ca2338; }
+body.pushsale-app-body .ps-carrier-vinaphone { background: #e8f2ff; color: #1769aa; }
+body.pushsale-app-body .ps-carrier-mobifone { background: #ffeded; color: #c51b1b; }
+
+body.pushsale-app-body .ps-upsale-badge {
+    display: inline-block;
+    margin-top: 3px;
+    padding: 1px 4px;
+    border: 1px solid #d39b12;
+    border-radius: 2px;
+    background: #fff7d9;
+    color: #9a6b00;
+    font-size: 8px;
+    font-weight: 700;
+}
+
+body.pushsale-app-body .ps-delivery-status { display: inline-block; color: #444; }
+body.pushsale-app-body .ps-delivery-delivered { color: #00a65a; font-weight: 700; }
+body.pushsale-app-body .ps-delivery-returned,
+body.pushsale-app-body .ps-delivery-cancelled { color: #dd4b39; font-weight: 700; }
+body.pushsale-app-body .ps-no-data { height: 100px !important; color: #777 !important; }
+
+/* Floating action menu copied from Pushsale behavior and dimensions. */
+body.pushsale-app-body .action-container {
+    position: fixed;
+    bottom: 18px;
+    left: 18px;
+    z-index: 2200;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 10px;
+}
+body.pushsale-app-body .action-container button { border: 0; cursor: pointer; }
+body.pushsale-app-body .action-container .main-action,
+body.pushsale-app-body .action-container .n-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #fff;
+    box-shadow: 0 3px 7px rgba(0,0,0,.28);
+}
+body.pushsale-app-body .action-container .main-action {
+    width: 66px;
+    height: 66px;
+    background: #0067bd;
+    font-size: 28px;
+}
+body.pushsale-app-body .action-container .main-action:hover { background: #0058a5; }
+body.pushsale-app-body .action-container .hidden-actions {
+    display: grid;
+    gap: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(15px);
+    transition: opacity .16s ease, transform .16s ease;
+}
+body.pushsale-app-body .action-container.is-open .hidden-actions {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+body.pushsale-app-body .action-container .icon-row { display: flex; gap: 10px; }
+body.pushsale-app-body .action-container .n-button { width: 50px; height: 50px; font-size: 21px; }
+body.pushsale-app-body .action-container .fam-primary { background: #0585e5; }
+body.pushsale-app-body .action-container .fam-success { background: #45a85a; }
+body.pushsale-app-body .action-container .fam-warning { background: #ff8c00; }
+body.pushsale-app-body .action-container .fam-danger { background: #c9332e; }
+body.pushsale-app-body .action-container .n-button::after {
+    position: absolute;
+    left: calc(100% + 9px);
+    top: 50%;
+    padding: 4px 7px;
+    border-radius: 2px;
+    background: rgba(0,0,0,.78);
+    color: #fff;
+    content: attr(data-tooltip);
+    font-size: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%);
+    white-space: nowrap;
+}
+body.pushsale-app-body .action-container .n-button:hover::after { opacity: 1; }
+body.pushsale-app-body .ps-action-count {
+    position: absolute;
+    right: -4px;
+    bottom: 50px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    background: #dd4b39;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+}
+
+/* Pagination rendered on every list page, including one-page results. */
+body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    padding: 8px 14px;
+    border-top: 0;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+    color: #777;
+    font-size: 11px;
+}
+body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination button {
+    height: 28px !important;
+    min-width: 30px !important;
+    padding: 3px 8px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #337ab7 !important;
+}
+body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination button[aria-current='page'] {
+    border-color: #337ab7 !important;
+    background: #337ab7 !important;
+    color: #fff !important;
+}
+body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination select {
+    height: 28px !important;
+    border-radius: 0 !important;
+    font-size: 11px !important;
+}
+
+/* Pushsale-style modal shell. */
+body.pushsale-app-body [data-slot='dialog-overlay'] { z-index: 3000 !important; background: rgba(0,0,0,.45) !important; }
+body.pushsale-app-body .ps-customer-modal {
+    z-index: 3010 !important;
+    display: block !important;
+    max-height: calc(100vh - 28px) !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    border: 1px solid rgba(0,0,0,.2) !important;
+    border-radius: 5px !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,.5) !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+}
+body.pushsale-app-body .ps-customer-modal .pushsale-dialog-close {
+    top: 8px !important;
+    right: 9px !important;
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    color: #777 !important;
+}
+body.pushsale-app-body .ps-customer-modal-header {
+    min-height: 48px;
+    padding: 15px 42px 10px 15px;
+    border-bottom: 1px solid #e5e5e5;
+}
+body.pushsale-app-body .ps-customer-modal-header [data-slot='dialog-title'] {
+    margin: 0;
+    color: #111;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 20px;
+}
+body.pushsale-app-body .ps-customer-modal-header [data-slot='dialog-description'] {
+    margin-top: 3px;
+    color: #777;
+    font-size: 11px;
+}
+body.pushsale-app-body .ps-customer-modal-body {
+    max-height: calc(100vh - 135px);
+    padding: 14px 15px;
+    overflow: auto;
+}
+body.pushsale-app-body .ps-customer-modal-footer {
+    min-height: 54px;
+    padding: 10px 15px;
+    border-top: 1px solid #e5e5e5;
+    background: #fff;
+    text-align: right;
+}
+body.pushsale-app-body .ps-customer-modal-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+    gap: 7px;
+    color: #777;
+}
+body.pushsale-app-body .ps-modal-customer-line { margin-bottom: 5px; font-size: 13px; }
+body.pushsale-app-body .ps-modal-customer-line a { color: #337ab7; }
+body.pushsale-app-body .ps-modal-address { margin-bottom: 12px; color: #555; }
+body.pushsale-app-body .ps-customer-tabs { display: flex; margin-bottom: 9px; border-bottom: 1px solid #ddd; }
+body.pushsale-app-body .ps-customer-tabs button {
+    margin: 0 2px -1px 0;
+    padding: 7px 12px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #337ab7;
+    font-size: 12px;
+}
+body.pushsale-app-body .ps-customer-tabs button.active { border-color: #ddd #ddd #fff; border-radius: 4px 4px 0 0; background: #fff; color: #555; }
+body.pushsale-app-body .ps-message-composer { display: grid; grid-template-columns: 1fr auto; gap: 7px; margin-bottom: 9px; }
+body.pushsale-app-body .ps-message-list { min-height: 130px; max-height: 460px; overflow-y: auto; border: 1px solid #ddd; background: #fafafa; }
+body.pushsale-app-body .ps-message-row { padding: 8px 10px; border-bottom: 1px solid #e7e7e7; background: #fff; }
+body.pushsale-app-body .ps-message-row:last-child { border-bottom: 0; }
+body.pushsale-app-body .ps-message-meta { margin-bottom: 3px; color: #777; font-size: 10px; }
+body.pushsale-app-body .ps-message-meta strong { color: #333; font-size: 11px; }
+body.pushsale-app-body .ps-message-text { white-space: pre-wrap; word-break: break-word; }
+body.pushsale-app-body .ps-empty-message,
+body.pushsale-app-body .ps-empty-cell { padding: 28px !important; color: #888; text-align: center; }
+body.pushsale-app-body .ps-same-phone-link { margin-top: 9px; padding: 0; border: 0; background: transparent; color: #337ab7; font-size: 11px; cursor: pointer; }
+body.pushsale-app-body .ps-compact-alert { margin: 0 0 9px; padding: 7px 10px; border-radius: 0; font-size: 11px; }
+
+body.pushsale-app-body .ps-history-table-wrap { max-height: 620px; overflow: auto; }
+body.pushsale-app-body .ps-history-table { min-width: 1000px; font-size: 11px; }
+body.pushsale-app-body .ps-history-table > thead > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    padding: 7px 6px;
+    border-color: #2f72c4 !important;
+    background: #3782dc !important;
+    color: #fff !important;
+    font-weight: 600;
+    text-align: center;
+}
+body.pushsale-app-body .ps-history-table > tbody > tr > td { padding: 6px; vertical-align: top; }
+body.pushsale-app-body .ps-purchase-summary { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 10px; border: 1px solid #ddd; }
+body.pushsale-app-body .ps-purchase-summary > div { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 7px 12px; border-right: 1px solid #ddd; }
+body.pushsale-app-body .ps-purchase-summary > div:last-child { border-right: 0; }
+body.pushsale-app-body .ps-purchase-summary span { color: #777; }
+body.pushsale-app-body .ps-purchase-summary strong { color: #337ab7; font-size: 15px; }
+body.pushsale-app-body .ps-view-log-filter { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+body.pushsale-app-body .ps-view-log-filter .form-control { width: auto; min-width: 170px; }
+body.pushsale-app-body .ps-view-log-grid { display: flex; margin-right: -7px; margin-left: -7px; }
+body.pushsale-app-body .ps-view-log-grid > div { padding-right: 7px; padding-left: 7px; }
+body.pushsale-app-body .ps-view-log-note { margin-top: 10px; font-size: 11px; font-style: italic; }
+
+@media (max-width: 1600px) {
+    body.pushsale-app-body .ps-filter-grid { column-gap: 14px; }
+    body.pushsale-app-body .ps-customer-profile-page { min-width: 1350px; }
+}

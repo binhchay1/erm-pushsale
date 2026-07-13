@@ -10,7 +10,6 @@ use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Support\Str;
 
 class LeadOrderFactory
 {
@@ -62,7 +61,8 @@ class LeadOrderFactory
         $comboItems = $this->buildItemRows($normalized['items'] ?? [], $normalized['item_origin'] ?? 'landing');
 
         $order = Order::query()->create([
-            'order_code' => 'PS'.strtoupper(Str::random(10)),
+            // Mã đơn chỉ được cấp khi sale chốt đơn thành công.
+            'order_code' => null,
             'sale_user_id' => $saleUser?->id,
             'marketer_user_id' => $source->marketer_user_id,
             'marketing_source_id' => $source->id,

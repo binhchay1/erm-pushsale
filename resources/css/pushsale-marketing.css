@@ -1,0 +1,629 @@
+/* Marketing dashboard + bảng xếp hạng — tái hiện giao diện Pushsale/AdminLTE 2.
+   Scope chặt để không ảnh hưởng các màn nghiệp vụ khác. */
+body.pushsale-app-body .psm-page,
+body.pushsale-app-body .psr-page {
+    min-height: calc(100vh - var(--topbar-height, 50px));
+    background: #fff;
+    color: #111;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+body.pushsale-app-body .psm-page *,
+body.pushsale-app-body .psr-page * { box-sizing: border-box; }
+
+body.pushsale-app-body .psm-topbar,
+body.pushsale-app-body .psr-topbar {
+    display: flex;
+    min-height: 54px;
+    align-items: center;
+    gap: 16px;
+    border-top: 2px solid #087df0;
+    border-bottom: 1px solid #d5d5d5;
+    background: #fff;
+    padding: 8px 15px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+
+body.pushsale-app-body .psm-topbar h1,
+body.pushsale-app-body .psr-topbar h1 {
+    width: 355px;
+    flex: 0 0 355px;
+    margin: 0;
+    color: #090909;
+    font-size: 16px;
+    line-height: 30px;
+    font-weight: 700;
+}
+
+body.pushsale-app-body .psm-top-selects,
+body.pushsale-app-body .psr-primary-filters {
+    display: grid;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 28px;
+    max-width: 805px;
+}
+
+body.pushsale-app-body .psm-top-actions,
+body.pushsale-app-body .psr-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+body.pushsale-app-body .psm-page .ps-control,
+body.pushsale-app-body .psr-page .ps-control,
+body.pushsale-app-body .psm-page .ps-date-range,
+body.pushsale-app-body .psr-page .ps-date-range {
+    width: 100%;
+    height: 30px;
+    min-height: 30px;
+    border: 1px solid #cbd2da;
+    border-radius: 0;
+    background-color: #fff;
+    color: #252525;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    box-shadow: none;
+}
+
+body.pushsale-app-body .psm-page select.ps-control,
+body.pushsale-app-body .psr-page select.ps-control {
+    padding: 4px 28px 4px 10px;
+    cursor: pointer;
+}
+
+body.pushsale-app-body .psm-page input.ps-control,
+body.pushsale-app-body .psr-page input.ps-control { padding: 5px 10px; }
+
+body.pushsale-app-body .psm-page .ps-date-range,
+body.pushsale-app-body .psr-page .ps-date-range {
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding: 0;
+}
+
+body.pushsale-app-body .psm-page .ps-date-range input,
+body.pushsale-app-body .psr-page .ps-date-range input {
+    width: 50%;
+    height: 28px;
+    border: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+body.pushsale-app-body .psm-page .ps-date-range > span:not(.ps-date-range-label),
+body.pushsale-app-body .psr-page .ps-date-range > span:not(.ps-date-range-label) { display: none; }
+
+body.pushsale-app-body .psm-page .ps-date-range-label,
+body.pushsale-app-body .psr-page .ps-date-range-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    color: #111;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+body.pushsale-app-body .psm-page .ps-btn,
+body.pushsale-app-body .psr-page .ps-btn {
+    height: 30px;
+    border-radius: 2px;
+    padding: 4px 13px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 20px;
+}
+
+body.pushsale-app-body .psm-page .ps-btn i,
+body.pushsale-app-body .psr-page .ps-btn i { margin-right: 7px; }
+
+body.pushsale-app-body .psm-collapse,
+body.pushsale-app-body .psr-collapse,
+body.pushsale-app-body .psm-square-button,
+body.pushsale-app-body .psr-square-button,
+body.pushsale-app-body .psm-help-button,
+body.pushsale-app-body .psr-help {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: #fff;
+    color: #0f6db4;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+body.pushsale-app-body .psm-collapse,
+body.pushsale-app-body .psr-collapse { width: 20px; color: #087bd2; }
+body.pushsale-app-body .psm-square-button,
+body.pushsale-app-body .psr-square-button { border: 1px solid #999; color: #333; font-size: 13px; }
+body.pushsale-app-body .psm-help-button,
+body.pushsale-app-body .psr-help { font-size: 21px; }
+
+body.pushsale-app-body .psm-gear,
+body.pushsale-app-body .psr-gear { position: relative; }
+body.pushsale-app-body .psm-gear-menu,
+body.pushsale-app-body .psr-gear-menu {
+    position: absolute;
+    z-index: 1060;
+    top: 34px;
+    right: 0;
+    width: 230px;
+    border: 1px solid #ccc;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(0,0,0,.18);
+    padding: 4px 0;
+}
+body.pushsale-app-body .psm-gear-menu a,
+body.pushsale-app-body .psr-gear-menu button {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: #fff;
+    padding: 8px 12px;
+    color: #333;
+    text-align: left;
+    text-decoration: none;
+    font-size: 12px;
+}
+body.pushsale-app-body .psm-gear-menu a:hover,
+body.pushsale-app-body .psr-gear-menu button:hover { background: #f3f3f3; }
+body.pushsale-app-body .psm-gear-menu i,
+body.pushsale-app-body .psr-gear-menu i { width: 20px; color: #1683ca; }
+
+/* Marketing filters */
+body.pushsale-app-body .psm-filter-panel {
+    border-bottom: 1px solid #d5d5d5;
+    background: #fff;
+    padding: 12px 15px;
+}
+body.pushsale-app-body .psm-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.05fr) minmax(250px, 1.45fr) minmax(180px, 1.05fr) minmax(145px, .8fr) minmax(190px, 1.05fr) minmax(185px, 1fr) minmax(185px, 1fr);
+    gap: 26px;
+    align-items: center;
+}
+body.pushsale-app-body .psm-filter-grid + .psm-filter-grid { margin-top: 10px; }
+body.pushsale-app-body .psm-filter-grid.is-second {
+    grid-template-columns: minmax(180px, 1.05fr) minmax(145px, .75fr) minmax(145px, .75fr) minmax(180px, 1fr) minmax(145px, .8fr) minmax(160px, .9fr) minmax(150px, .8fr) minmax(140px, .8fr);
+}
+body.pushsale-app-body .psm-utm-check {
+    display: inline-flex;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    font-weight: 400;
+    white-space: nowrap;
+}
+body.pushsale-app-body .psm-utm-check input { width: 15px; height: 15px; margin: 0; }
+body.pushsale-app-body .psm-history-link {
+    display: flex;
+    height: 30px;
+    align-items: center;
+    justify-content: flex-end;
+    color: #187bc1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+body.pushsale-app-body .psm-history-link i { margin-right: 2px; }
+
+/* Marketing data table */
+body.pushsale-app-body .psm-table-area { padding: 14px 15px 0; }
+body.pushsale-app-body .psm-table-scroll {
+    width: 100%;
+    max-height: calc(100vh - 250px);
+    overflow: auto;
+    border-right: 1px solid #d7d7d7;
+    border-bottom: 1px solid #d7d7d7;
+    background: #fff;
+}
+body.pushsale-app-body .psm-dashboard-table {
+    width: max(100%, 1780px);
+    min-width: 1780px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0;
+    font-size: 12px;
+}
+body.pushsale-app-body .psm-dashboard-table th,
+body.pushsale-app-body .psm-dashboard-table td {
+    border: 1px solid #d6d9df;
+    padding: 4px 5px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 16px;
+}
+body.pushsale-app-body .psm-dashboard-table thead th {
+    position: sticky;
+    z-index: 3;
+    top: 0;
+    height: 73px;
+    border-color: #2b6fbf !important;
+    background: #3782dc !important;
+    color: #fff !important;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: normal;
+}
+body.pushsale-app-body .psm-dashboard-table thead .psm-head-group th {
+    height: 28px;
+    padding: 4px;
+    top: 0;
+}
+body.pushsale-app-body .psm-dashboard-table thead tr:nth-child(2) th { top: 28px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(1) { width: 38px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(2) { width: 150px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(3) { width: 150px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(4) { width: 95px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(5) { width: 78px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(6) { width: 120px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(7) { width: 82px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(8) { width: 76px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(9) { width: 76px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(10) { width: 84px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(11) { width: 80px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(12) { width: 62px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(13) { width: 84px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(14) { width: 76px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(15) { width: 78px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(16) { width: 105px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(17) { width: 105px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(18) { width: 92px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(19) { width: 105px; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(20) { width: 52px; }
+body.pushsale-app-body .psm-dashboard-table tbody td { height: 26px; background: #fff; white-space: nowrap; }
+body.pushsale-app-body .psm-dashboard-table tbody tr.psm-level-1 td { background: #e7edf8; }
+body.pushsale-app-body .psm-dashboard-table tbody tr.psm-level-2 td { background: #fde9e7; }
+body.pushsale-app-body .psm-dashboard-table tbody tr.psm-level-3 td { background: #fff; }
+body.pushsale-app-body .psm-dashboard-table tbody tr:hover td { background: #fffbdc; }
+body.pushsale-app-body .psm-dashboard-table .psm-total-row td {
+    height: 21px;
+    padding: 1px 5px;
+    background: #fff !important;
+    font-weight: 700;
+}
+body.pushsale-app-body .psm-dashboard-table .psm-total-row td:first-child { text-align: right; }
+body.pushsale-app-body .psm-source-cell,
+body.pushsale-app-body .psm-product-cell { position: relative; text-align: left !important; overflow: hidden; text-overflow: ellipsis; }
+body.pushsale-app-body .psm-indent { display: inline-block; }
+body.pushsale-app-body .psm-add-button,
+body.pushsale-app-body .psm-expand-button,
+body.pushsale-app-body .psm-chart-button {
+    border: 0;
+    background: transparent;
+    color: #1789d5;
+    cursor: pointer;
+    padding: 0 3px;
+}
+body.pushsale-app-body .psm-add-button { color: #c9dcf5; font-size: 13px; }
+body.pushsale-app-body .psm-product-cell .psm-expand-button { position: absolute; right: 3px; top: 4px; color: #087df0; }
+body.pushsale-app-body .psm-utm-cell { text-align: left !important; }
+body.pushsale-app-body .psm-rate-cell { position: relative; overflow: hidden; }
+body.pushsale-app-body .psm-rate-cell > span {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    max-width: 16px;
+    background: #ff7d72;
+}
+body.pushsale-app-body .psm-rate-cell { isolation: isolate; }
+body.pushsale-app-body .psm-rate-cell::after { content: ''; position: relative; z-index: -1; }
+body.pushsale-app-body .psm-metric-fill { position: relative; display: block; min-height: 20px; overflow: hidden; line-height: 20px; }
+body.pushsale-app-body .psm-metric-fill .psm-metric-bar { position: absolute; inset: 0 auto 0 0; opacity: .7; }
+body.pushsale-app-body .psm-metric-fill.is-green .psm-metric-bar { background: linear-gradient(90deg,#a8ff9c,#5ce760); }
+body.pushsale-app-body .psm-metric-fill.is-blue .psm-metric-bar { background: linear-gradient(90deg,#c9f0ff,#58c2e8); }
+body.pushsale-app-body .psm-metric-fill b { position: relative; z-index: 1; font-weight: 400; }
+body.pushsale-app-body .psm-chart-button { color: #2089d0; font-size: 14px; }
+body.pushsale-app-body .psm-empty { height: 80px !important; color: #777; text-align: center !important; }
+
+body.pushsale-app-body .psm-pagination-row,
+body.pushsale-app-body .psr-pagination-row {
+    display: flex;
+    min-height: 46px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 8px 0;
+    color: #555;
+}
+body.pushsale-app-body .psm-pagination-row .ps-pager,
+body.pushsale-app-body .psr-pagination-row .ps-pager { margin: 0 auto; }
+body.pushsale-app-body .psm-pagination-row label,
+body.pushsale-app-body .psr-pagination-row label { display: flex; align-items: center; gap: 5px; margin: 0; font-weight: 400; }
+body.pushsale-app-body .psm-pagination-row select,
+body.pushsale-app-body .psr-pagination-row select { height: 27px; border: 1px solid #ccc; background: #fff; }
+
+/* Modal common */
+body.pushsale-app-body .psm-modal-layer {
+    position: fixed;
+    z-index: 3000;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+body.pushsale-app-body .psm-modal-backdrop { position: absolute; inset: 0; border: 0; background: rgba(0,0,0,.48); }
+body.pushsale-app-body .psm-modal {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: min(980px, calc(100vw - 36px));
+    flex-direction: column;
+    max-height: calc(100vh - 36px);
+    overflow: hidden;
+    border: 1px solid #888;
+    border-radius: 1px;
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(0,0,0,.35);
+}
+body.pushsale-app-body .psm-modal-md { width: min(650px, calc(100vw - 36px)); }
+body.pushsale-app-body .psm-modal-lg { width: min(980px, calc(100vw - 36px)); }
+body.pushsale-app-body .psm-modal-xl { width: min(1280px, calc(100vw - 36px)); }
+body.pushsale-app-body .psm-modal-full { width: calc(100vw - 2px); height: calc(100vh - 2px); max-height: calc(100vh - 2px); border-radius: 0; }
+body.pushsale-app-body .psm-modal-header {
+    display: flex;
+    height: 38px;
+    align-items: center;
+    justify-content: space-between;
+    background: #087df0;
+    padding: 0 12px;
+    color: #fff;
+}
+body.pushsale-app-body .psm-modal-header h2 { margin: 0; color: #fff; font-size: 14px; font-weight: 600; }
+body.pushsale-app-body .psm-modal-header button { width: 28px; height: 28px; border: 0; background: transparent; color: #fff; font-size: 16px; }
+body.pushsale-app-body .psm-modal-body { max-height: calc(100vh - 130px); overflow: auto; padding: 12px; }
+body.pushsale-app-body .psm-modal-full .psm-modal-body { flex: 1 1 auto; max-height: none; }
+body.pushsale-app-body .psm-modal-footer { display: flex; justify-content: flex-end; gap: 6px; border-top: 1px solid #ddd; background: #f5f5f5; padding: 8px 12px; }
+body.pushsale-app-body .psm-loading,
+body.pushsale-app-body .psm-chart-empty { display: flex; min-height: 180px; align-items: center; justify-content: center; color: #667; font-size: 13px; }
+body.pushsale-app-body .psm-loading i { margin-right: 7px; }
+body.pushsale-app-body .psm-alert { margin: 0 0 10px; border-radius: 0; padding: 8px 10px; }
+body.pushsale-app-body .psm-chart-title { display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid #ddd; padding: 2px 4px 10px; }
+body.pushsale-app-body .psm-chart-title b { font-size: 16px; }
+body.pushsale-app-body .psm-chart-title span { color: #666; }
+body.pushsale-app-body .psm-chart-wrap { padding: 10px 0 0; }
+body.pushsale-app-body .psm-chart-wrap svg { display: block; width: 100%; height: auto; }
+body.pushsale-app-body .psm-chart-grid { stroke: #e3e5e8; stroke-width: 1; }
+body.pushsale-app-body .psm-chart-axis { stroke: #888; stroke-width: 1; }
+body.pushsale-app-body .psm-chart-line { fill: none; stroke-width: 2.5; }
+body.pushsale-app-body .psm-chart-line.is-contact { stroke: #3782dc; }
+body.pushsale-app-body .psm-chart-line.is-revenue { stroke: #f39c12; }
+body.pushsale-app-body .psm-chart-point { stroke: #fff; stroke-width: 2; }
+body.pushsale-app-body .psm-chart-point.is-contact { fill: #3782dc; }
+body.pushsale-app-body .psm-chart-point.is-revenue { fill: #f39c12; }
+body.pushsale-app-body .psm-chart-label { fill: #555; font-size: 11px; }
+body.pushsale-app-body .psm-chart-legend { display: flex; justify-content: center; gap: 24px; }
+body.pushsale-app-body .psm-chart-legend span { display: flex; align-items: center; gap: 6px; }
+body.pushsale-app-body .psm-chart-legend i { display: inline-block; width: 18px; height: 3px; }
+body.pushsale-app-body .psm-chart-legend .is-contact { background: #3782dc; }
+body.pushsale-app-body .psm-chart-legend .is-revenue { background: #f39c12; }
+body.pushsale-app-body .psm-chart-summary { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; border-top: 1px solid #eee; padding: 10px; }
+body.pushsale-app-body .psm-daily-toolbar { display: flex; align-items: flex-end; gap: 12px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+body.pushsale-app-body .psm-daily-source { display: flex; flex: 1 1 auto; flex-direction: column; gap: 3px; padding-bottom: 3px; font-size: 15px; }
+body.pushsale-app-body .psm-daily-source small { color: #777; font-size: 11px; font-weight: 400; }
+body.pushsale-app-body .psm-daily-toolbar label { display: flex; flex-direction: column; gap: 3px; margin: 0; font-weight: 400; }
+body.pushsale-app-body .psm-daily-toolbar input { width: 150px; height: 29px; border: 1px solid #bbb; padding: 4px 7px; }
+body.pushsale-app-body .psm-daily-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 11px 6px; }
+body.pushsale-app-body .psm-daily-legend span { justify-self: start; padding: 3px 7px; }
+body.pushsale-app-body .psm-daily-legend .is-ready { background: transparent; }
+body.pushsale-app-body .psm-daily-legend .is-zero { background: #f5cfb5; }
+body.pushsale-app-body .psm-daily-legend .is-missing { background: #bdb8b8; }
+body.pushsale-app-body .psm-daily-table { margin: 0; font-size: 12px; }
+body.pushsale-app-body .psm-daily-table th { height: 48px; border-color: #2b6fbf !important; background: #3782dc !important; color: #fff !important; text-align: center; vertical-align: middle !important; }
+body.pushsale-app-body .psm-daily-table td { vertical-align: middle !important; }
+body.pushsale-app-body .psm-daily-table tbody tr.psm-daily-row.is-ready td { background: #fff; }
+body.pushsale-app-body .psm-daily-table tbody tr.psm-daily-row.is-zero td { background: #f5cfb5; }
+body.pushsale-app-body .psm-daily-table tbody tr.psm-daily-row.is-missing td { background: #d0cccc; }
+body.pushsale-app-body .psm-daily-updated b,
+body.pushsale-app-body .psm-daily-updated small { display: block; font-size: 10px; }
+body.pushsale-app-body .psm-daily-updated small { color: #666; }
+body.pushsale-app-body .psm-daily-table input { width: 100%; height: 28px; border: 1px solid #bbb; padding: 3px 7px; text-align: right; }
+body.pushsale-app-body .psm-daily-status { display: inline-block; min-width: 70px; border-radius: 2px; padding: 2px 6px; color: #fff; text-align: center; }
+body.pushsale-app-body .psm-daily-status.is-ready { background: #41b883; }
+body.pushsale-app-body .psm-daily-status.is-zero { background: #f39c12; }
+body.pushsale-app-body .psm-daily-status.is-missing { background: #999; }
+body.pushsale-app-body .psm-help { font-size: 13px; line-height: 1.6; }
+
+/* Ranking */
+body.pushsale-app-body .psr-topbar h1 { width: 300px; flex-basis: 300px; }
+body.pushsale-app-body .psr-primary-filters { max-width: 925px; grid-template-columns: 290px 290px 290px; }
+body.pushsale-app-body .psr-filter-row {
+    display: grid;
+    grid-template-columns: 290px 290px;
+    gap: 30px;
+    border-bottom: 1px solid #d5d5d5;
+    background: #fff;
+    padding: 14px 15px;
+}
+body.pushsale-app-body .psr-content { padding: 0 0 0; background: #fff; }
+body.pushsale-app-body .psr-podium-scroll { width: 100%; overflow-x: auto; }
+body.pushsale-app-body .psr-podium {
+    position: relative;
+    width: 100%;
+    min-width: 1280px;
+    height: 610px;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+    overflow: hidden;
+}
+body.pushsale-app-body .psr-podium::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    left: 2%;
+    right: 2%;
+    bottom: 124px;
+    height: 7px;
+    background: #eef0f3;
+    transform: rotate(-12.8deg);
+    transform-origin: left center;
+}
+body.pushsale-app-body .psr-podium-item {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    width: calc(100% / var(--psr-count));
+    height: 100%;
+    vertical-align: top;
+}
+body.pushsale-app-body .psr-person {
+    position: absolute;
+    left: 50%;
+    bottom: calc(42px + var(--psr-step) * 42px);
+    width: 155px;
+    transform: translateX(-50%);
+    text-align: center;
+}
+body.pushsale-app-body .psr-avatar {
+    position: relative;
+    width: 118px;
+    height: 118px;
+    margin: 0 auto 8px;
+    overflow: hidden;
+    border: 7px solid #ececf0;
+    border-radius: 50%;
+    background: #eee;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.05);
+}
+body.pushsale-app-body .psr-podium-item.rank-1 .psr-avatar {
+    width: 132px;
+    height: 132px;
+    border-color: #ff9200;
+    box-shadow: 0 0 14px rgba(255,146,0,.65);
+}
+body.pushsale-app-body .psr-avatar img,
+body.pushsale-app-body .psr-avatar-fallback { width: 100%; height: 100%; object-fit: cover; }
+body.pushsale-app-body .psr-avatar-fallback { display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#62a8e5,#2469a8); color: #fff; font-size: 28px; font-weight: 700; }
+body.pushsale-app-body .psr-podium-item.rank-1 .psr-avatar-fallback { background: linear-gradient(135deg,#ffca57,#f27b00); }
+body.pushsale-app-body .psr-crown {
+    position: absolute;
+    z-index: 3;
+    top: -48px;
+    left: 50%;
+    color: #ff9500;
+    font-size: 43px;
+    filter: drop-shadow(0 2px 1px rgba(0,0,0,.2));
+    transform: translateX(-50%);
+}
+body.pushsale-app-body .psr-rank-number { display: block; margin-bottom: 7px; font-size: 14px; }
+body.pushsale-app-body .psr-person-name { overflow: hidden; font-size: 12px; line-height: 17px; text-overflow: ellipsis; white-space: nowrap; }
+body.pushsale-app-body .psr-person-team { overflow: hidden; color: #777; font-size: 10px; line-height: 14px; text-overflow: ellipsis; white-space: nowrap; }
+body.pushsale-app-body .psr-person-revenue { color: #111; font-size: 12px; line-height: 19px; }
+body.pushsale-app-body .psr-podium-item.rank-1 .psr-person-name,
+body.pushsale-app-body .psr-podium-item.rank-1 .psr-person-revenue { color: #ff7900; font-weight: 600; }
+body.pushsale-app-body .psr-step { display: none; }
+body.pushsale-app-body .psr-empty-podium { display: flex; height: 100%; align-items: center; justify-content: center; color: #777; font-size: 14px; }
+
+body.pushsale-app-body .psr-table-scroll { width: 100%; overflow: auto; border-top: 1px solid #d6d9df; }
+body.pushsale-app-body .psr-table {
+    width: max(100%, 1660px);
+    min-width: 1660px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0;
+    font-size: 12px;
+}
+body.pushsale-app-body .psr-table th,
+body.pushsale-app-body .psr-table td { border: 1px solid #d6d9df; padding: 5px 6px; text-align: center; vertical-align: middle; }
+body.pushsale-app-body .psr-table thead th { height: 42px; background: #3782dc !important; border-color: #2b6fbf !important; color: #fff !important; font-weight: 600; }
+body.pushsale-app-body .psr-table .psr-head-group th { height: 31px; }
+body.pushsale-app-body .psr-table th:nth-child(1) { width: 48px; }
+body.pushsale-app-body .psr-table th:nth-child(2) { width: 190px; }
+body.pushsale-app-body .psr-table th:nth-child(n+3) { width: 93px; }
+body.pushsale-app-body .psr-table tbody tr:nth-child(even) td { background: #f4f4f4; }
+body.pushsale-app-body .psr-table tbody tr:hover td { background: #fffbdc; }
+body.pushsale-app-body .psr-total-row td { background: #fff !important; font-weight: 700; }
+body.pushsale-app-body .psr-total-row td:first-child { text-align: right; }
+body.pushsale-app-body .psr-sale-cell { display: flex; align-items: center; gap: 8px; text-align: left !important; }
+body.pushsale-app-body .psr-sale-avatar { display: block; width: 31px; height: 31px; flex: 0 0 31px; overflow: hidden; border-radius: 50%; }
+body.pushsale-app-body .psr-sale-avatar img,
+body.pushsale-app-body .psr-sale-avatar .psr-avatar-fallback { width: 100%; height: 100%; font-size: 10px; }
+body.pushsale-app-body .psr-sale-cell b,
+body.pushsale-app-body .psr-sale-cell small { display: block; }
+body.pushsale-app-body .psr-sale-cell b { font-weight: 600; }
+body.pushsale-app-body .psr-sale-cell small { color: #777; font-size: 10px; }
+body.pushsale-app-body .psr-table tbody tr.is-top.rank-1 td { background: #fff8e7; }
+body.pushsale-app-body .psr-empty { height: 70px; color: #777; text-align: center !important; }
+body.pushsale-app-body .psr-pagination-row { padding: 8px 15px; }
+
+@media (max-width: 1500px) {
+    body.pushsale-app-body .psm-topbar h1 { width: 240px; flex-basis: 240px; }
+    body.pushsale-app-body .psm-filter-grid,
+    body.pushsale-app-body .psm-filter-grid.is-second { gap: 10px; }
+    body.pushsale-app-body .psm-top-selects { gap: 10px; }
+    body.pushsale-app-body .psr-topbar h1 { width: 220px; flex-basis: 220px; }
+    body.pushsale-app-body .psr-primary-filters { gap: 10px; }
+}
+
+@media (max-width: 1100px) {
+    body.pushsale-app-body .psm-topbar,
+    body.pushsale-app-body .psr-topbar { flex-wrap: wrap; }
+    body.pushsale-app-body .psm-topbar h1,
+    body.pushsale-app-body .psr-topbar h1 { width: auto; flex: 1 1 200px; }
+    body.pushsale-app-body .psm-top-selects,
+    body.pushsale-app-body .psr-primary-filters { order: 3; width: 100%; max-width: none; grid-template-columns: repeat(3,1fr); }
+    body.pushsale-app-body .psm-filter-grid,
+    body.pushsale-app-body .psm-filter-grid.is-second { grid-template-columns: repeat(3,minmax(180px,1fr)); }
+    body.pushsale-app-body .psr-filter-row { grid-template-columns: repeat(2,minmax(220px,1fr)); }
+}
+
+@media (max-width: 700px) {
+    body.pushsale-app-body .psm-top-selects,
+    body.pushsale-app-body .psr-primary-filters,
+    body.pushsale-app-body .psm-filter-grid,
+    body.pushsale-app-body .psm-filter-grid.is-second,
+    body.pushsale-app-body .psr-filter-row { grid-template-columns: 1fr; }
+    body.pushsale-app-body .psm-pagination-row,
+    body.pushsale-app-body .psr-pagination-row { flex-direction: column; }
+    body.pushsale-app-body .psm-modal-layer { padding: 5px; }
+    body.pushsale-app-body .psm-modal { width: calc(100vw - 10px); max-height: calc(100vh - 10px); }
+    body.pushsale-app-body .psm-daily-toolbar { align-items: stretch; flex-direction: column; }
+}
+
+@media print {
+    body.pushsale-app-body .main-header,
+    body.pushsale-app-body .main-sidebar,
+    body.pushsale-app-body .psr-topbar,
+    body.pushsale-app-body .psr-filter-row,
+    body.pushsale-app-body .psr-pagination-row { display: none !important; }
+    body.pushsale-app-body .content-wrapper { margin: 0 !important; }
+    body.pushsale-app-body .psr-podium { height: 520px; }
+}
+
+/* UTM nâng cao: ba cột gốc của Pushsale chỉ xuất hiện khi người dùng bật checkbox. */
+body.pushsale-app-body .psm-dashboard-table.is-advanced {
+    width: max(100%, 1990px);
+    min-width: 1990px;
+}
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(7),
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(8),
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(9) { width: 72px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(10) { width: 82px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(11) { width: 76px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(12) { width: 76px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(13) { width: 84px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(14) { width: 80px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(15) { width: 62px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(16) { width: 84px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(17) { width: 76px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(18) { width: 78px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(19),
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(20) { width: 105px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(21) { width: 92px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(22) { width: 105px; }
+body.pushsale-app-body .psm-dashboard-table.is-advanced th:nth-child(23) { width: 52px; }

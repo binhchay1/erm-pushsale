@@ -14,6 +14,7 @@ readonly class ReportFilterData
 {
     public function __construct(
         public ?string $sourceType = null,
+        public ?int $marketingSourceId = null,
         public string $preset = ReportDateRange::PRESET_LAST_7_DAYS,
         public ?Carbon $dateFrom = null,
         public ?Carbon $dateTo = null,
@@ -31,6 +32,8 @@ readonly class ReportFilterData
         public ?int $marketerId = null,
         public ?int $warehouseId = null,
         public ?string $shippingMethod = null,
+        public ?string $careStatus = null,
+        public ?string $operationActivityStatus = null,
         public ?string $operationStage = null,
         public ?string $operationResult = null,
         public ?string $closingStatus = null,
@@ -58,6 +61,7 @@ readonly class ReportFilterData
 
         return new self(
             sourceType: $request->input('source_type'),
+            marketingSourceId: $request->integer('marketing_source_id') ?: null,
             preset: $dateRange->preset,
             dateFrom: $dateRange->from,
             dateTo: $dateRange->to,
@@ -75,6 +79,8 @@ readonly class ReportFilterData
             marketerId: $marketerId,
             warehouseId: $request->integer('warehouse_id') ?: null,
             shippingMethod: $request->input('shipping_method'),
+            careStatus: $request->input('care_status'),
+            operationActivityStatus: $request->input('operation_activity_status'),
             operationStage: $request->input('operation_stage'),
             operationResult: $request->input('operation_result'),
             closingStatus: $request->input('closing_status'),
@@ -85,6 +91,17 @@ readonly class ReportFilterData
             hideZeroStatus: $request->boolean('hide_zero_status'),
             hideNoPhone: $request->boolean('hide_no_phone'),
         );
+    }
+
+
+    /** Giữ nguyên mọi bộ lọc nhưng bỏ tab tác nghiệp để tính tổng số theo từng bước. */
+    public function withoutOperationStage(): self
+    {
+        if ($this->operationStage === null) {
+            return $this;
+        }
+
+        return new self(...array_merge(get_object_vars($this), ['operationStage' => null]));
     }
 
     /**
@@ -123,6 +140,7 @@ readonly class ReportFilterData
     {
         return [
             'source_type' => $this->sourceType,
+            'marketing_source_id' => $this->marketingSourceId,
             'preset' => $this->preset,
             'date_from' => $this->dateFrom?->toDateString(),
             'date_to' => $this->dateTo?->toDateString(),
@@ -140,6 +158,8 @@ readonly class ReportFilterData
             'marketer_id' => $this->marketerId,
             'warehouse_id' => $this->warehouseId,
             'shipping_method' => $this->shippingMethod,
+            'care_status' => $this->careStatus,
+            'operation_activity_status' => $this->operationActivityStatus,
             'operation_stage' => $this->operationStage,
             'operation_result' => $this->operationResult,
             'closing_status' => $this->closingStatus,

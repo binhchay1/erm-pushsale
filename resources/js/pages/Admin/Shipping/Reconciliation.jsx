@@ -711,7 +711,7 @@ export default function ShippingReconciliation({
                             </table>
                         </ScrollDataTable>
 
-                        {meta.last_page > 1 && (
+                        {meta && (
                             <div className="mt-4 flex items-center justify-between">
                                 <Button
                                     variant="outline"

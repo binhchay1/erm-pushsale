@@ -59,6 +59,13 @@ return [
         'marketer_user_id' => 'Marketing phụ trách',
         'created_by_user_id' => 'Người tạo',
         'approved_by_user_id' => 'Người duyệt',
+        'metric_rows' => 'Số dòng dữ liệu',
+        'date_from' => 'Từ ngày',
+        'date_to' => 'Đến ngày',
+        'total_budget' => 'Tổng ngân sách',
+        'total_clicks' => 'Tổng tương tác',
+        'utm_source' => 'UTM Source',
+        'utm_campaign' => 'UTM Campaign',
     ],
     'subjects' => [
         'campaign' => 'Chiến dịch',
@@ -66,6 +73,7 @@ return [
         'order' => 'Đơn hàng',
         'lead' => 'Lead',
         'inventory' => 'Kho',
+        'marketing_metrics' => 'Dữ liệu marketing',
     ],
     'actions' => [
         'user.created' => 'Tạo nhân viên',
@@ -80,5 +88,6 @@ return [
         'order.call_logged' => 'Ghi nhận cuộc gọi',
         'inventory.movement_approved' => 'Duyệt nhập/xuất kho',
         'lead.ingested' => 'Nhận lead',
+        'marketing.daily_metrics_updated' => 'Cập nhật dữ liệu marketing theo ngày',
     ],
 ];

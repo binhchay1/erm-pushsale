@@ -35,9 +35,13 @@ export function usePushsaleFilters(routeUrl, filters = {}) {
     };
 
     const apply = (extra = {}) => {
+        const payload = { ...draft, ...extra };
+        if (!Object.prototype.hasOwnProperty.call(extra, 'page')) {
+            payload.page = 1;
+        }
         router.get(
             routeUrl,
-            { ...draft, ...extra, page: 1 },
+            payload,
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
@@ -126,23 +130,30 @@ export function PushsaleExportButton({ routeUrl, filters, label = 'Xuất Excel'
 }
 
 export function PushsalePager({ current = 1, totalPages = 1, onPage, max = 7 }) {
-    const pageCount = Math.max(1, Math.min(totalPages, max));
-    const pages = Array.from({ length: pageCount }, (_, index) => index + 1);
+    const safeTotal = Math.max(1, Number(totalPages) || 1);
+    const safeCurrent = Math.min(safeTotal, Math.max(1, Number(current) || 1));
+    const windowSize = Math.max(3, Math.min(safeTotal, max));
+    let start = Math.max(1, safeCurrent - Math.floor(windowSize / 2));
+    let end = Math.min(safeTotal, start + windowSize - 1);
+    start = Math.max(1, end - windowSize + 1);
+    const pages = Array.from({ length: end - start + 1 }, (_, index) => start + index);
 
     return (
         <div className="ps-pager" aria-label="Phân trang">
-            <button type="button" disabled={current <= 1} onClick={() => onPage?.(Math.max(1, current - 1))}>«</button>
+            <button type="button" disabled={safeCurrent <= 1} onClick={() => onPage?.(1)} title="Trang đầu">«</button>
+            <button type="button" disabled={safeCurrent <= 1} onClick={() => onPage?.(safeCurrent - 1)} title="Trang trước">‹</button>
             {pages.map((page) => (
                 <button
                     type="button"
                     key={page}
-                    className={page === current ? 'is-active' : ''}
+                    className={page === safeCurrent ? 'is-active' : ''}
                     onClick={() => onPage?.(page)}
                 >
                     {page}
                 </button>
             ))}
-            <button type="button" disabled={current >= totalPages} onClick={() => onPage?.(Math.min(totalPages, current + 1))}>»</button>
+            <button type="button" disabled={safeCurrent >= safeTotal} onClick={() => onPage?.(safeCurrent + 1)} title="Trang sau">›</button>
+            <button type="button" disabled={safeCurrent >= safeTotal} onClick={() => onPage?.(safeTotal)} title="Trang cuối">»</button>
         </div>
     );
 }

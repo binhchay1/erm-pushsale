@@ -54,7 +54,10 @@ final class OrderOperationHistoryPresenter
             'result' => self::resultLabel($order->operation_result),
             'nextOperationAt' => $order->next_operation_at?->toIso8601String(),
             'note' => __('operations.customer_interactions.history_before_tracking'),
-            'metadata' => ['contact_count' => (int) $order->contact_count],
+            'metadata' => [
+                'contact_count' => (int) $order->contact_count,
+                'order_snapshot' => app(OrderOperationHistoryService::class)->orderSnapshot($order),
+            ],
             'createdAt' => ($order->updated_at ?? $order->created_at)?->toIso8601String(),
             'synthetic' => true,
         ];

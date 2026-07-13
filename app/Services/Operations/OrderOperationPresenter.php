@@ -16,9 +16,10 @@ use Illuminate\Support\Collection;
 final class OrderOperationPresenter
 {
     /** @return array<string, mixed> */
-    public static function toArray(Order $order): array
+    public static function toArray(Order $order, ?SaleOperationConfigurationService $configuration = null): array
     {
-        $stage = OperationStage::tryFrom($order->operation_stage);
+        $stage = OperationStage::tryFrom($order->operation_stage) ?? OperationStage::NoOperation;
+        $configuration ??= app(SaleOperationConfigurationService::class);
         $result = OperationResult::tryFromStored($order->operation_result);
         $closing = $order->closed_at
             ? ClosingStatus::Closed
@@ -26,7 +27,9 @@ final class OrderOperationPresenter
 
         return [
             'id' => (string) $order->id,
-            'orderCode' => $order->order_code,
+            // Mã đơn chỉ được công bố sau khi chốt. Dữ liệu cũ có mã nhưng chưa closed_at cũng không hiển thị.
+            'orderCode' => $order->closed_at ? $order->order_code : null,
+            'marketingSourceId' => $order->marketing_source_id !== null ? (string) $order->marketing_source_id : '',
             'sourceName' => $order->marketingSource?->name ?? '—',
             'dataArrivedAt' => $order->data_arrived_at?->toIso8601String(),
             'saleId' => (string) $order->sale_user_id,
@@ -38,6 +41,7 @@ final class OrderOperationPresenter
             'phoneCarrier' => \App\Support\PhoneCarrier::label($order->customer_phone) ?? $order->phone_carrier,
             'phoneCarrierKey' => \App\Support\PhoneCarrier::key($order->customer_phone),
             'customerNote' => $order->customer_note,
+            'saleOperationNote' => $order->sale_operation_note,
             'shippingAddress' => $order->shipping_address,
             'shippingAddress2' => $order->shipping_address_2,
             'effectiveShippingAddress' => $order->effectiveShippingAddress(),
@@ -49,10 +53,11 @@ final class OrderOperationPresenter
             'effectiveReceiverName' => $order->effectiveReceiverName(),
             'effectiveReceiverPhone' => $order->effectiveReceiverPhone(),
             'hasDifferentReceiver' => filled($order->receiver_name) || filled($order->receiver_phone),
-            'currentOperation' => $stage?->label() ?? $order->operation_stage,
+            'currentOperation' => $configuration->label($stage),
+            'operationDurationMinutes' => $configuration->durationMinutes($stage),
             'operationResult' => $result?->label() ?? $order->operation_result,
             'operationResultValue' => $result?->value ?? $order->operation_result,
-            'operationStage' => $order->operation_stage,
+            'operationStage' => $stage->value,
             'closingStatus' => $closing->value,
             'closingStatusLabel' => $closing->label(),
             'nextOperationAt' => $order->next_operation_at?->toIso8601String(),
@@ -60,6 +65,7 @@ final class OrderOperationPresenter
             'canCall' => SaleOperationPolicy::canCall($order),
             'canChangeStatus' => SaleOperationPolicy::canChangeStatus($order),
             'canClose' => SaleOperationPolicy::canClose($order),
+            'canDeleteData' => SaleOperationPolicy::canDeleteData($order),
             'products' => $order->items->map(fn ($item) => [
                 'itemId' => (string) $item->id,
                 'productId' => $item->product_id !== null ? (string) $item->product_id : null,
@@ -76,13 +82,15 @@ final class OrderOperationPresenter
             'shippingFeeCollected' => $order->shipping_fee_collected,
             'total' => $order->total,
             'deposit' => $order->deposit,
-            'deliveryStatus' => DeliveryStatus::tryFrom($order->delivery_status)?->label() ?? $order->delivery_status,
+            'deliveryStatus' => DeliveryStatus::tryFrom($order->delivery_status)?->label() ?? ($order->delivery_status ?: '—'),
             'deliveryStatusValue' => $order->delivery_status,
-            'desiredDeliveryAt' => $order->desired_delivery_at?->toDateString(),
+            'desiredDeliveryAt' => $order->desired_delivery_at?->toIso8601String(),
             'warehouseId' => $order->warehouse_id !== null ? (string) $order->warehouse_id : '',
             'warehouseName' => $order->warehouse?->name,
+            'shippingMethod' => $order->shipping_method,
             'carrierName' => $order->carrier_name,
             'trackingNumber' => $order->tracking_number,
+            'shippingNotes' => $order->shipping_notes,
             'accountingNotes' => $order->accounting_notes,
             'internalReconNote' => $order->internal_recon_note,
             'amountToCollect' => $order->amount_to_collect,

@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\Sales;
 
-use App\Http\Controllers\Concerns\InteractsWithReportFilters;
+use App\Data\Customers\CustomerProfileFilterData;
 use App\Http\Controllers\Controller;
-use App\Services\Operations\SaleOperationService;
+use App\Services\Customers\CustomerProfileOptionsService;
+use App\Services\Customers\CustomerProfileService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class CustomerProfileController extends Controller
 {
-    use InteractsWithReportFilters;
-
-    public function __invoke(Request $request, SaleOperationService $service): Response
-    {
-        $filter = $this->reportFilters($request);
-
+    public function __invoke(
+        Request $request,
+        CustomerProfileService $service,
+        CustomerProfileOptionsService $options,
+    ): Response {
+        $filter = CustomerProfileFilterData::fromRequest($request, $request->user());
         $path = '/'.$request->path();
         $activeMenuCode = match ($path) {
             '/admin/marketing/customers' => '2.3',
@@ -25,10 +26,13 @@ class CustomerProfileController extends Controller
             default => null,
         };
 
-        return Inertia::render('Sales/CustomerProfile', $this->reportPageProps($request, [
-            'report' => $service->buildPaginated($filter),
+        return Inertia::render('Sales/CustomerProfile', [
+            'filters' => $filter->toArray(),
+            'filterOptions' => $options->build($request->user()),
+            'report' => $service->paginate($filter),
             'routeUrl' => $path,
             'activeMenuCode' => $activeMenuCode,
-        ]));
+            'pageTitle' => 'Hồ sơ khách hàng',
+        ]);
     }
 }

@@ -34,6 +34,8 @@ final class ActivityLogger
 
     public const LEAD_INGESTED = 'lead.ingested';
 
+    public const MARKETING_DAILY_METRICS_UPDATED = 'marketing.daily_metrics_updated';
+
     /**
      * @param  array<string, mixed>  $properties
      */

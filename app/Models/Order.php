@@ -18,7 +18,7 @@ class Order extends Model
     protected $fillable = [
         'order_code', 'sale_user_id', 'marketer_user_id', 'team_id', 'marketing_source_id',
         'warehouse_id', 'product_id', 'customer_name', 'customer_phone', 'phone_carrier',
-        'customer_note',         'shipping_address', 'shipping_address_2', 'receiver_name', 'receiver_phone', 'shipping_notes', 'accounting_notes',
+        'customer_note', 'sale_operation_note', 'shipping_address', 'shipping_address_2', 'receiver_name', 'receiver_phone', 'shipping_notes', 'accounting_notes',
         'internal_recon_note', 'shipping_geo', 'data_arrived_at', 'landing_upsell_hold_until', 'landing_upsell_locked',
         'assigned_at', 'closed_at', 'inventory_deducted_at',
         'desired_delivery_at', 'next_operation_at', 'operation_stage', 'operation_result', 'closing_status',
@@ -223,12 +223,20 @@ class Order extends Model
     {
         $column = match ($filter->dateType) {
             DateType::SaleReceived => 'assigned_at',
+            DateType::CareUpdate, DateType::DeliveryUpdate => 'updated_at',
             DateType::Closing => 'closed_at',
+            DateType::Posting => 'created_at',
+            DateType::NextOperation => 'next_operation_at',
+            DateType::DesiredDelivery => 'desired_delivery_at',
             default => 'data_arrived_at',
         };
 
         if ($filter->dateFrom && $filter->dateTo && ! $filter->noClosingDateLimit) {
             $query->whereBetween($column, [$filter->dateFrom, $filter->dateTo]);
+        }
+
+        if ($filter->marketingSourceId) {
+            $query->where('marketing_source_id', $filter->marketingSourceId);
         }
 
         if ($filter->deliveryStatus) {
@@ -240,11 +248,18 @@ class Order extends Model
         }
 
         if ($filter->productId) {
-            $query->where('product_id', $filter->productId);
+            $query->where(function (Builder $productQuery) use ($filter): void {
+                $productQuery->where('product_id', $filter->productId)
+                    ->orWhereHas('items', fn (Builder $items) => $items->where('product_id', $filter->productId));
+            });
         }
 
         if ($filter->parentProductId) {
             $query->whereHas('product', fn ($q) => $q->where('parent_id', $filter->parentProductId));
+        }
+
+        if ($filter->teamLeaderId) {
+            $query->whereHas('team', fn (Builder $team) => $team->where('leader_user_id', $filter->teamLeaderId));
         }
 
         if ($filter->teamId) {
@@ -267,12 +282,57 @@ class Order extends Model
             $query->where('shipping_method', $filter->shippingMethod);
         }
 
-        if ($filter->operationStage) {
+        if ($filter->operationActivityStatus === 'not_operated') {
+            $query->whereNull('operation_result')
+                ->whereDoesntHave('operationHistories', fn (Builder $history) => $history->whereIn('action', [
+                    OrderOperationHistory::ACTION_CALL,
+                    OrderOperationHistory::ACTION_STATUS_UPDATED,
+                    OrderOperationHistory::ACTION_ORDER_CLOSED,
+                ]));
+        } elseif ($filter->operationActivityStatus === 'operated') {
+            $query->where(function (Builder $activity): void {
+                $activity->whereNotNull('operation_result')
+                    ->orWhereHas('operationHistories', fn (Builder $history) => $history->whereIn('action', [
+                        OrderOperationHistory::ACTION_CALL,
+                        OrderOperationHistory::ACTION_STATUS_UPDATED,
+                        OrderOperationHistory::ACTION_ORDER_CLOSED,
+                    ]));
+            });
+        }
+
+        if ($filter->careStatus) {
+            $query->where(function (Builder $care) use ($filter): void {
+                match ($filter->careStatus) {
+                    'waiting' => $care->whereNotNull('closed_at')
+                        ->whereIn('operation_stage', ['care_1', 'care_2', 'care_3'])
+                        ->whereNotIn('delivery_status', ['delivered', 'paid', 'delivery_complete', 'returned', 'refund']),
+                    'deliver_now' => $care->where('delivery_status', 'deliver_now'),
+                    'waiting_delivery' => $care->whereIn('delivery_status', ['waiting_waybill', 'posted', 'picking_up', 'delivering', 'redelivery']),
+                    'postponed' => $care->whereNotNull('desired_delivery_at')
+                        ->where('desired_delivery_at', '>', now())
+                        ->whereNotIn('delivery_status', ['delivered', 'paid', 'delivery_complete']),
+                    'saved' => $care->where('delivery_status', 'redelivery'),
+                    'complaint' => $care->where(function (Builder $complaint): void {
+                        $complaint->whereNotNull('return_reason')
+                            ->orWhereIn('delivery_status', ['cannot_deliver', 'returned', 'returning']);
+                    }),
+                    'complaint_done' => $care->whereNotNull('return_reason')
+                        ->whereIn('delivery_status', ['delivered', 'paid', 'delivery_complete', 'refund']),
+                    default => $care,
+                };
+            });
+        }
+
+        if ($filter->operationStage && $filter->operationStage !== 'all') {
             $query->where('operation_stage', $filter->operationStage);
         }
 
         if ($filter->operationResult) {
-            $query->where('operation_result', $filter->operationResult);
+            if ($filter->operationResult === 'no_answer') {
+                $query->whereIn('operation_result', ['no_answer_1', 'no_answer_2', 'no_answer_3', 'no_answer_4', 'no_answer_5', 'no_answer_6']);
+            } else {
+                $query->where('operation_result', $filter->operationResult);
+            }
         }
 
         if ($filter->closingStatus) {

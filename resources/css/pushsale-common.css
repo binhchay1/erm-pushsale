@@ -1,0 +1,121 @@
+/* Shared Pushsale/AdminLTE 2 primitives used by every converted page. */
+body.pushsale-app-body .ps-pushsale-page,
+body.pushsale-app-body .ps-customer-profile-page {
+    width: 100%;
+    min-height: calc(100vh - 50px);
+    background: #fff;
+    color: #111;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+body.pushsale-app-body .form-control {
+    height: 30px;
+    padding: 5px 10px;
+    border: 1px solid #d2d6de;
+    border-radius: 0;
+    background: #fff;
+    color: #333;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 18px;
+    box-shadow: none;
+}
+
+body.pushsale-app-body .form-control:focus {
+    border-color: #3c8dbc;
+    box-shadow: none;
+    outline: 0;
+}
+
+body.pushsale-app-body .btn {
+    min-height: 30px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 18px;
+}
+
+body.pushsale-app-body .btn-primary {
+    border-color: #367fa9;
+    background: #3c8dbc;
+    color: #fff;
+}
+
+body.pushsale-app-body .btn-primary:hover,
+body.pushsale-app-body .btn-primary:focus {
+    border-color: #204d74;
+    background: #367fa9;
+    color: #fff;
+}
+
+body.pushsale-app-body .btn-default {
+    border-color: #ddd;
+    background: #f4f4f4;
+    color: #444;
+}
+
+body.pushsale-app-body .btn-default:hover,
+body.pushsale-app-body .btn-default:focus {
+    border-color: #adadad;
+    background: #e7e7e7;
+    color: #333;
+}
+
+body.pushsale-app-body .table {
+    margin-bottom: 0;
+    border-collapse: collapse;
+    background: #fff;
+    color: #111;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+body.pushsale-app-body .table > thead > tr > th,
+body.pushsale-app-body .table > tbody > tr > td {
+    border: 1px solid #ddd;
+    vertical-align: middle;
+}
+
+body.pushsale-app-body .table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #f9f9f9;
+}
+
+body.pushsale-app-body .small-tip {
+    color: #84909d;
+    font-size: 10px;
+    font-style: normal;
+    line-height: 16px;
+}
+
+body.pushsale-app-body .no-wrap { white-space: nowrap; }
+body.pushsale-app-body .text-left { text-align: left !important; }
+body.pushsale-app-body .text-center { text-align: center !important; }
+body.pushsale-app-body .text-right { text-align: right !important; }
+body.pushsale-app-body .pull-right { float: right !important; }
+body.pushsale-app-body .text-danger { color: #dd4b39 !important; }
+body.pushsale-app-body .text-success { color: #00a65a !important; }
+
+body.pushsale-app-body .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    margin: 0 1px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #3c8dbc;
+    font-size: 13px;
+    line-height: 20px;
+    cursor: pointer;
+}
+body.pushsale-app-body .btn-icon:hover { color: #23527c; }
+
+body.pushsale-app-body .table-responsive {
+    width: 100%;
+    min-height: .01%;
+    overflow-x: auto;
+}

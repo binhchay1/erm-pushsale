@@ -174,7 +174,7 @@ export default function ActivityLogsIndex({ logs, filters, actionOptions, subjec
                     </table>
                 </ScrollDataTable>
 
-                {meta.last_page > 1 && (
+                {meta && (
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">
                             {meta.total} · {meta.current_page}/{meta.last_page}

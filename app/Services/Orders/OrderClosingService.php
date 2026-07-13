@@ -23,6 +23,7 @@ class OrderClosingService
         private readonly InventoryDeductionService $inventory,
         private readonly LandingUpsellService $landingUpsell,
         private readonly OrderOperationHistoryService $history,
+        private readonly OrderCodeGenerator $orderCodes,
     ) {}
 
     /**
@@ -72,6 +73,7 @@ class OrderClosingService
             }
 
             $order->update([
+                'order_code' => $this->orderCodes->generate($order),
                 'closed_at' => now(),
                 'closing_status' => ClosingStatus::Closed->value,
                 'operation_stage' => OperationStage::Care1->value,

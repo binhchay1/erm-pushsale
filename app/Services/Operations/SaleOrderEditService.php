@@ -61,10 +61,16 @@ class SaleOrderEditService
                 'customer_phone' => 'customer_phone',
                 'shipping_address' => 'shipping_address',
                 'customer_note' => 'customer_note',
+                'shipping_method' => 'shipping_method',
+                'shipping_notes' => 'shipping_notes',
             ] as $key => $column) {
                 if (array_key_exists($key, $payload) && $payload[$key] !== null) {
                     $order->{$column} = $payload[$key];
                 }
+            }
+
+            if (array_key_exists('marketing_source_id', $payload)) {
+                $order->marketing_source_id = $payload['marketing_source_id'] ?: null;
             }
 
             if (array_key_exists('warehouse_id', $payload)) {

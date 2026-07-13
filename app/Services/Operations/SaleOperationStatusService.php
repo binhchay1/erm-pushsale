@@ -24,6 +24,7 @@ class SaleOperationStatusService
         private readonly InventoryDeductionService $inventory,
         private readonly LandingUpsellService $landingUpsell,
         private readonly OrderOperationHistoryService $history,
+        private readonly SaleOperationConfigurationService $configuration,
     ) {}
 
     public function logCall(Order $order, User $actor): Order
@@ -114,10 +115,18 @@ class SaleOperationStatusService
             ]);
         }
 
-        $nextStage = $this->resolveNextStage($order, $result);
+        $currentStage = OperationStage::tryFrom($order->operation_stage) ?? OperationStage::NewCustomer;
+        $nextStage = $this->configuration->nextStage($currentStage, $result);
         $nextOperationAt = ! empty($payload['next_operation_at'])
             ? Carbon::parse($payload['next_operation_at'])
             : null;
+
+        if ($nextOperationAt === null) {
+            $delay = $this->configuration->workflowDelayMinutes($currentStage, $result);
+            if ($delay > 0) {
+                $nextOperationAt = now()->addMinutes($delay);
+            }
+        }
 
         $updates = [
             'operation_result' => $result->value,
@@ -153,41 +162,6 @@ class SaleOperationStatusService
 
             return $fresh;
         });
-    }
-
-    private function resolveNextStage(Order $order, OperationResult $result): OperationStage
-    {
-        if (str_starts_with($result->value, 'no_answer_')) {
-            return $result->nextStage();
-        }
-
-        if (in_array($result, [OperationResult::Considering, OperationResult::SentQuote, OperationResult::CallbackScheduled], true)) {
-            $current = OperationStage::tryFrom($order->operation_stage) ?? OperationStage::NewCustomer;
-
-            return $this->advanceCallStage($current);
-        }
-
-        return $result->nextStage();
-    }
-
-    private function advanceCallStage(OperationStage $current): OperationStage
-    {
-        $sequence = [
-            OperationStage::NewCustomer,
-            OperationStage::Call2,
-            OperationStage::Call3,
-            OperationStage::Call4,
-            OperationStage::Call5,
-            OperationStage::Call6,
-        ];
-
-        $index = array_search($current, $sequence, true);
-
-        if ($index === false) {
-            return $current;
-        }
-
-        return $sequence[min($index + 1, count($sequence) - 1)];
     }
 
     private function assertCanAct(Order $order, User $actor): void

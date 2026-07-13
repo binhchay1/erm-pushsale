@@ -22,6 +22,51 @@ final class OrderOperationHistoryService
     }
 
     /**
+     * Snapshot nghiệp vụ để modal lịch sử tái hiện đúng nội dung tại thời điểm tác nghiệp.
+     * Chỉ đọc dữ liệu thật của đơn; không tạo dòng demo.
+     *
+     * @return array<string, mixed>
+     */
+    public function orderSnapshot(Order $order): array
+    {
+        $order->loadMissing(['items', 'saleUser', 'marketingSource', 'warehouse']);
+
+        return [
+            'order_id' => (int) $order->id,
+            'order_code' => $order->closed_at ? $order->order_code : null,
+            'customer_name' => $order->customer_name,
+            'customer_phone' => $order->customer_phone,
+            'receiver_name' => $order->effectiveReceiverName(),
+            'receiver_phone' => $order->effectiveReceiverPhone(),
+            'address' => $order->effectiveShippingAddress(),
+            'source' => $order->marketingSource?->name,
+            'sale' => $order->saleUser?->name,
+            'warehouse' => $order->warehouse?->name,
+            'shipping_method' => $order->shipping_method,
+            'shipping_provider' => $order->shipping_provider,
+            'carrier_name' => $order->carrier_name,
+            'shipping_service' => data_get($order->shipping_geo, 'service'),
+            'shipping_notes' => $order->shipping_notes,
+            'tracking_number' => $order->tracking_number,
+            'subtotal' => (int) $order->subtotal,
+            'discount' => (int) $order->discount,
+            'vat' => (int) $order->vat,
+            'shipping_fee_collected' => (int) $order->shipping_fee_collected,
+            'total' => (int) $order->total,
+            'deposit' => (int) $order->deposit,
+            'amount_to_collect' => (int) $order->amount_to_collect,
+            'desired_delivery_at' => $order->desired_delivery_at?->toIso8601String(),
+            'products' => $order->items->map(fn ($item): array => [
+                'name' => $item->product_name,
+                'quantity' => (int) $item->quantity,
+                'unit_price' => (int) $item->unit_price,
+                'discount_amount' => (int) ($item->discount_amount ?? 0),
+                'item_type' => $item->item_type ?? 'product',
+            ])->values()->all(),
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $before
      * @param  array<string, mixed>  $after
      * @param  array<string, mixed>  $metadata
@@ -35,6 +80,10 @@ final class OrderOperationHistoryService
         ?string $note = null,
         array $metadata = [],
     ): OrderOperationHistory {
+        $metadata = array_replace_recursive([
+            'order_snapshot' => $this->orderSnapshot($order),
+        ], $metadata);
+
         return OrderOperationHistory::query()->create([
             'company_id' => $order->company_id ?? $actor->company_id,
             'order_id' => $order->id,
@@ -47,7 +96,7 @@ final class OrderOperationHistoryService
             'operation_result' => $after['operation_result'] ?? null,
             'next_operation_at' => $after['next_operation_at'] ?? null,
             'note' => filled($note) ? trim((string) $note) : null,
-            'metadata' => $metadata !== [] ? $metadata : null,
+            'metadata' => $metadata,
             'created_at' => now(),
         ]);
     }

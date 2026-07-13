@@ -86,4 +86,9 @@ class MarketingSource extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function dailyMetrics(): HasMany
+    {
+        return $this->hasMany(MarketingSourceDailyMetric::class);
+    }
 }

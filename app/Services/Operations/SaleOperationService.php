@@ -4,41 +4,57 @@ namespace App\Services\Operations;
 
 use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Data\ReportFilterData;
+use App\Enums\OperationStage;
+use Illuminate\Database\Eloquent\Builder;
 
 class SaleOperationService
 {
     public function __construct(
         private readonly OrderRepositoryInterface $orders,
+        private readonly SaleOperationConfigurationService $configuration,
     ) {}
 
     /** @return array<string, mixed> */
     public function build(ReportFilterData $filter): array
     {
-        $collection = $this->orders->allFiltered($filter);
-
-        if ($filter->operationStage && $filter->operationStage !== 'all') {
-            $collection = $collection->where('operation_stage', $filter->operationStage);
-        }
-
-        return [
-            'rows' => OrderOperationPresenter::collection($collection),
-            'statusTabs' => OrderOperationPresenter::statusTabs(
-                $this->orders->allFiltered($filter),
-                $filter->hideZeroStatus,
-            ),
-        ];
+        return $this->buildPaginated($filter);
     }
 
     /**
-     * Danh sách hồ sơ khách hàng dùng phân trang phía server để không tải toàn bộ
-     * đơn hàng vào bộ nhớ khi dữ liệu tăng lớn.
+     * Phân trang tại SQL. Counts của tab được tính trên cùng bộ lọc nhưng bỏ stage,
+     * nên không phải tải toàn bộ bảng orders lên PHP.
      *
      * @return array<string, mixed>
      */
     public function buildPaginated(ReportFilterData $filter): array
     {
-        $paginator = $this->orders
-            ->queryFiltered($filter)
+        $baseFilter = $filter->withoutOperationStage();
+        $baseQuery = $this->orders->queryFiltered($baseFilter);
+
+        $counts = (clone $baseQuery)
+            ->reorder()
+            ->selectRaw("COALESCE(operation_stage, 'no_operation') as stage_key, COUNT(*) as aggregate")
+            ->groupBy('stage_key')
+            ->pluck('aggregate', 'stage_key')
+            ->map(fn ($count) => (int) $count);
+
+        $total = (int) $counts->sum();
+        $selectedStage = $filter->operationStage && $filter->operationStage !== 'all'
+            ? $filter->operationStage
+            : null;
+
+        /** @var Builder $pageQuery */
+        $pageQuery = $this->orders->queryFiltered($baseFilter);
+        if ($selectedStage === OperationStage::NoOperation->value) {
+            $pageQuery->where(function (Builder $query): void {
+                $query->whereNull('operation_stage')
+                    ->orWhere('operation_stage', OperationStage::NoOperation->value);
+            });
+        } elseif ($selectedStage) {
+            $pageQuery->where('operation_stage', $selectedStage);
+        }
+
+        $paginator = $pageQuery
             ->paginate(
                 perPage: $filter->perPage,
                 columns: ['*'],
@@ -47,10 +63,36 @@ class SaleOperationService
             )
             ->withQueryString();
 
+        $definitions = $this->configuration->definitions();
+        $tabs = collect($definitions)
+            ->map(function (array $definition) use ($counts, $total): array {
+                $count = (int) ($counts[$definition['value']] ?? 0);
+
+                return $definition + [
+                    'status' => $definition['value'],
+                    'count' => $count,
+                    'total' => $total,
+                ];
+            })
+            ->when($filter->hideZeroStatus, fn ($collection) => $collection->where('count', '>', 0))
+            ->values()
+            ->all();
+
+        $tabs[] = [
+            'status' => 'all',
+            'value' => 'all',
+            'label' => 'Tất cả',
+            'count' => $total,
+            'total' => $total,
+            'durationMinutes' => 0,
+            'level' => 3,
+            'color' => '#c1e2f4',
+        ];
+
         return [
             'rows' => [
                 'data' => collect($paginator->items())
-                    ->map(fn ($order) => OrderOperationPresenter::toArray($order))
+                    ->map(fn ($order) => OrderOperationPresenter::toArray($order, $this->configuration))
                     ->values()
                     ->all(),
                 'meta' => [
@@ -62,6 +104,7 @@ class SaleOperationService
                     'to' => $paginator->lastItem(),
                 ],
             ],
+            'statusTabs' => $tabs,
         ];
     }
 }

@@ -20,6 +20,10 @@ class OrderOperationHistory extends Model
 
     public const ACTION_ORDER_CLOSED = 'order_closed';
 
+    public const ACTION_NOTE_UPDATED = 'note_updated';
+
+    public const ACTION_DESIRED_DELIVERY_UPDATED = 'desired_delivery_updated';
+
     public $timestamps = false;
 
     protected $fillable = [

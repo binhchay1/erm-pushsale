@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Rules\VietnameseMobilePhone;
 use App\Services\Leads\ManualLeadImportService;
+use App\Services\Operations\SaleOrderEditService;
+use App\Services\Orders\OrderClosingService;
+use App\Support\ShippingProviders;
 use App\Support\SpreadsheetLeadReader;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +20,8 @@ class ManualLeadController extends Controller
 {
     public function __construct(
         private readonly ManualLeadImportService $importer,
+        private readonly SaleOrderEditService $orderEditor,
+        private readonly OrderClosingService $orderClosing,
     ) {}
 
     /** Tạo 1 lead lẻ nhập tay. */
@@ -39,6 +44,21 @@ class ManualLeadController extends Controller
             'shipping_notes' => ['nullable', 'string', 'max:1000'],
             'deposit' => ['nullable', 'integer', 'min:0'],
             'shipping_fee_collected' => ['nullable', 'integer', 'min:0'],
+            'warehouse_id' => ['nullable', 'integer', 'exists:warehouses,id'],
+            'shipping_provider' => ['nullable', Rule::in(ShippingProviders::keys())],
+            'shipping_service' => ['nullable', 'string', 'max:30'],
+            'shipping_method' => ['nullable', 'string', 'max:100'],
+            'address_mode' => ['nullable', Rule::in(['old', 'new'])],
+            'address_detail' => ['nullable', 'string', 'max:200'],
+            'province_code' => ['nullable', 'string', 'max:20'],
+            'district_code' => ['nullable', 'string', 'max:20'],
+            'ward_code' => ['nullable', 'string', 'max:20'],
+            'receiver_is_customer' => ['nullable', 'boolean'],
+            'receiver_name' => ['nullable', 'string', 'max:150'],
+            'receiver_phone' => ['nullable', 'string', 'max:30'],
+            'vat' => ['nullable', 'integer', 'min:0'],
+            'close_order' => ['nullable', 'boolean'],
+            'confirm_insufficient_stock' => ['nullable', 'boolean'],
             'note' => ['nullable', 'string', 'max:1000'],
         ] + $this->allocationRules($request));
 
@@ -55,7 +75,40 @@ class ManualLeadController extends Controller
             return back()->with('error', $lead->error_message ?? __('messages.manual_lead.duplicate'));
         }
 
-        return back()->with('success', __('messages.manual_lead.created'));
+        // Lead nhập từ popup Sale phải đi qua đúng luồng tạo/gộp lead hiện tại trước.
+        // Sau đó mới áp các trường giao hàng mở rộng và tùy chọn chốt đơn.
+        $order = $lead->fresh(['order', 'relatedOrder'])->effectiveOrder();
+        if ($order) {
+            $detailKeys = [
+                'items', 'discount', 'warehouse_id', 'shipping_provider', 'shipping_service',
+                'shipping_method', 'shipping_notes', 'marketing_source_id', 'customer_name', 'customer_phone', 'shipping_address',
+                'address_mode', 'address_detail', 'province_code', 'district_code', 'ward_code',
+                'receiver_is_customer', 'receiver_name', 'receiver_phone', 'customer_note',
+                'shipping_fee_collected', 'deposit', 'vat',
+            ];
+
+            $details = collect($validated)->only($detailKeys)->all();
+            $details['customer_name'] = $validated['name'] ?? null;
+            $details['customer_phone'] = $validated['phone'];
+            $details['customer_note'] = $validated['message'] ?? null;
+
+            $order = $this->orderEditor->update($order, $request->user(), $details);
+
+            if ($request->boolean('close_order')) {
+                $this->orderClosing->close($order, $request->user(), [
+                    'warehouse_id' => $validated['warehouse_id'] ?? null,
+                    'shipping_provider' => $validated['shipping_provider'] ?? null,
+                    'shipping_method' => $validated['shipping_method'] ?? null,
+                    'shipping_address' => $order->effectiveShippingAddress(),
+                    'confirm_insufficient_stock' => $request->boolean('confirm_insufficient_stock'),
+                    'note' => $validated['note'] ?? null,
+                ]);
+            }
+        }
+
+        return back()->with('success', $request->boolean('close_order')
+            ? 'Đã tạo và chốt đơn.'
+            : __('messages.manual_lead.created'));
     }
 
     /** Import lead từ file CSV/Excel (.csv, .txt, .xls, .xlsx), tự khớp cột theo ý nghĩa. */

@@ -111,6 +111,7 @@ class ActivityLogController extends Controller
             ActivityLogger::ORDER_CALL_LOGGED,
             ActivityLogger::INVENTORY_MOVEMENT_APPROVED,
             ActivityLogger::LEAD_INGESTED,
+            ActivityLogger::MARKETING_DAILY_METRICS_UPDATED,
         ];
 
         return collect($actions)->map(fn (string $action) => [

@@ -69,4 +69,15 @@ final class SaleOperationPolicy
     {
         return self::isOpen($order) && ! self::isTerminal($order);
     }
+
+    /**
+     * Data chỉ được xóa khi chưa chốt và chưa phát sinh giao vận. Backend tiếp tục
+     * kiểm tra quyền sở hữu của sale và shipment để không dựa riêng vào UI.
+     */
+    public static function canDeleteData(Order $order): bool
+    {
+        return self::isOpen($order)
+            && blank($order->tracking_number)
+            && blank($order->shipping_provider);
+    }
 }

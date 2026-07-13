@@ -59,6 +59,13 @@ return [
         'marketer_user_id' => 'Marketer',
         'created_by_user_id' => 'Created by',
         'approved_by_user_id' => 'Approved by',
+        'metric_rows' => 'Metric rows',
+        'date_from' => 'From date',
+        'date_to' => 'To date',
+        'total_budget' => 'Total budget',
+        'total_clicks' => 'Total interactions',
+        'utm_source' => 'UTM Source',
+        'utm_campaign' => 'UTM Campaign',
     ],
     'subjects' => [
         'campaign' => 'Campaign',
@@ -66,6 +73,7 @@ return [
         'order' => 'Order',
         'lead' => 'Lead',
         'inventory' => 'Inventory',
+        'marketing_metrics' => 'Marketing metrics',
     ],
     'actions' => [
         'user.created' => 'User created',
@@ -80,5 +88,6 @@ return [
         'order.call_logged' => 'Call logged',
         'inventory.movement_approved' => 'Inventory movement approved',
         'lead.ingested' => 'Lead ingested',
+        'marketing.daily_metrics_updated' => 'Marketing daily metrics updated',
     ],
 ];

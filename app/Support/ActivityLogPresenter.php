@@ -100,7 +100,7 @@ class ActivityLogPresenter
         $label = self::propertyLabel($key);
 
         $display = match ($key) {
-            'amount_to_collect', 'total', 'order_total', 'discount' => self::money($value),
+            'amount_to_collect', 'total', 'order_total', 'discount', 'total_budget' => self::money($value),
             'delivery_status' => self::deliveryLabel((string) $value),
             'role' => self::roleLabel((string) $value),
             'type' => \App\Models\WarehouseInventoryMovement::typeLabel((string) $value),

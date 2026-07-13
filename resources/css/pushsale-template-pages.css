@@ -805,3 +805,40 @@ body.pushsale-app-body .pushsale-copy-button {
     color: #1679e8;
     font-size: 11px;
 }
+
+body.pushsale-app-body .pushsale-record-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+body.pushsale-app-body .pushsale-page-size {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: #555;
+    font-weight: 400;
+}
+
+body.pushsale-app-body .pushsale-page-size .form-control {
+    width: 66px;
+    height: 28px;
+    padding: 3px 6px;
+    border-radius: 0;
+    font-size: 11px;
+}
+
+body.pushsale-app-body .pushsale-pagination-wrap .pagination > li > span {
+    display: block;
+    min-width: 30px;
+    height: 30px;
+    padding: 5px 9px;
+    border: 1px solid #ddd;
+    border-left: 0;
+    background: #fff;
+    color: #999;
+    font-size: 11px;
+    line-height: 18px;
+    text-align: center;
+}

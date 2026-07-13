@@ -238,11 +238,14 @@ return array (
         'title' => '2.1 Marketing dashboard',
         'url' => '/admin/marketing/dashboard',
         'area' => 'marketing',
+        'code' => '2.1',
       ),
       1 => 
       array (
         'title' => '2.2 Bảng xếp hạng',
         'url' => '/admin/rankings',
+        'area' => 'marketing',
+        'code' => '2.2',
       ),
       2 => 
       array (

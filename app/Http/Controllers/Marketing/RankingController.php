@@ -2,28 +2,25 @@
 
 namespace App\Http\Controllers\Marketing;
 
-use App\Http\Controllers\Concerns\InteractsWithRevenueRanking;
+use App\Data\MarketingRankingFilterData;
 use App\Http\Controllers\Controller;
-use App\Services\Reports\RevenueRankingService;
+use App\Services\Reports\MarketingLeaderboardService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class RankingController extends Controller
 {
-    use InteractsWithRevenueRanking;
-
-    public function __invoke(Request $request, RevenueRankingService $service): Response
+    public function __invoke(Request $request, MarketingLeaderboardService $service): Response
     {
-        $user = $request->user();
+        $filter = MarketingRankingFilterData::fromRequest($request);
 
-        return Inertia::render('Rankings/Index', $this->revenueRankingPageProps(
-            $request,
-            $service,
-            route('marketing.rankings'),
-            roleScope: $user->role,
-            showDepartmentTabs: false,
-            highlightUserId: $user->id,
-        ));
+        return Inertia::render('Admin/Marketing/Ranking', [
+            'report' => $service->build($filter),
+            'filters' => $filter->toInertia(),
+            'filterOptions' => $service->options(),
+            'filterRouteUrl' => '/marketing/rankings',
+            'activeMenuCode' => '2.2',
+        ]);
     }
 }

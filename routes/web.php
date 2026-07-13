@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\Marketing\CampaignBudgetController;
 use App\Http\Controllers\Admin\Marketing\CampaignController;
 use App\Http\Controllers\Admin\Marketing\CampaignReportController;
 use App\Http\Controllers\Admin\Marketing\DashboardController as MarketingDashboardController;
+use App\Http\Controllers\Admin\Marketing\DashboardDataController as MarketingDashboardDataController;
 use App\Http\Controllers\Admin\Marketing\RevenueReportController as MarketingRevenueReportController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\Orders\FailedOrdersController;
@@ -45,6 +46,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CustomerInteractions\CustomerInternalMessageController;
 use App\Http\Controllers\CustomerInteractions\CustomerPurchaseHistoryController;
 use App\Http\Controllers\CustomerInteractions\CustomerSupplementPacketController;
+use App\Http\Controllers\CustomerInteractions\CustomerDataViewHistoryController;
+use App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController;
 use App\Http\Controllers\CustomerInteractions\OrderOperationHistoryController;
 use App\Http\Controllers\CustomerInteractions\PancakeCustomerMessageController;
 use App\Http\Controllers\HomeController;
@@ -67,9 +70,13 @@ use App\Http\Controllers\Sales\OperationController;
 use App\Http\Controllers\Sales\OrderClosingController;
 use App\Http\Controllers\Sales\PerformanceReportController as SalesPerformanceReportController;
 use App\Http\Controllers\Sales\RankingController as SalesRankingController;
+use App\Http\Controllers\Sales\SaleBulkCloseController;
 use App\Http\Controllers\Sales\SaleOperationCallController;
 use App\Http\Controllers\Sales\SaleOperationOrderController;
+use App\Http\Controllers\Sales\SaleOrderDeletionController;
 use App\Http\Controllers\Sales\SaleOperationStatusController;
+use App\Http\Controllers\Sales\SaleOperationNoteController;
+use App\Http\Controllers\Sales\DesiredDeliveryDateController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Warehouse\DashboardController as WarehouseDashboardController;
@@ -126,6 +133,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         ->name('customers.orders.operation-history');
     Route::get('customers/orders/{order}/purchase-history', [CustomerPurchaseHistoryController::class, 'index'])
         ->name('customers.orders.purchase-history');
+    Route::get('customers/orders/{order}/data-view-history', [CustomerDataViewHistoryController::class, 'index'])
+        ->name('customers.orders.data-view-history');
     Route::get('customers/orders/{order}/messages', [CustomerInternalMessageController::class, 'index'])
         ->name('customers.orders.messages.index');
     Route::post('customers/orders/{order}/messages', [CustomerInternalMessageController::class, 'store'])
@@ -140,6 +149,17 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         'customers/orders/{order}/supplement-packets/{leadIngestion}/review',
         [CustomerSupplementPacketController::class, 'store'],
     )->name('customers.orders.supplement-packets.review');
+
+    Route::get('customers/export', [CustomerProfileBulkActionController::class, 'export'])
+        ->name('customers.export');
+    Route::post('customers/bulk/reallocate-now', [CustomerProfileBulkActionController::class, 'reallocateNow'])
+        ->name('customers.bulk.reallocate-now');
+    Route::post('customers/bulk/queue-reallocation', [CustomerProfileBulkActionController::class, 'queueReallocation'])
+        ->name('customers.bulk.queue-reallocation');
+    Route::post('customers/bulk/recall', [CustomerProfileBulkActionController::class, 'recall'])
+        ->name('customers.bulk.recall');
+    Route::delete('customers/bulk/operation-history', [CustomerProfileBulkActionController::class, 'deleteOperationHistory'])
+        ->name('customers.bulk.operation-history.destroy');
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
@@ -165,6 +185,10 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('reports/team-leaders', TeamLeaderStatsController::class)->name('reports.team-leaders');
         Route::get('reports/extra/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
         Route::get('marketing/dashboard', MarketingDashboardController::class)->name('marketing.dashboard');
+        Route::get('marketing/dashboard/chart', [MarketingDashboardDataController::class, 'chart'])->name('marketing.dashboard.chart');
+        Route::get('marketing/dashboard/daily-metrics', [MarketingDashboardDataController::class, 'dailyMetrics'])->name('marketing.dashboard.daily-metrics');
+        Route::put('marketing/dashboard/daily-metrics', [MarketingDashboardDataController::class, 'saveDailyMetrics'])->name('marketing.dashboard.daily-metrics.update');
+        Route::get('marketing/dashboard/export', [MarketingDashboardDataController::class, 'export'])->name('marketing.dashboard.export');
         Route::get('landing-approvals', [LandingApprovalController::class, 'index'])->name('landing-approvals.index');
         Route::post('landing-approvals/{campaign}/approve', [LandingApprovalController::class, 'approve'])->name('landing-approvals.approve');
         Route::post('landing-approvals/{campaign}/reject', [LandingApprovalController::class, 'reject'])->name('landing-approvals.reject');
@@ -176,9 +200,13 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('sales/revenue', SaleRevenueReportController::class)->name('sales.revenue');
         Route::get('sales/performance', AdminSalesPerformanceReportController::class)->name('sales.performance');
         Route::get('sales/workspace', OperationController::class)->name('sales.workspace');
+        Route::post('sales/orders/bulk-close', [SaleBulkCloseController::class, 'store'])->name('sales.orders.bulk-close');
         Route::post('sales/orders/{order}/call', [SaleOperationCallController::class, 'store'])->name('sales.orders.call');
         Route::post('sales/orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('sales.orders.operation-status');
+        Route::patch('sales/orders/{order}/operation-note', [SaleOperationNoteController::class, 'update'])->name('sales.orders.operation-note');
+        Route::patch('sales/orders/{order}/desired-delivery-date', [DesiredDeliveryDateController::class, 'update'])->name('sales.orders.desired-delivery-date');
         Route::post('sales/orders/{order}/details', [SaleOperationOrderController::class, 'update'])->name('sales.orders.details');
+        Route::delete('sales/orders/{order}', [SaleOrderDeletionController::class, 'destroy'])->name('sales.orders.destroy');
         Route::post('sales/orders/{order}/close', [OrderClosingController::class, 'store'])->name('sales.orders.close');
         Route::post('sales/leads/manual', [ManualLeadController::class, 'store'])->name('sales.leads.manual');
         Route::get('accounting', AccountingOperationsController::class)->name('accounting');
@@ -253,9 +281,13 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('performance', SalesPerformanceReportController::class)->name('performance');
         Route::get('workspace', OperationController::class)->name('workspace');
         Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
+        Route::post('orders/bulk-close', [SaleBulkCloseController::class, 'store'])->name('orders.bulk-close');
         Route::post('orders/{order}/call', [SaleOperationCallController::class, 'store'])->name('orders.call');
         Route::post('orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('orders.operation-status');
+        Route::patch('orders/{order}/operation-note', [SaleOperationNoteController::class, 'update'])->name('orders.operation-note');
+        Route::patch('orders/{order}/desired-delivery-date', [DesiredDeliveryDateController::class, 'update'])->name('orders.desired-delivery-date');
         Route::post('orders/{order}/details', [SaleOperationOrderController::class, 'update'])->name('orders.details');
+        Route::delete('orders/{order}', [SaleOrderDeletionController::class, 'destroy'])->name('orders.destroy');
         Route::post('orders/{order}/close', [OrderClosingController::class, 'store'])->name('orders.close');
         Route::get('customers', CustomerProfileController::class)->name('customers');
         Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
@@ -266,6 +298,10 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('customers', CustomerProfileController::class)->name('customers');
         Route::get('rankings', MarketingRankingController::class)->name('rankings');
         Route::get('workspace', MarketingDashboardController::class)->name('workspace');
+        Route::get('workspace/chart', [MarketingDashboardDataController::class, 'chart'])->name('workspace.chart');
+        Route::get('workspace/daily-metrics', [MarketingDashboardDataController::class, 'dailyMetrics'])->name('workspace.daily-metrics');
+        Route::put('workspace/daily-metrics', [MarketingDashboardDataController::class, 'saveDailyMetrics'])->name('workspace.daily-metrics.update');
+        Route::get('workspace/export', [MarketingDashboardDataController::class, 'export'])->name('workspace.export');
         Route::get('campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
         Route::get('campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create');
         Route::post('campaigns', [CampaignController::class, 'store'])->name('campaigns.store');
