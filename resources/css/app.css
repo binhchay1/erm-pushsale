@@ -11,6 +11,7 @@
 @import "./public-shell.css";
 @import "./pushsale-ceo-report.css";
 @import "./pushsale-marketing.css";
+@import "./pushsale-v12-fixes.css";
 
 @custom-variant dark (&:is(.dark *));
 

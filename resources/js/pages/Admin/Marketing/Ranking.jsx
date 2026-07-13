@@ -85,6 +85,25 @@ function RankingTable({ report = {} }) {
     return (
         <div className="psr-table-scroll">
             <table className="psr-table">
+                <colgroup>
+                    <col className="psr-col-index" />
+                    <col className="psr-col-sale" />
+                    <col className="psr-col-count" />
+                    <col className="psr-col-count" />
+                    <col className="psr-col-rate" />
+                    <col className="psr-col-products" />
+                    <col className="psr-col-revenue" />
+                    <col className="psr-col-count" />
+                    <col className="psr-col-count" />
+                    <col className="psr-col-rate" />
+                    <col className="psr-col-products" />
+                    <col className="psr-col-revenue" />
+                    <col className="psr-col-revenue" />
+                    <col className="psr-col-discount" />
+                    <col className="psr-col-cod" />
+                    <col className="psr-col-cod-fee" />
+                    <col className="psr-col-revenue" />
+                </colgroup>
                 <thead>
                     <tr className="psr-head-group">
                         <th rowSpan="2">STT</th>

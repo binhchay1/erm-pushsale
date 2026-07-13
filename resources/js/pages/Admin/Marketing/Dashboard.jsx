@@ -351,6 +351,33 @@ function DashboardTable({ report, expanded, onToggle, onChart, onDaily, advanced
     return (
         <div className="psm-table-scroll">
             <table className={`psm-dashboard-table ${advancedUtm ? 'is-advanced' : ''}`}>
+                <colgroup>
+                    <col className="psm-col-stt" />
+                    <col className="psm-col-source" />
+                    <col className="psm-col-product" />
+                    <col className="psm-col-channel" />
+                    <col className="psm-col-utm-source" />
+                    <col className="psm-col-utm-campaign" />
+                    {advancedUtm && <>
+                        <col className="psm-col-utm-medium" />
+                        <col className="psm-col-utm-term" />
+                        <col className="psm-col-utm-content" />
+                    </>}
+                    <col className="psm-col-budget" />
+                    <col className="psm-col-clicks" />
+                    <col className="psm-col-contacts" />
+                    <col className="psm-col-contact-rate" />
+                    <col className="psm-col-contact-price" />
+                    <col className="psm-col-closed" />
+                    <col className="psm-col-close-rate" />
+                    <col className="psm-col-products" />
+                    <col className="psm-col-products-per-order" />
+                    <col className="psm-col-revenue" />
+                    <col className="psm-col-net-revenue" />
+                    <col className="psm-col-budget-revenue" />
+                    <col className="psm-col-budget-net-revenue" />
+                    <col className="psm-col-chart" />
+                </colgroup>
                 <thead>
                     <tr className="psm-head-group"><th colSpan={advancedUtm ? 9 : 6}>THÔNG TIN NGUỒN DỮ LIỆU</th><th colSpan="14">THÔNG TIN HIỆU QUẢ MARKETING</th></tr>
                     <tr>
