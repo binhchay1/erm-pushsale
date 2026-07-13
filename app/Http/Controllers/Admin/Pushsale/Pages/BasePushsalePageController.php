@@ -54,7 +54,7 @@ abstract class BasePushsalePageController extends Controller
             ]),
             'rows' => $result['data'],
             'pagination' => $result['meta'],
-            'filterOptions' => $this->pages->filterOptions(),
+            'filterOptions' => $this->pages->filterOptions($this->pageCode),
             'routeUrl' => '/'.$request->path(),
             'templateHtml' => $this->templateHtml($templateCode),
             'dialogTemplates' => collect($schema['dialogs'] ?? [])->mapWithKeys(

@@ -161,23 +161,36 @@ class PushsalePageService
         ];
     }
 
-    /** @return array<string, array<int, array{id: string|int, label: string}>> */
-    public function filterOptions(): array
+    /** @return array<string, array<int, array<string, mixed>>> */
+    public function filterOptions(string $pageCode): array
     {
+        $schema = $this->schema($pageCode);
+        $requestedSources = collect($schema['form_fields'] ?? [])
+            ->merge(collect($schema['dialog_resources'] ?? [])->flatMap(function (string $resourceKey): array {
+                $resources = config('pushsale_resources', []);
+                $definition = is_array($resources) ? ($resources[$resourceKey] ?? []) : [];
+
+                return (array) ($definition['fields'] ?? []);
+            }))
+            ->pluck('option_source')
+            ->filter(fn ($source): bool => is_string($source) && $source !== '')
+            ->unique()
+            ->values();
+
         $mapUsers = static fn ($items) => $items->map(fn (User $user) => [
             'id' => $user->id,
             'label' => trim($user->name.' · '.$user->email),
         ])->all();
         $mapTeams = static fn ($items) => $items->map(fn (Team $team) => ['id' => $team->id, 'label' => $team->name])->all();
 
-        return [
+        // Nguồn dùng chung bởi các select/filter trong HTML gốc.
+        $options = [
             'users' => $mapUsers(User::query()->orderBy('name')->limit(1000)->get(['id', 'name', 'email'])),
             'sales' => $mapUsers(User::query()->where('role', User::ROLE_SALES)->orderBy('name')->limit(500)->get(['id', 'name', 'email'])),
             'saleLeaders' => $mapUsers(User::query()->where('role', User::ROLE_SALES)->where('is_team_leader', true)->orderBy('name')->limit(300)->get(['id', 'name', 'email'])),
             'marketers' => $mapUsers(User::query()->where('role', User::ROLE_MARKETING)->orderBy('name')->limit(500)->get(['id', 'name', 'email'])),
             'marketingLeaders' => $mapUsers(User::query()->where('role', User::ROLE_MARKETING)->where('is_team_leader', true)->orderBy('name')->limit(300)->get(['id', 'name', 'email'])),
             'warehouseUsers' => $mapUsers(User::query()->where('role', User::ROLE_WAREHOUSE)->orderBy('name')->limit(500)->get(['id', 'name', 'email'])),
-            // Care đơn hiện là một quyền nghiệp vụ dùng bởi kho và sale, không có role cứng riêng.
             'careUsers' => $mapUsers(User::query()->whereIn('role', [User::ROLE_WAREHOUSE, User::ROLE_SALES])->orderBy('name')->limit(800)->get(['id', 'name', 'email'])),
             'teams' => $mapTeams(Team::query()->orderBy('name')->limit(1000)->get(['id', 'name'])),
             'saleTeams' => $mapTeams(Team::query()->where('type', TeamType::Sale->value)->orderBy('name')->limit(500)->get(['id', 'name'])),
@@ -196,17 +209,30 @@ class PushsalePageService
                 'id' => $order->id,
                 'label' => trim($order->order_code.' · '.$order->customer_name.' · '.$order->customer_phone),
             ])->all(),
-            'operationCategories' => OperationCategory::query()->orderBy('sort_order')->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (OperationCategory $item) => ['id' => $item->id, 'label' => $item->name])->all(),
-            'expenseGroups' => ExpenseGroup::query()->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (ExpenseGroup $item) => ['id' => $item->id, 'label' => $item->name])->all(),
-            'expenseCategories' => ExpenseCategory::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (ExpenseCategory $item) => ['id' => $item->id, 'label' => $item->name])->all(),
-            'expenseUnits' => ExpenseUnit::query()->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (ExpenseUnit $item) => ['id' => $item->id, 'label' => $item->name])->all(),
-            'productCategories' => ProductCategory::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (ProductCategory $item) => ['id' => $item->id, 'label' => $item->name])->all(),
-            'productAttributes' => ProductAttribute::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (ProductAttribute $item) => ['id' => $item->id, 'label' => $item->name])->all(),
-            'productAttributeValues' => ProductAttributeValue::query()->with('attribute:id,name')->orderBy('value')->limit(2000)->get()->map(fn (ProductAttributeValue $item) => [
+        ];
+
+        // Các bảng phụ chỉ được query khi đúng trang thực sự cần chúng.
+        // Một lỗi ở thuộc tính sản phẩm không được phép làm toàn bộ màn hình khác 500.
+        $loaders = [
+            'operationCategories' => fn (): array => OperationCategory::query()->orderBy('sort_order')->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (OperationCategory $item) => ['id' => $item->id, 'label' => $item->name])->all(),
+            'expenseGroups' => fn (): array => ExpenseGroup::query()->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (ExpenseGroup $item) => ['id' => $item->id, 'label' => $item->name])->all(),
+            'expenseCategories' => fn (): array => ExpenseCategory::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (ExpenseCategory $item) => ['id' => $item->id, 'label' => $item->name])->all(),
+            'expenseUnits' => fn (): array => ExpenseUnit::query()->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (ExpenseUnit $item) => ['id' => $item->id, 'label' => $item->name])->all(),
+            'productCategories' => fn (): array => ProductCategory::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (ProductCategory $item) => ['id' => $item->id, 'label' => $item->name])->all(),
+            'productAttributes' => fn (): array => ProductAttribute::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (ProductAttribute $item) => ['id' => $item->id, 'label' => $item->name])->all(),
+            'productAttributeValues' => fn (): array => ProductAttributeValue::query()->with('attribute:id,name')->orderBy('name')->limit(2000)->get()->map(fn (ProductAttributeValue $item) => [
                 'id' => $item->id,
-                'label' => trim(($item->attribute?->name ? $item->attribute->name.': ' : '').$item->value),
+                'label' => trim(($item->attribute?->name ? $item->attribute->name.': ' : '').$item->name),
             ])->all(),
         ];
+
+        foreach ($requestedSources as $source) {
+            if (isset($loaders[$source])) {
+                $options[$source] = $loaders[$source]();
+            }
+        }
+
+        return $options;
     }
 
     private function users(): Collection
@@ -306,7 +332,7 @@ class PushsalePageService
                     'marketing' => (bool) ($product->available_marketing ?? true),
                     'sale' => (bool) ($product->available_sale ?? true),
                     'care' => (bool) ($product->available_care ?? true),
-                    'attributes' => $product->attributeValues->map(fn (ProductAttributeValue $value) => trim(($value->attribute?->name ? $value->attribute->name.': ' : '').$value->value))->implode(', '),
+                    'attributes' => $product->attributeValues->map(fn (ProductAttributeValue $value) => trim(($value->attribute?->name ? $value->attribute->name.': ' : '').$value->name))->implode(', '),
                     'updated_at' => $product->updated_at?->toIso8601String(),
                     'actions' => 'Cập nhật',
                     '_record_id' => $product->id,
