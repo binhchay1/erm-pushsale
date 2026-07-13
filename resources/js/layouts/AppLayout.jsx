@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { AppHeader } from '@/components/layout/AppHeader';
@@ -8,6 +8,7 @@ import { LocaleSync } from '@/components/layout/LocaleSync';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useFlashToast } from '@/hooks/useFlashToast';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
+import { ensurePushsaleStyles } from '@/lib/uiShellStyles';
 import { cn } from '@/lib/utils';
 
 const dashboardRoutes = [
@@ -25,72 +26,63 @@ function dashboardRoleFromUrl(url) {
     return dashboardRoutes.find((route) => path.startsWith(route.prefix))?.role ?? null;
 }
 
-function initialCollapsedState() {
-    try {
-        return window.localStorage.getItem('pushsale-sidebar-collapsed') === '1';
-    } catch {
-        return false;
-    }
-}
-
 export default function AppLayout({ children }) {
     useFlashToast();
     useRealtimeNotifications();
 
     const [pendingDashboardRole, setPendingDashboardRole] = useState(null);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(initialCollapsedState);
-    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+    const [stylesReady, setStylesReady] = useState(() => document.documentElement.dataset.pushsaleStylesReady === '1' || Boolean(document.getElementById('pushsale-adminlte')));
+    // Pushsale mặc định đóng menu. Menu chỉ mở khi người dùng bấm hamburger.
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    // Login và phần mềm dùng hai CSS shell khác nhau. Khi Inertia chuyển SPA sau
+    // đăng nhập, nạp vendor CSS trước khi render để không xuất hiện HTML thô rồi mới F5.
+    useLayoutEffect(() => {
+        let active = true;
+        document.body.classList.remove('public-app-body');
+        document.body.classList.add('pushsale-app-body', 'hold-transition', 'skin-blue-light', 'sidebar-mini', 'fixed');
+        ensurePushsaleStyles().finally(() => active && setStylesReady(true));
+
+        return () => {
+            active = false;
+            document.body.classList.remove('pushsale-app-body', 'hold-transition', 'skin-blue-light', 'sidebar-mini', 'fixed');
+        };
+    }, []);
 
     useEffect(() => {
-        document.body.classList.add('hold-transition', 'skin-blue-light', 'sidebar-mini', 'fixed');
-
         const start = router.on('start', (event) => {
             setPendingDashboardRole(dashboardRoleFromUrl(event.detail.visit.url));
+            setSidebarOpen(false);
         });
         const finish = router.on('finish', () => {
             setPendingDashboardRole(null);
-            setMobileSidebarOpen(false);
+            setSidebarOpen(false);
         });
 
         return () => {
-            document.body.classList.remove('hold-transition', 'skin-blue-light', 'sidebar-mini', 'fixed');
             start();
             finish();
         };
     }, []);
 
-    const toggleSidebar = () => {
-        if (window.matchMedia('(max-width: 767px)').matches) {
-            setMobileSidebarOpen((open) => !open);
-            return;
-        }
+    const closeSidebar = () => setSidebarOpen(false);
 
-        setSidebarCollapsed((collapsed) => {
-            const next = !collapsed;
-            try {
-                window.localStorage.setItem('pushsale-sidebar-collapsed', next ? '1' : '0');
-            } catch {
-                // localStorage có thể bị chặn; trạng thái phiên hiện tại vẫn hoạt động.
-            }
-            return next;
-        });
-    };
+    if (!stylesReady) {
+        return <div className="pushsale-shell-loading"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>;
+    }
 
     return (
         <div
             className={cn(
                 'wrapper pushsale-wrapper',
-                sidebarCollapsed && 'sidebar-collapse',
-                mobileSidebarOpen && 'sidebar-open',
+                !sidebarOpen && 'sidebar-collapse',
+                sidebarOpen && 'sidebar-open',
             )}
         >
             <LocaleSync />
             <TooltipProvider>
-                <AppHeader onToggleSidebar={toggleSidebar} />
-                <AppSidebar
-                    collapsed={sidebarCollapsed}
-                    onNavigate={() => setMobileSidebarOpen(false)}
-                />
+                <AppHeader onToggleSidebar={() => setSidebarOpen((open) => !open)} />
+                <AppSidebar collapsed={!sidebarOpen} onNavigate={closeSidebar} />
 
                 <main className="content-wrapper">
                     <div className="content-inner">
@@ -106,7 +98,7 @@ export default function AppLayout({ children }) {
                     type="button"
                     className="sidebar-mobile-backdrop"
                     aria-label="Đóng menu"
-                    onClick={() => setMobileSidebarOpen(false)}
+                    onClick={closeSidebar}
                 />
             </TooltipProvider>
         </div>

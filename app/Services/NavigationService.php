@@ -94,6 +94,13 @@ class NavigationService
             return $url;
         }
 
+        // Các màn hình được dựng từ template Pushsale có URL tĩnh riêng và
+        // được dùng chung giữa các vai trò. Cây menu + permission quyết định
+        // người dùng có nhìn thấy và được phép mở mã màn hình nào.
+        if (preg_match('#^/admin/pages/[a-z0-9-]+$#', $url) === 1) {
+            return $url;
+        }
+
         $exact = match ($role) {
             UserRole::Sales => [
                 '/admin/sales/workspace' => '/sales/workspace',

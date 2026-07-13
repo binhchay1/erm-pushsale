@@ -11,8 +11,20 @@ function brandTitle(brand) {
     return normalized.replace(/\s+/g, '').toUpperCase();
 }
 
+function dashboardForRole(role) {
+    return {
+        admin: '/admin/dashboard',
+        sales: '/sales/dashboard',
+        marketing: '/marketing/dashboard',
+        warehouse: '/warehouse/dashboard',
+        accounting: '/accounting/dashboard',
+        allocator: '/allocator/dashboard',
+    }[role] ?? '/';
+}
+
 export function AppHeader({ onToggleSidebar }) {
-    const { brand } = usePage().props;
+    const { brand, auth } = usePage().props;
+    const dashboardUrl = dashboardForRole(auth?.user?.role);
 
     return (
         <header className="main-header pushsale-main-header">
@@ -25,7 +37,7 @@ export function AppHeader({ onToggleSidebar }) {
                 >
                     <i className="fa fa-bars" aria-hidden="true" />
                 </button>
-                <Link href="/" className="logo pushsale-logo" title={brandTitle(brand)}>
+                <Link href={dashboardUrl} className="logo pushsale-logo" title={brandTitle(brand)}>
                     {brandTitle(brand)}
                 </Link>
             </div>

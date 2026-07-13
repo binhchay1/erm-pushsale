@@ -6,19 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         @php
             $seo = app(\App\Support\Seo::class)->resolved();
-            $isPublicShell = request()->is('/')
-                || request()->is('login')
-                || request()->is('register')
-                || request()->is('forgot-password')
-                || request()->is('reset-password/*')
-                || request()->is('verify-email*')
-                || request()->is('confirm-password')
-                || request()->is('two-factor-challenge')
-                || request()->is('features')
-                || request()->is('solutions')
-                || request()->is('about')
-                || request()->is('contact')
-                || request()->is('sitemap.xml');
+            $isPublicShell = app(\App\Support\UiShell::class)->isPublic(request());
             $isPushsaleShell = ! $isPublicShell;
         @endphp
         <title inertia>{{ $seo['title'] }}</title>

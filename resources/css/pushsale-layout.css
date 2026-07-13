@@ -1852,3 +1852,189 @@ body.pushsale-app-body .pushsale-notification-dropdown .pushsale-notification-fo
     }
     body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-logo { display: none !important; }
 }
+
+/* V4: menu overlay mặc định đóng, không thay đổi kích thước vùng nội dung. */
+body.pushsale-app-body .pushsale-wrapper .content-wrapper,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper {
+    inset: var(--ps-header-height) 0 0 0 !important;
+    left: 0 !important;
+    width: auto !important;
+    margin: 0 !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper .pushsale-main-sidebar {
+    width: var(--ps-sidebar-width) !important;
+    transform: translateX(-100%);
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-main-sidebar {
+    transform: translateX(0) !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-main-sidebar {
+    transform: translateX(-100%) !important;
+}
+
+body.pushsale-app-body .sidebar-mobile-backdrop {
+    position: fixed;
+    inset: var(--ps-header-height) 0 0 0;
+    z-index: 2030;
+    display: none;
+    width: auto;
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: default;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .sidebar-mobile-backdrop {
+    display: block;
+}
+
+body.pushsale-app-body .pushsale-main-sidebar {
+    z-index: 2040;
+}
+
+body.pushsale-app-body .pushsale-third-menu {
+    z-index: 2060;
+}
+
+body.pushsale-app-body .sidebar-menu .a1 {
+    font-weight: 400 !important;
+}
+
+body.pushsale-app-body .sidebar-menu .li1.menu-open > .a1,
+body.pushsale-app-body .sidebar-menu .li1.active > .a1 {
+    font-weight: 500 !important;
+}
+
+body.pushsale-app-body .sidebar-menu .a2,
+body.pushsale-app-body .pushsale-third-link {
+    font-weight: 400 !important;
+}
+
+body.pushsale-app-body .sidebar-menu .li1.active > .a1:not(:hover) {
+    background: #f7f8fb !important;
+}
+
+@media (max-width: 767px) {
+    body.pushsale-app-body .pushsale-wrapper.sidebar-open .sidebar-mobile-backdrop {
+        background: rgba(0, 0, 0, .22);
+    }
+}
+
+/* V5 final shell rules — sidebar is always an overlay and closed by default. */
+body.pushsale-app-body {
+    overflow: hidden !important;
+    min-width: 1180px;
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open {
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+body.pushsale-app-body .pushsale-wrapper .content-wrapper,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper {
+    position: fixed !important;
+    top: var(--ps-header-height) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: auto !important;
+    background: #fff !important;
+    transition: none !important;
+}
+
+body.pushsale-app-body .pushsale-main-sidebar,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-main-sidebar {
+    position: fixed !important;
+    top: var(--ps-header-height) !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 2140 !important;
+    width: var(--ps-sidebar-width) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    transform: translate3d(-100%, 0, 0) !important;
+    transition: transform .16s ease-out !important;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, .22) !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-main-sidebar {
+    transform: translate3d(0, 0, 0) !important;
+}
+
+body.pushsale-app-body .pushsale-sidebar {
+    height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: #f8f9fb !important;
+}
+
+body.pushsale-app-body .sidebar-mobile-backdrop {
+    position: fixed !important;
+    top: var(--ps-header-height) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 2120 !important;
+    display: none !important;
+    border: 0 !important;
+    background: rgba(0, 0, 0, .08) !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .sidebar-mobile-backdrop {
+    display: block !important;
+}
+
+body.pushsale-app-body .pushsale-third-menu {
+    z-index: 2160 !important;
+}
+
+body.pushsale-app-body .sidebar-menu .a1,
+body.pushsale-app-body .sidebar-menu .a2,
+body.pushsale-app-body .pushsale-third-link {
+    font-weight: 400 !important;
+}
+
+body.pushsale-app-body .sidebar-menu .li1.menu-open > .a1,
+body.pushsale-app-body .sidebar-menu .li1.active > .a1,
+body.pushsale-app-body .sidebar-menu .li2.active > .a2,
+body.pushsale-app-body .pushsale-third-item.active > .pushsale-third-link {
+    font-weight: 500 !important;
+}
+
+/* Root branch only marks context. A second-level selected item (or the parent
+   of the selected flyout leaf) keeps the blue/white state shown by Pushsale. */
+body.pushsale-app-body .sidebar-menu .li1.active > .a1 {
+    background: #f7f8fb !important;
+    color: #007bff !important;
+}
+
+body.pushsale-app-body .sidebar-menu .li2.active > .a2,
+body.pushsale-app-body .sidebar-menu .li2.flyout-open > .a2 {
+    background: var(--ps-blue) !important;
+    color: #fff !important;
+}
+
+body.pushsale-app-body .pushsale-shell-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #f7f9fb;
+    color: #3c8dbc;
+    font: 12px Arial, Helvetica, sans-serif;
+}

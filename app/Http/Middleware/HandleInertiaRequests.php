@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\UserNotification;
 use App\Services\LabelRegistry;
 use App\Services\NavigationService;
+use App\Support\UiShell;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -14,7 +15,13 @@ class HandleInertiaRequests extends Middleware
 
     public function version(Request $request): ?string
     {
-        return parent::version($request);
+        // Public/login shell không nạp Bootstrap/AdminLTE, còn shell nội bộ có nạp.
+        // Đổi version khi trạng thái đăng nhập thay đổi để Inertia bắt buộc reload
+        // toàn bộ document; nếu không lần đăng nhập đầu tiên sẽ thiếu CSS cho tới F5.
+        $assetVersion = parent::version($request) ?? 'dev';
+        $shellVersion = app(UiShell::class)->name($request);
+
+        return $assetVersion.'-'.$shellVersion;
     }
 
     public function share(Request $request): array

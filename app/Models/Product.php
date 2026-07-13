@@ -6,18 +6,28 @@ use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['parent_id', 'name', 'type', 'sku', 'unit_price', 'is_active'];
+    protected $fillable = ['parent_id', 'name', 'type', 'sku', 'unit', 'unit_price', 'cost_price', 'vat_percent', 'vat_code', 'weight_grams', 'is_active', 'available_marketing', 'available_sale', 'available_care'];
 
     protected $attributes = ['type' => 'product'];
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean'];
+        return [
+            'is_active' => 'boolean',
+            'available_marketing' => 'boolean',
+            'available_sale' => 'boolean',
+            'available_care' => 'boolean',
+            'unit_price' => 'integer',
+            'cost_price' => 'integer',
+            'vat_percent' => 'decimal:2',
+            'weight_grams' => 'integer',
+        ];
     }
 
     public function isCombo(): bool
@@ -33,5 +43,15 @@ class Product extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Product::class, 'parent_id');
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\Pushsale\ProductCategory::class, 'product_category_product');
+    }
+
+    public function attributeValues(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\Pushsale\ProductAttributeValue::class, 'product_attribute_value_product');
     }
 }

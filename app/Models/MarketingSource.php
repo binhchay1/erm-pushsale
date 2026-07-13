@@ -7,10 +7,26 @@ use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class MarketingSource extends Model
 {
     use BelongsToTenant;
+
+    protected static function booted(): void
+    {
+        static::creating(function (MarketingSource $source): void {
+            if ($source->webhook_token) {
+                return;
+            }
+
+            do {
+                $token = Str::random(40);
+            } while (static::query()->withoutGlobalScopes()->where('webhook_token', $token)->exists());
+
+            $source->webhook_token = $token;
+        });
+    }
 
     protected $fillable = [
         'parent_id', 'name', 'product_id', 'marketer_user_id', 'created_by_user_id', 'ad_channel',

@@ -68,7 +68,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended($this->homeFor($user));
+        return redirect()->to($this->homeFor($user));
     }
 
     public function destroy(Request $request): RedirectResponse

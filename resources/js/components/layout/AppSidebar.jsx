@@ -5,18 +5,34 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 function cleanPath(url = '') {
-    return String(url).split('?')[0].split('#')[0] || '/';
+    const path = String(url).split('?')[0].split('#')[0] || '/';
+    return path.length > 1 ? path.replace(/\/+$/, '') : path;
 }
 
-function isNavActive(itemUrl, currentUrl) {
-    if (!itemUrl || itemUrl === '#') return false;
-    const itemPath = cleanPath(itemUrl);
+function flattenLeaves(items, prefix = 'root') {
+    const leaves = [];
+    items.forEach((item, index) => {
+        const key = `${prefix}.${index}`;
+        const children = item.children ?? [];
+        if (children.length) leaves.push(...flattenLeaves(children, key));
+        else if (item.url && !item.disabled) leaves.push({ item, key });
+    });
+    return leaves;
+}
+
+function resolveActiveKey(navigation, currentUrl, activeMenuCode) {
+    const leaves = flattenLeaves(navigation);
+    if (activeMenuCode) {
+        const byCode = leaves.find(({ item }) => String(item.code ?? '') === String(activeMenuCode));
+        if (byCode) return byCode.key;
+    }
+
     const currentPath = cleanPath(currentUrl);
-    return itemPath === '/' ? currentPath === '/' : currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
+    return leaves.find(({ item }) => cleanPath(item.url) === currentPath)?.key ?? null;
 }
 
-function nodeIsActive(item, currentUrl) {
-    return isNavActive(item.url, currentUrl) || (item.children ?? []).some((child) => nodeIsActive(child, currentUrl));
+function keyContains(activeKey, key) {
+    return Boolean(activeKey && (activeKey === key || activeKey.startsWith(`${key}.`)));
 }
 
 const defaultIcons = {
@@ -39,7 +55,13 @@ function menuNumber(title = '') {
 function LeafLink({ item, className, onNavigate, children }) {
     if (item.url && !item.disabled) {
         return (
-            <Link href={item.url} className={className} title={item.title} onClick={onNavigate}>
+            <Link
+                href={item.url}
+                className={className}
+                title={item.title}
+                preserveScroll={false}
+                onClick={onNavigate}
+            >
                 {children}
             </Link>
         );
@@ -52,7 +74,7 @@ function LeafLink({ item, className, onNavigate, children }) {
     );
 }
 
-function ThirdLevelFlyout({ flyout, currentUrl, onNavigate, onClose }) {
+function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onClose }) {
     if (!flyout || typeof document === 'undefined') return null;
 
     return createPortal(
@@ -63,9 +85,10 @@ function ThirdLevelFlyout({ flyout, currentUrl, onNavigate, onClose }) {
             aria-label={flyout.item.title}
         >
             {(flyout.item.children ?? []).map((child, index) => {
-                const active = nodeIsActive(child, currentUrl);
+                const childKey = `${flyout.key}.${index}`;
+                const active = keyContains(activeKey, childKey);
                 return (
-                    <div key={`${flyout.key}.${index}`} className={cn('pushsale-third-item', active && 'active')}>
+                    <div key={childKey} className={cn('pushsale-third-item', active && 'active')}>
                         <LeafLink
                             item={child}
                             className="pushsale-third-link"
@@ -85,22 +108,36 @@ function ThirdLevelFlyout({ flyout, currentUrl, onNavigate, onClose }) {
     );
 }
 
-export function AppSidebar({ collapsed = false, onNavigate }) {
+export function AppSidebar({ collapsed = true, onNavigate }) {
     const { props, url } = usePage();
-    const { navigation = [] } = props;
+    const { navigation = [], activeMenuCode = null } = props;
     const sidebarRef = useRef(null);
 
-    const activeRootIndex = useMemo(
-        () => navigation.findIndex((item) => nodeIsActive(item, url)),
-        [navigation, url],
+    const activeKey = useMemo(
+        () => resolveActiveKey(navigation, url, activeMenuCode),
+        [activeMenuCode, navigation, url],
     );
-    const [openRoot, setOpenRoot] = useState(activeRootIndex >= 0 ? activeRootIndex : null);
+    const activeRootIndex = useMemo(() => {
+        if (!activeKey) return null;
+        const match = activeKey.match(/^root\.(\d+)/);
+        return match ? Number(match[1]) : null;
+    }, [activeKey]);
+
+    const [openRoot, setOpenRoot] = useState(null);
     const [flyout, setFlyout] = useState(null);
 
     useEffect(() => {
-        if (activeRootIndex >= 0) setOpenRoot(activeRootIndex);
+        if (collapsed) {
+            setOpenRoot(null);
+            setFlyout(null);
+            return;
+        }
+        setOpenRoot(activeRootIndex);
+    }, [activeRootIndex, collapsed]);
+
+    useEffect(() => {
         setFlyout(null);
-    }, [activeRootIndex, url]);
+    }, [url]);
 
     useEffect(() => {
         const close = (event) => {
@@ -127,7 +164,7 @@ export function AppSidebar({ collapsed = false, onNavigate }) {
     const toggleFlyout = (event, item, key) => {
         const rect = event.currentTarget.getBoundingClientRect();
         const estimatedHeight = Math.max(61, (item.children?.length ?? 1) * 61);
-        const top = Math.max(42, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
+        const top = Math.max(50, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
         setFlyout((current) => (current?.key === key ? null : { item, key, top }));
     };
 
@@ -137,14 +174,15 @@ export function AppSidebar({ collapsed = false, onNavigate }) {
                 <section className="sidebar pushsale-sidebar" ref={sidebarRef}>
                     <ul className="sidebar-menu ul1">
                         {navigation.map((root, rootIndex) => {
+                            const rootKey = `root.${rootIndex}`;
                             const rootOpen = openRoot === rootIndex;
-                            const rootActive = nodeIsActive(root, url);
+                            const rootActive = keyContains(activeKey, rootKey);
                             const icon = root.icon ?? defaultIcons[menuNumber(root.title)] ?? 'circle-o';
                             const hasChildren = (root.children?.length ?? 0) > 0;
 
                             return (
                                 <li
-                                    key={`root.${rootIndex}`}
+                                    key={rootKey}
                                     className={cn('treeview li1', rootOpen && 'menu-open', rootActive && 'active')}
                                 >
                                     {hasChildren ? (
@@ -169,9 +207,9 @@ export function AppSidebar({ collapsed = false, onNavigate }) {
                                     {hasChildren && (
                                         <ul className={cn('treeview-menu ul2', rootOpen && 'is-open')}>
                                             {root.children.map((child, childIndex) => {
-                                                const key = `root.${rootIndex}.${childIndex}`;
+                                                const key = `${rootKey}.${childIndex}`;
                                                 const hasGrandchildren = (child.children?.length ?? 0) > 0;
-                                                const childActive = nodeIsActive(child, url);
+                                                const childActive = keyContains(activeKey, key);
                                                 const flyoutOpen = flyout?.key === key;
 
                                                 return (
@@ -218,7 +256,7 @@ export function AppSidebar({ collapsed = false, onNavigate }) {
             {!collapsed && (
                 <ThirdLevelFlyout
                     flyout={flyout}
-                    currentUrl={url}
+                    activeKey={activeKey}
                     onNavigate={onNavigate}
                     onClose={() => setFlyout(null)}
                 />

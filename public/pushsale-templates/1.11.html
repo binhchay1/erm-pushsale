@@ -1,0 +1,157 @@
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="1.11"><div class="content-wrapper" style="min-height: 737px;">
+<div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1515"><a name="1515" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1515_ContentPane"><!-- Start_Module_1515 --><div class="pushsale-template-inner" id="dnn_ctr1515_ModuleContent">
+
+
+
+
+
+<style>
+    .avatar_image_small { border-radius: 50%; width: 45px; height: 45px; }
+    .no-pd-lr { padding-left: 0px; padding-right: 0px; }
+    .m-header { display: flex; }
+    .opacity-1 a { opacity: 1; }
+    .max-1-row { word-break: break-word; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; height: 20px; line-height: 19px; }
+    .max-4-row { word-break: break-word; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; height: 80px; line-height: 19px; }
+    .chosen-container.chosen-container-single { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; border-radius: 0px !important; }
+        .chosen-container.chosen-container-single .chosen-single { margin: 0; position: relative; zoom: 1; vertical-align: middle; border: 1px solid #d2d6de; width: 100%; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; height: 26px; box-shadow: none; border-radius: 0px !important; border: none; }
+</style>
+<div class="ng-scope" id="app2" ng-app="app" ng-controller="ctrl" ng-init="init()">
+
+<div class="col-xs-12 col-md-12 no-pd-lr">
+<div class="m-header-wrap">
+<div class="m-header">
+<div class="col-sm-12 form-group">
+<span class="text form-group">Cấu hình Facebook của đơn vị</span>
+</div>
+</div>
+</div>
+<div class="col-xs-12">
+<div class="box box-toggle">
+<div class="box-body ibody">
+<div class="row">
+<div>
+<div class="box-body row">
+<div class="col-xs-6 col-sm-3">
+<input class="form-control text-center ng-pristine ng-untouched ng-valid ng-empty pushsale-native-input" ng-enter="seach()" ng-model="keyword" placeholder="Tìm PageID, Tên Fanpage" type="text"/>
+</div>
+<div class="col-xs-6 col-sm-3">
+<a class="btn btn-sm btn-primary mr15" data-pushsale-action="search" href="#" ng-click="seach()" role="button">
+<i class="fa fa-search"></i>Tìm kiếm
+                                    </a>
+</div>
+</div>
+</div>
+<div style="clear: both; border-bottom: 1px solid #ddd;"></div>
+<div class="box-body">
+<div class="row">
+<div class="col-sm-7">
+<table class="table table-bordered pushsale-data-table" data-pushsale-grid-table="primary">
+<thead><tr class="pushsale-captured-header-row">
+<th class="text-left no-wrap">Fanpage</th>
+<th class="text-left no-wrap">FB Creator</th>
+<th class="text-left no-wrap">Pushsale User</th>
+<th class="text-center"></th>
+</tr></thead><tbody data-pushsale-grid-anchor="primary"></tbody></table><div data-pushsale-pagination-anchor="primary"></div>
+<div class="row">
+<div class="hidden-print" style="padding-top: 20px;">
+<ul boundary-link-numbers="true" class="ng-pristine ng-untouched ng-valid ng-isolate-scope pagination ng-not-empty" items-per-page="paging.pageSize" max-size="5" next-text="›" ng-change="pageChanged()" ng-model="paging.currentPage" previous-text="‹" role="menu" total-items="paging.totalItems" uib-pagination=""><!-- ngIf: ::boundaryLinks -->
+<!-- ngIf: ::directionLinks --><li class="pagination-prev ng-scope disabled" ng-class="{disabled: noPrevious()||ngDisabled}" ng-if="::directionLinks" role="menuitem"><a class="ng-binding" disabled="disabled" href="" ng-click="selectPage(page - 1, $event)" ng-disabled="noPrevious()||ngDisabled" role="button" tabindex="-1" uib-tabindex-toggle="">‹</a></li><!-- end ngIf: ::directionLinks -->
+<!-- ngRepeat: page in pages track by $index --><li class="pagination-page ng-scope active" ng-class="{active: page.active,disabled: ngDisabled&amp;&amp;!page.active}" ng-repeat="page in pages track by $index" role="menuitem"><a class="ng-binding" href="" ng-click="selectPage(page.number, $event)" ng-disabled="ngDisabled&amp;&amp;!page.active" role="button" uib-tabindex-toggle="">1</a></li><!-- end ngRepeat: page in pages track by $index -->
+<!-- ngIf: ::directionLinks --><li class="pagination-next ng-scope disabled" ng-class="{disabled: noNext()||ngDisabled}" ng-if="::directionLinks" role="menuitem"><a class="ng-binding" disabled="disabled" href="" ng-click="selectPage(page + 1, $event)" ng-disabled="noNext()||ngDisabled" role="button" tabindex="-1" uib-tabindex-toggle="">›</a></li><!-- end ngIf: ::directionLinks -->
+<!-- ngIf: ::boundaryLinks -->
+</ul>
+</div>
+</div>
+</div>
+<div class="col-sm-5">
+<table class="table table-bordered table-line">
+<tbody><tr>
+<th colspan="2">Cập nhật
+                                            </th>
+</tr>
+<tr>
+<td class="text-right" style="width: 150px;">Id:</td>
+<td class="ng-binding" style="width: 250px;">
+</td>
+</tr>
+<tr>
+<td class="text-right"><span>Fanpage</span>:</td>
+<td>
+<input class="form-control txt-dotted ng-pristine ng-untouched ng-valid ng-empty pushsale-native-input" disabled="" ng-model="itemEdit.pageId" type="text"/></td>
+</tr>
+<tr>
+<td class="text-right"><span>Creator</span>:</td>
+<td>
+<input class="form-control txt-dotted ng-pristine ng-untouched ng-valid ng-empty pushsale-native-input" disabled="" ng-model="itemEdit.adminCreatorName" type="text"/></td>
+</tr>
+<tr>
+<td class="text-right"><span>Marketing<span class="text-red"> (*)</span></span>:</td>
+<td>
+<select chosen="" class="ng-pristine ng-untouched ng-valid localytics-chosen ng-empty pushsale-native-select" convert-to-number="" ng-model="itemEdit.userId" style="width: 100%; "><option selected="selected" value="? object:null ?"></option>
+<!-- ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87680">
+                                                        ttgroup2.marketing19
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87549">
+                                                        ttgroup2.marketing18
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87548">
+                                                        ttgroup2.marketing17
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87517">
+                                                        ttgroup2.marketing16
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87368">
+                                                        ttgroup2.marketing15
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87338">
+                                                        ttgroup2.marketing14
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87337">
+                                                        ttgroup2.marketing13
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87336">
+                                                        ttgroup2.marketing12
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87335">
+                                                        ttgroup2.marketing11
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87334">
+                                                        ttgroup2.marketing10
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87333">
+                                                        ttgroup2.marketing09
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87332">
+                                                        ttgroup2.marketing08
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87331">
+                                                        ttgroup2.marketing07
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87330">
+                                                        ttgroup2.marketing06
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87329">
+                                                        ttgroup2.marketing05
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87328">
+                                                        ttgroup2.marketing04
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87327">
+                                                        ttgroup2.marketing03
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87326">
+                                                        ttgroup2.marketing02
+                                                    </option><!-- end ngRepeat: mkt in listMKT --><option class="ng-binding ng-scope" ng-repeat="mkt in listMKT" value="87325">
+                                                        ttgroup2.marketing01
+                                                    </option><!-- end ngRepeat: mkt in listMKT -->
+</select><div class="chosen-container chosen-container-single" style="width: 462px;" title=""><a class="chosen-single chosen-default" role="button" tabindex="-1"><span>Chọn</span><div><b></b></div></a><div class="chosen-drop"><div class="chosen-search"><input autocomplete="off" class="pushsale-native-input" type="text"/></div><ul class="chosen-results"></ul></div></div>
+</td>
+</tr>
+<tr>
+<td class="text-right"></td>
+<td colspan="1">
+<a class="mr15" data-pushsale-action="save" href="#" ng-click="SaveOne(itemEdit)" role="button" title="Lưu">
+<i class="fa fa-save"></i> Cập nhật
+                                                    </a>
+<a class="mr15" href="#" ng-click="ClearForm()" role="button" title="Lưu">
+<i class="fa fa-refresh"></i> Làm lại
+                                                    </a>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div><!-- End_Module_1515 --></div>
+</div></div>
+</div></div>
