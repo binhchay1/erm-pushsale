@@ -40,6 +40,9 @@ class UserRequest extends FormRequest
             'team_id' => $this->input('team_id') ?: null,
             'manager_user_id' => $this->input('manager_user_id') ?: null,
             'org_level' => $this->input('org_level') ?: null,
+            'work_shift_id' => $this->input('work_shift_id') ?: null,
+            'receive_data' => $this->boolean('receive_data', true),
+            'is_locked' => $this->boolean('is_locked', false),
         ]);
 
         $company = $this->user()?->company;
@@ -68,6 +71,11 @@ class UserRequest extends FormRequest
             'org_level' => ['nullable', Rule::enum(OrgLevel::class)],
             'phone' => ['nullable', 'string', 'max:30'],
             'job_title' => ['nullable', 'string', 'max:120'],
+            'employee_code' => ['nullable', 'string', 'max:60', Rule::unique('user_operational_profiles', 'employee_code')->ignore($this->route('user')?->operationalProfile?->id)],
+            'base_salary' => ['nullable', 'integer', 'min:0'],
+            'receive_data' => ['sometimes', 'boolean'],
+            'work_shift_id' => ['nullable', 'exists:work_shifts,id'],
+            'is_locked' => ['sometimes', 'boolean'],
             'password' => [$userId ? 'nullable' : 'required', 'confirmed', Password::defaults()],
             'permissions' => ['sometimes', 'array'],
             'permissions.*' => ['nullable', Rule::in([

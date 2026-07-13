@@ -196,6 +196,10 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::delete('warehouses/{warehouse}', [WarehouseController::class, 'destroy'])->name('warehouses.destroy');
         Route::delete('warehouse-inventories/{inventory}', [WarehouseInventoryController::class, 'destroy'])->name('warehouse-inventories.destroy');
         Route::resource('teams', TeamController::class)->except(['show']);
+        Route::post('products/import', [ProductController::class, 'import'])->name('products.import');
+        Route::post('products/categories', [ProductController::class, 'storeCategory'])->name('products.categories.store');
+        Route::post('products/attributes', [ProductController::class, 'storeAttribute'])->name('products.attributes.store');
+        Route::post('products/attribute-values', [ProductController::class, 'storeAttributeValue'])->name('products.attribute-values.store');
         Route::resource('products', ProductController::class)->except(['show']);
         Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
         Route::delete('leads/{leadIngestion}', [LeadIngestionController::class, 'destroy'])->name('leads.destroy');
@@ -235,6 +239,10 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
 
     // Quản lý nhân viên: mở cho nhánh trên có quyền HR (không chỉ admin). Chặn qua middleware permissions + phân cấp.
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::patch('users/{user}/operational-status', [UserController::class, 'updateOperationalStatus'])
+            ->name('users.operational-status');
+        Route::patch('users/{user}/password', [UserController::class, 'updatePassword'])
+            ->name('users.password');
         Route::resource('users', UserController::class)->except(['show']);
     });
 

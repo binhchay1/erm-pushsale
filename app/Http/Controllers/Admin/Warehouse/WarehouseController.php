@@ -23,22 +23,45 @@ class WarehouseController extends Controller
         private readonly OrderRepository $orderStats,
     ) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $warehouses = $this->warehouses->allWithManagerAndCounts()
-            ->map(fn (Warehouse $w) => [
-                'id' => $w->id,
-                'name' => $w->name,
-                'phone' => $w->phone,
-                'address' => $w->address,
-                'manager_name' => $w->manager?->name,
-                'vtp_code' => $w->vtp_code,
-                'products_count' => $w->inventories_count,
-            ])
-            ->values();
+        $filters = [
+            'search' => trim((string) $request->query('search', '')),
+            'manager_user_id' => (string) $request->query('manager_user_id', ''),
+            'province' => (string) $request->query('province', ''),
+        ];
+
+        $query = Warehouse::query()->with('manager:id,name')->withCount('inventories');
+        if ($filters['search'] !== '') {
+            $term = $filters['search'];
+            $query->where(fn ($builder) => $builder->where('name', 'like', "%{$term}%")->orWhere('phone', 'like', "%{$term}%")->orWhere('address', 'like', "%{$term}%"));
+        }
+        if ($filters['manager_user_id'] !== '') $query->where('manager_user_id', $filters['manager_user_id']);
+        if ($filters['province'] !== '') $query->where('pick_province', $filters['province']);
+
+        $warehouses = $query->orderBy('name')->paginate(20)->withQueryString()->through(fn (Warehouse $warehouse): array => [
+            'id' => $warehouse->id,
+            'name' => $warehouse->name,
+            'phone' => $warehouse->phone,
+            'pick_province' => $warehouse->pick_province,
+            'pick_district' => $warehouse->pick_district,
+            'pick_ward' => $warehouse->pick_ward,
+            'address' => $warehouse->address,
+            'manager_user_id' => $warehouse->manager_user_id,
+            'manager_name' => $warehouse->manager?->name,
+            'vtp_code' => $warehouse->vtp_code,
+            'ghtk_pick_address_id' => $warehouse->ghtk_pick_address_id,
+            'code' => $warehouse->code,
+            'products_count' => (int) $warehouse->inventories_count,
+            'updated_at' => $warehouse->updated_at?->format('d/m/Y H:i'),
+        ]);
 
         return Inertia::render('Admin/Warehouse/Index', [
             'warehouses' => $warehouses,
+            'filters' => $filters,
+            'managers' => $this->managerOptions(),
+            'provinces' => Warehouse::query()->whereNotNull('pick_province')->where('pick_province', '!=', '')->distinct()->orderBy('pick_province')->pluck('pick_province')->values(),
+            'activeMenuCode' => '5.2.1',
         ]);
     }
 
@@ -47,6 +70,7 @@ class WarehouseController extends Controller
         return Inertia::render('Admin/Warehouse/Form', [
             'managers' => $this->managerOptions(),
             'warehouse' => null,
+            'activeMenuCode' => '5.2.1',
         ]);
     }
 
@@ -87,6 +111,7 @@ class WarehouseController extends Controller
                 'search' => $search,
             ],
             'rows' => $rows,
+            'activeMenuCode' => '5.2.1',
         ]);
     }
 
@@ -99,9 +124,15 @@ class WarehouseController extends Controller
                 'name' => $warehouse->name,
                 'phone' => $warehouse->phone,
                 'address' => $warehouse->address,
+                'pick_province' => $warehouse->pick_province,
+                'pick_district' => $warehouse->pick_district,
+                'pick_ward' => $warehouse->pick_ward,
+                'code' => $warehouse->code,
+                'ghtk_pick_address_id' => $warehouse->ghtk_pick_address_id,
                 'manager_user_id' => $warehouse->manager_user_id,
                 'vtp_code' => $warehouse->vtp_code,
             ],
+            'activeMenuCode' => '5.2.1',
         ]);
     }
 

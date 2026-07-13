@@ -24,6 +24,8 @@ export default function UserForm({
     orgLevels,
     emailIdentity = {},
     permissionConfig = {},
+    workShifts = [],
+    activeMenuCode = '1.2.1',
 }) {
     const t = useT();
     const labels = useLabels();
@@ -48,6 +50,11 @@ export default function UserForm({
         org_level: user?.org_level ?? '',
         phone: user?.phone ?? '',
         job_title: user?.job_title ?? '',
+        employee_code: user?.employee_code ?? '',
+        base_salary: user?.base_salary ?? 0,
+        receive_data: user?.receive_data ?? true,
+        work_shift_id: user?.work_shift_id ?? '',
+        is_locked: user?.is_locked ?? false,
         password: '',
         password_confirmation: '',
         permissions: capMap(user?.permissions ?? defaultsByRole[initialRole] ?? {}, grantable),
@@ -144,7 +151,7 @@ export default function UserForm({
     };
 
     return (
-        <AppLayout>
+        <AppLayout activeMenuCode={activeMenuCode}>
             <Head title={isEdit ? t('pages.users.edit') : t('pages.users.form_create')} />
 
             <div className="mx-auto max-w-2xl space-y-6">
@@ -264,6 +271,66 @@ export default function UserForm({
                                         id="job_title"
                                         value={data.job_title}
                                         onChange={(e) => setData('job_title', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="employee_code">Mã nhân viên</Label>
+                                    <Input
+                                        id="employee_code"
+                                        value={data.employee_code}
+                                        onChange={(e) => setData('employee_code', e.target.value)}
+                                    />
+                                    <FieldError message={errors.employee_code} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="base_salary">Mức lương cơ bản</Label>
+                                    <Input
+                                        id="base_salary"
+                                        type="number"
+                                        min="0"
+                                        value={data.base_salary}
+                                        onChange={(e) => setData('base_salary', e.target.value)}
+                                    />
+                                    <FieldError message={errors.base_salary} />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="work_shift_id">Ca làm việc</Label>
+                                <select
+                                    id="work_shift_id"
+                                    className="input-soft flex h-9 w-full px-3"
+                                    value={data.work_shift_id}
+                                    onChange={(e) => setData('work_shift_id', e.target.value)}
+                                >
+                                    <option value="">-- Chọn ca làm việc --</option>
+                                    {workShifts.map((shift) => (
+                                        <option key={shift.id} value={shift.id}>
+                                            {shift.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <FieldError message={errors.work_shift_id} />
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                                    <Label htmlFor="receive_data">Nhận phân bổ dữ liệu</Label>
+                                    <Switch
+                                        id="receive_data"
+                                        checked={Boolean(data.receive_data)}
+                                        onCheckedChange={(value) => setData('receive_data', value)}
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                                    <Label htmlFor="is_locked">Khóa tài khoản</Label>
+                                    <Switch
+                                        id="is_locked"
+                                        checked={Boolean(data.is_locked)}
+                                        onCheckedChange={(value) => setData('is_locked', value)}
                                     />
                                 </div>
                             </div>

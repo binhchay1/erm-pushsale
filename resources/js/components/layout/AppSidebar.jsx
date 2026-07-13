@@ -20,7 +20,7 @@ function flattenLeaves(items, prefix = 'root') {
     return leaves;
 }
 
-function resolveActiveKey(navigation, currentUrl, activeMenuCode) {
+function resolveActiveKey(navigation, currentUrl, activeMenuCode, rememberedMenuCode) {
     const leaves = flattenLeaves(navigation);
     if (activeMenuCode) {
         const byCode = leaves.find(({ item }) => String(item.code ?? '') === String(activeMenuCode));
@@ -28,6 +28,13 @@ function resolveActiveKey(navigation, currentUrl, activeMenuCode) {
     }
 
     const currentPath = cleanPath(currentUrl);
+    if (rememberedMenuCode) {
+        const remembered = leaves.find(({ item }) =>
+            String(item.code ?? '') === String(rememberedMenuCode) && cleanPath(item.url) === currentPath,
+        );
+        if (remembered) return remembered.key;
+    }
+
     return leaves.find(({ item }) => cleanPath(item.url) === currentPath)?.key ?? null;
 }
 
@@ -74,7 +81,7 @@ function LeafLink({ item, className, onNavigate, children }) {
     );
 }
 
-function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onClose }) {
+function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose }) {
     if (!flyout || typeof document === 'undefined') return null;
 
     return createPortal(
@@ -93,6 +100,7 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onClose }) {
                             item={child}
                             className="pushsale-third-link"
                             onNavigate={() => {
+                                onSelect?.(child);
                                 onClose();
                                 onNavigate?.();
                             }}
@@ -112,10 +120,13 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     const { props, url } = usePage();
     const { navigation = [], activeMenuCode = null } = props;
     const sidebarRef = useRef(null);
+    const [rememberedMenuCode, setRememberedMenuCode] = useState(() =>
+        typeof window === 'undefined' ? null : window.sessionStorage.getItem('pushsale-active-menu-code'),
+    );
 
     const activeKey = useMemo(
-        () => resolveActiveKey(navigation, url, activeMenuCode),
-        [activeMenuCode, navigation, url],
+        () => resolveActiveKey(navigation, url, activeMenuCode, rememberedMenuCode),
+        [activeMenuCode, navigation, rememberedMenuCode, url],
     );
     const activeRootIndex = useMemo(() => {
         if (!activeKey) return null;
@@ -155,6 +166,13 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
             sidebarRef.current?.removeEventListener('scroll', closeOnViewportChange);
         };
     }, []);
+
+    const rememberSelection = (item) => {
+        const code = item?.code ? String(item.code) : null;
+        if (!code) return;
+        setRememberedMenuCode(code);
+        window.sessionStorage.setItem('pushsale-active-menu-code', code);
+    };
 
     const toggleRoot = (index) => {
         setFlyout(null);
@@ -198,7 +216,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                             <i className={cn('i1 fa pull-right', rootOpen ? 'fa-minus' : 'fa-plus')} aria-hidden="true" />
                                         </button>
                                     ) : (
-                                        <LeafLink item={root} className="a1 pushsale-menu-link" onNavigate={onNavigate}>
+                                        <LeafLink item={root} className="a1 pushsale-menu-link" onNavigate={() => { rememberSelection(root); onNavigate?.(); }}>
                                             <i className={`fa fa-${icon}`} aria-hidden="true" />
                                             <span>{root.title}</span>
                                         </LeafLink>
@@ -234,6 +252,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                 item={child}
                                                                 className="a2 pushsale-menu-link"
                                                                 onNavigate={() => {
+                                                                    rememberSelection(child);
                                                                     setFlyout(null);
                                                                     onNavigate?.();
                                                                 }}
@@ -258,6 +277,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                     flyout={flyout}
                     activeKey={activeKey}
                     onNavigate={onNavigate}
+                    onSelect={rememberSelection}
                     onClose={() => setFlyout(null)}
                 />
             )}

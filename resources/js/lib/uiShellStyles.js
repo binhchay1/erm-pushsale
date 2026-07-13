@@ -27,7 +27,19 @@ function ensureLink(href, id) {
     });
 }
 
+function moveApplicationStylesAfterVendor() {
+    const styles = [...document.querySelectorAll('link[rel=\"stylesheet\"]')].filter((link) => {
+        const href = link.getAttribute('href') ?? '';
+        return !link.dataset.pushsaleShell && (href.includes('/build/assets/app-') || href.includes('/resources/css/app.css'));
+    });
+
+    styles.forEach((link) => document.head.appendChild(link));
+}
+
 export async function ensurePushsaleStyles() {
     await Promise.all(PUSHSALE_STYLES.map(([href, id]) => ensureLink(href, id)));
+    // AdminLTE/Bootstrap provide the base primitives; the scoped React page CSS must
+    // remain last in the cascade so each recreated Pushsale screen keeps its exact layout.
+    moveApplicationStylesAfterVendor();
     document.documentElement.dataset.pushsaleStylesReady = '1';
 }

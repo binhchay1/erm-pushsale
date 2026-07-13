@@ -17,9 +17,18 @@ class CustomerProfileController extends Controller
     {
         $filter = $this->reportFilters($request);
 
+        $path = '/'.$request->path();
+        $activeMenuCode = match ($path) {
+            '/admin/marketing/customers' => '2.3',
+            '/admin/customer-management' => '3.1',
+            '/admin/sales/customers' => '4.2',
+            default => null,
+        };
+
         return Inertia::render('Sales/CustomerProfile', $this->reportPageProps($request, [
             'report' => $service->buildPaginated($filter),
-            'routeUrl' => '/'.$request->path(),
+            'routeUrl' => $path,
+            'activeMenuCode' => $activeMenuCode,
         ]));
     }
 }

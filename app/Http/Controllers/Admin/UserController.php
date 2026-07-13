@@ -8,6 +8,8 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserRequest;
 use App\Models\User;
+use App\Models\Pushsale\UserOperationalProfile;
+use App\Models\Pushsale\WorkShift;
 use App\Repositories\TeamRepository;
 use App\Repositories\UserRepository;
 use App\Support\PermissionCatalog;
@@ -17,6 +19,7 @@ use App\Services\Users\UserOrgRules;
 use App\Support\ActivityLogger;
 use App\Support\TenantEmail;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,32 +32,98 @@ class UserController extends Controller
         private readonly UserHierarchyService $hierarchy,
     ) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $actor = auth()->user();
+        $actor = $request->user();
+        $visibleIds = $this->users->allWithTeamAndManager()
+            ->filter(fn (User $user) => $actor && $this->hierarchy->canView($actor, $user))
+            ->pluck('id');
 
-        $users = $this->users->allWithTeamAndManager()
-            ->filter(fn (User $u) => $actor && $this->hierarchy->canView($actor, $u))
-            ->map(fn (User $u) => [
-                'id' => $u->id,
-                'name' => $u->name,
-                'email' => $u->email,
-                'role' => $u->role->value,
-                'role_label' => $u->roleLabel(),
-                'team_name' => $u->team?->name,
-                'manager_name' => $u->manager?->name,
-                'is_team_leader' => (bool) $u->is_team_leader,
-                'org_level' => $u->org_level?->value,
-                'org_level_label' => $u->orgLevelLabel(),
-                'job_title' => $u->job_title,
-                'creator_name' => $u->creator?->name,
-                'can_manage' => $actor ? $this->hierarchy->canManage($actor, $u) : false,
-            ])
-            ->values();
+        $filters = [
+            'search' => trim((string) $request->query('search', '')),
+            'role' => (string) $request->query('role', ''),
+            'leader' => (string) $request->query('leader', ''),
+            'receive_data' => (string) $request->query('receive_data', ''),
+            'locked' => (string) $request->query('locked', ''),
+        ];
+
+        $query = User::query()
+            ->whereIn('id', $visibleIds)
+            ->with([
+                'team:id,name',
+                'manager:id,name',
+                'creator:id,name',
+                'operationalProfile.workShift:id,name',
+                'operationalProfile.updatedBy:id,name',
+            ]);
+
+        if ($filters['search'] !== '') {
+            $term = $filters['search'];
+            $query->where(function ($builder) use ($term): void {
+                $builder->where('name', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%")
+                    ->orWhere('phone', 'like', "%{$term}%")
+                    ->orWhereHas('operationalProfile', fn ($profile) => $profile->where('employee_code', 'like', "%{$term}%"));
+            });
+        }
+
+        if ($filters['role'] !== '') {
+            $query->where('role', $filters['role']);
+        }
+
+        if ($filters['leader'] !== '') {
+            $query->where('is_team_leader', $filters['leader'] === '1');
+        }
+
+        if ($filters['receive_data'] === '1') {
+            $query->where(function ($builder): void {
+                $builder->whereDoesntHave('operationalProfile')
+                    ->orWhereHas('operationalProfile', fn ($profile) => $profile->where('receive_data', true));
+            });
+        } elseif ($filters['receive_data'] === '0') {
+            $query->whereHas('operationalProfile', fn ($profile) => $profile->where('receive_data', false));
+        }
+
+        if ($filters['locked'] === '1') {
+            $query->whereHas('operationalProfile', fn ($profile) => $profile->where('is_locked', true));
+        } elseif ($filters['locked'] === '0') {
+            $query->where(function ($builder): void {
+                $builder->whereDoesntHave('operationalProfile')
+                    ->orWhereHas('operationalProfile', fn ($profile) => $profile->where('is_locked', false));
+            });
+        }
+
+        $users = $query->latest('id')->paginate(15)->withQueryString()->through(function (User $user) use ($actor): array {
+            $profile = $user->operationalProfile;
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role->value,
+                'role_label' => $user->roleLabel(),
+                'employee_code' => $profile?->employee_code ?: 'NV'.str_pad((string) $user->id, 5, '0', STR_PAD_LEFT),
+                'base_salary' => (int) ($profile?->base_salary ?? 0),
+                'phone' => $user->phone,
+                'team_name' => $user->team?->name,
+                'manager_name' => $user->manager?->name,
+                'is_team_leader' => (bool) $user->is_team_leader,
+                'receive_data' => (bool) ($profile?->receive_data ?? true),
+                'work_shift' => $profile?->workShift?->name,
+                'is_locked' => (bool) ($profile?->is_locked ?? false),
+                'updated_by' => $profile?->updatedBy?->name ?: $user->creator?->name,
+                'updated_at' => $user->updated_at?->format('d/m/Y H:i'),
+                'can_manage' => $actor ? $this->hierarchy->canManage($actor, $user) : false,
+            ];
+        });
 
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
+            'filters' => $filters,
+            'roles' => collect(UserRole::cases())->map(fn (UserRole $role) => ['value' => $role->value, 'label' => $role->label()])->values(),
+            'accountCount' => $visibleIds->count(),
             'canCreate' => (bool) $actor?->allows(PermissionArea::Hr, \App\Enums\PermissionLevel::Full),
+            'activeMenuCode' => '1.2.1',
         ]);
     }
 
@@ -69,17 +138,22 @@ class UserController extends Controller
             'orgLevels' => OrgStructureService::orgLevelOptions(),
             'emailIdentity' => $this->emailIdentity(),
             'permissionConfig' => $this->permissionConfig(),
+            'workShifts' => $this->workShiftOptions(),
+            'activeMenuCode' => '1.2.1',
         ]);
     }
 
     public function store(UserRequest $request): RedirectResponse
     {
-        $data = $this->normalizeUserData($request->validated());
+        $data = $request->validated();
+        $profileData = $this->pullOperationalData($data);
+        $data = $this->normalizeUserData($data);
         $data['password'] = Hash::make($data['password']);
         $data['created_by_user_id'] = auth()->id();
         $data['permissions'] = $this->resolvePermissions($request, $data['role'] ?? null);
 
         $user = User::query()->create($data);
+        $this->syncOperationalProfile($user, $profileData);
 
         ActivityLogger::log(
             ActivityLogger::USER_CREATED,
@@ -93,6 +167,8 @@ class UserController extends Controller
     public function edit(User $user): Response
     {
         $company = auth()->user()?->company;
+        $user->loadMissing('operationalProfile');
+        $profile = $user->operationalProfile;
 
         return Inertia::render('Admin/Users/Form', [
             'user' => [
@@ -109,6 +185,11 @@ class UserController extends Controller
                 'org_level' => $user->org_level?->value,
                 'phone' => $user->phone,
                 'job_title' => $user->job_title,
+                'employee_code' => $profile?->employee_code,
+                'base_salary' => (int) ($profile?->base_salary ?? 0),
+                'receive_data' => (bool) ($profile?->receive_data ?? true),
+                'work_shift_id' => $profile?->work_shift_id,
+                'is_locked' => (bool) ($profile?->is_locked ?? false),
                 'permissions' => $user->permissionsMap(),
             ],
             'roles' => $this->roleOptions(),
@@ -118,12 +199,16 @@ class UserController extends Controller
             'orgLevels' => OrgStructureService::orgLevelOptions(),
             'emailIdentity' => $this->emailIdentity(),
             'permissionConfig' => $this->permissionConfig(),
+            'workShifts' => $this->workShiftOptions(),
+            'activeMenuCode' => '1.2.1',
         ]);
     }
 
     public function update(UserRequest $request, User $user): RedirectResponse
     {
-        $data = $this->normalizeUserData($request->validated());
+        $data = $request->validated();
+        $profileData = $this->pullOperationalData($data);
+        $data = $this->normalizeUserData($data);
 
         if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
@@ -134,6 +219,7 @@ class UserController extends Controller
         $data['permissions'] = $this->resolvePermissions($request, $data['role'] ?? $user->role->value);
 
         $user->update($data);
+        $this->syncOperationalProfile($user, $profileData);
 
         ActivityLogger::log(
             ActivityLogger::USER_UPDATED,
@@ -142,6 +228,70 @@ class UserController extends Controller
         );
 
         return redirect()->route('admin.users.index')->with('success', __('messages.user_updated'));
+    }
+
+
+    public function updateOperationalStatus(Request $request, User $user): RedirectResponse
+    {
+        $actor = $request->user();
+        if (! $actor || ! $this->hierarchy->canManage($actor, $user)) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'receive_data' => ['sometimes', 'boolean'],
+            'is_locked' => ['sometimes', 'boolean'],
+        ]);
+
+        if ($data === []) {
+            return back()->with('error', 'Không có trạng thái nào được cập nhật.');
+        }
+
+        $profile = $user->operationalProfile()->firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'company_id' => $user->company_id,
+                'employee_code' => 'NV'.str_pad((string) $user->id, 5, '0', STR_PAD_LEFT),
+                'base_salary' => 0,
+                'receive_data' => true,
+                'is_locked' => false,
+                'updated_by_user_id' => $actor->id,
+            ],
+        );
+
+        $profile->fill($data);
+        $profile->updated_by_user_id = $actor->id;
+        $profile->save();
+
+        ActivityLogger::log(
+            ActivityLogger::USER_UPDATED,
+            $user,
+            ['operational_status' => $data],
+        );
+
+        return back()->with('success', 'Đã cập nhật trạng thái tài khoản.');
+    }
+
+    public function updatePassword(Request $request, User $user): RedirectResponse
+    {
+        $actor = $request->user();
+        if (! $actor || ! $this->hierarchy->canManage($actor, $user)) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+        ]);
+
+        $user->forceFill(['password' => Hash::make($data['password'])])->save();
+
+        ActivityLogger::log(
+            ActivityLogger::USER_UPDATED,
+            $user,
+            ['password_reset_by_admin' => true],
+        );
+
+        return back()->with('success', 'Đã thay đổi mật khẩu tài khoản.');
     }
 
     public function destroy(User $user): RedirectResponse
@@ -277,6 +427,50 @@ class UserController extends Controller
                 'org_level' => $u->org_level?->value,
                 'is_team_leader' => (bool) $u->is_team_leader,
             ])
+            ->all();
+    }
+
+    /** @param array<string, mixed> $data @return array<string, mixed> */
+    private function pullOperationalData(array &$data): array
+    {
+        $keys = ['employee_code', 'base_salary', 'receive_data', 'work_shift_id', 'is_locked'];
+        $profile = [];
+
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $data)) {
+                $profile[$key] = $data[$key];
+                unset($data[$key]);
+            }
+        }
+
+        return $profile;
+    }
+
+    /** @param array<string, mixed> $data */
+    private function syncOperationalProfile(User $user, array $data): void
+    {
+        UserOperationalProfile::query()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'company_id' => $user->company_id,
+                'employee_code' => ($data['employee_code'] ?? null) ?: 'NV'.str_pad((string) $user->id, 5, '0', STR_PAD_LEFT),
+                'base_salary' => (int) ($data['base_salary'] ?? 0),
+                'receive_data' => (bool) ($data['receive_data'] ?? true),
+                'work_shift_id' => $data['work_shift_id'] ?: null,
+                'is_locked' => (bool) ($data['is_locked'] ?? false),
+                'updated_by_user_id' => auth()->id(),
+            ],
+        );
+    }
+
+    /** @return list<array{id:int,name:string}> */
+    private function workShiftOptions(): array
+    {
+        return WorkShift::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (WorkShift $shift) => ['id' => $shift->id, 'name' => $shift->name])
             ->all();
     }
 

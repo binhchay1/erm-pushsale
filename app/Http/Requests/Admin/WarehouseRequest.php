@@ -18,6 +18,11 @@ class WarehouseRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:255'],
+            'pick_province' => ['nullable', 'string', 'max:120'],
+            'pick_district' => ['nullable', 'string', 'max:120'],
+            'pick_ward' => ['nullable', 'string', 'max:120'],
+            'code' => ['nullable', 'string', 'max:80'],
+            'ghtk_pick_address_id' => ['nullable', 'string', 'max:80'],
             'manager_user_id' => ['nullable', 'exists:users,id'],
             'vtp_code' => ['nullable', 'string', 'max:80'],
         ];

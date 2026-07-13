@@ -211,6 +211,11 @@ class User extends Authenticatable
         return $this->hasMany(self::class, 'manager_user_id');
     }
 
+    public function operationalProfile(): HasOne
+    {
+        return $this->hasOne(\App\Models\Pushsale\UserOperationalProfile::class);
+    }
+
     public function preferences(): HasOne
     {
         return $this->hasOne(UserPreference::class);

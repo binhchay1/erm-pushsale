@@ -8,11 +8,11 @@ Route::match(['put', 'patch'], 'company/subscription-history/records/{record}', 
 Route::delete('company/subscription-history/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_1_2Controller::class, 'destroy'])->whereNumber('record')->name('company.subscription-history.destroy');
 Route::redirect('pages/1-1-2-lich-su-dang-ky-goi-dich-vu', '/admin/company/subscription-history', 301);
 
-Route::get('hr/employees', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_2_1Controller::class, 'index'])->name('hr.employees');
-Route::redirect('pages/1-2-1-danh-sach-nhan-vien', '/admin/hr/employees', 301);
+Route::redirect('hr/employees', '/admin/users', 301);
+Route::redirect('pages/1-2-1-danh-sach-nhan-vien', '/admin/users', 301);
 
-Route::get('hr/teams', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_2_2Controller::class, 'index'])->name('hr.teams');
-Route::redirect('pages/1-2-2-quan-ly-doi-nhom', '/admin/hr/teams', 301);
+Route::redirect('hr/teams', '/admin/teams', 301);
+Route::redirect('pages/1-2-2-quan-ly-doi-nhom', '/admin/teams', 301);
 
 Route::get('hr/work-shifts', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_2_3Controller::class, 'index'])->name('hr.work-shifts');
 Route::post('hr/work-shifts/schedule', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_2_3Controller::class, 'saveSchedule'])->name('hr.work-shifts.schedule');
@@ -39,14 +39,8 @@ Route::match(['put', 'patch'], 'hr/care-distribution-rules/records/{record}', [\
 Route::delete('hr/care-distribution-rules/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_2_6Controller::class, 'destroy'])->whereNumber('record')->name('hr.care-distribution-rules.destroy');
 Route::redirect('pages/1-2-6-danh-sach-cau-hinh-chia-so-care-don', '/admin/hr/care-distribution-rules', 301);
 
-Route::get('catalog/products', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_1Controller::class, 'index'])->name('catalog.products');
-Route::post('catalog/products/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_1Controller::class, 'store'])->name('catalog.products.store');
-Route::match(['put', 'patch'], 'catalog/products/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_1Controller::class, 'update'])->whereNumber('record')->name('catalog.products.update');
-Route::delete('catalog/products/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_1Controller::class, 'destroy'])->whereNumber('record')->name('catalog.products.destroy');
-Route::post('catalog/products/dialogs/{dialog}/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_1Controller::class, 'storeDialog'])->where('dialog', '[a-z0-9\-]+')->name('catalog.products.dialogs.store');
-Route::match(['put', 'patch'], 'catalog/products/dialogs/{dialog}/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_1Controller::class, 'updateDialog'])->where(['dialog' => '[a-z0-9\-]+', 'record' => '[0-9]+'])->name('catalog.products.dialogs.update');
-Route::delete('catalog/products/dialogs/{dialog}/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_1Controller::class, 'destroyDialog'])->where(['dialog' => '[a-z0-9\-]+', 'record' => '[0-9]+'])->name('catalog.products.dialogs.destroy');
-Route::redirect('pages/1-3-1-quan-ly-san-pham', '/admin/catalog/products', 301);
+Route::redirect('catalog/products', '/admin/products', 301);
+Route::redirect('pages/1-3-1-quan-ly-san-pham', '/admin/products', 301);
 
 Route::get('catalog/combos', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_2Controller::class, 'index'])->name('catalog.combos');
 Route::post('catalog/combos/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_2Controller::class, 'store'])->name('catalog.combos.store');
@@ -99,7 +93,7 @@ Route::match(['put', 'patch'], 'security/phone-blacklist/records/{record}', [\Ap
 Route::delete('security/phone-blacklist/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_13_1Controller::class, 'destroy'])->whereNumber('record')->name('security.phone-blacklist.destroy');
 Route::redirect('pages/1-13-1-quan-ly-so-blacklist', '/admin/security/phone-blacklist', 301);
 
-Route::get('marketing/customers', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_3Controller::class, 'index'])->name('marketing.customers');
+Route::get('marketing/customers', \App\Http\Controllers\Sales\CustomerProfileController::class)->name('marketing.customers');
 Route::redirect('pages/2-3-ho-so-khach-hang', '/admin/marketing/customers', 301);
 
 Route::get('marketing/landing-connections', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_1Controller::class, 'index'])->name('marketing.landing-connections');
@@ -132,7 +126,7 @@ Route::match(['put', 'patch'], 'marketing/seeding-numbers/records/{record}', [\A
 Route::delete('marketing/seeding-numbers/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_6_4Controller::class, 'destroy'])->whereNumber('record')->name('marketing.seeding-numbers.destroy');
 Route::redirect('pages/2-6-4-kho-so-seeding-toi-da-1000', '/admin/marketing/seeding-numbers', 301);
 
-Route::get('customer-management', [\App\Http\Controllers\Admin\Pushsale\Pages\Page3_1Controller::class, 'index'])->name('customers.page');
+Route::get('customer-management', \App\Http\Controllers\Sales\CustomerProfileController::class)->name('customers.page');
 Route::redirect('pages/3-1-quan-ly-khach-hang', '/admin/customer-management', 301);
 
 Route::get('customers/care-campaigns', [\App\Http\Controllers\Admin\Pushsale\Pages\Page3_2Controller::class, 'index'])->name('customers.care-campaigns');
@@ -147,7 +141,7 @@ Route::redirect('pages/3-3-1-thong-ke-khach-hang-da-chieu', '/admin/customers/re
 Route::get('customers/reports/spending', [\App\Http\Controllers\Admin\Pushsale\Pages\Page3_3_2Controller::class, 'index'])->name('customers.reports.spending');
 Route::redirect('pages/3-3-2-thong-ke-khach-hang-chi-tra', '/admin/customers/reports/spending', 301);
 
-Route::get('sales/customers', [\App\Http\Controllers\Admin\Pushsale\Pages\Page4_2Controller::class, 'index'])->name('sales.customers');
+Route::get('sales/customers', \App\Http\Controllers\Sales\CustomerProfileController::class)->name('sales.customers');
 Route::redirect('pages/4-2-ho-so-khach-hang', '/admin/sales/customers', 301);
 
 Route::get('sales/rankings', [\App\Http\Controllers\Admin\Pushsale\Pages\Page4_3Controller::class, 'index'])->name('sales.rankings-page');
@@ -168,20 +162,14 @@ Route::redirect('pages/4-6-4-bao-cao-data-sale', '/admin/sales/reports/data', 30
 Route::get('sales/reports/optimization', [\App\Http\Controllers\Admin\Pushsale\Pages\Page4_6_5Controller::class, 'index'])->name('sales.reports.optimization');
 Route::redirect('pages/4-6-5-bao-cao-toi-uu-sale', '/admin/sales/reports/optimization', 301);
 
-Route::get('warehouse/shipping-operations', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_1Controller::class, 'index'])->name('warehouse.shipping-operations');
-Route::redirect('pages/5-1-tac-nghiep-van-don', '/admin/warehouse/shipping-operations', 301);
+Route::redirect('warehouse/shipping-operations', '/admin/warehouse/operations', 301);
+Route::redirect('pages/5-1-tac-nghiep-van-don', '/admin/warehouse/operations', 301);
 
-Route::get('warehouse/list', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_2_1Controller::class, 'index'])->name('warehouse.list-page');
-Route::post('warehouse/list/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_2_1Controller::class, 'store'])->name('warehouse.list-page.store');
-Route::match(['put', 'patch'], 'warehouse/list/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_2_1Controller::class, 'update'])->whereNumber('record')->name('warehouse.list-page.update');
-Route::delete('warehouse/list/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_2_1Controller::class, 'destroy'])->whereNumber('record')->name('warehouse.list-page.destroy');
-Route::post('warehouse/list/dialogs/{dialog}/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_2_1Controller::class, 'storeDialog'])->where('dialog', '[a-z0-9\-]+')->name('warehouse.list-page.dialogs.store');
-Route::match(['put', 'patch'], 'warehouse/list/dialogs/{dialog}/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_2_1Controller::class, 'updateDialog'])->where(['dialog' => '[a-z0-9\-]+', 'record' => '[0-9]+'])->name('warehouse.list-page.dialogs.update');
-Route::delete('warehouse/list/dialogs/{dialog}/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_2_1Controller::class, 'destroyDialog'])->where(['dialog' => '[a-z0-9\-]+', 'record' => '[0-9]+'])->name('warehouse.list-page.dialogs.destroy');
-Route::redirect('pages/5-2-1-danh-sach-kho', '/admin/warehouse/list', 301);
+Route::redirect('warehouse/list', '/admin/warehouses', 301);
+Route::redirect('pages/5-2-1-danh-sach-kho', '/admin/warehouses', 301);
 
-Route::get('warehouse/products', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_2_2Controller::class, 'index'])->name('warehouse.products');
-Route::redirect('pages/5-2-2-danh-sach-san-pham-kho', '/admin/warehouse/products', 301);
+Route::redirect('warehouse/products', '/admin/warehouse/inventory', 301);
+Route::redirect('pages/5-2-2-danh-sach-san-pham-kho', '/admin/warehouse/inventory', 301);
 
 Route::get('warehouse/vouchers/entry', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_3_1Controller::class, 'index'])->name('warehouse.vouchers.entry');
 Route::post('warehouse/vouchers/entry/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_3_1Controller::class, 'store'])->name('warehouse.vouchers.entry.store');

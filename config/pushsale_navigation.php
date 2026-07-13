@@ -34,14 +34,14 @@ return array (
           0 => 
           array (
             'title' => '1. Danh sách nhân viên',
-            'url' => '/admin/hr/employees',
+            'url' => '/admin/users',
             'area' => 'hr',
             'code' => '1.2.1',
           ),
           1 => 
           array (
             'title' => '2. Quản lý đội nhóm',
-            'url' => '/admin/hr/teams',
+            'url' => '/admin/teams',
             'area' => 'hr',
             'code' => '1.2.2',
           ),
@@ -81,7 +81,7 @@ return array (
           0 => 
           array (
             'title' => '1. Danh sách sản phẩm',
-            'url' => '/admin/catalog/products',
+            'url' => '/admin/products',
             'area' => 'products',
             'code' => '1.3.1',
           ),
@@ -610,7 +610,7 @@ return array (
       0 => 
       array (
         'title' => '5.1 Đăng đơn',
-        'url' => '/admin/warehouse/shipping-operations',
+        'url' => '/admin/warehouse/operations',
         'area' => 'warehouse',
         'code' => '5.1',
       ),
@@ -623,14 +623,14 @@ return array (
           0 => 
           array (
             'title' => '1. Danh sách kho',
-            'url' => '/admin/warehouse/list',
+            'url' => '/admin/warehouses',
             'area' => 'warehouse',
             'code' => '5.2.1',
           ),
           1 => 
           array (
             'title' => '2. Danh sách sản phẩm kho',
-            'url' => '/admin/warehouse/products',
+            'url' => '/admin/warehouse/inventory',
             'area' => 'warehouse',
             'code' => '5.2.2',
           ),

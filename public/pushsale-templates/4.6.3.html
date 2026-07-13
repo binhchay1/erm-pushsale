@@ -1,5 +1,6 @@
 <div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="4.6.3"><div class="content-wrapper" style="min-height: 737px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1487"><a name="1487" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1487_ContentPane"><!-- Start_Module_1487 --><div class="pushsale-template-inner" id="dnn_ctr1487_ModuleContent">
+
 <div id="dnn_ctr1487_Main_Dashboard_pnlMain">
 <span class="hidden" id="dnn_ctr1487_Main_Dashboard_lblDownLoad"></span>
 <div id="dnn_ctr1487_Main_Dashboard_pnSearch">
@@ -101,6 +102,7 @@
 <input class="ps-ddl-setting-json hidden pushsale-native-input" id="dnn_ctr1487_Main_Dashboard_ddlSanPhamGroup_tnt_SettingJson" name="dnn$ctr1487$Main$Dashboard$ddlSanPhamGroup$tnt_SettingJson" type="text" value='{"ShowLog":true,"SearchMinLength":0,"SearchDelay":500,"SearchMaxResultCount":20,"MultiSelect":false,"AutoPostBack":true,"DisplayItemId":false,"Enabled":true,"DefaultId":"-1","DefaultName":"--Sản phẩm cha--","RemoteUrl":"/sp/act.aspx?act=ld_san_pham_group&amp;ttkd=0","OptionalParams":{}}'/>
 <input class="ps-ddl-optinal-param hidden pushsale-native-input" id="dnn_ctr1487_Main_Dashboard_ddlSanPhamGroup_tnt_OptinalParams" name="dnn$ctr1487$Main$Dashboard$ddlSanPhamGroup$tnt_OptinalParams" type="text"/>
 </div>
+
 </div>
 <div class="col-sm-2 form-group">
 <select class="chosen pushsale-native-select" id="dnn_ctr1487_Main_Dashboard_ddlSanPham" name="dnn$ctr1487$Main$Dashboard$ddlSanPham" style="" title="">
@@ -140,32 +142,77 @@
 <div class="row mt15">
 <div class="col-md-2 col-sm-4 col-xs-4">
 <table class="table table-bordered table-multi-select tabledata">
-<tbody data-pushsale-captured-data-removed="1"></tbody></table>
+<tbody><tr>
+<th class="text-center header_chogiao">CHỜ GIAO</th>
+</tr>
+<tr>
+<td class="text-center">
+<span id="dnn_ctr1487_Main_Dashboard_lblGiaoHang_ChoGiao">573</span></td>
+</tr>
+</tbody></table>
 </div>
 <div class="col-md-2 col-sm-4 col-xs-4">
 <table class="table table-bordered table-multi-select tabledata">
-<tbody data-pushsale-captured-data-removed="1"></tbody></table>
+<tbody><tr>
+<th class="text-center header_chogiao">HỦY VẬN ĐƠN</th>
+</tr>
+<tr>
+<td class="text-center">
+<span id="dnn_ctr1487_Main_Dashboard_lblHuyVanDon">0</span></td>
+</tr>
+</tbody></table>
 </div>
 <div class="col-md-2 col-sm-4 col-xs-4">
 <table class="table table-bordered table-multi-select tabledata">
-<tbody data-pushsale-captured-data-removed="1"></tbody></table>
+<tbody><tr>
+<th class="text-center header_danggiao">ĐANG GIAO</th>
+</tr>
+<tr>
+<td class="text-center" style="width: 30%">
+<span id="dnn_ctr1487_Main_Dashboard_lblGiaoHang_DangGiao">0</span></td>
+</tr>
+</tbody></table>
 </div>
 <div class="col-md-2 col-sm-4 col-xs-4">
 <table class="table table-bordered table-multi-select tabledata">
-<tbody data-pushsale-captured-data-removed="1"></tbody></table>
+<tbody><tr>
+<th class="text-center header_dagiao">ĐÃ GIAO</th>
+</tr>
+<tr>
+<td class="text-center" style="width: 30%">
+<span id="dnn_ctr1487_Main_Dashboard_lblGiaoHang_DaGiao">0</span></td>
+</tr>
+</tbody></table>
 </div>
 <div class="col-md-2 col-sm-4 col-xs-4">
 <table class="table table-bordered table-multi-select tabledata">
-<tbody data-pushsale-captured-data-removed="1"></tbody></table>
+<tbody><tr>
+<th class="text-center header_thutien">ĐÃ THANH TOÁN</th>
+</tr>
+<tr>
+<td class="text-center" style="width: 30%">
+<span id="dnn_ctr1487_Main_Dashboard_lblGiaoHang_DaThanhToan">0</span></td>
+</tr>
+</tbody></table>
 </div>
 <div class="col-md-2 col-sm-4 col-xs-4">
 <table class="table table-bordered table-multi-select tabledata">
-<tbody data-pushsale-captured-data-removed="1"></tbody></table>
+<tbody><tr>
+<th class="text-center header_hoandon">ĐÃ HOÀN</th>
+</tr>
+<tr>
+<td class="text-center" style="width: 30%">
+<span id="dnn_ctr1487_Main_Dashboard_lblGiaoHang_DaHoan">0</span>
+                                    (<span id="dnn_ctr1487_Main_Dashboard_lblGiaoHang_TyLeHoanDon">0 %</span>)
+                                </td>
+</tr>
+</tbody></table>
 </div>
 </div>
 <div style="clear: both;"></div>
 <div class="dragscroll1 tableFixHead" style="height: 687px;">
 <table class="table table-bordered table-striped pushsale-data-table" data-pushsale-grid-table="primary" id="tblData">
+
 <thead><tr class="pushsale-captured-header-row">
 <th class="text-center" colspan="1" rowspan="2" style="width: 50px; top: 0.5px;">STT</th>
 <th class="text-center" colspan="1" rowspan="2" style="width: 10%; top: 0.5px;">SALE</th>
@@ -197,6 +244,8 @@
 </div>
 </div>
 </div>
+
+
 </div><!-- End_Module_1487 --></div>
 </div></div>
 </div></div>

@@ -25,6 +25,7 @@ class InventoryController extends Controller
             'intakeUrl' => $base.'/intake',
             'exportUrl' => $base.'/export',
             'approverOptions' => $users->warehouseApprovers(),
+            'activeMenuCode' => '5.2.2',
         ]);
     }
 }
