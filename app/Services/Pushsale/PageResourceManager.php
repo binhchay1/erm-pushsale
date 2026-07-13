@@ -55,6 +55,37 @@ class PageResourceManager
         return (array) ($this->definition($resourceKey)['fields'] ?? []);
     }
 
+    /**
+     * Dữ liệu thật cho danh sách bên trong dialog (phân loại, thuộc tính...).
+     * Không đọc các dòng mẫu nằm trong HTML chụp từ Pushsale.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function records(string $resourceKey, int $limit = 250): array
+    {
+        $modelClass = $this->modelClass($resourceKey);
+        if (! $modelClass) return [];
+
+        $fields = $this->formFields($resourceKey);
+
+        return $modelClass::query()
+            ->latest('id')
+            ->limit(max(1, min(1000, $limit)))
+            ->get()
+            ->map(function (Model $model) use ($fields): array {
+                $row = ['id' => $model->getKey()];
+                foreach ($fields as $field) {
+                    $key = (string) ($field['key'] ?? '');
+                    if ($key === '' || str_contains($key, 'token') || str_contains($key, 'secret')) continue;
+                    $row[$key] = data_get($model, $key);
+                }
+                $row['_form'] = $row;
+                return $row;
+            })
+            ->values()
+            ->all();
+    }
+
     /** @return array<string, mixed> */
     public function validate(string $resourceKey, array $payload): array
     {

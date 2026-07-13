@@ -2,6 +2,7 @@
 
 namespace App\Services\Pushsale;
 
+use App\Data\ReportFilterData;
 use App\Enums\DeliveryStatus;
 use App\Enums\OperationResult;
 use App\Enums\OperationStage;
@@ -52,6 +53,12 @@ use Illuminate\Support\Str;
 
 class PushsalePageService
 {
+    private ?Request $currentRequest = null;
+
+    public function __construct(
+        private readonly PushsaleLiveDataService $liveData,
+    ) {}
+
     /** @return array<string, mixed> */
     public function schema(string $code): array
     {
@@ -74,8 +81,15 @@ class PushsalePageService
     /** @return array{data: array<int, array<string, mixed>>, meta: array<string, int>} */
     public function rows(string $code, Request $request): array
     {
+        $this->currentRequest = $request;
         $schema = $this->schema($code);
         $source = (string) $schema['source'];
+
+        // Các màn đã có luồng nghiệp vụ trong ERM phải dùng trực tiếp query/service thật.
+        // Không đi qua collection demo hoặc dữ liệu chụp từ template.
+        if ($live = $this->liveData->resolve($source, $request)) {
+            return $live;
+        }
 
         $rows = match ($source) {
             'users' => $this->users(),
@@ -114,12 +128,9 @@ class PushsalePageService
             'care_allocation' => $this->careAllocation(),
             'monthly_plan' => $this->monthlyPlan($code),
             'trend' => $this->trend(),
-            'allocation_summary' => $this->allocationSummary(),
             'power_dashboard' => $this->powerDashboard(),
             'repurchase' => $this->repurchase(),
             'repurchase_products' => $this->repurchaseProducts(),
-            'allocation_v2' => $this->allocationV2(),
-            'care_allocation_daily' => $this->careAllocationDaily(),
             'subscriptions' => $this->subscriptions(),
             'work_shifts' => $this->workShifts(),
             'lead_distribution_rules' => $this->leadDistributionRules(),
@@ -157,6 +168,9 @@ class PushsalePageService
                 'total' => $total,
                 'from' => $total === 0 ? 0 : (($page - 1) * $perPage) + 1,
                 'to' => min($page * $perPage, $total),
+            ],
+            'summary' => [
+                'total_records' => $total,
             ],
         ];
     }
@@ -237,7 +251,7 @@ class PushsalePageService
 
     private function users(): Collection
     {
-        return User::query()->with('team:id,name')->latest('id')->limit(1000)->get()->values()->map(fn (User $user, int $index) => [
+        return User::query()->with(['team:id,name', 'company:id,name'])->latest('id')->limit(1000)->get()->values()->map(fn (User $user, int $index) => [
             'index' => $index + 1,
             'select' => false,
             'name' => $user->name,
@@ -249,7 +263,7 @@ class PushsalePageService
             'leader' => $user->team?->name ?? ($user->is_team_leader ? 'Trưởng nhóm' : ''),
             'receive_data' => data_get($user->permissions, 'receive_data', true),
             'shift' => data_get($user->permissions, 'shift', 'Giờ hành chính'),
-            'active' => true,
+            'active' => ! (bool) data_get($user->permissions, 'login_blocked', false),
             'updated_at' => $user->updated_at?->toIso8601String(),
             'actions' => 'Cập nhật',
             '_edit_url' => "/admin/users/{$user->id}/edit",
@@ -347,7 +361,7 @@ class PushsalePageService
 
     private function activityLogs(string $code): Collection
     {
-        return ActivityLog::query()->with('actor:id,name,email')->latest('created_at')->limit(2000)->get()->values()->map(function (ActivityLog $log, int $index) use ($code): array {
+        return ActivityLog::query()->with('actor.company:id,name')->latest('created_at')->limit(2000)->get()->values()->map(function (ActivityLog $log, int $index) use ($code): array {
             if ($code === '1.7.3') {
                 return [
                     'id' => $index + 1,
@@ -362,7 +376,7 @@ class PushsalePageService
 
             return [
                 'ip_address' => $log->ip_address,
-                'company' => data_get($log->properties, 'company', 'Đơn vị hiện tại'),
+                'company' => data_get($log->properties, 'company', $log->actor?->company?->name ?? '—'),
                 'account' => $log->actor?->email ?? $log->actor?->name,
                 'access_code' => Str::limit((string) data_get($log->properties, 'access_code', $log->subject_label), 48),
                 'browser' => Str::limit((string) $log->user_agent, 80),
@@ -374,13 +388,14 @@ class PushsalePageService
 
     private function loginPermissions(): Collection
     {
-        return User::query()->latest('updated_at')->limit(1000)->get()->values()->map(fn (User $user) => [
-            'company' => 'Đơn vị hiện tại',
+        return User::query()->with('company:id,name')->latest('updated_at')->limit(1000)->get()->values()->map(fn (User $user) => [
+            'company' => $user->company?->name ?? '—',
             'account' => $user->email,
             'access_code' => data_get($user->permissions, 'access_code'),
             'login_at' => $user->updated_at?->toIso8601String(),
-            'status' => 'Đã phê duyệt',
+            'status' => data_get($user->permissions, 'login_blocked', false) ? 'Đã khóa' : 'Được phép đăng nhập',
             'actions' => 'Cập nhật',
+            '_edit_url' => "/admin/users/{$user->id}/edit",
         ]);
     }
 
@@ -761,7 +776,7 @@ class PushsalePageService
                 'old_revenue' => $row['old_revenue'],
                 'care_rate' => round(($row['care_closed'] / max(1, $row['care_contacts'])) * 100, 2),
                 'care_revenue' => $row['care_revenue'],
-                'receive_data' => true,
+                'receive_data' => (bool) $row['receive_data'],
             ];
         });
     }
@@ -770,15 +785,15 @@ class PushsalePageService
     {
         return $this->ordersGroupedBySale()->values()->map(function (array $row, int $index): array {
             $answered = max(0, $row['contacts'] - $row['untouched']);
-            $callDuration = (int) $row['call_duration_seconds'];
+            $callDuration = $row['call_duration_seconds'];
             $allocatedUnique = max(0, $row['contacts'] - $row['duplicate_contacts']);
-            // Kho số là lượng contact đã chia nhưng chưa phát sinh tác nghiệp.
-            $poolTotal = (int) $row['untouched'];
+            // Kho số lấy trực tiếp từ các đơn chưa có stage/result tác nghiệp.
+            $poolTotal = (int) $row['pool_total'];
 
             return [
                 'index' => $index + 1,
                 'sale' => $row['name'],
-                'receive_data' => true,
+                'receive_data' => (bool) $row['receive_data'],
                 'provisional_revenue' => $row['provisional_revenue'],
                 'success_revenue' => $row['delivered_revenue'],
                 'contacts' => $row['contacts'],
@@ -786,13 +801,13 @@ class PushsalePageService
                 'allocated_duplicate' => $row['duplicate_contacts'],
                 'allocated_unique' => $allocatedUnique,
                 'pool_total' => $poolTotal,
-                'pool_duplicate' => 0,
-                'pool_unique' => $poolTotal,
-                'pool_closed' => 0,
-                'pool_revenue' => 0,
+                'pool_duplicate' => $row['pool_duplicate'],
+                'pool_unique' => $row['pool_unique'],
+                'pool_closed' => $row['pool_closed'],
+                'pool_revenue' => $row['pool_revenue'],
                 'answered_call_ratio' => round(($answered / max(1, $row['contacts'])) * 100, 2),
                 'call_duration' => $callDuration,
-                'avg_call_duration' => round($callDuration / max(1, $answered), 2),
+                'avg_call_duration' => $callDuration === null ? null : round($callDuration / max(1, $answered), 2),
                 'close_per_answered' => round(($row['closed'] / max(1, $answered)) * 100, 2),
                 'closed' => $row['closed'],
                 'closing_rate' => round(($row['closed'] / max(1, $row['contacts'])) * 100, 2),
@@ -883,7 +898,7 @@ class PushsalePageService
                 'voucher_code' => $first->reference_id ? strtoupper((string) $first->reference_type).'-'.$first->reference_id : 'PXN-'.$first->id,
                 'performed_at' => $first->created_at?->toIso8601String(),
                 'total_quantity' => $group->sum('quantity'),
-                'total_value' => 0,
+                'total_value' => null,
                 'status' => 'Hoàn thành',
                 'note' => $first->note,
                 'internal_voucher' => '',
@@ -900,7 +915,7 @@ class PushsalePageService
             'product' => trim(($movement->product?->name ?? '—').' ('.($movement->product?->sku ?? '').')'),
             'type' => WarehouseInventoryMovement::typeLabel($movement->type),
             'quantity' => (int) $movement->quantity,
-            'pending' => 0,
+            'pending' => null,
             'reference' => $movement->reference_id ? "{$movement->reference_type} #{$movement->reference_id}" : '',
             'note' => $movement->note,
             'created_at' => $movement->created_at?->toIso8601String(),
@@ -936,12 +951,12 @@ class PushsalePageService
                 'batch_code' => $item->batch_code,
                 'opening' => $opening,
                 'intake' => $intake,
-                'internal_intake' => 0,
+                'internal_intake' => null,
                 'returns' => $returns,
                 'export' => $export + $soldExport,
                 'internal_export' => $export,
                 'sold_export' => $soldExport,
-                'destroyed' => 0,
+                'destroyed' => null,
                 'closing' => $closing,
                 'available' => max(0, $closing - $pending),
                 'avg_closed_daily' => round(($intake + $returns) / 30, 2),
@@ -964,8 +979,8 @@ class PushsalePageService
             'batch_code' => $r['batch_code'],
             'opening' => $r['opening'],
             'pending' => $r['pending'],
-            'sold_export' => 0,
-            'closing' => $r['closing'] + $r['pending'],
+            'sold_export' => $r['sold_export'],
+            'closing' => $r['pending_closing'],
         ]);
     }
 
@@ -997,6 +1012,7 @@ class PushsalePageService
             $actions = $orders->whereNotNull('operation_result')->count();
             $success = $orders->where('delivery_status', 'delivered')->count();
             $returned = $orders->whereIn('delivery_status', ['returned', 'returning'])->count();
+            $cancelled = $orders->whereIn('delivery_status', ['cancelled', 'canceled', 'cancel_waybill', 'cancel_closing'])->count();
 
             return [
                 'index' => $index + 1,
@@ -1009,6 +1025,7 @@ class PushsalePageService
                 'care_actions' => $actions,
                 'success' => $success,
                 'returned' => $returned,
+                'cancelled' => $cancelled,
                 'success_rate' => round(($success / max(1, $received)) * 100, 2),
                 'auto_success' => $orders->where('operation_result', 'auto_success')->count(),
                 'auto_return' => $orders->where('operation_result', 'auto_return')->count(),
@@ -1050,7 +1067,7 @@ class PushsalePageService
             'shipping' => $r['caring'],
             'delivered' => $r['success'],
             'returned' => $r['returned'],
-            'cancelled' => 0,
+            'cancelled' => $r['cancelled'],
             'total' => $r['received'],
         ]);
     }
@@ -1076,7 +1093,7 @@ class PushsalePageService
             'account' => $user->email,
             'contacts' => Order::query()->where('sale_user_id', $user->id)->count(),
             'receive_data' => data_get($user->permissions, 'care_receive_data', true),
-            'active' => true,
+            'active' => ! (bool) data_get($user->permissions, 'login_blocked', false),
         ]);
     }
 
@@ -1140,31 +1157,6 @@ class PushsalePageService
             }
             return $row;
         })->values();
-    }
-
-    private function allocationSummary(): Collection
-    {
-        return $this->ordersGroupedBySale()->values()->map(function (array $row): array {
-            $result = ['day' => now()->format('d/m/Y'), 'sale' => $row['name']];
-            $waveValues = [
-                $row['new_contacts'],
-                $row['old_contacts'],
-                $row['care_contacts'],
-                $row['duplicate_contacts'],
-                max(0, $row['contacts'] - $row['new_contacts'] - $row['old_contacts']),
-                0,
-            ];
-            foreach ($waveValues as $index => $quantity) {
-                $wave = $index + 1;
-                $result['wave_'.$wave.'_quantity'] = $quantity;
-                $result['wave_'.$wave.'_date'] = $quantity > 0 ? now()->format('H:i') : '';
-                $result['wave_'.$wave.'_note'] = $quantity > 0 ? 'Đã chia' : '';
-            }
-            $result['total_quantity'] = array_sum($waveValues);
-            $result['total_date'] = now()->format('d/m/Y');
-            $result['total_note'] = 'Tổng trong ngày';
-            return $result;
-        });
     }
 
     private function powerDashboard(): Collection
@@ -1233,39 +1225,11 @@ class PushsalePageService
         return collect($rows);
     }
 
-    private function allocationV2(): Collection
-    {
-        return $this->ordersGroupedBySale()->values()->map(fn (array $r) => [
-            'day' => now()->format('d/m/Y'),
-            'user' => $r['name'],
-            'receive' => true,
-            'quota' => max(10, $r['contacts']),
-            'wave' => 1,
-            'new_contacts' => $r['new_contacts'],
-            'duplicate_new' => 0,
-            'old_contacts' => $r['old_contacts'],
-            'duplicate_old' => 0,
-            'care' => 0,
-        ]);
-    }
-
-    private function careAllocationDaily(): Collection
-    {
-        return $this->careAllocation()->map(fn (array $r) => [
-            'day' => now()->format('d/m/Y'),
-            'user' => $r['care_user'],
-            'receive' => $r['receive_data'],
-            'quota' => max(10, $r['contacts']),
-            'wave' => 1,
-            'new_contacts' => $r['contacts'],
-        ]);
-    }
-
     private function subscriptions(): Collection
     {
-        return CompanySubscriptionHistory::query()->latest('paid_at')->latest('id')->limit(2000)->get()->values()->map(fn (CompanySubscriptionHistory $row, int $index) => [
+        return CompanySubscriptionHistory::query()->with('company:id,name')->latest('paid_at')->latest('id')->limit(2000)->get()->values()->map(fn (CompanySubscriptionHistory $row, int $index) => [
             'id' => $index + 1,
-            'unit_payment' => trim('Đơn vị hiện tại'."\n".($row->payment_code ?: '—')),
+            'unit_payment' => trim(($row->company?->name ?? '—')."\n".($row->payment_code ?: '—')),
             'contract_type' => $row->contract_type,
             'description' => $row->description,
             'amount' => $row->amount,
@@ -1423,9 +1387,9 @@ class PushsalePageService
 
     private function careCampaigns(): Collection
     {
-        return CustomerCareCampaign::query()->latest()->get()->values()->map(fn (CustomerCareCampaign $row, int $index) => [
+        return CustomerCareCampaign::query()->with('company:id,name')->latest()->get()->values()->map(fn (CustomerCareCampaign $row, int $index) => [
             'index' => $index + 1,
-            'company' => 'Đơn vị hiện tại',
+            'company' => $row->company?->name ?? '—',
             'name' => $row->name,
             'customer_condition' => collect($row->customer_condition ?? [])->map(fn ($v, $k) => is_scalar($v) ? "{$k}: {$v}" : null)->filter()->implode(', '),
             'repeat_days' => $row->repeat_days,
@@ -1552,7 +1516,27 @@ class PushsalePageService
 
     private function recentOrders(): Collection
     {
-        return Order::query()->with(['team:id,name', 'saleUser:id,name', 'items:id,order_id,quantity,item_type'])->latest('data_arrived_at')->limit(5000)->get();
+        $request = $this->currentRequest;
+        $query = Order::query()
+            ->with([
+                'team:id,name,leader_user_id',
+                'saleUser:id,name,team_id,permissions',
+                'marketerUser:id,name,team_id',
+                'items:id,order_id,product_id,quantity,item_type,unit_price,discount_amount',
+            ]);
+
+        if ($request) {
+            $filter = ReportFilterData::fromRequest($request, $request->user());
+            $query->applyReportFilter($filter);
+            $query
+                ->when($request->integer('source_id'), fn ($q, int $id) => $q->where('marketing_source_id', $id))
+                ->when($request->integer('sale_team_id'), fn ($q, int $id) => $q->where('team_id', $id))
+                ->when($request->integer('sale_leader_id'), fn ($q, int $id) => $q->whereHas('team', fn ($team) => $team->where('leader_user_id', $id)))
+                ->when($request->integer('marketer_team_id'), fn ($q, int $id) => $q->whereHas('marketerUser', fn ($user) => $user->where('team_id', $id)))
+                ->when($request->integer('product_id'), fn ($q, int $id) => $q->whereHas('items', fn ($items) => $items->where('product_id', $id)));
+        }
+
+        return $query->latest('data_arrived_at')->get();
     }
 
     private function ordersGroupedBySale(): Collection
@@ -1578,6 +1562,8 @@ class PushsalePageService
             }
             $careOrders = $orders->filter(fn (Order $order) => str_starts_with((string) $this->normalizedOperationStage((string) $order->operation_stage), 'care_'));
             $careClosed = $careOrders->whereNotNull('closed_at');
+            $poolOrders = $orders->filter(fn (Order $order) => blank($order->operation_stage) && blank($order->operation_result));
+            $poolClosed = $poolOrders->whereNotNull('closed_at');
             $delivered = $orders->where('delivery_status', 'delivered');
             $cancelled = $orders->whereIn('delivery_status', ['cancelled', 'canceled']);
             $returned = $orders->whereIn('delivery_status', ['returned', 'returning']);
@@ -1585,6 +1571,7 @@ class PushsalePageService
             return [
                 'id' => (int) $saleId,
                 'name' => $first->saleUser?->name ?? 'Chưa phân sale',
+                'receive_data' => (bool) data_get($first->saleUser?->permissions, 'receive_data', true),
                 'contacts' => $orders->count(),
                 'untouched' => $orders->filter(fn (Order $order) => blank($order->operation_stage) && blank($order->operation_result))->count(),
                 'closed' => $closed->count(),
@@ -1606,10 +1593,15 @@ class PushsalePageService
                 'care_closed' => $careClosed->count(),
                 'care_revenue' => (int) $careClosed->sum(fn (Order $order) => $order->effectiveRevenue()),
                 'duplicate_contacts' => $orders->where('is_duplicate_phone', true)->count(),
+                'pool_total' => $poolOrders->count(),
+                'pool_duplicate' => $poolOrders->where('is_duplicate_phone', true)->count(),
+                'pool_unique' => $poolOrders->where('is_duplicate_phone', false)->count(),
+                'pool_closed' => $poolClosed->count(),
+                'pool_revenue' => (int) $poolClosed->sum(fn (Order $order) => $order->effectiveRevenue()),
                 'discount' => (int) $orders->sum('discount'),
                 'cod_collected' => (int) $orders->sum('settled_cod_amount'),
                 'cod_service_fee' => (int) $orders->sum(fn (Order $order) => (int) $order->cod_fee + (int) $order->carrier_service_fee),
-                'call_duration_seconds' => 0,
+                'call_duration_seconds' => null,
                 'overdue_orders' => $orders->filter(function (Order $order): bool {
                     if (! $order->desired_delivery_at || $order->desired_delivery_at->isFuture()) return false;
                     return ! in_array((string) $order->delivery_status, ['delivered', 'paid', 'cancelled', 'canceled', 'returned'], true);

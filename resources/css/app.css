@@ -243,3 +243,49 @@
     .pushsale-page-titlebar { flex-direction: column; }
     .pushsale-company-meta { justify-content: flex-start; }
 }
+
+/* Dữ liệu tổng hợp thật của từng màn Pushsale. Không dùng số chụp trong template. */
+.pushsale-live-data-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    margin: 0 0 10px;
+    border: 1px solid #d5dce5;
+    background: #d5dce5;
+}
+.pushsale-live-data-summary-item {
+    min-width: 170px;
+    flex: 1 1 170px;
+    padding: 8px 12px;
+    background: #fff;
+}
+.pushsale-live-data-summary-item span {
+    display: block;
+    color: #687789;
+    font-size: 12px;
+    font-weight: 400;
+}
+.pushsale-live-data-summary-item strong {
+    display: block;
+    margin-top: 2px;
+    color: #172b4d;
+    font-size: 16px;
+    font-weight: 600;
+}
+.pushsale-dialog-live-records {
+    margin-bottom: 12px;
+    border: 1px solid #d8dee6;
+    background: #fff;
+}
+.pushsale-dialog-live-records-title {
+    padding: 7px 10px;
+    border-bottom: 1px solid #d8dee6;
+    background: #f5f7fa;
+    font-weight: 600;
+}
+.pushsale-dialog-live-records .table { margin-bottom: 0; }
+.pushsale-live-trend-chart { min-height: 220px; padding: 8px 12px; background: #fff; }
+.pushsale-live-trend-title { margin-bottom: 4px; font-weight: 600; color: #2f4054; }
+.pushsale-live-trend-chart svg { display: block; width: 100%; height: 190px; }
+.pushsale-chart-value { font-size: 10px; fill: #425466; }
+.pushsale-chart-empty { display: flex; min-height: 180px; align-items: center; justify-content: center; color: #8996a5; }

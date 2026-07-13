@@ -43,6 +43,7 @@ abstract class BasePushsalePageController extends Controller
                 'alias' => $alias,
                 'resource_key' => $resourceKey,
                 'fields' => $this->resources->formFields((string) $resourceKey),
+                'records' => $this->resources->records((string) $resourceKey),
                 'store_url' => url($request->path().'/dialogs/'.$alias.'/records'),
             ];
         }
@@ -54,6 +55,7 @@ abstract class BasePushsalePageController extends Controller
             ]),
             'rows' => $result['data'],
             'pagination' => $result['meta'],
+            'summary' => $result['summary'] ?? [],
             'filterOptions' => $this->pages->filterOptions($this->pageCode),
             'routeUrl' => '/'.$request->path(),
             'templateHtml' => $this->templateHtml($templateCode),

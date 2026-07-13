@@ -333,6 +333,71 @@ function LiveSummary({ schema, rows }) {
     );
 }
 
+
+
+function TrendMetricChart({ row }) {
+    if (!row) return <div className="pushsale-chart-empty">Chưa có dữ liệu trong khoảng thời gian đã chọn.</div>;
+    const values = [6, 5, 4, 3, 2, 1, 0].map((offset) => Number(row[`day_${offset}_value`]) || 0);
+    const width = 760;
+    const height = 220;
+    const padding = 28;
+    const max = Math.max(1, ...values);
+    const points = values.map((value, index) => {
+        const x = padding + (index * (width - padding * 2)) / Math.max(1, values.length - 1);
+        const y = height - padding - (value / max) * (height - padding * 2);
+        return `${x},${y}`;
+    });
+
+    return (
+        <div className="pushsale-live-trend-chart">
+            <div className="pushsale-live-trend-title">{row.period ?? 'Số liệu thực tế'}</div>
+            <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Biểu đồ ${row.period ?? ''}`}>
+                {[0, 1, 2, 3, 4].map((line) => {
+                    const y = padding + (line * (height - padding * 2)) / 4;
+                    return <line key={line} x1={padding} y1={y} x2={width - padding} y2={y} className="pushsale-chart-grid" />;
+                })}
+                <polyline points={points.join(' ')} className="pushsale-chart-line is-current" />
+                {points.map((point, index) => {
+                    const [x, y] = point.split(',');
+                    return <g key={index}><circle cx={x} cy={y} r="4" className="pushsale-chart-point" /><text x={x} y={Number(y) - 8} textAnchor="middle" className="pushsale-chart-value">{numberFormatter.format(values[index])}</text></g>;
+                })}
+            </svg>
+            <div className="pushsale-chart-labels">{[6, 5, 4, 3, 2, 1, 0].map((offset) => <span key={offset}>{offset === 0 ? 'Hôm nay' : `-${offset} ngày`}</span>)}</div>
+        </div>
+    );
+}
+
+function LiveDataSummary({ summary = {} }) {
+    const entries = Object.entries(summary).filter(([, value]) => value !== null && value !== undefined);
+    if (!entries.length) return null;
+
+    const labels = {
+        total_orders: 'Tổng đơn',
+        closed_orders: 'Đơn đã chốt',
+        total_revenue: 'Doanh số',
+        upsell_orders: 'Đơn có upsale',
+        total_items: 'Sản phẩm tồn kho',
+        stock_quantity: 'Tồn thực tế',
+        pending_quantity: 'Chờ xuất',
+        cod_amount: 'COD cần thu',
+        insufficient_stock: 'Đơn thiếu tồn',
+        total_sales: 'Nhân viên sale',
+        total_records: 'Tổng bản ghi',
+    };
+    const currencyKeys = new Set(['total_revenue', 'cod_amount']);
+
+    return (
+        <div className="pushsale-live-data-summary" aria-label="Tổng hợp dữ liệu thực tế">
+            {entries.map(([key, value]) => (
+                <div key={key} className="pushsale-live-data-summary-item">
+                    <span>{labels[key] ?? key.replaceAll('_', ' ')}</span>
+                    <strong>{currencyKeys.has(key) ? currencyFormatter.format(Number(value) || 0) : numberFormatter.format(Number(value) || 0)}</strong>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 function optionsForField(field, filterOptions) {
     if (field?.options) {
         return Object.entries(field.options).map(([id, label]) => ({ id, label }));
@@ -437,11 +502,13 @@ function PushsaleEditorModal({ open, schema, row, dialogHtml = '', dialogSchema 
     const title = dialogSchema?.title ?? schema.title;
     const [payload, setPayload] = useState(() => defaultFormPayload(fields, row));
     const [saving, setSaving] = useState(false);
+    const [editingDialogRecord, setEditingDialogRecord] = useState(null);
     const [capturedFieldCount, setCapturedFieldCount] = useState(0);
     const dialogRef = useRef(null);
 
     useEffect(() => {
         setPayload(defaultFormPayload(fields, row));
+        setEditingDialogRecord(null);
     }, [open, row, dialogSchema, schema.code]);
 
     useEffect(() => {
@@ -472,7 +539,7 @@ function PushsaleEditorModal({ open, schema, row, dialogHtml = '', dialogSchema 
         const finalPayload = collectBoundFormValues(dialogRef.current, fields, payload);
         setSaving(true);
         try {
-            await onSaved(finalPayload, row?._record_id);
+            await onSaved(finalPayload, editingDialogRecord?.id ?? row?._record_id);
             onClose();
         } finally {
             setSaving(false);
@@ -499,10 +566,40 @@ function PushsaleEditorModal({ open, schema, row, dialogHtml = '', dialogSchema 
             <div className="pushsale-modal-backdrop" onClick={onClose} />
             <div className="pushsale-modal-dialog">
                 <div className="pushsale-modal-header">
-                    <strong>{row ? `Cập nhật ${title}` : title}</strong>
+                    <strong>{row || editingDialogRecord ? `Cập nhật ${title}` : title}</strong>
                     <button type="button" onClick={onClose} aria-label="Đóng"><i className="fa fa-times" /></button>
                 </div>
                 <div className="pushsale-modal-body" ref={dialogRef}>
+                    {dialogSchema?.records?.length > 0 && (
+                        <div className="pushsale-dialog-live-records">
+                            <div className="pushsale-dialog-live-records-title">Dữ liệu hiện có</div>
+                            <div className="table-responsive">
+                                <table className="table table-bordered table-striped table-condensed">
+                                    <thead><tr>
+                                        <th style={{ width: 55 }}>ID</th>
+                                        {fields.slice(0, 3).map((field) => <th key={field.key}>{field.label}</th>)}
+                                        <th style={{ width: 60 }} />
+                                    </tr></thead>
+                                    <tbody>
+                                        {dialogSchema.records.map((record) => (
+                                            <tr key={record.id}>
+                                                <td>{record.id}</td>
+                                                {fields.slice(0, 3).map((field) => <td key={field.key}>{displayValue(record[field.key], field.type === 'currency' ? 'currency' : undefined)}</td>)}
+                                                <td className="text-center">
+                                                    <button type="button" className="pushsale-icon-action" title="Sửa" onClick={() => {
+                                                        setEditingDialogRecord(record);
+                                                        setPayload(defaultFormPayload(fields, { _form: record._form ?? record }));
+                                                    }}>
+                                                        <i className="fa fa-pencil" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
                     {dialogHtml && <div className="pushsale-dialog-source" dangerouslySetInnerHTML={{ __html: dialogHtml }} />}
                     {(!dialogHtml || missingFields.length > 0) && (
                         <div className="pushsale-generated-form">
@@ -623,18 +720,43 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
     const gridEnabled = schema.grid_enabled !== false;
     const [rowAnchor, setRowAnchor] = useState(null);
     const [paginationAnchor, setPaginationAnchor] = useState(null);
+    const [chartAnchors, setChartAnchors] = useState([]);
     const hostRef = useRef(null);
 
     useEffect(() => {
         if (!templateHtml) {
             setRowAnchor(null);
             setPaginationAnchor(null);
+            setChartAnchors([]);
             return;
         }
         const frame = requestAnimationFrame(() => {
             const host = hostRef.current;
             setRowAnchor(gridEnabled ? (host?.querySelector('[data-pushsale-grid-anchor="primary"]') ?? null) : null);
             setPaginationAnchor(gridEnabled ? (host?.querySelector('[data-pushsale-pagination-anchor="primary"]') ?? null) : null);
+            setChartAnchors(schema.kind === 'trend' && host ? [...host.querySelectorAll('[data-highcharts-chart]')] : []);
+
+            if (host) {
+                host.querySelectorAll('tbody[data-pushsale-captured-data-removed="1"]').forEach((tbody) => {
+                    const table = tbody.closest('table');
+                    if (table && !table.querySelector('[data-pushsale-grid-anchor]') && !table.querySelector('input,select,textarea,button')) {
+                        table.remove();
+                    }
+                });
+                host.querySelectorAll('[data-pushsale-stale-counter="1"]').forEach((node) => {
+                    node.textContent = pagination?.total
+                        ? `Hiển thị ${pagination.from ?? 0} - ${pagination.to ?? 0} / ${numberFormatter.format(pagination.total)} bản ghi`
+                        : 'Chưa có dữ liệu';
+                });
+                const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+                let textNode = walker.nextNode();
+                while (textNode) {
+                    if (/Số\s*TK\s*:\s*\d+/i.test(textNode.nodeValue ?? '')) {
+                        textNode.nodeValue = String(textNode.nodeValue).replace(/Số\s*TK\s*:\s*\d+/gi, `Số TK: ${pagination?.total ?? 0}`);
+                    }
+                    textNode = walker.nextNode();
+                }
+            }
 
             if (schema.code === '1.2.3' && host) {
                 const controls = [...host.querySelectorAll('input[type="text"]:not([type="hidden"])')].filter((control) => control.offsetParent !== null || !control.style.display);
@@ -649,7 +771,7 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             }
         });
         return () => cancelAnimationFrame(frame);
-    }, [templateHtml, schema.code, gridEnabled, rows]);
+    }, [templateHtml, schema.code, gridEnabled, rows, pagination]);
 
     useEffect(() => {
         const host = hostRef.current;
@@ -786,6 +908,7 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             <div className="pushsale-template-host" ref={hostRef} dangerouslySetInnerHTML={{ __html: templateHtml }} />
             {gridEnabled && rowAnchor && createPortal(<PushsaleRows {...rowProps} />, rowAnchor)}
             {gridEnabled && paginationAnchor && createPortal(<Pagination pagination={pagination} routeUrl={routeUrl} />, paginationAnchor)}
+            {chartAnchors.map((anchor, index) => createPortal(<TrendMetricChart row={rows[index]} />, anchor, `trend-${index}`))}
             {gridEnabled && !rowAnchor && templateHtml && <div className="pushsale-template-fallback"><PushsaleFallbackGrid {...rowProps} pagination={pagination} routeUrl={routeUrl} /></div>}
             {!templateHtml && <div className="pushsale-template-loading"><i className="fa fa-spinner fa-spin" /> Chưa có nội dung template cho mã {schema.code}.</div>}
         </>
@@ -833,7 +956,7 @@ function requestFormData(url, formData) {
     });
 }
 
-export default function PushsaleBusinessPage({ schema, rows = [], pagination, routeUrl, templateHtml = '', dialogTemplates = {}, filterOptions = {} }) {
+export default function PushsaleBusinessPage({ schema, rows = [], pagination, summary = {}, routeUrl, templateHtml = '', dialogTemplates = {}, filterOptions = {} }) {
     const [editor, setEditor] = useState({ open: false, row: null, dialogCode: null, dialogSchema: null });
     const [error, setError] = useState('');
     const [selectedRecordIds, setSelectedRecordIds] = useState(() => new Set());
@@ -877,7 +1000,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, ro
             : (recordId ? `${routeUrl}/records/${recordId}` : `${routeUrl}/records`);
         try {
             await requestJson(target, recordId ? 'PUT' : 'POST', { payload });
-            router.reload({ preserveScroll: true, only: ['rows', 'pagination', 'filterOptions'] });
+            router.reload({ preserveScroll: true, only: ['schema', 'rows', 'pagination', 'summary', 'filterOptions'] });
         } catch (exception) {
             setError(exception.message);
             throw exception;
@@ -1017,6 +1140,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, ro
             <Head title={schema.title} />
             <div className={`pushsale-page pushsale-kind-${schema.kind}`} data-page-code={schema.code}>
                 {error && <div className="pushsale-error-banner"><i className="fa fa-exclamation-triangle" /> {error}</div>}
+                <LiveDataSummary summary={summary} />
                 <TemplateHost
                     templateHtml={templateHtml}
                     schema={schema}
