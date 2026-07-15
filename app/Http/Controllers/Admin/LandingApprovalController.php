@@ -65,6 +65,12 @@ class LandingApprovalController extends Controller
     /** @return array<string, mixed> */
     private function presentForApproval(MarketingSource $c, CampaignLandingService $landing): array
     {
+        $connection = $c->landingConnection;
+        $mainSource = $connection?->sources->firstWhere('source_type', 'main');
+        $submissionUrl = $connection && $mainSource
+            ? url('/api/v1/landing-connections/'.$connection->public_token.'/sources/'.$mainSource->public_token.'/submit')
+            : ($c->webhook_token ? $landing->webhookUrl($c) : null);
+
         return [
             'id' => $c->id,
             'name' => $c->name,
@@ -80,7 +86,9 @@ class LandingApprovalController extends Controller
             'ad_channel' => $c->ad_channel,
             'utm_source' => $c->utm_source,
             'utm_campaign' => $c->utm_campaign,
-            'webhook_url' => $c->webhook_token ? $landing->webhookUrl($c) : null,
+            'webhook_url' => $submissionUrl,
+            'is_landing_connection' => (bool) $connection,
+            'source_count' => (int) ($connection?->sources->count() ?? 0),
             'budget' => (int) $c->budget,
             'is_approved' => (bool) $c->is_approved,
             'is_active' => (bool) $c->is_active,
@@ -97,17 +105,14 @@ class LandingApprovalController extends Controller
     private function fieldMappingGuide(): array
     {
         return [
-            ['ladipage' => 'name', 'system' => 'name'],
-            ['ladipage' => 'phone', 'system' => 'phone'],
-            ['ladipage' => 'address', 'system' => 'address (địa chỉ nhận hàng)'],
-            ['ladipage' => 'message', 'system' => 'message'],
-            ['ladipage' => 'products', 'system' => 'products'],
-            ['ladipage' => 'quantity', 'system' => 'quantity'],
-            ['ladipage' => 'combo', 'system' => 'combo (gói khách chọn, có thể kèm giá "289k")'],
-            ['ladipage' => 'combo_price', 'system' => 'combo_price (giá gói nếu tách riêng)'],
-            ['ladipage' => 'discount', 'system' => 'discount (chiết khấu VND)'],
-            ['ladipage' => 'utm_source', 'system' => 'utm_source (tùy chọn)'],
-            ['ladipage' => 'utm_campaign', 'system' => 'utm_campaign (tự điền theo tên chiến dịch)'],
+            ['ladipage' => 'name', 'system' => 'name / customer_name'],
+            ['ladipage' => 'phone', 'system' => 'phone / customer_phone (bắt buộc)'],
+            ['ladipage' => 'address', 'system' => 'address / shipping_address'],
+            ['ladipage' => 'message', 'system' => 'message / note'],
+            ['ladipage' => 'ps_flow', 'system' => 'Mã luồng khách; trang upsale lấy từ URL và gửi lại'],
+            ['ladipage' => 'submission_id', 'system' => 'Mã submit duy nhất của landing (khuyến nghị)'],
+            ['ladipage' => 'field chọn gói', 'system' => 'Tên field/giá trị cấu hình tại Kết nối landing'],
+            ['ladipage' => 'giá / sản phẩm', 'system' => 'Không nhận từ landing; hệ thống lấy theo cấu hình backend'],
         ];
     }
 }

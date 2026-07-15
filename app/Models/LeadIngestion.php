@@ -25,7 +25,7 @@ class LeadIngestion extends Model
         'product_interest',
         'utm_source',
         'utm_campaign',
-        'marketing_source_id',
+        'marketing_source_id', 'landing_connection_id', 'landing_connection_source_id',
         'payload',
         'order_id',
         'parent_ingestion_id',
@@ -75,6 +75,16 @@ class LeadIngestion extends Model
     public function reviewedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by_user_id');
+    }
+
+    public function landingConnection(): BelongsTo
+    {
+        return $this->belongsTo(LandingConnection::class)->withTrashed();
+    }
+
+    public function landingConnectionSource(): BelongsTo
+    {
+        return $this->belongsTo(LandingConnectionSource::class)->withTrashed();
     }
 
     public function marketingSource(): BelongsTo

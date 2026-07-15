@@ -1,4 +1,124 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="4.6.5"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="4.6.5"><style>@scope ([data-template-code="4.6.5"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.table-bordered tr:nth-child(odd) td {
+        background-color: #f3f3f3 !important;
+    }
+
+    .table-bordered td {
+        background-color: #f3f3f3 !important;
+    }
+
+    .doanh_so {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .doanh_so_ds {
+        text-align: center;
+        font-weight: bold;
+        color: black;
+    }
+
+    .doanh_so_mau {
+        text-align: center;
+        color: #656161;
+    }
+
+    .doanh_so_mau_ds {
+        text-align: center;
+        color: black;
+    }
+
+    .table-bordered tbody tr td.doanh_so_duoi_80 {
+        background-color: #eb1e1e !important;
+        color: black !important;
+    }
+
+    .table-bordered tbody tr td.doanh_so_tu_80_den_100 {
+    }
+
+    .table-bordered tbody tr td.doanh_so_tren_100 {
+        background-color: #26c863 !important;
+        color: black !important;
+    }
+
+    .table-bordered tbody tr td.duoi_80 {
+        background-color: #fda2a2 !important;
+    }
+
+    .table-bordered tbody tr td.tu_80_den_100 {
+    }
+
+    .table-bordered tbody tr td.tren_100 {
+        background-color: #aef7cb !important;
+    }
+
+    .col_color_duoi_80 {
+        margin-left: 15px;
+        margin-right: 15px;
+        display: block;
+        width: 25px;
+        height: 20px;
+        background-color: #fda2a2 !important;
+    }
+
+    .col_color_tu_80_den_100 {
+        margin-left: 15px;
+        margin-right: 15px;
+        display: block;
+        width: 25px;
+        height: 20px;
+        background-color: #f3f3f3 !important;
+    }
+
+    .col_color_tren_100 {
+        margin-left: 15px;
+        margin-right: 15px;
+        display: block;
+        width: 25px;
+        height: 20px;
+        background-color: #aef7cb !important;
+    }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1560"><a name="1560" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1560_ContentPane"><!-- Start_Module_1560 --><div class="pushsale-template-inner" id="dnn_ctr1560_ModuleContent">
 
 <style>
@@ -110,7 +230,7 @@
 </select>
 </div>
 <div class="col-sm-2 form-group">
-<input class="form-control date-range pushsale-native-input" id="dnn_ctr1560_Main_ToiUuSale__TuNgay_DenNgay" name="dnn$ctr1560$Main$ToiUuSale$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+<input class="form-control date-range pushsale-native-input" id="dnn_ctr1560_Main_ToiUuSale__TuNgay_DenNgay" name="dnn$ctr1560$Main$ToiUuSale$_TuNgay_DenNgay" type="text" value="01/07/2026 00:00 - 14/07/2026 23:59"/>
 </div>
 <div class="col-sm-2 form-group">
 <select class="chosen pushsale-native-select" id="dnn_ctr1560_Main_ToiUuSale_ddlDoiSoatNoiBo" name="dnn$ctr1560$Main$ToiUuSale$ddlDoiSoatNoiBo" style="" title="">
@@ -278,7 +398,7 @@
 </div>
 </div>
 <div class="row">
-<div class="dragscroll1 tableFixHead" style="height: 687px;">
+<div class="dragscroll1 tableFixHead" style="height: 582px;">
 <table class="table table-bordered table-striped pushsale-data-table" data-pushsale-grid-table="primary" id="tableReport">
 
 <thead><tr class="pushsale-captured-header-row">

@@ -7,9 +7,11 @@ use App\Events\OrderClosed;
 use App\Listeners\DispatchShipmentOnOrderClosed;
 use App\Repositories\EloquentOrderRepository;
 use App\Services\Shipping\CarrierRegistry;
+use App\Services\Shipping\Carriers\Generic\GenericCarrier;
 use App\Services\Shipping\Carriers\Ghn\GhnCarrier;
 use App\Services\Shipping\Carriers\Ghtk\GhtkCarrier;
 use App\Services\Shipping\Carriers\Jnt\JntCarrier;
+use App\Services\Shipping\Carriers\Manual\ManualCarrier;
 use App\Services\Shipping\Carriers\Spx\SpxCarrier;
 use App\Services\Shipping\Carriers\ViettelPost\ViettelPostCarrier;
 use App\Services\Shipping\Support\PartnerCredentialResolver;
@@ -33,13 +35,24 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(OrderRepositoryInterface::class, EloquentOrderRepository::class);
 
         $this->app->singleton(CarrierRegistry::class, function ($app) {
-            return new CarrierRegistry([
+            $resolver = $app->make(PartnerCredentialResolver::class);
+            $carriers = [
+                $app->make(ManualCarrier::class),
                 $app->make(GhtkCarrier::class),
                 $app->make(GhnCarrier::class),
                 $app->make(ViettelPostCarrier::class),
                 $app->make(JntCarrier::class),
                 $app->make(SpxCarrier::class),
-            ], $app->make(PartnerCredentialResolver::class));
+            ];
+
+            $direct = ['manual', 'ghtk', 'ghn', 'viettel_post', 'jnt', 'spx'];
+            foreach (array_keys(config('shipping_partners.providers', [])) as $provider) {
+                if (! in_array($provider, $direct, true)) {
+                    $carriers[] = new GenericCarrier($provider, $resolver);
+                }
+            }
+
+            return new CarrierRegistry($carriers, $resolver);
         });
     }
 

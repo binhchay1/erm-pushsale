@@ -11,6 +11,7 @@ return [
         'cancel_waybill' => 'Waybill cancelled',
         'cannot_deliver' => 'Undeliverable',
         'deliver_now' => 'Deliver now',
+        'partial_delivery' => 'Partially delivered',
         'delivery_complete' => 'Delivery completed',
         'cancel_closing' => 'Order closing cancelled',
         'picking_up' => 'Picking up',

@@ -18,7 +18,7 @@ class ShipmentReconciliationEngine
     ];
 
     /** @var list<string> */
-    private const DELIVERED_AWAITING_PAYMENT = ['delivered', 'delivery_complete'];
+    private const DELIVERED_AWAITING_PAYMENT = ['delivered', 'delivery_complete', 'partial_delivery', 'partial'];
 
     /** @var list<string> */
     private const RETURNED = ['returned', 'returning', 'refund'];
@@ -31,9 +31,24 @@ class ShipmentReconciliationEngine
         $order->loadMissing('settlementLines');
 
         $expectedCod = max(0, (int) $order->amount_to_collect);
-        $settledCod = (int) $order->settlementLines
-            ->where('match_status', CarrierSettlementLine::MATCH_MATCHED)
-            ->sum('cod_amount');
+        $matchedLines = $order->settlementLines
+            ->where('match_status', CarrierSettlementLine::MATCH_MATCHED);
+        $settledCod = (int) $matchedLines->sum('cod_amount');
+        $carrierFee = (int) $matchedLines->sum('carrier_fee');
+        $returnFee = (int) $matchedLines->sum('return_fee');
+        $codFee = (int) $matchedLines->sum('cod_fee');
+        $otherFee = (int) $matchedLines->sum(fn (CarrierSettlementLine $line) => (int) $line->other_fee + (int) $line->insurance_fee);
+        $compensation = (int) $matchedLines->sum('compensation_amount');
+
+        if ($matchedLines->isNotEmpty()) {
+            $order->update([
+                'carrier_service_fee' => $carrierFee,
+                'carrier_return_fee' => $returnFee,
+                'cod_fee' => $codFee,
+                'carrier_other_fee' => $otherFee,
+                'carrier_compensation_amount' => $compensation,
+            ]);
+        }
 
         $delivery = (string) $order->delivery_status;
 

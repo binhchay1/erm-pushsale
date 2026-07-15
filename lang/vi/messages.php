@@ -35,7 +35,7 @@ return [
         'head_manager_admin_only' => 'Trưởng bộ phận chỉ được báo cáo lên quản trị viên.',
         'supervisor_reports_to_head' => 'Giám sát phải báo cáo lên trưởng bộ phận hoặc quản trị.',
     ],
-    'landing_approved' => 'Đã duyệt nguồn Landing — lead mới sẽ được chia số cho Sale.',
+    'landing_approved' => 'Đã duyệt kết nối Landing — dữ liệu mới sẽ tự động tạo đơn chờ và chia cho Sale.',
     'landing_rejected' => 'Đã từ chối kết nối Landing.',
     'password_changed' => 'Đã đổi mật khẩu.',
     'avatar_updated' => 'Đã cập nhật ảnh đại diện.',

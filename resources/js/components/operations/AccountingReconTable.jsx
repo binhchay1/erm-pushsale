@@ -10,7 +10,7 @@ import { useT } from '@/providers/I18nProvider';
 
 function Money({ value, className }) {
     if (!value) return <span className="text-muted-foreground">—</span>;
-    return <span className={className}>{formatNumber(value)}</span>;
+    return <span className={className}>{formatCurrency(value)}</span>;
 }
 
 export function AccountingReconTable({ rows, totals, enableDeleteOrder = false }) {
@@ -119,7 +119,7 @@ export function AccountingReconTable({ rows, totals, enableDeleteOrder = false }
                                         <div key={p.itemId ?? p.productName} className="flex justify-between gap-2 border-b border-dashed border-border/40 py-0.5 last:border-0">
                                             <span className="truncate">{p.productName}</span>
                                             <span className="whitespace-nowrap text-muted-foreground">x{p.quantity}</span>
-                                            <span className="whitespace-nowrap text-right">{formatNumber(p.unitPrice)}</span>
+                                            <span className="whitespace-nowrap text-right">{formatCurrency(p.unitPrice)}</span>
                                         </div>
                                     ))}
                                 </Td>
@@ -128,7 +128,7 @@ export function AccountingReconTable({ rows, totals, enableDeleteOrder = false }
                                 </Td>
                                 <Td className="text-right">
                                     {row.discount ? (
-                                        <span className="text-destructive">-{formatNumber(row.discount)}</span>
+                                        <span className="text-destructive">-{formatCurrency(row.discount)}</span>
                                     ) : (
                                         <span className="text-muted-foreground">—</span>
                                     )}
@@ -211,17 +211,17 @@ export function AccountingReconTable({ rows, totals, enableDeleteOrder = false }
                             <Td className="text-center">{formatNumber(totals.quantity)}</Td>
                             <Td className="text-right">{formatCurrency(totals.subtotal)}</Td>
                             <Td className="text-right text-destructive">
-                                {totals.discount ? `-${formatNumber(totals.discount)}` : '—'}
+                                {totals.discount ? `-${formatCurrency(totals.discount)}` : '—'}
                             </Td>
-                            <Td className="text-right">{formatNumber(totals.vat)}</Td>
-                            <Td className="text-right">{formatNumber(totals.shippingFeeCollected)}</Td>
+                            <Td className="text-right">{formatCurrency(totals.vat)}</Td>
+                            <Td className="text-right">{formatCurrency(totals.shippingFeeCollected)}</Td>
                             <Td className="text-right">{formatCurrency(totals.total)}</Td>
-                            <Td className="text-right">{formatNumber(totals.deposit)}</Td>
+                            <Td className="text-right">{formatCurrency(totals.deposit)}</Td>
                             <Td className="text-right text-emerald-600 dark:text-emerald-400">
                                 {formatCurrency(totals.amountToCollect)}
                             </Td>
-                            <Td className="text-right">{formatNumber(totals.carrierServiceFee)}</Td>
-                            <Td className="text-right">{formatNumber(totals.shippingSupportFee)}</Td>
+                            <Td className="text-right">{formatCurrency(totals.carrierServiceFee)}</Td>
+                            <Td className="text-right">{formatCurrency(totals.shippingSupportFee)}</Td>
                             <Td colSpan={enableDeleteOrder ? 3 : 2} />
                         </tr>
                     </tfoot>

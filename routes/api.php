@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\CampaignLandingUpsellController;
 use App\Http\Controllers\Api\V1\CampaignLandingWebhookController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\IntegrationController;
+use App\Http\Controllers\Api\V1\LandingConnectionSubmissionController;
 use App\Http\Controllers\Api\V1\LeadController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\Pancake\PancakeExtensionController;
@@ -17,6 +18,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::post('auth/token', [AuthController::class, 'token'])->middleware('throttle:api-auth');
+
+    Route::post('landing-connections/{connectionToken}/sources/{sourceToken}/submit', LandingConnectionSubmissionController::class)
+        ->where(['connectionToken' => '[a-z0-9]{32,48}', 'sourceToken' => '[a-z0-9]{24,48}'])
+        ->middleware('throttle:lead-intake');
 
     Route::post('landing/{token}/receive', [CampaignLandingWebhookController::class, 'receive'])
         ->where('token', '[a-z0-9]{16,64}')
@@ -51,7 +56,7 @@ Route::prefix('v1')->group(function () {
         ->where('platform', 'facebook|tiktok|zalo|landing|ladipage|google|shopee|lazada|pancake')
         ->middleware('throttle:lead-intake');
     Route::post('shipping/webhooks/{provider}', [ShippingWebhookController::class, 'handle'])
-        ->where('provider', 'viettel_post|ghn|ghtk|jnt|spx');
+        ->where('provider', '[a-z0-9_\-]+');
 
     Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
         Route::get('auth/me', [AuthController::class, 'me']);

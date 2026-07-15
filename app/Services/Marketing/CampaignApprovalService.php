@@ -79,13 +79,23 @@ class CampaignApprovalService
             ]);
         }
 
+        $approvedAt = now();
         $campaign->update([
             'is_approved' => true,
             'approved_by_user_id' => $actor->id,
-            'approved_at' => now(),
+            'approved_at' => $approvedAt,
             'rejected_by_user_id' => null,
             'rejected_at' => null,
             'rejection_reason' => null,
+        ]);
+
+        // marketing_sources remains the reporting compatibility record. The
+        // executable landing flow must always carry the same approval state.
+        $campaign->landingConnection()->update([
+            'is_approved' => true,
+            'approved_by_user_id' => $actor->id,
+            'approved_at' => $approvedAt,
+            'updated_by_user_id' => $actor->id,
         ]);
 
         $fresh = $campaign->fresh(['creator', 'marketer', 'approver']);
@@ -121,6 +131,13 @@ class CampaignApprovalService
             'rejected_by_user_id' => $actor->id,
             'rejected_at' => now(),
             'rejection_reason' => $reason,
+        ]);
+
+        $campaign->landingConnection()->update([
+            'is_approved' => false,
+            'approved_by_user_id' => null,
+            'approved_at' => null,
+            'updated_by_user_id' => $actor->id,
         ]);
 
         $fresh = $campaign->fresh(['creator', 'marketer', 'rejector']);

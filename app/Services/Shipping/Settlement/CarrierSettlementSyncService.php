@@ -103,7 +103,13 @@ class CarrierSettlementSyncService
 
         $codAmount = max(0, (int) ($row['cod_amount'] ?? 0));
         $carrierFee = max(0, (int) ($row['carrier_fee'] ?? 0));
-        $netAmount = (int) ($row['net_amount'] ?? max(0, $codAmount - $carrierFee));
+        $returnFee = max(0, (int) ($row['return_fee'] ?? 0));
+        $codFee = max(0, (int) ($row['cod_fee'] ?? 0));
+        $insuranceFee = max(0, (int) ($row['insurance_fee'] ?? 0));
+        $otherFee = max(0, (int) ($row['other_fee'] ?? 0));
+        $compensationAmount = max(0, (int) ($row['compensation_amount'] ?? 0));
+        $totalFees = $carrierFee + $returnFee + $codFee + $insuranceFee + $otherFee;
+        $netAmount = (int) ($row['net_amount'] ?? max(0, $codAmount - $totalFees + $compensationAmount));
 
         $match = $this->matcher->match($provider, $tracking, $partnerCode);
 
@@ -120,6 +126,11 @@ class CarrierSettlementSyncService
                 'partner_order_code' => $partnerCode,
                 'cod_amount' => $codAmount,
                 'carrier_fee' => $carrierFee,
+                'return_fee' => $returnFee,
+                'cod_fee' => $codFee,
+                'insurance_fee' => $insuranceFee,
+                'other_fee' => $otherFee,
+                'compensation_amount' => $compensationAmount,
                 'net_amount' => $netAmount,
                 'match_status' => $match['status'],
                 'match_method' => $match['method'],

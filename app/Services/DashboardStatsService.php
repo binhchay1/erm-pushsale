@@ -7,12 +7,15 @@ use App\Enums\DeliveryStatus;
 use App\Enums\LeadIngestionStatus;
 use App\Enums\OperationStage;
 use App\Enums\UserRole;
+use App\Models\LandingConnection;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\ShippingWebhookEvent;
 use App\Models\User;
 use App\Models\WarehouseInventory;
+use App\Services\Marketing\MarketingBudgetService;
+use App\Services\Reports\AdminFinancialDashboardService;
 use App\Services\Reports\ReportMetricService;
 use App\Services\Reports\ReportQueryService;
 use App\Support\LeadContactMetrics;
@@ -25,6 +28,8 @@ class DashboardStatsService
 {
     public function __construct(
         private readonly ReportMetricService $metrics,
+        private readonly AdminFinancialDashboardService $financialDashboard,
+        private readonly MarketingBudgetService $marketingBudgets,
     ) {}
 
     /** @return array<string, mixed> */
@@ -85,15 +90,25 @@ class DashboardStatsService
             fn (Builder $q) => $q->where('marketer_user_id', $user->id),
         );
         $sources = MarketingSource::query()->where('marketer_user_id', $user->id);
+        $connections = LandingConnection::query()->where('marketer_user_id', $user->id);
         $contactCount = LeadContactMetrics::countToday($user->id, $sourceIds->all());
+        $todayBudget = app(MarketingBudgetService::class)->effectiveForSourceIds(
+            (clone $connections)->pluck('marketing_source_id'),
+            now()->startOfDay(),
+            now()->endOfDay(),
+        );
 
         return [
-            'active_campaigns' => (clone $sources)->where('is_active', true)->count(),
+            'active_campaigns' => (clone $connections)->where('is_active', true)->count(),
+            'active_connections' => (clone $connections)->where('is_active', true)->count(),
             'leads_today' => $contactCount,
             'contacts_today' => $contactCount,
             'orders_closed' => (clone $orders)->whereNotNull('closed_at')->whereDate('closed_at', today())->count(),
             'aov' => self::averageOrderValue($orders),
-            'budget_total' => (int) (clone $sources)->sum('budget'),
+            'budget_total' => (int) $todayBudget['amount'],
+            'budget_actual' => (int) $todayBudget['actual'],
+            'budget_planned' => (int) $todayBudget['planned'],
+            'budget_basis' => $todayBudget['basis'],
             'lead_series' => self::dailyLeadSeries(7),
             'conversion_series' => self::dailyConversionSeries($orders, 7),
             'lead_sources' => self::marketerLeadSources($user),
@@ -218,7 +233,7 @@ class DashboardStatsService
                 'top_sales' => $this->metrics->topSales($user, $filter),
                 'top_sources' => $this->metrics->topSources($user, $filter),
                 'alerts' => self::alerts(),
-            ]),
+            ], $this->financialDashboard->snapshot($user, $filter)),
             'sales' => array_merge($base, [
                 'leads_pending' => $summary['orders'],
                 'orders_today' => $summary['closed_orders'],
@@ -232,15 +247,7 @@ class DashboardStatsService
                 ),
                 'pipeline' => $this->metrics->stageBreakdown($user, $filter),
             ]),
-            'marketing' => array_merge($base, [
-                'active_campaigns' => MarketingSource::query()->where('marketer_user_id', $user->id)->where('is_active', true)->count(),
-                'leads_today' => $leadsToday,
-                'contacts_today' => $leadsToday,
-                'orders_closed' => $summary['closed_orders'],
-                'aov' => $summary['aov'],
-                'budget_total' => (int) MarketingSource::query()->where('marketer_user_id', $user->id)->sum('budget'),
-                'top_sources' => $this->metrics->topSources($user, $filter),
-            ]),
+            'marketing' => $this->marketingDashboardData($user, $filter, $base, $summary, $leadsToday),
             'warehouse' => array_merge($base, $warehouseBuckets = $this->metrics->warehouseBuckets($user, $filter), [
                 'inventory_alerts' => self::inventoryAlerts(),
                 'delivery_breakdown' => self::deliveryBreakdown(
@@ -271,6 +278,32 @@ class DashboardStatsService
         };
     }
 
+    /** @param array<string,mixed> $base @param array<string,mixed> $summary @return array<string,mixed> */
+    private function marketingDashboardData(User $user, ReportFilterData $filter, array $base, array $summary, int $leadsToday): array
+    {
+        $connections = LandingConnection::query()->where('marketer_user_id', $user->id);
+        $sourceIds = (clone $connections)->pluck('marketing_source_id')->filter()->unique()->values();
+        $from = ($filter->dateFrom ?? now())->copy()->startOfDay();
+        $to = ($filter->dateTo ?? now())->copy()->endOfDay();
+        $budget = $this->marketingBudgets->effectiveForSourceIds($sourceIds, $from, $to);
+        $activeConnections = (clone $connections)->where('is_active', true)->count();
+
+        return array_merge($base, [
+            // Giữ key cũ để không phá UI hiện hữu, nhưng business đã là kết nối landing.
+            'active_campaigns' => $activeConnections,
+            'active_connections' => $activeConnections,
+            'leads_today' => $leadsToday,
+            'contacts_today' => $leadsToday,
+            'orders_closed' => $summary['closed_orders'],
+            'aov' => $summary['aov'],
+            'budget_total' => (int) $budget['amount'],
+            'budget_actual' => (int) $budget['actual'],
+            'budget_planned' => (int) $budget['planned'],
+            'budget_basis' => $budget['basis'],
+            'top_sources' => $this->metrics->topSources($user, $filter),
+        ]);
+    }
+
     /**
      * Giá trị đơn trung bình (AOV) = doanh thu net / số đơn đã chốt.
      *
@@ -284,11 +317,12 @@ class DashboardStatsService
             return 0;
         }
 
-        $revenueNet = OrderRevenue::aggregate(
-            (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible()),
-        )['net'];
+        $revenue = (int) (clone $orders)
+            ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
+            ->selectRaw('SUM('.OrderRevenue::grossAmountSql().') as aggregate_value')
+            ->value('aggregate_value');
 
-        return (int) round($revenueNet / $closedCount);
+        return (int) round($revenue / $closedCount);
     }
 
     /** @return Builder<Order> */
@@ -539,7 +573,11 @@ class DashboardStatsService
             ->whereIn('delivery_status', $revenueEligible)
             ->whereDate('updated_at', today());
 
-        $revenueBreakdown = OrderRevenue::aggregate($todayRevenueOrders);
+        $revenueBreakdown = OrderRevenue::aggregate(
+            $todayRevenueOrders,
+            now()->startOfDay(),
+            now()->endOfDay(),
+        );
 
         return [
             'revenue_today' => $revenueBreakdown['net'],

@@ -1,4 +1,52 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="3.2"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="3.2"><style>@scope ([data-template-code="3.2"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.fa-check {
+        color: #238051;
+    }
+
+    .fa-remove {
+        color: red;
+    }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1630"><a name="1630" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1630_ContentPane"><!-- Start_Module_1630 --><div class="pushsale-template-inner" id="dnn_ctr1630_ModuleContent">
 <style type="text/css">
     .fa-check {
@@ -33,13 +81,13 @@
 <div class="col-sm-6">
 <div class="row">
 <div class="col-sm-5 form-group">
-<input class="form-control date-range pushsale-native-input" id="dnn_ctr1630_Main_Events__TuNgay_DenNgay" name="dnn$ctr1630$Main$Events$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+<input class="form-control date-range pushsale-native-input" id="dnn_ctr1630_Main_Events__TuNgay_DenNgay" name="dnn$ctr1630$Main$Events$_TuNgay_DenNgay" type="text" value="14/06/2026 00:00 - 14/07/2026 23:59"/>
 </div>
 <div class="col-sm-7 form-group">
 <div style="width: calc(100% - 225px); float: left;">
 <input class="form-control mr15 pushsale-native-input" id="dnn_ctr1630_Main_Events__Keyword" name="dnn$ctr1630$Main$Events$_Keyword" placeholder="Tên chiến dịch" type="text"/>
 </div>
-<a class="btn-icon hidden" href="#" id="dnn_ctr1630_Main_Events_btnToggleSummary" role="button"><i class="fa fa-angle-double-up"></i></a>
+<a class="btn-icon hidden" href="#" id="dnn_ctr1630_Main_Events_btnToggleSummary" role="button"><i class="fa fa-angle-double-down"></i></a>
 <a class="btn btn-sm btn-primary mrl15" data-pushsale-action="search" href="#" id="dnn_ctr1630_Main_Events_btnSearch" role="button">
 <i class="fa fa-search"></i> Tìm kiếm
                                 </a>
@@ -52,7 +100,7 @@
 </div>
 </div>
 </div>
-<div class="box-body hidden" style="padding-bottom: 0px;">
+<div class="box-body hidden hidden" style="padding-bottom: 0px;">
 <div class="row">
 </div>
 </div>

@@ -1,4 +1,69 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="3.3.2"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="3.3.2"><style>@scope ([data-template-code="3.3.2"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.myGrid tr:first-child {
+        font-weight: bold !important;
+        font-size: 13px !important;
+        text-align: center !important;
+    }
+
+        .myGrid tr:first-child td {
+            background: rgba(2,139,255,1) !important;
+            color: #fff !important;
+            text-shadow: none !important;
+        }
+
+    .myGrid tr td:nth-of-type(1) {
+        text-align: center !important;
+        width: 50px !important;
+    }
+
+    .myGrid tr td:nth-of-type(2) {
+        width: 15% !important;
+    }
+
+        .myGrid tr td:nth-of-type(2) ~ td {
+            text-align: center !important;
+        }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1734"><a name="1734" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1734_ContentPane"><!-- Start_Module_1734 --><div class="pushsale-template-inner" id="dnn_ctr1734_ModuleContent">
 <style>
     .myGrid tr:first-child {
@@ -36,11 +101,11 @@
 </div>
 <div class="col-sm-2 form-group">
 <select class="chosen pushsale-native-select" id="dnn_ctr1734_Main_BaoCaoKhachHangChiTra_ddlKieuNgay" name="dnn$ctr1734$Main$BaoCaoKhachHangChiTra$ddlKieuNgay" style="" title="">
-<option value="-1">--Chuẩn Pushsale--</option>
+<option selected="selected" value="-1">--Chuẩn Pushsale--</option>
 <option value="4">Ngày sale chốt đơn</option>
 <option value="1">Ngày sale tác nghiệp</option>
 <option value="2">Ngày data về hệ thống</option>
-<option selected="selected" value="3">Ngày sale nhận data</option>
+<option value="3">Ngày sale nhận data</option>
 <option value="5">Ngày đăng đơn</option>
 <option value="6">Ngày đối soát</option>
 <option value="7">Ngày nhận care đơn</option>
@@ -48,7 +113,7 @@
 </select>
 </div>
 <div class="col-sm-2 form-group">
-<input class="form-control date-range pushsale-native-input" id="dnn_ctr1734_Main_BaoCaoKhachHangChiTra__TuNgay_DenNgay" name="dnn$ctr1734$Main$BaoCaoKhachHangChiTra$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+<input class="form-control date-range pushsale-native-input" id="dnn_ctr1734_Main_BaoCaoKhachHangChiTra__TuNgay_DenNgay" name="dnn$ctr1734$Main$BaoCaoKhachHangChiTra$_TuNgay_DenNgay" type="text" value="14/06/2026 00:00 - 14/07/2026 23:59"/>
 </div>
 <div class="col-sm-2 form-group">
 <select class="chosen pushsale-native-select" id="dnn_ctr1734_Main_BaoCaoKhachHangChiTra_ddlTrangThaiGiaoHang" name="dnn$ctr1734$Main$BaoCaoKhachHangChiTra$ddlTrangThaiGiaoHang" style="" title="">

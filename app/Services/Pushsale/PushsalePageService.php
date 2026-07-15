@@ -44,6 +44,7 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
 use App\Models\WarehouseInventoryMovement;
+use App\Services\Finance\PayrollCostService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -57,6 +58,7 @@ class PushsalePageService
 
     public function __construct(
         private readonly PushsaleLiveDataService $liveData,
+        private readonly PayrollCostService $payroll,
     ) {}
 
     /** @return array<string, mixed> */
@@ -573,7 +575,7 @@ class PushsalePageService
             ->get()
             ->map(function (Order $order): array {
                 $productLines = $order->items->map(function ($item): string {
-                    $line = trim("{$item->product_name} x{$item->quantity} · ".number_format((int) $item->unit_price));
+                    $line = trim("{$item->product_name} x{$item->quantity} · ".$this->formatVnd((int) $item->unit_price));
                     return $item->item_type === 'upsell' ? $line.' [UPSALE]' : $line;
                 })->implode("\n");
                 $upsellCount = (int) $order->items->where('item_type', 'upsell')->sum('quantity');
@@ -593,11 +595,11 @@ class PushsalePageService
                     'result' => trim(($order->operation_result ?: '—')."\n".$order->next_operation_at?->format('d/m/Y H:i:s')),
                     'products' => $productLines,
                     'money' => implode("\n", [
-                        number_format((int) $order->subtotal),
-                        '-'.number_format((int) $order->discount),
-                        number_format((int) $order->vat),
-                        number_format((int) $order->shipping_fee_collected),
-                        number_format((int) $order->total),
+                        $this->formatVnd((int) $order->subtotal),
+                        '-'.$this->formatVnd((int) $order->discount),
+                        $this->formatVnd((int) $order->vat),
+                        $this->formatVnd((int) $order->shipping_fee_collected),
+                        $this->formatVnd((int) $order->total),
                     ]),
                     'deposit' => (int) $order->deposit,
                     'shipping' => trim(($order->warehouse?->name ?? '—')."\n".($order->shipping_provider ?: $order->shipping_method)."\n".$order->tracking_number),
@@ -834,8 +836,8 @@ class PushsalePageService
                 'delivery' => trim($order->updated_at?->format('d/m/Y H:i:s')."\n".($order->delivery_status ?: 'Chờ vận đơn')."\n".$order->closed_at?->format('d/m/Y H:i:s')),
                 'customer' => trim("{$order->customer_name}\n{$order->customer_phone}\n".$order->desired_delivery_at?->format('d/m/Y')),
                 'address' => trim($order->effectiveShippingAddress()."\n".$order->shipping_notes),
-                'products' => $order->items->map(fn ($i) => "{$i->product_name} x{$i->quantity} ".number_format((int) $i->unit_price).($i->item_type === 'upsell' ? ' [UPSALE]' : ''))->implode("\n"),
-                'money' => implode("\n", [number_format((int) $order->subtotal), '-'.number_format((int) $order->discount), number_format((int) $order->vat), number_format((int) $order->shipping_fee_collected), number_format((int) $order->total)]),
+                'products' => $order->items->map(fn ($i) => "{$i->product_name} x{$i->quantity} ".$this->formatVnd((int) $i->unit_price).($i->item_type === 'upsell' ? ' [UPSALE]' : ''))->implode("\n"),
+                'money' => implode("\n", [$this->formatVnd((int) $order->subtotal), '-'.$this->formatVnd((int) $order->discount), $this->formatVnd((int) $order->vat), $this->formatVnd((int) $order->shipping_fee_collected), $this->formatVnd((int) $order->total)]),
                 'deposit' => (int) $order->deposit,
                 'collect' => (int) $order->amount_to_collect,
                 'carrier_fee' => (int) $order->carrier_service_fee,
@@ -1102,15 +1104,22 @@ class PushsalePageService
         $plans = MonthlyKpiPlan::query()->with('user:id,name,role')->latest('year')->latest('month')->limit(1000)->get();
 
         return $plans->values()->map(function (MonthlyKpiPlan $plan, int $index): array {
+            $month = CarbonImmutable::create((int) $plan->year, (int) $plan->month, 1)->startOfDay();
             $periodOrders = Order::query()
                 ->where('sale_user_id', $plan->user_id)
-                ->whereYear('data_arrived_at', $plan->year)
-                ->whereMonth('data_arrived_at', $plan->month)
+                ->whereBetween('data_arrived_at', [$month, $month->endOfMonth()])
                 ->get();
-            $actualRevenue = (int) $periodOrders->whereNotNull('closed_at')->sum(fn (Order $order) => $order->effectiveRevenue());
-            $bonus = (int) round($actualRevenue * ((float) $plan->bonus_percent / 100));
+            $closedPeriodOrders = Order::query()
+                ->where('sale_user_id', $plan->user_id)
+                ->whereBetween('closed_at', [$month, $month->endOfMonth()])
+                ->get();
+            $payroll = $this->payroll->forPlan($plan);
+            $actualRevenue = $payroll['closed_revenue'];
+            $bonus = $payroll['commission'];
             $new = $periodOrders->where('is_returning_customer', false);
             $old = $periodOrders->where('is_returning_customer', true);
+            $newClosed = $closedPeriodOrders->where('is_returning_customer', false);
+            $oldClosed = $closedPeriodOrders->where('is_returning_customer', true);
 
             return [
                 'index' => $index + 1,
@@ -1123,14 +1132,15 @@ class PushsalePageService
                 'revenue_target' => $plan->revenue_target,
                 'new_contacts_target' => $new->count(),
                 'old_contacts_target' => $old->count(),
-                'new_closed_target' => $new->whereNotNull('closed_at')->count(),
-                'old_closed_target' => $old->whereNotNull('closed_at')->count(),
+                'new_closed_target' => $newClosed->count(),
+                'old_closed_target' => $oldClosed->count(),
                 'actual_revenue' => $actualRevenue,
                 'working_days' => $plan->working_days,
                 'actual_days' => $plan->actual_days,
-                'base_salary' => $plan->base_salary,
+                'base_salary' => $payroll['base_salary'],
                 'bonus' => $bonus,
-                'income' => $plan->base_salary + $bonus,
+                'income' => $payroll['total'],
+                'salary_basis' => $payroll['estimated'] ? 'Dự kiến đủ ngày công' : $payroll['payable_days'].'/'.$payroll['working_days'].' ngày công',
                 'locked' => $plan->locked,
                 'updated_at' => $plan->updated_at?->toIso8601String(),
                 '_record_id' => $plan->id,
@@ -1852,6 +1862,11 @@ class PushsalePageService
         }
 
         return array_merge($payload, $overrides);
+    }
+
+    private function formatVnd(int|float|string|null $value): string
+    {
+        return number_format((int) round((float) ($value ?? 0)), 0, ',', '.').' ₫';
     }
 
 }

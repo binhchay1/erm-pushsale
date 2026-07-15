@@ -1600,7 +1600,7 @@ class LeadIngestionService
         } else {
             $assignToSale = ($campaign === null || $campaign->is_approved)
                 && $this->allocationResolver->shouldAutoAssign($campaign);
-            $saleUser = $assignToSale ? $this->routing->assignSalesUser() : null;
+            $saleUser = $assignToSale ? $this->routing->assignSalesUser($campaign) : null;
         }
 
         if (! $saleUser) {

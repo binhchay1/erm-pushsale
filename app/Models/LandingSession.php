@@ -19,6 +19,8 @@ class LandingSession extends Model
     protected $fillable = [
         'company_id',
         'marketing_source_id',
+        'landing_connection_id',
+        'landing_connection_source_id',
         'session_key',
         'customer_phone',
         'status',
@@ -39,6 +41,16 @@ class LandingSession extends Model
     public function marketingSource(): BelongsTo
     {
         return $this->belongsTo(MarketingSource::class);
+    }
+
+    public function landingConnection(): BelongsTo
+    {
+        return $this->belongsTo(LandingConnection::class)->withTrashed();
+    }
+
+    public function landingConnectionSource(): BelongsTo
+    {
+        return $this->belongsTo(LandingConnectionSource::class)->withTrashed();
     }
 
     public function lead(): BelongsTo

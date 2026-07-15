@@ -3,9 +3,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
+import { formatCurrency } from '@/lib/format';
 import { PushsalePagination } from './PushsalePagination';
 
-const money = (value) => new Intl.NumberFormat('vi-VN').format(Number(value ?? 0));
+const money = (value) => formatCurrency(Number(value ?? 0));
 const dateTime = (value) => {
     if (!value) return '';
     const date = new Date(value);

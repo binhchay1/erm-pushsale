@@ -1,319 +1,148 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
-import { AlertTriangle, Eye, Loader2, PackageCheck, Printer, RotateCcw, Truck } from 'lucide-react';
+import {
+    AlertTriangle, Ban, CalendarClock, CircleDollarSign, Eye, FilePenLine, History,
+    Loader2, PackageCheck, Printer, RotateCcw, Scissors, Truck, UserRoundCheck,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
-import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { ShippingOrderDetailModal } from '@/components/shipping/ShippingOrderDetailModal';
-import { Button } from '@/components/ui/button';
-import { DeleteRowButton } from '@/components/ui/delete-row-button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { apiPost } from '@/lib/api';
-import { formatCurrency } from '@/lib/format';
+import { WarehouseActionDialogs } from '@/components/operations/WarehouseActionDialogs';
+import { apiPost, apiRequest } from '@/lib/api';
+import { formatCurrency, formatDateTime, formatNumber } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
-import { deliveryTone } from '@/lib/status-tones';
-import { useT } from '@/providers/I18nProvider';
 
-function formatDate(value) {
-    if (!value) return '—';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
-    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' });
+function Badge({ children, tone = 'default' }) { return <span className={`ps-wh-badge ${tone}`}>{children}</span>; }
+function tone(status) {
+    if (['paid','delivered','delivery_complete'].includes(status)) return 'success';
+    if (['returned','returning','refund','cannot_deliver'].includes(status)) return 'danger';
+    if (['delivering','picking_up','posted','partial_delivery'].includes(status)) return 'warning';
+    return 'default';
+}
+function ActionButton({ title, onClick, children, disabled = false, className = '' }) {
+    return <button type="button" className={`ps-wh-action ${className}`} title={title} onClick={onClick} disabled={disabled}>{children}</button>;
 }
 
-function CreateShipmentButton({ row, apiBase }) {
-    const t = useT();
-    const [loading, setLoading] = useState(false);
+function ProductList({ items = [], upsell = false }) {
+    if (!items.length) return <span>—</span>;
+    return <div className="ps-wh-products">{items.map((item) => <div key={item.id} className={item.isUpsell ? 'upsell' : ''}><b>{item.productName}</b>{item.sku && <small>{item.sku}</small>}<span>x{item.quantity}</span>{item.isUpsell && <em>UPSALE</em>}</div>)}</div>;
+}
 
+function ShipmentButton({ row, apiBase }) {
+    const [loading, setLoading] = useState(false);
     const create = async () => {
         setLoading(true);
         try {
             await apiPost(`${apiBase}/${row.id}/create-shipment`);
-            toast.success(t('operations.warehouse_table.shipment_created', { code: row.orderCode }));
+            toast.success(`Đã tạo vận đơn cho ${row.orderCode}. Tồn kho được trừ tự động.`);
             router.reload({ only: ['report'] });
-        } catch (e) {
-            toast.error(e.message);
-        } finally {
-            setLoading(false);
-        }
+        } catch (error) { toast.error(error.message); }
+        finally { setLoading(false); }
     };
-
-    if (row.hasInsufficientStock) {
-        const missing = (row.stockWarnings ?? []).filter((w) => !w.sufficient);
-        return (
-            <div className="space-y-1">
-                <Button size="sm" variant="destructive" disabled className="w-full">
-                    <AlertTriangle className="size-3.5" />
-                    {t('operations.warehouse_table.out_of_stock')}
-                </Button>
-                {missing.map((w) => (
-                    <p key={w.productId} className="text-[11px] font-medium text-red-600 dark:text-red-400">
-                        {t('operations.warehouse_table.stock_warning', {
-                            product: w.productName,
-                            required: w.required,
-                            available: w.available,
-                        })}
-                    </p>
-                ))}
-            </div>
-        );
-    }
-
-    return (
-        <Button size="sm" onClick={create} disabled={loading} className="w-full">
-            {loading ? <Loader2 className="size-3.5 animate-spin" /> : <Truck className="size-3.5" />}
-            {t('operations.warehouse_table.create_waybill')}
-        </Button>
-    );
+    return <ActionButton title={row.hasInsufficientStock ? 'Không đủ tồn kho' : 'Tạo vận đơn'} onClick={create} disabled={loading || row.hasInsufficientStock} className={row.hasInsufficientStock ? 'danger' : 'primary'}>{loading ? <Loader2 className="animate-spin" /> : row.hasInsufficientStock ? <AlertTriangle /> : <Truck />}</ActionButton>;
 }
 
-function ReceiveReturnButton({ row, apiBase }) {
-    const t = useT();
-    const [open, setOpen] = useState(false);
-    const [reason, setReason] = useState(row.returnReason ?? '');
-    const [loading, setLoading] = useState(false);
-
-    const submit = async () => {
-        setLoading(true);
-        try {
-            const res = await apiPost(`${apiBase}/${row.id}/receive-return`, { reason });
-            toast.success(
-                res?.message ?? t('operations.warehouse_table.return_received_success', { code: row.orderCode }),
-            );
-            setOpen(false);
-            router.reload({ only: ['report'] });
-        } catch (e) {
-            toast.error(e.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <>
-            <Button
-                size="sm"
-                variant="outline"
-                className="w-full border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400"
-                onClick={() => setOpen(true)}
-            >
-                <RotateCcw className="size-3.5" />
-                {t('operations.warehouse_table.receive_return')}
-            </Button>
-
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>
-                            {t('operations.warehouse_table.return_dialog_title', { code: row.orderCode })}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {t('operations.warehouse_table.return_dialog_desc')}
-                            {row.inventoryDeducted ? '' : t('operations.warehouse_table.return_dialog_desc_no_deduct')}.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium" htmlFor={`return-reason-${row.id}`}>
-                            {t('operations.warehouse_table.return_reason')}
-                        </label>
-                        <textarea
-                            id={`return-reason-${row.id}`}
-                            className="input-soft min-h-20 w-full resize-y"
-                            placeholder={t('operations.warehouse_table.return_placeholder')}
-                            value={reason}
-                            onChange={(e) => setReason(e.target.value)}
-                            maxLength={500}
-                        />
-                    </div>
-
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
-                            {t('operations.warehouse_table.cancel')}
-                        </Button>
-                        <Button onClick={submit} disabled={loading}>
-                            {loading ? <Loader2 className="size-3.5 animate-spin" /> : <RotateCcw className="size-3.5" />}
-                            {t('operations.warehouse_table.confirm_return')}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </>
-    );
-}
-
-export function WarehouseOrderTable({ rows, apiBase, canDeleteOrder = false }) {
-    const t = useT();
+export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterOptions = {}, canDeleteOrder = false }) {
+    const [action, setAction] = useState(null);
     const [detailOrderId, setDetailOrderId] = useState(null);
-    const baseCols = 6 + (canDeleteOrder ? 1 : 0);
+    const printLabel = async (row) => {
+        try {
+            await apiRequest(`${actionApiBase}/${row.id}/printed`, { method: 'POST', body: {} });
+            if (row.canPrintLabel) openShippingLabel(`${apiBase}/${row.id}/label`);
+            else window.print();
+            router.reload({ only: ['report'] });
+        } catch (error) { toast.error(error.message); }
+    };
 
     return (
         <>
-            <ScrollDataTable>
-                <table className="w-full min-w-[1100px] border-collapse">
-                    <thead>
-                        <tr>
-                            <Th>{t('operations.warehouse_table.col_order')}</Th>
-                            <Th>{t('operations.warehouse_table.col_customer')}</Th>
-                            <Th>{t('operations.warehouse_table.col_products')}</Th>
-                            <Th className="text-right">{t('operations.warehouse_table.col_cod')}</Th>
-                            <Th>{t('operations.warehouse_table.col_shipping')}</Th>
-                            <Th>{t('operations.warehouse_table.col_actions')}</Th>
-                            {canDeleteOrder && <Th />}
-                        </tr>
-                    </thead>
+            <div className="ps-wh-table-wrap">
+                <table className="ps-wh-table">
+                    <thead><tr>
+                        <th rowSpan="2">STT</th><th rowSpan="2">Ngày các dữ liệu</th><th rowSpan="2">Mã đơn / trạng thái</th>
+                        <th rowSpan="2">Sale / Care kho</th><th rowSpan="2">Khách hàng / địa chỉ</th>
+                        <th colSpan="2">Sản phẩm</th><th colSpan="4">Giá trị đơn (VND)</th>
+                        <th colSpan="4">Giao vận và dòng tiền (VND)</th><th rowSpan="2">Kho / tồn</th><th rowSpan="2">Tác nghiệp</th>
+                    </tr><tr>
+                        <th>Sản phẩm chính</th><th>Upsale / quà</th>
+                        <th>Tạm tính</th><th>CK / VAT</th><th>Ship thu khách</th><th>Tổng đơn</th>
+                        <th>COD dự kiến / đã thu</th><th>Phí giao / COD</th><th>Phí hoàn / khác</th><th>Thực thu / doanh thu ròng</th>
+                    </tr></thead>
                     <tbody>
-                        {rows?.length ? (
-                            rows.map((row) => (
-                                <tr key={row.id} className="align-top">
-                                    <Td className="font-mono text-primary">
-                                        <div className="font-semibold">{row.orderCode}</div>
-                                        <div className="font-sans text-[11px] text-muted-foreground">
-                                            {t('operations.warehouse_table.closed_at')} {formatDate(row.closedAt)}
-                                        </div>
-                                        {row.warehouseName && (
-                                            <div className="font-sans text-[11px] text-muted-foreground">
-                                                {t('operations.warehouse_table.warehouse_label')} {row.warehouseName}
-                                            </div>
-                                        )}
-                                    </Td>
-                                    <Td className="max-w-[260px] whitespace-normal">
-                                        <div className="font-medium">{row.customerName}</div>
-                                        <div className="tabular-nums">{row.customerPhone}</div>
-                                        {row.hasDifferentReceiver && (
-                                            <div className="mt-1 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] leading-snug text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-                                                {t('operations.warehouse_table.receiver_label')}{' '}
-                                                <span className="font-medium">{row.effectiveReceiverName}</span>
-                                                {row.effectiveReceiverPhone ? ` · ${row.effectiveReceiverPhone}` : ''}
-                                            </div>
-                                        )}
-                                        <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-                                            {row.shippingAddress || t('operations.warehouse_table.no_address')}
-                                        </div>
-                                    </Td>
-                                    <Td className="whitespace-normal">
-                                        {row.products?.length ? (
-                                            row.products.map((p, idx) => (
-                                                <div key={idx} className="flex items-baseline gap-1.5">
-                                                    <span className="font-medium">{p.productName}</span>
-                                                    {p.sku && (
-                                                        <span className="rounded bg-muted px-1 font-mono text-[10px] text-muted-foreground">
-                                                            {p.sku}
-                                                        </span>
-                                                    )}
-                                                    <span className="font-semibold text-primary">x{p.quantity}</span>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <span className="text-muted-foreground">—</span>
-                                        )}
-                                        {row.inventoryDeducted && (
-                                            <StatusBadge tone="success" icon={PackageCheck} className="mt-1">
-                                                {t('operations.warehouse_table.stock_deducted')}
-                                            </StatusBadge>
-                                        )}
-                                    </Td>
-                                    <Td className="text-right font-semibold tabular-nums">
-                                        {formatCurrency(row.codAmount)}
-                                    </Td>
-                                    <Td>
-                                        <StatusBadge tone={deliveryTone(row.deliveryStatusValue)}>
-                                            {row.deliveryStatus}
-                                        </StatusBadge>
-                                        {row.trackingNumber && (
-                                            <div className="mt-1 font-mono text-[11px]">{row.trackingNumber}</div>
-                                        )}
-                                        {row.shippingProviderLabel && (
-                                            <div className="text-[11px] text-muted-foreground">
-                                                {row.shippingProviderLabel}
-                                            </div>
-                                        )}
-                                        {row.shipmentError && (
-                                            <div className="mt-1 max-w-[180px] whitespace-normal text-[11px] text-red-600 dark:text-red-400">
-                                                {row.shipmentError}
-                                            </div>
-                                        )}
-                                        {row.returnReason && (
-                                            <div className="mt-1 max-w-[180px] whitespace-normal text-[11px] text-amber-700 dark:text-amber-400">
-                                                {t('operations.warehouse_table.return_reason_label')} {row.returnReason}
-                                            </div>
-                                        )}
-                                        {row.returnRestockedAt && (
-                                            <StatusBadge tone="success" icon={PackageCheck} className="mt-1">
-                                                {t('operations.warehouse_table.return_received')}
-                                            </StatusBadge>
-                                        )}
-                                    </Td>
-                                    <Td>
-                                        <div className="flex w-36 flex-col gap-1.5">
-                                            {row.canCreateShipment && !row.isReturnFlow && (
-                                                <CreateShipmentButton row={row} apiBase={apiBase} />
-                                            )}
-                                            {row.canReceiveReturn && (
-                                                <ReceiveReturnButton row={row} apiBase={apiBase} />
-                                            )}
-                                            {row.canPrintLabel && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="w-full"
-                                                    onClick={() =>
-                                                        openShippingLabel(`${apiBase}/${row.id}/label`).catch(
-                                                            (e) => toast.error(e.message)
-                                                        )
-                                                    }
-                                                >
-                                                    <Printer className="size-3.5" />
-                                                    {t('operations.warehouse_table.print_label')}
-                                                </Button>
-                                            )}
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="w-full text-muted-foreground"
-                                                onClick={() => setDetailOrderId(row.id)}
-                                            >
-                                                <Eye className="size-3.5" />
-                                                {t('operations.warehouse_table.detail')}
-                                            </Button>
-                                        </div>
-                                    </Td>
-                                    {canDeleteOrder && (
-                                        <Td>
-                                            <DeleteRowButton
-                                                url={`/admin/orders/${row.id}`}
-                                                label={row.orderCode}
-                                                confirmMessage={t('operations.delete_order_confirm', { code: row.orderCode })}
-                                            />
-                                        </Td>
-                                    )}
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <Td colSpan={baseCols} className="py-8 text-center text-muted-foreground">
-                                    {t('operations.warehouse_table.empty')}
-                                </Td>
+                        {rows.length ? rows.map((row, index) => (
+                            <tr key={row.id} className={row.isReturnFlow ? 'return-row' : ''}>
+                                <td className="center">{index + 1}</td>
+                                <td className="ps-wh-dates">
+                                    <span><b>Lead:</b> {formatDateTime(row.dataArrivedAt, { withSeconds: false })}</span>
+                                    <span><b>Chốt:</b> {formatDateTime(row.closedAt, { withSeconds: false })}</span>
+                                    <span><b>Hẹn giao:</b> {formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</span>
+                                    <span><b>VC cập nhật:</b> {formatDateTime(row.lastDeliveryEventAt, { withSeconds: false })}</span>
+                                </td>
+                                <td>
+                                    <button className="ps-wh-order-code" onClick={() => setDetailOrderId(row.id)}>{row.orderCode}</button>
+                                    <div className="ps-wh-status-stack">
+                                        <Badge tone={tone(row.deliveryStatusValue)}>{row.deliveryStatus}</Badge>
+                                        {row.reconciliationStatus && <Badge tone={row.reconciliationStatus === 'settled' ? 'success' : 'default'}>{row.reconciliationStatus}</Badge>}
+                                        {row.printedAt && <Badge tone="info">Đã in</Badge>}
+                                    </div>
+                                    <small>{row.shippingProviderLabel || 'Chưa chọn hãng'}</small>
+                                    <strong className="ps-wh-tracking">{row.trackingNumber || 'Chưa có mã vận đơn'}</strong>
+                                    {row.shipmentError && <p className="ps-wh-error">{row.shipmentError}</p>}
+                                </td>
+                                <td>
+                                    <div><b>Sale:</b> {row.saleName || '—'}</div>
+                                    <div><b>MKT:</b> {row.marketerName || '—'}</div>
+                                    <div><b>Care:</b> {row.warehouseCareName || '—'}</div>
+                                    <Badge tone={row.warehouseCareStatus === 'completed' ? 'success' : 'default'}>{row.warehouseCareStatus || 'Chưa care'}</Badge>
+                                    {row.warehouseCareNote && <p className="ps-wh-note">{row.warehouseCareNote}</p>}
+                                </td>
+                                <td>
+                                    <b>{row.effectiveReceiverName || row.customerName}</b>
+                                    <a href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a>
+                                    <p>{row.shippingAddress || 'Chưa có địa chỉ giao'}</p>
+                                    {row.customerNote && <small>KH: {row.customerNote}</small>}
+                                    {row.shippingNotes && <small>Giao: {row.shippingNotes}</small>}
+                                </td>
+                                <td><ProductList items={row.mainProducts} /></td>
+                                <td><ProductList items={row.upsellProducts} upsell /></td>
+                                <td className="money">{formatCurrency(row.subtotal)}</td>
+                                <td className="money"><span>-{formatCurrency(row.discount)}</span><span>VAT {formatCurrency(row.vat)}</span></td>
+                                <td className="money">{formatCurrency(row.shippingFeeCollected)}</td>
+                                <td className="money strong">{formatCurrency(row.total)}</td>
+                                <td className="money"><span>{formatCurrency(row.codAmount)}</span><span className="success">{formatCurrency(row.settledCodAmount)}</span><small>Cọc {formatCurrency(row.deposit)}</small></td>
+                                <td className="money"><span>{formatCurrency(row.carrierServiceFee)}</span><span>{formatCurrency(row.codFee)}</span></td>
+                                <td className="money"><span className={row.carrierReturnFee ? 'danger-text' : ''}>{formatCurrency(row.carrierReturnFee)}</span><span>{formatCurrency(row.carrierOtherFee)}</span><small className="success">Bồi hoàn {formatCurrency(row.carrierCompensationAmount)}</small></td>
+                                <td className="money"><span>{formatCurrency(row.netCash)}</span><strong>{formatCurrency(row.netRevenue)}</strong></td>
+                                <td>
+                                    <b>{row.warehouseName || 'Chưa chọn kho'}</b>
+                                    <div>{row.inventoryDeducted ? <Badge tone="success">Đã xuất kho</Badge> : <Badge>Chưa xuất kho</Badge>}</div>
+                                    <small>SL: {formatNumber(row.totalQuantity)}</small>
+                                    {row.returnRestockedAt && <Badge tone="info">Đã nhập hoàn</Badge>}
+                                    {row.hasInsufficientStock && <p className="ps-wh-error">Không đủ tồn kho</p>}
+                                </td>
+                                <td>
+                                    <div className="ps-wh-actions">
+                                        <ActionButton title="Xem chi tiết giao vận" onClick={() => setDetailOrderId(row.id)}><Eye /></ActionButton>
+                                        <ActionButton title="Lịch sử webhook" onClick={() => setAction({ type: 'timeline', row })}><History /></ActionButton>
+                                        <ActionButton title="Cập nhật ngày giao" onClick={() => setAction({ type: 'date', row })}><CalendarClock /></ActionButton>
+                                        <ActionButton title="Cập nhật care đơn" onClick={() => setAction({ type: 'care', row })}><UserRoundCheck /></ActionButton>
+                                        <ActionButton title="Cập nhật trạng thái giao hàng" onClick={() => setAction({ type: 'delivery', row })}><PackageCheck /></ActionButton>
+                                        <ActionButton title="Cập nhật đơn" onClick={() => setAction({ type: 'edit', row })}><FilePenLine /></ActionButton>
+                                        <ActionButton title="Tách đơn" disabled={!row.canSplit} onClick={() => setAction({ type: 'split', row })}><Scissors /></ActionButton>
+                                        <ActionButton title="Thêm SĐT blacklist" onClick={() => setAction({ type: 'blacklist', row })} className="danger"><Ban /></ActionButton>
+                                        {row.canCreateShipment && <ShipmentButton row={row} apiBase={apiBase} />}
+                                        <ActionButton title="In đơn / nhãn" onClick={() => printLabel(row)}><Printer /></ActionButton>
+                                        {(row.isReturnFlow || row.canReceiveReturn) && <ActionButton title="Nhập hàng hoàn" onClick={() => setAction({ type: 'return', row })} className="warning"><RotateCcw /></ActionButton>}
+                                    </div>
+                                </td>
                             </tr>
-                        )}
+                        )) : <tr><td colSpan="17" className="ps-wh-empty">Không có đơn phù hợp bộ lọc.</td></tr>}
                     </tbody>
                 </table>
-            </ScrollDataTable>
+            </div>
 
-            <ShippingOrderDetailModal
-                open={!!detailOrderId}
-                onOpenChange={(open) => !open && setDetailOrderId(null)}
-                orderId={detailOrderId}
-                apiBase={apiBase}
-            />
+            <WarehouseActionDialogs action={action} onClose={() => setAction(null)} actionApiBase={actionApiBase} filterOptions={filterOptions} />
+            <ShippingOrderDetailModal orderId={detailOrderId} open={Boolean(detailOrderId)} onOpenChange={(open) => !open && setDetailOrderId(null)} apiBase={apiBase} />
         </>
     );
 }

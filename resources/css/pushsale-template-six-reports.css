@@ -1,0 +1,217 @@
+/* Template Six — báo cáo 4.5.x / 6.3.9. Chỉ scope trong .ps-report-page để
+   không ghi đè modal, dashboard hay các trang nghiệp vụ khác. */
+.ps-report-page {
+    --ps-report-blue: #3182d8;
+    --ps-report-blue-dark: #2174c8;
+    --ps-report-border: #cfd7e1;
+    --ps-report-muted: #f4f6f9;
+    min-width: 0;
+    padding: 0;
+    background: #fff;
+    color: #252f3b;
+    font-family: "Geist Variable", Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+.ps-report-page .ps-report-topbar {
+    min-height: 48px;
+    margin: 0;
+    padding: 8px 14px;
+    border-top: 1px solid #dce3ea;
+    border-bottom: 1px solid #d1d9e2;
+    background: #fff;
+}
+.ps-report-page .ps-report-topbar h1 { margin: 0; font-size: 16px; font-weight: 650; color: #1e2834; }
+.ps-report-page .ps-extra-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ps-report-page .ps-extra-toolbar-controls { display: flex; flex: 1 1 auto; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.ps-report-page .ps-extra-toolbar-controls > * { min-width: 150px; }
+.ps-report-page .ps-extra-toolbar-controls button { min-width: auto; }
+.ps-report-page .ps-table-scroll { width: 100%; max-width: 100%; overflow: auto; border-bottom: 1px solid var(--ps-report-border); scrollbar-gutter: stable; }
+.ps-report-page .ps-table {
+    width: max-content;
+    min-width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto;
+    white-space: nowrap;
+}
+.ps-report-page .ps-table th,
+.ps-report-page .ps-table td {
+    min-width: 72px;
+    height: 34px;
+    padding: 5px 8px;
+    border-right: 1px solid var(--ps-report-border);
+    border-bottom: 1px solid var(--ps-report-border);
+    text-align: center;
+    vertical-align: middle;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+.ps-report-page .ps-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-color: rgba(255,255,255,.24);
+    background: var(--ps-report-blue);
+    color: #fff;
+    font-weight: 650;
+    line-height: 1.25;
+}
+.ps-report-page .ps-table thead tr:nth-child(2) th { top: 34px; background: var(--ps-report-blue-dark); }
+.ps-report-page .ps-table tbody tr:nth-child(even) td { background: #f7f9fc; }
+.ps-report-page .ps-table tbody tr:hover td { background: #edf5ff; }
+.ps-report-page .ps-table .ps-total-row td { background: #eef3f9; color: #1c2d40; font-weight: 700; }
+.ps-report-page .ps-table .ps-text-left { min-width: 150px; max-width: 250px; text-align: left; overflow: hidden; text-overflow: ellipsis; }
+.ps-report-page .ps-table .ps-empty { height: 90px; color: #7c8795; text-align: center; }
+.ps-report-page .ps-upsell-group { background: #137a71 !important; }
+.ps-grouped-report-table thead tr:first-child th { min-height: 38px; text-transform: uppercase; letter-spacing: .01em; }
+.ps-grouped-report-table td:nth-child(n+3) { text-align: right; }
+.ps-v2-table td:nth-child(5n+1) { background-clip: padding-box; }
+.ps-revenue-table .ps-upsell-group + th { background: #137a71; }
+
+.ps-sale-kpi-report .ps-kpi-layout { display: grid; grid-template-columns: minmax(0, 1fr) 245px; gap: 12px; padding: 12px; }
+.ps-sale-kpi-report .ps-kpi-table { width: 100%; border-collapse: collapse; }
+.ps-sale-kpi-report .ps-kpi-table th,
+.ps-sale-kpi-report .ps-kpi-table td { min-width: 92px; height: 37px; padding: 6px; border: 1px solid #d1d8e0; text-align: center; font-size: 11px; }
+.ps-sale-kpi-report .ps-kpi-table thead th { background: #f0f3f6; font-weight: 650; }
+.ps-sale-kpi-report .ps-kpi-table tbody th { min-width: 75px; background: #f8fafc; text-align: left; }
+.ps-sale-kpi-report .ps-kpi-ok { color: #087a50; font-weight: 700; }
+.ps-sale-kpi-report .ps-kpi-pending { color: #a15c00; }
+.ps-sale-kpi-report .ps-time-table { width: 100%; border-collapse: collapse; }
+.ps-sale-kpi-report .ps-time-table th,
+.ps-sale-kpi-report .ps-time-table td { padding: 8px; border: 1px solid #d1d8e0; }
+.ps-sale-kpi-report .ps-time-table th { background: #3182d8; color: #fff; }
+.ps-sale-kpi-report .ps-kpi-progress-bar { margin-top: 12px; height: 32px; padding: 8px 12px; border: 1px solid #d4dce5; background: linear-gradient(90deg,#f2f8ff,#fff); }
+.ps-sale-kpi-report .ps-kpi-notes { margin-top: 8px; color: #5f6b78; line-height: 1.55; }
+
+.ps-appointment-report { min-height: calc(100vh - 96px); background: #f2f4f7; }
+.ps-appointment-report .ps-appointment-summary { display: flex; align-items: baseline; gap: 10px; margin: 12px; padding: 12px 16px; border: 1px solid #d8dee6; background: #fff; }
+.ps-appointment-report .ps-appointment-summary span { font-weight: 650; }
+.ps-appointment-report .ps-appointment-summary strong { color: #1d75c8; font-size: 24px; }
+.ps-appointment-report .ps-appointment-summary small { margin-left: auto; color: #75808c; }
+.ps-appointment-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(190px,1fr)); gap: 12px; padding: 0 12px 16px; }
+.ps-appointment-card { min-height: 178px; overflow: hidden; border: 1px solid #d5dce4; border-radius: 2px; background: #fff; box-shadow: 0 1px 2px rgba(31,45,61,.06); }
+.ps-appointment-card-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #3182d8; color: #fff; }
+.ps-appointment-card.is-overdue .ps-appointment-card-head { background: #7c8794; }
+.ps-appointment-count { padding-top: 20px; color: #25384d; font-size: 34px; font-weight: 700; text-align: center; }
+.ps-appointment-label { color: #647182; text-align: center; }
+.ps-appointment-sales { margin: 16px 12px 0; padding-top: 9px; border-top: 1px solid #edf0f3; color: #506173; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ps-product-conversion-report .ps-matrix-legend { display: flex; flex-wrap: wrap; gap: 16px; padding: 8px 14px; border-bottom: 1px solid #d8dee6; background: #f8fafc; color: #516173; }
+.ps-product-conversion-report .ps-matrix-legend span::before { content: "•"; margin-right: 6px; color: #3182d8; }
+.ps-product-matrix-table th:nth-child(1), .ps-product-matrix-table td:nth-child(1) { position: sticky; left: 0; z-index: 3; min-width: 44px; }
+.ps-product-matrix-table th:nth-child(2), .ps-product-matrix-table td:nth-child(2) { position: sticky; left: 44px; z-index: 3; min-width: 58px; }
+.ps-product-matrix-table th:nth-child(3), .ps-product-matrix-table td:nth-child(3) { position: sticky; left: 102px; z-index: 3; min-width: 220px; max-width: 220px; }
+.ps-product-matrix-table tbody td:nth-child(-n+3) { background: #fff; }
+.ps-product-matrix-table tbody tr:nth-child(even) td:nth-child(-n+3) { background: #f7f9fc; }
+.ps-product-matrix-table thead .is-sales { background: #2c78bf; }
+.ps-product-matrix-table thead .is-marketing { background: #7b66b1; }
+
+@media (max-width: 991px) {
+    .ps-report-page .ps-extra-toolbar { align-items: flex-start; flex-direction: column; }
+    .ps-report-page .ps-extra-toolbar-controls { width: 100%; justify-content: flex-start; }
+    .ps-sale-kpi-report .ps-kpi-layout { grid-template-columns: 1fr; overflow: auto; }
+}
+@media (max-width: 640px) {
+    .ps-report-page .ps-extra-toolbar-controls > * { width: 100%; min-width: 100%; }
+    .ps-appointment-report .ps-appointment-summary { align-items: flex-start; flex-direction: column; }
+    .ps-appointment-report .ps-appointment-summary small { margin-left: 0; }
+}
+
+/* Bộ chọn 12 nhóm doanh số của template 4.5.5 / 4.5.6. */
+.ps-report-page .ps-revenue-group-bar {
+    position: relative;
+    z-index: 6;
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--ps-report-border);
+    background: #f7f9fc;
+}
+.ps-report-page .ps-revenue-group-summary {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 10px;
+}
+.ps-report-page .ps-revenue-group-summary strong { color: #243448; font-size: 12px; }
+.ps-report-page .ps-revenue-group-summary span { color: #687687; font-size: 11px; }
+.ps-report-page .ps-revenue-group-picker { position: relative; }
+.ps-report-page .ps-revenue-group-picker > summary {
+    min-width: 190px;
+    cursor: pointer;
+    list-style: none;
+    padding: 7px 30px 7px 10px;
+    border: 1px solid #bfcbd8;
+    border-radius: 2px;
+    background: #fff;
+    color: #25374b;
+    font-weight: 600;
+}
+.ps-report-page .ps-revenue-group-picker > summary::-webkit-details-marker { display: none; }
+.ps-report-page .ps-revenue-group-picker > summary::after {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    content: "⌄";
+    color: #607286;
+}
+.ps-report-page .ps-revenue-group-popover {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    width: min(560px, calc(100vw - 32px));
+    padding: 10px;
+    border: 1px solid #c8d2dd;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0 12px 32px rgba(31, 45, 61, .18);
+}
+.ps-report-page .ps-revenue-group-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 7px;
+    margin-bottom: 9px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e6ebf0;
+}
+.ps-report-page .ps-revenue-group-actions button {
+    cursor: pointer;
+    padding: 5px 9px;
+    border: 1px solid #b8c6d4;
+    border-radius: 2px;
+    background: #f7f9fb;
+    color: #2c4055;
+    font: inherit;
+}
+.ps-report-page .ps-revenue-group-actions button:hover { background: #eaf3fd; border-color: #74a9dc; }
+.ps-report-page .ps-revenue-group-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px 12px;
+}
+.ps-report-page .ps-revenue-group-options label {
+    display: flex;
+    min-width: 0;
+    cursor: pointer;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 6px;
+    border-radius: 2px;
+    color: #34485c;
+}
+.ps-report-page .ps-revenue-group-options label:hover { background: #f0f6fc; }
+.ps-report-page .ps-revenue-group-options input { flex: 0 0 auto; margin: 0; }
+.ps-report-page .ps-revenue-group-options span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 720px) {
+    .ps-report-page .ps-revenue-group-bar,
+    .ps-report-page .ps-revenue-group-summary { align-items: flex-start; flex-direction: column; }
+    .ps-report-page .ps-revenue-group-picker { width: 100%; }
+    .ps-report-page .ps-revenue-group-picker > summary { width: 100%; }
+    .ps-report-page .ps-revenue-group-popover { right: auto; left: 0; }
+    .ps-report-page .ps-revenue-group-options { grid-template-columns: 1fr; }
+}

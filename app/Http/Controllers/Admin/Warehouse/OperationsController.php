@@ -23,6 +23,7 @@ class OperationsController extends Controller
             'report' => $service->build($filter),
             'routeUrl' => $isWarehouseRole ? '/warehouse/workspace' : '/admin/warehouse/operations',
             'shippingApiBase' => $isWarehouseRole ? '/warehouse/shipping/orders' : '/admin/shipping/orders',
+            'actionApiBase' => $isWarehouseRole ? '/warehouse/orders' : '/admin/warehouse/orders',
             'canDeleteOrder' => ! $isWarehouseRole,
             'filterFields' => app(FilterOptionsService::class)->warehouseOperationFilterFields(),
         ]));

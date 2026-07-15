@@ -5,30 +5,26 @@ namespace App\Services\Operations;
 use App\Data\ReportFilterData;
 use App\Enums\DeliveryStatus;
 use App\Models\Order;
+use App\Models\Shipment;
 use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Shipping\ShipmentActionResolver;
+use App\Support\OrderRevenue;
 use Illuminate\Database\Eloquent\Builder;
 
-/**
- * Màn "Thủ kho tác nghiệp" — chỉ hiển thị dữ liệu phục vụ xuất kho / vận đơn:
- * mã đơn, khách hàng (in vận đơn), sản phẩm (SKU, số lượng), COD, trạng thái VC.
- */
+/** Màn Thủ kho tác nghiệp — nguồn dữ liệu thống nhất cho xuất kho, giao vận, hoàn hàng và COD. */
 class WarehouseOperationService
 {
-    /**
-     * Tab gom nhóm trạng thái VC cho thủ kho: kho đi / kho hoàn tách bạch,
-     * trong đó "Đơn hoàn" là tab riêng theo yêu cầu nghiệp vụ.
-     * Nhãn hiển thị được dịch theo locale qua operations.warehouse_tabs.*
-     *
-     * @var array<string, list<string>>
-     */
+    /** @var array<string, list<string>> */
     private const TAB_GROUPS = [
-        'waiting' => ['waiting_waybill', 'posted'],
+        'waiting' => ['waiting_waybill'],
+        'posted' => ['posted'],
         'pickup' => ['picking_up', 'cannot_pickup'],
         'delivering' => ['delivering', 'deliver_now', 'redelivery'],
         'delivered' => ['delivered', 'delivery_complete'],
+        'partial' => ['partial_delivery', 'partial', 'delivered_partial', 'partially_delivered'],
         'paid' => ['paid'],
-        'returns' => ['returning', 'returned', 'refund', 'cannot_deliver'],
+        'returning' => ['returning', 'refund', 'cannot_deliver'],
+        'returned' => ['returned'],
         'cancelled' => ['cancel_waybill', 'cancel_closing'],
     ];
 
@@ -40,46 +36,44 @@ class WarehouseOperationService
     /** @return array<string, mixed> */
     public function build(ReportFilterData $filter): array
     {
-        // Delivery tabs are grouped values (waiting/pickup/returns...), therefore the
-        // base report scope deliberately omits delivery_status. Each tab is applied in
-        // SQL below so the page can paginate without loading all closed orders into PHP.
         $baseQuery = Order::query()
             ->whereNotNull('closed_at')
             ->applyReportFilter($filter->withoutDeliveryStatus());
 
         $statusTabs = $this->statusTabs($baseQuery, $filter->hideZeroStatus);
-
         $pageQuery = clone $baseQuery;
         $this->applyStatusTab($pageQuery, $filter->deliveryStatus);
 
-        $paginator = $pageQuery
-            ->with([
-                'items.product',
-                'warehouse',
-                'shipments' => fn ($query) => $query->latest('id'),
-            ])
-            ->orderByDesc('closed_at')
-            ->paginate(
-                perPage: $filter->perPage,
-                columns: ['*'],
-                pageName: 'page',
-                page: $filter->page,
-            )
-            ->withQueryString();
+        $summaryQuery = clone $pageQuery;
+        $summary = [
+            'orders' => (clone $summaryQuery)->count(),
+            'grossRevenue' => (int) (clone $summaryQuery)->sum('total'),
+            'codExpected' => (int) (clone $summaryQuery)->sum('amount_to_collect'),
+            'codSettled' => (int) (clone $summaryQuery)->sum('settled_cod_amount'),
+            'carrierCost' => (int) (clone $summaryQuery)->selectRaw('SUM('.OrderRevenue::shippingCostSql().') AS amount')->value('amount'),
+            'returns' => (clone $summaryQuery)->whereIn('delivery_status', array_merge(self::TAB_GROUPS['returning'], self::TAB_GROUPS['returned']))->count(),
+        ];
+
+        $paginator = $pageQuery->with([
+            'items.product', 'warehouse', 'saleUser', 'marketerUser', 'warehouseCareUser',
+            'shipments' => fn ($query) => $query->with(['statusEvents' => fn ($events) => $events->latest('occurred_at')])->latest('id'),
+            'returnReceipt.lines',
+            'shippingStatusEvents' => fn ($query) => $query->latest('occurred_at')->limit(10),
+        ])->orderByDesc('closed_at')->paginate(
+            perPage: $filter->perPage,
+            columns: ['*'],
+            pageName: 'page',
+            page: $filter->page,
+        )->withQueryString();
 
         return [
+            'summary' => $summary,
             'rows' => [
-                'data' => collect($paginator->items())
-                    ->map(fn (Order $order) => $this->presentRow($order))
-                    ->values()
-                    ->all(),
+                'data' => collect($paginator->items())->map(fn (Order $order) => $this->presentRow($order))->values()->all(),
                 'meta' => [
-                    'current_page' => $paginator->currentPage(),
-                    'last_page' => $paginator->lastPage(),
-                    'per_page' => $paginator->perPage(),
-                    'total' => $paginator->total(),
-                    'from' => $paginator->firstItem(),
-                    'to' => $paginator->lastItem(),
+                    'current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(), 'total' => $paginator->total(),
+                    'from' => $paginator->firstItem(), 'to' => $paginator->lastItem(),
                 ],
             ],
             'statusTabs' => $statusTabs,
@@ -88,92 +82,125 @@ class WarehouseOperationService
 
     private function applyStatusTab(Builder $query, ?string $value): void
     {
-        if (! $value || $value === 'all') {
-            return;
-        }
-
-        if (isset(self::TAB_GROUPS[$value])) {
-            $query->whereIn('delivery_status', self::TAB_GROUPS[$value]);
-
-            return;
-        }
-
-        // Preserve direct delivery status links used elsewhere in the application.
-        $query->where('delivery_status', $value);
+        if (! $value || $value === 'all') return;
+        $query->whereIn('delivery_status', self::TAB_GROUPS[$value] ?? [$value]);
     }
 
-    /**
-     * @return list<array{value: string, label: string, count: int}>
-     */
+    /** @return list<array{value:string,label:string,count:int}> */
     private function statusTabs(Builder $baseQuery, bool $hideZero = false): array
     {
-        $total = (clone $baseQuery)->count();
-        $tabs = [[
-            'value' => 'all',
-            'label' => __('operations.all'),
-            'count' => $total,
-        ]];
-
+        $labels = [
+            'waiting' => 'Chờ vận đơn', 'posted' => 'Đã đăng đơn', 'pickup' => 'Lấy hàng',
+            'delivering' => 'Đang giao', 'delivered' => 'Giao thành công', 'partial' => 'Giao một phần',
+            'paid' => 'Đã đối soát/COD', 'returning' => 'Đang hoàn', 'returned' => 'Đã hoàn',
+            'cancelled' => 'Đã hủy',
+        ];
+        $tabs = [['value' => 'all', 'label' => 'Tất cả', 'count' => (clone $baseQuery)->count()]];
         foreach (self::TAB_GROUPS as $value => $statuses) {
-            $count = (clone $baseQuery)
-                ->whereIn('delivery_status', $statuses)
-                ->count();
-
-            if ($hideZero && $count === 0) {
-                continue;
-            }
-
-            $tabs[] = [
-                'value' => $value,
-                'label' => __('operations.warehouse_tabs.'.$value),
-                'count' => $count,
-            ];
+            $count = (clone $baseQuery)->whereIn('delivery_status', $statuses)->count();
+            if (! $hideZero || $count > 0) $tabs[] = ['value' => $value, 'label' => $labels[$value] ?? $value, 'count' => $count];
         }
-
         return $tabs;
     }
 
     /** @return array<string, mixed> */
     public function presentRow(Order $order): array
     {
+        /** @var Shipment|null $shipment */
         $shipment = $order->shipments->first();
-        $provider = $order->shipping_provider ?? $shipment?->provider;
+        $provider = $order->shipping_provider ?: $shipment?->provider;
         $stockWarnings = $this->inventory->checkOrderStock($order);
         $hasInsufficientStock = collect($stockWarnings)->contains(fn (array $warning) => ! $warning['sufficient']);
         $actions = $this->shipmentActions->forShipment($shipment, $order);
-        $isReturnFlow = $this->isReturnStatus($order);
+        $isReturnFlow = in_array((string) $order->delivery_status, array_merge(self::TAB_GROUPS['returning'], self::TAB_GROUPS['returned']), true);
+        $products = $order->items->map(fn ($item) => [
+            'id' => (int) $item->id,
+            'productId' => $item->product_id ? (int) $item->product_id : null,
+            'productName' => $item->product_name,
+            'sku' => $item->product?->sku,
+            'itemType' => $item->item_type ?: 'product',
+            'origin' => $item->origin,
+            'isUpsell' => $item->item_type === 'upsell' || str_contains(strtolower((string) $item->origin), 'upsell'),
+            'quantity' => max(1, (int) $item->quantity),
+            'unitPrice' => (int) $item->unit_price,
+            'discountAmount' => (int) $item->discount_amount,
+            'lineTotal' => $item->lineTotal(),
+        ])->values();
+        $carrierCost = $order->shippingCost();
+        $netCash = (int) $order->settled_cod_amount + (int) $order->deposit - $carrierCost;
 
         return [
             'id' => (string) $order->id,
             'orderCode' => $order->order_code,
+            'dataArrivedAt' => $order->data_arrived_at?->toIso8601String(),
             'closedAt' => $order->closed_at?->toIso8601String(),
+            'desiredDeliveryAt' => $order->desired_delivery_at?->toIso8601String(),
+            'lastDeliveryEventAt' => $order->last_delivery_event_at?->toIso8601String(),
+            'printedAt' => $order->printed_at?->toIso8601String(),
+            'saleName' => $order->saleUser?->name,
+            'marketerName' => $order->marketerUser?->name,
+            'warehouseCareName' => $order->warehouseCareUser?->name,
+            'warehouseCareStatus' => $order->warehouse_care_status,
+            'warehouseCareNote' => $order->warehouse_care_note,
             'customerName' => $order->customer_name,
             'customerPhone' => $order->customer_phone,
             'receiverName' => $order->receiver_name,
             'receiverPhone' => $order->receiver_phone,
             'effectiveReceiverName' => $order->effectiveReceiverName(),
             'effectiveReceiverPhone' => $order->effectiveReceiverPhone(),
-            'hasDifferentReceiver' => filled($order->receiver_name) || filled($order->receiver_phone),
             'shippingAddress' => $order->effectiveShippingAddress(),
             'shippingAddressRaw' => $order->shipping_address,
             'shippingAddress2' => $order->shipping_address_2,
             'customerNote' => $order->customer_note,
+            'shippingNotes' => $order->shipping_notes,
+            'warehouseId' => $order->warehouse_id,
             'warehouseName' => $order->warehouse?->name,
-            'products' => $order->items->map(fn ($item) => [
-                'productName' => $item->product_name,
-                'sku' => $item->product?->sku,
-                'quantity' => max(1, (int) $item->quantity),
-            ])->values()->all(),
-            'codAmount' => $order->amount_to_collect ?? max(0, (float) $order->total - (float) $order->deposit),
+            'products' => $products->all(),
+            'mainProducts' => $products->where('isUpsell', false)->values()->all(),
+            'upsellProducts' => $products->where('isUpsell', true)->values()->all(),
+            'totalQuantity' => (int) $products->sum('quantity'),
+            'subtotal' => (int) $order->subtotal,
+            'discount' => (int) $order->discount,
+            'vat' => (int) $order->vat,
+            'shippingFeeCollected' => (int) $order->shipping_fee_collected,
+            'total' => (int) $order->total,
+            'deposit' => (int) $order->deposit,
+            'codAmount' => (int) ($order->amount_to_collect ?? max(0, (int) $order->total - (int) $order->deposit)),
+            'settledCodAmount' => (int) $order->settled_cod_amount,
+            'carrierServiceFee' => (int) $order->carrier_service_fee,
+            'carrierReturnFee' => (int) $order->carrier_return_fee,
+            'codFee' => (int) $order->cod_fee,
+            'carrierOtherFee' => (int) $order->carrier_other_fee,
+            'carrierCompensationAmount' => (int) $order->carrier_compensation_amount,
+            'carrierCost' => $carrierCost,
+            'netCash' => $netCash,
+            'netRevenue' => $order->netRevenue(),
+            'reconciliationStatus' => $order->reconciliation_status,
             'deliveryStatus' => DeliveryStatus::tryFrom((string) $order->delivery_status)?->label() ?? $order->delivery_status,
             'deliveryStatusValue' => $order->delivery_status,
+            'shippingMethod' => $order->shipping_method,
             'shippingProvider' => $provider,
-            'shippingProviderLabel' => $provider
-                ? config("shipping_partners.providers.{$provider}.label", strtoupper($provider))
-                : null,
-            'trackingNumber' => $shipment?->tracking_number,
+            'shippingProviderLabel' => $provider ? config("shipping_partners.providers.{$provider}.label", strtoupper($provider)) : null,
+            'trackingNumber' => $shipment?->tracking_number ?: $order->tracking_number,
             'shipmentError' => $shipment?->error_message,
+            'shipment' => $shipment ? [
+                'id' => $shipment->id,
+                'statusText' => $shipment->status_text,
+                'fee' => (int) $shipment->fee,
+                'returnFee' => (int) $shipment->return_fee,
+                'codFee' => (int) $shipment->cod_fee,
+                'codCollected' => (int) $shipment->cod_collected,
+                'codRemitted' => (int) $shipment->cod_remitted,
+                'compensationAmount' => (int) $shipment->compensation_amount,
+                'lastEventAt' => $shipment->last_event_at?->toIso8601String(),
+            ] : null,
+            'statusEvents' => $order->shippingStatusEvents->map(fn ($event) => [
+                'id' => $event->id, 'rawStatus' => $event->raw_status, 'mappedStatus' => $event->mapped_status,
+                'location' => $event->location, 'note' => $event->note,
+                'occurredAt' => $event->occurred_at?->toIso8601String(), 'financials' => $event->financials,
+            ])->values()->all(),
             'inventoryDeducted' => (bool) $order->inventory_deducted_at,
+            'inventoryDeductedAt' => $order->inventory_deducted_at?->toIso8601String(),
             'stockWarnings' => $stockWarnings,
             'hasInsufficientStock' => $hasInsufficientStock,
             'canCreateShipment' => $actions['canCreate'] && ! $isReturnFlow,
@@ -181,12 +208,13 @@ class WarehouseOperationService
             'isReturnFlow' => $isReturnFlow,
             'returnReason' => $order->return_reason,
             'returnRestockedAt' => $order->return_restocked_at?->toIso8601String(),
-            'canReceiveReturn' => $this->isReturnStatus($order) && ! $order->return_restocked_at,
+            'returnReceipt' => $order->returnReceipt ? [
+                'id' => $order->returnReceipt->id, 'status' => $order->returnReceipt->status,
+                'source' => $order->returnReceipt->source, 'receivedAt' => $order->returnReceipt->received_at?->toIso8601String(),
+                'lines' => $order->returnReceipt->lines->toArray(),
+            ] : null,
+            'canReceiveReturn' => $isReturnFlow && ! $order->return_restocked_at,
+            'canSplit' => ! $order->inventory_deducted_at && ! filled($shipment?->tracking_number),
         ];
-    }
-
-    private function isReturnStatus(Order $order): bool
-    {
-        return in_array((string) $order->delivery_status, self::TAB_GROUPS['returns'], true);
     }
 }

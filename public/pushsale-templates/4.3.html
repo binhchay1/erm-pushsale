@@ -1,4 +1,45 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="4.3"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="4.3"><style>@scope ([data-template-code="4.3"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1489"><a name="1489" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1489_ContentPane"><!-- Start_Module_1489 --><div class="pushsale-template-inner" id="dnn_ctr1489_ModuleContent">
 
 <div id="dnn_ctr1489_Main_SaleDashboard_pnlMain">
@@ -11,7 +52,7 @@
 <span class="text" id="dnn_ctr1489_Main_SaleDashboard_lblModuleTitle">Bảng xếp hạng Sales</span>
 </div>
 <div class="col-sm-2 form-group">
-<input class="form-control date-range pushsale-native-input" id="dnn_ctr1489_Main_SaleDashboard__TuNgay_DenNgay" name="dnn$ctr1489$Main$SaleDashboard$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+<input class="form-control date-range pushsale-native-input" id="dnn_ctr1489_Main_SaleDashboard__TuNgay_DenNgay" name="dnn$ctr1489$Main$SaleDashboard$_TuNgay_DenNgay" type="text" value="14/06/2026 00:00 - 14/07/2026 23:59"/>
 </div>
 <div class="col-sm-2 form-group">
 <select class="chosen pushsale-native-select" id="dnn_ctr1489_Main_SaleDashboard_ddlChietKhau" name="dnn$ctr1489$Main$SaleDashboard$ddlChietKhau" style="" title="">
@@ -88,12 +129,12 @@
 <div class="item-stt">1</div>
 <div class="item-tennv">Lan Anh</div>
 <div class="item-ds">
-                                                        51,473,000
+                                                        955,152,000
                                                         
                                                     </div>
 </div>
 </div>
-<div class="item-rank item-rank2" title="tt.sale01">
+<div class="item-rank item-rank2" title="tt.sale02">
 <div class="king-sale">
 <img src="/Portals/_default/Skins/APP/images/bxh/bxh2.png"/>
 </div>
@@ -102,14 +143,14 @@
 </div>
 <div class="item-info">
 <div class="item-stt">2</div>
-<div class="item-tennv">Hoài Thu</div>
+<div class="item-tennv">Thu Hường</div>
 <div class="item-ds">
-                                                        46,190,000
+                                                        910,976,000
                                                         
                                                     </div>
 </div>
 </div>
-<div class="item-rank item-rank3" title="tt.sale09">
+<div class="item-rank item-rank3" title="tt.sale06">
 <div class="king-sale">
 <img src="/Portals/_default/Skins/APP/images/bxh/bxh2.png"/>
 </div>
@@ -118,14 +159,14 @@
 </div>
 <div class="item-info">
 <div class="item-stt">3</div>
-<div class="item-tennv">Khánh Ly</div>
+<div class="item-tennv">Sale part 1</div>
 <div class="item-ds">
-                                                        38,570,000
+                                                        863,538,000
                                                         
                                                     </div>
 </div>
 </div>
-<div class="item-rank item-rank4" title="tt.sale06">
+<div class="item-rank item-rank4" title="tt.sale09">
 <div class="king-sale">
 <img src="/Portals/_default/Skins/APP/images/bxh/bxh2.png"/>
 </div>
@@ -134,14 +175,14 @@
 </div>
 <div class="item-info">
 <div class="item-stt">4</div>
-<div class="item-tennv">Sale part 1</div>
+<div class="item-tennv">Khánh Ly</div>
 <div class="item-ds">
-                                                        37,314,000
+                                                        753,043,000
                                                         
                                                     </div>
 </div>
 </div>
-<div class="item-rank item-rank5" title="tt.sale05">
+<div class="item-rank item-rank5" title="tt.sale01">
 <div class="king-sale">
 <img src="/Portals/_default/Skins/APP/images/bxh/bxh2.png"/>
 </div>
@@ -150,9 +191,9 @@
 </div>
 <div class="item-info">
 <div class="item-stt">5</div>
-<div class="item-tennv">Chu Thủy</div>
+<div class="item-tennv">Hoài Thu</div>
 <div class="item-ds">
-                                                        22,601,000
+                                                        695,955,000
                                                         
                                                     </div>
 </div>
@@ -168,12 +209,12 @@
 <div class="item-stt">6</div>
 <div class="item-tennv">Hồng Vân</div>
 <div class="item-ds">
-                                                        9,088,000
+                                                        486,837,000
                                                         
                                                     </div>
 </div>
 </div>
-<div class="item-rank item-rank7" title="tt.sale11">
+<div class="item-rank item-rank7" title="tt.sale04">
 <div class="king-sale">
 <img src="/Portals/_default/Skins/APP/images/bxh/bxh2.png"/>
 </div>
@@ -182,14 +223,14 @@
 </div>
 <div class="item-info">
 <div class="item-stt">7</div>
-<div class="item-tennv">Phạm Lý</div>
+<div class="item-tennv">Trần Hằng</div>
 <div class="item-ds">
-                                                        3,356,000
+                                                        387,412,000
                                                         
                                                     </div>
 </div>
 </div>
-<div class="item-rank item-rank8" title="ttgroup.saleadmin2">
+<div class="item-rank item-rank8" title="tt.sale05">
 <div class="king-sale">
 <img src="/Portals/_default/Skins/APP/images/bxh/bxh2.png"/>
 </div>
@@ -198,9 +239,43 @@
 </div>
 <div class="item-info">
 <div class="item-stt">8</div>
-<div class="item-tennv">SALE ADMIN</div>
+<div class="item-tennv">Chu Thủy</div>
 <div class="item-ds">
+                                                        370,087,000
+                                                        
+                                                    </div>
 </div>
+</div>
+<div class="item-rank item-rank9" title="tt.sale11">
+<div class="king-sale">
+<img src="/Portals/_default/Skins/APP/images/bxh/bxh2.png"/>
+</div>
+<div class="avatar-container blink9">
+<img class="avatar-img" src="/Portals/_default/Skins/APP/images/bxh/bxh4.png"/>
+</div>
+<div class="item-info">
+<div class="item-stt">9</div>
+<div class="item-tennv">Phạm Lý</div>
+<div class="item-ds">
+                                                        215,472,000
+                                                        
+                                                    </div>
+</div>
+</div>
+<div class="item-rank item-rank10" title="tt.sale10">
+<div class="king-sale">
+<img src="/Portals/_default/Skins/APP/images/bxh/bxh2.png"/>
+</div>
+<div class="avatar-container blink10">
+<img class="avatar-img" src="/Portals/_default/Skins/APP/images/bxh/bxh4.png"/>
+</div>
+<div class="item-info">
+<div class="item-stt">10</div>
+<div class="item-tennv">Mai Lan</div>
+<div class="item-ds">
+                                                        162,868,000
+                                                        
+                                                    </div>
 </div>
 </div>
 </div>
@@ -274,7 +349,8 @@
 <ul "="" class="pagination pagination-sm no-margin">
 <li><a class="aspNetDisabled" id="dnn_ctr1489_Main_SaleDashboard_tnPager_pre" role="button" title="Trang trước">«</a></li>
 <li class="active"><a href="#" id="dnn_ctr1489_Main_SaleDashboard_tnPager_rptPagger_btnPage_0" role="button">1</a></li>
-<li><a class="aspNetDisabled" id="dnn_ctr1489_Main_SaleDashboard_tnPager_nextx" role="button" title="Trang sau">»</a></li>
+<li class=""><a href="#" id="dnn_ctr1489_Main_SaleDashboard_tnPager_rptPagger_btnPage_1" role="button">2</a></li>
+<li><a href="#" id="dnn_ctr1489_Main_SaleDashboard_tnPager_nextx" role="button" title="Trang sau">»</a></li>
 </ul>
 </div>
 </div>

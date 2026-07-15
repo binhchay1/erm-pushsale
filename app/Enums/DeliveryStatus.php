@@ -14,6 +14,7 @@ enum DeliveryStatus: string
     case CannotDeliver = 'cannot_deliver';
     case DeliverNow = 'deliver_now';
     case DeliveryComplete = 'delivery_complete';
+    case PartialDelivery = 'partial_delivery';
     case CancelClosing = 'cancel_closing';
     case PickingUp = 'picking_up';
     case CannotPickup = 'cannot_pickup';
@@ -33,7 +34,7 @@ enum DeliveryStatus: string
      */
     public static function revenueEligible(): array
     {
-        return [self::Delivered->value, self::Paid->value];
+        return [self::Delivered->value, self::Paid->value, self::DeliveryComplete->value, self::PartialDelivery->value];
     }
 
     /** @return array<string, self> */

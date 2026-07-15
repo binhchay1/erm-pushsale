@@ -20,7 +20,8 @@ class CarrierSettlementLine extends Model
 
     protected $fillable = [
         'batch_id', 'order_id', 'provider', 'settlement_code', 'transaction_code',
-        'tracking_number', 'partner_order_code', 'cod_amount', 'carrier_fee', 'net_amount',
+        'tracking_number', 'partner_order_code', 'cod_amount', 'carrier_fee', 'return_fee', 'cod_fee',
+        'insurance_fee', 'other_fee', 'compensation_amount', 'net_amount',
         'match_status', 'match_method', 'settled_at', 'raw_payload',
     ];
 

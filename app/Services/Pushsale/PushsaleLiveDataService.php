@@ -141,7 +141,7 @@ final class PushsaleLiveDataService
     {
         $productLines = collect($row['products'] ?? [])->map(function (array $item): string {
             $suffix = ($item['itemType'] ?? 'product') === 'upsell' ? ' [UPSALE]' : '';
-            return sprintf('%s x%s · %s%s', $item['productName'] ?? '—', $item['quantity'] ?? 0, number_format((int) ($item['unitPrice'] ?? 0)), $suffix);
+            return sprintf('%s x%s · %s%s', $item['productName'] ?? '—', $item['quantity'] ?? 0, $this->formatVnd((int) ($item['unitPrice'] ?? 0)), $suffix);
         });
         $isUpsell = collect($row['products'] ?? [])->contains(fn (array $item) => ($item['itemType'] ?? '') === 'upsell');
 
@@ -157,11 +157,11 @@ final class PushsaleLiveDataService
             'result' => trim(($row['operationResult'] ?? '—')."\n".$this->formatDateTime($row['nextOperationAt'] ?? null)),
             'products' => $productLines->implode("\n"),
             'money' => implode("\n", [
-                number_format((int) ($row['subtotal'] ?? 0)),
-                '-'.number_format((int) ($row['discount'] ?? 0)),
-                number_format((int) ($row['vat'] ?? 0)),
-                number_format((int) ($row['shippingFeeCollected'] ?? 0)),
-                number_format((int) ($row['total'] ?? 0)),
+                $this->formatVnd((int) ($row['subtotal'] ?? 0)),
+                '-'.$this->formatVnd((int) ($row['discount'] ?? 0)),
+                $this->formatVnd((int) ($row['vat'] ?? 0)),
+                $this->formatVnd((int) ($row['shippingFeeCollected'] ?? 0)),
+                $this->formatVnd((int) ($row['total'] ?? 0)),
             ]),
             'deposit' => (int) ($row['deposit'] ?? 0),
             'shipping' => trim(($row['warehouseName'] ?? '—')."\n".($row['shippingProvider'] ?? '—')."\n".($row['trackingNumber'] ?? '')),
@@ -227,7 +227,7 @@ final class PushsaleLiveDataService
                 'customer' => trim(($row['effectiveReceiverName'] ?? $row['customerName'] ?? '')."\n".($row['effectiveReceiverPhone'] ?? $row['customerPhone'] ?? '')),
                 'address' => (string) ($row['shippingAddress'] ?? ''),
                 'products' => $products,
-                'money' => number_format((int) ($row['codAmount'] ?? 0)),
+                'money' => $this->formatVnd((int) ($row['codAmount'] ?? 0)),
                 'deposit' => 0,
                 'collect' => (int) ($row['codAmount'] ?? 0),
                 'carrier_fee' => 0,
@@ -580,6 +580,11 @@ final class PushsaleLiveDataService
             'from' => $total === 0 ? 0 : (($page - 1) * $perPage) + 1,
             'to' => min($page * $perPage, $total),
         ];
+    }
+
+    private function formatVnd(int|float|string|null $value): string
+    {
+        return number_format((int) round((float) ($value ?? 0)), 0, ',', '.').' ₫';
     }
 
     private function formatDateTime(mixed $value): string

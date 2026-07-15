@@ -3,46 +3,73 @@
 namespace App\Services\Shipping\Support;
 
 use App\Enums\DeliveryStatus;
+use Illuminate\Support\Str;
 
 /**
  * Ánh xạ trạng thái giao hàng dạng text (VI/EN) → DeliveryStatus.
- * Dùng chung cho mọi đơn vị vận chuyển để tránh phụ thuộc chéo giữa các carrier.
+ * Thứ tự được sắp từ trạng thái đặc thù đến trạng thái rộng để tránh
+ * "đã hoàn" bị hiểu nhầm thành "đang hoàn" hoặc "hoàn tất giao".
  */
 final class DeliveryStatusTextMapper
 {
     public static function map(?string $raw): ?DeliveryStatus
     {
-        if (! $raw) {
+        if (! filled($raw)) {
             return null;
         }
 
-        $value = mb_strtolower($raw);
+        $unicode = mb_strtolower(trim((string) $raw));
+        $ascii = mb_strtolower(Str::ascii($unicode));
+        $has = static fn (array $needles): bool => collect($needles)->contains(
+            static fn (string $needle): bool => str_contains($unicode, $needle)
+                || str_contains($ascii, Str::ascii($needle)),
+        );
 
         return match (true) {
-            str_contains($value, 'giao thành công'),
-            str_contains($value, 'delivered'),
-            str_contains($value, 'hoàn tất') => DeliveryStatus::Delivered,
+            $has(['giao một phần', 'giao 1 phần', 'partial delivery', 'partially delivered', 'partial_delivered'])
+                => DeliveryStatus::PartialDelivery,
 
-            str_contains($value, 'thanh toán'),
-            str_contains($value, 'đối soát'),
-            str_contains($value, 'paid') => DeliveryStatus::Paid,
+            $has(['đã đối soát', 'đã thanh toán cod', 'cod remitted', 'cod paid', 'reconciled', 'settled', 'paid'])
+                => DeliveryStatus::Paid,
 
-            str_contains($value, 'đang giao'),
-            str_contains($value, 'delivering') => DeliveryStatus::Delivering,
+            $has(['đã hoàn', 'hoàn thành công', 'hoàn về kho', 'đã trả người gửi', 'returned to sender', 'return completed', 'returned', 'return_success'])
+                => DeliveryStatus::Returned,
 
-            str_contains($value, 'lấy hàng'),
-            str_contains($value, 'pick') => DeliveryStatus::PickingUp,
+            $has(['đang hoàn', 'đang chuyển hoàn', 'chuyển hoàn', 'returning', 'return in progress', 'return_to_sender'])
+                => DeliveryStatus::Returning,
 
-            str_contains($value, 'hoàn'),
-            str_contains($value, 'return') => DeliveryStatus::Returning,
+            $has(['không lấy được hàng', 'lấy hàng thất bại', 'pickup failed', 'cannot pickup', 'pick_failed'])
+                => DeliveryStatus::CannotPickup,
 
-            str_contains($value, 'hủy'),
-            str_contains($value, 'cancel') => DeliveryStatus::CancelWaybill,
+            $has(['không giao được', 'giao thất bại', 'delivery failed', 'cannot deliver', 'undeliverable'])
+                => DeliveryStatus::CannotDeliver,
 
-            str_contains($value, 'chờ'),
-            str_contains($value, 'waiting') => DeliveryStatus::WaitingWaybill,
+            $has(['giao lại', 'đang giao lại', 'redelivery', 're-delivery'])
+                => DeliveryStatus::Redelivery,
 
-            default => DeliveryStatus::Delivering,
+            $has(['hủy vận đơn', 'đã hủy', 'cancelled', 'canceled', 'cancel'])
+                => DeliveryStatus::CancelWaybill,
+
+            $has(['giao thành công', 'đã giao', 'delivery complete', 'delivered', 'completed delivery'])
+                => DeliveryStatus::Delivered,
+
+            $has(['đang giao', 'đang vận chuyển', 'in transit', 'delivering', 'out for delivery'])
+                => DeliveryStatus::Delivering,
+
+            $has(['đã lấy hàng', 'lấy hàng thành công', 'picked up', 'picked_up'])
+                => DeliveryStatus::PickingUp,
+
+            $has(['đang lấy hàng', 'chờ lấy hàng', 'picking up', 'pickup'])
+                => DeliveryStatus::PickingUp,
+
+            $has(['đã đăng vận đơn', 'đã tạo vận đơn', 'order created', 'shipment created', 'posted', 'created'])
+                => DeliveryStatus::Posted,
+
+            $has(['chờ', 'waiting', 'pending'])
+                => DeliveryStatus::WaitingWaybill,
+
+            // Status lạ vẫn được giữ trong timeline; không tự đổi business status của đơn.
+            default => null,
         };
     }
 }

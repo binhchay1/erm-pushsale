@@ -1,4 +1,94 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="2.4.2"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="2.4.2"><style>@scope ([data-template-code="2.4.2"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.chon-kn-container {
+    }
+
+        .chon-kn-container .btn-xem-kn {
+            width: 250px;
+            height: 40px;
+            display: inline-block;
+            background: #eee;
+            float: left;
+            text-transform: uppercase;
+            font-size: 12px;
+            line-height: 40px;
+            text-align: center;
+            color: #8a8a8a;
+        }
+
+            .chon-kn-container .btn-xem-kn:hover {
+                color: #326db5;
+            }
+
+            .chon-kn-container .btn-xem-kn.active {
+                color: #326db5;
+                background-color: white;
+                border-top: 3px solid #3782dc;
+            }
+
+    .table-bordered tr td.td_landing80 {
+        max-width: 80px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .table-bordered tr td.td_landing100 {
+        max-width: 100px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .table-bordered tr td.td_landing150 {
+        max-width: 250px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .table-bordered tr td.td_landing200 {
+        max-width: 200px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1427"><a name="1427" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1427_ContentPane"><!-- Start_Module_1427 --><div class="pushsale-template-inner" id="dnn_ctr1427_ModuleContent">
 <style type="text/css">
 
@@ -137,13 +227,13 @@
 <a class="btn btn-sm btn-primary hidden btn-reload" data-pushsale-action="reload" href="#" id="dnn_ctr1427_Main_CauHinhNguonKetNoiDuLieu_btnReload" role="button">
 <i class="fa fa-refresh"></i> Reload
                             </a>
-<a class="btn-icon" href="#" id="dnn_ctr1427_Main_CauHinhNguonKetNoiDuLieu_btnToggleSummary" role="button"><i class="fa fa-angle-double-up"></i></a>
+<a class="btn-icon" href="#" id="dnn_ctr1427_Main_CauHinhNguonKetNoiDuLieu_btnToggleSummary" role="button"><i class="fa fa-angle-double-down"></i></a>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="box-body" style="padding-bottom: 0px;">
+<div class="box-body hidden" style="padding-bottom: 0px;">
 <div class="row">
 <div class="col-sm-2 form-group">
 <select class="chosen pushsale-native-select" id="dnn_ctr1427_Main_CauHinhNguonKetNoiDuLieu_ddlKenhQuangCao" name="dnn$ctr1427$Main$CauHinhNguonKetNoiDuLieu$ddlKenhQuangCao" style="" title="">
@@ -214,6 +304,7 @@
 <div class="col-sm-2 form-group">
 <select class="chosen pushsale-native-select" id="dnn_ctr1427_Main_CauHinhNguonKetNoiDuLieu__IdCSOption" name="dnn$ctr1427$Main$CauHinhNguonKetNoiDuLieu$_IdCSOption" style="" title="">
 <option selected="selected" value="-1">--Chọn cấu hình chia số--</option>
+<option value="3818">Cấu hình chia số mới</option>
 </select>
 </div>
 </div>

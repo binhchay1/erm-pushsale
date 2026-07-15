@@ -253,10 +253,32 @@ def prepare_primary_grid(fragment: Tag, soup: BeautifulSoup, dialog: bool, code:
         modal.decompose()
 
 
+
+def captured_styles(soup: BeautifulSoup, code: str) -> str:
+    """Keep the capture's page-level CSS without leaking it into another ERM screen."""
+    chunks: list[str] = []
+    skip_markers = (
+        "body[unresolved]", r"[ng\:cloak]", "#cpsoxmetrukgzgtvncxav",
+        ".main-sidebar, .left-side", "div.rcbSlide",
+    )
+    for style in soup.find_all("style"):
+        css = style.string or style.get_text() or ""
+        if not css.strip() or len(css) > 20000 or any(marker in css for marker in skip_markers):
+            continue
+        css = re.sub(r"(^|})\s*(html|body)(\s*[^,{]*)?\s*\{[^}]*\}", r"\1", css, flags=re.I | re.S)
+        css = re.sub(r"position\s*:\s*fixed", "position: absolute", css, flags=re.I)
+        css = css.replace(".content-wrapper", ".pushsale-template-fragment")
+        chunks.append(css.strip())
+    if not chunks:
+        return ""
+    escaped = code.replace('"', '\\"')
+    return '@scope ([data-template-code="' + escaped + '"]) {\n' + "\n".join(chunks) + '\n}'
+
 def sanitize(path: Path) -> str:
     raw = path.read_text(encoding="utf-8", errors="ignore")
     soup = BeautifulSoup(raw, "html.parser")
     dialog = is_dialog_file(path)
+    scoped_css = captured_styles(soup, path.stem)
     fragment = primary_fragment(soup, dialog)
     clean_node_tree(fragment)
     prepare_primary_grid(fragment, soup, dialog, path.stem.split("-", 1)[0])
@@ -267,6 +289,10 @@ def sanitize(path: Path) -> str:
         "pushsale-dialog-fragment" if dialog else "pushsale-page-fragment",
     ]
     wrapper.attrs["data-template-code"] = path.stem
+    if scoped_css:
+        style = soup.new_tag("style")
+        style.string = scoped_css
+        wrapper.append(style)
     wrapper.append(fragment.extract())
     return str(wrapper)
 

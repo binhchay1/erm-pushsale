@@ -11,7 +11,7 @@ class ShippingWebhookEvent extends Model
     use BelongsToTenant;
 
     protected $fillable = [
-        'provider',
+        'provider', 'event_hash',
         'event_type',
         'partner_order_code',
         'tracking_number',
@@ -19,10 +19,11 @@ class ShippingWebhookEvent extends Model
         'mapped_status',
         'partner_cod',
         'system_cod',
+        'shipping_fee', 'return_fee', 'cod_fee', 'other_fee', 'compensation_amount',
         'is_cod_mismatch',
         'order_id',
-        'payload',
-        'received_at',
+        'payload', 'normalized_payload',
+        'received_at', 'occurred_at',
         'result',
         'note',
     ];
@@ -31,7 +32,9 @@ class ShippingWebhookEvent extends Model
     {
         return [
             'payload' => 'array',
+            'normalized_payload' => 'array',
             'received_at' => 'datetime',
+            'occurred_at' => 'datetime',
             'is_cod_mismatch' => 'boolean',
         ];
     }

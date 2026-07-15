@@ -18,6 +18,7 @@ class Company extends Model
         'owner_user_id', 'contact_email', 'contact_phone', 'tax_code', 'address', 'website',
         'representative_name', 'representative_title', 'expires_at',
         'lead_import_template_path', 'lead_import_template_name',
+        'default_shipping_provider', 'default_shipping_method',
     ];
 
     protected function casts(): array

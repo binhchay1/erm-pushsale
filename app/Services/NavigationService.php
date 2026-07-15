@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Services\Reports\ExtraReportService;
 
 /**
  * Navigation theo đúng cây menu của Pushsale.vn (AdminLTE 2).
@@ -14,6 +15,10 @@ use App\Models\User;
  */
 class NavigationService
 {
+    public function __construct(
+        private readonly ExtraReportService $extraReports,
+    ) {}
+
     /** @return list<array<string, mixed>> */
     public function forUser(?User $user): array
     {
@@ -181,8 +186,19 @@ class NavigationService
         $result = [];
 
         foreach ($items as $item) {
+            if (! empty($item['roles']) && ! in_array($user->role->value, (array) $item['roles'], true)) {
+                continue;
+            }
+
             if (! $user->isAdmin() && ! empty($item['area']) && ! $user->allows((string) $item['area'])) {
                 continue;
+            }
+
+            if (! empty($item['url']) && is_string($item['url'])) {
+                $reportKey = $this->extraReportKeyFromUrl($item['url']);
+                if ($reportKey !== null && (! $this->extraReports->exists($reportKey) || ! $this->extraReports->canView($user, $reportKey))) {
+                    continue;
+                }
             }
 
             if (! empty($item['children']) && is_array($item['children'])) {
@@ -197,6 +213,15 @@ class NavigationService
         }
 
         return $result;
+    }
+
+    private function extraReportKeyFromUrl(string $url): ?string
+    {
+        if (preg_match('#/(?:admin/reports/extra|sales/reports|marketing/reports|warehouse/reports|accounting/reports)/([a-z0-9-]+)$#', $url, $matches) !== 1) {
+            return null;
+        }
+
+        return $matches[1];
     }
 
     /** @param list<array<string, mixed>> $tree @return list<array<string, mixed>> */

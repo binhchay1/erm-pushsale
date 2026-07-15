@@ -14,7 +14,6 @@ use App\Http\Controllers\Admin\ManualLeadController;
 use App\Http\Controllers\Admin\CompanySettingsController;
 use App\Http\Controllers\Admin\ManualLeadAllocationController;
 use App\Http\Controllers\Admin\Marketing\CampaignBudgetController;
-use App\Http\Controllers\Admin\Marketing\CampaignController;
 use App\Http\Controllers\Admin\Marketing\CampaignReportController;
 use App\Http\Controllers\Admin\Marketing\DashboardController as MarketingDashboardController;
 use App\Http\Controllers\Admin\Marketing\DashboardDataController as MarketingDashboardDataController;
@@ -81,6 +80,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Warehouse\DashboardController as WarehouseDashboardController;
 use App\Http\Controllers\Warehouse\OrderReturnController;
+use App\Http\Controllers\Warehouse\WarehouseOrderActionController;
 use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -211,6 +211,14 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::post('sales/leads/manual', [ManualLeadController::class, 'store'])->name('sales.leads.manual');
         Route::get('accounting', AccountingOperationsController::class)->name('accounting');
         Route::get('warehouse/operations', WarehouseOperationsController::class)->name('warehouse.operations');
+        Route::patch('warehouse/orders/{order}/desired-delivery', [WarehouseOrderActionController::class, 'desiredDelivery'])->name('warehouse.orders.desired-delivery');
+        Route::post('warehouse/orders/{order}/blacklist', [WarehouseOrderActionController::class, 'blacklist'])->name('warehouse.orders.blacklist');
+        Route::patch('warehouse/orders/{order}/care', [WarehouseOrderActionController::class, 'care'])->name('warehouse.orders.care');
+        Route::patch('warehouse/orders/{order}/delivery-status', [WarehouseOrderActionController::class, 'deliveryStatus'])->name('warehouse.orders.delivery-status');
+        Route::put('warehouse/orders/{order}', [WarehouseOrderActionController::class, 'updateOrder'])->name('warehouse.orders.update');
+        Route::post('warehouse/orders/{order}/split', [WarehouseOrderActionController::class, 'split'])->name('warehouse.orders.split');
+        Route::post('warehouse/orders/{order}/printed', [WarehouseOrderActionController::class, 'printed'])->name('warehouse.orders.printed');
+        Route::post('warehouse/orders/{order}/return-receipt', [WarehouseOrderActionController::class, 'receiveReturn'])->name('warehouse.orders.return-receipt');
         Route::get('warehouse/inventory', InventoryController::class)->name('warehouse.inventory');
         Route::post('warehouse/inventory/intake', [InventoryMovementController::class, 'intake'])->name('warehouse.inventory.intake');
         Route::post('warehouse/inventory/export', [InventoryMovementController::class, 'export'])->name('warehouse.inventory.export');
@@ -251,6 +259,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::delete('company/lead-template', [CompanySettingsController::class, 'destroyLeadTemplate'])->name('company.lead-template.destroy');
         Route::get('shipping-partners', [ShippingPartnersController::class, 'index'])->name('shipping-partners.index');
         Route::put('shipping-partners/{provider}', [ShippingPartnersController::class, 'update'])->name('shipping-partners.update');
+        Route::put('shipping-default', [ShippingPartnersController::class, 'updateDefault'])->name('shipping-partners.default');
         Route::get('shipping/reconciliation', ShippingReconciliationController::class)->name('shipping.reconciliation');
         Route::post('shipping/reconciliation/import', [CarrierSettlementController::class, 'import'])->name('shipping.reconciliation.import');
         Route::post('shipping/reconciliation/sync', [CarrierSettlementController::class, 'syncApi'])->name('shipping.reconciliation.sync');
@@ -302,12 +311,18 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('workspace/daily-metrics', [MarketingDashboardDataController::class, 'dailyMetrics'])->name('workspace.daily-metrics');
         Route::put('workspace/daily-metrics', [MarketingDashboardDataController::class, 'saveDailyMetrics'])->name('workspace.daily-metrics.update');
         Route::get('workspace/export', [MarketingDashboardDataController::class, 'export'])->name('workspace.export');
-        Route::get('campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
-        Route::get('campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create');
-        Route::post('campaigns', [CampaignController::class, 'store'])->name('campaigns.store');
-        Route::get('campaigns/{campaign}/edit', [CampaignController::class, 'edit'])->name('campaigns.edit');
-        Route::put('campaigns/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
-        Route::delete('campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
+        Route::redirect('campaigns', '/admin/marketing/landing-connections', 301)->name('campaigns.index');
+        Route::redirect('campaigns/create', '/admin/marketing/landing-connections', 301)->name('campaigns.create');
+        Route::redirect('campaigns/{campaign}/edit', '/admin/marketing/landing-connections', 301)->name('campaigns.edit');
+        Route::post('campaigns', function () {
+            abort(410, 'Luồng tạo chiến dịch đã được thay bằng Kết nối landing.');
+        })->name('campaigns.store');
+        Route::put('campaigns/{campaign}', function () {
+            abort(410, 'Luồng cập nhật chiến dịch đã được thay bằng Kết nối landing.');
+        })->whereNumber('campaign')->name('campaigns.update');
+        Route::delete('campaigns/{campaign}', function () {
+            abort(410, 'Luồng xóa chiến dịch đã được thay bằng Kết nối landing.');
+        })->whereNumber('campaign')->name('campaigns.destroy');
         Route::get('landing-approvals', [LandingApprovalController::class, 'index'])->name('landing-approvals.index');
         Route::post('landing-approvals/{campaign}/approve', [LandingApprovalController::class, 'approve'])->name('landing-approvals.approve');
         Route::post('landing-approvals/{campaign}/reject', [LandingApprovalController::class, 'reject'])->name('landing-approvals.reject');
@@ -326,6 +341,14 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::middleware('role:'.User::ROLE_WAREHOUSE)->prefix('warehouse')->name('warehouse.')->group(function () {
         Route::get('dashboard', WarehouseDashboardController::class)->name('dashboard');
         Route::get('workspace', WarehouseOperationsController::class)->name('workspace');
+        Route::patch('orders/{order}/desired-delivery', [WarehouseOrderActionController::class, 'desiredDelivery'])->name('orders.desired-delivery');
+        Route::post('orders/{order}/blacklist', [WarehouseOrderActionController::class, 'blacklist'])->name('orders.blacklist');
+        Route::patch('orders/{order}/care', [WarehouseOrderActionController::class, 'care'])->name('orders.care');
+        Route::patch('orders/{order}/delivery-status', [WarehouseOrderActionController::class, 'deliveryStatus'])->name('orders.delivery-status');
+        Route::put('orders/{order}', [WarehouseOrderActionController::class, 'updateOrder'])->name('orders.update');
+        Route::post('orders/{order}/split', [WarehouseOrderActionController::class, 'split'])->name('orders.split');
+        Route::post('orders/{order}/printed', [WarehouseOrderActionController::class, 'printed'])->name('orders.printed');
+        Route::post('orders/{order}/return-receipt', [WarehouseOrderActionController::class, 'receiveReturn'])->name('orders.return-receipt');
         Route::get('inventory', InventoryController::class)->name('inventory');
         Route::get('customers', CustomerProfileController::class)->name('customers.index');
         Route::post('inventory/intake', [InventoryMovementController::class, 'intake'])->name('inventory.intake');

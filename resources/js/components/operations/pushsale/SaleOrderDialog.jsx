@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiGet } from '@/lib/api';
+import { formatCurrency } from '@/lib/format';
 
 const EMPTY = {
     marketing_source_id: '',
@@ -31,7 +32,7 @@ const EMPTY = {
 };
 
 const numberValue = (value) => Math.max(0, Number(String(value ?? 0).replace(/[^0-9.-]/g, '')) || 0);
-const money = (value) => new Intl.NumberFormat('vi-VN').format(numberValue(value));
+const money = (value) => formatCurrency(numberValue(value));
 const key = () => `${Date.now()}-${Math.random()}`;
 
 function newLine(type = 'product') {

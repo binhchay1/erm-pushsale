@@ -25,6 +25,8 @@ export function formatCurrencyCompact(value, locale) {
     if (value == null || Number.isNaN(Number(value))) return '—';
 
     return new Intl.NumberFormat(resolveLocale(locale), {
+        style: 'currency',
+        currency: 'VND',
         notation: 'compact',
         compactDisplay: 'short',
         maximumFractionDigits: 1,

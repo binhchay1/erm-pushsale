@@ -2,8 +2,8 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { formatCurrency } from '@/lib/format';
 
-const money = new Intl.NumberFormat('vi-VN');
 
 function visitPage(url) {
     if (url) router.get(url, {}, { preserveScroll: true, preserveState: true });
@@ -202,7 +202,7 @@ export default function UsersIndex({ users, filters = {}, roles = [], accountCou
                                     <td className="text-center ps-user-name">{row.name} <span>({row.email?.split('@')[0]})</span></td>
                                     <td className="text-center">{row.role_label}</td>
                                     <td className="text-center">{row.employee_code}</td>
-                                    <td className="text-right">{row.base_salary ? money.format(row.base_salary) : ''}</td>
+                                    <td className="text-right">{row.base_salary ? formatCurrency(row.base_salary) : ''}</td>
                                     <td className="text-center">{row.phone ?? ''}</td>
                                     <td className="text-center">{row.email}</td>
                                     <td className="text-center">{row.is_team_leader ? (row.team_name || 'Trưởng nhóm') : ''}</td>

@@ -1,7 +1,77 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="1.10"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="1.10"><style>@scope ([data-template-code="1.10"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.tip { font-style: italic; display: inline-block; min-width: 30px; }
+    .dm-tac-nghiep { display: inline-block; width: 180px; font-size: 11px; color: #333; padding: 6px; transition: ease 3s all; }
+        .dm-tac-nghiep:hover, .dm-tac-nghiep.selected { box-shadow: inset 0 0 4px orange; }
+        .dm-tac-nghiep .flag { width: 20px; background-color: #C1E2F4; display: inline-block; height: 14px; float: left; }
+        .dm-tac-nghiep .text { display: inline-block; height: 16px; line-height: 16px; float: left; margin-left: 10px; }
+        .dm-tac-nghiep .count { font-weight: bold; margin-left: 6px; color: orange; float: left; line-height: 16px; transition: ease 3s all; }
+        .dm-tac-nghiep .level-1 { background-color: #a6ffa8 }
+        .dm-tac-nghiep .level-2 { background-color: #8ad6ff }
+        .dm-tac-nghiep .level-3 { background-color: #ffc0cb }
+        .dm-tac-nghiep .level-4 { background-color: orangered; }
+        .dm-tac-nghiep .flash-bg { background-color: red; }
+        .dm-tac-nghiep .live-stream { float: left; width: 5px; height: 5px; border-radius: 50%; background-color: red; margin-left: 5px; margin-top: 6px; display: none; }
+        .dm-tac-nghiep .count.flash-bg { color: white; }
+
+    tr.contact-row { transition: ease 3s all; }
+        tr.contact-row.high-light { box-shadow: inset 0 0 15px green; }
+            tr.contact-row.high-light td { background-color: transparent; }
+        tr.contact-row input.form-control, tr.contact-row select { font-size: 11px; }
+
+    .hoa-don-area td, .hoa-don-area th, .sale-area td, .sale-area th, .kh-area td, .kh-area th { transition: ease 0.5s all; }
+    .hide-hoa-don-area .hoa-don-area, .hide-sale-area .sale-area, .hide-kh-area .kh-area { width: 0px !important; padding: 0 !important; }
+        .hide-hoa-don-area .hoa-don-area *, .hide-sale-area .sale-area *, .hide-kh-area .kh-area * { display: none; }
+
+    .table-info th { background-color: #eee !important; }
+    .table-info td { }
+    .tb-giao-hang, .tb-giao-hang td { border: 1px solid transparent !important; }
+        .tb-giao-hang td { width: 110px; padding: 0px !important; }
+
+    .h-label { font-weight: normal; font-style: italic; color: #999; }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1438"><a name="1438" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1438_ContentPane"><!-- Start_Module_1438 --><div class="pushsale-template-inner" id="dnn_ctr1438_ModuleContent">
 <div id="dnn_ctr1438_Main_ImportContact_pgbBase_up1">
-<span class="server-time hidden" id="dnn_ctr1438_Main_ImportContact_pgbBase_lblTime">2026,07,12,19,00,50</span>
+<span class="server-time hidden" id="dnn_ctr1438_Main_ImportContact_pgbBase_lblTime">2026,07,14,10,25,09</span>
 <input class="txt-pgb-continue hidden pushsale-native-input" id="dnn_ctr1438_Main_ImportContact_pgbBase_txtButtonContinue" name="dnn$ctr1438$Main$ImportContact$pgbBase$txtButtonContinue" type="text"/>
 <input class="txt-cancel hidden pushsale-native-input" id="dnn_ctr1438_Main_ImportContact_pgbBase_txtCancel" name="dnn$ctr1438$Main$ImportContact$pgbBase$txtCancel" type="text"/>
 <input class="hidden txt-pgb-label pushsale-native-input" id="dnn_ctr1438_Main_ImportContact_pgbBase_txtLabel" name="dnn$ctr1438$Main$ImportContact$pgbBase$txtLabel" type="text"/>

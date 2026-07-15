@@ -21,8 +21,8 @@
 ### Luồng nghiệp vụ chính
 
 ```text
-Marketing chạy ads / form / landing
-    → Lead đổ về hệ thống
+Marketing tạo Kết nối Landing đầy đủ (nguồn + gói sản phẩm + Sale)
+    → Form Landing/upsale đổ trực tiếp về hệ thống
     → Telesale nhận data, gọi, chăm sóc, chốt đơn
     → Kho xác nhận tồn, đóng gói, chuyển đơn vị giao hàng
     → Kế toán kiểm tra COD, chuyển khoản, đối soát
@@ -42,8 +42,8 @@ flowchart TB
     end
 
     subgraph MKT["② Marketing"]
-        Camp[Tạo chiến dịch + gắn sản phẩm<br/>URL webhook tự sinh]
-        Approve{Admin duyệt<br/>chiến dịch?}
+        Camp[Tạo Kết nối Landing<br/>nguồn + gói SP + Sale + URL API]
+        Approve{Người có quyền<br/>duyệt kết nối?}
     end
 
     subgraph HeThong["③ Hệ thống ERM SaleOps"]
@@ -67,7 +67,7 @@ flowchart TB
     end
 
     LP -->|Khách gửi form| Webhook
-    Camp -->|Dán URL vào Ladipage| LP
+    Camp -->|Gắn URL submit trực tiếp| LP
     Camp --> Approve
     Approve -->|Chưa duyệt| Webhook
     Approve -->|Đã duyệt| ChiaSo
@@ -94,7 +94,7 @@ flowchart TB
 |---------|-----|------------|------------|
 | **Quản trị** | `admin` | `admin@saleops.local` | Toàn hệ thống: báo cáo CEO, duyệt landing, tích hợp, vận hành, lịch sử nhập xuất kho |
 | **Telesale** | `sales` | `sales@saleops.local` | Gọi khách, chuyển trạng thái, chốt đơn — chỉ thấy đơn được gán |
-| **Marketing** | `marketing` | `marketing@saleops.local` | Tạo chiến dịch, copy URL webhook sang Ladipage, xem hiệu quả |
+| **Marketing** | `marketing` | `marketing@saleops.local` | Tạo Kết nối Landing, cấu hình nguồn/gói/Sale, copy URL submit, xem hiệu quả |
 | **Kho** | `warehouse` | `warehouse@saleops.local` | Xuất hàng, tạo vận đơn, quản lý tồn — phiếu nhập/xuất cần trưởng kho duyệt |
 | **Chia số** | `allocator` | `allocator@saleops.local` | Theo dõi lead, xử lý lead chờ / lỗi, phân bổ thủ công |
 | **Kế toán** | `accounting` | `accounting@saleops.local` | Đối soát COD, chuyển khoản, trạng thái giao hàng |
@@ -137,22 +137,26 @@ Checklist field chi tiết cho developer: [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCH
 
 Khách xem quảng cáo → mở Landing Page → điền **Họ tên, SĐT, sản phẩm**. Ladipage là **cửa vào**; ERM SaleOps là **bộ não vận hành** phía sau (gọi, chốt, kho, đối soát).
 
-### Bước 2 — Marketing tạo chiến dịch
+### Bước 2 — Marketing tạo Kết nối Landing
 
-1. Đăng nhập Marketing → **`/marketing/campaigns`**
-2. **Tạo chiến dịch** → chọn sản phẩm, đặt tên.
-3. **Copy URL webhook** → dán vào cấu hình Webhook / Form submit trên Ladipage.
+1. Đăng nhập → menu **2.4.1 Kết nối landing** (`/admin/marketing/landing-connections`).
+2. Khai báo Landing chính, các trang upsale và trang cảm ơn.
+3. Gắn sản phẩm/gói backend, field lựa chọn gói, marketer, danh sách Sale và cách chia số.
+4. Copy URL nhận dữ liệu của từng source vào `action` form tương ứng.
+5. Người có quyền duyệt kiểm tra cấu hình tại `/admin/landing-approvals`.
 
-Chiến dịch mới ở trạng thái **Chờ duyệt**. Lead test vẫn về hệ thống nhưng **chưa giao Telesale** cho đến khi Admin duyệt tại **`/admin/landing-approvals`**.
+Kết nối chưa duyệt hoặc đang tắt **không nhận form công khai**. Không còn bước tạo campaign độc lập trước khi kết nối Landing.
 
 ### Bước 3 — Data khách đổ về
 
 Khi nhận lead, hệ thống:
 
-1. Ghi nhận tên, SĐT, sản phẩm, nguồn chiến dịch.
-2. **Kiểm tra trùng SĐT** trong **30 ngày** (`LEAD_DUPLICATE_WINDOW_DAYS`).
-3. Nếu chiến dịch **đã duyệt** → chia số + tạo đơn tác nghiệp (**Khách mới**).
-4. Thông báo Telesale được phân công.
+1. Resolve connection/source bằng token công khai không tuần tự.
+2. Ghi nhận tên, SĐT, địa chỉ; dựng lại sản phẩm và giá từ cấu hình backend.
+3. **Kiểm tra retry và trùng SĐT** trong cửa sổ nghiệp vụ.
+4. Tạo đơn tác nghiệp ngay và chia đúng Sale của kết nối.
+5. Packet upsale trong 90 giây tự cộng vào cùng đơn, không chia Sale lần hai.
+6. Thông báo Telesale được phân công.
 
 Theo dõi: **`/admin/leads`** (Admin), **`/allocator/workspace`** (Chia số).
 
@@ -249,7 +253,7 @@ Sales role: **`/sales/performance`**, **`/sales/rankings`**.
 | Dashboard Telesale | `/sales/dashboard` | Telesale |
 | **Tác nghiệp Telesale** | **`/sales/workspace`** | Telesale |
 | Hồ sơ khách hàng | `/sales/customers` | Telesale |
-| Kết nối Landing | `/marketing/campaigns` | Marketing |
+| Kết nối Landing | `/admin/marketing/landing-connections` | Marketing |
 | Duyệt Landing | `/admin/landing-approvals` | Admin |
 | Nhật ký lead | `/admin/leads` | Admin |
 | Chia số & lead | `/allocator/workspace` | Chia số |

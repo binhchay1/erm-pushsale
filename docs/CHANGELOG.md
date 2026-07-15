@@ -4,6 +4,22 @@ Timeline milestone và spec — **mới nhất trước**. Chi tiết kỹ thu�
 
 ---
 
+## 2026-07-14 — V13 Landing Connection + layout/modal hardening
+
+- Thay luồng tạo campaign bằng menu 2.4.1 **Kết nối Landing**.
+- Thêm 4 bảng cấu hình connection/source/product/sale và khóa ngoại truy vết trên session/lead/order.
+- Thêm public endpoint direct form submit, token riêng từng source, không cần SDK JS.
+- Gộp Landing chính + upsale bằng `ps_flow`, fallback SĐT 90 giây, idempotency namespace theo source.
+- Giá/item/chiết khấu client không được dùng; order dựng từ sản phẩm backend và tự tính total.
+- Mapping gói so khớp chính xác, chặn `ps_flow` nối chéo connection và soft-delete source để bảo toàn audit lịch sử.
+- Chia Sale theo danh sách riêng của connection; upsale không phân Sale lần hai.
+- Làm lại trang 2.4.1 theo template Pushsale bằng backend thật, có CRUD, batch delete, filter, pagination.
+- Redirect route campaign cũ; write cũ trả 410.
+- Chuẩn hóa shell để bỏ khoảng trắng đầu trang và đưa mọi modal vào đúng viewport.
+- Build Vite production thành công; thêm test `LandingConnectionFlowTest`.
+
+---
+
 ## 2026-06-10 — Phân quyền sơ đồ tổ chức, đơn hoàn & doanh số theo team
 
 - **Sơ đồ tổ chức theo business:** `OrgStructureService` — Admin thấy toàn công ty; **Trưởng bộ phận** (`org_level = head`, mỗi ngành 1 người) thấy toàn ngành; **Leader & nhân viên chỉ thấy team của mình**. Chỉ admin tạo/phân chia team (`/admin/teams`). `OrganizationSeeder` dựng đúng mô hình: ngành → trưởng bộ phận → team nhỏ (leader) → nhân viên (chuỗi `manager_user_id`).
@@ -109,3 +125,15 @@ Timeline milestone và spec — **mới nhất trước**. Chi tiết kỹ thu�
 | P1 | Dashboard KPI, ranking UI, export |
 | P2 | Shipping API thật, VoIP, Shopee/Lazada OAuth, import Excel |
 | P3 | Permission granular, so sánh kỳ, drilldown |
+
+---
+
+## 2026-07-14 — V14 Financial control, Landing budget và template-five
+
+- Thêm ngân sách tổng/ngày và kỳ chạy vào Kết nối Landing; phân bổ ngày chính xác, hỗ trợ thực chi/kế hoạch/mixed.
+- Làm lại Admin Dashboard bằng dữ liệu backend thật: doanh số chốt, doanh thu ghi nhận, tiền đã thu, COD, Marketing, COGS, vận chuyển, nhân sự, chi phí vận hành, lợi nhuận và tồn kho.
+- Snapshot giá vốn vào `order_items`; combo fallback theo thành phần.
+- Thêm `PayrollCostService`; KPI tháng và dashboard dùng chung công thức ngày công + thưởng doanh số chốt.
+- Thêm cảnh báo vượt ngân sách, COD chưa thu, lỗ ròng, tồn kho thấp, lương dự kiến và nguy cơ nhập trùng chi phí nhân sự.
+- Chuẩn hóa các trường tiền sang VND.
+- Làm sạch/scope 54 template từ template-five, phục hồi vendor CSS/font cần thiết và giữ backend thật cho từng mã menu.

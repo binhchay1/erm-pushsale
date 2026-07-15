@@ -1,0 +1,295 @@
+/* 2.4.1 — Kết nối dữ liệu landing. Source-faithful Pushsale/AdminLTE geometry. */
+body.pushsale-app-body .pslc-page {
+    min-width: 1280px;
+    min-height: calc(100dvh - var(--ps-header-height));
+    padding: 0 !important;
+    background: #fff;
+    color: #111;
+    font: 12px/1.35 Arial, Helvetica, sans-serif;
+}
+
+body.pushsale-app-body .pslc-page .m-header-wrap {
+    margin: 0 !important;
+    border-top: 2px solid #1679e8;
+    border-bottom: 1px solid #d7d7d7;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .13);
+}
+
+body.pushsale-app-body .pslc-header {
+    display: flex;
+    min-height: 51px;
+    align-items: center;
+    gap: 18px;
+    padding: 8px 15px !important;
+}
+
+body.pushsale-app-body .pslc-header .ps-title {
+    width: 245px;
+    flex: 0 0 245px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+body.pushsale-app-body .pslc-header-controls {
+    display: grid;
+    width: 100%;
+    align-items: center;
+    grid-template-columns: auto minmax(155px, .8fr) minmax(180px, 1fr) minmax(260px, 1.35fr) auto 32px 32px;
+    gap: 12px;
+}
+
+body.pushsale-app-body .pslc-check,
+body.pushsale-app-body .pslc-inline-checks label,
+body.pushsale-app-body .pslc-default-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+body.pushsale-app-body .pslc-header-controls .form-control,
+body.pushsale-app-body .pslc-form .form-control {
+    height: 31px;
+    min-height: 31px;
+    border: 1px solid #c9cfd7;
+    border-radius: 0;
+    padding: 5px 9px;
+    background: #fff;
+    box-shadow: none;
+    color: #333;
+    font: 12px/19px Arial, Helvetica, sans-serif;
+}
+
+body.pushsale-app-body .pslc-header-controls .btn {
+    height: 31px;
+    min-height: 31px;
+    border-radius: 2px;
+    padding: 5px 11px;
+}
+
+body.pushsale-app-body .pslc-tabs {
+    display: flex;
+    min-height: 42px;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 7px 15px 0;
+    border-bottom: 1px solid #d1d1d1;
+    background: #fff;
+}
+
+body.pushsale-app-body .pslc-tabs button {
+    height: 34px;
+    border: 1px solid #d2d6de;
+    border-bottom: 0;
+    border-radius: 2px 2px 0 0;
+    padding: 0 18px;
+    background: #f4f4f4;
+    color: #555;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+body.pushsale-app-body .pslc-tabs button.active {
+    border-color: #1679e8;
+    background: #1679e8;
+    color: #fff;
+}
+
+body.pushsale-app-body .pslc-toolbar {
+    display: flex;
+    min-height: 45px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 15px;
+}
+
+body.pushsale-app-body .pslc-toolbar .btn { min-height: 30px; border-radius: 2px; }
+
+body.pushsale-app-body .pslc-table-scroll {
+    width: 100%;
+    overflow: auto;
+    border-top: 1px solid #2f72c4;
+    border-bottom: 1px solid #d2d6de;
+}
+
+body.pushsale-app-body .pslc-table {
+    width: max(100%, 1780px);
+    min-width: 1780px;
+    table-layout: fixed;
+    border-collapse: collapse;
+    color: #222;
+    font-size: 11px;
+}
+
+body.pushsale-app-body .pslc-table th {
+    height: 55px;
+    border: 1px solid #2f72c4;
+    padding: 5px 6px;
+    background: #3782dc;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: middle;
+}
+
+body.pushsale-app-body .pslc-table th span { font-weight: 400; }
+body.pushsale-app-body .pslc-table th.w-check { width: 34px; }
+body.pushsale-app-body .pslc-table th.w-stt { width: 42px; }
+body.pushsale-app-body .pslc-table th.w-source { width: 270px; }
+body.pushsale-app-body .pslc-table th.w-products { width: 245px; }
+body.pushsale-app-body .pslc-table th.w-api { width: 220px; }
+body.pushsale-app-body .pslc-table th.w-actions { width: 78px; }
+
+body.pushsale-app-body .pslc-table td {
+    height: 43px;
+    border: 1px solid #d3d3d3;
+    padding: 5px 7px;
+    background: #fff;
+    vertical-align: top;
+    word-break: break-word;
+}
+
+body.pushsale-app-body .pslc-table tbody tr:nth-child(even) td { background: #f5f5f5; }
+body.pushsale-app-body .pslc-table tbody tr:hover td { background: #edf5ff; }
+body.pushsale-app-body .pslc-table td small { display: block; margin-top: 3px; color: #555; font-size: 10px; }
+body.pushsale-app-body .pslc-source-name { display: block; width: 100%; border: 0; padding: 0; background: transparent; color: #337ab7; font-weight: 700; text-align: left; }
+body.pushsale-app-body .pslc-source-name i { width: 13px; color: #9ec4e7; }
+body.pushsale-app-body .pslc-api-line { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 4px; }
+body.pushsale-app-body .pslc-api-line span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.pushsale-app-body .pslc-api-line em { color: #777; font-size: 10px; font-style: normal; white-space: nowrap; }
+body.pushsale-app-body .pslc-api-line button { flex: 0 0 auto; border: 0; padding: 2px 4px; background: transparent; color: #337ab7; font-size: 10px; }
+body.pushsale-app-body .pslc-actions button { border: 0; padding: 4px 6px; background: transparent; color: #337ab7; font-size: 14px; }
+body.pushsale-app-body .pslc-actions button:last-child { color: #dd4b39; }
+body.pushsale-app-body .pslc-actions button:disabled { opacity: .35; cursor: not-allowed; }
+
+body.pushsale-app-body .pslc-pagination {
+    display: grid;
+    min-height: 52px;
+    align-items: center;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    padding: 8px 15px;
+    color: #555;
+}
+
+body.pushsale-app-body .pslc-pages { display: flex; justify-content: center; }
+body.pushsale-app-body .pslc-pages button { min-width: 31px; height: 29px; border: 1px solid #ddd; border-right: 0; background: #fff; color: #337ab7; }
+body.pushsale-app-body .pslc-pages button:last-child { border-right: 1px solid #ddd; }
+body.pushsale-app-body .pslc-pages button.active { border-color: #337ab7; background: #337ab7; color: #fff; }
+body.pushsale-app-body .pslc-pages button:disabled { color: #bbb; }
+body.pushsale-app-body .pslc-pagination > label { display: flex; align-items: center; justify-content: flex-end; gap: 5px; margin: 0; font-weight: 400; }
+body.pushsale-app-body .pslc-pagination select { width: 62px; height: 29px; border: 1px solid #ccc; background: #fff; }
+
+/* Connection editor */
+body.pushsale-app-body .pslc-modal-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    display: flex;
+    width: 100vw;
+    height: 100dvh;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    overflow: auto;
+    background: rgba(0, 0, 0, .48);
+}
+
+body.pushsale-app-body .pslc-modal {
+    position: relative;
+    display: flex;
+    width: min(1180px, calc(100vw - 20px));
+    max-width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #666;
+    border-radius: 1px;
+    background: #fff;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .36);
+}
+
+body.pushsale-app-body .pslc-modal-header {
+    display: flex;
+    min-height: 40px;
+    flex: 0 0 40px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 13px;
+    background: #087df0;
+    color: #fff;
+    font-size: 14px;
+}
+
+body.pushsale-app-body .pslc-modal-header button { width: 30px; height: 30px; border: 0; background: transparent; color: #fff; font-size: 16px; }
+body.pushsale-app-body .pslc-form { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; }
+body.pushsale-app-body .pslc-modal-body { min-height: 0; flex: 1 1 auto; overflow: auto; padding: 12px; }
+body.pushsale-app-body .pslc-modal-footer { display: flex; min-height: 50px; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 8px; border-top: 1px solid #ddd; padding: 8px 12px; background: #f5f5f5; }
+
+body.pushsale-app-body .pslc-form-section { margin-bottom: 12px; border: 1px solid #d7d7d7; background: #fff; }
+body.pushsale-app-body .pslc-form-section > h4,
+body.pushsale-app-body .pslc-section-title { min-height: 34px; margin: 0; border-bottom: 1px solid #d7d7d7; padding: 8px 10px; background: #f4f4f4; color: #222; font-size: 12px; font-weight: 700; }
+body.pushsale-app-body .pslc-section-title { display: flex; align-items: center; justify-content: space-between; }
+body.pushsale-app-body .pslc-section-title h4 { margin: 0; font-size: 12px; }
+body.pushsale-app-body .pslc-section-title > div { display: flex; gap: 5px; }
+body.pushsale-app-body .pslc-form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 18px; padding: 12px; }
+body.pushsale-app-body .pslc-form-grid label { display: flex; min-width: 0; flex-direction: column; gap: 4px; margin: 0; font-weight: 600; }
+body.pushsale-app-body .pslc-form-grid .span-2 { grid-column: span 2; }
+body.pushsale-app-body .pslc-inline-checks { display: flex; gap: 24px; padding: 0 12px 12px; }
+body.pushsale-app-body .pslc-guide { margin: 0; border-bottom: 1px solid #e6e6e6; padding: 8px 10px; background: #fffdf0; color: #6a5b21; font-size: 11px; }
+body.pushsale-app-body .pslc-guide code { border: 1px solid #ddd; border-radius: 2px; padding: 1px 3px; background: #fff; color: #c7254e; }
+
+body.pushsale-app-body .pslc-source-editor { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 10px; }
+body.pushsale-app-body .pslc-source-card { border: 1px solid #cfd6df; }
+body.pushsale-app-body .pslc-source-card-head { display: flex; min-height: 30px; align-items: center; justify-content: space-between; border-bottom: 1px solid #d8d8d8; padding: 5px 8px; background: #edf5ff; }
+body.pushsale-app-body .pslc-source-card-head button { border: 0; background: transparent; color: #dd4b39; }
+body.pushsale-app-body .pslc-source-active { display: flex; align-items: center; gap: 6px; margin: 0 9px 9px; font-weight: 400; }
+body.pushsale-app-body .pslc-source-card .source-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; padding: 9px; }
+
+body.pushsale-app-body .pslc-product-editor { padding: 10px; overflow-x: auto; }
+body.pushsale-app-body .pslc-product-row { display: grid; min-width: 1080px; align-items: center; grid-template-columns: 28px 1.35fr 1fr .75fr 1fr 1fr 70px 95px 86px 30px; gap: 6px; margin-bottom: 7px; }
+body.pushsale-app-body .pslc-row-number { text-align: center; font-weight: 700; }
+body.pushsale-app-body .pslc-default-check { justify-content: center; }
+body.pushsale-app-body .pslc-remove { border: 0; background: transparent; color: #dd4b39; }
+body.pushsale-app-body .pslc-remove:disabled { opacity: .25; }
+
+body.pushsale-app-body .pslc-sale-picker { padding: 10px; }
+body.pushsale-app-body .pslc-team-quick { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+body.pushsale-app-body .pslc-team-quick span { margin-right: 5px; font-weight: 700; }
+body.pushsale-app-body .pslc-team-quick button { border: 1px solid #b8c7d9; border-radius: 2px; padding: 3px 7px; background: #eef5fc; color: #337ab7; font-size: 11px; }
+body.pushsale-app-body .pslc-sale-list { display: grid; max-height: 150px; overflow: auto; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px 12px; border: 1px solid #ddd; padding: 8px; }
+body.pushsale-app-body .pslc-sale-list label { display: flex; align-items: center; gap: 5px; margin: 0; font-weight: 400; }
+body.pushsale-app-body .pslc-errors { margin: 0; border-radius: 0; font-size: 11px; }
+
+@media (max-width: 1450px) {
+    body.pushsale-app-body .pslc-header .ps-title { width: 190px; flex-basis: 190px; }
+    body.pushsale-app-body .pslc-header-controls { grid-template-columns: auto 150px 170px minmax(220px, 1fr) auto 32px 32px; gap: 8px; }
+}
+
+body.pushsale-app-body .pslc-form .form-control:disabled { background: #eef1f4; color: #777; cursor: not-allowed; }
+
+/* V14 — budget control uses one VND contract from landing setup to reports. */
+body.pushsale-app-body .pslc-table { width: max(100%, 1950px); min-width: 1950px; }
+body.pushsale-app-body .pslc-table th.w-budget { width: 178px; }
+body.pushsale-app-body .pslc-money-cell { text-align: right; white-space: nowrap; }
+body.pushsale-app-body .pslc-money-cell strong { color: #0d6a38; font-size: 12px; }
+body.pushsale-app-body .pslc-money-cell small { white-space: normal; }
+body.pushsale-app-body .pslc-budget-box { margin: 0 12px 12px; border: 1px solid #c8d9eb; background: #f7fbff; }
+body.pushsale-app-body .pslc-budget-title { display: flex; min-height: 35px; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid #c8d9eb; padding: 7px 10px; background: #e8f3ff; color: #24577c; }
+body.pushsale-app-body .pslc-budget-title span { color: #526779; font-size: 10px; font-weight: 400; }
+body.pushsale-app-body .pslc-budget-grid { display: grid; grid-template-columns: 1.25fr 1fr .82fr .82fr 1.15fr; gap: 10px; align-items: end; padding: 10px; }
+body.pushsale-app-body .pslc-budget-grid > label { display: flex; min-width: 0; flex-direction: column; gap: 4px; margin: 0; font-weight: 600; }
+body.pushsale-app-body .pslc-budget-box > p { margin: 0; border-top: 1px dashed #cad8e5; padding: 7px 10px; color: #596c7e; font-size: 10px; }
+body.pushsale-app-body .pslc-money-input { position: relative; min-width: 0; }
+body.pushsale-app-body .pslc-money-input .form-control { padding-right: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+body.pushsale-app-body .pslc-money-input > span { position: absolute; top: 50%; right: 9px; color: #586879; font-weight: 700; transform: translateY(-50%); pointer-events: none; }
+body.pushsale-app-body .pslc-money-input.compact { width: 100%; }
+body.pushsale-app-body .pslc-budget-preview { display: flex; min-height: 31px; flex-direction: column; justify-content: center; border-left: 3px solid #00a65a; padding: 2px 10px; background: #fff; }
+body.pushsale-app-body .pslc-budget-preview span { color: #687687; font-size: 10px; }
+body.pushsale-app-body .pslc-budget-preview strong { color: #008d4c; font-size: 14px; font-variant-numeric: tabular-nums; }
+@media (max-width: 1100px) {
+    body.pushsale-app-body .pslc-budget-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    body.pushsale-app-body .pslc-budget-preview { grid-column: span 2; }
+}

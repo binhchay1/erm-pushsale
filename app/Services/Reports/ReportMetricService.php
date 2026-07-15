@@ -34,7 +34,7 @@ class ReportMetricService
         $closedOrders = (clone $orders)->whereNotNull('closed_at')->count();
         $ordersCount = (clone $orders)->count();
 
-        $revenueBreakdown = OrderRevenue::aggregate($orders);
+        $revenueBreakdown = OrderRevenue::aggregate($orders, $filter->dateFrom, $filter->dateTo);
 
         return [
             'leads' => (clone $leads)->count(),

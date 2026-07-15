@@ -26,7 +26,7 @@ class ShippingReconciliationService
     private const STATUS_PAID = ['paid'];
 
     /** Đã giao thành công nhưng chưa thấy tiền về → còn thiếu tiền cần đòi. */
-    private const STATUS_DELIVERED = ['delivered', 'delivery_complete'];
+    private const STATUS_DELIVERED = ['delivered', 'delivery_complete', 'partial_delivery', 'partial', 'delivered_partial', 'partially_delivered'];
 
     /** Đang luân chuyển (chưa kết thúc) → tiền chưa thể đối soát. */
     private const STATUS_TRANSIT = [

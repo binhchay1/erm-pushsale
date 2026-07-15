@@ -1,4 +1,76 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="2.6.3"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="2.6.3"><style>@scope ([data-template-code="2.6.3"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.tip { font-style: italic; display: inline-block; min-width: 30px; }
+    .badge{font-size:10px;}
+    .badge-danger{background-color:#f25b43;}
+    @media (min-width: 992px ) {
+        .col-md-1-5 { flex: 0 0 12.3%; max-width: 12.3%; position: relative; width: 100%; padding-right: 15px; padding-left: 15px; }
+    }
+
+    .thumbnail.bd-thumbnail-blue { border: 2px solid #1a597c; padding: 0px; }
+    .thumbnail > a { display: block; padding: 6px;    opacity: 0.2; }
+    /*.thumbnail > a img{ filter:grayscale(100%); }*/
+    .thumbnail a.selected { opacity: 1;}
+    .thumbnail a:hover { opacity: 1;}
+    /*.thumbnail a.selected img , .thumbnail a:hover img { filter:grayscale(0%);}*/
+
+    .thumbnail.bd-thumbnail-info { border: 1px solid #e8e8e8; }
+
+    /* The switch - the box around the slider */
+    .switch { position: relative; display: inline-block; width: 30px; height: 17px; }
+        /* Hide default HTML checkbox */
+        .switch input { opacity: 0; width: 0; height: 0; }
+    /* The slider */
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; -webkit-transition: .4s; transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 13px; width: 13px; left: 2px; bottom: 2px; background-color: white; -webkit-transition: .4s; transition: .4s; }
+
+    input:checked + .slider { background-color: #2196F3; }
+    input:focus + .slider { box-shadow: 0 0 1px #2196F3; }
+    input:checked + .slider:before { -webkit-transform: translateX(13px); -ms-transform: translateX(13px); transform: translateX(13px); }
+
+    /* Rounded sliders */
+    .slider.round { border-radius: 17px; }
+        .slider.round:before { border-radius: 50%; }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1543"><a name="1543" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1543_ContentPane"><!-- Start_Module_1543 --><div class="pushsale-template-inner" id="dnn_ctr1543_ModuleContent">
 <style type="text/css">
     .tip { font-style: italic; display: inline-block; min-width: 30px; }
@@ -85,13 +157,13 @@
 <a class="btn btn-sm btn-primary hidden btn-reload" data-pushsale-action="reload" href="#" id="dnn_ctr1543_Main_DanhSachPartnerToken_btnReload" role="button">
 <i class="fa fa-refresh"></i> Reload
                             </a>
-<a class="btn-icon hidden" href="#" id="dnn_ctr1543_Main_DanhSachPartnerToken_btnToggleSummary" role="button"><i class="fa fa-angle-double-up"></i></a>
+<a class="btn-icon hidden" href="#" id="dnn_ctr1543_Main_DanhSachPartnerToken_btnToggleSummary" role="button"><i class="fa fa-angle-double-down"></i></a>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="box-body hidden" style="padding-bottom: 0px;">
+<div class="box-body hidden hidden" style="padding-bottom: 0px;">
 <div class="row">
 <div class="col-sm-3 form-group">
 <select class="chosen pushsale-native-select" id="dnn_ctr1543_Main_DanhSachPartnerToken_ddlKenhQuangCao" name="dnn$ctr1543$Main$DanhSachPartnerToken$ddlKenhQuangCao" style="" title="">

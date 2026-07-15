@@ -1,0 +1,2862 @@
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="4.5.7"><style>@scope ([data-template-code="4.5.7"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+/*    .table-bordered tbody tr td {
+        font-size: 11px !important;
+    }*/
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 633px;">
+<div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1652"><a name="1652" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1652_ContentPane"><!-- Start_Module_1652 --><div class="pushsale-template-inner" id="dnn_ctr1652_ModuleContent">
+
+<style>
+    /*    .table-bordered tbody tr td {
+        font-size: 11px !important;
+    }*/
+</style>
+<div id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_pnlMain">
+<span class="hidden" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblDownLoad"></span>
+<div id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_pnSearch">
+<div class="m-header-wrap">
+<div class="m-header">
+<div class="col-sm-2 form-group">
+<span class="text form-group" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblModuleTitle">Báo cáo CEO V2</span>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen pushsale-native-select" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlKieuNgay" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$ddlKieuNgay" style="" title="">
+<option value="-1">--Chuẩn Pushsale--</option>
+<option value="4">Ngày sale chốt đơn</option>
+<option value="1">Ngày sale tác nghiệp</option>
+<option value="2">Ngày data về hệ thống</option>
+<option selected="selected" value="3">Ngày sale nhận data</option>
+<option value="5">Ngày đăng đơn</option>
+<option value="6">Ngày đối soát</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<input class="form-control date-range pushsale-native-input" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2__TuNgay_DenNgay" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$_TuNgay_DenNgay" type="text" value="01/07/2026 00:00 - 14/07/2026 23:59"/>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen pushsale-native-select" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlLoaiDoanhSo" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$ddlLoaiDoanhSo" style="" title="">
+<option selected="selected" value="1">1.Doanh số tổng</option>
+<option value="2">2.Doanh số xác nhận</option>
+<option value="3">3.Doanh số tạm tính</option>
+<option value="4">4.Tiền CK DS số tạm tính</option>
+<option value="5">5.Doanh số hủy</option>
+<option value="6">6.Doanh số đang hoàn</option>
+<option value="7">7.Doanh số đã hoàn</option>
+<option value="8">8.Doanh số đang chuyển</option>
+<option value="9">9.Doanh số giao thành công</option>
+<option value="10">10.Doanh số thực tế</option>
+<option value="11">11.Doanh số chờ đối soát</option>
+<option value="12">12.Doanh số giao hàng một phần</option>
+</select>
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen pushsale-native-select" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlTrangThaiGiaoHang" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$ddlTrangThaiGiaoHang" style="" title="">
+<option selected="selected" value="-1">-- Trạng thái giao hàng --</option>
+<option value="50">Bồi hoàn</option>
+<option value="41">Đã hoàn</option>
+<option value="40">Đang hoàn</option>
+<option value="35">Giao hàng một phần</option>
+<option value="34">Yêu cầu giao lại</option>
+<option value="33">Không giao được</option>
+<option value="32">Đã thanh toán</option>
+<option value="31">Đã giao hàng</option>
+<option value="30">Đang giao hàng</option>
+<option value="23">Đang lấy hàng</option>
+<option value="22">Không lấy được hàng</option>
+<option value="21">Đã lấy hàng</option>
+<option value="20">Đã đăng</option>
+<option value="5">Hủy đăng đơn</option>
+<option value="4">Hủy vận đơn</option>
+<option value="3">Hoãn giao hàng</option>
+<option value="2">Giao ngay</option>
+<option value="1">Chờ vận đơn</option>
+</select>
+</div>
+<div class="col-sm-2 form-group" style="min-height: 40px;">
+<div class="divSearch">
+<a class="btn-icon" href="#" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_btnToggleSummary" role="button"><i class="fa fa-angle-double-up"></i></a>
+<a class="btn btn-sm btn-primary mb10" data-pushsale-action="search" href="#" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_btnSearch" role="button">
+<i class="fa fa-search"></i> Tìm kiếm
+                            </a>
+<a href="#" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_btnNote" role="button" style="height: 30px; padding: 7px 0 0 0; vertical-align: bottom;" title="Chú thích">
+<i class="fa fa-question-circle" style="font-size:30px;color:#0c509a;margin-left:15px;cursor:pointer;margin-bottom: 16px;"></i>
+</a>
+<a class="btn btn-sm btn-primary hidden btn-reload" data-pushsale-action="reload" href="#" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_btnReload" role="button">
+<i class="fa fa-refresh"></i> Reload
+                            </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="box-body" style="padding-bottom: 0px;">
+<div class="row">
+<div class="col-sm-2 form-group">
+<div class="ps-ddl" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlSanPhamGroup">
+<div class="ps-ddl-display-text"><span class="ps-ddl-selected-item" item-id="-1">--Sản phẩm cha-- </span></div>
+<div class="ps-ddl-arow">
+<i class="fa fa-angle-down"></i>
+</div>
+<div class="ps-ddl-search-area hidden">
+<input class="ps-ddl-search-box pushsale-native-input" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlSanPhamGroup_tnt_SearchBox" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$ddlSanPhamGroup$tnt_SearchBox" placeholder="Nhập từ khóa để tìm kiếm" style="height:30px;" type="text"/>
+<a class="ps-ddl-on-change hidden" href="#" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlSanPhamGroup_btnOnChanged" role="button">On changed</a>
+<div class="result-not-found hidden" style="height:30px;line-height:30px;">Không tìm thấy</div>
+<div class="result-items hidden"></div>
+</div>
+<input class="ps-ddl-selected-json hidden pushsale-native-input" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlSanPhamGroup_tnt_DataJson" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$ddlSanPhamGroup$tnt_DataJson" type="text"/>
+<input class="ps-ddl-setting-json hidden pushsale-native-input" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlSanPhamGroup_tnt_SettingJson" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$ddlSanPhamGroup$tnt_SettingJson" type="text" value='{"ShowLog":true,"SearchMinLength":0,"SearchDelay":500,"SearchMaxResultCount":20,"MultiSelect":false,"AutoPostBack":true,"DisplayItemId":false,"Enabled":true,"DefaultId":"-1","DefaultName":"--Sản phẩm cha--","RemoteUrl":"/sp/act.aspx?act=ld_san_pham_group&amp;ttkd=0","OptionalParams":{}}'/>
+<input class="ps-ddl-optinal-param hidden pushsale-native-input" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlSanPhamGroup_tnt_OptinalParams" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$ddlSanPhamGroup$tnt_OptinalParams" type="text"/>
+</div>
+
+</div>
+<div class="col-sm-2 form-group">
+<select class="chosen pushsale-native-select" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlSanPham" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$ddlSanPham" style="" title="">
+<option selected="selected" value="-1">-- Sản phẩm --</option>
+</select>
+</div>
+<div class="col-sm-2">
+<div class="row">
+<div class="col-xs-12 col-md-6 form-group">
+<select class="chosen pushsale-native-select" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlChietKhau" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$ddlChietKhau" style="" title="">
+<option selected="selected" value="1">Sau chiết khấu</option>
+<option value="0">Trước chiết khấu</option>
+</select>
+</div>
+<div class="col-xs-12 col-md-6 form-group">
+<select class="chosen pushsale-native-select" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_ddlSoLuongHienThi" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$ddlSoLuongHienThi" style="" title="">
+<option selected="selected" value="20">20</option>
+<option value="50">50</option>
+<option value="100">100</option>
+<option value="200">200</option>
+<option value="500">500</option>
+<option value="1000">1000</option>
+<option value="999999">--Hiển thị tất--</option>
+</select>
+</div>
+</div>
+</div>
+<div class="col-sm-2 form-group">
+<span class="chkAdvanced"><input id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_chkAdvanced" name="dnn$ctr1652$Main$DashboardLoader$DashboardCEOV2$chkAdvanced" type="checkbox"/><label for="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_chkAdvanced">Không giới hạn ngày chốt</label></span>
+</div>
+<div class="col-sm-2 form-group">
+</div>
+<div class="col-sm-2 form-group">
+<button aria-expanded="false" class="dropdown-toggle ichucnang" data-toggle="dropdown" role="button" type="button">
+<i class="fa fa-gear"></i>
+</button>
+<ul class="dropdown-menu dropdown-menu-right" role="menu" style="left: 43px; top: -3px;">
+<li>
+<a data-pushsale-action="export" href="#" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_btnXuatExcelGiaoVan" role="button" title="Xuất Excel giao vận">
+<i class="fa fa-file-excel-o"></i> Xuất Excel giao vận
+                            </a>
+</li>
+<li>
+<a data-pushsale-action="export" href="#" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_btnXuatExcelSale" role="button" title="Xuất Excel Sale">
+<i class="fa fa-file-excel-o"></i> Xuất Excel Sale
+                            </a>
+</li>
+<li>
+<a data-pushsale-action="export" href="#" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_btnXuatExcelMarketing" role="button" title="Xuất Excel Marketing">
+<i class="fa fa-file-excel-o"></i> Xuất Excel Marketing
+                            </a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div style="clear: both;"></div>
+<div class="box-body" style="padding-top: 0px;">
+<div class="row mt15 row-flex" id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_divGiaoVan">
+<div class="col-md-2 col-sm-4 col-xs-4">
+<table class="table table-bordered table-multi-select tabledata">
+<tbody><tr>
+<th class="text-center header_chogiao">CHỜ GIAO</th>
+</tr>
+<tr>
+<td class="text-center">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblGiaoHang_ChoGiao">3664</span></td>
+</tr>
+</tbody></table>
+</div>
+<div class="col-md-2 col-sm-4 col-xs-4">
+<table class="table table-bordered table-multi-select tabledata">
+<tbody><tr>
+<th class="text-center header_ty_le_huy">HỦY VẬN ĐƠN</th>
+</tr>
+<tr>
+<td class="text-center">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblHuyVanDon">0/10545</span>
+                                (<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblGiaoHang_TyLeHuyDon">0 %</span>)
+                            </td>
+</tr>
+</tbody></table>
+</div>
+<div class="col-md-2 col-sm-4 col-xs-4">
+<table class="table table-bordered table-multi-select tabledata">
+<tbody><tr>
+<th class="text-center header_danggiao">ĐANG GIAO</th>
+</tr>
+<tr>
+<td class="text-center" style="width: 30%">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblGiaoHang_DangGiao">0</span></td>
+</tr>
+</tbody></table>
+</div>
+<div class="col-md-2 col-sm-4 col-xs-4">
+<table class="table table-bordered table-multi-select tabledata">
+<tbody><tr>
+<th class="text-center header_dagiao">ĐÃ GIAO</th>
+</tr>
+<tr>
+<td class="text-center" style="width: 30%">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblGiaoHang_DaGiao">3470</span></td>
+</tr>
+</tbody></table>
+</div>
+<div class="col-md-2 col-sm-4 col-xs-4">
+<table class="table table-bordered table-multi-select tabledata">
+<tbody><tr>
+<th class="text-center header_thutien">ĐÃ THANH TOÁN</th>
+</tr>
+<tr>
+<td class="text-center" style="width: 30%">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblGiaoHang_DaThanhToan">0</span></td>
+</tr>
+</tbody></table>
+</div>
+<div class="col-md-2 col-sm-4 col-xs-4">
+<table class="table table-bordered table-multi-select tabledata">
+<tbody><tr>
+<th class="text-center header_ty_le_hoan">ĐÃ HOÀN</th>
+</tr>
+<tr>
+<td class="text-center" style="width: 30%">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblGiaoHang_DaHoan">159/10545</span>
+                                (<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblGiaoHang_TyLeHoanDon">1.51 %</span>)
+                            </td>
+</tr>
+</tbody></table>
+</div>
+</div>
+<div style="clear: both;"></div>
+<div style="clear: both; margin-bottom: 15px;"></div>
+<div class="dragscroll1 tableFixHead table_sale" style="height: 540px;">
+<table class="table table-bordered table-multi-select" id="tableReportSale">
+<thead>
+<tr class="drags-area" style="cursor: grab;">
+<th class="text-center" style="width: 50px;"></th>
+<th class="text-center" style="width: 10%"></th>
+<th class="text-center" colspan="6" rowspan="1">KHÁCH HÀNG MỚI</th>
+<th class="text-center" colspan="6" rowspan="1">KHÁCH HÀNG CŨ</th>
+<th class="text-center" colspan="2" rowspan="1" style="width: 10%;">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblDoanhSo_Header_Sale">DOANH SỐ TỔNG</span></th>
+<th class="text-center" colspan="5" rowspan="1" style="width: 20%;">GIAO HÀNG</th>
+<th class="text-center" colspan="1" rowspan="2" style="width: 5%">KPI</th>
+<th class="text-center" colspan="1" rowspan="2" style="width: 5%">Tỉ lệ KPI (%)</th>
+</tr>
+<tr class="drags-area t28" style="cursor: grab;">
+<th class="text-center" style="width: 50px;">STT</th>
+<th class="text-center" style="width: 10%">SALE</th>
+<th class="text-center">Contact</th>
+<th class="text-center">Đơn chốt</th>
+<th class="text-center no-wrap">Tỉ lệ chốt (%)</th>
+<th class="text-center">Số sản phẩm</th>
+<th class="text-center">Doanh số</th>
+<th class="text-center">Giá trị đơn</th>
+<th class="text-center">Contact</th>
+<th class="text-center">Đơn chốt</th>
+<th class="text-center no-wrap">Tỉ lệ chốt (%)</th>
+<th class="text-center">Số sản phẩm</th>
+<th class="text-center">Doanh số</th>
+<th class="text-center">Giá trị đơn</th>
+<th class="text-center" style="width: 5%;">Doanh số</th>
+<th class="text-center" style="width: 5%;">Giá trị TB đơn</th>
+<th class="text-center" style="width: 5%;">Tỉ lệ hủy</th>
+<th class="text-center" style="width: 4%;">Tỉ lệ hoàn</th>
+<th class="text-center" style="width: 3%;">Phí COD</th>
+<th class="text-center" style="width: 3%;">Hỗ trợ COD</th>
+<th class="text-center" style="width: 3%;">Đặt cọc</th>
+</tr>
+<tr class="rowsum drags-area t72" style="cursor: grab;">
+<td class="text-center font-weight-bold" colspan="2">Tổng: </td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongContact_KHM_S">17,912</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongChotDon_KHM_S">13,350</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongTyLeChotDon_KHM_S">74.53 %</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongSoSanPham_KHM_S">22,871</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongDoanhSo_KHM_S">3,383,936,000</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongGiaTriDon_KHM_S">253,478.35</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongContact_KHC_S">1,422</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongChotDon_KHC_S">859</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongTyLeChotDon_KHC_S">60.41 %</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongSoSanPham_KHC_S">1,621</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongDoanhSo_KHC_S">228,335,000</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongGiaTriDon_KHC_S">265,814.9</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongDoanhSoTong_S">3,612,271,000</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongGiaTriDonTong_S">254,224.15</span></td>
+<td class="text-center font-weight-bold &gt;">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongHuy_S">0 %</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTongHoan_S">1.51 %</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblCOD_S">0</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblHoTroCOD_S">-259,043,990</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblDatCoc_S">718,000</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblDoanhSoKPI_S">0</span></td>
+<td class="text-center font-weight-bold">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblTyLeDSTTKPIDS_S">∞ %</span></td>
+</tr>
+</thead>
+<tbody><tr>
+<td class="text-center">
+                                    1
+                                </td>
+<td>Sale part 1 (tt.sale06)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">3,179</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">1,879
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 69.5039030996259%"></div>
+</div>
+<span class="progress-text">59.11 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">3,232</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">456,181,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 92.4760788062374%"></div>
+</div>
+<span class="progress-text">242,778.61</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">248</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">146
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 76.5322583234677%"></div>
+</div>
+<span class="progress-text">58.87 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">282</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">38,580,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 89.9103692895543%"></div>
+</div>
+<span class="progress-text">264,246.58</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">494,761,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 93.0656520901797%"></div>
+</div>
+<span class="progress-text">244,326.42</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 27.2041612872376%"></div>
+</div>
+<span class="progress-text">0.91</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-36,546,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">518,000</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    2
+                                </td>
+<td>Lan Anh (tt.sale03)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 71.4375589808116%"></div>
+</div>
+<span class="progress-text">2,271</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 93.1346460883449%"></div>
+</div>
+<span class="progress-text">1,750
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 90.6136993508229%"></div>
+</div>
+<span class="progress-text">77.06 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 95.4826732673267%"></div>
+</div>
+<span class="progress-text">3,086</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 98.2103594845029%"></div>
+</div>
+<span class="progress-text">448,017,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 97.5159011683371%"></div>
+</div>
+<span class="progress-text">256,009.71</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 87.0967741935484%"></div>
+</div>
+<span class="progress-text">216</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 88.3561643835616%"></div>
+</div>
+<span class="progress-text">129
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 77.6388885223611%"></div>
+</div>
+<span class="progress-text">59.72 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 89.0070921985816%"></div>
+</div>
+<span class="progress-text">251</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 95.912389839295%"></div>
+</div>
+<span class="progress-text">37,003,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 97.5995104593399%"></div>
+</div>
+<span class="progress-text">286,844.96</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 98.0311706056055%"></div>
+</div>
+<span class="progress-text">485,020,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 98.322261871301%"></div>
+</div>
+<span class="progress-text">258,126.66</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 54.2981638215464%"></div>
+</div>
+<span class="progress-text">1.82</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-33,234,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 11.5830115830116%"></div>
+</div>
+<span class="progress-text">60,000</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    3
+                                </td>
+<td>Thu Hường (tt.sale02)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 67.1594841145014%"></div>
+</div>
+<span class="progress-text">2,135</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 90.9526343799894%"></div>
+</div>
+<span class="progress-text">1,709
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 94.1276302318377%"></div>
+</div>
+<span class="progress-text">80.05 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 89.0779702970297%"></div>
+</div>
+<span class="progress-text">2,879</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 96.671715832093%"></div>
+</div>
+<span class="progress-text">440,998,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 98.2909541058445%"></div>
+</div>
+<span class="progress-text">258,044.47</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 83.0645161290323%"></div>
+</div>
+<span class="progress-text">206</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 83.5616438356164%"></div>
+</div>
+<span class="progress-text">122
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 76.9902912230097%"></div>
+</div>
+<span class="progress-text">59.22 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 74.468085106383%"></div>
+</div>
+<span class="progress-text">210</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 77.3043027475376%"></div>
+</div>
+<span class="progress-text">29,824,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 83.1776170102076%"></div>
+</div>
+<span class="progress-text">244,459.02</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 95.1615022202639%"></div>
+</div>
+<span class="progress-text">470,822,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 97.9461561848351%"></div>
+</div>
+<span class="progress-text">257,139.27</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 50.841073734041%"></div>
+</div>
+<span class="progress-text">1.7</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-32,569,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    4
+                                </td>
+<td>Khánh Ly (tt.sale09)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 60.4592639194715%"></div>
+</div>
+<span class="progress-text">1,922</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 77.9137839276211%"></div>
+</div>
+<span class="progress-text">1,464
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 89.5696010188998%"></div>
+</div>
+<span class="progress-text">76.17 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 76.7945544554455%"></div>
+</div>
+<span class="progress-text">2,482</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 82.7353616218124%"></div>
+</div>
+<span class="progress-text">377,423,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 98.1988222842043%"></div>
+</div>
+<span class="progress-text">257,802.6</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 42.741935483871%"></div>
+</div>
+<span class="progress-text">106</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 45.2054794520548%"></div>
+</div>
+<span class="progress-text">66
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 80.9433962190566%"></div>
+</div>
+<span class="progress-text">62.26 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 45.0354609929078%"></div>
+</div>
+<span class="progress-text">127</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 45.0207361327112%"></div>
+</div>
+<span class="progress-text">17,369,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 89.542928433821%"></div>
+</div>
+<span class="progress-text">263,166.67</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 79.7944866309188%"></div>
+</div>
+<span class="progress-text">394,792,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 98.2869608581835%"></div>
+</div>
+<span class="progress-text">258,033.99</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 27.9305635250801%"></div>
+</div>
+<span class="progress-text">0.93</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-27,675,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    5
+                                </td>
+<td>Hồng Vân (tt.sale07)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 54.0421516200063%"></div>
+</div>
+<span class="progress-text">1,718</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 77.7541245343268%"></div>
+</div>
+<span class="progress-text">1,461
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">85.04 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 74.2264851485149%"></div>
+</div>
+<span class="progress-text">2,399</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 80.5064217931041%"></div>
+</div>
+<span class="progress-text">367,255,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 95.7494956150934%"></div>
+</div>
+<span class="progress-text">251,372.35</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 56.4516129032258%"></div>
+</div>
+<span class="progress-text">140</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 60.2739726027397%"></div>
+</div>
+<span class="progress-text">88
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 81.7142858182857%"></div>
+</div>
+<span class="progress-text">62.86 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 58.5106382978723%"></div>
+</div>
+<span class="progress-text">165</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 62.5298081907724%"></div>
+</div>
+<span class="progress-text">24,124,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 93.275387422933%"></div>
+</div>
+<span class="progress-text">274,136.36</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 79.1046586129465%"></div>
+</div>
+<span class="progress-text">391,379,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 96.2421009704559%"></div>
+</div>
+<span class="progress-text">252,665.59</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 58.5516186104337%"></div>
+</div>
+<span class="progress-text">1.96</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-26,842,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 11.5830115830116%"></div>
+</div>
+<span class="progress-text">60,000</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    6
+                                </td>
+<td>Hoài Thu (tt.sale01)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 56.0868197546398%"></div>
+</div>
+<span class="progress-text">1,783</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 71.261309207025%"></div>
+</div>
+<span class="progress-text">1,339
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 88.3084326225035%"></div>
+</div>
+<span class="progress-text">75.1 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 71.4727722772277%"></div>
+</div>
+<span class="progress-text">2,310</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 75.2262807964383%"></div>
+</div>
+<span class="progress-text">343,168,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 97.6214378973932%"></div>
+</div>
+<span class="progress-text">256,286.78</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 62.0967741935484%"></div>
+</div>
+<span class="progress-text">154</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 65.0684931506849%"></div>
+</div>
+<span class="progress-text">95
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 80.1948055198052%"></div>
+</div>
+<span class="progress-text">61.69 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 68.4397163120567%"></div>
+</div>
+<span class="progress-text">193</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 68.0715396578538%"></div>
+</div>
+<span class="progress-text">26,262,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 94.0599201303164%"></div>
+</div>
+<span class="progress-text">276,442.11</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 74.6683752357199%"></div>
+</div>
+<span class="progress-text">369,430,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 98.130045951482%"></div>
+</div>
+<span class="progress-text">257,622.04</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">3.35</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-27,262,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 5.79150579150579%"></div>
+</div>
+<span class="progress-text">30,000</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    7
+                                </td>
+<td>Chu Thủy (tt.sale05)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 42.5920100660585%"></div>
+</div>
+<span class="progress-text">1,354</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 56.5194252261841%"></div>
+</div>
+<span class="progress-text">1,062
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 92.231399195762%"></div>
+</div>
+<span class="progress-text">78.43 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 55.4764851485149%"></div>
+</div>
+<span class="progress-text">1,793</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 57.890398767156%"></div>
+</div>
+<span class="progress-text">264,085,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 94.7192413421259%"></div>
+</div>
+<span class="progress-text">248,667.61</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 44.758064516129%"></div>
+</div>
+<span class="progress-text">111</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 42.4657534246575%"></div>
+</div>
+<span class="progress-text">62
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 72.6126127273874%"></div>
+</div>
+<span class="progress-text">55.86 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 39.3617021276596%"></div>
+</div>
+<span class="progress-text">111</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 40.3576982892691%"></div>
+</div>
+<span class="progress-text">15,570,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 85.4471018230691%"></div>
+</div>
+<span class="progress-text">251,129.03</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 56.5232506199963%"></div>
+</div>
+<span class="progress-text">279,655,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 94.770958041376%"></div>
+</div>
+<span class="progress-text">248,803.38</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 59.3101181083537%"></div>
+</div>
+<span class="progress-text">1.98</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-22,996,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    8
+                                </td>
+<td>Trần Hằng (tt.sale04)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 38.5026737967914%"></div>
+</div>
+<span class="progress-text">1,224</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 49.8137307078233%"></div>
+</div>
+<span class="progress-text">936
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 89.922293131369%"></div>
+</div>
+<span class="progress-text">76.47 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 50.5878712871287%"></div>
+</div>
+<span class="progress-text">1,635</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 53.2558348550247%"></div>
+</div>
+<span class="progress-text">242,943,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 98.8661301003214%"></div>
+</div>
+<span class="progress-text">259,554.49</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 36.6935483870968%"></div>
+</div>
+<span class="progress-text">91</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 39.041095890411%"></div>
+</div>
+<span class="progress-text">57
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 81.4285718185714%"></div>
+</div>
+<span class="progress-text">62.64 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 39.0070921985816%"></div>
+</div>
+<span class="progress-text">110</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 39.3027475375842%"></div>
+</div>
+<span class="progress-text">15,163,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 90.5129444913236%"></div>
+</div>
+<span class="progress-text">266,017.54</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 52.167814358852%"></div>
+</div>
+<span class="progress-text">258,106,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 99.0074432464707%"></div>
+</div>
+<span class="progress-text">259,925.48</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 31.9633421795056%"></div>
+</div>
+<span class="progress-text">1.07</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-16,817,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 9.65250965250965%"></div>
+</div>
+<span class="progress-text">50,000</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    9
+                                </td>
+<td>Phạm Lý (tt.sale11)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 34.0044039005977%"></div>
+</div>
+<span class="progress-text">1,081</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 43.3209153805216%"></div>
+</div>
+<span class="progress-text">814
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 88.5465525966406%"></div>
+</div>
+<span class="progress-text">75.3 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 44.4616336633663%"></div>
+</div>
+<span class="progress-text">1,437</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 45.6838404054531%"></div>
+</div>
+<span class="progress-text">208,401,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 97.5201559894298%"></div>
+</div>
+<span class="progress-text">256,020.88</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 34.6774193548387%"></div>
+</div>
+<span class="progress-text">86</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 34.2465753424658%"></div>
+</div>
+<span class="progress-text">50
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 75.5813954244186%"></div>
+</div>
+<span class="progress-text">58.14 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 35.4609929078014%"></div>
+</div>
+<span class="progress-text">100</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 35.1296008294453%"></div>
+</div>
+<span class="progress-text">13,553,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 92.2286492004083%"></div>
+</div>
+<span class="progress-text">271,060</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 44.8608520073328%"></div>
+</div>
+<span class="progress-text">221,954,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 97.8516666888228%"></div>
+</div>
+<span class="progress-text">256,891.2</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-16,548,990</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    10
+                                </td>
+<td>Mai Lan (tt.sale10)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 27.9647687952186%"></div>
+</div>
+<span class="progress-text">889</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 34.3799893560404%"></div>
+</div>
+<span class="progress-text">646
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 85.4483541977437%"></div>
+</div>
+<span class="progress-text">72.67 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 35.365099009901%"></div>
+</div>
+<span class="progress-text">1,143</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 35.9881275195591%"></div>
+</div>
+<span class="progress-text">164,171,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 96.8016854842995%"></div>
+</div>
+<span class="progress-text">254,134.67</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 20.1612903225806%"></div>
+</div>
+<span class="progress-text">50</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 23.2876712328767%"></div>
+</div>
+<span class="progress-text">34
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 88.3999999116%"></div>
+</div>
+<span class="progress-text">68 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 17.7304964539007%"></div>
+</div>
+<span class="progress-text">50</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 20.6013478486262%"></div>
+</div>
+<span class="progress-text">7,948,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 79.538858755359%"></div>
+</div>
+<span class="progress-text">233,764.71</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 34.788311932428%"></div>
+</div>
+<span class="progress-text">172,119,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 96.4137322589216%"></div>
+</div>
+<span class="progress-text">253,116.18</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 6.98264835269928%"></div>
+</div>
+<span class="progress-text">0.23</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-13,089,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    11
+                                </td>
+<td>Lại Giang (tt.sale12)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 8.36741113557722%"></div>
+</div>
+<span class="progress-text">266</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 12.0276742948377%"></div>
+</div>
+<span class="progress-text">226
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 99.90788062828%"></div>
+</div>
+<span class="progress-text">84.96 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 10.9220297029703%"></div>
+</div>
+<span class="progress-text">353</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 11.9452585706112%"></div>
+</div>
+<span class="progress-text">54,492,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 91.8424165686942%"></div>
+</div>
+<span class="progress-text">241,115.04</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 5.24193548387097%"></div>
+</div>
+<span class="progress-text">13</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 6.84931506849315%"></div>
+</div>
+<span class="progress-text">10
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">76.92 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 7.80141843971631%"></div>
+</div>
+<span class="progress-text">22</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 7.61793675479523%"></div>
+</div>
+<span class="progress-text">2,939,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">293,900</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 11.6078268093079%"></div>
+</div>
+<span class="progress-text">57,431,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 92.6943725423164%"></div>
+</div>
+<span class="progress-text">243,351.69</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-4,507,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    12
+                                </td>
+<td>Quỳnh Anh (tt.sale08)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 2.7681660899654%"></div>
+</div>
+<span class="progress-text">88</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 3.40606705694518%"></div>
+</div>
+<span class="progress-text">64
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 85.5205031423466%"></div>
+</div>
+<span class="progress-text">72.73 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 3.77475247524752%"></div>
+</div>
+<span class="progress-text">122</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 3.68318715597537%"></div>
+</div>
+<span class="progress-text">16,802,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">262,531.25</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 3.39598311103745%"></div>
+</div>
+<span class="progress-text">16,802,000</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 100%"></div>
+</div>
+<span class="progress-text">262,531.25</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">-958,000</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    13
+                                </td>
+<td>SALE ADMIN (ttgroup.saleadmin2)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0.0629128656810318%"></div>
+</div>
+<span class="progress-text">2</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0.403225806451613%"></div>
+</div>
+<span class="progress-text">1</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+<tr>
+<td class="text-center">
+                                    14
+                                </td>
+<td>Admin (Admin)
+                                </td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdSoContact">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdSoChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0
+                                    </span></div>
+</td>
+<td class="tdProgress tdTyLeChotDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+<td class="tdProgress tdSoSanPham">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSo">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoTong">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdGiaTriDon">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHuy">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeHoan">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdHoTroCOD">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0</span>
+</div>
+</td>
+<td class="tdProgress tdTyLeDoanhSoKPI">
+<div class="box-progress">
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="70" class="progress-bar" role="progressbar" style="width: 0%"></div>
+</div>
+<span class="progress-text">0 %</span>
+</div>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div style="height: 15px; clear: both;"></div>
+<div class="dragscroll1 tableFixHead table_marketing" style="height: 570px;">
+<table class="table table-bordered table-multi-select pushsale-data-table" data-pushsale-grid-table="primary" id="tableReportMarketing">
+
+<thead><tr class="drags-area pushsale-captured-header-row" style="cursor: grab;">
+<th class="text-center" style="width: 35px;"></th>
+<th class="text-center no-wrap" style="min-width: 10%"></th>
+<th class="text-center" colspan="9" rowspan="1">KHÁCH HÀNG MỚI</th>
+<th class="text-center" colspan="2" rowspan="1">KHÁCH HÀNG CŨ</th>
+<th class="text-center" colspan="3" rowspan="1">
+<span id="dnn_ctr1652_Main_DashboardLoader_DashboardCEOV2_lblDoanhSo_Header_Marketing">DOANH SỐ TỔNG</span></th>
+<th class="text-center" colspan="5" rowspan="1">GIAO HÀNG</th>
+<th class="text-center" colspan="1" rowspan="2" style="width: 5%">KPI</th>
+<th class="text-center" colspan="1" rowspan="2" style="width: 5%">Tỉ lệ KPI (%)</th>
+</tr><tr class="drags-area t28 pushsale-captured-header-row" style="cursor: grab;">
+<th class="text-center" style="width: 35px;">STT</th>
+<th class="text-center" style="width: 10%">MARKETING</th>
+<th class="text-center" style="width: 4%;">Ngân sách</th>
+<th class="text-center" style="width: 4%;">Contact</th>
+<th class="text-center" style="width: 4%;">Giá contact</th>
+<th class="text-center" style="width: 4%;">Đơn chốt</th>
+<th class="text-center" style="width: 5%;">Tỉ lệ chốt đơn (%)</th>
+<th class="text-center" style="width: 4%;">Số sản phẩm</th>
+<th class="text-center" style="width: 5%;">Doanh số</th>
+<th class="text-center" style="width: 5%;">Giá trị đơn</th>
+<th class="text-center" style="width: 4%;">Tỉ lệ NS/DS(%)</th>
+<th class="text-center" style="width: 5%;">Doanh số</th>
+<th class="text-center" style="width: 5%;">Giá trị đơn</th>
+<th class="text-center" style="width: 5%;">Doanh số</th>
+<th class="text-center" style="width: 4%;">Tỉ lệ NS/DS (%)</th>
+<th class="text-center" style="width: 7%;">Giá trị đơn</th>
+<th class="text-center" style="width: 4%;">Tỉ lệ hủy</th>
+<th class="text-center" style="width: 3%;">Tỉ lệ hoàn</th>
+<th class="text-center" style="width: 3%;">Phí COD</th>
+<th class="text-center" style="width: 3%;">Hỗ trợ COD</th>
+<th class="text-center" style="width: 3%;">Đặt cọc</th>
+</tr></thead><tbody data-pushsale-grid-anchor="primary"></tbody></table><div data-pushsale-pagination-anchor="primary"></div>
+</div>
+<div style="height: 5px;"></div>
+</div>
+</div>
+
+
+</div><!-- End_Module_1652 --></div>
+</div></div>
+</div></div>

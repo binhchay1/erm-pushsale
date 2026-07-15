@@ -11,6 +11,7 @@ return [
         'cancel_waybill' => 'Hủy vận đơn',
         'cannot_deliver' => 'Không giao được',
         'deliver_now' => 'Giao ngay',
+        'partial_delivery' => 'Giao hàng một phần',
         'delivery_complete' => 'Hoàn giao hàng',
         'cancel_closing' => 'Hủy đóng đơn',
         'picking_up' => 'Đang lấy hàng',

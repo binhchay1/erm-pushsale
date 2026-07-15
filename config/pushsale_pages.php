@@ -2471,7 +2471,7 @@ return array (
   ),
   '2.4.1' => 
   array (
-    'title' => 'Kết nối dữ liệu',
+    'title' => 'Kết nối landing',
     'columns' => 
     array (
       0 => 
@@ -2519,7 +2519,7 @@ return array (
       7 => 
       array (
         'key' => 'webhook_url',
-        'label' => 'Url kết nối V2',
+        'label' => 'URL nhận dữ liệu',
         'format' => 'text',
       ),
       8 => 
@@ -2547,7 +2547,7 @@ return array (
         'format' => 'text',
       ),
     ),
-    'source' => 'marketing_sources',
+    'source' => 'landing_connections',
     'template_alias' => '2.4.1',
     'slug' => '2-4-1-ket-noi-du-lieu',
     'component' => 'Page_2_4_1',

@@ -1,4 +1,57 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="5.5.1"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="5.5.1"><style>@scope ([data-template-code="5.5.1"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.tt0 { color: #ff0000; } 
+    .tt1 { color: #0b7f16; }
+    .tt2 { color: #007bff; }
+    .ml5 { margin-left: 5px; }
+    th.sep1, td.sep1 {border-left:2px solid #256cc2!important;}
+
+    /* Fix first two rows */
+    .div-overflow-y{height:70vh;overflow-y:auto;}
+    .fixed-2-row-top tr:nth-child(1) th:nth-child(1) { position: sticky; top: 0px; z-index:202; }
+    .fixed-2-row-top tr:nth-child(1) th:nth-child(2) { position: sticky; top: 0px; z-index:202; }
+    .fixed-2-row-top tr:nth-child(1) th { position: sticky; top: 0px; z-index:201; }
+    .fixed-2-row-top tr:nth-child(2) th { position: sticky; top: 29px; z-index:201; }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1663"><a name="1663" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1663_ContentPane"><!-- Start_Module_1663 --><div class="pushsale-template-inner" id="dnn_ctr1663_ModuleContent">
 <style type="text/css">
     .tt0 { color: #ff0000; } 
@@ -21,7 +74,7 @@
 <div class="m-header">
 <div class="col-sm-5">
 <span class="text form-group" id="dnn_ctr1663_Main_BCNhapXuatTheoNgay_lblModuleTitle">Bảng tổng hợp sản phẩm nhập, xuất theo ngày: </span>
-<span id="dnn_ctr1663_Main_BCNhapXuatTheoNgay_lblSoNgay" style="color:#007bff;font-size:14px;font-weight:bold;" title="Số ngày">1</span>
+<span id="dnn_ctr1663_Main_BCNhapXuatTheoNgay_lblSoNgay" style="color:#007bff;font-size:14px;font-weight:bold;" title="Số ngày">14</span>
 </div>
 </div>
 </div>
@@ -29,12 +82,12 @@
 <div class="box-body">
 <div class="row">
 <div class="col-sm-2 form-group">
-<input class="form-control date-range pushsale-native-input" id="dnn_ctr1663_Main_BCNhapXuatTheoNgay__TuNgay_DenNgay" name="dnn$ctr1663$Main$BCNhapXuatTheoNgay$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+<input class="form-control date-range pushsale-native-input" id="dnn_ctr1663_Main_BCNhapXuatTheoNgay__TuNgay_DenNgay" name="dnn$ctr1663$Main$BCNhapXuatTheoNgay$_TuNgay_DenNgay" type="text" value="01/07/2026 00:00 - 14/07/2026 23:59"/>
 </div>
 <div class="col-sm-2">
 <select class="chosen pushsale-native-select" id="dnn_ctr1663_Main_BCNhapXuatTheoNgay__IdKho" name="dnn$ctr1663$Main$BCNhapXuatTheoNgay$_IdKho" style="" title="">
-<option value="-1">--Chọn kho--</option>
-<option selected="selected" value="5456">Kho HB Thủ công</option>
+<option selected="selected" value="-1">--Chọn kho--</option>
+<option value="5456">Kho HB Thủ công</option>
 </select>
 </div>
 <div class="col-sm-2">

@@ -1,4 +1,58 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="1.7.3"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="1.7.3"><style>@scope ([data-template-code="1.7.3"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.dm-tac-nghiep { display: inline-block; font-size: 11px; color: #333; padding: 6px 30px 6px 6px; transition: ease 3s all; white-space: nowrap; }
+        .dm-tac-nghiep:hover, .dm-tac-nghiep.selected { box-shadow: inset 0 0 4px orange; }
+        .dm-tac-nghiep .flag { width: 20px; background-color: #C1E2F4; display: inline-block; height: 14px; float: left; }
+        .dm-tac-nghiep .text { display: inline-block; height: 16px; line-height: 16px; float: left; margin-left: 10px; }
+        .dm-tac-nghiep .count { font-weight: bold; margin-left: 6px; color: orange; float: left; line-height: 16px; transition: ease 3s all; }
+        .dm-tac-nghiep .level-1 { background-color: #a6ffa8 }
+        .dm-tac-nghiep .level-2 { background-color: #8ad6ff }
+        .dm-tac-nghiep .level-3 { background-color: #ffc0cb }
+        .dm-tac-nghiep .level-4 { background-color: orangered; }
+        .dm-tac-nghiep .flash-bg { background-color: red; }
+        .dm-tac-nghiep .live-stream { float: left; width: 5px; height: 5px; border-radius: 50%; background-color: red; margin-left: 5px; margin-top: 6px; display: none; }
+        .dm-tac-nghiep .count.flash-bg { color: white; }
+        .dm-tac-nghiep:hover .aoh { opacity: 1; }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1745"><a name="1745" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1745_ContentPane"><!-- Start_Module_1745 --><div class="pushsale-template-inner" id="dnn_ctr1745_ModuleContent">
 <style type="text/css">
     .dm-tac-nghiep { display: inline-block; font-size: 11px; color: #333; padding: 6px 30px 6px 6px; transition: ease 3s all; white-space: nowrap; }
@@ -27,7 +81,7 @@
 <div class="row">
 <div>
 <div class="col-sm-4 form-group">
-<input class="form-control date-range pushsale-native-input" id="dnn_ctr1745_Main_SearchFilterDataChotDonLog__TuNgay_DenNgay" name="dnn$ctr1745$Main$SearchFilterDataChotDonLog$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+<input class="form-control date-range pushsale-native-input" id="dnn_ctr1745_Main_SearchFilterDataChotDonLog__TuNgay_DenNgay" name="dnn$ctr1745$Main$SearchFilterDataChotDonLog$_TuNgay_DenNgay" type="text" value="14/06/2026 00:00 - 14/07/2026 23:59"/>
 </div>
 <div class="col-sm-2 form-group">
 <input class="form-control pushsale-native-input" id="dnn_ctr1745_Main_SearchFilterDataChotDonLog_txtUsername" name="dnn$ctr1745$Main$SearchFilterDataChotDonLog$txtUsername" placeholder="Username" type="text"/>

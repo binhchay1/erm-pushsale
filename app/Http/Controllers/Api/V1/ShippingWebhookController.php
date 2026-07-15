@@ -20,9 +20,50 @@ class ShippingWebhookController extends Controller
         if ($request->getContentLength() > (int) config('security.webhook.max_payload_kb', 512) * 1024) {
             return $this->error(__('messages.webhook.payload_too_large'), 413);
         }
-
         if (! array_key_exists($provider, config('shipping_partners.providers', []))) {
             return $this->error(__('messages.shipping.provider_unsupported'), 404);
+        }
+
+        $payload = $request->all();
+        $providedSecret = $request->header('X-Webhook-Secret')
+            ?? $request->header('X-Api-Key')
+            ?? $request->query('secret');
+
+        $connections = ShippingPartnerConnection::query()->withoutTenant()
+            ->where('provider', $provider)
+            ->where('is_enabled', true)
+            ->get();
+
+        $connection = $connections->first(function (ShippingPartnerConnection $item) use ($providedSecret, $request): bool {
+            $expected = $item->webhook_secret;
+            if (! filled($expected)) {
+                return false;
+            }
+            if ($providedSecret && hash_equals((string) $expected, (string) $providedSecret)) {
+                return true;
+            }
+
+            $settings = $item->settings ?? [];
+            $header = (string) ($settings['webhook_signature_header'] ?? 'X-Signature');
+            $signature = $request->header($header);
+            if (! $signature) {
+                return false;
+            }
+            $algo = (string) ($settings['webhook_signature_algorithm'] ?? 'sha256');
+            $calculated = hash_hmac($algo, $request->getContent(), (string) $expected);
+            return hash_equals($calculated, preg_replace('/^sha256=/i', '', (string) $signature));
+        });
+
+        // Chỉ cho phép webhook không secret ở local/testing để hỗ trợ phát triển.
+        if (! $connection
+            && app()->environment(['local', 'testing'])
+            && $connections->count() === 1
+            && ! filled($connections->first()->webhook_secret)) {
+            $connection = $connections->first();
+        }
+
+        if (! $connection) {
+            return $this->error(__('messages.shipping.unauthorized'), $connections->isEmpty() ? 503 : 401);
         }
 
         $event = app(InboundEventRecorder::class)->record(
@@ -30,37 +71,12 @@ class ShippingWebhookController extends Controller
             InboundEventSource::ShippingWebhook,
             $provider,
             null,
-            $request->all(),
+            $payload,
         );
-
-        $connection = ShippingPartnerConnection::forProvider($provider);
-
-        if (! $connection->is_enabled && ! app()->environment('local')) {
-            $event->markRejected(503, __('messages.shipping.partner_disabled'));
-
-            return $this->error(__('messages.shipping.partner_disabled'), 503);
-        }
-
-        $expected = $connection->webhook_secret;
-        if ($expected) {
-            $provided = $request->header('X-Webhook-Secret')
-                ?? $request->header('X-Api-Key')
-                ?? $request->query('secret');
-
-            if (! $provided || ! hash_equals($expected, (string) $provided)) {
-                $event->markRejected(401, __('messages.shipping.unauthorized'));
-
-                return $this->error(__('messages.shipping.unauthorized'), 401);
-            }
-        }
-
-        if ($connection->company_id) {
-            $event->update(['company_id' => $connection->company_id]);
-        }
-
+        $event->update(['company_id' => $connection->company_id]);
         $event->markQueued();
 
-        ProcessShippingWebhookJob::dispatch($provider, $request->all(), $event->id);
+        ProcessShippingWebhookJob::dispatch($provider, $payload, $event->id, $connection->company_id);
 
         return $this->success(
             ['queued' => true, 'correlation_id' => $event->correlation_id],

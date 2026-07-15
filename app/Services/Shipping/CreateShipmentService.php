@@ -18,19 +18,34 @@ class CreateShipmentService
 
     public function createForOrder(Order $order, ?string $provider = null): Shipment
     {
-        $order->loadMissing(['items', 'warehouse']);
+        $order->loadMissing(['items', 'warehouse', 'company']);
 
         if (! $order->inventory_deducted_at && ! $this->inventory->hasSufficientStock($order)) {
             throw new RuntimeException(__('messages.shipping_actions.out_of_stock_create'));
         }
 
-        $carrier = $this->registry->resolveForOrder($provider ?? $order->shipping_provider);
+        $providerKey = $provider
+            ?? $order->shipping_provider
+            ?? $order->company?->default_shipping_provider;
 
-        if (! $carrier) {
+        if (! $providerKey || ! $this->registry->has($providerKey)) {
             throw new RuntimeException(__('messages.shipping_actions.no_carrier_configured'));
         }
 
-        return $carrier->createFromOrder($order);
+        $carrier = $this->registry->get($providerKey);
+        if (! $carrier->isReady()) {
+            throw new RuntimeException(__('messages.shipping_actions.no_carrier_configured'));
+        }
+
+        if ($order->shipping_provider !== $providerKey) {
+            $order->update([
+                'shipping_provider' => $providerKey,
+                'shipping_method' => $order->shipping_method
+                    ?: $order->company?->default_shipping_method,
+            ]);
+        }
+
+        return $carrier->createFromOrder($order->fresh(['items', 'warehouse', 'company']));
     }
 
     public function sync(Order $order, ?string $provider = null): Shipment
@@ -74,7 +89,11 @@ class CreateShipmentService
 
     private function carrierForOrder(Order $order, ?string $provider = null): ShippingCarrierInterface
     {
-        $key = $provider ?? $order->shipping_provider ?? $order->shipments()->latest('id')->value('provider');
+        $order->loadMissing('company');
+        $key = $provider
+            ?? $order->shipments()->latest('id')->value('provider')
+            ?? $order->shipping_provider
+            ?? $order->company?->default_shipping_provider;
 
         if (! $key || ! $this->registry->has($key)) {
             throw new RuntimeException(__('messages.shipping_actions.carrier_undetermined'));

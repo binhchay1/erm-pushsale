@@ -33,7 +33,7 @@ function formatDate(value, withTime = false) {
 
 function displayValue(value, format) {
     if (value === null || value === undefined || value === '') return '';
-    if (format === 'currency') return currencyFormatter.format(Number(value) || 0).replace('₫', '').trim();
+    if (format === 'currency') return currencyFormatter.format(Number(value) || 0);
     if (format === 'number') return isNumeric(value) ? numberFormatter.format(Number(value)) : String(value);
     if (format === 'percent') return `${numberFormatter.format(Number(value) || 0)} %`;
     if (format === 'datetime') return formatDate(value, true);

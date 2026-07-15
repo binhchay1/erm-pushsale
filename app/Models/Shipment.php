@@ -21,9 +21,11 @@ class Shipment extends Model
 
     protected $fillable = [
         'order_id', 'provider', 'partner_order_id', 'tracking_number', 'tracking_id',
-        'status_id', 'status_text', 'fee', 'insurance_fee', 'transport', 'state',
+        'status_id', 'status_text', 'fee', 'insurance_fee', 'cod_amount', 'cod_collected', 'cod_remitted',
+        'cod_fee', 'return_fee', 'other_fee', 'compensation_amount', 'transport', 'state',
         'error_message', 'request_payload', 'response_payload',
-        'submitted_at', 'cancelled_at', 'last_synced_at',
+        'submitted_at', 'posted_at', 'picked_up_at', 'delivered_at', 'returning_at', 'returned_at',
+        'cod_remitted_at', 'cancelled_at', 'last_synced_at', 'last_event_at',
     ];
 
     protected function casts(): array
@@ -32,6 +34,13 @@ class Shipment extends Model
             'request_payload' => 'array',
             'response_payload' => 'array',
             'submitted_at' => 'datetime',
+            'posted_at' => 'datetime',
+            'picked_up_at' => 'datetime',
+            'delivered_at' => 'datetime',
+            'returning_at' => 'datetime',
+            'returned_at' => 'datetime',
+            'cod_remitted_at' => 'datetime',
+            'last_event_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'last_synced_at' => 'datetime',
         ];
@@ -40,6 +49,11 @@ class Shipment extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function statusEvents(): HasMany
+    {
+        return $this->hasMany(ShippingStatusEvent::class);
     }
 
     public function apiLogs(): HasMany

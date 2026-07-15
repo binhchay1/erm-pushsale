@@ -7,6 +7,7 @@ use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class MarketingSource extends Model
@@ -80,6 +81,11 @@ class MarketingSource extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function landingConnection(): HasOne
+    {
+        return $this->hasOne(LandingConnection::class);
     }
 
     public function orders(): HasMany

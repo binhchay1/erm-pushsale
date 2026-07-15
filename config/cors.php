@@ -3,6 +3,7 @@
 return [
     'paths' => [
         'api/v1/landing/*',
+        'api/v1/landing-connections/*',
     ],
 
     'allowed_methods' => ['POST', 'OPTIONS'],

@@ -13,8 +13,10 @@ class ShippingPartnerConnection extends Model
 
     protected $fillable = [
         'provider',
+        'integration_mode',
         'is_enabled',
         'credentials',
+        'settings',
         'webhook_secret',
         'last_synced_at',
     ];
@@ -24,6 +26,7 @@ class ShippingPartnerConnection extends Model
         return [
             'is_enabled' => 'boolean',
             'last_synced_at' => 'datetime',
+            'settings' => 'array',
         ];
     }
 
@@ -41,7 +44,12 @@ class ShippingPartnerConnection extends Model
     {
         return static::query()->firstOrCreate(
             ['provider' => $provider],
-            ['is_enabled' => false, 'credentials' => []],
+            [
+                'integration_mode' => (string) config("shipping_partners.providers.{$provider}.integration_mode", 'direct'),
+                'is_enabled' => false,
+                'credentials' => [],
+                'settings' => [],
+            ],
         );
     }
 }

@@ -8,6 +8,8 @@ use App\Enums\DeliveryStatus;
 use App\Enums\DiscountMode;
 use App\Enums\OperationResult;
 use App\Enums\OperationStage;
+use App\Enums\OrgLevel;
+use App\Enums\TeamType;
 use App\Enums\UserRole;
 use App\Models\Team;
 use App\Models\User;
@@ -28,6 +30,10 @@ class FilterOptionsService
     /** @return array<string, mixed> */
     public function forReports(?User $user = null): array
     {
+        $allTeams = $this->teams->optionsWithType();
+        $salesTeams = $allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Sale)->values();
+        $marketingTeams = $allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Marketing)->values();
+
         $options = [
             'dateTypes' => collect(DateType::cases())->map(fn ($e) => [
                 'value' => $e->value,
@@ -47,7 +53,9 @@ class FilterOptionsService
             ])->values(),
             'operationResults' => OperationResult::filterOptions(),
             'closingStatuses' => ClosingStatus::options(),
-            'teams' => $this->teams->optionsWithType(),
+            'teams' => $allTeams,
+            'salesTeams' => $salesTeams,
+            'marketingTeams' => $marketingTeams,
             'products' => $this->products->options(),
             'parentProducts' => $this->products->parentProducts(),
             'warehouses' => $this->warehouses->options(),
@@ -60,14 +68,54 @@ class FilterOptionsService
                 ['value' => 'pending', 'label' => __('filters.reconciliation_pending')],
                 ['value' => 'reconciled', 'label' => __('filters.reconciliation_reconciled')],
             ],
+            'shippingProviders' => collect(config('shipping_partners.providers', []))->map(
+                fn (array $meta, string $provider) => ['value' => $provider, 'label' => $meta['label'] ?? $provider]
+            )->values(),
+            'warehouseCareStatuses' => [
+                ['value' => 'waiting', 'label' => 'Chờ care'],
+                ['value' => 'calling', 'label' => 'Đang liên hệ'],
+                ['value' => 'confirmed', 'label' => 'Đã xác nhận'],
+                ['value' => 'reschedule', 'label' => 'Hẹn giao lại'],
+                ['value' => 'complaint', 'label' => 'Khiếu nại'],
+                ['value' => 'completed', 'label' => 'Hoàn tất'],
+            ],
+            'printedStatuses' => [
+                ['value' => 'printed', 'label' => 'Đã in'],
+                ['value' => 'not_printed', 'label' => 'Chưa in'],
+            ],
+            'depositStatuses' => [
+                ['value' => 'with_deposit', 'label' => 'Có cọc'],
+                ['value' => 'without_deposit', 'label' => 'Không cọc'],
+            ],
+            'trackingAlerts' => [
+                ['value' => 'missing', 'label' => 'Chưa có mã vận đơn'],
+                ['value' => 'has_error', 'label' => 'Có lỗi vận đơn'],
+                ['value' => 'stale', 'label' => 'Quá 24h chưa cập nhật'],
+            ],
         ];
 
+        $elevated = $user && ($user->isAdmin()
+            || $user->is_team_leader
+            || in_array($user->org_level, [OrgLevel::Head, OrgLevel::Supervisor], true));
+
         if ($user?->isSales()) {
-            unset($options['salesUsers'], $options['marketingUsers'], $options['teams']);
+            unset($options['marketingUsers'], $options['marketingTeams']);
+            $options['teams'] = $salesTeams;
+
+            if (! $elevated) {
+                unset($options['salesUsers'], $options['teams'], $options['salesTeams']);
+            }
         } elseif ($user?->role === UserRole::Marketing) {
-            unset($options['salesUsers'], $options['teams']);
-        } elseif ($user && ! $user->isAdmin()) {
-            unset($options['salesUsers'], $options['marketingUsers']);
+            unset($options['salesUsers'], $options['salesTeams']);
+            $options['teams'] = $marketingTeams;
+
+            if (! $elevated) {
+                unset($options['marketingUsers'], $options['teams'], $options['marketingTeams']);
+            }
+        } elseif ($user
+            && ! $user->isAdmin()
+            && ! in_array($user->role, [UserRole::Warehouse, UserRole::Accounting], true)) {
+            unset($options['salesUsers'], $options['marketingUsers'], $options['salesTeams'], $options['marketingTeams']);
         }
 
         return $options;
@@ -185,7 +233,7 @@ class FilterOptionsService
     /** @return list<string> */
     public function warehouseOperationFilterFields(): array
     {
-        return ['date_from', 'date_to', 'product_id', 'search', 'warehouse_id'];
+        return ['date_type', 'date_from', 'date_to', 'product_id', 'search', 'warehouse_id', 'shipping_provider', 'warehouse_care_status', 'printed_status', 'deposit_status', 'tracking_alert', 'sale_id', 'marketer_id', 'team_id', 'marketing_team_id', 'reconciliation_status', 'min_product_quantity', 'max_product_quantity', 'hide_zero_status'];
     }
 
     /** @return list<string> */
@@ -206,7 +254,9 @@ class FilterOptionsService
                 'value' => $e->value,
                 'label' => $e->label(),
             ])->values(),
-            'teams' => $this->teams->optionsWithType(),
+            'teams' => $allTeams,
+            'salesTeams' => $salesTeams,
+            'marketingTeams' => $marketingTeams,
             'teamLeaders' => User::query()
                 ->where(function ($q) {
                     $q->where('is_team_leader', true)

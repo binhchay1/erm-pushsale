@@ -139,6 +139,6 @@ class ShippingFeePresenter
 
     private function formatMoney(int $amount): string
     {
-        return number_format($amount, 0, ',', '.').'đ';
+        return number_format($amount, 0, ',', '.').' ₫';
     }
 }

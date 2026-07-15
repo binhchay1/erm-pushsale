@@ -16,18 +16,18 @@ class Order extends Model
     use BelongsToTenant;
 
     protected $fillable = [
-        'order_code', 'sale_user_id', 'marketer_user_id', 'team_id', 'marketing_source_id',
+        'order_code', 'sale_user_id', 'marketer_user_id', 'team_id', 'marketing_source_id', 'landing_connection_id', 'landing_connection_source_id',
         'warehouse_id', 'product_id', 'customer_name', 'customer_phone', 'phone_carrier',
         'customer_note', 'sale_operation_note', 'shipping_address', 'shipping_address_2', 'receiver_name', 'receiver_phone', 'shipping_notes', 'accounting_notes',
         'internal_recon_note', 'shipping_geo', 'data_arrived_at', 'landing_upsell_hold_until', 'landing_upsell_locked',
         'assigned_at', 'closed_at', 'inventory_deducted_at',
         'desired_delivery_at', 'next_operation_at', 'operation_stage', 'operation_result', 'closing_status',
-        'delivery_status', 'return_reason', 'return_restocked_at',
+        'delivery_status', 'warehouse_care_status', 'warehouse_care_note', 'warehouse_care_user_id', 'printed_at', 'return_reason', 'return_restocked_at',
         'shipping_method', 'shipping_provider', 'carrier_name', 'tracking_number',
         'reconciliation_status', 'is_returning_customer', 'is_duplicate_phone',
         'subtotal', 'discount', 'vat', 'shipping_fee_collected', 'total', 'deposit',
-        'amount_to_collect', 'settled_cod_amount', 'settlement_matched_at',
-        'carrier_service_fee', 'shipping_support_fee',
+        'amount_to_collect', 'settled_cod_amount', 'settlement_matched_at', 'last_delivery_event_at',
+        'carrier_service_fee', 'carrier_return_fee', 'carrier_other_fee', 'carrier_compensation_amount', 'shipping_support_fee',
         'cod_fee', 'cod_support', 'contact_count',
     ];
 
@@ -41,6 +41,8 @@ class Order extends Model
             'closed_at' => 'datetime',
             'inventory_deducted_at' => 'datetime',
             'return_restocked_at' => 'datetime',
+            'printed_at' => 'datetime',
+            'last_delivery_event_at' => 'datetime',
             'desired_delivery_at' => 'datetime',
             'next_operation_at' => 'datetime',
             'settlement_matched_at' => 'datetime',
@@ -104,6 +106,16 @@ class Order extends Model
         return $this->belongsTo(Team::class);
     }
 
+    public function landingConnection(): BelongsTo
+    {
+        return $this->belongsTo(LandingConnection::class)->withTrashed();
+    }
+
+    public function landingConnectionSource(): BelongsTo
+    {
+        return $this->belongsTo(LandingConnectionSource::class)->withTrashed();
+    }
+
     public function marketingSource(): BelongsTo
     {
         return $this->belongsTo(MarketingSource::class);
@@ -127,6 +139,21 @@ class Order extends Model
     public function shipments(): HasMany
     {
         return $this->hasMany(Shipment::class);
+    }
+
+    public function warehouseCareUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'warehouse_care_user_id');
+    }
+
+    public function shippingStatusEvents(): HasMany
+    {
+        return $this->hasMany(ShippingStatusEvent::class);
+    }
+
+    public function returnReceipt(): HasOne
+    {
+        return $this->hasOne(WarehouseReturnReceipt::class);
     }
 
     public function settlementLines(): HasMany
@@ -205,11 +232,14 @@ class Order extends Model
 
     public function shippingCost(): int
     {
-        return (int) (
+        return (int) max(0,
             $this->carrier_service_fee
+            + $this->carrier_return_fee
+            + $this->carrier_other_fee
             + $this->cod_fee
             + $this->shipping_support_fee
             + $this->cod_support
+            - $this->carrier_compensation_amount
         );
     }
 
@@ -274,12 +304,66 @@ class Order extends Model
             $query->where('marketer_user_id', $filter->marketerId);
         }
 
+        if ($filter->marketingTeamLeaderId) {
+            $query->whereHas('marketerUser.team', fn (Builder $team) => $team->where('leader_user_id', $filter->marketingTeamLeaderId));
+        }
+
+        if ($filter->marketingTeamId) {
+            $query->whereHas('marketerUser', fn (Builder $marketer) => $marketer->where('team_id', $filter->marketingTeamId));
+        }
+
         if ($filter->warehouseId) {
             $query->where('warehouse_id', $filter->warehouseId);
         }
 
         if ($filter->shippingMethod) {
             $query->where('shipping_method', $filter->shippingMethod);
+        }
+
+        if ($filter->shippingProvider) {
+            $query->where('shipping_provider', $filter->shippingProvider);
+        }
+
+        if ($filter->warehouseCareStatus) {
+            $query->where('warehouse_care_status', $filter->warehouseCareStatus);
+        }
+
+        if ($filter->printedStatus === 'printed') {
+            $query->whereNotNull('printed_at');
+        } elseif ($filter->printedStatus === 'not_printed') {
+            $query->whereNull('printed_at');
+        }
+
+        if ($filter->depositStatus === 'with_deposit') {
+            $query->where('deposit', '>', 0);
+        } elseif ($filter->depositStatus === 'without_deposit') {
+            $query->where('deposit', '<=', 0);
+        }
+
+        if ($filter->minProductQuantity !== null) {
+            $query->whereRaw(
+                '(SELECT COALESCE(SUM(order_items.quantity), 0) FROM order_items WHERE order_items.order_id = orders.id) >= ?',
+                [$filter->minProductQuantity],
+            );
+        }
+
+        if ($filter->maxProductQuantity !== null) {
+            $query->whereRaw(
+                '(SELECT COALESCE(SUM(order_items.quantity), 0) FROM order_items WHERE order_items.order_id = orders.id) <= ?',
+                [$filter->maxProductQuantity],
+            );
+        }
+
+        if ($filter->trackingAlert === 'missing') {
+            $query->whereNull('tracking_number');
+        } elseif ($filter->trackingAlert === 'has_error') {
+            $query->whereHas('shipments', fn (Builder $shipment) => $shipment->whereNotNull('error_message'));
+        } elseif ($filter->trackingAlert === 'stale') {
+            $query->whereNotNull('tracking_number')
+                ->where(function (Builder $stale): void {
+                    $stale->whereNull('last_delivery_event_at')
+                        ->orWhere('last_delivery_event_at', '<', now()->subHours(24));
+                });
         }
 
         if ($filter->operationActivityStatus === 'not_operated') {

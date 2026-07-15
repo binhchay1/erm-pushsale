@@ -87,6 +87,7 @@ class MarketingSourceRepository
                 'approver:id,name',
                 'rejector:id,name',
                 'product:id,name,sku,unit_price',
+                'landingConnection.sources',
             ])
             ->latest('id');
 

@@ -1,4 +1,52 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="3.3.1"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="3.3.1"><style>@scope ([data-template-code="3.3.1"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.fa-check {
+        color: #238051;
+    }
+
+    .fa-remove {
+        color: red;
+    }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1717"><a name="1717" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1717_ContentPane"><!-- Start_Module_1717 --><div class="pushsale-template-inner" id="dnn_ctr1717_ModuleContent">
 <style type="text/css">
     .fa-check {
@@ -21,7 +69,7 @@
 <span class="text form-group" id="dnn_ctr1717_Main_ThongKeMuaLai_lblModuleTitle">Thống kê khách hàng đa chiều</span>
 </div>
 <div class="col-sm-2 form-group">
-<input class="form-control date-range pushsale-native-input" id="dnn_ctr1717_Main_ThongKeMuaLai__TuNgay_DenNgay" name="dnn$ctr1717$Main$ThongKeMuaLai$_TuNgay_DenNgay" type="text" value="12/07/2026 00:00 - 12/07/2026 23:59"/>
+<input class="form-control date-range pushsale-native-input" id="dnn_ctr1717_Main_ThongKeMuaLai__TuNgay_DenNgay" name="dnn$ctr1717$Main$ThongKeMuaLai$_TuNgay_DenNgay" type="text" value="14/06/2026 00:00 - 14/07/2026 23:59"/>
 </div>
 <div class="col-sm-2 form-group">
 <select class="chosen pushsale-native-select" id="dnn_ctr1717_Main_ThongKeMuaLai_ddlKieuXem" name="dnn$ctr1717$Main$ThongKeMuaLai$ddlKieuXem" style="" title="">
@@ -88,7 +136,7 @@
 <div style="width: calc(100% - 150px); float: left;">
 <input class="form-control hidden pushsale-native-input" id="dnn_ctr1717_Main_ThongKeMuaLai__Keyword" name="dnn$ctr1717$Main$ThongKeMuaLai$_Keyword" placeholder="Tên, phone, mã kh" type="text"/>
 </div>
-<a class="btn-icon" href="#" id="dnn_ctr1717_Main_ThongKeMuaLai_btnToggleSummary" role="button"><i class="fa fa-angle-double-up"></i></a>
+<a class="btn-icon" href="#" id="dnn_ctr1717_Main_ThongKeMuaLai_btnToggleSummary" role="button"><i class="fa fa-angle-double-down"></i></a>
 <a class="btn btn-sm btn-primary" data-pushsale-action="search" href="#" id="dnn_ctr1717_Main_ThongKeMuaLai_btnSearch" role="button">
 <i class="fa fa-search"></i> Tìm kiếm
                                 </a>
@@ -111,7 +159,7 @@
 </div>
 </div>
 </div>
-<div class="box-body" style="padding-bottom: 0px;">
+<div class="box-body hidden" style="padding-bottom: 0px;">
 <div class="row">
 <div class="hidden" id="dnn_ctr1717_Main_ThongKeMuaLai_divDonVi">
 </div>

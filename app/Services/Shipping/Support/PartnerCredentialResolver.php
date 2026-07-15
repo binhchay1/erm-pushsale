@@ -16,13 +16,19 @@ class PartnerCredentialResolver
                 $this->mergeCredentials($provider, $connection->credentials ?? []),
                 fn ($v) => $v !== null && $v !== '',
             ),
+            'settings' => array_merge(
+                config('shipping_partners.default_settings', []),
+                $connection->settings ?? [],
+            ),
+            'integration_mode' => $connection->integration_mode
+                ?: config("shipping_partners.providers.{$provider}.integration_mode", 'direct'),
             'is_enabled' => (bool) $connection->is_enabled,
             'base_url' => $this->baseUrl($provider),
         ];
     }
 
     /**
-     * Hợp nhất credential theo thứ tự ưu tiên: DB → mặc định .env (config) → null.
+     * Hợp nhất credential theo thứ tự ưu tiên: DB → mặc định .env/config → null.
      *
      * @param  array<string, mixed>  $stored
      * @return array<string, mixed>
@@ -30,8 +36,8 @@ class PartnerCredentialResolver
     public function mergeCredentials(string $provider, array $stored): array
     {
         $fields = config("shipping_partners.providers.{$provider}.fields", []);
-
         $merged = [];
+
         foreach ($fields as $key => $field) {
             $merged[$key] = $stored[$key] ?? ($field['default'] ?? null);
         }
@@ -47,36 +53,62 @@ class PartnerCredentialResolver
             return false;
         }
 
-        return match ($provider) {
-            'ghtk' => filled($pack['credentials']['token'] ?? null),
-            'ghn' => filled($pack['credentials']['token'] ?? null)
-                && filled($pack['credentials']['shop_id'] ?? null),
-            'viettel_post' => filled($pack['credentials']['token'] ?? null)
-                || (filled($pack['credentials']['username'] ?? null) && filled($pack['credentials']['password'] ?? null)),
-            'jnt' => filled($pack['credentials']['api_key'] ?? null)
-                && filled($pack['credentials']['api_secret'] ?? null),
-            'spx' => filled($pack['credentials']['user_id'] ?? null)
-                && filled($pack['credentials']['secret_key'] ?? null)
-                && filled($pack['base_url'] ?? null),
-            default => false,
-        };
+        if (($pack['integration_mode'] ?? null) === 'manual' || $provider === 'manual') {
+            return true;
+        }
+
+        $fields = config("shipping_partners.providers.{$provider}.fields", []);
+        $required = collect($fields)
+            ->filter(fn (array $field) => (bool) ($field['required'] ?? false))
+            ->keys();
+
+        if ($required->isEmpty()) {
+            return false;
+        }
+
+        foreach ($required as $key) {
+            if ($key === 'base_url') {
+                if (! filled($pack['base_url'] ?? null)) {
+                    return false;
+                }
+                continue;
+            }
+
+            if (! filled($pack['credentials'][$key] ?? null)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function baseUrl(string $provider): string
     {
         $meta = config("shipping_partners.providers.{$provider}", []);
+        $connection = ShippingPartnerConnection::forProvider($provider);
+        $stored = $connection->credentials ?? [];
 
-        if ($provider === 'ghtk' && ($meta['use_sandbox'] ?? false)) {
-            return $meta['api_staging_url'] ?? 'https://services-staging.ghtklab.com';
+        if (filled($stored['base_url'] ?? null)) {
+            return rtrim((string) $stored['base_url'], '/');
         }
 
-        return $meta['api_base_url'] ?? '';
+        if ($provider === 'ghtk' && ($meta['use_sandbox'] ?? false)) {
+            return rtrim((string) ($meta['api_staging_url'] ?? 'https://services-staging.ghtklab.com'), '/');
+        }
+
+        return rtrim((string) ($meta['api_base_url'] ?? ''), '/');
+    }
+
+    /** @return array<string, mixed> */
+    public function settings(string $provider): array
+    {
+        return $this->credentials($provider)['settings'];
     }
 
     public function trackingUrl(string $provider, string $code): ?string
     {
         $template = config("shipping_partners.providers.{$provider}.tracking_url");
 
-        return $template ? str_replace('{code}', $code, $template) : null;
+        return $template ? str_replace('{code}', urlencode($code), $template) : null;
     }
 }

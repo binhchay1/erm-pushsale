@@ -17,6 +17,27 @@ function createApiError(response, data = {}) {
     return error;
 }
 
+
+export async function apiRequest(url, { method = 'GET', body } = {}) {
+    const headers = {
+        Accept: 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+    };
+    if (body !== undefined) {
+        headers['Content-Type'] = 'application/json';
+        headers['X-CSRF-TOKEN'] = getCsrfToken();
+    }
+    const response = await fetch(url, {
+        method,
+        headers,
+        credentials: 'same-origin',
+        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw createApiError(response, data);
+    return data;
+}
+
 export async function apiPost(url, body = {}) {
     const response = await fetch(url, {
         method: 'POST',

@@ -98,9 +98,11 @@ Route::redirect('pages/2-3-ho-so-khach-hang', '/admin/marketing/customers', 301)
 
 Route::get('marketing/landing-connections', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_1Controller::class, 'index'])->name('marketing.landing-connections');
 Route::post('marketing/landing-connections/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_1Controller::class, 'store'])->name('marketing.landing-connections.store');
+Route::delete('marketing/landing-connections/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_1Controller::class, 'destroyMany'])->name('marketing.landing-connections.destroy-many');
 Route::match(['put', 'patch'], 'marketing/landing-connections/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_1Controller::class, 'update'])->whereNumber('record')->name('marketing.landing-connections.update');
 Route::delete('marketing/landing-connections/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_1Controller::class, 'destroy'])->whereNumber('record')->name('marketing.landing-connections.destroy');
 Route::redirect('pages/2-4-1-ket-noi-du-lieu', '/admin/marketing/landing-connections', 301);
+Route::redirect('pages/2-4-1-ket-noi-landing', '/admin/marketing/landing-connections', 301);
 
 Route::get('marketing/website-connections', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_2Controller::class, 'index'])->name('marketing.website-connections');
 Route::post('marketing/website-connections/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_2Controller::class, 'store'])->name('marketing.website-connections.store');

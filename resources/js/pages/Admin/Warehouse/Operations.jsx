@@ -1,98 +1,45 @@
 import { Head, router } from '@inertiajs/react';
+import { Banknote, Boxes, CircleDollarSign, RotateCcw, Truck } from 'lucide-react';
 
 import AppLayout from '@/layouts/AppLayout';
-import { PageHeader } from '@/components/layout/PageHeader';
-import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
-import { PushsalePager } from '@/components/reports/PushsaleReportChrome';
-import { StatusTabs } from '@/components/operations/StatusTabs';
+import { WarehouseFilterPanel } from '@/components/operations/WarehouseFilterPanel';
 import { WarehouseOrderTable } from '@/components/operations/WarehouseOrderTable';
-import { useT } from '@/providers/I18nProvider';
+import { PushsalePager } from '@/components/reports/PushsaleReportChrome';
+import { formatCurrency, formatNumber } from '@/lib/format';
 
-function WarehousePagination({ meta, routeUrl, filters }) {
+function Pagination({ meta, routeUrl, filters }) {
     if (!meta) return null;
-
-    const visit = (overrides = {}) => {
-        router.get(routeUrl, {
-            ...filters,
-            ...overrides,
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        });
-    };
-
-    return (
-        <div className="ps-warehouse-pagination">
-            <div>Hiển thị {meta.from ?? 0} - {meta.to ?? 0} / {meta.total ?? 0} đơn hàng</div>
-            <PushsalePager
-                current={meta.current_page ?? 1}
-                totalPages={meta.last_page ?? 1}
-                onPage={(page) => visit({ page })}
-            />
-            <label>
-                Hiển thị
-                <select
-                    value={meta.per_page ?? 20}
-                    onChange={(event) => visit({ page: 1, per_page: event.target.value })}
-                >
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
-                dòng
-            </label>
-        </div>
-    );
+    const visit = (overrides) => router.get(routeUrl, { ...filters, ...overrides }, { preserveState: true, preserveScroll: true, replace: true });
+    return <div className="ps-wh-pagination"><span>Hiển thị {meta.from ?? 0} - {meta.to ?? 0} / {meta.total ?? 0} đơn</span><PushsalePager current={meta.current_page ?? 1} totalPages={meta.last_page ?? 1} onPage={(page) => visit({ page })} /><label>Hiển thị <select value={meta.per_page ?? 20} onChange={(e) => visit({ page: 1, per_page: e.target.value })}><option>10</option><option>20</option><option>50</option><option>100</option></select> dòng</label></div>;
 }
 
 export default function WarehouseOperations({
-    filters = {},
-    filterOptions = {},
-    filterFields = [],
-    report = { rows: { data: [], meta: null }, statusTabs: [] },
-    pageTitle,
-    routeUrl = '/admin/warehouse/operations',
-    shippingApiBase = '/admin/shipping/orders',
-    canDeleteOrder = false,
-    activeMenuCode = '5.1',
+    filters = {}, filterOptions = {}, report = { rows: { data: [], meta: null }, statusTabs: [], summary: {} },
+    pageTitle = 'Thủ kho tác nghiệp', routeUrl = '/admin/warehouse/operations', shippingApiBase = '/admin/shipping/orders',
+    actionApiBase = '/admin/warehouse/orders', canDeleteOrder = false, activeMenuCode = '5.1',
 }) {
-    const t = useT();
-    const title = pageTitle ?? t('pages.warehouse_ops.title');
-    const rows = report?.rows?.data ?? [];
-    const meta = report?.rows?.meta ?? null;
+    const setTab = (value) => router.get(routeUrl, { ...filters, delivery_status: value === 'all' ? undefined : value, page: 1 }, { preserveState: true, preserveScroll: true, replace: true });
+    const active = filters.delivery_status ?? 'all';
+    const summary = report.summary ?? {};
 
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
-            <Head title={title} />
+            <Head title={pageTitle} />
+            <section className="ps-wh-page">
+                <header className="ps-wh-titlebar"><h1>{pageTitle}</h1><p>Điều phối xuất kho, vận đơn, webhook, hàng hoàn, COD và phí giao vận trên cùng một luồng.</p></header>
+                <WarehouseFilterPanel routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} />
 
-            <section className="ps-warehouse-operations-page">
-                <PageHeader title={title} description={t('pages.warehouse_ops.desc')} />
-
-                <div className="ps-warehouse-operation-content">
-                    <ReportFilterBar
-                        routeUrl={routeUrl}
-                        filters={filters}
-                        filterOptions={filterOptions}
-                        filterFields={filterFields}
-                    />
-
-                    <StatusTabs
-                        routeUrl={routeUrl}
-                        filters={filters}
-                        tabs={report.statusTabs ?? []}
-                        filterKey="delivery_status"
-                    />
-
-                    <WarehouseOrderTable
-                        rows={rows}
-                        apiBase={shippingApiBase}
-                        canDeleteOrder={canDeleteOrder}
-                    />
-
-                    <WarehousePagination meta={meta} routeUrl={routeUrl} filters={filters} />
+                <div className="ps-wh-summary">
+                    <div><Boxes /><span>Đơn trong bộ lọc</span><strong>{formatNumber(summary.orders ?? 0)}</strong></div>
+                    <div><CircleDollarSign /><span>Tổng giá trị đơn</span><strong>{formatCurrency(summary.grossRevenue ?? 0)}</strong></div>
+                    <div><Banknote /><span>COD dự kiến / đã thu</span><strong>{formatCurrency(summary.codExpected ?? 0)} / {formatCurrency(summary.codSettled ?? 0)}</strong></div>
+                    <div><Truck /><span>Chi phí giao vận</span><strong>{formatCurrency(summary.carrierCost ?? 0)}</strong></div>
+                    <div><RotateCcw /><span>Đơn hoàn</span><strong>{formatNumber(summary.returns ?? 0)}</strong></div>
                 </div>
+
+                <div className="ps-wh-tabs">{(report.statusTabs ?? []).map((tab) => <button key={tab.value} className={active === tab.value ? 'active' : ''} onClick={() => setTab(tab.value)}>{tab.label} <b>({tab.count})</b></button>)}</div>
+                <WarehouseOrderTable rows={report.rows?.data ?? []} apiBase={shippingApiBase} actionApiBase={actionApiBase} filterOptions={filterOptions} canDeleteOrder={canDeleteOrder} />
+                <Pagination meta={report.rows?.meta} routeUrl={routeUrl} filters={filters} />
             </section>
         </AppLayout>
     );

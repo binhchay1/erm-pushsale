@@ -10,6 +10,7 @@ use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class LeadOrderFactory
 {
@@ -100,6 +101,7 @@ class LeadOrderFactory
                 'origin' => $normalized['item_origin'] ?? 'landing',
                 'quantity' => $qty,
                 'unit_price' => $product?->unit_price ?? 0,
+                'cost_price' => $this->productCost($product),
             ]);
         }
 
@@ -114,6 +116,17 @@ class LeadOrderFactory
      */
     public function buildItemRows(array $items, string $defaultOrigin = 'system'): array
     {
+        $productIds = collect($items)
+            ->pluck('product_id')
+            ->filter()
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+        $products = Product::query()
+            ->whereIn('id', $productIds)
+            ->get(['id', 'type', 'cost_price'])
+            ->keyBy('id');
+        $comboCosts = $this->comboCosts($productIds);
         $rows = [];
 
         foreach ($items as $item) {
@@ -122,21 +135,60 @@ class LeadOrderFactory
                 continue;
             }
 
+            $productId = filled($item['product_id'] ?? null) ? (int) $item['product_id'] : null;
+            $product = $productId ? $products->get($productId) : null;
+            $costPrice = $product
+                ? max(0, (int) ($product->cost_price ?: ($comboCosts[$productId] ?? 0)))
+                : 0;
+
             $rows[] = [
-                'product_id' => $item['product_id'] ?? null,
+                'product_id' => $productId,
                 'product_name' => $name,
                 'item_type' => in_array($item['item_type'] ?? null, ['product', 'combo', 'upsell', 'gift'], true)
                     ? $item['item_type']
                     : 'combo',
                 'origin' => $item['origin'] ?? $defaultOrigin,
                 'quantity' => max(1, (int) ($item['quantity'] ?? 1)),
+                // Giá bán có thể đến từ mapping backend của kết nối landing; giá vốn
+                // tuyệt đối không lấy từ request/client mà luôn tra từ catalog nội bộ.
                 'unit_price' => max(0, (int) ($item['unit_price'] ?? 0)),
+                'cost_price' => $costPrice,
                 'discount_amount' => max(0, (int) ($item['discount_amount'] ?? 0)),
                 'meta' => $item['meta'] ?? null,
             ];
         }
 
         return $rows;
+    }
+
+    private function productCost(?Product $product): int
+    {
+        if (! $product) {
+            return 0;
+        }
+
+        $cost = max(0, (int) $product->cost_price);
+        if ($cost > 0 || ! $product->isCombo()) {
+            return $cost;
+        }
+
+        return (int) ($this->comboCosts(collect([$product->id]))[$product->id] ?? 0);
+    }
+
+    /** @return \Illuminate\Support\Collection<int, int> */
+    private function comboCosts(\Illuminate\Support\Collection $productIds): \Illuminate\Support\Collection
+    {
+        if ($productIds->isEmpty() || ! \Illuminate\Support\Facades\Schema::hasTable('product_combo_items')) {
+            return collect();
+        }
+
+        return DB::table('product_combo_items as combo_items')
+            ->join('products as components', 'components.id', '=', 'combo_items.component_product_id')
+            ->whereIn('combo_items.combo_product_id', $productIds)
+            ->selectRaw('combo_items.combo_product_id, SUM(combo_items.quantity * COALESCE(components.cost_price, 0)) as aggregate_cost')
+            ->groupBy('combo_items.combo_product_id')
+            ->pluck('aggregate_cost', 'combo_items.combo_product_id')
+            ->map(fn ($value): int => max(0, (int) $value));
     }
 
     /**

@@ -76,3 +76,48 @@ Queue production được quản lý bởi Laravel Horizon, tách riêng từng 
 ## Landing + upsell 90 giây
 
 Luồng form chính → trang cảm ơn khác domain → gộp upsell vào cùng đơn được mô tả tại [`docs/LANDING_UPSELL_90S_FLOW.md`](docs/LANDING_UPSELL_90S_FLOW.md).
+
+## V13 — Kết nối Landing thay Campaign
+
+Menu `2.4.1 — Kết nối landing` là điểm khởi tạo luồng Marketing mới. Một kết nối quản lý đồng thời Landing chính, các trang upsale/cảm ơn, mapping sản phẩm backend, danh sách Sale và cách chia số. Form gửi trực tiếp vào URL API riêng của từng source; ERM không yêu cầu nhúng SDK JavaScript.
+
+Tài liệu triển khai và nghiệp vụ:
+
+- [`docs/LANDING_CONNECTION_FLOW_V13.md`](docs/LANDING_CONNECTION_FLOW_V13.md)
+- [`docs/CONTEXT_HANDOFF_V13.md`](docs/CONTEXT_HANDOFF_V13.md)
+
+Sau khi cập nhật mã nguồn:
+
+```bash
+php artisan migrate --force
+php artisan optimize:clear
+npm ci --ignore-scripts
+npm run build
+php artisan horizon:terminate
+```
+
+## V14 — Điều hành tài chính và template-five
+
+V14 bổ sung ngân sách trực tiếp trên Kết nối Landing và làm lại Admin Dashboard thành bảng điều hành dòng tiền khép kín. Báo cáo tách doanh số đã chốt, doanh thu đã ghi nhận, tiền đã thu, COD chưa thu; đồng thời trừ Marketing, giá vốn snapshot, vận chuyển, lương/thưởng và chi phí vận hành để ra lợi nhuận ròng.
+
+Tài liệu:
+
+- [`docs/FINANCIAL_CONTROL_V14.md`](docs/FINANCIAL_CONTROL_V14.md)
+- [`docs/CONTEXT_HANDOFF_V14.md`](docs/CONTEXT_HANDOFF_V14.md)
+
+## V15 — Template-six reports và menu theo vai trò
+
+V15 tích hợp các trang báo cáo `4.5.1` đến `4.5.8` và `6.3.9`, dùng backend thật và bổ sung upsale vào toàn bộ công thức liên quan. Contact chỉ tính packet landing chính; packet upsale không làm tăng mẫu số. Hai báo cáo doanh số kho giữ đủ 12 nhóm Pushsale, đồng bộ với Marketing Dashboard và tách riêng doanh số upsale.
+
+`partial_delivery` được đưa thành trạng thái doanh thu chính thức. Menu báo cáo được tái sử dụng theo role, quyền khu vực và cấp staff/leader; Sales, Marketing, Warehouse và Accounting nhận đúng route/menu nghiệp vụ thay vì nhìn nguyên cây Admin.
+
+- [`docs/TEMPLATE_SIX_REPORTS_V15.md`](docs/TEMPLATE_SIX_REPORTS_V15.md)
+- [`docs/CONTEXT_HANDOFF_V15.md`](docs/CONTEXT_HANDOFF_V15.md)
+
+## V16 — Tác nghiệp kho và giao vận khép kín
+
+V16 làm lại màn thủ kho theo template-seven, thay trang cấu hình giao vận cũ và nối trực tiếp luồng kho với vận đơn, webhook, hàng hoàn, COD và phí vận chuyển. Hệ thống hỗ trợ adapter direct, adapter cấu hình chuẩn cho đối tác trung gian/multi-carrier, timeline webhook, xuất kho idempotent và biên bản nhập hoàn theo từng sản phẩm.
+
+- [`docs/WAREHOUSE_SHIPPING_FLOW_V16.md`](docs/WAREHOUSE_SHIPPING_FLOW_V16.md)
+- [`docs/CONTEXT_HANDOFF_V16.md`](docs/CONTEXT_HANDOFF_V16.md)
+- [`docs/RELEASE_VALIDATION_V16.md`](docs/RELEASE_VALIDATION_V16.md)

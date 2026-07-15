@@ -1,9 +1,9 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useMemo, useRef, useState } from 'react';
 
+import { CurrencyInput } from '@/components/ui/currency-input';
 import AppLayout from '@/layouts/AppLayout';
-
-const number = new Intl.NumberFormat('vi-VN');
+import { formatCurrency, formatNumber } from '@/lib/format';
 
 function Modal({ title, open, onClose, children, wide = false }) {
     if (!open) return null;
@@ -180,11 +180,11 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                                 <td>{row.category_names}</td>
                                 <td><strong>{row.name}</strong>{row.sku && <small>({row.sku})</small>}</td>
                                 <td className="text-center">{row.unit}</td>
-                                <td className="text-right">{row.cost_price ? number.format(row.cost_price) : ''}</td>
-                                <td className="text-right"><strong>{number.format(row.unit_price)}</strong></td>
+                                <td className="text-right">{row.cost_price ? formatCurrency(row.cost_price) : ''}</td>
+                                <td className="text-right"><strong>{formatCurrency(row.unit_price)}</strong></td>
                                 <td className="text-center">{row.vat_percent} %</td>
                                 <td className="text-center">{row.vat_code}</td>
-                                <td className="text-center">{number.format(row.weight_grams)}</td>
+                                <td className="text-center">{formatNumber(row.weight_grams)}</td>
                                 <td className="text-center"><input type="checkbox" readOnly checked={!row.is_active} /></td>
                                 <td className="text-center">{row.available_marketing ? <i className="fa fa-check text-green" /> : ''}</td>
                                 <td className="text-center">{row.available_sale ? <i className="fa fa-check text-green" /> : ''}</td>
@@ -208,8 +208,8 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                         <label>Mã SP<input className="form-control" value={productForm.data.sku} onChange={(event) => productForm.setData('sku', event.target.value)} /></label>
                         <label>KL(gram)<input className="form-control" type="number" min="0" value={productForm.data.weight_grams} onChange={(event) => productForm.setData('weight_grams', Number(event.target.value))} /></label>
                         <label>Đ.vị tính<input className="form-control" value={productForm.data.unit} onChange={(event) => productForm.setData('unit', event.target.value)} /></label>
-                        <label>Giá nhập<input className="form-control" type="number" min="0" value={productForm.data.cost_price} onChange={(event) => productForm.setData('cost_price', Number(event.target.value))} /></label>
-                        <label>Đơn giá<input className="form-control" type="number" min="0" value={productForm.data.unit_price} onChange={(event) => productForm.setData('unit_price', Number(event.target.value))} required /></label>
+                        <label>Giá nhập (VND)<CurrencyInput className="form-control" min="0" value={productForm.data.cost_price} onChange={(value) => productForm.setData('cost_price', value)} /></label>
+                        <label>Đơn giá (VND)<CurrencyInput className="form-control" min="0" value={productForm.data.unit_price} onChange={(value) => productForm.setData('unit_price', value)} required /></label>
                         <label>SP ngừng kinh doanh<span className="ps-check-label"><input type="checkbox" checked={!productForm.data.is_active} onChange={(event) => productForm.setData('is_active', !event.target.checked)} /> Ngừng kinh doanh</span></label>
                         <label>Mã VAT<input className="form-control" value={productForm.data.vat_code} onChange={(event) => productForm.setData('vat_code', event.target.value)} /></label>
                         <label>VAT (%)<input className="form-control" type="number" min="0" max="100" value={productForm.data.vat_percent} onChange={(event) => productForm.setData('vat_percent', Number(event.target.value))} /></label>

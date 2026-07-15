@@ -4,6 +4,7 @@ namespace App\Data;
 
 use App\Enums\DateType;
 use App\Enums\DiscountMode;
+use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use App\Models\User;
 use App\Services\Reports\ReportDateRange;
@@ -32,6 +33,13 @@ readonly class ReportFilterData
         public ?int $marketerId = null,
         public ?int $warehouseId = null,
         public ?string $shippingMethod = null,
+        public ?string $shippingProvider = null,
+        public ?string $warehouseCareStatus = null,
+        public ?string $printedStatus = null,
+        public ?string $depositStatus = null,
+        public ?int $minProductQuantity = null,
+        public ?int $maxProductQuantity = null,
+        public ?string $trackingAlert = null,
         public ?string $careStatus = null,
         public ?string $operationActivityStatus = null,
         public ?string $operationStage = null,
@@ -50,12 +58,12 @@ readonly class ReportFilterData
         $dateRange = ReportDateRange::fromRequest($request);
 
         $saleId = $request->integer('sale_id') ?: null;
-        if ($user?->isSales()) {
+        if ($user?->isSales() && ! self::isElevatedOperator($user)) {
             $saleId = $user->id;
         }
 
         $marketerId = $request->integer('marketer_id') ?: null;
-        if ($user?->role === UserRole::Marketing) {
+        if ($user?->role === UserRole::Marketing && ! self::isElevatedOperator($user)) {
             $marketerId = $user->id;
         }
 
@@ -79,6 +87,13 @@ readonly class ReportFilterData
             marketerId: $marketerId,
             warehouseId: $request->integer('warehouse_id') ?: null,
             shippingMethod: $request->input('shipping_method'),
+            shippingProvider: $request->input('shipping_provider'),
+            warehouseCareStatus: $request->input('warehouse_care_status'),
+            printedStatus: $request->input('printed_status'),
+            depositStatus: $request->input('deposit_status'),
+            minProductQuantity: $request->integer('min_product_quantity') ?: null,
+            maxProductQuantity: $request->integer('max_product_quantity') ?: null,
+            trackingAlert: $request->input('tracking_alert'),
             careStatus: $request->input('care_status'),
             operationActivityStatus: $request->input('operation_activity_status'),
             operationStage: $request->input('operation_stage'),
@@ -93,6 +108,12 @@ readonly class ReportFilterData
         );
     }
 
+
+    private static function isElevatedOperator(User $user): bool
+    {
+        return $user->is_team_leader
+            || in_array($user->org_level, [OrgLevel::Head, OrgLevel::Supervisor], true);
+    }
 
     /** Giữ nguyên mọi bộ lọc nhưng bỏ tab tác nghiệp để tính tổng số theo từng bước. */
     public function withoutOperationStage(): self
@@ -135,6 +156,15 @@ readonly class ReportFilterData
         return $this->withDateRange(Carbon::now()->startOfDay(), Carbon::now()->endOfDay());
     }
 
+    public function withDateType(DateType $dateType): self
+    {
+        if ($this->dateType === $dateType) {
+            return $this;
+        }
+
+        return new self(...array_merge(get_object_vars($this), ['dateType' => $dateType]));
+    }
+
     /** @return array<string, mixed> */
     public function toInertia(): array
     {
@@ -158,6 +188,13 @@ readonly class ReportFilterData
             'marketer_id' => $this->marketerId,
             'warehouse_id' => $this->warehouseId,
             'shipping_method' => $this->shippingMethod,
+            'shipping_provider' => $this->shippingProvider,
+            'warehouse_care_status' => $this->warehouseCareStatus,
+            'printed_status' => $this->printedStatus,
+            'deposit_status' => $this->depositStatus,
+            'min_product_quantity' => $this->minProductQuantity,
+            'max_product_quantity' => $this->maxProductQuantity,
+            'tracking_alert' => $this->trackingAlert,
             'care_status' => $this->careStatus,
             'operation_activity_status' => $this->operationActivityStatus,
             'operation_stage' => $this->operationStage,

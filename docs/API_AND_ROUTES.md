@@ -179,6 +179,11 @@ Các endpoint dưới đây là thiết kế mục tiêu — triển khai khi c�
 | DELETE | `/admin/warehouse-inventories/{id}` | admin.warehouse-inventories.destroy | |
 | GET | `/admin/orders/failed` | admin.orders.failed | Đơn lỗi |
 | GET | `/admin/rankings` | admin.rankings | Xếp hạng |
+| GET | `/admin/marketing/landing-connections` | admin.marketing.landing-connections | Trang 2.4.1, dữ liệu backend thật |
+| POST | `/admin/marketing/landing-connections/records` | admin.marketing.landing-connections.store | Tạo kết nối + sources + products + sales |
+| PUT | `/admin/marketing/landing-connections/records/{record}` | admin.marketing.landing-connections.update | Cập nhật nguyên tử |
+| DELETE | `/admin/marketing/landing-connections/records` | admin.marketing.landing-connections.destroy-many | Xóa nhiều |
+| DELETE | `/admin/marketing/landing-connections/records/{record}` | admin.marketing.landing-connections.destroy | Ngừng/xóa kết nối |
 | GET | `/admin/landing-approvals` | admin.landing-approvals.index | Duyệt landing |
 | POST | `/admin/landing-approvals/{id}/approve` | admin.landing-approvals.approve | |
 | GET | `/admin/integrations` | admin.integrations.index | Tích hợp nền tảng |
@@ -223,12 +228,12 @@ Các endpoint dưới đây là thiết kế mục tiêu — triển khai khi c�
 | GET | `/marketing/dashboard` | marketing.dashboard | Dashboard |
 | GET | `/marketing/rankings` | marketing.rankings | Xếp hạng |
 | GET | `/marketing/workspace` | marketing.workspace | Workspace MKT |
-| GET | `/marketing/campaigns` | marketing.campaigns.index | Danh sách chiến dịch |
-| GET | `/marketing/campaigns/create` | marketing.campaigns.create | Tạo chiến dịch |
-| POST | `/marketing/campaigns` | marketing.campaigns.store | |
-| GET | `/marketing/campaigns/{id}/edit` | marketing.campaigns.edit | |
-| PUT | `/marketing/campaigns/{id}` | marketing.campaigns.update | |
-| DELETE | `/marketing/campaigns/{id}` | marketing.campaigns.destroy | |
+| GET | `/marketing/campaigns` | marketing.campaigns.index | Redirect tương thích sang `/admin/marketing/landing-connections` |
+| GET | `/marketing/campaigns/create` | marketing.campaigns.create | Redirect tương thích sang Kết nối Landing |
+| POST | `/marketing/campaigns` | marketing.campaigns.store | 410 — không còn cho tạo campaign độc lập |
+| GET | `/marketing/campaigns/{id}/edit` | marketing.campaigns.edit | Redirect tương thích |
+| PUT | `/marketing/campaigns/{id}` | marketing.campaigns.update | 410 |
+| DELETE | `/marketing/campaigns/{id}` | marketing.campaigns.destroy | 410 |
 | GET | `/marketing/revenue` | marketing.revenue | BC doanh số |
 | GET | `/marketing/campaign-report` | marketing.campaign-report | BC chiến dịch |
 | PATCH | `/marketing/campaigns/{id}/budget` | marketing.campaigns.budget | |

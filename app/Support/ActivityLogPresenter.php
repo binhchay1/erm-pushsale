@@ -145,7 +145,7 @@ class ActivityLogPresenter
 
     private static function money(mixed $value): string
     {
-        return number_format((float) $value, 0, ',', '.').'đ';
+        return number_format((float) $value, 0, ',', '.').' ₫';
     }
 
     private static function deliveryLabel(string $value): string

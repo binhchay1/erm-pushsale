@@ -16,6 +16,8 @@ use App\Models\Team;
 use App\Models\User;
 use App\Support\ActivityLogger;
 use App\Support\LeadContactMetrics;
+use App\Support\OrderRevenueClassifier;
+use App\Services\Marketing\MarketingBudgetService;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,9 +26,16 @@ use Illuminate\Support\Facades\DB;
 
 class PushsaleMarketingDashboardService
 {
+    private ?MarketingDashboardFilterData $activeFilter = null;
+
+    public function __construct(
+        private readonly MarketingBudgetService $budgetService,
+    ) {}
+
     /** @return array<string, mixed> */
     public function build(MarketingDashboardFilterData $filter): array
     {
+        $this->activeFilter = $filter;
         $sources = $this->sourceQuery($filter)
             ->with([
                 'product:id,parent_id,name',
@@ -531,15 +540,9 @@ class PushsaleMarketingDashboardService
             });
         }
 
-        match ($filter->revenueMode) {
-            'returning' => $query->where('delivery_status', 'returning'),
-            'returned' => $query->where('delivery_status', 'returned'),
-            'shipping' => $query->whereIn('delivery_status', ['waiting_waybill', 'posted', 'picking_up', 'delivering', 'redelivery']),
-            'delivered', 'actual' => $query->whereIn('delivery_status', ['delivered', 'paid', 'delivery_complete']),
-            'reconciling' => $query->whereIn('reconciliation_status', ['pending', 'mismatch', 'short_paid', 'over_paid', 'missing_settlement']),
-            'partial' => $query->whereIn('delivery_status', ['partial', 'partial_delivery']),
-            default => null,
-        };
+        if ($filter->revenueMode !== 'cancelled') {
+            OrderRevenueClassifier::applyMode($query, $filter->revenueMode);
+        }
 
         $this->applyOrderDate($query, $filter);
 
@@ -670,16 +673,31 @@ class PushsaleMarketingDashboardService
         $contacts = $ingestionSet->count();
         $budget = (int) $metricSet->sum('budget');
         $clicks = (int) $metricSet->sum('clicks');
-        if ($metricSet->isEmpty() && $level === 1) {
-            // Dữ liệu dự án cũ chỉ lưu tổng ngân sách/tương tác trên nguồn.
-            // Dùng làm fallback cho đến khi người dùng nhập số liệu theo ngày.
-            $budget = (int) $source->budget + (int) $source->children->sum('budget');
-            $clicks = (int) $source->interactions + (int) $source->children->sum('interactions');
+        if ($level === 1) {
+            // Luồng mới ghép thực chi/kế hoạch theo từng nguồn và từng ngày.
+            // Nguồn cũ chưa có landing_connection vẫn dùng cột tương thích.
+            $effective = $this->activeFilter
+                ? $this->budgetService->effectiveForSourceIds(
+                    $sourceIds,
+                    $this->activeFilter->dateFrom,
+                    $this->activeFilter->dateTo,
+                )
+                : ['amount' => 0];
+            $connectionBudget = (int) ($effective['amount'] ?? 0);
+            if ($connectionBudget > 0 || $metricSet->isNotEmpty()) {
+                $budget = $connectionBudget;
+            } elseif ($budget === 0) {
+                $budget = (int) $source->budget + (int) $source->children->sum('budget');
+            }
+            if ($metricSet->isEmpty()) {
+                $clicks = (int) $source->interactions + (int) $source->children->sum('interactions');
+            }
         }
-        $closedOrders = $orderSet->count();
-        $productQuantity = (int) $orderSet->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
-        $grossRevenue = (int) $orderSet->sum(fn (Order $order): int => max((int) $order->subtotal, $order->items->sum(fn ($item) => (int) $item->quantity * (int) $item->unit_price)));
-        $netRevenue = (int) $orderSet->sum(fn (Order $order): int => $order->effectiveRevenue());
+        $closedOrderSet = $orderSet->filter(fn (Order $order): bool => $order->closed_at !== null);
+        $closedOrders = $closedOrderSet->count();
+        $productQuantity = (int) $closedOrderSet->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
+        $grossRevenue = (int) $closedOrderSet->sum(fn (Order $order): int => max((int) $order->subtotal, $order->items->sum(fn ($item) => (int) $item->quantity * (int) $item->unit_price)));
+        $netRevenue = (int) $closedOrderSet->sum(fn (Order $order): int => $order->effectiveRevenue());
         $utmMedium = $level >= 3 ? $this->summarizePayloadUtm($ingestionSet, 'utm_medium') : '';
         $utmTerm = $level >= 3 ? $this->summarizePayloadUtm($ingestionSet, 'utm_term') : '';
         $utmContent = $level >= 3 ? $this->summarizePayloadUtm($ingestionSet, 'utm_content') : '';

@@ -77,6 +77,22 @@ function CommonToolbar({ title, routeUrl, filters, filterOptions, filterFields =
                         onChange={(value) => set('marketer_id', value)}
                     />
                 )}
+                {fields.has('team_id') && (
+                    <PushsaleSelect
+                        placeholder="--Nhóm sale--"
+                        value={draft.team_id ?? ''}
+                        options={filterOptions.salesTeams ?? filterOptions.teams ?? []}
+                        onChange={(value) => set('team_id', value)}
+                    />
+                )}
+                {fields.has('marketing_team_id') && (
+                    <PushsaleSelect
+                        placeholder="--Nhóm marketing--"
+                        value={draft.marketing_team_id ?? ''}
+                        options={filterOptions.marketingTeams ?? []}
+                        onChange={(value) => set('marketing_team_id', value)}
+                    />
+                )}
                 {fields.has('warehouse_id') && (
                     <PushsaleSelect
                         placeholder="--Chọn kho--"
@@ -115,10 +131,9 @@ const SALE_STAGES = [
 
 function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
-    const [operationFilter, setOperationFilter] = useState('');
-    const [teamType, setTeamType] = useState('leader');
-    const [teamId, setTeamId] = useState('');
+    const fields = new Set(filterFields);
     const [pageSize, setPageSize] = useState('50');
+    const [page, setPage] = useState(1);
     const operationOptions = SALE_STAGES.map(([value, label]) => ({ value, label }));
 
     const totalWithUntouched = useMemo(() => {
@@ -132,54 +147,90 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
         return base;
     }, [rows, totals]);
 
+    const perPage = Number(pageSize) || 50;
+    const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
+    const safePage = Math.min(page, totalPages);
+    const visibleRows = rows.slice((safePage - 1) * perPage, safePage * perPage);
+    const fromRow = rows.length === 0 ? 0 : (safePage - 1) * perPage + 1;
+    const toRow = Math.min(rows.length, safePage * perPage);
+
+    const submit = () => {
+        setPage(1);
+        apply();
+    };
+
     return (
         <section className="ps-report-page ps-sale-work-report">
             <div className="ps-report-topbar ps-extra-toolbar ps-sale-work-toolbar">
                 <h1>{title}</h1>
                 <div className="ps-extra-toolbar-controls">
-                    <PushsaleSelect
-                        placeholder="Ngày sale nhận data"
-                        value={draft.date_type ?? ''}
-                        options={filterOptions.dateTypes ?? []}
-                        onChange={(value) => set('date_type', value)}
-                    />
+                    {fields.has('date_type') && (
+                        <PushsaleSelect
+                            placeholder="Ngày sale nhận data"
+                            value={draft.date_type ?? ''}
+                            options={filterOptions.dateTypes ?? []}
+                            onChange={(value) => set('date_type', value)}
+                        />
+                    )}
                     <PushsaleDateRange filters={draft} onChange={set} />
-                    <PushsaleSelect
-                        placeholder="Chọn tác nghiệp"
-                        value={operationFilter}
-                        options={operationOptions}
-                        onChange={setOperationFilter}
-                    />
+                    {fields.has('operation_stage') && (
+                        <PushsaleSelect
+                            placeholder="Chọn tác nghiệp"
+                            value={draft.operation_stage ?? ''}
+                            options={operationOptions}
+                            onChange={(value) => set('operation_stage', value)}
+                        />
+                    )}
+                    {fields.has('product_id') && (
+                        <PushsaleSelect
+                            placeholder="--Chọn sản phẩm--"
+                            value={draft.product_id ?? ''}
+                            options={filterOptions.products ?? []}
+                            onChange={(value) => set('product_id', value)}
+                        />
+                    )}
                     <div className="ps-topbar-actions">
                         <button type="button" className="ps-collapse-filter" title="Thu gọn bộ lọc" aria-label="Thu gọn bộ lọc">
                             <i className="fa fa-angle-double-up" aria-hidden="true" />
                         </button>
-                        <PushsaleSearchButton onClick={() => apply()} />
+                        <PushsaleSearchButton onClick={submit} />
                         <PushsaleExportButton routeUrl={routeUrl} filters={draft} />
                     </div>
                 </div>
             </div>
             <div className="ps-sale-work-secondary">
-                <PushsaleSelect
-                    placeholder="Trưởng nhóm"
-                    value={teamType}
-                    options={[{ value: 'leader', label: 'Trưởng nhóm' }, { value: 'staff', label: 'Nhân viên' }]}
-                    onChange={setTeamType}
-                />
-                <PushsaleSelect
-                    placeholder="--Chọn nhóm--"
-                    value={teamId}
-                    options={filterOptions.teams ?? []}
-                    onChange={setTeamId}
-                />
+                {fields.has('sale_id') && (
+                    <PushsaleSelect
+                        placeholder="--Chọn sale--"
+                        value={draft.sale_id ?? ''}
+                        options={filterOptions.salesUsers ?? []}
+                        onChange={(value) => set('sale_id', value)}
+                    />
+                )}
+                {fields.has('team_id') && (
+                    <PushsaleSelect
+                        placeholder="--Chọn nhóm sale--"
+                        value={draft.team_id ?? ''}
+                        options={filterOptions.salesTeams ?? filterOptions.teams ?? []}
+                        onChange={(value) => set('team_id', value)}
+                    />
+                )}
                 <PushsaleSelect
                     placeholder="50"
                     value={pageSize}
-                    options={[{ value: '50', label: '50' }, { value: '100', label: '100' }]}
-                    onChange={setPageSize}
+                    options={[
+                        { value: '50', label: '50' },
+                        { value: '100', label: '100' },
+                        { value: '200', label: '200' },
+                    ]}
+                    onChange={(value) => { setPageSize(value); setPage(1); }}
                 />
             </div>
-            <div className="ps-grid-count">1 - {Math.max(1, rows.length)} / {Math.max(1, rows.length)} <button disabled>‹</button><button disabled>›</button></div>
+            <div className="ps-grid-count">
+                {fromRow} - {toRow} / {rows.length}
+                <button type="button" disabled={safePage <= 1} onClick={() => setPage(Math.max(1, safePage - 1))}>‹</button>
+                <button type="button" disabled={safePage >= totalPages} onClick={() => setPage(Math.min(totalPages, safePage + 1))}>›</button>
+            </div>
             <div className="ps-table-scroll">
                 <table className="ps-table ps-sale-work-table">
                     <thead>
@@ -209,9 +260,9 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
                                 <td key={`${key}-untouched-total`}>{formatNumber(totalWithUntouched[`stage_${key}_untouched`])}</td>,
                             ])}
                         </tr>
-                        {rows.map((row, index) => (
+                        {visibleRows.map((row, index) => (
                             <tr key={`${row.name}-${index}`}>
-                                <td>{index + 2}</td>
+                                <td>{(safePage - 1) * perPage + index + 2}</td>
                                 <td className="ps-text-left">{row.name}</td>
                                 <td>{formatNumber(row.contacts)}</td>
                                 <td>{formatNumber(row.untouched)}</td>
@@ -221,10 +272,13 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
                                 ])}
                             </tr>
                         ))}
+                        {visibleRows.length === 0 && (
+                            <tr><td colSpan={24} className="ps-empty">Không có dữ liệu.</td></tr>
+                        )}
                     </tbody>
                 </table>
             </div>
-            <PushsalePager current={1} totalPages={1} />
+            <PushsalePager current={safePage} totalPages={totalPages} onPage={setPage} />
         </section>
     );
 }
@@ -240,15 +294,17 @@ function dateProgress(filters) {
     return { totalDays, worked, remaining, progress: Math.min(100, Math.round((worked / totalDays) * 100)) };
 }
 
-function SaleKpiReport({ rows, totals, filters, filterOptions, routeUrl }) {
+function SaleKpiReport({ rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
-    const achieved = rows[0] ?? totals ?? {};
+    const fields = new Set(filterFields);
+    const achieved = filters.sale_id ? (rows[0] ?? totals ?? {}) : (totals ?? rows[0] ?? {});
     const time = dateProgress(draft);
     const cells = [
         ['new_contacts', 'number'], ['new_closed', 'number'], ['new_rate', 'percent'],
         ['old_contacts', 'number'], ['old_closed', 'number'], ['old_rate', 'percent'],
         ['total_closed', 'number'], ['expected_rev', 'currency'], ['base_salary', 'currency'],
         ['bonus', 'currency'], ['income', 'currency'], ['actual_rev', 'currency'],
+        ['upsell_qty', 'number'], ['upsell_rev', 'currency'],
     ];
 
     return (
@@ -256,12 +312,14 @@ function SaleKpiReport({ rows, totals, filters, filterOptions, routeUrl }) {
             <div className="ps-report-topbar ps-extra-toolbar">
                 <h1>Sale KPI 2</h1>
                 <div className="ps-kpi-toolbar-controls">
-                    <PushsaleSelect
-                        placeholder="--Chọn sale--"
-                        value={draft.sale_id ?? ''}
-                        options={filterOptions.salesUsers ?? []}
-                        onChange={(value) => set('sale_id', value)}
-                    />
+                    {fields.has('sale_id') && (
+                        <PushsaleSelect
+                            placeholder="--Chọn sale--"
+                            value={draft.sale_id ?? ''}
+                            options={filterOptions.salesUsers ?? []}
+                            onChange={(value) => set('sale_id', value)}
+                        />
+                    )}
                     <PushsaleDateRange filters={draft} onChange={set} />
                     <PushsaleSearchButton onClick={() => apply()} />
                     <PushsaleExportButton routeUrl={routeUrl} filters={draft} />
@@ -278,19 +336,33 @@ function SaleKpiReport({ rows, totals, filters, filterOptions, routeUrl }) {
                                 <th>Contact cũ</th><th>Chốt đơn</th><th>Tỉ lệ</th>
                                 <th>Tổng đơn chốt</th><th>Doanh số dự kiến</th><th>Lương cứng</th>
                                 <th>Thưởng dự kiến</th><th>Tổng thu nhập</th><th>Doanh số thực</th>
+                                <th>Upsale (SL)</th><th>Upsale (DS)</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><th>Target</th>{cells.map(([key]) => <td key={key}>{key.includes('rate') ? '%' : ''}</td>)}</tr>
-                            <tr><th>Đã đạt</th>{cells.map(([key, format]) => <td key={key}>{formatCell(achieved[key], format) || (format === 'percent' ? '%' : '')}</td>)}</tr>
-                            <tr><th>Tiến độ</th>{cells.map(([key]) => <td key={key} />)}</tr>
-                            <tr><th>Tình trạng</th>{cells.map(([key]) => <td key={key} />)}</tr>
+                            <tr><th>Target</th>{cells.map(([key, format]) => {
+                                const targetKey = `target_${key}`;
+                                const target = achieved[targetKey] ?? null;
+                                return <td key={key}>{target === null ? '—' : formatCell(target, format)}</td>;
+                            })}</tr>
+                            <tr><th>Đã đạt</th>{cells.map(([key, format]) => <td key={key}>{formatCell(achieved[key], format) || (format === 'percent' ? '0%' : '0')}</td>)}</tr>
+                            <tr><th>Tiến độ</th>{cells.map(([key]) => {
+                                const target = Number(achieved[`target_${key}`] ?? 0);
+                                const value = Number(achieved[key] ?? 0);
+                                return <td key={key}>{target > 0 ? `${Math.min(999, Math.round(value * 100 / target))}%` : '—'}</td>;
+                            })}</tr>
+                            <tr><th>Tình trạng</th>{cells.map(([key]) => {
+                                const target = Number(achieved[`target_${key}`] ?? 0);
+                                const value = Number(achieved[key] ?? 0);
+                                return <td key={key} className={target > 0 && value >= target ? 'ps-kpi-ok' : 'ps-kpi-pending'}>{target > 0 ? (value >= target ? 'Đạt' : 'Đang chạy') : '—'}</td>;
+                            })}</tr>
                         </tbody>
                     </table>
                     <div className="ps-kpi-progress-bar"><span>Doanh số đạt:</span></div>
                     <div className="ps-kpi-notes">
                         <div>* Số contact tính theo [ngày sale nhận data] nằm trong khoảng ngày đã chọn</div>
                         <div>* Số chốt đơn tính theo [ngày chốt đơn] nằm trong khoảng ngày đã chọn</div>
+                        <div>* Upsale cộng doanh thu và số lượng sản phẩm nhưng không tạo thêm contact/KPI lead.</div>
                     </div>
                 </div>
                 <div>
@@ -336,8 +408,9 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
                             <th rowSpan={2}>% hoàn</th><th rowSpan={2}>% hủy</th><th rowSpan={2}>% XNGH</th>
                             <th rowSpan={2}>% giao TC</th><th rowSpan={2}>Contact</th><th rowSpan={2}>Tỷ lệ chốt</th>
                             <th rowSpan={2}>Số SP</th><th rowSpan={2}>Đơn TB</th><th rowSpan={2}>% DS hoàn</th><th rowSpan={2}>% DS hủy</th>
+                            <th colSpan={6} className="ps-upsell-group">UPSALE</th>
                         </tr>
-                        <tr>{REVENUE_GROUPS.flatMap(([label]) => [<th key={`${label}-q`}>SL</th>, <th key={`${label}-r`}>Doanh số</th>])}</tr>
+                        <tr>{REVENUE_GROUPS.flatMap(([label]) => [<th key={`${label}-q`}>SL</th>, <th key={`${label}-r`}>Doanh số</th>])}<th>SP gốc</th><th>DS gốc</th><th>SL upsale</th><th>DS upsale</th><th>% đơn upsale</th><th>% DS upsale</th></tr>
                     </thead>
                     <tbody>
                         {totals && (
@@ -347,6 +420,9 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
                                 {['pct_returned','pct_cancel','pct_xngh','pct_success','contacts','close_rate','product_count','avg_order','pct_rev_returned','pct_rev_cancel'].map((key) => (
                                     <td key={key}>{formatCell(totals[key], key.includes('pct') || key === 'close_rate' ? 'percent' : key === 'avg_order' ? 'currency' : 'number')}</td>
                                 ))}
+                                <td>{formatNumber(totals.base_qty)}</td><td>{formatCurrency(totals.base_rev)}</td>
+                                <td>{formatNumber(totals.upsell_qty)}</td><td>{formatCurrency(totals.upsell_rev)}</td>
+                                <td>{formatCell(totals.upsell_order_rate, 'percent')}</td><td>{formatCell(totals.upsell_revenue_share, 'percent')}</td>
                             </tr>
                         )}
                         {rows.map((row, index) => (
@@ -356,6 +432,9 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
                                 {['pct_returned','pct_cancel','pct_xngh','pct_success','contacts','close_rate','product_count','avg_order','pct_rev_returned','pct_rev_cancel'].map((key) => (
                                     <td key={key}>{formatCell(row[key], key.includes('pct') || key === 'close_rate' ? 'percent' : key === 'avg_order' ? 'currency' : 'number')}</td>
                                 ))}
+                                <td>{formatNumber(row.base_qty)}</td><td>{formatCurrency(row.base_rev)}</td>
+                                <td>{formatNumber(row.upsell_qty)}</td><td>{formatCurrency(row.upsell_rev)}</td>
+                                <td>{formatCell(row.upsell_order_rate, 'percent')}</td><td>{formatCell(row.upsell_revenue_share, 'percent')}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -439,6 +518,208 @@ function WarehousePendingReport({ rows, filters, filterOptions, routeUrl }) {
     );
 }
 
+
+function ReportTotalRow({ totals, fields, label = 'Tổng' }) {
+    if (!totals) return null;
+    return (
+        <tr className="ps-total-row">
+            <td>1</td><td className="ps-text-left">{label}</td>
+            {fields.map(([key, format]) => <td key={key}>{formatCell(totals[key], format)}</td>)}
+        </tr>
+    );
+}
+
+function SaleClosingSummaryReport({ rows, totals, filters, filterOptions, filterFields, routeUrl }) {
+    const fields = [
+        ['new_contacts','number'],['new_closed','number'],['new_rate','percent'],['new_gross','currency'],['new_discount','currency'],['new_net','currency'],
+        ['old_closed','number'],['old_gross','currency'],['old_discount','currency'],['old_net','currency'],
+        ['total_closed','number'],['total_rate','percent'],['total_gross','currency'],['total_discount','currency'],['total_net','currency'],
+        ['upsell_qty','number'],['upsell_revenue','currency'],
+    ];
+    return (
+        <section className="ps-report-page ps-closing-summary-report">
+            <CommonToolbar title="Bảng tổng hợp chốt đơn" routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} filterFields={filterFields} />
+            <div className="ps-table-scroll">
+                <table className="ps-table ps-grouped-report-table">
+                    <thead>
+                        <tr><th rowSpan={2}>STT</th><th rowSpan={2}>TELESALE</th><th colSpan={6}>CONTACT MỚI</th><th colSpan={4}>KHÁCH HÀNG CŨ</th><th colSpan={5}>TỔNG</th><th colSpan={2} className="ps-upsell-group">UPSALE</th></tr>
+                        <tr><th>Contact</th><th>Chốt đơn</th><th>Tỷ lệ</th><th>Doanh số</th><th>Chiết khấu</th><th>Sau CK</th><th>Chốt đơn</th><th>Doanh số</th><th>Chiết khấu</th><th>Sau CK</th><th>Chốt đơn</th><th>Tỷ lệ</th><th>Doanh số</th><th>Chiết khấu</th><th>Sau CK</th><th>SL</th><th>Doanh số</th></tr>
+                    </thead>
+                    <tbody>
+                        <ReportTotalRow totals={totals} fields={fields} />
+                        {rows.map((row, index) => <tr key={`${row.name}-${index}`}><td>{index + 2}</td><td className="ps-text-left">{row.name}</td>{fields.map(([key, format]) => <td key={key}>{formatCell(row[key], format)}</td>)}</tr>)}
+                        {rows.length === 0 && <tr><td colSpan={19} className="ps-empty">Không có dữ liệu.</td></tr>}
+                    </tbody>
+                </table>
+            </div>
+            <PushsalePager current={1} totalPages={1} />
+        </section>
+    );
+}
+
+function RevenueGroupSelector({ groups, selectedKeys, onChange, defaultKeys = [] }) {
+    const selected = new Set(selectedKeys);
+    const setAll = () => onChange(groups.map((group) => group.key));
+    const reset = () => onChange(defaultKeys.length > 0 ? defaultKeys : groups.slice(0, 4).map((group) => group.key));
+    const toggle = (key) => {
+        const next = new Set(selectedKeys);
+        if (next.has(key)) next.delete(key);
+        else next.add(key);
+        onChange(groups.filter((group) => next.has(group.key)).map((group) => group.key));
+    };
+
+    return (
+        <div className="ps-revenue-group-bar">
+            <div className="ps-revenue-group-summary">
+                <strong>Nhóm doanh số</strong>
+                <span>Đang hiển thị {selectedKeys.length}/{groups.length} nhóm; dữ liệu xuất Excel vẫn gồm đầy đủ.</span>
+            </div>
+            <details className="ps-revenue-group-picker">
+                <summary>Chọn doanh số hiển thị</summary>
+                <div className="ps-revenue-group-popover">
+                    <div className="ps-revenue-group-actions">
+                        <button type="button" onClick={setAll}>Chọn tất cả</button>
+                        <button type="button" onClick={reset}>Mặc định 1–4</button>
+                    </div>
+                    <div className="ps-revenue-group-options">
+                        {groups.map((group) => (
+                            <label key={group.key} title={group.description}>
+                                <input
+                                    type="checkbox"
+                                    checked={selected.has(group.key)}
+                                    onChange={() => toggle(group.key)}
+                                />
+                                <span>{group.number}. {group.label}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            </details>
+        </div>
+    );
+}
+
+function WarehouseSalesSummaryReport({ rows, totals, filters, filterOptions, filterFields, routeUrl, extra = {} }) {
+    const groups = extra.revenueGroups ?? [];
+    const defaultKeys = extra.defaultRevenueGroups ?? groups.slice(0, 4).map((group) => group.key);
+    const [selectedKeys, setSelectedKeys] = useState(defaultKeys);
+    const selected = new Set(selectedKeys);
+    const visibleGroups = groups.filter((group) => selected.has(group.key));
+    const fields = [
+        ...visibleGroups.flatMap((group) => [
+            [`${group.key}_revenue`, 'currency'],
+            [`${group.key}_orders`, 'number'],
+            [`${group.key}_avg`, 'currency'],
+            [`${group.key}_products`, 'number'],
+            [`${group.key}_products_per_order`, 'number'],
+        ]),
+        ['upsell_qty', 'number'], ['upsell_revenue', 'currency'], ['upsell_share', 'percent'],
+    ];
+
+    return (
+        <section className="ps-report-page ps-warehouse-sales-summary">
+            <CommonToolbar title="Báo cáo doanh số theo kho" routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} filterFields={filterFields} />
+            <RevenueGroupSelector groups={groups} selectedKeys={selectedKeys} onChange={setSelectedKeys} defaultKeys={defaultKeys} />
+            <div className="ps-table-scroll"><table className="ps-table ps-grouped-report-table"><thead>
+                <tr>
+                    <th rowSpan={2}>STT</th><th rowSpan={2}>TÊN KHO</th>
+                    {visibleGroups.map((group) => <th key={group.key} colSpan={5} title={group.description}>{group.label} ({group.number})</th>)}
+                    <th colSpan={3} className="ps-upsell-group">UPSALE</th>
+                </tr>
+                <tr>
+                    {visibleGroups.flatMap((group) => ['Doanh số', 'Số đơn', 'TB/đơn', 'Số SP', 'SP/đơn'].map((label) => <th key={`${group.key}-${label}`}>{label}</th>))}
+                    <th>SL</th><th>Doanh số</th><th>Tỷ trọng</th>
+                </tr>
+            </thead><tbody>
+                <ReportTotalRow totals={totals} fields={fields} />
+                {rows.map((row, index) => <tr key={row.warehouse_id ?? index}><td>{index + 2}</td><td className="ps-text-left">{row.name}</td>{fields.map(([key, format]) => <td key={key}>{formatCell(row[key], format)}</td>)}</tr>)}
+                {rows.length === 0 && <tr><td colSpan={2 + fields.length} className="ps-empty">Không có dữ liệu.</td></tr>}
+            </tbody></table></div><PushsalePager current={1} totalPages={1} />
+        </section>
+    );
+}
+
+function WarehouseSalesV2Report({ rows, totals, filters, filterOptions, filterFields, routeUrl, extra = {} }) {
+    const groups = extra.revenueGroups ?? [];
+    const defaultKeys = extra.defaultRevenueGroups ?? groups.slice(0, 4).map((group) => group.key);
+    const [selectedKeys, setSelectedKeys] = useState(defaultKeys);
+    const selected = new Set(selectedKeys);
+    const visibleGroups = groups.filter((group) => selected.has(group.key));
+    const fields = [
+        ['contacts', 'number'], ['closed_contacts', 'number'], ['close_rate', 'percent'],
+        ...visibleGroups.flatMap((group) => [
+            [`${group.key}_orders`, 'number'],
+            [`${group.key}_products`, 'number'],
+            [`${group.key}_avg`, 'currency'],
+            [`${group.key}_revenue`, 'currency'],
+        ]),
+        ['upsell_qty', 'number'], ['upsell_revenue', 'currency'], ['upsell_share', 'percent'],
+    ];
+
+    return (
+        <section className="ps-report-page ps-warehouse-sales-v2">
+            <CommonToolbar title="Báo cáo doanh số V2" routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} filterFields={filterFields} />
+            <RevenueGroupSelector groups={groups} selectedKeys={selectedKeys} onChange={setSelectedKeys} defaultKeys={defaultKeys} />
+            <div className="ps-table-scroll"><table className="ps-table ps-grouped-report-table ps-v2-table"><thead>
+                <tr>
+                    <th rowSpan={2}>STT</th><th rowSpan={2}>TÊN KHO</th><th colSpan={3}>PHỄU CONTACT</th>
+                    {visibleGroups.map((group) => <th key={group.key} colSpan={4} title={group.description}>{group.label} ({group.number})</th>)}
+                    <th colSpan={3} className="ps-upsell-group">UPSALE</th>
+                </tr>
+                <tr>
+                    <th>Contact</th><th>Chốt</th><th>Tỷ lệ</th>
+                    {visibleGroups.flatMap((group) => ['Số đơn', 'Số SP', 'TB/đơn', 'Doanh số'].map((label) => <th key={`${group.key}-${label}`}>{label}</th>))}
+                    <th>SL</th><th>Doanh số</th><th>Tỷ trọng</th>
+                </tr>
+            </thead><tbody>
+                <ReportTotalRow totals={totals} fields={fields} />
+                {rows.map((row, index) => <tr key={row.warehouse_id ?? index}><td>{index + 2}</td><td className="ps-text-left">{row.name}</td>{fields.map(([key, format]) => <td key={key}>{formatCell(row[key], format)}</td>)}</tr>)}
+                {rows.length === 0 && <tr><td colSpan={2 + fields.length} className="ps-empty">Không có dữ liệu.</td></tr>}
+            </tbody></table></div><PushsalePager current={1} totalPages={1} />
+        </section>
+    );
+}
+
+function AppointmentCardsReport({ rows, totals, filters, filterOptions, filterFields, routeUrl }) {
+    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const fields = new Set(filterFields);
+    return (
+        <section className="ps-report-page ps-appointment-report">
+            <div className="ps-report-topbar ps-extra-toolbar"><h1>Báo cáo lịch hẹn telesales</h1><div className="ps-extra-toolbar-controls">
+                <PushsaleDateRange filters={draft} onChange={set} />
+                {fields.has('operation_stage') && <PushsaleSelect placeholder="--Tác nghiệp--" value={draft.operation_stage ?? ''} options={filterOptions.operationStages ?? []} onChange={(value)=>set('operation_stage',value)} />}
+                {fields.has('operation_result') && <PushsaleSelect placeholder="--Kết quả--" value={draft.operation_result ?? ''} options={filterOptions.operationResults ?? []} onChange={(value)=>set('operation_result',value)} />}
+                {fields.has('team_id') && <PushsaleSelect placeholder="--Nhóm sale--" value={draft.team_id ?? ''} options={filterOptions.salesTeams ?? filterOptions.teams ?? []} onChange={(value)=>set('team_id',value)} />}
+                {fields.has('sale_id') && <PushsaleSelect placeholder="--Chọn sale--" value={draft.sale_id ?? ''} options={filterOptions.salesUsers ?? []} onChange={(value)=>set('sale_id',value)} />}
+                <PushsaleSearchButton onClick={()=>apply()} /><PushsaleExportButton routeUrl={routeUrl} filters={draft} />
+            </div></div>
+            <div className="ps-appointment-summary"><span>Tổng lịch hẹn</span><strong>{formatNumber(totals?.count ?? 0)}</strong><small>Không nhân đôi bởi packet upsale</small></div>
+            <div className="ps-appointment-grid">{rows.map((row,index)=><article key={row.date_iso ?? index} className={`ps-appointment-card ${row.overdue ? 'is-overdue' : ''}`}><div className="ps-appointment-card-head"><span>{row.weekday}</span><strong>{row.date}</strong></div><div className="ps-appointment-count">{formatNumber(row.count)}</div><div className="ps-appointment-label">lịch hẹn gọi lại</div><div className="ps-appointment-sales" title={row.sales}>{row.sales}</div></article>)}</div>
+        </section>
+    );
+}
+
+function ProductConversionMatrixReport({ rows, totals, extra, filters, filterOptions, filterFields, routeUrl }) {
+    const groups = extra?.groups ?? [];
+    const core = [['contacts','number'],['closed','number'],['rate','percent'],['revenue','currency'],['avg','currency'],['upsell_qty','number'],['upsell_revenue','currency'],['upsell_share','percent']];
+    const personFields = [['contacts','number'],['closed','number'],['rate','percent'],['revenue','currency'],['avg','currency']];
+    const renderMetrics = (record, prefix='') => personFields.map(([key,format])=><td key={`${prefix}${key}`}>{formatCell(record?.[`${prefix}${key}`],format)}</td>);
+    return (
+        <section className="ps-report-page ps-product-conversion-report">
+            <CommonToolbar title="Tỉ lệ chốt đơn sản phẩm" routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} filterFields={filterFields} />
+            <div className="ps-matrix-legend"><span>Contact chỉ đếm lead gốc</span><span>Doanh số gồm sản phẩm gốc + upsale</span><span>Doanh số sản phẩm tính theo từng dòng hàng</span></div>
+            <div className="ps-table-scroll"><table className="ps-table ps-product-matrix-table"><thead>
+                <tr><th rowSpan={2}>STT</th><th rowSpan={2}>ID</th><th rowSpan={2}>SẢN PHẨM</th><th colSpan={8}>TỔNG HỢP</th>{groups.map((group)=><th key={group.prefix} colSpan={5} className={group.role==='marketing'?'is-marketing':'is-sales'}>{group.label}</th>)}</tr>
+                <tr>{['Contact','Chốt đơn','Tỷ lệ','Doanh số','AVG','Upsale SL','Upsale DS','% Upsale'].map((label)=><th key={label}>{label}</th>)}{groups.flatMap((group)=>['Contact','Chốt','Tỷ lệ','Doanh số','AVG'].map((label)=><th key={`${group.prefix}${label}`}>{label}</th>))}</tr>
+            </thead><tbody>
+                {totals && <tr className="ps-total-row"><td>1</td><td /><td className="ps-text-left">Tổng</td>{core.map(([key,format])=><td key={key}>{formatCell(totals[key],format)}</td>)}{groups.flatMap((group)=>renderMetrics(totals,group.prefix))}</tr>}
+                {rows.map((row,index)=><tr key={row.product_key ?? index}><td>{index+2}</td><td>{row.product_id ?? '—'}</td><td className="ps-text-left ps-sticky-product">{row.name}</td>{core.map(([key,format])=><td key={key}>{formatCell(row[key],format)}</td>)}{groups.flatMap((group)=>renderMetrics(row,group.prefix))}</tr>)}
+                {rows.length===0 && <tr><td colSpan={11+groups.length*5} className="ps-empty">Không có dữ liệu.</td></tr>}
+            </tbody></table></div>
+        </section>
+    );
+}
+
 function GenericReport({ title, rows, totals, columns, filters, filterOptions, filterFields, routeUrl, t, labels }) {
     const perPage = 50;
     const [page, setPage] = useState(1);
@@ -476,6 +757,8 @@ export default function ExtraReport({
     filterOptions = {},
     filterFields = [],
     routeUrl,
+    extra = {},
+    activeMenuCode = null,
 }) {
     const t = useT();
     const labels = useLabels();
@@ -485,8 +768,18 @@ export default function ExtraReport({
     let content;
     if (meta.key === 'sale-1') {
         content = <SaleWorkReport title="Báo cáo công việc sale" rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
+    } else if (meta.key === 'sale-2') {
+        content = <SaleClosingSummaryReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
     } else if (meta.key === 'sale-4') {
-        content = <SaleKpiReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} routeUrl={routeUrl} />;
+        content = <SaleKpiReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
+    } else if (meta.key === 'sale-5') {
+        content = <AppointmentCardsReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
+    } else if (meta.key === 'warehouse-sales-summary') {
+        content = <WarehouseSalesSummaryReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} extra={extra} />;
+    } else if (meta.key === 'warehouse-sales-v2') {
+        content = <WarehouseSalesV2Report rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} extra={extra} />;
+    } else if (meta.key === 'product-conversion') {
+        content = <ProductConversionMatrixReport rows={rows} totals={totals} extra={extra} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
     } else if (meta.key === 'kho-1') {
         content = <WarehousePendingReport rows={rows} filters={filters} filterOptions={filterOptions} routeUrl={routeUrl} />;
     } else if (isRevenueDetail) {
@@ -496,7 +789,7 @@ export default function ExtraReport({
     }
 
     return (
-        <AppLayout>
+        <AppLayout activeMenuCode={activeMenuCode}>
             <Head title={meta.key === 'sale-4' ? 'Sale KPI 2' : title} />
             {content}
         </AppLayout>

@@ -1,4 +1,119 @@
-<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="5.3.1"><div class="content-wrapper" style="min-height: 737px;">
+<div class="pushsale-template-fragment pushsale-page-fragment" data-template-code="5.3.1"><style>@scope ([data-template-code="5.3.1"]) {
+.left-none {
+        display: none;
+    }
+
+    .select2-container-multi {
+        height: auto !important;
+    }
+
+    .modal-loading .modal-dialog {
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+    }
+
+        .modal-loading .modal-dialog .modal-content {
+            background-color: transparent;
+            border: none;
+        }
+
+    #vnp_chat {
+        bottom: 0px !important;
+        right: 0px !important;
+    }
+.table-line {
+        font-size: 12px;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table-line th {
+            text-align: left;
+            padding: 8px;
+            font-size: 11px;
+            font-style: italic;
+            vertical-align: bottom;
+        }
+
+        .table-line td {
+            text-align: left;
+            border-top: 1px solid #aaa;
+            padding: 2px;
+        }
+
+    .form-control {
+        display: unset;
+        font-size: 11px;
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    .h-label {
+        font-weight: normal;
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    .h-text {
+        font-weight: bold;
+        display: table-cell;
+        vertical-align: middle;
+        font-size: 12px;
+        width: 100%;
+    }
+
+    .table-bordered tr:nth-child(odd) td {
+        background: white;
+    }
+
+    .txt-label {
+        background-color: white !important;
+        height: 30px;
+        padding: 5px;
+        border: 1px solid transparent;
+        width: 100%;
+        outline: none;
+        box-shadow: none;
+        color: inherit;
+    }
+
+    .idnv0 {
+        display: none;
+    }
+
+    .idnv4, idnv5 {
+        display: unset;
+    }
+
+    @media print {
+        @page {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .pushsale-template-fragment {
+            border: none !important;
+        }
+    }
+.background-img-watermark {
+        z-index: 999;
+        opacity: 0.1;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        left: 0;
+        pointer-events:none;
+        background-image:url('') ;
+        background-position:center center;
+        background-repeat:no-repeat;
+        /*background-size:cover;*/
+        background-size:contain;
+    }
+}</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1658"><a name="1658" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1658_ContentPane"><!-- Start_Module_1658 --><div class="pushsale-template-inner" id="dnn_ctr1658_ModuleContent">
 <style type="text/css">
     .table-line {
@@ -81,7 +196,7 @@
 <div class="m-header">
 <div class="col-xs-6 form-group">
 <span class="text" id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_lblModuleTitle">Phiếu nhập / xuất kho</span>
-                    (<span id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_lblId">445247</span>)
+                    (<span id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_lblId">445359</span>)
                     <span class="hidden" style="color: darkcyan; font-style: italic; font-size: 11px; cursor: pointer;">(Xem hướng dẫn)</span>
 </div>
 <div class="col-xs-6 text-right hidden-print">
@@ -128,7 +243,7 @@
 <input class="form-control pushsale-native-input" id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho__MaPhieu" maxlength="50" name="dnn$ctr1658$Main$CapNhatPhieuXuatNhapKho$_MaPhieu" style="text-transform: uppercase" type="text"/>
 </div>
 <div class="col-xs-2 form-group">
-<input class="form-control date-range-one pushsale-native-input" id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho__NgayThucHien" maxlength="20" name="dnn$ctr1658$Main$CapNhatPhieuXuatNhapKho$_NgayThucHien" type="text" value="12/07/2026"/>
+<input class="form-control date-range-one pushsale-native-input" id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho__NgayThucHien" maxlength="20" name="dnn$ctr1658$Main$CapNhatPhieuXuatNhapKho$_NgayThucHien" type="text" value="14/07/2026"/>
 </div>
 <div class="col-xs-2 form-group">
 </div>
@@ -262,7 +377,7 @@
                             - Nên cập nhật phiếu trước khi import data từ Excel tránh bị mất dữ liệu đã nhập
                             <br/>
 </div>
-<span id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_lblLogs"><br/>- Tạo phiếu tạm: ttgroup2.admin, 12/07/2026 18:18:38</span>
+<span id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_lblLogs"><br/>- Tạo phiếu tạm: ttgroup2.admin, 14/07/2026 10:34:16</span>
 </div>
 <div class="col-xs-6 form-group text-right hidden-print">
 <a class="hidden btn-reload" data-pushsale-action="reload" href="#" id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_btnRefresh" role="button">

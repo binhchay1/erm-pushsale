@@ -36,6 +36,7 @@ class ShippingOrderService
         $order->load([
             'items', 'warehouse', 'saleUser', 'shipments',
             'shippingApiLogs' => fn ($q) => $q->latest('id')->limit(50),
+            'shippingStatusEvents' => fn ($q) => $q->orderBy('occurred_at')->limit(100),
         ]);
 
         $provider = $order->shipping_provider ?? $order->shipments->sortByDesc('id')->first()?->provider;
@@ -109,7 +110,23 @@ class ShippingOrderService
             ];
         }
 
-        // Mark last event as current
+        // Webhook timeline là nguồn chính xác hơn API log; gộp và chống trùng.
+        foreach ($order->shippingStatusEvents as $event) {
+            $events[] = [
+                'at' => $event->occurred_at?->toIso8601String() ?? $event->created_at?->toIso8601String(),
+                'provider' => $event->provider,
+                'statusText' => $event->raw_status ?: ($event->mapped_status ?: 'Cập nhật vận chuyển'),
+                'note' => trim(collect([$event->location, $event->note])->filter()->implode(' — ')) ?: null,
+                'financials' => $event->financials,
+                'isCurrent' => false,
+            ];
+        }
+
+        $events = collect($events)
+            ->sortBy('at')
+            ->unique(fn (array $event) => implode('|', [$event['provider'] ?? '', $event['statusText'] ?? '', $event['at'] ?? '']))
+            ->values()->all();
+
         if ($events !== []) {
             $events[array_key_last($events)]['isCurrent'] = true;
         }
@@ -184,11 +201,25 @@ class ShippingOrderService
             'statusText' => $shipment->status_text,
             'fee' => $shipment->fee,
             'insuranceFee' => $shipment->insurance_fee,
+            'codAmount' => $shipment->cod_amount,
+            'codCollected' => $shipment->cod_collected,
+            'codRemitted' => $shipment->cod_remitted,
+            'codFee' => $shipment->cod_fee,
+            'returnFee' => $shipment->return_fee,
+            'otherFee' => $shipment->other_fee,
+            'compensationAmount' => $shipment->compensation_amount,
             'transport' => $shipment->transport,
             'state' => $shipment->state,
             'errorMessage' => $shipment->error_message,
             'submittedAt' => $shipment->submitted_at?->toIso8601String(),
             'lastSyncedAt' => $shipment->last_synced_at?->toIso8601String(),
+            'lastEventAt' => $shipment->last_event_at?->toIso8601String(),
+            'postedAt' => $shipment->posted_at?->toIso8601String(),
+            'pickedUpAt' => $shipment->picked_up_at?->toIso8601String(),
+            'deliveredAt' => $shipment->delivered_at?->toIso8601String(),
+            'returningAt' => $shipment->returning_at?->toIso8601String(),
+            'returnedAt' => $shipment->returned_at?->toIso8601String(),
+            'codRemittedAt' => $shipment->cod_remitted_at?->toIso8601String(),
             'cancelledAt' => $shipment->cancelled_at?->toIso8601String(),
             'requestPayload' => $shipment->request_payload,
             'responsePayload' => $shipment->response_payload,

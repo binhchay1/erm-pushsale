@@ -56,6 +56,8 @@ function SaleTable({ rows, allRows, t }) {
     const maxOldProductQty = maxInRows(rows, 'oldProductQty');
     const maxOldEstRevenue = maxInRows(rows, 'oldEstRevenue');
     const maxTotalEstRevenue = maxInRows(rows, 'totalEstRevenue');
+    const maxUpsellQty = maxInRows(rows, 'upsellQty');
+    const maxUpsellRevenue = maxInRows(rows, 'upsellRevenue');
     const maxCodFee = maxInRows(rows, 'codFee');
     const maxCodSupport = maxInRows(rows, 'codSupport');
     const maxBankTransfer = maxInRows(rows, 'bankTransfer');
@@ -71,6 +73,8 @@ function SaleTable({ rows, allRows, t }) {
     const tOldProductQty = sumRows(allRows, 'oldProductQty');
     const tOldEstRevenue = sumRows(allRows, 'oldEstRevenue');
     const tTotalEstRevenue = sumRows(allRows, 'totalEstRevenue');
+    const tUpsellQty = sumRows(allRows, 'upsellQty');
+    const tUpsellRevenue = sumRows(allRows, 'upsellRevenue');
     const tCodFee = sumRows(allRows, 'codFee');
     const tCodSupport = sumRows(allRows, 'codSupport');
     const tBankTransfer = sumRows(allRows, 'bankTransfer');
@@ -90,7 +94,7 @@ function SaleTable({ rows, allRows, t }) {
                         <th className="text-center" colSpan={5}>
                             {t('reports.ceo_report.old_customers_group')}
                         </th>
-                        <th className="text-center" colSpan={8} style={{ width: '36%' }}>
+                        <th className="text-center" colSpan={11} style={{ width: '42%' }}>
                             {t('reports.ceo_report.total_group')}
                         </th>
                     </tr>
@@ -114,6 +118,9 @@ function SaleTable({ rows, allRows, t }) {
                         <th className="text-center" style={{ width: '10%' }}>
                             {t('reports.ceo_report.est_revenue')}
                         </th>
+                        <th className="text-center">Upsale (SL)</th>
+                        <th className="text-center">Upsale (DS)</th>
+                        <th className="text-center">% DS upsale</th>
                         <th className="text-center show_sp" style={{ width: '4%' }}>
                             {t('reports.ceo_report.cod_fee')}
                         </th>
@@ -152,6 +159,9 @@ function SaleTable({ rows, allRows, t }) {
                         <td className="text-center font-weight-bold">{tOldProductQty}</td>
                         <td className="text-center font-weight-bold">{tOldEstRevenue}</td>
                         <td className="text-center font-weight-bold">{tTotalEstRevenue}</td>
+                        <td className="text-center font-weight-bold">{tUpsellQty}</td>
+                        <td className="text-center font-weight-bold">{tUpsellRevenue}</td>
+                        <td className="text-center font-weight-bold">{formatNaNPct(tUpsellRevenue, tTotalEstRevenue)}</td>
                         <td className="text-center font-weight-bold show_sp">{tCodFee}</td>
                         <td className="text-center font-weight-bold show_sp">{tCodSupport}</td>
                         <td className="text-center font-weight-bold show_sp">{tBankTransfer}</td>
@@ -227,6 +237,9 @@ function SaleTable({ rows, allRows, t }) {
                                 format="currency"
                                 className="tdDoanhSoTong"
                             />
+                            <PushsaleProgressCell value={r.upsellQty} max={maxUpsellQty} className="tdSoSanPham" />
+                            <PushsaleProgressCell value={r.upsellRevenue} max={maxUpsellRevenue} format="currency" className="tdDoanhSoTong" />
+                            <PushsaleProgressCell value={r.upsellRevenueShare} max={100} format="percent" className="tdTyLeChotDon" />
                             <PushsaleProgressCell
                                 value={r.codFee}
                                 max={maxCodFee}
@@ -281,6 +294,8 @@ function MarketingTable({ rows, allRows, t }) {
     const maxBudgetRatioNewCk = maxInRows(rows, 'budgetRevenueRatioNewAfterDiscount');
     const maxOldEstRevenue = maxInRows(rows, 'oldEstRevenue');
     const maxTotalEstRevenue = maxInRows(rows, 'totalEstRevenue');
+    const maxUpsellQty = maxInRows(rows, 'upsellQty');
+    const maxUpsellRevenue = maxInRows(rows, 'upsellRevenue');
     const maxBudgetRatioTotal = maxInRows(rows, 'budgetRevenueRatioTotal');
     const maxCodFee = maxInRows(rows, 'codFee');
     const maxCodSupport = maxInRows(rows, 'codSupport');
@@ -294,6 +309,8 @@ function MarketingTable({ rows, allRows, t }) {
     const tNewEstRevenue = sumRows(allRows, 'newEstRevenue');
     const tOldEstRevenue = sumRows(allRows, 'oldEstRevenue');
     const tTotalEstRevenue = sumRows(allRows, 'totalEstRevenue');
+    const tUpsellQty = sumRows(allRows, 'upsellQty');
+    const tUpsellRevenue = sumRows(allRows, 'upsellRevenue');
     const tCodFee = sumRows(allRows, 'codFee');
     const tCodSupport = sumRows(allRows, 'codSupport');
     const tBankTransfer = sumRows(allRows, 'bankTransfer');
@@ -315,7 +332,7 @@ function MarketingTable({ rows, allRows, t }) {
                         <th className="text-center" colSpan={1}>
                             {t('reports.ceo_report.old_customers_group')}
                         </th>
-                        <th className="text-center" colSpan={9}>
+                        <th className="text-center" colSpan={12}>
                             {t('reports.ceo_report.total_group')}
                         </th>
                     </tr>
@@ -356,6 +373,9 @@ function MarketingTable({ rows, allRows, t }) {
                         <th className="text-center" style={{ width: '10%' }}>
                             {t('reports.ceo_report.est_revenue')}
                         </th>
+                        <th className="text-center">Upsale (SL)</th>
+                        <th className="text-center">Upsale (DS)</th>
+                        <th className="text-center">% DS upsale</th>
                         <th className="text-center" style={{ width: '6%' }}>
                             {t('reports.ceo_report.budget_revenue_total_pct')}
                         </th>
@@ -398,6 +418,9 @@ function MarketingTable({ rows, allRows, t }) {
                         </td>
                         <td className="text-center font-weight-bold">{tOldEstRevenue}</td>
                         <td className="text-center font-weight-bold">{tTotalEstRevenue}</td>
+                        <td className="text-center font-weight-bold">{tUpsellQty}</td>
+                        <td className="text-center font-weight-bold">{tUpsellRevenue}</td>
+                        <td className="text-center font-weight-bold">{formatNaNPct(tUpsellRevenue, tTotalEstRevenue)}</td>
                         <td className="text-center font-weight-bold">
                             {formatNaNPct(tBudget, tTotalEstRevenue)}
                         </td>
@@ -474,6 +497,9 @@ function MarketingTable({ rows, allRows, t }) {
                                 format="currency"
                                 className="tdDoanhSo_Marketing"
                             />
+                            <PushsaleProgressCell value={r.upsellQty} max={maxUpsellQty} className="tdSoClick_Marketing" />
+                            <PushsaleProgressCell value={r.upsellRevenue} max={maxUpsellRevenue} format="currency" className="tdDoanhSo_Marketing" />
+                            <PushsaleProgressCell value={r.upsellRevenueShare} max={100} format="percent" className="tdTyLeNganSachDoanhSo_Marketing" />
                             <PushsaleProgressCell
                                 value={r.budgetRevenueRatioTotal}
                                 max={maxBudgetRatioTotal}

@@ -104,7 +104,7 @@ return [
         'landing' => [
             'label' => 'Landing Page (Ladipage, Web)',
             'category' => 'landing',
-            'description' => 'Mỗi chiến dịch có URL API riêng (Marketing → Kết nối Landing). Webhook chung bên dưới chỉ dùng dự phòng.',
+            'description' => 'Mỗi kết nối Landing có URL nhận form riêng cho nguồn chính và từng trang upsale. Sản phẩm, giá và chia Sale được khóa theo cấu hình backend.',
             'driver' => LandingFormDriver::class,
             'fields' => [
                 'api_key' => ['label' => 'Khóa API / Webhook', 'env' => 'LANDING_API_KEY', 'secret' => true, 'default' => env('LANDING_API_KEY')],

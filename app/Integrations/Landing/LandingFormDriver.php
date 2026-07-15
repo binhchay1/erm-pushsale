@@ -280,6 +280,10 @@ class LandingFormDriver implements LeadPayloadNormalizer
      */
     protected function findDiscount(array $payload, array $flatFields): int
     {
+        if ((bool) Arr::get($payload, '_landing_connection_authoritative_pricing', false)) {
+            return 0;
+        }
+
         $candidates = [
             Arr::get($payload, 'discount'),
             Arr::get($payload, 'chiet_khau'),
@@ -310,6 +314,10 @@ class LandingFormDriver implements LeadPayloadNormalizer
      */
     protected function findShippingFee(array $payload, array $flatFields): int
     {
+        if ((bool) Arr::get($payload, '_landing_connection_authoritative_pricing', false)) {
+            return 0;
+        }
+
         $candidates = [
             Arr::get($payload, 'shipping_fee_collected'),
             Arr::get($payload, 'shipping_fee'),

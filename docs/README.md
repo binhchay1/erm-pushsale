@@ -10,6 +10,8 @@
 | [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md) | Developer, architect | Stack, kiến trúc layered, domain model, báo cáo, realtime, trạng thái triển khai |
 | [API_AND_ROUTES.md](./API_AND_ROUTES.md) | Developer, DevOps, tích hợp | REST API v1, webhook, Inertia pages, bảng route thực tế từ `web.php` |
 | [CHANGELOG.md](./CHANGELOG.md) | Toàn team | Timeline milestone và spec đã hoàn thành / đang làm |
+| [LANDING_CONNECTION_FLOW_V13.md](./LANDING_CONNECTION_FLOW_V13.md) | Marketing, Telesale, Developer | Luồng Kết nối Landing thay campaign, mapping sản phẩm, upsale và tính giá backend |
+| [CONTEXT_HANDOFF_V13.md](./CONTEXT_HANDOFF_V13.md) | Developer | Điểm bàn giao V13, file thay đổi, kiểm thử và bước triển khai |
 
 ## Khởi động nhanh
 

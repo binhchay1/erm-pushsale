@@ -4,8 +4,9 @@ import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiGet } from '@/lib/api';
+import { formatCurrency } from '@/lib/format';
 
-const money = (value) => new Intl.NumberFormat('vi-VN').format(Number(value ?? 0));
+const money = (value) => formatCurrency(Number(value ?? 0));
 
 function formatDateTime(value) {
     if (!value) return '—';
