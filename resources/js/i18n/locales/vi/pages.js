@@ -226,7 +226,7 @@ export default {
         connect_step3_desc: 'Phía dưới cửa sổ API có các dòng map: ô bên TRÁI là tên trường trên form của bạn; ô "Nhập tên gửi API" bên PHẢI hãy điền đúng giá trị ở cột giữa bên dưới. Trường nào form không có thì bỏ qua.',
         connect_note: 'Đường dẫn đã có mã bảo mật riêng nên KHÔNG cần API key/header. Sau khi lưu trên LadiPage, gửi thử 1 đơn test để kiểm tra. Chiến dịch cần Admin duyệt mới bắt đầu nhận lead thật.',
         lead_allocation: 'Chia số lead',
-        lead_allocation_hint: 'Áp dụng cho mọi lead nhận qua webhook của chiến dịch này. "Theo cấu hình chung" dùng công tắc ở màn Nhật ký lead.',
+        lead_allocation_hint: 'Áp dụng cho mọi lead nhận qua webhook của chiến dịch này. "Theo cấu hình chung" dùng công tắc ở màn Phân bổ data.',
         api_url: 'API URL',
         connection_name: 'Tên tài khoản liên kết',
         content_type: 'Kiểu dữ liệu (Content-Type)',
@@ -304,7 +304,7 @@ export default {
         webhook_label: 'URL nhận dữ liệu form',
     },
     leads: {
-        title: 'Nhật ký lead về',
+        title: 'Phân bổ data',
         desc: 'Lead đổ về từ webhook/landing — phân số thủ công khi cần',
         manual_allocate: 'Phân số thủ công',
         search_placeholder: 'Tìm SĐT, tên, nguồn…',

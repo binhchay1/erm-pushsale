@@ -24,7 +24,7 @@ class Order extends Model
         'desired_delivery_at', 'next_operation_at', 'operation_stage', 'operation_result', 'closing_status',
         'delivery_status', 'warehouse_care_status', 'warehouse_care_note', 'warehouse_care_user_id', 'printed_at', 'return_reason', 'return_restocked_at',
         'shipping_method', 'shipping_provider', 'carrier_name', 'tracking_number',
-        'reconciliation_status', 'is_returning_customer', 'is_duplicate_phone',
+        'reconciliation_status', 'is_returning_customer', 'is_duplicate_phone', 'phone_lock_conflict', 'phone_lock_note',
         'subtotal', 'discount', 'vat', 'shipping_fee_collected', 'total', 'deposit',
         'amount_to_collect', 'settled_cod_amount', 'settlement_matched_at', 'last_delivery_event_at',
         'carrier_service_fee', 'carrier_return_fee', 'carrier_other_fee', 'carrier_compensation_amount', 'shipping_support_fee',
@@ -48,6 +48,7 @@ class Order extends Model
             'settlement_matched_at' => 'datetime',
             'is_returning_customer' => 'boolean',
             'is_duplicate_phone' => 'boolean',
+            'phone_lock_conflict' => 'boolean',
             'shipping_geo' => 'array',
         ];
     }

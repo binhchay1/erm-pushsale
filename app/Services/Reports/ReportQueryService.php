@@ -91,7 +91,12 @@ class ReportQueryService
     {
         return match ($filter->dateType) {
             DateType::SaleReceived => 'assigned_at',
+            DateType::CareUpdate => 'updated_at',
             DateType::Closing => 'closed_at',
+            DateType::Posting => 'created_at',
+            DateType::NextOperation => 'next_operation_at',
+            DateType::DeliveryUpdate => 'last_delivery_event_at',
+            DateType::DesiredDelivery => 'desired_delivery_at',
             default => 'data_arrived_at',
         };
     }

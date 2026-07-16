@@ -121,3 +121,21 @@ V16 làm lại màn thủ kho theo template-seven, thay trang cấu hình giao v
 - [`docs/WAREHOUSE_SHIPPING_FLOW_V16.md`](docs/WAREHOUSE_SHIPPING_FLOW_V16.md)
 - [`docs/CONTEXT_HANDOFF_V16.md`](docs/CONTEXT_HANDOFF_V16.md)
 - [`docs/RELEASE_VALIDATION_V16.md`](docs/RELEASE_VALIDATION_V16.md)
+
+## V17 — Hợp nhất CSS, filter động và modal dùng chung
+
+V17 xây lại hợp đồng giao diện chung thay vì tiếp tục vá từng trang: CSS public/login và ERM được tách entry, 79 template được scope, filter Bootstrap được chuyển sang grid 12 cột không còn cột rỗng, action cell bỏ khung lồng, font nội bộ thống nhất Arial và modal dùng chung được clamp theo viewport.
+
+Lịch sử đăng nhập `1.7.1` lấy user/role/company thật, đồng thời ghi audit cho login thành công, thất bại, bị chặn và logout. Product/team filters và bảng xếp hạng Sales cũng dùng dữ liệu backend, không dùng tên hoặc doanh số chụp từ Pushsale.
+
+- [`docs/UI_SYSTEM_V17.md`](docs/UI_SYSTEM_V17.md)
+- [`docs/CONTEXT_HANDOFF_V17.md`](docs/CONTEXT_HANDOFF_V17.md)
+- [`docs/RELEASE_VALIDATION_V17.md`](docs/RELEASE_VALIDATION_V17.md)
+
+## V18 — Daily facts, snapshot lịch sử và archive theo tháng
+
+V18 tách report thành hot window và historical window. Hôm nay vẫn live; ngày cũ đọc daily facts và snapshot DB thay vì quét raw tables. Webhook/COD/hàng hoàn đến muộn sẽ đánh dấu đúng ngày bị ảnh hưởng, xóa snapshot và rebuild lại ngày đó. Raw rows được copy sang bảng `*_YYYY_MM` với full-row SHA-256; mặc định không xóa nguồn.
+
+- [`docs/HISTORICAL_REPORTING_V18.md`](docs/HISTORICAL_REPORTING_V18.md)
+- [`docs/CONTEXT_HANDOFF_V18.md`](docs/CONTEXT_HANDOFF_V18.md)
+- [`docs/RELEASE_VALIDATION_V18.md`](docs/RELEASE_VALIDATION_V18.md)

@@ -1,0 +1,175 @@
+/*
+ * ERM Pushsale UI contract V22.
+ * Final layer for internal Pushsale-like shell: menu typography, hamburger
+ * geometry and legacy-page hygiene. Public/login pages are not affected.
+ */
+:root {
+    --ps-blue: #007bff;
+    --ps-blue-dark: #006fd6;
+    --ps-table-blue: #3782dc;
+    --ps-table-blue-border: #2f72c4;
+    --ps-header-height: 50px;
+    --ps-sidebar-width: 252px;
+    --ps-sidebar-collapsed: 42px;
+    --ps-sidebar-collapsed-width: 42px;
+    --ps-font: Arial, Helvetica, sans-serif;
+}
+
+body.pushsale-app-body,
+body.pushsale-app-body *:not(.fa) {
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
+body.pushsale-app-body {
+    font-size: 12px !important;
+    line-height: 1.42857143;
+}
+
+body.pushsale-app-body .pushsale-main-header {
+    height: 50px !important;
+    min-height: 50px !important;
+    background: #007bff !important;
+}
+
+body.pushsale-app-body .pushsale-header-brand {
+    flex: 0 0 252px !important;
+    width: 252px !important;
+    min-width: 252px !important;
+    height: 50px !important;
+}
+
+body.pushsale-app-body .pushsale-sidebar-toggle {
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 50px !important;
+    padding: 0 !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    line-height: 50px !important;
+    border-right: 1px solid rgba(255, 255, 255, .16) !important;
+}
+
+body.pushsale-app-body .pushsale-sidebar-toggle i,
+body.pushsale-app-body .pushsale-sidebar-toggle .fa {
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 14px !important;
+    line-height: 14px !important;
+}
+
+body.pushsale-app-body .pushsale-logo {
+    height: 50px !important;
+    padding: 0 12px !important;
+    color: #fff !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    line-height: 50px !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-header-brand {
+    flex-basis: 42px !important;
+    width: 42px !important;
+    min-width: 42px !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-logo {
+    display: none !important;
+}
+
+body.pushsale-app-body .main-sidebar {
+    width: 252px !important;
+    font-size: 12px !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .main-sidebar {
+    width: 42px !important;
+}
+
+body.pushsale-app-body .content-wrapper {
+    left: 252px !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper,
+body.pushsale-app-body.sidebar-collapse .content-wrapper {
+    left: 42px !important;
+}
+
+body.pushsale-app-body .sidebar-menu .a1 {
+    min-height: 38px !important;
+    padding: 0 18px 0 12px !important;
+    color: #333 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 38px !important;
+}
+
+body.pushsale-app-body .sidebar-menu .a1 > .fa:first-child {
+    width: 18px !important;
+    min-width: 18px !important;
+    color: #333 !important;
+    font-size: 13px !important;
+}
+
+body.pushsale-app-body .sidebar-menu .a2 {
+    min-height: 34px !important;
+    padding: 0 18px 0 38px !important;
+    color: #333 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 34px !important;
+}
+
+body.pushsale-app-body .sidebar-menu .li1.menu-open > .a1,
+body.pushsale-app-body .sidebar-menu .li1.active > .a1,
+body.pushsale-app-body .sidebar-menu .li1 > .a1:hover,
+body.pushsale-app-body .sidebar-menu .li2 > .a2:hover {
+    color: #007bff !important;
+    background: #f7f7f7 !important;
+}
+
+body.pushsale-app-body .sidebar-menu .li2.active > .a2,
+body.pushsale-app-body .sidebar-menu .li2.flyout-open > .a2 {
+    color: #fff !important;
+    background: #007bff !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .sidebar-menu .a1 {
+    justify-content: center !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    padding: 0 !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .sidebar-menu .a1 > .fa:first-child {
+    width: 42px !important;
+    min-width: 42px !important;
+    text-align: center !important;
+}
+
+body.pushsale-app-body .pushsale-template-fragment .box,
+body.pushsale-app-body .pushsale-template-fragment .panel,
+body.pushsale-app-body .pushsale-template-fragment .content,
+body.pushsale-app-body .pushsale-template-fragment .content-wrapper {
+    border-radius: 0 !important;
+}
+
+body.pushsale-app-body .pushsale-template-fragment select,
+body.pushsale-app-body .pushsale-template-fragment input,
+body.pushsale-app-body .pushsale-template-fragment button,
+body.pushsale-app-body .psdd-page select,
+body.pushsale-app-body .psdd-page input,
+body.pushsale-app-body .psdd-page button,
+body.pushsale-app-body .pssp-page select,
+body.pushsale-app-body .pssp-page input,
+body.pushsale-app-body .pssp-page button {
+    font-size: 12px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
+/* The lead journal was replaced by Pushsale-style data distribution. */
+body.pushsale-app-body [data-legacy-page='lead-log'],
+body.pushsale-app-body .lead-log-legacy-entry {
+    display: none !important;
+}

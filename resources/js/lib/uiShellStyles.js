@@ -27,17 +27,31 @@ function ensureLink(href, id) {
     });
 }
 
+
+async function ensureCompiledPushsaleStyles() {
+    const alreadyLoaded = [...document.querySelectorAll('link[rel="stylesheet"]')].some((link) => {
+        const href = link.getAttribute('href') ?? '';
+        return href.includes('/build/assets/pushsale-') || href.includes('/resources/css/pushsale.css');
+    });
+    if (alreadyLoaded) return;
+
+    await import('../../css/pushsale.css');
+}
+
 function moveApplicationStylesAfterVendor() {
     const styles = [...document.querySelectorAll('link[rel=\"stylesheet\"]')].filter((link) => {
         const href = link.getAttribute('href') ?? '';
-        return !link.dataset.pushsaleShell && (href.includes('/build/assets/app-') || href.includes('/resources/css/app.css'));
+        return !link.dataset.pushsaleShell && (href.includes('/build/assets/app-') || href.includes('/build/assets/pushsale-') || href.includes('/resources/css/app.css') || href.includes('/resources/css/pushsale.css'));
     });
 
     styles.forEach((link) => document.head.appendChild(link));
 }
 
 export async function ensurePushsaleStyles() {
-    await Promise.all(PUSHSALE_STYLES.map(([href, id]) => ensureLink(href, id)));
+    await Promise.all([
+        ...PUSHSALE_STYLES.map(([href, id]) => ensureLink(href, id)),
+        ensureCompiledPushsaleStyles(),
+    ]);
     // AdminLTE/Bootstrap provide the base primitives; the scoped React page CSS must
     // remain last in the cascade so each recreated Pushsale screen keeps its exact layout.
     moveApplicationStylesAfterVendor();

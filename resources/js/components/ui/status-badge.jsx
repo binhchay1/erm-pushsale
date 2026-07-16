@@ -25,7 +25,7 @@ const TONES = {
     muted: 'border border-border bg-muted/60 text-muted-foreground',
 };
 
-export function StatusBadge({ tone = 'muted', icon: Icon, children, className }) {
+export function StatusBadge({ tone = 'muted', icon: Icon, children, className, label }) {
     return (
         <span
             className={cn(
@@ -35,7 +35,7 @@ export function StatusBadge({ tone = 'muted', icon: Icon, children, className })
             )}
         >
             {Icon && <Icon className="size-3" />}
-            {children}
+            {children ?? label}
         </span>
     );
 }

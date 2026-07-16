@@ -8,8 +8,8 @@ use App\Http\Controllers\Admin\IntegrationsController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\LandingApprovalController;
 use App\Http\Controllers\Admin\LeadIngestionController;
+use App\Http\Controllers\Admin\DataDistributionController;
 use App\Http\Controllers\Admin\LeadReviewController;
-use App\Http\Controllers\Admin\LeadsLogController;
 use App\Http\Controllers\Admin\ManualLeadController;
 use App\Http\Controllers\Admin\CompanySettingsController;
 use App\Http\Controllers\Admin\ManualLeadAllocationController;
@@ -248,7 +248,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::post('integrations/{platform}/test', [IntegrationsController::class, 'testWebhook'])->name('integrations.test');
         Route::get('system-monitor', [SystemMonitorController::class, 'index'])->name('system-monitor.index');
         Route::get('system-monitor/events/{inboundEvent}', [SystemMonitorController::class, 'show'])->name('system-monitor.show');
-        Route::get('leads', LeadsLogController::class)->name('leads.index');
+        Route::get('leads', [DataDistributionController::class, 'index'])->name('leads.index');
+        Route::post('leads/distribute', [DataDistributionController::class, 'store'])->name('leads.distribute');
         Route::get('customers', CustomerProfileController::class)->name('customers.index');
         Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
         Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
@@ -332,7 +333,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('reports/hourly', HourlyStatsController::class)->name('reports.hourly');
         Route::get('reports/team-leaders', TeamLeaderStatsController::class)->name('reports.team-leaders');
         Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
-        Route::get('leads', LeadsLogController::class)->name('leads.index');
+        Route::get('leads', [DataDistributionController::class, 'index'])->name('leads.index');
+        Route::post('leads/distribute', [DataDistributionController::class, 'store'])->name('leads.distribute');
         Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
         Route::post('leads/import', [ManualLeadController::class, 'import'])->name('leads.import');
         Route::get('leads/import-template', [ManualLeadController::class, 'template'])->name('leads.import-template');
@@ -373,7 +375,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
 
     Route::middleware('role:'.User::ROLE_ALLOCATOR)->prefix('allocator')->name('allocator.')->group(function () {
         Route::get('dashboard', AllocatorDashboardController::class)->name('dashboard');
-        Route::get('workspace', LeadsLogController::class)->name('workspace');
+        Route::get('workspace', [DataDistributionController::class, 'index'])->name('workspace');
+        Route::post('leads/distribute', [DataDistributionController::class, 'store'])->name('leads.distribute');
         Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
         Route::patch('leads/{leadIngestion}/review', [LeadReviewController::class, 'update'])->name('leads.review');
         Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');

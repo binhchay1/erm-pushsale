@@ -148,6 +148,7 @@ class InventoryIntakeService
             'approved_by_user_id' => $approvedByUserId,
             'type' => $type,
             'quantity' => $quantity,
+            'unit_cost' => (int) (Product::query()->whereKey($inventory->product_id)->value('cost_price') ?: 0),
             'stock_after' => $inventory->stock_quantity,
             'note' => $note,
         ]);

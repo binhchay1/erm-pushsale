@@ -31,6 +31,8 @@ class LeadIngestion extends Model
         'parent_ingestion_id',
         'related_order_id',
         'requires_review',
+        'phone_lock_conflict',
+        'phone_lock_owner_user_id',
         'reviewed_at',
         'reviewed_by_user_id',
         'review_resolution',
@@ -46,6 +48,7 @@ class LeadIngestion extends Model
             'processed_at' => 'datetime',
             'reviewed_at' => 'datetime',
             'requires_review' => 'boolean',
+            'phone_lock_conflict' => 'boolean',
             'counts_as_lead' => 'boolean',
             'status' => LeadIngestionStatus::class,
             'packet_type' => LeadPacketType::class,
@@ -60,6 +63,12 @@ class LeadIngestion extends Model
     public function relatedOrder(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'related_order_id');
+    }
+
+
+    public function phoneLockOwner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'phone_lock_owner_user_id');
     }
 
     public function parentIngestion(): BelongsTo

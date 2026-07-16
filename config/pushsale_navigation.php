@@ -99,12 +99,14 @@ return array (
         'title' => '1.4 Kết nối giao hàng',
         'url' => '/admin/shipping-partners',
         'area' => 'shipping',
+        'code' => '1.4',
       ),
       4 => 
       array (
         'title' => '1.5 Phân bổ data',
         'url' => '/admin/leads',
         'area' => 'leads',
+        'code' => '1.5',
       ),
       5 => 
       array (
@@ -814,8 +816,9 @@ return array (
           0 => 
           array (
             'title' => '1. Cấu hình chia số care đơn',
-            'url' => '/admin/leads',
-            'area' => 'leads',
+            'url' => '/admin/hr/care-distribution-rules',
+            'area' => 'care_distribution',
+            'code' => '5.8.1',
           ),
           1 => 
           array (

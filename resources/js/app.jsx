@@ -5,7 +5,6 @@ import { Toaster } from 'sonner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { I18nProvider } from '@/providers/I18nProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
-import '../css/app.css';
 
 const pages = import.meta.glob('./pages/**/*.jsx');
 

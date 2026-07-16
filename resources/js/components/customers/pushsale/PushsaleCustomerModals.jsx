@@ -1,12 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { PushsaleModal } from '@/components/ui/pushsale-modal';
 import { apiGet, apiPost } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 
@@ -20,20 +15,17 @@ function EmptyRow({ colSpan, text = 'Không có dữ liệu' }) {
 
 function PushsaleDialog({ open, onOpenChange, width = '800px', title, description, children, footer }) {
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent
-                showClose
-                className="ps-customer-modal"
-                style={{ width, maxWidth: 'calc(100vw - 32px)' }}
-            >
-                <div className="ps-customer-modal-header">
-                    <DialogTitle>{title}</DialogTitle>
-                    {description ? <DialogDescription>{description}</DialogDescription> : null}
-                </div>
-                <div className="ps-customer-modal-body">{children}</div>
-                {footer ? <div className="ps-customer-modal-footer">{footer}</div> : null}
-            </DialogContent>
-        </Dialog>
+        <PushsaleModal
+            open={open}
+            onOpenChange={onOpenChange}
+            width={width}
+            title={title}
+            description={description}
+            className="ps-customer-modal"
+            footer={footer}
+        >
+            {children}
+        </PushsaleModal>
     );
 }
 

@@ -29,10 +29,8 @@ function MessageBubble({ message, external = false }) {
         <div className={cn('flex', isMine ? 'justify-end' : 'justify-start')}>
             <div
                 className={cn(
-                    'max-w-[82%] rounded-2xl border px-4 py-3 shadow-sm',
-                    isMine
-                        ? 'border-primary/30 bg-primary text-primary-foreground'
-                        : 'bg-card text-card-foreground',
+                    'ps-chat-bubble',
+                    isMine && 'is-mine',
                 )}
             >
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
@@ -73,7 +71,7 @@ function ThreadBody({ loading, messages, emptyText, listRef, external = false })
     const t = useT();
 
     return (
-        <div ref={listRef} className="max-h-[54vh] min-h-72 overflow-y-auto px-6 py-5">
+        <div ref={listRef} className="ps-chat-thread">
             {loading ? (
                 <div className="flex h-full min-h-64 items-center justify-center text-muted-foreground">
                     <Loader2 className="mr-2 size-5 animate-spin" />
@@ -109,7 +107,7 @@ function Composer({ value, setValue, canWrite, sending, onSend, placeholder, rea
     };
 
     return (
-        <div className="border-t bg-background px-6 py-4">
+        <div className="ps-chat-composer">
             {canWrite ? (
                 <div className="flex items-end gap-3">
                     <textarea
@@ -132,7 +130,7 @@ function Composer({ value, setValue, canWrite, sending, onSend, placeholder, rea
                     </Button>
                 </div>
             ) : (
-                <div className="rounded-lg border border-dashed bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                <div className="ps-chat-readonly">
                     {readOnlyText}
                 </div>
             )}
@@ -365,19 +363,14 @@ export function CustomerMessagesDialog({ order }) {
         }
     };
 
-    const tabClass = (tab) => cn(
-        'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-        activeTab === tab
-            ? 'bg-primary text-primary-foreground shadow-sm'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-    );
+    const tabClass = (tab) => cn(activeTab === tab && 'active');
 
     const renderPancakeNotice = () => {
         if (!pancakeStatus) return null;
 
         if (!pancakeStatus.connected) {
             return (
-                <div className="border-b bg-amber-50 px-6 py-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+                <div className="ps-chat-meta">
                     {t('operations.customer_interactions.pancake_not_connected')}
                 </div>
             );
@@ -385,7 +378,7 @@ export function CustomerMessagesDialog({ order }) {
 
         if (pancakeStatus.source === 'cache') {
             return (
-                <div className="border-b bg-amber-50 px-6 py-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+                <div className="ps-chat-meta">
                     {t('operations.customer_interactions.pancake_cache_notice')}
                 </div>
             );
@@ -393,7 +386,7 @@ export function CustomerMessagesDialog({ order }) {
 
         if (pancakeStatus.source === 'error') {
             return (
-                <div className="border-b bg-destructive/10 px-6 py-3 text-sm text-destructive">
+                <div className="ps-chat-meta text-destructive">
                     {t('operations.customer_interactions.pancake_error_notice')}
                 </div>
             );
@@ -417,7 +410,7 @@ export function CustomerMessagesDialog({ order }) {
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="max-h-[88vh] max-w-[min(980px,calc(100vw-2rem))] overflow-hidden p-0">
+            <DialogContent className="ps-modal-surface ps-customer-chat-modal max-h-[88vh] overflow-hidden p-0" style={{ '--ps-modal-width': '980px' }}>
                 <DialogHeader className="border-b px-6 py-5 pr-14">
                     <DialogTitle>{t('operations.customer_interactions.messages_title')}</DialogTitle>
                     <DialogDescription>
@@ -427,8 +420,8 @@ export function CustomerMessagesDialog({ order }) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex items-center justify-between gap-3 border-b px-6 py-3">
-                    <div className="inline-flex rounded-lg border bg-background p-1">
+                <div className="ps-chat-tabs">
+                    <div className="contents">
                         <button type="button" onClick={() => setActiveTab('internal')} className={tabClass('internal')}>
                             {t('operations.customer_interactions.internal_tab')}
                         </button>
@@ -436,13 +429,11 @@ export function CustomerMessagesDialog({ order }) {
                             {t('operations.customer_interactions.pancake_tab')}
                         </button>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                        {t('operations.customer_interactions.live_status')}
-                    </div>
+                    
                 </div>
 
                 <div className="grid min-h-0 grid-rows-[auto_1fr_auto]">
-                    <div className="border-b bg-muted/30 px-6 py-3 text-sm">
+                    <div className="ps-chat-meta">
                         {customer?.address && (
                             <div>
                                 <span className="font-semibold">{t('operations.customer_interactions.address')}:</span>{' '}

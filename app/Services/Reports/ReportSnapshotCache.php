@@ -4,19 +4,30 @@ namespace App\Services\Reports;
 
 use App\Data\ReportFilterData;
 use App\Models\User;
+use App\Services\Reporting\ReportSnapshotStore;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cache;
 
 /**
- * Cache báo cáo tổng hợp nặng — TTL đến cuối ngày.
- * Tác nghiệp / dashboard realtime không qua lớp này.
+ * Router snapshot báo cáo V18.
+ *
+ * - Kỳ có hôm nay: Redis TTL ngắn để vẫn live.
+ * - Kỳ quá khứ đã đóng: snapshot DB bền vững, không query lại raw tables.
+ * - Khi webhook/đơn/COD/hàng hoàn sửa ngày cũ, observer đánh dấu dirty và xóa snapshot giao nhau.
  */
 class ReportSnapshotCache
 {
+    public function __construct(
+        private readonly ReportSnapshotStore $store,
+    ) {}
+
     /** @return list<string> */
     public static function heavyExtraKeys(): array
     {
-        return ['sale-3', 'marketing-1', 'marketing-2', 'marketing-3', 'marketing-4'];
+        return [
+            'sale-1', 'sale-2', 'sale-3', 'sale-4', 'sale-5',
+            'marketing-1', 'marketing-2', 'marketing-3', 'marketing-4',
+            'kho-1', 'warehouse-sales-summary', 'warehouse-sales-v2', 'product-conversion', 'kho-2',
+        ];
     }
 
     public static function isHeavyExtra(string $key): bool
@@ -27,14 +38,13 @@ class ReportSnapshotCache
     /** @return list<string> */
     public static function heavyPageKeys(): array
     {
-        return ['team-leaders', 'marketing-dashboard'];
+        return ['team-leaders', 'marketing-dashboard', 'admin-dashboard', 'sales-dashboard', 'warehouse-dashboard', 'accounting-dashboard', 'allocator-dashboard'];
     }
 
     /**
      * @template T
-     *
-     * @param  callable(): T  $compute
-     * @return array{data: T, cachedAt: ?string, fromCache: bool}
+     * @param callable(): T $compute
+     * @return array{data:T,cachedAt:?string,fromCache:bool,storage:string,isFinal:bool}
      */
     public function remember(
         string $reportKey,
@@ -43,40 +53,15 @@ class ReportSnapshotCache
         callable $compute,
         bool $forceRefresh = false,
     ): array {
-        $cacheKey = $this->cacheKey($reportKey, $user, $filter);
-
-        if ($forceRefresh) {
-            Cache::forget($cacheKey);
-        }
-
-        $hit = Cache::has($cacheKey);
-        $ttl = max(300, (int) now()->diffInSeconds(now()->copy()->endOfDay()));
-
-        $data = Cache::remember($cacheKey, $ttl, function () use ($compute) {
-            return ['payload' => $compute(), 'stored_at' => now()->toIso8601String()];
-        });
-
-        return [
-            'data' => $data['payload'],
-            'cachedAt' => $data['stored_at'] ?? null,
-            'fromCache' => $hit && ! $forceRefresh,
-        ];
+        return $this->store->remember($reportKey, $user, $filter, $compute, $forceRefresh);
     }
 
     public function forgetAllForCompany(int $companyId): void
     {
-        // File/database cache không hỗ trợ tag — warm command sẽ ghi đè từng key.
+        app(\App\Services\Reporting\ReportDateDirtyTracker::class)->bumpCompanyRevision($companyId);
+        \App\Models\Reporting\ReportQuerySnapshot::query()->where('company_id', $companyId)->delete();
     }
 
-    private function cacheKey(string $reportKey, User $user, ReportFilterData $filter): string
-    {
-        $companyId = (int) ($user->company_id ?? 0);
-        $filterHash = md5(json_encode($filter->toInertia()));
-
-        return "report_snap:{$companyId}:{$user->id}:{$reportKey}:{$filterHash}";
-    }
-
-    /** Thời điểm snapshot cuối ngày chạy (dùng cho scheduler). */
     public static function dailyWarmAt(): Carbon
     {
         return now()->endOfDay()->subMinutes(5);

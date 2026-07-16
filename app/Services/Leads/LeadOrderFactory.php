@@ -48,6 +48,9 @@ class LeadOrderFactory
     public function createFromLead(LeadIngestion $lead, array $normalized, ?User $saleUser = null): Order
     {
         $source = $this->resolveCampaign($lead, $normalized);
+        $landingConnection = $lead->landing_connection_id
+            ? $lead->landingConnection
+            : $source->landingConnection()->first();
 
         // Khách cũ = SĐT đã từng có đơn trước đó (đồng bộ với báo cáo khách mới/cũ).
         $isReturningCustomer = filled($normalized['customer_phone'] ?? null)
@@ -67,6 +70,8 @@ class LeadOrderFactory
             'sale_user_id' => $saleUser?->id,
             'marketer_user_id' => $source->marketer_user_id,
             'marketing_source_id' => $source->id,
+            'landing_connection_id' => $lead->landing_connection_id ?: $landingConnection?->id,
+            'landing_connection_source_id' => $lead->landing_connection_source_id,
             'product_id' => $source->product_id,
             'customer_name' => $normalized['customer_name'],
             'customer_phone' => $normalized['customer_phone'],

@@ -45,6 +45,13 @@ return [
         'duplicate_window_days' => (int) env('LEAD_DUPLICATE_WINDOW_DAYS', 30),
     ],
 
+    // Một SĐT đang có Sale phụ trách sẽ luôn quay về đúng Sale đó, kể cả khi
+    // phát sinh đơn mới từ kết nối landing khác. Báo cáo vẫn tính đơn/nguồn riêng,
+    // nhưng vận hành không còn hai Sale gọi cùng một khách.
+    'customer_phone_lock' => [
+        'active_days' => (int) env('CUSTOMER_PHONE_LOCK_ACTIVE_DAYS', 30),
+    ],
+
     /*
     | Gộp đơn Landing (form đầu + upsale trang cảm ơn).
     | Đơn được tạo/chia sale ngay; hold_seconds chỉ là khoảng thời gian đơn còn
@@ -95,7 +102,12 @@ return [
         'pancake_chat_broadcasts' => env('QUEUE_PANCAKE_CHAT_BROADCASTS', 'broadcasts-pancake-chat'),
         'notifications' => env('QUEUE_NOTIFICATIONS', 'notifications'),
         'translations' => env('QUEUE_TRANSLATIONS', 'translations'),
-        'reports' => env('QUEUE_REPORTS', 'reports'),
+        'reports_live' => env('QUEUE_REPORTS_LIVE', 'reports-live'),
+        'reports_history' => env('QUEUE_REPORTS_HISTORY', env('QUEUE_REPORTS', 'reports-history')),
+        'reports_archive' => env('QUEUE_REPORTS_ARCHIVE', 'reports-archive'),
+        'reports_maintenance' => env('QUEUE_REPORTS_MAINTENANCE', 'reports-maintenance'),
+        // Backward-compatible alias for older deployments; new reporting jobs use the split queues above.
+        'reports' => env('QUEUE_REPORTS', 'reports-history'),
         'exports' => env('QUEUE_EXPORTS', 'exports'),
         'default' => env('QUEUE_DEFAULT_NAMED', 'default'),
     ],

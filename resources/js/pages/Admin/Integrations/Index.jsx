@@ -21,7 +21,7 @@ export default function IntegrationsIndex({ hub, categories, platforms, stats })
         <AppLayout>
             <Head title={t('pages.integrations_page.title')} />
 
-            <div className="space-y-8">
+            <div className="ps-feature-page ps-integrations-page">
                 <PageHeader
                     title={tOr(t, 'integrations.hub.title', hub.title)}
                     description={tOr(t, 'integrations.hub.summary', hub.summary)}

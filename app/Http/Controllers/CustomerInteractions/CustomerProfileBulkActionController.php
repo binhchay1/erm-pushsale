@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderOperationHistory;
 use App\Services\CustomerInteractions\OrderOperationHistoryService;
+use App\Services\Customers\CustomerPhoneAssignmentService;
 use App\Services\Leads\LeadRoutingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -20,23 +21,36 @@ class CustomerProfileBulkActionController extends Controller
     public function reallocateNow(
         Request $request,
         LeadRoutingService $routing,
+        CustomerPhoneAssignmentService $phoneAssignment,
         OrderOperationHistoryService $history,
     ): JsonResponse|RedirectResponse {
         $this->authorizeFull($request);
         $orders = $this->selectedOrders($request);
 
-        DB::transaction(function () use ($orders, $routing, $history, $request): void {
+        DB::transaction(function () use ($orders, $routing, $phoneAssignment, $history, $request): void {
             foreach ($orders as $order) {
                 $before = $history->snapshot($order);
-                $sale = $routing->assignSalesUser();
-                if (! $sale) {
+                $candidateSale = $routing->assignSalesUser($order->marketingSource);
+                if (! $candidateSale) {
                     continue;
                 }
+
+                $sale = $phoneAssignment->resolveSaleForNewOrder(
+                    $order->customer_phone,
+                    $candidateSale,
+                    $candidateSale,
+                    $order->company_id,
+                ) ?: $candidateSale;
+                $phoneAssignment->attachOrder($order, $sale, 'customer_reallocated_now');
 
                 $order->forceFill([
                     'sale_user_id' => $sale->id,
                     'team_id' => $sale->team_id,
                     'assigned_at' => now(),
+                    'phone_lock_conflict' => (int) $sale->id !== (int) $candidateSale->id,
+                    'phone_lock_note' => (int) $sale->id !== (int) $candidateSale->id
+                        ? 'Phân bổ lại tự đổi về Sale đang sở hữu SĐT để tránh gọi trùng khách.'
+                        : $order->phone_lock_note,
                 ])->save();
 
                 $history->record(

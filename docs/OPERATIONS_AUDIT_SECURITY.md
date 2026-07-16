@@ -50,7 +50,11 @@ QUEUE_PANCAKE_CHAT_SYNC=pancake-chat
 QUEUE_PANCAKE_CHAT_BROADCASTS=broadcasts-pancake-chat
 QUEUE_NOTIFICATIONS=notifications
 QUEUE_TRANSLATIONS=translations
-QUEUE_REPORTS=reports
+QUEUE_REPORTS_LIVE=reports-live
+QUEUE_REPORTS_HISTORY=reports-history
+QUEUE_REPORTS_ARCHIVE=reports-archive
+QUEUE_REPORTS_MAINTENANCE=reports-maintenance
+QUEUE_REPORTS=reports-history
 QUEUE_EXPORTS=exports
 QUEUE_DEFAULT_NAMED=default
 QUEUE_AFTER_COMMIT=true
@@ -67,6 +71,8 @@ Các job đã được đưa vào queue riêng:
 - Broadcast chat Pancake: `broadcasts-pancake-chat`
 - Notification: `notifications`
 - Translation: `translations`
+- Report live/history/archive/maintenance: `reports-live`, `reports-history`, `reports-archive`, `reports-maintenance`
+- Export: `exports`
 
 Production queue processes are managed by one Supervisor program running `php artisan horizon`. Per-lane process limits are defined in `config/horizon.php`; use `deploy/supervisor/horizon.conf.example` and follow `HORIZON_REDIS_OPERATIONS.md`.
 

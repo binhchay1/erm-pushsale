@@ -18,6 +18,7 @@ use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\OrderOperationHistory;
 use App\Models\User;
+use App\Services\Customers\CustomerPhoneAssignmentService;
 use App\Services\Marketing\MarketingStatsBroadcaster;
 use App\Services\NotificationService;
 use App\Support\ActivityLogger;
@@ -34,6 +35,8 @@ class LeadIngestionService
         protected LeadAllocationResolver $allocationResolver,
         protected LandingUpsellService $landingUpsell,
         protected MarketingStatsBroadcaster $marketingStats,
+        protected LeadDuplicatePolicy $duplicatePolicy,
+        protected CustomerPhoneAssignmentService $phoneAssignment,
     ) {}
 
     /**
@@ -1439,12 +1442,12 @@ class LeadIngestionService
 
         $windowDays = (int) config('saleops.lead_routing.duplicate_window_days', 30);
 
-        $duplicateOrderModel = Order::query()
-            ->where('customer_phone', $normalized['customer_phone'])
-            ->where('created_at', '>=', now()->subDays($windowDays))
-            ->latest('id')
-            ->first();
-        $duplicateOrder = $duplicateOrderModel !== null;
+        $duplicateOrderModel = $this->duplicatePolicy->findDuplicateOrder(
+            $normalized['customer_phone'],
+            $campaign,
+            $windowDays,
+        );
+        $duplicateOrder = $this->duplicatePolicy->countsAsDuplicate($duplicateOrderModel);
         $duplicatePrimary = $duplicateOrderModel ? $this->findPrimaryIngestionForOrder($duplicateOrderModel) : null;
 
         // Luồng Landing: tạo/chia đơn ngay. Job chỉ đóng trạng thái mở gộp khi
@@ -1473,9 +1476,23 @@ class LeadIngestionService
         // dữ liệu — khi gộp thêm gói sau, khi chốt đơn, hoặc khi chia tay từ pool (lead
         // nhập tay/CSV) không bị mất hàng.
         $storedPayload = $rawPayload;
+        $landingConnection = $campaign?->relationLoaded('landingConnection')
+            ? $campaign->landingConnection
+            : $campaign?->landingConnection()->first();
+        $landingConnectionId = $landingConnection?->id
+            ?? (filled($normalized['landing_connection_id'] ?? null) ? (int) $normalized['landing_connection_id'] : null);
+        $landingConnectionSourceId = filled($normalized['landing_connection_source_id'] ?? null)
+            ? (int) $normalized['landing_connection_source_id']
+            : null;
         $normalizedItems = is_array($normalized['items'] ?? null) ? $normalized['items'] : [];
         if ($campaign || $normalizedItems !== []) {
             $storedPayload['items'] = $normalizedItems;
+        }
+        if ($landingConnectionId) {
+            $storedPayload['landing_connection_id'] = $landingConnectionId;
+        }
+        if ($landingConnectionSourceId) {
+            $storedPayload['landing_connection_source_id'] = $landingConnectionSourceId;
         }
         if ((int) ($normalized['discount'] ?? 0) > 0) {
             $storedPayload['discount'] = (int) $normalized['discount'];
@@ -1506,13 +1523,15 @@ class LeadIngestionService
             [
                 'status' => $status,
                 'packet_type' => LeadPacketType::Lead,
-                'counts_as_lead' => true,
+                'counts_as_lead' => ! $duplicateOrder,
                 'customer_name' => $normalized['customer_name'],
                 'customer_phone' => $normalized['customer_phone'],
                 'product_interest' => $normalized['product_interest'],
                 'utm_source' => $normalized['utm_source'],
                 'utm_campaign' => $normalized['utm_campaign'],
                 'marketing_source_id' => $campaign?->id,
+                'landing_connection_id' => $landingConnectionId,
+                'landing_connection_source_id' => $landingConnectionSourceId,
                 'payload' => $storedPayload,
                 'parent_ingestion_id' => $duplicatePrimary?->id,
                 'related_order_id' => $duplicateOrderModel?->id,
@@ -1594,13 +1613,34 @@ class LeadIngestionService
         ?User $forceSale = null,
         bool $forcePending = false,
     ): LeadIngestion {
-        // Chia thủ công: gán thẳng cho sale được chọn (không qua auto route / pool).
+        $phone = $normalized['customer_phone'] ?? $ingestion->customer_phone;
+        $requestedSale = $forceSale;
+        $companyId = $ingestion->company_id ?? $campaign?->company_id;
+
         if ($forceSale !== null) {
-            $saleUser = $forceSale;
+            $candidateSale = $forceSale;
         } else {
             $assignToSale = ($campaign === null || $campaign->is_approved)
                 && $this->allocationResolver->shouldAutoAssign($campaign);
-            $saleUser = $assignToSale ? $this->routing->assignSalesUser($campaign) : null;
+            $candidateSale = $assignToSale ? $this->routing->assignSalesUser($campaign) : null;
+        }
+
+        $saleUser = $this->phoneAssignment->resolveSaleForNewOrder(
+            is_scalar($phone) ? (string) $phone : null,
+            $requestedSale,
+            $candidateSale,
+            $companyId,
+        );
+
+        if ($saleUser && $requestedSale && (int) $requestedSale->id !== (int) $saleUser->id) {
+            $payload = is_array($ingestion->payload) ? $ingestion->payload : [];
+            $payload['phone_lock_requested_sale_user_id'] = $requestedSale->id;
+            $payload['phone_lock_owner_user_id'] = $saleUser->id;
+            $ingestion->forceFill([
+                'payload' => $payload,
+                'phone_lock_conflict' => true,
+                'phone_lock_owner_user_id' => $saleUser->id,
+            ])->save();
         }
 
         if (! $saleUser) {
@@ -1615,10 +1655,20 @@ class LeadIngestionService
 
         return DB::transaction(function () use ($ingestion, $normalized, $saleUser, $campaign, $session) {
             $order = $this->orderFactory->createFromLead($ingestion, $normalized, $saleUser);
+            $lock = $this->phoneAssignment->attachOrder($order, $saleUser, 'lead_allocated');
+
+            if ((bool) $ingestion->phone_lock_conflict) {
+                $order->forceFill([
+                    'phone_lock_conflict' => true,
+                    'phone_lock_note' => 'Đơn được chuyển về Sale đang sở hữu SĐT để tránh hai Sale gọi cùng một khách.',
+                ])->save();
+            }
+
             $ingestion->update([
                 'status' => LeadIngestionStatus::Processed,
                 'order_id' => $order->id,
                 'processed_at' => now(),
+                'phone_lock_owner_user_id' => $lock->owner_sale_user_id,
             ]);
 
             if ($session) {

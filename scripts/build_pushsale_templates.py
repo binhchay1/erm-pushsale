@@ -104,8 +104,10 @@ def clean_node_tree(fragment: Tag) -> None:
             tag.attrs["action"] = "#"
         tag.attrs.pop("target", None)
 
-    # Select2's generated copy needs its old JS; keep the original <select> instead.
-    for container in list(fragment.select(".select2-container")):
+    # Select2/Chosen generated copies need their old JS; keep the original
+    # native <select> instead. Leaving both copies is one of the main causes of
+    # doubled controls and unexplained empty space in captured pages.
+    for container in list(fragment.select(".select2-container, .chosen-container")):
         container.decompose()
     for select in fragment.select("select"):
         style = re.sub(r"display\s*:\s*none\s*;?", "", str(select.attrs.get("style", "")), flags=re.I)
@@ -115,6 +117,19 @@ def clean_node_tree(fragment: Tag) -> None:
             classes.append("pushsale-native-select")
         select.attrs["class"] = classes
         select.attrs.pop("tabindex", None)
+
+        # Options rendered by ng-repeat/DNN are captured tenant data, not UI
+        # structure. Dynamic controls are repopulated from the ERM backend by
+        # BusinessPage. Keep static enums/placeholders only.
+        for option in list(select.find_all("option", recursive=False)):
+            label = " ".join(option.get_text(" ", strip=True).split())
+            captured_account = re.search(
+                r"(?:\bttgroup\d*\.|\btt\.sale\d+\b|@saleops\.local\b)",
+                label,
+                re.I,
+            )
+            if option.has_attr("ng-repeat") or captured_account:
+                option.decompose()
 
     for tag in fragment.select("a, button, input[type=button], input[type=submit], .btn"):
         label = text_of(tag) or str(tag.attrs.get("value", "")).strip().lower()

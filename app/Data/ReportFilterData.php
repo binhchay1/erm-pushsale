@@ -9,6 +9,7 @@ use App\Enums\UserRole;
 use App\Models\User;
 use App\Services\Reports\ReportDateRange;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 
 readonly class ReportFilterData
@@ -142,12 +143,12 @@ readonly class ReportFilterData
      * Giữ nguyên mọi scope (marketer, team, product…) nhưng ép khoảng ngày mới.
      * Dùng cho các KPI "hôm nay" trên dashboard: cùng phạm vi dữ liệu nhưng chỉ tính ngày hiện tại.
      */
-    public function withDateRange(Carbon $from, Carbon $to): self
+    public function withDateRange(CarbonInterface $from, CarbonInterface $to): self
     {
         return new self(...array_merge(get_object_vars($this), [
             'preset' => ReportDateRange::PRESET_CUSTOM,
-            'dateFrom' => $from,
-            'dateTo' => $to,
+            'dateFrom' => Carbon::instance($from)->copy(),
+            'dateTo' => Carbon::instance($to)->copy(),
         ]));
     }
 

@@ -120,8 +120,8 @@
     }
 }</style><div class="content-wrapper" style="min-height: 632px;">
 <div class="contentPane pushsale-template-inner" id="dnn_ContentPane"><div class="DnnModule DnnModule-ModuleLoader DnnModule-1474"><a name="1474" role="button"></a><div class="pushsale-template-inner" id="dnn_ctr1474_ContentPane"><!-- Start_Module_1474 --><div class="pushsale-template-inner" id="dnn_ctr1474_ModuleContent">
-<style type="text/css">
-    .tip { font-style: italic; display: inline-block; min-width: 30px; }
+<style type="text/css">@scope ([data-template-code="5.1"]) {
+.tip { font-style: italic; display: inline-block; min-width: 30px; }
     .dm-tac-nghiep { display: inline-block; width: 180px; font-size: 11px; color: #333; padding: 6px 15px 6px 6px; transition: ease 3s all; white-space: nowrap; }
         .dm-tac-nghiep:hover, .dm-tac-nghiep.selected { box-shadow: inset 0 0 4px orange; }
         .dm-tac-nghiep .flag { width: 20px; background-color: #C1E2F4; display: inline-block; height: 14px; float: left; }
@@ -200,7 +200,7 @@
         .hidden-actions a:hover { background-color: #006400; transform: scale(1.1); }
     /* end menu mới nhathl viết*/
     .action-container:hover .hidden-actions { display: flex; opacity: 1; pointer-events: auto; margin-left: 5px; /* Cho phép click khi hiển thị */ }
-</style>
+}</style>
 <div>
 <div id="dnn_ctr1474_Main_WarehouseTacNghiep_up1">
 <span class="hidden" id="dnn_ctr1474_Main_WarehouseTacNghiep_lblDownLoad"></span>
@@ -295,10 +295,8 @@
 </div>
 <div class="col-sm-2 form-group">
 <select class="chosen chosen-x pushsale-native-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlCareDonUserId" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlCareDonUserId" style="" title="">
-<option selected="selected" value="-1">--Chọn care đơn--</option>
-<option value="0"> (Chưa care đơn)</option>
-<option value="87360">Thắm (tt.kho1)</option>
-</select>
+
+<option selected="selected" value="-1">--Chọn care đơn--</option></select>
 </div>
 </div>
 <div class="row hidden-xs">
@@ -318,7 +316,6 @@
 <input class="ps-ddl-setting-json hidden pushsale-native-input" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdSanPham_tnt_SettingJson" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdSanPham$tnt_SettingJson" type="text" value='{"ShowLog":false,"SearchMinLength":0,"SearchDelay":500,"SearchMaxResultCount":20,"MultiSelect":false,"AutoPostBack":false,"DisplayItemId":false,"Enabled":true,"DefaultId":"-1","DefaultName":"--Chọn sản phẩm--","RemoteUrl":"/sp/act.aspx?act=ld_san_pham&amp;ttkd=0","OptionalParams":{}}'/>
 <input class="ps-ddl-optinal-param hidden pushsale-native-input" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdSanPham_tnt_OptinalParams" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdSanPham$tnt_OptinalParams" type="text"/>
 </div>
-
 </div>
 <div class="col-sm-2 form-group">
 <select class="chosen chosen-x id-loai-tac-nghiep pushsale-native-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlIdDoiSoatNoiBo" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlIdDoiSoatNoiBo" style="" title="">
@@ -366,67 +363,33 @@
 <div class="row">
 <div class="col-sm-2 form-group" id="dnn_ctr1474_Main_WarehouseTacNghiep_div1">
 <select class="chosen ddlpb pushsale-native-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlLeaderSale" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlLeaderSale" style="" title="">
-<option selected="selected" value="-1">--Chọn trưởng nhóm sale--</option>
-<option value="87343">SALE ADMIN (ttgroup.saleadmin2)</option>
-</select>
+
+<option selected="selected" value="-1">--Chọn trưởng nhóm sale--</option></select>
 </div>
 <div class="col-sm-2 form-group" id="dnn_ctr1474_Main_WarehouseTacNghiep_div2">
 <select class="chosen ddlpb pushsale-native-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlNhomSale" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlNhomSale" style="" title="">
-<option selected="selected" value="-1">--Chọn nhóm sale--</option>
-</select>
+
+<option selected="selected" value="-1">--Chọn nhóm sale--</option></select>
 </div>
 <div class="col-sm-2 form-group">
 <select class="chosen chosen-x pushsale-native-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlSaleUserId" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlSaleUserId" style="" title="">
-<option selected="selected" value="-1">--Chọn sale--</option>
-<option value="87343">SALE ADMIN (ttgroup.saleadmin2)</option>
-<option value="87344">Hoài Thu (tt.sale01)</option>
-<option value="87345">Thu Hường (tt.sale02)</option>
-<option value="87346">Lan Anh (tt.sale03)</option>
-<option value="87347">Trần Hằng (tt.sale04)</option>
-<option value="87348">Chu Thủy (tt.sale05)</option>
-<option value="87355">Sale part 1 (tt.sale06)</option>
-<option value="87370">Hồng Vân (tt.sale07)</option>
-<option value="87376">Quỳnh Anh (tt.sale08)</option>
-<option value="87529">Khánh Ly (tt.sale09)</option>
-<option value="87741">Mai Lan (tt.sale10)</option>
-<option value="87743">Phạm Lý (tt.sale11)</option>
-<option value="87744">Lại Giang (tt.sale12)</option>
-</select>
+
+<option selected="selected" value="-1">--Chọn sale--</option></select>
 </div>
 <div class="col-sm-2 form-group" id="dnn_ctr1474_Main_WarehouseTacNghiep_divLeaderMkt">
 <select class="chosen ddlpb pushsale-native-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlLeaderMKt" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlLeaderMKt" style="" title="">
-<option selected="selected" value="-1">--Chọn trưởng nhóm marketing--</option>
-<option value="87325">Phan Văn Minh (ttgroup2.marketing01)</option>
-</select>
+
+<option selected="selected" value="-1">--Chọn trưởng nhóm marketing--</option></select>
 </div>
 <div class="col-sm-2 form-group" id="dnn_ctr1474_Main_WarehouseTacNghiep_divNhomMkt">
 <select class="chosen ddlpb pushsale-native-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlNhomMkt" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlNhomMkt" style="" title="">
-<option selected="selected" value="-1">--Chọn nhóm marketing--</option>
-</select>
+
+<option selected="selected" value="-1">--Chọn nhóm marketing--</option></select>
 </div>
 <div class="col-sm-2 form-group">
 <select class="chosen chosen-x pushsale-native-select" id="dnn_ctr1474_Main_WarehouseTacNghiep_ddlMarketingUserId" name="dnn$ctr1474$Main$WarehouseTacNghiep$ddlMarketingUserId" style="" title="">
-<option selected="selected" value="-1">--Chọn marketing--</option>
-<option value="87325">Phan Văn Minh (ttgroup2.marketing01)</option>
-<option value="87326">Nguyễn Dương (ttgroup2.marketing02)</option>
-<option value="87327">Phạm Tú (ttgroup2.marketing03)</option>
-<option value="87328">Trần Dung (ttgroup2.marketing04)</option>
-<option value="87329">Kim Hồng (ttgroup2.marketing05)</option>
-<option value="87330">Ngọc Huyền (ttgroup2.marketing06)</option>
-<option value="87331">Trần Lan (ttgroup2.marketing07)</option>
-<option value="87332">Khánh Ly (ttgroup2.marketing08)</option>
-<option value="87333">Khánh Linh (ttgroup2.marketing09)</option>
-<option value="87334">Ngọc Ánh (ttgroup2.marketing10)</option>
-<option value="87335">Linh Chi (ttgroup2.marketing11)</option>
-<option value="87336">Vy Thảo (ttgroup2.marketing12)</option>
-<option value="87337">Hà Phương (ttgroup2.marketing13)</option>
-<option value="87338">Phương Anh (ttgroup2.marketing14)</option>
-<option value="87368">Thùy Dương (ttgroup2.marketing15)</option>
-<option value="87517">Khánh Chi (ttgroup2.marketing16)</option>
-<option value="87548">Hải Vân (ttgroup2.marketing17)</option>
-<option value="87549">Đỗ Ngân (ttgroup2.marketing18)</option>
-<option value="87680">Phương Quỳnh (ttgroup2.marketing19)</option>
-</select>
+
+<option selected="selected" value="-1">--Chọn marketing--</option></select>
 </div>
 </div>
 <div class="row hidden-xs">
@@ -675,7 +638,6 @@
 <div class="dragscroll1 tableFixHead" style="height: 582px;">
 <div id="dnn_ctr1474_Main_WarehouseTacNghiep_up2">
 <table class="table table-bordered table-multi-select table-sale pushsale-data-table" data-pushsale-grid-table="primary">
-
 <thead><tr class="drags-area hidden pushsale-captured-header-row">
 <th class="text-center" colspan="11" style="top: 0px;">THÔNG TIN ĐƠN HÀNG</th>
 <th class="text-center" colspan="4" style="top: 0px;">THÔNG TIN GIAO HÀNG</th>
@@ -849,17 +811,11 @@
 <button class="open-button hidden" role="button"></button>
 <div class="chat-popup fStartCall" id="fStartCall" style="overflow-y: auto;">
 <button aria-label="Close" class="close" role="button" type="button"><span aria-hidden="true">×</span></button>
-
 </div>
 <div class="chat-popup fStartCallOmi hidden" id="fStartCallOmi">
-
-
 <button aria-label="Close" class="close" role="button" type="button"><span aria-hidden="true">×</span></button>
-
 </div>
 <div style="height: 200px;"></div>
-
-
 </div><!-- End_Module_1474 --></div>
 </div></div>
 </div></div>

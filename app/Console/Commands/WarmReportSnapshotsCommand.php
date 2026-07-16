@@ -2,65 +2,79 @@
 
 namespace App\Console\Commands;
 
-use App\Data\ReportFilterData;
 use App\Enums\UserRole;
+use App\Jobs\Reports\WarmReportSnapshotsForUserJob;
 use App\Models\User;
-use App\Services\Reports\ExtraReportService;
-use App\Services\Reports\MarketingDashboardService;
-use App\Services\Reports\ReportSnapshotCache;
-use App\Services\Reports\TeamLeaderStatsService;
+use App\Services\Reporting\ReportSnapshotWarmupService;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
-use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 
 class WarmReportSnapshotsCommand extends Command
 {
-    protected $signature = 'reports:warm-snapshots {--company=}';
+    protected $signature = 'reports:warm-snapshots
+        {--company=}
+        {--all-users : Warm every staff account; default only admin/leader accounts}
+        {--queue : Dispatch one bounded job per user/date window instead of warming inline}';
 
-    protected $description = 'Pre-compute heavy report snapshots (end-of-day cache warm-up)';
+    protected $description = 'Pre-compute durable snapshots from closed daily facts';
 
-    public function handle(
-        ExtraReportService $extra,
-        TeamLeaderStatsService $teamLeaders,
-        MarketingDashboardService $marketingDashboard,
-        ReportSnapshotCache $cache,
-    ): int {
-        $companyId = $this->option('company');
-
-        $admins = User::query()
-            ->where('role', UserRole::Admin)
-            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+    public function handle(ReportSnapshotWarmupService $warmup): int
+    {
+        $users = User::query()
+            ->when($this->option('company'), fn ($q) => $q->where('company_id', $this->option('company')))
+            ->unless($this->option('all-users'), fn ($q) => $q->where(function ($scope): void {
+                $scope->where('role', UserRole::Admin->value)
+                    ->orWhere('is_team_leader', true)
+                    ->orWhere('org_level', 'head');
+            }))
+            ->orderBy('company_id')
+            ->orderBy('id')
             ->get();
 
-        if ($admins->isEmpty()) {
-            $this->warn('No admin users found.');
-
+        if ($users->isEmpty()) {
+            $this->warn('No users found.');
             return self::SUCCESS;
         }
 
-        $filter = ReportFilterData::fromRequest(
-            Request::create('/', 'GET', ['preset' => 'today']),
-        );
+        $now = CarbonImmutable::now(config('reporting.timezone'));
+        $yesterday = $now->subDay();
+        $windows = [
+            'yesterday' => [$yesterday->toDateString(), $yesterday->toDateString()],
+            'previous_month' => [
+                $now->subMonthNoOverflow()->startOfMonth()->toDateString(),
+                $now->subMonthNoOverflow()->endOfMonth()->toDateString(),
+            ],
+        ];
 
-        foreach ($admins as $admin) {
-            $this->info("Warming reports for company {$admin->company_id}...");
-
-            foreach (ReportSnapshotCache::heavyExtraKeys() as $key) {
-                if (! $extra->exists($key)) {
-                    continue;
-                }
-                $cache->remember($key, $admin, $filter, fn () => $extra->build($key, $admin, $filter), forceRefresh: true);
-                $this->line("  extra/{$key} OK");
-            }
-
-            $cache->remember('team-leaders', $admin, $filter, fn () => $teamLeaders->build($admin, $filter), forceRefresh: true);
-            $this->line('  team-leaders OK');
-
-            $cache->remember('marketing-dashboard', $admin, $filter, fn () => $marketingDashboard->build($filter), forceRefresh: true);
-            $this->line('  marketing-dashboard OK');
+        if ($now->day > 1) {
+            $windows['month_to_yesterday'] = [
+                $now->startOfMonth()->toDateString(),
+                $yesterday->toDateString(),
+            ];
         }
 
-        $this->info('Done at '.Carbon::now()->toDateTimeString());
+        foreach ($users as $user) {
+            foreach ($windows as $window => [$from, $to]) {
+                if ($this->option('queue')) {
+                    WarmReportSnapshotsForUserJob::dispatch((int) $user->id, $from, $to);
+                    $this->line("Queued {$user->company_id}/{$user->id} {$window} {$from}..{$to}");
+                    continue;
+                }
+
+                $warmed = $warmup->warmUserWindow($user, $from, $to);
+                $this->line(sprintf(
+                    '%s/%s %s %s..%s OK: %s',
+                    $user->company_id,
+                    $user->id,
+                    $window,
+                    $from,
+                    $to,
+                    implode(', ', $warmed),
+                ));
+            }
+        }
+
+        $this->info('Snapshot warming finished at '.now()->toDateTimeString());
 
         return self::SUCCESS;
     }

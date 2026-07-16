@@ -36,7 +36,7 @@ export default {
         marketing_dashboard: 'Tổng quan Marketing',
         landing_approvals: 'Duyệt trang Landing',
         activity_logs: 'Nhật ký hoạt động',
-        leads_log: 'Nhật ký lead về',
+        leads_log: 'Phân bổ data',
         integrations: 'Kết nối nền tảng',
         shipping_partners: 'Đối tác vận chuyển',
         shipping_orders: 'Đơn vận chuyển',

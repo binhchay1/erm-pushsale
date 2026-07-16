@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Sales;
 
 use App\Http\Controllers\Concerns\ExportsReportData;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
+use App\Http\Controllers\Concerns\InteractsWithReportSnapshots;
 use App\Http\Controllers\Controller;
 use App\Services\FilterOptionsService;
 use App\Services\Reports\SalesPerformanceReportService;
@@ -17,11 +18,18 @@ class PerformanceReportController extends Controller
 {
     use ExportsReportData;
     use InteractsWithReportFilters;
+    use InteractsWithReportSnapshots;
 
     public function __invoke(Request $request, SalesPerformanceReportService $service): Response|StreamedResponse|HttpResponse
     {
         $filter = $this->reportFilters($request);
-        $report = $service->build($filter, $request->user());
+        $snapshot = $this->maybeCachedReport(
+            $request,
+            'sales-performance',
+            $filter,
+            fn () => $service->build($filter, $request->user()),
+        );
+        $report = $snapshot['data'];
 
         if ($exported = $this->maybeExportReport(
             $request,
@@ -44,6 +52,7 @@ class PerformanceReportController extends Controller
             $this->reportPageProps($request, [
                 'report' => $report,
                 'routeUrl' => '/sales/performance',
+            'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
             ]),
             ['filterFields' => $filterOptions->detailReportFilterFields($request->user())],
         ));

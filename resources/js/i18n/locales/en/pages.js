@@ -227,7 +227,7 @@ export default {
         connect_step3_desc: 'Below the API dialog are the mapping rows: the LEFT box is your form field name; in the RIGHT "API name" box type the exact value from the middle column below. Skip any field your form does not have.',
         connect_note: 'The URL carries its own secret token, so NO API key/header is needed. After saving on LadiPage, send a test submission to verify. The campaign must be approved by an Admin before it receives real leads.',
         lead_allocation: 'Lead distribution',
-        lead_allocation_hint: 'Applies to every lead received via this campaign webhook. "Follow global setting" uses the toggle on the Lead log screen.',
+        lead_allocation_hint: 'Applies to every lead received via this campaign webhook. "Follow global setting" uses the toggle on the Data distribution screen.',
         api_url: 'API URL',
         connection_name: 'Connection name',
         content_type: 'Content-Type',
@@ -305,7 +305,7 @@ export default {
         webhook_label: 'Lead intake URL (Ladipage)',
     },
     leads: {
-        title: 'Lead ingestion log',
+        title: 'Data distribution',
         desc: 'Leads from webhook/landing — manual allocation when needed',
         manual_allocate: 'Manual allocation',
         search_placeholder: 'Search phone, name, source…',

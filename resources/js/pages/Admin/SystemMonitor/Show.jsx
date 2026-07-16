@@ -15,7 +15,7 @@ export default function SystemMonitorShow({ event }) {
         <AppLayout>
             <Head title={`${t('system_monitor.payload_title')} #${event.id}`} />
 
-            <div className="space-y-6">
+            <div className="ps-feature-page ps-system-monitor-detail">
                 <div className="flex items-center gap-3">
                     <Button variant="ghost" size="sm" asChild>
                         <Link href="/admin/system-monitor">

@@ -10,6 +10,7 @@ use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Customers\CustomerPhoneAssignmentService;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,6 +22,7 @@ class ManualLeadAllocationService
     public function __construct(
         private readonly LeadOrderFactory $orderFactory,
         private readonly LeadIngestionService $ingestionService,
+        private readonly CustomerPhoneAssignmentService $phoneAssignment,
     ) {}
 
     /**
@@ -44,8 +46,9 @@ class ManualLeadAllocationService
 
         $allocated = 0;
         $landingOrders = [];
+        $affectedSaleIds = [];
 
-        DB::transaction(function () use ($leadIds, $saleUser, &$allocated, &$landingOrders) {
+        DB::transaction(function () use ($leadIds, $saleUser, &$allocated, &$landingOrders, &$affectedSaleIds) {
             // Khoá hàng lead để tránh đua với chia tự động / phiên chia tay khác.
             $leads = LeadIngestion::query()
                 ->whereIn('id', $leadIds)
@@ -64,12 +67,31 @@ class ManualLeadAllocationService
 
             foreach ($leads as $lead) {
                 $normalized = $this->orderFactory->normalizedFromLead($lead);
-                $order = $this->orderFactory->createFromLead($lead, $normalized, $saleUser);
+                $effectiveSale = $this->phoneAssignment->resolveSaleForNewOrder(
+                    (string) ($normalized['customer_phone'] ?? $lead->customer_phone),
+                    $saleUser,
+                    $saleUser,
+                    $lead->company_id,
+                ) ?: $saleUser;
+
+                $phoneConflict = (int) $effectiveSale->id !== (int) $saleUser->id;
+                $affectedSaleIds[(int) $effectiveSale->id] = (int) $effectiveSale->id;
+                $order = $this->orderFactory->createFromLead($lead, $normalized, $effectiveSale);
+                $lock = $this->phoneAssignment->attachOrder($order, $effectiveSale, 'manual_lead_allocated');
+
+                if ($phoneConflict) {
+                    $order->forceFill([
+                        'phone_lock_conflict' => true,
+                        'phone_lock_note' => 'Chia tay đã được đổi về Sale đang sở hữu SĐT để tránh hai Sale gọi cùng một khách.',
+                    ])->save();
+                }
 
                 $lead->update([
                     'status' => LeadIngestionStatus::Processed,
                     'order_id' => $order->id,
                     'processed_at' => now(),
+                    'phone_lock_conflict' => $phoneConflict,
+                    'phone_lock_owner_user_id' => $lock->owner_sale_user_id,
                 ]);
 
                 if ($lead->platform === 'landing' && $lead->marketing_source_id) {
@@ -81,7 +103,7 @@ class ManualLeadAllocationService
                 }
 
                 NotificationService::push(
-                    $saleUser->id,
+                    $effectiveSale->id,
                     'lead',
                     null,
                     null,
@@ -120,7 +142,9 @@ class ManualLeadAllocationService
         if ($allocated > 0) {
             // Realtime ping — không để lỗi broadcaster làm hỏng việc chia lead.
             try {
-                event(new SaleWorkspaceChanged($saleUser->id));
+                foreach ($affectedSaleIds ?: [(int) $saleUser->id => (int) $saleUser->id] as $saleId) {
+                    event(new SaleWorkspaceChanged($saleId));
+                }
                 event(new LeadPoolChanged);
             } catch (Throwable $e) {
                 Log::warning('Realtime broadcast failed (allocation)', ['error' => $e->getMessage()]);

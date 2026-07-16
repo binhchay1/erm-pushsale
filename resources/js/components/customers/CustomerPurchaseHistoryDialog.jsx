@@ -269,7 +269,7 @@ export function CustomerPurchaseHistoryDialog({ order }) {
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="max-h-[92vh] max-w-[min(1500px,calc(100vw-1.5rem))] overflow-hidden p-0">
+            <DialogContent className="ps-modal-surface max-h-[92vh] overflow-hidden p-0" style={{ '--ps-modal-width': '1500px' }}>
                 <DialogHeader className="border-b px-6 py-5 pr-14">
                     <DialogTitle>{t('operations.customer_interactions.purchase_title')}</DialogTitle>
                     <DialogDescription>

@@ -7,6 +7,7 @@ use App\Enums\RankingPeriod;
 use App\Enums\UserRole;
 use App\Services\FilterOptionsService;
 use App\Services\Reports\RevenueRankingService;
+use App\Services\Reporting\ReportSnapshotStore;
 use Illuminate\Http\Request;
 
 trait InteractsWithRevenueRanking
@@ -23,9 +24,19 @@ trait InteractsWithRevenueRanking
         ?int $highlightUserId = null,
     ): array {
         $filter = RankingFilterData::fromRequest($request);
-        $departments = $roleScope !== null
-            ? $service->buildForRole($roleScope, $filter)
-            : $service->build($filter);
+        $snapshot = app(ReportSnapshotStore::class)->rememberPayload(
+            'revenue-ranking-'.($roleScope?->value ?? 'all'),
+            $request->user(),
+            array_merge($filter->toInertia(), ['role_scope' => $roleScope?->value]),
+            $filter->dateFrom,
+            $filter->dateTo,
+            'closing_date',
+            fn () => $roleScope !== null
+                ? $service->buildForRole($roleScope, $filter)
+                : $service->build($filter),
+            $request->boolean('refresh'),
+        );
+        $departments = $snapshot['data'];
 
         $myRank = null;
 
@@ -45,6 +56,7 @@ trait InteractsWithRevenueRanking
                 ->map(fn (RankingPeriod $p) => ['value' => $p->value, 'label' => $p->label()])
                 ->all(),
             'departments' => $departments,
+            'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
         ];
     }
 }

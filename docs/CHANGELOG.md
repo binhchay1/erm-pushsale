@@ -137,3 +137,32 @@ Timeline milestone và spec — **mới nhất trước**. Chi tiết kỹ thu�
 - Thêm cảnh báo vượt ngân sách, COD chưa thu, lỗ ròng, tồn kho thấp, lương dự kiến và nguy cơ nhập trùng chi phí nhân sự.
 - Chuẩn hóa các trường tiền sang VND.
 - Làm sạch/scope 54 template từ template-five, phục hồi vendor CSS/font cần thiết và giữ backend thật cho từng mã menu.
+
+---
+
+## 2026-07-15 — V17 UI system, dynamic filters và modal contract
+
+- Tách CSS thành ba entry: shared (`app.css`), public/login (`public.css`) và ERM nội bộ (`pushsale.css`).
+- Loại các patch CSS V12/V13 khỏi source; `pushsale-system-v17.css` trở thành contract cuối.
+- Scope 79 template; loại generated Select2/Chosen DOM, script và dữ liệu tenant Pushsale capture.
+- Chuẩn hóa filter Bootstrap thành grid 12 cột, tự bỏ cột trống đầu hàng.
+- Chuẩn hóa action cell, không còn border/hộp con quanh icon.
+- Thêm `PushsaleModal`, clamp mọi modal vào viewport, header/footer cố định và body cuộn.
+- Chuyển các modal hồ sơ khách hàng và editor template sang modal dùng chung.
+- Lịch sử đăng nhập lấy user/role/company thật và ghi audit login success/failed/blocked/logout.
+- Kết nối filter sản phẩm, phân loại, trạng thái, quyền Marketing/Sale/CSKH, sản phẩm cha và trưởng nhóm vào backend thật.
+- Thay bảng xếp hạng Sales capture bằng top 10 backend động.
+
+---
+
+## 2026-07-15 — V18 Historical reporting, daily facts và monthly archive
+
+- Thêm hot/cold report router: hôm nay live từ raw + Redis, ngày cũ từ daily materialized facts.
+- Thêm daily facts cho lead, order, product/upsale, shipping cashflow và inventory.
+- Thêm closure, full fact checksum, source fingerprint và verify/repair command.
+- Thêm dirty-date observer cho dữ liệu đến muộn; reopen ngày cũ và invalidate snapshot tự động.
+- Thêm snapshot DB nén cho kỳ quá khứ đã đóng, phân tách theo tenant/user/filter.
+- Thêm archive raw theo bảng `*_YYYY_MM`, copy chunk, full-row SHA-256 và manifest.
+- Không purge mặc định; orders/order_items/shipments luôn được coi là mutable.
+- Nối snapshot vào dashboard, báo cáo, ranking, hourly, đối soát giao vận và các màn operations nặng.
+- Warm snapshot mặc định chỉ cho Admin/leader để tránh burst tài nguyên.

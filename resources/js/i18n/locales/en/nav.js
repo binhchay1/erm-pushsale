@@ -36,7 +36,7 @@ export default {
         marketing_dashboard: 'Marketing dashboard',
         landing_approvals: 'Landing approvals',
         activity_logs: 'Activity log',
-        leads_log: 'Lead ingestion log',
+        leads_log: 'Data distribution',
         integrations: 'Platform integrations',
         shipping_partners: 'Shipping partners',
         shipping_orders: 'Shipping orders',

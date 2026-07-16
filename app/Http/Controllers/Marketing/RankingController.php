@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Marketing;
 use App\Data\MarketingRankingFilterData;
 use App\Http\Controllers\Controller;
 use App\Services\Reports\MarketingLeaderboardService;
+use App\Services\Reporting\ReportSnapshotStore;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -15,12 +16,24 @@ class RankingController extends Controller
     {
         $filter = MarketingRankingFilterData::fromRequest($request);
 
+        $snapshot = app(ReportSnapshotStore::class)->rememberPayload(
+            'marketing-ranking',
+            $request->user(),
+            $filter->toInertia(),
+            $filter->dateFrom,
+            $filter->dateTo,
+            'data_arrival',
+            fn () => $service->build($filter),
+            $request->boolean('refresh'),
+        );
+
         return Inertia::render('Admin/Marketing/Ranking', [
-            'report' => $service->build($filter),
+            'report' => $snapshot['data'],
             'filters' => $filter->toInertia(),
             'filterOptions' => $service->options(),
             'filterRouteUrl' => '/marketing/rankings',
             'activeMenuCode' => '2.2',
+            'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
         ]);
     }
 }

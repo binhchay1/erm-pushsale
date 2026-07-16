@@ -6,6 +6,7 @@ use App\Data\MarketingDashboardFilterData;
 use App\Http\Controllers\Controller;
 use App\Models\MarketingSource;
 use App\Services\Reports\PushsaleMarketingDashboardService;
+use App\Services\Reporting\ReportSnapshotStore;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,12 +26,25 @@ class DashboardDataController extends Controller
         $source = MarketingSource::query()->findOrFail((int) $validated['source_id']);
         $filter = MarketingDashboardFilterData::fromRequest($request, $request->user());
 
-        return response()->json($service->chartData(
-            $filter,
-            $source,
-            $validated['utm_source'] ?? null,
-            $validated['utm_campaign'] ?? null,
-        ));
+        $snapshot = app(ReportSnapshotStore::class)->rememberPayload(
+            'pushsale-marketing-chart',
+            $request->user(),
+            array_merge($filter->toInertia(), $validated),
+            $filter->dateFrom,
+            $filter->dateTo,
+            $filter->dateType->value,
+            fn () => $service->chartData(
+                $filter,
+                $source,
+                $validated['utm_source'] ?? null,
+                $validated['utm_campaign'] ?? null,
+            ),
+            $request->boolean('refresh'),
+        );
+
+        return response()->json($snapshot['data'])
+            ->header('X-Report-Cache', $snapshot['storage'])
+            ->header('X-Report-Cache-Hit', $snapshot['fromCache'] ? '1' : '0');
     }
 
     public function dailyMetrics(
@@ -48,13 +62,26 @@ class DashboardDataController extends Controller
         $from = Carbon::parse($validated['date_from'] ?? now()->toDateString())->startOfDay();
         $to = Carbon::parse($validated['date_to'] ?? $from->toDateString())->endOfDay();
 
-        return response()->json($service->dailyMetricRows(
-            $source,
+        $snapshot = app(ReportSnapshotStore::class)->rememberPayload(
+            'pushsale-marketing-daily-metrics',
+            $request->user(),
+            $validated,
             $from,
             $to,
-            $validated['utm_source'] ?? null,
-            $validated['utm_campaign'] ?? null,
-        ));
+            'marketing_metric_date',
+            fn () => $service->dailyMetricRows(
+                $source,
+                $from,
+                $to,
+                $validated['utm_source'] ?? null,
+                $validated['utm_campaign'] ?? null,
+            ),
+            $request->boolean('refresh'),
+        );
+
+        return response()->json($snapshot['data'])
+            ->header('X-Report-Cache', $snapshot['storage'])
+            ->header('X-Report-Cache-Hit', $snapshot['fromCache'] ? '1' : '0');
     }
 
     public function saveDailyMetrics(
@@ -84,7 +111,16 @@ class DashboardDataController extends Controller
         PushsaleMarketingDashboardService $service,
     ): StreamedResponse {
         $filter = MarketingDashboardFilterData::fromRequest($request, $request->user());
-        $rows = $service->exportRows($filter);
+        $rows = app(ReportSnapshotStore::class)->rememberPayload(
+            'pushsale-marketing-export',
+            $request->user(),
+            $filter->toInertia(),
+            $filter->dateFrom,
+            $filter->dateTo,
+            $filter->dateType->value,
+            fn () => $service->exportRows($filter),
+            $request->boolean('refresh'),
+        )['data'];
         $filename = 'marketing-dashboard-'.$filter->dateFrom->format('Ymd').'-'.$filter->dateTo->format('Ymd').'.csv';
 
         return response()->streamDownload(function () use ($rows): void {

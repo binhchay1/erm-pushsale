@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CustomerMessagesDialog } from '@/components/customers/CustomerMessagesDialog';
 import { CustomerPurchaseHistoryDialog } from '@/components/customers/CustomerPurchaseHistoryDialog';
 import { OrderOperationHistoryDialog } from '@/components/customers/OrderOperationHistoryDialog';
+import { PushsaleModal } from '@/components/ui/pushsale-modal';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
@@ -43,7 +44,13 @@ function displayValue(value, format) {
 
 function StatusValue({ value }) {
     const normalized = String(value ?? '').toLowerCase();
-    const tone = normalized.includes('hoàn') || normalized.includes('đang') || normalized.includes('áp dụng')
+    const tone = normalized.includes('không thành công') || normalized.includes('thất bại') || normalized === 'failed'
+        ? 'danger'
+        : normalized.includes('thành công') || normalized === 'success'
+          ? 'success'
+          : normalized.includes('đăng xuất') || normalized === 'logout'
+            ? 'default'
+            : normalized.includes('hoàn') || normalized.includes('đang') || normalized.includes('áp dụng')
         ? 'success'
         : normalized.includes('chờ') || normalized.includes('mới')
           ? 'warning'
@@ -586,67 +593,67 @@ function PushsaleEditorModal({ open, schema, row, dialogHtml = '', dialogSchema 
     if (!open) return null;
     const missingFields = fields.slice(capturedFieldCount);
 
-    return createPortal(
-        <div className="pushsale-modal-layer" role="dialog" aria-modal="true" aria-label={title}>
-            <div className="pushsale-modal-backdrop" onClick={onClose} />
-            <div className="pushsale-modal-dialog">
-                <div className="pushsale-modal-header">
-                    <strong>{row || editingDialogRecord ? `Cập nhật ${title}` : title}</strong>
-                    <button type="button" onClick={onClose} aria-label="Đóng"><i className="fa fa-times" /></button>
-                </div>
-                <div className="pushsale-modal-body" ref={dialogRef}>
-                    {dialogSchema?.records?.length > 0 && (
-                        <div className="pushsale-dialog-live-records">
-                            <div className="pushsale-dialog-live-records-title">Dữ liệu hiện có</div>
-                            <div className="table-responsive">
-                                <table className="table table-bordered table-striped table-condensed">
-                                    <thead><tr>
-                                        <th style={{ width: 55 }}>ID</th>
-                                        {fields.slice(0, 3).map((field) => <th key={field.key}>{field.label}</th>)}
-                                        <th style={{ width: 60 }} />
-                                    </tr></thead>
-                                    <tbody>
-                                        {dialogSchema.records.map((record) => (
-                                            <tr key={record.id}>
-                                                <td>{record.id}</td>
-                                                {fields.slice(0, 3).map((field) => <td key={field.key}>{displayValue(record[field.key], field.type === 'currency' ? 'currency' : undefined)}</td>)}
-                                                <td className="text-center">
-                                                    <button type="button" className="pushsale-icon-action" title="Sửa" onClick={() => {
-                                                        setEditingDialogRecord(record);
-                                                        setPayload(defaultFormPayload(fields, { _form: record._form ?? record }));
-                                                    }}>
-                                                        <i className="fa fa-pencil" />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
-                    {dialogHtml && <div className="pushsale-dialog-source" dangerouslySetInnerHTML={{ __html: dialogHtml }} />}
-                    {(!dialogHtml || missingFields.length > 0) && (
-                        <div className="pushsale-generated-form">
-                            {(dialogHtml ? missingFields : fields).map((field) => (
-                                <label key={field.key} className={`pushsale-form-field pushsale-form-field-${field.type ?? 'text'}`}>
-                                    <span>{field.label}{field.required ? ' (*)' : ''}</span>
-                                    <FormField field={field} value={payload[field.key]} filterOptions={filterOptions} onChange={(value) => setPayload((current) => ({ ...current, [field.key]: value }))} />
-                                </label>
-                            ))}
-                        </div>
-                    )}
-                </div>
-                <div className="pushsale-modal-footer">
+    return (
+        <PushsaleModal
+            open={open}
+            onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}
+            width="1120px"
+            title={row || editingDialogRecord ? `Cập nhật ${title}` : title}
+            bodyRef={dialogRef}
+            className="pushsale-editor-modal"
+            footer={(
+                <>
                     <button type="button" className="btn btn-default btn-sm" onClick={onClose}>Đóng</button>
                     <button type="button" className="btn btn-primary btn-sm" disabled={saving} onClick={submit}>
                         <i className={`fa ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} /> {saving ? 'Đang lưu' : 'Cập nhật'}
                     </button>
+                </>
+            )}
+        >
+            {dialogSchema?.records?.length > 0 && (
+                <div className="pushsale-dialog-live-records">
+                    <div className="pushsale-dialog-live-records-title">Dữ liệu hiện có</div>
+                    <div className="table-responsive">
+                        <table className="table table-bordered table-striped table-condensed">
+                            <thead><tr>
+                                <th style={{ width: 55 }}>ID</th>
+                                {fields.slice(0, 3).map((field) => <th key={field.key}>{field.label}</th>)}
+                                <th style={{ width: 60 }} />
+                            </tr></thead>
+                            <tbody>
+                                {dialogSchema.records.map((record) => (
+                                    <tr key={record.id}>
+                                        <td>{record.id}</td>
+                                        {fields.slice(0, 3).map((field) => <td key={field.key}>{displayValue(record[field.key], field.type === 'currency' ? 'currency' : undefined)}</td>)}
+                                        <td className="text-center">
+                                            <button type="button" className="pushsale-icon-action" title="Sửa" onClick={() => {
+                                                setEditingDialogRecord(record);
+                                                setPayload(defaultFormPayload(fields, { _form: record._form ?? record }));
+                                            }}>
+                                                <i className="fa fa-pencil" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        </div>,
-        document.body,
+            )}
+            {dialogHtml && <div className="pushsale-dialog-source" dangerouslySetInnerHTML={{ __html: dialogHtml }} />}
+            {(!dialogHtml || missingFields.length > 0) && (
+                <div className="pushsale-generated-form">
+                    {(dialogHtml ? missingFields : fields).map((field) => (
+                        <label key={field.key} className={`pushsale-form-field pushsale-form-field-${field.type ?? 'text'}`}>
+                            <span>{field.label}{field.required ? ' (*)' : ''}</span>
+                            <FormField field={field} value={payload[field.key]} filterOptions={filterOptions} onChange={(value) => setPayload((current) => ({ ...current, [field.key]: value }))} />
+                        </label>
+                    ))}
+                </div>
+            )}
+        </PushsaleModal>
     );
+
 }
 
 
@@ -654,14 +661,33 @@ function inferFilterKey(node) {
     const source = `${node?.id ?? ''} ${node?.name ?? ''}`.toLowerCase();
     if (!source) return null;
     if (source.includes('tukhoa') || source.includes('keyword') || source.includes('search')) return 'search';
+    if (source.includes('lichsudangnhap') && source.includes('ddldonvi')) return 'company_id';
+    if (source.includes('lichsudangnhap') && (source.includes('ddlchucvu') || source.includes('role'))) return 'role';
+    if (source.includes('lichsudangnhap') && (source.includes('ddlusers') || source.includes('ddluser'))) return 'user_id';
+    if (source.includes('lichsudangnhap') && source.includes('ddltrangthai')) return 'login_status';
+    if (source.includes('lichsudangnhap') && source.includes('ddlsapxep')) return 'sort';
+    if (source.includes('ddlusers') || source.includes('ddluser')) return 'user_id';
+    if (source.includes('ddlchucvu') || source.includes('role')) return 'role';
+    if (source.includes('ddldonvi') || source.includes('company')) return 'company_id';
+    if (source.includes('danhsachsanpham') && source.includes('ddlcatid')) return 'category_id';
+    if (source.includes('danhsachsanpham') && source.includes('ddlisngungkinhdoanh')) return 'active_status';
+    if (source.includes('danhsachsanpham') && source.includes('ddlmarketing')) return 'available_marketing';
+    if (source.includes('danhsachsanpham') && source.includes('ddlsale')) return 'available_sale';
+    if (source.includes('danhsachsanpham') && source.includes('ddlcskh')) return 'available_care';
+    if (source.includes('sanphamgroup')) return 'parent_product_id';
+    if (source.includes('truongnhom')) return 'team_leader_id';
+    if (source.includes('ddlsapxep')) return 'sort';
     if (source.includes('tungay') || source.includes('ngaytu') || source.includes('datefrom')) return 'date_from';
     if (source.includes('denngay') || source.includes('ngayden') || source.includes('dateto')) return 'date_to';
+    if (source.includes('caredonuserid') || source.includes('careuserid') || source.includes('ddlcskh')) return 'care_user_id';
+    if (source.includes('quankho_userid')) return 'warehouse_user_id';
     if (source.includes('leadersale')) return 'sale_leader_id';
-    if (source.includes('nhomsale') || source.includes('teamsale')) return 'sale_team_id';
+    if (source.includes('nhomsale') || source.includes('teamsale') || source.endsWith('ddlnhom')) return 'sale_team_id';
     if (source.includes('saleuserid') || source.includes('idsale')) return 'sale_id';
     if (source.includes('leadermkt') || source.includes('leadermarketing')) return 'marketer_leader_id';
     if (source.includes('nhommkt') || source.includes('teammarketing')) return 'marketer_team_id';
-    if (source.includes('marketinguserid') || source.includes('idmarketing')) return 'marketer_id';
+    if (source.includes('marketinguserid') || source.includes('idmarketing') || source.includes('ddlmarketing') || source.includes('ddlmarketings')) return 'marketer_id';
+    if ((source.includes('ddlsale') || source.includes('ddlsales')) && !source.includes('leader')) return 'sale_id';
     if (source.includes('sanpham') || source.includes('product')) return 'product_id';
     if (source.includes('landing') || source.includes('nguondulieu') || source.includes('source')) return 'source_id';
     if (source.includes('kho') || source.includes('warehouse')) return 'warehouse_id';
@@ -729,16 +755,133 @@ function collectTemplateFilters(host) {
 
 function optionsForControl(id, filterOptions) {
     const source = String(id ?? '').toLowerCase();
+    const combine = (...groups) => {
+        const unique = new Map();
+        groups.flat().forEach((option) => unique.set(String(option.id), option));
+        return [...unique.values()];
+    };
+    if (source.includes('lichsudangnhap') && source.includes('ddldonvi')) return filterOptions?.companies ?? [];
+    if (source.includes('lichsudangnhap') && source.includes('ddlchucvu')) return filterOptions?.roles ?? [];
+    if (source.includes('lichsudangnhap') && (source.includes('ddlusers') || source.includes('ddluser'))) return filterOptions?.loginUsers ?? filterOptions?.users ?? [];
+    if (source.includes('lichsudangnhap') && source.includes('ddltrangthai')) return filterOptions?.loginStatuses ?? [];
+    if (source.includes('lichsudangnhap') && source.includes('ddlsapxep')) return filterOptions?.loginSorts ?? [];
+    if (source.includes('ddlusers') || source.includes('ddluser')) return filterOptions?.users ?? [];
+    if (source.includes('ddlchucvu') || source.includes('role')) return filterOptions?.roles ?? [];
+    if (source.includes('ddldonvi') || source.includes('company')) return filterOptions?.companies ?? [];
+    if (source.includes('danhsachsanpham') && source.includes('ddlcatid')) return filterOptions?.productCategories ?? [];
+    if (source.includes('danhsachsanpham') && source.includes('ddlmarketing')) return filterOptions?.availabilityOptions ?? [];
+    if (source.includes('danhsachsanpham') && source.includes('ddlsale')) return filterOptions?.availabilityOptions ?? [];
+    if (source.includes('danhsachsanpham') && source.includes('ddlcskh')) return filterOptions?.availabilityOptions ?? [];
+    if (source.includes('sanphamgroup')) return filterOptions?.productGroups ?? filterOptions?.products ?? [];
+    if (source.includes('truongnhom')) return filterOptions?.teamLeaders ?? filterOptions?.users ?? [];
+    if (source.includes('leadersaleormarketing')) return combine(filterOptions?.saleLeaders ?? [], filterOptions?.marketingLeaders ?? []);
+    if (source.includes('caredonuserid') || source.includes('careuserid') || source.includes('ddlcskh')) return filterOptions?.careUsers ?? filterOptions?.users ?? [];
+    if (source.includes('quankho_userid')) return filterOptions?.warehouseUsers ?? filterOptions?.users ?? [];
     if (source.includes('leadersale')) return filterOptions?.saleLeaders ?? filterOptions?.sales ?? [];
-    if (source.includes('nhomsale') || source.includes('teamsale')) return filterOptions?.saleTeams ?? filterOptions?.teams ?? [];
+    if (source.includes('nhomsale') || source.includes('teamsale') || source.endsWith('ddlnhom')) return filterOptions?.saleTeams ?? filterOptions?.teams ?? [];
     if (source.includes('saleuserid') || source.includes('idsale')) return filterOptions?.sales ?? [];
     if (source.includes('leadermkt')) return filterOptions?.marketingLeaders ?? filterOptions?.marketers ?? [];
     if (source.includes('nhommkt') || source.includes('teammarketing')) return filterOptions?.marketingTeams ?? filterOptions?.teams ?? [];
-    if (source.includes('marketinguserid') || source.includes('idmarketing')) return filterOptions?.marketers ?? [];
+    if (source.includes('marketinguserid') || source.includes('idmarketing') || source.includes('ddlmarketing') || source.includes('ddlmarketings')) return filterOptions?.marketers ?? [];
+    if ((source.includes('ddlsale') || source.includes('ddlsales')) && !source.includes('leader')) return filterOptions?.sales ?? [];
     if (source.includes('sanpham') || source.includes('product')) return filterOptions?.products ?? [];
     if (source.includes('landing') || source.includes('nguon')) return filterOptions?.sources ?? [];
     if (source.includes('kho') || source.includes('warehouse')) return filterOptions?.warehouses ?? [];
     return [];
+}
+
+
+function normalizeTemplateLayout(host) {
+    if (!host) return;
+
+    host.querySelectorAll('.content-header').forEach((node) => {
+        if (!node.textContent?.trim() && !node.querySelector('input, select, textarea, button, a, table')) {
+            node.classList.add('pushsale-template-empty-spacer');
+            node.setAttribute('aria-hidden', 'true');
+        }
+    });
+
+    host.querySelectorAll('.m-header').forEach((row) => row.classList.add('pushsale-header-row'));
+    host.querySelectorAll('.box-body .row, .m-header-wrap .row').forEach((row) => {
+        if (row.closest('.modal, [role="dialog"]')) return;
+        const controls = row.querySelectorAll('select, .ps-ddl, input:not([type="hidden"]):not([type="file"]), textarea');
+        const hasDataGrid = row.querySelector('table, [data-pushsale-grid-anchor], [data-pushsale-pagination-anchor]');
+        const hasBootstrapColumns = [...row.children].some((child) => /(^|\s)col-(xs|sm|md|lg)-\d+/.test(child.className ?? ''));
+        if (controls.length >= 1 && hasBootstrapColumns && !hasDataGrid) row.classList.add('pushsale-filter-row');
+    });
+
+    host.querySelectorAll('.pushsale-filter-row, .pushsale-header-row').forEach((row) => {
+        [...row.children].forEach((column) => {
+            if (!column.matches?.('[class*="col-"]')) return;
+            const hasInteractive = column.querySelector('input:not([type="hidden"]), select, textarea, button, a, .ps-ddl, table');
+            const hasText = Boolean(column.textContent?.replace(/\s+/g, ' ').trim());
+            if (!hasInteractive && !hasText) column.classList.add('pushsale-empty-column');
+        });
+    });
+}
+
+function LoginUserQuickFilters({ users = [], routeUrl }) {
+    const current = new URLSearchParams(window.location.search).get('user_id') ?? '';
+    const visit = (userId) => {
+        const params = new URLSearchParams(window.location.search);
+        params.delete('page');
+        if (userId) params.set('user_id', String(userId)); else params.delete('user_id');
+        router.get(routeUrl, Object.fromEntries(params.entries()), {
+            preserveState: false,
+            preserveScroll: false,
+            replace: true,
+        });
+    };
+
+    return (
+        <div className="pushsale-login-user-summary" aria-label="Nhân viên có trong hệ thống">
+            {users.map((user) => (
+                <button
+                    type="button"
+                    key={user.id}
+                    className={`pushsale-login-user-chip ${String(user.id) === String(current) ? 'is-active' : ''}`}
+                    onClick={() => visit(user.id)}
+                    title={`${user.name ?? user.label}${user.role_label ? ` · ${user.role_label}` : ''}`}
+                >
+                    <span className="flag" aria-hidden="true" />
+                    <span className="label">{user.name ?? user.label}</span>
+                    <span className="count">({numberFormatter.format(Number(user.login_count ?? 0))})</span>
+                </button>
+            ))}
+            <button
+                type="button"
+                className={`pushsale-login-user-chip ${current ? '' : 'is-active'}`}
+                onClick={() => visit('')}
+            >
+                <span className="flag" aria-hidden="true" style={{ background: '#b8def2' }} />
+                <span className="label">Tất cả</span>
+            </button>
+        </div>
+    );
+}
+
+function SalesRankingCards({ rows = [] }) {
+    const topRows = rows.slice(0, 10);
+    if (!topRows.length) {
+        return <div className="pushsale-ranking-empty">Chưa có dữ liệu xếp hạng trong khoảng lọc.</div>;
+    }
+
+    return (
+        <div className="pushsale-ranking-cards" aria-label="Bảng xếp hạng Sales theo dữ liệu ERM">
+            {topRows.map((row, index) => (
+                <article className={`pushsale-ranking-card rank-${index + 1}`} key={`${row.sale}-${index}`}>
+                    <div className="pushsale-ranking-position">{index + 1}</div>
+                    <div className="pushsale-ranking-avatar" aria-hidden="true">
+                        {String(row.sale ?? '?').trim().slice(0, 1).toUpperCase()}
+                    </div>
+                    <div className="pushsale-ranking-copy">
+                        <strong>{row.sale ?? 'Chưa phân Sale'}</strong>
+                        <span>{currencyFormatter.format(Number(row.revenue ?? row.total ?? 0))}</span>
+                    </div>
+                </article>
+            ))}
+        </div>
+    );
 }
 
 function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, filterOptions, onCreate, onEdit, onDelete, onDeleteSelected, onPushsaleSave, selectedRecordIds, onToggleSelect }) {
@@ -746,6 +889,8 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
     const [rowAnchor, setRowAnchor] = useState(null);
     const [paginationAnchor, setPaginationAnchor] = useState(null);
     const [chartAnchors, setChartAnchors] = useState([]);
+    const [loginUsersAnchor, setLoginUsersAnchor] = useState(null);
+    const [rankingAnchor, setRankingAnchor] = useState(null);
     const hostRef = useRef(null);
 
     useEffect(() => {
@@ -753,13 +898,34 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             setRowAnchor(null);
             setPaginationAnchor(null);
             setChartAnchors([]);
+            setLoginUsersAnchor(null);
+            setRankingAnchor(null);
             return;
         }
         const frame = requestAnimationFrame(() => {
             const host = hostRef.current;
+            normalizeTemplateLayout(host);
             setRowAnchor(gridEnabled ? (host?.querySelector('[data-pushsale-grid-anchor="primary"]') ?? null) : null);
             setPaginationAnchor(gridEnabled ? (host?.querySelector('[data-pushsale-pagination-anchor="primary"]') ?? null) : null);
             setChartAnchors(schema.kind === 'trend' && host ? [...host.querySelectorAll('[data-highcharts-chart]')] : []);
+            setLoginUsersAnchor(schema.code === '1.7.1' && host ? host.querySelector('[data-pushsale-login-user-summary]') : null);
+            setRankingAnchor(null);
+
+            if (schema.kind === 'ranking' && host) {
+                const rankingContainer = host.querySelector('.bxh-container');
+                if (rankingContainer) {
+                    rankingContainer.querySelectorAll(':scope > .hidden-xs').forEach((node) => node.remove());
+                    const table = rankingContainer.querySelector('[data-pushsale-grid-table="primary"]');
+                    if (table?.parentElement) table.parentElement.style.marginTop = '12px';
+                    let anchor = rankingContainer.querySelector('[data-pushsale-ranking-anchor]');
+                    if (!anchor) {
+                        anchor = document.createElement('div');
+                        anchor.dataset.pushsaleRankingAnchor = '1';
+                        rankingContainer.prepend(anchor);
+                    }
+                    setRankingAnchor(anchor);
+                }
+            }
 
             if (host) {
                 host.querySelectorAll('tbody[data-pushsale-captured-data-removed="1"]').forEach((tbody) => {
@@ -801,12 +967,14 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
     useEffect(() => {
         const host = hostRef.current;
         if (!host) return;
+        const currentParams = new URLSearchParams(window.location.search);
         host.querySelectorAll('.ps-ddl').forEach((dropdown) => {
-            const options = optionsForControl(dropdown.id || dropdown.getAttribute('name'), filterOptions);
+            const controlId = dropdown.id || dropdown.getAttribute('name');
+            const options = optionsForControl(controlId, filterOptions);
             const result = dropdown.querySelector('.result-items');
-            if (!result || !options.length) return;
+            if (!result) return;
             result.innerHTML = '';
-            result.classList.remove('hidden');
+            result.classList.toggle('hidden', options.length === 0);
             options.slice(0, 500).forEach((option) => {
                 const button = document.createElement('button');
                 button.type = 'button';
@@ -817,13 +985,34 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
                 button.textContent = button.dataset.pushsaleOptionLabel;
                 result.appendChild(button);
             });
+            const key = inferFilterKey(dropdown);
+            const queryValue = key ? currentParams.get(key) : null;
+            const selectedOption = options.find((option) => String(option.id) === String(queryValue))
+                ?? (options.length === 1 ? options[0] : null);
+            const selected = dropdown.querySelector('.ps-ddl-selected-item');
+            if (selectedOption && selected) {
+                selected.textContent = String(selectedOption.label ?? selectedOption.name ?? selectedOption.id);
+                selected.setAttribute('item-id', String(selectedOption.id));
+                selected.dataset.optionData = JSON.stringify(selectedOption);
+            } else if (selected) {
+                selected.textContent = '-- Chọn đơn vị --';
+                selected.setAttribute('item-id', '-1');
+                selected.dataset.optionData = '{}';
+            }
+            dropdown.classList.toggle('ps-ddl-disabled', options.length <= 1);
+            const searchBox = dropdown.querySelector('.ps-ddl-search-box');
+            if (searchBox) {
+                searchBox.disabled = options.length <= 1;
+                searchBox.classList.toggle('aspNetDisabled', options.length <= 1);
+            }
         });
 
         host.querySelectorAll('select').forEach((select) => {
             const options = optionsForControl(select.id || select.name, filterOptions);
             if (!options.length) return;
             const placeholder = select.options[0]?.textContent || '--Chọn--';
-            const current = select.value;
+            const key = inferFilterKey(select);
+            const current = (key ? currentParams.get(key) : null) ?? select.value;
             select.innerHTML = '';
             const empty = document.createElement('option');
             empty.value = '-1';
@@ -836,6 +1025,8 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
                 select.appendChild(node);
             });
             if ([...select.options].some((option) => option.value === current)) select.value = current;
+            select.disabled = false;
+            select.classList.remove('aspNetDisabled');
         });
     }, [filterOptions, templateHtml, schema.code]);
 
@@ -849,6 +1040,9 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             'warehouse_id', 'closed_status', 'delivery_status', 'operation_result', 'operation_state',
             'operation_stage', 'date_type', 'customer_type', 'status', 'care_operation_status',
             'allocation_status', 'shipping_method', 'internal_reconciliation_status', 'duplicate_status',
+            'company_id', 'role', 'user_id', 'login_status', 'sort', 'care_user_id', 'warehouse_user_id',
+            'category_id', 'parent_product_id', 'team_leader_id', 'active_status',
+            'available_marketing', 'available_sale', 'available_care',
         ];
         knownKeys.forEach((key) => params.delete(key));
         Object.entries(collected).forEach(([key, value]) => params.set(key, String(value)));
@@ -902,6 +1096,7 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             }
             const dropdown = event.target.closest?.('.ps-ddl');
             if (dropdown && !event.target.closest('input')) {
+                if (dropdown.classList.contains('ps-ddl-disabled')) return;
                 dropdown.classList.toggle('is-open');
                 dropdown.querySelector('.ps-ddl-search-area')?.classList.toggle('hidden');
             }
@@ -934,6 +1129,8 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             {gridEnabled && rowAnchor && createPortal(<PushsaleRows {...rowProps} />, rowAnchor)}
             {gridEnabled && paginationAnchor && createPortal(<Pagination pagination={pagination} routeUrl={routeUrl} />, paginationAnchor)}
             {chartAnchors.map((anchor, index) => createPortal(<TrendMetricChart row={rows[index]} />, anchor, `trend-${index}`))}
+            {loginUsersAnchor && createPortal(<LoginUserQuickFilters users={filterOptions?.loginUsers ?? filterOptions?.users ?? []} routeUrl={routeUrl} />, loginUsersAnchor)}
+            {rankingAnchor && createPortal(<SalesRankingCards rows={rows} />, rankingAnchor)}
             {gridEnabled && !rowAnchor && templateHtml && <div className="pushsale-template-fallback"><PushsaleFallbackGrid {...rowProps} pagination={pagination} routeUrl={routeUrl} /></div>}
             {!templateHtml && <div className="pushsale-template-loading"><i className="fa fa-spinner fa-spin" /> Chưa có nội dung template cho mã {schema.code}.</div>}
         </>

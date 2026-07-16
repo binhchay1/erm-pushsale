@@ -32,7 +32,7 @@ class InventoryReturnService
         ?string $note = null,
     ): WarehouseReturnReceipt {
         return DB::transaction(function () use ($order, $reason, $actor, $lines, $source, $shipment, $note) {
-            $order = Order::query()->lockForUpdate()->with('items')->findOrFail($order->id);
+            $order = Order::query()->lockForUpdate()->with('items.product')->findOrFail($order->id);
             $warehouseId = $this->deduction->resolveWarehouseId($order);
 
             $receipt = WarehouseReturnReceipt::query()->firstOrCreate(
@@ -113,6 +113,7 @@ class InventoryReturnService
                         'user_id' => $actor?->id,
                         'type' => WarehouseInventoryMovement::TYPE_RETURN,
                         'quantity' => $delta,
+                        'unit_cost' => (int) ($item->cost_price ?: $item->product?->cost_price ?: 0),
                         'stock_after' => $inventory->stock_quantity,
                         'reference_type' => 'warehouse_return_receipt',
                         'reference_id' => $receipt->id,

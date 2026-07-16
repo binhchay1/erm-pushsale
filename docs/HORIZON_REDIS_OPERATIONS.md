@@ -113,18 +113,32 @@ Project chạy `horizon:snapshot` mỗi 5 phút để Horizon có throughput/run
 
 ## Tuning
 
-Số process mỗi lane lấy từ `.env`, ví dụ:
+Số process mỗi lane lấy từ `.env`. Từ V21, Horizon được gộp thành 7 supervisor autoscale để giảm PHP worker idle:
 
 ```dotenv
-HORIZON_WEBHOOK_MAX_PROCESSES=6
-HORIZON_PANCAKE_ORDER_MAX_PROCESSES=4
+HORIZON_INGESTION_MIN_PROCESSES=2
+HORIZON_INGESTION_MAX_PROCESSES=8
+HORIZON_SHIPPING_MIN_PROCESSES=1
+HORIZON_SHIPPING_MAX_PROCESSES=5
+HORIZON_BROADCAST_MIN_PROCESSES=1
+HORIZON_BROADCAST_MAX_PROCESSES=4
+HORIZON_BACKGROUND_MIN_PROCESSES=1
+HORIZON_BACKGROUND_MAX_PROCESSES=3
+HORIZON_REPORT_LIVE_MIN_PROCESSES=1
+HORIZON_REPORT_LIVE_MAX_PROCESSES=2
+HORIZON_REPORT_BATCH_MIN_PROCESSES=1
+HORIZON_REPORT_BATCH_MAX_PROCESSES=2
+HORIZON_EXPORT_MIN_PROCESSES=1
 HORIZON_EXPORT_MAX_PROCESSES=2
 ```
 
 Nguyên tắc:
 
-- webhook/chat/broadcast: nhiều process, timeout ngắn;
-- report/export/translation: ít process, memory và timeout cao hơn;
+- ingestion/webhook/chat không chung supervisor với báo cáo nặng;
+- shipping tách riêng vì API hãng vận chuyển có thể chậm hoặc timeout;
+- broadcasts gom chung vì job ngắn;
+- report live giới hạn nhỏ để dashboard vẫn live nhưng không chiếm CPU;
+- report history/archive/maintenance gom vào batch lane, timeout cao nhưng max process thấp;
 - không tăng đồng loạt process nếu MySQL/Redis/API đối tác đang là bottleneck;
 - theo dõi wait time, throughput và failed jobs trước khi chỉnh.
 

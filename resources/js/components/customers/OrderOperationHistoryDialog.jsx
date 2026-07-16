@@ -96,7 +96,7 @@ export function OrderOperationHistoryDialog({ order }) {
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="max-h-[88vh] max-w-[min(1280px,calc(100vw-2rem))] overflow-hidden p-0">
+            <DialogContent className="ps-modal-surface max-h-[88vh] overflow-hidden p-0" style={{ '--ps-modal-width': '1280px' }}>
                 <DialogHeader className="border-b px-6 py-5 pr-14">
                     <DialogTitle>{t('operations.customer_interactions.history_title')}</DialogTitle>
                     <DialogDescription>

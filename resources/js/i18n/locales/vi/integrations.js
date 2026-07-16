@@ -43,7 +43,7 @@ export default {
     meta_secret_ph: 'Khóa ký HMAC từ Meta (nếu có)',
     webhook_secret_api: 'Khóa bí mật webhook / API',
     webhook_secret_ph: 'Header X-SaleOps-Signature hoặc X-Api-Key',
-    leads_log: 'Nhật ký lead',
+    leads_log: 'Phân bổ data',
     leads_today: 'Lead hôm nay',
     leads_pending: 'Đang chờ xử lý',
     platforms_enabled: 'Nền tảng đang bật',

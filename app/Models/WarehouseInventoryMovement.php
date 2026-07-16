@@ -26,11 +26,21 @@ class WarehouseInventoryMovement extends Model
         'approved_by_user_id',
         'type',
         'quantity',
+        'unit_cost',
         'stock_after',
         'reference_type',
         'reference_id',
         'note',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'quantity' => 'integer',
+            'stock_after' => 'integer',
+            'unit_cost' => 'integer',
+        ];
+    }
 
     public static function typeLabel(string $type): string
     {

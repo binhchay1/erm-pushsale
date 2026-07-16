@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Reports;
 
 use App\Http\Controllers\Concerns\ExportsReportData;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
+use App\Http\Controllers\Concerns\InteractsWithReportSnapshots;
 use App\Http\Controllers\Controller;
 use App\Services\Reports\CeoReportService;
 use Illuminate\Http\Request;
@@ -16,11 +17,18 @@ class CeoReportController extends Controller
 {
     use ExportsReportData;
     use InteractsWithReportFilters;
+    use InteractsWithReportSnapshots;
 
     public function __invoke(Request $request, CeoReportService $service): Response|StreamedResponse|HttpResponse
     {
         $filter = $this->reportFilters($request);
-        $report = $service->build($filter, $request->user());
+        $snapshot = $this->maybeCachedReport(
+            $request,
+            'admin-ceo-report',
+            $filter,
+            fn () => $service->build($filter, $request->user()),
+        );
+        $report = $snapshot['data'];
 
         $columns = [
             ['key' => 'saleStaffName', 'label' => __('reports.ceo_report.sale')],
@@ -58,6 +66,7 @@ class CeoReportController extends Controller
         return Inertia::render('Admin/Reports/CeoReport', array_merge($this->reportPageProps($request, [
             'report' => $report,
             'routeUrl' => '/admin/reports/ceo',
+            'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
         ]), [
             'filterFields' => $filterOptions->ceoReportFilterFields(),
         ]));

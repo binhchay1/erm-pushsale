@@ -14,6 +14,14 @@ final class ActivityLogger
 
     public const USER_UPDATED = 'user.updated';
 
+    public const AUTH_LOGIN_SUCCESS = 'auth.login.success';
+
+    public const AUTH_LOGIN_FAILED = 'auth.login.failed';
+
+    public const AUTH_LOGIN_BLOCKED = 'auth.login.blocked';
+
+    public const AUTH_LOGOUT = 'auth.logout';
+
     public const CAMPAIGN_CREATED = 'campaign.created';
 
     public const CAMPAIGN_UPDATED = 'campaign.updated';

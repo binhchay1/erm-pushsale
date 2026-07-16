@@ -51,7 +51,7 @@
         @endif
 
         @viteReactRefresh
-        @vite(['resources/css/app.css', 'resources/js/app.jsx'])
+        @vite(['resources/css/app.css', $isPushsaleShell ? 'resources/css/pushsale.css' : 'resources/css/public.css', 'resources/js/app.jsx'])
         @inertiaHead
     </head>
     <body class="{{ $isPushsaleShell ? 'hold-transition skin-blue-light sidebar-mini fixed pushsale-app-body' : 'public-app-body' }}">

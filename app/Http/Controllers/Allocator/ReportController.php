@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Allocator;
 use App\Enums\OrgLevel;
 use App\Http\Controllers\Concerns\ExportsReportData;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
+use App\Http\Controllers\Concerns\InteractsWithReportSnapshots;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\FilterOptionsService;
@@ -19,6 +20,7 @@ class ReportController extends Controller
 {
     use ExportsReportData;
     use InteractsWithReportFilters;
+    use InteractsWithReportSnapshots;
 
     public function __invoke(
         Request $request,
@@ -38,7 +40,13 @@ class ReportController extends Controller
         );
 
         $filter = $this->reportFilters($request);
-        $data = $service->build($report, $filter);
+        $snapshot = $this->maybeCachedReport(
+            $request,
+            'allocator-'.$report,
+            $filter,
+            fn () => $service->build($report, $filter),
+        );
+        $data = $snapshot['data'];
         $columns = $this->exportColumns($report);
         $exportRows = $data['rows'];
 
@@ -75,6 +83,7 @@ class ReportController extends Controller
             'filterFields' => ['date_from', 'date_to'],
             'filterOptions' => $filterOptions->forReports($user),
             'routeUrl' => '/allocator/reports/'.$report,
+            'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
         ]);
     }
 

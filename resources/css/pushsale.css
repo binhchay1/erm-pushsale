@@ -1,0 +1,20 @@
+/* ERM internal shell only. Loaded after shared Tailwind tokens and after AdminLTE vendor CSS. */
+@import "./pushsale-layout.css";
+@import "./pushsale-common.css";
+@import "./pushsale-customer-profile.css";
+@import "./pushsale-sale-workspace.css";
+@import "./pushsale-template-pages.css";
+@import "./pushsale-adminlte-pages.css";
+@import "./pushsale-ceo-report.css";
+@import "./pushsale-marketing.css";
+@import "./pushsale-landing-connections.css";
+@import "./pushsale-admin-finance-dashboard.css";
+@import "./pushsale-template-six-reports.css";
+@import "./pushsale-warehouse-v16.css";
+@import "./pushsale-system-v17.css";
+@import "./pushsale-data-distribution-v22.css";
+@import "./pushsale-shipping-config-v22.css";
+
+@import "./pushsale-system-v22.css";
+
+@import "./pushsale-system-v23.css";

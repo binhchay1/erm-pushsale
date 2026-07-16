@@ -7,7 +7,9 @@ use App\Enums\DeliveryStatus;
 use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Enums\TeamType;
+use App\Enums\UserRole;
 use App\Models\ActivityLog;
+use App\Models\Company;
 use App\Models\IntegrationConnection;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
@@ -45,6 +47,7 @@ use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
 use App\Models\WarehouseInventoryMovement;
 use App\Services\Finance\PayrollCostService;
+use App\Support\ActivityLogger;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -156,6 +159,7 @@ class PushsalePageService
 
         $rows = $this->applyFilters($rows, $request);
         $rows = $this->applySearch($rows, trim((string) $request->query('search', '')));
+        $rows = $this->applySort($rows, trim((string) $request->query('sort', '')));
         $perPage = max(10, min(100, (int) $request->query('per_page', 20)));
         $page = max(1, (int) $request->query('page', 1));
         $total = $rows->count();
@@ -198,10 +202,67 @@ class PushsalePageService
             'label' => trim($user->name.' · '.$user->email),
         ])->all();
         $mapTeams = static fn ($items) => $items->map(fn (Team $team) => ['id' => $team->id, 'label' => $team->name])->all();
+        $allUsers = User::query()
+            ->with('company:id,name')
+            ->orderBy('name')
+            ->limit(1000)
+            ->get(['id', 'company_id', 'name', 'email', 'role', 'is_team_leader']);
+        $allProducts = Product::query()
+            ->orderBy('name')
+            ->limit(2000)
+            ->get(['id', 'parent_id', 'name', 'type', 'unit_price', 'sku', 'is_active']);
+        $teamLeaderIds = Team::query()->whereNotNull('leader_id')->pluck('leader_id')->map(fn ($id) => (int) $id);
+        $loginCounts = $pageCode === '1.7.1'
+            ? ActivityLog::query()
+                ->whereIn('action', [
+                    ActivityLogger::AUTH_LOGIN_SUCCESS,
+                    ActivityLogger::AUTH_LOGIN_FAILED,
+                    ActivityLogger::AUTH_LOGIN_BLOCKED,
+                    ActivityLogger::AUTH_LOGOUT,
+                ])
+                ->whereNotNull('user_id')
+                ->selectRaw('user_id, COUNT(*) as aggregate')
+                ->groupBy('user_id')
+                ->pluck('aggregate', 'user_id')
+            : collect();
+        $loginUsers = $allUsers->map(fn (User $user): array => [
+            'id' => $user->id,
+            'label' => trim($user->name.' · '.$user->email),
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role->value,
+            'role_label' => $user->roleLabel(),
+            'company_id' => $user->company_id,
+            'company' => $user->company?->name,
+            'login_count' => (int) ($loginCounts[$user->id] ?? 0),
+        ])->all();
+        $companyIds = $allUsers->pluck('company_id')->filter()->unique()->values();
 
         // Nguồn dùng chung bởi các select/filter trong HTML gốc.
         $options = [
-            'users' => $mapUsers(User::query()->orderBy('name')->limit(1000)->get(['id', 'name', 'email'])),
+            'users' => $mapUsers($allUsers),
+            'loginUsers' => $loginUsers,
+            'roles' => collect(UserRole::cases())
+                ->filter(fn (UserRole $role): bool => $allUsers->contains(fn (User $user): bool => $user->role === $role))
+                ->map(fn (UserRole $role): array => ['id' => $role->value, 'label' => $role->label()])
+                ->values()
+                ->all(),
+            'companies' => Company::query()
+                ->when($companyIds->isNotEmpty(), fn ($query) => $query->whereIn('id', $companyIds))
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (Company $company): array => ['id' => $company->id, 'label' => $company->name])
+                ->all(),
+            'loginStatuses' => [
+                ['id' => 'success', 'label' => 'Thành công'],
+                ['id' => 'failed', 'label' => 'Không thành công'],
+                ['id' => 'logout', 'label' => 'Đăng xuất'],
+            ],
+            'loginSorts' => [
+                ['id' => 'created_desc', 'label' => 'Mới nhất'],
+                ['id' => 'ip', 'label' => 'Sắp xếp theo IP'],
+                ['id' => 'user', 'label' => 'Sắp xếp theo tài khoản'],
+            ],
             'sales' => $mapUsers(User::query()->where('role', User::ROLE_SALES)->orderBy('name')->limit(500)->get(['id', 'name', 'email'])),
             'saleLeaders' => $mapUsers(User::query()->where('role', User::ROLE_SALES)->where('is_team_leader', true)->orderBy('name')->limit(300)->get(['id', 'name', 'email'])),
             'marketers' => $mapUsers(User::query()->where('role', User::ROLE_MARKETING)->orderBy('name')->limit(500)->get(['id', 'name', 'email'])),
@@ -212,13 +273,28 @@ class PushsalePageService
             'saleTeams' => $mapTeams(Team::query()->where('type', TeamType::Sale->value)->orderBy('name')->limit(500)->get(['id', 'name'])),
             'marketingTeams' => $mapTeams(Team::query()->where('type', TeamType::Marketing->value)->orderBy('name')->limit(500)->get(['id', 'name'])),
             'warehouseTeams' => $mapTeams(Team::query()->where('type', TeamType::Warehouse->value)->orderBy('name')->limit(500)->get(['id', 'name'])),
-            'products' => Product::query()->orderBy('name')->limit(2000)->get(['id', 'name', 'type', 'unit_price', 'sku'])->map(fn (Product $product) => [
+            'teamLeaders' => $mapUsers($allUsers->filter(
+                fn (User $user): bool => (bool) $user->is_team_leader || $teamLeaderIds->contains((int) $user->id),
+            )->values()),
+            'products' => $allProducts->map(fn (Product $product) => [
                 'id' => $product->id,
                 'label' => trim($product->name.($product->sku ? " ({$product->sku})" : '')),
                 'name' => $product->name,
                 'type' => $product->type,
                 'unit_price' => (int) $product->unit_price,
             ])->all(),
+            'productGroups' => $allProducts
+                ->filter(fn (Product $product): bool => $product->type === 'product' && $product->parent_id === null && $product->is_active)
+                ->map(fn (Product $product): array => [
+                    'id' => $product->id,
+                    'label' => trim($product->name.($product->sku ? " ({$product->sku})" : '')),
+                ])
+                ->values()
+                ->all(),
+            'availabilityOptions' => [
+                ['id' => '1', 'label' => 'Được phép sử dụng'],
+                ['id' => '0', 'label' => 'Không được phép sử dụng'],
+            ],
             'warehouses' => Warehouse::query()->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (Warehouse $warehouse) => ['id' => $warehouse->id, 'label' => $warehouse->name])->all(),
             'sources' => MarketingSource::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (MarketingSource $source) => ['id' => $source->id, 'label' => $source->name])->all(),
             'orders' => Order::query()->latest('id')->limit(1000)->get(['id', 'order_code', 'customer_name', 'customer_phone'])->map(fn (Order $order) => [
@@ -285,6 +361,7 @@ class PushsalePageService
             'parent' => $team->parent?->name,
             'updated_at' => $team->updated_at?->toIso8601String(),
             'actions' => 'Cập nhật',
+            '_team_leader_id' => $team->leader_id,
             '_edit_url' => "/admin/teams/{$team->id}/edit",
         ]);
     }
@@ -351,6 +428,12 @@ class PushsalePageService
                     'attributes' => $product->attributeValues->map(fn (ProductAttributeValue $value) => trim(($value->attribute?->name ? $value->attribute->name.': ' : '').$value->name))->implode(', '),
                     'updated_at' => $product->updated_at?->toIso8601String(),
                     'actions' => 'Cập nhật',
+                    '_category_ids' => $product->categories->pluck('id')->map(fn ($id) => (string) $id)->values()->all(),
+                    '_parent_product_id' => $product->parent_id,
+                    '_active_status' => $product->is_active ? '1' : '0',
+                    '_available_marketing' => $product->available_marketing ? '1' : '0',
+                    '_available_sale' => $product->available_sale ? '1' : '0',
+                    '_available_care' => $product->available_care ? '1' : '0',
                     '_record_id' => $product->id,
                     '_resource_key' => '1.3.1:product',
                     '_form' => $this->formPayload('1.3.1:product', $product, [
@@ -363,7 +446,18 @@ class PushsalePageService
 
     private function activityLogs(string $code): Collection
     {
-        return ActivityLog::query()->with('actor.company:id,name')->latest('created_at')->limit(2000)->get()->values()->map(function (ActivityLog $log, int $index) use ($code): array {
+        $query = ActivityLog::query()->with('actor.company:id,name');
+
+        if ($code === '1.7.1') {
+            $query->whereIn('action', [
+                ActivityLogger::AUTH_LOGIN_SUCCESS,
+                ActivityLogger::AUTH_LOGIN_FAILED,
+                ActivityLogger::AUTH_LOGIN_BLOCKED,
+                ActivityLogger::AUTH_LOGOUT,
+            ]);
+        }
+
+        return $query->latest('created_at')->limit(5000)->get()->values()->map(function (ActivityLog $log, int $index) use ($code): array {
             if ($code === '1.7.3') {
                 return [
                     'id' => $index + 1,
@@ -376,14 +470,25 @@ class PushsalePageService
                 ];
             }
 
+            $status = match ($log->action) {
+                ActivityLogger::AUTH_LOGIN_SUCCESS => 'success',
+                ActivityLogger::AUTH_LOGOUT => 'logout',
+                default => 'failed',
+            };
+
             return [
                 'ip_address' => $log->ip_address,
                 'company' => data_get($log->properties, 'company', $log->actor?->company?->name ?? '—'),
-                'account' => $log->actor?->email ?? $log->actor?->name,
+                'account' => $log->actor?->email ?? data_get($log->properties, 'email', $log->subject_label),
                 'access_code' => Str::limit((string) data_get($log->properties, 'access_code', $log->subject_label), 48),
-                'browser' => Str::limit((string) $log->user_agent, 80),
+                'browser' => Str::limit((string) $log->user_agent, 100),
                 'created_at' => $log->created_at?->toIso8601String(),
-                'status' => str_contains($log->action, 'fail') ? 'Không thành công' : 'Thành công',
+                'status' => $status === 'success' ? 'Thành công' : ($status === 'logout' ? 'Đăng xuất' : 'Không thành công'),
+                '_user_id' => $log->user_id,
+                '_role' => $log->actor?->role?->value ?? data_get($log->properties, 'role'),
+                '_company_id' => $log->company_id ?? data_get($log->properties, 'company_id'),
+                '_login_status' => $status,
+                '_created_at' => $log->created_at?->toIso8601String(),
             ];
         });
     }
@@ -398,6 +503,10 @@ class PushsalePageService
             'status' => data_get($user->permissions, 'login_blocked', false) ? 'Đã khóa' : 'Được phép đăng nhập',
             'actions' => 'Cập nhật',
             '_edit_url' => "/admin/users/{$user->id}/edit",
+            '_user_id' => $user->id,
+            '_role' => $user->role->value,
+            '_company_id' => $user->company_id,
+            '_created_at' => $user->updated_at?->toIso8601String(),
         ]);
     }
 
@@ -1660,6 +1769,19 @@ class PushsalePageService
             'internal_reconciliation_status' => '_internal_reconciliation_status',
             'duplicate_status' => '_duplicate_status',
             'care_operation_status' => '_care_operation_status',
+            'company_id' => '_company_id',
+            'role' => '_role',
+            'user_id' => '_user_id',
+            'care_user_id' => '_care_user_id',
+            'warehouse_user_id' => '_warehouse_user_id',
+            'login_status' => '_login_status',
+            'category_id' => '_category_ids',
+            'parent_product_id' => '_parent_product_id',
+            'team_leader_id' => '_team_leader_id',
+            'active_status' => '_active_status',
+            'available_marketing' => '_available_marketing',
+            'available_sale' => '_available_sale',
+            'available_care' => '_available_care',
             'status' => 'status',
         ];
 
@@ -1809,6 +1931,20 @@ class PushsalePageService
         }
 
         return $value;
+    }
+
+    private function applySort(Collection $rows, string $sort): Collection
+    {
+        return match ($sort) {
+            'ip', 'IpAddress' => $rows->sortBy(fn (array $row): string => Str::lower((string) data_get($row, 'ip_address')))->values(),
+            'user', 'UserId' => $rows->sortBy(fn (array $row): string => Str::lower((string) data_get($row, 'account')))->values(),
+            'NgayTao' => $rows->sortByDesc(fn (array $row): int => (int) (data_get($row, '_record_id') ?? data_get($row, 'id', 0)))->values(),
+            'MaSanPham' => $rows->sortBy(fn (array $row): string => Str::lower((string) (data_get($row, 'code') ?? data_get($row, 'product'))))->values(),
+            'TenSanPham' => $rows->sortBy(fn (array $row): string => Str::lower((string) (data_get($row, 'name') ?? data_get($row, 'product'))))->values(),
+            'created_asc' => $rows->sortBy(fn (array $row): string => (string) (data_get($row, '_created_at') ?? data_get($row, 'created_at')))->values(),
+            'created_desc' => $rows->sortByDesc(fn (array $row): string => (string) (data_get($row, '_created_at') ?? data_get($row, 'created_at')))->values(),
+            default => $rows->values(),
+        };
     }
 
     private function applySearch(Collection $rows, string $search): Collection

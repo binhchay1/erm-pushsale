@@ -145,11 +145,14 @@ class PancakeCustomerChatService
                 ->where('conversation_id', $context['conversationId'])
                 ->whereNotNull('order_id')
                 ->latest('id')
-                ->first()?->order;
+                ->first()?->order
+            ?? $this->orderForPayloadPhone($connection, $payload);
 
         if (! $order) {
             return [];
         }
+
+        $record ??= $this->upsertConversationRecord($connection, $order, $payload, $context['pageId'], $context['conversationId']);
 
         $messages = $this->normalizeMessages($payload, $order, $connection, $context['pageId'], $context['conversationId']);
         $changed = [];
@@ -182,6 +185,25 @@ class PancakeCustomerChatService
         $credentials = $connection->credentials ?? [];
         $metadata = $record?->metadata ?? [];
         $payload = $record?->payload ?? [];
+
+        if (! $record) {
+            $message = PancakeCustomerMessage::query()
+                ->withoutGlobalScope(TenantScope::class)
+                ->where('company_id', $connection->company_id)
+                ->where('order_id', $order->id)
+                ->whereNotNull('conversation_id')
+                ->latest('sent_at')
+                ->latest('id')
+                ->first();
+
+            if ($message) {
+                return [
+                    'pageId' => $message->page_id ?: $this->connections->credential($credentials, 'page_id'),
+                    'conversationId' => $message->conversation_id,
+                    'record' => null,
+                ];
+            }
+        }
 
         $pageId = $this->firstScalar([
             Arr::get($metadata, 'page_id'),
@@ -431,6 +453,94 @@ class PancakeCustomerChatService
             ->latest('last_synced_at')
             ->latest('id')
             ->first();
+    }
+
+    /** @param array<string, mixed> $payload */
+    protected function orderForPayloadPhone(IntegrationConnection $connection, array $payload): ?Order
+    {
+        $phone = $this->customerPhoneFromPayload($payload);
+        if (! $phone) {
+            return null;
+        }
+
+        return Order::query()
+            ->withoutGlobalScope(TenantScope::class)
+            ->where('company_id', $connection->company_id)
+            ->where('customer_phone', $phone)
+            ->whereNotNull('sale_user_id')
+            ->latest('id')
+            ->first()
+            ?? Order::query()
+                ->withoutGlobalScope(TenantScope::class)
+                ->where('company_id', $connection->company_id)
+                ->where('customer_phone', $phone)
+                ->latest('id')
+                ->first();
+    }
+
+    /** @param array<string, mixed> $payload */
+    protected function upsertConversationRecord(
+        IntegrationConnection $connection,
+        Order $order,
+        array $payload,
+        ?string $pageId,
+        string $conversationId,
+    ): PancakeSyncRecord {
+        return PancakeSyncRecord::query()->updateOrCreate(
+            [
+                'company_id' => $connection->company_id,
+                'external_type' => PancakeSyncRecord::TYPE_CONVERSATION,
+                'external_id' => $conversationId,
+            ],
+            [
+                'integration_connection_id' => $connection->id,
+                'shop_id' => $this->firstScalar([
+                    Arr::get($payload, 'shop_id'),
+                    Arr::get($payload, 'data.shop_id'),
+                    Arr::get($payload, 'shop.id'),
+                    $connection->credentials['shop_id'] ?? null,
+                ]),
+                'external_code' => null,
+                'lead_ingestion_id' => null,
+                'order_id' => $order->id,
+                'status' => 'conversation_linked',
+                'payload' => $payload,
+                'metadata' => [
+                    'page_id' => $pageId,
+                    'conversation_id' => $conversationId,
+                    'customer_phone' => $order->customer_phone,
+                    'matched_by' => 'phone_or_conversation_webhook',
+                ],
+                'last_synced_at' => now(),
+            ],
+        );
+    }
+
+    /** @param array<string, mixed> $payload */
+    protected function customerPhoneFromPayload(array $payload): ?string
+    {
+        $value = $this->firstScalar([
+            Arr::get($payload, 'customer_phone'),
+            Arr::get($payload, 'phone'),
+            Arr::get($payload, 'mobile'),
+            Arr::get($payload, 'customer.phone'),
+            Arr::get($payload, 'customer.mobile'),
+            Arr::get($payload, 'data.customer_phone'),
+            Arr::get($payload, 'data.phone'),
+            Arr::get($payload, 'data.customer.phone'),
+            Arr::get($payload, 'conversation.customer.phone'),
+            Arr::get($payload, 'data.conversation.customer.phone'),
+            Arr::get($payload, 'sender.phone'),
+            Arr::get($payload, 'from.phone'),
+        ]);
+
+        if (! $value) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D+/', '', $value) ?? '';
+
+        return strlen($digits) >= 9 ? substr($digits, 0, 20) : null;
     }
 
     /** @param array<string, mixed> $row */

@@ -98,7 +98,7 @@ function OverviewTab({ system }) {
     if (!system) return null;
 
     return (
-        <div className="space-y-6">
+        <div className="ps-feature-page ps-system-monitor-page">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <StatCard icon={Cpu} title="CPU" value={system.cpu?.usage_percent == null ? `${system.cpu?.cores ?? 0} core` : `${system.cpu.usage_percent}%`} />
                 <StatCard icon={MemoryStick} title="RAM" value={`${system.memory?.percent ?? 0}%`} />
@@ -415,7 +415,7 @@ export default function SystemMonitorIndex({ tab, events, logs, stats, filters, 
         <AppLayout>
             <Head title={t('system_monitor.title')} />
 
-            <div className="space-y-6">
+            <div className="ps-feature-page ps-system-monitor-page">
                 <PageHeader
                     title={t('system_monitor.title')}
                     description="Giám sát CPU, RAM, disk, process, queue, webhook, log lỗi và độ nhất quán báo cáo."
@@ -450,7 +450,7 @@ export default function SystemMonitorIndex({ tab, events, logs, stats, filters, 
                     </Card>
                 )}
 
-                <div className="flex flex-wrap gap-1 rounded-lg border bg-muted/40 p-1">
+                <div className="ps-system-tabs">
                     {tabs.map(([id, label]) => (
                         <button
                             key={id}

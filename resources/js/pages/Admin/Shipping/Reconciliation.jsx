@@ -180,7 +180,7 @@ export default function ShippingReconciliation({
         <AppLayout>
             <Head title={t('shipping.reconciliation_title')} />
 
-            <div className="space-y-6">
+            <div className="ps-feature-page ps-shipping-reconciliation-page">
                 <PageHeader
                     title={t('shipping.reconciliation_title')}
                     description={t('shipping.reconciliation.desc')}

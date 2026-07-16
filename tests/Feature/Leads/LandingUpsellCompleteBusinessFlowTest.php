@@ -143,7 +143,7 @@ class LandingUpsellCompleteBusinessFlowTest extends TestCase
         $this->assertSame(1, (int) $campaign->fresh()->contacts);
         $this->assertCanonicalContactCount($campaign, expected: 1);
 
-        // Hồ sơ khách hàng phải chỉ có một row/order, nhưng Nhật ký lead có ba packet.
+        // Hồ sơ khách hàng phải chỉ có một row/order; packet thô được giữ ở DB để audit kỹ thuật.
         $this->actingAs($context['sales']->first())
             ->get('/sales/customers?search='.$phone)
             ->assertOk()
@@ -157,19 +157,12 @@ class LandingUpsellCompleteBusinessFlowTest extends TestCase
             );
 
         $this->actingAs($context['admin'])
-            ->get('/admin/leads?search='.$phone)
+            ->get('/admin/leads')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Admin/Leads/Index')
-                ->has('leads.data', 3)
-                ->where('leads.data', function ($rows) use ($phone, $order): bool {
-                    $rows = collect($rows);
-
-                    return $rows->where('customer_phone', $phone)->count() === 3
-                        && $rows->where('order_code', $order->order_code)->count() === 3
-                        && $rows->where('counts_as_lead', true)->count() === 1
-                        && $rows->every(fn (array $row): bool => filled($row['customer_name'] ?? null));
-                })
+                ->component('Admin/DataDistribution/Index')
+                ->has('products')
+                ->has('sales')
             );
     }
 

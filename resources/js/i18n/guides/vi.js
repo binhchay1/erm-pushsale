@@ -245,7 +245,7 @@ export default [
     },
     {
         path: '/admin/leads',
-        title: 'Nhật ký lead về & chia số',
+        title: 'Phân bổ data',
         intro: 'Toàn bộ lead đổ về từ các nền tảng, trạng thái xử lý và nơi chia số (tự động / chia tay) cho sale.',
         sections: [
             {

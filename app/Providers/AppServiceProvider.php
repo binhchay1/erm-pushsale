@@ -5,6 +5,23 @@ namespace App\Providers;
 use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Events\OrderClosed;
 use App\Listeners\DispatchShipmentOnOrderClosed;
+use App\Models\CarrierSettlementLine;
+use App\Models\InboundEvent;
+use App\Models\LandingConnection;
+use App\Models\LeadIngestion;
+use App\Models\MarketingSourceDailyMetric;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Shipment;
+use App\Models\Team;
+use App\Models\ShippingStatusEvent;
+use App\Models\ShippingWebhookEvent;
+use App\Models\WarehouseInventoryMovement;
+use App\Models\WarehouseReturnReceipt;
+use App\Models\WarehouseReturnReceiptLine;
+use App\Models\User;
+use App\Observers\ReportAccessScopeObserver;
+use App\Observers\ReportDateObserver;
 use App\Repositories\EloquentOrderRepository;
 use App\Services\Shipping\CarrierRegistry;
 use App\Services\Shipping\Carriers\Generic\GenericCarrier;
@@ -65,6 +82,29 @@ class AppServiceProvider extends ServiceProvider
             OrderClosed::class,
             DispatchShipmentOnOrderClosed::class,
         );
+
+        foreach ([User::class, Team::class, \App\Models\MarketingSource::class] as $scopeModel) {
+            $scopeModel::observe(ReportAccessScopeObserver::class);
+        }
+
+        foreach ([
+            Order::class,
+            OrderItem::class,
+            LeadIngestion::class,
+            InboundEvent::class,
+            Shipment::class,
+            ShippingStatusEvent::class,
+            ShippingWebhookEvent::class,
+            CarrierSettlementLine::class,
+            MarketingSourceDailyMetric::class,
+            WarehouseInventoryMovement::class,
+            WarehouseReturnReceipt::class,
+            WarehouseReturnReceiptLine::class,
+            LandingConnection::class,
+        ] as $reportingModel) {
+            $reportingModel::observe(ReportDateObserver::class);
+        }
+
 
         // Chống flood/spam cổng nhận lead — giới hạn theo token chiến dịch + IP.
         RateLimiter::for('lead-intake', function (Request $request) {

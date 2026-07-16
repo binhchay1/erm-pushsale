@@ -84,7 +84,7 @@ class ShippingPartnerConfigService
 
         if (is_array($payload['settings'] ?? null)) {
             $settings = array_merge($connection->settings ?? [], $payload['settings']);
-            foreach (['insurance_enabled', 'allow_partial_delivery', 'auto_create_waybill', 'auto_restock_return', 'use_carrier_cod'] as $key) {
+            foreach (['insurance_enabled', 'allow_partial_delivery', 'auto_create_waybill', 'auto_restock_return', 'use_carrier_cod', 'callback_url_enabled', 'allow_insurance_order'] as $key) {
                 if (array_key_exists($key, $settings)) {
                     $settings[$key] = filter_var($settings[$key], FILTER_VALIDATE_BOOL);
                 }

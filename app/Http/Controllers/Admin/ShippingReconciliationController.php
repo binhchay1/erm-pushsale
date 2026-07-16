@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\ShippingWebhookEvent;
 use App\Repositories\ShippingWebhookEventRepository;
 use App\Services\Shipping\ShippingReconciliationService;
+use App\Services\Reporting\ReportSnapshotStore;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -64,27 +65,47 @@ class ShippingReconciliationController extends Controller
             ->values()
             ->all();
 
-        $orders = $filter['tab'] === 'unmatched'
-            ? new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25)
-            : $service->paginate($filter);
+        $snapshot = app(ReportSnapshotStore::class)->rememberPayload(
+            'shipping-reconciliation',
+            $request->user(),
+            $filter,
+            $from,
+            $to,
+            'delivery_update_date',
+            function () use ($filter, $service): array {
+                $orders = $filter['tab'] === 'unmatched'
+                    ? new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25)
+                    : $service->paginate($filter);
+
+                return [
+                    'summary' => $service->summary($filter),
+                    'statusBreakdown' => $service->statusBreakdown($filter),
+                    'returnsByProduct' => $service->returnsByProduct($filter),
+                    'unmatchedSettlements' => $service->unmatchedSettlements($filter),
+                    'orders' => [
+                        'data' => collect($orders->items())->map(fn (Order $o) => $this->presentRow($o))->values()->all(),
+                        'meta' => [
+                            'current_page' => $orders->currentPage(),
+                            'last_page' => $orders->lastPage(),
+                            'per_page' => $orders->perPage(),
+                            'total' => $orders->total(),
+                        ],
+                    ],
+                ];
+            },
+            $request->boolean('refresh'),
+        );
+        $report = $snapshot['data'];
 
         return Inertia::render('Admin/Shipping/Reconciliation', [
-            'summary' => $service->summary($filter),
+            'summary' => $report['summary'],
             'stats' => $webhookStats,
             'webhookStats' => $webhookStats,
             'webhookIssues' => $webhookIssues,
-            'statusBreakdown' => $service->statusBreakdown($filter),
-            'returnsByProduct' => $service->returnsByProduct($filter),
-            'unmatchedSettlements' => $service->unmatchedSettlements($filter),
-            'orders' => [
-                'data' => collect($orders->items())->map(fn (Order $o) => $this->presentRow($o))->values(),
-                'meta' => [
-                    'current_page' => $orders->currentPage(),
-                    'last_page' => $orders->lastPage(),
-                    'per_page' => $orders->perPage(),
-                    'total' => $orders->total(),
-                ],
-            ],
+            'statusBreakdown' => $report['statusBreakdown'],
+            'returnsByProduct' => $report['returnsByProduct'],
+            'unmatchedSettlements' => $report['unmatchedSettlements'],
+            'orders' => $report['orders'],
             'filters' => [
                 'tab' => $filter['tab'],
                 'period_type' => $filter['period_type'],
@@ -105,6 +126,7 @@ class ShippingReconciliationController extends Controller
             'providerOptions' => $this->providerOptions(),
             'syncProviders' => ['viettel_post', 'ghtk'],
             'yearOptions' => range(now()->year, now()->year - 4),
+            'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
         ]);
     }
 

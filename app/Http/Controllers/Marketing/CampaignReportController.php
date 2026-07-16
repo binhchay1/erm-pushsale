@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Marketing;
 
 use App\Http\Controllers\Concerns\ExportsReportData;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
+use App\Http\Controllers\Concerns\InteractsWithReportSnapshots;
 use App\Http\Controllers\Controller;
 use App\Services\FilterOptionsService;
 use App\Services\Reports\MarketingCampaignReportService;
@@ -17,11 +18,18 @@ class CampaignReportController extends Controller
 {
     use ExportsReportData;
     use InteractsWithReportFilters;
+    use InteractsWithReportSnapshots;
 
     public function __invoke(Request $request, MarketingCampaignReportService $service): Response|StreamedResponse|HttpResponse
     {
         $filter = $this->reportFilters($request);
-        $report = $service->build($filter, $request->user());
+        $snapshot = $this->maybeCachedReport(
+            $request,
+            'marketing-campaign-report',
+            $filter,
+            fn () => $service->build($filter, $request->user()),
+        );
+        $report = $snapshot['data'];
 
         if ($exported = $this->maybeExportReport(
             $request,
@@ -44,6 +52,7 @@ class CampaignReportController extends Controller
             $this->reportPageProps($request, [
                 'report' => $report,
                 'routeUrl' => '/marketing/campaign-report',
+            'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
                 'budgetUpdateUrl' => '/marketing/campaigns',
                 'canEditBudget' => true,
             ]),

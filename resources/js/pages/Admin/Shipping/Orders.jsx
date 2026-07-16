@@ -24,7 +24,7 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
         <AppLayout>
             <Head title={title} />
 
-            <div className="space-y-4">
+            <div className="ps-feature-page ps-shipping-orders-page">
                 <PageHeader icon={PackageSearch} title={title} description={t('shipping.orders_desc')} />
 
                 <ReportFilterBar routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} />

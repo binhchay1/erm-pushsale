@@ -43,7 +43,7 @@ export default {
     meta_secret_ph: 'HMAC signing key from Meta (if any)',
     webhook_secret_api: 'Webhook secret / API key',
     webhook_secret_ph: 'X-SaleOps-Signature or X-Api-Key header',
-    leads_log: 'Lead log',
+    leads_log: 'Data distribution',
     leads_today: 'Leads today',
     leads_pending: 'Pending',
     platforms_enabled: 'Platforms enabled',

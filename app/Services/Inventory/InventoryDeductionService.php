@@ -18,7 +18,7 @@ class InventoryDeductionService
      */
     public function checkOrderStock(Order $order): array
     {
-        $order->loadMissing('items');
+        $order->loadMissing('items.product');
         $warehouseId = $this->resolveWarehouseId($order);
 
         if (! $warehouseId || $order->items->isEmpty()) {
@@ -69,7 +69,7 @@ class InventoryDeductionService
             return;
         }
 
-        $order->loadMissing('items');
+        $order->loadMissing('items.product');
         $warehouseId = $this->resolveWarehouseId($order);
 
         if (! $warehouseId || $order->items->isEmpty()) {
@@ -95,6 +95,7 @@ class InventoryDeductionService
                     'user_id' => $actor?->id,
                     'type' => WarehouseInventoryMovement::TYPE_DEDUCTION,
                     'quantity' => -$qty,
+                    'unit_cost' => (int) ($item->cost_price ?: $item->product?->cost_price ?: 0),
                     'stock_after' => $inventory->stock_quantity,
                     'reference_type' => 'order',
                     'reference_id' => $order->id,
