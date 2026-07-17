@@ -32,8 +32,8 @@ export default function AppLayout({ children }) {
 
     const [pendingDashboardRole, setPendingDashboardRole] = useState(null);
     const [stylesReady, setStylesReady] = useState(() => document.documentElement.dataset.pushsaleStylesReady === '1' || Boolean(document.getElementById('pushsale-adminlte')));
-    // V25: menu nội bộ mở mặc định trên mỗi lần vào app. Không đọc trạng thái cũ
-    // từ localStorage vì các bản trước đã lưu nhầm trạng thái collapsed và tạo gutter 42px.
+    // Menu ERM luôn mở mặc định. Không đọc localStorage từ các bản cũ vì
+    // trạng thái collapsed cũ từng làm màn hình còn lại gutter 42px.
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     // Login và phần mềm dùng hai CSS shell khác nhau. Khi Inertia chuyển SPA sau

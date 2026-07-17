@@ -1178,7 +1178,7 @@ function requestFormData(url, formData) {
     });
 }
 
-export default function PushsaleBusinessPage({ schema, rows = [], pagination, summary = {}, routeUrl, templateHtml = '', dialogTemplates = {}, filterOptions = {} }) {
+export default function PushsaleBusinessPage({ schema, rows = [], pagination, summary = {}, routeUrl, templateHtml = '', dialogTemplates = {}, filterOptions = {}, pageRuntimeError = null }) {
     const [editor, setEditor] = useState({ open: false, row: null, dialogCode: null, dialogSchema: null });
     const [error, setError] = useState('');
     const [selectedRecordIds, setSelectedRecordIds] = useState(() => new Set());
@@ -1361,7 +1361,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
         <AppLayout>
             <Head title={schema.title} />
             <div className={`pushsale-page pushsale-kind-${schema.kind}`} data-page-code={schema.code}>
-                {error && <div className="pushsale-error-banner"><i className="fa fa-exclamation-triangle" /> {error}</div>}
+                {(error || pageRuntimeError) && <div className="pushsale-error-banner"><i className="fa fa-exclamation-triangle" /> {error || pageRuntimeError}</div>}
                 <LiveDataSummary summary={summary} />
                 <TemplateHost
                     templateHtml={templateHtml}

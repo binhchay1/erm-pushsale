@@ -1,0 +1,42 @@
+<?php
+
+return [
+    'enabled' => (bool) env('ERM_STAGING_TEST_MODE', false),
+    'secret' => env('ERM_STAGING_TEST_SECRET'),
+    'allow_artisan' => (bool) env('ERM_STAGING_TEST_ALLOW_ARTISAN', true),
+    'base_url' => rtrim((string) env('ERM_STAGING_TEST_BASE_URL', env('APP_URL', 'http://localhost')), '/'),
+    'timeout' => (int) env('ERM_STAGING_TEST_HTTP_TIMEOUT', 20),
+    'allowed_hosts' => array_values(array_filter(array_map('trim', explode(',', env('ERM_STAGING_TEST_HOSTS', env('ERM_AUTO_ADMIN_LOGIN_HOSTS', '')))))),
+
+    // GET-only pages used to catch 500/redirect/component/CSS-shell errors from the deployed domain.
+    'page_urls' => [
+        '/',
+        '/admin/dashboard',
+        '/admin/hr/teams',
+        '/admin/users',
+        '/admin/products',
+        '/admin/catalog/combos',
+        '/admin/leads',
+        '/admin/marketing/landing-connections',
+        '/admin/landing-approvals',
+        '/admin/marketing/dashboard',
+        '/admin/marketing/revenue',
+        '/admin/customer-management',
+        '/admin/sales/customers',
+        '/admin/sales/workspace',
+                '/admin/shipping/orders',
+        '/admin/shipping/reconciliation',
+        '/admin/shipping-partners',
+        '/admin/warehouse/operations',
+        '/admin/warehouse/inventory',
+        '/admin/accounting/expenses',
+        '/admin/accounting',
+        '/admin/reports/ceo',
+        '/admin/reports/extra/sale-1',
+        '/admin/reports/extra/sale-2',
+        '/admin/reports/extra/sale-3',
+        '/admin/system-monitor',
+        '/admin/integrations',
+        '/org-chart',
+    ],
+];

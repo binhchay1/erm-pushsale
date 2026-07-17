@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Middleware\AddSecurityHeaders;
+use App\Http\Middleware\AutoLoginAsAdmin;
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\EnforcePermissions;
 use App\Http\Middleware\EnsurePlatformAdmin;
@@ -42,6 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(prepend: [
             SetLocale::class,
+            AutoLoginAsAdmin::class,
         ]);
 
         $middleware->api(prepend: [

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 abstract class BasePushsalePageController extends Controller
 {
@@ -28,24 +29,41 @@ abstract class BasePushsalePageController extends Controller
     {
         $this->authorizePage($request);
         $schema = $this->pages->schema($this->pageCode);
-        $result = $this->pages->rows($this->pageCode, $request);
-
-        if ($request->boolean('export')) {
-            return $this->export($schema, $result['data']);
-        }
-
         $templateCode = (string) ($schema['template_alias'] ?? $this->pageCode);
         $component = 'Pushsale/Pages/'.($schema['component'] ?? 'Page_'.str_replace('.', '_', $this->pageCode));
         $dialogResources = [];
-        foreach ((array) ($schema['dialog_resources'] ?? []) as $dialogCode => $resourceKey) {
-            $alias = $this->dialogAlias((string) $dialogCode);
-            $dialogResources[$dialogCode] = [
-                'alias' => $alias,
-                'resource_key' => $resourceKey,
-                'fields' => $this->resources->formFields((string) $resourceKey),
-                'records' => $this->resources->records((string) $resourceKey),
-                'store_url' => url($request->path().'/dialogs/'.$alias.'/records'),
-            ];
+        $result = [
+            'data' => [],
+            'meta' => ['current_page' => 1, 'last_page' => 1, 'per_page' => 20, 'total' => 0, 'from' => 0, 'to' => 0],
+            'summary' => [],
+        ];
+        $filterOptions = [];
+        $pageRuntimeError = null;
+
+        try {
+            $result = $this->pages->rows($this->pageCode, $request);
+
+            if ($request->boolean('export')) {
+                return $this->export($schema, $result['data']);
+            }
+
+            foreach ((array) ($schema['dialog_resources'] ?? []) as $dialogCode => $resourceKey) {
+                $alias = $this->dialogAlias((string) $dialogCode);
+                $dialogResources[$dialogCode] = [
+                    'alias' => $alias,
+                    'resource_key' => $resourceKey,
+                    'fields' => $this->resources->formFields((string) $resourceKey),
+                    'records' => $this->resources->records((string) $resourceKey),
+                    'store_url' => url($request->path().'/dialogs/'.$alias.'/records'),
+                ];
+            }
+
+            $filterOptions = $this->pages->filterOptions($this->pageCode);
+        } catch (Throwable $exception) {
+            report($exception);
+            $pageRuntimeError = (bool) config('app.debug')
+                ? $exception->getMessage()
+                : 'Trang này đang thiếu dữ liệu hoặc cấu hình bảng. Vui lòng chạy migrate/cache clear rồi thử lại.';
         }
 
         return Inertia::render($component, [
@@ -55,14 +73,15 @@ abstract class BasePushsalePageController extends Controller
             ]),
             'rows' => $result['data'],
             'pagination' => $result['meta'],
-            'summary' => $result['summary'] ?? [],
-            'filterOptions' => $this->pages->filterOptions($this->pageCode),
+'summary' => $result['summary'] ?? [],
+            'filterOptions' => $filterOptions,
             'routeUrl' => '/'.$request->path(),
             'templateHtml' => $this->templateHtml($templateCode),
             'dialogTemplates' => collect($schema['dialogs'] ?? [])->mapWithKeys(
                 fn (string $dialog): array => [$dialog => $this->templateHtml($dialog)],
             )->all(),
             'activeMenuCode' => $this->pageCode,
+            'pageRuntimeError' => $pageRuntimeError,
         ]);
     }
 

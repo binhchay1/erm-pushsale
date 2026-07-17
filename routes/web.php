@@ -98,6 +98,17 @@ Route::get('about', [MarketingController::class, 'about'])->name('marketing.abou
 Route::get('contact', [MarketingController::class, 'contact'])->name('marketing.contact');
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 
+
+// Staging-only QA endpoints. Protected by ERM_STAGING_TEST_MODE + ERM_STAGING_TEST_SECRET.
+Route::prefix('__erm-test')->name('staging-test.')->group(function () {
+    Route::get('health', [\App\Http\Controllers\Testing\StagingTestController::class, 'health'])->name('health');
+    Route::get('pages', [\App\Http\Controllers\Testing\StagingTestController::class, 'pages'])->name('pages');
+    Route::get('bootstrap', [\App\Http\Controllers\Testing\StagingTestController::class, 'bootstrap'])->name('bootstrap');
+    Route::get('flow', [\App\Http\Controllers\Testing\StagingTestController::class, 'flow'])->name('flow');
+    Route::get('landing-flow', [\App\Http\Controllers\Testing\StagingTestController::class, 'landingFlow'])->name('landing-flow');
+    Route::get('audit', [\App\Http\Controllers\Testing\StagingTestController::class, 'audit'])->name('audit');
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
     Route::post('login', [LoginController::class, 'store']);

@@ -139,3 +139,36 @@ V18 tách report thành hot window và historical window. Hôm nay vẫn live; n
 - [`docs/HISTORICAL_REPORTING_V18.md`](docs/HISTORICAL_REPORTING_V18.md)
 - [`docs/CONTEXT_HANDOFF_V18.md`](docs/CONTEXT_HANDOFF_V18.md)
 - [`docs/RELEASE_VALIDATION_V18.md`](docs/RELEASE_VALIDATION_V18.md)
+
+## V27 Temporary Auto Admin Login
+
+Để tắt tạm đăng nhập trên môi trường test, thêm vào `.env`:
+
+```dotenv
+ERM_AUTO_ADMIN_LOGIN=true
+ERM_AUTO_ADMIN_LOGIN_HOSTS=erm-pushsale.duckdns.org
+```
+
+Sau đó chạy `php artisan optimize:clear && php artisan config:cache`. Xem thêm `docs/AUTO_ADMIN_LOGIN_V27.md`.
+
+
+## V28 staging remote test
+
+Bật test mode trên domain staging:
+
+```bash
+cd /var/www/erm-pushsale
+APP_DIR=/var/www/erm-pushsale DOMAIN=erm-pushsale.duckdns.org BASE_URL=http://erm-pushsale.duckdns.org \
+  bash deploy/staging-enable-test-mode.sh
+```
+
+Sau đó dùng các endpoint được bảo vệ bằng secret:
+
+```text
+/__erm-test/health?secret=...
+/__erm-test/pages?secret=...
+/__erm-test/landing-flow?secret=...
+/__erm-test/flow?secret=...
+```
+
+Tài liệu: `docs/STAGING_REMOTE_TEST_V28.md`.
