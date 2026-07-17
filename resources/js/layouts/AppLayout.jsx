@@ -32,8 +32,9 @@ export default function AppLayout({ children }) {
 
     const [pendingDashboardRole, setPendingDashboardRole] = useState(null);
     const [stylesReady, setStylesReady] = useState(() => document.documentElement.dataset.pushsaleStylesReady === '1' || Boolean(document.getElementById('pushsale-adminlte')));
-    // Pushsale mặc định đóng menu. Menu chỉ mở khi người dùng bấm hamburger.
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    // V25: menu nội bộ mở mặc định trên mỗi lần vào app. Không đọc trạng thái cũ
+    // từ localStorage vì các bản trước đã lưu nhầm trạng thái collapsed và tạo gutter 42px.
+    const [sidebarOpen, setSidebarOpen] = useState(true);
 
     // Login và phần mềm dùng hai CSS shell khác nhau. Khi Inertia chuyển SPA sau
     // đăng nhập, nạp vendor CSS trước khi render để không xuất hiện HTML thô rồi mới F5.
@@ -52,11 +53,9 @@ export default function AppLayout({ children }) {
     useEffect(() => {
         const start = router.on('start', (event) => {
             setPendingDashboardRole(dashboardRoleFromUrl(event.detail.visit.url));
-            setSidebarOpen(false);
         });
         const finish = router.on('finish', () => {
             setPendingDashboardRole(null);
-            setSidebarOpen(false);
         });
 
         return () => {
@@ -65,7 +64,16 @@ export default function AppLayout({ children }) {
         };
     }, []);
 
-    const closeSidebar = () => setSidebarOpen(false);
+    const setSidebarState = (open) => {
+        setSidebarOpen(open);
+    };
+
+    const toggleSidebar = () => setSidebarState(!sidebarOpen);
+    const closeSidebar = () => {
+        if (typeof window !== 'undefined' && window.innerWidth < 992) {
+            setSidebarState(false);
+        }
+    };
 
     if (!stylesReady) {
         return <div className="pushsale-shell-loading"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>;
@@ -81,7 +89,7 @@ export default function AppLayout({ children }) {
         >
             <LocaleSync />
             <TooltipProvider>
-                <AppHeader onToggleSidebar={() => setSidebarOpen((open) => !open)} />
+                <AppHeader onToggleSidebar={toggleSidebar} />
                 <AppSidebar collapsed={!sidebarOpen} onNavigate={closeSidebar} />
 
                 <main className="content-wrapper">

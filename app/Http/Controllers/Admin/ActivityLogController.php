@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Repositories\ActivityLogRepository;
 use App\Support\ActivityLogger;
 use App\Support\ActivityLogPresenter;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -47,14 +48,13 @@ class ActivityLogController extends Controller
         ]);
     }
 
-    public function show(int $activityLog): Response
+    public function show(int $activityLog): RedirectResponse
     {
-        $log = $this->logs->find($activityLog);
-        abort_unless($log, 404);
+        // Chi tiết đã mở bằng modal trong trang danh sách. Không render một page
+        // Inertia riêng để tránh lỗi manifest nếu production chưa build lại.
+        abort_unless($this->logs->find($activityLog), 404);
 
-        return Inertia::render('Admin/ActivityLogs/Show', [
-            'log' => $this->presentDetail($log),
-        ]);
+        return redirect()->route('admin.activity-logs.index', ['focus' => $activityLog]);
     }
 
     /** @return array<string, mixed> */
