@@ -93,7 +93,7 @@ class ReportDateDirtyTracker
                     }
                 } else {
                     DB::table('report_dirty_dates')
-                        ->whereKey($dirty->id)
+                        ->where('id', $dirty->getKey())
                         ->update(array_merge($values, [
                             'event_count' => DB::raw('event_count + 1'),
                         ]));

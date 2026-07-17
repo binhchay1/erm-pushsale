@@ -108,7 +108,7 @@ class StagingTestService
         $commands = [];
 
         $commands[] = $this->runArtisan('migrate', ['--force' => true]);
-        $commands[] = $this->runArtisan('db:seed', ['--force' => true]);
+        $commands[] = $this->seedDemoSafely();
 
         $bulkOptions = [
             '--campaigns' => max(1, min(5, $campaigns)),
@@ -222,7 +222,7 @@ class StagingTestService
         $baseUrl = rtrim((string) config('staging_test.base_url'), '/');
         $admin = User::withoutTenant()->where('role', User::ROLE_ADMIN)->orderByDesc('is_owner')->first();
         if (! $admin) {
-            $seed = $this->runArtisan('db:seed', ['--force' => true]);
+            $seed = $this->seedDemoSafely();
             $admin = User::withoutTenant()->where('role', User::ROLE_ADMIN)->orderByDesc('is_owner')->first();
             if (! $admin) {
                 return ['ok' => false, 'error' => 'Không có admin để tạo dữ liệu test.', 'seed' => $seed];
@@ -237,7 +237,7 @@ class StagingTestService
         $products = Product::withoutTenant()->where('company_id', $companyId)->where('is_active', true)->orderBy('id')->limit(2)->get();
 
         if (! $marketer || $sales->isEmpty() || ! $warehouse || $products->isEmpty()) {
-            $seed = $this->runArtisan('db:seed', ['--force' => true]);
+            $seed = $this->seedDemoSafely();
             $marketer = User::withoutTenant()->where('company_id', $companyId)->where('role', User::ROLE_MARKETING)->first()
                 ?: User::withoutTenant()->where('company_id', $companyId)->first();
             $sales = User::withoutTenant()->where('company_id', $companyId)->where('role', User::ROLE_SALES)->limit(2)->get();
@@ -498,6 +498,28 @@ class StagingTestService
                 'output' => trim(Artisan::output()),
                 'error' => $e->getMessage(),
             ];
+        }
+    }
+
+
+    /** @return array<string, mixed> */
+    private function seedDemoSafely(): array
+    {
+        $reportingEnabled = config('reporting.enabled');
+        $archiveEnabled = config('reporting.archive.enabled');
+
+        config([
+            'reporting.enabled' => false,
+            'reporting.archive.enabled' => false,
+        ]);
+
+        try {
+            return $this->runArtisan('db:seed', ['--force' => true]);
+        } finally {
+            config([
+                'reporting.enabled' => $reportingEnabled,
+                'reporting.archive.enabled' => $archiveEnabled,
+            ]);
         }
     }
 
