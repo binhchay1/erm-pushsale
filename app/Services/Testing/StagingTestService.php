@@ -155,7 +155,7 @@ class StagingTestService
     {
         $baseUrl = rtrim((string) config('staging_test.base_url'), '/');
         $timeout = max(5, (int) config('staging_test.timeout', 20));
-        $urls = $urls ?: ($allStatic ? $this->staticWebGetUrls() : (array) config('staging_test.page_urls', []));
+        $urls = $urls ?: ($allStatic ? $this->allPageUrls() : (array) config('staging_test.page_urls', []));
 
         $results = [];
 
@@ -177,7 +177,7 @@ class StagingTestService
                     || str_contains($body, 'Illuminate\\Database')
                     || str_contains($body, 'Stack trace');
 
-                $ok = $response->status() < 500 && ! $hasPhpError;
+                $ok = $response->status() >= 200 && $response->status() < 400 && ! $hasPhpError;
 
                 $results[] = [
                     'url' => $url,
@@ -187,7 +187,7 @@ class StagingTestService
                     'title' => $title,
                     'inertia_root' => $hasInertiaRoot,
                     'bytes' => strlen($body),
-                    'error_hint' => $hasPhpError ? 'php_error_signature_in_body' : ($response->status() >= 500 ? $this->compactErrorHint($body) : null),
+                    'error_hint' => $hasPhpError ? 'php_error_signature_in_body' : (! $ok ? $this->compactErrorHint($body) : null),
                 ];
             } catch (\Throwable $e) {
                 $results[] = [
@@ -212,6 +212,7 @@ class StagingTestService
             'generated_at' => now()->toISOString(),
             'total' => count($results),
             'failed' => count($failed),
+            'failed_results' => $failed,
             'results' => $results,
         ];
     }
@@ -573,6 +574,45 @@ class StagingTestService
     }
 
     /** @return list<string> */
+    private function allPageUrls(): array
+    {
+        return $this->normalizeUrls(array_merge(
+            (array) config('staging_test.page_urls', []),
+            $this->navigationUrls(),
+            $this->staticWebGetUrls(),
+        ));
+    }
+
+    /** @return list<string> */
+    private function navigationUrls(): array
+    {
+        $urls = [];
+        $walk = static function (array $items) use (&$walk, &$urls): void {
+            foreach ($items as $item) {
+                if (! is_array($item)) {
+                    continue;
+                }
+
+                $url = $item['url'] ?? null;
+                if (is_string($url) && str_starts_with($url, '/')) {
+                    $urls[] = $url;
+                }
+
+                if (isset($item['children']) && is_array($item['children'])) {
+                    $walk($item['children']);
+                }
+            }
+        };
+
+        $navigation = config('pushsale_navigation', []);
+        if (is_array($navigation)) {
+            $walk($navigation);
+        }
+
+        return $this->normalizeUrls($urls);
+    }
+
+    /** @return list<string> */
     private function staticWebGetUrls(): array
     {
         $urls = [];
@@ -594,9 +634,25 @@ class StagingTestService
             $urls[] = $uri === '/' ? '/' : rtrim($uri, '/');
         }
 
-        $configured = array_map(static fn ($url) => '/'.ltrim((string) $url, '/'), (array) config('staging_test.page_urls', []));
+        return $this->normalizeUrls($urls);
+    }
 
-        return array_values(array_unique(array_merge($configured, $urls)));
+    /** @param list<string> $urls
+     *  @return list<string>
+     */
+    private function normalizeUrls(array $urls): array
+    {
+        $normalized = [];
+        foreach ($urls as $url) {
+            $url = '/'.ltrim((string) $url, '/');
+            if ($url === '/#' || str_contains($url, '{') || str_contains($url, '}')) {
+                continue;
+            }
+
+            $normalized[] = $url === '/' ? '/' : rtrim($url, '/');
+        }
+
+        return array_values(array_unique($normalized));
     }
 
     /** @param class-string $model */

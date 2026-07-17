@@ -8498,3 +8498,97 @@ body.pushsale-app-body .pushsale-third-menu {
     background: #fff4f4;
     color: #a94442;
 }
+
+/* V32 header/sidebar cleanup
+   - Header brand shows logged-in user name from AppHeader.
+   - Desktop sidebar open pushes content; collapsed hides the sidebar fully.
+   - Remove sidebar/flyout/backdrop shadows and hide legacy security score. */
+body.pushsale-app-body .pushsale-security-score {
+    display: none !important;
+}
+
+body.pushsale-app-body .pushsale-header-brand,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-header-brand,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-header-brand {
+    flex: 0 0 var(--ps-sidebar-width, 252px) !important;
+    width: var(--ps-sidebar-width, 252px) !important;
+    min-width: var(--ps-sidebar-width, 252px) !important;
+    max-width: var(--ps-sidebar-width, 252px) !important;
+}
+
+body.pushsale-app-body .pushsale-logo,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-logo,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-logo {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: calc(var(--ps-sidebar-width, 252px) - 54px) !important;
+}
+
+body.pushsale-app-body .pushsale-main-sidebar,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-main-sidebar,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-main-sidebar,
+body.pushsale-app-body .pushsale-third-menu {
+    box-shadow: none !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper .content-wrapper {
+    position: fixed !important;
+    top: var(--ps-header-height, 50px) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: auto !important;
+    background: #fff !important;
+    transition: left .16s ease-out !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper {
+    left: var(--ps-sidebar-width, 252px) !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper {
+    left: 0 !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-main-sidebar {
+    transform: translate3d(0, 0, 0) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-main-sidebar {
+    transform: translate3d(-100%, 0, 0) !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+body.pushsale-app-body .sidebar-mobile-backdrop,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .sidebar-mobile-backdrop,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .sidebar-mobile-backdrop {
+    display: none !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 767px) {
+    body.pushsale-app-body .pushsale-header-brand,
+    body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-header-brand,
+    body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-header-brand {
+        flex: 0 0 min(252px, 66vw) !important;
+        width: min(252px, 66vw) !important;
+        min-width: min(252px, 66vw) !important;
+        max-width: min(252px, 66vw) !important;
+    }
+
+    body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper,
+    body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper {
+        left: 0 !important;
+    }
+
+    body.pushsale-app-body .pushsale-wrapper.sidebar-open .sidebar-mobile-backdrop {
+        display: block !important;
+        background: rgba(0, 0, 0, .08) !important;
+    }
+}

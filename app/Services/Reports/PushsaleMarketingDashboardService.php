@@ -21,6 +21,7 @@ use App\Services\Marketing\MarketingBudgetService;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -522,7 +523,7 @@ class PushsaleMarketingDashboardService
             ->with([
                 'items:id,order_id,product_id,product_name,quantity,unit_price',
                 'marketingSource:id,utm_source,utm_campaign',
-                'leadPackets' => function (Builder $q): void {
+                'leadPackets' => function (Builder|Relation $q): void {
                     LeadContactMetrics::applyCountableScope($q);
                     $q->oldest('id')->select(['id', 'order_id', 'marketing_source_id', 'utm_source', 'utm_campaign', 'payload', 'counts_as_lead', 'status']);
                 },

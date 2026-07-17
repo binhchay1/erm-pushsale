@@ -32,7 +32,9 @@ class StagingTestController extends Controller
 
         config(['staging_test.base_url' => $request->getSchemeAndHttpHost()]);
 
-        return response()->json($this->service->scanPages($urls, $request->boolean('all')));
+        $scanAll = $request->has('all') ? $request->boolean('all') : true;
+
+        return response()->json($this->service->scanPages($urls, $scanAll));
     }
 
     public function bootstrap(Request $request): JsonResponse

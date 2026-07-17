@@ -8,6 +8,7 @@ use App\Enums\LeadIngestionStatus;
 use App\Models\LeadIngestion;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -23,8 +24,8 @@ use Illuminate\Support\Collection;
  */
 final class LeadContactMetrics
 {
-    /** @param  Builder<LeadIngestion>  $query */
-    public static function applyCountableScope(Builder $query): Builder
+    /** @param  Builder<LeadIngestion>|Relation<LeadIngestion, mixed, mixed>  $query */
+    public static function applyCountableScope(Builder|Relation $query): Builder|Relation
     {
         return $query
             ->where('counts_as_lead', true)
