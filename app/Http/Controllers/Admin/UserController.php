@@ -93,6 +93,8 @@ class UserController extends Controller
             });
         }
 
+        $accountCount = (clone $query)->count();
+
         $users = $query->latest('id')->paginate(15)->withQueryString()->through(function (User $user) use ($actor): array {
             $profile = $user->operationalProfile;
 
@@ -121,7 +123,7 @@ class UserController extends Controller
             'users' => $users,
             'filters' => $filters,
             'roles' => collect(UserRole::cases())->map(fn (UserRole $role) => ['value' => $role->value, 'label' => $role->label()])->values(),
-            'accountCount' => $visibleIds->count(),
+            'accountCount' => $accountCount,
             'canCreate' => (bool) $actor?->allows(PermissionArea::Hr, \App\Enums\PermissionLevel::Full),
             'activeMenuCode' => '1.2.1',
         ]);

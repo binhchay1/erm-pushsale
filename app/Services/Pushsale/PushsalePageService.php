@@ -202,8 +202,13 @@ class PushsalePageService
             'label' => trim($user->name.' · '.$user->email),
         ])->all();
         $mapTeams = static fn ($items) => $items->map(fn (Team $team) => ['id' => $team->id, 'label' => $team->name])->all();
-        $allUsers = User::query()
-            ->with('company:id,name')
+        $userOptionQuery = User::query()->with('company:id,name');
+        if (auth()->user()?->isPlatformAdmin()) {
+            // Super Admin phải nhìn thấy danh sách tài khoản đăng nhập thật trên toàn hệ thống,
+            // không bị TenantScope làm màn 1.7.1 / 1.7.2 trống dữ liệu.
+            $userOptionQuery->withoutTenant();
+        }
+        $allUsers = $userOptionQuery
             ->orderBy('name')
             ->limit(1000)
             ->get(['id', 'company_id', 'name', 'email', 'role', 'is_team_leader']);
@@ -213,7 +218,11 @@ class PushsalePageService
             ->get(['id', 'parent_id', 'name', 'type', 'unit_price', 'sku', 'is_active']);
         $teamLeaderIds = Team::query()->whereNotNull('leader_id')->pluck('leader_id')->map(fn ($id) => (int) $id);
         $loginCounts = $pageCode === '1.7.1'
-            ? ActivityLog::query()
+            ? tap(ActivityLog::query(), function ($query): void {
+                if (auth()->user()?->isPlatformAdmin()) {
+                    $query->withoutTenant();
+                }
+            })
                 ->whereIn('action', [
                     ActivityLogger::AUTH_LOGIN_SUCCESS,
                     ActivityLogger::AUTH_LOGIN_FAILED,
@@ -447,6 +456,9 @@ class PushsalePageService
     private function activityLogs(string $code): Collection
     {
         $query = ActivityLog::query()->with('actor.company:id,name');
+        if (auth()->user()?->isPlatformAdmin()) {
+            $query->withoutTenant();
+        }
 
         if ($code === '1.7.1') {
             $query->whereIn('action', [
@@ -495,7 +507,12 @@ class PushsalePageService
 
     private function loginPermissions(): Collection
     {
-        return User::query()->with('company:id,name')->latest('updated_at')->limit(1000)->get()->values()->map(fn (User $user) => [
+        $query = User::query()->with('company:id,name');
+        if (auth()->user()?->isPlatformAdmin()) {
+            $query->withoutTenant();
+        }
+
+        return $query->latest('updated_at')->limit(1000)->get()->values()->map(fn (User $user) => [
             'company' => $user->company?->name ?? '—',
             'account' => $user->email,
             'access_code' => data_get($user->permissions, 'access_code'),

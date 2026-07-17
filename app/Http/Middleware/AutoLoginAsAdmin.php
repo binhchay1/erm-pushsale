@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Models\User;
+use App\Support\ActivityLogger;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,6 +43,10 @@ class AutoLoginAsAdmin
         }
 
         $user = $request->user();
+        if ($user && $request->hasSession() && $request->session()->get('auto_admin_login') === true) {
+            $this->logAutoAdminLoginOncePerSession($request, $user);
+        }
+
         if ($user && $request->isMethod('GET') && $this->shouldRedirectToAdmin($request)) {
             return redirect()->to(LoginController::homeFor($user));
         }
@@ -131,4 +136,34 @@ class AutoLoginAsAdmin
             ->orderBy('id')
             ->first();
     }
+
+    private function logAutoAdminLoginOncePerSession(Request $request, User $user): void
+    {
+        if ($request->session()->has('auto_admin_login_logged')) {
+            return;
+        }
+
+        try {
+            ActivityLogger::log(
+                ActivityLogger::AUTH_LOGIN_SUCCESS,
+                null,
+                [
+                    'email' => $user->email,
+                    'company' => $user->company?->name,
+                    'company_id' => $user->company_id,
+                    'role' => $user->role?->value,
+                    'status' => 'success',
+                    'reason' => 'auto_admin_login',
+                    'access_code' => substr(hash('sha256', $request->session()->getId()), 0, 20),
+                ],
+                $user->email,
+                $user,
+            );
+
+            $request->session()->put('auto_admin_login_logged', now()->toIso8601String());
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+    }
+
 }

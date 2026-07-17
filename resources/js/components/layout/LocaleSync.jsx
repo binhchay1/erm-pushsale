@@ -10,6 +10,7 @@ export function LocaleSync() {
 
     useEffect(() => {
         if (pageLocale) {
+            document.documentElement.lang = pageLocale;
             syncLocaleFromServer(pageLocale);
         }
     }, [pageLocale, syncLocaleFromServer]);

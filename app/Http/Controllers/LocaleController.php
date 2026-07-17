@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 
 class LocaleController extends Controller
 {
@@ -12,6 +13,7 @@ class LocaleController extends Controller
     {
         $locale = $request->validate([
             'locale' => ['required', 'in:vi,en'],
+            'redirect' => ['nullable', 'string', 'max:2048'],
         ])['locale'];
 
         session(['locale' => $locale]);
@@ -23,6 +25,31 @@ class LocaleController extends Controller
             $user->unsetRelation('preferences');
         }
 
-        return back(303);
+        $redirect = (string) $request->input('redirect', '');
+        $response = $this->safeRedirect($redirect) !== null
+            ? redirect($this->safeRedirect($redirect), 303)
+            : back(303);
+
+        return $response->withCookie(cookie()->forever('locale', $locale, '/', null, null, false, false, 'Lax'));
+    }
+
+    private function safeRedirect(string $redirect): ?string
+    {
+        $redirect = trim($redirect);
+
+        if ($redirect === '') {
+            return null;
+        }
+
+        if (! Str::startsWith($redirect, '/') || Str::startsWith($redirect, '//')) {
+            return null;
+        }
+
+        // Không cho redirect ngược lại endpoint đổi ngôn ngữ để tránh vòng lặp.
+        if (Str::startsWith($redirect, '/locale')) {
+            return '/';
+        }
+
+        return $redirect;
     }
 }

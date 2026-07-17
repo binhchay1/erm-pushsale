@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,7 +30,13 @@ class CompanyProfileController extends Controller
                 'contact_email' => $company->contact_email,
                 'contact_phone' => $company->contact_phone,
                 'tax_code' => $company->tax_code,
+                'product_field' => Schema::hasColumn('companies', 'product_field') ? $company->product_field : null,
                 'address' => $company->address,
+                'address_2' => Schema::hasColumn('companies', 'address_2') ? $company->address_2 : null,
+                'use_two_level_address' => Schema::hasColumn('companies', 'use_two_level_address') ? (bool) $company->use_two_level_address : false,
+                'province_name' => Schema::hasColumn('companies', 'province_name') ? $company->province_name : null,
+                'district_name' => Schema::hasColumn('companies', 'district_name') ? $company->district_name : null,
+                'ward_name' => Schema::hasColumn('companies', 'ward_name') ? $company->ward_name : null,
                 'website' => $company->website,
                 'representative_name' => $company->representative_name,
                 'representative_title' => $company->representative_title,
@@ -52,13 +59,27 @@ class CompanyProfileController extends Controller
             'contact_email' => ['nullable', 'email', 'max:160'],
             'contact_phone' => ['nullable', 'string', 'max:40'],
             'tax_code' => ['nullable', 'string', 'max:40'],
+            'product_field' => ['nullable', 'string', 'max:120'],
             'address' => ['nullable', 'string', 'max:500'],
+            'address_2' => ['nullable', 'string', 'max:500'],
+            'use_two_level_address' => ['nullable', 'boolean'],
+            'province_name' => ['nullable', 'string', 'max:120'],
+            'district_name' => ['nullable', 'string', 'max:120'],
+            'ward_name' => ['nullable', 'string', 'max:120'],
             'website' => ['nullable', 'url', 'max:255'],
             'representative_name' => ['nullable', 'string', 'max:160'],
             'representative_title' => ['nullable', 'string', 'max:160'],
         ]);
 
-        $company->update($data);
+        $data['use_two_level_address'] = (bool) ($data['use_two_level_address'] ?? false);
+
+        $persistable = array_filter(
+            $data,
+            static fn (string $key): bool => Schema::hasColumn('companies', $key),
+            ARRAY_FILTER_USE_KEY,
+        );
+
+        $company->update($persistable);
 
         return back()->with('success', 'Đã cập nhật thông tin đơn vị.');
     }

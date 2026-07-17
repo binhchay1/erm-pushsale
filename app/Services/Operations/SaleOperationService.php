@@ -31,10 +31,15 @@ class SaleOperationService
         $baseFilter = $filter->withoutOperationStage();
         $baseQuery = $this->orders->queryFiltered($baseFilter);
 
-        $counts = (clone $baseQuery)
-            ->reorder()
+        $countsQuery = (clone $baseQuery)->withoutEagerLoads()->reorder();
+        // queryFiltered() có withCount() nên MySQL ONLY_FULL_GROUP_BY sẽ lỗi nếu
+        // câu đếm tab còn giữ orders.* / subselect pending_supplement_packets_count.
+        // Reset lại phần SELECT để câu GROUP BY chỉ còn stage_key + aggregate.
+        $countsQuery->getQuery()->columns = null;
+
+        $counts = $countsQuery
             ->selectRaw("COALESCE(operation_stage, 'no_operation') as stage_key, COUNT(*) as aggregate")
-            ->groupBy('stage_key')
+            ->groupByRaw("COALESCE(operation_stage, 'no_operation')")
             ->pluck('aggregate', 'stage_key')
             ->map(fn ($count) => (int) $count);
 

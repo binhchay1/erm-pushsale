@@ -27,6 +27,9 @@ export function I18nProvider({ children, initialLocale = 'vi', localeMeta = null
 
     useEffect(() => {
         setTranslateLocale(locale);
+        if (typeof document !== 'undefined') {
+            document.documentElement.lang = locale;
+        }
     }, [locale]);
 
     const applyLocale = useCallback((next) => {
@@ -45,6 +48,21 @@ export function I18nProvider({ children, initialLocale = 'vi', localeMeta = null
 
         pendingLocale.current = next;
         applyLocale(next);
+
+        if (typeof window !== 'undefined') {
+            try {
+                window.localStorage.setItem('saleops-locale', next);
+                window.sessionStorage.setItem('saleops-locale', next);
+                document.documentElement.lang = next;
+                document.cookie = `locale=${next};path=/;max-age=31536000;SameSite=Lax`;
+
+                const redirect = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+                window.location.assign(`/locale?locale=${encodeURIComponent(next)}&redirect=${encodeURIComponent(redirect)}`);
+                return;
+            } catch (error) {
+                // Fallback for locked-down browsers: keep the original Inertia flow.
+            }
+        }
 
         router.post(
             '/locale',

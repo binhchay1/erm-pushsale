@@ -17,6 +17,7 @@ class Company extends Model
         'name', 'slug', 'status', 'plan', 'max_users',
         'owner_user_id', 'contact_email', 'contact_phone', 'tax_code', 'address', 'website',
         'representative_name', 'representative_title', 'expires_at',
+        'product_field', 'address_2', 'use_two_level_address', 'province_name', 'district_name', 'ward_name',
         'lead_import_template_path', 'lead_import_template_name',
         'default_shipping_provider', 'default_shipping_method',
     ];
@@ -26,6 +27,7 @@ class Company extends Model
         return [
             'expires_at' => 'datetime',
             'max_users' => 'integer',
+            'use_two_level_address' => 'boolean',
         ];
     }
 

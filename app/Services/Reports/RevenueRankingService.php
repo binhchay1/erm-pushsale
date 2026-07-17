@@ -3,6 +3,7 @@
 namespace App\Services\Reports;
 
 use App\Data\RankingFilterData;
+use App\Enums\ClosingStatus;
 use App\Enums\DiscountMode;
 use App\Enums\RankingDepartment;
 use App\Enums\UserRole;
@@ -73,8 +74,24 @@ class RevenueRankingService
             ->when($filter->teamLeaderId, fn (Builder $q) => $q->where('users.manager_user_id', $filter->teamLeaderId))
             ->leftJoin('orders', function ($join) use ($column, $filter) {
                 $join->on('orders.'.$column, '=', 'users.id')
-                    ->whereNotNull('orders.closed_at')
-                    ->whereBetween('orders.closed_at', [$filter->dateFrom, $filter->dateTo]);
+                    ->where(function ($closed): void {
+                        $closed->whereNotNull('orders.closed_at')
+                            ->orWhere('orders.closing_status', ClosingStatus::Closed->value);
+                    })
+                    ->where(function ($dated) use ($filter): void {
+                        $dated->whereBetween('orders.closed_at', [$filter->dateFrom, $filter->dateTo])
+                            ->orWhere(function ($legacy) use ($filter): void {
+                                $legacy->whereNull('orders.closed_at')
+                                    ->where('orders.closing_status', ClosingStatus::Closed->value)
+                                    ->whereBetween('orders.data_arrived_at', [$filter->dateFrom, $filter->dateTo]);
+                            })
+                            ->orWhere(function ($legacy) use ($filter): void {
+                                $legacy->whereNull('orders.closed_at')
+                                    ->where('orders.closing_status', ClosingStatus::Closed->value)
+                                    ->whereNull('orders.data_arrived_at')
+                                    ->whereBetween('orders.updated_at', [$filter->dateFrom, $filter->dateTo]);
+                            });
+                    });
 
                 if ($filter->operationStage) {
                     $join->where('orders.operation_stage', $filter->operationStage);

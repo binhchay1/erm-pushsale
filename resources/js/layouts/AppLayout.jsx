@@ -32,9 +32,10 @@ export default function AppLayout({ children }) {
 
     const [pendingDashboardRole, setPendingDashboardRole] = useState(null);
     const [stylesReady, setStylesReady] = useState(() => document.documentElement.dataset.pushsaleStylesReady === '1' || Boolean(document.getElementById('pushsale-adminlte')));
-    // Menu ERM luôn mở mặc định. Không đọc localStorage từ các bản cũ vì
-    // trạng thái collapsed cũ từng làm màn hình còn lại gutter 42px.
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    // Menu ERM mặc định ẩn để trang tác nghiệp/report mở full màn hình.
+    // Người dùng bấm hamburger mới mở menu 252px. Không lưu localStorage để tránh
+    // trạng thái cũ làm lệch layout sau deploy.
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Login và phần mềm dùng hai CSS shell khác nhau. Khi Inertia chuyển SPA sau
     // đăng nhập, nạp vendor CSS trước khi render để không xuất hiện HTML thô rồi mới F5.

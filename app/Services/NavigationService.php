@@ -45,7 +45,7 @@ class NavigationService
             $tree = $this->appendPlatformItems($tree);
         }
 
-        return $tree;
+        return $this->localizeTree($tree);
     }
 
     /** @return list<int> */
@@ -222,6 +222,50 @@ class NavigationService
         }
 
         return $matches[1];
+    }
+
+
+    /**
+     * @param list<array<string, mixed>> $items
+     * @return list<array<string, mixed>>
+     */
+    private function localizeTree(array $items): array
+    {
+        if (app()->getLocale() === 'vi') {
+            return $items;
+        }
+
+        return array_map(function (array $item): array {
+            $key = $this->translationKeyForItem($item);
+            if ($key !== null) {
+                $translated = __(sprintf('pushsale_navigation.items.%s', $key));
+                if (is_string($translated) && ! str_starts_with($translated, 'pushsale_navigation.')) {
+                    $item['title'] = $translated;
+                }
+            }
+
+            if (! empty($item['children']) && is_array($item['children'])) {
+                $item['children'] = $this->localizeTree($item['children']);
+            }
+
+            return $item;
+        }, $items);
+    }
+
+    /** @param array<string, mixed> $item */
+    private function translationKeyForItem(array $item): ?string
+    {
+        $code = isset($item['code']) ? (string) $item['code'] : null;
+
+        if (! $code && isset($item['title']) && preg_match('/^\s*(\d+(?:\.\d+)*)\b/u', (string) $item['title'], $matches) === 1) {
+            $code = $matches[1];
+        }
+
+        if (! $code) {
+            return null;
+        }
+
+        return str_replace('.', '_', $code);
     }
 
     /** @param list<array<string, mixed>> $tree @return list<array<string, mixed>> */

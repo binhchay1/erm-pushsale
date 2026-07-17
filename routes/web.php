@@ -87,7 +87,7 @@ use Illuminate\Support\Facades\Route;
 
 Broadcast::routes(['middleware' => ['web', 'auth', 'tenant']]);
 
-Route::post('locale', [LocaleController::class, 'update'])->name('locale.update');
+Route::match(['get', 'post'], 'locale', [LocaleController::class, 'update'])->name('locale.update');
 
 Route::get('/', HomeController::class)->name('home');
 
