@@ -1,0 +1,50 @@
+name: Deploy SSD
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-ssd
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSD_SSH_PRIVATE_KEY }}" > ~/.ssh/ssd_deploy_key
+          chmod 600 ~/.ssh/ssd_deploy_key
+          ssh-keyscan -H "${{ secrets.SSD_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Ensure app directory
+        run: |
+          ssh -i ~/.ssh/ssd_deploy_key \
+            "${{ secrets.SSD_USER }}@${{ secrets.SSD_HOST }}" \
+            "mkdir -p '${{ secrets.SSD_APP_PATH }}'"
+
+      - name: Rsync source to SSD
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/ssd_deploy_key" \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.env' \
+            --exclude='storage' \
+            --exclude='node_modules' \
+            --exclude='vendor' \
+            ./ "${{ secrets.SSD_USER }}@${{ secrets.SSD_HOST }}:${{ secrets.SSD_APP_PATH }}/"
+
+      - name: Run deploy script
+        run: |
+          ssh -i ~/.ssh/ssd_deploy_key \
+            "${{ secrets.SSD_USER }}@${{ secrets.SSD_HOST }}" \
+            "cd '${{ secrets.SSD_APP_PATH }}' && chmod +x deploy/ssd-deploy.sh && APP_DIR='${{ secrets.SSD_APP_PATH }}' bash deploy/ssd-deploy.sh"
