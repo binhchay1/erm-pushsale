@@ -107,6 +107,7 @@ Route::prefix('__erm-test')->name('staging-test.')->group(function () {
     Route::get('flow', [\App\Http\Controllers\Testing\StagingTestController::class, 'flow'])->name('flow');
     Route::get('landing-flow', [\App\Http\Controllers\Testing\StagingTestController::class, 'landingFlow'])->name('landing-flow');
     Route::get('audit', [\App\Http\Controllers\Testing\StagingTestController::class, 'audit'])->name('audit');
+    Route::get('logs', [\App\Http\Controllers\Testing\StagingTestController::class, 'logs'])->name('logs');
 });
 
 Route::middleware('guest')->group(function () {

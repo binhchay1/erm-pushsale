@@ -34,6 +34,7 @@ export default function Workspace({
     routeUrl = '/sales/workspace',
     actionBaseUrl = '/sales',
     manualUrl = '/sales/leads/manual',
+    workspaceError = null,
 }) {
     const rows = report?.rows?.data ?? [];
     const meta = report?.rows?.meta ?? null;
@@ -56,6 +57,9 @@ export default function Workspace({
         <AppLayout>
             <Head title="Sale tác nghiệp" />
             <section className="ps-sale-workspace-page">
+                {workspaceError && (
+                    <div className="ps-alert ps-alert-danger">{workspaceError}</div>
+                )}
                 <SaleWorkspaceFilters routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} />
                 <SaleWorkspaceTabs tabs={report.statusTabs ?? []} routeUrl={routeUrl} filters={filters} />
                 <SaleWorkspaceTable

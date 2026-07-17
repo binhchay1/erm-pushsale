@@ -151,11 +151,11 @@ class StagingTestService
     /** @param list<string>|null $urls
      *  @return array<string, mixed>
      */
-    public function scanPages(?array $urls = null): array
+    public function scanPages(?array $urls = null, bool $allStatic = false): array
     {
         $baseUrl = rtrim((string) config('staging_test.base_url'), '/');
         $timeout = max(5, (int) config('staging_test.timeout', 20));
-        $urls = $urls ?: (array) config('staging_test.page_urls', []);
+        $urls = $urls ?: ($allStatic ? $this->staticWebGetUrls() : (array) config('staging_test.page_urls', []));
 
         $results = [];
 
@@ -187,7 +187,7 @@ class StagingTestService
                     'title' => $title,
                     'inertia_root' => $hasInertiaRoot,
                     'bytes' => strlen($body),
-                    'error_hint' => $hasPhpError ? 'php_error_signature_in_body' : null,
+                    'error_hint' => $hasPhpError ? 'php_error_signature_in_body' : ($response->status() >= 500 ? $this->compactErrorHint($body) : null),
                 ];
             } catch (\Throwable $e) {
                 $results[] = [
@@ -208,6 +208,7 @@ class StagingTestService
         return [
             'ok' => count($failed) === 0,
             'base_url' => $baseUrl,
+            'all_static' => $allStatic,
             'generated_at' => now()->toISOString(),
             'total' => count($results),
             'failed' => count($failed),
@@ -539,13 +540,81 @@ class StagingTestService
         $counts = [];
         foreach ($models as $key => [$model, $table]) {
             try {
-                $counts[$key] = Schema::hasTable($table) ? $model::withoutTenant()->count() : null;
+                $counts[$key] = Schema::hasTable($table) ? $this->modelQueryWithoutTenant($model)->count() : null;
             } catch (\Throwable $e) {
                 $counts[$key] = 'error: '.$e->getMessage();
             }
         }
 
         return $counts;
+    }
+
+
+    /** @return array<string, mixed> */
+    public function logs(int $lines = 160): array
+    {
+        $files = glob(storage_path('logs/laravel*.log')) ?: [];
+        usort($files, static fn (string $a, string $b) => filemtime($b) <=> filemtime($a));
+        $file = $files[0] ?? null;
+
+        if (! $file || ! is_file($file)) {
+            return ['ok' => true, 'file' => null, 'lines' => []];
+        }
+
+        $content = @file($file, FILE_IGNORE_NEW_LINES) ?: [];
+        $tail = array_slice($content, -max(20, min(1000, $lines)));
+
+        return [
+            'ok' => true,
+            'file' => basename($file),
+            'updated_at' => date('c', filemtime($file)),
+            'lines' => array_values($tail),
+        ];
+    }
+
+    /** @return list<string> */
+    private function staticWebGetUrls(): array
+    {
+        $urls = [];
+        foreach (Route::getRoutes() as $route) {
+            if (! in_array('GET', $route->methods(), true)) {
+                continue;
+            }
+
+            $uri = '/'.ltrim($route->uri(), '/');
+            if ($uri === '/_ignition/health-check'
+                || str_starts_with($uri, '/api/')
+                || str_starts_with($uri, '/__erm-test')
+                || str_contains($uri, '{')
+                || str_contains($uri, '}')
+            ) {
+                continue;
+            }
+
+            $urls[] = $uri === '/' ? '/' : rtrim($uri, '/');
+        }
+
+        $configured = array_map(static fn ($url) => '/'.ltrim((string) $url, '/'), (array) config('staging_test.page_urls', []));
+
+        return array_values(array_unique(array_merge($configured, $urls)));
+    }
+
+    /** @param class-string $model */
+    private function modelQueryWithoutTenant(string $model): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = $model::query();
+
+        return method_exists($model, 'scopeWithoutTenant') ? $model::withoutTenant() : $query;
+    }
+
+    private function compactErrorHint(string $body): ?string
+    {
+        $plain = trim(preg_replace('/\s+/', ' ', strip_tags($body)) ?: '');
+        if ($plain === '') {
+            return null;
+        }
+
+        return mb_substr($plain, 0, 240);
     }
 
     private function extractTitle(string $body): ?string

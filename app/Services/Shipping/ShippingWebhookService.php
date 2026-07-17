@@ -151,15 +151,15 @@ class ShippingWebhookService
             'tracking_number' => $shipment->tracking_number ?: $tracking,
             'status_text' => $rawStatus ?: $shipment->status_text,
             'state' => $mapped === DeliveryStatus::CancelWaybill ? Shipment::STATE_CANCELLED : Shipment::STATE_SUBMITTED,
-            'fee' => $financials['shipping_fee'] ?: $shipment->fee,
-            'insurance_fee' => $financials['insurance_fee'] ?: $shipment->insurance_fee,
-            'cod_amount' => $financials['cod_amount'] ?: $shipment->cod_amount,
-            'cod_collected' => $financials['cod_collected'] ?: $shipment->cod_collected,
-            'cod_remitted' => $financials['cod_remitted'] ?: $shipment->cod_remitted,
-            'cod_fee' => $financials['cod_fee'] ?: $shipment->cod_fee,
-            'return_fee' => $financials['return_fee'] ?: $shipment->return_fee,
-            'other_fee' => $financials['other_fee'] ?: $shipment->other_fee,
-            'compensation_amount' => $financials['compensation_amount'] ?: $shipment->compensation_amount,
+            'fee' => $this->moneyOrCurrent($financials['shipping_fee'], $shipment->fee),
+            'insurance_fee' => $this->moneyOrCurrent($financials['insurance_fee'], $shipment->insurance_fee),
+            'cod_amount' => $this->moneyOrCurrent($financials['cod_amount'], $shipment->cod_amount),
+            'cod_collected' => $this->moneyOrCurrent($financials['cod_collected'], $shipment->cod_collected),
+            'cod_remitted' => $this->moneyOrCurrent($financials['cod_remitted'], $shipment->cod_remitted),
+            'cod_fee' => $this->moneyOrCurrent($financials['cod_fee'], $shipment->cod_fee),
+            'return_fee' => $this->moneyOrCurrent($financials['return_fee'], $shipment->return_fee),
+            'other_fee' => $this->moneyOrCurrent($financials['other_fee'], $shipment->other_fee),
+            'compensation_amount' => $this->moneyOrCurrent($financials['compensation_amount'], $shipment->compensation_amount),
             'response_payload' => $payload,
         ]));
     }
@@ -286,6 +286,13 @@ class ShippingWebhookService
         if (! filled($value)) return null;
         $digits = preg_replace('/[^\d-]/', '', $value);
         return $digits === '' ? null : (int) $digits;
+    }
+
+    private function moneyOrCurrent(mixed $incoming, mixed $current): int
+    {
+        $incoming = (int) $incoming;
+
+        return $incoming > 0 ? $incoming : max(0, (int) ($current ?? 0));
     }
 
     private function money(mixed $value): int

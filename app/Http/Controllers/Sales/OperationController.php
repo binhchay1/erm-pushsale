@@ -18,6 +18,7 @@ use App\Services\Operations\SaleOperationConfigurationService;
 use App\Services\Operations\SaleOperationService;
 use App\Support\ShippingProviders;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -50,11 +51,31 @@ class OperationController extends Controller
         ])->values()->all();
         $options['operationResults'] = OperationResult::filterOptions();
 
+        try {
+            $report = $service->buildPaginated($filter);
+            $workspaceError = null;
+        } catch (\Throwable $e) {
+            Log::error('Sales workspace failed to build report', [
+                'message' => $e->getMessage(),
+                'user_id' => $request->user()?->id,
+                'filters' => $request->query(),
+            ]);
+
+            $report = [
+                'rows' => ['data' => [], 'meta' => ['current_page' => 1, 'last_page' => 1, 'per_page' => $filter->perPage, 'total' => 0, 'from' => null, 'to' => null]],
+                'statusTabs' => [],
+            ];
+            $workspaceError = app()->isProduction()
+                ? 'Không tải được dữ liệu tác nghiệp Sale. Vui lòng xem log staging để xử lý.'
+                : $e->getMessage();
+        }
+
         return Inertia::render('Sales/Workspace', array_merge(
             $this->reportPageProps($request, [
-                'report' => $service->buildPaginated($filter),
+                'report' => $report,
             ]),
             [
+                'workspaceError' => $workspaceError,
                 'activeMenuCode' => '4.1',
                 'filterOptions' => $options,
                 'filterFields' => [

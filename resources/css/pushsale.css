@@ -8481,3 +8481,20 @@ body.pushsale-app-body .pushsale-third-link {
 body.pushsale-app-body .pushsale-third-menu {
     z-index: 2280 !important;
 }
+
+/* V30 staging/runtime guard alerts */
+.ps-alert {
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    color: #333;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+}
+.ps-alert-danger {
+    border-color: #d43f3a;
+    background: #fff4f4;
+    color: #a94442;
+}

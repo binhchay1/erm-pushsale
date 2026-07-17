@@ -16,6 +16,8 @@ class StagingTestController extends Controller
     {
         $this->guard($request);
 
+        config(['staging_test.base_url' => $request->getSchemeAndHttpHost()]);
+
         return response()->json($this->service->health());
     }
 
@@ -28,12 +30,16 @@ class StagingTestController extends Controller
             $urls = array_values(array_filter(array_map('trim', explode(',', (string) $request->query('urls')))));
         }
 
-        return response()->json($this->service->scanPages($urls));
+        config(['staging_test.base_url' => $request->getSchemeAndHttpHost()]);
+
+        return response()->json($this->service->scanPages($urls, $request->boolean('all')));
     }
 
     public function bootstrap(Request $request): JsonResponse
     {
         $this->guard($request, requireArtisan: true);
+
+        config(['staging_test.base_url' => $request->getSchemeAndHttpHost()]);
 
         return response()->json($this->service->bootstrapDemo(
             reset: $request->boolean('reset'),
@@ -48,6 +54,8 @@ class StagingTestController extends Controller
 
         $phone = $request->filled('phone') ? (string) $request->query('phone') : null;
 
+        config(['staging_test.base_url' => $request->getSchemeAndHttpHost()]);
+
         return response()->json($this->service->fullFlow($phone));
     }
 
@@ -58,7 +66,16 @@ class StagingTestController extends Controller
 
         $phone = $request->filled('phone') ? (string) $request->query('phone') : null;
 
+        config(['staging_test.base_url' => $request->getSchemeAndHttpHost()]);
+
         return response()->json($this->service->landingConnectionFlow($phone));
+    }
+
+    public function logs(Request $request): JsonResponse
+    {
+        $this->guard($request);
+
+        return response()->json($this->service->logs((int) $request->integer('lines', 160)));
     }
 
     public function audit(Request $request): JsonResponse

@@ -3,7 +3,7 @@ set -euo pipefail
 
 APP_DIR="${APP_DIR:-/var/www/erm-pushsale}"
 DOMAIN="${DOMAIN:-erm-pushsale.duckdns.org}"
-BASE_URL="${BASE_URL:-http://${DOMAIN}}"
+BASE_URL="${BASE_URL:-https://${DOMAIN}}"
 SECRET="${ERM_STAGING_TEST_SECRET:-}"
 SEED_MODE="${STAGING_SEED_MODE:-full}"
 
@@ -78,3 +78,5 @@ echo "Page scan: ${BASE_URL}/__erm-test/pages?secret=${SECRET}"
 echo "Bootstrap demo: ${BASE_URL}/__erm-test/bootstrap?secret=${SECRET}&reset=1&campaigns=2&per_campaign=8"
 echo "Full flow: ${BASE_URL}/__erm-test/flow?secret=${SECRET}"
 echo "Landing connection flow: ${BASE_URL}/__erm-test/landing-flow?secret=${SECRET}"
+echo "Logs: ${BASE_URL}/__erm-test/logs?secret=${SECRET}"
+echo "All static pages: ${BASE_URL}/__erm-test/pages?secret=${SECRET}\&all=1"
