@@ -6069,7 +6069,7 @@ body.pushsale-app-body .pslc-budget-preview strong { color: #008d4c; font-size: 
 
 /* ===== pushsale-admin-finance-dashboard.css ===== */
 body.pushsale-app-body .psfd-page { min-height: calc(100vh - var(--topbar-height, 50px)); background: #ecf0f5; color: #333; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
-body.pushsale-app-body .psfd-toolbar { display: flex; min-height: 67px; align-items: center; justify-content: space-between; gap: 16px; border-top: 3px solid #087df0; border-bottom: 1px solid #d2d6de; padding: 10px 14px; background: #fff; }
+body.pushsale-app-body .psfd-toolbar { display: flex; min-height: 67px; align-items: center; justify-content: space-between; gap: 16px; border-top: 0; border-bottom: 1px solid #d2d6de; padding: 10px 14px; background: #fff; }
 body.pushsale-app-body .psfd-toolbar h1 { margin: 0; color: #202a34; font-size: 17px; font-weight: 700; }
 body.pushsale-app-body .psfd-toolbar p { margin: 4px 0 0; color: #6b7785; font-size: 11px; }
 body.pushsale-app-body .psfd-filter-controls { display: flex; align-items: flex-end; gap: 8px; }
@@ -6355,7 +6355,7 @@ body.pushsale-app-body .psfd-no-alert { grid-column: 1 / -1; padding: 16px; colo
 }
 
 /* ===== pushsale-warehouse-v16.css ===== */
-.ps-wh-page{min-height:calc(100vh - var(--topbar-height));background:#f4f4f4;color:#222;font:12px Arial,"Helvetica Neue",sans-serif}.ps-wh-titlebar{background:#fff;border-bottom:1px solid #ddd;padding:10px 14px}.ps-wh-titlebar h1{margin:0;font-size:17px;font-weight:600}.ps-wh-titlebar p{margin:3px 0 0;color:#777}.ps-wh-filter{background:#fff;border-top:2px solid #0e7ecf;border-bottom:1px solid #cfd5dc;padding:10px 12px}.ps-wh-filter-grid{display:grid;grid-template-columns:repeat(8,minmax(135px,1fr));gap:8px}.ps-wh-filter select,.ps-wh-filter input,.ps-wh-dialog input,.ps-wh-dialog select,.ps-wh-dialog textarea{width:100%;min-height:29px;border:1px solid #c8d0db;background:#fff;padding:5px 8px;border-radius:0;font:12px Arial}.ps-wh-filter select:focus,.ps-wh-filter input:focus,.ps-wh-dialog input:focus,.ps-wh-dialog select:focus,.ps-wh-dialog textarea:focus{outline:1px solid #3c8dbc;border-color:#3c8dbc}.ps-wh-date-field{display:flex;align-items:center;gap:5px;border:1px solid #c8d0db;padding-left:7px}.ps-wh-date-field span{white-space:nowrap;color:#666}.ps-wh-date-field input{border:0}.ps-wh-check{display:flex;align-items:center;gap:5px;white-space:nowrap}.ps-wh-check input{width:auto;min-height:auto}.ps-wh-filter-actions{display:flex;gap:6px;justify-content:flex-end}.ps-wh-btn{height:29px;display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid #bbb;background:#fff;padding:0 10px;cursor:pointer}.ps-wh-btn.primary{border-color:#1976ad;background:#3c8dbc;color:#fff}.ps-wh-summary{display:grid;grid-template-columns:repeat(5,minmax(170px,1fr));gap:8px;padding:8px 10px;background:#fff;border-bottom:1px solid #ddd}.ps-wh-summary>div{position:relative;min-height:64px;border:1px solid #d8dde4;background:#fafafa;padding:8px 8px 8px 42px}.ps-wh-summary svg{position:absolute;left:10px;top:18px;width:23px;color:#3285d2}.ps-wh-summary span{display:block;color:#6c7580}.ps-wh-summary strong{display:block;margin-top:5px;font-size:14px}.ps-wh-tabs{display:flex;flex-wrap:wrap;gap:0;background:#fff;padding:8px 10px 0;border-bottom:1px solid #d2d6de}.ps-wh-tabs button{border:1px solid #d2d6de;border-bottom:0;background:#fff;padding:7px 10px;cursor:pointer;margin-right:-1px}.ps-wh-tabs button.active{background:#3c8dbc;color:#fff;border-color:#367fa9}.ps-wh-table-wrap{width:100%;overflow:auto;background:#fff;border-bottom:1px solid #ccc}.ps-wh-table{width:100%;min-width:2850px;border-collapse:collapse;table-layout:fixed}.ps-wh-table th{background:#3782dc!important;color:#fff!important;border:1px solid #2f72c4!important;text-align:center!important;font-weight:600;padding:7px 5px;white-space:normal}.ps-wh-table td{border:1px solid #d2d6de;padding:6px;vertical-align:top;line-height:1.4;background:#fff;overflow-wrap:anywhere}.ps-wh-table tbody tr:nth-child(even) td{background:#f7f9fc}.ps-wh-table tbody tr.return-row td{background:#fff8f1}.ps-wh-table th:nth-child(1){width:42px}.ps-wh-table th:nth-child(2){width:180px}.ps-wh-table th:nth-child(3){width:180px}.ps-wh-table th:nth-child(4){width:155px}.ps-wh-table th:nth-child(5){width:240px}.ps-wh-table th:nth-child(6),.ps-wh-table th:nth-child(7){width:230px}.ps-wh-table th:nth-child(16){width:170px}.ps-wh-table th:nth-child(17){width:180px}.ps-wh-table .center{text-align:center}.ps-wh-dates span{display:block;margin-bottom:3px}.ps-wh-order-code{border:0;background:transparent;color:#0074c7;font-weight:700;cursor:pointer;padding:0}.ps-wh-status-stack{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0}.ps-wh-badge{display:inline-block;border-radius:2px;background:#d8dde4;color:#3f4b59;padding:2px 5px;font-size:10px}.ps-wh-badge.success{background:#42ad64;color:#fff}.ps-wh-badge.warning{background:#f39c12;color:#fff}.ps-wh-badge.danger{background:#dd4b39;color:#fff}.ps-wh-badge.info{background:#00a7d0;color:#fff}.ps-wh-tracking{display:block;margin-top:3px;color:#3c8dbc}.ps-wh-error{margin:3px 0;color:#d73925;font-size:10px}.ps-wh-note{margin:4px 0;padding:4px;background:#fffbe6;border-left:2px solid #f39c12}.ps-wh-table td a{display:block;color:#0073b7}.ps-wh-table td p{margin:3px 0}.ps-wh-table td small{display:block;color:#687382}.ps-wh-products>div{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 5px;padding:4px 0;border-bottom:1px dotted #ccd3da}.ps-wh-products b{font-weight:600}.ps-wh-products small{grid-column:1}.ps-wh-products span{grid-column:2;grid-row:1/3;font-weight:700}.ps-wh-products em{position:absolute;right:0;bottom:1px;color:#a000ff;font-size:9px;font-style:normal}.ps-wh-products .upsell{background:#f9f0ff}.ps-wh-table td.money{text-align:right;white-space:nowrap}.ps-wh-table td.money span,.ps-wh-table td.money strong{display:block}.ps-wh-table td.money.strong{font-weight:700;color:#005cad}.ps-wh-table .success{color:#15803d}.ps-wh-table .danger-text{color:#d73925}.ps-wh-actions{display:grid;grid-template-columns:repeat(4,29px);gap:4px}.ps-wh-action{width:29px;height:28px;border:1px solid #cbd2da;background:#fff;color:#444;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}.ps-wh-action svg{width:14px;height:14px}.ps-wh-action:hover{background:#edf6ff;color:#1976ad}.ps-wh-action.primary{background:#3c8dbc;color:#fff;border-color:#367fa9}.ps-wh-action.warning{background:#f39c12;color:#fff;border-color:#e08e0b}.ps-wh-action.danger{color:#d73925}.ps-wh-action:disabled{opacity:.35;cursor:not-allowed}.ps-wh-empty{text-align:center!important;padding:40px!important}.ps-wh-pagination{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:10px;background:#fff}.ps-wh-pagination label{display:flex;align-items:center;gap:5px}.ps-wh-pagination select{border:1px solid #cfd5dc;padding:4px}.ps-wh-dialog{width:min(600px,calc(100vw - 24px))!important;max-width:none!important;max-height:calc(100vh - 24px)!important;display:flex!important;flex-direction:column!important;gap:0!important;border-radius:0!important;padding:0!important;overflow:hidden!important}.ps-wh-dialog.wide{width:min(1280px,calc(100vw - 24px))!important}.ps-wh-dialog [data-slot=dialog-header]{flex:none;background:#fff;border-bottom:1px solid #d2d6de;padding:13px 16px}.ps-wh-dialog [data-slot=dialog-title]{font:600 16px Arial;color:#222}.ps-wh-dialog-body{min-height:0;overflow:auto;padding:12px 16px;background:#fff}.ps-wh-dialog-footer{flex:none;border-top:1px solid #ddd;background:#fafafa;padding:9px 16px}.ps-wh-dialog-order-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#f3f6f9;border:1px solid #d5dbe2;padding:7px;margin-bottom:12px}.ps-wh-dialog-field{display:grid;grid-template-columns:210px minmax(0,1fr);gap:10px;align-items:start;margin-bottom:8px}.ps-wh-dialog-field>span{padding-top:7px;font-weight:600}.ps-wh-dialog-field b{color:#e53935}.ps-wh-dialog textarea{min-height:70px;resize:vertical}.ps-wh-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.ps-wh-edit-grid>.ps-wh-dialog-field:nth-child(5),.ps-wh-edit-grid>.ps-wh-dialog-field:nth-child(12),.ps-wh-items-editor{grid-column:1/-1}.ps-wh-items-editor,.ps-wh-return-editor{overflow:auto}.ps-wh-items-editor h4{margin:12px 0 6px;color:#ff6418;border-bottom:2px solid #ff7425;padding-bottom:4px}.ps-wh-items-editor table,.ps-wh-return-editor table{width:100%;border-collapse:collapse;min-width:800px}.ps-wh-items-editor th,.ps-wh-return-editor th{background:#3782dc;color:#fff;border:1px solid #2f72c4;padding:6px}.ps-wh-items-editor td,.ps-wh-return-editor td{border:1px solid #d2d6de;padding:5px}.ps-wh-warning{background:#fffbea;border:1px solid #f5a623;padding:8px;margin-bottom:8px;color:#7a5700}.ps-wh-timeline{position:relative;padding-left:22px}.ps-wh-timeline:before{content:"";position:absolute;left:7px;top:4px;bottom:4px;border-left:2px solid #d5dce4}.ps-wh-timeline>div{position:relative;display:grid;grid-template-columns:145px 180px minmax(0,1fr);gap:8px;padding:0 0 14px}.ps-wh-timeline>div:before{content:"";position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:#3c8dbc;border:2px solid #fff;box-shadow:0 0 0 1px #3c8dbc}.ps-wh-timeline small{grid-column:2/-1}.dark .ps-wh-page,.dark .ps-wh-filter,.dark .ps-wh-summary,.dark .ps-wh-tabs,.dark .ps-wh-table-wrap{background:#1f2937;color:#f3f4f6}.dark .ps-wh-table td{background:#18202b;border-color:#3b4655}.dark .ps-wh-table tbody tr:nth-child(even) td{background:#202b38}@media(max-width:1200px){.ps-wh-filter-grid{grid-template-columns:repeat(4,1fr)}.ps-wh-summary{grid-template-columns:repeat(3,1fr)}}@media(max-width:700px){.ps-wh-filter-grid,.ps-wh-summary{grid-template-columns:1fr 1fr}.ps-wh-edit-grid{grid-template-columns:1fr}.ps-wh-edit-grid>*{grid-column:1!important}.ps-wh-dialog-field,.ps-wh-dialog-order-summary{grid-template-columns:1fr}.ps-wh-timeline>div{grid-template-columns:1fr}}
+.ps-wh-page{min-height:calc(100vh - var(--topbar-height));background:#f4f4f4;color:#222;font:12px Arial,"Helvetica Neue",sans-serif}.ps-wh-titlebar{background:#fff;border-bottom:1px solid #ddd;padding:10px 14px}.ps-wh-titlebar h1{margin:0;font-size:17px;font-weight:600}.ps-wh-titlebar p{margin:3px 0 0;color:#777}.ps-wh-filter{background:#fff;border-top:0;border-bottom:1px solid #cfd5dc;padding:10px 12px}.ps-wh-filter-grid{display:grid;grid-template-columns:repeat(8,minmax(135px,1fr));gap:8px}.ps-wh-filter select,.ps-wh-filter input,.ps-wh-dialog input,.ps-wh-dialog select,.ps-wh-dialog textarea{width:100%;min-height:29px;border:1px solid #c8d0db;background:#fff;padding:5px 8px;border-radius:0;font:12px Arial}.ps-wh-filter select:focus,.ps-wh-filter input:focus,.ps-wh-dialog input:focus,.ps-wh-dialog select:focus,.ps-wh-dialog textarea:focus{outline:1px solid #3c8dbc;border-color:#3c8dbc}.ps-wh-date-field{display:flex;align-items:center;gap:5px;border:1px solid #c8d0db;padding-left:7px}.ps-wh-date-field span{white-space:nowrap;color:#666}.ps-wh-date-field input{border:0}.ps-wh-check{display:flex;align-items:center;gap:5px;white-space:nowrap}.ps-wh-check input{width:auto;min-height:auto}.ps-wh-filter-actions{display:flex;gap:6px;justify-content:flex-end}.ps-wh-btn{height:29px;display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid #bbb;background:#fff;padding:0 10px;cursor:pointer}.ps-wh-btn.primary{border-color:#1976ad;background:#3c8dbc;color:#fff}.ps-wh-summary{display:grid;grid-template-columns:repeat(5,minmax(170px,1fr));gap:8px;padding:8px 10px;background:#fff;border-bottom:1px solid #ddd}.ps-wh-summary>div{position:relative;min-height:64px;border:1px solid #d8dde4;background:#fafafa;padding:8px 8px 8px 42px}.ps-wh-summary svg{position:absolute;left:10px;top:18px;width:23px;color:#3285d2}.ps-wh-summary span{display:block;color:#6c7580}.ps-wh-summary strong{display:block;margin-top:5px;font-size:14px}.ps-wh-tabs{display:flex;flex-wrap:wrap;gap:0;background:#fff;padding:8px 10px 0;border-bottom:1px solid #d2d6de}.ps-wh-tabs button{border:1px solid #d2d6de;border-bottom:0;background:#fff;padding:7px 10px;cursor:pointer;margin-right:-1px}.ps-wh-tabs button.active{background:#3c8dbc;color:#fff;border-color:#367fa9}.ps-wh-table-wrap{width:100%;overflow:auto;background:#fff;border-bottom:1px solid #ccc}.ps-wh-table{width:100%;min-width:2850px;border-collapse:collapse;table-layout:fixed}.ps-wh-table th{background:#3782dc!important;color:#fff!important;border:1px solid #2f72c4!important;text-align:center!important;font-weight:600;padding:7px 5px;white-space:normal}.ps-wh-table td{border:1px solid #d2d6de;padding:6px;vertical-align:top;line-height:1.4;background:#fff;overflow-wrap:anywhere}.ps-wh-table tbody tr:nth-child(even) td{background:#f7f9fc}.ps-wh-table tbody tr.return-row td{background:#fff8f1}.ps-wh-table th:nth-child(1){width:42px}.ps-wh-table th:nth-child(2){width:180px}.ps-wh-table th:nth-child(3){width:180px}.ps-wh-table th:nth-child(4){width:155px}.ps-wh-table th:nth-child(5){width:240px}.ps-wh-table th:nth-child(6),.ps-wh-table th:nth-child(7){width:230px}.ps-wh-table th:nth-child(16){width:170px}.ps-wh-table th:nth-child(17){width:180px}.ps-wh-table .center{text-align:center}.ps-wh-dates span{display:block;margin-bottom:3px}.ps-wh-order-code{border:0;background:transparent;color:#0074c7;font-weight:700;cursor:pointer;padding:0}.ps-wh-status-stack{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0}.ps-wh-badge{display:inline-block;border-radius:2px;background:#d8dde4;color:#3f4b59;padding:2px 5px;font-size:10px}.ps-wh-badge.success{background:#42ad64;color:#fff}.ps-wh-badge.warning{background:#f39c12;color:#fff}.ps-wh-badge.danger{background:#dd4b39;color:#fff}.ps-wh-badge.info{background:#00a7d0;color:#fff}.ps-wh-tracking{display:block;margin-top:3px;color:#3c8dbc}.ps-wh-error{margin:3px 0;color:#d73925;font-size:10px}.ps-wh-note{margin:4px 0;padding:4px;background:#fffbe6;border-left:2px solid #f39c12}.ps-wh-table td a{display:block;color:#0073b7}.ps-wh-table td p{margin:3px 0}.ps-wh-table td small{display:block;color:#687382}.ps-wh-products>div{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 5px;padding:4px 0;border-bottom:1px dotted #ccd3da}.ps-wh-products b{font-weight:600}.ps-wh-products small{grid-column:1}.ps-wh-products span{grid-column:2;grid-row:1/3;font-weight:700}.ps-wh-products em{position:absolute;right:0;bottom:1px;color:#a000ff;font-size:9px;font-style:normal}.ps-wh-products .upsell{background:#f9f0ff}.ps-wh-table td.money{text-align:right;white-space:nowrap}.ps-wh-table td.money span,.ps-wh-table td.money strong{display:block}.ps-wh-table td.money.strong{font-weight:700;color:#005cad}.ps-wh-table .success{color:#15803d}.ps-wh-table .danger-text{color:#d73925}.ps-wh-actions{display:grid;grid-template-columns:repeat(4,29px);gap:4px}.ps-wh-action{width:29px;height:28px;border:1px solid #cbd2da;background:#fff;color:#444;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}.ps-wh-action svg{width:14px;height:14px}.ps-wh-action:hover{background:#edf6ff;color:#1976ad}.ps-wh-action.primary{background:#3c8dbc;color:#fff;border-color:#367fa9}.ps-wh-action.warning{background:#f39c12;color:#fff;border-color:#e08e0b}.ps-wh-action.danger{color:#d73925}.ps-wh-action:disabled{opacity:.35;cursor:not-allowed}.ps-wh-empty{text-align:center!important;padding:40px!important}.ps-wh-pagination{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:10px;background:#fff}.ps-wh-pagination label{display:flex;align-items:center;gap:5px}.ps-wh-pagination select{border:1px solid #cfd5dc;padding:4px}.ps-wh-dialog{width:min(600px,calc(100vw - 24px))!important;max-width:none!important;max-height:calc(100vh - 24px)!important;display:flex!important;flex-direction:column!important;gap:0!important;border-radius:0!important;padding:0!important;overflow:hidden!important}.ps-wh-dialog.wide{width:min(1280px,calc(100vw - 24px))!important}.ps-wh-dialog [data-slot=dialog-header]{flex:none;background:#fff;border-bottom:1px solid #d2d6de;padding:13px 16px}.ps-wh-dialog [data-slot=dialog-title]{font:600 16px Arial;color:#222}.ps-wh-dialog-body{min-height:0;overflow:auto;padding:12px 16px;background:#fff}.ps-wh-dialog-footer{flex:none;border-top:1px solid #ddd;background:#fafafa;padding:9px 16px}.ps-wh-dialog-order-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#f3f6f9;border:1px solid #d5dbe2;padding:7px;margin-bottom:12px}.ps-wh-dialog-field{display:grid;grid-template-columns:210px minmax(0,1fr);gap:10px;align-items:start;margin-bottom:8px}.ps-wh-dialog-field>span{padding-top:7px;font-weight:600}.ps-wh-dialog-field b{color:#e53935}.ps-wh-dialog textarea{min-height:70px;resize:vertical}.ps-wh-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.ps-wh-edit-grid>.ps-wh-dialog-field:nth-child(5),.ps-wh-edit-grid>.ps-wh-dialog-field:nth-child(12),.ps-wh-items-editor{grid-column:1/-1}.ps-wh-items-editor,.ps-wh-return-editor{overflow:auto}.ps-wh-items-editor h4{margin:12px 0 6px;color:#ff6418;border-bottom:2px solid #ff7425;padding-bottom:4px}.ps-wh-items-editor table,.ps-wh-return-editor table{width:100%;border-collapse:collapse;min-width:800px}.ps-wh-items-editor th,.ps-wh-return-editor th{background:#3782dc;color:#fff;border:1px solid #2f72c4;padding:6px}.ps-wh-items-editor td,.ps-wh-return-editor td{border:1px solid #d2d6de;padding:5px}.ps-wh-warning{background:#fffbea;border:1px solid #f5a623;padding:8px;margin-bottom:8px;color:#7a5700}.ps-wh-timeline{position:relative;padding-left:22px}.ps-wh-timeline:before{content:"";position:absolute;left:7px;top:4px;bottom:4px;border-left:2px solid #d5dce4}.ps-wh-timeline>div{position:relative;display:grid;grid-template-columns:145px 180px minmax(0,1fr);gap:8px;padding:0 0 14px}.ps-wh-timeline>div:before{content:"";position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:#3c8dbc;border:2px solid #fff;box-shadow:0 0 0 1px #3c8dbc}.ps-wh-timeline small{grid-column:2/-1}.dark .ps-wh-page,.dark .ps-wh-filter,.dark .ps-wh-summary,.dark .ps-wh-tabs,.dark .ps-wh-table-wrap{background:#1f2937;color:#f3f4f6}.dark .ps-wh-table td{background:#18202b;border-color:#3b4655}.dark .ps-wh-table tbody tr:nth-child(even) td{background:#202b38}@media(max-width:1200px){.ps-wh-filter-grid{grid-template-columns:repeat(4,1fr)}.ps-wh-summary{grid-template-columns:repeat(3,1fr)}}@media(max-width:700px){.ps-wh-filter-grid,.ps-wh-summary{grid-template-columns:1fr 1fr}.ps-wh-edit-grid{grid-template-columns:1fr}.ps-wh-edit-grid>*{grid-column:1!important}.ps-wh-dialog-field,.ps-wh-dialog-order-summary{grid-template-columns:1fr}.ps-wh-timeline>div{grid-template-columns:1fr}}
 
 /* ===== pushsale-system-v17.css ===== */
 /*
@@ -10142,4 +10142,1374 @@ body.pushsale-app-body .pushsale-header-help-trigger {
     background: transparent !important;
     color: #fff !important;
     cursor: pointer !important;
+}
+
+/* ===== V39 Pushsale UI system consolidation =====
+   One generic layer for page chrome, table cell density, action buttons and
+   operation tabs. Keep future UI fixes here instead of per-page patching. */
+:root {
+    --ps-blue: #087df0;
+    --ps-header-blue: #3782dc;
+    --ps-header-border: #2f72c4;
+    --ps-row-border: #d9dee5;
+    --ps-row-border-soft: #e7ebf0;
+    --ps-text: #111;
+    --ps-muted: #777;
+    --ps-fab-size: 55px;
+}
+
+/* Page chrome: remove the accidental blue strip/border that appears only at scroll top. */
+body.pushsale-app-body .psfd-toolbar,
+body.pushsale-app-body .ps-wh-filter,
+body.pushsale-app-body .ps-sale-filter-shell,
+body.pushsale-app-body .psm-topbar,
+body.pushsale-app-body .psr-topbar,
+body.pushsale-app-body .pushsale-page-header,
+body.pushsale-app-body .ps-adminlte-page .m-header-wrap,
+body.pushsale-app-body .ps-adminlte-page .m-header {
+    border-top: 0 !important;
+}
+body.pushsale-app-body .content-wrapper,
+body.pushsale-app-body .content-wrapper > *,
+body.pushsale-app-body .pushsale-wrapper,
+body.pushsale-app-body .pushsale-wrapper > * {
+    outline: 0 !important;
+}
+body.pushsale-app-body .content-wrapper::before,
+body.pushsale-app-body .content-wrapper::after,
+body.pushsale-app-body .pushsale-wrapper::before,
+body.pushsale-app-body .pushsale-wrapper::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Source-faithful operation stage filters. */
+body.pushsale-app-body .ps-sale-stage-tabs {
+    min-height: 82px !important;
+    align-content: flex-start !important;
+    gap: 8px 18px !important;
+    padding: 10px 18px !important;
+    border-bottom: 0 !important;
+    background: #fff !important;
+}
+body.pushsale-app-body .dm-tac-nghiep {
+    width: 180px !important;
+    min-width: 180px !important;
+    min-height: 26px !important;
+    padding: 5px 6px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #333 !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    transition: ease 3s all !important;
+}
+body.pushsale-app-body .dm-tac-nghiep:hover,
+body.pushsale-app-body .dm-tac-nghiep.selected {
+    box-shadow: inset 0 0 4px orange !important;
+}
+body.pushsale-app-body .dm-tac-nghiep .flag {
+    width: 20px !important;
+    height: 14px !important;
+    flex: 0 0 20px !important;
+    margin-right: 10px !important;
+}
+body.pushsale-app-body .dm-tac-nghiep .text {
+    height: 16px !important;
+    line-height: 16px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+}
+body.pushsale-app-body .dm-tac-nghiep .count {
+    margin-left: 6px !important;
+    color: orange !important;
+    font-weight: 700 !important;
+    line-height: 16px !important;
+    transition: ease 3s all !important;
+}
+body.pushsale-app-body .dm-tac-nghiep .level-1 { background-color: #a6ffa8 !important; }
+body.pushsale-app-body .dm-tac-nghiep .level-2 { background-color: #8ad6ff !important; }
+body.pushsale-app-body .dm-tac-nghiep .level-3 { background-color: #ffc0cb !important; }
+body.pushsale-app-body .dm-tac-nghiep .level-4 { background-color: orangered !important; }
+
+/* Standard action/FAB component. Applies to React pages and legacy template anchors. */
+body.pushsale-app-body .tao-don-fixed,
+body.pushsale-app-body a.tao-don-fixed,
+body.pushsale-app-body button.tao-don-fixed,
+body.pushsale-app-body .pushsale-create-order-fab,
+body.pushsale-app-body .ps-floating-add,
+body.pushsale-app-body .legacy-floating-add,
+body.pushsale-app-body .ps-action-fab {
+    position: fixed !important;
+    left: 20px !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: 20px !important;
+    z-index: 3000 !important;
+    display: inline-flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: var(--ps-fab-size) !important;
+    height: var(--ps-fab-size) !important;
+    min-width: var(--ps-fab-size) !important;
+    min-height: var(--ps-fab-size) !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: #0080ff !important;
+    color: #fff !important;
+    text-align: center !important;
+    box-shadow: 0 3px 9px rgba(0,0,0,.32) !important;
+    transform: translate3d(0,0,0) !important;
+    cursor: pointer !important;
+    overflow: hidden !important;
+    clip-path: circle(50%) !important;
+    transition: background .18s ease, box-shadow .18s ease, transform .18s ease !important;
+}
+body.pushsale-app-body .tao-don-fixed:hover,
+body.pushsale-app-body a.tao-don-fixed:hover,
+body.pushsale-app-body button.tao-don-fixed:hover,
+body.pushsale-app-body .pushsale-create-order-fab:hover,
+body.pushsale-app-body .ps-floating-add:hover,
+body.pushsale-app-body .legacy-floating-add:hover,
+body.pushsale-app-body .ps-action-fab:hover {
+    background: #006fdc !important;
+    box-shadow: 0 5px 12px rgba(0,0,0,.35) !important;
+    transform: translate3d(0,-1px,0) !important;
+}
+body.pushsale-app-body .tao-don-fixed i,
+body.pushsale-app-body .pushsale-create-order-fab i,
+body.pushsale-app-body .ps-floating-add i,
+body.pushsale-app-body .legacy-floating-add i,
+body.pushsale-app-body .ps-action-fab i,
+body.pushsale-app-body .ps-action-fab svg {
+    margin: 0 !important;
+    font-size: 20px !important;
+    line-height: 20px !important;
+}
+body.pushsale-app-body .tao-don-fixed .text,
+body.pushsale-app-body .pushsale-create-order-fab strong,
+body.pushsale-app-body .ps-floating-add span,
+body.pushsale-app-body .legacy-floating-add span {
+    display: block !important;
+    margin-top: 2px !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    line-height: 10px !important;
+    white-space: nowrap !important;
+}
+
+/* Generic table density + action icons: no boxed mini cells for row actions. */
+body.pushsale-app-body .pushsale-table-system table,
+body.pushsale-app-body .ps-sale-operation-table,
+body.pushsale-app-body .ps-customer-profile-table,
+body.pushsale-app-body .psm-dashboard-table,
+body.pushsale-app-body .ps-wh-table,
+body.pushsale-app-body .ps-source-table,
+body.pushsale-app-body .ps-report-table,
+body.pushsale-app-body .pushsale-wrapper table:not(.ps-kpi-table):not(.ps-time-table) {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+}
+body.pushsale-app-body table td .btn-icon,
+body.pushsale-app-body table td .ps-row-actions,
+body.pushsale-app-body table td .ps-row-actions a,
+body.pushsale-app-body table td .ps-row-actions button,
+body.pushsale-app-body table td [data-slot='button'],
+body.pushsale-app-body table td .ps-wh-action,
+body.pushsale-app-body table td .psm-add-button,
+body.pushsale-app-body table td .psm-expand-button,
+body.pushsale-app-body table td .psm-chart-button {
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body table td .btn-icon,
+body.pushsale-app-body table td .ps-wh-action,
+body.pushsale-app-body table td .psm-add-button,
+body.pushsale-app-body table td .psm-expand-button,
+body.pushsale-app-body table td .psm-chart-button {
+    display: inline-flex !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    color: #0d84df !important;
+}
+body.pushsale-app-body table td .btn-icon:hover,
+body.pushsale-app-body table td .ps-wh-action:hover,
+body.pushsale-app-body table td .psm-add-button:hover,
+body.pushsale-app-body table td .psm-expand-button:hover,
+body.pushsale-app-body table td .psm-chart-button:hover {
+    background: transparent !important;
+    color: #005fae !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .ps-wh-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 2px 4px !important;
+}
+body.pushsale-app-body .ps-wh-action svg { width: 15px !important; height: 15px !important; }
+
+/* Marketing dashboard: widen the two identifying columns. */
+body.pushsale-app-body .psm-dashboard-table {
+    width: max(100%, 1980px) !important;
+    min-width: 1980px !important;
+}
+body.pushsale-app-body .psm-dashboard-table col.psm-col-source { width: 250px !important; }
+body.pushsale-app-body .psm-dashboard-table col.psm-col-product { width: 250px !important; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(2),
+body.pushsale-app-body .psm-dashboard-table td.psm-source-cell { width: 250px !important; min-width: 250px !important; }
+body.pushsale-app-body .psm-dashboard-table th:nth-child(3),
+body.pushsale-app-body .psm-dashboard-table td.psm-product-cell { width: 250px !important; min-width: 250px !important; }
+body.pushsale-app-body .psm-source-cell,
+body.pushsale-app-body .psm-product-cell {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word !important;
+    line-height: 16px !important;
+}
+body.pushsale-app-body .psm-source-cell .psm-add-button { margin-right: 4px !important; }
+
+/* Sale/customer money/product columns: solve the real cause of the inner boxes by sizing the columns. */
+body.pushsale-app-body .ps-sale-operation-table,
+body.pushsale-app-body .ps-customer-profile-table {
+    min-width: 2580px !important;
+}
+body.pushsale-app-body .ps-sale-operation-table col.c-products { width: 390px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-money { width: 230px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-needed { width: 280px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-message { width: 320px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-customer { width: 270px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-delivery { width: 220px !important; }
+body.pushsale-app-body .ps-sale-operation-table td:has(.tb-in-sp),
+body.pushsale-app-body .ps-customer-profile-table td:has(.tb-in-sp) {
+    min-width: 380px !important;
+}
+body.pushsale-app-body .ps-sale-operation-table td.ps-money-cell,
+body.pushsale-app-body .ps-customer-profile-table td.ps-money-cell,
+body.pushsale-app-body .ps-customer-profile-table td:has(.ps-money-stack) {
+    min-width: 220px !important;
+    white-space: nowrap !important;
+    font-variant-numeric: tabular-nums !important;
+}
+body.pushsale-app-body .tb-in-sp {
+    width: 100% !important;
+    table-layout: fixed !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+body.pushsale-app-body .tb-in-sp td {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 3px 4px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+body.pushsale-app-body .tb-in-sp td:nth-child(1) { width: auto !important; }
+body.pushsale-app-body .tb-in-sp td:nth-child(2) { width: 42px !important; text-align: center !important; }
+body.pushsale-app-body .tb-in-sp td:nth-child(3) { width: 92px !important; text-align: right !important; white-space: nowrap !important; }
+body.pushsale-app-body .tb-in-sp .row-sp + .row-sp td {
+    border-top: 1px dashed #edf0f3 !important;
+}
+body.pushsale-app-body .ps-money-cell > div,
+body.pushsale-app-body .ps-money-cell > strong,
+body.pushsale-app-body td .ps-money-stack > div,
+body.pushsale-app-body td .ps-money-stack > strong {
+    display: flex !important;
+    min-height: 18px !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding: 1px 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+}
+
+/* Bulk/action bar foundation shared by sale and warehouse pages. */
+body.pushsale-app-body .ps-table-action-bar,
+body.pushsale-app-body .ps-sale-selection-bar,
+body.pushsale-app-body .ps-wh-selection-bar {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 35 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    min-height: 42px !important;
+    padding: 7px 12px !important;
+    border-top: 1px solid #d6dde6 !important;
+    background: #fff !important;
+    box-shadow: 0 -2px 6px rgba(0,0,0,.08) !important;
+}
+body.pushsale-app-body .ps-table-action-bar .btn,
+body.pushsale-app-body .ps-sale-selection-bar .btn,
+body.pushsale-app-body .ps-wh-selection-bar .btn {
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 4px 10px !important;
+    border-radius: 2px !important;
+}
+
+/* ===== V40 Pushsale UI architecture normalization =====
+   Shared page chrome + shared table/action styling. This intentionally sits at
+   the end of the Pushsale stylesheet so old per-page CSS cannot override the
+   common system. */
+:root {
+    --ps-topbar-height: 52px;
+    --ps-control-height: 30px;
+    --ps-control-border: #cfd8e3;
+    --ps-blue-primary: #087df0;
+    --ps-table-blue: #3782dc;
+    --ps-table-blue-border: #2e73c1;
+    --ps-cell-border: #d9d9d9;
+}
+
+/* Header information button: one source of truth, always beside language. */
+body.pushsale-app-body .pushsale-header-info-trigger,
+body.pushsale-app-body .pushsale-header-tools .pushsale-header-info-trigger,
+body.pushsale-app-body .pushsale-header-tools button.pushsale-header-info-trigger {
+    display: inline-flex !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    opacity: .98 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+}
+body.pushsale-app-body .pushsale-header-info-trigger i {
+    color: #fff !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+}
+body.pushsale-app-body .pushsale-header-info-trigger:hover {
+    background: rgba(255,255,255,.14) !important;
+}
+body.pushsale-app-body .content-wrapper .psr-help,
+body.pushsale-app-body .content-wrapper .btn-help,
+body.pushsale-app-body .content-wrapper .ps-help-button,
+body.pushsale-app-body .content-wrapper .psm-help-button {
+    display: none !important;
+}
+
+/* Page chrome: all pages share the same title/filter/action layout. */
+body.pushsale-app-body .ps-page-chrome,
+body.pushsale-app-body .pushsale-page-header,
+body.pushsale-app-body .ps-report-topbar,
+body.pushsale-app-body .ps-extra-toolbar,
+body.pushsale-app-body .ps-sale-title-row,
+body.pushsale-app-body .psm-topbar,
+body.pushsale-app-body .psr-topbar,
+body.pushsale-app-body .m-header-wrap > .m-header:first-child,
+body.pushsale-app-body .ps-wh-filter .ps-wh-filter-grid:first-child,
+body.pushsale-app-body .psfd-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(210px, 300px) minmax(0, 1fr) !important;
+    align-items: center !important;
+    min-height: var(--ps-topbar-height) !important;
+    gap: 10px 18px !important;
+    padding: 8px 14px !important;
+    border-top: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .ps-page-chrome__primary {
+    display: contents !important;
+}
+body.pushsale-app-body .ps-page-chrome__title,
+body.pushsale-app-body .pushsale-page-header__main,
+body.pushsale-app-body .ps-report-topbar > h1,
+body.pushsale-app-body .ps-extra-toolbar > h1,
+body.pushsale-app-body .ps-sale-page-title,
+body.pushsale-app-body .psm-topbar > h1,
+body.pushsale-app-body .psr-topbar > h1,
+body.pushsale-app-body .m-header-wrap > .m-header:first-child .module-title,
+body.pushsale-app-body .psfd-toolbar h1 {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    align-self: center !important;
+    margin: 0 !important;
+    color: #111 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 20px !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .ps-page-chrome__title h1,
+body.pushsale-app-body .pushsale-page-header h1,
+body.pushsale-app-body .ps-report-topbar h1,
+body.pushsale-app-body .psm-topbar h1,
+body.pushsale-app-body .psr-topbar h1,
+body.pushsale-app-body .psfd-toolbar h1 {
+    margin: 0 !important;
+    color: #111 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 20px !important;
+}
+body.pushsale-app-body .ps-page-chrome__title p,
+body.pushsale-app-body .pushsale-page-header p,
+body.pushsale-app-body .psfd-toolbar p {
+    margin: 2px 0 0 !important;
+    color: #6f7d8b !important;
+    font-size: 11px !important;
+    line-height: 15px !important;
+}
+body.pushsale-app-body .ps-page-chrome__controls,
+body.pushsale-app-body .pushsale-page-header__actions,
+body.pushsale-app-body .ps-extra-toolbar-controls,
+body.pushsale-app-body .ps-sale-title-row > :not(.ps-sale-page-title):not(.ps-sale-title-spacer),
+body.pushsale-app-body .psm-top-selects,
+body.pushsale-app-body .psm-top-actions,
+body.pushsale-app-body .psr-primary-filters,
+body.pushsale-app-body .psr-actions,
+body.pushsale-app-body .m-header-wrap > .m-header:first-child .form-group:not(:first-child),
+body.pushsale-app-body .psfd-filter-controls,
+body.pushsale-app-body .psfd-toolbar > :not(:first-child) {
+    min-width: 0 !important;
+}
+body.pushsale-app-body .ps-page-chrome__controls,
+body.pushsale-app-body .ps-extra-toolbar-controls,
+body.pushsale-app-body .psm-topbar .psm-top-selects,
+body.pushsale-app-body .psr-topbar .psr-primary-filters {
+    grid-column: 2 !important;
+    display: flex !important;
+    min-width: 0 !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px 14px !important;
+    flex-wrap: nowrap !important;
+}
+body.pushsale-app-body .ps-page-chrome__filters,
+body.pushsale-app-body .ps-page-chrome__actions,
+body.pushsale-app-body .ps-topbar-actions,
+body.pushsale-app-body .psm-top-actions,
+body.pushsale-app-body .psr-actions,
+body.pushsale-app-body .divSearch {
+    display: inline-flex !important;
+    min-width: 0 !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+}
+body.pushsale-app-body .ps-sale-title-row .ps-sale-title-spacer { display: none !important; }
+body.pushsale-app-body .ps-sale-title-row .ps-sale-search-wrap {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+body.pushsale-app-body .psm-topbar .psm-top-actions,
+body.pushsale-app-body .psr-topbar .psr-actions {
+    grid-column: 2 !important;
+    justify-self: end !important;
+}
+body.pushsale-app-body .psm-topbar,
+body.pushsale-app-body .psr-topbar {
+    grid-template-columns: minmax(210px, 300px) minmax(0, 1fr) auto !important;
+}
+body.pushsale-app-body .psm-topbar .psm-top-selects,
+body.pushsale-app-body .psr-topbar .psr-primary-filters { justify-content: flex-start !important; }
+body.pushsale-app-body .psm-topbar .psm-top-actions,
+body.pushsale-app-body .psr-topbar .psr-actions { grid-column: 3 !important; }
+
+/* CEO report has two header rows; the first row is page chrome, the second row is filters only. */
+body.pushsale-app-body .m-header-wrap.ps-ceo-page-chrome,
+body.pushsale-app-body .m-header-wrap {
+    border-top: 0 !important;
+    background: #fff !important;
+}
+body.pushsale-app-body .m-header-wrap > .m-header:first-child {
+    grid-template-columns: minmax(210px, 300px) repeat(4, minmax(180px, 1fr)) auto !important;
+}
+body.pushsale-app-body .m-header-wrap > .m-header:not(:first-child) {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(160px, 1fr)) !important;
+    align-items: center !important;
+    gap: 10px 18px !important;
+    padding: 8px 14px !important;
+    border-top: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    background: #f4f7fa !important;
+}
+body.pushsale-app-body .m-header-wrap .form-group {
+    margin: 0 !important;
+    min-width: 0 !important;
+}
+
+/* Controls use one sizing rule. */
+body.pushsale-app-body .ps-control,
+body.pushsale-app-body .ps-select,
+body.pushsale-app-body .ps-input,
+body.pushsale-app-body .form-control.ps-sale-select,
+body.pushsale-app-body .ps-sale-search-wrap .form-control,
+body.pushsale-app-body .date-range-wrap .ps-input,
+body.pushsale-app-body .ps-date-range,
+body.pushsale-app-body .ps-sale-date-range {
+    height: var(--ps-control-height) !important;
+    min-height: var(--ps-control-height) !important;
+    border: 1px solid var(--ps-control-border) !important;
+    border-radius: 0 !important;
+    background-color: #fff !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .ps-control,
+body.pushsale-app-body .ps-select,
+body.pushsale-app-body .form-control.ps-sale-select {
+    min-width: 210px !important;
+}
+body.pushsale-app-body .ps-date-range,
+body.pushsale-app-body .ps-sale-date-range {
+    min-width: 310px !important;
+}
+body.pushsale-app-body .ps-btn,
+body.pushsale-app-body .btn-ps-primary,
+body.pushsale-app-body .btn.btn-primary.btn-sm,
+body.pushsale-app-body .psm-square-button,
+body.pushsale-app-body .psr-square-button,
+body.pushsale-app-body .ichucnang {
+    height: var(--ps-control-height) !important;
+    min-height: var(--ps-control-height) !important;
+    border-radius: 2px !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .ps-collapse-filter,
+body.pushsale-app-body .psm-collapse,
+body.pushsale-app-body .psr-collapse {
+    width: 24px !important;
+    height: 24px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #0d84df !important;
+    box-shadow: none !important;
+}
+
+/* Revenue-group selector: use an actual FA icon, no broken encoded pseudo content. */
+body.pushsale-app-body .ps-revenue-group-picker > summary::after { content: none !important; }
+body.pushsale-app-body .ps-revenue-group-trigger {
+    display: inline-flex !important;
+    min-width: 190px !important;
+    height: 32px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 6px 10px !important;
+    border: 1px solid #bfcbd8 !important;
+    border-radius: 2px !important;
+    background: #fff !important;
+    color: #25374b !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+}
+body.pushsale-app-body .ps-revenue-group-trigger i {
+    color: #607286 !important;
+    font-size: 13px !important;
+}
+body.pushsale-app-body .ps-revenue-group-picker {
+    position: relative !important;
+}
+body.pushsale-app-body .ps-revenue-group-picker .ps-revenue-group-popover {
+    right: 0 !important;
+    left: auto !important;
+}
+
+/* Tables: one density/column system instead of per-cell boxes. */
+body.pushsale-app-body .ps-table-scroll,
+body.pushsale-app-body .psm-table-scroll,
+body.pushsale-app-body .psr-table-wrap,
+body.pushsale-app-body .ps-sale-table-scroll,
+body.pushsale-app-body .ps-customer-table-scroll,
+body.pushsale-app-body .ps-wh-table-scroll {
+    width: 100% !important;
+    overflow-x: auto !important;
+}
+body.pushsale-app-body .ps-table,
+body.pushsale-app-body .ps-grouped-report-table,
+body.pushsale-app-body .psm-dashboard-table,
+body.pushsale-app-body .ps-sale-operation-table,
+body.pushsale-app-body .ps-customer-profile-table,
+body.pushsale-app-body .ps-wh-table,
+body.pushsale-app-body .psr-table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    table-layout: fixed !important;
+}
+body.pushsale-app-body .ps-table th,
+body.pushsale-app-body .ps-table td,
+body.pushsale-app-body .ps-grouped-report-table th,
+body.pushsale-app-body .ps-grouped-report-table td,
+body.pushsale-app-body .psm-dashboard-table th,
+body.pushsale-app-body .psm-dashboard-table td,
+body.pushsale-app-body .ps-sale-operation-table th,
+body.pushsale-app-body .ps-sale-operation-table td,
+body.pushsale-app-body .ps-customer-profile-table th,
+body.pushsale-app-body .ps-customer-profile-table td,
+body.pushsale-app-body .ps-wh-table th,
+body.pushsale-app-body .ps-wh-table td,
+body.pushsale-app-body .psr-table th,
+body.pushsale-app-body .psr-table td {
+    border: 1px solid var(--ps-cell-border) !important;
+    box-shadow: none !important;
+    vertical-align: middle !important;
+}
+body.pushsale-app-body .ps-table th,
+body.pushsale-app-body .ps-grouped-report-table th,
+body.pushsale-app-body .psm-dashboard-table th,
+body.pushsale-app-body .ps-sale-operation-table th,
+body.pushsale-app-body .ps-customer-profile-table th,
+body.pushsale-app-body .ps-wh-table th,
+body.pushsale-app-body .psr-table th {
+    background: var(--ps-table-blue) !important;
+    border-color: var(--ps-table-blue-border) !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 15px !important;
+    text-align: center !important;
+}
+body.pushsale-app-body .ps-table td,
+body.pushsale-app-body .ps-grouped-report-table td,
+body.pushsale-app-body .psm-dashboard-table td,
+body.pushsale-app-body .ps-sale-operation-table td,
+body.pushsale-app-body .ps-customer-profile-table td,
+body.pushsale-app-body .ps-wh-table td,
+body.pushsale-app-body .psr-table td {
+    padding: 7px 8px !important;
+    font-size: 12px !important;
+    line-height: 17px !important;
+}
+body.pushsale-app-body .ps-sale-operation-table,
+body.pushsale-app-body .ps-customer-profile-table { min-width: 2840px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-products,
+body.pushsale-app-body .ps-customer-profile-table col.c-products { width: 450px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-money,
+body.pushsale-app-body .ps-customer-profile-table col.c-money { width: 250px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-needed { width: 300px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-message,
+body.pushsale-app-body .ps-customer-profile-table col.c-message { width: 340px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-customer,
+body.pushsale-app-body .ps-customer-profile-table col.c-customer { width: 290px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-result,
+body.pushsale-app-body .ps-customer-profile-table col.c-result { width: 260px !important; }
+body.pushsale-app-body .ps-sale-operation-table col.c-delivery,
+body.pushsale-app-body .ps-customer-profile-table col.c-delivery { width: 260px !important; }
+body.pushsale-app-body .psm-dashboard-table { width: max(100%, 2150px) !important; min-width: 2150px !important; }
+body.pushsale-app-body .psm-dashboard-table col.psm-col-source,
+body.pushsale-app-body .psm-dashboard-table th:nth-child(2),
+body.pushsale-app-body .psm-dashboard-table td.psm-source-cell { width: 300px !important; min-width: 300px !important; }
+body.pushsale-app-body .psm-dashboard-table col.psm-col-product,
+body.pushsale-app-body .psm-dashboard-table th:nth-child(3),
+body.pushsale-app-body .psm-dashboard-table td.psm-product-cell { width: 300px !important; min-width: 300px !important; }
+
+/* Nested product/money layouts are content, not mini tables. */
+body.pushsale-app-body .tb-in-sp,
+body.pushsale-app-body .ps-money-stack {
+    width: 100% !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .tb-in-sp td,
+body.pushsale-app-body .ps-money-cell > div,
+body.pushsale-app-body .ps-money-cell > strong,
+body.pushsale-app-body .ps-money-stack > div,
+body.pushsale-app-body .ps-money-stack > strong {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .tb-in-sp td {
+    padding: 3px 5px !important;
+}
+body.pushsale-app-body .ps-money-cell,
+body.pushsale-app-body td:has(.ps-money-stack) {
+    text-align: right !important;
+    white-space: nowrap !important;
+    font-variant-numeric: tabular-nums !important;
+}
+body.pushsale-app-body .ps-money-cell > div,
+body.pushsale-app-body .ps-money-cell > strong,
+body.pushsale-app-body .ps-money-stack > div,
+body.pushsale-app-body .ps-money-stack > strong {
+    display: flex !important;
+    min-height: 20px !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding: 1px 0 !important;
+}
+body.pushsale-app-body .ps-money-cell > div + div,
+body.pushsale-app-body .ps-money-stack > div + div {
+    border-top: 1px dashed #eef1f4 !important;
+}
+
+/* Floating action: rounded square, Pushsale-like, fixed to viewport and never jumps with devtools. */
+body.pushsale-app-body .tao-don-fixed,
+body.pushsale-app-body a.tao-don-fixed,
+body.pushsale-app-body button.tao-don-fixed,
+body.pushsale-app-body .pushsale-create-order-fab,
+body.pushsale-app-body .ps-floating-add,
+body.pushsale-app-body .legacy-floating-add,
+body.pushsale-app-body .ps-action-fab {
+    position: fixed !important;
+    left: 24px !important;
+    bottom: 24px !important;
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
+    border-radius: 4px !important;
+    clip-path: none !important;
+    background: #007ad3 !important;
+    color: #fff !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,.32) !important;
+    transform: none !important;
+}
+body.pushsale-app-body .tao-don-fixed i,
+body.pushsale-app-body .pushsale-create-order-fab i,
+body.pushsale-app-body .ps-floating-add i,
+body.pushsale-app-body .legacy-floating-add i,
+body.pushsale-app-body .ps-action-fab i,
+body.pushsale-app-body .ps-action-fab svg { font-size: 20px !important; }
+body.pushsale-app-body .tao-don-fixed:hover,
+body.pushsale-app-body .pushsale-create-order-fab:hover,
+body.pushsale-app-body .ps-floating-add:hover,
+body.pushsale-app-body .legacy-floating-add:hover,
+body.pushsale-app-body .ps-action-fab:hover {
+    background: #006fbd !important;
+    transform: none !important;
+}
+
+@media (max-width: 1100px) {
+    body.pushsale-app-body .ps-page-chrome,
+    body.pushsale-app-body .pushsale-page-header,
+    body.pushsale-app-body .ps-report-topbar,
+    body.pushsale-app-body .ps-extra-toolbar,
+    body.pushsale-app-body .ps-sale-title-row,
+    body.pushsale-app-body .psm-topbar,
+    body.pushsale-app-body .psr-topbar,
+    body.pushsale-app-body .m-header-wrap > .m-header:first-child,
+    body.pushsale-app-body .m-header-wrap > .m-header:not(:first-child) {
+        grid-template-columns: 1fr !important;
+    }
+    body.pushsale-app-body .ps-extra-toolbar-controls,
+    body.pushsale-app-body .psm-topbar .psm-top-selects,
+    body.pushsale-app-body .psr-topbar .psr-primary-filters,
+    body.pushsale-app-body .ps-page-chrome__controls {
+        grid-column: 1 !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+    }
+}
+
+/* V40 built-asset compatibility: old header help trigger maps to the new info trigger. */
+body.pushsale-app-body .pushsale-header-help-trigger,
+body.pushsale-app-body .pushsale-header-tools .pushsale-header-help-trigger {
+    display: inline-flex !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    line-height: 1 !important;
+}
+body.pushsale-app-body .pushsale-header-help-trigger i {
+    color: #fff !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+}
+body.pushsale-app-body .pushsale-header-help-trigger:hover {
+    background: rgba(255,255,255,.14) !important;
+}
+
+/* V40 fallback for older built JS that still renders <details><summary>. */
+body.pushsale-app-body .ps-revenue-group-picker > summary::after {
+    content: "\f107" !important;
+    font-family: FontAwesome !important;
+    position: absolute !important;
+    top: 8px !important;
+    right: 10px !important;
+    color: #607286 !important;
+    font-size: 13px !important;
+}
+body.pushsale-app-body .ps-revenue-group-picker[open] > summary::after {
+    content: "\f106" !important;
+}
+
+/* V41 Warehouse operations legacy parity
+   This block is intentionally scoped to ps-wh-legacy-page so the warehouse screen can
+   match Pushsale without leaking table/action styles to unrelated pages. */
+body.pushsale-app .ps-wh-legacy-page {
+  background: #fff;
+  color: #111;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  min-height: calc(100vh - 50px);
+}
+
+body.pushsale-app .ps-wh-legacy-page .ps-wh-legacy-filter,
+body.pushsale-app .ps-wh-legacy-page .m-header-wrap,
+body.pushsale-app .ps-wh-legacy-page .ps-wh-filter-body,
+body.pushsale-app .ps-wh-legacy-page .box-body {
+  border-top: 0 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+body.pushsale-app .ps-wh-legacy-filter {
+  border-bottom: 1px solid #ddd;
+  padding: 0;
+}
+
+body.pushsale-app .ps-wh-search-header {
+  min-height: 50px;
+  padding: 10px 15px 8px;
+}
+
+body.pushsale-app .ps-wh-header-grid {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(260px, 1fr) minmax(210px, auto) minmax(480px, 38vw);
+  width: 100%;
+}
+
+body.pushsale-app .ps-wh-header-title .text {
+  color: #111;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+body.pushsale-app .ps-wh-header-check {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin: 0;
+  white-space: nowrap;
+}
+
+body.pushsale-app .ps-wh-header-search {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+body.pushsale-app .ps-wh-header-search input {
+  border: 1px solid #cfd8e3;
+  height: 30px;
+  min-width: 240px;
+  padding: 6px 10px;
+  width: calc(100% - 140px);
+}
+
+body.pushsale-app .ps-wh-header-search .btn-primary {
+  background: #2f89bf;
+  border: 1px solid #287daa;
+  border-radius: 2px;
+  color: #fff;
+  height: 30px;
+  line-height: 18px;
+  min-width: 100px;
+  padding: 5px 12px;
+}
+
+body.pushsale-app .ps-wh-summary-toggle {
+  background: transparent !important;
+  border: 0 !important;
+  color: #007bff;
+  height: 30px;
+  width: 24px;
+}
+
+body.pushsale-app .ps-wh-filter-body {
+  padding: 0 15px 9px;
+}
+
+body.pushsale-app .ps-wh-filter-grid.legacy-grid {
+  display: grid;
+  gap: 10px 28px;
+  grid-template-columns: 1.65fr 0.88fr 0.88fr 0.88fr 0.88fr;
+  width: 100%;
+}
+
+body.pushsale-app .ps-wh-filter-grid.legacy-grid input,
+body.pushsale-app .ps-wh-filter-grid.legacy-grid select,
+body.pushsale-app .ps-wh-filter-grid.legacy-grid .date-range {
+  background: #fff;
+  border: 1px solid #cfd8e3;
+  border-radius: 0;
+  color: #111;
+  font-size: 12px;
+  height: 30px;
+  padding: 5px 8px;
+  width: 100%;
+}
+
+body.pushsale-app .ps-wh-filter-actions.legacy-actions {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+}
+
+body.pushsale-app .ps-wh-btn {
+  background: #f5f5f5;
+  border: 1px solid #d6d6d6;
+  border-radius: 2px;
+  color: #111;
+  height: 30px;
+  padding: 5px 12px;
+}
+
+body.pushsale-app .ps-wh-status-row {
+  margin: 10px 15px 12px;
+}
+
+body.pushsale-app .ps-wh-status-row .col-sm-12 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 0;
+}
+
+body.pushsale-app .ps-wh-legacy-page .dm-tac-nghiep {
+  align-items: center;
+  background: #fff;
+  border: 1px solid transparent;
+  color: #111;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 12px;
+  height: 27px;
+  min-width: 170px;
+  padding: 0 8px;
+  text-align: left;
+  text-decoration: none;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+
+body.pushsale-app .ps-wh-legacy-page .dm-tac-nghiep:hover,
+body.pushsale-app .ps-wh-legacy-page .dm-tac-nghiep.selected {
+  background: #fffaf0;
+  border-color: #ffbd5c;
+}
+
+body.pushsale-app .ps-wh-legacy-page .dm-tac-nghiep .flag {
+  display: inline-block;
+  height: 13px;
+  margin-right: 10px;
+  min-width: 20px;
+  width: 20px;
+}
+
+body.pushsale-app .ps-wh-legacy-page .dm-tac-nghiep .flag.level-1,
+body.pushsale-app .ps-wh-legacy-page .dm-tac-nghiep .flag.level- {
+  background: #99f8a1;
+}
+
+body.pushsale-app .ps-wh-legacy-page .dm-tac-nghiep .flag.level-4 {
+  background: #ff3b19;
+}
+
+body.pushsale-app .ps-wh-legacy-page .dm-tac-nghiep .text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.pushsale-app .ps-wh-legacy-page .dm-tac-nghiep .count {
+  color: #ff8a00;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+body.pushsale-app .ps-wh-legacy-page .dm-tac-nghiep .fa {
+  color: #8a8a8a;
+  font-size: 11px;
+  margin-left: 8px;
+}
+
+body.pushsale-app .ps-wh-table-shell {
+  height: auto;
+  max-height: none;
+  margin: 0 15px;
+  overflow: auto;
+  width: calc(100% - 30px);
+}
+
+body.pushsale-app .ps-wh-legacy-table {
+  border-collapse: collapse;
+  margin: 0;
+  min-width: 2480px;
+  table-layout: fixed;
+  width: 2480px;
+}
+
+body.pushsale-app .ps-wh-legacy-table thead th {
+  background: #3782dc !important;
+  border: 1px solid #2f72c4 !important;
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  padding: 9px 6px;
+  position: sticky;
+  text-align: center;
+  top: 0;
+  vertical-align: middle;
+  z-index: 4;
+}
+
+body.pushsale-app .ps-wh-legacy-table td {
+  border: 1px solid #d2d6de !important;
+  color: #111;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 6px 7px;
+  vertical-align: top;
+}
+
+body.pushsale-app .ps-wh-legacy-table tbody tr:nth-child(even) td {
+  background: #f3f3f3;
+}
+
+body.pushsale-app .ps-wh-legacy-table tbody tr:hover td {
+  background: #eaf4ff;
+}
+
+body.pushsale-app .ps-wh-legacy-table .c-check { width: 52px; }
+body.pushsale-app .ps-wh-legacy-table .c-sale { width: 125px; }
+body.pushsale-app .ps-wh-legacy-table .c-order { width: 170px; }
+body.pushsale-app .ps-wh-legacy-table .c-shipper { width: 165px; }
+body.pushsale-app .ps-wh-legacy-table .c-care { width: 245px; }
+body.pushsale-app .ps-wh-legacy-table .c-status { width: 170px; }
+body.pushsale-app .ps-wh-legacy-table .c-customer { width: 230px; }
+body.pushsale-app .ps-wh-legacy-table .c-address { width: 420px; }
+body.pushsale-app .ps-wh-legacy-table .c-products { width: 330px; }
+body.pushsale-app .ps-wh-legacy-table .c-money { width: 155px; }
+body.pushsale-app .ps-wh-legacy-table .c-deposit { width: 95px; }
+body.pushsale-app .ps-wh-legacy-table .c-cod { width: 115px; }
+body.pushsale-app .ps-wh-legacy-table .c-fee { width: 88px; }
+body.pushsale-app .ps-wh-legacy-table .c-recon { width: 88px; }
+
+body.pushsale-app .ps-wh-legacy-table .chk-all,
+body.pushsale-app .ps-wh-legacy-table .chk-item {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+body.pushsale-app .ps-wh-legacy-table .chk-item label {
+  font-weight: 400;
+  margin: 0;
+}
+
+body.pushsale-app .ps-wh-inline-icon,
+body.pushsale-app .ps-wh-legacy-table .btn-icon.aoh {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #9edbff;
+  display: inline-flex;
+  height: 20px;
+  line-height: 20px;
+  margin: 0 2px;
+  padding: 0 !important;
+  text-align: center;
+  width: 20px;
+}
+
+body.pushsale-app .ps-wh-inline-icon.orange,
+body.pushsale-app .ps-wh-legacy-table .orange {
+  color: darkorange;
+}
+
+body.pushsale-app .ps-wh-inline-icon:disabled {
+  color: #dbe9f5;
+  cursor: default;
+}
+
+body.pushsale-app .ps-wh-order-code,
+body.pushsale-app .ps-wh-legacy-table .item-md {
+  background: transparent;
+  border: 0;
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0;
+}
+
+body.pushsale-app .ps-wh-green { color: green; font-weight: 700; }
+body.pushsale-app .ps-wh-magenta { color: magenta; }
+body.pushsale-app .ps-wh-error { color: red; font-size: 11px; }
+body.pushsale-app .ps-wh-sale-name { display: inline-block; min-width: 80px; }
+body.pushsale-app .small-tip { color: #777; font-size: 11px; }
+body.pushsale-app .sline { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.pushsale-app .no-wrap { white-space: nowrap; }
+
+body.pushsale-app .ps-wh-legacy-table .span-col {
+  display: inline-block;
+  vertical-align: top;
+}
+
+body.pushsale-app .ps-wh-legacy-table .icon-col { width: 22px; }
+body.pushsale-app .ps-wh-legacy-table .care-text {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: calc(100% - 92px);
+}
+body.pushsale-app .ps-wh-legacy-table .save-col { width: 62px; }
+
+body.pushsale-app .ps-wh-legacy-table .mof-container {
+  clear: both;
+  padding-top: 4px;
+}
+
+body.pushsale-app .ps-wh-legacy-table .txt-mof {
+  background: #fff;
+  border: 1px dotted #c9c9c9 !important;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 12px;
+  min-height: 48px;
+  padding: 5px;
+  resize: vertical;
+  width: 100%;
+}
+
+body.pushsale-app .ps-wh-legacy-table .txt-mof:focus {
+  min-height: 82px;
+  outline: 1px solid #7db7ff;
+}
+
+body.pushsale-app .ps-wh-product-table,
+body.pushsale-app .ps-wh-money-stack,
+body.pushsale-app .ps-wh-legacy-table .tb-in-sp {
+  background: transparent;
+  border: 0 !important;
+  border-collapse: collapse;
+  margin: 0;
+  width: 100%;
+}
+
+body.pushsale-app .ps-wh-product-table td,
+body.pushsale-app .ps-wh-money-stack td,
+body.pushsale-app .ps-wh-legacy-table .tb-in-sp td {
+  background: transparent !important;
+  border: 0 !important;
+  line-height: 20px;
+  padding: 2px 4px;
+}
+
+body.pushsale-app .ps-wh-product-table .row-sp + .row-sp td,
+body.pushsale-app .ps-wh-money-stack tr + tr td {
+  border-top: 1px dotted #d4d4d4 !important;
+}
+
+body.pushsale-app .ps-wh-product-table .ten-sp {
+  display: inline-block;
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+body.pushsale-app .ps-wh-upsell-tag {
+  background: #f59e0b;
+  color: #fff;
+  font-size: 9px;
+  font-style: normal;
+  margin-left: 4px;
+  padding: 1px 3px;
+}
+
+body.pushsale-app .ps-wh-empty {
+  height: 56px;
+  text-align: center;
+  vertical-align: middle !important;
+}
+
+body.pushsale-app .ttgh1 { color: #111; font-weight: 700; }
+body.pushsale-app .ttgh20 { color: darkorange; font-weight: 700; }
+body.pushsale-app .ttgh21,
+body.pushsale-app .ttgh23,
+body.pushsale-app .ttgh30 { color: #0086d1; font-weight: 700; }
+body.pushsale-app .ttgh31,
+body.pushsale-app .ttgh32 { color: green; font-weight: 700; }
+body.pushsale-app .ttgh33,
+body.pushsale-app .ttgh40,
+body.pushsale-app .ttgh41,
+body.pushsale-app .ttgh4,
+body.pushsale-app .ttgh5 { color: #d93025; font-weight: 700; }
+body.pushsale-app .ttgh34,
+body.pushsale-app .ttgh35,
+body.pushsale-app .ttgh50 { color: #b45309; font-weight: 700; }
+
+body.pushsale-app .action-container.ps-wh-floating-actions {
+  bottom: 26px;
+  left: 22px;
+  position: fixed;
+  z-index: 1060;
+}
+
+body.pushsale-app .ps-wh-floating-actions .hidden-actions {
+  bottom: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateY(14px) scale(.92);
+  transform-origin: left bottom;
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+body.pushsale-app .ps-wh-floating-actions.open .hidden-actions {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+body.pushsale-app .ps-wh-floating-actions .icon-row {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-height: 48px;
+}
+
+body.pushsale-app .ps-wh-floating-actions .main-action,
+body.pushsale-app .ps-wh-floating-actions .n-button {
+  align-items: center;
+  border: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,.22);
+  color: #fff;
+  display: inline-flex;
+  justify-content: center;
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+
+body.pushsale-app .ps-wh-floating-actions .main-action {
+  background: #0073c7;
+  border-radius: 50%;
+  font-size: 23px;
+  height: 62px;
+  width: 62px;
+}
+
+body.pushsale-app .ps-wh-floating-actions .n-button {
+  border-radius: 50%;
+  font-size: 20px;
+  height: 52px;
+  width: 52px;
+}
+
+body.pushsale-app .ps-wh-floating-actions .main-action:hover,
+body.pushsale-app .ps-wh-floating-actions .n-button:hover {
+  box-shadow: 0 6px 16px rgba(0,0,0,.28);
+  transform: translateY(-1px);
+}
+
+body.pushsale-app .ps-wh-floating-actions .fam-primary { background: #0885f5; }
+body.pushsale-app .ps-wh-floating-actions .fam-success { background: #4caf50; }
+body.pushsale-app .ps-wh-floating-actions .fam-warning { background: #fb9100; }
+body.pushsale-app .ps-wh-floating-actions .n-button:disabled {
+  cursor: default;
+  filter: grayscale(.2);
+  opacity: .38;
+  transform: none;
+}
+
+body.pushsale-app .ps-wh-floating-actions .n-button::after {
+  background: rgba(0,0,0,.78);
+  border-radius: 3px;
+  bottom: 50%;
+  color: #fff;
+  content: attr(fam-tooltip);
+  font-size: 11px;
+  left: 58px;
+  opacity: 0;
+  padding: 4px 6px;
+  pointer-events: none;
+  position: absolute;
+  transform: translateY(50%);
+  transition: opacity .12s ease;
+  white-space: nowrap;
+}
+
+body.pushsale-app .ps-wh-floating-actions .n-button:hover::after { opacity: 1; }
+
+body.pushsale-app .ps-wh-selected-hint {
+  background: rgba(0, 115, 199, .92);
+  border-radius: 4px;
+  bottom: 28px;
+  color: #fff;
+  font-size: 12px;
+  left: 100px;
+  padding: 8px 10px;
+  position: fixed;
+  z-index: 1059;
+}
+
+body.pushsale-app .ps-wh-pagination {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 12px 15px 200px;
+}
+
+body.pushsale-app .ps-wh-pagination label {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  margin: 0;
+}
+
+@media (max-width: 1199px) {
+  body.pushsale-app .ps-wh-header-grid { grid-template-columns: 1fr; }
+  body.pushsale-app .ps-wh-header-check,
+  body.pushsale-app .ps-wh-header-search { justify-content: flex-start; }
+  body.pushsale-app .ps-wh-filter-grid.legacy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

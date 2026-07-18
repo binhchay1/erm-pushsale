@@ -9,6 +9,7 @@ import {
     PushsaleSelect,
     usePushsaleFilters,
 } from '@/components/reports/PushsaleReportChrome';
+import { PushsalePageChrome } from '@/components/layout/PushsalePageChrome';
 import { useLabels } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
 import { formatCurrency, formatNumber } from '@/lib/format';
@@ -53,73 +54,78 @@ function CommonToolbar({ title, routeUrl, filters, filterOptions, filterFields =
     const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
     const fields = new Set(filterFields);
 
+    const controls = (
+        <>
+            {fields.has('date_type') && (
+                <PushsaleSelect
+                    placeholder={psText(t, 'date_sale_received', 'Ngày sale nhận data')}
+                    value={draft.date_type ?? ''}
+                    options={filterOptions.dateTypes ?? []}
+                    onChange={(value) => set('date_type', value)}
+                />
+            )}
+            {(fields.has('date_from') || fields.has('date_to')) && (
+                <PushsaleDateRange filters={draft} onChange={set} />
+            )}
+            {fields.has('sale_id') && (
+                <PushsaleSelect
+                    placeholder={psText(t, 'choose_sale', '--Chọn sale--')}
+                    value={draft.sale_id ?? ''}
+                    options={filterOptions.salesUsers ?? []}
+                    onChange={(value) => set('sale_id', value)}
+                />
+            )}
+            {fields.has('marketer_id') && (
+                <PushsaleSelect
+                    placeholder={psText(t, 'choose_marketing', '--Marketing--')}
+                    value={draft.marketer_id ?? ''}
+                    options={filterOptions.marketingUsers ?? []}
+                    onChange={(value) => set('marketer_id', value)}
+                />
+            )}
+            {fields.has('team_id') && (
+                <PushsaleSelect
+                    placeholder={psText(t, 'choose_sales_team', '--Nhóm sale--')}
+                    value={draft.team_id ?? ''}
+                    options={filterOptions.salesTeams ?? filterOptions.teams ?? []}
+                    onChange={(value) => set('team_id', value)}
+                />
+            )}
+            {fields.has('marketing_team_id') && (
+                <PushsaleSelect
+                    placeholder={psText(t, 'choose_marketing_team', '--Nhóm marketing--')}
+                    value={draft.marketing_team_id ?? ''}
+                    options={filterOptions.marketingTeams ?? []}
+                    onChange={(value) => set('marketing_team_id', value)}
+                />
+            )}
+            {fields.has('warehouse_id') && (
+                <PushsaleSelect
+                    placeholder={psText(t, 'choose_warehouse', '--Chọn kho--')}
+                    value={draft.warehouse_id ?? ''}
+                    options={filterOptions.warehouses ?? []}
+                    onChange={(value) => set('warehouse_id', value)}
+                />
+            )}
+            {fields.has('product_id') && (
+                <PushsaleSelect
+                    placeholder={psText(t, 'choose_product', '--Chọn sản phẩm--')}
+                    value={draft.product_id ?? ''}
+                    options={filterOptions.products ?? []}
+                    onChange={(value) => set('product_id', value)}
+                />
+            )}
+            <PushsaleSearchButton onClick={() => apply()} />
+            <PushsaleExportButton routeUrl={routeUrl} filters={draft} />
+        </>
+    );
+
     return (
-        <div className={`ps-report-topbar ps-extra-toolbar ${compact ? 'is-compact' : ''}`}>
-            <h1>{title}</h1>
-            <div className="ps-extra-toolbar-controls">
-                {fields.has('date_type') && (
-                    <PushsaleSelect
-                        placeholder={psText(t, 'date_sale_received', 'Ngày sale nhận data')}
-                        value={draft.date_type ?? ''}
-                        options={filterOptions.dateTypes ?? []}
-                        onChange={(value) => set('date_type', value)}
-                    />
-                )}
-                {(fields.has('date_from') || fields.has('date_to')) && (
-                    <PushsaleDateRange filters={draft} onChange={set} />
-                )}
-                {fields.has('sale_id') && (
-                    <PushsaleSelect
-                        placeholder={psText(t, 'choose_sale', '--Chọn sale--')}
-                        value={draft.sale_id ?? ''}
-                        options={filterOptions.salesUsers ?? []}
-                        onChange={(value) => set('sale_id', value)}
-                    />
-                )}
-                {fields.has('marketer_id') && (
-                    <PushsaleSelect
-                        placeholder={psText(t, 'choose_marketing', '--Marketing--')}
-                        value={draft.marketer_id ?? ''}
-                        options={filterOptions.marketingUsers ?? []}
-                        onChange={(value) => set('marketer_id', value)}
-                    />
-                )}
-                {fields.has('team_id') && (
-                    <PushsaleSelect
-                        placeholder={psText(t, 'choose_sales_team', '--Nhóm sale--')}
-                        value={draft.team_id ?? ''}
-                        options={filterOptions.salesTeams ?? filterOptions.teams ?? []}
-                        onChange={(value) => set('team_id', value)}
-                    />
-                )}
-                {fields.has('marketing_team_id') && (
-                    <PushsaleSelect
-                        placeholder={psText(t, 'choose_marketing_team', '--Nhóm marketing--')}
-                        value={draft.marketing_team_id ?? ''}
-                        options={filterOptions.marketingTeams ?? []}
-                        onChange={(value) => set('marketing_team_id', value)}
-                    />
-                )}
-                {fields.has('warehouse_id') && (
-                    <PushsaleSelect
-                        placeholder={psText(t, 'choose_warehouse', '--Chọn kho--')}
-                        value={draft.warehouse_id ?? ''}
-                        options={filterOptions.warehouses ?? []}
-                        onChange={(value) => set('warehouse_id', value)}
-                    />
-                )}
-                {fields.has('product_id') && (
-                    <PushsaleSelect
-                        placeholder={psText(t, 'choose_product', '--Chọn sản phẩm--')}
-                        value={draft.product_id ?? ''}
-                        options={filterOptions.products ?? []}
-                        onChange={(value) => set('product_id', value)}
-                    />
-                )}
-                <PushsaleSearchButton onClick={() => apply()} />
-                <PushsaleExportButton routeUrl={routeUrl} filters={draft} />
-            </div>
-        </div>
+        <PushsalePageChrome
+            title={title}
+            className={`ps-report-topbar ps-extra-toolbar ${compact ? 'is-compact' : ''}`}
+            filters={controls}
+        />
     );
 }
 
@@ -571,6 +577,8 @@ function SaleClosingSummaryReport({ rows, totals, filters, filterOptions, filter
 }
 
 function RevenueGroupSelector({ groups, selectedKeys, onChange, defaultKeys = [] }) {
+    const t = useT();
+    const [open, setOpen] = useState(false);
     const selected = new Set(selectedKeys);
     const setAll = () => onChange(groups.map((group) => group.key));
     const reset = () => onChange(defaultKeys.length > 0 ? defaultKeys : groups.slice(0, 4).map((group) => group.key));
@@ -584,30 +592,39 @@ function RevenueGroupSelector({ groups, selectedKeys, onChange, defaultKeys = []
     return (
         <div className="ps-revenue-group-bar">
             <div className="ps-revenue-group-summary">
-                <strong>Nhóm doanh số</strong>
-                <span>Đang hiển thị {selectedKeys.length}/{groups.length} nhóm; dữ liệu xuất Excel vẫn gồm đầy đủ.</span>
+                <strong>{reportText(t, 'warehouse_sales', 'group_title', 'Nhóm doanh số')}</strong>
+                <span>
+                    {reportText(t, 'warehouse_sales', 'group_summary', 'Đang hiển thị {visible}/{total} nhóm; dữ liệu xuất Excel vẫn gồm đầy đủ.')
+                        .replace('{visible}', selectedKeys.length)
+                        .replace('{total}', groups.length)}
+                </span>
             </div>
-            <details className="ps-revenue-group-picker">
-                <summary>Chọn doanh số hiển thị</summary>
-                <div className="ps-revenue-group-popover">
-                    <div className="ps-revenue-group-actions">
-                        <button type="button" onClick={setAll}>Chọn tất cả</button>
-                        <button type="button" onClick={reset}>Mặc định 1–4</button>
+            <div className={`ps-revenue-group-picker ${open ? 'is-open' : ''}`}>
+                <button type="button" className="ps-revenue-group-trigger" onClick={() => setOpen((value) => !value)}>
+                    <span>{reportText(t, 'warehouse_sales', 'choose_visible', 'Chọn doanh số hiển thị')}</span>
+                    <i className={`fa fa-angle-${open ? 'up' : 'down'}`} aria-hidden="true" />
+                </button>
+                {open && (
+                    <div className="ps-revenue-group-popover">
+                        <div className="ps-revenue-group-actions">
+                            <button type="button" onClick={setAll}>{reportText(t, 'warehouse_sales', 'select_all', 'Chọn tất cả')}</button>
+                            <button type="button" onClick={reset}>{reportText(t, 'warehouse_sales', 'default_1_4', 'Mặc định 1–4')}</button>
+                        </div>
+                        <div className="ps-revenue-group-options">
+                            {groups.map((group) => (
+                                <label key={group.key} title={group.description}>
+                                    <input
+                                        type="checkbox"
+                                        checked={selected.has(group.key)}
+                                        onChange={() => toggle(group.key)}
+                                    />
+                                    <span>{group.number}. {group.label}</span>
+                                </label>
+                            ))}
+                        </div>
                     </div>
-                    <div className="ps-revenue-group-options">
-                        {groups.map((group) => (
-                            <label key={group.key} title={group.description}>
-                                <input
-                                    type="checkbox"
-                                    checked={selected.has(group.key)}
-                                    onChange={() => toggle(group.key)}
-                                />
-                                <span>{group.number}. {group.label}</span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-            </details>
+                )}
+            </div>
         </div>
     );
 }

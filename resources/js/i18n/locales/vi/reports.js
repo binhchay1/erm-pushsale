@@ -416,6 +416,13 @@ export default {
             title: 'Báo cáo doanh số theo kho',
             description: 'Đủ 12 nhóm doanh số Pushsale theo kho, kèm sản lượng, giá trị trung bình và phần upsale.',
         },
+        warehouse_sales: {
+            group_title: 'Nhóm doanh số',
+            group_summary: 'Đang hiển thị {visible}/{total} nhóm; dữ liệu xuất Excel vẫn gồm đầy đủ.',
+            choose_visible: 'Chọn doanh số hiển thị',
+            select_all: 'Chọn tất cả',
+            default_1_4: 'Mặc định 1–4',
+        },
         'warehouse-sales-v2': {
             title: 'Báo cáo doanh số V2',
             description: 'Phễu contact và đủ 12 nhóm doanh số theo kho; mỗi nhóm có số đơn, sản lượng, giá trị trung bình và doanh số.',

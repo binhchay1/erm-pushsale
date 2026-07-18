@@ -1,5 +1,5 @@
 body.pushsale-app-body .psfd-page { min-height: calc(100vh - var(--topbar-height, 50px)); background: #ecf0f5; color: #333; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
-body.pushsale-app-body .psfd-toolbar { display: flex; min-height: 67px; align-items: center; justify-content: space-between; gap: 16px; border-top: 3px solid #087df0; border-bottom: 1px solid #d2d6de; padding: 10px 14px; background: #fff; }
+body.pushsale-app-body .psfd-toolbar { display: flex; min-height: 67px; align-items: center; justify-content: space-between; gap: 16px; border-top: 0; border-bottom: 1px solid #d2d6de; padding: 10px 14px; background: #fff; }
 body.pushsale-app-body .psfd-toolbar h1 { margin: 0; color: #202a34; font-size: 17px; font-weight: 700; }
 body.pushsale-app-body .psfd-toolbar p { margin: 4px 0 0; color: #6b7785; font-size: 11px; }
 body.pushsale-app-body .psfd-filter-controls { display: flex; align-items: flex-end; gap: 8px; }

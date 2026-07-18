@@ -416,6 +416,13 @@ export default {
             title: 'Warehouse sales summary',
             description: 'All 12 Pushsale sales groups by warehouse, with product volume, averages, and upsell.',
         },
+        warehouse_sales: {
+            group_title: 'Sales groups',
+            group_summary: 'Showing {visible}/{total} groups; Excel export still includes all data.',
+            choose_visible: 'Choose visible sales groups',
+            select_all: 'Select all',
+            default_1_4: 'Default 1–4',
+        },
         'warehouse-sales-v2': {
             title: 'Sales report V2',
             description: 'Contact funnel plus all 12 warehouse sales groups with order, product, average, and sales metrics.',

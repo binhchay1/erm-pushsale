@@ -9,6 +9,7 @@ use App\Models\Shipment;
 use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Shipping\ShipmentActionResolver;
 use App\Support\OrderRevenue;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 /** Màn Thủ kho tác nghiệp — nguồn dữ liệu thống nhất cho xuất kho, giao vận, hoàn hàng và COD. */
@@ -16,16 +17,24 @@ class WarehouseOperationService
 {
     /** @var array<string, list<string>> */
     private const TAB_GROUPS = [
-        'waiting' => ['waiting_waybill'],
+        'waiting_waybill' => ['waiting_waybill'],
+        'deliver_now' => ['deliver_now'],
+        'postpone' => ['postpone', 'delay_delivery'],
+        'cancel_waybill' => ['cancel_waybill'],
+        'cancel_closing' => ['cancel_closing'],
         'posted' => ['posted'],
-        'pickup' => ['picking_up', 'cannot_pickup'],
-        'delivering' => ['delivering', 'deliver_now', 'redelivery'],
+        'picking_up' => ['picking_up'],
+        'picked_up' => ['picked_up'],
+        'cannot_pickup' => ['cannot_pickup'],
+        'delivering' => ['delivering'],
+        'cannot_deliver' => ['cannot_deliver'],
+        'redelivery' => ['redelivery'],
         'delivered' => ['delivered', 'delivery_complete'],
-        'partial' => ['partial_delivery', 'partial', 'delivered_partial', 'partially_delivered'],
+        'partial_delivery' => ['partial_delivery', 'partial', 'delivered_partial', 'partially_delivered'],
         'paid' => ['paid'],
-        'returning' => ['returning', 'refund', 'cannot_deliver'],
+        'returning' => ['returning', 'refund'],
         'returned' => ['returned'],
-        'cancelled' => ['cancel_waybill', 'cancel_closing'],
+        'compensation' => ['compensation', 'carrier_compensation'],
     ];
 
     public function __construct(
@@ -89,18 +98,48 @@ class WarehouseOperationService
     /** @return list<array{value:string,label:string,count:int}> */
     private function statusTabs(Builder $baseQuery, bool $hideZero = false): array
     {
-        $labels = [
-            'waiting' => 'Chờ vận đơn', 'posted' => 'Đã đăng đơn', 'pickup' => 'Lấy hàng',
-            'delivering' => 'Đang giao', 'delivered' => 'Giao thành công', 'partial' => 'Giao một phần',
-            'paid' => 'Đã đối soát/COD', 'returning' => 'Đang hoàn', 'returned' => 'Đã hoàn',
-            'cancelled' => 'Đã hủy',
+        $meta = [
+            'waiting_waybill' => ['label' => 'Chờ vận đơn', 'code' => '1', 'level' => 4],
+            'deliver_now' => ['label' => 'Giao ngay', 'code' => '2', 'level' => 1],
+            'postpone' => ['label' => 'Hoãn giao hàng', 'code' => '3', 'level' => 1],
+            'cancel_waybill' => ['label' => 'Hủy vận đơn', 'code' => '4', 'level' => 1],
+            'cancel_closing' => ['label' => 'Hủy đăng đơn', 'code' => '5', 'level' => 1],
+            'posted' => ['label' => 'Đã đăng', 'code' => '20', 'level' => 4],
+            'picking_up' => ['label' => 'Đang lấy hàng', 'code' => '23', 'level' => 1],
+            'picked_up' => ['label' => 'Đã lấy hàng', 'code' => '21', 'level' => 1],
+            'cannot_pickup' => ['label' => 'Không lấy được hàng', 'code' => '22', 'level' => 1],
+            'delivering' => ['label' => 'Đang giao hàng', 'code' => '30', 'level' => 1],
+            'cannot_deliver' => ['label' => 'Không giao được', 'code' => '33', 'level' => 1],
+            'redelivery' => ['label' => 'Yêu cầu giao lại', 'code' => '34', 'level' => 1],
+            'delivered' => ['label' => 'Đã giao hàng', 'code' => '31', 'level' => 1],
+            'partial_delivery' => ['label' => 'Giao hàng một phần', 'code' => '35', 'level' => 1],
+            'paid' => ['label' => 'Đã thanh toán', 'code' => '32', 'level' => 1],
+            'returning' => ['label' => 'Đang hoàn', 'code' => '40', 'level' => 1],
+            'returned' => ['label' => 'Đã hoàn', 'code' => '41', 'level' => 1],
+            'compensation' => ['label' => 'Bồi hoàn', 'code' => '50', 'level' => 1],
         ];
-        $tabs = [['value' => 'all', 'label' => 'Tất cả', 'count' => (clone $baseQuery)->count()]];
+        $tabs = [];
         foreach (self::TAB_GROUPS as $value => $statuses) {
             $count = (clone $baseQuery)->whereIn('delivery_status', $statuses)->count();
-            if (! $hideZero || $count > 0) $tabs[] = ['value' => $value, 'label' => $labels[$value] ?? $value, 'count' => $count];
+            if (! $hideZero || $count > 0) {
+                $tabs[] = ['value' => $value, 'label' => $meta[$value]['label'] ?? $value, 'count' => $count, 'code' => $meta[$value]['code'] ?? $value, 'level' => $meta[$value]['level'] ?? 1];
+            }
         }
+        $tabs[] = ['value' => 'all', 'label' => 'Tất cả', 'count' => (clone $baseQuery)->count(), 'code' => '0', 'level' => ''];
         return $tabs;
+    }
+
+    private function warehouseCareLabel(?string $status): ?string
+    {
+        return match ($status) {
+            'waiting' => 'Chờ care đơn',
+            'calling' => 'Đang liên hệ',
+            'confirmed' => 'Đã xác nhận',
+            'reschedule' => 'Hẹn giao lại',
+            'complaint' => 'Khiếu nại',
+            'completed' => 'Hoàn tất',
+            default => $status,
+        };
     }
 
     /** @return array<string, mixed> */
@@ -128,6 +167,10 @@ class WarehouseOperationService
         ])->values();
         $carrierCost = $order->shippingCost();
         $netCash = (int) $order->settled_cod_amount + (int) $order->deposit - $carrierCost;
+        $warehouseCareUpdatedAt = $order->getAttribute('warehouse_care_updated_at');
+        $warehouseCareUpdatedAt = $warehouseCareUpdatedAt instanceof CarbonInterface
+            ? $warehouseCareUpdatedAt->toIso8601String()
+            : $warehouseCareUpdatedAt;
 
         return [
             'id' => (string) $order->id,
@@ -138,10 +181,14 @@ class WarehouseOperationService
             'lastDeliveryEventAt' => $order->last_delivery_event_at?->toIso8601String(),
             'printedAt' => $order->printed_at?->toIso8601String(),
             'saleName' => $order->saleUser?->name,
+            'saleUsername' => $order->saleUser?->email ? strstr($order->saleUser->email, '@', true) : null,
             'marketerName' => $order->marketerUser?->name,
             'warehouseCareName' => $order->warehouseCareUser?->name,
             'warehouseCareStatus' => $order->warehouse_care_status,
+            'warehouseCareStatusLabel' => $this->warehouseCareLabel($order->warehouse_care_status),
             'warehouseCareNote' => $order->warehouse_care_note,
+            'warehouseCareUpdatedAt' => $warehouseCareUpdatedAt,
+            'lastInternalMessage' => null,
             'customerName' => $order->customer_name,
             'customerPhone' => $order->customer_phone,
             'receiverName' => $order->receiver_name,

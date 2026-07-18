@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronsDown, ChevronsUp, HelpCircle, Search, Settings } from 'lucide-react';
+import { ChevronDown, ChevronsDown, ChevronsUp, Search, Settings } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useLocalizedFilterOptions } from '@/hooks/use-localized-filter-options';
@@ -54,7 +54,7 @@ export function CeoReportFilterBar({
     );
 
     return (
-        <div className="m-header-wrap">
+        <div className="m-header-wrap ps-ceo-page-chrome">
             <div className="m-header">
                 <div className="form-group">
                     <span className="module-title">{t('reports.ceo_report.module_title')}</span>
@@ -134,9 +134,6 @@ export function CeoReportFilterBar({
                         <button type="button" className="btn-ps-primary" onClick={applySearch}>
                             <Search className="size-3.5" />
                             {t('common.search')}
-                        </button>
-                        <button type="button" className="btn-help" title={t('reports.ceo_report.legend')} onClick={onShowNote}>
-                            <HelpCircle className="size-7" />
                         </button>
                     </div>
                 </div>

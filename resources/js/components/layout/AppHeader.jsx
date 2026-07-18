@@ -53,7 +53,7 @@ export function AppHeader({ onToggleSidebar }) {
             <div className="pushsale-header-spacer" />
 
             <div className="pushsale-header-tools">
-                <PageInfoButton />
+                <PageInfoButton className="is-header" />
                 <LanguageToggle pushsaleStyle />
                 <NotificationBell pushsaleStyle />
                 <span className="pushsale-header-icon" aria-hidden="true" title="Thông báo hệ thống">

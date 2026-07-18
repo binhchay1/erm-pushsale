@@ -1,8 +1,6 @@
 import { usePage } from '@inertiajs/react';
-import { Info } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -11,35 +9,67 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useI18n } from '@/providers/I18nProvider';
 import { findPageGuide } from '@/lib/page-guides';
+import { useI18n } from '@/providers/I18nProvider';
 
-/**
- * Header "i" button — opens a popup explaining the current page's business logic.
- * Hidden when no guide content exists for the page.
- */
-export function PageInfoButton() {
+function fallbackTitle(pathname, locale) {
+    const last = pathname.split('/').filter(Boolean).pop() ?? 'dashboard';
+    const label = last
+        .replace(/[-_]+/g, ' ')
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+
+    return locale === 'en' ? `Page guide: ${label}` : `Hướng dẫn trang: ${label}`;
+}
+
+function fallbackGuide(pathname, locale, t) {
+    return {
+        title: fallbackTitle(pathname, locale),
+        intro: locale === 'en'
+            ? 'This page uses the shared Pushsale layout. Use the filters, table and action buttons according to your permission scope.'
+            : 'Trang này dùng cùng bộ khung Pushsale. Sử dụng bộ lọc, bảng dữ liệu và các nút thao tác theo quyền được cấp.',
+        sections: [
+            {
+                heading: locale === 'en' ? 'How to use' : 'Cách sử dụng',
+                items: [
+                    locale === 'en'
+                        ? 'Filter first, then press Search to reload data in the current permission scope.'
+                        : 'Chọn bộ lọc trước, sau đó bấm Tìm kiếm để tải dữ liệu trong phạm vi quyền hiện tại.',
+                    locale === 'en'
+                        ? 'Rows can be selected when a bulk action bar is available at the bottom of the table.'
+                        : 'Các dòng có thể tích chọn khi trang có thanh thao tác hàng loạt ở cuối bảng.',
+                    locale === 'en'
+                        ? 'Export buttons keep the same active filters unless the page explicitly says otherwise.'
+                        : 'Nút xuất file giữ nguyên bộ lọc đang dùng, trừ khi trang có ghi chú riêng.',
+                ],
+            },
+        ],
+    };
+}
+
+export function PageInfoButton({ className = '' }) {
     const { url } = usePage();
     const { locale, t } = useI18n();
     const [open, setOpen] = useState(false);
 
     const pathname = url.split('?')[0];
-    const guide = findPageGuide(pathname, locale);
-
-    if (!guide) return null;
+    const guide = useMemo(
+        () => findPageGuide(pathname, locale) ?? fallbackGuide(pathname, locale, t),
+        [pathname, locale, t],
+    );
 
     return (
         <>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        size="icon-sm"
+                    <button
+                        type="button"
+                        className={`pushsale-header-info-trigger ${className}`.trim()}
                         aria-label={t('page_info.tooltip')}
+                        title={t('page_info.tooltip')}
                         onClick={() => setOpen(true)}
                     >
-                        <Info className="size-4" />
-                    </Button>
+                        <i className="fa fa-info-circle" aria-hidden="true" />
+                    </button>
                 </TooltipTrigger>
                 <TooltipContent>{t('page_info.what_is_this')}</TooltipContent>
             </Tooltip>
@@ -49,7 +79,7 @@ export function PageInfoButton() {
                     <DialogHeader className="border-b border-border/60 px-6 py-4">
                         <div className="flex items-center gap-2">
                             <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                <Info className="size-4" />
+                                <i className="fa fa-info-circle" aria-hidden="true" />
                             </span>
                             <DialogTitle>{guide.title}</DialogTitle>
                         </div>

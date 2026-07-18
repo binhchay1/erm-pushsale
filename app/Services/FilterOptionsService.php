@@ -34,6 +34,9 @@ class FilterOptionsService
         $salesTeams = $allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Sale)->values();
         $marketingTeams = $allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Marketing)->values();
 
+        $saleLeaderIds = $salesTeams->pluck('leader_user_id')->filter()->unique()->values();
+        $marketingLeaderIds = $marketingTeams->pluck('leader_user_id')->filter()->unique()->values();
+
         $options = [
             'dateTypes' => collect(DateType::cases())->map(fn ($e) => [
                 'value' => $e->value,
@@ -61,6 +64,24 @@ class FilterOptionsService
             'warehouses' => $this->warehouses->options(),
             'salesUsers' => $this->users->byRole(UserRole::Sales),
             'marketingUsers' => $this->users->byRole(UserRole::Marketing),
+            'teamLeaders' => User::query()
+                ->where(function ($query) use ($saleLeaderIds) {
+                    $query->whereIn('id', $saleLeaderIds)
+                        ->orWhere(function ($inner) {
+                            $inner->where('is_team_leader', true)->where('role', UserRole::Sales);
+                        });
+                })
+                ->orderBy('name')
+                ->get(['id', 'name']),
+            'marketingTeamLeaders' => User::query()
+                ->where(function ($query) use ($marketingLeaderIds) {
+                    $query->whereIn('id', $marketingLeaderIds)
+                        ->orWhere(function ($inner) {
+                            $inner->where('is_team_leader', true)->where('role', UserRole::Marketing);
+                        });
+                })
+                ->orderBy('name')
+                ->get(['id', 'name']),
             'sourceTypes' => [
                 ['value' => 'standard', 'label' => __('filters.source_standard')],
             ],
@@ -233,7 +254,7 @@ class FilterOptionsService
     /** @return list<string> */
     public function warehouseOperationFilterFields(): array
     {
-        return ['date_type', 'date_from', 'date_to', 'product_id', 'search', 'warehouse_id', 'shipping_provider', 'warehouse_care_status', 'printed_status', 'deposit_status', 'tracking_alert', 'sale_id', 'marketer_id', 'team_id', 'marketing_team_id', 'reconciliation_status', 'min_product_quantity', 'max_product_quantity', 'hide_zero_status'];
+        return ['date_type', 'date_from', 'date_to', 'product_id', 'search', 'warehouse_id', 'shipping_provider', 'warehouse_care_status', 'printed_status', 'deposit_status', 'tracking_alert', 'care_status', 'sale_id', 'marketer_id', 'team_leader_id', 'team_id', 'marketing_team_leader_id', 'marketing_team_id', 'reconciliation_status', 'min_product_quantity', 'max_product_quantity', 'invoice_status', 'hide_zero_status'];
     }
 
     /** @return list<string> */
