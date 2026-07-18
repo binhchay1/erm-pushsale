@@ -5,7 +5,9 @@ namespace App\Services\Operations;
 use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Data\ReportFilterData;
 use App\Enums\OperationStage;
+use App\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 
 class SaleOperationService
 {
@@ -29,19 +31,30 @@ class SaleOperationService
     public function buildPaginated(ReportFilterData $filter): array
     {
         $baseFilter = $filter->withoutOperationStage();
-        $baseQuery = $this->orders->queryFiltered($baseFilter);
 
-        $countsQuery = (clone $baseQuery)->withoutEagerLoads()->reorder();
-        // queryFiltered() có withCount() nên MySQL ONLY_FULL_GROUP_BY sẽ lỗi nếu
-        // câu đếm tab còn giữ orders.* / subselect pending_supplement_packets_count.
-        // Reset lại phần SELECT để câu GROUP BY chỉ còn stage_key + aggregate.
-        $countsQuery->getQuery()->columns = null;
+        // Count tab tác nghiệp bằng query sạch, không dùng repository queryFiltered()
+        // vì query đó eager load + withCount pendingSupplementPackets cho bảng chính.
+        // Nếu xóa columns của query có withCount nhưng không xóa select bindings, PDO sẽ
+        // bind nhầm false/true của subquery vào whereBetween (thành BETWEEN 0 AND 1)
+        // và gây SQLSTATE[HY093] trên /sales/workspace.
+        try {
+            $countQuery = Order::query()
+                ->applyReportFilter($baseFilter)
+                ->cloneWithout(['columns', 'orders', 'limit', 'offset'])
+                ->cloneWithoutBindings(['select', 'order']);
 
-        $counts = $countsQuery
-            ->selectRaw("COALESCE(operation_stage, 'no_operation') as stage_key, COUNT(*) as aggregate")
-            ->groupByRaw("COALESCE(operation_stage, 'no_operation')")
-            ->pluck('aggregate', 'stage_key')
-            ->map(fn ($count) => (int) $count);
+            $counts = $countQuery
+                ->selectRaw("COALESCE(operation_stage, 'no_operation') as stage_key, COUNT(*) as aggregate")
+                ->groupByRaw("COALESCE(operation_stage, 'no_operation')")
+                ->pluck('aggregate', 'stage_key')
+                ->map(fn ($count) => (int) $count);
+        } catch (\Throwable $exception) {
+            Log::warning('sale_workspace.stage_count_failed', [
+                'message' => $exception->getMessage(),
+                'filter' => $baseFilter->toInertia(),
+            ]);
+            $counts = collect();
+        }
 
         $total = (int) $counts->sum();
         $selectedStage = $filter->operationStage && $filter->operationStage !== 'all'

@@ -85,10 +85,15 @@ readonly class ReportDateRange
 
     private static function parseCustomDate(mixed $value, Carbon $fallback): Carbon
     {
-        if (! $value) {
+        if (! $value || is_bool($value)) {
             return $fallback;
         }
 
-        return Carbon::parse($value);
+        $normalized = trim((string) $value);
+        if ($normalized === '' || in_array($normalized, ['0', '1', 'true', 'false'], true)) {
+            return $fallback;
+        }
+
+        return Carbon::parse($normalized);
     }
 }

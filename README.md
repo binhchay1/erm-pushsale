@@ -145,8 +145,8 @@ V18 tách report thành hot window và historical window. Hôm nay vẫn live; n
 Để tắt tạm đăng nhập trên môi trường test, thêm vào `.env`:
 
 ```dotenv
-ERM_AUTO_ADMIN_LOGIN=true
-ERM_AUTO_ADMIN_LOGIN_HOSTS=erm-pushsale.duckdns.org
+ERM_AUTO_ADMIN_LOGIN=false
+ERM_AUTO_ADMIN_LOGIN_HOSTS=
 ```
 
 Sau đó chạy `php artisan optimize:clear && php artisan config:cache`. Xem thêm `docs/AUTO_ADMIN_LOGIN_V27.md`.

@@ -74,6 +74,7 @@ export default function UsersIndex({ users, filters = {}, roles = [], accountCou
     });
     const rows = users?.data ?? [];
     const links = users?.links ?? [];
+    const visibleAccountCount = rows.length;
 
     const submit = (event) => {
         event?.preventDefault();
@@ -118,7 +119,7 @@ export default function UsersIndex({ users, filters = {}, roles = [], accountCou
                     <div className="m-header-wrap">
                         <div className="m-header ps-header-grid">
                             <div className="ps-title">
-                                Danh sách nhân viên | <span className="ps-orange">Số TK: {accountCount}</span>
+                                Danh sách nhân viên | <span className="ps-orange">Số TK: {visibleAccountCount}</span>
                             </div>
                             <div className="ps-header-search">
                                 <input
@@ -179,7 +180,6 @@ export default function UsersIndex({ users, filters = {}, roles = [], accountCou
                         <thead>
                             <tr>
                                 <th>STT</th>
-                                <th>#</th>
                                 <th>Họ tên</th>
                                 <th>Chức vụ</th>
                                 <th>Mã nhân viên</th>
@@ -198,7 +198,6 @@ export default function UsersIndex({ users, filters = {}, roles = [], accountCou
                             {rows.length ? rows.map((row, index) => (
                                 <tr key={row.id} className={row.is_locked ? 'disableRow' : ''}>
                                     <td className="text-center">{(users.from ?? 1) + index}</td>
-                                    <td className="text-center">{row.id}</td>
                                     <td className="text-center ps-user-name">{row.name} <span>({row.email?.split('@')[0]})</span></td>
                                     <td className="text-center">{row.role_label}</td>
                                     <td className="text-center">{row.employee_code}</td>
@@ -224,7 +223,7 @@ export default function UsersIndex({ users, filters = {}, roles = [], accountCou
                                     </td>
                                 </tr>
                             )) : (
-                                <tr><td colSpan="14" className="ps-empty">Không có tài khoản phù hợp.</td></tr>
+                                <tr><td colSpan="13" className="ps-empty">Không có tài khoản phù hợp.</td></tr>
                             )}
                         </tbody>
                     </table>

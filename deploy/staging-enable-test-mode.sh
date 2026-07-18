@@ -24,8 +24,8 @@ set_env() {
 }
 
 set_env APP_URL "$BASE_URL"
-set_env ERM_AUTO_ADMIN_LOGIN true
-set_env ERM_AUTO_ADMIN_LOGIN_HOSTS "$DOMAIN"
+set_env ERM_AUTO_ADMIN_LOGIN false
+# Auto-admin login was removed from the normal staging flow. Use the real login screen.
 set_env ERM_STAGING_TEST_MODE true
 set_env ERM_STAGING_TEST_HOSTS "$DOMAIN"
 set_env ERM_STAGING_TEST_BASE_URL "$BASE_URL"

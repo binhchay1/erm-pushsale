@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react';
+import { useT } from '@/providers/I18nProvider';
 import { useEffect, useMemo, useState } from 'react';
 
 function pad(value) {
@@ -76,6 +77,7 @@ export function PushsaleSelect({ value = '', onChange, options = [], placeholder
 }
 
 export function PushsaleDateRange({ filters, onChange, className = '' }) {
+    const t = useT();
     const from = filters?.date_from ?? '';
     const to = filters?.date_to ?? '';
     const label = useMemo(() => displayDateRange(filters), [from, to]);
@@ -83,14 +85,14 @@ export function PushsaleDateRange({ filters, onChange, className = '' }) {
     return (
         <div className={`ps-date-range ${className}`.trim()} title={label}>
             <input
-                aria-label="Từ ngày"
+                aria-label={t('reports.pushsale.from_date')}
                 type="date"
                 value={from}
                 onChange={(event) => onChange?.('date_from', event.target.value)}
             />
             <span>-</span>
             <input
-                aria-label="Đến ngày"
+                aria-label={t('reports.pushsale.to_date')}
                 type="date"
                 value={to}
                 onChange={(event) => onChange?.('date_to', event.target.value)}
@@ -100,11 +102,14 @@ export function PushsaleDateRange({ filters, onChange, className = '' }) {
     );
 }
 
-export function PushsaleSearchButton({ onClick, label = 'Tìm kiếm' }) {
+export function PushsaleSearchButton({ onClick, label }) {
+    const t = useT();
+    const text = label ?? t('reports.pushsale.search');
+
     return (
         <button type="button" className="ps-btn ps-btn-primary" onClick={onClick}>
             <i className="fa fa-search" aria-hidden="true" />
-            <span>{label}</span>
+            <span>{text}</span>
         </button>
     );
 }
@@ -120,16 +125,20 @@ function exportUrl(routeUrl, filters) {
     return `${routeUrl}?${params.toString()}`;
 }
 
-export function PushsaleExportButton({ routeUrl, filters, label = 'Xuất Excel' }) {
+export function PushsaleExportButton({ routeUrl, filters, label }) {
+    const t = useT();
+    const text = label ?? t('reports.pushsale.export_excel');
+
     return (
         <a className="ps-btn ps-btn-primary" href={exportUrl(routeUrl, filters)}>
             <i className="fa fa-file-excel-o" aria-hidden="true" />
-            <span>{label}</span>
+            <span>{text}</span>
         </a>
     );
 }
 
 export function PushsalePager({ current = 1, totalPages = 1, onPage, max = 7 }) {
+    const t = useT();
     const safeTotal = Math.max(1, Number(totalPages) || 1);
     const safeCurrent = Math.min(safeTotal, Math.max(1, Number(current) || 1));
     const windowSize = Math.max(3, Math.min(safeTotal, max));
@@ -139,9 +148,9 @@ export function PushsalePager({ current = 1, totalPages = 1, onPage, max = 7 }) 
     const pages = Array.from({ length: end - start + 1 }, (_, index) => start + index);
 
     return (
-        <div className="ps-pager" aria-label="Phân trang">
-            <button type="button" disabled={safeCurrent <= 1} onClick={() => onPage?.(1)} title="Trang đầu">«</button>
-            <button type="button" disabled={safeCurrent <= 1} onClick={() => onPage?.(safeCurrent - 1)} title="Trang trước">‹</button>
+        <div className="ps-pager" aria-label={t('reports.pushsale.pagination')}>
+            <button type="button" disabled={safeCurrent <= 1} onClick={() => onPage?.(1)} title={t('reports.pushsale.first_page')}>«</button>
+            <button type="button" disabled={safeCurrent <= 1} onClick={() => onPage?.(safeCurrent - 1)} title={t('reports.pushsale.prev_page')}>‹</button>
             {pages.map((page) => (
                 <button
                     type="button"
@@ -152,8 +161,8 @@ export function PushsalePager({ current = 1, totalPages = 1, onPage, max = 7 }) 
                     {page}
                 </button>
             ))}
-            <button type="button" disabled={safeCurrent >= safeTotal} onClick={() => onPage?.(safeCurrent + 1)} title="Trang sau">›</button>
-            <button type="button" disabled={safeCurrent >= safeTotal} onClick={() => onPage?.(safeTotal)} title="Trang cuối">»</button>
+            <button type="button" disabled={safeCurrent >= safeTotal} onClick={() => onPage?.(safeCurrent + 1)} title={t('reports.pushsale.next_page')}>›</button>
+            <button type="button" disabled={safeCurrent >= safeTotal} onClick={() => onPage?.(safeTotal)} title={t('reports.pushsale.last_page')}>»</button>
         </div>
     );
 }

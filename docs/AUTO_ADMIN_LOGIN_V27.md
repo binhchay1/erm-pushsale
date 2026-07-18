@@ -7,7 +7,7 @@ Mục đích: tắt tạm màn đăng nhập trên môi trường test/staging �
 Thêm vào `.env`:
 
 ```dotenv
-ERM_AUTO_ADMIN_LOGIN=true
+ERM_AUTO_ADMIN_LOGIN=false
 ERM_AUTO_ADMIN_LOGIN_HOSTS=erm-pushsale.duckdns.org
 ```
 

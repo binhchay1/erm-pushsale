@@ -8,7 +8,7 @@ Copy các biến trong `.env.staging-test.example` vào `.env`, tối thiểu:
 
 ```env
 APP_URL=http://erm-pushsale.duckdns.org
-ERM_AUTO_ADMIN_LOGIN=true
+ERM_AUTO_ADMIN_LOGIN=false
 ERM_AUTO_ADMIN_LOGIN_HOSTS=erm-pushsale.duckdns.org
 
 ERM_STAGING_TEST_MODE=true
