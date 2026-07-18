@@ -217,6 +217,7 @@ export function SaleOperationHistoryDialog({ order, context = 'sale', open, onOp
 
 export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange }) {
     const [loading, setLoading] = useState(false);
+    const [closedOnly, setClosedOnly] = useState(false);
     const [data, setData] = useState({ customer: null, summary: null, orders: [] });
 
     useEffect(() => {
@@ -225,48 +226,68 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange }) {
         setLoading(true);
         apiGet(`/customers/orders/${order.id}/purchase-history`)
             .then((payload) => active && setData(payload))
-            .catch((error) => active && toast.error(error.message ?? 'Không tải được danh sách trùng số.'))
+            .catch((error) => active && toast.error(error.message ?? 'Không tải được danh sách cùng số điện thoại.'))
             .finally(() => active && setLoading(false));
         return () => { active = false; };
     }, [open, order?.id]);
 
     if (!order) return null;
 
+    const orders = (data.orders ?? []).filter((item) => !closedOnly || item.closedAt || item.closingStatus === 'closed');
+    const copyAddress = async (value) => {
+        try {
+            await navigator.clipboard.writeText(value || '');
+            toast.success('Đã copy địa chỉ.');
+        } catch (error) {
+            toast.error('Không copy được địa chỉ.');
+        }
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-modal ps-duplicate-phone-modal" aria-describedby={undefined}>
-                <DialogHeader className="ps-sale-modal-header">
-                    <DialogTitle>Danh sách trùng số: <span className="ps-history-title-code">{data.customer?.phone ?? order.customerPhone}</span></DialogTitle>
+            <DialogContent className="ps-sale-modal ps-duplicate-phone-modal ps-duplicate-phone-modal-legacy" aria-describedby={undefined}>
+                <DialogHeader className="ps-sale-modal-header ps-duplicate-phone-header">
+                    <DialogTitle>Danh sách đơn cùng số điện thoại</DialogTitle>
+                    <label className="ps-duplicate-closed-filter"><input type="checkbox" checked={closedOnly} onChange={(event) => setClosedOnly(event.target.checked)} /> Đã chốt đơn</label>
                 </DialogHeader>
                 <div className="ps-duplicate-phone-body">
-                    <div className="ps-duplicate-summary">
-                        <span>Khách hàng: <b>{data.customer?.name ?? order.customerName ?? '—'}</b></span>
-                        <span>Tổng bản ghi: <b>{data.summary?.orderCount ?? 0}</b></span>
-                        <span>Đã chốt: <b>{data.summary?.closedOrderCount ?? 0}</b></span>
-                    </div>
-                    <div className="table-responsive">
-                        <table className="table table-bordered table-striped ps-duplicate-table">
-                            <thead><tr><th>#</th><th>Mã đơn</th><th>Ngày data về</th><th>Nguồn</th><th>Sale / Nhóm</th><th>Tác nghiệp</th><th>Sản phẩm</th><th>Tổng tiền</th><th>Trạng thái</th></tr></thead>
+                    <div className="table-responsive ps-duplicate-table-wrap">
+                        <table className="table table-bordered table-striped ps-duplicate-table ps-duplicate-table-legacy">
+                            <thead><tr>
+                                <th>#</th>
+                                <th>Nguồn dữ liệu<br />Ngày data về</th>
+                                <th>Họ tên<br />Số điện thoại</th>
+                                <th>Tin nhắn</th>
+                                <th>Sale</th>
+                                <th>Tác nghiệp</th>
+                                <th>Kết quả</th>
+                                <th>Ngày chốt đơn<br />Mã đơn</th>
+                                <th>TTGH<br />Mã giao vận</th>
+                                <th>Địa chỉ</th>
+                                <th />
+                            </tr></thead>
                             <tbody>
-                                {loading ? <tr><td colSpan={9} className="text-center">Đang tải...</td></tr> : null}
-                                {!loading && (data.orders ?? []).map((item, index) => (
+                                {loading ? <tr><td colSpan={11} className="text-center">Đang tải...</td></tr> : null}
+                                {!loading && orders.map((item) => (
                                     <tr key={item.id} className={item.isSelected ? 'info' : ''}>
-                                        <td className="text-center">{index + 1}</td>
-                                        <td><b>{item.orderCode || `#${item.id}`}</b></td>
-                                        <td>{formatDateTime(item.dataArrivedAt)}</td>
-                                        <td>{item.sourceName || '—'}</td>
-                                        <td>{item.saleName || '—'}<br /><span className="small-tip">{item.teamName || ''}</span></td>
-                                        <td>{item.operationStage || '—'}<br /><span className="small-tip">{item.operationResult || ''}</span></td>
-                                        <td>{item.products?.map((product) => `${product.name} x${product.quantity}`).join(' | ') || '—'}</td>
-                                        <td className="text-right"><b>{money(item.total)}</b></td>
-                                        <td>{item.closingStatusLabel || '—'}<br /><span className="small-tip">{item.deliveryStatus || ''}</span></td>
+                                        <td className="text-center text-danger">{item.id}</td>
+                                        <td className="text-center"><b>{item.sourceName || '—'}</b><br /><span className="small-tip">{formatDateTime(item.dataArrivedAt)}</span></td>
+                                        <td><b>{item.customerName || '—'}</b><br /><button type="button" className="ps-phone-link">{item.customerPhone || '—'}</button></td>
+                                        <td className="ps-duplicate-message">{item.customerNote || item.shippingNotes || '—'}</td>
+                                        <td className="text-center"><b>{item.saleName || '—'}</b>{item.teamName ? <><br /><span className="small-tip">({item.teamName})</span></> : null}</td>
+                                        <td className="text-center">{item.operationStage || '—'}</td>
+                                        <td className="text-center">{item.operationResult || '—'}</td>
+                                        <td className="text-center">{item.closedAt ? formatDateTime(item.closedAt) : '—'}<br /><b>{item.orderCode || '—'}</b></td>
+                                        <td className="text-center">{item.deliveryStatus || '—'}<br /><span className="item-mdgv">{item.trackingNumber || '—'}</span></td>
+                                        <td className="ps-duplicate-address">{item.address || '—'}{item.address ? <><br /><button type="button" className="btn btn-link btn-xs" onClick={() => copyAddress(item.address)}><i className="fa fa-copy" /> Copy</button></> : null}</td>
+                                        <td className="text-center"><i className="fa fa-circle-o-notch text-info" /></td>
                                     </tr>
                                 ))}
-                                {!loading && !(data.orders ?? []).length ? <tr><td colSpan={9} className="text-center">Không có bản ghi cùng số điện thoại.</td></tr> : null}
+                                {!loading && !orders.length ? <tr><td colSpan={11} className="text-center">Không có đơn cùng số điện thoại.</td></tr> : null}
                             </tbody>
                         </table>
                     </div>
-                    <div className="ps-sale-modal-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>Đóng</button></div>
+                    <div className="ps-sale-modal-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}><i className="fa fa-times" /> Đóng</button></div>
                 </div>
             </DialogContent>
         </Dialog>

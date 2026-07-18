@@ -49,7 +49,18 @@ function appendQuery(url, params) {
     return `${url}${url.includes('?') ? '&' : '?'}${query.toString()}`;
 }
 
-function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenModal, saleWorkspaceUrl = null }) {
+function externalHref(url) {
+    const value = String(url ?? '').trim();
+    if (!value) return null;
+
+    if (/^(https?:)?\/\//i.test(value)) {
+        return value.startsWith('//') ? `https:${value}` : value;
+    }
+
+    return `https://${value}`;
+}
+
+function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenModal, saleWorkspaceUrl = null, warehouseOperationsUrl = null }) {
     const allSelected = rows.length > 0 && rows.every((row) => selected.has(String(row.id)));
     const start = Number(pagination?.from ?? 1);
 
@@ -119,7 +130,13 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenM
                                 </td>
                                 <td className="text-center">
                                     <span className="span-col span-col-width cancel-col">
-                                        <a href="#" onClick={(event) => event.preventDefault()}>{safeText(row.sourceName)}</a>
+                                        {externalHref(row.sourceUrl) ? (
+                                            <a href={externalHref(row.sourceUrl)} target="_blank" rel="noopener noreferrer" title={row.sourceUrl}>
+                                                {safeText(row.sourceName)}
+                                            </a>
+                                        ) : (
+                                            <span>{safeText(row.sourceName)}</span>
+                                        )}
                                     </span>
                                     <br />
                                     <span className="small-tip">{row.marketerEmail ? `(${row.marketerEmail})` : row.marketerName ? `(${row.marketerName})` : ''}</span>
@@ -193,7 +210,22 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenM
                                 <td className="text-center area4">
                                     <span className="ps-warehouse-name">{safeText(row.warehouseName, '')}</span>
                                     {row.shippingMethod || row.shippingProvider ? <><br /><span className="small-tip">{row.shippingMethod || row.shippingProvider}</span></> : null}
-                                    {row.trackingNumber ? <><br /><a className="item-mdgv" href="#" onClick={(event) => event.preventDefault()}>{row.trackingNumber}</a></> : null}
+                                    {row.trackingNumber ? (
+                                        <>
+                                            <br />
+                                            {warehouseOperationsUrl ? (
+                                                <a
+                                                    className="item-mdgv"
+                                                    href={appendQuery(warehouseOperationsUrl, { search: row.trackingNumber, no_closing_date_limit: '1' })}
+                                                    title="Mở tác nghiệp kho theo mã giao vận"
+                                                >
+                                                    {row.trackingNumber}
+                                                </a>
+                                            ) : (
+                                                <span className="item-mdgv">{row.trackingNumber}</span>
+                                            )}
+                                        </>
+                                    ) : null}
                                 </td>
                                 <td className="text-center area4">
                                     <span className={`ps-delivery-status ps-delivery-${row.deliveryStatusValue ?? 'unknown'}`}>{safeText(row.deliveryStatus, '')}</span>
@@ -212,14 +244,99 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenM
     );
 }
 
+const actionButtonBaseStyle = {
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 54,
+    height: 54,
+    minWidth: 54,
+    minHeight: 54,
+    border: 0,
+    borderRadius: 999,
+    color: '#fff',
+    boxShadow: '0 4px 12px rgba(0,0,0,.25)',
+    fontSize: 20,
+    cursor: 'pointer',
+};
+
+const actionMainStyle = {
+    ...actionButtonBaseStyle,
+    width: 66,
+    height: 66,
+    minWidth: 66,
+    minHeight: 66,
+    background: '#0067bd',
+    fontSize: 26,
+};
+
+const actionColors = {
+    primary: '#0585e5',
+    success: '#45a85a',
+    warning: '#ff8c00',
+    danger: '#c9332e',
+};
+
+function ActionBubble({ tone = 'primary', label, onClick, children }) {
+    return (
+        <button
+            type="button"
+            className={`ps-action-bubble ps-action-bubble-${tone}`}
+            title={label}
+            aria-label={label}
+            onClick={onClick}
+            style={{ ...actionButtonBaseStyle, background: actionColors[tone] ?? actionColors.primary }}
+        >
+            {children}
+            <span className="ps-action-tooltip" aria-hidden="true">{label}</span>
+        </button>
+    );
+}
+
 function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
     const [open, setOpen] = useState(false);
     const hasSelection = selectedIds.length > 0;
 
-    const exportCsv = (variant) => {
-        const query = new URLSearchParams({ variant: String(variant) });
-        selectedIds.forEach((id) => query.append('ids[]', id));
-        window.location.assign(`${apiBase}/export?${query.toString()}`);
+    const downloadBlob = (blob, filename) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.URL.revokeObjectURL(url);
+    };
+
+    const exportCsv = async (variant) => {
+        try {
+            const query = new URLSearchParams({ variant: String(variant) });
+            selectedIds.forEach((id) => query.append('ids[]', id));
+            const response = await fetch(`${apiBase}/export?${query.toString()}`, {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'text/csv,application/json,text/plain,*/*',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+            const contentType = response.headers.get('content-type') ?? '';
+            if (!response.ok) {
+                const message = contentType.includes('application/json')
+                    ? (await response.json().catch(() => ({}))).message
+                    : await response.text().catch(() => '');
+                throw new Error(message || `Không xuất được file (${response.status}).`);
+            }
+            const blob = await response.blob();
+            const disposition = response.headers.get('content-disposition') ?? '';
+            const filenameMatch = disposition.match(/filename\*?=(?:UTF-8''|\")?([^";]+)/i);
+            const filename = filenameMatch ? decodeURIComponent(filenameMatch[1].replaceAll('"', '')) : `ho-so-khach-hang-kieu-${variant}.csv`;
+            downloadBlob(blob, filename);
+            toast.success('Đã xuất file.');
+        } catch (error) {
+            toast.error(error.message ?? 'Không xuất được file.');
+        }
     };
 
     const submit = async (url, method, confirmMessage) => {
@@ -251,34 +368,36 @@ function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
     };
 
     return (
-        <nav className={`action-container ${open ? 'is-open' : ''}`}>
+        <nav className={`action-container ps-floating-action-menu ${open ? 'is-open' : ''}`} aria-label="Thao tác hồ sơ khách hàng">
             <div className="hidden-actions">
                 <div className="icon-row">
-                    <button type="button" className="n-button fam-primary" data-tooltip="Xuất Excel kiểu 1" onClick={() => exportCsv(1)}><i className="fa fa-file-excel-o" /></button>
-                    <button type="button" className="n-button fam-success" data-tooltip="Xuất Excel kiểu 2" onClick={() => exportCsv(2)}><i className="fa fa-file-excel-o" /></button>
-                    <button type="button" className="n-button fam-warning" data-tooltip="Xuất Excel kiểu 3" onClick={() => exportCsv(3)}><i className="fa fa-file-excel-o" /></button>
-                    <button type="button" className="n-button fam-danger" data-tooltip="Xuất Excel Sandbox" onClick={() => exportCsv(4)}><i className="fa fa-file-excel-o" /></button>
+                    <ActionBubble tone="primary" label="Xuất Excel kiểu 1" onClick={() => exportCsv(1)}><i className="fa fa-file-excel-o" /></ActionBubble>
+                    <ActionBubble tone="success" label="Xuất Excel kiểu 2" onClick={() => exportCsv(2)}><i className="fa fa-file-excel-o" /></ActionBubble>
+                    <ActionBubble tone="warning" label="Xuất Excel kiểu 3" onClick={() => exportCsv(3)}><i className="fa fa-file-excel-o" /></ActionBubble>
+                    <ActionBubble tone="danger" label="Xuất Excel sandbox" onClick={() => exportCsv(4)}><i className="fa fa-file-excel-o" /></ActionBubble>
                 </div>
                 {permissions?.canBulkManage ? (
                     <div className="icon-row">
-                        <button type="button" className="n-button fam-warning" data-tooltip="Phân bổ lại ngay lập tức" onClick={() => submit(`${apiBase}/bulk/reallocate-now`, 'POST', 'Bạn chắc chắn muốn phân bổ lại hồ sơ khách hàng?')}><i className="fa fa-retweet" /></button>
-                        <button type="button" className="n-button fam-warning" data-tooltip="Chuyển phân bổ lại sau" onClick={() => submit(`${apiBase}/bulk/queue-reallocation`, 'POST', 'Bạn chắc chắn muốn chuyển hồ sơ về danh sách phân bổ lại?')}><i className="fa fa-send" /></button>
-                        <button type="button" className="n-button fam-danger" data-tooltip="Thu hồi số" onClick={() => submit(`${apiBase}/bulk/recall`, 'POST', 'Bạn chắc chắn muốn thu hồi các hồ sơ đã chọn?')}><i className="fa fa-chain-broken" /></button>
+                        <ActionBubble tone="warning" label="Phân bổ lại ngay" onClick={() => submit(`${apiBase}/bulk/reallocate-now`, 'POST', 'Bạn chắc chắn muốn phân bổ lại hồ sơ khách hàng?')}><i className="fa fa-retweet" /></ActionBubble>
+                        <ActionBubble tone="warning" label="Chuyển phân bổ lại sau" onClick={() => submit(`${apiBase}/bulk/queue-reallocation`, 'POST', 'Bạn chắc chắn muốn chuyển hồ sơ về danh sách phân bổ lại?')}><i className="fa fa-send" /></ActionBubble>
+                        <ActionBubble tone="danger" label="Thu hồi số" onClick={() => submit(`${apiBase}/bulk/recall`, 'POST', 'Bạn chắc chắn muốn thu hồi các hồ sơ đã chọn?')}><i className="fa fa-chain-broken" /></ActionBubble>
                     </div>
                 ) : null}
                 {permissions?.canDeleteHistory ? (
                     <div className="icon-row">
-                        <button type="button" className="n-button fam-danger" data-tooltip="Xóa lịch sử tác nghiệp" onClick={() => submit(`${apiBase}/bulk/operation-history`, 'DELETE', 'Bạn chắc chắn muốn xóa lịch sử tác nghiệp?')}><i className="fa fa-trash" /></button>
+                        <ActionBubble tone="danger" label="Xóa lịch sử tác nghiệp" onClick={() => submit(`${apiBase}/bulk/operation-history`, 'DELETE', 'Bạn chắc chắn muốn xóa lịch sử tác nghiệp?')}><i className="fa fa-trash" /></ActionBubble>
                     </div>
                 ) : null}
             </div>
-            <button type="button" className="main-action" onClick={() => setOpen((current) => !current)} title="Thao tác"><i className="fa fa-bars" /></button>
+            <button type="button" className="main-action" onClick={() => setOpen((current) => !current)} title="Thao tác" style={actionMainStyle}>
+                <i className="fa fa-bars" />
+            </button>
             {hasSelection ? <span className="ps-action-count">{selectedIds.length}</span> : null}
         </nav>
     );
 }
 
-export default function CustomerProfile({ filters = {}, filterOptions = {}, report, routeUrl = '/customers', saleWorkspaceUrl = null, pageTitle = 'Hồ sơ khách hàng' }) {
+export default function CustomerProfile({ filters = {}, filterOptions = {}, report, routeUrl = '/customers', saleWorkspaceUrl = null, warehouseOperationsUrl = null, pageTitle = 'Hồ sơ khách hàng' }) {
     const rows = report?.rows?.data ?? [];
     const pagination = report?.rows?.meta ?? { current_page: 1, last_page: 1, per_page: 20, total: 0, from: 0, to: 0 };
     const [form, setForm] = useState(filters);
@@ -318,7 +437,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
     };
     const openModal = (type, order) => setModal({ type, order });
     const closeModal = () => setModal(EMPTY_MODAL);
-    const customerActionBase = routeUrl.startsWith('/admin') ? '/admin/customers' : '/customers';
+    const customerActionBase = String(routeUrl || '/customers').split('?')[0].replace(/\/$/, '');
 
     return (
         <AppLayout>
@@ -380,7 +499,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                     </div>
                 ) : null}
 
-                <CustomerProfileTable rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onOpenModal={openModal} saleWorkspaceUrl={saleWorkspaceUrl} />
+                <CustomerProfileTable rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onOpenModal={openModal} saleWorkspaceUrl={saleWorkspaceUrl} warehouseOperationsUrl={warehouseOperationsUrl} />
 
                 <ReportPagination routeUrl={routeUrl} filters={form} meta={pagination} scrollTargetId="customer-profile-table" />
 

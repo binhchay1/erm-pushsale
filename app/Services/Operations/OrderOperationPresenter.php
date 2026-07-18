@@ -31,6 +31,7 @@ final class OrderOperationPresenter
             'orderCode' => $order->closed_at ? $order->order_code : null,
             'marketingSourceId' => $order->marketing_source_id !== null ? (string) $order->marketing_source_id : '',
             'sourceName' => $order->marketingSource?->name ?? '—',
+            'sourceUrl' => self::landingSourceUrl($order),
             'dataArrivedAt' => $order->data_arrived_at?->toIso8601String(),
             'saleId' => (string) $order->sale_user_id,
             'saleName' => $order->saleUser?->name ?? '—',
@@ -110,6 +111,27 @@ final class OrderOperationPresenter
         ];
     }
 
+
+    private static function landingSourceUrl(Order $order): ?string
+    {
+        $direct = trim((string) ($order->landingConnectionSource?->source_url ?? ''));
+        if ($direct !== '') {
+            return $direct;
+        }
+
+        if ($order->relationLoaded('landingConnection') && $order->landingConnection?->relationLoaded('sources')) {
+            $source = $order->landingConnection->sources->firstWhere('source_type', 'main') ?? $order->landingConnection->sources->first();
+            $url = trim((string) ($source?->source_url ?? ''));
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        $fallback = trim((string) ($order->landingConnection?->success_url ?? ''));
+
+        return $fallback !== '' ? $fallback : null;
+    }
+
     /**
      * @param  Collection<int, Order>  $orders
      * @return list<array<string, mixed>>
@@ -118,6 +140,7 @@ final class OrderOperationPresenter
     {
         return $orders->map(fn (Order $o) => self::toArray($o))->values()->all();
     }
+
 
     /**
      * @param  Collection<int, Order>  $orders
@@ -166,6 +189,7 @@ final class OrderOperationPresenter
             'shippingSupportFee' => (int) $orders->sum('shipping_support_fee'),
         ];
     }
+
 
     /**
      * @param  Collection<int, Order>  $orders

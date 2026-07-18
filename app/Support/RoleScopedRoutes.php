@@ -20,6 +20,19 @@ final class RoleScopedRoutes
         };
     }
 
+    public static function warehouseOperations(?User $user): ?string
+    {
+        if (! $user) {
+            return null;
+        }
+
+        return match ($user->role) {
+            UserRole::Admin => '/admin/warehouse/operations',
+            UserRole::Warehouse => '/warehouse/workspace',
+            default => null,
+        };
+    }
+
     public static function appendOrderId(?string $baseUrl, int $orderId): ?string
     {
         if (! $baseUrl) {

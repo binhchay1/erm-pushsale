@@ -7,6 +7,12 @@ import { formatCurrency } from '@/lib/format';
 import { PushsalePagination } from './PushsalePagination';
 
 const money = (value) => formatCurrency(Number(value ?? 0));
+const externalHref = (url) => {
+    const value = String(url ?? '').trim();
+    if (!value) return null;
+    if (/^(https?:)?\/\//i.test(value)) return value.startsWith('//') ? `https:${value}` : value;
+    return `https://${value}`;
+};
 const dateTime = (value) => {
     if (!value) return '';
     const date = new Date(value);
@@ -84,13 +90,15 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
 function ProductLines({ products = [] }) {
     if (!products.length) return <span>—</span>;
     return (
-        <table className="tb-in-sp"><tbody>{products.map((product, index) => (
-            <tr key={product.itemId ?? index} className="row-sp">
-                <td>{product.productName}</td>
-                <td className="text-center">x{product.quantity}</td>
-                <td className="text-right"><b>{money(product.unitPrice)}</b></td>
-            </tr>
-        ))}</tbody></table>
+        <div className="ps-split-stack ps-product-stack">
+            {products.map((product, index) => (
+                <div key={product.itemId ?? index} className="ps-split-row row-sp">
+                    <span className="ten-sp">{product.productName}</span>
+                    <span className="text-center no-wrap">x{product.quantity}</span>
+                    <span className="text-right no-wrap"><b>{money(product.unitPrice)}</b></span>
+                </div>
+            ))}
+        </div>
     );
 }
 
@@ -185,7 +193,13 @@ export function SaleWorkspaceTable({
                                         <button type="button" className="btn-icon ps-cell-action" onClick={() => onDataViewHistory(order)} title="Lịch sử xem thông tin số"><i className="fa fa-history" /></button>
                                     </td>
                                     <td className="text-center">
-                                        <a href="#" onClick={(event) => event.preventDefault()}>{order.sourceName}</a><br />
+                                        {externalHref(order.sourceUrl) ? (
+                                            <a href={externalHref(order.sourceUrl)} target="_blank" rel="noopener noreferrer" title={order.sourceUrl}>
+                                                {order.sourceName}
+                                            </a>
+                                        ) : (
+                                            <span>{order.sourceName}</span>
+                                        )}<br />
                                         <span className="small-tip">({dateTime(order.dataArrivedAt)})</span>
                                     </td>
                                     <td className="text-center ps-sale-cell">
@@ -232,7 +246,13 @@ export function SaleWorkspaceTable({
                                         {order.awaitingLandingUpsell && <div className="ps-upsale-wait">Đang chờ upsale</div>}
                                     </td>
                                     <td className="text-right ps-money-cell">
-                                        <div>{money(order.subtotal)}</div><div>{money(order.discount)}</div><div>{money(order.vat)}</div><div>{money(order.shippingFeeCollected)}</div><strong>{money(order.total)}</strong>
+                                        <div className="ps-money-stack">
+                                            <div>{money(order.subtotal)}</div>
+                                            <div>{money(order.discount)}</div>
+                                            <div>{money(order.vat)}</div>
+                                            <div>{money(order.shippingFeeCollected)}</div>
+                                            <strong>{money(order.total)}</strong>
+                                        </div>
                                     </td>
                                     <td className="text-right">{money(order.deposit)}</td>
                                     <td className={`text-center ttgh ttgh-${order.deliveryStatusValue || 'none'}`}>

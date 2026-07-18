@@ -134,6 +134,16 @@ Route::post('customers/bulk/queue-reallocation', [\App\Http\Controllers\Customer
 Route::post('customers/bulk/recall', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'recall'])->name('customers.bulk.recall.admin-alias');
 Route::delete('customers/bulk/operation-history', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'deleteOperationHistory'])->name('customers.bulk.operation-history.destroy.admin-alias');
 
+// Role-scoped customer profile action aliases. The visible page URL decides the action URL,
+// so /admin/marketing/customers never has to call /admin/customers behind the scenes.
+foreach (['marketing/customers' => 'marketing.customers', 'sales/customers' => 'sales.customers'] as $customerProfilePath => $customerProfileName) {
+    Route::get($customerProfilePath.'/export', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'export'])->name($customerProfileName.'.export');
+    Route::post($customerProfilePath.'/bulk/reallocate-now', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'reallocateNow'])->name($customerProfileName.'.bulk.reallocate-now');
+    Route::post($customerProfilePath.'/bulk/queue-reallocation', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'queueReallocation'])->name($customerProfileName.'.bulk.queue-reallocation');
+    Route::post($customerProfilePath.'/bulk/recall', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'recall'])->name($customerProfileName.'.bulk.recall');
+    Route::delete($customerProfilePath.'/bulk/operation-history', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'deleteOperationHistory'])->name($customerProfileName.'.bulk.operation-history.destroy');
+}
+
 Route::get('customer-management', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'index'])->name('customers.page');
 Route::get('ld/customers/list-customers', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'index'])->name('legacy.customers.management');
 Route::get('customer-management/export', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'export'])->name('customer-management.export');

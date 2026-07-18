@@ -51,6 +51,9 @@ final class CustomerProfileService
                 'marketerUser:id,name,email,team_id,manager_user_id',
                 'marketingSource:id,name,marketer_user_id,ad_channel,utm_source,utm_campaign',
                 'marketingSource.marketer:id,name,email',
+                'landingConnection:id,success_url',
+                'landingConnection.sources:id,landing_connection_id,source_type,source_url,sort_order,is_active',
+                'landingConnectionSource:id,landing_connection_id,name,source_url',
                 'warehouse:id,name',
                 'team:id,name,leader_user_id',
                 'supplementalOriginPacket.relatedOrder:id,order_code',
@@ -72,6 +75,7 @@ final class CustomerProfileService
             $row['marketerEmail'] = $order->marketerUser?->email ?? $order->marketingSource?->marketer?->email;
             $row['sourceChannel'] = $order->marketingSource?->ad_channel;
             $row['sourceUtm'] = $order->marketingSource?->utm_source;
+            $row['sourceUrl'] = $this->landingSourceUrl($order);
             $row['lastOperationAt'] = $order->updated_at?->toIso8601String();
             $row['shippingMethod'] = $order->shipping_method;
             $row['reconciliationStatus'] = $order->reconciliation_status;
@@ -92,6 +96,28 @@ final class CustomerProfileService
                 ],
             ],
         ];
+    }
+
+
+    private function landingSourceUrl(Order $order): ?string
+    {
+        $direct = trim((string) ($order->landingConnectionSource?->source_url ?? ''));
+        if ($direct !== '') {
+            return $direct;
+        }
+
+        $connection = $order->landingConnection;
+        if ($connection && $connection->relationLoaded('sources')) {
+            $source = $connection->sources->firstWhere('source_type', 'main') ?? $connection->sources->first();
+            $url = trim((string) ($source?->source_url ?? ''));
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        $fallback = trim((string) ($connection?->success_url ?? ''));
+
+        return $fallback !== '' ? $fallback : null;
     }
 
     public function filteredQuery(CustomerProfileFilterData $filter): Builder

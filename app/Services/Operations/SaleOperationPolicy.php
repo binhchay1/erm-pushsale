@@ -76,8 +76,10 @@ final class SaleOperationPolicy
      */
     public static function canDeleteData(Order $order): bool
     {
+        $provider = trim(strtolower((string) $order->shipping_provider));
+
         return self::isOpen($order)
             && blank($order->tracking_number)
-            && blank($order->shipping_provider);
+            && ($provider === '' || in_array($provider, ['manual', 'thu_cong', 'thu-cong', 'thủ công'], true));
     }
 }

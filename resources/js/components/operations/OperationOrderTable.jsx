@@ -15,6 +15,13 @@ import { formatCurrency, formatDateTime } from '@/lib/format';
 import { deliveryTone } from '@/lib/status-tones';
 import { useT } from '@/providers/I18nProvider';
 
+const externalHref = (url) => {
+    const value = String(url ?? '').trim();
+    if (!value) return null;
+    if (/^(https?:)?\/\//i.test(value)) return value.startsWith('//') ? `https:${value}` : value;
+    return `https://${value}`;
+};
+
 const CARRIER_STYLES = {
     viettel: 'bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300',
     vinaphone: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',
@@ -158,7 +165,13 @@ export function OperationOrderTable({
                                 </Td>
 
                                 <Td className="text-center text-sm">
-                                    <div className="text-blue-500 hover:underline cursor-pointer">{row.sourceName}</div>
+                                    {externalHref(row.sourceUrl) ? (
+                                        <a className="text-blue-500 hover:underline" href={externalHref(row.sourceUrl)} target="_blank" rel="noopener noreferrer" title={row.sourceUrl}>
+                                            {row.sourceName}
+                                        </a>
+                                    ) : (
+                                        <div className="text-blue-500">{row.sourceName}</div>
+                                    )}
                                     <div className="text-muted-foreground mt-1 text-[11px]">{formatDateTime(row.dataArrivedAt)}</div>
                                 </Td>
 

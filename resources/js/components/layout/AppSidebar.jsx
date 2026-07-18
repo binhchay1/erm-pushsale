@@ -241,6 +241,12 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                 className="a2 pushsale-menu-link"
                                                                 data-pushsale-second-parent="true"
                                                                 onClick={(event) => toggleFlyout(event, child, key)}
+                                                                onMouseEnter={(event) => {
+                                                                    const rect = event.currentTarget.getBoundingClientRect();
+                                                                    const estimatedHeight = Math.max(61, (child.children?.length ?? 1) * 61);
+                                                                    const top = Math.max(50, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
+                                                                    setFlyout({ item: child, key, top });
+                                                                }}
                                                                 aria-expanded={flyoutOpen}
                                                                 title={child.title}
                                                             >

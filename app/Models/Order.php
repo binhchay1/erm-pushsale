@@ -440,7 +440,9 @@ class Order extends Model
             $query->where(function ($q) use ($term) {
                 $q->where('customer_name', 'like', $term)
                     ->orWhere('customer_phone', 'like', $term)
-                    ->orWhere('order_code', 'like', $term);
+                    ->orWhere('order_code', 'like', $term)
+                    ->orWhere('tracking_number', 'like', $term)
+                    ->orWhereHas('shipments', fn (Builder $shipment) => $shipment->where('tracking_number', 'like', $term));
             });
         }
 
