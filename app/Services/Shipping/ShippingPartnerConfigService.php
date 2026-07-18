@@ -75,11 +75,16 @@ class ShippingPartnerConfigService
             $updates['webhook_secret'] = (string) $payload['webhook_secret'];
         }
 
-        if (is_array($payload['credentials'] ?? null)) {
-            $filled = array_filter($payload['credentials'], fn ($value) => $value !== null && $value !== '');
-            if ($filled !== []) {
-                $updates['credentials'] = array_merge($connection->credentials ?? [], $filled);
+        if (array_key_exists('credentials', $payload) && is_array($payload['credentials'] ?? null)) {
+            $credentials = $connection->credentials ?? [];
+            foreach ($payload['credentials'] as $key => $value) {
+                if ($value === null || $value === '') {
+                    unset($credentials[$key]);
+                    continue;
+                }
+                $credentials[$key] = (string) $value;
             }
+            $updates['credentials'] = $credentials;
         }
 
         if (is_array($payload['settings'] ?? null)) {

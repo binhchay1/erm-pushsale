@@ -134,6 +134,9 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
 
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::get('ld/unit-admin/cau-hinh-chuc-nang', [SettingsController::class, 'index'])->name('legacy.unit.feature-settings');
+    Route::get('ld/unit-admin/cau-hinh-giao-hang', [ShippingPartnersController::class, 'index'])->name('legacy.unit.shipping-config');
+    Route::get('ld/marketing/thong-ke-truong-nhom', TeamLeaderStatsController::class)->name('legacy.marketing.team-leader-stats');
 
 
     // Hồ sơ khách hàng dùng chung cho các vai trò có quyền customers:view.
@@ -271,6 +274,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::post('company/lead-template', [CompanySettingsController::class, 'updateLeadTemplate'])->name('company.lead-template');
         Route::delete('company/lead-template', [CompanySettingsController::class, 'destroyLeadTemplate'])->name('company.lead-template.destroy');
         Route::get('shipping-partners', [ShippingPartnersController::class, 'index'])->name('shipping-partners.index');
+        Route::get('ld/unit-admin/cau-hinh-giao-hang', [ShippingPartnersController::class, 'index'])->name('legacy.unit.shipping-config');
         Route::put('shipping-partners/{provider}', [ShippingPartnersController::class, 'update'])->name('shipping-partners.update');
         Route::put('shipping-default', [ShippingPartnersController::class, 'updateDefault'])->name('shipping-partners.default');
         Route::get('shipping/reconciliation', ShippingReconciliationController::class)->name('shipping.reconciliation');

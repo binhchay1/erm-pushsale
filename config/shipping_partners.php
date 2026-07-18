@@ -101,6 +101,7 @@ return [
             'https://my.vnpost.vn/',
             'https://ipostal.vnpost.vn/tra-cuu-buu-gui?code={code}',
             [
+                'account' => ['label' => 'Tài khoản', 'secret' => false, 'required' => true],
                 'customer_code' => ['label' => 'Mã khách hàng', 'secret' => false, 'required' => true],
                 'contract_code' => ['label' => 'Mã hợp đồng', 'secret' => false, 'required' => false],
             ],

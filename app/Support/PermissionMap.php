@@ -35,6 +35,8 @@ final class PermissionMap
         'admin.activity-logs.' => 'activity:view',
         'admin.integrations.' => 'integrations:full',
         'admin.shipping-partners.' => 'shipping:full',
+        'admin.legacy.unit.shipping-config' => 'shipping:full',
+        'legacy.unit.shipping-config' => 'shipping:full',
         'admin.shipping.' => 'shipping:full',
         'admin.warehouses.' => 'warehouse:full',
         'admin.warehouse-inventories.' => 'warehouse:full',

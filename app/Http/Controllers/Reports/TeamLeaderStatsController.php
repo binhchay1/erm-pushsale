@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Reports;
 
-use App\Enums\UserRole;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
 use App\Http\Controllers\Concerns\InteractsWithReportSnapshots;
 use App\Http\Controllers\Controller;
+use App\Services\FilterOptionsService;
 use App\Services\Reports\TeamLeaderStatsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,7 +20,7 @@ class TeamLeaderStatsController extends Controller
         private readonly TeamLeaderStatsService $service,
     ) {}
 
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request, FilterOptionsService $filterOptions): Response
     {
         $user = $request->user();
         $filter = $this->reportFilters($request);
@@ -32,19 +32,19 @@ class TeamLeaderStatsController extends Controller
         );
         $data = $cached['data'];
 
-        $filterFields = ['date_from', 'date_to', 'date_type'];
-        if ($user->role === UserRole::Admin) {
-            $filterFields[] = 'marketer_id';
-        }
-
-        $base = $request->routeIs('marketing.*') ? '/marketing/reports/team-leaders' : '/admin/reports/team-leaders';
+        $routeUrl = $request->is('ld/marketing/thong-ke-truong-nhom')
+            ? '/ld/marketing/thong-ke-truong-nhom'
+            : ($request->routeIs('marketing.*') ? '/marketing/reports/team-leaders' : '/admin/reports/team-leaders');
 
         return Inertia::render('Reports/TeamLeaderStats', array_merge(
-            $this->reportPageProps($request, ['filterFields' => $filterFields]),
+            $this->reportPageProps($request, [
+                'filterFields' => $filterOptions->marketingLeaderStatsFilterFields(),
+            ]),
             [
-                'rows' => $data['rows'],
-                'totals' => $data['totals'],
-                'routeUrl' => $base,
+                'rows' => $data['rows'] ?? [],
+                'totals' => $data['totals'] ?? [],
+                'statusSummary' => $data['statusSummary'] ?? [],
+                'routeUrl' => $routeUrl,
                 'cachedAt' => $cached['cachedAt'],
                 'fromCache' => $cached['fromCache'],
             ],

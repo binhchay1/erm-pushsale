@@ -198,6 +198,24 @@ class FilterOptionsService
     }
 
     /** @return list<string> */
+    public function marketingLeaderStatsFilterFields(): array
+    {
+        return [
+            'date_type',
+            'date_from',
+            'date_to',
+            'discount_mode',
+            'delivery_status',
+            'marketing_team_leader_id',
+            'marketing_team_id',
+            'parent_product_id',
+            'product_id',
+            'reconciliation_status',
+            'per_page',
+        ];
+    }
+
+    /** @return list<string> */
     public function marketingDashboardFilterFields(?User $user = null): array
     {
         $fields = ['date_from', 'date_to', 'product_id'];
