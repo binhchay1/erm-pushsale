@@ -128,7 +128,18 @@ Route::match(['put', 'patch'], 'marketing/seeding-numbers/records/{record}', [\A
 Route::delete('marketing/seeding-numbers/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_6_4Controller::class, 'destroy'])->whereNumber('record')->name('marketing.seeding-numbers.destroy');
 Route::redirect('pages/2-6-4-kho-so-seeding-toi-da-1000', '/admin/marketing/seeding-numbers', 301);
 
-Route::get('customer-management', \App\Http\Controllers\Sales\CustomerProfileController::class)->name('customers.page');
+Route::get('customers/export', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'export'])->name('customers.export.admin-alias');
+Route::post('customers/bulk/reallocate-now', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'reallocateNow'])->name('customers.bulk.reallocate-now.admin-alias');
+Route::post('customers/bulk/queue-reallocation', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'queueReallocation'])->name('customers.bulk.queue-reallocation.admin-alias');
+Route::post('customers/bulk/recall', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'recall'])->name('customers.bulk.recall.admin-alias');
+Route::delete('customers/bulk/operation-history', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'deleteOperationHistory'])->name('customers.bulk.operation-history.destroy.admin-alias');
+
+Route::get('customer-management', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'index'])->name('customers.page');
+Route::get('ld/customers/list-customers', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'index'])->name('legacy.customers.management');
+Route::get('customer-management/export', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'export'])->name('customer-management.export');
+Route::post('customer-management/campaigns', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'createCampaign'])->name('customer-management.campaigns.store');
+Route::post('customer-management/campaigns/attach', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'attachCampaign'])->name('customer-management.campaigns.attach');
+Route::put('customer-management/segments', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'saveSegments'])->name('customer-management.segments.update');
 Route::redirect('pages/3-1-quan-ly-khach-hang', '/admin/customer-management', 301);
 
 Route::get('customers/care-campaigns', [\App\Http\Controllers\Admin\Pushsale\Pages\Page3_2Controller::class, 'index'])->name('customers.care-campaigns');

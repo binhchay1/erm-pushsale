@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class CustomerProfileBulkActionController extends Controller
 {
@@ -27,43 +28,49 @@ class CustomerProfileBulkActionController extends Controller
         $this->authorizeFull($request);
         $orders = $this->selectedOrders($request);
 
-        DB::transaction(function () use ($orders, $routing, $phoneAssignment, $history, $request): void {
-            foreach ($orders as $order) {
-                $before = $history->snapshot($order);
-                $candidateSale = $routing->assignSalesUser($order->marketingSource);
-                if (! $candidateSale) {
-                    continue;
+        try {
+            DB::transaction(function () use ($orders, $routing, $phoneAssignment, $history, $request): void {
+                foreach ($orders as $order) {
+                    $before = $history->snapshot($order);
+                    $candidateSale = $routing->assignSalesUser($order->marketingSource);
+                    if (! $candidateSale) {
+                        continue;
+                    }
+
+                    $sale = $phoneAssignment->resolveSaleForNewOrder(
+                        $order->customer_phone,
+                        $candidateSale,
+                        $candidateSale,
+                        $order->company_id,
+                    ) ?: $candidateSale;
+                    $phoneAssignment->attachOrder($order, $sale, 'customer_reallocated_now');
+
+                    $order->forceFill([
+                        'sale_user_id' => $sale->id,
+                        'team_id' => $sale->team_id,
+                        'assigned_at' => now(),
+                        'phone_lock_conflict' => (int) $sale->id !== (int) $candidateSale->id,
+                        'phone_lock_note' => (int) $sale->id !== (int) $candidateSale->id
+                            ? 'Phân bổ lại tự đổi về Sale đang sở hữu SĐT để tránh gọi trùng khách.'
+                            : $order->phone_lock_note,
+                    ])->save();
+
+                    $history->record(
+                        $order,
+                        $request->user(),
+                        'customer_reallocated_now',
+                        $before,
+                        $history->snapshot($order),
+                        'Phân bổ lại ngay từ Hồ sơ khách hàng',
+                        ['sale_user_id' => $sale->id],
+                    );
                 }
+            });
+        } catch (Throwable $e) {
+            report($e);
 
-                $sale = $phoneAssignment->resolveSaleForNewOrder(
-                    $order->customer_phone,
-                    $candidateSale,
-                    $candidateSale,
-                    $order->company_id,
-                ) ?: $candidateSale;
-                $phoneAssignment->attachOrder($order, $sale, 'customer_reallocated_now');
-
-                $order->forceFill([
-                    'sale_user_id' => $sale->id,
-                    'team_id' => $sale->team_id,
-                    'assigned_at' => now(),
-                    'phone_lock_conflict' => (int) $sale->id !== (int) $candidateSale->id,
-                    'phone_lock_note' => (int) $sale->id !== (int) $candidateSale->id
-                        ? 'Phân bổ lại tự đổi về Sale đang sở hữu SĐT để tránh gọi trùng khách.'
-                        : $order->phone_lock_note,
-                ])->save();
-
-                $history->record(
-                    $order,
-                    $request->user(),
-                    'customer_reallocated_now',
-                    $before,
-                    $history->snapshot($order),
-                    'Phân bổ lại ngay từ Hồ sơ khách hàng',
-                    ['sale_user_id' => $sale->id],
-                );
-            }
-        });
+            return $this->failure($request, 'Không phân bổ lại được hồ sơ đã chọn.');
+        }
 
         return $this->success($request, 'Đã phân bổ lại '.count($orders).' hồ sơ.');
     }
@@ -75,25 +82,31 @@ class CustomerProfileBulkActionController extends Controller
         $this->authorizeFull($request);
         $orders = $this->selectedOrders($request);
 
-        DB::transaction(function () use ($orders, $history, $request): void {
-            foreach ($orders as $order) {
-                $before = $history->snapshot($order);
-                $order->forceFill([
-                    'sale_user_id' => null,
-                    'team_id' => null,
-                    'assigned_at' => null,
-                ])->save();
+        try {
+            DB::transaction(function () use ($orders, $history, $request): void {
+                foreach ($orders as $order) {
+                    $before = $history->snapshot($order);
+                    $order->forceFill([
+                        'sale_user_id' => null,
+                        'team_id' => null,
+                        'assigned_at' => null,
+                    ])->save();
 
-                $history->record(
-                    $order,
-                    $request->user(),
-                    'customer_reallocation_queued',
-                    $before,
-                    $history->snapshot($order),
-                    'Chuyển về danh sách chờ phân bổ lại',
-                );
-            }
-        });
+                    $history->record(
+                        $order,
+                        $request->user(),
+                        'customer_reallocation_queued',
+                        $before,
+                        $history->snapshot($order),
+                        'Chuyển về danh sách chờ phân bổ lại',
+                    );
+                }
+            });
+        } catch (Throwable $e) {
+            report($e);
+
+            return $this->failure($request, 'Không chuyển được hồ sơ về danh sách chờ phân bổ.');
+        }
 
         return $this->success($request, 'Đã chuyển '.count($orders).' hồ sơ về danh sách chờ phân bổ.');
     }
@@ -105,28 +118,34 @@ class CustomerProfileBulkActionController extends Controller
         $this->authorizeFull($request);
         $orders = $this->selectedOrders($request);
 
-        DB::transaction(function () use ($orders, $history, $request): void {
-            foreach ($orders as $order) {
-                $before = $history->snapshot($order);
-                $order->forceFill([
-                    'sale_user_id' => null,
-                    'team_id' => null,
-                    'assigned_at' => null,
-                    'operation_stage' => 'new_customer',
-                    'operation_result' => null,
-                    'next_operation_at' => null,
-                ])->save();
+        try {
+            DB::transaction(function () use ($orders, $history, $request): void {
+                foreach ($orders as $order) {
+                    $before = $history->snapshot($order);
+                    $order->forceFill([
+                        'sale_user_id' => null,
+                        'team_id' => null,
+                        'assigned_at' => null,
+                        'operation_stage' => 'new_customer',
+                        'operation_result' => null,
+                        'next_operation_at' => null,
+                    ])->save();
 
-                $history->record(
-                    $order,
-                    $request->user(),
-                    'customer_recalled',
-                    $before,
-                    $history->snapshot($order),
-                    'Thu hồi hồ sơ khách hàng',
-                );
-            }
-        });
+                    $history->record(
+                        $order,
+                        $request->user(),
+                        'customer_recalled',
+                        $before,
+                        $history->snapshot($order),
+                        'Thu hồi hồ sơ khách hàng',
+                    );
+                }
+            });
+        } catch (Throwable $e) {
+            report($e);
+
+            return $this->failure($request, 'Không thu hồi được hồ sơ đã chọn.');
+        }
 
         return $this->success($request, 'Đã thu hồi '.count($orders).' hồ sơ.');
     }
@@ -134,9 +153,15 @@ class CustomerProfileBulkActionController extends Controller
     public function deleteOperationHistory(Request $request): JsonResponse|RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $ids = $this->validatedIds($request);
-        $orderIds = Order::query()->whereIn('id', $ids)->pluck('id');
-        $deleted = OrderOperationHistory::query()->whereIn('order_id', $orderIds)->delete();
+        try {
+            $ids = $this->validatedIds($request);
+            $orderIds = Order::query()->whereIn('id', $ids)->pluck('id');
+            $deleted = OrderOperationHistory::query()->whereIn('order_id', $orderIds)->delete();
+        } catch (Throwable $e) {
+            report($e);
+
+            return $this->failure($request, 'Không xóa được lịch sử tác nghiệp đã chọn.');
+        }
 
         return $this->success($request, 'Đã xóa '.$deleted.' bản ghi lịch sử tác nghiệp.');
     }
@@ -213,5 +238,14 @@ class CustomerProfileBulkActionController extends Controller
         }
 
         return back()->with('success', $message);
+    }
+
+    private function failure(Request $request, string $message, int $status = 422): JsonResponse|RedirectResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message], $status);
+        }
+
+        return back()->withErrors(['customers' => $message]);
     }
 }

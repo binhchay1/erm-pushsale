@@ -6,6 +6,7 @@ use App\Data\Customers\CustomerProfileFilterData;
 use App\Http\Controllers\Controller;
 use App\Services\Customers\CustomerProfileOptionsService;
 use App\Services\Customers\CustomerProfileService;
+use App\Support\RoleScopedRoutes;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,6 +32,7 @@ class CustomerProfileController extends Controller
             'filterOptions' => $options->build($request->user()),
             'report' => $service->paginate($filter),
             'routeUrl' => $path,
+            'saleWorkspaceUrl' => RoleScopedRoutes::saleWorkspace($request->user()),
             'activeMenuCode' => $activeMenuCode,
             'pageTitle' => 'Hồ sơ khách hàng',
         ]);

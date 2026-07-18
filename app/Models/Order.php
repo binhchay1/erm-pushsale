@@ -262,7 +262,11 @@ class Order extends Model
             default => 'data_arrived_at',
         };
 
-        if ($filter->dateFrom && $filter->dateTo && ! $filter->noClosingDateLimit) {
+        if ($filter->orderId) {
+            $query->whereKey($filter->orderId);
+        }
+
+        if (! $filter->orderId && $filter->dateFrom && $filter->dateTo && ! $filter->noClosingDateLimit) {
             $query->whereBetween($column, [$filter->dateFrom, $filter->dateTo]);
         }
 

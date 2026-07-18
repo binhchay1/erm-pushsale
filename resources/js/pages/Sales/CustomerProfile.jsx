@@ -43,7 +43,13 @@ function safeText(value, fallback = '—') {
     return value === null || value === undefined || value === '' ? fallback : value;
 }
 
-function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenModal }) {
+function appendQuery(url, params) {
+    if (!url) return null;
+    const query = new URLSearchParams(params);
+    return `${url}${url.includes('?') ? '&' : '?'}${query.toString()}`;
+}
+
+function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenModal, saleWorkspaceUrl = null }) {
     const allSelected = rows.length > 0 && rows.every((row) => selected.has(String(row.id)));
     const start = Number(pagination?.from ?? 1);
 
@@ -122,7 +128,11 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenM
                                 </td>
                                 <td className="text-left">
                                     <div className="span-col ps-customer-name">
-                                        <a href={`/sales/workspace?order_id=${row.id}`}>{safeText(row.customerName)}</a>
+                                        {saleWorkspaceUrl ? (
+                                            <a href={appendQuery(saleWorkspaceUrl, { order_id: row.id })}>{safeText(row.customerName)}</a>
+                                        ) : (
+                                            <span>{safeText(row.customerName)}</span>
+                                        )}
                                     </div>
                                     <div className="no-wrap ps-phone-line">
                                         <button type="button" className="ps-phone-link" onClick={() => onOpenModal('purchase', row)}>{safeText(row.customerPhone)}</button>
@@ -160,24 +170,24 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenM
                                     {row.nextOperationAt ? <div className="item-noidung-other">Hẹn: {dateLabel(row.nextOperationAt)}</div> : null}
                                 </td>
                                 <td className="text-left">
-                                    <table className="tb-in-sp"><tbody>
+                                    <div className="ps-split-stack ps-product-stack">
                                         {row.products?.length ? row.products.map((product) => (
-                                            <tr className="row-sp" key={product.itemId ?? `${row.id}-${product.productName}`}>
-                                                <td><span className="ten-sp">{product.productName}</span></td>
-                                                <td className="text-center no-wrap">x{product.quantity}</td>
-                                                <td className="text-right">{formatCurrency(product.unitPrice)}</td>
-                                            </tr>
-                                        )) : <tr><td>—</td><td></td><td></td></tr>}
-                                    </tbody></table>
+                                            <div className="ps-split-row row-sp" key={product.itemId ?? `${row.id}-${product.productName}`}>
+                                                <span className="ten-sp">{product.productName}</span>
+                                                <span className="text-center no-wrap">x{product.quantity}</span>
+                                                <span className="text-right no-wrap">{formatCurrency(product.unitPrice)}</span>
+                                            </div>
+                                        )) : <div className="ps-split-row"><span>—</span><span /><span /></div>}
+                                    </div>
                                 </td>
                                 <td className="no-wrap area3 text-right">
-                                    <table className="tb-in-sp"><tbody>
-                                        <tr><td title="Thành tiền">{formatCurrency(row.subtotal)}</td></tr>
-                                        <tr><td title="Chiết khấu">-{formatCurrency(row.discount)}</td></tr>
-                                        <tr><td title="VAT">{formatCurrency(row.vat)}</td></tr>
-                                        <tr><td title="Phí VC">{formatCurrency(row.shippingFeeCollected)}</td></tr>
-                                        <tr><td className="ps-order-total" title="Tổng tiền đơn hàng">{formatCurrency(row.total)}</td></tr>
-                                    </tbody></table>
+                                    <div className="ps-money-stack">
+                                        <div title="Thành tiền">{formatCurrency(row.subtotal)}</div>
+                                        <div title="Chiết khấu">-{formatCurrency(row.discount)}</div>
+                                        <div title="VAT">{formatCurrency(row.vat)}</div>
+                                        <div title="Phí VC">{formatCurrency(row.shippingFeeCollected)}</div>
+                                        <strong className="ps-order-total" title="Tổng tiền đơn hàng">{formatCurrency(row.total)}</strong>
+                                    </div>
                                 </td>
                                 <td className="text-right">{row.deposit ? formatCurrency(row.deposit) : ''}</td>
                                 <td className="text-center area4">
@@ -202,14 +212,14 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenM
     );
 }
 
-function FloatingActions({ selectedIds, permissions }) {
+function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
     const [open, setOpen] = useState(false);
     const hasSelection = selectedIds.length > 0;
 
     const exportCsv = (variant) => {
         const query = new URLSearchParams({ variant: String(variant) });
         selectedIds.forEach((id) => query.append('ids[]', id));
-        window.location.assign(`/customers/export?${query.toString()}`);
+        window.location.assign(`${apiBase}/export?${query.toString()}`);
     };
 
     const submit = async (url, method, confirmMessage) => {
@@ -232,7 +242,7 @@ function FloatingActions({ selectedIds, permissions }) {
                 body: JSON.stringify({ ids: selectedIds }),
             });
             const data = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(data.message ?? 'Không thực hiện được thao tác.');
+            if (!response.ok) throw new Error(data.message ?? `Không thực hiện được thao tác (${response.status}).`);
             toast.success(data.message ?? 'Đã thực hiện thao tác.');
             router.reload({ preserveScroll: true });
         } catch (error) {
@@ -251,14 +261,14 @@ function FloatingActions({ selectedIds, permissions }) {
                 </div>
                 {permissions?.canBulkManage ? (
                     <div className="icon-row">
-                        <button type="button" className="n-button fam-warning" data-tooltip="Phân bổ lại ngay lập tức" onClick={() => submit('/customers/bulk/reallocate-now', 'POST', 'Bạn chắc chắn muốn phân bổ lại hồ sơ khách hàng?')}><i className="fa fa-retweet" /></button>
-                        <button type="button" className="n-button fam-warning" data-tooltip="Chuyển phân bổ lại sau" onClick={() => submit('/customers/bulk/queue-reallocation', 'POST', 'Bạn chắc chắn muốn chuyển hồ sơ về danh sách phân bổ lại?')}><i className="fa fa-send" /></button>
-                        <button type="button" className="n-button fam-danger" data-tooltip="Thu hồi số" onClick={() => submit('/customers/bulk/recall', 'POST', 'Bạn chắc chắn muốn thu hồi các hồ sơ đã chọn?')}><i className="fa fa-chain-broken" /></button>
+                        <button type="button" className="n-button fam-warning" data-tooltip="Phân bổ lại ngay lập tức" onClick={() => submit(`${apiBase}/bulk/reallocate-now`, 'POST', 'Bạn chắc chắn muốn phân bổ lại hồ sơ khách hàng?')}><i className="fa fa-retweet" /></button>
+                        <button type="button" className="n-button fam-warning" data-tooltip="Chuyển phân bổ lại sau" onClick={() => submit(`${apiBase}/bulk/queue-reallocation`, 'POST', 'Bạn chắc chắn muốn chuyển hồ sơ về danh sách phân bổ lại?')}><i className="fa fa-send" /></button>
+                        <button type="button" className="n-button fam-danger" data-tooltip="Thu hồi số" onClick={() => submit(`${apiBase}/bulk/recall`, 'POST', 'Bạn chắc chắn muốn thu hồi các hồ sơ đã chọn?')}><i className="fa fa-chain-broken" /></button>
                     </div>
                 ) : null}
                 {permissions?.canDeleteHistory ? (
                     <div className="icon-row">
-                        <button type="button" className="n-button fam-danger" data-tooltip="Xóa lịch sử tác nghiệp" onClick={() => submit('/customers/bulk/operation-history', 'DELETE', 'Bạn chắc chắn muốn xóa lịch sử tác nghiệp?')}><i className="fa fa-trash" /></button>
+                        <button type="button" className="n-button fam-danger" data-tooltip="Xóa lịch sử tác nghiệp" onClick={() => submit(`${apiBase}/bulk/operation-history`, 'DELETE', 'Bạn chắc chắn muốn xóa lịch sử tác nghiệp?')}><i className="fa fa-trash" /></button>
                     </div>
                 ) : null}
             </div>
@@ -268,7 +278,7 @@ function FloatingActions({ selectedIds, permissions }) {
     );
 }
 
-export default function CustomerProfile({ filters = {}, filterOptions = {}, report, routeUrl = '/customers', pageTitle = 'Hồ sơ khách hàng' }) {
+export default function CustomerProfile({ filters = {}, filterOptions = {}, report, routeUrl = '/customers', saleWorkspaceUrl = null, pageTitle = 'Hồ sơ khách hàng' }) {
     const rows = report?.rows?.data ?? [];
     const pagination = report?.rows?.meta ?? { current_page: 1, last_page: 1, per_page: 20, total: 0, from: 0, to: 0 };
     const [form, setForm] = useState(filters);
@@ -308,6 +318,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
     };
     const openModal = (type, order) => setModal({ type, order });
     const closeModal = () => setModal(EMPTY_MODAL);
+    const customerActionBase = routeUrl.startsWith('/admin') ? '/admin/customers' : '/customers';
 
     return (
         <AppLayout>
@@ -369,11 +380,11 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                     </div>
                 ) : null}
 
-                <CustomerProfileTable rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onOpenModal={openModal} />
+                <CustomerProfileTable rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onOpenModal={openModal} saleWorkspaceUrl={saleWorkspaceUrl} />
 
                 <ReportPagination routeUrl={routeUrl} filters={form} meta={pagination} scrollTargetId="customer-profile-table" />
 
-                <FloatingActions selectedIds={[...selected]} permissions={filterOptions.permissions} />
+                <FloatingActions selectedIds={[...selected]} permissions={filterOptions.permissions} apiBase={customerActionBase} />
             </section>
 
             <PushsaleCustomerMessagesModal order={modal.order} open={modal.type === 'messages'} onOpenChange={(open) => !open && closeModal()} />

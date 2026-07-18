@@ -108,7 +108,7 @@ export function ErrorShell({
     const codeLabel = status === 'client' ? '!' : String(status);
 
     return (
-        <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-background via-muted/30 to-background px-4 py-10">
+        <div className="fixed inset-0 z-[9999] flex min-h-screen w-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-background via-muted/30 to-background px-4 py-10">
             <div
                 className={cn(
                     'pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b',

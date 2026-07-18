@@ -6,11 +6,16 @@
     <title>@yield('title') — {{ config('saleops.brand.name', 'ERM SaleOps') }}</title>
     <style>
         * { box-sizing: border-box; margin: 0; }
+        html, body {
+            width: 100vw;
+            min-width: 100vw;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
         body {
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: grid;
+            place-items: center;
             padding: 2rem 1rem;
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #f8fafc 100%);

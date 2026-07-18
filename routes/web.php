@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RankingController;
 use App\Http\Controllers\Admin\Reports\CeoReportController;
 use App\Http\Controllers\Admin\Sales\PerformanceReportController as AdminSalesPerformanceReportController;
+use App\Http\Controllers\Admin\Sales\WorkspaceController as AdminSalesWorkspaceController;
 use App\Http\Controllers\Admin\Sales\RevenueReportController as SaleRevenueReportController;
 use App\Http\Controllers\Admin\ShippingOrderController;
 use App\Http\Controllers\Admin\ShippingPartnersController;
@@ -214,7 +215,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::patch('marketing/campaigns/{campaign}/budget', [CampaignBudgetController::class, 'update'])->name('marketing.campaigns.budget');
         Route::get('sales/revenue', SaleRevenueReportController::class)->name('sales.revenue');
         Route::get('sales/performance', AdminSalesPerformanceReportController::class)->name('sales.performance');
-        Route::get('sales/workspace', OperationController::class)->name('sales.workspace');
+        Route::get('sales/workspace', AdminSalesWorkspaceController::class)->name('sales.workspace');
         Route::post('sales/orders/bulk-close', [SaleBulkCloseController::class, 'store'])->name('sales.orders.bulk-close');
         Route::post('sales/orders/{order}/call', [SaleOperationCallController::class, 'store'])->name('sales.orders.call');
         Route::post('sales/orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('sales.orders.operation-status');

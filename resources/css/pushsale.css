@@ -12307,3 +12307,620 @@ body.pushsale-app-body .ps-marketing-leader-page .no-data-row {
         grid-template-columns: repeat(5, minmax(160px, 1fr));
     }
 }
+
+/* V46 — Customer UI consolidation: shared nested cell, header info, customer 360, floating actions. */
+body.pushsale-app-body .pushsale-header-tools {
+    align-items: center !important;
+    gap: 2px !important;
+}
+body.pushsale-app-body .pushsale-header-info-trigger,
+body.pushsale-app-body .pushsale-header-tools .pushsale-header-info-trigger,
+body.pushsale-app-body .pushsale-header-tools button.pushsale-header-info-trigger {
+    width: 32px !important;
+    height: 50px !important;
+    min-width: 32px !important;
+    min-height: 50px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    align-self: center !important;
+    margin: 0 !important;
+    transform: none !important;
+    vertical-align: middle !important;
+}
+body.pushsale-app-body .pushsale-header-info-trigger i {
+    display: block !important;
+    font-size: 14px !important;
+    line-height: 50px !important;
+}
+
+/* Hồ sơ khách hàng: source Pushsale chỉ có một nút tìm kiếm chính trên header. */
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-panel .ps-filter-search {
+    display: none !important;
+}
+
+/* Nested table/stack content is content, not table cells. Applies to every Pushsale table. */
+body.pushsale-app-body table.table .tb-in-sp,
+body.pushsale-app-body table.table .tb-in-sp tbody,
+body.pushsale-app-body table.table .tb-in-sp tr,
+body.pushsale-app-body table.table .tb-in-sp td,
+body.pushsale-app-body .ps-split-stack,
+body.pushsale-app-body .ps-split-row,
+body.pushsale-app-body .ps-money-stack,
+body.pushsale-app-body .ps-money-stack > div,
+body.pushsale-app-body .ps-money-stack > strong {
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    background: transparent !important;
+}
+body.pushsale-app-body table.table .tb-in-sp {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    table-layout: fixed !important;
+}
+body.pushsale-app-body table.table .tb-in-sp td {
+    padding: 2px 4px !important;
+    vertical-align: middle !important;
+}
+body.pushsale-app-body table.table .tb-in-sp .row-sp + .row-sp td {
+    border-top: 0 !important;
+}
+body.pushsale-app-body .ps-split-stack,
+body.pushsale-app-body .ps-money-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+    width: 100% !important;
+}
+body.pushsale-app-body .ps-split-row {
+    display: grid !important;
+    grid-template-columns: minmax(145px, 1fr) 42px 96px !important;
+    align-items: center !important;
+    min-height: 22px !important;
+    column-gap: 6px !important;
+}
+body.pushsale-app-body .ps-split-row .ten-sp {
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+body.pushsale-app-body .ps-money-stack > div,
+body.pushsale-app-body .ps-money-stack > strong {
+    display: flex !important;
+    min-height: 20px !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding: 1px 0 !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .ps-money-cell,
+body.pushsale-app-body .ps-customer-profile-table td:has(.ps-money-stack),
+body.pushsale-app-body .ps-sale-operation-table td:has(.ps-money-stack),
+body.pushsale-app-body .ps-wh-legacy-table td:has(.ps-money-stack) {
+    min-width: 220px !important;
+}
+
+/* One floating action system: fixed viewport bottom-left, Pushsale circular buttons. */
+body.pushsale-app-body .action-container,
+body.pushsale-app-body nav.action-container,
+body.pushsale-app-body .action-container.ps-wh-floating-actions {
+    position: fixed !important;
+    left: 22px !important;
+    bottom: 22px !important;
+    z-index: 9999 !important;
+    display: block !important;
+    width: 70px !important;
+    height: 70px !important;
+    overflow: visible !important;
+    transform: translateZ(0) !important;
+}
+body.pushsale-app-body .action-container .main-action,
+body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action {
+    position: absolute !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 66px !important;
+    height: 66px !important;
+    border-radius: 50% !important;
+    background: #0067bd !important;
+    color: #fff !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 0 !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,.28) !important;
+    font-size: 26px !important;
+    cursor: pointer !important;
+}
+body.pushsale-app-body .action-container .hidden-actions,
+body.pushsale-app-body .action-container.ps-wh-floating-actions .hidden-actions {
+    position: absolute !important;
+    left: 0 !important;
+    bottom: 76px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(18px) scale(.92) !important;
+    transform-origin: left bottom !important;
+    transition: opacity .18s ease, transform .18s ease !important;
+}
+body.pushsale-app-body .action-container.is-open .hidden-actions,
+body.pushsale-app-body .action-container.open .hidden-actions,
+body.pushsale-app-body .action-container.ps-wh-floating-actions.is-open .hidden-actions,
+body.pushsale-app-body .action-container.ps-wh-floating-actions.open .hidden-actions {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+}
+body.pushsale-app-body .action-container .icon-row,
+body.pushsale-app-body .action-container.ps-wh-floating-actions .icon-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-height: 54px !important;
+}
+body.pushsale-app-body .action-container .n-button,
+body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button {
+    position: relative !important;
+    width: 54px !important;
+    height: 54px !important;
+    min-width: 54px !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #fff !important;
+    border: 0 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25) !important;
+    font-size: 20px !important;
+}
+body.pushsale-app-body .action-container .fam-primary { background: #0585e5 !important; }
+body.pushsale-app-body .action-container .fam-success { background: #45a85a !important; }
+body.pushsale-app-body .action-container .fam-warning { background: #ff8c00 !important; }
+body.pushsale-app-body .action-container .fam-danger { background: #c9332e !important; }
+body.pushsale-app-body .action-container .ps-action-count {
+    position: absolute !important;
+    left: 48px !important;
+    bottom: 52px !important;
+    z-index: 2 !important;
+}
+
+/* 3.1 Khách hàng 360 — source-compatible layout with project backend. */
+body.pushsale-app-body .ps-customer360-page {
+    padding: 0 !important;
+    background: #fff !important;
+}
+body.pushsale-app-body .ps-customer360-header {
+    padding: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    background: #fff !important;
+    min-height: 52px !important;
+}
+body.pushsale-app-body .ps-customer360-header .m-header {
+    display: grid !important;
+    grid-template-columns: 260px 1fr 290px 390px 270px 28px auto auto !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-height: 52px !important;
+    padding: 8px 14px !important;
+}
+body.pushsale-app-body .ps-customer360-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .ps-customer360-header .form-control,
+body.pushsale-app-body .ps-customer360-filter-grid .form-control,
+body.pushsale-app-body .ps-customer360-filter-grid select {
+    height: 30px !important;
+    min-height: 30px !important;
+    border: 1px solid #cfd8e3 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    font-size: 12px !important;
+    padding: 4px 10px !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .ps-customer360-advanced {
+    padding: 12px 14px 4px !important;
+    border-bottom: 1px solid #d2d6de !important;
+}
+body.pushsale-app-body .ps-customer360-filter-grid {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(160px, 1fr)) !important;
+    gap: 12px 28px !important;
+}
+body.pushsale-app-body .ps-customer360-actions {
+    padding: 14px !important;
+    background: #fff !important;
+}
+body.pushsale-app-body .ps-customer360-actions .btn {
+    margin-right: 24px !important;
+}
+body.pushsale-app-body .ps-customer360-table-wrap {
+    margin: 0 14px !important;
+    overflow-x: auto !important;
+}
+body.pushsale-app-body .ps-customer360-table {
+    width: 100% !important;
+    min-width: 1500px !important;
+    margin-bottom: 0 !important;
+    border-collapse: collapse !important;
+}
+body.pushsale-app-body .ps-customer360-table th {
+    height: 38px !important;
+    background: #3782dc !important;
+    border: 1px solid #2e73c1 !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    vertical-align: middle !important;
+}
+body.pushsale-app-body .ps-customer360-table td {
+    min-height: 28px !important;
+    padding: 7px 8px !important;
+    border: 1px solid #d9d9d9 !important;
+    font-size: 12px !important;
+    vertical-align: middle !important;
+}
+body.pushsale-app-body .ps-customer360-table .ps-col-check { width: 36px !important; }
+body.pushsale-app-body .ps-customer360-table .ps-customer360-row-actions {
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .ps-customer360-table .ps-customer360-row-actions a,
+body.pushsale-app-body .ps-customer360-table .ps-customer360-row-actions button,
+body.pushsale-app-body .ps-customer360-add {
+    border: 0 !important;
+    background: transparent !important;
+    color: #087df0 !important;
+    box-shadow: none !important;
+    padding: 0 6px !important;
+    font-weight: 700 !important;
+}
+body.pushsale-app-body .ps-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 11000 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding-top: 80px !important;
+    background: rgba(0,0,0,.42) !important;
+}
+body.pushsale-app-body .ps-modal-card {
+    width: min(720px, calc(100vw - 32px)) !important;
+    background: #fff !important;
+    border-radius: 0 !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,.28) !important;
+}
+body.pushsale-app-body .ps-modal-header,
+body.pushsale-app-body .ps-modal-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 12px 15px !important;
+    border-bottom: 1px solid #ddd !important;
+}
+body.pushsale-app-body .ps-modal-footer {
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    border-top: 1px solid #ddd !important;
+    border-bottom: 0 !important;
+}
+body.pushsale-app-body .ps-modal-header h3 {
+    margin: 0 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+}
+body.pushsale-app-body .ps-modal-close {
+    border: 0 !important;
+    background: transparent !important;
+    font-size: 24px !important;
+    line-height: 1 !important;
+}
+body.pushsale-app-body .ps-modal-body {
+    padding: 15px !important;
+}
+body.pushsale-app-body .ps-segment-editor,
+body.pushsale-app-body .ps-segment-row {
+    display: grid !important;
+    gap: 8px !important;
+}
+body.pushsale-app-body .ps-segment-row {
+    grid-template-columns: 1fr 46px 34px !important;
+    align-items: center !important;
+}
+body.pushsale-app-body .ps-segment-row input[type="color"] {
+    width: 40px !important;
+    height: 30px !important;
+    border: 1px solid #cfd8e3 !important;
+    padding: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   V47 - Modal system normalization
+   All dialog implementations must share the same viewport contract:
+   - overlay covers the viewport
+   - dialog is centered in the viewport, never relative to page/table scroll
+   - header/footer stay visible, body scrolls inside
+   - no page-specific top/left/padding hacks override this block
+   -------------------------------------------------------------------------- */
+body.pushsale-app-body [data-slot='dialog-overlay'],
+body.pushsale-app-body .pushsale-modal-layer,
+body.pushsale-app-body .psm-modal-layer,
+body.pushsale-app-body .pslc-modal-layer,
+body.pushsale-app-body .ps-modal-backdrop,
+body.pushsale-app-body .modal-note-overlay,
+body.pushsale-app-body .legacy-modal-layer,
+body.pushsale-app-body .modal.in,
+body.pushsale-app-body .modal.show,
+body.pushsale-app-body .modal[style*='display: block'] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 12000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+    background: rgba(0, 0, 0, .46) !important;
+}
+body.pushsale-app-body .legacy-modal-layer .legacy-modal-backdrop,
+body.pushsale-app-body .pushsale-modal-layer > .pushsale-modal-backdrop,
+body.pushsale-app-body .psm-modal-layer > .psm-modal-backdrop {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+body.pushsale-app-body [data-slot='dialog-content'],
+body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface,
+body.pushsale-app-body [data-slot='dialog-content'].ps-customer-modal,
+body.pushsale-app-body .ps-sale-modal[data-slot='dialog-content'],
+body.pushsale-app-body .ps-wh-dialog[data-slot='dialog-content'] {
+    position: fixed !important;
+    top: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: 50% !important;
+    z-index: 12010 !important;
+    margin: 0 !important;
+    transform: translate3d(-50%, -50%, 0) !important;
+    transform-origin: center center !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow: hidden !important;
+    overscroll-behavior: contain !important;
+}
+body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface,
+body.pushsale-app-body [data-slot='dialog-content'].ps-customer-modal {
+    display: flex !important;
+    width: min(var(--ps-modal-width, 900px), calc(100vw - 32px)) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    border: 1px solid rgba(0, 0, 0, .24) !important;
+    border-radius: 4px !important;
+    background: #fff !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .36) !important;
+}
+body.pushsale-app-body .pushsale-modal-dialog,
+body.pushsale-app-body .psm-modal,
+body.pushsale-app-body .pslc-modal,
+body.pushsale-app-body .ps-source-modal,
+body.pushsale-app-body .modal-note-panel,
+body.pushsale-app-body .legacy-modal-dialog,
+body.pushsale-app-body .ps-modal-card,
+body.pushsale-app-body .modal-dialog {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 1 !important;
+    display: flex !important;
+    width: min(var(--ps-modal-width, 960px), calc(100vw - 32px)) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 32px) !important;
+    flex-direction: column !important;
+    margin: auto !important;
+    overflow: hidden !important;
+    transform: none !important;
+}
+body.pushsale-app-body .ps-source-modal.is-wide,
+body.pushsale-app-body .psm-modal-lg,
+body.pushsale-app-body .pslc-modal-lg,
+body.pushsale-app-body .pushsale-modal-dialog.is-wide,
+body.pushsale-app-body .legacy-modal-dialog.is-wide {
+    width: min(var(--ps-modal-width, 1280px), calc(100vw - 32px)) !important;
+}
+body.pushsale-app-body .ps-modal-card.ps-customer360-modal {
+    width: min(var(--ps-modal-width, 980px), calc(100vw - 32px)) !important;
+}
+body.pushsale-app-body .modal.fade .modal-dialog,
+body.pushsale-app-body .modal.in .modal-dialog,
+body.pushsale-app-body .modal.show .modal-dialog {
+    transform: none !important;
+}
+body.pushsale-app-body .ps-modal-body,
+body.pushsale-app-body .pushsale-modal-body,
+body.pushsale-app-body .psm-modal-body,
+body.pushsale-app-body .pslc-modal-body,
+body.pushsale-app-body .ps-source-modal-body,
+body.pushsale-app-body .modal-note-body,
+body.pushsale-app-body .legacy-modal-body,
+body.pushsale-app-body .modal-body {
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+}
+body.pushsale-app-body .ps-modal-header,
+body.pushsale-app-body .ps-modal-footer,
+body.pushsale-app-body .pushsale-modal-header,
+body.pushsale-app-body .pushsale-modal-footer,
+body.pushsale-app-body .psm-modal-header,
+body.pushsale-app-body .psm-modal-footer,
+body.pushsale-app-body .pslc-modal-header,
+body.pushsale-app-body .pslc-modal-footer,
+body.pushsale-app-body .ps-source-modal-header,
+body.pushsale-app-body .modal-note-header,
+body.pushsale-app-body .legacy-modal-header,
+body.pushsale-app-body .legacy-modal-footer,
+body.pushsale-app-body .modal-header,
+body.pushsale-app-body .modal-footer {
+    flex: 0 0 auto !important;
+}
+@media (max-width: 767px) {
+    body.pushsale-app-body [data-slot='dialog-overlay'],
+    body.pushsale-app-body .pushsale-modal-layer,
+    body.pushsale-app-body .psm-modal-layer,
+    body.pushsale-app-body .pslc-modal-layer,
+    body.pushsale-app-body .ps-modal-backdrop,
+    body.pushsale-app-body .modal-note-overlay,
+    body.pushsale-app-body .legacy-modal-layer,
+    body.pushsale-app-body .modal.in,
+    body.pushsale-app-body .modal.show,
+    body.pushsale-app-body .modal[style*='display: block'] {
+        padding: 10px !important;
+    }
+    body.pushsale-app-body [data-slot='dialog-content'],
+    body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface,
+    body.pushsale-app-body [data-slot='dialog-content'].ps-customer-modal,
+    body.pushsale-app-body .ps-sale-modal[data-slot='dialog-content'],
+    body.pushsale-app-body .ps-wh-dialog[data-slot='dialog-content'] {
+        max-width: calc(100vw - 20px) !important;
+        max-height: calc(100dvh - 20px) !important;
+    }
+    body.pushsale-app-body .pushsale-modal-dialog,
+    body.pushsale-app-body .psm-modal,
+    body.pushsale-app-body .pslc-modal,
+    body.pushsale-app-body .ps-source-modal,
+    body.pushsale-app-body .modal-note-panel,
+    body.pushsale-app-body .legacy-modal-dialog,
+    body.pushsale-app-body .ps-modal-card,
+    body.pushsale-app-body .modal-dialog {
+        width: calc(100vw - 20px) !important;
+        max-height: calc(100dvh - 20px) !important;
+    }
+}
+
+/* =====================================================================
+   V50 - Customer profile table parity
+   Scope: only Hồ sơ khách hàng. Keep global table system intact, but make
+   this page match Pushsale's compact full-width grid without horizontal scroll.
+   ===================================================================== */
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-titlebar {
+    border-top: 0 !important;
+}
+
+body.pushsale-app-body .ps-customer-profile-page {
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+}
+
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-table-scroll {
+    width: calc(100% - 28px) !important;
+    margin: 14px 14px 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    border-bottom: 0 !important;
+    background: #fff !important;
+}
+
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+}
+
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th,
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > tbody > tr > td {
+    white-space: normal !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .no-wrap {
+    white-space: normal !important;
+}
+
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-check { width: 3.1% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-code { width: 5.7% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-source { width: 10.1% !important; min-width: 0 !important; max-width: none !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-customer { width: 9.4% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-message { width: 18.2% !important; min-width: 0 !important; max-width: none !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-sale { width: 7.5% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-operation { width: 6.6% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-result { width: 8.9% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-products { width: 12.4% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-money { width: 6.4% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-deposit { width: 4.5% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-shipping { width: 5.8% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-delivery { width: 5.9% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-recon { width: 2.5% !important; min-width: 0 !important; }
+
+body.pushsale-app-body .ps-customer-profile-page .ps-message-cell,
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-name,
+body.pushsale-app-body .ps-customer-profile-page .span-col,
+body.pushsale-app-body .ps-customer-profile-page .ten-sp {
+    max-width: none !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+body.pushsale-app-body .ps-customer-profile-page .ps-split-row {
+    grid-template-columns: minmax(0, 1fr) 28px minmax(54px, 74px) !important;
+    column-gap: 4px !important;
+}
+
+body.pushsale-app-body .ps-customer-profile-page .ps-money-stack,
+body.pushsale-app-body .ps-customer-profile-page .ps-money-stack > div,
+body.pushsale-app-body .ps-customer-profile-page .ps-money-stack > strong,
+body.pushsale-app-body .ps-customer-profile-page td:has(.ps-money-stack) {
+    min-width: 0 !important;
+    white-space: normal !important;
+}
+
+body.pushsale-app-body .ps-customer-profile-page .ps-money-stack > div,
+body.pushsale-app-body .ps-customer-profile-page .ps-money-stack > strong {
+    justify-content: flex-end !important;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+}
+
+body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination {
+    margin-left: 14px !important;
+    margin-right: 14px !important;
+}
+
+@media (max-width: 1499px) {
+    body.pushsale-app-body .ps-customer-profile-page .ps-customer-table-scroll {
+        overflow-x: auto !important;
+    }
+    body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table {
+        min-width: 1350px !important;
+    }
+}

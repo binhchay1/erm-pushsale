@@ -33,8 +33,6 @@ class OperationController extends Controller
         SaleOperationConfigurationService $configuration,
     ): Response {
         $filter = $this->reportFilters($request);
-        $isAdminPath = $request->is('admin/*');
-
         $options = $filterOptions->forReports($request->user());
         $options['dateTypes'] = collect(DateType::cases())->map(fn (DateType $type) => [
             'value' => $type->value,
@@ -92,11 +90,26 @@ class OperationController extends Controller
                 'warehouseOptions' => $this->warehouseOptions(),
                 'productOptions' => $this->productOptions(),
                 'sourceOptions' => $this->sourceOptions(),
-                'routeUrl' => $isAdminPath ? '/admin/sales/workspace' : '/sales/workspace',
-                'actionBaseUrl' => $isAdminPath ? '/admin/sales' : '/sales',
-                'manualUrl' => $isAdminPath ? '/admin/sales/leads/manual' : '/sales/leads/manual',
+                'routeUrl' => $this->workspaceRouteUrl($request),
+                'actionBaseUrl' => $this->workspaceActionBaseUrl($request),
+                'manualUrl' => $this->workspaceManualUrl($request),
             ]
         ));
+    }
+
+    protected function workspaceRouteUrl(Request $request): string
+    {
+        return '/sales/workspace';
+    }
+
+    protected function workspaceActionBaseUrl(Request $request): string
+    {
+        return '/sales';
+    }
+
+    protected function workspaceManualUrl(Request $request): string
+    {
+        return '/sales/leads/manual';
     }
 
     /** @return list<array{id:int,name:string}> */
