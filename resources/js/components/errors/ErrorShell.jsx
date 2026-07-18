@@ -108,7 +108,7 @@ export function ErrorShell({
     const codeLabel = status === 'client' ? '!' : String(status);
 
     return (
-        <div className="fixed inset-0 z-[9999] flex min-h-screen w-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-background via-muted/30 to-background px-4 py-10">
+        <div className="erm-error-page fixed inset-0 z-[9999] flex h-dvh min-h-dvh w-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-background via-muted/30 to-background px-5 py-8">
             <div
                 className={cn(
                     'pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b',
@@ -125,8 +125,8 @@ export function ErrorShell({
                 aria-hidden
             />
 
-            <div className="relative z-10 w-full max-w-lg">
-                <div className="mb-6 flex flex-col items-center gap-2 text-center">
+            <div className="erm-error-panel relative z-10 w-full max-w-xl">
+                <div className="mb-7 flex flex-col items-center gap-2 text-center">
                     <div className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
                         <LayoutDashboard className="size-5" />
                     </div>
@@ -140,7 +140,7 @@ export function ErrorShell({
                     <CardContent className="relative p-0">
                         <span
                             className={cn(
-                                'pointer-events-none absolute -right-4 -top-6 select-none text-[7rem] font-black leading-none',
+                                'pointer-events-none absolute -right-4 -top-8 select-none text-[8.5rem] font-black leading-none',
                                 tone.code,
                             )}
                             aria-hidden
@@ -148,7 +148,7 @@ export function ErrorShell({
                             {codeLabel}
                         </span>
 
-                        <div className="relative space-y-5 p-6 sm:p-8">
+                        <div className="relative space-y-6 p-8 sm:p-10">
                             <div className="flex items-start gap-4">
                                 <div
                                     className={cn(
@@ -164,13 +164,13 @@ export function ErrorShell({
                                             ? t('errors.client_title')
                                             : t('errors.error_code', { code: status })}
                                     </p>
-                                    <h1 className="mt-1 text-xl font-bold tracking-tight text-foreground">
+                                    <h1 className="mt-2 text-3xl font-bold leading-tight tracking-tight text-foreground">
                                         {displayTitle}
                                     </h1>
                                 </div>
                             </div>
 
-                            <p className="text-sm leading-relaxed text-muted-foreground">
+                            <p className="text-base leading-relaxed text-muted-foreground">
                                 {displayDescription}
                             </p>
 
@@ -186,7 +186,7 @@ export function ErrorShell({
                                 </pre>
                             )}
 
-                            <div className="flex flex-wrap gap-2 pt-1">
+                            <div className="flex flex-wrap gap-3 pt-2">
                                 {children ?? (
                                     <>
                                         <Button asChild>

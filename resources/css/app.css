@@ -179,3 +179,41 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* V51 - full-screen, readable error pages. */
+html, body, #app { width: 100% !important; min-height: 100% !important; }
+#app > .erm-error-page,
+#app > .fixed.inset-0.z-\[9999\] {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: none !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 32px 20px !important;
+    overflow: hidden !important;
+}
+#app > .erm-error-page .erm-error-panel,
+#app > .fixed.inset-0.z-\[9999\] .relative.z-10.w-full {
+    width: min(620px, calc(100vw - 40px)) !important;
+    max-width: 620px !important;
+}
+#app > .erm-error-page h1,
+#app > .fixed.inset-0.z-\[9999\] h1 {
+    font-size: clamp(32px, 4.2vw, 46px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -.03em !important;
+}
+#app > .erm-error-page p,
+#app > .fixed.inset-0.z-\[9999\] p {
+    line-height: 1.55 !important;
+}
+#app > .erm-error-page .text-\[7rem\],
+#app > .fixed.inset-0.z-\[9999\] .text-\[7rem\] {
+    font-size: clamp(112px, 12vw, 154px) !important;
+}

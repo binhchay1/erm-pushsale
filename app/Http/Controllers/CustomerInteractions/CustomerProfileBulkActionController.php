@@ -169,15 +169,9 @@ class CustomerProfileBulkActionController extends Controller
     public function export(Request $request): StreamedResponse
     {
         abort_unless($request->user()?->allows(PermissionArea::Customers, PermissionLevel::View), 403);
+
         $ids = collect($request->input('ids', []))->filter()->map(fn ($id) => (int) $id)->values();
         $variant = min(4, max(1, $request->integer('variant', 1)));
-
-        $orders = Order::query()
-            ->with(['items', 'saleUser:id,name,email', 'marketerUser:id,name,email', 'marketingSource:id,name', 'warehouse:id,name'])
-            ->when($ids->isNotEmpty(), fn ($query) => $query->whereIn('id', $ids))
-            ->latest('id')
-            ->limit($ids->isNotEmpty() ? max(1, $ids->count()) : 5000)
-            ->get();
 
         $headers = match ($variant) {
             2 => ['Tên khách hàng', 'Số điện thoại', 'Địa chỉ', 'Tin nhắn', 'Nguồn dữ liệu', 'Marketing', 'Sale'],
@@ -186,20 +180,38 @@ class CustomerProfileBulkActionController extends Controller
             default => ['Mã đơn', 'Nguồn dữ liệu', 'Ngày data về', 'Tên khách hàng', 'Số điện thoại', 'Sale', 'Tác nghiệp', 'Kết quả', 'Sản phẩm', 'Tổng tiền', 'Trạng thái giao hàng'],
         };
 
-        return response()->streamDownload(function () use ($orders, $headers, $variant): void {
-            $out = fopen('php://output', 'wb');
-            fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, $headers);
+        try {
+            $orders = Order::query()
+                ->with(['items', 'saleUser:id,name,email', 'marketerUser:id,name,email', 'marketingSource:id,name', 'warehouse:id,name'])
+                ->when($ids->isNotEmpty(), fn ($query) => $query->whereIn('id', $ids))
+                ->when($request->user()?->company_id, fn ($query, $companyId) => $query->where('company_id', $companyId))
+                ->latest('id')
+                ->limit($ids->isNotEmpty() ? max(1, $ids->count()) : 5000)
+                ->get();
 
-            foreach ($orders as $order) {
-                $products = $order->items->map(fn ($item) => $item->product_name.' x'.$item->quantity)->implode(' | ');
+            $rows = $orders->map(function (Order $order) use ($variant): array {
+                $products = $order->items->map(fn ($item) => trim((string) $item->product_name).' x'.(int) $item->quantity)->implode(' | ');
                 $quantity = (int) $order->items->sum('quantity');
-                $row = match ($variant) {
+
+                return match ($variant) {
                     2 => [$order->customer_name, $order->customer_phone, $order->effectiveShippingAddress(), $order->customer_note, $order->marketingSource?->name, $order->marketerUser?->name, $order->saleUser?->name],
                     3 => [$order->order_code, $products, $quantity, $order->subtotal, $order->discount, $order->vat, $order->shipping_fee_collected, $order->total, $order->deposit],
                     4 => [$order->order_code, $order->customer_name, $order->customer_phone, $order->marketingSource?->name, $order->marketerUser?->name, $order->saleUser?->name, $order->operation_stage, $order->operation_result, $products, $order->total, $order->warehouse?->name, $order->shipping_method, $order->tracking_number, $order->delivery_status, $order->internal_recon_note],
                     default => [$order->order_code, $order->marketingSource?->name, $order->data_arrived_at?->format('d/m/Y H:i:s'), $order->customer_name, $order->customer_phone, $order->saleUser?->name, $order->operation_stage, $order->operation_result, $products, $order->total, $order->delivery_status],
                 };
+            })->all();
+        } catch (Throwable $e) {
+            report($e);
+            $headers = ['Lỗi xuất dữ liệu'];
+            $rows = [['Không xuất được dữ liệu hồ sơ khách hàng. Vui lòng kiểm tra log server.']];
+        }
+
+        return response()->streamDownload(function () use ($headers, $rows): void {
+            $out = fopen('php://output', 'wb');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, $headers);
+
+            foreach ($rows as $row) {
                 fputcsv($out, $row);
             }
 
@@ -217,7 +229,10 @@ class CustomerProfileBulkActionController extends Controller
     /** @return \Illuminate\Database\Eloquent\Collection<int, Order> */
     private function selectedOrders(Request $request)
     {
-        return Order::query()->whereIn('id', $this->validatedIds($request))->get();
+        return Order::query()
+            ->whereIn('id', $this->validatedIds($request))
+            ->when($request->user()?->company_id, fn ($query, $companyId) => $query->where('company_id', $companyId))
+            ->get();
     }
 
     /** @return list<int> */

@@ -354,7 +354,6 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                             <FilterSelect value={form.care_status} onChange={(value) => setField('care_status', value)} options={filterOptions.careStatuses} placeholder="--Care đơn--" />
                             <FilterSelect value={form.closing_status} onChange={(value) => setField('closing_status', value)} options={filterOptions.closingStatuses} placeholder="--Trạng thái chốt đơn--" />
                             <FilterSelect value={form.source_id} onChange={(value) => setField('source_id', value)} options={filterOptions.sources} placeholder="--Nguồn dữ liệu--" />
-                            <button type="button" className="btn btn-default ps-filter-reset" onClick={reset}><i className="fa fa-refresh" /> Đặt lại</button>
 
                             <FilterSelect value={form.sale_leader_id} onChange={(value) => setForm((current) => ({ ...current, sale_leader_id: value, sale_team_id: '', sale_id: '', page: 1 }))} options={filterOptions.saleLeaders} placeholder="--Trưởng nhóm sale--" />
                             <FilterSelect value={form.sale_team_id} onChange={(value) => setForm((current) => ({ ...current, sale_team_id: value, sale_id: '', page: 1 }))} options={saleTeams} placeholder="--Nhóm sale--" />
@@ -375,6 +374,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                             <FilterSelect value={form.customer_type} onChange={(value) => setField('customer_type', value)} options={filterOptions.customerTypes} placeholder="--Khách cũ / Khách mới--" />
                             <FilterSelect value={form.allocation_status} onChange={(value) => setField('allocation_status', value)} options={filterOptions.allocationStatuses} placeholder="--Phân bổ--" />
                             <FilterSelect value={form.shipping_method} onChange={(value) => setField('shipping_method', value)} options={filterOptions.shippingMethods} placeholder="--PTGH--" />
+                            <button type="button" className="btn btn-default ps-filter-reset" onClick={reset}><i className="fa fa-refresh" /> Đặt lại</button>
                             <button type="button" className="btn btn-primary ps-filter-search" onClick={search}><i className="fa fa-search" /> Tìm kiếm</button>
                         </div>
                     </div>
