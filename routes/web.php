@@ -294,6 +294,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
 
     // Quản lý nhân viên: mở cho nhánh trên có quyền HR (không chỉ admin). Chặn qua middleware permissions + phân cấp.
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::post('users/bulk', [UserController::class, 'storeBulk'])
+            ->name('users.bulk.store');
         Route::patch('users/{user}/operational-status', [UserController::class, 'updateOperationalStatus'])
             ->name('users.operational-status');
         Route::patch('users/{user}/password', [UserController::class, 'updatePassword'])

@@ -14094,3 +14094,244 @@ html body.pushsale-app-body .modal.fade.show .modal-dialog {
         transition: none !important;
     }
 }
+
+/* V57 - Pushsale menu interaction + employee modal contract.
+   Keep this block last: it fixes flyout closing, menu scroll contract and modal forms. */
+:root {
+    --ps-menu-speed: 620ms;
+    --ps-submenu-speed: 540ms;
+    --ps-flyout-speed: 320ms;
+    --ps-menu-width: 252px;
+    --ps-menu-blue: #0087ff;
+    --ps-menu-blue-hover: #0569be;
+    --ps-menu-bg: #f9fafc;
+}
+
+html body.pushsale-app-body .pushsale-wrapper .pushsale-main-sidebar,
+html body.pushsale-app-body .pushsale-main-sidebar {
+    position: absolute !important;
+    top: var(--ps-menu-top) !important;
+    bottom: auto !important;
+    height: auto !important;
+    min-height: 2048px !important;
+    overflow: visible !important;
+    background: var(--ps-menu-bg) !important;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, .18) !important;
+    transform: translate3d(-100%, 0, 0) !important;
+    transition: transform var(--ps-menu-speed) cubic-bezier(.22, .61, .36, 1), box-shadow var(--ps-menu-speed) cubic-bezier(.22, .61, .36, 1) !important;
+}
+
+html body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-main-sidebar {
+    transform: translate3d(0, 0, 0) !important;
+}
+
+html body.pushsale-app-body .pushsale-sidebar {
+    height: auto !important;
+    min-height: 2048px !important;
+    overflow: visible !important;
+    scrollbar-width: none !important;
+    background: var(--ps-menu-bg) !important;
+}
+html body.pushsale-app-body .pushsale-sidebar::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+
+html body.pushsale-app-body .sidebar-menu .a1,
+html body.pushsale-app-body .sidebar-menu .a2,
+html body.pushsale-app-body .pushsale-third-link {
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    -webkit-font-smoothing: subpixel-antialiased !important;
+    text-rendering: auto !important;
+}
+
+html body.pushsale-app-body .sidebar-menu .a1 {
+    height: 45px !important;
+    min-height: 45px !important;
+    padding: 0 11px !important;
+    color: #1f2d3d !important;
+    font-size: 14px !important;
+    line-height: 45px !important;
+}
+html body.pushsale-app-body .sidebar-menu .a1 > .fa:first-child,
+html body.pushsale-app-body .sidebar-menu .a1 > .i1 {
+    line-height: 45px !important;
+}
+
+html body.pushsale-app-body .sidebar-menu .a2 {
+    height: 43px !important;
+    min-height: 43px !important;
+    padding: 0 12px 0 38px !important;
+    color: #425466 !important;
+    font-size: 14px !important;
+    line-height: 43px !important;
+}
+
+html body.pushsale-app-body .treeview-menu.ul2 {
+    transition: max-height var(--ps-submenu-speed) cubic-bezier(.22, .61, .36, 1), opacity 340ms ease, transform var(--ps-submenu-speed) cubic-bezier(.22, .61, .36, 1) !important;
+}
+
+html body.pushsale-app-body .sidebar-menu .li2 > .a2:hover {
+    background: #eef5ff !important;
+    color: #007bff !important;
+}
+
+html body.pushsale-app-body .sidebar-menu .li2.active > .a2,
+html body.pushsale-app-body .sidebar-menu .li2.flyout-open > .a2 {
+    background: #0087ff !important;
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu {
+    width: 280px !important;
+    min-width: 280px !important;
+    padding: 8px !important;
+    background: #0087ff !important;
+    box-shadow: 3px 3px 9px rgba(0, 0, 0, .22) !important;
+    overflow: visible !important;
+    animation: ps-third-menu-in var(--ps-flyout-speed) cubic-bezier(.22, .61, .36, 1) both !important;
+}
+
+html body.pushsale-app-body .pushsale-third-item {
+    margin: 4px 0 !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .pushsale-third-link {
+    height: 53px !important;
+    min-height: 53px !important;
+    padding: 0 18px 0 20px !important;
+    border-radius: 4px !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    line-height: 53px !important;
+    transition: background-color 180ms ease, color 180ms ease !important;
+}
+html body.pushsale-app-body .pushsale-third-link:hover,
+html body.pushsale-app-body .pushsale-third-item.active .pushsale-third-link {
+    background: var(--ps-menu-blue-hover) !important;
+    color: #fff !important;
+    text-decoration: none !important;
+}
+
+html body.pushsale-app-body .ps-employee-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147482500 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding: 10px 0 36px !important;
+    background: rgba(0, 0, 0, .45) !important;
+    overflow: auto !important;
+    animation: ps-modal-backdrop-in 220ms ease-out both !important;
+}
+
+html body.pushsale-app-body .ps-employee-modal {
+    width: min(var(--ps-employee-modal-width, 600px), calc(100vw - 20px)) !important;
+    margin: 0 auto !important;
+    background: #fff !important;
+    border: 1px solid #d2d6de !important;
+    box-shadow: 0 2px 9px rgba(0, 0, 0, .28) !important;
+    animation: ps-modal-slide-down 260ms cubic-bezier(.2, .75, .25, 1) both !important;
+}
+
+html body.pushsale-app-body .ps-employee-modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    min-height: 50px !important;
+    padding: 0 18px !important;
+    border-bottom: 1px solid #d2d6de !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-employee-modal-header strong {
+    font-size: 18px !important;
+    color: #111 !important;
+}
+html body.pushsale-app-body .ps-employee-modal-close {
+    border: 0 !important;
+    background: transparent !important;
+    font-size: 18px !important;
+    color: #111 !important;
+    line-height: 1 !important;
+}
+
+html body.pushsale-app-body .ps-employee-form {
+    padding: 14px 16px 24px !important;
+}
+html body.pushsale-app-body .ps-employee-form-row {
+    display: grid !important;
+    grid-template-columns: 190px 1fr !important;
+    align-items: start !important;
+    gap: 10px 14px !important;
+    margin-bottom: 12px !important;
+}
+html body.pushsale-app-body .ps-employee-form-row > label {
+    margin: 8px 0 0 !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+}
+html body.pushsale-app-body .ps-employee-form-row .required {
+    color: #f00 !important;
+}
+html body.pushsale-app-body .ps-employee-form .form-control,
+html body.pushsale-app-body .ps-employee-form select,
+html body.pushsale-app-body .ps-employee-form textarea {
+    width: 100% !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    border: 1px solid #cbd5df !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 13px !important;
+}
+html body.pushsale-app-body .ps-employee-form textarea {
+    height: 215px !important;
+    min-height: 215px !important;
+    resize: vertical !important;
+}
+html body.pushsale-app-body .ps-employee-inline {
+    display: flex !important;
+    align-items: center !important;
+    gap: 24px !important;
+    flex-wrap: wrap !important;
+    min-height: 30px !important;
+}
+html body.pushsale-app-body .ps-employee-inline label,
+html body.pushsale-app-body .ps-employee-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    font-weight: 400 !important;
+    color: #111 !important;
+}
+html body.pushsale-app-body .ps-employee-inline input[type='checkbox'],
+html body.pushsale-app-body .ps-employee-check input[type='checkbox'] {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+}
+html body.pushsale-app-body .ps-employee-support {
+    display: grid !important;
+    grid-template-columns: 125px 125px 100px auto !important;
+    gap: 12px 30px !important;
+    align-items: center !important;
+}
+html body.pushsale-app-body .ps-employee-support .form-control {
+    width: 125px !important;
+}
+html body.pushsale-app-body .ps-employee-action-row {
+    padding-left: 204px !important;
+    margin-top: 10px !important;
+}
+html body.pushsale-app-body .ps-employee-error {
+    margin: 0 0 12px 204px !important;
+    color: #b00020 !important;
+    font-size: 12px !important;
+}

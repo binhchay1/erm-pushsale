@@ -81,7 +81,7 @@ function LeafLink({ item, className, onNavigate, children }) {
     );
 }
 
-function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose }) {
+function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose, onMouseEnter, onMouseLeave }) {
     if (!flyout || typeof document === 'undefined') return null;
 
     return createPortal(
@@ -90,6 +90,8 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose }) 
             style={{ top: flyout.top }}
             role="menu"
             aria-label={flyout.item.title}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
         >
             {(flyout.item.children ?? []).map((child, index) => {
                 const childKey = `${flyout.key}.${index}`;
@@ -120,6 +122,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     const { props, url } = usePage();
     const { navigation = [], activeMenuCode = null } = props;
     const sidebarRef = useRef(null);
+    const flyoutTimerRef = useRef(null);
     const [rememberedMenuCode, setRememberedMenuCode] = useState(() =>
         typeof window === 'undefined' ? null : window.sessionStorage.getItem('pushsale-active-menu-code'),
     );
@@ -137,33 +140,56 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     const [openRoot, setOpenRoot] = useState(null);
     const [flyout, setFlyout] = useState(null);
 
+    const clearFlyoutTimer = () => {
+        if (flyoutTimerRef.current) {
+            window.clearTimeout(flyoutTimerRef.current);
+            flyoutTimerRef.current = null;
+        }
+    };
+
+    const closeFlyout = () => {
+        clearFlyoutTimer();
+        setFlyout(null);
+    };
+
+    const scheduleFlyoutClose = (delay = 180) => {
+        clearFlyoutTimer();
+        flyoutTimerRef.current = window.setTimeout(() => {
+            setFlyout(null);
+            flyoutTimerRef.current = null;
+        }, delay);
+    };
+
     useEffect(() => {
         if (collapsed) {
             setOpenRoot(null);
-            setFlyout(null);
+            closeFlyout();
             return;
         }
         setOpenRoot(activeRootIndex);
     }, [activeRootIndex, collapsed]);
 
     useEffect(() => {
-        setFlyout(null);
+        closeFlyout();
     }, [url]);
 
     useEffect(() => {
         const close = (event) => {
             const target = event.target;
             if (target.closest?.('.pushsale-third-menu') || target.closest?.('[data-pushsale-second-parent="true"]')) return;
-            setFlyout(null);
+            closeFlyout();
         };
-        const closeOnViewportChange = () => setFlyout(null);
+        const closeOnViewportChange = () => closeFlyout();
         document.addEventListener('mousedown', close);
+        document.addEventListener('touchstart', close, { passive: true });
         window.addEventListener('resize', closeOnViewportChange);
-        sidebarRef.current?.addEventListener('scroll', closeOnViewportChange, { passive: true });
+        window.addEventListener('scroll', closeOnViewportChange, true);
         return () => {
             document.removeEventListener('mousedown', close);
+            document.removeEventListener('touchstart', close);
             window.removeEventListener('resize', closeOnViewportChange);
-            sidebarRef.current?.removeEventListener('scroll', closeOnViewportChange);
+            window.removeEventListener('scroll', closeOnViewportChange, true);
+            clearFlyoutTimer();
         };
     }, []);
 
@@ -175,11 +201,12 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     };
 
     const toggleRoot = (index) => {
-        setFlyout(null);
+        closeFlyout();
         setOpenRoot((current) => (current === index ? null : index));
     };
 
     const toggleFlyout = (event, item, key) => {
+        clearFlyoutTimer();
         const rect = event.currentTarget.getBoundingClientRect();
         const estimatedHeight = Math.max(61, (item.children?.length ?? 1) * 61);
         const top = Math.max(50, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
@@ -189,7 +216,12 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     return (
         <>
             <aside className="main-sidebar pushsale-main-sidebar" aria-label="Điều hướng chính">
-                <section className="sidebar pushsale-sidebar" ref={sidebarRef}>
+                <section
+                    className="sidebar pushsale-sidebar"
+                    ref={sidebarRef}
+                    onMouseEnter={clearFlyoutTimer}
+                    onMouseLeave={() => scheduleFlyoutClose(140)}
+                >
                     <ul className="sidebar-menu ul1">
                         {navigation.map((root, rootIndex) => {
                             const rootKey = `root.${rootIndex}`;
@@ -234,6 +266,9 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                     <li
                                                         key={key}
                                                         className={cn('li2', childActive && 'active', flyoutOpen && 'flyout-open')}
+                                                        onMouseEnter={() => {
+                                                            if (!hasGrandchildren) closeFlyout();
+                                                        }}
                                                     >
                                                         {hasGrandchildren ? (
                                                             <button
@@ -242,6 +277,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                 data-pushsale-second-parent="true"
                                                                 onClick={(event) => toggleFlyout(event, child, key)}
                                                                 onMouseEnter={(event) => {
+                                                                    clearFlyoutTimer();
                                                                     const rect = event.currentTarget.getBoundingClientRect();
                                                                     const estimatedHeight = Math.max(61, (child.children?.length ?? 1) * 61);
                                                                     const top = Math.max(50, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
@@ -259,7 +295,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                 className="a2 pushsale-menu-link"
                                                                 onNavigate={() => {
                                                                     rememberSelection(child);
-                                                                    setFlyout(null);
+                                                                    closeFlyout();
                                                                     onNavigate?.();
                                                                 }}
                                                             >
@@ -284,7 +320,9 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                     activeKey={activeKey}
                     onNavigate={onNavigate}
                     onSelect={rememberSelection}
-                    onClose={() => setFlyout(null)}
+                    onClose={closeFlyout}
+                    onMouseEnter={clearFlyoutTimer}
+                    onMouseLeave={() => scheduleFlyoutClose(140)}
                 />
             )}
         </>

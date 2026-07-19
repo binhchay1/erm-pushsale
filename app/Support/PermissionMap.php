@@ -23,6 +23,7 @@ final class PermissionMap
         'admin.users.create' => 'hr:full',
         'admin.users.edit' => 'hr:full',
         'admin.users.store' => 'hr:full',
+        'admin.users.bulk.store' => 'hr:full',
         'admin.users.update' => 'hr:full',
         'admin.users.destroy' => 'hr:full',
         'admin.teams.' => 'hr:full',

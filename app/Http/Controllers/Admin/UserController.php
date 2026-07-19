@@ -21,6 +21,7 @@ use App\Support\TenantEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -123,6 +124,7 @@ class UserController extends Controller
             'users' => $users,
             'filters' => $filters,
             'roles' => collect(UserRole::cases())->map(fn (UserRole $role) => ['value' => $role->value, 'label' => $role->label()])->values(),
+            'workShifts' => $this->workShiftOptions(),
             'accountCount' => $accountCount,
             'canCreate' => (bool) $actor?->allows(PermissionArea::Hr, \App\Enums\PermissionLevel::Full),
             'activeMenuCode' => '1.2.1',
@@ -164,6 +166,88 @@ class UserController extends Controller
         );
 
         return redirect()->route('admin.users.index')->with('success', __('messages.user_created'));
+    }
+
+
+    public function storeBulk(Request $request): RedirectResponse
+    {
+        $actor = $request->user();
+        if (! $actor || ! $actor->allows(PermissionArea::Hr, \App\Enums\PermissionLevel::Full)) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'role' => ['required', Rule::enum(UserRole::class)],
+            'accounts' => ['required', 'string'],
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+            'receive_data' => ['sometimes', 'boolean'],
+        ]);
+
+        $assignable = array_map(
+            fn (UserRole $role) => $role->value,
+            $this->hierarchy->assignableRoles($actor),
+        );
+        if (! in_array((string) $data['role'], $assignable, true)) {
+            return back()->withErrors(['role' => __('messages.user_role_not_allowed')]);
+        }
+
+        $company = $actor->company;
+        if (! $company) {
+            return back()->withErrors(['accounts' => 'Không xác định được đơn vị để tạo tài khoản.']);
+        }
+
+        $rawAccounts = preg_split('/\R+/', (string) $data['accounts']) ?: [];
+        $accounts = collect($rawAccounts)
+            ->map(fn ($value) => TenantEmail::normalizeLocalPart((string) $value))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($accounts->isEmpty()) {
+            return back()->withErrors(['accounts' => 'Chưa có tài khoản hợp lệ.']);
+        }
+
+        $created = 0;
+        $duplicates = [];
+        foreach ($accounts as $local) {
+            $email = TenantEmail::build($local, $company);
+            if (User::query()->where('email', $email)->exists()) {
+                $duplicates[] = $local;
+                continue;
+            }
+
+            $user = User::query()->create([
+                'company_id' => $company->id,
+                'name' => str_replace(['.', '_', '-'], ' ', $local),
+                'email' => $email,
+                'password' => Hash::make($data['password']),
+                'role' => $data['role'],
+                'created_by_user_id' => $actor->id,
+                'permissions' => null,
+            ]);
+
+            $this->syncOperationalProfile($user, [
+                'employee_code' => 'NV'.str_pad((string) $user->id, 5, '0', STR_PAD_LEFT),
+                'base_salary' => 0,
+                'receive_data' => (bool) ($data['receive_data'] ?? false),
+                'work_shift_id' => null,
+                'is_locked' => false,
+            ]);
+            $created++;
+        }
+
+        ActivityLogger::log(
+            ActivityLogger::USER_CREATED,
+            $actor,
+            ['bulk_created' => $created, 'duplicates' => $duplicates],
+        );
+
+        $message = "Đã tạo {$created} tài khoản.";
+        if ($duplicates !== []) {
+            $message .= ' Bỏ qua trùng: '.implode(', ', array_slice($duplicates, 0, 8));
+        }
+
+        return redirect()->route('admin.users.index')->with('success', $message);
     }
 
     public function edit(User $user): Response

@@ -63,8 +63,197 @@ function PasswordModal({ user, onClose }) {
     );
 }
 
-export default function UsersIndex({ users, filters = {}, roles = [], accountCount = 0, canCreate = true }) {
+
+function SingleAccountModal({ open, onClose, roles = [], workShifts = [] }) {
+    const form = useForm({
+        role: '',
+        email_local: '',
+        password: '',
+        password_confirmation: '',
+        phone: '',
+        name: '',
+        employee_code: '',
+        contact_email: '',
+        base_salary: '',
+        work_shift_id: '',
+        is_team_leader: false,
+        receive_data: false,
+    });
+
+    if (!open) return null;
+
+    const submit = (event) => {
+        event.preventDefault();
+        form.post('/admin/users', {
+            preserveScroll: true,
+            onSuccess: onClose,
+        });
+    };
+
+    return (
+        <div className="ps-employee-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+            <div className="ps-employee-modal" style={{ '--ps-employee-modal-width': '600px' }} role="dialog" aria-modal="true" aria-label="Cập nhật tài khoản">
+                <div className="ps-employee-modal-header">
+                    <strong>Cập nhật tài khoản</strong>
+                    <button type="button" className="ps-employee-modal-close" onClick={onClose}>×</button>
+                </div>
+                <form className="ps-employee-form" onSubmit={submit}>
+                    {Object.keys(form.errors).length > 0 && <div className="ps-employee-error">{Object.values(form.errors).join(' · ')}</div>}
+                    <div className="ps-employee-form-row"><label>#</label><div>0</div></div>
+                    <div className="ps-employee-form-row">
+                        <label>Chức vụ:</label>
+                        <select className="form-control" value={form.data.role} onChange={(event) => form.setData('role', event.target.value)} required>
+                            <option value="">--Chức vụ</option>
+                            {roles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
+                        </select>
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Tài khoản <span className="required">(*)</span>:</label>
+                        <input className="form-control" value={form.data.email_local} onChange={(event) => form.setData('email_local', event.target.value)} required />
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Mật khẩu:</label>
+                        <input className="form-control" type="password" value={form.data.password} onChange={(event) => {
+                            const password = event.target.value;
+                            form.setData({ ...form.data, password, password_confirmation: password });
+                        }} required />
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Số ĐT:</label>
+                        <input className="form-control" value={form.data.phone} onChange={(event) => form.setData('phone', event.target.value)} />
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Họ và tên <span className="required">(*)</span>:</label>
+                        <input className="form-control" value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} required />
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Mã nhân viên:</label>
+                        <input className="form-control" value={form.data.employee_code} onChange={(event) => form.setData('employee_code', event.target.value)} />
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Email:</label>
+                        <input className="form-control" type="email" value={form.data.contact_email} onChange={(event) => form.setData('contact_email', event.target.value)} />
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Lương cứng:</label>
+                        <input className="form-control" type="number" min="0" value={form.data.base_salary} onChange={(event) => form.setData('base_salary', event.target.value)} />
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Ca làm việc:</label>
+                        <div className="ps-employee-inline">
+                            {workShifts.slice(0, 3).map((shift, index) => (
+                                <label key={shift.id}>
+                                    <input type="checkbox" checked={String(form.data.work_shift_id) === String(shift.id)} onChange={(event) => form.setData('work_shift_id', event.target.checked ? shift.id : '')} />
+                                    {shift.name || `Ca ${index + 1}`}
+                                </label>
+                            ))}
+                            {workShifts.length === 0 && ['Ca 1', 'Ca 2', 'Ca 3'].map((name) => <label key={name}><input type="checkbox" disabled />{name}</label>)}
+                        </div>
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label></label>
+                        <label className="ps-employee-check"><input type="checkbox" checked={form.data.is_team_leader} onChange={(event) => form.setData('is_team_leader', event.target.checked)} />Trưởng nhóm</label>
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label></label>
+                        <label className="ps-employee-check"><input type="checkbox" checked={form.data.receive_data} onChange={(event) => form.setData('receive_data', event.target.checked)} />Nhận dữ liệu</label>
+                    </div>
+                    <div className="ps-employee-action-row">
+                        <button className="btn btn-sm btn-primary" disabled={form.processing}><i className="fa fa-save" /> Cập nhật</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+function BulkAccountModal({ open, onClose, roles = [] }) {
+    const form = useForm({
+        template: '',
+        quantity: '',
+        start: '',
+        role: '',
+        accounts: '',
+        password: '',
+        password_confirmation: '',
+        receive_data: false,
+    });
+
+    if (!open) return null;
+
+    const generateAccounts = () => {
+        const qty = Math.max(0, Number.parseInt(form.data.quantity || '0', 10));
+        const start = Number.parseInt(form.data.start || '1', 10);
+        const template = form.data.template || 'user{n}';
+        if (!qty) return;
+        const lines = Array.from({ length: qty }, (_, index) => {
+            const n = start + index;
+            return template.includes('{n}') ? template.replaceAll('{n}', String(n)) : `${template}${n}`;
+        });
+        form.setData('accounts', lines.join('\n'));
+    };
+
+    const submit = (event) => {
+        event.preventDefault();
+        form.post('/admin/users/bulk', {
+            preserveScroll: true,
+            onSuccess: onClose,
+        });
+    };
+
+    return (
+        <div className="ps-employee-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+            <div className="ps-employee-modal" style={{ '--ps-employee-modal-width': '800px' }} role="dialog" aria-modal="true" aria-label="Tạo tài khoản nhiều">
+                <div className="ps-employee-modal-header">
+                    <strong>Tạo tài khoản nhiều</strong>
+                    <button type="button" className="ps-employee-modal-close" onClick={onClose}>×</button>
+                </div>
+                <form className="ps-employee-form" onSubmit={submit}>
+                    {Object.keys(form.errors).length > 0 && <div className="ps-employee-error">{Object.values(form.errors).join(' · ')}</div>}
+                    <div className="ps-employee-form-row">
+                        <label>Hỗ trợ:</label>
+                        <div className="ps-employee-support">
+                            <input className="form-control" placeholder="mẫu" value={form.data.template} onChange={(event) => form.setData('template', event.target.value)} />
+                            <input className="form-control" placeholder="số lượng" type="number" min="1" value={form.data.quantity} onChange={(event) => form.setData('quantity', event.target.value)} />
+                            <input className="form-control" placeholder="Số thứ tự" type="number" min="1" value={form.data.start} onChange={(event) => form.setData('start', event.target.value)} />
+                            <button type="button" className="btn btn-link" onClick={generateAccounts}>Tạo TK</button>
+                        </div>
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Chức vụ <span className="required">(*)</span>:</label>
+                        <select className="form-control" value={form.data.role} onChange={(event) => form.setData('role', event.target.value)} required>
+                            <option value="">--Chức vụ</option>
+                            {roles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
+                        </select>
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Tài khoản <span className="required">(*)</span>:<br /><span className="small-tip">(mỗi dòng một tài khoản)</span></label>
+                        <textarea className="form-control" value={form.data.accounts} onChange={(event) => form.setData('accounts', event.target.value)} required />
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label>Mật khẩu:</label>
+                        <input className="form-control" type="password" value={form.data.password} onChange={(event) => {
+                            const password = event.target.value;
+                            form.setData({ ...form.data, password, password_confirmation: password });
+                        }} required />
+                    </div>
+                    <div className="ps-employee-form-row">
+                        <label></label>
+                        <label className="ps-employee-check"><input type="checkbox" checked={form.data.receive_data} onChange={(event) => form.setData('receive_data', event.target.checked)} />Nhận dữ liệu</label>
+                    </div>
+                    <div className="ps-employee-action-row">
+                        <button className="btn btn-sm btn-primary" disabled={form.processing}><i className="fa fa-save" /> Cập nhật</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+export default function UsersIndex({ users, filters = {}, roles = [], workShifts = [], accountCount = 0, canCreate = true }) {
     const [passwordUser, setPasswordUser] = useState(null);
+    const [singleModalOpen, setSingleModalOpen] = useState(false);
+    const [bulkModalOpen, setBulkModalOpen] = useState(false);
     const [form, setForm] = useState({
         search: filters.search ?? '',
         role: filters.role ?? '',
@@ -160,13 +349,13 @@ export default function UsersIndex({ users, filters = {}, roles = [], accountCou
 
                 <div className="box-body ps-toolbar">
                     {canCreate && (
-                        <Link className="btn btn-sm btn-primary" href="/admin/users/create">
+                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setSingleModalOpen(true)}>
                             <i className="fa fa-plus" /> Thêm tài khoản
-                        </Link>
+                        </button>
                     )}
-                    <Link className="btn btn-sm btn-default" href="/admin/users/create?mode=bulk">
+                    <button type="button" className="btn btn-sm btn-default" onClick={() => setBulkModalOpen(true)}>
                         <i className="fa fa-gears" /> Thêm nhiều tài khoản
-                    </Link>
+                    </button>
                     <button type="button" className="btn btn-sm btn-default" disabled={!canBulk} title="Cập nhật tại màn hình sửa tài khoản">
                         <i className="fa fa-gears" /> Cập nhật nhận dữ liệu
                     </button>
@@ -240,6 +429,8 @@ export default function UsersIndex({ users, filters = {}, roles = [], accountCou
                     </ul>
                 </div>
             </section>
+            <SingleAccountModal open={singleModalOpen} onClose={() => setSingleModalOpen(false)} roles={roles} workShifts={workShifts} />
+            <BulkAccountModal open={bulkModalOpen} onClose={() => setBulkModalOpen(false)} roles={roles} />
             <PasswordModal user={passwordUser} onClose={() => setPasswordUser(null)} />
         </AppLayout>
     );
