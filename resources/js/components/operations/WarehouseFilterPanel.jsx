@@ -43,11 +43,20 @@ function DateRangeInput({ filters, onChange }) {
 
     return (
         <input
-            className="date-range"
+            className="form-control date-range"
             value={value}
             onChange={(event) => sync(event.target.value)}
             placeholder="dd/mm/yyyy 00:00 - dd/mm/yyyy 23:59"
         />
+    );
+}
+
+function SelectField({ name, value, placeholder, children, options: optionList }) {
+    return (
+        <select className="form-control chosen chosen-x" name={name} defaultValue={value ?? ''}>
+            <option value="">{placeholder}</option>
+            {children ?? options(optionList)}
+        </select>
     );
 }
 
@@ -79,15 +88,22 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
 
             <div className="m-header-wrap ps-wh-search-header">
                 <div className="m-header">
-                    <div className="ps-wh-header-grid">
-                        <div className="ps-wh-header-title"><span className="text">{title}</span></div>
-                        <label className="ps-wh-header-check"><input type="checkbox" name="hide_zero_status" value="1" defaultChecked={Boolean(filters.hide_zero_status)} /> <span>Ẩn trạng thái không số</span></label>
-                        <div className="ps-wh-header-search">
-                            <input name="search" defaultValue={filters.search ?? ''} placeholder="Họ tên, số điện thoại" />
-                            <button type="submit" className="btn btn-sm btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
-                            <button type="button" className="btn-icon ps-wh-summary-toggle" onClick={() => setSummaryOpen((open) => !open)} title={summaryOpen ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}>
-                                <i className={`fa fa-angle-double-${summaryOpen ? 'up' : 'down'}`} />
-                            </button>
+                    <div className="row ps-wh-header-row">
+                        <div className="col-xs-12 col-sm-6 form-group ps-wh-title-col">
+                            <span className="text">{title}</span>
+                        </div>
+                        <div className="col-xs-12 col-sm-2 form-group text-right ps-wh-check-col">
+                            <label><input type="checkbox" name="hide_zero_status" value="1" defaultChecked={Boolean(filters.hide_zero_status)} /> <span>Ẩn trạng thái không số</span></label>
+                        </div>
+                        <div className="col-xs-12 col-sm-4 form-group ps-wh-search-col">
+                            <div className="ps-wh-keyword"><input className="form-control" name="search" defaultValue={filters.search ?? ''} placeholder="Họ tên, số điện thoại" /></div>
+                            <div className="ps-wh-search-actions">
+                                <button type="submit" className="btn btn-sm btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
+                                <button type="button" className="btn-icon ps-wh-summary-toggle" onClick={() => setSummaryOpen((open) => !open)} title={summaryOpen ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}>
+                                    <i className={`fa fa-angle-double-${summaryOpen ? 'up' : 'down'}`} />
+                                </button>
+                            </div>
+                            <div className="clearfix" />
                         </div>
                     </div>
                 </div>
@@ -95,74 +111,38 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
 
             {summaryOpen && (
                 <div className="box-body ps-wh-filter-body">
-                    <div className="ps-wh-filter-grid legacy-grid">
-                        <DateRangeInput filters={filters} onChange={setDateRange} />
-                        <select name="date_type" defaultValue={filters.date_type ?? 'data_arrival'}>
-                            <option value="">--Kiểu ngày--</option>{options(filterOptions.dateTypes)}
-                        </select>
-                        <select name="printed_status" defaultValue={filters.printed_status ?? ''}>
-                            <option value="">--In đơn--</option>{options(filterOptions.printedStatuses)}
-                        </select>
-                        <select name="warehouse_care_status" defaultValue={filters.warehouse_care_status ?? ''}>
-                            <option value="">--Trạng thái care--</option>{options(filterOptions.warehouseCareStatuses)}
-                        </select>
-                        <select name="care_status" defaultValue={filters.care_status ?? ''}>
-                            <option value="">--Chọn care đơn--</option>{options(filterOptions.careUsers)}
-                        </select>
+                    <div className="ps-wh-filter-row ps-wh-filter-row-main">
+                        <div className="ps-wh-filter-cell ps-wh-cell-wide"><DateRangeInput filters={filters} onChange={setDateRange} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="date_type" value={filters.date_type ?? 'data_arrival'} placeholder="--Kiểu ngày--" options={filterOptions.dateTypes} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="printed_status" value={filters.printed_status ?? ''} placeholder="--In đơn--" options={filterOptions.printedStatuses} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="warehouse_care_status" value={filters.warehouse_care_status ?? ''} placeholder="--Trạng thái care--" options={filterOptions.warehouseCareStatuses} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="care_status" value={filters.care_status ?? ''} placeholder="--Chọn care đơn--" options={filterOptions.careUsers} /></div>
+                    </div>
 
-                        <select name="product_id" defaultValue={filters.product_id ?? ''}>
-                            <option value="">--Chọn sản phẩm--</option>{options(filterOptions.products)}
-                        </select>
-                        <select name="reconciliation_status" defaultValue={filters.reconciliation_status ?? ''}>
-                            <option value="">--Chọn đối soát nội bộ--</option>{options(filterOptions.reconciliationStatuses)}
-                        </select>
-                        <select name="shipping_provider" defaultValue={filters.shipping_provider ?? ''}>
-                            <option value="">--Chọn PTGH--</option>{options(filterOptions.shippingProviders)}
-                        </select>
-                        <select name="warehouse_id" defaultValue={filters.warehouse_id ?? ''}>
-                            <option value="">--Chọn kho--</option>{options(filterOptions.warehouses)}
-                        </select>
-                        <select name="deposit_status" defaultValue={filters.deposit_status ?? ''}>
-                            <option value="">--Đặt cọc--</option>{options(filterOptions.depositStatuses)}
-                        </select>
+                    <div className="ps-wh-filter-row ps-wh-filter-row-six hidden-xs">
+                        <div className="ps-wh-filter-cell"><SelectField name="product_id" value={filters.product_id ?? ''} placeholder="--Chọn sản phẩm--" options={filterOptions.products} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="reconciliation_status" value={filters.reconciliation_status ?? ''} placeholder="--Chọn đối soát nội bộ--" options={filterOptions.reconciliationStatuses} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="shipping_provider" value={filters.shipping_provider ?? ''} placeholder="--Chọn PTGH--" options={filterOptions.shippingProviders} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="warehouse_id" value={filters.warehouse_id ?? ''} placeholder="--Chọn kho--" options={filterOptions.warehouses} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="deposit_status" value={filters.deposit_status ?? ''} placeholder="--Đặt cọc--" options={filterOptions.depositStatuses} /></div>
+                    </div>
 
-                        <select name="team_leader_id" defaultValue={filters.team_leader_id ?? ''}>
-                            <option value="">--Chọn trưởng nhóm sale--</option>{options(filterOptions.teamLeaders)}
-                        </select>
-                        <select name="team_id" defaultValue={filters.team_id ?? ''}>
-                            <option value="">--Chọn nhóm sale--</option>{options(filterOptions.salesTeams)}
-                        </select>
-                        <select name="sale_id" defaultValue={filters.sale_id ?? ''}>
-                            <option value="">--Chọn sale--</option>{options(filterOptions.salesUsers)}
-                        </select>
-                        <select name="marketing_team_leader_id" defaultValue={filters.marketing_team_leader_id ?? ''}>
-                            <option value="">--Chọn trưởng nhóm marketing--</option>{options(filterOptions.marketingTeamLeaders)}
-                        </select>
-                        <select name="marketing_team_id" defaultValue={filters.marketing_team_id ?? ''}>
-                            <option value="">--Chọn nhóm marketing--</option>{options(filterOptions.marketingTeams)}
-                        </select>
+                    <div className="ps-wh-filter-row ps-wh-filter-row-six">
+                        <div className="ps-wh-filter-cell"><SelectField name="team_leader_id" value={filters.team_leader_id ?? ''} placeholder="--Chọn trưởng nhóm sale--" options={filterOptions.teamLeaders} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="team_id" value={filters.team_id ?? ''} placeholder="--Chọn nhóm sale--" options={filterOptions.salesTeams} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="sale_id" value={filters.sale_id ?? ''} placeholder="--Chọn sale--" options={filterOptions.salesUsers} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="marketing_team_leader_id" value={filters.marketing_team_leader_id ?? ''} placeholder="--Chọn trưởng nhóm marketing--" options={filterOptions.marketingTeamLeaders} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="marketing_team_id" value={filters.marketing_team_id ?? ''} placeholder="--Chọn nhóm marketing--" options={filterOptions.marketingTeams} /></div>
+                        <div className="ps-wh-filter-cell"><SelectField name="marketer_id" value={filters.marketer_id ?? ''} placeholder="--Chọn marketing--" options={filterOptions.marketingUsers} /></div>
+                    </div>
 
-                        <select name="tracking_alert" defaultValue={filters.tracking_alert ?? ''}>
-                            <option value="">--Theo dõi đơn--</option>{options(filterOptions.trackingAlerts)}
-                        </select>
-                        <select name="min_product_quantity" defaultValue={filters.min_product_quantity ?? ''}>
-                            <option value="">--Toàn bộ số lượng--</option>
-                            {[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100].map((value) => <option key={value} value={value}>Tổng số lượng sản phẩm từ {value}</option>)}
-                        </select>
-                        <select name="max_product_quantity" defaultValue={filters.max_product_quantity ?? ''}>
-                            <option value="">--Toàn bộ số lượng--</option>
-                            {[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100].map((value) => <option key={value} value={value}>Tổng số lượng sản phẩm đến {value}</option>)}
-                            <option value="999999">Tổng số lượng sản phẩm không giới hạn</option>
-                        </select>
-                        <div className="ps-wh-filter-spacer" />
-                        <select name="invoice_status" defaultValue={filters.invoice_status ?? ''}>
-                            <option value="">--Xuất HĐĐT--</option>
-                            <option value="issued">Đã xuất HĐĐT</option>
-                            <option value="not_issued">Chưa xuất HĐĐT</option>
-                        </select>
-                        <div className="ps-wh-filter-actions legacy-actions">
-                            <button type="button" className="ps-wh-btn" onClick={reset}><i className="fa fa-refresh" /> Đặt lại</button>
-                        </div>
+                    <div className="ps-wh-filter-row ps-wh-filter-row-six hidden-xs">
+                        <div className="ps-wh-filter-cell"><SelectField name="tracking_alert" value={filters.tracking_alert ?? ''} placeholder="--Theo dõi đơn--" options={filterOptions.trackingAlerts} /></div>
+                        <div className="ps-wh-filter-cell"><select className="form-control chosen" name="min_product_quantity" defaultValue={filters.min_product_quantity ?? ''}><option value="">--Toàn bộ số lượng--</option>{[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100].map((value) => <option key={value} value={value}>Tổng số lượng sản phẩm từ {value}</option>)}</select></div>
+                        <div className="ps-wh-filter-cell"><select className="form-control chosen" name="max_product_quantity" defaultValue={filters.max_product_quantity ?? ''}><option value="">--Toàn bộ số lượng--</option>{[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100].map((value) => <option key={value} value={value}>Tổng số lượng sản phẩm đến {value}</option>)}<option value="999999">Tổng số lượng sản phẩm không giới hạn</option></select></div>
+                        <div className="ps-wh-filter-cell ps-wh-empty-cell" />
+                        <div className="ps-wh-filter-cell"><select className="form-control chosen chosen-x" name="invoice_status" defaultValue={filters.invoice_status ?? ''}><option value="">--Xuất HĐĐT--</option><option value="issued">Đã xuất HĐĐT</option><option value="not_issued">Chưa xuất HĐĐT</option></select></div>
+                        <div className="ps-wh-filter-cell ps-wh-reset-cell"><button type="button" className="btn btn-sm btn-default ps-wh-btn" onClick={reset}><i className="fa fa-refresh" /> Đặt lại</button></div>
                     </div>
                 </div>
             )}

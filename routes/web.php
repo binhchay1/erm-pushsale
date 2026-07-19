@@ -227,6 +227,9 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::post('sales/leads/manual', [ManualLeadController::class, 'store'])->name('sales.leads.manual');
         Route::get('accounting', AccountingOperationsController::class)->name('accounting');
         Route::get('warehouse/operations', WarehouseOperationsController::class)->name('warehouse.operations');
+        Route::post('warehouse/orders/bulk/export', [WarehouseOrderActionController::class, 'bulkExport'])->name('warehouse.orders.bulk.export');
+        Route::post('warehouse/orders/bulk/invoices', [WarehouseOrderActionController::class, 'bulkInvoices'])->name('warehouse.orders.bulk.invoices');
+        Route::post('warehouse/orders/bulk/update-by-code', [WarehouseOrderActionController::class, 'bulkUpdateByCode'])->name('warehouse.orders.bulk.update-by-code');
         Route::patch('warehouse/orders/{order}/desired-delivery', [WarehouseOrderActionController::class, 'desiredDelivery'])->name('warehouse.orders.desired-delivery');
         Route::post('warehouse/orders/{order}/blacklist', [WarehouseOrderActionController::class, 'blacklist'])->name('warehouse.orders.blacklist');
         Route::patch('warehouse/orders/{order}/care', [WarehouseOrderActionController::class, 'care'])->name('warehouse.orders.care');
@@ -362,6 +365,9 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::middleware('role:'.User::ROLE_WAREHOUSE)->prefix('warehouse')->name('warehouse.')->group(function () {
         Route::get('dashboard', WarehouseDashboardController::class)->name('dashboard');
         Route::get('workspace', WarehouseOperationsController::class)->name('workspace');
+        Route::post('orders/bulk/export', [WarehouseOrderActionController::class, 'bulkExport'])->name('orders.bulk.export');
+        Route::post('orders/bulk/invoices', [WarehouseOrderActionController::class, 'bulkInvoices'])->name('orders.bulk.invoices');
+        Route::post('orders/bulk/update-by-code', [WarehouseOrderActionController::class, 'bulkUpdateByCode'])->name('orders.bulk.update-by-code');
         Route::patch('orders/{order}/desired-delivery', [WarehouseOrderActionController::class, 'desiredDelivery'])->name('orders.desired-delivery');
         Route::post('orders/{order}/blacklist', [WarehouseOrderActionController::class, 'blacklist'])->name('orders.blacklist');
         Route::patch('orders/{order}/care', [WarehouseOrderActionController::class, 'care'])->name('orders.care');

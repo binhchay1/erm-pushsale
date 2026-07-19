@@ -14814,3 +14814,958 @@ html body.pushsale-app-body .ps-dialog-body .ps-employee-form {
         animation: none !important;
     }
 }
+
+/* ========================================================================
+   V61: source-only deploy contract + icon/button/dashboard cleanup
+   ------------------------------------------------------------------------
+   The production hook builds assets with pnpm, so the source CSS must not
+   rely on public/vendor FontAwesome/AdminLTE files being committed.
+   ======================================================================== */
+html body.pushsale-app-body {
+    --ps-admin-blue: #3c8dbc;
+    --ps-admin-blue-hover: #367fa9;
+    --ps-admin-border: #d2d6de;
+    --ps-admin-gray-btn: #f4f4f4;
+    --ps-admin-text: #222;
+}
+
+/* FontAwesome compatibility without shipping font files. It restores the
+   existing <i class="fa fa-..."> contract used across legacy-parity pages. */
+html body.pushsale-app-body .fa {
+    display: inline-flex !important;
+    width: 1.08em;
+    min-width: 1.08em;
+    height: 1em;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-style: normal !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+html body.pushsale-app-body .fa::before { content: '' !important; display: inline-block !important; }
+html body.pushsale-app-body .fa-bars::before { content: '☰' !important; }
+html body.pushsale-app-body .fa-cog::before,
+html body.pushsale-app-body .fa-gears::before { content: '⚙' !important; }
+html body.pushsale-app-body .fa-plus::before { content: '+' !important; }
+html body.pushsale-app-body .fa-minus::before { content: '−' !important; }
+html body.pushsale-app-body .fa-angle-right::before { content: '›' !important; font-size: 16px; }
+html body.pushsale-app-body .fa-angle-down::before { content: '⌄' !important; font-size: 14px; }
+html body.pushsale-app-body .fa-angle-up::before { content: '⌃' !important; font-size: 14px; }
+html body.pushsale-app-body .fa-angle-double-right::before { content: '»' !important; }
+html body.pushsale-app-body .fa-angle-double-down::before { content: '⇊' !important; }
+html body.pushsale-app-body .fa-angle-double-up::before { content: '⇈' !important; }
+html body.pushsale-app-body .fa-trophy::before { content: '♛' !important; }
+html body.pushsale-app-body .fa-user::before { content: '●' !important; font-size: 11px; }
+html body.pushsale-app-body .fa-user-plus::before { content: '+' !important; }
+html body.pushsale-app-body .fa-user-secret::before { content: '◆' !important; }
+html body.pushsale-app-body .fa-tags::before { content: '✥' !important; }
+html body.pushsale-app-body .fa-calculator::before { content: '▦' !important; }
+html body.pushsale-app-body .fa-dashboard::before { content: '◉' !important; }
+html body.pushsale-app-body .fa-credit-card::before { content: '▣' !important; }
+html body.pushsale-app-body .fa-tty::before { content: '☎' !important; }
+html body.pushsale-app-body .fa-search::before { content: '🔍' !important; font-size: 11px; }
+html body.pushsale-app-body .fa-bell-o::before { content: '♧' !important; }
+html body.pushsale-app-body .fa-bullhorn::before { content: '◄' !important; }
+html body.pushsale-app-body .fa-globe::before { content: '◉' !important; }
+html body.pushsale-app-body .fa-info-circle::before,
+html body.pushsale-app-body .fa-question-circle::before { content: 'i' !important; font-family: Georgia, serif !important; font-weight: 700 !important; }
+html body.pushsale-app-body .fa-check::before,
+html body.pushsale-app-body .fa-check-circle::before,
+html body.pushsale-app-body .fa-check-circle-o::before { content: '✓' !important; }
+html body.pushsale-app-body .fa-check-square-o::before { content: '☑' !important; }
+html body.pushsale-app-body .fa-circle-o::before { content: '○' !important; }
+html body.pushsale-app-body .fa-times::before { content: '×' !important; }
+html body.pushsale-app-body .fa-trash::before { content: '⌫' !important; }
+html body.pushsale-app-body .fa-edit::before,
+html body.pushsale-app-body .fa-pencil::before,
+html body.pushsale-app-body .fa-pencil-square-o::before { content: '✎' !important; }
+html body.pushsale-app-body .fa-save::before,
+html body.pushsale-app-body .fa-floppy-o::before { content: '▣' !important; }
+html body.pushsale-app-body .fa-refresh::before,
+html body.pushsale-app-body .fa-undo::before { content: '↻' !important; }
+html body.pushsale-app-body .fa-history::before,
+html body.pushsale-app-body .fa-clock-o::before { content: '↺' !important; }
+html body.pushsale-app-body .fa-commenting-o::before { content: '▱' !important; }
+html body.pushsale-app-body .fa-link::before { content: '↔' !important; }
+html body.pushsale-app-body .fa-chain-broken::before { content: '⤫' !important; }
+html body.pushsale-app-body .fa-copy::before,
+html body.pushsale-app-body .fa-clone::before { content: '⧉' !important; }
+html body.pushsale-app-body .fa-phone::before { content: '☎' !important; }
+html body.pushsale-app-body .fa-calendar::before,
+html body.pushsale-app-body .fa-calendar-check-o::before,
+html body.pushsale-app-body .fa-calendar-minus-o::before { content: '□' !important; }
+html body.pushsale-app-body .fa-cube::before { content: '◧' !important; }
+html body.pushsale-app-body .fa-truck::before { content: '▰' !important; }
+html body.pushsale-app-body .fa-shopping-cart::before { content: '◌' !important; }
+html body.pushsale-app-body .fa-money::before { content: '₫' !important; }
+html body.pushsale-app-body .fa-bar-chart::before,
+html body.pushsale-app-body .fa-line-chart::before { content: '▥' !important; }
+html body.pushsale-app-body .fa-file-excel-o::before { content: '▤' !important; }
+html body.pushsale-app-body .fa-external-link::before { content: '↗' !important; }
+html body.pushsale-app-body .fa-map-marker::before { content: '⌖' !important; }
+html body.pushsale-app-body .fa-warning::before,
+html body.pushsale-app-body .fa-exclamation-triangle::before,
+html body.pushsale-app-body .fa-exclamation-circle::before { content: '!' !important; }
+html body.pushsale-app-body .fa-lock::before { content: '▣' !important; }
+html body.pushsale-app-body .fa-power-off::before { content: '⏻' !important; }
+html body.pushsale-app-body .fa-print::before { content: '▤' !important; }
+html body.pushsale-app-body .fa-send::before { content: '➤' !important; }
+html body.pushsale-app-body .fa-heart::before { content: '♥' !important; }
+html body.pushsale-app-body .fa-diamond::before { content: '◆' !important; }
+html body.pushsale-app-body .fa-balance-scale::before { content: '⚖' !important; }
+html body.pushsale-app-body .fa-list-alt::before { content: '☷' !important; }
+html body.pushsale-app-body .fa-sliders::before { content: '≡' !important; }
+html body.pushsale-app-body .fa-retweet::before,
+html body.pushsale-app-body .fa-exchange::before { content: '⇄' !important; }
+html body.pushsale-app-body .fa-compress::before { content: '↙' !important; }
+html body.pushsale-app-body .fa-eye::before { content: '◉' !important; }
+html body.pushsale-app-body .fa-spinner::before,
+html body.pushsale-app-body .fa-circle-o-notch::before { content: '◌' !important; }
+html body.pushsale-app-body .fa-spin { animation: ps-fa-spin .85s linear infinite !important; }
+@keyframes ps-fa-spin { to { transform: rotate(360deg); } }
+
+/* Button contract, independent from Bootstrap/AdminLTE vendor files. */
+html body.pushsale-app-body .btn {
+    display: inline-flex !important;
+    min-height: 30px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    padding: 5px 12px !important;
+    border: 1px solid transparent !important;
+    border-radius: 3px !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 18px !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+}
+html body.pushsale-app-body .btn:hover,
+html body.pushsale-app-body .btn:focus { text-decoration: none !important; outline: 0 !important; }
+html body.pushsale-app-body .btn-primary {
+    border-color: #367fa9 !important;
+    background: var(--ps-admin-blue) !important;
+    color: #fff !important;
+}
+html body.pushsale-app-body .btn-primary:hover,
+html body.pushsale-app-body .btn-primary:focus {
+    border-color: #204d74 !important;
+    background: var(--ps-admin-blue-hover) !important;
+    color: #fff !important;
+}
+html body.pushsale-app-body .btn-default {
+    border-color: #ddd !important;
+    background: var(--ps-admin-gray-btn) !important;
+    color: #444 !important;
+}
+html body.pushsale-app-body .btn-default:hover,
+html body.pushsale-app-body .btn-default:focus {
+    border-color: #adadad !important;
+    background: #e7e7e7 !important;
+    color: #333 !important;
+}
+html body.pushsale-app-body .btn-link {
+    min-height: 0 !important;
+    border-color: transparent !important;
+    background: transparent !important;
+    color: #0073b7 !important;
+    padding: 0 !important;
+    font-weight: 400 !important;
+}
+html body.pushsale-app-body .btn-sm { min-height: 28px !important; padding: 4px 10px !important; font-size: 12px !important; }
+html body.pushsale-app-body .btn-xs { min-height: 22px !important; padding: 1px 5px !important; font-size: 11px !important; }
+html body.pushsale-app-body .ps-actions-row,
+html body.pushsale-app-body .ps-toolbar,
+html body.pushsale-app-body .ps-users-actions,
+html body.pushsale-app-body .pushsale-actions-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+/* Marketing dashboard: fit the normal dashboard inside the viewport. The
+   server rebuilds assets, so do not hard-code a min-width that forces scroll. */
+html body.pushsale-app-body .psm-table-area { padding: 12px 12px 0 !important; }
+html body.pushsale-app-body .psm-table-scroll {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+html body.pushsale-app-body .psm-dashboard-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+}
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-stt { width: 44px !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-source { width: 13% !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-product { width: 13% !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-channel { width: 5% !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-utm-source { width: 5% !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-utm-campaign { width: 5.2% !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-budget { width: 6% !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-clicks,
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-contacts,
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-closed,
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-products { width: 4.3% !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-contact-rate,
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-close-rate,
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-products-per-order,
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-contact-price { width: 5.2% !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-revenue,
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-net-revenue { width: 5.8% !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-budget-revenue,
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-budget-net-revenue { width: 5.1% !important; }
+html body.pushsale-app-body .psm-dashboard-table col.psm-col-chart { width: 42px !important; }
+html body.pushsale-app-body .psm-dashboard-table th,
+html body.pushsale-app-body .psm-dashboard-table td {
+    padding: 4px 5px !important;
+    font-size: 12px !important;
+    line-height: 15px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+html body.pushsale-app-body .psm-dashboard-table th:nth-child(2),
+html body.pushsale-app-body .psm-dashboard-table td.psm-source-cell,
+html body.pushsale-app-body .psm-dashboard-table th:nth-child(3),
+html body.pushsale-app-body .psm-dashboard-table td.psm-product-cell {
+    width: auto !important;
+    min-width: 0 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow: hidden !important;
+}
+html body.pushsale-app-body .psm-dashboard-table td:not(.psm-source-cell):not(.psm-product-cell) {
+    white-space: nowrap !important;
+}
+html body.pushsale-app-body .psm-dashboard-table .psm-chart-button {
+    width: 20px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    min-height: 20px !important;
+}
+@media (max-width: 1366px) {
+    html body.pushsale-app-body .psm-table-scroll { overflow-x: auto !important; }
+    html body.pushsale-app-body .psm-dashboard-table { min-width: 1280px !important; }
+}
+
+/* ========================================================================
+   V62: final dialog-only and dense table cleanup
+   ------------------------------------------------------------------------
+   This block intentionally lives last.  It separates the Radix overlay from
+   the dialog surface, removes old dimming side effects, and keeps interactive
+   table editors out of table layout calculations.
+   ======================================================================== */
+html body.pushsale-app-body [data-slot='dialog-portal'] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147482990 !important;
+    pointer-events: none !important;
+}
+html body.pushsale-app-body [data-slot='dialog-overlay'] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483000 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    background: rgba(0, 0, 0, .42) !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    animation: ps-dialog-overlay-in .18s ease-out both !important;
+}
+html body.pushsale-app-body [data-slot='dialog-content'] {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    z-index: 2147483010 !important;
+    isolation: isolate !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: auto !important;
+    animation: ps-dialog-content-drop .22s cubic-bezier(.2, .8, .2, 1) both !important;
+}
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface {
+    display: flex !important;
+    width: min(var(--ps-dialog-width, 800px), calc(100vw - 24px)) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(0, 0, 0, .35) !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: 0 12px 34px rgba(0, 0, 0, .36) !important;
+}
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface * {
+    filter: none !important;
+}
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface > [data-slot='dialog-header'],
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface > .ps-dialog-header {
+    flex: 0 0 auto !important;
+    min-height: 40px !important;
+    padding: 9px 42px 9px 13px !important;
+    border-bottom: 1px solid #0d6fb8 !important;
+    background: #087df0 !important;
+    color: #fff !important;
+}
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface > [data-slot='dialog-header'] *,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface > .ps-dialog-header * {
+    color: #fff !important;
+    opacity: 1 !important;
+}
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface > .ps-dialog-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+    padding: 16px 20px !important;
+    background: #fff !important;
+    color: #111 !important;
+    opacity: 1 !important;
+}
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface > .ps-dialog-footer {
+    flex: 0 0 auto !important;
+    padding: 9px 14px !important;
+    border-top: 1px solid #ddd !important;
+    background: #f7f7f7 !important;
+    opacity: 1 !important;
+}
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .pushsale-dialog-close {
+    z-index: 3 !important;
+    color: #444 !important;
+    opacity: 1 !important;
+}
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface input,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface select,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface textarea {
+    background: #fff !important;
+    color: #111 !important;
+    opacity: 1 !important;
+    filter: none !important;
+}
+@keyframes ps-dialog-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ps-dialog-content-drop {
+    from { opacity: 0; transform: translate(-50%, calc(-50% - 28px)); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+/* Sale workspace TN cần editor: the expanded editor is rendered in a body portal,
+   so hovering/focusing never changes table width or horizontal scroll. */
+html body.pushsale-app-body .ps-operation-note-editor {
+    position: relative !important;
+    min-height: 82px !important;
+    overflow: visible !important;
+    z-index: auto !important;
+}
+html body.pushsale-app-body .ps-operation-note-editor textarea.txt-mof,
+html body.pushsale-app-body .ps-operation-note-editor:hover textarea.txt-mof,
+html body.pushsale-app-body .ps-operation-note-editor.is-pinned textarea.txt-mof,
+html body.pushsale-app-body .ps-operation-note-editor .ps-note-inline-textarea {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    padding: 5px !important;
+    resize: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border: 1px dotted #ddd !important;
+    z-index: 1 !important;
+}
+html body.pushsale-app-body .ps-operation-note-editor .ps-note-toolbar {
+    top: 18px !important;
+    right: 4px !important;
+    z-index: 2 !important;
+}
+html body.pushsale-app-body .ps-note-counter { display: none !important; }
+html body.pushsale-app-body .ps-note-floating-panel {
+    position: fixed !important;
+    z-index: 2147482500 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    border: 1px solid #9d9d9d !important;
+    background: #fff !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .28) !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+html body.pushsale-app-body .ps-note-floating-head {
+    display: flex !important;
+    min-height: 27px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding: 4px 7px !important;
+    border-bottom: 1px solid #ddd !important;
+    background: #f7f7f7 !important;
+    color: #ff2612 !important;
+    font-size: 12px !important;
+}
+html body.pushsale-app-body .ps-note-floating-actions { display: inline-flex !important; align-items: center !important; gap: 5px !important; }
+html body.pushsale-app-body .ps-note-floating-panel .btn-icon {
+    width: 19px !important;
+    height: 19px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #3c8dbc !important;
+}
+html body.pushsale-app-body .ps-note-floating-panel .ps-note-floating-textarea {
+    display: block !important;
+    width: 100% !important;
+    min-height: 92px !important;
+    height: 92px !important;
+    padding: 7px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    line-height: 17px !important;
+    resize: none !important;
+    outline: none !important;
+}
+html body.pushsale-app-body .ps-note-floating-counter {
+    padding: 3px 7px !important;
+    border-top: 1px solid #ddd !important;
+    background: #fafafa !important;
+    color: #777 !important;
+    font-size: 11px !important;
+    text-align: right !important;
+}
+
+/* Marketing dashboard: normal view must fit the viewport; only the explicit
+   advanced UTM view is allowed to scroll horizontally. */
+html body.pushsale-app-body .psm-table-scroll {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+}
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+}
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-stt { width: 2.4% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-source { width: 12% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-product { width: 12% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-channel { width: 4% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-utm-source { width: 4% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-utm-campaign { width: 4% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-budget { width: 5% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-clicks,
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-contacts,
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-closed,
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-products { width: 4% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-contact-rate,
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-close-rate,
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-contact-price { width: 5% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-products-per-order { width: 4% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-revenue,
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-net-revenue { width: 5% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-budget-revenue,
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-budget-net-revenue { width: 4.5% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) col.psm-col-chart { width: 2.1% !important; }
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) th,
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) td {
+    padding: 4px 5px !important;
+    font-size: 11.5px !important;
+    line-height: 15px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    vertical-align: middle !important;
+}
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) td.psm-source-cell,
+html body.pushsale-app-body .psm-dashboard-table:not(.is-advanced) td.psm-product-cell {
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+html body.pushsale-app-body .psm-dashboard-table.is-advanced {
+    min-width: 1480px !important;
+}
+html body.pushsale-app-body .psm-dashboard-table.is-advanced + * { overflow-x: auto !important; }
+
+/* V63 - Warehouse operations Pushsale parity: filters, table, floating actions.
+   This block intentionally stays last so old page CSS cannot stretch filters or square action buttons. */
+html body.pushsale-app-body .ps-wh-legacy-page {
+    background: #fff !important;
+    color: #111 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+}
+html body.pushsale-app-body .ps-wh-legacy-filter {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid #ddd !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .ps-wh-search-header {
+    padding: 10px 15px 8px !important;
+    border-bottom: 0 !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-wh-header-row {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+    margin: 0 !important;
+}
+html body.pushsale-app-body .ps-wh-header-row > [class*='col-'] {
+    padding-left: 0 !important;
+    padding-right: 15px !important;
+    margin: 0 !important;
+}
+html body.pushsale-app-body .ps-wh-title-col .text,
+html body.pushsale-app-body .ps-wh-title-col span.text {
+    display: inline-block !important;
+    color: #111 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 30px !important;
+}
+html body.pushsale-app-body .ps-wh-check-col {
+    text-align: right !important;
+    white-space: nowrap !important;
+}
+html body.pushsale-app-body .ps-wh-check-col label {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 7px !important;
+    height: 30px !important;
+    margin: 0 !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+}
+html body.pushsale-app-body .ps-wh-check-col input[type='checkbox'] {
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+}
+html body.pushsale-app-body .ps-wh-search-col { min-width: 0 !important; }
+html body.pushsale-app-body .ps-wh-keyword {
+    float: left !important;
+    width: calc(100% - 145px) !important;
+}
+html body.pushsale-app-body .ps-wh-search-actions {
+    float: right !important;
+    width: 125px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    justify-content: flex-end !important;
+}
+html body.pushsale-app-body .ps-wh-search-actions .btn,
+html body.pushsale-app-body .ps-wh-filter .btn.btn-primary {
+    min-width: 90px !important;
+    height: 30px !important;
+    padding: 5px 12px !important;
+    border: 1px solid #2e8ec6 !important;
+    border-radius: 3px !important;
+    background: #3c8dbc !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 18px !important;
+    text-align: center !important;
+}
+html body.pushsale-app-body .ps-wh-search-actions .btn-icon,
+html body.pushsale-app-body .ps-wh-summary-toggle {
+    width: 22px !important;
+    min-width: 22px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #3c8dbc !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .ps-wh-filter input.form-control,
+html body.pushsale-app-body .ps-wh-filter select.form-control,
+html body.pushsale-app-body .ps-wh-filter select.chosen,
+html body.pushsale-app-body .ps-wh-filter .date-range {
+    width: 100% !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 5px 8px !important;
+    border: 1px solid #cbd5df !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    outline: 0 !important;
+}
+html body.pushsale-app-body .ps-wh-filter input.form-control:focus,
+html body.pushsale-app-body .ps-wh-filter select.form-control:focus {
+    border-color: #9dbad1 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .ps-wh-filter-body,
+html body.pushsale-app-body .ps-wh-filter .box-body {
+    padding: 9px 15px 0 !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-wh-filter-row {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 10px 30px !important;
+    align-items: center !important;
+    margin: 0 0 10px !important;
+}
+html body.pushsale-app-body .ps-wh-filter-row-main .ps-wh-cell-wide { grid-column: span 2 !important; }
+html body.pushsale-app-body .ps-wh-filter-cell {
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+html body.pushsale-app-body .ps-wh-empty-cell { visibility: hidden !important; }
+html body.pushsale-app-body .ps-wh-reset-cell {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+html body.pushsale-app-body .ps-wh-reset-cell .btn-default {
+    min-width: 64px !important;
+    height: 30px !important;
+    padding: 5px 12px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 3px !important;
+    background: #f7f7f7 !important;
+    color: #111 !important;
+    font-size: 12px !important;
+}
+html body.pushsale-app-body .ps-wh-legacy-filter + .ps-wh-status-strip,
+html body.pushsale-app-body .ps-wh-status-strip {
+    padding: 8px 15px 10px !important;
+    border-bottom: 1px solid #ddd !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-wh-status-strip .dm-tac-nghiep,
+html body.pushsale-app-body .ttgh-acc .dm-tac-nghiep {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-width: 155px !important;
+    height: 27px !important;
+    margin: 0 18px 8px 0 !important;
+    padding: 4px 7px !important;
+    color: #111 !important;
+    text-decoration: none !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+}
+html body.pushsale-app-body .ps-wh-status-strip .dm-tac-nghiep.selected,
+html body.pushsale-app-body .ttgh-acc .dm-tac-nghiep.selected {
+    border-color: #f5bd5a !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-wh-status-strip .flag,
+html body.pushsale-app-body .ttgh-acc .flag {
+    display: inline-block !important;
+    width: 20px !important;
+    height: 14px !important;
+    margin-right: 8px !important;
+    background: #98f89e !important;
+}
+html body.pushsale-app-body .ps-wh-status-strip .level-4,
+html body.pushsale-app-body .ttgh-acc .level-4 { background: #98f89e !important; }
+html body.pushsale-app-body .ps-wh-status-strip .level-1,
+html body.pushsale-app-body .ttgh-acc .level-1 { background: #98f89e !important; }
+html body.pushsale-app-body .ps-wh-status-strip .level-,
+html body.pushsale-app-body .ttgh-acc .level- { background: #c4e6f5 !important; }
+html body.pushsale-app-body .ps-wh-status-strip .count,
+html body.pushsale-app-body .ttgh-acc .count { color: #f39800 !important; font-weight: 700 !important; }
+
+html body.pushsale-app-body .ps-wh-table-shell,
+html body.pushsale-app-body .dragscroll1.tableFixHead.ps-wh-table-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-top: 0 !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body table.ps-wh-table,
+html body.pushsale-app-body .ps-wh-legacy-table.table-sale {
+    width: 100% !important;
+    min-width: 1880px !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    margin: 0 !important;
+    font-size: 12px !important;
+}
+html body.pushsale-app-body .ps-wh-legacy-table thead th {
+    height: 63px !important;
+    padding: 8px 6px !important;
+    border: 1px solid #2878c6 !important;
+    background: #3685dc !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 18px !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+html body.pushsale-app-body .ps-wh-legacy-table tbody td {
+    padding: 6px 6px !important;
+    border: 1px solid #ddd !important;
+    color: #111 !important;
+    background: #fff !important;
+    font-size: 12px !important;
+    line-height: 17px !important;
+    vertical-align: middle !important;
+}
+html body.pushsale-app-body .ps-wh-legacy-table tbody tr:nth-child(odd) td { background: #f3f3f3 !important; }
+html body.pushsale-app-body .ps-wh-legacy-table tbody tr.return-row td { background: #fff8f1 !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-check { width: 50px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-sale { width: 70px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-order { width: 145px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-shipper { width: 150px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-care { width: 245px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-status { width: 165px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-customer { width: 190px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-address { width: 220px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-products { width: 270px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-money { width: 150px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-deposit { width: 80px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-cod { width: 105px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-fee { width: 90px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .c-recon { width: 65px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table .btn-icon,
+html body.pushsale-app-body .ps-wh-inline-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    margin: 0 2px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #3c8dbc !important;
+    box-shadow: none !important;
+    line-height: 18px !important;
+}
+html body.pushsale-app-body .ps-wh-inline-icon.orange,
+html body.pushsale-app-body .ps-wh-legacy-table .orange { color: darkorange !important; }
+html body.pushsale-app-body .ps-wh-product-table,
+html body.pushsale-app-body .ps-wh-money-stack,
+html body.pushsale-app-body .ps-wh-product-table td,
+html body.pushsale-app-body .ps-wh-money-stack td {
+    border: 0 !important;
+    background: transparent !important;
+    padding: 3px 0 !important;
+    font-size: 11.5px !important;
+}
+html body.pushsale-app-body .ps-wh-product-table { width: 100% !important; table-layout: fixed !important; }
+html body.pushsale-app-body .ps-wh-product-table .row-sp:not(:last-child) td { border-bottom: 1px dotted #ccc !important; }
+html body.pushsale-app-body .ps-wh-product-table .ten-sp {
+    display: inline-block !important;
+    max-width: 170px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+html body.pushsale-app-body .ps-wh-green { color: #0b7f16 !important; font-weight: 700 !important; }
+html body.pushsale-app-body .ps-wh-magenta,
+html body.pushsale-app-body .nha-mang { color: magenta !important; }
+html body.pushsale-app-body .ps-wh-error { color: #ff0000 !important; font-size: 11px !important; }
+html body.pushsale-app-body .ps-wh-legacy-table textarea.txt-mof,
+html body.pushsale-app-body .ps-wh-legacy-table textarea.txt-mof:focus,
+html body.pushsale-app-body .ps-wh-legacy-table textarea.txt-mof:hover {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    padding: 4px 6px !important;
+    border: 1px dotted #ddd !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: none !important;
+    resize: none !important;
+    transform: none !important;
+    outline: none !important;
+    line-height: 15px !important;
+    font-size: 12px !important;
+}
+html body.pushsale-app-body .ps-wh-legacy-table .mof-container {
+    width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    background: transparent !important;
+    overflow: visible !important;
+}
+html body.pushsale-app-body .ps-wh-legacy-table .item-md,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-wh-order-code {
+    color: #007bff !important;
+    font-weight: 700 !important;
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+html body.pushsale-app-body .ps-wh-legacy-table .item-mdgv { color: darkorange !important; display: inline-block !important; margin-left: 4px !important; }
+html body.pushsale-app-body .ps-wh-empty { padding: 18px !important; text-align: center !important; color: #777 !important; }
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 2147480500 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 50px 100px 0 20px !important;
+    pointer-events: auto !important;
+}
+html body.pushsale-app-body .ps-wh-floating-actions .hidden-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    margin-left: 5px !important;
+    margin-bottom: 15px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(14px) !important;
+    transition: opacity .28s ease, transform .28s ease, visibility .28s ease !important;
+}
+html body.pushsale-app-body .ps-wh-floating-actions:hover .hidden-actions,
+html body.pushsale-app-body .ps-wh-floating-actions.open .hidden-actions {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
+}
+html body.pushsale-app-body .ps-wh-floating-actions .icon-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-height: 50px !important;
+}
+html body.pushsale-app-body .ps-wh-floating-actions .main-action,
+html body.pushsale-app-body .ps-wh-floating-actions .n-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, .22) !important;
+    cursor: pointer !important;
+    transition: transform .24s ease, filter .24s ease, background-color .24s ease !important;
+}
+html body.pushsale-app-body .ps-wh-floating-actions .main-action {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    background: #007bff !important;
+    font-size: 24px !important;
+    margin: 0 0 15px !important;
+}
+html body.pushsale-app-body .ps-wh-floating-actions .n-button {
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    background: #43a047 !important;
+    font-size: 22px !important;
+}
+html body.pushsale-app-body .ps-wh-floating-actions .fam-primary { background: #0080ff !important; }
+html body.pushsale-app-body .ps-wh-floating-actions .fam-success { background: #43a047 !important; }
+html body.pushsale-app-body .ps-wh-floating-actions .fam-warning { background: #ff9800 !important; }
+html body.pushsale-app-body .ps-wh-floating-actions .n-button:hover,
+html body.pushsale-app-body .ps-wh-floating-actions .main-action:hover { transform: scale(1.08) !important; filter: brightness(.95) !important; }
+html body.pushsale-app-body .ps-wh-floating-actions .n-button:disabled {
+    opacity: .45 !important;
+    filter: grayscale(.35) !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+html body.pushsale-app-body .ps-wh-floating-actions .n-button[fam-tooltip]::after {
+    content: attr(fam-tooltip) !important;
+    position: absolute !important;
+    left: 58px !important;
+    white-space: nowrap !important;
+    padding: 4px 7px !important;
+    border-radius: 3px !important;
+    background: rgba(0,0,0,.78) !important;
+    color: #fff !important;
+    font-size: 11px !important;
+    line-height: 14px !important;
+    opacity: 0 !important;
+    transform: translateX(-4px) !important;
+    pointer-events: none !important;
+    transition: opacity .18s ease, transform .18s ease !important;
+}
+html body.pushsale-app-body .ps-wh-floating-actions .n-button[fam-tooltip]:hover::after {
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+}
+html body.pushsale-app-body .ps-wh-selected-hint {
+    position: fixed !important;
+    left: 94px !important;
+    bottom: 18px !important;
+    z-index: 2147480400 !important;
+    padding: 7px 10px !important;
+    border-radius: 3px !important;
+    background: rgba(0,0,0,.74) !important;
+    color: #fff !important;
+    font-size: 12px !important;
+}
+@media (max-width: 1199px) {
+    html body.pushsale-app-body .ps-wh-header-row { flex-wrap: wrap !important; }
+    html body.pushsale-app-body .ps-wh-filter-row,
+    html body.pushsale-app-body .ps-wh-filter-row-main { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 10px 20px !important; }
+    html body.pushsale-app-body .ps-wh-filter-row-main .ps-wh-cell-wide { grid-column: span 1 !important; }
+}
+@media (max-width: 768px) {
+    html body.pushsale-app-body .ps-wh-header-row { display: block !important; }
+    html body.pushsale-app-body .ps-wh-header-row > [class*='col-'] { padding-right: 0 !important; margin-bottom: 8px !important; }
+    html body.pushsale-app-body .ps-wh-filter-row,
+    html body.pushsale-app-body .ps-wh-filter-row-main { grid-template-columns: 1fr !important; gap: 8px !important; }
+    html body.pushsale-app-body .ps-wh-keyword { width: calc(100% - 135px) !important; }
+    html body.pushsale-app-body .ps-wh-search-actions { width: 125px !important; }
+}

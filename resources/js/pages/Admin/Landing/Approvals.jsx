@@ -232,7 +232,7 @@ export default function LandingApprovals({
 
             <CampaignApprovalDetailDialog
                 campaign={selectedCampaign}
-                open={modalOpen}
+                open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 fieldMapping={fieldMapping}
                 products={products}

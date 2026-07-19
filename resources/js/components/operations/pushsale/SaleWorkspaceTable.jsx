@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
@@ -45,44 +46,114 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     const [value, setValue] = useState(order.saleOperationNote ?? '');
     const [pinned, setPinned] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [floatingRect, setFloatingRect] = useState(null);
+    const editorRef = useRef(null);
+    const floatingRef = useRef(null);
 
     useEffect(() => setValue(order.saleOperationNote ?? ''), [order.saleOperationNote]);
+
+    const calculateFloatingRect = () => {
+        if (typeof window === 'undefined' || !editorRef.current) return null;
+        const rect = editorRef.current.getBoundingClientRect();
+        const width = Math.min(335, window.innerWidth - 16);
+        const height = 150;
+        const left = Math.min(Math.max(rect.right - width + 2, 8), window.innerWidth - width - 8);
+        const top = Math.min(Math.max(rect.top + 20, 8), window.innerHeight - height - 8);
+        return { left, top, width };
+    };
+
+    const openFloating = () => {
+        const nextRect = calculateFloatingRect();
+        if (!nextRect) return;
+        setFloatingRect(nextRect);
+        setPinned(true);
+    };
+
+    useEffect(() => {
+        if (!pinned) return undefined;
+        const reposition = () => {
+            const nextRect = calculateFloatingRect();
+            if (nextRect) setFloatingRect(nextRect);
+        };
+        const closeOnOutside = (event) => {
+            if (editorRef.current?.contains(event.target) || floatingRef.current?.contains(event.target)) return;
+            setPinned(false);
+        };
+        window.addEventListener('scroll', reposition, true);
+        window.addEventListener('resize', reposition);
+        document.addEventListener('mousedown', closeOnOutside);
+        return () => {
+            window.removeEventListener('scroll', reposition, true);
+            window.removeEventListener('resize', reposition);
+            document.removeEventListener('mousedown', closeOnOutside);
+        };
+    }, [pinned]);
 
     const save = () => {
         setSaving(true);
         router.patch(`${actionBaseUrl}/orders/${order.id}/operation-note`, { note: value }, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã lưu tác nghiệp cần.'),
+            onSuccess: () => {
+                toast.success('Đã lưu tác nghiệp cần.');
+                setPinned(false);
+            },
             onError: (errors) => toast.error(errors.note ?? errors.order ?? 'Không thể lưu tác nghiệp cần.'),
             onFinish: () => setSaving(false),
         });
     };
 
-    return (
-        <div className={`ps-operation-note-editor ${pinned ? 'is-pinned' : ''}`}>
-            <div className="ps-operation-stage-label">{order.currentOperation || 'Gọi lần 1'}</div>
-            <div className="ps-note-toolbar">
-                <button type="button" className="btn-icon" onClick={() => onMessages(order)} title="Tin nhắn"><i className="fa fa-commenting-o" /></button>
-                <button type="button" className="btn-icon" onClick={save} disabled={saving} title="Lưu tác nghiệp cần"><i className="fa fa-floppy-o" /></button>
-                {pinned && <button type="button" className="btn-icon" onClick={() => setPinned(false)} title="Thu gọn"><i className="fa fa-compress" /></button>}
+    const floatingPanel = pinned && floatingRect && typeof document !== 'undefined' ? createPortal(
+        <div
+            ref={floatingRef}
+            className="ps-note-floating-panel"
+            style={{ left: floatingRect.left, top: floatingRect.top, width: floatingRect.width }}
+        >
+            <div className="ps-note-floating-head">
+                <strong>{order.currentOperation || 'Gọi lần 1'}</strong>
+                <div className="ps-note-floating-actions">
+                    <button type="button" className="btn-icon" onClick={() => onMessages(order)} title="Tin nhắn"><i className="fa fa-commenting-o" /></button>
+                    <button type="button" className="btn-icon" onClick={save} disabled={saving} title="Lưu tác nghiệp cần"><i className="fa fa-floppy-o" /></button>
+                    <button type="button" className="btn-icon" onClick={() => setPinned(false)} title="Thu gọn"><i className="fa fa-compress" /></button>
+                </div>
             </div>
             <textarea
-                className="form-control txt-mof txt-dotted"
+                className="form-control txt-mof txt-dotted ps-note-floating-textarea"
                 maxLength={500}
                 value={value}
+                autoFocus
                 onChange={(event) => setValue(event.target.value)}
-                onClick={() => setPinned(true)}
-                onFocus={() => setPinned(true)}
-                onBlur={(event) => {
-                    if (!event.currentTarget.parentElement?.contains(event.relatedTarget)) setPinned(false);
-                }}
                 onKeyDown={(event) => {
                     if (event.key === 'Escape') setPinned(false);
                     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
                 }}
                 aria-label={`Tác nghiệp cần của ${order.customerName ?? order.customerPhone}`}
             />
-            {pinned && <div className="ps-note-counter">{value.length}/500 · Ctrl+Enter để lưu</div>}
+            <div className="ps-note-floating-counter">{value.length}/500 · Ctrl+Enter để lưu</div>
+        </div>,
+        document.body,
+    ) : null;
+
+    return (
+        <div ref={editorRef} className={`ps-operation-note-editor ${pinned ? 'is-pinned' : ''}`} onMouseEnter={openFloating}>
+            <div className="ps-operation-stage-label">{order.currentOperation || 'Gọi lần 1'}</div>
+            <div className="ps-note-toolbar">
+                <button type="button" className="btn-icon" onClick={() => onMessages(order)} title="Tin nhắn"><i className="fa fa-commenting-o" /></button>
+                <button type="button" className="btn-icon" onClick={save} disabled={saving} title="Lưu tác nghiệp cần"><i className="fa fa-floppy-o" /></button>
+            </div>
+            <textarea
+                className="form-control txt-mof txt-dotted ps-note-inline-textarea"
+                maxLength={500}
+                value={value}
+                onChange={(event) => setValue(event.target.value)}
+                onClick={openFloating}
+                onFocus={openFloating}
+                onKeyDown={(event) => {
+                    if (event.key === 'Escape') setPinned(false);
+                    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
+                }}
+                aria-label={`Tác nghiệp cần của ${order.customerName ?? order.customerPhone}`}
+            />
+            {floatingPanel}
         </div>
     );
 }

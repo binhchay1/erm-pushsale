@@ -5,15 +5,110 @@ namespace App\Http\Controllers\Warehouse;
 use App\Enums\DeliveryStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Pushsale\ElectronicInvoiceJob;
 use App\Services\Warehouse\WarehouseOrderActionService;
 use App\Support\ShippingProviders;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WarehouseOrderActionController extends Controller
 {
     public function __construct(private readonly WarehouseOrderActionService $service) {}
+
+
+
+    public function bulkExport(Request $request): StreamedResponse
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:orders,id'],
+            'type' => ['nullable', Rule::in(['standard', 'shipping', 'accounting', 'delivery-status'])],
+        ]);
+
+        $type = $data['type'] ?? 'standard';
+        $orders = Order::query()
+            ->with(['items', 'warehouse', 'saleUser', 'marketerUser', 'shipments' => fn ($query) => $query->latest('id')])
+            ->whereIn('id', $data['ids'])
+            ->orderBy('id')
+            ->get();
+
+        $headersByType = [
+            'standard' => ['Mã đơn', 'Khách hàng', 'Số điện thoại', 'Địa chỉ', 'Sản phẩm', 'Tổng tiền', 'Đặt cọc', 'COD', 'Sale'],
+            'shipping' => ['Mã đơn', 'Kho', 'PTGH', 'Mã giao vận', 'Người nhận', 'SĐT nhận', 'Địa chỉ giao', 'Phí VC', 'COD'],
+            'accounting' => ['Mã đơn', 'Thành tiền', 'Chiết khấu', 'VAT', 'Phí VC', 'Tổng tiền', 'Đã thu', 'Đối soát'],
+            'delivery-status' => ['Mã đơn', 'Mã giao vận', 'Trạng thái hiện tại', 'Trạng thái cập nhật', 'Ghi chú'],
+        ];
+
+        $filename = 'warehouse-'.$type.'-'.now()->format('YmdHis').'.csv';
+
+        return response()->streamDownload(function () use ($orders, $headersByType, $type): void {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, $headersByType[$type]);
+            foreach ($orders as $order) {
+                $shipment = $order->shipments->first();
+                $products = $order->items->map(fn ($item) => $item->product_name.' x'.$item->quantity.' @'.$item->unit_price)->implode(' | ');
+                $receiverName = trim((string) ($order->receiver_name ?: $order->customer_name));
+                $receiverPhone = trim((string) ($order->receiver_phone ?: $order->customer_phone));
+                $address = trim((string) ($order->shipping_address_2 ?: $order->shipping_address));
+                $row = match ($type) {
+                    'shipping' => [$order->order_code, $order->warehouse?->name, $order->shipping_provider ?: $order->shipping_method, $shipment?->tracking_number ?: $order->tracking_number, $receiverName, $receiverPhone, $address, (int) $order->shipping_fee_collected, (int) ($order->amount_to_collect ?: max(0, (int) $order->total - (int) $order->deposit))],
+                    'accounting' => [$order->order_code, (int) $order->subtotal, (int) $order->discount, (int) $order->vat, (int) $order->shipping_fee_collected, (int) $order->total, (int) $order->settled_cod_amount, $order->reconciliation_status],
+                    'delivery-status' => [$order->order_code, $shipment?->tracking_number ?: $order->tracking_number, $order->delivery_status, '', ''],
+                    default => [$order->order_code, $order->customer_name, $order->customer_phone, $address, $products, (int) $order->total, (int) $order->deposit, (int) ($order->amount_to_collect ?: max(0, (int) $order->total - (int) $order->deposit)), $order->saleUser?->name],
+                };
+                fputcsv($out, $row);
+            }
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    public function bulkInvoices(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:orders,id'],
+            'source' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $batch = 'warehouse-'.now()->format('YmdHis').'-'.substr(md5(implode(',', $data['ids'])), 0, 8);
+        $userId = $request->user()?->id;
+        $count = 0;
+        foreach (array_unique($data['ids']) as $id) {
+            ElectronicInvoiceJob::query()->create([
+                'order_id' => $id,
+                'code_type' => 'order_code',
+                'process_type' => 'warehouse_bulk_issue',
+                'status' => 'pending',
+                'note' => 'Tạo từ màn thủ kho tác nghiệp'.(($data['source'] ?? '') ? ' - '.$data['source'] : ''),
+                'batch_id' => $batch,
+                'created_by_user_id' => $userId,
+                'updated_by_user_id' => $userId,
+            ]);
+            $count++;
+        }
+
+        return response()->json(['message' => "Đã tạo {$count} yêu cầu xuất HĐĐT.", 'batch_id' => $batch, 'count' => $count]);
+    }
+
+    public function bulkUpdateByCode(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:orders,id'],
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $orders = Order::query()->whereIn('id', $data['ids'])->get();
+        foreach ($orders as $order) {
+            $note = trim((string) ($data['note'] ?? 'Cập nhật nhiều đơn theo mã Pushsale'));
+            $order->forceFill(['internal_recon_note' => trim(($order->internal_recon_note ? $order->internal_recon_note."\n" : '').now()->format('d/m/Y H:i').' - '.$note)])->save();
+        }
+
+        return response()->json(['message' => 'Đã ghi nhận cập nhật theo mã Pushsale cho '.$orders->count().' đơn.', 'count' => $orders->count()]);
+    }
 
     public function desiredDelivery(Request $request, Order $order): JsonResponse
     {

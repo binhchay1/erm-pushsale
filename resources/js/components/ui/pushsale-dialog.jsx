@@ -62,11 +62,14 @@ export function PushsaleDialog({
                 aria-describedby={description ? undefined : undefined}
                 {...contentProps}
                 style={{
-                    ...contentProps.style,
                     '--ps-dialog-width': dialogWidth,
                     width: clampWidth(dialogWidth),
                     maxWidth: 'calc(100vw - 48px)',
                     maxHeight: 'calc(100dvh - 48px)',
+                    background: '#fff',
+                    opacity: 1,
+                    filter: 'none',
+                    ...contentProps.style,
                 }}
             >
                 <DialogHeader className={cn('ps-dialog-header', !title && !description ? 'sr-only' : '', headerClassName)}>

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { XIcon } from 'lucide-react';
 
-const MODAL_Z_INDEX = 2147483000;
+const DIALOG_Z_INDEX = 2147483000;
 
 function Dialog(props) {
     return <DialogPrimitive.Root data-slot="dialog" {...props} />;
@@ -28,7 +28,7 @@ function DialogOverlay({ className, style, ...props }) {
         <DialogPrimitive.Overlay
             data-slot="dialog-overlay"
             className={cn('ps-dialog-overlay fixed inset-0 bg-black/40', className)}
-            style={{ zIndex: MODAL_Z_INDEX, ...style }}
+            style={{ zIndex: DIALOG_Z_INDEX, opacity: 1, filter: 'none', ...style }}
             {...props}
         />
     );
@@ -41,7 +41,7 @@ function DialogContent({ className, children, showClose = true, style, ...props 
             <DialogPrimitive.Content
                 data-slot="dialog-content"
                 className={cn('ps-dialog-content fixed left-1/2 top-1/2 grid w-full max-w-lg gap-4 rounded bg-popover p-6 shadow-lg', className)}
-                style={{ zIndex: MODAL_Z_INDEX + 1, ...style }}
+                style={{ zIndex: DIALOG_Z_INDEX + 10, opacity: 1, filter: 'none', background: '#fff', ...style }}
                 {...props}
             >
                 {children}

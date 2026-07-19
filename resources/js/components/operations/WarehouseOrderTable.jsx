@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 import { ShippingOrderDetailDialog } from '@/components/shipping/ShippingOrderDetailDialog';
 import { WarehouseActionDialogs } from '@/components/operations/WarehouseActionDialogs';
-import { apiPost, apiRequest } from '@/lib/api';
+import { apiPost, apiRequest, getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime, formatNumber } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
 
@@ -27,6 +27,44 @@ const statusTone = {
     cancel_waybill: 'ttgh4',
     cancel_closing: 'ttgh5',
 };
+
+
+function filenameFromDisposition(header, fallback) {
+    const match = String(header || '').match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i);
+    return decodeURIComponent(match?.[1] || match?.[2] || fallback);
+}
+
+async function postJson(url, body = {}) {
+    return apiRequest(url, { method: 'POST', body });
+}
+
+async function postDownload(url, body = {}, fallbackName = 'warehouse-export.csv') {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/csv, application/vnd.ms-excel, application/json',
+            'X-CSRF-TOKEN': getCsrfToken(),
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || 'Không thể xuất dữ liệu.');
+    }
+    const blob = await response.blob();
+    const filename = filenameFromDisposition(response.headers.get('Content-Disposition'), fallbackName);
+    const href = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = href;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(href);
+}
 
 function InlineIconButton({ title, icon, onClick, disabled = false, className = '' }) {
     return (
@@ -74,6 +112,7 @@ function ActionMenuButton({ title, icon, tone = 'success', onClick, disabled = f
 function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpenSingle, onClear, onPrint, onReload }) {
     const [open, setOpen] = useState(false);
     const selectedCount = selectedRows.length;
+    const selectedIds = selectedRows.map((row) => row.id);
     const selectedValidForShipment = selectedRows.filter((row) => row.canCreateShipment && !row.hasInsufficientStock);
     const requireSelected = (callback, message = 'Chọn ít nhất 1 đơn ở cột đầu tiên trước khi thao tác.') => {
         if (!selectedCount) {
@@ -82,6 +121,8 @@ function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpen
         }
         callback();
     };
+
+    const bulkJson = async (endpoint, payload = {}) => postJson(`${actionApiBase}/bulk/${endpoint}`, { ids: selectedIds, ...payload });
 
     const createShipments = async () => {
         if (!selectedValidForShipment.length) {
@@ -128,13 +169,31 @@ function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpen
         });
     };
 
-    const exportSelected = (kind) => requireSelected(() => {
-        toast.success(`${kind}: đã nhận ${selectedCount} đơn được chọn để xử lý.`);
-        window.print();
+    const exportSelected = (kind, type = 'standard') => requireSelected(async () => {
+        try {
+            await postDownload(`${actionApiBase}/bulk/export`, { ids: selectedIds, type }, `warehouse-${type}.csv`);
+            toast.success(`${kind}: đã xuất ${selectedCount} đơn.`);
+        } catch (error) { toast.error(error.message); }
+    });
+
+    const issueInvoices = () => requireSelected(async () => {
+        try {
+            const data = await bulkJson('invoices', { source: 'warehouse-actions' });
+            toast.success(data.message || `Đã tạo yêu cầu xuất HĐĐT cho ${selectedCount} đơn.`);
+            onReload();
+        } catch (error) { toast.error(error.message); }
+    });
+
+    const updateByOrderCode = () => requireSelected(async () => {
+        try {
+            const data = await bulkJson('update-by-code', { note: 'Cập nhật nhiều đơn theo mã Pushsale từ màn thủ kho.' });
+            toast.success(data.message || `Đã ghi nhận ${selectedCount} đơn cần cập nhật.`);
+            onReload();
+        } catch (error) { toast.error(error.message); }
     });
 
     return (
-        <nav className={`action-container ps-wh-floating-actions ${open ? 'open' : ''}`}>
+        <nav className={`action-container ps-wh-floating-actions ${open ? 'open' : ''}`} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
             <div className="hidden-actions" aria-hidden={!open}>
                 <div className="icon-row">
                     <ActionMenuButton title="Đăng đơn" icon="calendar-check-o" tone="primary" onClick={createShipments} disabled={!selectedValidForShipment.length} />
@@ -142,7 +201,7 @@ function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpen
                 </div>
                 <div className="icon-row">
                     <ActionMenuButton title="Cập nhật trạng thái giao hàng" icon="truck" tone="success" onClick={syncStatuses} disabled={!selectedCount} />
-                    <ActionMenuButton title="Cập nhật trạng thái giao hàng Excel" icon="truck" tone="warning" onClick={() => exportSelected('Cập nhật giao hàng Excel')} disabled={!selectedCount} />
+                    <ActionMenuButton title="Cập nhật trạng thái giao hàng Excel" icon="truck" tone="warning" onClick={() => exportSelected('Cập nhật giao hàng Excel', 'delivery-status')} disabled={!selectedCount} />
                 </div>
                 <div className="icon-row">
                     <ActionMenuButton title="In đơn" icon="print" tone="success" onClick={() => markPrinted('In đơn')} disabled={!selectedCount} />
@@ -153,16 +212,16 @@ function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpen
                     <ActionMenuButton title="In đơn mẫu SPX" icon="print" tone="success" onClick={() => markPrinted('In SPX')} disabled={!selectedCount} />
                 </div>
                 <div className="icon-row">
-                    <ActionMenuButton title="Xuất Excel kiểu 1" icon="file-excel-o" tone="primary" onClick={() => exportSelected('Xuất Excel kiểu 1')} disabled={!selectedCount} />
-                    <ActionMenuButton title="Xuất Excel kiểu 2" icon="file-excel-o" tone="success" onClick={() => exportSelected('Xuất Excel kiểu 2')} disabled={!selectedCount} />
-                    <ActionMenuButton title="Xuất Excel kiểu 3" icon="file-excel-o" tone="warning" onClick={() => exportSelected('Xuất Excel kiểu 3')} disabled={!selectedCount} />
+                    <ActionMenuButton title="Xuất Excel kiểu 1" icon="file-excel-o" tone="primary" onClick={() => exportSelected('Xuất Excel kiểu 1', 'standard')} disabled={!selectedCount} />
+                    <ActionMenuButton title="Xuất Excel kiểu 2" icon="file-excel-o" tone="success" onClick={() => exportSelected('Xuất Excel kiểu 2', 'shipping')} disabled={!selectedCount} />
+                    <ActionMenuButton title="Xuất Excel kiểu 3" icon="file-excel-o" tone="warning" onClick={() => exportSelected('Xuất Excel kiểu 3', 'accounting')} disabled={!selectedCount} />
                 </div>
                 <div className="icon-row">
                     <ActionMenuButton title="Thêm đơn vào biên bản" icon="file-text-o" tone="success" onClick={() => onOpenSingle('return')} disabled={selectedCount !== 1} />
-                    <ActionMenuButton title="Xuất hóa đơn điện tử theo mã đơn" icon="barcode" tone="success" onClick={() => exportSelected('Xuất HĐĐT')} disabled={!selectedCount} />
+                    <ActionMenuButton title="Xuất hóa đơn điện tử theo mã đơn" icon="barcode" tone="success" onClick={issueInvoices} disabled={!selectedCount} />
                 </div>
                 <div className="icon-row">
-                    <ActionMenuButton title="Cập nhật nhiều đơn theo mã Pushsale" icon="gears" tone="success" onClick={() => exportSelected('Cập nhật nhiều đơn')} disabled={!selectedCount} />
+                    <ActionMenuButton title="Cập nhật nhiều đơn theo mã Pushsale" icon="gears" tone="success" onClick={updateByOrderCode} disabled={!selectedCount} />
                 </div>
             </div>
             <button type="button" className="main-action" id="warehouseMenuToggle" title={open ? 'Đóng chức năng' : 'Mở chức năng'} onClick={() => setOpen((value) => !value)}>
