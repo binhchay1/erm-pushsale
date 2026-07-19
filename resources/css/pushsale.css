@@ -15769,3 +15769,460 @@ html body.pushsale-app-body .ps-wh-selected-hint {
     html body.pushsale-app-body .ps-wh-keyword { width: calc(100% - 135px) !important; }
     html body.pushsale-app-body .ps-wh-search-actions { width: 125px !important; }
 }
+
+/* ===== V64 Pushsale menu/icon parity hardening =====
+   Keep the React shell visually compatible with the original Pushsale/AdminLTE 2
+   left menu after file cleanup.  This block intentionally wins over older V24-V63
+   recovery blocks appended above. */
+body.pushsale-app-body {
+    --ps-header-height: 50px;
+    --ps-sidebar-width: 252px;
+    --ps-sidebar-collapsed: 42px;
+    --ps-font: Arial, Helvetica, sans-serif;
+}
+
+/* Do not let Tailwind/Geist override Font Awesome glyph rendering. */
+body.pushsale-app-body .fa,
+body.pushsale-app-body .fa::before {
+    font-family: FontAwesome !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-variant: normal !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Header stays fixed and compact; the logo/name area is always visible even when
+   the menu rail is hidden. */
+body.pushsale-app-body .pushsale-main-header {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    z-index: 2100 !important;
+    height: var(--ps-header-height) !important;
+    min-height: var(--ps-header-height) !important;
+    border: 0 !important;
+    background: #3c8dbc !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .pushsale-header-brand {
+    width: var(--ps-sidebar-width) !important;
+    min-width: var(--ps-sidebar-width) !important;
+    flex: 0 0 var(--ps-sidebar-width) !important;
+    height: var(--ps-header-height) !important;
+    background: #367fa9 !important;
+}
+body.pushsale-app-body .pushsale-sidebar-toggle {
+    width: 42px !important;
+    height: var(--ps-header-height) !important;
+    min-width: 42px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    line-height: var(--ps-header-height) !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .pushsale-sidebar-toggle::before,
+body.pushsale-app-body .pushsale-sidebar-toggle::after {
+    content: none !important;
+    display: none !important;
+}
+body.pushsale-app-body .pushsale-logo {
+    display: block !important;
+    min-width: 0 !important;
+    height: var(--ps-header-height) !important;
+    padding: 0 10px 0 0 !important;
+    overflow: hidden !important;
+    color: #fff !important;
+    font: 600 13px/50px Arial, Helvetica, sans-serif !important;
+    text-align: left !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    background: transparent !important;
+}
+body.pushsale-app-body .pushsale-header-tools {
+    height: var(--ps-header-height) !important;
+    padding-right: 8px !important;
+}
+
+/* Sidebar is an overlay rail, not a layout-pushing column. This removes the
+   bad top-left seam/strip that appeared when content was shifted while menu was
+   also fixed. */
+body.pushsale-app-body .content-wrapper,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper {
+    position: fixed !important;
+    inset: var(--ps-header-height) 0 0 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin-left: 0 !important;
+    border-left: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    overflow: auto !important;
+    transition: none !important;
+}
+body.pushsale-app-body .content-wrapper::before,
+body.pushsale-app-body .content-wrapper::after,
+body.pushsale-app-body .content-inner::before,
+body.pushsale-app-body .content-inner::after,
+body.pushsale-app-body .pushsale-wrapper::before,
+body.pushsale-app-body .pushsale-wrapper::after,
+body.pushsale-app-body .pushsale-main-sidebar::before,
+body.pushsale-app-body .pushsale-main-sidebar::after {
+    display: none !important;
+    content: none !important;
+}
+body.pushsale-app-body .content-inner {
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: #fff !important;
+}
+
+body.pushsale-app-body .pushsale-main-sidebar,
+body.pushsale-app-body .left-side.pushsale-main-sidebar,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-main-sidebar {
+    position: fixed !important;
+    top: var(--ps-header-height) !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 2050 !important;
+    width: var(--ps-sidebar-width) !important;
+    min-width: var(--ps-sidebar-width) !important;
+    height: calc(100vh - var(--ps-header-height)) !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    visibility: hidden !important;
+    background: #f4f6f9 !important;
+    border-right: 1px solid #d2d6de !important;
+    box-shadow: none !important;
+    transform: translate3d(calc(-1 * var(--ps-sidebar-width)), 0, 0) !important;
+    transition: transform .34s cubic-bezier(.22,.61,.36,1), visibility 0s linear .34s !important;
+}
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-main-sidebar {
+    visibility: visible !important;
+    transform: translate3d(0, 0, 0) !important;
+    transition: transform .36s cubic-bezier(.22,.61,.36,1), visibility 0s linear 0s !important;
+}
+body.pushsale-app-body .pushsale-sidebar {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: #f4f6f9 !important;
+}
+body.pushsale-app-body .pushsale-menu-root,
+body.pushsale-app-body .sidebar-menu,
+body.pushsale-app-body .sidebar-menu ul {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    background: transparent !important;
+}
+body.pushsale-app-body .sidebar-menu li {
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+body.pushsale-app-body .pushsale-menu-link,
+body.pushsale-app-body .sidebar-menu .a1,
+body.pushsale-app-body .sidebar-menu .a2,
+body.pushsale-app-body .pushsale-third-menu .a3 {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+body.pushsale-app-body .sidebar-menu .a1 {
+    height: 45px !important;
+    min-height: 45px !important;
+    padding: 0 18px 0 16px !important;
+    background: #f4f6f9 !important;
+    color: #455a70 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 45px !important;
+}
+body.pushsale-app-body .sidebar-menu .a1 .ps-menu-title {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .sidebar-menu .a1 > .ps-menu-root-icon,
+body.pushsale-app-body .sidebar-menu .a1 > .fa:first-child {
+    flex: 0 0 15px !important;
+    width: 15px !important;
+    min-width: 15px !important;
+    height: 15px !important;
+    margin: 0 5px 0 0 !important;
+    color: inherit !important;
+    font-size: 11px !important;
+    line-height: 15px !important;
+    text-align: center !important;
+}
+body.pushsale-app-body .sidebar-menu .a1 .fa-tty,
+body.pushsale-app-body .sidebar-menu .a1 .fa-calculator,
+body.pushsale-app-body .sidebar-menu .a1 .fa-dashboard {
+    font-size: 11px !important;
+}
+body.pushsale-app-body .sidebar-menu .a1 .fa-trophy,
+body.pushsale-app-body .sidebar-menu .a1 .fa-user-secret,
+body.pushsale-app-body .sidebar-menu .a1 .fa-credit-card {
+    font-size: 10.5px !important;
+}
+body.pushsale-app-body .ps-menu-caret,
+body.pushsale-app-body .sidebar-menu .a1 > .i1,
+body.pushsale-app-body .sidebar-menu .a1 .ps-menu-caret .i1 {
+    flex: 0 0 12px !important;
+    width: 12px !important;
+    min-width: 12px !important;
+    height: 45px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #007bff !important;
+    font-size: 10px !important;
+    line-height: 45px !important;
+    text-align: center !important;
+}
+body.pushsale-app-body .ps-menu-caret {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+body.pushsale-app-body .ps-menu-caret .ps-menu-caret-minus {
+    display: none !important;
+}
+body.pushsale-app-body .li1.menu-open > .a1 .ps-menu-caret-plus {
+    display: none !important;
+}
+body.pushsale-app-body .li1.menu-open > .a1 .ps-menu-caret-minus {
+    display: inline-block !important;
+}
+body.pushsale-app-body .sidebar-menu .li1 > .a1:hover,
+body.pushsale-app-body .sidebar-menu .li1.menu-open > .a1,
+body.pushsale-app-body .sidebar-menu .li1.active > .a1 {
+    background: #f2f3f6 !important;
+    color: #007bff !important;
+}
+body.pushsale-app-body .sidebar-menu .li1.active > .a1:not(:hover) {
+    color: #455a70 !important;
+}
+body.pushsale-app-body .sidebar-menu .li1.menu-open.active > .a1,
+body.pushsale-app-body .sidebar-menu .li1.menu-open > .a1 {
+    color: #007bff !important;
+}
+
+body.pushsale-app-body .treeview-menu.ul2 {
+    display: block !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    opacity: .96 !important;
+    transform: translateY(-2px) !important;
+    transition: max-height .42s cubic-bezier(.22,.61,.36,1), opacity .28s ease, transform .34s cubic-bezier(.22,.61,.36,1) !important;
+}
+body.pushsale-app-body .treeview-menu.ul2.is-open,
+body.pushsale-app-body .li1.menu-open > .treeview-menu.ul2 {
+    max-height: 980px !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+body.pushsale-app-body .sidebar-menu .a2 {
+    min-height: 34px !important;
+    padding: 0 12px 0 54px !important;
+    background: #fff !important;
+    color: #333 !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    line-height: 34px !important;
+}
+body.pushsale-app-body .sidebar-menu .a2 .ps-menu-title {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .sidebar-menu .a2 .ps-menu-angle,
+body.pushsale-app-body .sidebar-menu .a2 > .fa-angle-right {
+    flex: 0 0 12px !important;
+    width: 12px !important;
+    min-width: 12px !important;
+    margin-left: 8px !important;
+    color: #546a7f !important;
+    font-size: 10px !important;
+    line-height: 34px !important;
+    text-align: center !important;
+}
+body.pushsale-app-body .sidebar-menu .li2 > .a2:hover {
+    background: #eef5ff !important;
+    color: #007bff !important;
+}
+body.pushsale-app-body .sidebar-menu .li2.active > .a2,
+body.pushsale-app-body .sidebar-menu .li2.flyout-open > .a2 {
+    background: #007bff !important;
+    color: #fff !important;
+}
+body.pushsale-app-body .sidebar-menu .li2.active > .a2 i,
+body.pushsale-app-body .sidebar-menu .li2.flyout-open > .a2 i {
+    color: #fff !important;
+}
+body.pushsale-app-body .pushsale-menu-link.is-disabled {
+    opacity: .55 !important;
+    cursor: not-allowed !important;
+}
+
+/* Original Pushsale level-3 menu is the small ul3 flyout at the right of level-2. */
+body.pushsale-app-body .pushsale-third-menu.ul3,
+body.pushsale-app-body ul.ul3.pushsale-third-menu {
+    position: fixed !important;
+    left: var(--ps-sidebar-width) !important;
+    z-index: 2075 !important;
+    display: block !important;
+    min-width: 230px !important;
+    max-width: min(360px, calc(100vw - var(--ps-sidebar-width) - 18px)) !important;
+    max-height: calc(100vh - var(--ps-header-height) - 12px) !important;
+    margin: 0 !important;
+    padding: 4px 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    list-style: none !important;
+    background: #fff !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,.16) !important;
+    color: #333 !important;
+    font: 12px Arial, Helvetica, sans-serif !important;
+}
+body.pushsale-app-body .pushsale-third-menu .li3,
+body.pushsale-app-body .pushsale-third-menu .pushsale-third-item {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+body.pushsale-app-body .pushsale-third-menu .a3,
+body.pushsale-app-body .pushsale-third-menu .pushsale-third-link {
+    min-height: 30px !important;
+    padding: 0 13px !important;
+    background: #fff !important;
+    color: #333 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 30px !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .pushsale-third-menu .a3:hover,
+body.pushsale-app-body .pushsale-third-menu .li3.active > .a3 {
+    background: #eef5ff !important;
+    color: #007bff !important;
+}
+body.pushsale-app-body .pushsale-third-menu .ps-menu-angle {
+    margin-left: 10px !important;
+    font-size: 10px !important;
+    line-height: 30px !important;
+}
+
+/* Header/page help and action icons: normalize missing/tiny icon symptoms without
+   touching business data cells. */
+body.pushsale-app-body .pushsale-header-icon,
+body.pushsale-app-body .pushsale-header-tools .ps-help-button,
+body.pushsale-app-body .pushsale-header-tools [data-slot='button'],
+body.pushsale-app-body .btn-icon,
+body.pushsale-app-body .ps-cell-action,
+body.pushsale-app-body .ps-wh-inline-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+body.pushsale-app-body .pushsale-header-icon .fa,
+body.pushsale-app-body .pushsale-header-tools .fa,
+body.pushsale-app-body .btn-icon .fa,
+body.pushsale-app-body .ps-cell-action .fa,
+body.pushsale-app-body .ps-wh-inline-icon.fa {
+    width: 14px !important;
+    min-width: 14px !important;
+    height: 14px !important;
+    font-size: 12px !important;
+    line-height: 14px !important;
+    text-align: center !important;
+}
+
+/* Bootstrap/AdminLTE page chrome parity after cleanup. */
+body.pushsale-app-body .ps-adminlte-page,
+body.pushsale-app-body .ps-sale-workspace-page,
+body.pushsale-app-body .ps-report-page,
+body.pushsale-app-body .ps-wh-page,
+body.pushsale-app-body .pushsale-page-shell {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+}
+body.pushsale-app-body .box,
+body.pushsale-app-body .panel,
+body.pushsale-app-body .card {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 767px) {
+    body.pushsale-app-body {
+        min-width: 0 !important;
+    }
+    body.pushsale-app-body .pushsale-header-brand {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+    body.pushsale-app-body .pushsale-main-sidebar,
+    body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-main-sidebar {
+        transform: translate3d(calc(-1 * var(--ps-sidebar-width)), 0, 0) !important;
+    }
+    body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-main-sidebar {
+        transform: translate3d(0, 0, 0) !important;
+    }
+    body.pushsale-app-body .pushsale-wrapper.sidebar-open .sidebar-mobile-backdrop {
+        display: block !important;
+        position: fixed !important;
+        inset: var(--ps-header-height) 0 0 0 !important;
+        z-index: 2045 !important;
+        border: 0 !important;
+        background: rgba(0,0,0,.22) !important;
+        pointer-events: auto !important;
+    }
+    body.pushsale-app-body .pushsale-third-menu.ul3 {
+        left: 12px !important;
+        right: 12px !important;
+        max-width: none !important;
+    }
+}
+

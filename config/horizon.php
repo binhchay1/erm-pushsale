@@ -90,12 +90,12 @@ $production = [
     ], (int) env('HORIZON_REPORT_LIVE_MIN_PROCESSES', 1), (int) env('HORIZON_REPORT_LIVE_MAX_PROCESSES', 2), 900, 256, 2, 5, 250),
 
     // Heavy historical reporting: closed-day facts, checksum verify, snapshot warmup and month archive.
-    'supervisor-reports-batch' => $supervisor([
+    'supervisor-reports-batch' => $supervisor(array_values(array_unique([
         $queues['reports_history'],
         $queues['reports_maintenance'],
         $queues['reports_archive'],
         $queues['reports'],
-    ], (int) env('HORIZON_REPORT_BATCH_MIN_PROCESSES', 1), (int) env('HORIZON_REPORT_BATCH_MAX_PROCESSES', 2), 3600, 384, 2, 10, 100),
+    ])), (int) env('HORIZON_REPORT_BATCH_MIN_PROCESSES', 1), (int) env('HORIZON_REPORT_BATCH_MAX_PROCESSES', 2), 3600, 384, 2, 10, 100),
 
     // Exports are user-visible but heavy; keep an isolated low-priority lane.
     'supervisor-exports' => $supervisor([
