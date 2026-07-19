@@ -8,6 +8,7 @@ import {
     PushsaleSelect,
     usePushsaleFilters,
 } from '@/components/reports/PushsaleReportChrome';
+import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import AppLayout from '@/layouts/AppLayout';
 import { apiGet, getCsrfToken } from '@/lib/api';
 import { formatNumber } from '@/lib/format';
@@ -33,28 +34,22 @@ function money(value) {
     return formatNumber(Number(value ?? 0));
 }
 
-function Modal({ open, title, size = 'lg', onClose, children, footer }) {
-    useEffect(() => {
-        if (!open) return undefined;
-        const close = (event) => event.key === 'Escape' && onClose?.();
-        window.addEventListener('keydown', close);
-        return () => window.removeEventListener('keydown', close);
-    }, [open, onClose]);
-
-    if (!open) return null;
+function DialogShell({ open, title, size = 'lg', onClose, children, footer }) {
+    const widths = { md: '650px', lg: '980px', xl: '1280px', full: 'calc(100vw - 24px)' };
 
     return (
-        <div className="psm-modal-layer" role="dialog" aria-modal="true" aria-label={title}>
-            <button type="button" className="psm-modal-backdrop" aria-label="Đóng" onClick={onClose} />
-            <div className={`psm-modal psm-modal-${size}`}>
-                <div className="psm-modal-header">
-                    <h2>{title}</h2>
-                    <button type="button" onClick={onClose} aria-label="Đóng"><i className="fa fa-times" /></button>
-                </div>
-                <div className="psm-modal-body">{children}</div>
-                {footer && <div className="psm-modal-footer">{footer}</div>}
-            </div>
-        </div>
+        <PushsaleDialog
+            open={Boolean(open)}
+            onOpenChange={(nextOpen) => !nextOpen && onClose?.()}
+            title={title}
+            width={widths[size] ?? widths.lg}
+            className={`psm-dialog psm-dialog-${size}`}
+            bodyClassName="psm-dialog-body"
+            footerClassName="psm-dialog-footer"
+            footer={footer}
+        >
+            {children}
+        </PushsaleDialog>
     );
 }
 
@@ -125,7 +120,7 @@ function ChartGraphic({ days = [] }) {
     );
 }
 
-function ChartModal({ state, endpoint, filters, onClose }) {
+function ChartDialog({ state, endpoint, filters, onClose }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [data, setData] = useState(null);
@@ -149,7 +144,7 @@ function ChartModal({ state, endpoint, filters, onClose }) {
     }, [state, endpoint, filters]);
 
     return (
-        <Modal open={Boolean(state)} title="BIỂU ĐỒ DỮ LIỆU" size="full" onClose={onClose}>
+        <DialogShell open={Boolean(state)} title="BIỂU ĐỒ DỮ LIỆU" size="full" onClose={onClose}>
             {loading && <LoadingBlock />}
             {error && <ErrorBlock message={error} />}
             {!loading && !error && data && (
@@ -161,11 +156,11 @@ function ChartModal({ state, endpoint, filters, onClose }) {
                     <ChartGraphic days={data.days ?? []} />
                 </>
             )}
-        </Modal>
+        </DialogShell>
     );
 }
 
-function DailyMetricsModal({ state, endpoint, filters, canEdit, onClose, onSaved }) {
+function DailyMetricsDialog({ state, endpoint, filters, canEdit, onClose, onSaved }) {
     const [range, setRange] = useState({ date_from: filters.date_from, date_to: filters.date_to });
     const [rows, setRows] = useState([]);
     const [source, setSource] = useState(null);
@@ -245,7 +240,7 @@ function DailyMetricsModal({ state, endpoint, filters, canEdit, onClose, onSaved
     };
 
     return (
-        <Modal
+        <DialogShell
             open={Boolean(state)}
             title="THÊM DỮ LIỆU CHO LANDING THEO NGÀY"
             size="full"
@@ -299,19 +294,19 @@ function DailyMetricsModal({ state, endpoint, filters, canEdit, onClose, onSaved
                     </table>
                 </div>
             )}
-        </Modal>
+        </DialogShell>
     );
 }
 
-function HelpModal({ open, onClose }) {
+function HelpDialog({ open, onClose }) {
     return (
-        <Modal open={open} title="HƯỚNG DẪN MARKETING DASHBOARD" size="md" onClose={onClose}>
+        <DialogShell open={open} title="HƯỚNG DẪN MARKETING DASHBOARD" size="md" onClose={onClose}>
             <div className="psm-help">
                 <p><b>Ngân sách và số tương tác</b> được nhập theo ngày bằng nút dấu cộng tại từng nguồn/UTM.</p>
                 <p><b>Contact</b> lấy từ lead hợp lệ của nguồn dữ liệu trong khoảng lọc. <b>Chốt đơn và doanh số</b> lấy từ đơn đã chốt thực tế.</p>
                 <p>Bấm mũi tên tại cột sản phẩm để mở chi tiết UTM Source và UTM Campaign; bấm biểu đồ để xem biến động theo ngày.</p>
             </div>
-        </Modal>
+        </DialogShell>
     );
 }
 
@@ -536,9 +531,9 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
                 </div>
             </section>
 
-            <ChartModal state={chartState} endpoint={endpoints.chart} filters={draft} onClose={() => setChartState(null)} />
-            <DailyMetricsModal state={dailyState} endpoint={endpoints.dailyMetrics} filters={draft} canEdit={Boolean(filterOptions.canEditDailyMetrics)} onClose={() => setDailyState(null)} onSaved={() => router.reload({ only: ['report'] })} />
-            <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+            <ChartDialog state={chartState} endpoint={endpoints.chart} filters={draft} onClose={() => setChartState(null)} />
+            <DailyMetricsDialog state={dailyState} endpoint={endpoints.dailyMetrics} filters={draft} canEdit={Boolean(filterOptions.canEditDailyMetrics)} onClose={() => setDailyState(null)} onSaved={() => router.reload({ only: ['report'] })} />
+            <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
         </AppLayout>
     );
 }

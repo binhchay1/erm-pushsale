@@ -396,8 +396,8 @@ body.pushsale-app-body button.tao-don-fixed i { font-size: 20px; }
 body.pushsale-app-body button.tao-don-fixed .text { margin-top: 1px; font-size: 10px; font-weight: 700; }
 body.pushsale-app-body button.tao-don-fixed:hover { background: #006fdc; }
 
-/* Shared modal shell, replacing the old iframe popup but retaining Pushsale geometry. */
-body.pushsale-app-body .ps-sale-modal[data-slot='dialog-content'] {
+/* Shared dialog shell, replacing the old iframe popup but retaining Pushsale geometry. */
+body.pushsale-app-body .ps-sale-dialog[data-slot='dialog-content'] {
     top: 50% !important;
     left: 50% !important;
     max-width: none !important;
@@ -412,17 +412,17 @@ body.pushsale-app-body .ps-sale-modal[data-slot='dialog-content'] {
     font-size: 11px !important;
     box-shadow: 0 5px 18px rgba(0,0,0,.32) !important;
 }
-body.pushsale-app-body .ps-sale-modal-header {
+body.pushsale-app-body .ps-sale-dialog-header {
     min-height: 54px;
     padding: 17px 16px 10px;
     border-bottom: 1px solid #d5d5d5;
     background: #fff;
 }
-body.pushsale-app-body .ps-sale-modal-header [data-slot='dialog-title'] { margin: 0; color: #000; font-size: 16px !important; font-weight: 700; line-height: 22px; }
-body.pushsale-app-body .ps-sale-modal > button[data-slot='dialog-close'] { top: 18px !important; right: 15px !important; width: 18px !important; height: 18px !important; color: #444 !important; opacity: 1 !important; }
-body.pushsale-app-body .ps-sale-modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding-top: 12px; }
+body.pushsale-app-body .ps-sale-dialog-header [data-slot='dialog-title'] { margin: 0; color: #000; font-size: 16px !important; font-weight: 700; line-height: 22px; }
+body.pushsale-app-body .ps-sale-dialog > button[data-slot='dialog-close'] { top: 18px !important; right: 15px !important; width: 18px !important; height: 18px !important; color: #444 !important; opacity: 1 !important; }
+body.pushsale-app-body .ps-sale-dialog-footer { display: flex; justify-content: flex-end; gap: 8px; padding-top: 12px; }
 
-body.pushsale-app-body .ps-sale-order-modal[data-slot='dialog-content'] { width: min(1280px, 96vw) !important; }
+body.pushsale-app-body .ps-sale-order-dialog[data-slot='dialog-content'] { width: min(1280px, 96vw) !important; }
 body.pushsale-app-body .ps-sale-order-body {
     display: grid;
     grid-template-columns: 32.5% 67.5%;
@@ -452,8 +452,8 @@ body.pushsale-app-body .ps-order-field-label {
     line-height: 20px;
 }
 body.pushsale-app-body .ps-order-field-label span { color: #f24f39; }
-body.pushsale-app-body .ps-sale-order-modal .form-control,
-body.pushsale-app-body .ps-sale-order-modal select {
+body.pushsale-app-body .ps-sale-order-dialog .form-control,
+body.pushsale-app-body .ps-sale-order-dialog select {
     height: 31px;
     min-height: 31px;
     padding: 5px 8px;
@@ -464,7 +464,7 @@ body.pushsale-app-body .ps-sale-order-modal select {
     font-size: 12px;
     box-shadow: none !important;
 }
-body.pushsale-app-body .ps-sale-order-modal textarea.form-control { height: auto; min-height: 53px; resize: vertical; }
+body.pushsale-app-body .ps-sale-order-dialog textarea.form-control { height: auto; min-height: 53px; resize: vertical; }
 body.pushsale-app-body .ps-order-checkbox { display: flex; align-items: center; min-height: 35px; gap: 10px; margin: 0; font-size: 11px; font-weight: 400; }
 body.pushsale-app-body .ps-order-checkbox input { width: 16px; height: 16px; margin: 0; }
 body.pushsale-app-body .ps-order-top-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 30px; }
@@ -489,18 +489,18 @@ body.pushsale-app-body .ps-order-actions { display: flex; flex-wrap: wrap; justi
 body.pushsale-app-body .ps-order-actions .btn { min-width: 115px; height: 31px; font-weight: 600; }
 body.pushsale-app-body .ps-order-actions .btn i { margin-right: 8px; }
 
-body.pushsale-app-body .ps-desired-date-modal[data-slot='dialog-content'] { width: min(1720px, 96vw) !important; }
+body.pushsale-app-body .ps-desired-date-dialog[data-slot='dialog-content'] { width: min(1720px, 96vw) !important; }
 body.pushsale-app-body .ps-desired-date-body { max-height: calc(94vh - 55px); padding: 14px 16px 28px; overflow: auto; }
 body.pushsale-app-body .ps-desired-date-body .table td { height: 28px; padding: 5px 6px !important; font-size: 12px; }
 body.pushsale-app-body .ps-desired-date-body .table td:first-child { width: 180px; }
 body.pushsale-app-body .ps-order-code { color: #007bff; font-weight: 700; }
 
-body.pushsale-app-body .ps-operation-result-modal[data-slot='dialog-content'] { width: min(610px, 94vw) !important; }
+body.pushsale-app-body .ps-operation-result-dialog[data-slot='dialog-content'] { width: min(610px, 94vw) !important; }
 body.pushsale-app-body .ps-operation-result-body { padding: 16px; }
 body.pushsale-app-body .ps-operation-result-body label { display: block; margin-bottom: 5px; font-weight: 600; }
 body.pushsale-app-body .ps-static-value { min-height: 31px; padding: 7px 9px; border: 1px solid #ddd; background: #f8f8f8; }
 
-body.pushsale-app-body .ps-operation-history-modal[data-slot='dialog-content'] { width: min(1600px, 96vw) !important; }
+body.pushsale-app-body .ps-operation-history-dialog[data-slot='dialog-content'] { width: min(1600px, 96vw) !important; }
 body.pushsale-app-body .ps-history-customer-line { padding: 10px 14px; border-bottom: 1px solid #ddd; background: #f7f7f7; }
 body.pushsale-app-body .ps-history-table-wrap { max-height: calc(94vh - 115px); overflow: auto; padding: 12px 14px 20px; }
 body.pushsale-app-body .ps-history-table { min-width: 1160px; font-size: 11px; }
@@ -564,7 +564,7 @@ body.pushsale-app-body .ps-sale-selection-bar {
 body.pushsale-app-body .ps-page-size { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 0 16px; font-weight: 400; }
 body.pushsale-app-body .ps-page-size .form-control { width: 66px; height: 28px; padding: 3px 6px; }
 
-body.pushsale-app-body .ps-operation-history-modal[data-slot='dialog-content'] {
+body.pushsale-app-body .ps-operation-history-dialog[data-slot='dialog-content'] {
     width: min(1728px, 96vw) !important;
 }
 body.pushsale-app-body .ps-history-customer-line {
@@ -572,18 +572,18 @@ body.pushsale-app-body .ps-history-customer-line {
     border-bottom: 1px solid #ddd;
     background: #fafafa;
 }
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table-wrap {
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table-wrap {
     max-height: calc(94vh - 150px);
     overflow: auto;
     padding: 12px 14px 0;
 }
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table {
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table {
     min-width: 1450px;
     margin: 0;
     table-layout: fixed;
     font-size: 11px;
 }
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table th {
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table th {
     height: 34px;
     border-color: #2d72c4 !important;
     background: #3782dc !important;
@@ -591,21 +591,21 @@ body.pushsale-app-body .ps-operation-history-modal .ps-history-table th {
     text-align: center;
     vertical-align: middle;
 }
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table th:nth-child(1) { width: 42px; }
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table th:nth-child(2) { width: 165px; }
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table th:nth-child(3),
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table th:nth-child(4),
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table th:nth-child(5) { width: 145px; }
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table th:nth-child(7) { width: 145px; }
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table th:nth-child(8) { width: 32px; }
-body.pushsale-app-body .ps-operation-history-modal .ps-history-table td { padding: 8px !important; vertical-align: top; }
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table th:nth-child(1) { width: 42px; }
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table th:nth-child(2) { width: 165px; }
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table th:nth-child(3),
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table th:nth-child(4),
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table th:nth-child(5) { width: 145px; }
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table th:nth-child(7) { width: 145px; }
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table th:nth-child(8) { width: 32px; }
+body.pushsale-app-body .ps-operation-history-dialog .ps-history-table td { padding: 8px !important; vertical-align: top; }
 body.pushsale-app-body .ps-history-auto-row > td { background: #c6f0b9 !important; }
 body.pushsale-app-body .ps-history-manual-row > td { background: #dcecff !important; }
 body.pushsale-app-body .ps-history-order-snapshot { line-height: 17px; white-space: normal; }
 body.pushsale-app-body .ps-history-order-snapshot > div { border-bottom: 1px dotted rgba(0,0,0,.14); padding: 1px 0; }
 body.pushsale-app-body .ps-history-footer-actions { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px 14px; }
 
-body.pushsale-app-body .ps-bulk-close-modal[data-slot='dialog-content'] { width: min(1180px, 94vw) !important; }
+body.pushsale-app-body .ps-bulk-close-dialog[data-slot='dialog-content'] { width: min(1180px, 94vw) !important; }
 body.pushsale-app-body .ps-bulk-close-body { max-height: calc(94vh - 55px); padding: 14px; overflow: auto; }
 body.pushsale-app-body .ps-bulk-close-body table th { background: #3782dc !important; color: #fff !important; text-align: center; }
 body.pushsale-app-body .ps-bulk-stock-confirm { display: flex; align-items: center; gap: 8px; font-weight: 400; }
@@ -637,7 +637,7 @@ body.pushsale-app-body .ps-delivery-actions {
     margin-top: 6px;
 }
 body.pushsale-app-body .ps-history-title-code { color: #007bff; }
-body.pushsale-app-body .ps-duplicate-phone-modal[data-slot='dialog-content'] { width: min(1550px, 96vw) !important; }
+body.pushsale-app-body .ps-duplicate-phone-dialog[data-slot='dialog-content'] { width: min(1550px, 96vw) !important; }
 body.pushsale-app-body .ps-duplicate-phone-body {
     max-height: calc(94vh - 55px);
     padding: 14px 16px 18px;

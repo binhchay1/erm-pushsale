@@ -71,8 +71,8 @@ export function DesiredDeliveryDialog({ order, open, onOpenChange, actionBaseUrl
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-modal ps-desired-date-modal" aria-describedby={undefined}>
-                <DialogHeader className="ps-sale-modal-header"><DialogTitle>Cập nhật ngày muốn giao hàng</DialogTitle></DialogHeader>
+            <DialogContent className="ps-sale-dialog ps-desired-date-dialog" aria-describedby={undefined}>
+                <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Cập nhật ngày muốn giao hàng</DialogTitle></DialogHeader>
                 <form onSubmit={submit} className="ps-desired-date-body">
                     <table className="table table-bordered table-striped">
                         <tbody>
@@ -135,15 +135,15 @@ export function OperationResultDialog({ order, result, open, onOpenChange, actio
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-modal ps-operation-result-modal" aria-describedby={undefined}>
-                <DialogHeader className="ps-sale-modal-header"><DialogTitle>Cập nhật tác nghiệp</DialogTitle></DialogHeader>
+            <DialogContent className="ps-sale-dialog ps-operation-result-dialog" aria-describedby={undefined}>
+                <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Cập nhật tác nghiệp</DialogTitle></DialogHeader>
                 <form onSubmit={submit} className="ps-operation-result-body">
                     <div className="form-group"><label>Khách hàng</label><div className="ps-static-value">{order.customerName} - {order.customerPhone}</div></div>
                     <div className="form-group"><label>Tác nghiệp cần</label><div className="ps-static-value">{order.currentOperation || 'Gọi lần 1'}</div></div>
                     <div className="form-group"><label>Kết quả tác nghiệp</label><div className="ps-static-value"><b>{result.label}</b></div></div>
                     {needsDate && <div className="form-group"><label>Tác nghiệp tiếp (*)</label><input required className="form-control" type="datetime-local" value={nextAt} onChange={(event) => setNextAt(event.target.value)} /></div>}
                     <div className="form-group"><label>Ghi chú</label><textarea className="form-control" rows={4} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} /></div>
-                    <div className="ps-sale-modal-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>Đóng</button><button className="btn btn-primary" disabled={processing}><i className="fa fa-floppy-o" /> Cập nhật</button></div>
+                    <div className="ps-sale-dialog-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>Đóng</button><button className="btn btn-primary" disabled={processing}><i className="fa fa-floppy-o" /> Cập nhật</button></div>
                 </form>
             </DialogContent>
         </Dialog>
@@ -176,8 +176,8 @@ export function SaleOperationHistoryDialog({ order, context = 'sale', open, onOp
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-modal ps-operation-history-modal" aria-describedby={undefined}>
-                <DialogHeader className="ps-sale-modal-header"><DialogTitle>{dialogTitle}: <span className="ps-history-title-code">{order.orderCode || `#${order.id}`}</span></DialogTitle></DialogHeader>
+            <DialogContent className="ps-sale-dialog ps-operation-history-dialog" aria-describedby={undefined}>
+                <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{dialogTitle}: <span className="ps-history-title-code">{order.orderCode || `#${order.id}`}</span></DialogTitle></DialogHeader>
                 <div className="ps-history-customer-line">
                     <b>{data.customer?.name ?? order.customerName}</b> · {data.customer?.phone ?? order.customerPhone} · {order.orderCode || `Đơn chưa chốt #${order.id}`}
                 </div>
@@ -245,8 +245,8 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange }) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-modal ps-duplicate-phone-modal ps-duplicate-phone-modal-legacy" aria-describedby={undefined}>
-                <DialogHeader className="ps-sale-modal-header ps-duplicate-phone-header">
+            <DialogContent className="ps-sale-dialog ps-duplicate-phone-dialog ps-duplicate-phone-dialog-legacy" aria-describedby={undefined}>
+                <DialogHeader className="ps-sale-dialog-header ps-duplicate-phone-header">
                     <DialogTitle>Danh sách đơn cùng số điện thoại</DialogTitle>
                     <label className="ps-duplicate-closed-filter"><input type="checkbox" checked={closedOnly} onChange={(event) => setClosedOnly(event.target.checked)} /> Đã chốt đơn</label>
                 </DialogHeader>
@@ -287,7 +287,7 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange }) {
                             </tbody>
                         </table>
                     </div>
-                    <div className="ps-sale-modal-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}><i className="fa fa-times" /> Đóng</button></div>
+                    <div className="ps-sale-dialog-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}><i className="fa fa-times" /> Đóng</button></div>
                 </div>
             </DialogContent>
         </Dialog>
@@ -319,15 +319,15 @@ export function BulkCloseDialog({ orderIds = [], rows = [], actionBaseUrl, open,
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-modal ps-bulk-close-modal" aria-describedby={undefined}>
-                <DialogHeader className="ps-sale-modal-header"><DialogTitle>Chốt đơn nhiều</DialogTitle></DialogHeader>
+            <DialogContent className="ps-sale-dialog ps-bulk-close-dialog" aria-describedby={undefined}>
+                <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Chốt đơn nhiều</DialogTitle></DialogHeader>
                 <div className="ps-bulk-close-body">
                     <div className="alert alert-info">Đã chọn <b>{orderIds.length}</b> đơn. Mã đơn sẽ chỉ được sinh cho các đơn chốt thành công.</div>
                     <div className="table-responsive"><table className="table table-bordered table-striped"><thead><tr><th>#</th><th>Khách hàng</th><th>Điện thoại</th><th>Sản phẩm</th><th>Tổng tiền</th><th>Trạng thái</th></tr></thead><tbody>
                         {selectedRows.map((order, index) => <tr key={order.id}><td>{index + 1}</td><td>{order.customerName || '—'}</td><td>{order.customerPhone || '—'}</td><td>{order.products?.map((item) => `${item.productName} x${item.quantity}`).join(' | ') || '—'}</td><td className="text-right">{money(order.total)}</td><td>{order.closedAt ? 'Đã chốt' : 'Chưa chốt'}</td></tr>)}
                     </tbody></table></div>
                     <label className="ps-bulk-stock-confirm"><input type="checkbox" checked={confirmStock} onChange={(event) => setConfirmStock(event.target.checked)} /> Xác nhận tiếp tục nếu tồn kho không đủ</label>
-                    <div className="ps-sale-modal-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>Đóng</button><button type="button" className="btn btn-primary" disabled={processing || !orderIds.length} onClick={submit}><i className="fa fa-check-square-o" /> Chốt đơn</button></div>
+                    <div className="ps-sale-dialog-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>Đóng</button><button type="button" className="btn btn-primary" disabled={processing || !orderIds.length} onClick={submit}><i className="fa fa-check-square-o" /> Chốt đơn</button></div>
                 </div>
             </DialogContent>
         </Dialog>

@@ -2,6 +2,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 
 const number = new Intl.NumberFormat('vi-VN');
 
@@ -9,9 +10,18 @@ function Pagination({ data, routeUrl, filters }) {
     return <div className="ps-pagination-bar"><span>{data.from ?? 0} - {data.to ?? 0} / {data.total ?? 0}</span><ul className="pagination pagination-sm">{(data.links ?? []).map((link, index) => <li key={`${link.label}-${index}`} className={`${link.active ? 'active' : ''} ${!link.url ? 'disabled' : ''}`}><button type="button" disabled={!link.url} onClick={() => link.url && router.get(link.url, filters, { preserveState: true, preserveScroll: true })} dangerouslySetInnerHTML={{ __html: link.label }} /></li>)}</ul></div>;
 }
 
-function Modal({ open, onClose, children }) {
-    if (!open) return null;
-    return <div className="ps-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><div className="ps-source-modal is-medium"><div className="ps-source-modal-header"><strong>XUẤT / NHẬP KHO</strong><button type="button" onClick={onClose}><i className="fa fa-times" /></button></div><div className="ps-source-modal-body">{children}</div></div></div>;
+function DialogShell({ open, onClose, children }) {
+    return (
+        <PushsaleDialog
+            open={open}
+            onOpenChange={(nextOpen) => !nextOpen && onClose()}
+            title="XUẤT / NHẬP KHO"
+            width="900px"
+            bodyClassName="ps-source-dialog-body"
+        >
+            {children}
+        </PushsaleDialog>
+    );
 }
 
 export default function Inventory({ report, filterOptions = {}, intakeUrl, exportUrl, approverOptions = [] }) {
@@ -72,7 +82,7 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
                 <Pagination data={report.rows} routeUrl={routeUrl} filters={filters} />
             </section>
 
-            <Modal open={movementOpen} onClose={() => setMovementOpen(false)}>
+            <DialogShell open={movementOpen} onClose={() => setMovementOpen(false)}>
                 <form onSubmit={submitMovement} className="ps-form-grid ps-form-grid-2">
                     <div className="span-2 ps-tabs"><button type="button" className={mode === 'intake' ? 'active' : ''} onClick={() => setMode('intake')}>Nhập kho</button><button type="button" className={mode === 'export' ? 'active' : ''} onClick={() => setMode('export')}>Xuất kho</button></div>
                     <label>Kho (*)<select className="form-control" value={movement.data.warehouse_id} onChange={(event) => movement.setData('warehouse_id', event.target.value)} required><option value="">--Chọn kho--</option>{(filterOptions.warehouses ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
@@ -83,7 +93,7 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
                     {Object.keys(movement.errors).length > 0 && <div className="alert alert-danger span-2">{Object.values(movement.errors).join(' · ')}</div>}
                     <div className="span-2"><button className="btn btn-primary" disabled={movement.processing}><i className="fa fa-save" /> Lưu phiếu</button></div>
                 </form>
-            </Modal>
+            </DialogShell>
         </AppLayout>
     );
 }

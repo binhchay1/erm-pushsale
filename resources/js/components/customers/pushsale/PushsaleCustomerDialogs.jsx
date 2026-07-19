@@ -1,31 +1,31 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import { PushsaleModal } from '@/components/ui/pushsale-modal';
+import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { apiGet, apiPost } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 
 function LoadingBlock() {
-    return <div className="ps-customer-modal-loading"><i className="fa fa-spinner fa-spin" /> Đang tải dữ liệu…</div>;
+    return <div className="ps-customer-dialog-loading"><i className="fa fa-spinner fa-spin" /> Đang tải dữ liệu…</div>;
 }
 
 function EmptyRow({ colSpan, text = 'Không có dữ liệu' }) {
     return <tr><td colSpan={colSpan} className="text-center ps-empty-cell">{text}</td></tr>;
 }
 
-function PushsaleDialog({ open, onOpenChange, width = '800px', title, description, children, footer }) {
+function CustomerDialogShell({ open, onOpenChange, width = '800px', title, description, children, footer }) {
     return (
-        <PushsaleModal
+        <PushsaleDialog
             open={open}
             onOpenChange={onOpenChange}
             width={width}
             title={title}
             description={description}
-            className="ps-customer-modal"
+            className="ps-customer-dialog"
             footer={footer}
         >
             {children}
-        </PushsaleModal>
+        </PushsaleDialog>
     );
 }
 
@@ -37,7 +37,7 @@ function messageDate(message) {
     return message.createdAt ?? message.sentAt;
 }
 
-export function PushsaleCustomerMessagesModal({ order, open, onOpenChange }) {
+export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
     const [tab, setTab] = useState('internal');
     const [loading, setLoading] = useState(false);
     const [customer, setCustomer] = useState(null);
@@ -122,18 +122,18 @@ export function PushsaleCustomerMessagesModal({ order, open, onOpenChange }) {
     };
 
     return (
-        <PushsaleDialog
+        <CustomerDialogShell
             open={open}
             onOpenChange={onOpenChange}
             width="800px"
             title={`Tin nhắn: ${customer?.name ?? order?.customerName ?? '-'}`}
         >
-            <div className="ps-modal-customer-line">
+            <div className="ps-dialog-customer-line">
                 <a href="#" onClick={(event) => event.preventDefault()}>{customer?.name ?? order?.customerName ?? '—'}</a>
                 <span> / </span>
                 <a href={`tel:${customer?.phone ?? order?.customerPhone ?? ''}`}>{customer?.phone ?? order?.customerPhone ?? '—'}</a>
             </div>
-            <div className="ps-modal-address">{customer?.address ?? order?.effectiveShippingAddress ?? '—'}</div>
+            <div className="ps-dialog-address">{customer?.address ?? order?.effectiveShippingAddress ?? '—'}</div>
 
             <div className="ps-customer-tabs">
                 <button type="button" className={tab === 'internal' ? 'active' : ''} onClick={() => setTab('internal')}>Tin nhắn nội bộ</button>
@@ -180,11 +180,11 @@ export function PushsaleCustomerMessagesModal({ order, open, onOpenChange }) {
             <button type="button" className="ps-same-phone-link" onClick={() => setTab('internal')}>
                 <i className="fa fa-link" /> Xem tin nhắn cùng số điện thoại
             </button>
-        </PushsaleDialog>
+        </CustomerDialogShell>
     );
 }
 
-export function PushsaleOperationHistoryModal({ order, open, onOpenChange }) {
+export function PushsaleOperationHistoryDialog({ order, open, onOpenChange }) {
     const [loading, setLoading] = useState(false);
     const [samePhone, setSamePhone] = useState(false);
     const [data, setData] = useState({ customer: null, histories: [], hasMore: false });
@@ -205,7 +205,7 @@ export function PushsaleOperationHistoryModal({ order, open, onOpenChange }) {
     }, [open]);
 
     return (
-        <PushsaleDialog
+        <CustomerDialogShell
             open={open}
             onOpenChange={onOpenChange}
             width="1728px"
@@ -254,11 +254,11 @@ export function PushsaleOperationHistoryModal({ order, open, onOpenChange }) {
                 <i className="fa fa-link" /> {samePhone ? 'Chỉ xem lịch sử của đơn hiện tại' : 'Xem danh sách lịch sử các đơn cùng số điện thoại'}
             </button>
             {data.hasMore ? <div className="small-tip">Chỉ hiển thị 200 lịch sử gần nhất.</div> : null}
-        </PushsaleDialog>
+        </CustomerDialogShell>
     );
 }
 
-export function PushsalePurchaseHistoryModal({ order, open, onOpenChange }) {
+export function PushsalePurchaseHistoryDialog({ order, open, onOpenChange }) {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState({ customer: null, summary: null, orders: [] });
 
@@ -276,7 +276,7 @@ export function PushsalePurchaseHistoryModal({ order, open, onOpenChange }) {
     const summary = data.summary ?? {};
 
     return (
-        <PushsaleDialog
+        <CustomerDialogShell
             open={open}
             onOpenChange={onOpenChange}
             width="1500px"
@@ -319,11 +319,11 @@ export function PushsalePurchaseHistoryModal({ order, open, onOpenChange }) {
                     </div>
                 </>
             )}
-        </PushsaleDialog>
+        </CustomerDialogShell>
     );
 }
 
-export function PushsaleDataViewHistoryModal({ order, open, onOpenChange }) {
+export function PushsaleDataViewHistoryDialog({ order, open, onOpenChange }) {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState({ logs: [], counts: [], users: [], filters: {} });
     const [filters, setFilters] = useState({ date_from: '', date_to: '', user_id: '' });
@@ -350,7 +350,7 @@ export function PushsaleDataViewHistoryModal({ order, open, onOpenChange }) {
     }, [open, order?.id]);
 
     return (
-        <PushsaleDialog
+        <CustomerDialogShell
             open={open}
             onOpenChange={onOpenChange}
             width="1728px"
@@ -400,6 +400,6 @@ export function PushsaleDataViewHistoryModal({ order, open, onOpenChange }) {
                 </div>
             )}
             <div className="text-danger ps-view-log-note">* Hệ thống chỉ lưu và hiển thị lịch sử xem data trong 30 ngày gần nhất.</div>
-        </PushsaleDialog>
+        </CustomerDialogShell>
     );
 }

@@ -40,15 +40,15 @@ body.pushsale-app-body .pushsale-template-fragment .content-header[aria-hidden='
     padding: 0 !important;
 }
 
-/* One viewport coordinate system for every modal implementation in the project. */
+/* One viewport coordinate system for every dialog implementation in the project. */
 body.pushsale-app-body [data-slot='dialog-overlay'],
-body.pushsale-app-body .psm-modal-layer,
-body.pushsale-app-body .pushsale-modal-layer,
-body.pushsale-app-body .ps-modal-backdrop,
-body.pushsale-app-body .modal-note-overlay,
-body.pushsale-app-body .pslc-modal-layer,
-body.pushsale-app-body .modal.in,
-body.pushsale-app-body .modal.show {
+body.pushsale-app-body .psm-dialog-layer,
+body.pushsale-app-body .pushsale-dialog-layer,
+body.pushsale-app-body .ps-dialog-backdrop,
+body.pushsale-app-body .dialog-note-overlay,
+body.pushsale-app-body .pslc-dialog-layer,
+body.pushsale-app-body .dialog.in,
+body.pushsale-app-body .dialog.show {
     position: fixed !important;
     inset: 0 !important;
     z-index: 12000 !important;
@@ -57,11 +57,11 @@ body.pushsale-app-body .modal.show {
     margin: 0 !important;
 }
 
-body.pushsale-app-body .psm-modal-layer,
-body.pushsale-app-body .pushsale-modal-layer,
-body.pushsale-app-body .ps-modal-backdrop,
-body.pushsale-app-body .modal-note-overlay,
-body.pushsale-app-body .pslc-modal-layer {
+body.pushsale-app-body .psm-dialog-layer,
+body.pushsale-app-body .pushsale-dialog-layer,
+body.pushsale-app-body .ps-dialog-backdrop,
+body.pushsale-app-body .dialog-note-overlay,
+body.pushsale-app-body .pslc-dialog-layer {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -70,24 +70,24 @@ body.pushsale-app-body .pslc-modal-layer {
 }
 
 body.pushsale-app-body [data-slot='dialog-content'],
-body.pushsale-app-body .psm-modal,
-body.pushsale-app-body .pushsale-modal-dialog,
-body.pushsale-app-body .ps-source-modal,
-body.pushsale-app-body .modal-note-panel,
-body.pushsale-app-body .pslc-modal,
-body.pushsale-app-body .modal.in .modal-dialog,
-body.pushsale-app-body .modal.show .modal-dialog {
+body.pushsale-app-body .psm-dialog,
+body.pushsale-app-body .pushsale-dialog-dialog,
+body.pushsale-app-body .ps-source-dialog,
+body.pushsale-app-body .dialog-note-panel,
+body.pushsale-app-body .pslc-dialog,
+body.pushsale-app-body .dialog.in .dialog-dialog,
+body.pushsale-app-body .dialog.show .dialog-dialog {
     max-width: calc(100vw - 20px) !important;
     max-height: calc(100dvh - 20px) !important;
 }
 
-body.pushsale-app-body .psm-modal,
-body.pushsale-app-body .pushsale-modal-dialog,
-body.pushsale-app-body .ps-source-modal,
-body.pushsale-app-body .modal-note-panel,
-body.pushsale-app-body .pslc-modal,
-body.pushsale-app-body .modal.in .modal-dialog,
-body.pushsale-app-body .modal.show .modal-dialog {
+body.pushsale-app-body .psm-dialog,
+body.pushsale-app-body .pushsale-dialog-dialog,
+body.pushsale-app-body .ps-source-dialog,
+body.pushsale-app-body .dialog-note-panel,
+body.pushsale-app-body .pslc-dialog,
+body.pushsale-app-body .dialog.in .dialog-dialog,
+body.pushsale-app-body .dialog.show .dialog-dialog {
     position: relative !important;
     top: auto !important;
     right: auto !important;
@@ -98,21 +98,21 @@ body.pushsale-app-body .modal.show .modal-dialog {
 }
 
 
-body.pushsale-app-body .psm-modal,
-body.pushsale-app-body .pushsale-modal-dialog,
-body.pushsale-app-body .ps-source-modal,
-body.pushsale-app-body .modal-note-panel,
-body.pushsale-app-body .pslc-modal,
-body.pushsale-app-body .modal.in .modal-content,
-body.pushsale-app-body .modal.show .modal-content {
+body.pushsale-app-body .psm-dialog,
+body.pushsale-app-body .pushsale-dialog-dialog,
+body.pushsale-app-body .ps-source-dialog,
+body.pushsale-app-body .dialog-note-panel,
+body.pushsale-app-body .pslc-dialog,
+body.pushsale-app-body .dialog.in .dialog-content,
+body.pushsale-app-body .dialog.show .dialog-content {
     display: flex !important;
     min-height: 0 !important;
     flex-direction: column !important;
     overflow: hidden !important;
 }
 
-body.pushsale-app-body .modal.in .modal-content,
-body.pushsale-app-body .modal.show .modal-content {
+body.pushsale-app-body .dialog.in .dialog-content,
+body.pushsale-app-body .dialog.show .dialog-content {
     max-height: calc(100dvh - 20px) !important;
 }
 
@@ -128,16 +128,16 @@ body.pushsale-app-body [data-slot='dialog-content'] {
 }
 
 body.pushsale-app-body [data-slot='dialog-content'] > :not([data-slot='dialog-header']):not([data-slot='dialog-footer']):not(.pushsale-dialog-close),
-body.pushsale-app-body .psm-modal-body,
-body.pushsale-app-body .pushsale-modal-body,
-body.pushsale-app-body .ps-source-modal-body,
-body.pushsale-app-body .modal-note-body,
-body.pushsale-app-body .modal.in .modal-body,
-body.pushsale-app-body .modal.show .modal-body,
-body.pushsale-app-body .ps-customer-modal-body,
+body.pushsale-app-body .psm-dialog-body,
+body.pushsale-app-body .pushsale-dialog-body,
+body.pushsale-app-body .ps-source-dialog-body,
+body.pushsale-app-body .dialog-note-body,
+body.pushsale-app-body .dialog.in .dialog-body,
+body.pushsale-app-body .dialog.show .dialog-body,
+body.pushsale-app-body .ps-customer-dialog-body,
 body.pushsale-app-body .ps-sale-order-body,
 body.pushsale-app-body .sale-order-dialog-body,
-body.pushsale-app-body .pslc-modal-body {
+body.pushsale-app-body .pslc-dialog-body {
     min-height: 0 !important;
     flex: 1 1 auto !important;
     overflow: auto !important;
@@ -146,11 +146,11 @@ body.pushsale-app-body .pslc-modal-body {
 
 body.pushsale-app-body [data-slot='dialog-header'],
 body.pushsale-app-body [data-slot='dialog-footer'],
-body.pushsale-app-body .psm-modal-header,
-body.pushsale-app-body .psm-modal-footer,
-body.pushsale-app-body .ps-source-modal-header,
-body.pushsale-app-body .pslc-modal-header,
-body.pushsale-app-body .pslc-modal-footer {
+body.pushsale-app-body .psm-dialog-header,
+body.pushsale-app-body .psm-dialog-footer,
+body.pushsale-app-body .ps-source-dialog-header,
+body.pushsale-app-body .pslc-dialog-header,
+body.pushsale-app-body .pslc-dialog-footer {
     flex: 0 0 auto !important;
 }
 

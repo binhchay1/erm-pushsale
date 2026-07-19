@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { ReportPagination } from '@/components/reports/ReportPagination';
 import { apiRequest } from '@/lib/api';
 
@@ -39,20 +40,18 @@ function parseDateRange(value) {
     };
 }
 
-function ModalShell({ title, open, onClose, children, footer }) {
-    if (!open) return null;
-
+function DialogShell({ title, open, onClose, children, footer }) {
     return (
-        <div className="ps-modal-backdrop" role="presentation" onMouseDown={onClose}>
-            <div className="ps-modal-card ps-customer360-modal" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
-                <div className="ps-modal-header">
-                    <h3>{title}</h3>
-                    <button type="button" className="ps-modal-close" onClick={onClose} aria-label="Đóng">×</button>
-                </div>
-                <div className="ps-modal-body">{children}</div>
-                {footer ? <div className="ps-modal-footer">{footer}</div> : null}
-            </div>
-        </div>
+        <PushsaleDialog
+            open={open}
+            onOpenChange={(nextOpen) => !nextOpen && onClose()}
+            title={title}
+            width="980px"
+            bodyClassName="ps-dialog-body"
+            footer={footer}
+        >
+            {children}
+        </PushsaleDialog>
     );
 }
 
@@ -150,7 +149,7 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
     const [dateRange, setDateRange] = useState(toDateRangeLabel(filters));
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [selected, setSelected] = useState(new Set());
-    const [modal, setModal] = useState(null);
+    const [dialog, setDialog] = useState(null);
     const [campaignName, setCampaignName] = useState('');
     const [campaignId, setCampaignId] = useState('');
     const [segments, setSegments] = useState(filterOptions.segments ?? []);
@@ -181,7 +180,7 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
         try {
             const data = await apiRequest(url, { method: url.endsWith('/segments') ? 'PUT' : 'POST', body });
             toast.success(data.message ?? successMessage);
-            setModal(null);
+            setDialog(null);
             router.reload({ preserveScroll: true });
         } catch (error) {
             toast.error(error.message ?? 'Không thực hiện được thao tác.');
@@ -266,42 +265,42 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
                 ) : null}
 
                 <div className="box-body ps-customer360-actions">
-                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setModal('createCampaign')}><i className="fa fa-plus" /> Tạo chiến dịch từ bộ lọc tìm kiếm</button>
-                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setModal('attachCampaign')}><i className="fa fa-user-plus" /> Thêm khách hàng vào chiến dịch</button>
-                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setModal('segments')}><i className="fa fa-diamond" /> Quản lý phân loại khách hàng</button>
+                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('createCampaign')}><i className="fa fa-plus" /> Tạo chiến dịch từ bộ lọc tìm kiếm</button>
+                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('attachCampaign')}><i className="fa fa-user-plus" /> Thêm khách hàng vào chiến dịch</button>
+                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('segments')}><i className="fa fa-diamond" /> Quản lý phân loại khách hàng</button>
                 </div>
 
-                <Customer360Table rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onAdd={() => setModal('createCustomer')} />
+                <Customer360Table rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onAdd={() => setDialog('createCustomer')} />
                 <ReportPagination routeUrl={routeUrl} filters={normalizedForm()} meta={pagination} scrollTargetId="customer360-table" />
             </section>
 
-            <ModalShell
+            <DialogShell
                 title="Tạo chiến dịch theo điều kiện tìm kiếm lọc"
-                open={modal === 'createCampaign'}
-                onClose={() => setModal(null)}
-                footer={<><button type="button" className="btn btn-default" onClick={() => setModal(null)}>Đóng</button><button type="button" className="btn btn-primary" onClick={createCampaign}><i className="fa fa-save" /> Lưu</button></>}
+                open={dialog === 'createCampaign'}
+                onClose={() => setDialog(null)}
+                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>Đóng</button><button type="button" className="btn btn-primary" onClick={createCampaign}><i className="fa fa-save" /> Lưu</button></>}
             >
                 <label>Tên chiến dịch</label>
                 <input className="form-control" value={campaignName} onChange={(event) => setCampaignName(event.target.value)} placeholder="Nhập tên chiến dịch chăm sóc" />
                 <p className="small-tip mt-2">Chiến dịch sẽ lưu bộ lọc hiện tại và danh sách khách hàng đã tích chọn nếu có.</p>
-            </ModalShell>
+            </DialogShell>
 
-            <ModalShell
+            <DialogShell
                 title="Thêm khách hàng vào chiến dịch"
-                open={modal === 'attachCampaign'}
-                onClose={() => setModal(null)}
-                footer={<><button type="button" className="btn btn-default" onClick={() => setModal(null)}>Đóng</button><button type="button" className="btn btn-primary" onClick={attachCampaign}><i className="fa fa-save" /> Lưu</button></>}
+                open={dialog === 'attachCampaign'}
+                onClose={() => setDialog(null)}
+                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>Đóng</button><button type="button" className="btn btn-primary" onClick={attachCampaign}><i className="fa fa-save" /> Lưu</button></>}
             >
                 <label>Chiến dịch</label>
                 <SelectBox value={campaignId} onChange={setCampaignId} options={filterOptions.campaigns} placeholder="-- Chọn chiến dịch --" />
                 <p className="small-tip mt-2">Đã chọn {selectedIds.length} khách hàng.</p>
-            </ModalShell>
+            </DialogShell>
 
-            <ModalShell
+            <DialogShell
                 title="Quản lý phân loại khách hàng"
-                open={modal === 'segments'}
-                onClose={() => setModal(null)}
-                footer={<><button type="button" className="btn btn-default" onClick={() => setModal(null)}>Đóng</button><button type="button" className="btn btn-primary" onClick={saveSegments}><i className="fa fa-save" /> Lưu</button></>}
+                open={dialog === 'segments'}
+                onClose={() => setDialog(null)}
+                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>Đóng</button><button type="button" className="btn btn-primary" onClick={saveSegments}><i className="fa fa-save" /> Lưu</button></>}
             >
                 <div className="ps-segment-editor">
                     {segments.map((segment, index) => (
@@ -313,16 +312,16 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
                     ))}
                     <button type="button" className="btn btn-default btn-sm" onClick={() => setSegments((current) => [...current, { id: Date.now(), name: 'Nhóm khách hàng mới', color: '#337ab7' }])}><i className="fa fa-plus" /> Thêm nhóm</button>
                 </div>
-            </ModalShell>
+            </DialogShell>
 
-            <ModalShell
+            <DialogShell
                 title="Thêm khách hàng"
-                open={modal === 'createCustomer'}
-                onClose={() => setModal(null)}
-                footer={<button type="button" className="btn btn-default" onClick={() => setModal(null)}>Đóng</button>}
+                open={dialog === 'createCustomer'}
+                onClose={() => setDialog(null)}
+                footer={<button type="button" className="btn btn-default" onClick={() => setDialog(null)}>Đóng</button>}
             >
                 <p>Màn này dùng dữ liệu khách hàng phát sinh từ lead/đơn hàng thật. Để thêm khách mới, dùng luồng nhập data thủ công hoặc import lead để đảm bảo đi đúng phân bổ.</p>
-            </ModalShell>
+            </DialogShell>
         </AppLayout>
     );
 }

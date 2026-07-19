@@ -2,6 +2,7 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { formatCurrency } from '@/lib/format';
 
 
@@ -25,7 +26,9 @@ function CircleStatus({ active, title, onClick, disabled = false }) {
     );
 }
 
-function PasswordModal({ user, onClose }) {
+
+
+function PasswordDialog({ user, onClose }) {
     const form = useForm({ password: '', password_confirmation: '' });
     if (!user) return null;
 
@@ -38,33 +41,27 @@ function PasswordModal({ user, onClose }) {
     };
 
     return (
-        <div className="ps-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-            <div className="ps-source-modal" role="dialog" aria-modal="true">
-                <div className="ps-source-modal-header">
-                    <strong>THAY ĐỔI MẬT KHẨU</strong>
-                    <button type="button" onClick={onClose}><i className="fa fa-times" /></button>
+        <PushsaleDialog open={Boolean(user)} onOpenChange={(nextOpen) => !nextOpen && onClose()} title="THAY ĐỔI MẬT KHẨU" width="600px" bodyClassName="ps-source-dialog-body ps-taxonomy-form">
+            <form onSubmit={submit}>
+                <div className="alert alert-info">Tài khoản: <strong>{user.name}</strong> ({user.email})</div>
+                <label>Mật khẩu mới
+                    <input className="form-control" type="password" value={form.data.password} onChange={(event) => form.setData('password', event.target.value)} required />
+                </label>
+                <label>Nhập lại mật khẩu
+                    <input className="form-control" type="password" value={form.data.password_confirmation} onChange={(event) => form.setData('password_confirmation', event.target.value)} required />
+                </label>
+                {Object.keys(form.errors).length > 0 && <div className="alert alert-danger">{Object.values(form.errors).join(' · ')}</div>}
+                <div className="text-right">
+                    <button type="button" className="btn btn-default" onClick={onClose}>Hủy</button>{' '}
+                    <button className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> Lưu</button>
                 </div>
-                <form className="ps-source-modal-body ps-taxonomy-form" onSubmit={submit}>
-                    <div className="alert alert-info">Tài khoản: <strong>{user.name}</strong> ({user.email})</div>
-                    <label>Mật khẩu mới
-                        <input className="form-control" type="password" value={form.data.password} onChange={(event) => form.setData('password', event.target.value)} required />
-                    </label>
-                    <label>Nhập lại mật khẩu
-                        <input className="form-control" type="password" value={form.data.password_confirmation} onChange={(event) => form.setData('password_confirmation', event.target.value)} required />
-                    </label>
-                    {Object.keys(form.errors).length > 0 && <div className="alert alert-danger">{Object.values(form.errors).join(' · ')}</div>}
-                    <div className="text-right">
-                        <button type="button" className="btn btn-default" onClick={onClose}>Hủy</button>{' '}
-                        <button className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> Lưu</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+            </form>
+        </PushsaleDialog>
     );
 }
 
 
-function SingleAccountModal({ open, onClose, roles = [], workShifts = [] }) {
+function SingleAccountDialog({ open, onClose, roles = [], workShifts = [] }) {
     const form = useForm({
         role: '',
         email_local: '',
@@ -91,12 +88,7 @@ function SingleAccountModal({ open, onClose, roles = [], workShifts = [] }) {
     };
 
     return (
-        <div className="ps-employee-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-            <div className="ps-employee-modal" style={{ '--ps-employee-modal-width': '600px' }} role="dialog" aria-modal="true" aria-label="Cập nhật tài khoản">
-                <div className="ps-employee-modal-header">
-                    <strong>Cập nhật tài khoản</strong>
-                    <button type="button" className="ps-employee-modal-close" onClick={onClose}>×</button>
-                </div>
+        <PushsaleDialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()} title="Cập nhật tài khoản" width="600px" bodyClassName="ps-employee-dialog-body">
                 <form className="ps-employee-form" onSubmit={submit}>
                     {Object.keys(form.errors).length > 0 && <div className="ps-employee-error">{Object.values(form.errors).join(' · ')}</div>}
                     <div className="ps-employee-form-row"><label>#</label><div>0</div></div>
@@ -162,12 +154,11 @@ function SingleAccountModal({ open, onClose, roles = [], workShifts = [] }) {
                         <button className="btn btn-sm btn-primary" disabled={form.processing}><i className="fa fa-save" /> Cập nhật</button>
                     </div>
                 </form>
-            </div>
-        </div>
+        </PushsaleDialog>
     );
 }
 
-function BulkAccountModal({ open, onClose, roles = [] }) {
+function BulkAccountDialog({ open, onClose, roles = [] }) {
     const form = useForm({
         template: '',
         quantity: '',
@@ -202,12 +193,7 @@ function BulkAccountModal({ open, onClose, roles = [] }) {
     };
 
     return (
-        <div className="ps-employee-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-            <div className="ps-employee-modal" style={{ '--ps-employee-modal-width': '800px' }} role="dialog" aria-modal="true" aria-label="Tạo tài khoản nhiều">
-                <div className="ps-employee-modal-header">
-                    <strong>Tạo tài khoản nhiều</strong>
-                    <button type="button" className="ps-employee-modal-close" onClick={onClose}>×</button>
-                </div>
+        <PushsaleDialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()} title="Tạo tài khoản nhiều" width="800px" bodyClassName="ps-employee-dialog-body">
                 <form className="ps-employee-form" onSubmit={submit}>
                     {Object.keys(form.errors).length > 0 && <div className="ps-employee-error">{Object.values(form.errors).join(' · ')}</div>}
                     <div className="ps-employee-form-row">
@@ -245,15 +231,14 @@ function BulkAccountModal({ open, onClose, roles = [] }) {
                         <button className="btn btn-sm btn-primary" disabled={form.processing}><i className="fa fa-save" /> Cập nhật</button>
                     </div>
                 </form>
-            </div>
-        </div>
+        </PushsaleDialog>
     );
 }
 
 export default function UsersIndex({ users, filters = {}, roles = [], workShifts = [], accountCount = 0, canCreate = true }) {
     const [passwordUser, setPasswordUser] = useState(null);
-    const [singleModalOpen, setSingleModalOpen] = useState(false);
-    const [bulkModalOpen, setBulkModalOpen] = useState(false);
+    const [singleDialogOpen, setSingleDialogOpen] = useState(false);
+    const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
     const [form, setForm] = useState({
         search: filters.search ?? '',
         role: filters.role ?? '',
@@ -349,11 +334,11 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
 
                 <div className="box-body ps-toolbar">
                     {canCreate && (
-                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setSingleModalOpen(true)}>
+                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setSingleDialogOpen(true)}>
                             <i className="fa fa-plus" /> Thêm tài khoản
                         </button>
                     )}
-                    <button type="button" className="btn btn-sm btn-default" onClick={() => setBulkModalOpen(true)}>
+                    <button type="button" className="btn btn-sm btn-default" onClick={() => setBulkDialogOpen(true)}>
                         <i className="fa fa-gears" /> Thêm nhiều tài khoản
                     </button>
                     <button type="button" className="btn btn-sm btn-default" disabled={!canBulk} title="Cập nhật tại màn hình sửa tài khoản">
@@ -429,9 +414,9 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
                     </ul>
                 </div>
             </section>
-            <SingleAccountModal open={singleModalOpen} onClose={() => setSingleModalOpen(false)} roles={roles} workShifts={workShifts} />
-            <BulkAccountModal open={bulkModalOpen} onClose={() => setBulkModalOpen(false)} roles={roles} />
-            <PasswordModal user={passwordUser} onClose={() => setPasswordUser(null)} />
+            <SingleAccountDialog open={singleDialogOpen} onClose={() => setSingleDialogOpen(false)} roles={roles} workShifts={workShifts} />
+            <BulkAccountDialog open={bulkDialogOpen} onClose={() => setBulkDialogOpen(false)} roles={roles} />
+            <PasswordDialog user={passwordUser} onClose={() => setPasswordUser(null)} />
         </AppLayout>
     );
 }

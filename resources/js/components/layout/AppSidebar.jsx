@@ -152,7 +152,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
         setFlyout(null);
     };
 
-    const scheduleFlyoutClose = (delay = 180) => {
+    const scheduleFlyoutClose = (delay = 260) => {
         clearFlyoutTimer();
         flyoutTimerRef.current = window.setTimeout(() => {
             setFlyout(null);
@@ -208,7 +208,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     const toggleFlyout = (event, item, key) => {
         clearFlyoutTimer();
         const rect = event.currentTarget.getBoundingClientRect();
-        const estimatedHeight = Math.max(61, (item.children?.length ?? 1) * 61);
+        const estimatedHeight = Math.max(50, (item.children?.length ?? 1) * 48 + 16);
         const top = Math.max(50, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
         setFlyout((current) => (current?.key === key ? null : { item, key, top }));
     };
@@ -220,7 +220,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                     className="sidebar pushsale-sidebar"
                     ref={sidebarRef}
                     onMouseEnter={clearFlyoutTimer}
-                    onMouseLeave={() => scheduleFlyoutClose(140)}
+                    onMouseLeave={() => scheduleFlyoutClose(260)}
                 >
                     <ul className="sidebar-menu ul1">
                         {navigation.map((root, rootIndex) => {
@@ -269,6 +269,9 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                         onMouseEnter={() => {
                                                             if (!hasGrandchildren) closeFlyout();
                                                         }}
+                                                        onMouseLeave={() => {
+                                                            if (hasGrandchildren) scheduleFlyoutClose(260);
+                                                        }}
                                                     >
                                                         {hasGrandchildren ? (
                                                             <button
@@ -279,7 +282,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                 onMouseEnter={(event) => {
                                                                     clearFlyoutTimer();
                                                                     const rect = event.currentTarget.getBoundingClientRect();
-                                                                    const estimatedHeight = Math.max(61, (child.children?.length ?? 1) * 61);
+                                                                    const estimatedHeight = Math.max(50, (child.children?.length ?? 1) * 48 + 16);
                                                                     const top = Math.max(50, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
                                                                     setFlyout({ item: child, key, top });
                                                                 }}
@@ -322,7 +325,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                     onSelect={rememberSelection}
                     onClose={closeFlyout}
                     onMouseEnter={clearFlyoutTimer}
-                    onMouseLeave={() => scheduleFlyoutClose(140)}
+                    onMouseLeave={() => scheduleFlyoutClose(260)}
                 />
             )}
         </>

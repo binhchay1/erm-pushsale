@@ -377,14 +377,14 @@ body.pushsale-app-body .ps-integrations-page form .grid {
 
 body.pushsale-app-body .ps-integrations-page .border-dashed,
 body.pushsale-app-body .ps-system-monitor-page .border-dashed,
-body.pushsale-app-body .ps-customer-chat-modal .border-dashed {
+body.pushsale-app-body .ps-customer-chat-dialog .border-dashed {
     border-style: solid !important;
     background: #fffde8 !important;
     border-color: #ff9800 !important;
 }
 
-/* Customer / Pancake chat modal now follows the shared Pushsale modal shell. */
-body.pushsale-app-body .ps-customer-chat-modal .ps-modal-body {
+/* Customer / Pancake chat dialog now follows the shared Pushsale dialog shell. */
+body.pushsale-app-body .ps-customer-chat-dialog .ps-dialog-body {
     padding: 0 !important;
 }
 
@@ -477,14 +477,14 @@ body.pushsale-app-body .ps-shipping-reconciliation-page [data-slot='card-content
     min-width: 1100px !important;
 }
 
-/* Fine tune modal details globally. */
-body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface {
+/* Fine tune dialog details globally. */
+body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface {
     border-radius: 0 !important;
     border: 1px solid #666 !important;
 }
 
-body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface [data-slot='dialog-header'],
-body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface .ps-modal-header {
+body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface [data-slot='dialog-header'],
+body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-dialog-header {
     min-height: 40px !important;
     padding: 9px 13px !important;
     border-bottom: 1px solid #0e6ed0 !important;
@@ -492,9 +492,9 @@ body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface .ps-modal-h
     color: #fff !important;
 }
 
-body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface [data-slot='dialog-title'],
-body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface [data-slot='dialog-description'],
-body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface .ps-modal-header * {
+body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface [data-slot='dialog-title'],
+body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface [data-slot='dialog-description'],
+body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-dialog-header * {
     color: #fff !important;
 }
 body.pushsale-app-body .ps-chat-tabs .contents { display: contents !important; }

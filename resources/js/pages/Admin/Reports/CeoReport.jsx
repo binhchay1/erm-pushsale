@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 import { CeoReportFilterBar } from '@/components/reports/ceo/CeoReportFilterBar';
-import { CeoReportHelpModal } from '@/components/reports/ceo/CeoReportHelpModal';
+import { CeoReportHelpDialog } from '@/components/reports/ceo/CeoReportHelpDialog';
 import {
     formatNaNPct,
     formatPct,
@@ -628,7 +628,7 @@ export default function CeoReport({ filters, filterOptions, report, routeUrl = '
                     />
                 </div>
 
-                <CeoReportHelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+                <CeoReportHelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
             </div>
         </AppLayout>
     );

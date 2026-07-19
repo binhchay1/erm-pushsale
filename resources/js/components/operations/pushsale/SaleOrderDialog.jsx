@@ -272,8 +272,8 @@ export function SaleOrderDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-modal ps-sale-order-modal" aria-describedby={undefined}>
-                <DialogHeader className="ps-sale-modal-header"><DialogTitle>{order ? `${closeIntent ? 'Chốt đơn' : 'Cập nhật đơn'}: ${order.orderCode || 'Đơn chưa chốt'}` : 'Nhập đơn mới: --'}</DialogTitle></DialogHeader>
+            <DialogContent className="ps-sale-dialog ps-sale-order-dialog" aria-describedby={undefined}>
+                <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{order ? `${closeIntent ? 'Chốt đơn' : 'Cập nhật đơn'}: ${order.orderCode || 'Đơn chưa chốt'}` : 'Nhập đơn mới: --'}</DialogTitle></DialogHeader>
                 <div className="ps-sale-order-body">
                     <section className="ps-order-left-panel">
                         <div className="ps-order-field ps-full"><FieldLabel required>Nguồn dữ liệu</FieldLabel><Select value={form.marketing_source_id} onChange={(value) => update('marketing_source_id', value)}><option value="">--Chọn nguồn dữ liệu--</option>{sourceOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>

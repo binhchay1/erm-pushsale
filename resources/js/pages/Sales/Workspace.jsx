@@ -5,10 +5,10 @@ import AppLayout from '@/layouts/AppLayout';
 import { useLandingUpsellHoldRefresh } from '@/hooks/useLandingUpsellHoldRefresh';
 import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import {
-    PushsaleCustomerMessagesModal,
-    PushsaleDataViewHistoryModal,
-    PushsalePurchaseHistoryModal,
-} from '@/components/customers/pushsale/PushsaleCustomerModals';
+    PushsaleCustomerMessagesDialog,
+    PushsaleDataViewHistoryDialog,
+    PushsalePurchaseHistoryDialog,
+} from '@/components/customers/pushsale/PushsaleCustomerDialogs';
 import {
     BulkCloseDialog,
     DesiredDeliveryDialog,
@@ -99,9 +99,9 @@ export default function Workspace({
                 shippingServiceOptions={shippingServiceOptions}
             />
             <SaleOperationHistoryDialog order={historyState.order} context={historyState.context} open={Boolean(historyState.order)} onOpenChange={(open) => !open && setHistoryState({ order: null, context: 'sale' })} />
-            <PushsaleDataViewHistoryModal order={dataViewOrder} open={Boolean(dataViewOrder)} onOpenChange={(open) => !open && setDataViewOrder(null)} />
-            <PushsaleCustomerMessagesModal order={messagesOrder} open={Boolean(messagesOrder)} onOpenChange={(open) => !open && setMessagesOrder(null)} />
-            <PushsalePurchaseHistoryModal order={purchaseOrder} open={Boolean(purchaseOrder)} onOpenChange={(open) => !open && setPurchaseOrder(null)} />
+            <PushsaleDataViewHistoryDialog order={dataViewOrder} open={Boolean(dataViewOrder)} onOpenChange={(open) => !open && setDataViewOrder(null)} />
+            <PushsaleCustomerMessagesDialog order={messagesOrder} open={Boolean(messagesOrder)} onOpenChange={(open) => !open && setMessagesOrder(null)} />
+            <PushsalePurchaseHistoryDialog order={purchaseOrder} open={Boolean(purchaseOrder)} onOpenChange={(open) => !open && setPurchaseOrder(null)} />
             <DuplicatePhoneOrdersDialog order={duplicateOrder} open={Boolean(duplicateOrder)} onOpenChange={(open) => !open && setDuplicateOrder(null)} />
             <DesiredDeliveryDialog order={desiredOrder} open={Boolean(desiredOrder)} onOpenChange={(open) => !open && setDesiredOrder(null)} actionBaseUrl={actionBaseUrl} />
             <OperationResultDialog

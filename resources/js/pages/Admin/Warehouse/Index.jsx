@@ -2,24 +2,21 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 
-function Modal({ open, onClose, title, children }) {
-    if (!open) return null;
+function DialogShell({ title, open, onClose, children, wide = false }) {
     return (
-        <div className="ps-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-            <div className="ps-source-modal is-medium">
-                <div className="ps-source-modal-header"><strong>{title}</strong><button type="button" onClick={onClose}><i className="fa fa-times" /></button></div>
-                <div className="ps-source-modal-body">{children}</div>
-            </div>
-        </div>
+        <PushsaleDialog
+            open={open}
+            onOpenChange={(nextOpen) => !nextOpen && onClose()}
+            title={title}
+            width={wide ? 'calc(100vw - 60px)' : '900px'}
+            bodyClassName="ps-source-dialog-body"
+        >
+            {children}
+        </PushsaleDialog>
     );
 }
-
-function Pagination({ data }) {
-    return <div className="ps-pagination-bar"><span>{data.from ?? 0} - {data.to ?? 0} / {data.total ?? 0}</span><ul className="pagination pagination-sm">{(data.links ?? []).map((link, index) => <li key={`${link.label}-${index}`} className={`${link.active ? 'active' : ''} ${!link.url ? 'disabled' : ''}`}><button type="button" disabled={!link.url} onClick={() => link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true })} dangerouslySetInnerHTML={{ __html: link.label }} /></li>)}</ul></div>;
-}
-
-const empty = { name: '', phone: '', pick_province: '', pick_district: '', pick_ward: '', address: '', manager_user_id: '', vtp_code: '', ghtk_pick_address_id: '', code: '' };
 
 export default function WarehouseIndex({ warehouses, filters = {}, managers = [], provinces = [] }) {
     const [search, setSearch] = useState(filters.search ?? '');
@@ -77,7 +74,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                 <Pagination data={warehouses} />
             </section>
 
-            <Modal open={open} onClose={() => setOpen(false)} title={editing ? 'CẬP NHẬT KHO' : 'THÊM MỚI KHO'}>
+            <DialogShell open={open} onClose={() => setOpen(false)} title={editing ? 'CẬP NHẬT KHO' : 'THÊM MỚI KHO'}>
                 <form onSubmit={save} className="ps-form-grid ps-form-grid-2">
                     <label>Tên kho (*)<input className="form-control" required value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} /></label>
                     <label>Mã kho<input className="form-control" value={form.data.code} onChange={(event) => form.setData('code', event.target.value)} /></label>
@@ -92,7 +89,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                     {Object.keys(form.errors).length > 0 && <div className="alert alert-danger span-2">{Object.values(form.errors).join(' · ')}</div>}
                     <div className="span-2"><button className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> Lưu</button></div>
                 </form>
-            </Modal>
+            </DialogShell>
         </AppLayout>
     );
 }

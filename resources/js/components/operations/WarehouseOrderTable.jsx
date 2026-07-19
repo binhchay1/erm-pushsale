@@ -3,7 +3,7 @@ import { router } from '@inertiajs/react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { ShippingOrderDetailModal } from '@/components/shipping/ShippingOrderDetailModal';
+import { ShippingOrderDetailDialog } from '@/components/shipping/ShippingOrderDetailDialog';
 import { WarehouseActionDialogs } from '@/components/operations/WarehouseActionDialogs';
 import { apiPost, apiRequest } from '@/lib/api';
 import { formatCurrency, formatDateTime, formatNumber } from '@/lib/format';
@@ -330,7 +330,7 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
             />
             {selectedRows.length > 0 && <div className="ps-wh-selected-hint">Đã chọn {selectedRows.length} đơn. Mở nút chức năng màu xanh bên trái để xử lý hàng loạt.</div>}
             <WarehouseActionDialogs action={action} onClose={() => setAction(null)} actionApiBase={actionApiBase} filterOptions={filterOptions} />
-            <ShippingOrderDetailModal orderId={detailOrderId} open={Boolean(detailOrderId)} onOpenChange={(open) => !open && setDetailOrderId(null)} apiBase={apiBase} />
+            <ShippingOrderDetailDialog orderId={detailOrderId} open={Boolean(detailOrderId)} onOpenChange={(open) => !open && setDetailOrderId(null)} apiBase={apiBase} />
         </>
     );
 }

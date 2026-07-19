@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { formatCurrency, formatDate, formatMoneyInput, parseMoneyInput } from '@/lib/format';
+import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 
 const connectionTypes = [
     ['landing', 'KẾT NỐI NGUỒN DỮ LIỆU'],
@@ -85,19 +86,18 @@ const blankForm = () => {
     };
 };
 
-function PageModal({ open, title, onClose, children }) {
-    if (!open) return null;
-
+function PageDialog({ open, title, onClose, children }) {
     return (
-        <div className="pslc-modal-layer" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}>
-            <section className="pslc-modal" role="dialog" aria-modal="true" aria-label={title}>
-                <header className="pslc-modal-header">
-                    <strong>{title}</strong>
-                    <button type="button" onClick={onClose} aria-label="Đóng"><i className="fa fa-times" /></button>
-                </header>
-                {children}
-            </section>
-        </div>
+        <PushsaleDialog
+            open={Boolean(open)}
+            onOpenChange={(nextOpen) => !nextOpen && onClose?.()}
+            title={title}
+            width="calc(100vw - 44px)"
+            className="pslc-dialog"
+            bodyClassName="pslc-dialog-body"
+        >
+            {children}
+        </PushsaleDialog>
     );
 }
 
@@ -423,9 +423,9 @@ export default function LandingConnectionsPage({
                 }} />
             </section>
 
-            <PageModal open={open} title={editingId ? 'CHỈNH SỬA NGUỒN DỮ LIỆU' : 'THÊM NGUỒN DỮ LIỆU'} onClose={() => setOpen(false)}>
+            <PageDialog open={open} title={editingId ? 'CHỈNH SỬA NGUỒN DỮ LIỆU' : 'THÊM NGUỒN DỮ LIỆU'} onClose={() => setOpen(false)}>
                 <form className="pslc-form" onSubmit={save}>
-                    <div className="pslc-modal-body">
+                    <div className="pslc-dialog-body">
                         <section className="pslc-form-section">
                             <h4>THÔNG TIN KẾT NỐI</h4>
                             <div className="pslc-form-grid">
@@ -532,9 +532,9 @@ export default function LandingConnectionsPage({
 
                         {Object.keys(form.errors).length > 0 && <div className="alert alert-danger pslc-errors">{Object.entries(form.errors).map(([key, message]) => <div key={key}><strong>{key}:</strong> {message}</div>)}</div>}
                     </div>
-                    <footer className="pslc-modal-footer"><button type="button" className="btn btn-default" onClick={() => setOpen(false)}>Đóng</button><button className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> Lưu</button></footer>
+                    <footer className="pslc-dialog-footer"><button type="button" className="btn btn-default" onClick={() => setOpen(false)}>Đóng</button><button className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> Lưu</button></footer>
                 </form>
-            </PageModal>
+            </PageDialog>
         </AppLayout>
     );
 }

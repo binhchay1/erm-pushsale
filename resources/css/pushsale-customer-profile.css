@@ -399,9 +399,9 @@ body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination select {
     font-size: 11px !important;
 }
 
-/* Pushsale-style modal shell. */
+/* Pushsale-style dialog shell. */
 body.pushsale-app-body [data-slot='dialog-overlay'] { z-index: 3000 !important; background: rgba(0,0,0,.45) !important; }
-body.pushsale-app-body .ps-customer-modal {
+body.pushsale-app-body .ps-customer-dialog {
     z-index: 3010 !important;
     display: block !important;
     max-height: calc(100vh - 28px) !important;
@@ -416,7 +416,7 @@ body.pushsale-app-body .ps-customer-modal {
     font-family: Arial, Helvetica, sans-serif !important;
     font-size: 12px !important;
 }
-body.pushsale-app-body .ps-customer-modal .pushsale-dialog-close {
+body.pushsale-app-body .ps-customer-dialog .pushsale-dialog-close {
     top: 8px !important;
     right: 9px !important;
     width: 24px !important;
@@ -424,36 +424,36 @@ body.pushsale-app-body .ps-customer-modal .pushsale-dialog-close {
     padding: 0 !important;
     color: #777 !important;
 }
-body.pushsale-app-body .ps-customer-modal-header {
+body.pushsale-app-body .ps-customer-dialog-header {
     min-height: 48px;
     padding: 15px 42px 10px 15px;
     border-bottom: 1px solid #e5e5e5;
 }
-body.pushsale-app-body .ps-customer-modal-header [data-slot='dialog-title'] {
+body.pushsale-app-body .ps-customer-dialog-header [data-slot='dialog-title'] {
     margin: 0;
     color: #111;
     font-size: 15px;
     font-weight: 600;
     line-height: 20px;
 }
-body.pushsale-app-body .ps-customer-modal-header [data-slot='dialog-description'] {
+body.pushsale-app-body .ps-customer-dialog-header [data-slot='dialog-description'] {
     margin-top: 3px;
     color: #777;
     font-size: 11px;
 }
-body.pushsale-app-body .ps-customer-modal-body {
+body.pushsale-app-body .ps-customer-dialog-body {
     max-height: calc(100vh - 135px);
     padding: 14px 15px;
     overflow: auto;
 }
-body.pushsale-app-body .ps-customer-modal-footer {
+body.pushsale-app-body .ps-customer-dialog-footer {
     min-height: 54px;
     padding: 10px 15px;
     border-top: 1px solid #e5e5e5;
     background: #fff;
     text-align: right;
 }
-body.pushsale-app-body .ps-customer-modal-loading {
+body.pushsale-app-body .ps-customer-dialog-loading {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -461,9 +461,9 @@ body.pushsale-app-body .ps-customer-modal-loading {
     gap: 7px;
     color: #777;
 }
-body.pushsale-app-body .ps-modal-customer-line { margin-bottom: 5px; font-size: 13px; }
-body.pushsale-app-body .ps-modal-customer-line a { color: #337ab7; }
-body.pushsale-app-body .ps-modal-address { margin-bottom: 12px; color: #555; }
+body.pushsale-app-body .ps-dialog-customer-line { margin-bottom: 5px; font-size: 13px; }
+body.pushsale-app-body .ps-dialog-customer-line a { color: #337ab7; }
+body.pushsale-app-body .ps-dialog-address { margin-bottom: 12px; color: #555; }
 body.pushsale-app-body .ps-customer-tabs { display: flex; margin-bottom: 9px; border-bottom: 1px solid #ddd; }
 body.pushsale-app-body .ps-customer-tabs button {
     margin: 0 2px -1px 0;

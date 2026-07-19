@@ -72,7 +72,7 @@ function TrackingTimeline({ events }) {
     );
 }
 
-export function ShippingOrderDetailModal({ open, onOpenChange, orderId, apiBase }) {
+export function ShippingOrderDetailDialog({ open, onOpenChange, orderId, apiBase }) {
     const t = useT();
     const [loading, setLoading] = useState(false);
     const [acting, setActing] = useState(null);

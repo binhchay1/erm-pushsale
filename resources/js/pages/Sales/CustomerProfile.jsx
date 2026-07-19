@@ -6,15 +6,15 @@ import AppLayout from '@/layouts/AppLayout';
 import { ReportPagination } from '@/components/reports/ReportPagination';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import {
-    PushsaleCustomerMessagesModal,
-    PushsaleDataViewHistoryModal,
-    PushsaleOperationHistoryModal,
-    PushsalePurchaseHistoryModal,
-} from '@/components/customers/pushsale/PushsaleCustomerModals';
+    PushsaleCustomerMessagesDialog,
+    PushsaleDataViewHistoryDialog,
+    PushsaleOperationHistoryDialog,
+    PushsalePurchaseHistoryDialog,
+} from '@/components/customers/pushsale/PushsaleCustomerDialogs';
 import { getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 
-const EMPTY_MODAL = { type: null, order: null };
+const EMPTY_DIALOG = { type: null, order: null };
 
 function optionValue(option) {
     return String(option?.value ?? option?.id ?? '');
@@ -60,7 +60,7 @@ function externalHref(url) {
     return `https://${value}`;
 }
 
-function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenModal, saleWorkspaceUrl = null, warehouseOperationsUrl = null }) {
+function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenDialog, saleWorkspaceUrl = null, warehouseOperationsUrl = null }) {
     const allSelected = rows.length > 0 && rows.every((row) => selected.has(String(row.id)));
     const start = Number(pagination?.from ?? 1);
 
@@ -123,7 +123,7 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenM
                                 </td>
                                 <td className="text-center">
                                     <span className="item-md">{row.orderCode}</span>
-                                    <button type="button" className="btn-icon aoh" onClick={() => onOpenModal('view', row)} title="Xem lịch sử xem thông tin số">
+                                    <button type="button" className="btn-icon aoh" onClick={() => onOpenDialog('view', row)} title="Xem lịch sử xem thông tin số">
                                         <i className="fa fa-history" />
                                     </button>
                                     {row.isSupplementalOrder ? <span className="ps-upsale-badge" title={`Đơn upsale từ ${row.supplementalOriginalOrderCode ?? 'đơn gốc'}`}>UPSALE</span> : null}
@@ -152,7 +152,7 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenM
                                         )}
                                     </div>
                                     <div className="no-wrap ps-phone-line">
-                                        <button type="button" className="ps-phone-link" onClick={() => onOpenModal('purchase', row)}>{safeText(row.customerPhone)}</button>
+                                        <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('purchase', row)}>{safeText(row.customerPhone)}</button>
                                         {row.isDuplicatePhone ? <i className="fa fa-clone text-danger" title="Số điện thoại trùng" /> : null}
                                         {row.isReturningCustomer ? <i className="fa fa-heart text-danger" title="Khách hàng cũ" /> : null}
                                     </div>
@@ -174,9 +174,9 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenM
                                 </td>
                                 <td className="text-center ps-result-cell">
                                     <div className="ps-row-actions">
-                                        <button type="button" className="btn-icon aoh" onClick={() => onOpenModal('messages', row)} title="Tin nhắn nội bộ / Chat khách hàng"><i className="fa fa-commenting-o" /></button>
-                                        <button type="button" className="btn-icon aoh" onClick={() => onOpenModal('operation', row)} title="Lịch sử tác nghiệp"><i className="fa fa-history" /></button>
-                                        <button type="button" className="btn-icon aoh" onClick={() => onOpenModal('purchase', row)} title="Lịch sử mua hàng"><i className="fa fa-shopping-cart" /></button>
+                                        <button type="button" className="btn-icon aoh" onClick={() => onOpenDialog('messages', row)} title="Tin nhắn nội bộ / Chat khách hàng"><i className="fa fa-commenting-o" /></button>
+                                        <button type="button" className="btn-icon aoh" onClick={() => onOpenDialog('operation', row)} title="Lịch sử tác nghiệp"><i className="fa fa-history" /></button>
+                                        <button type="button" className="btn-icon aoh" onClick={() => onOpenDialog('purchase', row)} title="Lịch sử mua hàng"><i className="fa fa-shopping-cart" /></button>
                                         {row.pendingSupplementCount > 0 ? <CustomerSupplementPacketsDialog order={row} count={row.pendingSupplementCount} /> : null}
                                     </div>
                                     <div>
@@ -403,7 +403,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
     const [form, setForm] = useState(filters);
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [selected, setSelected] = useState(new Set());
-    const [modal, setModal] = useState(EMPTY_MODAL);
+    const [dialog, setDialog] = useState(EMPTY_DIALOG);
 
     useEffect(() => {
         setSelected(new Set());
@@ -435,8 +435,8 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
         setForm(next);
         router.get(routeUrl, next, { preserveState: true, replace: true });
     };
-    const openModal = (type, order) => setModal({ type, order });
-    const closeModal = () => setModal(EMPTY_MODAL);
+    const openDialog = (type, order) => setDialog({ type, order });
+    const closeDialog = () => setDialog(EMPTY_DIALOG);
     const customerActionBase = String(routeUrl || '/customers').split('?')[0].replace(/\/$/, '');
 
     return (
@@ -499,17 +499,17 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                     </div>
                 ) : null}
 
-                <CustomerProfileTable rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onOpenModal={openModal} saleWorkspaceUrl={saleWorkspaceUrl} warehouseOperationsUrl={warehouseOperationsUrl} />
+                <CustomerProfileTable rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onOpenDialog={openDialog} saleWorkspaceUrl={saleWorkspaceUrl} warehouseOperationsUrl={warehouseOperationsUrl} />
 
                 <ReportPagination routeUrl={routeUrl} filters={form} meta={pagination} scrollTargetId="customer-profile-table" />
 
                 <FloatingActions selectedIds={[...selected]} permissions={filterOptions.permissions} apiBase={customerActionBase} />
             </section>
 
-            <PushsaleCustomerMessagesModal order={modal.order} open={modal.type === 'messages'} onOpenChange={(open) => !open && closeModal()} />
-            <PushsaleOperationHistoryModal order={modal.order} open={modal.type === 'operation'} onOpenChange={(open) => !open && closeModal()} />
-            <PushsalePurchaseHistoryModal order={modal.order} open={modal.type === 'purchase'} onOpenChange={(open) => !open && closeModal()} />
-            <PushsaleDataViewHistoryModal order={modal.order} open={modal.type === 'view'} onOpenChange={(open) => !open && closeModal()} />
+            <PushsaleCustomerMessagesDialog order={dialog.order} open={dialog.type === 'messages'} onOpenChange={(open) => !open && closeDialog()} />
+            <PushsaleOperationHistoryDialog order={dialog.order} open={dialog.type === 'operation'} onOpenChange={(open) => !open && closeDialog()} />
+            <PushsalePurchaseHistoryDialog order={dialog.order} open={dialog.type === 'purchase'} onOpenChange={(open) => !open && closeDialog()} />
+            <PushsaleDataViewHistoryDialog order={dialog.order} open={dialog.type === 'view'} onOpenChange={(open) => !open && closeDialog()} />
         </AppLayout>
     );
 }

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
 const currencyFormatter = new Intl.NumberFormat('vi-VN', {
@@ -310,7 +311,7 @@ function genericPayloadFromColumns(schema, row = {}) {
         .map((column) => [column.key, row[column.key] ?? '']));
 }
 
-function LegacyEditorModal({ open, schema, row, dialogUrl, onClose, onSaved }) {
+function LegacyEditorDialog({ open, schema, row, dialogUrl, onClose, onSaved }) {
     const [dialogHtml, setDialogHtml] = useState('');
     const [payload, setPayload] = useState(() => genericPayloadFromColumns(schema, row));
     const [saving, setSaving] = useState(false);
@@ -353,7 +354,7 @@ function LegacyEditorModal({ open, schema, row, dialogUrl, onClose, onSaved }) {
                 event.preventDefault();
                 submit();
             }
-            if (event.target.closest?.('[id$="btnDong"], [data-dismiss="modal"]')) {
+            if (event.target.closest?.('[id$="btnDong"], [data-dismiss]')) {
                 event.preventDefault();
                 onClose();
             }
@@ -365,15 +366,23 @@ function LegacyEditorModal({ open, schema, row, dialogUrl, onClose, onSaved }) {
 
     if (!open) return null;
 
-    return createPortal(
-        <div className="legacy-modal-layer" role="dialog" aria-modal="true" aria-label={schema.title}>
-            <div className="legacy-modal-backdrop" onClick={onClose} />
-            <div className="legacy-modal-dialog">
-                <div className="legacy-modal-header">
-                    <strong>{row ? `Cập nhật ${schema.title}` : `Thêm mới ${schema.title}`}</strong>
-                    <button type="button" onClick={onClose} aria-label="Đóng"><i className="fa fa-times" /></button>
-                </div>
-                <div className="legacy-modal-body" ref={dialogRef}>
+    return (
+        <PushsaleDialog
+            open={open}
+            onOpenChange={(nextOpen) => !nextOpen && onClose()}
+            title={row ? `Cập nhật ${schema.title}` : `Thêm mới ${schema.title}`}
+            width="900px"
+            bodyRef={dialogRef}
+            bodyClassName="legacy-dialog-body"
+            footer={(
+                <>
+                    <button type="button" className="btn btn-default btn-sm" onClick={onClose}>Đóng</button>
+                    <button type="button" className="btn btn-primary btn-sm" disabled={saving} onClick={submit}>
+                        <i className={`fa ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} /> {saving ? 'Đang lưu' : 'Cập nhật'}
+                    </button>
+                </>
+            )}
+        >
                     {dialogHtml ? (
                         <div className="legacy-dialog-source" dangerouslySetInnerHTML={{ __html: dialogHtml }} />
                     ) : (
@@ -399,16 +408,7 @@ function LegacyEditorModal({ open, schema, row, dialogUrl, onClose, onSaved }) {
                             ))}
                         </div>
                     )}
-                </div>
-                <div className="legacy-modal-footer">
-                    <button type="button" className="btn btn-default btn-sm" onClick={onClose}>Đóng</button>
-                    <button type="button" className="btn btn-primary btn-sm" disabled={saving} onClick={submit}>
-                        <i className={`fa ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} /> {saving ? 'Đang lưu' : 'Cập nhật'}
-                    </button>
-                </div>
-            </div>
-        </div>,
-        document.body,
+        </PushsaleDialog>
     );
 }
 
@@ -691,7 +691,7 @@ export default function LegacyIndex({ schema, rows = [], pagination, routeUrl, t
                     </button>
                 )}
             </div>
-            <LegacyEditorModal
+            <LegacyEditorDialog
                 open={editor.open}
                 schema={schema}
                 row={editor.row}

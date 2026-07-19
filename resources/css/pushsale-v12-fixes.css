@@ -1,6 +1,6 @@
 /* V12 final alignment fixes.
  * Loaded after all legacy/page styles so these rules are the single source of truth
- * for the authenticated Pushsale shell, viewport modals and the two marketing pages.
+ * for the authenticated Pushsale shell, viewport dialogs and the two marketing pages.
  */
 
 /* The original Pushsale pages start at the content viewport edge. Page components
@@ -30,7 +30,7 @@ body.pushsale-app-body .ps-adminlte-page .m-header-wrap {
 }
 
 /* Keep the Pushsale/AdminLTE typography consistent. Geist/Tailwind must not leak
- * into report tables, forms or modal content. Font Awesome remains untouched. */
+ * into report tables, forms or dialog content. Font Awesome remains untouched. */
 body.pushsale-app-body .content-wrapper,
 body.pushsale-app-body .content-wrapper h1,
 body.pushsale-app-body .content-wrapper h2,
@@ -55,7 +55,7 @@ body.pushsale-app-body [data-slot='dialog-content'] textarea {
     font-family: Arial, Helvetica, sans-serif !important;
 }
 
-/* ---------- Viewport-safe modal system ---------- */
+/* ---------- Viewport-safe dialog system ---------- */
 body.pushsale-app-body [data-slot='dialog-overlay'] {
     position: fixed !important;
     inset: 0 !important;
@@ -95,12 +95,12 @@ body.pushsale-app-body [data-slot='dialog-content'] > [data-slot='dialog-footer'
     margin-top: 0 !important;
 }
 
-/* Custom React modal layers. Grid centering keeps them centred even when the
+/* Custom React dialog layers. Grid centering keeps them centred even when the
  * underlying report is wider than the browser viewport. */
-body.pushsale-app-body .psm-modal-layer,
-body.pushsale-app-body .pushsale-modal-layer,
-body.pushsale-app-body .ps-modal-backdrop,
-body.pushsale-app-body .modal-note-overlay {
+body.pushsale-app-body .psm-dialog-layer,
+body.pushsale-app-body .pushsale-dialog-layer,
+body.pushsale-app-body .ps-dialog-backdrop,
+body.pushsale-app-body .dialog-note-overlay {
     position: fixed !important;
     inset: 0 !important;
     z-index: 10000 !important;
@@ -113,10 +113,10 @@ body.pushsale-app-body .modal-note-overlay {
     overflow: auto !important;
 }
 
-body.pushsale-app-body .psm-modal,
-body.pushsale-app-body .pushsale-modal-dialog,
-body.pushsale-app-body .ps-source-modal,
-body.pushsale-app-body .modal-note-panel {
+body.pushsale-app-body .psm-dialog,
+body.pushsale-app-body .pushsale-dialog-dialog,
+body.pushsale-app-body .ps-source-dialog,
+body.pushsale-app-body .dialog-note-panel {
     position: relative !important;
     top: auto !important;
     right: auto !important;
@@ -128,17 +128,17 @@ body.pushsale-app-body .modal-note-panel {
     transform: none !important;
 }
 
-body.pushsale-app-body .psm-modal-body,
-body.pushsale-app-body .pushsale-modal-body,
-body.pushsale-app-body .ps-source-modal-body,
-body.pushsale-app-body .modal-note-body {
+body.pushsale-app-body .psm-dialog-body,
+body.pushsale-app-body .pushsale-dialog-body,
+body.pushsale-app-body .ps-source-dialog-body,
+body.pushsale-app-body .dialog-note-body {
     min-height: 0 !important;
     overflow: auto !important;
 }
 
-/* Bootstrap 3 modals carried over from source templates. */
-body.pushsale-app-body .modal.in,
-body.pushsale-app-body .modal.show {
+/* Bootstrap 3 dialogs carried over from source templates. */
+body.pushsale-app-body .dialog.in,
+body.pushsale-app-body .dialog.show {
     position: fixed !important;
     inset: 0 !important;
     z-index: 10000 !important;
@@ -150,8 +150,8 @@ body.pushsale-app-body .modal.show {
     overflow: auto !important;
 }
 
-body.pushsale-app-body .modal.in .modal-dialog,
-body.pushsale-app-body .modal.show .modal-dialog {
+body.pushsale-app-body .dialog.in .dialog-dialog,
+body.pushsale-app-body .dialog.show .dialog-dialog {
     position: relative !important;
     top: auto !important;
     left: auto !important;
@@ -161,14 +161,14 @@ body.pushsale-app-body .modal.show .modal-dialog {
     transform: none !important;
 }
 
-body.pushsale-app-body .modal.in .modal-content,
-body.pushsale-app-body .modal.show .modal-content {
+body.pushsale-app-body .dialog.in .dialog-content,
+body.pushsale-app-body .dialog.show .dialog-content {
     max-height: calc(100dvh - 20px) !important;
     overflow: hidden !important;
 }
 
-body.pushsale-app-body .modal.in .modal-body,
-body.pushsale-app-body .modal.show .modal-body {
+body.pushsale-app-body .dialog.in .dialog-body,
+body.pushsale-app-body .dialog.show .dialog-body {
     max-height: calc(100dvh - 125px) !important;
     overflow: auto !important;
 }

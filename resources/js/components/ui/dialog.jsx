@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { XIcon } from 'lucide-react';
 
+const MODAL_Z_INDEX = 2147483000;
+
 function Dialog(props) {
     return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
@@ -21,29 +23,25 @@ function DialogClose(props) {
     return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
-function DialogOverlay({ className, ...props }) {
+function DialogOverlay({ className, style, ...props }) {
     return (
         <DialogPrimitive.Overlay
             data-slot="dialog-overlay"
-            className={cn(
-                'fixed inset-0 z-50 bg-black/40 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0',
-                className
-            )}
+            className={cn('ps-dialog-overlay fixed inset-0 bg-black/40', className)}
+            style={{ zIndex: MODAL_Z_INDEX, ...style }}
             {...props}
         />
     );
 }
 
-function DialogContent({ className, children, showClose = true, ...props }) {
+function DialogContent({ className, children, showClose = true, style, ...props }) {
     return (
         <DialogPortal>
             <DialogOverlay />
             <DialogPrimitive.Content
                 data-slot="dialog-content"
-                className={cn(
-                    'fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border bg-popover p-6 shadow-lg duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
-                    className
-                )}
+                className={cn('ps-dialog-content fixed left-1/2 top-1/2 grid w-full max-w-lg gap-4 rounded bg-popover p-6 shadow-lg', className)}
+                style={{ zIndex: MODAL_Z_INDEX + 1, ...style }}
                 {...props}
             >
                 {children}

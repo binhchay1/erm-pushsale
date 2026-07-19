@@ -1,5 +1,5 @@
 /* Template Six — báo cáo 4.5.x / 6.3.9. Chỉ scope trong .ps-report-page để
-   không ghi đè modal, dashboard hay các trang nghiệp vụ khác. */
+   không ghi đè dialog, dashboard hay các trang nghiệp vụ khác. */
 .ps-report-page {
     --ps-report-blue: #3182d8;
     --ps-report-blue-dark: #2174c8;

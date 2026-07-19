@@ -3,7 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import { CheckCircle2, Clock, Copy, Eye, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { CampaignApprovalDetailModal } from '@/components/marketing/CampaignApprovalDetailModal';
+import { CampaignApprovalDetailDialog } from '@/components/marketing/CampaignApprovalDetailDialog';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { Button } from '@/components/ui/button';
@@ -26,13 +26,13 @@ export default function LandingApprovals({
     const rowRefs = useRef({});
     const { ask, ConfirmDialogPortal } = useConfirm();
     const [selectedCampaign, setSelectedCampaign] = useState(null);
-    const [modalOpen, setModalOpen] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
     const [approving, setApproving] = useState(false);
     const [rejecting, setRejecting] = useState(false);
 
     const openDetail = (campaign) => {
         setSelectedCampaign(campaign);
-        setModalOpen(true);
+        setDialogOpen(true);
     };
 
     const approve = async (campaign, productId = null) => {
@@ -50,7 +50,7 @@ export default function LandingApprovals({
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    setModalOpen(false);
+                    setDialogOpen(false);
                     setSelectedCampaign(null);
                     toast.success(t('pages.landing.approve_success', { name: campaign.name }));
                 },
@@ -70,7 +70,7 @@ export default function LandingApprovals({
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    setModalOpen(false);
+                    setDialogOpen(false);
                     setSelectedCampaign(null);
                     toast.success(t('pages.landing.reject_success'));
                 },
@@ -230,10 +230,10 @@ export default function LandingApprovals({
                 </ScrollDataTable>
             </div>
 
-            <CampaignApprovalDetailModal
+            <CampaignApprovalDetailDialog
                 campaign={selectedCampaign}
                 open={modalOpen}
-                onOpenChange={setModalOpen}
+                onOpenChange={setDialogOpen}
                 fieldMapping={fieldMapping}
                 products={products}
                 onApprove={approve}

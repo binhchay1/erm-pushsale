@@ -366,7 +366,7 @@
     pointer-events: none;
 }
 
-.ceo-report-pushsale .modal-note-overlay {
+.ceo-report-pushsale .dialog-note-overlay {
     position: fixed;
     inset: 0;
     z-index: 100;
@@ -377,7 +377,7 @@
     background: rgba(0, 0, 0, 0.45);
 }
 
-.ceo-report-pushsale .modal-note-panel {
+.ceo-report-pushsale .dialog-note-panel {
     width: 100%;
     max-width: 720px;
     background: #fff;
@@ -385,7 +385,7 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.ceo-report-pushsale .modal-note-header {
+.ceo-report-pushsale .dialog-note-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -393,31 +393,31 @@
     border-bottom: 1px solid #e5e5e5;
 }
 
-.ceo-report-pushsale .modal-note-title {
+.ceo-report-pushsale .dialog-note-title {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
     text-transform: uppercase;
 }
 
-.ceo-report-pushsale .modal-note-body {
+.ceo-report-pushsale .dialog-note-body {
     padding: 16px;
     max-height: 50vh;
     overflow: auto;
 }
 
-.ceo-report-pushsale .modal-note-body table {
+.ceo-report-pushsale .dialog-note-body table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.ceo-report-pushsale .modal-note-body th,
-.ceo-report-pushsale .modal-note-body td {
+.ceo-report-pushsale .dialog-note-body th,
+.ceo-report-pushsale .dialog-note-body td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
 }
 
-.ceo-report-pushsale .modal-note-body th {
+.ceo-report-pushsale .dialog-note-body th {
     background: #f9f9f9;
 }

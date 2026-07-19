@@ -36,7 +36,7 @@ body.pushsale-app-body .ps-adminlte-page .ps-title {
 body.pushsale-app-body .ps-adminlte-page .ps-orange { color: darkorange; }
 
 body.pushsale-app-body .ps-adminlte-page .form-control,
-body.pushsale-app-body .ps-source-modal .form-control {
+body.pushsale-app-body .ps-source-dialog .form-control {
     width: 100%;
     height: 31px;
     min-height: 31px;
@@ -51,13 +51,13 @@ body.pushsale-app-body .ps-source-modal .form-control {
     line-height: 19px;
 }
 
-body.pushsale-app-body .ps-source-modal textarea.form-control {
+body.pushsale-app-body .ps-source-dialog textarea.form-control {
     min-height: 74px;
     height: 74px;
 }
 
 body.pushsale-app-body .ps-adminlte-page .btn,
-body.pushsale-app-body .ps-source-modal .btn {
+body.pushsale-app-body .ps-source-dialog .btn {
     min-height: 31px;
     padding: 5px 12px;
     border-radius: 2px;
@@ -67,7 +67,7 @@ body.pushsale-app-body .ps-source-modal .btn {
 }
 
 body.pushsale-app-body .ps-adminlte-page .btn i,
-body.pushsale-app-body .ps-source-modal .btn i { margin-right: 5px; }
+body.pushsale-app-body .ps-source-dialog .btn i { margin-right: 5px; }
 
 body.pushsale-app-body .ps-adminlte-page .box-body {
     padding: 0 0 12px !important;
@@ -278,7 +278,7 @@ body.pushsale-app-body .ps-inventory-table th:nth-child(3) { min-width: 180px; }
 body.pushsale-app-body .ps-inventory-table th:nth-child(4) { min-width: 330px; }
 body.pushsale-app-body .ps-inventory-table th:nth-child(14) { width: 60px; }
 
-body.pushsale-app-body .ps-modal-backdrop {
+body.pushsale-app-body .ps-dialog-backdrop {
     position: fixed;
     inset: 0;
     z-index: 5000;
@@ -289,7 +289,7 @@ body.pushsale-app-body .ps-modal-backdrop {
     overflow: auto;
     background: rgba(0,0,0,.45);
 }
-body.pushsale-app-body .ps-source-modal {
+body.pushsale-app-body .ps-source-dialog {
     width: 620px;
     max-width: calc(100vw - 40px);
     margin: 0 auto;
@@ -298,9 +298,9 @@ body.pushsale-app-body .ps-source-modal {
     background: #fff;
     box-shadow: 0 5px 20px rgba(0,0,0,.35);
 }
-body.pushsale-app-body .ps-source-modal.is-medium { width: 900px; }
-body.pushsale-app-body .ps-source-modal.is-wide { width: calc(100vw - 60px); }
-body.pushsale-app-body .ps-source-modal-header {
+body.pushsale-app-body .ps-source-dialog.is-medium { width: 900px; }
+body.pushsale-app-body .ps-source-dialog.is-wide { width: calc(100vw - 60px); }
+body.pushsale-app-body .ps-source-dialog-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -311,9 +311,9 @@ body.pushsale-app-body .ps-source-modal-header {
     font-size: 14px;
     font-weight: 500;
 }
-body.pushsale-app-body .ps-source-modal-header button { width: 30px; height: 30px; border: 0; background: transparent; color: #fff; }
-body.pushsale-app-body .ps-source-modal-body { padding: 25px 15px 22px; }
-body.pushsale-app-body .ps-source-modal h4 {
+body.pushsale-app-body .ps-source-dialog-header button { width: 30px; height: 30px; border: 0; background: transparent; color: #fff; }
+body.pushsale-app-body .ps-source-dialog-body { padding: 25px 15px 22px; }
+body.pushsale-app-body .ps-source-dialog h4 {
     margin: 0 0 15px;
     padding: 0 0 5px;
     border-bottom: 2px solid #ff5b2b;

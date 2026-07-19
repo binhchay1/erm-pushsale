@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { useT } from '@/providers/I18nProvider';
 
-/** Confirm modal — use directly or via useConfirm(). */
+/** Confirm dialog — use directly or via useConfirm(). */
 export function ConfirmDialog({
     open,
     onOpenChange,

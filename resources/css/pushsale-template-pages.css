@@ -11,7 +11,7 @@ body.pushsale-app-body .pushsale-page {
 }
 
 body.pushsale-app-body .pushsale-page *,
-body.pushsale-app-body .pushsale-modal-layer * {
+body.pushsale-app-body .pushsale-dialog-layer * {
     box-sizing: border-box;
 }
 
@@ -150,7 +150,7 @@ body.pushsale-app-body .pushsale-dialog-fragment textarea:focus {
 
 body.pushsale-app-body .pushsale-template-fragment .btn,
 body.pushsale-app-body .pushsale-dialog-fragment .btn,
-body.pushsale-app-body .pushsale-modal-layer .btn {
+body.pushsale-app-body .pushsale-dialog-layer .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -171,7 +171,7 @@ body.pushsale-app-body .pushsale-modal-layer .btn {
 
 body.pushsale-app-body .pushsale-template-fragment .btn-primary,
 body.pushsale-app-body .pushsale-dialog-fragment .btn-primary,
-body.pushsale-app-body .pushsale-modal-layer .btn-primary {
+body.pushsale-app-body .pushsale-dialog-layer .btn-primary {
     border-color: #2679a8;
     background: #3c8dbc;
     color: #fff;
@@ -179,7 +179,7 @@ body.pushsale-app-body .pushsale-modal-layer .btn-primary {
 
 body.pushsale-app-body .pushsale-template-fragment .btn-primary:hover,
 body.pushsale-app-body .pushsale-dialog-fragment .btn-primary:hover,
-body.pushsale-app-body .pushsale-modal-layer .btn-primary:hover {
+body.pushsale-app-body .pushsale-dialog-layer .btn-primary:hover {
     border-color: #204d74;
     background: #367fa9;
     color: #fff;
@@ -187,7 +187,7 @@ body.pushsale-app-body .pushsale-modal-layer .btn-primary:hover {
 
 body.pushsale-app-body .pushsale-template-fragment .btn-default,
 body.pushsale-app-body .pushsale-dialog-fragment .btn-default,
-body.pushsale-app-body .pushsale-modal-layer .btn-default {
+body.pushsale-app-body .pushsale-dialog-layer .btn-default {
     border-color: #d2d6de;
     background: #f4f4f4;
     color: #444;
@@ -195,7 +195,7 @@ body.pushsale-app-body .pushsale-modal-layer .btn-default {
 
 body.pushsale-app-body .pushsale-template-fragment .btn-sm,
 body.pushsale-app-body .pushsale-dialog-fragment .btn-sm,
-body.pushsale-app-body .pushsale-modal-layer .btn-sm {
+body.pushsale-app-body .pushsale-dialog-layer .btn-sm {
     min-height: 30px;
     padding: 5px 10px;
 }
@@ -600,7 +600,7 @@ body.pushsale-app-body .pushsale-live-summary > div {
 body.pushsale-app-body .pushsale-live-summary span { display: block; color: #778; font-size: 10px; text-transform: uppercase; }
 body.pushsale-app-body .pushsale-live-summary strong { display: block; margin-top: 4px; color: #1679e8; font-size: 18px; }
 
-body.pushsale-app-body .pushsale-modal-layer {
+body.pushsale-app-body .pushsale-dialog-layer {
     position: fixed;
     inset: 0;
     z-index: 5000;
@@ -610,8 +610,8 @@ body.pushsale-app-body .pushsale-modal-layer {
     padding: 45px 20px 20px;
     font-family: Arial, Helvetica, sans-serif;
 }
-body.pushsale-app-body .pushsale-modal-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .48); }
-body.pushsale-app-body .pushsale-modal-dialog {
+body.pushsale-app-body .pushsale-dialog-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .48); }
+body.pushsale-app-body .pushsale-dialog-dialog {
     position: relative;
     z-index: 1;
     width: min(1120px, calc(100vw - 40px));
@@ -622,7 +622,7 @@ body.pushsale-app-body .pushsale-modal-dialog {
     background: #fff;
     box-shadow: 0 5px 18px rgba(0, 0, 0, .45);
 }
-body.pushsale-app-body .pushsale-modal-header {
+body.pushsale-app-body .pushsale-dialog-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -634,11 +634,11 @@ body.pushsale-app-body .pushsale-modal-header {
     font-size: 13px;
     text-transform: uppercase;
 }
-body.pushsale-app-body .pushsale-modal-header button { width: 28px; height: 28px; border: 0; background: transparent; color: #555; cursor: pointer; }
-body.pushsale-app-body .pushsale-modal-body { max-height: calc(100vh - 175px); overflow: auto; padding: 0; }
-body.pushsale-app-body .pushsale-modal-footer { display: flex; justify-content: flex-end; gap: 4px; padding: 8px 12px; border-top: 1px solid #ddd; background: #f7f7f7; }
-body.pushsale-app-body .pushsale-dialog-source .pushsale-template-fragment > .modal-content { border: 0; box-shadow: none; }
-body.pushsale-app-body .pushsale-dialog-source .modal-header { display: none; }
+body.pushsale-app-body .pushsale-dialog-header button { width: 28px; height: 28px; border: 0; background: transparent; color: #555; cursor: pointer; }
+body.pushsale-app-body .pushsale-dialog-body { max-height: calc(100vh - 175px); overflow: auto; padding: 0; }
+body.pushsale-app-body .pushsale-dialog-footer { display: flex; justify-content: flex-end; gap: 4px; padding: 8px 12px; border-top: 1px solid #ddd; background: #f7f7f7; }
+body.pushsale-app-body .pushsale-dialog-source .pushsale-template-fragment > .dialog-content { border: 0; box-shadow: none; }
+body.pushsale-app-body .pushsale-dialog-source .dialog-header { display: none; }
 body.pushsale-app-body .pushsale-dialog-source .m-header-wrap { border-top: 0; }
 
 body.pushsale-app-body .pushsale-generic-form {
@@ -660,8 +660,8 @@ body.pushsale-app-body .pushsale-template-fragment .div-overflow-y {
 @media (max-width: 767px) {
     body.pushsale-app-body .pushsale-page { min-width: 1000px; }
     body.pushsale-app-body .pushsale-live-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    body.pushsale-app-body .pushsale-modal-layer { padding: 10px; }
-    body.pushsale-app-body .pushsale-modal-dialog { width: calc(100vw - 20px); }
+    body.pushsale-app-body .pushsale-dialog-layer { padding: 10px; }
+    body.pushsale-app-body .pushsale-dialog-dialog { width: calc(100vw - 20px); }
 }
 body.pushsale-app-body .pushsale-template-fragment .result-items {
     max-height: 230px;

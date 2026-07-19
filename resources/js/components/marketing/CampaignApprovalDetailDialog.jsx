@@ -26,7 +26,7 @@ function DetailItem({ label, children, className }) {
     );
 }
 
-export function CampaignApprovalDetailModal({
+export function CampaignApprovalDetailDialog({
     campaign,
     open,
     onOpenChange,

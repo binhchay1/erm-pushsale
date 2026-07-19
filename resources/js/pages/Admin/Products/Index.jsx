@@ -3,20 +3,20 @@ import { useMemo, useRef, useState } from 'react';
 
 import { CurrencyInput } from '@/components/ui/currency-input';
 import AppLayout from '@/layouts/AppLayout';
+import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { formatCurrency, formatNumber } from '@/lib/format';
 
-function Modal({ title, open, onClose, children, wide = false }) {
-    if (!open) return null;
+function DialogShell({ title, open, onClose, children, wide = false }) {
     return (
-        <div className="ps-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-            <div className={`ps-source-modal ${wide ? 'is-wide' : ''}`} role="dialog" aria-modal="true">
-                <div className="ps-source-modal-header">
-                    <strong>{title}</strong>
-                    <button type="button" onClick={onClose}><i className="fa fa-times" /></button>
-                </div>
-                <div className="ps-source-modal-body">{children}</div>
-            </div>
-        </div>
+        <PushsaleDialog
+            open={open}
+            onOpenChange={(nextOpen) => !nextOpen && onClose()}
+            title={title}
+            width={wide ? 'calc(100vw - 60px)' : '900px'}
+            bodyClassName="ps-source-dialog-body"
+        >
+            {children}
+        </PushsaleDialog>
     );
 }
 
@@ -198,7 +198,7 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                 <Pagination pagination={products} />
             </section>
 
-            <Modal title={editingId ? 'CẬP NHẬT SẢN PHẨM' : 'THÊM MỚI SẢN PHẨM'} open={productOpen} onClose={() => setProductOpen(false)} wide>
+            <DialogShell title={editingId ? 'CẬP NHẬT SẢN PHẨM' : 'THÊM MỚI SẢN PHẨM'} open={productOpen} onClose={() => setProductOpen(false)} wide>
                 <form onSubmit={saveProduct} className="ps-product-form">
                     <h4>THÔNG TIN SẢN PHẨM</h4>
                     <div className="ps-guide"><strong>Chỉ dẫn:</strong><br />- Tên, mã, đơn vị tính, mã vị trí của sản phẩm không được trùng.<br />- Các quyền Marketing, Sale và Chăm sóc KH quyết định nhóm nào được sử dụng sản phẩm.</div>
@@ -223,15 +223,15 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                     {Object.keys(productForm.errors).length > 0 && <div className="alert alert-danger">{Object.values(productForm.errors).join(' · ')}</div>}
                     <button className="btn btn-primary" disabled={productForm.processing}><i className="fa fa-save" /> Lưu</button>
                 </form>
-            </Modal>
+            </DialogShell>
 
-            <Modal title={taxonomy === 'category' ? 'PHÂN LOẠI SẢN PHẨM' : taxonomy === 'attribute' ? 'THUỘC TÍNH SẢN PHẨM' : 'THUỘC TÍNH GIÁ TRỊ'} open={Boolean(taxonomy)} onClose={() => setTaxonomy(null)}>
+            <DialogShell title={taxonomy === 'category' ? 'PHÂN LOẠI SẢN PHẨM' : taxonomy === 'attribute' ? 'THUỘC TÍNH SẢN PHẨM' : 'THUỘC TÍNH GIÁ TRỊ'} open={Boolean(taxonomy)} onClose={() => setTaxonomy(null)}>
                 <form onSubmit={saveTaxonomy} className="ps-taxonomy-form">
                     {taxonomy === 'value' && <label>Thuộc tính<select className="form-control" value={taxonomyForm.data.product_attribute_id} onChange={(event) => taxonomyForm.setData('product_attribute_id', event.target.value)} required><option value="">--Chọn thuộc tính--</option>{attributes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>}
                     <label>Tên<input className="form-control" value={taxonomyForm.data.name} onChange={(event) => taxonomyForm.setData('name', event.target.value)} required /></label>
                     <button className="btn btn-primary" disabled={taxonomyForm.processing}><i className="fa fa-save" /> Lưu</button>
                 </form>
-            </Modal>
+            </DialogShell>
         </AppLayout>
     );
 }

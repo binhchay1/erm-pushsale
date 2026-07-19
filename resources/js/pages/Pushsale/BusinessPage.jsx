@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CustomerMessagesDialog } from '@/components/customers/CustomerMessagesDialog';
 import { CustomerPurchaseHistoryDialog } from '@/components/customers/CustomerPurchaseHistoryDialog';
 import { OrderOperationHistoryDialog } from '@/components/customers/OrderOperationHistoryDialog';
-import { PushsaleModal } from '@/components/ui/pushsale-modal';
+import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
@@ -529,7 +529,7 @@ function FormField({ field, value, filterOptions, onChange }) {
     return <input {...common} type={type} value={value ?? ''} onChange={(event) => onChange(event.target.value)} />;
 }
 
-function PushsaleEditorModal({ open, schema, row, dialogHtml = '', dialogSchema = null, filterOptions, onClose, onSaved }) {
+function PushsaleEditorDialog({ open, schema, row, dialogHtml = '', dialogSchema = null, filterOptions, onClose, onSaved }) {
     const fields = dialogSchema?.fields ?? schema.form_fields ?? [];
     const title = dialogSchema?.title ?? schema.title;
     const [payload, setPayload] = useState(() => defaultFormPayload(fields, row));
@@ -584,7 +584,7 @@ function PushsaleEditorModal({ open, schema, row, dialogHtml = '', dialogSchema 
         const handler = (event) => {
             const action = event.target.closest?.('[data-pushsale-action]')?.dataset.pushsaleAction;
             if (action === 'save') { event.preventDefault(); submit(); }
-            if (event.target.closest?.('[id$="btnDong"], [data-dismiss="modal"], .close')) { event.preventDefault(); onClose(); }
+            if (event.target.closest?.('[id$="btnDong"], [data-dismiss], .close')) { event.preventDefault(); onClose(); }
         };
         root?.addEventListener('click', handler);
         return () => root?.removeEventListener('click', handler);
@@ -594,13 +594,13 @@ function PushsaleEditorModal({ open, schema, row, dialogHtml = '', dialogSchema 
     const missingFields = fields.slice(capturedFieldCount);
 
     return (
-        <PushsaleModal
+        <PushsaleDialog
             open={open}
             onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}
             width="1120px"
             title={row || editingDialogRecord ? `Cập nhật ${title}` : title}
             bodyRef={dialogRef}
-            className="pushsale-editor-modal"
+            className="pushsale-editor-dialog"
             footer={(
                 <>
                     <button type="button" className="btn btn-default btn-sm" onClick={onClose}>Đóng</button>
@@ -651,7 +651,7 @@ function PushsaleEditorModal({ open, schema, row, dialogHtml = '', dialogSchema 
                     ))}
                 </div>
             )}
-        </PushsaleModal>
+        </PushsaleDialog>
     );
 
 }
@@ -803,7 +803,7 @@ function normalizeTemplateLayout(host) {
 
     host.querySelectorAll('.m-header').forEach((row) => row.classList.add('pushsale-header-row'));
     host.querySelectorAll('.box-body .row, .m-header-wrap .row').forEach((row) => {
-        if (row.closest('.modal, [role="dialog"]')) return;
+        if (row.closest('[role="dialog"]')) return;
         const controls = row.querySelectorAll('select, .ps-ddl, input:not([type="hidden"]):not([type="file"]), textarea');
         const hasDataGrid = row.querySelector('table, [data-pushsale-grid-anchor], [data-pushsale-pagination-anchor]');
         const hasBootstrapColumns = [...row.children].some((child) => /(^|\s)col-(xs|sm|md|lg)-\d+/.test(child.className ?? ''));
@@ -1379,7 +1379,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
                     onToggleSelect={toggleSelectedRecord}
                 />
             </div>
-            <PushsaleEditorModal
+            <PushsaleEditorDialog
                 open={editor.open}
                 schema={schema}
                 row={editor.row}

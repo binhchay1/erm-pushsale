@@ -183,7 +183,7 @@ body.pushsale-app-body .pslc-pagination > label { display: flex; align-items: ce
 body.pushsale-app-body .pslc-pagination select { width: 62px; height: 29px; border: 1px solid #ccc; background: #fff; }
 
 /* Connection editor */
-body.pushsale-app-body .pslc-modal-layer {
+body.pushsale-app-body .pslc-dialog-layer {
     position: fixed;
     inset: 0;
     z-index: 12000;
@@ -197,7 +197,7 @@ body.pushsale-app-body .pslc-modal-layer {
     background: rgba(0, 0, 0, .48);
 }
 
-body.pushsale-app-body .pslc-modal {
+body.pushsale-app-body .pslc-dialog {
     position: relative;
     display: flex;
     width: min(1180px, calc(100vw - 20px));
@@ -211,7 +211,7 @@ body.pushsale-app-body .pslc-modal {
     box-shadow: 0 6px 24px rgba(0, 0, 0, .36);
 }
 
-body.pushsale-app-body .pslc-modal-header {
+body.pushsale-app-body .pslc-dialog-header {
     display: flex;
     min-height: 40px;
     flex: 0 0 40px;
@@ -223,10 +223,10 @@ body.pushsale-app-body .pslc-modal-header {
     font-size: 14px;
 }
 
-body.pushsale-app-body .pslc-modal-header button { width: 30px; height: 30px; border: 0; background: transparent; color: #fff; font-size: 16px; }
+body.pushsale-app-body .pslc-dialog-header button { width: 30px; height: 30px; border: 0; background: transparent; color: #fff; font-size: 16px; }
 body.pushsale-app-body .pslc-form { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; }
-body.pushsale-app-body .pslc-modal-body { min-height: 0; flex: 1 1 auto; overflow: auto; padding: 12px; }
-body.pushsale-app-body .pslc-modal-footer { display: flex; min-height: 50px; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 8px; border-top: 1px solid #ddd; padding: 8px 12px; background: #f5f5f5; }
+body.pushsale-app-body .pslc-dialog-body { min-height: 0; flex: 1 1 auto; overflow: auto; padding: 12px; }
+body.pushsale-app-body .pslc-dialog-footer { display: flex; min-height: 50px; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 8px; border-top: 1px solid #ddd; padding: 8px 12px; background: #f5f5f5; }
 
 body.pushsale-app-body .pslc-form-section { margin-bottom: 12px; border: 1px solid #d7d7d7; background: #fff; }
 body.pushsale-app-body .pslc-form-section > h4,

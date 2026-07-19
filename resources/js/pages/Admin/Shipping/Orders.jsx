@@ -5,7 +5,7 @@ import { PackageSearch } from 'lucide-react';
 import AppLayout from '@/layouts/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
-import { ShippingOrderDetailModal } from '@/components/shipping/ShippingOrderDetailModal';
+import { ShippingOrderDetailDialog } from '@/components/shipping/ShippingOrderDetailDialog';
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useTableSort } from '@/hooks/use-table-sort';
@@ -102,7 +102,7 @@ export default function ShippingOrders({ filters, filterOptions, orders, pageTit
                 </ScrollDataTable>
             </div>
 
-            <ShippingOrderDetailModal
+            <ShippingOrderDetailDialog
                 open={!!selectedId}
                 onOpenChange={(open) => !open && setSelectedId(null)}
                 orderId={selectedId}
