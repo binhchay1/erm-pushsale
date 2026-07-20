@@ -11,13 +11,19 @@ test -f .env
 echo "==> Composer install"
 composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
-echo "==> NPM build"
-if [ -f package-lock.json ]; then
-  npm ci
-else
-  npm install
+echo "==> PNPM build"
+export HOME="${HOME:-/home/deploy}"
+export PNPM_HOME="${PNPM_HOME:-$HOME/.local/share/pnpm}"
+export COREPACK_HOME="${COREPACK_HOME:-$HOME/.cache/node/corepack}"
+export PATH="$PNPM_HOME:$PATH"
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "ERROR: pnpm is required. Install/activate pnpm@9.15.9 for the deploy user before running this script." >&2
+  exit 1
 fi
-npm run build
+
+pnpm install --frozen-lockfile
+pnpm run build
 
 echo "==> Prepare storage"
 mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache

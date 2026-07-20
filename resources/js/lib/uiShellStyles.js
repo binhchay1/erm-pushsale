@@ -29,19 +29,32 @@ function ensureLink(href, id) {
 
 
 async function ensureCompiledPushsaleStyles() {
-    const alreadyLoaded = [...document.querySelectorAll('link[rel="stylesheet"]')].some((link) => {
+    const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
+    const hasBasePushsale = links.some((link) => {
         const href = link.getAttribute('href') ?? '';
         return href.includes('/build/assets/pushsale-') || href.includes('/resources/css/pushsale.css');
     });
-    if (alreadyLoaded) return;
+    const hasV66Parity = links.some((link) => {
+        const href = link.getAttribute('href') ?? '';
+        return href.includes('/build/assets/pushsale-parity-v66-') || href.includes('/resources/css/pushsale-parity-v66.css');
+    });
 
-    await import('../../css/pushsale.css');
+    if (!hasBasePushsale) {
+        await import('../../css/pushsale.css');
+    }
+
+    // V66 must be loaded after the legacy bundle. It is the last CSS authority for
+    // header/sidebar/icon/page chrome parity with the captured Pushsale HTML.
+    if (!hasV66Parity) {
+        await import('../../css/pushsale-parity-v66.css');
+    }
 }
+
 
 function moveApplicationStylesAfterVendor() {
     const styles = [...document.querySelectorAll('link[rel=\"stylesheet\"]')].filter((link) => {
         const href = link.getAttribute('href') ?? '';
-        return !link.dataset.pushsaleShell && (href.includes('/build/assets/app-') || href.includes('/build/assets/pushsale-') || href.includes('/resources/css/app.css') || href.includes('/resources/css/pushsale.css'));
+        return !link.dataset.pushsaleShell && (href.includes('/build/assets/app-') || href.includes('/build/assets/pushsale-') || href.includes('/build/assets/pushsale-parity-v66-') || href.includes('/resources/css/app.css') || href.includes('/resources/css/pushsale.css') || href.includes('/resources/css/pushsale-parity-v66.css'));
     });
 
     styles.forEach((link) => document.head.appendChild(link));

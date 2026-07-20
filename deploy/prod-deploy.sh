@@ -9,9 +9,19 @@ git pull --ff-only origin main
 echo "=== COMPOSER ==="
 composer install --no-dev --optimize-autoloader --no-interaction
 
-echo "=== FRONTEND BUILD ==="
-npm ci --no-audit --no-fund
-npm run build
+echo "=== FRONTEND BUILD (PNPM) ==="
+export HOME="${HOME:-/home/deploy}"
+export PNPM_HOME="${PNPM_HOME:-$HOME/.local/share/pnpm}"
+export COREPACK_HOME="${COREPACK_HOME:-$HOME/.cache/node/corepack}"
+export PATH="$PNPM_HOME:$PATH"
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "ERROR: pnpm is required. Install/activate pnpm@9.15.9 for the deploy user before running this script." >&2
+  exit 1
+fi
+
+pnpm install --frozen-lockfile
+pnpm run build
 
 echo "=== MIGRATE ==="
 php artisan migrate --force
