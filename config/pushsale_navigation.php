@@ -657,7 +657,7 @@ return array (
   4 => 
   array (
     'title' => '5. Kho',
-    'icon' => 'tags',
+    'icon' => 'cubes',
     'children' => 
     array (
       0 => 

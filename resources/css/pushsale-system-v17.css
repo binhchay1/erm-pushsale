@@ -1,7 +1,7 @@
 /*
  * ERM Pushsale UI contract V17.
  * This is the only final authority for the internal shell, template geometry,
- * action cells and dialog viewport behavior. Legacy V12/V13 patch files are no
+ * action cells and modal viewport behavior. Legacy V12/V13 patch files are no
  * longer loaded.
  */
 @layer components {
@@ -315,8 +315,8 @@ body.pushsale-app-body table tbody td:has(> .pushsale-row-actions) {
 }
 
 /* --------------------------------------------------------------------------
-   One dialog system. Header/footer never scroll; only the body scrolls.
-   Width is supplied through --ps-dialog-width and always stays in viewport.
+   One modal system. Header/footer never scroll; only the body scrolls.
+   Width is supplied through --ps-modal-width and always stays in viewport.
    -------------------------------------------------------------------------- */
 body.pushsale-app-body [data-slot='dialog-overlay'] {
     position: fixed !important;
@@ -326,19 +326,19 @@ body.pushsale-app-body [data-slot='dialog-overlay'] {
     height: 100dvh !important;
     background: rgba(0, 0, 0, .48) !important;
 }
-body.pushsale-app-body [data-slot='dialog-content']:not(.ps-dialog-surface) {
+body.pushsale-app-body [data-slot='dialog-content']:not(.ps-modal-surface) {
     max-width: calc(100vw - 24px) !important;
     max-height: calc(100dvh - 24px) !important;
     overflow: auto !important;
     overscroll-behavior: contain !important;
 }
-body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface {
+body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface {
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
     z-index: 12010 !important;
     display: flex !important;
-    width: min(var(--ps-dialog-width, 800px), calc(100vw - 24px)) !important;
+    width: min(var(--ps-modal-width, 800px), calc(100vw - 24px)) !important;
     min-width: 0 !important;
     max-width: none !important;
     max-height: calc(100dvh - 24px) !important;
@@ -354,33 +354,33 @@ body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface {
     color: #111 !important;
     box-shadow: 0 8px 30px rgba(0, 0, 0, .38) !important;
 }
-body.pushsale-app-body .ps-dialog-header {
+body.pushsale-app-body .ps-modal-header {
     flex: 0 0 auto !important;
     min-height: 46px !important;
     padding: 13px 42px 10px 15px !important;
     border-bottom: 1px solid #e5e5e5 !important;
     background: #fff !important;
 }
-body.pushsale-app-body .ps-dialog-header [data-slot='dialog-title'] {
+body.pushsale-app-body .ps-modal-header [data-slot='dialog-title'] {
     margin: 0 !important;
     color: #111 !important;
     font-size: 15px !important;
     font-weight: 600 !important;
     line-height: 20px !important;
 }
-body.pushsale-app-body .ps-dialog-header [data-slot='dialog-description'] {
+body.pushsale-app-body .ps-modal-header [data-slot='dialog-description'] {
     margin-top: 3px !important;
     color: #777 !important;
     font-size: 11px !important;
 }
-body.pushsale-app-body .ps-dialog-body {
+body.pushsale-app-body .ps-modal-body {
     min-height: 0 !important;
     flex: 1 1 auto !important;
     padding: 14px 15px !important;
     overflow: auto !important;
     overscroll-behavior: contain !important;
 }
-body.pushsale-app-body .ps-dialog-footer {
+body.pushsale-app-body .ps-modal-footer {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
@@ -392,8 +392,8 @@ body.pushsale-app-body .ps-dialog-footer {
     background: #fff !important;
     text-align: right !important;
 }
-body.pushsale-app-body .ps-dialog-footer:empty { display: none !important; }
-body.pushsale-app-body .ps-dialog-surface .pushsale-dialog-close {
+body.pushsale-app-body .ps-modal-footer:empty { display: none !important; }
+body.pushsale-app-body .ps-modal-surface .pushsale-dialog-close {
     position: absolute !important;
     top: 8px !important;
     right: 9px !important;
@@ -407,18 +407,18 @@ body.pushsale-app-body .ps-dialog-surface .pushsale-dialog-close {
     color: #777 !important;
     box-shadow: none !important;
 }
-body.pushsale-app-body .ps-dialog-surface .pushsale-dialog-close:hover {
+body.pushsale-app-body .ps-modal-surface .pushsale-dialog-close:hover {
     background: #f1f1f1 !important;
     color: #333 !important;
 }
 
 /* Legacy shells still receive the same viewport contract while they are
-   progressively migrated to PushsaleDialog. */
-body.pushsale-app-body .pushsale-dialog-layer,
-body.pushsale-app-body .psm-dialog-layer,
-body.pushsale-app-body .pslc-dialog-layer,
-body.pushsale-app-body .ps-dialog-backdrop,
-body.pushsale-app-body .dialog-note-overlay {
+   progressively migrated to PushsaleModal. */
+body.pushsale-app-body .pushsale-modal-layer,
+body.pushsale-app-body .psm-modal-layer,
+body.pushsale-app-body .pslc-modal-layer,
+body.pushsale-app-body .ps-modal-backdrop,
+body.pushsale-app-body .modal-note-overlay {
     position: fixed !important;
     inset: 0 !important;
     z-index: 12000 !important;
@@ -431,18 +431,18 @@ body.pushsale-app-body .dialog-note-overlay {
     padding: 12px !important;
     overflow: auto !important;
 }
-body.pushsale-app-body .pushsale-dialog-dialog,
-body.pushsale-app-body .psm-dialog,
-body.pushsale-app-body .pslc-dialog,
-body.pushsale-app-body .ps-source-dialog,
-body.pushsale-app-body .dialog-note-panel {
+body.pushsale-app-body .pushsale-modal-dialog,
+body.pushsale-app-body .psm-modal,
+body.pushsale-app-body .pslc-modal,
+body.pushsale-app-body .ps-source-modal,
+body.pushsale-app-body .modal-note-panel {
     position: relative !important;
     top: auto !important;
     right: auto !important;
     bottom: auto !important;
     left: auto !important;
     display: flex !important;
-    width: min(var(--ps-dialog-width, 1120px), calc(100vw - 24px)) !important;
+    width: min(var(--ps-modal-width, 1120px), calc(100vw - 24px)) !important;
     min-width: 0 !important;
     max-width: none !important;
     max-height: calc(100dvh - 24px) !important;
@@ -451,23 +451,23 @@ body.pushsale-app-body .dialog-note-panel {
     overflow: hidden !important;
     transform: none !important;
 }
-body.pushsale-app-body .pushsale-dialog-body,
-body.pushsale-app-body .psm-dialog-body,
-body.pushsale-app-body .pslc-dialog-body,
-body.pushsale-app-body .ps-source-dialog-body,
-body.pushsale-app-body .dialog-note-body {
+body.pushsale-app-body .pushsale-modal-body,
+body.pushsale-app-body .psm-modal-body,
+body.pushsale-app-body .pslc-modal-body,
+body.pushsale-app-body .ps-source-modal-body,
+body.pushsale-app-body .modal-note-body {
     min-height: 0 !important;
     flex: 1 1 auto !important;
     overflow: auto !important;
 }
 
 /* Customer dialogs now use the shared shell; retain only content-specific rules. */
-body.pushsale-app-body .ps-customer-dialog {
+body.pushsale-app-body .ps-customer-modal {
     font-size: 12px !important;
 }
-body.pushsale-app-body .ps-customer-dialog-header,
-body.pushsale-app-body .ps-customer-dialog-body,
-body.pushsale-app-body .ps-customer-dialog-footer {
+body.pushsale-app-body .ps-customer-modal-header,
+body.pushsale-app-body .ps-customer-modal-body,
+body.pushsale-app-body .ps-customer-modal-footer {
     display: contents !important;
 }
 body.pushsale-app-body .ps-history-table-wrap {
@@ -531,13 +531,13 @@ body.pushsale-app-body .pushsale-login-user-chip .count {
 
 /* Radix dialogs that already provide DialogHeader/DialogFooter also share the
    same surface contract. Their first content section is the only scroll area. */
-body.pushsale-app-body .ps-dialog-surface > [data-slot='dialog-header'] {
+body.pushsale-app-body .ps-modal-surface > [data-slot='dialog-header'] {
     flex: 0 0 auto !important;
 }
-body.pushsale-app-body .ps-dialog-surface > [data-slot='dialog-footer'] {
+body.pushsale-app-body .ps-modal-surface > [data-slot='dialog-footer'] {
     flex: 0 0 auto !important;
 }
-body.pushsale-app-body .ps-dialog-surface > :not([data-slot='dialog-header']):not([data-slot='dialog-footer']):not(.ps-dialog-header):not(.ps-dialog-footer):not(.pushsale-dialog-close) {
+body.pushsale-app-body .ps-modal-surface > :not([data-slot='dialog-header']):not([data-slot='dialog-footer']):not(.ps-modal-header):not(.ps-modal-footer):not(.pushsale-dialog-close) {
     min-height: 0 !important;
     flex: 1 1 auto !important;
     overflow: auto !important;

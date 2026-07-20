@@ -42,7 +42,7 @@ function keyContains(activeKey, key) {
     return Boolean(activeKey && (activeKey === key || activeKey.startsWith(`${key}.`)));
 }
 
-const legacyRootIcons = {
+const defaultIcons = {
     1: 'cog',
     2: 'trophy',
     3: 'user',
@@ -57,36 +57,6 @@ const legacyRootIcons = {
 function menuNumber(title = '') {
     const match = String(title).match(/^(\d+)\./);
     return match ? Number(match[1]) : null;
-}
-
-function normalizeFaIcon(icon, title = '') {
-    const fallback = legacyRootIcons[menuNumber(title)] ?? 'circle-o';
-    const tokens = String(icon || fallback)
-        .trim()
-        .split(/\s+/)
-        .map((token) => token.trim())
-        .filter(Boolean);
-
-    const candidate = tokens
-        .map((token) => token.replace(/^fa-/, ''))
-        .find((token) => token && token !== 'fa');
-
-    return String(candidate || fallback).replace(/[^a-z0-9-]/gi, '') || fallback;
-}
-
-function LegacyIcon({ icon, title, className }) {
-    const normalized = normalizeFaIcon(icon, title);
-
-    return <i className={cn('fa', `fa-${normalized}`, className)} aria-hidden="true" />;
-}
-
-function RootExpandIcon() {
-    return (
-        <span className="ps-menu-caret" aria-hidden="true">
-            <i className="i1 fa fa-plus pull-right ps-menu-caret-plus" />
-            <i className="i1 fa fa-minus pull-right ps-menu-caret-minus" />
-        </span>
-    );
 }
 
 function LeafLink({ item, className, onNavigate, children }) {
@@ -115,8 +85,8 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose, on
     if (!flyout || typeof document === 'undefined') return null;
 
     return createPortal(
-        <ul
-            className="ul3 pushsale-third-menu"
+        <div
+            className="pushsale-third-menu"
             style={{ top: flyout.top }}
             role="menu"
             aria-label={flyout.item.title}
@@ -127,10 +97,10 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose, on
                 const childKey = `${flyout.key}.${index}`;
                 const active = keyContains(activeKey, childKey);
                 return (
-                    <li key={childKey} className={cn('li3 pushsale-third-item', active && 'active')}>
+                    <div key={childKey} className={cn('pushsale-third-item', active && 'active')}>
                         <LeafLink
                             item={child}
-                            className="a3 pushsale-third-link"
+                            className="pushsale-third-link"
                             onNavigate={() => {
                                 onSelect?.(child);
                                 onClose();
@@ -138,12 +108,12 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose, on
                             }}
                         >
                             <span>{child.title}</span>
-                            {(child.children?.length ?? 0) > 0 && <i className="fa fa-angle-right pull-right ps-menu-angle" aria-hidden="true" />}
+                            {(child.children?.length ?? 0) > 0 && <i className="fa fa-angle-right" aria-hidden="true" />}
                         </LeafLink>
-                    </li>
+                    </div>
                 );
             })}
-        </ul>,
+        </div>,
         document.body,
     );
 }
@@ -182,7 +152,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
         setFlyout(null);
     };
 
-    const scheduleFlyoutClose = (delay = 220) => {
+    const scheduleFlyoutClose = (delay = 180) => {
         clearFlyoutTimer();
         flyoutTimerRef.current = window.setTimeout(() => {
             setFlyout(null);
@@ -235,119 +205,112 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
         setOpenRoot((current) => (current === index ? null : index));
     };
 
-    const positionFlyout = (event, item, key) => {
-        clearFlyoutTimer();
-        const rect = event.currentTarget.getBoundingClientRect();
-        const estimatedHeight = Math.max(44, (item.children?.length ?? 1) * 31 + 8);
-        const top = Math.max(52, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
-        setFlyout((current) => (current?.key === key ? current : { item, key, top }));
-    };
-
     const toggleFlyout = (event, item, key) => {
         clearFlyoutTimer();
         const rect = event.currentTarget.getBoundingClientRect();
-        const estimatedHeight = Math.max(44, (item.children?.length ?? 1) * 31 + 8);
-        const top = Math.max(52, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
+        const estimatedHeight = Math.max(61, (item.children?.length ?? 1) * 61);
+        const top = Math.max(50, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
         setFlyout((current) => (current?.key === key ? null : { item, key, top }));
     };
 
     return (
         <>
-            <aside className="main-sidebar left-side pushsale-main-sidebar hidden-print" aria-label="Điều hướng chính">
+            <aside className="main-sidebar pushsale-main-sidebar" aria-label="Điều hướng chính">
                 <section
                     className="sidebar pushsale-sidebar"
                     ref={sidebarRef}
                     onMouseEnter={clearFlyoutTimer}
-                    onMouseLeave={() => scheduleFlyoutClose(220)}
+                    onMouseLeave={() => scheduleFlyoutClose(140)}
                 >
-                    <span id="dnn_MenuLeft_lblMenu" className="pushsale-menu-root">
-                        <ul className="sidebar-menu ul1">
-                            {navigation.map((root, rootIndex) => {
-                                const rootKey = `root.${rootIndex}`;
-                                const rootOpen = openRoot === rootIndex;
-                                const rootActive = keyContains(activeKey, rootKey);
-                                const icon = normalizeFaIcon(root.icon, root.title);
-                                const hasChildren = (root.children?.length ?? 0) > 0;
+                    <ul className="sidebar-menu ul1">
+                        {navigation.map((root, rootIndex) => {
+                            const rootKey = `root.${rootIndex}`;
+                            const rootOpen = openRoot === rootIndex;
+                            const rootActive = keyContains(activeKey, rootKey);
+                            const icon = root.icon ?? defaultIcons[menuNumber(root.title)] ?? 'circle-o';
+                            const hasChildren = (root.children?.length ?? 0) > 0;
 
-                                return (
-                                    <li
-                                        key={rootKey}
-                                        className={cn('treeview li1', rootOpen && 'menu-open', rootActive && 'active')}
-                                    >
-                                        {hasChildren ? (
-                                            <button
-                                                type="button"
-                                                className="a1 pushsale-menu-link"
-                                                onClick={() => toggleRoot(rootIndex)}
-                                                aria-expanded={rootOpen}
-                                                title={root.title}
-                                            >
-                                                <LegacyIcon icon={icon} title={root.title} className="ps-menu-root-icon" />
-                                                <span className="ps-menu-title">{root.title}</span>
-                                                <RootExpandIcon />
-                                            </button>
-                                        ) : (
-                                            <LeafLink item={root} className="a1 pushsale-menu-link" onNavigate={() => { rememberSelection(root); onNavigate?.(); }}>
-                                                <LegacyIcon icon={icon} title={root.title} className="ps-menu-root-icon" />
-                                                <span className="ps-menu-title">{root.title}</span>
-                                            </LeafLink>
-                                        )}
+                            return (
+                                <li
+                                    key={rootKey}
+                                    className={cn('treeview li1', rootOpen && 'menu-open', rootActive && 'active')}
+                                >
+                                    {hasChildren ? (
+                                        <button
+                                            type="button"
+                                            className="a1 pushsale-menu-link"
+                                            onClick={() => toggleRoot(rootIndex)}
+                                            aria-expanded={rootOpen}
+                                            title={root.title}
+                                        >
+                                            <i className={`fa fa-${icon}`} aria-hidden="true" />
+                                            <span>{root.title}</span>
+                                            <i className={cn('i1 fa pull-right', rootOpen ? 'fa-minus' : 'fa-plus')} aria-hidden="true" />
+                                        </button>
+                                    ) : (
+                                        <LeafLink item={root} className="a1 pushsale-menu-link" onNavigate={() => { rememberSelection(root); onNavigate?.(); }}>
+                                            <i className={`fa fa-${icon}`} aria-hidden="true" />
+                                            <span>{root.title}</span>
+                                        </LeafLink>
+                                    )}
 
-                                        {hasChildren && (
-                                            <ul className={cn('treeview-menu ul2', rootOpen && 'is-open')}>
-                                                {root.children.map((child, childIndex) => {
-                                                    const key = `${rootKey}.${childIndex}`;
-                                                    const hasGrandchildren = (child.children?.length ?? 0) > 0;
-                                                    const childActive = keyContains(activeKey, key);
-                                                    const flyoutOpen = flyout?.key === key;
+                                    {hasChildren && (
+                                        <ul className={cn('treeview-menu ul2', rootOpen && 'is-open')}>
+                                            {root.children.map((child, childIndex) => {
+                                                const key = `${rootKey}.${childIndex}`;
+                                                const hasGrandchildren = (child.children?.length ?? 0) > 0;
+                                                const childActive = keyContains(activeKey, key);
+                                                const flyoutOpen = flyout?.key === key;
 
-                                                    return (
-                                                        <li
-                                                            key={key}
-                                                            className={cn('li2', childActive && 'active', flyoutOpen && 'flyout-open')}
-                                                            onMouseEnter={() => {
-                                                                if (!hasGrandchildren) closeFlyout();
-                                                            }}
-                                                            onMouseLeave={() => {
-                                                                if (hasGrandchildren) scheduleFlyoutClose(220);
-                                                            }}
-                                                        >
-                                                            {hasGrandchildren ? (
-                                                                <button
-                                                                    type="button"
-                                                                    className="a2 pushsale-menu-link"
-                                                                    data-pushsale-second-parent="true"
-                                                                    onClick={(event) => toggleFlyout(event, child, key)}
-                                                                    onMouseEnter={(event) => positionFlyout(event, child, key)}
-                                                                    aria-expanded={flyoutOpen}
-                                                                    title={child.title}
-                                                                >
-                                                                    <span className="ps-menu-title">{child.title}</span>
-                                                                    <i className="fa fa-angle-right pull-right ps-menu-angle" aria-hidden="true" />
-                                                                </button>
-                                                            ) : (
-                                                                <LeafLink
-                                                                    item={child}
-                                                                    className="a2 pushsale-menu-link"
-                                                                    onNavigate={() => {
-                                                                        rememberSelection(child);
-                                                                        closeFlyout();
-                                                                        onNavigate?.();
-                                                                    }}
-                                                                >
-                                                                    <span className="ps-menu-title">{child.title}</span>
-                                                                </LeafLink>
-                                                            )}
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        )}
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </span>
+                                                return (
+                                                    <li
+                                                        key={key}
+                                                        className={cn('li2', childActive && 'active', flyoutOpen && 'flyout-open')}
+                                                        onMouseEnter={() => {
+                                                            if (!hasGrandchildren) closeFlyout();
+                                                        }}
+                                                    >
+                                                        {hasGrandchildren ? (
+                                                            <button
+                                                                type="button"
+                                                                className="a2 pushsale-menu-link"
+                                                                data-pushsale-second-parent="true"
+                                                                onClick={(event) => toggleFlyout(event, child, key)}
+                                                                onMouseEnter={(event) => {
+                                                                    clearFlyoutTimer();
+                                                                    const rect = event.currentTarget.getBoundingClientRect();
+                                                                    const estimatedHeight = Math.max(61, (child.children?.length ?? 1) * 61);
+                                                                    const top = Math.max(50, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
+                                                                    setFlyout({ item: child, key, top });
+                                                                }}
+                                                                aria-expanded={flyoutOpen}
+                                                                title={child.title}
+                                                            >
+                                                                <span>{child.title}</span>
+                                                                <i className="fa fa-angle-right pull-right" aria-hidden="true" />
+                                                            </button>
+                                                        ) : (
+                                                            <LeafLink
+                                                                item={child}
+                                                                className="a2 pushsale-menu-link"
+                                                                onNavigate={() => {
+                                                                    rememberSelection(child);
+                                                                    closeFlyout();
+                                                                    onNavigate?.();
+                                                                }}
+                                                            >
+                                                                <span>{child.title}</span>
+                                                            </LeafLink>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
                 </section>
             </aside>
 
@@ -359,7 +322,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                     onSelect={rememberSelection}
                     onClose={closeFlyout}
                     onMouseEnter={clearFlyoutTimer}
-                    onMouseLeave={() => scheduleFlyoutClose(220)}
+                    onMouseLeave={() => scheduleFlyoutClose(140)}
                 />
             )}
         </>

@@ -151,7 +151,7 @@
     }
   html {
     @apply font-sans overflow-x-hidden;
-    /* Giữ chỗ cho thanh cuộn — tránh layout nhảy ~10px khi Dialog/Dialog khóa scroll body */
+    /* Giữ chỗ cho thanh cuộn — tránh layout nhảy ~10px khi Dialog/Modal khóa scroll body */
     scrollbar-gutter: stable;
     }
   @supports not (scrollbar-gutter: stable) {
