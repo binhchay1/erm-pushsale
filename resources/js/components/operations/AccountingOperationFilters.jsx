@@ -2,6 +2,7 @@ import { router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { DateRangeFilter, dateRangeFilterLabel } from '@/components/filters/DateRangeFilter';
+import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
 import { useLocalizedFilterOptions } from '@/hooks/use-localized-filter-options';
 import { cn } from '@/lib/utils';
 
@@ -121,9 +122,7 @@ export function AccountingOperationFilters({ routeUrl, filters = {}, filterOptio
                 <FilterSelect value={draft.date_type} onChange={(value) => set('date_type', value)}>
                     {(localized?.dateTypes ?? []).map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                 </FilterSelect>
-                <FilterSelect value={draft.product_id} onChange={(value) => set('product_id', value)}>
-                    <OptionList items={filterOptions?.products ?? []} firstLabel="--Chọn sản phẩm--" />
-                </FilterSelect>
+                <ProductSearchSelect products={filterOptions?.products ?? []} value={draft.product_id} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} onChange={(value) => set('product_id', value)} />
                 <FilterSelect value={draft.warehouse_id} onChange={(value) => set('warehouse_id', value)}>
                     <OptionList items={filterOptions?.warehouses ?? []} firstLabel="--Chọn kho--" />
                 </FilterSelect>

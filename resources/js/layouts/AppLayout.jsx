@@ -95,11 +95,13 @@ export default function AppLayout({ children }) {
 
                 <main className="content-wrapper">
                     <div className="content-inner">
-                        {pendingDashboardRole ? (
-                            <DashboardSkeleton role={pendingDashboardRole} />
-                        ) : (
-                            children
-                        )}
+                        <div className="ps-page-viewport">
+                            {pendingDashboardRole ? (
+                                <DashboardSkeleton role={pendingDashboardRole} />
+                            ) : (
+                                children
+                            )}
+                        </div>
                     </div>
                 </main>
 

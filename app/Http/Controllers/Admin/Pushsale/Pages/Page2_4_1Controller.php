@@ -53,7 +53,7 @@ final class Page2_4_1Controller extends Controller
             'marketers' => User::query()->whereIn('role', [UserRole::Marketing, UserRole::Admin])->orderBy('name')->get(['id', 'name']),
             'sales' => User::query()->where('role', UserRole::Sales)->orderBy('name')->get(['id', 'name', 'team_id']),
             'saleTeams' => Team::query()->where('type', 'sale')->with('users:id,name,team_id')->orderBy('name')->get(['id', 'name']),
-            'products' => Product::query()->where('is_active', true)->where('available_marketing', true)->orderBy('name')->get(['id', 'name', 'sku', 'unit_price']),
+            'products' => Product::query()->where('is_active', true)->where('available_marketing', true)->orderBy('type')->orderBy('name')->get(['id', 'name', 'sku', 'type', 'unit_price']),
             'canManage' => $this->canManage($request->user()),
             'canApprove' => $request->user()->isAdmin(),
             'activeMenuCode' => '2.4.1',
@@ -182,6 +182,10 @@ final class Page2_4_1Controller extends Controller
                 $validator->errors()->add('sources', 'Mã nội bộ của các nguồn landing không được trùng nhau.');
             }
 
+            $catalogTypes = Product::query()
+                ->whereIn('id', $products->pluck('product_id')->filter()->map(fn ($id) => (int) $id)->unique()->values())
+                ->pluck('type', 'id');
+
             foreach ($products as $index => $product) {
                 $sourceKey = (string) ($product['source_key'] ?? '');
                 if ($sourceKey !== '' && ! $sourceKeys->contains($sourceKey)) {
@@ -192,6 +196,16 @@ final class Page2_4_1Controller extends Controller
                 $value = trim((string) ($product['external_value'] ?? ''));
                 if (($field === '') xor ($value === '')) {
                     $validator->errors()->add("products.{$index}.external_field", 'Tên field và giá trị field phải được khai báo cùng nhau.');
+                }
+
+                $productId = (int) ($product['product_id'] ?? 0);
+                $catalogType = (string) ($catalogTypes[$productId] ?? 'product');
+                $itemType = (string) ($product['item_type'] ?? 'product');
+                if ($catalogType === 'combo' && $itemType !== 'combo') {
+                    $validator->errors()->add("products.{$index}.item_type", 'Gói sản phẩm trong catalog phải được lưu với loại gói sản phẩm.');
+                }
+                if ($catalogType !== 'combo' && $itemType === 'combo') {
+                    $validator->errors()->add("products.{$index}.item_type", 'Sản phẩm đơn không được lưu dưới loại gói sản phẩm.');
                 }
             }
 
@@ -264,6 +278,7 @@ final class Page2_4_1Controller extends Controller
                 'product_id' => $mapping->product_id,
                 'product_name' => $mapping->product?->name,
                 'product_sku' => $mapping->product?->sku,
+                'product_type' => $mapping->product?->type,
                 'source_key' => $mapping->source ? (string) ($mapping->source->metadata['client_key'] ?? $mapping->source->id) : '',
                 'item_type' => $mapping->item_type,
                 'external_field' => $mapping->external_field,

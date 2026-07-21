@@ -2,6 +2,7 @@ import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
+import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
 import { SelectFilter } from '@/components/filters/SelectFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,14 +58,16 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                 return null;
             case 'product_id':
                 return (
-                    <SelectFilter
-                        key={key}
-                        label={t('filters.product')}
-                        name="product_id"
-                        value={filters.product_id}
-                        options={filterOptions?.products?.map((p) => ({ value: p.id, label: p.name }))}
-                        onChange={set}
-                    />
+                    <div key={key} className="space-y-1.5">
+                        <Label className="text-xs font-medium text-foreground/80">{t('filters.product')}</Label>
+                        <ProductSearchSelect
+                            products={filterOptions?.products ?? []}
+                            value={filters.product_id}
+                            placeholder="--Sản phẩm / gói sản phẩm--"
+                            showPrice={false}
+                            onChange={(value) => set('product_id', value || null)}
+                        />
+                    </div>
                 );
             case 'search':
                 return (

@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
+import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
 
 const toArray = (value) => Array.isArray(value) ? value : (value?.data ?? Object.values(value ?? {}));
 const optionValue = (item) => item.value ?? item.id;
@@ -79,7 +80,7 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {} }) 
                     <Select value={form.marketing_source_id} onChange={(value) => update('marketing_source_id', value)} placeholder="--Chọn nguồn dữ liệu--" options={filterOptions.marketingSources} />
                     <label className="ps-sale-check"><input type="checkbox" checked={Boolean(form.hide_zero_status)} onChange={(event) => update('hide_zero_status', event.target.checked ? 1 : '')} /> Ẩn tác nghiệp không số</label>
 
-                    <Select value={form.product_id} onChange={(value) => update('product_id', value)} placeholder="--Chọn sản phẩm--" options={filterOptions.products} />
+                    <ProductSearchSelect products={filterOptions.products ?? []} value={form.product_id} onChange={(value) => update('product_id', value)} placeholder="--Chọn sản phẩm / gói sản phẩm--" showPrice={false} />
                     <Select value={form.operation_activity_status} onChange={(value) => update('operation_activity_status', value)} placeholder="--Chọn trạng thái tác nghiệp--" options={[{ value: 'not_operated', label: 'Chưa tác nghiệp' }, { value: 'operated', label: 'Đã tác nghiệp' }]} />
                     <Select value={form.operation_result} onChange={(value) => update('operation_result', value)} placeholder="--Chọn kết quả tác nghiệp--" options={filterOptions.operationResults} />
                     <Select value={form.closing_status} onChange={(value) => update('closing_status', value)} placeholder="--Trạng thái chốt đơn--" options={filterOptions.closingStatuses} />

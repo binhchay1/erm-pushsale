@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { ReportPagination } from '@/components/reports/ReportPagination';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
+import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
 import {
     PushsaleCustomerMessagesDialog,
     PushsaleDataViewHistoryDialog,
@@ -493,7 +494,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                             <FilterSelect value={form.operation_stage} onChange={(value) => setField('operation_stage', value)} options={filterOptions.operationStages} placeholder="--Tác nghiệp--" />
                             <FilterSelect value={form.operation_result} onChange={(value) => setField('operation_result', value)} options={filterOptions.operationResults} placeholder="--Kết quả tác nghiệp--" />
                             <FilterSelect value={form.delivery_status} onChange={(value) => setField('delivery_status', value)} options={filterOptions.deliveryStatuses} placeholder="--Trạng thái giao hàng--" />
-                            <FilterSelect value={form.product_id} onChange={(value) => setField('product_id', value)} options={filterOptions.products} placeholder="--Sản phẩm--" />
+                            <ProductSearchSelect products={filterOptions.products ?? []} value={form.product_id} onChange={(value) => setField('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
                             <FilterSelect value={form.warehouse_id} onChange={(value) => setField('warehouse_id', value)} options={filterOptions.warehouses} placeholder="--Kho--" />
 
                             <FilterSelect value={form.reconciliation_status} onChange={(value) => setField('reconciliation_status', value)} options={filterOptions.reconciliationStatuses} placeholder="--Đối soát nội bộ--" />

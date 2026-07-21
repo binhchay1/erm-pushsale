@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
+import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
 
 function options(list = []) {
     return list.map((item) => {
@@ -22,6 +23,7 @@ function SelectField({ name, value, placeholder, children, options: optionList }
 export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {}, title = 'Thủ kho tác nghiệp' }) {
     const [dateFrom, setDateFrom] = useState(filters.date_from ?? '');
     const [dateTo, setDateTo] = useState(filters.date_to ?? '');
+    const [productId, setProductId] = useState(filters.product_id ?? '');
     const [summaryOpen, setSummaryOpen] = useState(true);
 
     const submit = (event) => {
@@ -29,6 +31,7 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
         const data = Object.fromEntries(new FormData(event.currentTarget));
         data.date_from = dateFrom || undefined;
         data.date_to = dateTo || undefined;
+        data.product_id = productId || undefined;
         data.hide_zero_status = event.currentTarget.elements.hide_zero_status?.checked ? '1' : '0';
         router.get(routeUrl, { ...filters, ...data, page: 1 }, { preserveState: true, preserveScroll: true, replace: true });
     };
@@ -79,7 +82,7 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
                     </div>
 
                     <div className="ps-wh-filter-row ps-wh-filter-row-six hidden-xs">
-                        <div className="ps-wh-filter-cell"><SelectField name="product_id" value={filters.product_id ?? ''} placeholder="--Chọn sản phẩm--" options={filterOptions.products} /></div>
+                        <div className="ps-wh-filter-cell"><ProductSearchSelect name="product_id" products={filterOptions.products ?? []} value={productId} placeholder="--Chọn sản phẩm / gói sản phẩm--" showPrice={false} onChange={setProductId} /></div>
                         <div className="ps-wh-filter-cell"><SelectField name="reconciliation_status" value={filters.reconciliation_status ?? ''} placeholder="--Chọn đối soát nội bộ--" options={filterOptions.reconciliationStatuses} /></div>
                         <div className="ps-wh-filter-cell"><SelectField name="shipping_provider" value={filters.shipping_provider ?? ''} placeholder="--Chọn PTGH--" options={filterOptions.shippingProviders} /></div>
                         <div className="ps-wh-filter-cell"><SelectField name="warehouse_id" value={filters.warehouse_id ?? ''} placeholder="--Chọn kho--" options={filterOptions.warehouses} /></div>

@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { formatCurrency, formatDate, formatMoneyInput, parseMoneyInput } from '@/lib/format';
+import { ProductMultiAdder, ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 
 const connectionTypes = [
@@ -101,33 +103,6 @@ function PageDialog({ open, title, onClose, children }) {
     );
 }
 
-function Pagination({ paginator, perPage, onPerPage }) {
-    const links = paginator?.links ?? [];
-    return (
-        <div className="pslc-pagination">
-            <span>Hiển thị {paginator?.from ?? 0} - {paginator?.to ?? 0} / {paginator?.total ?? 0} nguồn dữ liệu</span>
-            <div className="pslc-pages">
-                {links.map((link, index) => (
-                    <button
-                        type="button"
-                        key={`${link.label}-${index}`}
-                        className={link.active ? 'active' : ''}
-                        disabled={!link.url}
-                        onClick={() => link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true })}
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                    />
-                ))}
-            </div>
-            <label>Hiển thị
-                <select value={perPage} onChange={(event) => onPerPage(event.target.value)}>
-                    {[10, 20, 50, 100].map((size) => <option key={size} value={size}>{size}</option>)}
-                </select>
-                dòng
-            </label>
-        </div>
-    );
-}
-
 function MultiSalePicker({ sales, teams, selected, onChange }) {
     const selectedSet = useMemo(() => new Set(selected.map(Number)), [selected]);
     const toggle = (id) => {
@@ -182,6 +157,12 @@ export default function LandingConnectionsPage({
     const [allProducts, setAllProducts] = useState(!filters.product_id);
     const form = useForm(blankForm());
     const rows = connections?.data ?? [];
+    const productCatalog = useMemo(() => products.map((product) => ({
+        ...product,
+        type: product.type ?? product.product_type ?? 'product',
+    })), [products]);
+    const selectedProductIds = useMemo(() => form.data.products.map((item) => item.product_id).filter(Boolean).map(String), [form.data.products]);
+
 
     const search = (event) => {
         event?.preventDefault();
@@ -244,6 +225,32 @@ export default function LandingConnectionsPage({
     const addProduct = () => {
         const mainKey = form.data.sources.find((source) => source.source_type === 'main')?.client_key ?? '';
         form.setData('products', [...form.data.products, blankProduct(false, mainKey)]);
+    };
+    const addProducts = (items) => {
+        const mainKey = form.data.sources.find((source) => source.source_type === 'main')?.client_key ?? '';
+        const existing = new Set(form.data.products.map((item) => String(item.product_id)).filter(Boolean));
+        const next = items
+            .filter((item) => !existing.has(String(item.id)))
+            .map((item) => ({
+                ...blankProduct(false, mainKey),
+                product_id: String(item.id),
+                item_type: item.type === 'combo' ? 'combo' : 'product',
+            }));
+        if (next.length) {
+            form.setData('products', [...form.data.products, ...next]);
+        }
+    };
+    const chooseProduct = (index, value) => {
+        const product = productCatalog.find((item) => String(item.id) === String(value));
+        form.setData('products', form.data.products.map((row, rowIndex) => {
+            if (rowIndex !== index) return row;
+
+            return {
+                ...row,
+                product_id: value,
+                item_type: product?.type === 'combo' ? 'combo' : (row.item_type === 'combo' ? 'product' : row.item_type),
+            };
+        }));
     };
 
     const copy = async (value) => {
@@ -309,13 +316,18 @@ export default function LandingConnectionsPage({
                                     <option value="">--Marketing--</option>
                                     {marketers.map((user) => <option key={user.id} value={user.id}>{user.name}</option>)}
                                 </select>
-                                <select className="form-control" disabled={allProducts} value={query.product_id} onChange={(event) => {
-                                    setAllProducts(false);
-                                    setQuery((old) => ({ ...old, product_id: event.target.value }));
-                                }}>
-                                    <option value="">--Sản phẩm--</option>
-                                    {products.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}
-                                </select>
+                                <ProductSearchSelect
+                                    className="pslc-filter-product"
+                                    disabled={allProducts}
+                                    products={productCatalog}
+                                    value={query.product_id}
+                                    placeholder="--Sản phẩm / gói sản phẩm--"
+                                    showPrice={false}
+                                    onChange={(value) => {
+                                        setAllProducts(false);
+                                        setQuery((old) => ({ ...old, product_id: value }));
+                                    }}
+                                />
                                 <input className="form-control" placeholder="Tìm kiếm tên nguồn hoặc URL" value={query.search} onChange={(event) => setQuery((old) => ({ ...old, search: event.target.value }))} />
                                 <button className="btn btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
                                 <button type="button" className="btn btn-default" title="Cài đặt"><i className="fa fa-cog" /></button>
@@ -416,11 +428,12 @@ export default function LandingConnectionsPage({
                     </table>
                 </div>
 
-                <Pagination paginator={connections} perPage={query.per_page} onPerPage={(value) => {
-                    const next = { ...query, per_page: value };
-                    setQuery(next);
-                    router.get('/admin/marketing/landing-connections', next, { preserveState: true, replace: true });
-                }} />
+                <PushsalePagination
+                    meta={connections}
+                    routeUrl="/admin/marketing/landing-connections"
+                    filters={query}
+                    itemLabel="nguồn dữ liệu"
+                />
             </section>
 
             <PageDialog open={open} title={editingId ? 'CHỈNH SỬA NGUỒN DỮ LIỆU' : 'THÊM NGUỒN DỮ LIỆU'} onClose={() => setOpen(false)}>
@@ -504,16 +517,25 @@ export default function LandingConnectionsPage({
                             </div>
                         </section>
 
-                        <section className="pslc-form-section">
-                            <div className="pslc-section-title"><h4>SẢN PHẨM / GÓI SẢN PHẨM</h4><button type="button" className="btn btn-xs btn-success" onClick={addProduct}><i className="fa fa-plus" /> Thêm gói</button></div>
-                            <p className="pslc-guide">Giá và mã sản phẩm lấy từ backend. Có thể map chính xác giá trị option của form, ví dụ field <code>combo</code> = <code>Mua 2 Thỏi</code>; nhiều giá trị hợp lệ ngăn bằng <code>|</code>. Client không được tự gửi giá để tránh sai doanh thu và tồn kho.</p>
+                        <section className="pslc-form-section pslc-products-section">
+                            <div className="pslc-section-title">
+                                <h4>SẢN PHẨM / GÓI SẢN PHẨM</h4>
+                                <button type="button" className="btn btn-xs btn-success" onClick={addProduct}><i className="fa fa-plus" /> Thêm dòng trống</button>
+                            </div>
+                            <p className="pslc-guide">Chỉ chọn sản phẩm/gói đang bật cho Marketing. Có thể tìm nhanh và thêm nhiều dòng cùng lúc; backend vẫn xác thực lại catalog, mapping form, sản phẩm mặc định và nguồn áp dụng trước khi lưu.</p>
+                            <ProductMultiAdder products={productCatalog} selectedIds={selectedProductIds} onAdd={addProducts} />
                             <div className="pslc-product-editor">
                                 {form.data.products.map((mapping, index) => (
                                     <div className="pslc-product-row" key={`product-${index}`}>
                                         <span className="pslc-row-number">{index + 1}</span>
-                                        <select className="form-control" required value={mapping.product_id} onChange={(event) => updateProduct(index, 'product_id', event.target.value)}><option value="">--Sản phẩm--</option>{products.map((product) => <option key={product.id} value={product.id}>{product.name}{product.sku ? ` (${product.sku})` : ''} — {formatCurrency(product.unit_price ?? 0)}</option>)}</select>
+                                        <ProductSearchSelect
+                                            products={productCatalog}
+                                            value={mapping.product_id}
+                                            placeholder="--Chọn sản phẩm / gói--"
+                                            onChange={(value) => chooseProduct(index, value)}
+                                        />
                                         <select className="form-control" value={mapping.source_key} onChange={(event) => updateProduct(index, 'source_key', event.target.value)}><option value="">Tất cả nguồn</option>{form.data.sources.map((source) => <option key={source.client_key} value={source.client_key}>{source.name}</option>)}</select>
-                                        <select className="form-control" value={mapping.item_type} onChange={(event) => updateProduct(index, 'item_type', event.target.value)}><option value="product">Sản phẩm</option><option value="combo">Combo</option><option value="upsell">Upsell</option><option value="gift">Quà tặng</option></select>
+                                        <select className="form-control" value={mapping.item_type} onChange={(event) => updateProduct(index, 'item_type', event.target.value)}><option value="product">Sản phẩm</option><option value="combo">Gói sản phẩm</option><option value="upsell">Upsell</option><option value="gift">Quà tặng</option></select>
                                         <input className="form-control" placeholder="Tên field (vd: combo)" value={mapping.external_field ?? ''} onChange={(event) => updateProduct(index, 'external_field', event.target.value)} />
                                         <input className="form-control" placeholder="Giá trị field" value={mapping.external_value ?? ''} onChange={(event) => updateProduct(index, 'external_value', event.target.value)} />
                                         <input className="form-control" type="number" min="1" title="Số lượng" value={mapping.quantity} onChange={(event) => updateProduct(index, 'quantity', Number(event.target.value))} />

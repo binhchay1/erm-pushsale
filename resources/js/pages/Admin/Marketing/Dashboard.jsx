@@ -3,11 +3,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
     PushsaleDateRange,
-    PushsalePager,
     PushsaleSearchButton,
     PushsaleSelect,
     usePushsaleFilters,
 } from '@/components/reports/PushsaleReportChrome';
+import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import AppLayout from '@/layouts/AppLayout';
 import { apiGet, getCsrfToken } from '@/lib/api';
@@ -461,8 +462,6 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
     const products = (filterOptions.products ?? []).filter((product) => !selectedParent || Number(product.parent_id) === selectedParent || Number(product.id) === selectedParent);
     const pagination = report.pagination ?? { current_page: 1, last_page: 1, total: 0, from: 0, to: 0, per_page: 10 };
 
-    const changePage = (page) => apply({ page });
-    const changePerPage = (value) => apply({ page: 1, per_page: value });
     const toggle = (key) => setExpanded((current) => {
         const next = new Set(current);
         if (next.has(key)) next.delete(key); else next.add(key);
@@ -510,7 +509,7 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
                         </div>
                         <div className="psm-filter-grid is-second">
                             <PushsaleSelect value={draft.parent_product_id ?? ''} onChange={(value) => { set('parent_product_id', value); set('product_id', ''); }} options={filterOptions.parentProducts ?? []} placeholder="--Sản phẩm cha--" />
-                            <PushsaleSelect value={draft.product_id ?? ''} onChange={(value) => set('product_id', value)} options={products} placeholder="-- Sản phẩm --" />
+                            <ProductSearchSelect products={products} value={draft.product_id ?? ''} onChange={(value) => set('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
                             <input className="ps-control" value={draft.utm_keyword ?? ''} onChange={(event) => set('utm_keyword', event.target.value)} placeholder="Mã Utm" />
                             <input className="ps-control" value={draft.source_keyword ?? ''} onChange={(event) => set('source_keyword', event.target.value)} placeholder="Tên nguồn dữ liệu" />
                             <PushsaleSelect value={draft.sort_by ?? ''} onChange={(value) => set('sort_by', value)} options={filterOptions.sortOptions ?? []} placeholder="Số contact" />
@@ -523,11 +522,7 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
 
                 <div className="psm-table-area">
                     <DashboardTable report={report} expanded={expanded} advancedUtm={Boolean(draft.advanced_utm)} onToggle={toggle} onChart={(row) => setChartState({ row })} onDaily={(row) => setDailyState({ row })} />
-                    <div className="psm-pagination-row">
-                        <div>Hiển thị {pagination.from ?? 0} - {pagination.to ?? 0} / {pagination.total ?? 0} nguồn dữ liệu</div>
-                        <PushsalePager current={pagination.current_page} totalPages={pagination.last_page} onPage={changePage} />
-                        <label>Hiển thị <select value={pagination.per_page ?? 10} onChange={(event) => changePerPage(event.target.value)}><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option></select> dòng</label>
-                    </div>
+                    <PushsalePagination meta={pagination} routeUrl={routeUrl} filters={draft} itemLabel="nguồn dữ liệu" />
                 </div>
             </section>
 
