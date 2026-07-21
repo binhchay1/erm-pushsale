@@ -291,6 +291,8 @@ class PushsalePageService
                 'name' => $product->name,
                 'type' => $product->type,
                 'unit_price' => (int) $product->unit_price,
+                'sku' => $product->sku,
+                'is_active' => (bool) $product->is_active,
             ])->all(),
             'productGroups' => $allProducts
                 ->filter(fn (Product $product): bool => $product->type === 'product' && $product->parent_id === null && $product->is_active)
@@ -331,6 +333,18 @@ class PushsalePageService
             if (isset($loaders[$source])) {
                 $options[$source] = $loaders[$source]();
             }
+        }
+
+        if ($pageCode === '1.8.1') {
+            $options['operationResults'] = collect(OperationResult::selectableOptions())
+                ->values()
+                ->map(fn (array $item, int $index): array => [
+                    'value' => $item['value'],
+                    'label' => $item['label'],
+                    'legacy_id' => 109117 + $index,
+                ])
+                ->all();
+            $options['operationWorkflowsFull'] = $this->operationWorkflows()->all();
         }
 
         return $options;
@@ -387,30 +401,51 @@ class PushsalePageService
             ->map(function (Product $product, int $index) use ($combos): array {
                 if ($combos) {
                     $items = ProductComboItem::query()
-                        ->with('component:id,name,sku,unit_price')
+                        ->with('component:id,name,sku,unit_price,type')
                         ->where('combo_product_id', $product->id)
+                        ->orderBy('id')
                         ->get();
-                    $originalTotal = $items->sum(fn (ProductComboItem $item) => ((int) $item->quantity) * ((int) ($item->unit_price ?: $item->component?->unit_price)));
+                    $componentItems = $items->map(fn (ProductComboItem $item): array => [
+                        'product_id' => (int) $item->component_product_id,
+                        'quantity' => max(1, (int) $item->quantity),
+                        'unit_price' => (int) ($item->unit_price ?: $item->component?->unit_price),
+                    ])->values();
+                    $originalTotal = $componentItems->sum(fn (array $item): int => ((int) $item['quantity']) * ((int) $item['unit_price']));
+                    $componentLabels = $items->map(function (ProductComboItem $item): string {
+                        $name = $item->component?->name ?? 'Sản phẩm #'.$item->component_product_id;
+                        $sku = $item->component?->sku ? ' ('.$item->component->sku.')' : '';
+
+                        return trim($name.$sku.' x'.max(1, (int) $item->quantity));
+                    })->implode("\n");
+                    $productIds = $items->pluck('component_product_id')->map(fn ($id) => (int) $id)->values()->all();
 
                     return [
                         'id' => $product->id,
                         'select' => false,
                         'code' => $product->sku ?: 'CB'.str_pad((string) $product->id, 5, '0', STR_PAD_LEFT),
+                        'sku' => $product->sku,
                         'name' => $product->name,
-                        'product_count' => $items->sum('quantity'),
+                        'components' => $componentLabels,
+                        'product_count' => $componentItems->sum('quantity'),
                         'original_total' => $originalTotal,
                         'combo_total' => (int) $product->unit_price,
                         'status' => $product->is_active ? 'Đang áp dụng' : 'Ngừng áp dụng',
                         'applied_at' => $product->created_at?->format('d/m/Y'),
-                        'limit_quantity' => data_get($product->metadata, 'limit_quantity'),
-                        'sold' => (int) data_get($product->metadata, 'sold', 0),
-                        'remaining' => data_get($product->metadata, 'remaining'),
-                        'shipping_support' => (int) data_get($product->metadata, 'shipping_support', 0),
+                        'limit_quantity' => null,
+                        'sold' => 0,
+                        'remaining' => null,
+                        'shipping_support' => 0,
                         'updated_at' => $product->updated_at?->toIso8601String(),
+                        'actions' => 'Cập nhật',
                         '_record_id' => $product->id,
                         '_resource_key' => '1.3.2',
+                        '_product_ids' => $productIds,
+                        '_is_active' => (bool) $product->is_active,
+                        '_active_status' => $product->is_active ? '1' : '0',
+                        '_created_at' => $product->created_at?->toIso8601String(),
                         '_form' => $this->formPayload('1.3.2', $product, [
-                            'component_product_ids' => $items->pluck('component_product_id')->map(fn ($id) => (int) $id)->values()->all(),
+                            'component_product_ids' => $productIds,
+                            'component_items' => $componentItems->all(),
                         ]),
                     ];
                 }
@@ -489,13 +524,16 @@ class PushsalePageService
             };
 
             return [
+                'id' => $log->id,
+                'index' => $index + 1,
                 'ip_address' => $log->ip_address,
                 'company' => data_get($log->properties, 'company', $log->actor?->company?->name ?? '—'),
                 'account' => $log->actor?->email ?? data_get($log->properties, 'email', $log->subject_label),
                 'access_code' => Str::limit((string) data_get($log->properties, 'access_code', $log->subject_label), 48),
-                'browser' => Str::limit((string) $log->user_agent, 100),
+                'browser' => Str::limit((string) $log->user_agent, 160),
                 'created_at' => $log->created_at?->toIso8601String(),
                 'status' => $status === 'success' ? 'Thành công' : ($status === 'logout' ? 'Đăng xuất' : 'Không thành công'),
+                '_record_id' => $log->id,
                 '_user_id' => $log->user_id,
                 '_role' => $log->actor?->role?->value ?? data_get($log->properties, 'role'),
                 '_company_id' => $log->company_id ?? data_get($log->properties, 'company_id'),
@@ -1450,13 +1488,17 @@ class PushsalePageService
 
     private function operationCategories(): Collection
     {
-        return OperationCategory::query()->orderBy('sort_order')->orderBy('id')->get()->map(fn (OperationCategory $row) => [
+        return OperationCategory::query()->with('updater:id,name')->orderBy('sort_order')->orderBy('id')->get()->map(fn (OperationCategory $row) => [
             'id' => $row->id,
             'name' => $row->name,
             'sort_order' => $row->sort_order,
             'is_start' => $row->is_start,
             'pool' => $row->is_pool,
+            'is_pool' => $row->is_pool,
+            'duration_minutes' => $row->duration_minutes,
             'duration' => $row->duration_minutes ? $row->duration_minutes.' phút' : '',
+            'is_active' => $row->is_active,
+            'updated_by' => $row->updater?->name ?? 'saleadmin',
             'updated_at' => $row->updated_at?->toIso8601String(),
             'actions' => 'Cập nhật',
             '_record_id' => $row->id,
@@ -1466,12 +1508,20 @@ class PushsalePageService
 
     private function operationWorkflows(): Collection
     {
-        return OperationWorkflow::query()->with(['fromCategory:id,name', 'toCategory:id,name'])->latest()->get()->map(fn (OperationWorkflow $row) => [
+        return OperationWorkflow::query()->with(['fromCategory:id,name', 'toCategory:id,name', 'updater:id,name'])->latest()->get()->map(fn (OperationWorkflow $row) => [
             'id' => $row->id,
+            'from_operation_category_id' => $row->from_operation_category_id,
             'condition' => trim(($row->fromCategory?->name ?? 'Mọi tác nghiệp')."\n".($row->condition_type ?? '')),
-            'result' => $row->operation_result,
+            'condition_type' => $row->condition_type,
+            'operation_result' => $row->operation_result,
+            'result_value' => $row->operation_result,
+            'result' => $row->operation_result === 'no_answer_auto' ? 'Không nghe máy' : (OperationResult::tryFromStored($row->operation_result)?->label() ?? $row->operation_result),
+            'to_operation_category_id' => $row->to_operation_category_id,
             'next_operation' => $row->toCategory?->name,
+            'delay_minutes' => $row->delay_minutes,
             'delay' => $row->delay_minutes.' phút',
+            'is_active' => $row->is_active,
+            'updated_by' => $row->updater?->name ?? 'saleadmin',
             'updated_at' => $row->updated_at?->toIso8601String(),
             'actions' => 'Cập nhật',
             '_record_id' => $row->id,
@@ -1960,6 +2010,8 @@ class PushsalePageService
             'TenSanPham' => $rows->sortBy(fn (array $row): string => Str::lower((string) (data_get($row, 'name') ?? data_get($row, 'product'))))->values(),
             'created_asc' => $rows->sortBy(fn (array $row): string => (string) (data_get($row, '_created_at') ?? data_get($row, 'created_at')))->values(),
             'created_desc' => $rows->sortByDesc(fn (array $row): string => (string) (data_get($row, '_created_at') ?? data_get($row, 'created_at')))->values(),
+            'sku' => $rows->sortBy(fn (array $row): string => Str::lower((string) data_get($row, 'code')))->values(),
+            'name' => $rows->sortBy(fn (array $row): string => Str::lower((string) data_get($row, 'name')))->values(),
             default => $rows->values(),
         };
     }

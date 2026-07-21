@@ -94,7 +94,7 @@ function PageDialog({ open, title, onClose, children }) {
             title={title}
             width="calc(100vw - 44px)"
             className="pslc-dialog"
-            bodyClassName="pslc-dialog-body"
+            bodyClassName="pslc-dialog-shell"
         >
             {children}
         </PushsaleDialog>

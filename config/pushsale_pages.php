@@ -1158,216 +1158,52 @@ return array (
       ),
     ),
   ),
-  '1.3.2' => 
-  array (
+  '1.3.2' => [
     'title' => 'Danh sách combo',
-    'columns' => 
-    array (
-      0 => 
-      array (
-        'key' => 'id',
-        'label' => '#',
-        'format' => 'text',
-      ),
-      1 => 
-      array (
-        'key' => 'code',
-        'label' => 'Mã combo',
-        'format' => 'text',
-      ),
-      2 => 
-      array (
-        'key' => 'name',
-        'label' => 'Tên combo',
-        'format' => 'text',
-      ),
-      3 => 
-      array (
-        'key' => 'product_count',
-        'label' => 'Tổng số SP',
-        'format' => 'number',
-      ),
-      4 => 
-      array (
-        'key' => 'original_total',
-        'label' => 'Tổng giá gốc',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      5 => 
-      array (
-        'key' => 'combo_total',
-        'label' => 'Tổng giá combo',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      6 => 
-      array (
-        'key' => 'status',
-        'label' => 'Trạng thái',
-        'format' => 'status',
-      ),
-      7 => 
-      array (
-        'key' => 'applied_at',
-        'label' => 'Thời gian áp dụng',
-        'format' => 'text',
-      ),
-      8 => 
-      array (
-        'key' => 'limit_quantity',
-        'label' => 'Số lượng giới hạn',
-        'format' => 'number',
-      ),
-      9 => 
-      array (
-        'key' => 'sold',
-        'label' => 'Đã bán',
-        'format' => 'number',
-      ),
-      10 => 
-      array (
-        'key' => 'remaining',
-        'label' => 'Còn lại',
-        'format' => 'number',
-      ),
-      11 => 
-      array (
-        'key' => 'shipping_support',
-        'label' => 'Hỗ trợ phí VC',
-        'format' => 'currency',
-      ),
-      12 => 
-      array (
-        'key' => 'updated_at',
-        'label' => 'Cập nhật',
-        'format' => 'datetime',
-      ),
-    ),
+    'columns' => [
+      ['key' => 'id', 'label' => '#', 'format' => 'text'],
+      ['key' => 'code', 'label' => 'Mã combo', 'format' => 'text'],
+      ['key' => 'name', 'label' => 'Tên combo', 'format' => 'text'],
+      ['key' => 'components', 'label' => 'Sản phẩm trong combo', 'format' => 'text'],
+      ['key' => 'product_count', 'label' => 'Tổng số SP', 'format' => 'number'],
+      ['key' => 'original_total', 'label' => 'Tổng giá gốc', 'format' => 'currency', 'align' => 'right'],
+      ['key' => 'combo_total', 'label' => 'Tổng giá combo', 'format' => 'currency', 'align' => 'right'],
+      ['key' => 'status', 'label' => 'Trạng thái', 'format' => 'status'],
+      ['key' => 'applied_at', 'label' => 'Thời gian áp dụng', 'format' => 'text'],
+      ['key' => 'updated_at', 'label' => 'Cập nhật', 'format' => 'datetime'],
+      ['key' => 'actions', 'label' => 'Thao tác', 'format' => 'actions'],
+    ],
     'source' => 'combos',
     'editable' => true,
-    'dialogs' => 
-    array (
-      0 => '1.3.2-dialog-create',
-    ),
+    'dialogs' => ['1.3.2-dialog-create'],
     'slug' => '1-3-2-danh-sach-combo',
     'component' => 'Page_1_3_2',
     'resource_key' => '1.3.2',
-    'form_fields' => 
-    array (
-      0 => 
-      array (
-        'key' => 'name',
-        'label' => 'Tên combo',
-        'type' => 'text',
-        'required' => true,
-      ),
-      1 => 
-      array (
-        'key' => 'sku',
-        'label' => 'Mã combo',
-        'type' => 'text',
-      ),
-      2 => 
-      array (
-        'key' => 'unit_price',
-        'label' => 'Giá combo',
-        'type' => 'currency',
-        'required' => true,
-      ),
-      3 => 
-      array (
-        'key' => 'component_product_ids',
-        'label' => 'Sản phẩm trong combo',
-        'type' => 'multiselect',
-        'option_source' => 'products',
-      ),
-      4 => 
-      array (
-        'key' => 'is_active',
-        'label' => 'Đang áp dụng',
-        'type' => 'checkbox',
-        'default' => true,
-      ),
-    ),
-    'dialog_resources' => 
-    array (
+    'form_fields' => [
+      ['key' => 'name', 'label' => 'Tên combo', 'type' => 'text', 'required' => true],
+      ['key' => 'sku', 'label' => 'Mã combo', 'type' => 'text'],
+      ['key' => 'unit_price', 'label' => 'Giá combo', 'type' => 'currency', 'required' => true],
+      ['key' => 'component_product_ids', 'label' => 'Sản phẩm trong combo', 'type' => 'multiselect', 'option_source' => 'products'],
+      ['key' => 'component_items', 'label' => 'Chi tiết sản phẩm trong combo', 'type' => 'combo-items'],
+      ['key' => 'is_active', 'label' => 'Đang áp dụng', 'type' => 'checkbox', 'default' => true],
+    ],
+    'dialog_resources' => [
       '1.3.2-dialog-create' => '1.3.2',
-    ),
-    'display_columns' => 
-    array (
-      0 => 
-      array (
-        'key' => 'id',
-        'format' => 'text',
-      ),
-      1 => 
-      array (
-        'key' => 'code',
-        'format' => 'text',
-      ),
-      2 => 
-      array (
-        'key' => 'name',
-        'format' => 'text',
-      ),
-      3 => 
-      array (
-        'key' => 'product_count',
-        'format' => 'number',
-      ),
-      4 => 
-      array (
-        'key' => 'original_total',
-        'format' => 'currency',
-      ),
-      5 => 
-      array (
-        'key' => 'combo_total',
-        'format' => 'currency',
-      ),
-      6 => 
-      array (
-        'key' => 'status',
-        'format' => 'status',
-      ),
-      7 => 
-      array (
-        'key' => 'applied_at',
-        'format' => 'date',
-      ),
-      8 => 
-      array (
-        'key' => 'limit_quantity',
-        'format' => 'number',
-      ),
-      9 => 
-      array (
-        'key' => 'sold',
-        'format' => 'number',
-      ),
-      10 => 
-      array (
-        'key' => 'remaining',
-        'format' => 'number',
-      ),
-      11 => 
-      array (
-        'key' => 'shipping_support',
-        'format' => 'currency',
-      ),
-      12 => 
-      array (
-        'key' => 'updated_at',
-        'format' => 'datetime',
-      ),
-      13 => 
-      array (
-        'key' => 'actions',
-        'format' => 'actions',
-      ),
-    ),
-  ),
+    ],
+    'display_columns' => [
+      ['key' => 'id', 'format' => 'text'],
+      ['key' => 'code', 'format' => 'text'],
+      ['key' => 'name', 'format' => 'text'],
+      ['key' => 'components', 'format' => 'text'],
+      ['key' => 'product_count', 'format' => 'number'],
+      ['key' => 'original_total', 'format' => 'currency'],
+      ['key' => 'combo_total', 'format' => 'currency'],
+      ['key' => 'status', 'format' => 'status'],
+      ['key' => 'applied_at', 'format' => 'date'],
+      ['key' => 'updated_at', 'format' => 'datetime'],
+      ['key' => 'actions', 'format' => 'actions'],
+    ],
+  ],
   '1.7.1' => 
   array (
     'title' => 'Lịch sử đăng nhập',

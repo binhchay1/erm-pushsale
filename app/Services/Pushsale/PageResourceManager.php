@@ -3,6 +3,8 @@
 namespace App\Services\Pushsale;
 
 use App\Models\Product;
+use App\Models\Pushsale\OperationCategory;
+use App\Models\Pushsale\OperationWorkflow;
 use App\Models\Pushsale\Expense;
 use App\Models\Pushsale\ProductComboItem;
 use App\Models\Pushsale\WarehouseVoucher;
@@ -93,8 +95,13 @@ class PageResourceManager
         abort_unless($definition, 404);
 
         $normalized = $this->normalizePayload($definition, $payload);
+        $validated = Validator::make($normalized, (array) ($definition['rules'] ?? []))->validate();
 
-        return Validator::make($normalized, (array) ($definition['rules'] ?? []))->validate();
+        if (($definition['special'] ?? null) === 'combo') {
+            $validated = $this->validateComboPayload($validated);
+        }
+
+        return $validated;
     }
 
     public function create(string $resourceKey, array $payload, ?User $actor): Model
@@ -141,6 +148,10 @@ class PageResourceManager
             if ($resourceKey === '2.6.3' && trim((string) ($attributes['access_token'] ?? '')) === '') {
                 unset($attributes['access_token']);
             }
+            // Mã combo dùng làm mã danh mục tham chiếu cho đơn hàng/kho, không đổi sau khi tạo.
+            if ($resourceKey === '1.3.2') {
+                unset($attributes['sku']);
+            }
             $this->applyAudit($attributes, $actor, false);
             $attributes = Arr::only($attributes, $model->getFillable());
             $model->fill($attributes)->save();
@@ -160,6 +171,15 @@ class PageResourceManager
             abort_if($model->status === 'confirmed', 422, 'Phiếu kho đã xác nhận không thể xóa vì đã phát sinh tồn kho.');
         }
 
+        if ($resourceKey === '1.8.1' && $model instanceof OperationCategory) {
+            abort_if((bool) $model->is_start, 422, 'Tác nghiệp khởi đầu đang gắn với luồng chia/sale, không thể xóa. Hãy sửa tên hoặc tắt áp dụng thay vì xóa.');
+            $isUsedInWorkflow = OperationWorkflow::query()
+                ->where('from_operation_category_id', $model->id)
+                ->orWhere('to_operation_category_id', $model->id)
+                ->exists();
+            abort_if($isUsedInWorkflow, 422, 'Tác nghiệp này đang được dùng trong luồng chuyển bước. Hãy xóa/sửa luồng liên quan trước.');
+        }
+
         $model->delete();
     }
 
@@ -177,12 +197,18 @@ class PageResourceManager
                 $value = $payload[$key] ?? [];
                 if (is_string($value)) $value = array_filter(array_map('trim', explode(',', $value)));
                 $payload[$key] = array_values(array_unique(array_map('intval', (array) $value)));
+            } elseif ($type === 'combo-items') {
+                $payload[$key] = $this->normalizeComboItems($payload[$key] ?? []);
             } elseif ($type === 'currency') {
                 $payload[$key] = (int) preg_replace('/[^0-9-]/', '', (string) ($payload[$key] ?? 0));
             } elseif ($type === 'json' && is_string($payload[$key] ?? null)) {
                 $decoded = json_decode((string) $payload[$key], true);
                 $payload[$key] = json_last_error() === JSON_ERROR_NONE ? $decoded : ['expression' => $payload[$key]];
             }
+        }
+
+        if (array_key_exists('component_items', $payload)) {
+            $payload['component_items'] = $this->normalizeComboItems($payload['component_items']);
         }
 
         if (array_key_exists('quantity', $payload) && array_key_exists('unit_price', $payload)) {
@@ -195,9 +221,9 @@ class PageResourceManager
     /** @param array<string, mixed> $definition @param array<string, mixed> $validated @return array<string, mixed> */
     private function modelAttributes(array $definition, array $validated): array
     {
-        $relationFields = ['category_ids', 'attribute_value_ids', 'component_product_ids', 'product_id', 'document_quantity', 'quantity', 'unit_cost', 'batch_code', 'expiry_date', 'location_code'];
+        $relationFields = ['category_ids', 'attribute_value_ids', 'component_product_ids', 'component_items', 'product_id', 'document_quantity', 'quantity', 'unit_cost', 'batch_code', 'expiry_date', 'location_code'];
         if (($definition['special'] ?? null) !== 'warehouse_voucher') {
-            $relationFields = ['category_ids', 'attribute_value_ids', 'component_product_ids'];
+            $relationFields = ['category_ids', 'attribute_value_ids', 'component_product_ids', 'component_items'];
         }
 
         $attributes = Arr::except($validated, $relationFields);
@@ -233,18 +259,92 @@ class PageResourceManager
         }
 
         if ($resourceKey === '1.3.2' && $model instanceof Product) {
-            $ids = array_values(array_unique(array_map('intval', $validated['component_product_ids'] ?? [])));
+            $items = $validated['component_items'] ?? [];
+            if (! count($items)) {
+                $items = collect($validated['component_product_ids'] ?? [])->map(fn ($id): array => [
+                    'product_id' => (int) $id,
+                    'quantity' => 1,
+                    'unit_price' => (int) Product::query()->whereKey((int) $id)->value('unit_price'),
+                ])->all();
+            }
+
             ProductComboItem::query()->where('combo_product_id', $model->id)->delete();
-            foreach ($ids as $id) {
-                if ($id === $model->id) continue;
+            foreach ($items as $item) {
+                $id = (int) ($item['product_id'] ?? 0);
+                if ($id <= 0 || $id === $model->id) continue;
                 ProductComboItem::query()->create([
                     'combo_product_id' => $model->id,
                     'component_product_id' => $id,
-                    'quantity' => 1,
-                    'unit_price' => (int) Product::query()->whereKey($id)->value('unit_price'),
+                    'quantity' => max(1, (int) ($item['quantity'] ?? 1)),
+                    'unit_price' => max(0, (int) ($item['unit_price'] ?? Product::query()->whereKey($id)->value('unit_price'))),
                 ]);
             }
         }
+    }
+
+    /** @param mixed $value @return list<array{product_id:int, quantity:int, unit_price:int}> */
+    private function normalizeComboItems(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            $value = json_last_error() === JSON_ERROR_NONE ? $decoded : [];
+        }
+
+        return collect((array) $value)
+            ->map(function ($item): array {
+                if (! is_array($item)) {
+                    return ['product_id' => (int) $item, 'quantity' => 1, 'unit_price' => 0];
+                }
+
+                return [
+                    'product_id' => (int) ($item['product_id'] ?? $item['component_product_id'] ?? 0),
+                    'quantity' => max(1, (int) ($item['quantity'] ?? 1)),
+                    'unit_price' => max(0, (int) preg_replace('/[^0-9-]/', '', (string) ($item['unit_price'] ?? 0))),
+                ];
+            })
+            ->filter(fn (array $item): bool => $item['product_id'] > 0)
+            ->unique('product_id')
+            ->values()
+            ->all();
+    }
+
+    /** @param array<string, mixed> $validated @return array<string, mixed> */
+    private function validateComboPayload(array $validated): array
+    {
+        $items = $this->normalizeComboItems($validated['component_items'] ?? []);
+        if (! count($items)) {
+            $items = collect($validated['component_product_ids'] ?? [])->map(fn ($id): array => [
+                'product_id' => (int) $id,
+                'quantity' => 1,
+                'unit_price' => (int) Product::query()->whereKey((int) $id)->value('unit_price'),
+            ])->filter(fn (array $item): bool => $item['product_id'] > 0)->values()->all();
+        }
+
+        if (! count($items)) {
+            throw ValidationException::withMessages(['component_items' => 'Vui lòng chọn ít nhất một sản phẩm trong combo.']);
+        }
+
+        $productIds = collect($items)->pluck('product_id')->map(fn ($id) => (int) $id)->unique()->values();
+        $validIds = Product::query()
+            ->whereIn('id', $productIds)
+            ->where('type', 'product')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id);
+
+        if ($validIds->count() !== $productIds->count()) {
+            throw ValidationException::withMessages(['component_items' => 'Combo chỉ được gồm sản phẩm đơn đang có trong catalog, không được lồng combo khác.']);
+        }
+
+        $validated['component_items'] = collect($items)->map(function (array $item): array {
+            if ((int) ($item['unit_price'] ?? 0) <= 0) {
+                $item['unit_price'] = (int) Product::query()->whereKey((int) $item['product_id'])->value('unit_price');
+            }
+
+            return $item;
+        })->values()->all();
+        $validated['component_product_ids'] = $productIds->all();
+
+        return $validated;
     }
 
     /** @param array<string, mixed> $validated */

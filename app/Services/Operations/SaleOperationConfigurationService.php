@@ -63,6 +63,10 @@ final class SaleOperationConfigurationService
 
             return $configuredResult === $result->value
                 || $condition === $result->value
+                || ($configuredResult === 'no_answer_auto' && str_starts_with($result->value, 'no_answer_'))
+                || ($condition === 'no_answer_auto' && str_starts_with($result->value, 'no_answer_'))
+                || ($configuredResult === 'no_answer' && str_starts_with($result->value, 'no_answer_'))
+                || ($condition === 'no_answer' && str_starts_with($result->value, 'no_answer_'))
                 || $configuredResult === $result->label()
                 || $condition === $result->label();
         });
@@ -96,10 +100,12 @@ final class SaleOperationConfigurationService
                 return false;
             }
 
-            return in_array($result->value, [
-                trim((string) $workflow->operation_result),
-                trim((string) $workflow->condition_type),
-            ], true);
+            $configuredResult = trim((string) $workflow->operation_result);
+            $condition = trim((string) $workflow->condition_type);
+
+            return in_array($result->value, [$configuredResult, $condition], true)
+                || (str_starts_with($result->value, 'no_answer_') && in_array('no_answer_auto', [$configuredResult, $condition], true))
+                || (str_starts_with($result->value, 'no_answer_') && in_array('no_answer', [$configuredResult, $condition], true));
         });
 
         if ($workflow) {

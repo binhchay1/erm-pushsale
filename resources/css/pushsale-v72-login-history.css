@@ -1,0 +1,239 @@
+/* V72 - Login history page parity
+ * The 1.7.1 screen is now rendered as a real React page instead of mixing
+ * captured template title/pager controls with live rows. Keep the rules scoped.
+ */
+body.pushsale-app-body .ps-login-history-page {
+    width: 100%;
+    max-width: none;
+    padding: 0 12px 20px;
+    font-size: 12px;
+    color: #111;
+}
+
+body.pushsale-app-body .ps-login-history-page .form-control,
+body.pushsale-app-body .ps-login-history-page .btn {
+    border-radius: 0;
+    font-size: 12px;
+    height: 30px;
+    line-height: 18px;
+}
+
+body.pushsale-app-body .ps-login-toolbar {
+    display: grid;
+    grid-template-columns: 1fr minmax(320px, 520px);
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 8px 0 10px;
+    border-bottom: 1px solid #d3dce6;
+}
+
+body.pushsale-app-body .ps-login-title {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+}
+
+body.pushsale-app-body .ps-login-search-box {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+body.pushsale-app-body .ps-login-search-box .form-control {
+    max-width: 290px;
+}
+
+body.pushsale-app-body .ps-login-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(160px, 1.2fr) minmax(130px, .9fr) minmax(170px, 1.2fr) minmax(230px, 1.25fr) minmax(170px, 1fr) minmax(160px, 1fr);
+    gap: 10px 12px;
+    align-items: center;
+    padding: 12px 0 14px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+body.pushsale-app-body .ps-login-date-range {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 5px;
+}
+
+body.pushsale-app-body .ps-login-date-range span {
+    color: #777;
+    line-height: 30px;
+}
+
+body.pushsale-app-body .ps-login-table-wrap {
+    width: 100%;
+    margin-top: 12px;
+    overflow-x: hidden;
+}
+
+body.pushsale-app-body .ps-login-table {
+    width: 100%;
+    table-layout: fixed;
+    margin-bottom: 0;
+    border-color: #2f76bd;
+}
+
+body.pushsale-app-body .ps-login-table > thead > tr > th {
+    background: #3c86d8;
+    color: #fff;
+    border-color: #2f76bd !important;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 700;
+    height: 28px;
+    padding: 5px 6px;
+    white-space: normal;
+}
+
+body.pushsale-app-body .ps-login-table > tbody > tr > td {
+    border-color: #d7d7d7 !important;
+    vertical-align: middle;
+    padding: 6px 7px;
+    line-height: 18px;
+    word-break: break-word;
+}
+
+body.pushsale-app-body .ps-login-table > thead > tr > th:nth-child(1),
+body.pushsale-app-body .ps-login-table > tbody > tr > td:nth-child(1) { width: 12%; }
+body.pushsale-app-body .ps-login-table > thead > tr > th:nth-child(2),
+body.pushsale-app-body .ps-login-table > tbody > tr > td:nth-child(2) { width: 15%; }
+body.pushsale-app-body .ps-login-table > thead > tr > th:nth-child(3),
+body.pushsale-app-body .ps-login-table > tbody > tr > td:nth-child(3) { width: 17%; }
+body.pushsale-app-body .ps-login-table > thead > tr > th:nth-child(4),
+body.pushsale-app-body .ps-login-table > tbody > tr > td:nth-child(4) { width: 14%; }
+body.pushsale-app-body .ps-login-table > thead > tr > th:nth-child(5),
+body.pushsale-app-body .ps-login-table > tbody > tr > td:nth-child(5) { width: 22%; }
+body.pushsale-app-body .ps-login-table > thead > tr > th:nth-child(6),
+body.pushsale-app-body .ps-login-table > tbody > tr > td:nth-child(6) { width: 12%; }
+body.pushsale-app-body .ps-login-table > thead > tr > th:nth-child(7),
+body.pushsale-app-body .ps-login-table > tbody > tr > td:nth-child(7) { width: 8%; text-align: center; }
+
+body.pushsale-app-body .ps-login-browser {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.pushsale-app-body .ps-login-access-code {
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 11px;
+}
+
+body.pushsale-app-body .ps-login-status {
+    display: inline-block;
+    min-width: 74px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+body.pushsale-app-body .ps-login-status-success {
+    color: #008d4c;
+    background: #e8f7ee;
+    border: 1px solid #b8e3c8;
+}
+
+body.pushsale-app-body .ps-login-status-danger {
+    color: #d73925;
+    background: #fff0ef;
+    border: 1px solid #f0bab3;
+}
+
+body.pushsale-app-body .ps-login-status-default {
+    color: #555;
+    background: #f5f5f5;
+    border: 1px solid #d7d7d7;
+}
+
+body.pushsale-app-body .ps-login-empty {
+    height: 56px;
+    color: #777;
+    text-align: center;
+    font-style: italic;
+}
+
+body.pushsale-app-body .ps-login-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 46px;
+    padding: 9px 0 0;
+}
+
+body.pushsale-app-body .ps-login-note {
+    color: #777;
+    font-style: italic;
+    font-size: 11px;
+}
+
+body.pushsale-app-body .ps-login-pager-controls,
+body.pushsale-app-body .ps-login-page-size {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    margin: 0;
+}
+
+body.pushsale-app-body .ps-login-page-size select {
+    width: 72px;
+}
+
+body.pushsale-app-body .ps-login-short-pager .btn {
+    height: 30px;
+    min-width: 32px;
+    line-height: 18px;
+}
+
+body.pushsale-app-body .ps-login-short-pager .btn:first-child {
+    min-width: 132px;
+    font-weight: 700;
+    color: #111;
+    opacity: 1;
+}
+
+@media (max-width: 1280px) {
+    body.pushsale-app-body .ps-login-toolbar,
+    body.pushsale-app-body .ps-login-filter-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    body.pushsale-app-body .ps-login-search-box {
+        justify-content: stretch;
+    }
+
+    body.pushsale-app-body .ps-login-search-box .form-control {
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    body.pushsale-app-body .ps-login-toolbar,
+    body.pushsale-app-body .ps-login-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body.pushsale-app-body .ps-login-title {
+        text-align: left;
+    }
+
+    body.pushsale-app-body .ps-login-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    body.pushsale-app-body .ps-login-pager-controls {
+        justify-content: space-between;
+    }
+}

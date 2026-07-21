@@ -29,19 +29,53 @@ function ensureLink(href, id) {
 
 
 async function ensureCompiledPushsaleStyles() {
-    const alreadyLoaded = [...document.querySelectorAll('link[rel="stylesheet"]')].some((link) => {
+    const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
+    const hasPushsale = links.some((link) => {
         const href = link.getAttribute('href') ?? '';
         return href.includes('/build/assets/pushsale-') || href.includes('/resources/css/pushsale.css');
     });
-    if (alreadyLoaded) return;
+    const hasV70 = links.some((link) => {
+        const href = link.getAttribute('href') ?? '';
+        return href.includes('/build/assets/pushsale-v70-page-polish-') || href.includes('/resources/css/pushsale-v70-page-polish.css');
+    });
+    const hasV71 = links.some((link) => {
+        const href = link.getAttribute('href') ?? '';
+        return href.includes('/build/assets/pushsale-v71-combo-page-') || href.includes('/resources/css/pushsale-v71-combo-page.css');
+    });
+    const hasV72 = links.some((link) => {
+        const href = link.getAttribute('href') ?? '';
+        return href.includes('/build/assets/pushsale-v72-login-history-') || href.includes('/resources/css/pushsale-v72-login-history.css');
+    });
+    const hasV73 = links.some((link) => {
+        const href = link.getAttribute('href') ?? '';
+        return href.includes('/build/assets/pushsale-v73-operation-categories-') || href.includes('/resources/css/pushsale-v73-operation-categories.css');
+    });
 
-    await import('../../css/pushsale.css');
+    if (!hasPushsale) {
+        await import('../../css/pushsale.css');
+    }
+
+    if (!hasV70) {
+        await import('../../css/pushsale-v70-page-polish.css');
+    }
+
+    if (!hasV71) {
+        await import('../../css/pushsale-v71-combo-page.css');
+    }
+
+    if (!hasV72) {
+        await import('../../css/pushsale-v72-login-history.css');
+    }
+
+    if (!hasV73) {
+        await import('../../css/pushsale-v73-operation-categories.css');
+    }
 }
 
 function moveApplicationStylesAfterVendor() {
     const styles = [...document.querySelectorAll('link[rel=\"stylesheet\"]')].filter((link) => {
         const href = link.getAttribute('href') ?? '';
-        return !link.dataset.pushsaleShell && (href.includes('/build/assets/app-') || href.includes('/build/assets/pushsale-') || href.includes('/resources/css/app.css') || href.includes('/resources/css/pushsale.css'));
+        return !link.dataset.pushsaleShell && (href.includes('/build/assets/app-') || href.includes('/build/assets/pushsale-') || href.includes('/resources/css/app.css') || href.includes('/resources/css/pushsale.css') || href.includes('/resources/css/pushsale-v70-page-polish.css') || href.includes('/build/assets/pushsale-v70-page-polish-') || href.includes('/resources/css/pushsale-v71-combo-page.css') || href.includes('/build/assets/pushsale-v71-combo-page-') || href.includes('/resources/css/pushsale-v72-login-history.css') || href.includes('/build/assets/pushsale-v72-login-history-') || href.includes('/resources/css/pushsale-v73-operation-categories.css') || href.includes('/build/assets/pushsale-v73-operation-categories-'));
     });
 
     styles.forEach((link) => document.head.appendChild(link));
