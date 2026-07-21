@@ -299,6 +299,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('users/bulk', [UserController::class, 'storeBulk'])
             ->name('users.bulk.store');
+        Route::patch('users/{user}/quick-update', [UserController::class, 'quickUpdate'])
+            ->name('users.quick-update');
         Route::patch('users/{user}/operational-status', [UserController::class, 'updateOperationalStatus'])
             ->name('users.operational-status');
         Route::patch('users/{user}/password', [UserController::class, 'updatePassword'])

@@ -1,6 +1,7 @@
 import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { SelectFilter } from '@/components/filters/SelectFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,26 +43,18 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
         switch (key) {
             case 'date_from':
                 return (
-                    <div key={key} className="space-y-1.5">
-                        <Label className="text-xs font-medium text-foreground/80">{t('filters.date_from')}</Label>
-                        <Input
-                            type="date"
-                            value={filters.date_from ?? ''}
-                            onChange={(e) => set('date_from', e.target.value)}
+                    <div key={key} className="space-y-1.5 sm:col-span-2">
+                        <Label className="text-xs font-medium text-foreground/80">{t('filters.date_from')} - {t('filters.date_to')}</Label>
+                        <DateRangeFilter
+                            className="ps-report-date-filter"
+                            from={filters.date_from}
+                            to={filters.date_to}
+                            onChange={({ date_from, date_to }) => search({ date_from, date_to, page: 1 })}
                         />
                     </div>
                 );
             case 'date_to':
-                return (
-                    <div key={key} className="space-y-1.5">
-                        <Label className="text-xs font-medium text-foreground/80">{t('filters.date_to')}</Label>
-                        <Input
-                            type="date"
-                            value={filters.date_to ?? ''}
-                            onChange={(e) => set('date_to', e.target.value)}
-                        />
-                    </div>
-                );
+                return null;
             case 'product_id':
                 return (
                     <SelectFilter

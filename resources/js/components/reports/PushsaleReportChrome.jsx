@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { useT } from '@/providers/I18nProvider';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 
 function pad(value) {
     return String(value).padStart(2, '0');
@@ -77,28 +78,20 @@ export function PushsaleSelect({ value = '', onChange, options = [], placeholder
 }
 
 export function PushsaleDateRange({ filters, onChange, className = '' }) {
-    const t = useT();
     const from = filters?.date_from ?? '';
     const to = filters?.date_to ?? '';
-    const label = useMemo(() => displayDateRange(filters), [from, to]);
 
     return (
-        <div className={`ps-date-range ${className}`.trim()} title={label}>
-            <input
-                aria-label={t('reports.pushsale.from_date')}
-                type="date"
-                value={from}
-                onChange={(event) => onChange?.('date_from', event.target.value)}
-            />
-            <span>-</span>
-            <input
-                aria-label={t('reports.pushsale.to_date')}
-                type="date"
-                value={to}
-                onChange={(event) => onChange?.('date_to', event.target.value)}
-            />
-            <span className="ps-date-range-label">{label}</span>
-        </div>
+        <DateRangeFilter
+            className={`ps-date-range ${className}`.trim()}
+            from={from}
+            to={to}
+            displayLabel
+            onChange={({ date_from, date_to }) => {
+                onChange?.('date_from', date_from);
+                onChange?.('date_to', date_to);
+            }}
+        />
     );
 }
 

@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 
 function options(list = []) {
     return list.map((item) => {
@@ -7,48 +8,6 @@ function options(list = []) {
         const label = item.label ?? item.name;
         return <option key={value} value={value}>{label}</option>;
     });
-}
-
-function toDisplayDate(value) {
-    if (!value) return '';
-    const [year, month, day] = String(value).slice(0, 10).split('-');
-    if (!year || !month || !day) return value;
-    return `${day}/${month}/${year}`;
-}
-
-function toInputDate(value) {
-    if (!value) return '';
-    const trimmed = String(value).trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-    const match = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if (!match) return '';
-    return `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
-}
-
-function DateRangeInput({ filters, onChange }) {
-    const initial = useMemo(() => {
-        const from = toDisplayDate(filters.date_from);
-        const to = toDisplayDate(filters.date_to);
-        return from && to ? `${from} 00:00 - ${to} 23:59` : '';
-    }, [filters.date_from, filters.date_to]);
-    const [value, setValue] = useState(initial);
-
-    const sync = (next) => {
-        setValue(next);
-        const [fromRaw = '', toRaw = ''] = next.split('-').map((part) => part.trim());
-        const from = toInputDate(fromRaw);
-        const to = toInputDate(toRaw);
-        onChange(from, to);
-    };
-
-    return (
-        <input
-            className="form-control date-range"
-            value={value}
-            onChange={(event) => sync(event.target.value)}
-            placeholder="dd/mm/yyyy 00:00 - dd/mm/yyyy 23:59"
-        />
-    );
 }
 
 function SelectField({ name, value, placeholder, children, options: optionList }) {
@@ -112,7 +71,7 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
             {summaryOpen && (
                 <div className="box-body ps-wh-filter-body">
                     <div className="ps-wh-filter-row ps-wh-filter-row-main">
-                        <div className="ps-wh-filter-cell ps-wh-cell-wide"><DateRangeInput filters={filters} onChange={setDateRange} /></div>
+                        <div className="ps-wh-filter-cell ps-wh-cell-wide"><DateRangeFilter className="ps-wh-date-range" from={dateFrom} to={dateTo} onChange={({ date_from, date_to }) => setDateRange(date_from, date_to)} /></div>
                         <div className="ps-wh-filter-cell"><SelectField name="date_type" value={filters.date_type ?? 'data_arrival'} placeholder="--Kiểu ngày--" options={filterOptions.dateTypes} /></div>
                         <div className="ps-wh-filter-cell"><SelectField name="printed_status" value={filters.printed_status ?? ''} placeholder="--In đơn--" options={filterOptions.printedStatuses} /></div>
                         <div className="ps-wh-filter-cell"><SelectField name="warehouse_care_status" value={filters.warehouse_care_status ?? ''} placeholder="--Trạng thái care--" options={filterOptions.warehouseCareStatuses} /></div>

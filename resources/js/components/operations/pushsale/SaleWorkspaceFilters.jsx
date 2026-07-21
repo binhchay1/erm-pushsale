@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 
 const toArray = (value) => Array.isArray(value) ? value : (value?.data ?? Object.values(value ?? {}));
 const optionValue = (item) => item.value ?? item.id;
@@ -27,15 +28,6 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {} }) 
         per_page: filters.per_page || 20,
     });
     const [expanded, setExpanded] = useState(true);
-
-    const dateRangeText = useMemo(() => {
-        const format = (date, end = false) => {
-            if (!date) return '';
-            const [y, m, d] = String(date).slice(0, 10).split('-');
-            return `${d}/${m}/${y} ${end ? '23:59' : '00:00'}`;
-        };
-        return `${format(form.date_from)} - ${format(form.date_to, true)}`;
-    }, [form.date_from, form.date_to]);
 
     const update = (key, value) => setForm((current) => ({ ...current, [key]: value, page: 1 }));
     const submit = (event) => {
@@ -66,11 +58,13 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {} }) 
 
             {expanded && (
                 <div className="ps-sale-extra-filters">
-                    <div className="ps-sale-date-range form-control" title={dateRangeText}>
-                        <span>{dateRangeText}</span>
-                        <input type="date" value={form.date_from ?? ''} onChange={(event) => update('date_from', event.target.value)} aria-label="Từ ngày" />
-                        <input type="date" value={form.date_to ?? ''} onChange={(event) => update('date_to', event.target.value)} aria-label="Đến ngày" />
-                    </div>
+                    <DateRangeFilter
+                        className="ps-sale-date-range form-control"
+                        from={form.date_from}
+                        to={form.date_to}
+                        displayLabel
+                        onChange={({ date_from, date_to }) => setForm((current) => ({ ...current, date_from, date_to, page: 1 }))}
+                    />
                     <Select value={form.date_type} onChange={(value) => update('date_type', value)} placeholder="--Kiểu ngày--" options={filterOptions.dateTypes} />
                     <select className="form-control ps-sale-select" value={form.care_status ?? ''} onChange={(event) => update('care_status', event.target.value)}>
                         <option value="">--Care đơn--</option>

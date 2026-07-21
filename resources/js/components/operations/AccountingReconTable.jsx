@@ -1,232 +1,164 @@
-import { Heart, Copy, CheckCircle2, Circle } from 'lucide-react';
+import { Copy, Heart } from 'lucide-react';
 
-import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { useTableSort } from '@/hooks/use-table-sort';
 import { formatCurrency, formatDate, formatDateTime, formatNumber } from '@/lib/format';
-import { deliveryTone } from '@/lib/status-tones';
 import { useT } from '@/providers/I18nProvider';
 
-function Money({ value, className }) {
-    if (!value) return <span className="text-muted-foreground">—</span>;
-    return <span className={className}>{formatCurrency(value)}</span>;
+function money(value) {
+    if (value === null || value === undefined || value === '') return '—';
+    return formatCurrency(Number(value || 0));
 }
 
-export function AccountingReconTable({ rows, totals, enableDeleteOrder = false }) {
-    const t = useT();
-    const { sortedRows, sort, toggleSort } = useTableSort(rows ?? [], {
-        defaultKey: 'dataArrivedAt',
-        defaultDir: 'desc',
-    });
+function dateTime(value) {
+    return value ? formatDateTime(value) : '—';
+}
 
-    const colCount = 18 + (enableDeleteOrder ? 1 : 0);
+function ProductTable({ items = [] }) {
+    if (!items.length) return <span>—</span>;
 
     return (
-        <ScrollDataTable>
-            <table className="min-w-[2200px] w-full border-collapse">
+        <table className="tb-in-sp ps-acc-product-table">
+            <tbody>
+                {items.map((item, index) => (
+                    <tr className="row-sp" key={item.itemId ?? item.productName ?? index}>
+                        <td><span className="ten-sp">{item.productName}</span>{item.itemType === 'upsell' && <em className="ps-acc-upsell-tag">UP</em>}</td>
+                        <td className="text-center no-wrap">x{item.quantity}</td>
+                        <td className="text-right no-wrap">{formatNumber(item.unitPrice)}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    );
+}
+
+function MoneyStack({ row }) {
+    return (
+        <table className="tb-in-sp ps-acc-money-stack">
+            <tbody>
+                <tr><td><span title="Thành tiền">{money(row.subtotal)}</span></td></tr>
+                <tr><td><span title="Chiết khấu">{Number(row.discount ?? 0) > 0 ? `-${money(row.discount)}` : '—'}</span></td></tr>
+                <tr><td><span title="Tiền VAT SP">{money(row.vat)}</span></td></tr>
+                <tr><td><span title="Phí VC">{money(row.shippingFeeCollected)}</span></td></tr>
+                <tr><td><strong title="Tổng tiền đơn hàng">{money(row.total)}</strong></td></tr>
+            </tbody>
+        </table>
+    );
+}
+
+function ReconIcon({ value }) {
+    return value ? (
+        <i className="fa fa-check-circle ps-acc-recon-ok" title="Đã đối soát nội bộ" />
+    ) : (
+        <i className="fa fa-circle-o ps-acc-recon-empty" title="Chưa đối soát nội bộ" />
+    );
+}
+
+function CustomerCell({ row }) {
+    return (
+        <div className="ps-acc-customer-cell">
+            <b>{row.customerName || '—'}</b><br />
+            <span>{row.customerPhone || '—'}</span>
+            {row.isReturningCustomer && <Heart className="ps-acc-mini-icon text-danger" aria-label="Khách mua lại" />}
+            {row.isDuplicatePhone && <Copy className="ps-acc-mini-icon text-danger" aria-label="Trùng số" />}
+            {row.desiredDeliveryAt && <div className="small-tip">{formatDate(row.desiredDeliveryAt)}</div>}
+            {row.hasDifferentReceiver && (
+                <div className="small-tip ps-acc-receiver">NN: {row.effectiveReceiverName}{row.effectiveReceiverPhone ? ` · ${row.effectiveReceiverPhone}` : ''}</div>
+            )}
+        </div>
+    );
+}
+
+export function AccountingReconTable({ rows = [], totals, enableDeleteOrder = false }) {
+    const t = useT();
+    const colCount = 15 + (enableDeleteOrder ? 1 : 0);
+
+    return (
+        <div className="table-responsive ps-acc-table-wrap">
+            <table className="table table-bordered table-striped ps-acc-operation-table">
                 <thead>
                     <tr>
-                        <Th className="text-center">{t('operations.recon_table.seq')}</Th>
-                        <Th sortable sortKey="saleName" sort={sort} onSort={toggleSort}>
-                            {t('operations.recon_table.sale')}
-                        </Th>
-                        <Th sortable sortKey="dataArrivedAt" sort={sort} onSort={toggleSort}>
-                            {t('operations.recon_table.source_order')}
-                        </Th>
-                        <Th>{t('operations.recon_table.warehouse_carrier')}</Th>
-                        <Th>{t('operations.recon_table.care')}</Th>
-                        <Th sortable sortKey="deliveryStatus" sort={sort} onSort={toggleSort}>
-                            {t('operations.recon_table.delivery')}
-                        </Th>
-                        <Th className="text-center">{t('operations.recon_table.recon')}</Th>
-                        <Th>{t('operations.recon_table.products')}</Th>
-                        <Th className="text-right" sortable sortKey="subtotal" sort={sort} onSort={toggleSort}>
-                            {t('operations.recon_table.subtotal')}
-                        </Th>
-                        <Th className="text-right">{t('operations.recon_table.discount')}</Th>
-                        <Th className="text-right">{t('operations.recon_table.vat')}</Th>
-                        <Th className="text-right">{t('operations.recon_table.shipping_fee')}</Th>
-                        <Th className="text-right" sortable sortKey="total" sort={sort} onSort={toggleSort}>
-                            {t('operations.recon_table.total')}
-                        </Th>
-                        <Th className="text-right">{t('operations.recon_table.deposit')}</Th>
-                        <Th className="text-right">{t('operations.recon_table.collect')}</Th>
-                        <Th className="text-right">{t('operations.recon_table.carrier_fee')}</Th>
-                        <Th className="text-right">{t('operations.recon_table.support_fee')}</Th>
-                        <Th>{t('operations.recon_table.customer')}</Th>
-                        <Th>{t('operations.recon_table.address')}</Th>
-                        {enableDeleteOrder && <Th />}
+                        <th className="text-center ps-col-stt">STT</th>
+                        <th className="text-center ps-col-sale">Sale</th>
+                        <th className="text-center ps-col-code">Ngày data về<br />Mã đơn<br />Ngày chốt đơn</th>
+                        <th className="text-center ps-col-warehouse">Kho / PTGH / Mã giao vận</th>
+                        <th className="text-center ps-col-care">Care đơn / Ghi chú KT</th>
+                        <th className="text-center ps-col-delivery">Trạng thái giao hàng<br />Ngày đăng đơn</th>
+                        <th className="text-center ps-col-recon" title="Đối soát nội bộ">ĐSNB</th>
+                        <th className="text-center ps-col-products">Sản phẩm - SL - Đơn giá</th>
+                        <th className="text-center ps-col-money">Thành tiền<br />CK / VAT SP<br />Phí VC / Tổng tiền</th>
+                        <th className="text-center ps-col-deposit">Đặt cọc</th>
+                        <th className="text-center ps-col-collect">Tiền thu<br />của khách</th>
+                        <th className="text-center ps-col-vc">Giá dịch vụ VC</th>
+                        <th className="text-center ps-col-support">Phí VC<br />hỗ trợ khách</th>
+                        <th className="text-center ps-col-customer">Họ tên / Số điện thoại</th>
+                        <th className="text-center ps-col-address">Địa chỉ<br />Ghi chú giao hàng</th>
+                        {enableDeleteOrder && <th className="text-center ps-col-action">Thao tác</th>}
                     </tr>
                 </thead>
                 <tbody>
-                    {sortedRows.length ? (
-                        sortedRows.map((row, index) => (
-                            <tr key={row.id} className="align-top hover:bg-muted/30">
-                                <Td className="text-center text-muted-foreground">{index + 1}</Td>
-                                <Td>
-                                    <div className="font-medium">{row.saleName}</div>
-                                    <div className="text-[11px] text-muted-foreground">{row.saleGroup}</div>
-                                </Td>
-                                <Td className="whitespace-nowrap">
-                                    <div className="text-[11px] text-muted-foreground">
-                                        {formatDateTime(row.dataArrivedAt)}
-                                    </div>
-                                    <div className="font-mono font-semibold text-primary">{row.orderCode}</div>
-                                    <div className="text-[11px] text-muted-foreground">
-                                        {row.closedAt ? formatDateTime(row.closedAt) : '—'}
-                                    </div>
-                                </Td>
-                                <Td className="whitespace-nowrap">
-                                    <div>{row.warehouseName || '—'}</div>
-                                    <div className="font-semibold text-emerald-600 dark:text-emerald-400">
-                                        {row.carrierName || row.shippingProvider || '—'}
-                                    </div>
-                                    <div className="text-[11px] text-amber-600 dark:text-amber-400">
-                                        {row.trackingNumber || ''}
-                                    </div>
-                                </Td>
-                                <Td className="max-w-[180px] whitespace-normal">
-                                    <div className="text-fuchsia-600 dark:text-fuchsia-400">
-                                        {row.carePersonName || ''}
-                                    </div>
-                                    <div className="text-muted-foreground">{row.accountingNotes || ''}</div>
-                                </Td>
-                                <Td>
-                                    <StatusBadge tone={deliveryTone(row.deliveryStatusValue)}>
-                                        {row.deliveryStatus}
-                                    </StatusBadge>
-                                </Td>
-                                <Td className="text-center">
-                                    {row.internalReconNote ? (
-                                        <span
-                                            className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400"
-                                            title={t('operations.recon_table.reconciled')}
-                                        >
-                                            <CheckCircle2 className="size-4" />
-                                        </span>
-                                    ) : (
-                                        <span
-                                            className="inline-flex items-center gap-1 text-muted-foreground/50"
-                                            title={t('operations.recon_table.not_reconciled')}
-                                        >
-                                            <Circle className="size-4" />
-                                        </span>
-                                    )}
-                                </Td>
-                                <Td className="max-w-[260px] whitespace-normal">
-                                    {row.products?.map((p) => (
-                                        <div key={p.itemId ?? p.productName} className="flex justify-between gap-2 border-b border-dashed border-border/40 py-0.5 last:border-0">
-                                            <span className="truncate">{p.productName}</span>
-                                            <span className="whitespace-nowrap text-muted-foreground">x{p.quantity}</span>
-                                            <span className="whitespace-nowrap text-right">{formatCurrency(p.unitPrice)}</span>
-                                        </div>
-                                    ))}
-                                </Td>
-                                <Td className="text-right">
-                                    <Money value={row.subtotal} />
-                                </Td>
-                                <Td className="text-right">
-                                    {row.discount ? (
-                                        <span className="text-destructive">-{formatCurrency(row.discount)}</span>
-                                    ) : (
-                                        <span className="text-muted-foreground">—</span>
-                                    )}
-                                </Td>
-                                <Td className="text-right">
-                                    <Money value={row.vat} />
-                                </Td>
-                                <Td className="text-right">
-                                    <Money value={row.shippingFeeCollected} />
-                                </Td>
-                                <Td className="text-right">
-                                    <Money value={row.total} className="font-semibold" />
-                                </Td>
-                                <Td className="text-right">
-                                    <Money value={row.deposit} />
-                                </Td>
-                                <Td className="text-right">
-                                    <Money value={row.amountToCollect} className="font-semibold text-emerald-600 dark:text-emerald-400" />
-                                </Td>
-                                <Td className="text-right">
-                                    <Money value={row.carrierServiceFee} />
-                                </Td>
-                                <Td className="text-right">
-                                    <Money value={row.shippingSupportFee} />
-                                </Td>
-                                <Td className="max-w-[180px] whitespace-normal">
-                                    <div className="truncate font-medium">{row.customerName}</div>
-                                    <div className="flex items-center gap-1 text-muted-foreground">
-                                        {row.customerPhone}
-                                        {row.isReturningCustomer && (
-                                            <Heart className="size-3 text-destructive" aria-label={t('operations.recon_table.returning_customer')} />
-                                        )}
-                                        {row.isDuplicatePhone && (
-                                            <Copy className="size-3 text-destructive" aria-label={t('operations.recon_table.duplicate_phone')} />
-                                        )}
-                                    </div>
-                                    {row.hasDifferentReceiver && (
-                                        <div className="mt-0.5 text-[11px] text-amber-700 dark:text-amber-400">
-                                            {t('operations.recon_table.receiver_label')} {row.effectiveReceiverName}
-                                            {row.effectiveReceiverPhone ? ` · ${row.effectiveReceiverPhone}` : ''}
-                                        </div>
-                                    )}
-                                    {row.desiredDeliveryAt && (
-                                        <div className="text-[11px] text-muted-foreground">{formatDate(row.desiredDeliveryAt)}</div>
-                                    )}
-                                </Td>
-                                <Td className="max-w-[220px] whitespace-normal">
-                                    <div>{row.effectiveShippingAddress || row.shippingAddress}</div>
-                                    {row.customerNote && (
-                                        <div className="mt-0.5 text-[11px] text-fuchsia-600 dark:text-fuchsia-400">
-                                            {row.customerNote}
-                                        </div>
-                                    )}
-                                </Td>
-                                {enableDeleteOrder && (
-                                    <Td>
-                                        <DeleteRowButton
-                                            url={`/admin/orders/${row.id}`}
-                                            label={row.orderCode}
-                                            confirmMessage={t('operations.delete_order_confirm', { code: row.orderCode })}
-                                        />
-                                    </Td>
-                                )}
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <Td colSpan={colCount} className="py-8 text-center text-muted-foreground">
-                                {t('operations.recon_table.no_data')}
-                            </Td>
+                    {rows.length ? rows.map((row, index) => (
+                        <tr key={row.id} className="contact-row ps-acc-row">
+                            <td className="text-center ps-col-stt">{index + 1}</td>
+                            <td className="text-center ps-col-sale"><b>{row.saleName}</b><br /><span className="small-tip">{row.saleGroup}</span></td>
+                            <td className="text-center ps-col-code">
+                                <span className="small-tip">{dateTime(row.dataArrivedAt)}</span><br />
+                                <b className="ps-order-code-text">{row.orderCode || '—'}</b><br />
+                                <span className="small-tip">{dateTime(row.closedAt)}</span>
+                            </td>
+                            <td className="text-center ps-col-warehouse">
+                                <b>{row.warehouseName || '—'}</b><br />
+                                <span className="text-success">{row.carrierName || row.shippingProvider || 'Thủ công'}</span><br />
+                                <span className="text-warning">{row.trackingNumber || '—'}</span>
+                            </td>
+                            <td className="ps-col-care">
+                                <span className="ps-care-name">{row.carePersonName || row.saleName || '—'}</span><br />
+                                <span className="small-tip">{row.accountingNotes || '—'}</span>
+                            </td>
+                            <td className="text-center ps-col-delivery">
+                                <span className={`ps-acc-delivery-badge ttgh-${row.deliveryStatusValue || 'none'}`}>{row.deliveryStatus || '—'}</span><br />
+                                <span className="small-tip">{row.desiredDeliveryAt ? dateTime(row.desiredDeliveryAt) : '—'}</span>
+                            </td>
+                            <td className="text-center ps-col-recon"><ReconIcon value={row.internalReconNote} /></td>
+                            <td className="ps-col-products"><ProductTable items={row.products ?? []} /></td>
+                            <td className="text-right ps-col-money"><MoneyStack row={row} /></td>
+                            <td className="text-right ps-col-deposit">{money(row.deposit)}</td>
+                            <td className="text-right ps-col-collect"><strong className="text-success">{money(row.amountToCollect)}</strong></td>
+                            <td className="text-right ps-col-vc">{money(row.carrierServiceFee)}</td>
+                            <td className="text-right ps-col-support">{money(row.shippingSupportFee)}</td>
+                            <td className="ps-col-customer"><CustomerCell row={row} /></td>
+                            <td className="ps-col-address">
+                                <div>{row.effectiveShippingAddress || row.shippingAddress || '—'}</div>
+                                {row.customerNote && <div className="small-tip text-fuchsia">{row.customerNote}</div>}
+                            </td>
+                            {enableDeleteOrder && (
+                                <td className="text-center ps-col-action">
+                                    <DeleteRowButton
+                                        url={`/admin/orders/${row.id}`}
+                                        label={row.orderCode || row.customerPhone}
+                                        confirmMessage={t('operations.delete_order_confirm', { code: row.orderCode || row.customerPhone })}
+                                    />
+                                </td>
+                            )}
                         </tr>
+                    )) : (
+                        <tr><td colSpan={colCount} className="text-center ps-acc-empty">Không có dữ liệu phù hợp.</td></tr>
                     )}
                 </tbody>
-                {sortedRows.length > 0 && totals && (
+                {rows.length > 0 && totals && (
                     <tfoot>
-                        <tr className="border-t-2 border-border bg-muted/60 font-semibold">
-                            <Td colSpan={7} className="text-right">
-                                {t('operations.recon_table.total_row')}
-                            </Td>
-                            <Td className="text-center">{formatNumber(totals.quantity)}</Td>
-                            <Td className="text-right">{formatCurrency(totals.subtotal)}</Td>
-                            <Td className="text-right text-destructive">
-                                {totals.discount ? `-${formatCurrency(totals.discount)}` : '—'}
-                            </Td>
-                            <Td className="text-right">{formatCurrency(totals.vat)}</Td>
-                            <Td className="text-right">{formatCurrency(totals.shippingFeeCollected)}</Td>
-                            <Td className="text-right">{formatCurrency(totals.total)}</Td>
-                            <Td className="text-right">{formatCurrency(totals.deposit)}</Td>
-                            <Td className="text-right text-emerald-600 dark:text-emerald-400">
-                                {formatCurrency(totals.amountToCollect)}
-                            </Td>
-                            <Td className="text-right">{formatCurrency(totals.carrierServiceFee)}</Td>
-                            <Td className="text-right">{formatCurrency(totals.shippingSupportFee)}</Td>
-                            <Td colSpan={enableDeleteOrder ? 3 : 2} />
+                        <tr className="ps-acc-total-row">
+                            <td colSpan={7} className="text-right"><b>Tổng:</b></td>
+                            <td className="text-center"><b>{formatNumber(totals.quantity ?? 0)}</b></td>
+                            <td className="text-right"><MoneyStack row={totals} /></td>
+                            <td className="text-right"><b>{money(totals.deposit)}</b></td>
+                            <td className="text-right"><b className="text-success">{money(totals.amountToCollect)}</b></td>
+                            <td className="text-right"><b>{money(totals.carrierServiceFee)}</b></td>
+                            <td className="text-right"><b>{money(totals.shippingSupportFee)}</b></td>
+                            <td colSpan={enableDeleteOrder ? 3 : 2} />
                         </tr>
                     </tfoot>
                 )}
             </table>
-        </ScrollDataTable>
+        </div>
     );
 }

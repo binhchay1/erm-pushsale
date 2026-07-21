@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import AppLayout from '@/layouts/AppLayout';
 import { ReportPagination } from '@/components/reports/ReportPagination';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
+import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import {
     PushsaleCustomerMessagesDialog,
     PushsaleDataViewHistoryDialog,
@@ -310,6 +311,11 @@ function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
     };
 
     const exportCsv = async (variant) => {
+        if (!hasSelection) {
+            toast.warning('Vui lòng tích chọn ít nhất một hồ sơ.');
+            return;
+        }
+
         try {
             const query = new URLSearchParams({ variant: String(variant) });
             selectedIds.forEach((id) => query.append('ids[]', id));
@@ -464,11 +470,13 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                 {filtersOpen ? (
                     <div className="ps-customer-filter-panel">
                         <div className="ps-filter-grid">
-                            <div className="ps-date-range-control">
-                                <input type="date" className="form-control ps-filter-control" value={form.date_from ?? ''} onChange={(event) => setField('date_from', event.target.value)} />
-                                <span>-</span>
-                                <input type="date" className="form-control ps-filter-control" value={form.date_to ?? ''} onChange={(event) => setField('date_to', event.target.value)} />
-                            </div>
+                            <DateRangeFilter
+                                className="ps-date-range-control"
+                                inputClassName="ps-filter-control"
+                                from={form.date_from}
+                                to={form.date_to}
+                                onChange={({ date_from, date_to }) => setForm((current) => ({ ...current, date_from, date_to, page: 1 }))}
+                            />
                             <FilterSelect value={form.date_type} onChange={(value) => setField('date_type', value)} options={filterOptions.dateTypes} placeholder="--Kiểu ngày--" />
                             <FilterSelect value={form.care_status} onChange={(value) => setField('care_status', value)} options={filterOptions.careStatuses} placeholder="--Care đơn--" />
                             <FilterSelect value={form.closing_status} onChange={(value) => setField('closing_status', value)} options={filterOptions.closingStatuses} placeholder="--Trạng thái chốt đơn--" />

@@ -23,7 +23,7 @@ createInertiaApp({
                         themes={pageProps.themes}
                     >
                         <App {...props} />
-                        <Toaster richColors position="top-right" closeButton />
+                        <Toaster richColors position="top-right" closeButton visibleToasts={5} offset={18} toastOptions={{ className: 'pushsale-toast' }} />
                     </ThemeProvider>
                 </ErrorBoundary>
             </I18nProvider>

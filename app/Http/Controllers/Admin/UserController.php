@@ -52,6 +52,7 @@ class UserController extends Controller
             ->whereIn('id', $visibleIds)
             ->with([
                 'team:id,name',
+                'company:id,slug,name',
                 'manager:id,name',
                 'creator:id,name',
                 'operationalProfile.workShift:id,name',
@@ -104,6 +105,13 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role->value,
+                'team_id' => $user->team_id,
+                'manager_user_id' => $user->manager_user_id,
+                'work_shift_id' => $profile?->work_shift_id,
+                'job_title' => $user->job_title,
+                'email_local' => $user->company
+                    ? (TenantEmail::localPartFromEmail($user->email, $user->company) ?? explode('@', $user->email, 2)[0])
+                    : explode('@', $user->email, 2)[0],
                 'role_label' => $user->roleLabel(),
                 'employee_code' => $profile?->employee_code ?: 'NV'.str_pad((string) $user->id, 5, '0', STR_PAD_LEFT),
                 'base_salary' => (int) ($profile?->base_salary ?? 0),
@@ -125,6 +133,9 @@ class UserController extends Controller
             'filters' => $filters,
             'roles' => collect(UserRole::cases())->map(fn (UserRole $role) => ['value' => $role->value, 'label' => $role->label()])->values(),
             'workShifts' => $this->workShiftOptions(),
+            'teams' => $this->teamOptions(),
+            'managers' => $this->managerOptions(),
+            'emailIdentity' => $this->emailIdentity(),
             'accountCount' => $accountCount,
             'canCreate' => (bool) $actor?->allows(PermissionArea::Hr, \App\Enums\PermissionLevel::Full),
             'activeMenuCode' => '1.2.1',
@@ -317,6 +328,92 @@ class UserController extends Controller
     }
 
 
+
+    public function quickUpdate(Request $request, User $user): RedirectResponse
+    {
+        $actor = $request->user();
+        if (! $actor || ! $this->hierarchy->canManage($actor, $user)) {
+            abort(403);
+        }
+
+        $company = $actor->company ?: $user->company;
+        if (! $company) {
+            return back()->withErrors(['email_local' => 'Không xác định được đơn vị để cập nhật tài khoản.']);
+        }
+
+        $local = TenantEmail::normalizeLocalPart((string) $request->input('email_local', ''));
+        $request->merge([
+            'email_local' => $local,
+            'email' => TenantEmail::build($local, $company),
+            'team_id' => $request->input('team_id') ?: null,
+            'manager_user_id' => $request->input('manager_user_id') ?: null,
+            'work_shift_id' => $request->input('work_shift_id') ?: null,
+            'receive_data' => $request->boolean('receive_data', true),
+            'is_locked' => $request->boolean('is_locked', false),
+            'is_team_leader' => $request->boolean('is_team_leader', false),
+        ]);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email_local' => ['required', 'string', 'min:2', 'max:64', 'regex:/^[a-z0-9]([a-z0-9._-]*[a-z0-9])?$/i'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'role' => ['required', Rule::enum(UserRole::class)],
+            'team_id' => ['nullable', 'exists:teams,id'],
+            'manager_user_id' => ['nullable', 'exists:users,id', Rule::notIn([$user->id])],
+            'is_team_leader' => ['sometimes', 'boolean'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'employee_code' => ['nullable', 'string', 'max:60', Rule::unique('user_operational_profiles', 'employee_code')->ignore($user->operationalProfile?->id)],
+            'base_salary' => ['nullable', 'integer', 'min:0'],
+            'receive_data' => ['sometimes', 'boolean'],
+            'work_shift_id' => ['nullable', 'exists:work_shifts,id'],
+            'is_locked' => ['sometimes', 'boolean'],
+            'password' => ['nullable', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+        ]);
+
+        $assignable = array_map(
+            fn (UserRole $role) => $role->value,
+            $this->hierarchy->assignableRoles($actor),
+        );
+        if (! in_array((string) $data['role'], $assignable, true)) {
+            return back()->withErrors(['role' => __('messages.user_role_not_allowed')]);
+        }
+
+        if (! TenantEmail::acceptsForCompany((string) $data['email'], $company)) {
+            return back()->withErrors(['email_local' => __('messages.tenant.invalid_email_suffix', ['suffix' => TenantEmail::suffixFor($company)])]);
+        }
+
+        $profileData = [
+            'employee_code' => $data['employee_code'] ?? null,
+            'base_salary' => $data['base_salary'] ?? 0,
+            'receive_data' => (bool) ($data['receive_data'] ?? true),
+            'work_shift_id' => $data['work_shift_id'] ?? null,
+            'is_locked' => (bool) ($data['is_locked'] ?? false),
+        ];
+
+        $user->fill([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'role' => $data['role'],
+            'team_id' => $data['team_id'] ?? null,
+            'manager_user_id' => $data['manager_user_id'] ?? null,
+            'is_team_leader' => (bool) ($data['is_team_leader'] ?? false),
+            'phone' => $data['phone'] ?? null,
+        ]);
+        if (! empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+        $user->save();
+        $this->syncOperationalProfile($user, $profileData);
+
+        ActivityLogger::log(
+            ActivityLogger::USER_UPDATED,
+            $user->fresh(),
+            ['quick_update' => true, 'role' => $user->role->value],
+        );
+
+        return back()->with('success', 'Đã cập nhật tài khoản.');
+    }
+
     public function updateOperationalStatus(Request $request, User $user): RedirectResponse
     {
         $actor = $request->user();
@@ -460,6 +557,13 @@ class UserController extends Controller
         $actor = auth()->user();
         if (! $actor) {
             return null;
+        }
+
+        if (! $request->has('permissions') && $role) {
+            $roleEnum = UserRole::tryFrom($role);
+            if ($roleEnum instanceof UserRole) {
+                return $this->hierarchy->sanitizePermissions($actor, PermissionCatalog::defaultsForRole($roleEnum));
+            }
         }
 
         return $this->hierarchy->sanitizePermissions($actor, (array) $request->input('permissions', []));

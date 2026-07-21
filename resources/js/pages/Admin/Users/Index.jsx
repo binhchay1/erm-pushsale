@@ -1,10 +1,10 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { formatCurrency } from '@/lib/format';
-
+import { PushsalePageFrame } from '@/pages/Pushsale/components/PushsalePageFrame';
 
 function visitPage(url) {
     if (url) router.get(url, {}, { preserveScroll: true, preserveState: true });
@@ -26,7 +26,32 @@ function CircleStatus({ active, title, onClick, disabled = false }) {
     );
 }
 
+function roleLabel(roles, value) {
+    return roles.find((role) => String(role.value) === String(value))?.label ?? value ?? '';
+}
 
+function optionName(options, id) {
+    return options.find((item) => String(item.id) === String(id))?.name ?? '';
+}
+
+function userToForm(user = null) {
+    return {
+        role: user?.role ?? '',
+        email_local: user?.email_local ?? user?.email?.split('@')?.[0] ?? '',
+        password: '',
+        password_confirmation: '',
+        phone: user?.phone ?? '',
+        name: user?.name ?? '',
+        employee_code: user?.employee_code ?? '',
+        base_salary: user?.base_salary ?? '',
+        team_id: user?.team_id ?? '',
+        manager_user_id: user?.manager_user_id ?? '',
+        work_shift_id: user?.work_shift_id ?? '',
+        is_team_leader: Boolean(user?.is_team_leader ?? false),
+        receive_data: Boolean(user?.receive_data ?? true),
+        is_locked: Boolean(user?.is_locked ?? false),
+    };
+}
 
 function PasswordDialog({ user, onClose }) {
     const form = useForm({ password: '', password_confirmation: '' });
@@ -36,7 +61,10 @@ function PasswordDialog({ user, onClose }) {
         event.preventDefault();
         form.patch(`/admin/users/${user.id}/password`, {
             preserveScroll: true,
-            onSuccess: onClose,
+            onSuccess: () => {
+                form.reset();
+                onClose();
+            },
         });
     };
 
@@ -52,108 +80,135 @@ function PasswordDialog({ user, onClose }) {
                 </label>
                 {Object.keys(form.errors).length > 0 && <div className="alert alert-danger">{Object.values(form.errors).join(' · ')}</div>}
                 <div className="text-right">
-                    <button type="button" className="btn btn-default" onClick={onClose}>Hủy</button>{' '}
-                    <button className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> Lưu</button>
+                    <button type="button" className="btn btn-default btn-sm" onClick={onClose}>Hủy</button>{' '}
+                    <button className="btn btn-primary btn-sm" disabled={form.processing}><i className="fa fa-save" /> Lưu</button>
                 </div>
             </form>
         </PushsaleDialog>
     );
 }
 
+function AccountDialog({ mode = 'create', user = null, onClose, roles = [], workShifts = [], teams = [], managers = [], emailIdentity = {} }) {
+    const form = useForm(userToForm(mode === 'update' ? user : null));
+    if (mode === 'update' && !user) return null;
+    if (!['create', 'update'].includes(mode)) return null;
 
-function SingleAccountDialog({ open, onClose, roles = [], workShifts = [] }) {
-    const form = useForm({
-        role: '',
-        email_local: '',
-        password: '',
-        password_confirmation: '',
-        phone: '',
-        name: '',
-        employee_code: '',
-        contact_email: '',
-        base_salary: '',
-        work_shift_id: '',
-        is_team_leader: false,
-        receive_data: false,
-    });
-
-    if (!open) return null;
+    const isUpdate = mode === 'update';
+    const title = isUpdate ? 'CẬP NHẬT TÀI KHOẢN' : 'THÊM TÀI KHOẢN';
+    const actionText = isUpdate ? 'Cập nhật' : 'Thêm mới';
+    const suffix = emailIdentity?.suffix ?? '@saleops.local';
 
     const submit = (event) => {
         event.preventDefault();
-        form.post('/admin/users', {
+        const options = {
             preserveScroll: true,
-            onSuccess: onClose,
-        });
+            onSuccess: () => {
+                form.reset();
+                onClose();
+            },
+        };
+        if (isUpdate) form.patch(`/admin/users/${user.id}/quick-update`, options);
+        else form.post('/admin/users', options);
     };
 
     return (
-        <PushsaleDialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()} title="Cập nhật tài khoản" width="600px" bodyClassName="ps-employee-dialog-body">
-                <form className="ps-employee-form" onSubmit={submit}>
-                    {Object.keys(form.errors).length > 0 && <div className="ps-employee-error">{Object.values(form.errors).join(' · ')}</div>}
-                    <div className="ps-employee-form-row"><label>#</label><div>0</div></div>
-                    <div className="ps-employee-form-row">
-                        <label>Chức vụ:</label>
+        <PushsaleDialog
+            open
+            onOpenChange={(nextOpen) => !nextOpen && onClose()}
+            title={title}
+            width="760px"
+            bodyClassName="ps-employee-dialog-body ps-employee-account-dialog"
+        >
+            <form className="ps-employee-form" onSubmit={submit}>
+                {Object.keys(form.errors).length > 0 && <div className="ps-employee-error">{Object.values(form.errors).join(' · ')}</div>}
+
+                <div className="ps-employee-form-grid">
+                    <label className="ps-employee-form-field">
+                        <span>Chức vụ <b className="required">(*)</b></span>
                         <select className="form-control" value={form.data.role} onChange={(event) => form.setData('role', event.target.value)} required>
-                            <option value="">--Chức vụ</option>
+                            <option value="">--Chức vụ--</option>
                             {roles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
                         </select>
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label>Tài khoản <span className="required">(*)</span>:</label>
-                        <input className="form-control" value={form.data.email_local} onChange={(event) => form.setData('email_local', event.target.value)} required />
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label>Mật khẩu:</label>
+                    </label>
+
+                    <label className="ps-employee-form-field">
+                        <span>Họ và tên <b className="required">(*)</b></span>
+                        <input className="form-control" value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} required />
+                    </label>
+
+                    <label className="ps-employee-form-field">
+                        <span>Tài khoản <b className="required">(*)</b></span>
+                        <div className="ps-employee-email-input">
+                            <input className="form-control" value={form.data.email_local} onChange={(event) => form.setData('email_local', event.target.value)} required />
+                            <span>{suffix}</span>
+                        </div>
+                    </label>
+
+                    <label className="ps-employee-form-field">
+                        <span>Mật khẩu{!isUpdate && <b className="required"> (*)</b>}</span>
                         <input className="form-control" type="password" value={form.data.password} onChange={(event) => {
                             const password = event.target.value;
                             form.setData({ ...form.data, password, password_confirmation: password });
-                        }} required />
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label>Số ĐT:</label>
+                        }} required={!isUpdate} placeholder={isUpdate ? 'Để trống nếu không đổi' : ''} />
+                    </label>
+
+                    <label className="ps-employee-form-field">
+                        <span>Số ĐT</span>
                         <input className="form-control" value={form.data.phone} onChange={(event) => form.setData('phone', event.target.value)} />
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label>Họ và tên <span className="required">(*)</span>:</label>
-                        <input className="form-control" value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} required />
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label>Mã nhân viên:</label>
+                    </label>
+
+                    <label className="ps-employee-form-field">
+                        <span>Mã nhân viên</span>
                         <input className="form-control" value={form.data.employee_code} onChange={(event) => form.setData('employee_code', event.target.value)} />
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label>Email:</label>
-                        <input className="form-control" type="email" value={form.data.contact_email} onChange={(event) => form.setData('contact_email', event.target.value)} />
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label>Lương cứng:</label>
+                    </label>
+
+                    <label className="ps-employee-form-field">
+                        <span>Trưởng nhóm/QL trực tiếp</span>
+                        <select className="form-control" value={form.data.manager_user_id} onChange={(event) => form.setData('manager_user_id', event.target.value)}>
+                            <option value="">--Chọn quản lý--</option>
+                            {managers.map((manager) => <option key={manager.id} value={manager.id}>{manager.name}</option>)}
+                        </select>
+                    </label>
+
+                    <label className="ps-employee-form-field">
+                        <span>Đội nhóm</span>
+                        <select className="form-control" value={form.data.team_id} onChange={(event) => form.setData('team_id', event.target.value)}>
+                            <option value="">--Chọn đội nhóm--</option>
+                            {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+                        </select>
+                    </label>
+
+                    <label className="ps-employee-form-field">
+                        <span>Lương cứng</span>
                         <input className="form-control" type="number" min="0" value={form.data.base_salary} onChange={(event) => form.setData('base_salary', event.target.value)} />
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label>Ca làm việc:</label>
-                        <div className="ps-employee-inline">
-                            {workShifts.slice(0, 3).map((shift, index) => (
-                                <label key={shift.id}>
-                                    <input type="checkbox" checked={String(form.data.work_shift_id) === String(shift.id)} onChange={(event) => form.setData('work_shift_id', event.target.checked ? shift.id : '')} />
-                                    {shift.name || `Ca ${index + 1}`}
-                                </label>
-                            ))}
-                            {workShifts.length === 0 && ['Ca 1', 'Ca 2', 'Ca 3'].map((name) => <label key={name}><input type="checkbox" disabled />{name}</label>)}
-                        </div>
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label></label>
-                        <label className="ps-employee-check"><input type="checkbox" checked={form.data.is_team_leader} onChange={(event) => form.setData('is_team_leader', event.target.checked)} />Trưởng nhóm</label>
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label></label>
-                        <label className="ps-employee-check"><input type="checkbox" checked={form.data.receive_data} onChange={(event) => form.setData('receive_data', event.target.checked)} />Nhận dữ liệu</label>
-                    </div>
-                    <div className="ps-employee-action-row">
-                        <button className="btn btn-sm btn-primary" disabled={form.processing}><i className="fa fa-save" /> Cập nhật</button>
-                    </div>
-                </form>
+                    </label>
+
+                    <label className="ps-employee-form-field">
+                        <span>Ca làm việc</span>
+                        <select className="form-control" value={form.data.work_shift_id} onChange={(event) => form.setData('work_shift_id', event.target.value)}>
+                            <option value="">--Ca làm việc--</option>
+                            {workShifts.map((shift) => <option key={shift.id} value={shift.id}>{shift.name}</option>)}
+                        </select>
+                    </label>
+                </div>
+
+                <div className="ps-employee-switch-row">
+                    <label><input type="checkbox" checked={form.data.is_team_leader} onChange={(event) => form.setData('is_team_leader', event.target.checked)} /> Trưởng nhóm</label>
+                    <label><input type="checkbox" checked={form.data.receive_data} onChange={(event) => form.setData('receive_data', event.target.checked)} /> Nhận dữ liệu</label>
+                    <label><input type="checkbox" checked={!form.data.is_locked} onChange={(event) => form.setData('is_locked', !event.target.checked)} /> Đang sử dụng</label>
+                </div>
+
+                <div className="ps-employee-dialog-note">
+                    {isUpdate
+                        ? 'Cập nhật chức vụ/đội nhóm/nhận dữ liệu sẽ ảnh hưởng trực tiếp đến phân bổ data, báo cáo và quyền tác nghiệp.'
+                        : 'Tài khoản mới sẽ được gắn vào đơn vị hiện tại và dùng ngay trong phân bổ data, báo cáo, kho/sale/marketing theo chức vụ.'}
+                </div>
+
+                <div className="ps-employee-action-row">
+                    <button type="button" className="btn btn-default btn-sm" onClick={onClose}>Đóng</button>
+                    <button className="btn btn-primary btn-sm" disabled={form.processing}><i className={`fa ${form.processing ? 'fa-spinner fa-spin' : 'fa-save'}`} /> {actionText}</button>
+                </div>
+            </form>
         </PushsaleDialog>
     );
 }
@@ -188,56 +243,61 @@ function BulkAccountDialog({ open, onClose, roles = [] }) {
         event.preventDefault();
         form.post('/admin/users/bulk', {
             preserveScroll: true,
-            onSuccess: onClose,
+            onSuccess: () => {
+                form.reset();
+                onClose();
+            },
         });
     };
 
     return (
-        <PushsaleDialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()} title="Tạo tài khoản nhiều" width="800px" bodyClassName="ps-employee-dialog-body">
-                <form className="ps-employee-form" onSubmit={submit}>
-                    {Object.keys(form.errors).length > 0 && <div className="ps-employee-error">{Object.values(form.errors).join(' · ')}</div>}
-                    <div className="ps-employee-form-row">
-                        <label>Hỗ trợ:</label>
-                        <div className="ps-employee-support">
-                            <input className="form-control" placeholder="mẫu" value={form.data.template} onChange={(event) => form.setData('template', event.target.value)} />
-                            <input className="form-control" placeholder="số lượng" type="number" min="1" value={form.data.quantity} onChange={(event) => form.setData('quantity', event.target.value)} />
-                            <input className="form-control" placeholder="Số thứ tự" type="number" min="1" value={form.data.start} onChange={(event) => form.setData('start', event.target.value)} />
-                            <button type="button" className="btn btn-link" onClick={generateAccounts}>Tạo TK</button>
-                        </div>
+        <PushsaleDialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()} title="THÊM NHIỀU TÀI KHOẢN" width="820px" bodyClassName="ps-employee-dialog-body ps-employee-bulk-dialog">
+            <form className="ps-employee-form" onSubmit={submit}>
+                {Object.keys(form.errors).length > 0 && <div className="ps-employee-error">{Object.values(form.errors).join(' · ')}</div>}
+                <div className="ps-employee-form-row">
+                    <label>Hỗ trợ tạo nhanh:</label>
+                    <div className="ps-employee-support">
+                        <input className="form-control" placeholder="Mẫu, ví dụ sale{n}" value={form.data.template} onChange={(event) => form.setData('template', event.target.value)} />
+                        <input className="form-control" placeholder="Số lượng" type="number" min="1" value={form.data.quantity} onChange={(event) => form.setData('quantity', event.target.value)} />
+                        <input className="form-control" placeholder="Bắt đầu" type="number" min="1" value={form.data.start} onChange={(event) => form.setData('start', event.target.value)} />
+                        <button type="button" className="btn btn-default btn-sm" onClick={generateAccounts}>Tạo TK</button>
                     </div>
-                    <div className="ps-employee-form-row">
-                        <label>Chức vụ <span className="required">(*)</span>:</label>
-                        <select className="form-control" value={form.data.role} onChange={(event) => form.setData('role', event.target.value)} required>
-                            <option value="">--Chức vụ</option>
-                            {roles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
-                        </select>
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label>Tài khoản <span className="required">(*)</span>:<br /><span className="small-tip">(mỗi dòng một tài khoản)</span></label>
-                        <textarea className="form-control" value={form.data.accounts} onChange={(event) => form.setData('accounts', event.target.value)} required />
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label>Mật khẩu:</label>
-                        <input className="form-control" type="password" value={form.data.password} onChange={(event) => {
-                            const password = event.target.value;
-                            form.setData({ ...form.data, password, password_confirmation: password });
-                        }} required />
-                    </div>
-                    <div className="ps-employee-form-row">
-                        <label></label>
-                        <label className="ps-employee-check"><input type="checkbox" checked={form.data.receive_data} onChange={(event) => form.setData('receive_data', event.target.checked)} />Nhận dữ liệu</label>
-                    </div>
-                    <div className="ps-employee-action-row">
-                        <button className="btn btn-sm btn-primary" disabled={form.processing}><i className="fa fa-save" /> Cập nhật</button>
-                    </div>
-                </form>
+                </div>
+                <div className="ps-employee-form-row">
+                    <label>Chức vụ <span className="required">(*)</span>:</label>
+                    <select className="form-control" value={form.data.role} onChange={(event) => form.setData('role', event.target.value)} required>
+                        <option value="">--Chức vụ--</option>
+                        {roles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
+                    </select>
+                </div>
+                <div className="ps-employee-form-row">
+                    <label>Tài khoản <span className="required">(*)</span>:<br /><span className="small-tip">Mỗi dòng một tài khoản</span></label>
+                    <textarea className="form-control" rows="9" value={form.data.accounts} onChange={(event) => form.setData('accounts', event.target.value)} required />
+                </div>
+                <div className="ps-employee-form-row">
+                    <label>Mật khẩu:</label>
+                    <input className="form-control" type="password" value={form.data.password} onChange={(event) => {
+                        const password = event.target.value;
+                        form.setData({ ...form.data, password, password_confirmation: password });
+                    }} required />
+                </div>
+                <div className="ps-employee-form-row">
+                    <label></label>
+                    <label className="ps-employee-check"><input type="checkbox" checked={form.data.receive_data} onChange={(event) => form.setData('receive_data', event.target.checked)} /> Nhận dữ liệu ngay sau khi tạo</label>
+                </div>
+                <div className="ps-employee-dialog-note">Các tài khoản được tạo thật trong bảng users, sinh email theo đơn vị hiện tại và tự tạo hồ sơ vận hành để tham gia phân bổ data.</div>
+                <div className="ps-employee-action-row">
+                    <button type="button" className="btn btn-default btn-sm" onClick={onClose}>Đóng</button>
+                    <button className="btn btn-primary btn-sm" disabled={form.processing}><i className={`fa ${form.processing ? 'fa-spinner fa-spin' : 'fa-save'}`} /> Tạo tài khoản</button>
+                </div>
+            </form>
         </PushsaleDialog>
     );
 }
 
-export default function UsersIndex({ users, filters = {}, roles = [], workShifts = [], accountCount = 0, canCreate = true }) {
+export default function UsersIndex({ users, filters = {}, roles = [], workShifts = [], teams = [], managers = [], emailIdentity = {}, accountCount = 0, canCreate = true }) {
     const [passwordUser, setPasswordUser] = useState(null);
-    const [singleDialogOpen, setSingleDialogOpen] = useState(false);
+    const [accountDialog, setAccountDialog] = useState({ mode: null, user: null });
     const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
     const [form, setForm] = useState({
         search: filters.search ?? '',
@@ -248,7 +308,7 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
     });
     const rows = users?.data ?? [];
     const links = users?.links ?? [];
-    const visibleAccountCount = rows.length;
+    const visibleAccountCount = accountCount || users?.total || rows.length;
 
     const submit = (event) => {
         event?.preventDefault();
@@ -285,63 +345,56 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
 
     const canBulk = useMemo(() => rows.some((row) => row.can_manage), [rows]);
 
+    const title = <>Danh sách nhân viên <span className="ps-title-divider">|</span> <span className="ps-orange">Số TK: {visibleAccountCount}</span></>;
+    const actions = (
+        <form className="ps-header-search" onSubmit={submit}>
+            <input
+                type="text"
+                className="form-control"
+                value={form.search}
+                onChange={(event) => setForm((old) => ({ ...old, search: event.target.value }))}
+            />
+            <button className="btn btn-sm btn-primary" type="submit"><i className="fa fa-search" /> Tìm kiếm</button>
+        </form>
+    );
+    const filtersNode = (
+        <form className="ps-filter-row" onSubmit={submit}>
+            <select className="form-control" value={form.role} onChange={(event) => setForm((old) => ({ ...old, role: event.target.value }))}>
+                <option value="">--Chức vụ--</option>
+                {roles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
+            </select>
+            <select className="form-control" value={form.leader} onChange={(event) => setForm((old) => ({ ...old, leader: event.target.value }))}>
+                <option value="">--Chọn trưởng nhóm--</option>
+                <option value="1">Trưởng nhóm</option>
+                <option value="0">Thành viên</option>
+            </select>
+            <select className="form-control" value={form.receive_data} onChange={(event) => setForm((old) => ({ ...old, receive_data: event.target.value }))}>
+                <option value="">--Chọn TT nhận dữ liệu--</option>
+                <option value="1">Có nhận dữ liệu</option>
+                <option value="0">Không nhận dữ liệu</option>
+            </select>
+            <select className="form-control" value={form.locked} onChange={(event) => setForm((old) => ({ ...old, locked: event.target.value }))}>
+                <option value="">--Chọn TT sử dụng--</option>
+                <option value="0">Đang sử dụng</option>
+                <option value="1">Đã khóa</option>
+            </select>
+        </form>
+    );
+
     return (
         <AppLayout>
             <Head title="Danh sách nhân viên" />
-            <section className="ps-adminlte-page ps-users-page" data-page-code="1.2.1">
-                <form onSubmit={submit}>
-                    <div className="m-header-wrap">
-                        <div className="m-header ps-header-grid">
-                            <div className="ps-title">
-                                Danh sách nhân viên | <span className="ps-orange">Số TK: {visibleAccountCount}</span>
-                            </div>
-                            <div className="ps-header-search">
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={form.search}
-                                    onChange={(event) => setForm((old) => ({ ...old, search: event.target.value }))}
-                                />
-                                <button className="btn btn-sm btn-primary" type="submit">
-                                    <i className="fa fa-search" /> Tìm kiếm
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="box-body ps-filter-row">
-                        <select className="form-control" value={form.role} onChange={(event) => setForm((old) => ({ ...old, role: event.target.value }))}>
-                            <option value="">--Chức vụ--</option>
-                            {roles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
-                        </select>
-                        <select className="form-control" value={form.leader} onChange={(event) => setForm((old) => ({ ...old, leader: event.target.value }))}>
-                            <option value="">--Chọn trưởng nhóm--</option>
-                            <option value="1">Trưởng nhóm</option>
-                            <option value="0">Thành viên</option>
-                        </select>
-                        <select className="form-control" value={form.receive_data} onChange={(event) => setForm((old) => ({ ...old, receive_data: event.target.value }))}>
-                            <option value="">--Chọn TT nhận dữ liệu--</option>
-                            <option value="1">Có nhận dữ liệu</option>
-                            <option value="0">Không nhận dữ liệu</option>
-                        </select>
-                        <select className="form-control" value={form.locked} onChange={(event) => setForm((old) => ({ ...old, locked: event.target.value }))}>
-                            <option value="">--Chọn TT sử dụng--</option>
-                            <option value="0">Đang sử dụng</option>
-                            <option value="1">Đã khóa</option>
-                        </select>
-                    </div>
-                </form>
-
-                <div className="box-body ps-toolbar">
+            <PushsalePageFrame title={title} actions={actions} filters={filtersNode} className="ps-adminlte-page ps-users-page ps-standard-list-page" data-page-code="1.2.1">
+                <div className="ps-toolbar">
                     {canCreate && (
-                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setSingleDialogOpen(true)}>
+                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setAccountDialog({ mode: 'create', user: null })}>
                             <i className="fa fa-plus" /> Thêm tài khoản
                         </button>
                     )}
                     <button type="button" className="btn btn-sm btn-default" onClick={() => setBulkDialogOpen(true)}>
                         <i className="fa fa-gears" /> Thêm nhiều tài khoản
                     </button>
-                    <button type="button" className="btn btn-sm btn-default" disabled={!canBulk} title="Cập nhật tại màn hình sửa tài khoản">
+                    <button type="button" className="btn btn-sm btn-default" disabled={!canBulk} title="Bật/tắt nhận dữ liệu trực tiếp tại từng dòng hoặc trong dialog cập nhật">
                         <i className="fa fa-gears" /> Cập nhật nhận dữ liệu
                     </button>
                     <button type="button" className="btn btn-sm btn-default" onClick={exportCsv}>
@@ -349,11 +402,11 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
                     </button>
                 </div>
 
-                <div className="ps-table-scroll">
-                    <table className="table table-bordered ps-source-table">
+                <div className="ps-table-scroll ps-users-table-wrap">
+                    <table className="table table-bordered table-striped ps-source-table ps-users-table">
                         <thead>
                             <tr>
-                                <th>STT</th>
+                                <th className="ps-col-stt">STT</th>
                                 <th>Họ tên</th>
                                 <th>Chức vụ</th>
                                 <th>Mã nhân viên</th>
@@ -365,7 +418,7 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
                                 <th>Ca làm việc</th>
                                 <th>Đang sử dụng</th>
                                 <th>Ngày cập nhật</th>
-                                <th>Thao tác</th>
+                                <th className="ps-action-col">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -373,26 +426,26 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
                                 <tr key={row.id} className={row.is_locked ? 'disableRow' : ''}>
                                     <td className="text-center">{(users.from ?? 1) + index}</td>
                                     <td className="text-center ps-user-name">{row.name} <span>({row.email?.split('@')[0]})</span></td>
-                                    <td className="text-center">{row.role_label}</td>
+                                    <td className="text-center">{row.role_label || roleLabel(roles, row.role)}</td>
                                     <td className="text-center">{row.employee_code}</td>
                                     <td className="text-right">{row.base_salary ? formatCurrency(row.base_salary) : ''}</td>
                                     <td className="text-center">{row.phone ?? ''}</td>
                                     <td className="text-center">{row.email}</td>
-                                    <td className="text-center">{row.is_team_leader ? (row.team_name || 'Trưởng nhóm') : ''}</td>
+                                    <td className="text-center">{row.is_team_leader ? (row.team_name || 'Trưởng nhóm') : (row.manager_name ?? '')}</td>
                                     <td className="text-center"><CircleStatus active={row.receive_data} disabled={!row.can_manage} title={row.receive_data ? 'Tắt nhận dữ liệu' : 'Bật nhận dữ liệu'} onClick={row.can_manage ? () => router.patch(`/admin/users/${row.id}/operational-status`, { receive_data: !row.receive_data }, { preserveScroll: true }) : undefined} /></td>
-                                    <td className="text-center">{row.work_shift ?? ''}</td>
+                                    <td className="text-center">{row.work_shift || optionName(workShifts, row.work_shift_id)}</td>
                                     <td className="text-center"><CircleStatus active={!row.is_locked} disabled={!row.can_manage} title={row.is_locked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'} onClick={row.can_manage ? () => router.patch(`/admin/users/${row.id}/operational-status`, { is_locked: !row.is_locked }, { preserveScroll: true }) : undefined} /></td>
                                     <td className="text-center ps-update-cell">
                                         {row.updated_by && <strong>{row.updated_by}</strong>}
                                         <span>{row.updated_at}</span>
                                     </td>
-                                    <td className="text-center ps-row-actions">
+                                    <td className="text-center ps-row-actions-cell">
                                         {row.can_manage ? (
-                                            <>
-                                                <Link href={`/admin/users/${row.id}/edit`} title="Cập nhật"><i className="fa fa-edit" /></Link>
+                                            <div className="ps-row-actions">
+                                                <button type="button" title="Cập nhật" onClick={() => setAccountDialog({ mode: 'update', user: row })}><i className="fa fa-edit" /></button>
                                                 <button type="button" title="Thay đổi mật khẩu" onClick={() => setPasswordUser(row)}><i className="fa fa-retweet" /></button>
                                                 <button type="button" title="Xóa" onClick={() => window.confirm(`Xóa tài khoản ${row.name}?`) && router.delete(`/admin/users/${row.id}`, { preserveScroll: true })}><i className="fa fa-trash" /></button>
-                                            </>
+                                            </div>
                                         ) : null}
                                     </td>
                                 </tr>
@@ -413,8 +466,19 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
                         ))}
                     </ul>
                 </div>
-            </section>
-            <SingleAccountDialog open={singleDialogOpen} onClose={() => setSingleDialogOpen(false)} roles={roles} workShifts={workShifts} />
+            </PushsalePageFrame>
+            {accountDialog.mode && (
+                <AccountDialog
+                    mode={accountDialog.mode}
+                    user={accountDialog.user}
+                    onClose={() => setAccountDialog({ mode: null, user: null })}
+                    roles={roles}
+                    workShifts={workShifts}
+                    teams={teams}
+                    managers={managers}
+                    emailIdentity={emailIdentity}
+                />
+            )}
             <BulkAccountDialog open={bulkDialogOpen} onClose={() => setBulkDialogOpen(false)} roles={roles} />
             <PasswordDialog user={passwordUser} onClose={() => setPasswordUser(null)} />
         </AppLayout>

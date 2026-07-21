@@ -61,7 +61,10 @@ class TeamController extends Controller
                 'name' => $user->name,
                 'account' => explode('@', $user->email, 2)[0],
             ])->values(),
+            'parent_id' => $team->parent_id,
             'parent_name' => $team->parent?->name,
+            'leader_user_id' => $team->leader_user_id,
+            'permissions' => is_array($team->permissions) ? $team->permissions : [],
             'updated_at' => $team->updated_at?->format('d/m/Y H:i'),
         ]);
 
@@ -70,6 +73,8 @@ class TeamController extends Controller
             'filters' => $filters,
             'types' => $this->typeOptions(),
             'leaders' => $this->leaderOptions(),
+            'parents' => $this->parentOptions(),
+            'permissionAreas' => $this->permissionAreas(),
             'activeMenuCode' => '1.2.2',
         ]);
     }
@@ -91,7 +96,9 @@ class TeamController extends Controller
     public function store(TeamRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $data['permissions'] = $this->sanitizePermissions($request);
+        $data['permissions'] = $request->has('permissions')
+            ? $this->sanitizePermissions($request)
+            : $this->defaultPermissionsForType((string) ($data['type'] ?? ''));
 
         Team::query()->create($data);
 
@@ -128,7 +135,11 @@ class TeamController extends Controller
         }
 
         $data = $request->validated();
-        $data['permissions'] = $this->sanitizePermissions($request);
+        if ($request->has('permissions')) {
+            $data['permissions'] = $this->sanitizePermissions($request);
+        } else {
+            unset($data['permissions']);
+        }
 
         $team->update($data);
 
@@ -187,6 +198,52 @@ class TeamController extends Controller
     private function leaderOptions(): array
     {
         return $this->users->nameOptions();
+    }
+
+
+    /**
+     * Quyền mặc định cấp theo loại đội nhóm để nhóm mới không bị rời rạc khỏi business.
+     * Thành viên vẫn có quyền hiệu lực theo user role; quyền team dùng cho các màn cấu hình/report scope.
+     *
+     * @return array<string, string>
+     */
+    private function defaultPermissionsForType(string $type): array
+    {
+        $full = PermissionLevel::Full->value;
+        $view = PermissionLevel::View->value;
+
+        return match ($type) {
+            TeamType::Sale->value => [
+                PermissionArea::Telesale->value => $full,
+                PermissionArea::Customers->value => $full,
+                PermissionArea::Orders->value => $full,
+                PermissionArea::Reports->value => $view,
+            ],
+            TeamType::Marketing->value => [
+                PermissionArea::Marketing->value => $full,
+                PermissionArea::Leads->value => $full,
+                PermissionArea::Customers->value => $view,
+                PermissionArea::Reports->value => $view,
+            ],
+            TeamType::Warehouse->value => [
+                PermissionArea::Warehouse->value => $full,
+                PermissionArea::Shipping->value => $full,
+                PermissionArea::Orders->value => $view,
+                PermissionArea::Reports->value => $view,
+            ],
+            TeamType::Accounting->value => [
+                PermissionArea::Accounting->value => $full,
+                PermissionArea::Orders->value => $view,
+                PermissionArea::Shipping->value => $view,
+                PermissionArea::Reports->value => $view,
+            ],
+            TeamType::Allocator->value => [
+                PermissionArea::Leads->value => $full,
+                PermissionArea::Customers->value => $view,
+                PermissionArea::Reports->value => $view,
+            ],
+            default => [],
+        };
     }
 
     /** @return list<string> */

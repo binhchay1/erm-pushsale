@@ -1,38 +1,22 @@
 import { Head } from '@inertiajs/react';
-import { Calculator } from 'lucide-react';
 
 import AppLayout from '@/layouts/AppLayout';
-import { PageHeader } from '@/components/layout/PageHeader';
-import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
+import { AccountingOperationFilters } from '@/components/operations/AccountingOperationFilters';
 import { AccountingReconTable } from '@/components/operations/AccountingReconTable';
-import { StatusTabs } from '@/components/operations/StatusTabs';
-import { useT } from '@/providers/I18nProvider';
 
-export default function AccountingOperations({ filters, filterOptions, report }) {
-    const t = useT();
-
+export default function AccountingOperations({ filters = {}, filterOptions = {}, report = { rows: [], totals: {}, statusTabs: [] } }) {
     return (
-        <AppLayout>
-            <Head title={t('pages.accounting.ops_title')} />
-
-            <div className="space-y-4">
-                <PageHeader icon={Calculator} title={t('pages.accounting.ops_title')} />
-
-                <ReportFilterBar
+        <AppLayout activeMenuCode="6.1">
+            <Head title="Kế toán tác nghiệp" />
+            <section className="ps-acc-page ps-operation-page">
+                <AccountingOperationFilters
                     routeUrl="/admin/accounting"
                     filters={filters}
                     filterOptions={filterOptions}
+                    statusTabs={report.statusTabs ?? []}
                 />
-
-                <StatusTabs
-                    routeUrl="/admin/accounting"
-                    filters={filters}
-                    tabs={report.statusTabs}
-                    filterKey="delivery_status"
-                />
-
-                <AccountingReconTable rows={report.rows} totals={report.totals} enableDeleteOrder />
-            </div>
+                <AccountingReconTable rows={report.rows ?? []} totals={report.totals} enableDeleteOrder />
+            </section>
         </AppLayout>
     );
 }

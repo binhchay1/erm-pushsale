@@ -45,39 +45,68 @@ function TimeRemaining({ order }) {
 function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     const [value, setValue] = useState(order.saleOperationNote ?? '');
     const [pinned, setPinned] = useState(false);
+    const [hoverOpen, setHoverOpen] = useState(false);
     const [saving, setSaving] = useState(false);
     const [floatingRect, setFloatingRect] = useState(null);
     const editorRef = useRef(null);
     const floatingRef = useRef(null);
+    const closeTimerRef = useRef(null);
 
     useEffect(() => setValue(order.saleOperationNote ?? ''), [order.saleOperationNote]);
 
     const calculateFloatingRect = () => {
         if (typeof window === 'undefined' || !editorRef.current) return null;
         const rect = editorRef.current.getBoundingClientRect();
-        const width = Math.min(335, window.innerWidth - 16);
-        const height = 150;
-        const left = Math.min(Math.max(rect.right - width + 2, 8), window.innerWidth - width - 8);
-        const top = Math.min(Math.max(rect.top + 20, 8), window.innerHeight - height - 8);
+        const width = Math.min(380, window.innerWidth - 16);
+        const height = 170;
+        const left = Math.min(Math.max(rect.left - 16, 8), window.innerWidth - width - 8);
+        const top = Math.min(Math.max(rect.top - 8, 56), window.innerHeight - height - 8);
         return { left, top, width };
     };
 
-    const openFloating = () => {
+    const clearCloseTimer = () => {
+        if (closeTimerRef.current) {
+            window.clearTimeout(closeTimerRef.current);
+            closeTimerRef.current = null;
+        }
+    };
+
+    const openFloating = ({ pin = false } = {}) => {
+        clearCloseTimer();
         const nextRect = calculateFloatingRect();
         if (!nextRect) return;
         setFloatingRect(nextRect);
-        setPinned(true);
+        setHoverOpen(true);
+        if (pin) setPinned(true);
+    };
+
+    const scheduleCloseFloating = () => {
+        clearCloseTimer();
+        closeTimerRef.current = window.setTimeout(() => {
+            if (!pinned) {
+                setHoverOpen(false);
+                setFloatingRect(null);
+            }
+            closeTimerRef.current = null;
+        }, 180);
+    };
+
+    const forceCloseFloating = () => {
+        clearCloseTimer();
+        setPinned(false);
+        setHoverOpen(false);
+        setFloatingRect(null);
     };
 
     useEffect(() => {
-        if (!pinned) return undefined;
+        if (!pinned && !hoverOpen) return undefined;
         const reposition = () => {
             const nextRect = calculateFloatingRect();
             if (nextRect) setFloatingRect(nextRect);
         };
         const closeOnOutside = (event) => {
             if (editorRef.current?.contains(event.target) || floatingRef.current?.contains(event.target)) return;
-            setPinned(false);
+            forceCloseFloating();
         };
         window.addEventListener('scroll', reposition, true);
         window.addEventListener('resize', reposition);
@@ -86,8 +115,9 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
             window.removeEventListener('scroll', reposition, true);
             window.removeEventListener('resize', reposition);
             document.removeEventListener('mousedown', closeOnOutside);
+            clearCloseTimer();
         };
-    }, [pinned]);
+    }, [pinned, hoverOpen]);
 
     const save = () => {
         setSaving(true);
@@ -95,35 +125,37 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
             preserveScroll: true,
             onSuccess: () => {
                 toast.success('Đã lưu tác nghiệp cần.');
-                setPinned(false);
+                forceCloseFloating();
             },
             onError: (errors) => toast.error(errors.note ?? errors.order ?? 'Không thể lưu tác nghiệp cần.'),
             onFinish: () => setSaving(false),
         });
     };
 
-    const floatingPanel = pinned && floatingRect && typeof document !== 'undefined' ? createPortal(
+    const floatingPanel = (pinned || hoverOpen) && floatingRect && typeof document !== 'undefined' ? createPortal(
         <div
             ref={floatingRef}
-            className="ps-note-floating-panel"
+            className={`ps-note-floating-panel ${pinned ? 'is-pinned' : 'is-hovering'}`}
             style={{ left: floatingRect.left, top: floatingRect.top, width: floatingRect.width }}
+            onMouseEnter={clearCloseTimer}
+            onMouseLeave={scheduleCloseFloating}
         >
             <div className="ps-note-floating-head">
                 <strong>{order.currentOperation || 'Gọi lần 1'}</strong>
                 <div className="ps-note-floating-actions">
                     <button type="button" className="btn-icon" onClick={() => onMessages(order)} title="Tin nhắn"><i className="fa fa-commenting-o" /></button>
                     <button type="button" className="btn-icon" onClick={save} disabled={saving} title="Lưu tác nghiệp cần"><i className="fa fa-floppy-o" /></button>
-                    <button type="button" className="btn-icon" onClick={() => setPinned(false)} title="Thu gọn"><i className="fa fa-compress" /></button>
+                    <button type="button" className="btn-icon" onClick={forceCloseFloating} title="Thu gọn"><i className="fa fa-compress" /></button>
                 </div>
             </div>
             <textarea
                 className="form-control txt-mof txt-dotted ps-note-floating-textarea"
                 maxLength={500}
                 value={value}
-                autoFocus
+                autoFocus={pinned}
                 onChange={(event) => setValue(event.target.value)}
                 onKeyDown={(event) => {
-                    if (event.key === 'Escape') setPinned(false);
+                    if (event.key === 'Escape') forceCloseFloating();
                     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
                 }}
                 aria-label={`Tác nghiệp cần của ${order.customerName ?? order.customerPhone}`}
@@ -134,7 +166,12 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     ) : null;
 
     return (
-        <div ref={editorRef} className={`ps-operation-note-editor ${pinned ? 'is-pinned' : ''}`} onMouseEnter={openFloating}>
+        <div
+            ref={editorRef}
+            className={`ps-operation-note-editor ${pinned ? 'is-pinned' : ''} ${hoverOpen ? 'is-hover-open' : ''}`}
+            onMouseEnter={() => openFloating({ pin: false })}
+            onMouseLeave={scheduleCloseFloating}
+        >
             <div className="ps-operation-stage-label">{order.currentOperation || 'Gọi lần 1'}</div>
             <div className="ps-note-toolbar">
                 <button type="button" className="btn-icon" onClick={() => onMessages(order)} title="Tin nhắn"><i className="fa fa-commenting-o" /></button>
@@ -145,10 +182,10 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
                 maxLength={500}
                 value={value}
                 onChange={(event) => setValue(event.target.value)}
-                onClick={openFloating}
-                onFocus={openFloating}
+                onClick={() => openFloating({ pin: true })}
+                onFocus={() => openFloating({ pin: true })}
                 onKeyDown={(event) => {
-                    if (event.key === 'Escape') setPinned(false);
+                    if (event.key === 'Escape') forceCloseFloating();
                     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
                 }}
                 aria-label={`Tác nghiệp cần của ${order.customerName ?? order.customerPhone}`}
