@@ -34,6 +34,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-v82-page-contract-products.css', layer: 'page-contract', load: () => import('../../css/pushsale-v82-page-contract-products.css') },
     { file: 'pushsale-v83-universal-page-contract.css', layer: 'page-contract', load: () => import('../../css/pushsale-v83-universal-page-contract.css') },
     { file: 'pushsale-v84-stability-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v84-stability-contract.css') },
+    { file: 'pushsale-v85-page-shell-menu-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v85-page-shell-menu-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {

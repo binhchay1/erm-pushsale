@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
+import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
@@ -166,57 +167,63 @@ export default function LoginHistoryPage({ schema, rows = [], pagination = {}, f
         });
     };
 
+    const searchActions = (
+        <form className="ps-login-search-box" onSubmit={submit}>
+            <input
+                className="form-control input-sm"
+                value={filters.search}
+                placeholder="IPAddress/Mã truy cập/Tài khoản"
+                onChange={(event) => setField('search', event.target.value)}
+            />
+            <button type="submit" className="btn btn-sm btn-primary">
+                <i className="fa fa-search" /> Tìm kiếm
+            </button>
+            <button type="button" className="btn btn-sm btn-default" title="Tải lại" onClick={reset}>
+                <i className="fa fa-refresh" />
+            </button>
+        </form>
+    );
+
+    const advancedFilters = (
+        <form className="ps-login-filter-grid" onSubmit={submit}>
+            <select className="form-control input-sm" value={filters.company_id} onChange={(event) => setField('company_id', event.target.value)}>
+                <option value="-1">-- Chọn đơn vị --</option>
+                {companies.map((company) => <option key={company.id} value={company.id}>{optionLabel(company)}</option>)}
+            </select>
+            <select className="form-control input-sm" value={filters.role} onChange={(event) => setField('role', event.target.value)}>
+                <option value="-1">-- Quyền --</option>
+                {roles.map((role) => <option key={role.id} value={role.id}>{optionLabel(role)}</option>)}
+            </select>
+            <select className="form-control input-sm" value={filters.user_id} onChange={(event) => setField('user_id', event.target.value)}>
+                <option value="-1">-- User --</option>
+                {filteredUsers.map((user) => <option key={user.id} value={user.id}>{optionLabel(user)}</option>)}
+            </select>
+            <div className="ps-login-date-range">
+                <input className="form-control input-sm" type="date" value={filters.date_from} onChange={(event) => setField('date_from', event.target.value)} />
+                <span>-</span>
+                <input className="form-control input-sm" type="date" value={filters.date_to} onChange={(event) => setField('date_to', event.target.value)} />
+            </div>
+            <select className="form-control input-sm" value={filters.login_status} onChange={(event) => setField('login_status', event.target.value)}>
+                <option value="-1">-- Trạng thái đăng nhập --</option>
+                {statuses.map((status) => <option key={status.id} value={status.id}>{optionLabel(status)}</option>)}
+            </select>
+            <select className="form-control input-sm" value={filters.sort} onChange={(event) => setField('sort', event.target.value)}>
+                {sorts.map((sort) => <option key={sort.id} value={sort.id}>{optionLabel(sort)}</option>)}
+            </select>
+        </form>
+    );
+
     return (
         <AppLayout>
             <Head title={schema?.title ?? 'Lịch sử đăng nhập'} />
-            <div className="ps-login-history-page pushsale-page" data-page-code="1.7.1">
-                {pageRuntimeError && <div className="pushsale-error-banner"><i className="fa fa-exclamation-triangle" /> {pageRuntimeError}</div>}
-
-                <form className="ps-login-toolbar" onSubmit={submit}>
-                    <div className="ps-login-title">Lịch sử đăng nhập</div>
-                    <div className="ps-login-search-box">
-                        <input
-                            className="form-control input-sm"
-                            value={filters.search}
-                            placeholder="IPAddress/Mã truy cập/Tài khoản"
-                            onChange={(event) => setField('search', event.target.value)}
-                        />
-                        <button type="submit" className="btn btn-sm btn-primary">
-                            <i className="fa fa-search" /> Tìm kiếm
-                        </button>
-                        <button type="button" className="btn btn-sm btn-default" title="Tải lại" onClick={reset}>
-                            <i className="fa fa-refresh" />
-                        </button>
-                    </div>
-                </form>
-
-                <form className="ps-login-filter-grid" onSubmit={submit}>
-                    <select className="form-control input-sm" value={filters.company_id} onChange={(event) => setField('company_id', event.target.value)}>
-                        <option value="-1">-- Chọn đơn vị --</option>
-                        {companies.map((company) => <option key={company.id} value={company.id}>{optionLabel(company)}</option>)}
-                    </select>
-                    <select className="form-control input-sm" value={filters.role} onChange={(event) => setField('role', event.target.value)}>
-                        <option value="-1">-- Quyền --</option>
-                        {roles.map((role) => <option key={role.id} value={role.id}>{optionLabel(role)}</option>)}
-                    </select>
-                    <select className="form-control input-sm" value={filters.user_id} onChange={(event) => setField('user_id', event.target.value)}>
-                        <option value="-1">-- User --</option>
-                        {filteredUsers.map((user) => <option key={user.id} value={user.id}>{optionLabel(user)}</option>)}
-                    </select>
-                    <div className="ps-login-date-range">
-                        <input className="form-control input-sm" type="date" value={filters.date_from} onChange={(event) => setField('date_from', event.target.value)} />
-                        <span>-</span>
-                        <input className="form-control input-sm" type="date" value={filters.date_to} onChange={(event) => setField('date_to', event.target.value)} />
-                    </div>
-                    <select className="form-control input-sm" value={filters.login_status} onChange={(event) => setField('login_status', event.target.value)}>
-                        <option value="-1">-- Trạng thái đăng nhập --</option>
-                        {statuses.map((status) => <option key={status.id} value={status.id}>{optionLabel(status)}</option>)}
-                    </select>
-                    <select className="form-control input-sm" value={filters.sort} onChange={(event) => setField('sort', event.target.value)}>
-                        {sorts.map((sort) => <option key={sort.id} value={sort.id}>{optionLabel(sort)}</option>)}
-                    </select>
-                </form>
-
+            <PushsalePageShell
+                title="Lịch sử đăng nhập"
+                actions={searchActions}
+                advancedFilters={advancedFilters}
+                notice={pageRuntimeError ? <div className="pushsale-error-banner"><i className="fa fa-exclamation-triangle" /> {pageRuntimeError}</div> : null}
+                className="ps-login-history-page pushsale-page"
+                data-page-code="1.7.1"
+            >
                 <div className="ps-login-table-wrap">
                     <table className="table table-bordered table-striped table-condensed ps-login-table">
                         <thead>
@@ -251,7 +258,7 @@ export default function LoginHistoryPage({ schema, rows = [], pagination = {}, f
                 </div>
 
                 <Pagination pagination={pagination} routeUrl={routeUrl} perPage={filters.per_page} onPerPageChange={changePerPage} />
-            </div>
+            </PushsalePageShell>
         </AppLayout>
     );
 }

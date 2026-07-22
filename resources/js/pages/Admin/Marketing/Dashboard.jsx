@@ -8,6 +8,7 @@ import {
     usePushsaleFilters,
 } from '@/components/reports/PushsaleReportChrome';
 import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
+import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import AppLayout from '@/layouts/AppLayout';
@@ -433,7 +434,6 @@ function DashboardTable({ report, expanded, onToggle, onChart, onDaily, advanced
 export default function Dashboard({ filters = {}, filterOptions = {}, report = {}, filterRouteUrl, endpoints = {}, activeMenuCode = '2.1' }) {
     const routeUrl = filterRouteUrl ?? '/admin/marketing/dashboard';
     const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
-    const [collapsed, setCollapsed] = useState(false);
     const [gearOpen, setGearOpen] = useState(false);
     const [expanded, setExpanded] = useState(new Set());
     const [chartState, setChartState] = useState(null);
@@ -469,62 +469,69 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
     });
     const exportHref = `${endpoints.export ?? `${routeUrl}/export`}?${queryString(draft)}`;
 
+    const primaryFilters = (
+        <div className="psm-top-selects">
+            <PushsaleSelect value={draft.team_leader_id ?? ''} onChange={(value) => { set('team_leader_id', value); set('team_id', ''); set('marketer_id', ''); }} options={filterOptions.teamLeaders ?? []} placeholder="--Chọn trưởng nhóm--" />
+            <PushsaleSelect value={draft.team_id ?? ''} onChange={(value) => { set('team_id', value); set('marketer_id', ''); }} options={visibleTeams} placeholder="--Chọn nhóm--" />
+            <PushsaleSelect value={draft.marketer_id ?? ''} onChange={(value) => set('marketer_id', value)} options={visibleMarketers} placeholder="--Marketing--" />
+        </div>
+    );
+
+    const shellActions = (
+        <div className="psm-top-actions">
+            <PushsaleSearchButton onClick={() => apply()} />
+            <div className="psm-gear" ref={gearRef}>
+                <button type="button" className="psm-square-button" onClick={() => setGearOpen((value) => !value)} title="Cấu hình"><i className="fa fa-cog" /></button>
+                {gearOpen && (
+                    <div className="psm-gear-menu">
+                        <a href={exportHref}><i className="fa fa-file-excel-o" /> Xuất Excel</a>
+                        {endpoints.operationConfig && <Link href={endpoints.operationConfig}><i className="fa fa-sliders" /> Cấu hình tác nghiệp loại trừ</Link>}
+                    </div>
+                )}
+            </div>
+            <button type="button" className="psm-help-button" onClick={() => setHelpOpen(true)} title="Hướng dẫn"><i className="fa fa-question-circle" /></button>
+        </div>
+    );
+
+    const advancedFilters = (
+        <div className="psm-filter-panel">
+            <div className="psm-filter-grid is-first">
+                <PushsaleSelect value={draft.date_type ?? ''} onChange={(value) => set('date_type', value)} options={filterOptions.dateTypes ?? []} placeholder="--Chuẩn Pushsale--" />
+                <PushsaleDateRange filters={draft} onChange={set} />
+                <PushsaleSelect value={draft.operation_scope ?? ''} onChange={(value) => set('operation_scope', value)} options={filterOptions.operationScopes ?? []} placeholder="Tác nghiệp cần" />
+                <PushsaleSelect value={draft.customer_type ?? ''} onChange={(value) => set('customer_type', value)} options={filterOptions.customerTypes ?? []} placeholder="Khách mới" />
+                <PushsaleSelect value={draft.contact_mode ?? ''} onChange={(value) => set('contact_mode', value)} options={filterOptions.contactModes ?? []} placeholder="Có Contact (Hoặc chốt đơn)" />
+                <PushsaleSelect value={draft.source_type ?? ''} onChange={(value) => set('source_type', value)} options={filterOptions.sourceTypes ?? []} placeholder="--Nguồn dữ liệu--" />
+                <PushsaleSelect value={draft.ad_channel ?? ''} onChange={(value) => set('ad_channel', value)} options={filterOptions.adChannels ?? []} placeholder="--Kênh quảng cáo--" />
+            </div>
+            <div className="psm-filter-grid is-second">
+                <PushsaleSelect value={draft.parent_product_id ?? ''} onChange={(value) => { set('parent_product_id', value); set('product_id', ''); }} options={filterOptions.parentProducts ?? []} placeholder="--Sản phẩm cha--" />
+                <ProductSearchSelect products={products} value={draft.product_id ?? ''} onChange={(value) => set('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
+                <input className="ps-control" value={draft.utm_keyword ?? ''} onChange={(event) => set('utm_keyword', event.target.value)} placeholder="Mã Utm" />
+                <input className="ps-control" value={draft.source_keyword ?? ''} onChange={(event) => set('source_keyword', event.target.value)} placeholder="Tên nguồn dữ liệu" />
+                <PushsaleSelect value={draft.sort_by ?? ''} onChange={(value) => set('sort_by', value)} options={filterOptions.sortOptions ?? []} placeholder="Số contact" />
+                <PushsaleSelect value={draft.revenue_mode ?? ''} onChange={(value) => set('revenue_mode', value)} options={filterOptions.revenueModes ?? []} placeholder="1.Doanh số tổng" />
+                <label className="psm-utm-check"><input type="checkbox" checked={Boolean(draft.advanced_utm)} onChange={(event) => set('advanced_utm', event.target.checked ? 1 : 0)} /> UTM Nâng cao</label>
+                <Link className="psm-history-link" href={endpoints.activityHistory ?? '/notifications'}><i className="fa fa-history" /> Lịch sử hoạt động</Link>
+            </div>
+        </div>
+    );
+
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title="Marketing dashboard" />
-            <section className="psm-page">
-                <div className="psm-topbar">
-                    <h1>Marketing dashboard</h1>
-                    <div className="psm-top-selects">
-                        <PushsaleSelect value={draft.team_leader_id ?? ''} onChange={(value) => { set('team_leader_id', value); set('team_id', ''); set('marketer_id', ''); }} options={filterOptions.teamLeaders ?? []} placeholder="--Chọn trưởng nhóm--" />
-                        <PushsaleSelect value={draft.team_id ?? ''} onChange={(value) => { set('team_id', value); set('marketer_id', ''); }} options={visibleTeams} placeholder="--Chọn nhóm--" />
-                        <PushsaleSelect value={draft.marketer_id ?? ''} onChange={(value) => set('marketer_id', value)} options={visibleMarketers} placeholder="--Marketing--" />
-                    </div>
-                    <div className="psm-top-actions">
-                        <button type="button" className="psm-collapse" onClick={() => setCollapsed((value) => !value)} title="Thu gọn"><i className={`fa fa-angle-double-${collapsed ? 'down' : 'up'}`} /></button>
-                        <PushsaleSearchButton onClick={() => apply()} />
-                        <div className="psm-gear" ref={gearRef}>
-                            <button type="button" className="psm-square-button" onClick={() => setGearOpen((value) => !value)} title="Cấu hình"><i className="fa fa-cog" /></button>
-                            {gearOpen && (
-                                <div className="psm-gear-menu">
-                                    <a href={exportHref}><i className="fa fa-file-excel-o" /> Xuất Excel</a>
-                                    {endpoints.operationConfig && <Link href={endpoints.operationConfig}><i className="fa fa-sliders" /> Cấu hình tác nghiệp loại trừ</Link>}
-                                </div>
-                            )}
-                        </div>
-                        <button type="button" className="psm-help-button" onClick={() => setHelpOpen(true)} title="Hướng dẫn"><i className="fa fa-question-circle" /></button>
-                    </div>
-                </div>
-
-                {!collapsed && (
-                    <div className="psm-filter-panel">
-                        <div className="psm-filter-grid is-first">
-                            <PushsaleSelect value={draft.date_type ?? ''} onChange={(value) => set('date_type', value)} options={filterOptions.dateTypes ?? []} placeholder="--Chuẩn Pushsale--" />
-                            <PushsaleDateRange filters={draft} onChange={set} />
-                            <PushsaleSelect value={draft.operation_scope ?? ''} onChange={(value) => set('operation_scope', value)} options={filterOptions.operationScopes ?? []} placeholder="Tác nghiệp cần" />
-                            <PushsaleSelect value={draft.customer_type ?? ''} onChange={(value) => set('customer_type', value)} options={filterOptions.customerTypes ?? []} placeholder="Khách mới" />
-                            <PushsaleSelect value={draft.contact_mode ?? ''} onChange={(value) => set('contact_mode', value)} options={filterOptions.contactModes ?? []} placeholder="Có Contact (Hoặc chốt đơn)" />
-                            <PushsaleSelect value={draft.source_type ?? ''} onChange={(value) => set('source_type', value)} options={filterOptions.sourceTypes ?? []} placeholder="--Nguồn dữ liệu--" />
-                            <PushsaleSelect value={draft.ad_channel ?? ''} onChange={(value) => set('ad_channel', value)} options={filterOptions.adChannels ?? []} placeholder="--Kênh quảng cáo--" />
-                        </div>
-                        <div className="psm-filter-grid is-second">
-                            <PushsaleSelect value={draft.parent_product_id ?? ''} onChange={(value) => { set('parent_product_id', value); set('product_id', ''); }} options={filterOptions.parentProducts ?? []} placeholder="--Sản phẩm cha--" />
-                            <ProductSearchSelect products={products} value={draft.product_id ?? ''} onChange={(value) => set('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
-                            <input className="ps-control" value={draft.utm_keyword ?? ''} onChange={(event) => set('utm_keyword', event.target.value)} placeholder="Mã Utm" />
-                            <input className="ps-control" value={draft.source_keyword ?? ''} onChange={(event) => set('source_keyword', event.target.value)} placeholder="Tên nguồn dữ liệu" />
-                            <PushsaleSelect value={draft.sort_by ?? ''} onChange={(value) => set('sort_by', value)} options={filterOptions.sortOptions ?? []} placeholder="Số contact" />
-                            <PushsaleSelect value={draft.revenue_mode ?? ''} onChange={(value) => set('revenue_mode', value)} options={filterOptions.revenueModes ?? []} placeholder="1.Doanh số tổng" />
-                            <label className="psm-utm-check"><input type="checkbox" checked={Boolean(draft.advanced_utm)} onChange={(event) => set('advanced_utm', event.target.checked ? 1 : 0)} /> UTM Nâng cao</label>
-                            <Link className="psm-history-link" href={endpoints.activityHistory ?? '/notifications'}><i className="fa fa-history" /> Lịch sử hoạt động</Link>
-                        </div>
-                    </div>
-                )}
-
+            <PushsalePageShell
+                title="Marketing dashboard"
+                primaryFilters={primaryFilters}
+                actions={shellActions}
+                advancedFilters={advancedFilters}
+                className="psm-page"
+            >
                 <div className="psm-table-area">
                     <DashboardTable report={report} expanded={expanded} advancedUtm={Boolean(draft.advanced_utm)} onToggle={toggle} onChart={(row) => setChartState({ row })} onDaily={(row) => setDailyState({ row })} />
                     <PushsalePagination meta={pagination} routeUrl={routeUrl} filters={draft} itemLabel="nguồn dữ liệu" />
                 </div>
-            </section>
+            </PushsalePageShell>
 
             <ChartDialog state={chartState} endpoint={endpoints.chart} filters={draft} onClose={() => setChartState(null)} />
             <DailyMetricsDialog state={dailyState} endpoint={endpoints.dailyMetrics} filters={draft} canEdit={Boolean(filterOptions.canEditDailyMetrics)} onClose={() => setDailyState(null)} onSaved={() => router.reload({ only: ['report'] })} />
