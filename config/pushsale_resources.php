@@ -295,7 +295,7 @@ return [
         ],
     ],
     '2.4.1' => [
-        // Trang này dùng Page2_4_1Controller để quản lý đồng thời nguồn, gói sản phẩm
+        // Trang này dùng LandingConnectionsController để quản lý đồng thời nguồn, gói sản phẩm
         // và danh sách Sale. Cấu hình tối thiểu dưới đây chỉ là metadata dự phòng.
         'model' => \App\Models\LandingConnection::class,
         'fields' => [

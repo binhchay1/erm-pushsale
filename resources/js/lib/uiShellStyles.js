@@ -87,6 +87,11 @@ async function ensureCompiledPushsaleStyles() {
         return href.includes('/build/assets/pushsale-v81-dialog-pagination-products-') || href.includes('/resources/css/pushsale-v81-dialog-pagination-products.css');
     });
 
+    const hasV82 = links.some((link) => {
+        const href = link.getAttribute('href') ?? '';
+        return href.includes('/build/assets/pushsale-v82-page-contract-products-') || href.includes('/resources/css/pushsale-v82-page-contract-products.css');
+    });
+
     if (!hasPushsale) {
         await import('../../css/pushsale.css');
     }
@@ -139,12 +144,17 @@ async function ensureCompiledPushsaleStyles() {
     if (!hasV81) {
         await import('../../css/pushsale-v81-dialog-pagination-products.css');
     }
+
+
+    if (!hasV82) {
+        await import('../../css/pushsale-v82-page-contract-products.css');
+    }
 }
 
 function moveApplicationStylesAfterVendor() {
     const styles = [...document.querySelectorAll('link[rel=\"stylesheet\"]')].filter((link) => {
         const href = link.getAttribute('href') ?? '';
-        return !link.dataset.pushsaleShell && (href.includes('/build/assets/app-') || href.includes('/build/assets/pushsale-') || href.includes('/resources/css/app.css') || href.includes('/resources/css/pushsale.css') || href.includes('/resources/css/pushsale-v70-page-polish.css') || href.includes('/build/assets/pushsale-v70-page-polish-') || href.includes('/resources/css/pushsale-v71-combo-page.css') || href.includes('/build/assets/pushsale-v71-combo-page-') || href.includes('/resources/css/pushsale-v72-login-history.css') || href.includes('/build/assets/pushsale-v72-login-history-') || href.includes('/resources/css/pushsale-v73-operation-categories.css') || href.includes('/build/assets/pushsale-v73-operation-categories-') || href.includes('/resources/css/pushsale-v74-users-frame-toast.css') || href.includes('/build/assets/pushsale-v74-users-frame-toast-') || href.includes('/resources/css/pushsale-v75-teams-page.css') || href.includes('/build/assets/pushsale-v75-teams-page-') || href.includes('/resources/css/pushsale-v76-operations-polish.css') || href.includes('/build/assets/pushsale-v76-operations-polish-') || href.includes('/resources/css/pushsale-v77-accounting-operations.css') || href.includes('/build/assets/pushsale-v77-accounting-operations-') || href.includes('/resources/css/pushsale-v78-shared-filters-actions.css') || href.includes('/build/assets/pushsale-v78-shared-filters-actions-') || href.includes('/resources/css/pushsale-v79-content-shell-actions.css') || href.includes('/build/assets/pushsale-v79-content-shell-actions-') || href.includes('/resources/css/pushsale-v80-menu-isolation.css') || href.includes('/build/assets/pushsale-v80-menu-isolation-') || href.includes('/resources/css/pushsale-v81-dialog-pagination-products.css') || href.includes('/build/assets/pushsale-v81-dialog-pagination-products-'));
+        return !link.dataset.pushsaleShell && (href.includes('/build/assets/app-') || href.includes('/build/assets/pushsale-') || href.includes('/resources/css/app.css') || href.includes('/resources/css/pushsale.css') || href.includes('/resources/css/pushsale-v70-page-polish.css') || href.includes('/build/assets/pushsale-v70-page-polish-') || href.includes('/resources/css/pushsale-v71-combo-page.css') || href.includes('/build/assets/pushsale-v71-combo-page-') || href.includes('/resources/css/pushsale-v72-login-history.css') || href.includes('/build/assets/pushsale-v72-login-history-') || href.includes('/resources/css/pushsale-v73-operation-categories.css') || href.includes('/build/assets/pushsale-v73-operation-categories-') || href.includes('/resources/css/pushsale-v74-users-frame-toast.css') || href.includes('/build/assets/pushsale-v74-users-frame-toast-') || href.includes('/resources/css/pushsale-v75-teams-page.css') || href.includes('/build/assets/pushsale-v75-teams-page-') || href.includes('/resources/css/pushsale-v76-operations-polish.css') || href.includes('/build/assets/pushsale-v76-operations-polish-') || href.includes('/resources/css/pushsale-v77-accounting-operations.css') || href.includes('/build/assets/pushsale-v77-accounting-operations-') || href.includes('/resources/css/pushsale-v78-shared-filters-actions.css') || href.includes('/build/assets/pushsale-v78-shared-filters-actions-') || href.includes('/resources/css/pushsale-v79-content-shell-actions.css') || href.includes('/build/assets/pushsale-v79-content-shell-actions-') || href.includes('/resources/css/pushsale-v80-menu-isolation.css') || href.includes('/build/assets/pushsale-v80-menu-isolation-') || href.includes('/resources/css/pushsale-v81-dialog-pagination-products.css') || href.includes('/build/assets/pushsale-v81-dialog-pagination-products-') || href.includes('/resources/css/pushsale-v82-page-contract-products.css') || href.includes('/build/assets/pushsale-v82-page-contract-products-'));
     });
 
     styles.forEach((link) => document.head.appendChild(link));

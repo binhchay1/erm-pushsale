@@ -2386,7 +2386,7 @@ return array (
     'source' => 'landing_connections',
     'template_alias' => '2.4.1',
     'slug' => '2-4-1-ket-noi-du-lieu',
-    'component' => 'Page_2_4_1',
+    'component' => 'Marketing/LandingConnectionsPage',
     'resource_key' => '2.4.1',
     'editable' => true,
     'grid_enabled' => true,

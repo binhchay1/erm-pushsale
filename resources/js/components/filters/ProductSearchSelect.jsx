@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const normalize = (items = []) => (Array.isArray(items) ? items : Object.values(items ?? {}))
     .filter(Boolean)
@@ -27,6 +27,7 @@ export function ProductSearchSelect({
     const [open, setOpen] = useState(false);
     const [keyword, setKeyword] = useState('');
     const closeTimer = useRef(null);
+    const searchInputRef = useRef(null);
     const catalog = useMemo(() => normalize(products), [products]);
     const selected = catalog.find((item) => String(item.id) === String(value ?? '')) ?? null;
     const filtered = useMemo(() => {
@@ -40,61 +41,84 @@ export function ProductSearchSelect({
             .includes(q)).slice(0, 80);
     }, [catalog, keyword]);
 
+    useEffect(() => {
+        if (!open) return;
+        const timer = window.setTimeout(() => searchInputRef.current?.focus(), 0);
+        return () => window.clearTimeout(timer);
+    }, [open]);
+
     const select = (item) => {
         onChange?.(item ? String(item.id) : '');
         setKeyword('');
         setOpen(false);
     };
 
+    const openMenu = () => {
+        if (disabled) return;
+        if (closeTimer.current) window.clearTimeout(closeTimer.current);
+        setKeyword('');
+        setOpen(true);
+    };
+
+    const closeLater = () => {
+        closeTimer.current = window.setTimeout(() => setOpen(false), 140);
+    };
+
     return (
-        <div className={`ps-product-search-select ${disabled ? 'is-disabled' : ''} ${className}`.trim()}>
+        <div className={`ps-product-search-select ps-product-search-select-v82 ${disabled ? 'is-disabled' : ''} ${open ? 'is-open' : ''} ${className}`.trim()}>
             {name ? <input type="hidden" name={name} value={value ?? ''} readOnly /> : null}
-            <div className="ps-product-search-control">
-                <input
-                    type="text"
-                    className="form-control ps-product-search-input"
-                    disabled={disabled}
-                    value={open ? keyword : (selected ? `${selected.name}${selected.sku ? ` (${selected.sku})` : ''}` : '')}
-                    placeholder={selected ? '' : placeholder}
-                    onChange={(event) => {
-                        setKeyword(event.target.value);
-                        setOpen(true);
-                    }}
-                    onFocus={() => {
-                        if (closeTimer.current) window.clearTimeout(closeTimer.current);
-                        setKeyword('');
-                        setOpen(true);
-                    }}
-                    onBlur={() => {
-                        closeTimer.current = window.setTimeout(() => setOpen(false), 140);
-                    }}
-                    autoComplete="off"
-                />
-                {selected && allowClear && !disabled ? (
-                    <button type="button" className="ps-product-clear" onMouseDown={(event) => event.preventDefault()} onClick={() => select(null)} title="Bỏ chọn">
-                        <i className="fa fa-times" />
-                    </button>
-                ) : null}
-                <button type="button" disabled={disabled} className="ps-product-caret" onMouseDown={(event) => event.preventDefault()} onClick={() => setOpen((current) => !current)} title="Tìm sản phẩm">
-                    <i className="fa fa-search" />
+            <button
+                type="button"
+                className="ps-product-select-button"
+                disabled={disabled}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => (open ? setOpen(false) : openMenu())}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+            >
+                <span className={selected ? 'ps-product-select-label has-value' : 'ps-product-select-label'}>
+                    {selected ? `${selected.name}${selected.sku ? ` (${selected.sku})` : ''}` : placeholder}
+                </span>
+                <span className="ps-product-select-arrow"><i className="fa fa-caret-down" /></span>
+            </button>
+            {selected && allowClear && !disabled ? (
+                <button type="button" className="ps-product-clear" onMouseDown={(event) => event.preventDefault()} onClick={() => select(null)} title="Bỏ chọn">
+                    <i className="fa fa-times" />
                 </button>
-            </div>
+            ) : null}
             {open && !disabled ? (
-                <div className="ps-product-search-menu">
-                    {filtered.length ? filtered.map((item) => (
-                        <button
-                            type="button"
-                            key={item.id}
-                            className={String(item.id) === String(value ?? '') ? 'is-active' : ''}
-                            onMouseDown={(event) => event.preventDefault()}
-                            onClick={() => select(item)}
-                        >
-                            <span className="ps-product-name">{item.name}</span>
-                            <span className="ps-product-meta">
-                                {item.type === 'combo' ? 'Gói sản phẩm' : 'Sản phẩm'}{item.sku ? ` · ${item.sku}` : ''}{showPrice ? ` · ${formatVnd(item.unit_price)}` : ''}
-                            </span>
-                        </button>
-                    )) : <div className="ps-product-empty">Không tìm thấy sản phẩm/gói phù hợp</div>}
+                <div className="ps-product-search-menu" onMouseDown={(event) => event.preventDefault()}>
+                    <div className="ps-product-search-box">
+                        <i className="fa fa-search" />
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            className="form-control ps-product-search-input"
+                            value={keyword}
+                            onChange={(event) => setKeyword(event.target.value)}
+                            onBlur={closeLater}
+                            placeholder="Tìm theo tên, mã SKU hoặc loại..."
+                            autoComplete="off"
+                        />
+                    </div>
+                    <div className="ps-product-search-results" role="listbox">
+                        {filtered.length ? filtered.map((item) => (
+                            <button
+                                type="button"
+                                key={item.id}
+                                role="option"
+                                aria-selected={String(item.id) === String(value ?? '')}
+                                className={String(item.id) === String(value ?? '') ? 'is-active' : ''}
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => select(item)}
+                            >
+                                <span className="ps-product-name">{item.name}</span>
+                                <span className="ps-product-meta">
+                                    {item.type === 'combo' ? 'Gói sản phẩm' : 'Sản phẩm'}{item.sku ? ` · ${item.sku}` : ''}{showPrice ? ` · ${formatVnd(item.unit_price)}` : ''}
+                                </span>
+                            </button>
+                        )) : <div className="ps-product-empty">Không tìm thấy sản phẩm/gói phù hợp</div>}
+                    </div>
                 </div>
             ) : null}
         </div>
