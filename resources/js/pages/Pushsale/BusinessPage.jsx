@@ -794,6 +794,8 @@ function optionsForControl(id, filterOptions) {
 function normalizeTemplateLayout(host) {
     if (!host) return;
 
+    host.classList.add('pushsale-template-host-v83');
+
     host.querySelectorAll('.content-header').forEach((node) => {
         if (!node.textContent?.trim() && !node.querySelector('input, select, textarea, button, a, table')) {
             node.classList.add('pushsale-template-empty-spacer');

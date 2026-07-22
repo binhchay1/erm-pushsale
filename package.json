@@ -10,7 +10,9 @@
     "scripts": {
         "preinstall": "node ./scripts/enforce-pnpm.cjs",
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "audit:pushsale": "node ./scripts/audit-pushsale-contract.mjs",
+        "check:frontend": "node --check resources/js/lib/uiShellStyles.js && node --check resources/js/lib/pushsaleStyleRegistry.js && node ./scripts/audit-pushsale-contract.mjs"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.3.0",
