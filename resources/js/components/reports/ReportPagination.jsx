@@ -1,8 +1,4 @@
 import { router } from '@inertiajs/react';
-import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
-import { useT } from '@/providers/I18nProvider';
 
 const PER_PAGE_OPTIONS = [10, 20, 50, 100];
 
@@ -47,8 +43,6 @@ export function ReportPagination({
     scrollTargetId,
     perPageOptions = PER_PAGE_OPTIONS,
 }) {
-    const t = useT();
-
     if (!meta || Number(meta.total ?? 0) === 0) {
         return null;
     }
@@ -88,102 +82,50 @@ export function ReportPagination({
     };
 
     return (
-        <div className="pushsale-pagination">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
-                <span>
-                    {t('common.pagination.showing', {
-                        from: meta.from ?? 0,
-                        to: meta.to ?? 0,
-                        total: meta.total ?? 0,
-                    })}
-                </span>
-
-                <label className="flex items-center gap-2">
-                    <span>{t('common.pagination.rows_per_page')}</span>
-                    <select
-                        className="h-8 rounded-md border border-input bg-background px-2 text-foreground"
-                        value={perPage}
-                        onChange={(event) => navigate({
-                            per_page: Number(event.target.value),
-                            page: 1,
-                        })}
-                    >
-                        {perPageOptions.map((value) => (
-                            <option key={value} value={value}>{value}</option>
-                        ))}
-                    </select>
-                </label>
+        <div className="pushsale-pagination ps-pagination-v81 is-split">
+            <div className="ps-pagination-info">
+                Hiển thị <b>{meta.from ?? 0}</b> - <b>{meta.to ?? 0}</b> / <b>{meta.total ?? 0}</b> bản ghi
             </div>
 
-            <div className="flex flex-wrap items-center gap-1">
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="size-8"
-                    disabled={current <= 1}
-                    onClick={() => goToPage(1)}
-                    aria-label={t('common.pagination.first_page')}
-                    title={t('common.pagination.first_page')}
-                >
-                    <ChevronFirst className="size-4" />
-                </Button>
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="size-8"
-                    disabled={current <= 1}
-                    onClick={() => goToPage(current - 1)}
-                    aria-label={t('common.pagination.previous_page')}
-                    title={t('common.pagination.previous_page')}
-                >
-                    <ChevronLeft className="size-4" />
-                </Button>
+            <div className="ps-pagination-pages" role="navigation" aria-label="Phân trang">
+                <button type="button" disabled={current <= 1} onClick={() => goToPage(1)} aria-label="Trang đầu" title="Trang đầu">«</button>
+                <button type="button" disabled={current <= 1} onClick={() => goToPage(current - 1)} aria-label="Trang trước" title="Trang trước">‹</button>
 
                 {items.map((item) => (
                     typeof item === 'number' ? (
-                        <Button
+                        <button
                             key={item}
                             type="button"
-                            variant={item === current ? 'default' : 'outline'}
-                            size="sm"
-                            className="h-8 min-w-8 px-2"
+                            className={item === current ? 'active' : ''}
                             onClick={() => goToPage(item)}
                             aria-current={item === current ? 'page' : undefined}
                         >
                             {item}
-                        </Button>
+                        </button>
                     ) : (
-                        <span key={item} className="px-1 text-muted-foreground">…</span>
+                        <span key={item} className="ellipsis">…</span>
                     )
                 ))}
 
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="size-8"
-                    disabled={current >= last}
-                    onClick={() => goToPage(current + 1)}
-                    aria-label={t('common.pagination.next_page')}
-                    title={t('common.pagination.next_page')}
-                >
-                    <ChevronRight className="size-4" />
-                </Button>
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="size-8"
-                    disabled={current >= last}
-                    onClick={() => goToPage(last)}
-                    aria-label={t('common.pagination.last_page')}
-                    title={t('common.pagination.last_page')}
-                >
-                    <ChevronLast className="size-4" />
-                </Button>
+                <button type="button" disabled={current >= last} onClick={() => goToPage(current + 1)} aria-label="Trang sau" title="Trang sau">›</button>
+                <button type="button" disabled={current >= last} onClick={() => goToPage(last)} aria-label="Trang cuối" title="Trang cuối">»</button>
             </div>
+
+            <label className="ps-pagination-size">
+                <span>Hiển thị</span>
+                <select
+                    value={perPage}
+                    onChange={(event) => navigate({
+                        per_page: Number(event.target.value),
+                        page: 1,
+                    })}
+                >
+                    {perPageOptions.map((value) => (
+                        <option key={value} value={value}>{value}</option>
+                    ))}
+                </select>
+                <span>dòng</span>
+            </label>
         </div>
     );
 }

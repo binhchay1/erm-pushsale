@@ -1,0 +1,301 @@
+/*
+ * V86 page/menu polish contract.
+ * Fixes regressions reported after V85 without adding page-specific hacks:
+ * - content starts immediately under the fixed blue header (no double top offset)
+ * - hamburger icon is vertically centered
+ * - level-3 flyout has no inherited bottom borders/underlines
+ * - shared page headers align legacy captured templates with PushsalePageShell
+ * - dialog close button keeps a visible, consistent hover state
+ */
+
+html body.pushsale-app-body .pushsale-wrapper .content-wrapper,
+html body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper,
+html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper {
+    top: 0 !important;
+    margin-top: var(--ps-v85-header-height, 50px) !important;
+    padding-top: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-main-header,
+html body.pushsale-app-body .pushsale-header-brand,
+html body.pushsale-app-body .pushsale-sidebar-toggle {
+    line-height: var(--ps-v85-header-height, 50px) !important;
+}
+
+html body.pushsale-app-body .pushsale-sidebar-toggle,
+html body.pushsale-app-body .sidebar-toggle.pushsale-sidebar-toggle {
+    position: relative !important;
+    top: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: top !important;
+    transform: none !important;
+}
+
+html body.pushsale-app-body .pushsale-sidebar-toggle .fa,
+html body.pushsale-app-body .sidebar-toggle.pushsale-sidebar-toggle .fa,
+html body.pushsale-app-body .pushsale-sidebar-toggle svg,
+html body.pushsale-app-body .sidebar-toggle.pushsale-sidebar-toggle svg {
+    position: static !important;
+    top: auto !important;
+    display: block !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    line-height: 14px !important;
+    transform: none !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu,
+html body.pushsale-app-body .pushsale-third-menu.ul3,
+html body.pushsale-app-body ul.ul3.pushsale-third-menu {
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    list-style: none !important;
+    border: 0 !important;
+    outline: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-item,
+html body.pushsale-app-body .pushsale-third-menu .li3,
+html body.pushsale-app-body .pushsale-third-menu li {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link,
+html body.pushsale-app-body .pushsale-third-menu .a3,
+html body.pushsale-app-body .pushsale-third-menu a {
+    margin: 0 !important;
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    text-decoration: none !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link::before,
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link::after,
+html body.pushsale-app-body .pushsale-third-menu .a3::before,
+html body.pushsale-app-body .pushsale-third-menu .a3::after {
+    display: none !important;
+    content: none !important;
+}
+
+html body.pushsale-app-body .ps-page-shell__main-row {
+    min-height: 58px !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+html body.pushsale-app-body .ps-page-shell__actions,
+html body.pushsale-app-body .ps-page-shell__actions > form,
+html body.pushsale-app-body .ps-page-shell__actions .ps-header-search,
+html body.pushsale-app-body .ps-header-search,
+html body.pushsale-app-body .ps-login-search-box,
+html body.pushsale-app-body .psm-top-actions {
+    min-height: var(--ps-v85-control-height, 34px) !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .ps-page-shell__actions .form-control,
+html body.pushsale-app-body .ps-header-search .form-control,
+html body.pushsale-app-body .ps-login-search-box .form-control,
+html body.pushsale-app-body .ps-page-shell__actions .btn,
+html body.pushsale-app-body .ps-header-search .btn,
+html body.pushsale-app-body .ps-login-search-box .btn {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .ps-page-shell__actions .btn.btn-primary,
+html body.pushsale-app-body .ps-header-search .btn.btn-primary,
+html body.pushsale-app-body .ps-login-search-box .btn.btn-primary,
+html body.pushsale-app-body .ps-page-shell .ps-search-button,
+html body.pushsale-app-body .ps-page-shell .psm-search-button {
+    height: var(--ps-v85-control-height, 34px) !important;
+    min-height: var(--ps-v85-control-height, 34px) !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    line-height: 18px !important;
+}
+
+html body.pushsale-app-body .pushsale-page .content-wrapper,
+html body.pushsale-app-body .pushsale-template-host-v83 .content-wrapper,
+html body.pushsale-app-body .pushsale-template-fragment .content-wrapper,
+html body.pushsale-app-body .pushsale-template-inner {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .m-header-wrap,
+html body.pushsale-app-body .pushsale-template-host-v83 .content-header,
+html body.pushsale-app-body .ps-page-viewport .m-header-wrap,
+html body.pushsale-app-body .ps-page-viewport .content-header,
+html body.pushsale-app-body .ps-page-viewport .psm-topbar,
+html body.pushsale-app-body .ps-page-viewport .ps-login-toolbar {
+    min-height: 58px !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .m-header-wrap > .m-header:first-child,
+html body.pushsale-app-body .ps-page-viewport .m-header-wrap > .m-header:first-child,
+html body.pushsale-app-body .ps-page-viewport .content-header,
+html body.pushsale-app-body .ps-page-viewport .psm-topbar,
+html body.pushsale-app-body .ps-page-viewport .ps-login-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(230px, 330px) minmax(280px, 1fr) auto !important;
+    align-items: center !important;
+    gap: 18px !important;
+    min-height: 58px !important;
+    padding: 8px 16px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-row > [class*="col-"],
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-row > [class*="col-"],
+html body.pushsale-app-body .ps-page-viewport .m-header-wrap > .m-header:first-child > [class*="col-"],
+html body.pushsale-app-body .ps-page-viewport .content-header > [class*="col-"] {
+    float: none !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-title-col,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-title-col {
+    justify-self: start !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-filter-col,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-filter-col {
+    justify-self: stretch !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-actions-col,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-actions-col,
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-row > [class*="col-"]:has([data-pushsale-action="search"]),
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-row > [class*="col-"]:has([data-pushsale-action="search"]) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-actions-col > div,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-actions-col > div,
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-row > [class*="col-"]:has([data-pushsale-action="search"]) > div,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-row > [class*="col-"]:has([data-pushsale-action="search"]) > div {
+    float: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-actions-col > div:first-child,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-actions-col > div:first-child,
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-row > [class*="col-"]:has([data-pushsale-action="search"]) > div:first-child,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-row > [class*="col-"]:has([data-pushsale-action="search"]) > div:first-child {
+    flex: 1 1 280px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-actions-col > div:last-child,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-actions-col > div:last-child,
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-row > [class*="col-"]:has([data-pushsale-action="search"]) > div:last-child,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-row > [class*="col-"]:has([data-pushsale-action="search"]) > div:last-child {
+    flex: 0 0 auto !important;
+    text-align: right !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-actions-col .form-control,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-actions-col .form-control,
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-actions-col .btn,
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-actions-col .btn {
+    margin: 0 !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .pushsale-header-row .text[id$="lblModuleTitle"],
+html body.pushsale-app-body .ps-page-viewport .pushsale-header-row .text[id$="lblModuleTitle"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 22px !important;
+    color: #000 !important;
+    font-family: var(--ps-v85-font, Arial, Helvetica, sans-serif) !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    line-height: 22px !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body [data-slot='dialog-content'] .pushsale-dialog-close,
+html body.pushsale-app-body .ps-modal-surface .pushsale-dialog-close,
+html body.pushsale-app-body .ps-modal-close,
+html body.pushsale-app-body .ps-employee-modal-close {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    padding: 0 !important;
+    border: 1px solid transparent !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: #5f6b76 !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    text-decoration: none !important;
+}
+
+html body.pushsale-app-body [data-slot='dialog-content'] .pushsale-dialog-close svg,
+html body.pushsale-app-body .ps-modal-surface .pushsale-dialog-close svg,
+html body.pushsale-app-body .ps-modal-close svg,
+html body.pushsale-app-body .ps-employee-modal-close svg {
+    width: 16px !important;
+    height: 16px !important;
+    stroke-width: 2.25 !important;
+}
+
+html body.pushsale-app-body [data-slot='dialog-content'] .pushsale-dialog-close:hover,
+html body.pushsale-app-body [data-slot='dialog-content'] .pushsale-dialog-close:focus-visible,
+html body.pushsale-app-body .ps-modal-surface .pushsale-dialog-close:hover,
+html body.pushsale-app-body .ps-modal-surface .pushsale-dialog-close:focus-visible,
+html body.pushsale-app-body .ps-modal-close:hover,
+html body.pushsale-app-body .ps-modal-close:focus-visible,
+html body.pushsale-app-body .ps-employee-modal-close:hover,
+html body.pushsale-app-body .ps-employee-modal-close:focus-visible {
+    background: #eaf4ff !important;
+    border-color: #9dccf5 !important;
+    color: #0c6fc3 !important;
+    box-shadow: 0 0 0 2px rgba(13,139,242,.12) !important;
+}
+
+@media (max-width: 1366px) {
+    html body.pushsale-app-body .pushsale-template-host-v83 .m-header-wrap > .m-header:first-child,
+    html body.pushsale-app-body .ps-page-viewport .m-header-wrap > .m-header:first-child,
+    html body.pushsale-app-body .ps-page-viewport .content-header,
+    html body.pushsale-app-body .ps-page-viewport .psm-topbar,
+    html body.pushsale-app-body .ps-page-viewport .ps-login-toolbar {
+        grid-template-columns: minmax(200px, 280px) minmax(260px, 1fr) auto !important;
+        gap: 12px !important;
+    }
+}

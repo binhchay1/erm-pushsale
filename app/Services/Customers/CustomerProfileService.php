@@ -46,7 +46,7 @@ final class CustomerProfileService
 
         $orders = Order::query()
             ->with([
-                'items:id,order_id,product_id,product_name,item_type,quantity,unit_price,discount_amount',
+                'items:id,order_id,product_id,product_name,item_type,origin,quantity,unit_price,discount_amount',
                 'saleUser:id,name,email,team_id,manager_user_id',
                 'marketerUser:id,name,email,team_id,manager_user_id',
                 'marketingSource:id,name,marketer_user_id,ad_channel,utm_source,utm_campaign',

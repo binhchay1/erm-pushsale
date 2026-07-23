@@ -45,6 +45,22 @@ function safeText(value, fallback = '—') {
     return value === null || value === undefined || value === '' ? fallback : value;
 }
 
+function isUpsaleProduct(product, row = {}) {
+    const type = String(product?.itemType ?? product?.item_type ?? '').toLowerCase();
+    const origin = String(product?.origin ?? '').toLowerCase();
+
+    return Boolean(product?.isUpsell)
+        || type === 'upsell'
+        || type === 'upsale'
+        || origin.includes('upsell')
+        || origin.includes('upsale')
+        || Boolean(row?.isSupplementalOrder);
+}
+
+function productLineKey(product, row, index) {
+    return product.itemId ?? `${row.id}-${product.productName ?? 'product'}-${index}`;
+}
+
 function appendQuery(url, params) {
     if (!url) return null;
     const query = new URLSearchParams(params);
@@ -190,13 +206,24 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                 </td>
                                 <td className="text-left">
                                     <div className="ps-split-stack ps-product-stack">
-                                        {row.products?.length ? row.products.map((product) => (
-                                            <div className="ps-split-row row-sp" key={product.itemId ?? `${row.id}-${product.productName}`}>
-                                                <span className="ten-sp">{product.productName}</span>
-                                                <span className="text-center no-wrap">x{product.quantity}</span>
-                                                <span className="text-right no-wrap">{formatCurrency(product.unitPrice)}</span>
-                                            </div>
-                                        )) : <div className="ps-split-row"><span>—</span><span /><span /></div>}
+                                        {row.products?.length ? row.products.map((product, productIndex) => {
+                                            const isUpsellLine = isUpsaleProduct(product, row);
+                                            const previousWasUpsell = productIndex > 0 && isUpsaleProduct(row.products[productIndex - 1], row);
+
+                                            return (
+                                                <div
+                                                    className={`ps-split-row row-sp ps-product-line ${isUpsellLine ? 'is-upsale-line' : 'is-main-line'} ${isUpsellLine && !previousWasUpsell ? 'has-upsale-divider' : ''}`}
+                                                    key={productLineKey(product, row, productIndex)}
+                                                >
+                                                    <span className="ten-sp">
+                                                        {isUpsellLine ? <i className="fa fa-level-up ps-upsale-line-icon" title="Upsale" aria-label="Upsale" /> : null}
+                                                        <span>{product.productName}</span>
+                                                    </span>
+                                                    <span className="text-center no-wrap">x{product.quantity}</span>
+                                                    <span className="text-right no-wrap">{formatCurrency(product.unitPrice)}</span>
+                                                </div>
+                                            );
+                                        }) : <div className="ps-split-row"><span>—</span><span /><span /></div>}
                                     </div>
                                 </td>
                                 <td className="no-wrap area3 text-right">
@@ -284,7 +311,7 @@ function ActionBubble({ tone = 'primary', label, onClick, children }) {
     return (
         <button
             type="button"
-            className={`ps-action-bubble ps-action-bubble-${tone}`}
+            className={`ps-action-bubble ps-v87-round-action ps-action-bubble-${tone}`}
             title={label}
             aria-label={label}
             onClick={onClick}
@@ -396,7 +423,7 @@ function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
                     </div>
                 ) : null}
             </div>
-            <button type="button" className="main-action" onClick={() => setOpen((current) => !current)} title="Thao tác" style={actionMainStyle}>
+            <button type="button" className="main-action ps-v87-round-action" onClick={() => setOpen((current) => !current)} title="Thao tác" style={actionMainStyle}>
                 <i className="fa fa-bars" />
             </button>
             {hasSelection ? <span className="ps-action-count">{selectedIds.length}</span> : null}

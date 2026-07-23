@@ -803,7 +803,18 @@ function normalizeTemplateLayout(host) {
         }
     });
 
-    host.querySelectorAll('.m-header').forEach((row) => row.classList.add('pushsale-header-row'));
+    host.querySelectorAll('.m-header').forEach((row) => {
+        row.classList.add('pushsale-header-row');
+        [...row.children].forEach((column) => {
+            if (!column.matches?.('[class*="col-"]')) return;
+            const hasTitle = Boolean(column.querySelector('[id$="lblModuleTitle"], .module-title, .ps-title'));
+            const hasSearchAction = Boolean(column.querySelector('[data-pushsale-action="search"], [id$="btnSearch"], .btn-reload'));
+            const hasControls = Boolean(column.querySelector('select, .ps-ddl, input:not([type="hidden"]):not([type="file"]), textarea'));
+            column.classList.toggle('pushsale-header-title-col', hasTitle);
+            column.classList.toggle('pushsale-header-actions-col', hasSearchAction);
+            column.classList.toggle('pushsale-header-filter-col', !hasTitle && !hasSearchAction && hasControls);
+        });
+    });
     host.querySelectorAll('.box-body .row, .m-header-wrap .row').forEach((row) => {
         if (row.closest('[role="dialog"]')) return;
         const controls = row.querySelectorAll('select, .ps-ddl, input:not([type="hidden"]):not([type="file"]), textarea');

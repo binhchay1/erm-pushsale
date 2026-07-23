@@ -72,6 +72,8 @@ final class OrderOperationPresenter
                 'productId' => $item->product_id !== null ? (string) $item->product_id : null,
                 'productName' => $item->product_name,
                 'itemType' => $item->item_type ?? 'product',
+                'origin' => $item->origin ?? '',
+                'isUpsell' => ($item->item_type === 'upsell') || str_contains(strtolower((string) ($item->origin ?? '')), 'upsell'),
                 'quantity' => $item->quantity,
                 'unitPrice' => $item->unit_price,
                 'discountAmount' => (int) ($item->discount_amount ?? 0),
