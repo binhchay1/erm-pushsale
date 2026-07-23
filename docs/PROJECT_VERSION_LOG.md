@@ -28,6 +28,8 @@ File này là bản tổng hợp ngắn để không phải đọc toàn bộ `C
 - V96: marketing work + leader reports.
 - V97: marketing upsale report, menu 2.8/8.1, demo endpoint.
 - V98: warehouse 5.3.1–5.3.3 templates + backend voucher/inventory/movement linkage + tests.
+- V99: security pages 1.7.2/1.7.3 header/filter parity + real login/filter logs.
+- V100: Sale KPI 2 footer cleanup + menu 4.5.2 closing summary rebuilt from real order data and template structure.
 
 ## Nguyên tắc duy trì từ V98 trở đi
 

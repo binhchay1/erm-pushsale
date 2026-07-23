@@ -504,16 +504,39 @@ class PushsalePageService
             ]);
         }
 
+        if ($code === '1.7.3') {
+            $query->where('action', ActivityLogger::DATA_FILTER_SEARCHED);
+        }
+
         return $query->latest('created_at')->limit(5000)->get()->values()->map(function (ActivityLog $log, int $index) use ($code): array {
             if ($code === '1.7.3') {
+                $dateFilter = $this->formatFilterDateLabel(
+                    data_get($log->properties, 'date_type'),
+                    data_get($log->properties, 'date_from'),
+                    data_get($log->properties, 'date_to'),
+                );
+
                 return [
                     'id' => $index + 1,
-                    'filter_form' => data_get($log->properties, 'filters', $log->subject_label ?: $log->actionLabel()),
-                    'closing_status' => data_get($log->properties, 'closing_status'),
-                    'delivery_status' => data_get($log->properties, 'delivery_status'),
-                    'date_filter' => data_get($log->properties, 'date_type'),
-                    'user' => $log->actor?->name,
+                    'filter_form' => data_get($log->properties, 'filter_label')
+                        ?: data_get($log->properties, 'page_title')
+                        ?: $log->subject_label
+                        ?: $log->actionLabel(),
+                    'closing_status' => data_get($log->properties, 'closing_status_label')
+                        ?: data_get($log->properties, 'closing_status')
+                        ?: data_get($log->properties, 'closed_status'),
+                    'delivery_status' => data_get($log->properties, 'delivery_status_label')
+                        ?: data_get($log->properties, 'delivery_status'),
+                    'date_filter' => data_get($log->properties, 'date_filter') ?: $dateFilter,
+                    'user' => $log->actor?->name ?? data_get($log->properties, 'actor_name') ?? 'Hệ thống',
                     'created_at' => $log->created_at?->toIso8601String(),
+                    '_record_id' => $log->id,
+                    '_user_id' => $log->user_id,
+                    '_company_id' => $log->company_id,
+                    '_created_at' => $log->created_at?->toIso8601String(),
+                    '_delivery_status' => data_get($log->properties, 'delivery_status'),
+                    '_closed_status' => data_get($log->properties, 'closed_status') ?? data_get($log->properties, 'closing_status'),
+                    '_date_type' => data_get($log->properties, 'date_type'),
                 ];
             }
 
@@ -543,6 +566,50 @@ class PushsalePageService
         });
     }
 
+    private function formatFilterDateLabel(mixed $dateType, mixed $dateFrom, mixed $dateTo): ?string
+    {
+        $parts = [];
+        $dateType = trim((string) $dateType);
+        if ($dateType !== '' && ! in_array($dateType, ['-1', 'all'], true)) {
+            $parts[] = $this->dateTypeLabel($dateType);
+        }
+
+        $from = trim((string) $dateFrom);
+        $to = trim((string) $dateTo);
+        if ($from !== '' || $to !== '') {
+            $parts[] = trim(($from !== '' ? $this->formatDateForLabel($from) : '...').' - '.($to !== '' ? $this->formatDateForLabel($to) : '...'));
+        }
+
+        return $parts !== [] ? implode(' · ', $parts) : null;
+    }
+
+    private function dateTypeLabel(string $dateType): string
+    {
+        return match ($dateType) {
+            'SaleTacNghiepNgayCapNhat' => 'Ngày sale tác nghiệp',
+            'SaleNgayNhanData' => 'Ngày sale nhận data',
+            'DonHangNgayChot' => 'Ngày sale chốt đơn',
+            'NgayDangDon' => 'Ngày đăng đơn',
+            'NgayChoXuat' => 'Ngày sale tác nghiệp tiếp',
+            'NgayCapNhatTrangThaiGiaoHang' => 'Ngày cập nhật trạng thái giao hàng',
+            'NgayGiaoHang' => 'Ngày giao hàng',
+            'DoiSoatNoiBoNgayCapNhat' => 'Ngày đối soát',
+            'CareDonNgayNhan' => 'Ngày nhận care đơn',
+            'NgayTacNghiepCareDon' => 'Ngày cập nhật care đơn',
+            'NgayTao' => 'Ngày data về hệ thống',
+            default => $dateType,
+        };
+    }
+
+    private function formatDateForLabel(string $date): string
+    {
+        try {
+            return CarbonImmutable::parse($date)->format('d/m/Y');
+        } catch (\Throwable) {
+            return $date;
+        }
+    }
+
     private function loginPermissions(): Collection
     {
         $query = User::query()->with('company:id,name');
@@ -550,19 +617,25 @@ class PushsalePageService
             $query->withoutTenant();
         }
 
-        return $query->latest('updated_at')->limit(1000)->get()->values()->map(fn (User $user) => [
-            'company' => $user->company?->name ?? '—',
-            'account' => $user->email,
-            'access_code' => data_get($user->permissions, 'access_code'),
-            'login_at' => $user->updated_at?->toIso8601String(),
-            'status' => data_get($user->permissions, 'login_blocked', false) ? 'Đã khóa' : 'Được phép đăng nhập',
-            'actions' => 'Cập nhật',
-            '_edit_url' => "/admin/users/{$user->id}/edit",
-            '_user_id' => $user->id,
-            '_role' => $user->role->value,
-            '_company_id' => $user->company_id,
-            '_created_at' => $user->updated_at?->toIso8601String(),
-        ]);
+        return $query->latest('updated_at')->limit(1000)->get()->values()->map(function (User $user): array {
+            $blocked = (bool) data_get($user->permissions, 'login_blocked', false);
+            $approved = ! $blocked;
+
+            return [
+                'company' => $user->company?->name ?? '—',
+                'account' => $user->email,
+                'access_code' => data_get($user->permissions, 'access_code'),
+                'login_at' => $user->updated_at?->toIso8601String(),
+                'status' => $approved ? 'Đã phê duyệt' : 'Chưa phê duyệt',
+                'actions' => 'Cập nhật',
+                '_edit_url' => "/admin/users/{$user->id}/edit",
+                '_user_id' => $user->id,
+                '_role' => $user->role->value,
+                '_company_id' => $user->company_id,
+                '_created_at' => $user->updated_at?->toIso8601String(),
+                '_login_permission_status' => $approved ? '2' : '1',
+            ];
+        });
     }
 
     private function integrations(): Collection
@@ -1866,6 +1939,7 @@ class PushsalePageService
             'warehouse_id' => '_warehouse_id',
             'closed_status' => '_closed_status',
             'delivery_status' => '_delivery_status',
+            'date_type' => '_date_type',
             'operation_state' => '_operation_state',
             'operation_stage' => '_operation_stage',
             'operation_result' => '_operation_result',
@@ -1881,6 +1955,7 @@ class PushsalePageService
             'care_user_id' => '_care_user_id',
             'warehouse_user_id' => '_warehouse_user_id',
             'login_status' => '_login_status',
+            'login_permission_status' => '_login_permission_status',
             'category_id' => '_category_ids',
             'parent_product_id' => '_parent_product_id',
             'team_leader_id' => '_team_leader_id',
@@ -2045,6 +2120,8 @@ class PushsalePageService
             'ip', 'IpAddress' => $rows->sortBy(fn (array $row): string => Str::lower((string) data_get($row, 'ip_address')))->values(),
             'user', 'UserId' => $rows->sortBy(fn (array $row): string => Str::lower((string) data_get($row, 'account')))->values(),
             'NgayTao' => $rows->sortByDesc(fn (array $row): int => (int) (data_get($row, '_record_id') ?? data_get($row, 'id', 0)))->values(),
+            '1' => $rows->sortByDesc(fn (array $row): string => (string) (data_get($row, '_created_at') ?? data_get($row, 'created_at') ?? data_get($row, 'login_at')))->values(),
+            '2' => $rows->sortBy(fn (array $row): string => (string) (data_get($row, '_created_at') ?? data_get($row, 'created_at') ?? data_get($row, 'login_at')))->values(),
             'MaSanPham' => $rows->sortBy(fn (array $row): string => Str::lower((string) (data_get($row, 'code') ?? data_get($row, 'product'))))->values(),
             'TenSanPham' => $rows->sortBy(fn (array $row): string => Str::lower((string) (data_get($row, 'name') ?? data_get($row, 'product'))))->values(),
             'created_asc' => $rows->sortBy(fn (array $row): string => (string) (data_get($row, '_created_at') ?? data_get($row, 'created_at')))->values(),

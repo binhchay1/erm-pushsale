@@ -90,7 +90,7 @@ class ExtraReportController extends Controller
         $path = '/'.ltrim($request->path(), '/');
 
         return match ($path) {
-            '/ld/thong-ke/bao-cao-cong-viec-mkt', '/ld/thong-ke/bao-cao-up-sale', '/bao-cao/bao-cao-doanh-so-chi-tiet-marketing' => $path,
+            '/ld/thong-ke/bao-cao-cong-viec-mkt', '/ld/thong-ke/bao-cao-up-sale', '/ld/sale/bang-tong-hop-ban-hang', '/bao-cao/bao-cao-doanh-so-chi-tiet-marketing' => $path,
             default => $this->reports->basePathFor($user).'/'.$report,
         };
     }

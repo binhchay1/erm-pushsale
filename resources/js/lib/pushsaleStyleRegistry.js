@@ -48,6 +48,8 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-v96-marketing-work-leader-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v96-marketing-work-leader-contract.css') },
     { file: 'pushsale-v97-marketing-upsale-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v97-marketing-upsale-contract.css') },
     { file: 'pushsale-v98-warehouse-flow-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v98-warehouse-flow-contract.css') },
+    { file: 'pushsale-v99-security-report-header-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v99-security-report-header-contract.css') },
+    { file: 'pushsale-v100-sale-kpi-closing-summary-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v100-sale-kpi-closing-summary-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {

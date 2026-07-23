@@ -2,10 +2,12 @@
 
 namespace Tests\Feature\Database;
 
+use App\Models\ActivityLog;
 use App\Models\Order;
 use App\Models\Scopes\TenantScope;
 use App\Models\User;
 use App\Services\Tenant\CompanyProvisioningService;
+use App\Support\ActivityLogger;
 use App\Support\TenantManager;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\CatalogSeeder;
@@ -33,6 +35,12 @@ class FullDemoSeedTest extends TestCase
             ->where('email', 'admin@saleops.local')->first();
         $this->assertNotNull($admin);
         $this->assertFalse((bool) $admin->is_platform_admin);
+
+        $this->assertGreaterThan(
+            0,
+            ActivityLog::query()->withoutTenant()->where('action', ActivityLogger::DATA_FILTER_SEARCHED)->count(),
+            'Full seed phải có dữ liệu lịch sử lọc cho menu 1.7.3.'
+        );
     }
 
     public function test_landing_flow_seeder_produces_new_flow_data(): void

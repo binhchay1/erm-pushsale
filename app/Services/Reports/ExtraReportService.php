@@ -65,7 +65,7 @@ class ExtraReportService
     {
         $defs = [
             'sale-1' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'operation_stage', 'team_id', 'product_id']],
-            'sale-2' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
+            'sale-2' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'search', 'per_page']],
             'sale-3' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_type', 'date_from', 'date_to', 'discount_mode', 'reconciliation_status', 'team_leader_id', 'team_id', 'parent_product_id', 'product_id', 'delivery_status', 'per_page', 'no_closing_date_limit']],
             'sale-4' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'product_id']],
             'sale-5' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'operation_stage', 'operation_result', 'team_id']],
@@ -178,7 +178,7 @@ class ExtraReportService
 
         // Admin có thể lọc theo từng nhân viên; các role khác đã bị giới hạn phạm vi sẵn
         if ($user->role === UserRole::Admin && $filterFields !== []) {
-            if (in_array($key, ['sale-1', 'sale-2', 'sale-3', 'sale-4', 'sale-5'], true)) {
+            if (in_array($key, ['sale-1', 'sale-3', 'sale-4', 'sale-5'], true)) {
                 $filterFields[] = 'sale_id';
             }
 
@@ -186,7 +186,7 @@ class ExtraReportService
                 $filterFields[] = 'marketer_id';
             }
         } elseif ($user->role === UserRole::Sales && $this->isElevated($user)) {
-            if (in_array($key, ['sale-1', 'sale-2', 'sale-3', 'sale-4', 'sale-5'], true)) {
+            if (in_array($key, ['sale-1', 'sale-3', 'sale-4', 'sale-5'], true)) {
                 $filterFields[] = 'sale_id';
             }
         } elseif ($user->role === UserRole::Marketing && $this->isElevated($user)) {
@@ -273,11 +273,44 @@ class ExtraReportService
 
     private function saleClosing(User $user, ReportFilterData $filter): array
     {
-        $orders = $this->fetchOrdersWithItems($user, $filter, scopeSales: true)
+        /*
+         * Bảng tổng hợp chốt đơn (menu 4.5.2) bám đúng mẫu Pushsale:
+         * - Contact nhận mới: data được sale nhận trong kỳ (assigned_at).
+         * - Contact nhận trước đó: data sale đã nhận trước kỳ nhưng chốt trong kỳ.
+         * - Doanh số/chốt đơn: tính theo ngày chốt đơn, không dùng dữ liệu HTML mẫu.
+         */
+        $contactFilter = $filter->withDateType(DateType::SaleReceived);
+        $closingFilter = $filter->withDateType(DateType::Closing);
+
+        $contactRangeOrders = $this->fetchOrdersWithItems($user, $contactFilter, scopeSales: true)
+            ->filter(fn (Order $order): bool => $order->sale_user_id !== null);
+        $closingRangeOrders = $this->fetchOrdersWithItems($user, $closingFilter, scopeSales: true)
             ->filter(fn (Order $order): bool => $order->sale_user_id !== null);
 
+        $saleIds = $contactRangeOrders->pluck('sale_user_id')
+            ->merge($closingRangeOrders->pluck('sale_user_id'))
+            ->when($filter->saleId, fn (Collection $ids) => $ids->push($filter->saleId))
+            ->filter()
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        $saleUsers = $saleIds->isEmpty()
+            ? collect()
+            : User::query()
+                ->with('operationalProfile:id,user_id,employee_code')
+                ->whereIn('id', $saleIds)
+                ->get(['id', 'name', 'email'])
+                ->keyBy('id');
+
+        $contactGroups = $contactRangeOrders->groupBy('sale_user_id');
+        $closingGroups = $closingRangeOrders->groupBy('sale_user_id');
+        $from = ($filter->dateFrom ?? now()->startOfMonth())->copy()->startOfDay();
+        $to = ($filter->dateTo ?? now()->endOfMonth())->copy()->endOfDay();
+
         $columns = [
-            $this->col('telesale', 'name', 'text'),
+            $this->col('telesale', 'account', 'text'),
+            $this->col('sale_name', 'name', 'text'),
             $this->col('new_contacts', 'new_contacts', 'number'),
             $this->col('new_closed', 'new_closed', 'number'),
             $this->col('new_rate', 'new_rate', 'percent', ['tone' => 'positive']),
@@ -293,49 +326,53 @@ class ExtraReportService
             $this->col('total_gross', 'total_gross', 'currency'),
             $this->col('total_discount', 'total_discount', 'currency'),
             $this->col('total_net', 'total_net', 'currency'),
-            $this->col('upsell_qty', 'upsell_qty', 'number'),
-            $this->col('upsell_rev', 'upsell_revenue', 'currency'),
         ];
 
-        $rows = $orders->groupBy('sale_user_id')->map(function (Collection $group): array {
-            /*
-             * Order supplemental/late-upsell vẫn mang doanh thu cho sale nhưng
-             * không đại diện cho một contact và không được làm tăng số đơn chốt
-             * trong tỷ lệ. contactOrders() là nguồn sự thật dùng chung toàn hệ thống.
-             */
-            $contactOrders = $this->contactOrders($group);
-            $newContacts = $contactOrders->where('is_returning_customer', false);
-            $oldContacts = $contactOrders->where('is_returning_customer', true);
-            $newClosedContacts = $this->closed($newContacts);
-            $oldClosedContacts = $this->closed($oldContacts);
+        $metrics = static function (Collection $closed): array {
+            $net = (int) $closed->sum(fn (Order $order): int => $order->netRevenue());
+            $discount = (int) $closed->sum('discount');
 
-            $newClosedOrders = $this->closed($group->where('is_returning_customer', false));
-            $oldClosedOrders = $this->closed($group->where('is_returning_customer', true));
-            $allClosedOrders = $this->closed($group);
+            return [
+                'gross' => $net + $discount,
+                'discount' => $discount,
+                'net' => $net,
+            ];
+        };
 
-            $metrics = static function (Collection $closed): array {
-                $net = (int) $closed->sum(fn (Order $order): int => $order->netRevenue());
-                $discount = (int) $closed->sum('discount');
+        $rows = $saleIds->map(function (int $saleId) use ($saleUsers, $contactGroups, $closingGroups, $from, $to, $metrics): array {
+            $sale = $saleUsers->get($saleId);
+            $assignedGroup = collect($contactGroups->get($saleId, collect()));
+            $closingGroup = collect($closingGroups->get($saleId, collect()));
 
-                return [
-                    'gross' => $net + $discount,
-                    'discount' => $discount,
-                    'net' => $net,
-                ];
-            };
+            $assignedContacts = $this->contactOrders($assignedGroup);
+            $closedOrders = $this->closed($closingGroup);
+            $closedContactOrders = $this->closed($this->contactOrders($closingGroup));
+
+            $newClosedOrders = $closedOrders->filter(fn (Order $order): bool => $order->assigned_at !== null && $order->assigned_at->betweenIncluded($from, $to));
+            $oldClosedOrders = $closedOrders->filter(fn (Order $order): bool => $order->assigned_at !== null && $order->assigned_at->lt($from));
+            $newClosedContacts = $closedContactOrders->filter(fn (Order $order): bool => $order->assigned_at !== null && $order->assigned_at->betweenIncluded($from, $to));
+            $oldClosedContacts = $closedContactOrders->filter(fn (Order $order): bool => $order->assigned_at !== null && $order->assigned_at->lt($from));
 
             $newMoney = $metrics($newClosedOrders);
             $oldMoney = $metrics($oldClosedOrders);
-            $totalMoney = $metrics($allClosedOrders);
-            $closedItems = $allClosedOrders->flatMap(fn (Order $order) => $order->items);
-            $upsellItems = $closedItems->filter(fn (OrderItem $i) => $this->isUpsellItem($i));
+            $totalMoney = $metrics($newClosedOrders->merge($oldClosedOrders)->unique('id'));
+            $newContactCount = $assignedContacts->count();
             $totalClosed = $newClosedContacts->count() + $oldClosedContacts->count();
+            $email = (string) ($sale?->email ?? $assignedGroup->first()?->saleUser?->email ?? $closingGroup->first()?->saleUser?->email ?? '');
+            $emailAccount = $email !== '' ? (strstr($email, '@', true) ?: $email) : '';
+            $account = $sale?->operationalProfile?->employee_code ?: $emailAccount;
 
             return [
-                'name' => $group->first()->saleUser?->name ?? '—',
-                'new_contacts' => $newContacts->count(),
+                'sale_id' => $saleId,
+                'account' => $account !== '' ? $account : '—',
+                'name' => $sale?->name
+                    ?? $assignedGroup->first()?->saleUser?->name
+                    ?? $closingGroup->first()?->saleUser?->name
+                    ?? '—',
+                'email' => $email,
+                'new_contacts' => $newContactCount,
                 'new_closed' => $newClosedContacts->count(),
-                'new_rate' => self::pct($newClosedContacts->count(), $newContacts->count()),
+                'new_rate' => self::pct($newClosedContacts->count(), $newContactCount),
                 'new_gross' => $newMoney['gross'],
                 'new_discount' => $newMoney['discount'],
                 'new_net' => $newMoney['net'],
@@ -344,15 +381,19 @@ class ExtraReportService
                 'old_discount' => $oldMoney['discount'],
                 'old_net' => $oldMoney['net'],
                 'total_closed' => $totalClosed,
-                // Theo đúng công thức Pushsale: tổng chốt / contact nhận mới.
-                'total_rate' => self::pct($totalClosed, $newContacts->count()),
+                'total_rate' => self::pct($totalClosed, $newContactCount),
                 'total_gross' => $totalMoney['gross'],
                 'total_discount' => $totalMoney['discount'],
                 'total_net' => $totalMoney['net'],
-                'upsell_qty' => (int) $upsellItems->sum('quantity'),
-                'upsell_revenue' => (int) $upsellItems->sum(fn (OrderItem $item): int => $item->lineTotal()),
             ];
-        })->sortByDesc('total_net')->values()->all();
+        });
+
+        $term = mb_strtolower(trim((string) $filter->search));
+        if ($term !== '') {
+            $rows = $rows->filter(fn (array $row): bool => str_contains(mb_strtolower(($row['account'] ?? '').' '.($row['name'] ?? '').' '.($row['email'] ?? '')), $term));
+        }
+
+        $rows = $rows->sortByDesc('total_net')->values()->all();
 
         $totals = $this->sumTotals($columns, $rows);
         $totals['new_rate'] = self::pct($totals['new_closed'] ?? 0, $totals['new_contacts'] ?? 0);

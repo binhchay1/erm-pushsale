@@ -66,6 +66,12 @@ return [
         'total_clicks' => 'Total interactions',
         'utm_source' => 'UTM Source',
         'utm_campaign' => 'UTM Campaign',
+        'page_code' => 'Page code',
+        'page_title' => 'Page title',
+        'filter_label' => 'Filter',
+        'closed_status' => 'Closing status',
+        'closing_status' => 'Closing status',
+        'result_count' => 'Matched records',
     ],
     'subjects' => [
         'campaign' => 'Campaign',
@@ -89,5 +95,6 @@ return [
         'inventory.movement_approved' => 'Inventory movement approved',
         'lead.ingested' => 'Lead ingested',
         'marketing.daily_metrics_updated' => 'Marketing daily metrics updated',
+        'data_filter.searched' => 'Filtered closing data',
     ],
 ];

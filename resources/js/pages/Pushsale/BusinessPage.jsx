@@ -47,13 +47,13 @@ function StatusValue({ value }) {
     const normalized = String(value ?? '').toLowerCase();
     const tone = normalized.includes('không thành công') || normalized.includes('thất bại') || normalized === 'failed'
         ? 'danger'
-        : normalized.includes('thành công') || normalized === 'success'
+        : normalized.includes('thành công') || normalized.includes('đã phê duyệt') || normalized === 'success'
           ? 'success'
           : normalized.includes('đăng xuất') || normalized === 'logout'
             ? 'default'
             : normalized.includes('hoàn') || normalized.includes('đang') || normalized.includes('áp dụng')
         ? 'success'
-        : normalized.includes('chờ') || normalized.includes('mới')
+        : normalized.includes('chờ') || normalized.includes('mới') || normalized.includes('chưa phê duyệt')
           ? 'warning'
           : normalized.includes('hủy') || normalized.includes('ngừng') || normalized.includes('lỗi')
             ? 'danger'
@@ -357,7 +357,9 @@ function TrendMetricChart({ row }) {
 
 function LiveDataSummary({ summary = {} }) {
     const entries = Object.entries(summary).filter(([, value]) => value !== null && value !== undefined);
-    if (!entries.length) return null;
+    // Plain table pages only return total_records for pagination bookkeeping.
+    // Rendering that as a KPI card makes Pushsale pages look like fake/demo data.
+    if (!entries.length || (entries.length === 1 && entries[0][0] === 'total_records')) return null;
 
     const labels = {
         total_orders: 'Tổng đơn',
@@ -616,7 +618,12 @@ function PushsaleEditorDialog({ open, schema, row, dialogHtml = '', dialogSchema
 function inferFilterKey(node) {
     const source = `${node?.id ?? ''} ${node?.name ?? ''}`.toLowerCase();
     if (!source) return null;
-    if (source.includes('tukhoa') || source.includes('keyword') || source.includes('search')) return 'search';
+    if (source.includes('tukhoa') || source.includes('keyword') || source.includes('search') || source.includes('username')) return 'search';
+    if (source.includes('quanlydangnhap') && source.includes('ddldonvi')) return 'company_id';
+    if (source.includes('quanlydangnhap') && (source.includes('ddlchucvu') || source.includes('role'))) return 'role';
+    if (source.includes('quanlydangnhap') && (source.includes('ddlusers') || source.includes('ddluser'))) return 'user_id';
+    if (source.includes('quanlydangnhap') && source.includes('ddltrangthai')) return 'login_permission_status';
+    if (source.includes('quanlydangnhap') && source.includes('ddlngaypheduyet')) return 'sort';
     if (source.includes('lichsudangnhap') && source.includes('ddldonvi')) return 'company_id';
     if (source.includes('lichsudangnhap') && (source.includes('ddlchucvu') || source.includes('role'))) return 'role';
     if (source.includes('lichsudangnhap') && (source.includes('ddlusers') || source.includes('ddluser'))) return 'user_id';
@@ -916,6 +923,35 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
                     }
                     textNode = walker.nextNode();
                 }
+
+                if (schema.code === '1.7.3') {
+                    const sideBody = host.querySelector('#dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row > .col-sm-4 table tbody');
+                    if (sideBody) {
+                        sideBody.querySelectorAll('tr[data-pushsale-user-count-row="1"]').forEach((row) => row.remove());
+                        const counts = new Map();
+                        rows.forEach((row) => {
+                            const user = String(row.user || 'Hệ thống').trim() || 'Hệ thống';
+                            counts.set(user, (counts.get(user) || 0) + 1);
+                        });
+                        [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12).forEach(([user, count], index) => {
+                            const tr = document.createElement('tr');
+                            tr.dataset.pushsaleUserCountRow = '1';
+                            const indexCell = document.createElement('td');
+                            indexCell.className = 'text-center';
+                            indexCell.textContent = String(index + 1);
+                            const userCell = document.createElement('td');
+                            userCell.textContent = user;
+                            const countCell = document.createElement('td');
+                            countCell.className = 'text-center';
+                            countCell.textContent = numberFormatter.format(count);
+                            const actionCell = document.createElement('td');
+                            actionCell.className = 'text-center';
+                            actionCell.textContent = '';
+                            tr.append(indexCell, userCell, countCell, actionCell);
+                            sideBody.appendChild(tr);
+                        });
+                    }
+                }
             }
 
             if (schema.code === '1.2.3' && host) {
@@ -955,6 +991,7 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
                 result.appendChild(button);
             });
             const key = inferFilterKey(dropdown);
+            dropdown.classList.toggle('ps-ddl-disabled', options.length === 0);
             const queryValue = key ? currentParams.get(key) : null;
             const selectedOption = options.find((option) => String(option.id) === String(queryValue))
                 ?? (options.length === 1 ? options[0] : null);
@@ -1009,7 +1046,7 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             'warehouse_id', 'closed_status', 'delivery_status', 'operation_result', 'operation_state',
             'operation_stage', 'date_type', 'customer_type', 'status', 'care_operation_status',
             'allocation_status', 'shipping_method', 'internal_reconciliation_status', 'duplicate_status',
-            'company_id', 'role', 'user_id', 'login_status', 'sort', 'care_user_id', 'warehouse_user_id',
+            'company_id', 'role', 'user_id', 'login_status', 'login_permission_status', 'sort', 'care_user_id', 'warehouse_user_id',
             'category_id', 'parent_product_id', 'team_leader_id', 'active_status',
             'available_marketing', 'available_sale', 'available_care',
         ];

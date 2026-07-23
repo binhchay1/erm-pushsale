@@ -408,12 +408,6 @@ function SaleKpiReport({ rows, totals, filters, filterOptions, filterFields, rou
                             })}</tr>
                         </tbody>
                     </table>
-                    <div className="ps-kpi-progress-bar"><span>{psText(t, 'sales_progress', 'Doanh số đạt:')}</span></div>
-                    <div className="ps-kpi-notes">
-                        <div>{psText(t, 'kpi_note_contacts', '* Số contact tính theo [ngày sale nhận data] nằm trong khoảng ngày đã chọn')}</div>
-                        <div>{psText(t, 'kpi_note_closed', '* Số chốt đơn tính theo [ngày chốt đơn] nằm trong khoảng ngày đã chọn')}</div>
-                        <div>{psText(t, 'kpi_note_upsale', '* Upsale cộng doanh thu và số lượng sản phẩm nhưng không tạo thêm contact/KPI lead.')}</div>
-                    </div>
                 </div>
                 <div>
                     <table className="ps-time-table" data-table-theme="neutral">
@@ -425,7 +419,6 @@ function SaleKpiReport({ rows, totals, filters, filterOptions, filterFields, rou
                             <tr><td>{psText(t, 'time_rate', 'Tiến độ thời gian')}</td><td>{time.progress}%</td></tr>
                         </tbody>
                     </table>
-                    <div className="ps-kpi-notes">{psText(t, 'actual_revenue_formula', '* Doanh số thực = [Doanh số] - [Chiết khấu] - [Giá dịch vụ COD]')}</div>
                 </div>
             </div>
         </section>
@@ -709,29 +702,124 @@ function ReportTotalRow({ totals, fields, label = 'Tổng' }) {
     );
 }
 
+function ShortRecordPager({ current, totalPages, from, to, total, onPage }) {
+    return (
+        <div className="ps-short-record-pager btn-group">
+            <button type="button" className="btn btn-default btn-sm" disabled>
+                <span>{from} - {to} <span style={{ fontWeight: 'normal' }}> / </span> {total}</span>
+            </button>
+            <button type="button" className="btn btn-default btn-sm" disabled={current <= 1} onClick={() => onPage?.(current - 1)} title="Trang trước">
+                <i className="fa fa-caret-left" aria-hidden="true" />
+            </button>
+            <button type="button" className="btn btn-default btn-sm" disabled={current >= totalPages} onClick={() => onPage?.(current + 1)} title="Trang sau">
+                <i className="fa fa-caret-right" aria-hidden="true" />
+            </button>
+        </div>
+    );
+}
+
 function SaleClosingSummaryReport({ rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const t = useT();
+    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
     const fields = [
-        ['new_contacts','number'],['new_closed','number'],['new_rate','percent'],['new_gross','currency'],['new_discount','currency'],['new_net','currency'],
-        ['old_closed','number'],['old_gross','currency'],['old_discount','currency'],['old_net','currency'],
-        ['total_closed','number'],['total_rate','percent'],['total_gross','currency'],['total_discount','currency'],['total_net','currency'],
-        ['upsell_qty','number'],['upsell_revenue','currency'],
+        ['new_contacts', 'number'], ['new_closed', 'number'], ['new_rate', 'percent'], ['new_gross', 'currency'], ['new_discount', 'currency'], ['new_net', 'currency'],
+        ['old_closed', 'number'], ['old_gross', 'currency'], ['old_discount', 'currency'], ['old_net', 'currency'],
+        ['total_closed', 'number'], ['total_rate', 'percent'], ['total_gross', 'currency'], ['total_discount', 'currency'], ['total_net', 'currency'],
     ];
+    const perPage = Math.max(1, Number(draft.per_page || filters.per_page || 20));
+    const allRows = rows ?? [];
+    const totalRows = allRows.length;
+    const totalPages = perPage >= 999999 ? 1 : Math.max(1, Math.ceil(totalRows / perPage));
+    const [page, setPage] = useState(1);
+    const safePage = Math.min(totalPages, Math.max(1, page));
+    const visibleRows = perPage >= 999999 ? allRows : allRows.slice((safePage - 1) * perPage, safePage * perPage);
+    const recordFrom = totalRows === 0 ? 0 : (safePage - 1) * perPage + 1;
+    const recordTo = perPage >= 999999 ? totalRows : Math.min(totalRows, safePage * perPage);
+    const primaryFilters = (
+        <div className="ps-report-v2-primary ps-report-toolbar-controls ps-closing-summary-filters">
+            <PushsaleDateRange filters={draft} onChange={set} />
+            {filterFields.includes('search') ? (
+                <input
+                    className="ps-control ps-closing-sale-search"
+                    value={draft.search ?? ''}
+                    placeholder={psText(t, 'sale_name_placeholder', 'Tên sale')}
+                    onChange={(event) => set('search', event.target.value)}
+                />
+            ) : null}
+            {filterFields.includes('sale_id') ? (
+                <PushsaleSelect
+                    placeholder={psText(t, 'choose_sale', '--Chọn sale--')}
+                    value={draft.sale_id ?? ''}
+                    options={filterOptions.salesUsers ?? []}
+                    onChange={(value) => set('sale_id', value)}
+                />
+            ) : null}
+            {filterFields.includes('per_page') ? (
+                <PushsaleSelect
+                    placeholder="20"
+                    value={String(draft.per_page ?? '20')}
+                    options={PER_PAGE_OPTIONS(t)}
+                    onChange={(value) => set('per_page', value)}
+                />
+            ) : null}
+        </div>
+    );
+
     return (
         <section className="ps-report-page ps-closing-summary-report">
-            <CommonToolbar title="Bảng tổng hợp chốt đơn" routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} filterFields={filterFields} />
-            <div className="ps-table-scroll">
-                <table className="ps-table ps-grouped-report-table">
+            <PushsalePageShell
+                title="Bảng tổng hợp chốt đơn"
+                className="ps-report-toolbar-shell ps-extra-toolbar ps-report-v2-toolbar ps-closing-summary-toolbar"
+                primaryFilters={primaryFilters}
+                actions={(
+                    <div className="ps-report-toolbar-actions">
+                        <PushsaleSearchButton onClick={() => apply()} />
+                        <PushsaleExportButton routeUrl={routeUrl} filters={cleanReportPayload(draft)} />
+                    </div>
+                )}
+            />
+            <div className="ps-closing-summary-pager-row">
+                <ShortRecordPager current={safePage} totalPages={totalPages} from={recordFrom} to={recordTo} total={totalRows} onPage={setPage} />
+            </div>
+            <div className="ps-table-scroll ps-closing-summary-scroll">
+                <table className="table table-bordered ps-grouped-report-table ps-closing-summary-table" id="tblData">
                     <thead>
-                        <tr><th rowSpan={2}>{psText(t, 'stt', 'STT')}</th><th rowSpan={2}>TELESALE</th><th colSpan={6}>CONTACT MỚI</th><th colSpan={4}>KHÁCH HÀNG CŨ</th><th colSpan={5}>TỔNG</th><th colSpan={2} className="ps-upsell-group">UPSALE</th></tr>
-                        <tr><th>Contact</th><th>Chốt đơn</th><th>Tỷ lệ</th><th>Doanh số</th><th>Chiết khấu</th><th>Sau CK</th><th>Chốt đơn</th><th>Doanh số</th><th>Chiết khấu</th><th>Sau CK</th><th>Chốt đơn</th><th>Tỷ lệ</th><th>Doanh số</th><th>Chiết khấu</th><th>Sau CK</th><th>SL</th><th>Doanh số</th></tr>
+                        <tr>
+                            <th rowSpan={2}>Tài khoản</th>
+                            <th colSpan={6}>Contact nhận mới</th>
+                            <th colSpan={4}>Contact nhận trước đó</th>
+                            <th colSpan={5}>Tổng hợp</th>
+                        </tr>
+                        <tr>
+                            <th>Số contact</th><th>Chốt đơn</th><th>Tỉ lệ</th><th>Doanh số</th><th>CK</th><th>Doanh số sau CK</th>
+                            <th>Chốt đơn</th><th>Doanh số</th><th>CK</th><th>Doanh số sau CK</th>
+                            <th>Chốt đơn</th><th>Tỉ lệ</th><th>Doanh số</th><th>CK</th><th>Doanh số sau CK</th>
+                        </tr>
+                        <tr className="ps-closing-formula-row">
+                            <th>(1)</th>
+                            <th>(2)</th><th>(3)</th><th>(4) = (3) / (2)</th><th>(5)</th><th>(6)</th><th>(7) = (5) - (6)</th>
+                            <th>(8)</th><th>(9)</th><th>(10)</th><th>(11) = (9) - (10)</th>
+                            <th>(12) = (3) + (8)</th><th>(13) = (12) / (2)</th><th>(14)</th><th>(15)</th><th>(16) = (14) - (15)</th>
+                        </tr>
                     </thead>
                     <tbody>
-                        <ReportTotalRow totals={totals} fields={fields} />
-                        {rows.map((row, index) => <tr key={`${row.name}-${index}`}><td>{index + 2}</td><td className="ps-text-left">{row.name}</td>{fields.map(([key, format]) => <td key={key}>{formatCell(row[key], format)}</td>)}</tr>)}
-                        {rows.length === 0 && <tr><td colSpan={19} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
+                        {visibleRows.map((row, index) => (
+                            <tr key={`${row.sale_id ?? row.account}-${index}`}>
+                                <td className="ps-account-cell">
+                                    <strong>{row.account || '—'}</strong>
+                                    <span>{row.name || '—'}</span>
+                                </td>
+                                {fields.map(([key, format]) => <td key={key}>{formatCell(row[key], format)}</td>)}
+                            </tr>
+                        ))}
+                        {visibleRows.length === 0 && <tr><td colSpan={16} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
                     </tbody>
                 </table>
+            </div>
+            <div className="ps-closing-summary-notes small-tip">
+                <div>* Contact nhận mới: [Số contact] = số đơn có ngày sale nhận data trong khoảng ngày đã chọn, [Số chốt đơn] = số đơn có ngày sale nhận data và ngày chốt đơn đều nằm trong khoảng ngày đã chọn.</div>
+                <div>** Contact nhận trước đó: [Số chốt đơn] = số đơn có ngày nhận data nhỏ hơn khoảng ngày đã chọn và ngày chốt đơn nằm trong khoảng ngày đã chọn.</div>
+                <div>** Các đơn đã chốt ở trạng thái "Hủy vận đơn", "Đã hoàn" không được tính vào chỉ số giao thành công, nhưng vẫn được đối soát ở báo cáo doanh số chi tiết.</div>
             </div>
         </section>
     );

@@ -66,6 +66,12 @@ return [
         'total_clicks' => 'Tổng tương tác',
         'utm_source' => 'UTM Source',
         'utm_campaign' => 'UTM Campaign',
+        'page_code' => 'Mã trang',
+        'page_title' => 'Tên trang',
+        'filter_label' => 'Bộ lọc',
+        'closed_status' => 'Trạng thái chốt đơn',
+        'closing_status' => 'Trạng thái chốt đơn',
+        'result_count' => 'Số bản ghi tìm được',
     ],
     'subjects' => [
         'campaign' => 'Chiến dịch',
@@ -89,5 +95,6 @@ return [
         'inventory.movement_approved' => 'Duyệt nhập/xuất kho',
         'lead.ingested' => 'Nhận lead',
         'marketing.daily_metrics_updated' => 'Cập nhật dữ liệu marketing theo ngày',
+        'data_filter.searched' => 'Lọc dữ liệu chốt đơn',
     ],
 ];

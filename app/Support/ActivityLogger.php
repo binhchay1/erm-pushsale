@@ -44,6 +44,8 @@ final class ActivityLogger
 
     public const MARKETING_DAILY_METRICS_UPDATED = 'marketing.daily_metrics_updated';
 
+    public const DATA_FILTER_SEARCHED = 'data_filter.searched';
+
     /**
      * @param  array<string, mixed>  $properties
      */

@@ -6,10 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Services\NavigationService;
 use App\Services\Pushsale\PageResourceManager;
 use App\Services\Pushsale\PushsalePageService;
+use App\Support\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -46,6 +50,8 @@ abstract class BasePushsalePageController extends Controller
             if ($request->boolean('export')) {
                 return $this->export($schema, $result['data']);
             }
+
+            $this->recordFilterHistoryIfNeeded($request, $schema, $result);
 
             foreach ((array) ($schema['dialog_resources'] ?? []) as $dialogCode => $resourceKey) {
                 $alias = $this->dialogAlias((string) $dialogCode);
@@ -231,6 +237,186 @@ abstract class BasePushsalePageController extends Controller
         return $request->expectsJson()
             ? response()->json(['ok' => true, 'record' => $record], $status)
             : back()->with('success', $message);
+    }
+
+    /** @param array<string, mixed> $schema @param array{data?: array<int, array<string, mixed>>, meta?: array<string, mixed>, summary?: array<string, mixed>} $result */
+    private function recordFilterHistoryIfNeeded(Request $request, array $schema, array $result): void
+    {
+        if (Str::startsWith($this->pageCode, '1.7.')) {
+            return;
+        }
+
+        $filters = $this->meaningfulFilterPayload($request);
+        if ($filters === []) {
+            return;
+        }
+
+        try {
+            $pageTitle = (string) ($schema['title'] ?? 'Trang '.$this->pageCode);
+            $filterLabel = $this->buildFilterLabel($pageTitle, $filters);
+
+            ActivityLogger::log(ActivityLogger::DATA_FILTER_SEARCHED, null, [
+                'page_code' => $this->pageCode,
+                'page_title' => $pageTitle,
+                'filters' => $filters,
+                'filter_label' => $filterLabel,
+                'date_type' => $filters['date_type'] ?? null,
+                'date_from' => $filters['date_from'] ?? null,
+                'date_to' => $filters['date_to'] ?? null,
+                'closed_status' => $filters['closed_status'] ?? null,
+                'closing_status' => $this->labelForFilterValue('closed_status', $filters['closed_status'] ?? null),
+                'closing_status_label' => $this->labelForFilterValue('closed_status', $filters['closed_status'] ?? null),
+                'delivery_status' => $filters['delivery_status'] ?? null,
+                'delivery_status_label' => $this->labelForFilterValue('delivery_status', $filters['delivery_status'] ?? null),
+                'result_count' => Arr::get($result, 'meta.total'),
+                'actor_name' => $request->user()?->name,
+            ], $filterLabel, $request->user());
+        } catch (Throwable $exception) {
+            report($exception);
+        }
+    }
+
+    /** @return array<string, string> */
+    private function meaningfulFilterPayload(Request $request): array
+    {
+        $ignored = [
+            'page', 'per_page', 'export', '_token', '_method', 'sort',
+        ];
+        $allowed = [
+            'search', 'date_from', 'date_to', 'date_type', 'closed_status', 'delivery_status',
+            'operation_result', 'operation_state', 'operation_stage', 'customer_type',
+            'sale_leader_id', 'sale_team_id', 'sale_id', 'marketer_leader_id', 'marketer_team_id',
+            'marketer_id', 'product_id', 'source_id', 'warehouse_id', 'allocation_status',
+            'shipping_method', 'internal_reconciliation_status', 'duplicate_status',
+            'care_operation_status', 'care_user_id', 'warehouse_user_id', 'status',
+        ];
+
+        $filters = [];
+        foreach ($request->query() as $key => $value) {
+            $key = (string) $key;
+            if (in_array($key, $ignored, true) || ! in_array($key, $allowed, true)) {
+                continue;
+            }
+
+            $value = is_array($value) ? implode(',', array_filter(array_map('strval', $value))) : trim((string) $value);
+            if ($value === '' || in_array($value, ['-1', 'all'], true)) {
+                continue;
+            }
+
+            $filters[$key] = $value;
+        }
+
+        return $filters;
+    }
+
+    /** @param array<string, string> $filters */
+    private function buildFilterLabel(string $pageTitle, array $filters): string
+    {
+        $labels = [];
+        foreach ($filters as $key => $value) {
+            $labels[] = $this->filterKeyLabel($key).': '.$this->labelForFilterValue($key, $value);
+        }
+
+        return $pageTitle.($labels !== [] ? ' · '.implode(' · ', array_slice($labels, 0, 4)) : '');
+    }
+
+    private function filterKeyLabel(string $key): string
+    {
+        return match ($key) {
+            'search' => 'Từ khóa',
+            'date_from' => 'Từ ngày',
+            'date_to' => 'Đến ngày',
+            'date_type' => 'Kiểu ngày',
+            'closed_status' => 'Trạng thái chốt đơn',
+            'delivery_status' => 'Trạng thái giao hàng',
+            'operation_result' => 'Kết quả tác nghiệp',
+            'operation_state' => 'Trạng thái tác nghiệp',
+            'operation_stage' => 'Lần tác nghiệp',
+            'customer_type' => 'Loại khách',
+            'sale_leader_id' => 'Trưởng nhóm sale',
+            'sale_team_id' => 'Nhóm sale',
+            'sale_id' => 'Sale',
+            'marketer_leader_id' => 'Trưởng nhóm marketing',
+            'marketer_team_id' => 'Nhóm marketing',
+            'marketer_id' => 'Marketing',
+            'product_id' => 'Sản phẩm',
+            'source_id' => 'Nguồn data',
+            'warehouse_id' => 'Kho',
+            'allocation_status' => 'Phân bổ',
+            'shipping_method' => 'Vận chuyển',
+            'internal_reconciliation_status' => 'Đối soát',
+            'duplicate_status' => 'Trùng số',
+            'care_operation_status' => 'Care đơn',
+            'care_user_id' => 'Nhân sự care',
+            'warehouse_user_id' => 'Nhân sự kho',
+            default => Str::headline(str_replace('_', ' ', $key)),
+        };
+    }
+
+    private function labelForFilterValue(string $key, mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $value = (string) $value;
+
+        if (in_array($key, ['date_from', 'date_to'], true)) {
+            try {
+                return CarbonImmutable::parse($value)->format('d/m/Y');
+            } catch (Throwable) {
+                return $value;
+            }
+        }
+
+        if ($key === 'closed_status') {
+            return match ($value) {
+                '1', 'closed', 'Đã chốt đơn' => 'Đã chốt đơn',
+                '0', 'pending', 'Chưa chốt đơn' => 'Chưa chốt đơn',
+                default => $value,
+            };
+        }
+
+        if ($key === 'delivery_status') {
+            return match ($value) {
+                '1' => 'Chờ vận đơn',
+                '2' => 'Giao ngay',
+                '3' => 'Hoãn giao hàng',
+                '4' => 'Hủy vận đơn',
+                '5' => 'Hủy đăng đơn',
+                '20' => 'Đã đăng',
+                '21', '23' => 'Đang lấy hàng',
+                '22' => 'Không lấy được hàng',
+                '30' => 'Đang giao hàng',
+                '31' => 'Đã giao hàng',
+                '32' => 'Đã thanh toán',
+                '33' => 'Không giao được',
+                '34' => 'Yêu cầu giao lại',
+                '35' => 'Giao hàng một phần',
+                '40' => 'Đang hoàn',
+                '41' => 'Đã hoàn',
+                '50' => 'Bồi hoàn',
+                default => $value,
+            };
+        }
+
+        if ($key === 'date_type') {
+            return match ($value) {
+                'SaleNgayNhanData' => 'Ngày sale nhận data',
+                'NgayTao' => 'Ngày data về hệ thống',
+                'SaleTacNghiepNgayCapNhat' => 'Ngày sale tác nghiệp',
+                'DonHangNgayChot' => 'Ngày sale chốt đơn',
+                'NgayDangDon' => 'Ngày đăng đơn',
+                'NgayChoXuat' => 'Ngày sale tác nghiệp tiếp',
+                'NgayCapNhatTrangThaiGiaoHang' => 'Ngày cập nhật trạng thái giao hàng',
+                'DoiSoatNoiBoNgayCapNhat' => 'Ngày đối soát',
+                'CareDonNgayNhan' => 'Ngày nhận care đơn',
+                'NgayTacNghiepCareDon' => 'Ngày cập nhật care đơn',
+                default => $value,
+            };
+        }
+
+        return $value;
     }
 
     /** @param array<string, mixed> $schema @param array<int, array<string, mixed>> $rows */

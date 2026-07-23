@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
                 InventorySeeder::class,
                 MarketingCampaignSeeder::class,
                 SalesPipelineSeeder::class,
+                DataFilterHistorySeeder::class,
                 LandingFlowSeeder::class,
                 ShippingEventSeeder::class,
                 DemoNotificationSeeder::class,

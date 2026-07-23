@@ -36,6 +36,7 @@ export default {
         all: 'Tất cả',
         sale_work_title: 'Báo cáo công việc sale',
         sale_kpi_title: 'Sale KPI 2',
+        sale_name_placeholder: 'Tên sale',
         revenue_detail_title: 'Báo cáo doanh số chi tiết sale',
         warehouse_pending_title: 'Bảng tổng hợp chờ xuất theo ngày',
         contact_new: 'Contact mới',
@@ -443,6 +444,7 @@ export default {
         },
     },
     columns: {
+        sale_name: 'Tên sale',
         telesale: 'Telesale',
         marketer: 'Marketer',
         product: 'Sản phẩm',

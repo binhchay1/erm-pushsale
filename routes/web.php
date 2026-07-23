@@ -150,6 +150,9 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::get('ld/thong-ke/bao-cao-up-sale', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
         return $controller($request, 'marketing-4');
     })->name('legacy.reports.marketing-upsale');
+    Route::get('ld/sale/bang-tong-hop-ban-hang', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'sale-2');
+    })->name('legacy.reports.sale-closing-summary');
 
 
     // Hồ sơ khách hàng dùng chung cho các vai trò có quyền customers:view.

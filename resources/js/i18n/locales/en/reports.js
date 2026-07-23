@@ -36,6 +36,7 @@ export default {
         all: 'All',
         sale_work_title: 'Sales work report',
         sale_kpi_title: 'Sales KPI 2',
+        sale_name_placeholder: 'Sale name',
         revenue_detail_title: 'Detailed sales revenue report',
         warehouse_pending_title: 'Daily pending export summary',
         contact_new: 'New contact',
@@ -443,6 +444,7 @@ export default {
         },
     },
     columns: {
+        sale_name: 'Sale name',
         telesale: 'Telesales',
         marketer: 'Marketer',
         product: 'Product',
