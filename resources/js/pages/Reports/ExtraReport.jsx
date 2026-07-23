@@ -9,7 +9,7 @@ import {
     PushsaleSelect,
     usePushsaleFilters,
 } from '@/components/reports/PushsaleReportChrome';
-import { PushsalePageChrome } from '@/components/layout/PushsalePageChrome';
+import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { useLabels } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
 import { formatCurrency, formatNumber } from '@/lib/format';
@@ -54,8 +54,8 @@ function CommonToolbar({ title, routeUrl, filters, filterOptions, filterFields =
     const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
     const fields = new Set(filterFields);
 
-    const controls = (
-        <>
+    const filterControls = (
+        <div className="ps-extra-toolbar-controls ps-report-toolbar-controls">
             {fields.has('date_type') && (
                 <PushsaleSelect
                     placeholder={psText(t, 'date_sale_received', 'Ngày sale nhận data')}
@@ -115,16 +115,22 @@ function CommonToolbar({ title, routeUrl, filters, filterOptions, filterFields =
                     onChange={(value) => set('product_id', value)}
                 />
             )}
-            <PushsaleSearchButton onClick={() => apply()} />
-            <PushsaleExportButton routeUrl={routeUrl} filters={draft} />
-        </>
+        </div>
     );
 
     return (
-        <PushsalePageChrome
+        <PushsalePageShell
             title={title}
-            className={`ps-report-topbar ps-extra-toolbar ${compact ? 'is-compact' : ''}`}
-            filters={controls}
+            className={`ps-report-toolbar-shell ps-extra-toolbar ${compact ? 'is-compact' : ''}`}
+            primaryFilters={filterControls}
+            actions={(
+                <div className="ps-report-toolbar-actions">
+                    <PushsaleSearchButton onClick={() => apply()} />
+                    <PushsaleExportButton routeUrl={routeUrl} filters={draft} />
+                </div>
+            )}
+            compact={compact}
+            collapsible={false}
         />
     );
 }
@@ -240,11 +246,13 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
                     onChange={(value) => { setPageSize(value); setPage(1); }}
                 />
             </div>
-            <div className="ps-grid-count">
-                {fromRow} - {toRow} / {rows.length}
-                <button type="button" disabled={safePage <= 1} onClick={() => setPage(Math.max(1, safePage - 1))}>‹</button>
-                <button type="button" disabled={safePage >= totalPages} onClick={() => setPage(Math.min(totalPages, safePage + 1))}>›</button>
-            </div>
+            {totalPages > 1 ? (
+                <div className="ps-grid-count ps-grid-count-top">
+                    {fromRow} - {toRow} / {rows.length}
+                    <button type="button" disabled={safePage <= 1} onClick={() => setPage(Math.max(1, safePage - 1))}>‹</button>
+                    <button type="button" disabled={safePage >= totalPages} onClick={() => setPage(Math.min(totalPages, safePage + 1))}>›</button>
+                </div>
+            ) : null}
             <div className="ps-table-scroll">
                 <table className="ps-table ps-sale-work-table">
                     <thead>
@@ -292,7 +300,7 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
                     </tbody>
                 </table>
             </div>
-            <PushsalePager current={safePage} totalPages={totalPages} onPage={setPage} />
+            {totalPages > 1 ? <PushsalePager current={safePage} totalPages={totalPages} onPage={setPage} /> : null}
         </section>
     );
 }
@@ -457,7 +465,6 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
                     </tbody>
                 </table>
             </div>
-            <PushsalePager current={1} totalPages={1} />
         </section>
     );
 }
@@ -531,7 +538,7 @@ function WarehousePendingReport({ rows, filters, filterOptions, routeUrl }) {
                     </tbody>
                 </table>
             </div>
-            <PushsalePager current={page} totalPages={totalPages} onPage={setPage} />
+            {totalPages > 1 ? <PushsalePager current={page} totalPages={totalPages} onPage={setPage} /> : null}
         </section>
     );
 }
@@ -571,7 +578,6 @@ function SaleClosingSummaryReport({ rows, totals, filters, filterOptions, filter
                     </tbody>
                 </table>
             </div>
-            <PushsalePager current={1} totalPages={1} />
         </section>
     );
 }
@@ -665,7 +671,7 @@ function WarehouseSalesSummaryReport({ rows, totals, filters, filterOptions, fil
                 <ReportTotalRow totals={totals} fields={fields} />
                 {rows.map((row, index) => <tr key={row.warehouse_id ?? index}><td>{index + 2}</td><td className="ps-text-left">{row.name}</td>{fields.map(([key, format]) => <td key={key}>{formatCell(row[key], format)}</td>)}</tr>)}
                 {rows.length === 0 && <tr><td colSpan={2 + fields.length} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
-            </tbody></table></div><PushsalePager current={1} totalPages={1} />
+            </tbody></table></div>
         </section>
     );
 }
@@ -707,7 +713,7 @@ function WarehouseSalesV2Report({ rows, totals, filters, filterOptions, filterFi
                 <ReportTotalRow totals={totals} fields={fields} />
                 {rows.map((row, index) => <tr key={row.warehouse_id ?? index}><td>{index + 2}</td><td className="ps-text-left">{row.name}</td>{fields.map(([key, format]) => <td key={key}>{formatCell(row[key], format)}</td>)}</tr>)}
                 {rows.length === 0 && <tr><td colSpan={2 + fields.length} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
-            </tbody></table></div><PushsalePager current={1} totalPages={1} />
+            </tbody></table></div>
         </section>
     );
 }
@@ -777,7 +783,7 @@ function GenericReport({ title, rows, totals, columns, filters, filterOptions, f
                     </tbody>
                 </table>
             </div>
-            <PushsalePager current={page} totalPages={totalPages} onPage={setPage} />
+            {totalPages > 1 ? <PushsalePager current={page} totalPages={totalPages} onPage={setPage} /> : null}
         </section>
     );
 }

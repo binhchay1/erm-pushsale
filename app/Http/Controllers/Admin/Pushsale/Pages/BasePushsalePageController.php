@@ -57,13 +57,23 @@ abstract class BasePushsalePageController extends Controller
                     'store_url' => url($request->path().'/dialogs/'.$alias.'/records'),
                 ];
             }
-
-            $filterOptions = $this->pages->filterOptions($this->pageCode);
         } catch (Throwable $exception) {
             report($exception);
             $pageRuntimeError = (bool) config('app.debug')
                 ? $exception->getMessage()
                 : 'Trang này đang thiếu dữ liệu hoặc cấu hình bảng. Vui lòng chạy migrate/cache clear rồi thử lại.';
+        }
+
+        if ($pageRuntimeError === null) {
+            try {
+                $filterOptions = $this->pages->filterOptions($this->pageCode);
+            } catch (Throwable $exception) {
+                report($exception);
+                $filterOptions = [];
+                if ((bool) config('app.debug')) {
+                    $pageRuntimeError = 'Không tải được dữ liệu bộ lọc: '.$exception->getMessage();
+                }
+            }
         }
 
         return Inertia::render($component, [
@@ -73,7 +83,7 @@ abstract class BasePushsalePageController extends Controller
             ]),
             'rows' => $result['data'],
             'pagination' => $result['meta'],
-'summary' => $result['summary'] ?? [],
+            'summary' => $result['summary'] ?? [],
             'filterOptions' => $filterOptions,
             'routeUrl' => '/'.$request->path(),
             'templateHtml' => $this->templateHtml($templateCode),

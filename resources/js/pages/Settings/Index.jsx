@@ -220,7 +220,6 @@ export default function SettingsIndex({ definition = [], values = {}, activityUr
 
                 <div className="ps-feature-body">
                     <aside className="ps-feature-tabs" aria-label="Nhóm cấu hình">
-                        <div className="ps-feature-all-label">Tất cả</div>
                         <button type="button" className={`btn-xem-kn tab-0 ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>Tất cả</button>
                         {definition.map((tab) => (
                             <button

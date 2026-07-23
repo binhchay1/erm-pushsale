@@ -6,6 +6,7 @@ use App\Contracts\Shipping\ShippingCarrierInterface;
 use App\Models\Order;
 use App\Models\Shipment;
 use App\Services\Inventory\InventoryDeductionService;
+use App\Services\Settings\FeatureSettingsService;
 use RuntimeException;
 
 class CreateShipmentService
@@ -14,6 +15,7 @@ class CreateShipmentService
         private readonly CarrierRegistry $registry,
         private readonly InventoryDeductionService $inventory,
         private readonly ShippingFeePresenter $feePresenter,
+        private readonly FeatureSettingsService $featureSettings,
     ) {}
 
     public function createForOrder(Order $order, ?string $provider = null): Shipment
@@ -45,7 +47,27 @@ class CreateShipmentService
             ]);
         }
 
-        return $carrier->createFromOrder($order->fresh(['items', 'warehouse', 'company']));
+        return $carrier->createFromOrder($this->shipmentOrder($order));
+    }
+
+    private function shipmentOrder(Order $order): Order
+    {
+        $shipmentOrder = $order->fresh(['items', 'warehouse', 'company']);
+
+        $fixedRecipientPhone = preg_replace('/\D+/', '', $this->featureSettings->string('SettingDangDonNguoiNhanSDT', ''));
+        if ($fixedRecipientPhone !== '') {
+            // Chỉ áp dụng cho payload gửi đơn vị giao vận, không ghi đè số khách trong hệ thống.
+            $shipmentOrder->setAttribute('receiver_phone', $fixedRecipientPhone);
+        }
+
+        if (! filled($shipmentOrder->shipping_notes)) {
+            $defaultNote = $this->featureSettings->string('SettingGhiChuGiaoHangSale', '');
+            if (filled($defaultNote)) {
+                $shipmentOrder->setAttribute('shipping_notes', $defaultNote);
+            }
+        }
+
+        return $shipmentOrder;
     }
 
     public function sync(Order $order, ?string $provider = null): Shipment

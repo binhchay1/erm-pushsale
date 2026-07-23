@@ -71,10 +71,31 @@ export default function AppLayout({ children }) {
 
     const toggleSidebar = () => setSidebarState(!sidebarOpen);
     const closeSidebar = () => {
-        if (typeof window !== 'undefined' && window.innerWidth < 992) {
-            setSidebarState(false);
-        }
+        setSidebarState(false);
     };
+
+    useEffect(() => {
+        if (!sidebarOpen) return undefined;
+
+        const closeOnOutsidePointer = (event) => {
+            const target = event.target;
+            if (target?.closest?.('.pushsale-main-sidebar, .pushsale-third-menu, .main-header, .pushsale-header')) return;
+            setSidebarState(false);
+        };
+        const closeOnEscape = (event) => {
+            if (event.key === 'Escape') setSidebarState(false);
+        };
+
+        document.addEventListener('mousedown', closeOnOutsidePointer);
+        document.addEventListener('touchstart', closeOnOutsidePointer, { passive: true });
+        document.addEventListener('keydown', closeOnEscape);
+
+        return () => {
+            document.removeEventListener('mousedown', closeOnOutsidePointer);
+            document.removeEventListener('touchstart', closeOnOutsidePointer);
+            document.removeEventListener('keydown', closeOnEscape);
+        };
+    }, [sidebarOpen]);
 
     if (!stylesReady) {
         return <div className="pushsale-shell-loading"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>;

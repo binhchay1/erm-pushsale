@@ -1,14 +1,11 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 
 const number = new Intl.NumberFormat('vi-VN');
-
-function Pagination({ data, routeUrl, filters }) {
-    return <div className="ps-pagination-bar"><span>{data.from ?? 0} - {data.to ?? 0} / {data.total ?? 0}</span><ul className="pagination pagination-sm">{(data.links ?? []).map((link, index) => <li key={`${link.label}-${index}`} className={`${link.active ? 'active' : ''} ${!link.url ? 'disabled' : ''}`}><button type="button" disabled={!link.url} onClick={() => link.url && router.get(link.url, filters, { preserveState: true, preserveScroll: true })} dangerouslySetInnerHTML={{ __html: link.label }} /></li>)}</ul></div>;
-}
 
 function DialogShell({ open, onClose, children }) {
     return (
@@ -79,7 +76,7 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
                 <div className="ps-table-scroll"><table className="table table-bordered ps-source-table ps-inventory-table"><thead><tr><th><input type="checkbox" /></th><th>#</th><th>Kho</th><th>Sản phẩm</th><th>Đơn vị tính</th><th>Mã lô</th><th>Ngày hết hạn</th><th>Vị trí</th><th>Tồn kho</th><th>Chờ xuất bán hàng</th><th>SL sắp hết hàng</th><th>Ngừng KD</th><th>Cập nhật</th><th /></tr></thead><tbody>
                     {rows.length ? rows.map((row) => <tr key={row.id}><td className="text-center"><input type="checkbox" /></td><td className="text-center">{row.id}</td><td>{row.warehouseName}</td><td><strong>{row.productName}</strong>{row.sku && <small>({row.sku})</small>}</td><td className="text-center">{row.uom}</td><td className="text-center">{row.batchCode}</td><td className="text-center">{row.expiryDate}</td><td className="text-center">{row.locationCode}</td><td className="text-center"><strong>{number.format(row.stockQuantity)}</strong></td><td className="text-center">{number.format(row.pendingSalesQuantity)}</td><td className="text-center" /><td className="text-center"><input type="checkbox" readOnly checked={Boolean(row.isDiscontinued)} /></td><td className="text-center" /><td className="text-center ps-row-actions"><button type="button" onClick={() => window.confirm(`Xóa dòng tồn kho ${row.productName}?`) && router.delete(`/admin/warehouse-inventories/${row.id}`, { preserveScroll: true })}><i className="fa fa-trash" /></button></td></tr>) : <tr><td colSpan="14" className="ps-empty">Chưa có dữ liệu tồn kho.</td></tr>}
                 </tbody></table></div>
-                <Pagination data={report.rows} routeUrl={routeUrl} filters={filters} />
+                <PushsalePagination meta={report.rows} routeUrl={routeUrl} filters={filters} itemLabel="dòng tồn kho" />
             </section>
 
             <DialogShell open={movementOpen} onClose={() => setMovementOpen(false)}>

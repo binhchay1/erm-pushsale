@@ -38,6 +38,8 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-v86-header-menu-dialog-polish.css', layer: 'final-contract', load: () => import('../../css/pushsale-v86-header-menu-dialog-polish.css') },
     { file: 'pushsale-v87-pagination-actions-upsale.css', layer: 'final-contract', load: () => import('../../css/pushsale-v87-pagination-actions-upsale.css') },
     { file: 'pushsale-v88-filter-info-upsale-actions.css', layer: 'final-contract', load: () => import('../../css/pushsale-v88-filter-info-upsale-actions.css') },
+    { file: 'pushsale-v89-page-pagination-menu-fixes.css', layer: 'final-contract', load: () => import('../../css/pushsale-v89-page-pagination-menu-fixes.css') },
+    { file: 'pushsale-v90-report-feature-ecommerce-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v90-report-feature-ecommerce-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {

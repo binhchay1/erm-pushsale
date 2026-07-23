@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Services\CustomerInteractions\OrderOperationHistoryService;
 use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Leads\LandingUpsellService;
+use App\Services\Settings\FeatureSettingsService;
 use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -24,6 +25,7 @@ class OrderClosingService
         private readonly LandingUpsellService $landingUpsell,
         private readonly OrderOperationHistoryService $history,
         private readonly OrderCodeGenerator $orderCodes,
+        private readonly FeatureSettingsService $featureSettings,
     ) {}
 
     /**
@@ -72,6 +74,11 @@ class OrderClosingService
                 $customerNote = trim(($customerNote ? $customerNote."\n" : '').$payload['note']);
             }
 
+            $shippingNotes = $payload['shipping_notes'] ?? $order->shipping_notes;
+            if (! filled($shippingNotes)) {
+                $shippingNotes = $this->featureSettings->string('SettingGhiChuGiaoHangSale', '');
+            }
+
             $order->update([
                 'order_code' => $this->orderCodes->generate($order),
                 'closed_at' => now(),
@@ -85,6 +92,7 @@ class OrderClosingService
                 'warehouse_id' => $payload['warehouse_id'] ?? $order->warehouse_id,
                 'shipping_provider' => $shippingProvider,
                 'shipping_method' => $payload['shipping_method'] ?? $order->shipping_method,
+                'shipping_notes' => $shippingNotes,
                 'customer_note' => $customerNote,
             ]);
 

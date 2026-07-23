@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\Accounting\OperationsController as AccountingOper
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FailedPartnerOrderController;
 use App\Http\Controllers\Admin\IntegrationsController;
+use App\Http\Controllers\Admin\EcommerceConnectShopController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\LandingApprovalController;
 use App\Http\Controllers\Admin\LeadIngestionController;
@@ -181,6 +182,9 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
     Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 
+    Route::redirect('connect-shop-list', '/admin/ecommerce/connect-shops', 301)->name('legacy.ecommerce.connect-shops');
+    Route::redirect('ld/ecommerce/e-connect-shop-list', '/admin/ecommerce/connect-shops', 301)->name('legacy.ecommerce.connect-shops.ld');
+
     // Mỗi mã menu là một màn hình nghiệp vụ với controller và route tĩnh riêng.
     // Các file template chỉ cung cấp content + dialog; header/sidebar do AppLayout quản lý.
     Route::prefix('admin')->name('admin.')->group(function () {
@@ -262,6 +266,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::delete('failed-orders/{failedPartnerOrder}', [FailedPartnerOrderController::class, 'destroy'])->name('failed-orders.destroy');
         Route::get('orders/failed', FailedOrdersController::class)->name('orders.failed');
         Route::get('rankings', RankingController::class)->name('rankings');
+        Route::get('ecommerce/connect-shops', EcommerceConnectShopController::class)->name('ecommerce.connect-shops');
         Route::get('integrations', [IntegrationsController::class, 'index'])->name('integrations.index');
         Route::put('integrations/{platform}', [IntegrationsController::class, 'update'])->name('integrations.update');
         Route::post('integrations/{platform}/test', [IntegrationsController::class, 'testWebhook'])->name('integrations.test');

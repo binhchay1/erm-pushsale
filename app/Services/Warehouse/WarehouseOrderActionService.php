@@ -6,6 +6,8 @@ use App\Enums\DeliveryStatus;
 use App\Models\Order;
 use App\Models\Pushsale\PhoneBlacklist;
 use App\Models\User;
+use App\Enums\UserRole;
+use App\Services\Settings\FeatureSettingsService;
 use App\Services\CustomerInteractions\OrderOperationHistoryService;
 use App\Services\Inventory\InventoryReturnService;
 use App\Services\Leads\LeadOrderFactory;
@@ -19,6 +21,7 @@ class WarehouseOrderActionService
         private readonly LeadOrderFactory $factory,
         private readonly InventoryReturnService $returns,
         private readonly OrderOperationHistoryService $history,
+        private readonly FeatureSettingsService $featureSettings,
     ) {}
 
     public function updateDesiredDelivery(Order $order, ?string $date, ?User $actor): Order
@@ -61,6 +64,15 @@ class WarehouseOrderActionService
             throw ValidationException::withMessages(['delivery_status' => 'Trạng thái giao hàng không hợp lệ.']);
         }
 
+        if ($enum === DeliveryStatus::CancelClosing) {
+            if ($this->actorIsWarehouse($actor) && ! $this->featureSettings->bool('SettingKhoHuyDangDon', true)) {
+                throw ValidationException::withMessages(['delivery_status' => 'Cấu hình chức năng đang khóa quyền kho hủy đăng đơn.']);
+            }
+            if ($this->actorIsAccounting($actor) && ! $this->featureSettings->bool('SettingKeToanHuyDangDon', true)) {
+                throw ValidationException::withMessages(['delivery_status' => 'Cấu hình chức năng đang khóa quyền kế toán hủy đăng đơn.']);
+            }
+        }
+
         $updates = [
             'delivery_status' => $enum->value,
             'last_delivery_event_at' => now(),
@@ -88,6 +100,8 @@ class WarehouseOrderActionService
         if ($order->inventory_deducted_at && isset($payload['items'])) {
             throw ValidationException::withMessages(['items' => 'Đơn đã xuất kho; không thể thay đổi sản phẩm. Hãy xử lý hoàn/tách bằng chứng từ kho.']);
         }
+
+        $this->assertOrderUpdateAllowed($payload, $actor);
 
         return DB::transaction(function () use ($order, $payload, $actor) {
             $before = $this->history->snapshot($order);
@@ -201,6 +215,36 @@ class WarehouseOrderActionService
             $code = $base.'-T'.$index++;
         } while (Order::query()->where('order_code', $code)->exists());
         return $code;
+    }
+
+    private function actorIsWarehouse(?User $actor): bool
+    {
+        return $actor?->role === UserRole::Warehouse;
+    }
+
+    private function actorIsAccounting(?User $actor): bool
+    {
+        return $actor?->role === UserRole::Accounting;
+    }
+
+    /** @param array<string,mixed> $payload */
+    private function assertOrderUpdateAllowed(array $payload, ?User $actor): void
+    {
+        if ($this->actorIsWarehouse($actor) && array_key_exists('items', $payload) && ! $this->featureSettings->bool('SettingKhoSuaSanPham', true)) {
+            throw ValidationException::withMessages(['items' => 'Cấu hình chức năng đang khóa quyền kho sửa sản phẩm của đơn hàng.']);
+        }
+
+        $shippingFields = [
+            'customer_name', 'customer_phone', 'receiver_name', 'receiver_phone',
+            'shipping_address', 'shipping_address_2', 'shipping_notes', 'customer_note',
+            'warehouse_id', 'shipping_provider', 'shipping_method',
+        ];
+
+        if ($this->actorIsWarehouse($actor)
+            && collect($shippingFields)->contains(fn (string $field): bool => array_key_exists($field, $payload))
+            && ! $this->featureSettings->bool('SettingGiaoVanCapNhatPTGH', true)) {
+            throw ValidationException::withMessages(['order' => 'Cấu hình chức năng đang khóa quyền kho sửa thông tin giao vận của đơn hàng.']);
+        }
     }
 
     /** @param array<string,mixed> $metadata */

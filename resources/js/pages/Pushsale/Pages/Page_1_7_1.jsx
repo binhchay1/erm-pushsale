@@ -2,9 +2,8 @@ import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
-
-const numberFormatter = new Intl.NumberFormat('vi-VN');
 
 function formatDateTime(value) {
     if (!value) return '';
@@ -52,45 +51,22 @@ function StatusBadge({ value }) {
     return <span className={`ps-login-status ps-login-status-${tone}`}>{value || '—'}</span>;
 }
 
-function Pagination({ pagination, routeUrl, perPage, onPerPageChange }) {
-    const current = Math.max(1, Number(pagination?.current_page || 1));
-    const last = Math.max(1, Number(pagination?.last_page || 1));
-    const total = Number(pagination?.total || 0);
+function currentFilters() {
+    if (typeof window === 'undefined') return {};
+    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
+}
 
-    const visit = (page) => {
-        const params = new URLSearchParams(window.location.search);
-        params.set('page', String(Math.max(1, Math.min(last, page))));
-        params.set('per_page', String(perPage || 20));
-        router.get(routeUrl, Object.fromEntries(params.entries()), {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-        });
-    };
-
+function Pagination({ pagination, routeUrl }) {
     return (
-        <div className="ps-login-pagination">
+        <div className="ps-login-pagination ps-login-pagination-v89">
             <div className="ps-login-note">* Hệ thống chỉ lưu lịch sử 60 ngày gần nhất</div>
-            <div className="ps-login-pager-controls">
-                <label className="ps-login-page-size">
-                    <span>Hiển thị</span>
-                    <select className="form-control input-sm" value={perPage} onChange={(event) => onPerPageChange(event.target.value)}>
-                        {[20, 50, 100, 200, 500].map((size) => <option key={size} value={size}>{size}</option>)}
-                    </select>
-                    <span>dòng</span>
-                </label>
-                <div className="btn-group ps-login-short-pager">
-                    <button type="button" className="btn btn-default btn-sm" disabled>
-                        {numberFormatter.format(Number(pagination?.from || 0))} - {numberFormatter.format(Number(pagination?.to || 0))} / {numberFormatter.format(total)}
-                    </button>
-                    <button type="button" className="btn btn-default btn-sm" disabled={current <= 1} onClick={() => visit(current - 1)} title="Trang trước">
-                        <i className="fa fa-caret-left" />
-                    </button>
-                    <button type="button" className="btn btn-default btn-sm" disabled={current >= last} onClick={() => visit(current + 1)} title="Trang sau">
-                        <i className="fa fa-caret-right" />
-                    </button>
-                </div>
-            </div>
+            <PushsalePagination
+                meta={pagination}
+                routeUrl={routeUrl}
+                filters={currentFilters()}
+                itemLabel="lần đăng nhập"
+                perPageOptions={[20, 50, 100, 200, 500]}
+            />
         </div>
     );
 }
@@ -152,19 +128,6 @@ export default function LoginHistoryPage({ schema, rows = [], pagination = {}, f
 
     const reset = () => {
         router.get(routeUrl, {}, { preserveState: false, preserveScroll: false, replace: true });
-    };
-
-    const changePerPage = (value) => {
-        const next = { ...filters, per_page: value };
-        setFilters(next);
-        const params = new URLSearchParams(window.location.search);
-        params.set('per_page', String(value));
-        params.delete('page');
-        router.get(routeUrl, Object.fromEntries(params.entries()), {
-            preserveState: false,
-            preserveScroll: true,
-            replace: true,
-        });
     };
 
     const searchActions = (
@@ -257,7 +220,7 @@ export default function LoginHistoryPage({ schema, rows = [], pagination = {}, f
                     </table>
                 </div>
 
-                <Pagination pagination={pagination} routeUrl={routeUrl} perPage={filters.per_page} onPerPageChange={changePerPage} />
+                <Pagination pagination={pagination} routeUrl={routeUrl} />
             </PushsalePageShell>
         </AppLayout>
     );

@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Shipping\CreateShipmentService;
 use App\Services\Shipping\ShippingOrderService;
+use App\Services\Settings\FeatureSettingsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -17,6 +19,35 @@ use Inertia\Response as InertiaResponse;
 class ShippingOrderController extends Controller
 {
     use InteractsWithReportFilters;
+
+    private function assertShipmentPermission(Request $request, string $action): ?JsonResponse
+    {
+        $user = $request->user();
+        if (! $user) {
+            return null;
+        }
+
+        $features = app(FeatureSettingsService::class);
+        $role = $user->role instanceof UserRole ? $user->role : UserRole::tryFrom((string) $user->role);
+
+        $key = match ([$role, $action]) {
+            [UserRole::Warehouse, 'create'] => 'SettingKhoDangDon',
+            [UserRole::Warehouse, 'cancel'] => 'SettingKhoHuyDangDon',
+            [UserRole::Accounting, 'create'] => 'SettingKeToanDangDon',
+            [UserRole::Accounting, 'cancel'] => 'SettingKeToanHuyDangDon',
+            default => null,
+        };
+
+        if ($key && ! $features->bool($key, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chức năng này đang bị khóa trong Cấu hình chức năng.',
+            ], 422);
+        }
+
+        return null;
+    }
+
 
     public function index(Request $request, ShippingOrderService $service): InertiaResponse
     {
@@ -47,6 +78,10 @@ class ShippingOrderController extends Controller
     public function createShipment(Request $request, Order $order, CreateShipmentService $service): JsonResponse
     {
         abort_unless($order->closed_at, 422, __('messages.shipping_actions.order_not_closed'));
+
+        if ($blocked = $this->assertShipmentPermission($request, 'create')) {
+            return $blocked;
+        }
 
         if (! $order->inventory_deducted_at && ! app(InventoryDeductionService::class)->hasSufficientStock($order)) {
             return response()->json([
@@ -84,6 +119,10 @@ class ShippingOrderController extends Controller
 
     public function cancelShipment(Request $request, Order $order, CreateShipmentService $service, ShippingOrderService $presenter): JsonResponse
     {
+        if ($blocked = $this->assertShipmentPermission($request, 'cancel')) {
+            return $blocked;
+        }
+
         $provider = $request->string('provider')->toString() ?: null;
         $service->cancel($order, $provider);
 

@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 
@@ -140,39 +141,19 @@ function TotalsRow({ columns, rows }) {
     );
 }
 
+function currentFilters() {
+    if (typeof window === 'undefined') return {};
+    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
+}
+
 function Pagination({ pagination, routeUrl }) {
-    if (!pagination || pagination.last_page <= 1) return null;
-
-    const visit = (page) => {
-        const params = new URLSearchParams(window.location.search);
-        params.set('page', String(page));
-        router.get(routeUrl, Object.fromEntries(params.entries()), { preserveScroll: true, preserveState: true });
-    };
-
-    const start = Math.max(1, pagination.current_page - 3);
-    const end = Math.min(pagination.last_page, start + 6);
-    const pages = [];
-    for (let page = start; page <= end; page += 1) pages.push(page);
-
     return (
-        <div className="legacy-pagination-wrap">
-            <span className="legacy-record-info">
-                Hiển thị {pagination.from} - {pagination.to} / {numberFormatter.format(pagination.total)} bản ghi
-            </span>
-            <ul className="pagination pagination-sm no-margin">
-                <li className={pagination.current_page <= 1 ? 'disabled' : ''}>
-                    <button type="button" onClick={() => pagination.current_page > 1 && visit(pagination.current_page - 1)}>«</button>
-                </li>
-                {pages.map((page) => (
-                    <li key={page} className={page === pagination.current_page ? 'active' : ''}>
-                        <button type="button" onClick={() => visit(page)}>{page}</button>
-                    </li>
-                ))}
-                <li className={pagination.current_page >= pagination.last_page ? 'disabled' : ''}>
-                    <button type="button" onClick={() => pagination.current_page < pagination.last_page && visit(pagination.current_page + 1)}>»</button>
-                </li>
-            </ul>
-        </div>
+        <PushsalePagination
+            meta={pagination}
+            routeUrl={routeUrl}
+            filters={currentFilters()}
+            itemLabel="bản ghi"
+        />
     );
 }
 

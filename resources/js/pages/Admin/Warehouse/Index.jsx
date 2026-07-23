@@ -2,7 +2,26 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+
+const emptyWarehouse = {
+    name: '',
+    code: '',
+    phone: '',
+    pick_province: '',
+    pick_district: '',
+    pick_ward: '',
+    address: '',
+    manager_user_id: '',
+    vtp_code: '',
+    ghtk_pick_address_id: '',
+};
+
+function currentFilters() {
+    if (typeof window === 'undefined') return {};
+    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
+}
 
 function DialogShell({ title, open, onClose, children, wide = false }) {
     return (
@@ -24,7 +43,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
     const [province, setProvince] = useState(filters.province ?? '');
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState(null);
-    const form = useForm(empty);
+    const form = useForm(emptyWarehouse);
     const rows = warehouses?.data ?? [];
 
     const submitFilters = (event) => {
@@ -32,7 +51,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
         router.get('/admin/warehouses', { search: search || null, manager_user_id: manager || null, province: province || null }, { preserveState: true, replace: true });
     };
 
-    const openCreate = () => { setEditing(null); form.setData(empty); form.clearErrors(); setOpen(true); };
+    const openCreate = () => { setEditing(null); form.setData(emptyWarehouse); form.clearErrors(); setOpen(true); };
     const openEdit = (row) => { setEditing(row.id); form.setData({ name: row.name ?? '', phone: row.phone ?? '', pick_province: row.pick_province ?? '', pick_district: row.pick_district ?? '', pick_ward: row.pick_ward ?? '', address: row.address ?? '', manager_user_id: row.manager_user_id ?? '', vtp_code: row.vtp_code ?? '', ghtk_pick_address_id: row.ghtk_pick_address_id ?? '', code: row.code ?? '' }); form.clearErrors(); setOpen(true); };
     const save = (event) => {
         event.preventDefault();
@@ -71,7 +90,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                         </tr>) : <tr><td colSpan="12" className="ps-empty">Chưa có kho phù hợp.</td></tr>}</tbody>
                     </table>
                 </div>
-                <Pagination data={warehouses} />
+                <PushsalePagination meta={warehouses} routeUrl="/admin/warehouses" filters={currentFilters()} itemLabel="kho" />
             </section>
 
             <DialogShell open={open} onClose={() => setOpen(false)} title={editing ? 'CẬP NHẬT KHO' : 'THÊM MỚI KHO'}>

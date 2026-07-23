@@ -1,6 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useMemo, useRef, useState } from 'react';
 
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
@@ -20,19 +21,9 @@ function DialogShell({ title, open, onClose, children, wide = false }) {
     );
 }
 
-function Pagination({ pagination }) {
-    return (
-        <div className="ps-pagination-bar">
-            <span>{pagination.from ?? 0} - {pagination.to ?? 0} / {pagination.total ?? 0}</span>
-            <ul className="pagination pagination-sm">
-                {(pagination.links ?? []).map((link, index) => (
-                    <li key={`${link.label}-${index}`} className={`${link.active ? 'active' : ''} ${!link.url ? 'disabled' : ''}`}>
-                        <button type="button" disabled={!link.url} onClick={() => link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true })} dangerouslySetInnerHTML={{ __html: link.label }} />
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
+function currentFilters() {
+    if (typeof window === 'undefined') return {};
+    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
 }
 
 const emptyProduct = {
@@ -195,7 +186,7 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                         </tbody>
                     </table>
                 </div>
-                <Pagination pagination={products} />
+                <PushsalePagination meta={products} routeUrl="/admin/products" filters={currentFilters()} itemLabel="sản phẩm" />
             </section>
 
             <DialogShell title={editingId ? 'CẬP NHẬT SẢN PHẨM' : 'THÊM MỚI SẢN PHẨM'} open={productOpen} onClose={() => setProductOpen(false)} wide>

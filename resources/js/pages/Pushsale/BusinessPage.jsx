@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CustomerMessagesDialog } from '@/components/customers/CustomerMessagesDialog';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { CustomerPurchaseHistoryDialog } from '@/components/customers/CustomerPurchaseHistoryDialog';
 import { OrderOperationHistoryDialog } from '@/components/customers/OrderOperationHistoryDialog';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
@@ -190,64 +191,19 @@ function TotalsRow({ columns, rows }) {
     );
 }
 
+function currentQueryFilters() {
+    if (typeof window === 'undefined') return {};
+    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
+}
+
 function Pagination({ pagination, routeUrl }) {
-    if (!pagination) return null;
-
-    const current = Math.max(1, Number(pagination.current_page || 1));
-    const last = Math.max(1, Number(pagination.last_page || 1));
-    const currentPerPage = Number(pagination.per_page || new URLSearchParams(window.location.search).get('per_page') || 20);
-
-    const visit = (page, perPage = currentPerPage) => {
-        const targetPage = Math.min(last, Math.max(1, Number(page) || 1));
-        const targetPerPage = Number(perPage) || currentPerPage;
-        const params = new URLSearchParams(window.location.search);
-        params.set('page', String(targetPage));
-        params.set('per_page', String(targetPerPage));
-        router.get(routeUrl, Object.fromEntries(params.entries()), {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-        });
-    };
-
-    const start = Math.max(1, current - 2);
-    const end = Math.min(last, current + 2);
-    const pages = [];
-    for (let page = start; page <= end; page += 1) pages.push(page);
-
     return (
-        <div className="pushsale-pagination-wrap">
-            <div className="pushsale-record-info">
-                <span>Hiển thị <b>{pagination.from ?? 0}</b> - <b>{pagination.to ?? 0}</b> / <b>{numberFormatter.format(Number(pagination.total || 0))}</b> bản ghi</span>
-                <label className="pushsale-page-size">
-                    <span>Số dòng</span>
-                    <select className="form-control input-sm" value={currentPerPage} onChange={(event) => visit(1, event.target.value)}>
-                        {[10, 20, 50, 100].map((size) => <option key={size} value={size}>{size}</option>)}
-                    </select>
-                </label>
-            </div>
-            <ul className="pagination pagination-sm no-margin">
-                <li className={current <= 1 ? 'disabled' : ''}>
-                    <button type="button" onClick={() => current > 1 && visit(1)} aria-label="Trang đầu">«</button>
-                </li>
-                <li className={current <= 1 ? 'disabled' : ''}>
-                    <button type="button" onClick={() => current > 1 && visit(current - 1)} aria-label="Trang trước">‹</button>
-                </li>
-                {start > 1 && <li className="disabled"><span>…</span></li>}
-                {pages.map((page) => (
-                    <li key={page} className={page === current ? 'active' : ''}>
-                        <button type="button" onClick={() => visit(page)}>{page}</button>
-                    </li>
-                ))}
-                {end < last && <li className="disabled"><span>…</span></li>}
-                <li className={current >= last ? 'disabled' : ''}>
-                    <button type="button" onClick={() => current < last && visit(current + 1)} aria-label="Trang sau">›</button>
-                </li>
-                <li className={current >= last ? 'disabled' : ''}>
-                    <button type="button" onClick={() => current < last && visit(last)} aria-label="Trang cuối">»</button>
-                </li>
-            </ul>
-        </div>
+        <PushsalePagination
+            meta={pagination}
+            routeUrl={routeUrl}
+            filters={currentQueryFilters()}
+            itemLabel="bản ghi"
+        />
     );
 }
 
@@ -1138,7 +1094,12 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
     const rowProps = { schema, rows, onEdit, onDelete, selectedRecordIds, onToggleSelect };
     return (
         <>
-            <div className="pushsale-template-host" ref={hostRef} dangerouslySetInnerHTML={{ __html: templateHtml }} />
+            <div
+                className={`pushsale-template-host pushsale-template-page-${String(schema.code ?? '').replaceAll('.', '-')}`}
+                data-page-code={schema.code}
+                ref={hostRef}
+                dangerouslySetInnerHTML={{ __html: templateHtml }}
+            />
             {gridEnabled && rowAnchor && createPortal(<PushsaleRows {...rowProps} />, rowAnchor)}
             {gridEnabled && paginationAnchor && createPortal(<Pagination pagination={pagination} routeUrl={routeUrl} />, paginationAnchor)}
             {chartAnchors.map((anchor, index) => createPortal(<TrendMetricChart row={rows[index]} />, anchor, `trend-${index}`))}
@@ -1375,7 +1336,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
             <Head title={schema.title} />
             <div className={`pushsale-page pushsale-kind-${schema.kind}`} data-page-code={schema.code}>
                 {(error || pageRuntimeError) && <div className="pushsale-error-banner"><i className="fa fa-exclamation-triangle" /> {error || pageRuntimeError}</div>}
-                <LiveDataSummary summary={summary} />
+                {!['1.10', '2.6.1'].includes(String(schema.code)) && <LiveDataSummary summary={summary} />}
                 <TemplateHost
                     templateHtml={templateHtml}
                     schema={schema}

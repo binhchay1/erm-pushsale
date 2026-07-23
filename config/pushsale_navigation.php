@@ -211,8 +211,9 @@ return array (
           0 => 
           array (
             'title' => '1. Danh sách kết nối cửa hàng',
-            'url' => '/admin/integrations',
-            'area' => 'connections',
+            'url' => '/admin/ecommerce/connect-shops',
+            'area' => 'ecommerce',
+            'code' => '1.15.1',
           ),
           1 => 
           array (
@@ -434,8 +435,9 @@ return array (
           0 => 
           array (
             'title' => '1. Danh sách kết nối cửa hàng',
-            'url' => '/admin/integrations',
-            'area' => 'connections',
+            'url' => '/admin/ecommerce/connect-shops',
+            'area' => 'ecommerce',
+            'code' => '2.9.1',
           ),
           1 => 
           array (

@@ -1,13 +1,15 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { formatCurrency } from '@/lib/format';
 import { PushsalePageFrame } from '@/pages/Pushsale/components/PushsalePageFrame';
 
-function visitPage(url) {
-    if (url) router.get(url, {}, { preserveScroll: true, preserveState: true });
+function currentFilters() {
+    if (typeof window === 'undefined') return {};
+    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
 }
 
 function CircleStatus({ active, title, onClick, disabled = false }) {
@@ -314,7 +316,6 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
         locked: filters.locked ?? '',
     });
     const rows = users?.data ?? [];
-    const links = users?.links ?? [];
     const visibleAccountCount = accountCount || users?.total || rows.length;
 
     const submit = (event) => {
@@ -463,16 +464,12 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
                     </table>
                 </div>
 
-                <div className="ps-pagination-bar">
-                    <span>{users.from ?? 0} - {users.to ?? 0} / {users.total ?? 0}</span>
-                    <ul className="pagination pagination-sm">
-                        {links.map((link, index) => (
-                            <li key={`${link.label}-${index}`} className={`${link.active ? 'active' : ''} ${!link.url ? 'disabled' : ''}`}>
-                                <button type="button" disabled={!link.url} onClick={() => visitPage(link.url)} dangerouslySetInnerHTML={{ __html: link.label }} />
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                <PushsalePagination
+                    meta={users}
+                    routeUrl="/admin/users"
+                    filters={currentFilters()}
+                    itemLabel="tài khoản"
+                />
             </PushsalePageFrame>
             {accountDialog.mode && (
                 <AccountDialog

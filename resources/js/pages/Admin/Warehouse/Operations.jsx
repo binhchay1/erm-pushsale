@@ -1,15 +1,9 @@
 import { Head, router } from '@inertiajs/react';
 
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { WarehouseFilterPanel } from '@/components/operations/WarehouseFilterPanel';
 import { WarehouseOrderTable } from '@/components/operations/WarehouseOrderTable';
-import { PushsalePager } from '@/components/reports/PushsaleReportChrome';
-
-function Pagination({ meta, routeUrl, filters }) {
-    if (!meta) return null;
-    const visit = (overrides) => router.get(routeUrl, { ...filters, ...overrides }, { preserveState: true, preserveScroll: true, replace: true });
-    return <div className="ps-wh-pagination"><span>Hiển thị {meta.from ?? 0} - {meta.to ?? 0} / {meta.total ?? 0} đơn</span><PushsalePager current={meta.current_page ?? 1} totalPages={meta.last_page ?? 1} onPage={(page) => visit({ page })} /><label>Hiển thị <select value={meta.per_page ?? 20} onChange={(e) => visit({ page: 1, per_page: e.target.value })}><option>10</option><option>20</option><option>50</option><option>100</option></select> dòng</label></div>;
-}
 
 export default function WarehouseOperations({
     filters = {}, filterOptions = {}, report = { rows: { data: [], meta: null }, statusTabs: [], summary: {} },
@@ -43,7 +37,7 @@ export default function WarehouseOperations({
                     </div>
                 </div>
                 <WarehouseOrderTable rows={report.rows?.data ?? []} apiBase={shippingApiBase} actionApiBase={actionApiBase} filterOptions={filterOptions} canDeleteOrder={canDeleteOrder} />
-                <Pagination meta={report.rows?.meta} routeUrl={routeUrl} filters={filters} />
+                <PushsalePagination meta={report.rows?.meta} routeUrl={routeUrl} filters={filters} itemLabel="đơn" />
             </section>
         </AppLayout>
     );

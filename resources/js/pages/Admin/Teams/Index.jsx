@@ -1,11 +1,13 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsalePageFrame } from '@/pages/Pushsale/components/PushsalePageFrame';
 
-function navigate(url) {
-    if (url) router.get(url, {}, { preserveScroll: true, preserveState: true });
+function currentFilters() {
+    if (typeof window === 'undefined') return {};
+    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
 }
 
 function teamFormPayload(team = null, fallbackType = 'marketing') {
@@ -223,16 +225,12 @@ export default function TeamsIndex({ teams, filters = {}, types = [], leaders = 
                     </table>
                 </div>
 
-                <div className="ps-pagination-bar ps-team-pagination">
-                    <span>{teams.from ?? 0} - {teams.to ?? 0} / {teams.total ?? 0}</span>
-                    <ul className="pagination pagination-sm">
-                        {(teams.links ?? []).map((link, index) => (
-                            <li key={`${link.label}-${index}`} className={`${link.active ? 'active' : ''} ${!link.url ? 'disabled' : ''}`}>
-                                <button type="button" disabled={!link.url} onClick={() => navigate(link.url)} dangerouslySetInnerHTML={{ __html: link.label }} />
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                <PushsalePagination
+                    meta={teams}
+                    routeUrl="/admin/teams"
+                    filters={currentFilters()}
+                    itemLabel="đội nhóm"
+                />
             </PushsalePageFrame>
 
             <TeamDialog

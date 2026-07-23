@@ -141,7 +141,7 @@ export function PushsalePager({ current = 1, totalPages = 1, onPage, max = 7 }) 
     const pages = Array.from({ length: end - start + 1 }, (_, index) => start + index);
 
     return (
-        <div className="ps-pager" aria-label={t('reports.pushsale.pagination')}>
+        <div className="ps-pager ps-pagination-v81 pushsale-pagination" aria-label={t('reports.pushsale.pagination')}>
             <button type="button" disabled={safeCurrent <= 1} onClick={() => onPage?.(1)} title={t('reports.pushsale.first_page')}>«</button>
             <button type="button" disabled={safeCurrent <= 1} onClick={() => onPage?.(safeCurrent - 1)} title={t('reports.pushsale.prev_page')}>‹</button>
             {pages.map((page) => (
