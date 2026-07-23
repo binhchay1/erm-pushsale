@@ -16,7 +16,6 @@ const connectionTypes = [
 const sourceTypeLabels = {
     main: 'Landing chính',
     upsell: 'Trang upsale',
-    thank_you: 'Trang cảm ơn',
 };
 
 const allocationLabels = {
@@ -44,7 +43,7 @@ const blankKey = () => globalThis.crypto?.randomUUID?.() ?? `src_${Date.now()}_$
 const blankSource = (sourceType = 'main') => ({
     id: null,
     client_key: blankKey(),
-    name: sourceType === 'main' ? 'Landing chính' : sourceType === 'upsell' ? 'Trang upsale' : 'Trang cảm ơn',
+    name: sourceType === 'main' ? 'Landing chính' : 'Trang upsale',
     source_type: sourceType,
     source_url: '',
     redirect_url: '',
@@ -62,6 +61,24 @@ const blankProduct = (isDefault = false, sourceKey = '') => ({
     unit_price_override: '',
     is_default: isDefault,
 });
+const editableSourceTypes = new Set(['main', 'upsell']);
+
+function normalizeEditableSources(sources = []) {
+    const normalized = (sources ?? [])
+        .filter((source) => editableSourceTypes.has(source?.source_type))
+        .map((source, index) => ({
+            ...source,
+            source_type: source.source_type === 'main' ? 'main' : 'upsell',
+            sort_order: source.sort_order ?? index,
+        }));
+
+    if (!normalized.some((source) => source.source_type === 'main')) {
+        normalized.unshift(blankSource('main'));
+    }
+
+    return normalized;
+}
+
 
 const blankForm = () => {
     const mainSource = blankSource('main');
@@ -178,6 +195,9 @@ export default function LandingConnectionsPage({
     };
 
     const openEdit = (row) => {
+        const editableSources = normalizeEditableSources(row.sources ?? []);
+        const sourceKeys = new Set(editableSources.map((source) => String(source.client_key)));
+
         setEditingId(row.id);
         form.setData({
             name: row.name ?? '',
@@ -194,8 +214,14 @@ export default function LandingConnectionsPage({
             is_approved: Boolean(row.is_approved),
             is_active: Boolean(row.is_active),
             notes: row.notes ?? '',
-            sources: (row.sources ?? []).length ? row.sources.map((source) => ({ ...source })) : [blankSource('main')],
-            products: (row.products ?? []).length ? row.products.map((product) => ({ ...product, unit_price_override: product.unit_price_override ?? '' })) : [blankProduct(true)],
+            sources: editableSources,
+            products: (row.products ?? []).length
+                ? row.products.map((product) => ({
+                    ...product,
+                    source_key: sourceKeys.has(String(product.source_key ?? '')) ? product.source_key : '',
+                    unit_price_override: product.unit_price_override ?? '',
+                }))
+                : [blankProduct(true)],
             sale_user_ids: row.sale_user_ids ?? [],
         });
         form.clearErrors();
@@ -331,7 +357,7 @@ export default function LandingConnectionsPage({
                                 <input className="form-control" placeholder="Tìm kiếm tên nguồn hoặc URL" value={query.search} onChange={(event) => setQuery((old) => ({ ...old, search: event.target.value }))} />
                                 <button className="btn btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
                                 <button type="button" className="btn btn-default" title="Cài đặt"><i className="fa fa-cog" /></button>
-                                <button type="button" className="btn btn-default" title="Trợ giúp"><i className="fa fa-question-circle" /></button>
+                                
                             </div>
                         </div>
                     </div>
@@ -393,7 +419,7 @@ export default function LandingConnectionsPage({
                                             <i className={`fa fa-${expanded.has(row.id) ? 'minus' : 'plus'}-square-o`} /> {row.name}
                                         </button>
                                         {(expanded.has(row.id) ? row.sources : row.sources?.slice(0, 1))?.map((source) => (
-                                            <small key={source.id}><b>{sourceTypeLabels[source.source_type]}:</b> {source.source_url}</small>
+                                            <small key={source.id}><b>{sourceTypeLabels[source.source_type] ?? source.source_type}:</b> {source.source_url}</small>
                                         ))}
                                     </td>
                                     <td><strong>{row.connection_type}</strong><small>{row.ad_channel || '—'}</small></td>
@@ -408,7 +434,7 @@ export default function LandingConnectionsPage({
                                     <td>
                                         {row.sources?.map((source) => (
                                             <div className="pslc-api-line" key={source.id}>
-                                                <span>{sourceTypeLabels[source.source_type]}</span>
+                                                <span>{sourceTypeLabels[source.source_type] ?? source.source_type}</span>
                                                 {source.submit_url
                                                     ? <button type="button" onClick={() => copy(source.submit_url)} title={source.submit_url}><i className="fa fa-copy" /> Copy URL</button>
                                                     : <em>Chỉ làm trang đích</em>}
@@ -460,7 +486,7 @@ export default function LandingConnectionsPage({
                                 </label>
                                 <label>Tên nguồn dữ liệu (*)<input className="form-control" required value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} /></label>
                                 <label>Kênh quảng cáo (*)<input className="form-control" value={form.data.ad_channel} onChange={(event) => form.setData('ad_channel', event.target.value)} placeholder="landing / facebook / tiktok..." /></label>
-                                <label>URL hoàn tất mặc định<input className="form-control" type="url" value={form.data.success_url} onChange={(event) => form.setData('success_url', event.target.value)} placeholder="https://.../cam-on" /></label>
+                                <label>URL kết thúc luồng<input className="form-control" type="url" value={form.data.success_url} onChange={(event) => form.setData('success_url', event.target.value)} placeholder="https://landing.example/hoan-tat" /></label>
                                 <label className="span-2">Ghi chú cấu hình<input className="form-control" value={form.data.notes} onChange={(event) => form.setData('notes', event.target.value)} placeholder="Quy ước nguồn, sản phẩm, cách vận hành..." /></label>
                             </div>
                             <div className="pslc-budget-box">
@@ -498,17 +524,23 @@ export default function LandingConnectionsPage({
                         </section>
 
                         <section className="pslc-form-section">
-                            <div className="pslc-section-title"><h4>NGUỒN LANDING / UPSELL</h4><div><button type="button" className="btn btn-xs btn-info" onClick={() => addSource('upsell')}><i className="fa fa-plus" /> Trang upsale</button><button type="button" className="btn btn-xs btn-default" onClick={() => addSource('thank_you')}><i className="fa fa-plus" /> Trang cảm ơn</button></div></div>
-                            <p className="pslc-guide">Form của từng trang gửi trực tiếp tới URL API được sinh tự động. Landing chính sẽ redirect sang URL tiếp theo kèm <code>ps_flow</code>; trang upsale gửi lại mã này để gộp đúng khách và đúng đơn.</p>
+                            <div className="pslc-section-title"><h4>NGUỒN LANDING / UPSELL</h4><div><button type="button" className="btn btn-xs btn-info" onClick={() => addSource('upsell')}><i className="fa fa-plus" /> Trang upsale</button></div></div>
+                            <div className="pslc-guide pslc-guide-setup">
+                                <strong>Luồng đúng:</strong> Landing chính nhận form khách đặt lần đầu. Nếu có upsale, nhập URL trang upsale ở ô Redirect của Landing chính; hệ thống tự đính kèm <code>ps_flow</code> và <code>saleops_session</code> khi chuyển trang. Trang upsale chỉ cần gửi form về URL API của nguồn upsale tương ứng, kèm <code>ps_flow</code> từ query string hoặc số điện thoại khách để hệ thống gộp đúng đơn trong cửa sổ giữ luồng.
+                                <br />
+                                <strong>Ladipage / form website:</strong> đặt method POST tới URL nhận dữ liệu, field bắt buộc là số điện thoại (<code>phone</code>, <code>customer_phone</code> hoặc <code>tel</code>). Các field tên, địa chỉ, ghi chú, sản phẩm được map bằng bảng sản phẩm bên dưới; nếu landing không gửi mã sản phẩm thì dòng Mặc định sẽ được dùng.
+                                <br />
+                                <strong>Facebook Ads:</strong> dùng cùng kết nối để quy hoạch ngân sách/sản phẩm/marketing; nguồn Facebook sẽ đi qua webhook Facebook riêng, không cần tạo thêm nguồn đích cuối riêng.
+                            </div>
                             <div className="pslc-source-editor">
                                 {form.data.sources.map((source, index) => (
                                     <div className="pslc-source-card" key={source.client_key}>
                                         <div className="pslc-source-card-head"><strong>Nguồn {index + 1}</strong>{form.data.sources.length > 1 && source.source_type !== 'main' && <button type="button" onClick={() => removeSource(index)}><i className="fa fa-trash" /></button>}</div>
                                         <div className="pslc-form-grid source-grid">
-                                            <label>Vai trò nguồn (*)<select className="form-control" value={source.source_type} disabled={source.source_type === 'main'} onChange={(event) => updateSource(index, 'source_type', event.target.value)}>{source.source_type === 'main' && <option value="main">Landing chính</option>}<option value="upsell">Trang upsale</option><option value="thank_you">Trang cảm ơn</option></select></label>
+                                            <label>Vai trò nguồn (*)<select className="form-control" value={source.source_type} disabled={source.source_type === 'main'} onChange={(event) => updateSource(index, 'source_type', event.target.value)}>{source.source_type === 'main' && <option value="main">Landing chính</option>}<option value="upsell">Trang upsale</option></select></label>
                                             <label>Tên nguồn (*)<input className="form-control" required value={source.name} onChange={(event) => updateSource(index, 'name', event.target.value)} /></label>
                                             <label className="span-2">URL nguồn dữ liệu (*)<input className="form-control" type="url" required value={source.source_url} onChange={(event) => updateSource(index, 'source_url', event.target.value)} placeholder="https://landing.example/..." /></label>
-                                            <label className="span-2">Redirect sau khi nhận thành công<input className="form-control" type="url" value={source.redirect_url ?? ''} onChange={(event) => updateSource(index, 'redirect_url', event.target.value)} placeholder={source.source_type === 'main' ? 'URL trang upsale' : 'URL trang cảm ơn tiếp theo'} /></label>
+                                            <label className="span-2">Redirect sau khi nhận thành công<input className="form-control" type="url" value={source.redirect_url ?? ''} onChange={(event) => updateSource(index, 'redirect_url', event.target.value)} placeholder={source.source_type === 'main' ? 'URL trang upsale nếu có' : 'URL kết thúc luồng hoặc để trống'} /></label>
                                             <label className="span-2">Ghi chú nguồn<input className="form-control" value={source.notes ?? ''} onChange={(event) => updateSource(index, 'notes', event.target.value)} placeholder="Tên form, vị trí form, quy ước field..." /></label>
                                             <label className="pslc-source-active"><input type="checkbox" checked={Boolean(source.is_active)} onChange={(event) => updateSource(index, 'is_active', event.target.checked)} /> Cho phép nhận dữ liệu từ nguồn này</label>
                                         </div>

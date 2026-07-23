@@ -288,7 +288,7 @@ class StagingTestService
             'budget_amount' => 2_000_000,
             'budget_start_date' => now()->toDateString(),
             'budget_end_date' => now()->toDateString(),
-            'success_url' => $baseUrl.'/thank-you?ps_flow={flow_token}',
+            'success_url' => $baseUrl.'/qa/hoan-tat-'.$suffix.'?ps_flow={flow_token}',
             'manual_import' => false,
             'is_approved' => true,
             'is_active' => true,
@@ -314,7 +314,7 @@ class StagingTestService
             'name' => 'Upsale QA',
             'source_type' => LandingConnectionSource::TYPE_UPSELL,
             'source_url' => $baseUrl.'/qa/upsell-'.$suffix,
-            'redirect_url' => $baseUrl.'/qa/thank-you-'.$suffix,
+            'redirect_url' => $baseUrl.'/qa/hoan-tat-'.$suffix,
             'sort_order' => 2,
             'is_active' => true,
         ]));

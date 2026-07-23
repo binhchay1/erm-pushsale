@@ -154,16 +154,20 @@ function AdminDashboardContent({ stats: initialStats, filters = {} }) {
 
     return (
         <section className="psfd-page">
-            <form className="psfd-toolbar" onSubmit={submitFilter}>
-                <div>
+            <form className="psfd-toolbar psfd-toolbar-v88" onSubmit={submitFilter}>
+                <div className="psfd-toolbar-copy">
                     <h1>ADMIN DASHBOARD</h1>
                     <p>Điều hành doanh thu, dòng tiền, marketing, kho và vận hành trên cùng một nguồn dữ liệu.</p>
                 </div>
-                <div className="psfd-filter-controls">
-                    <label>Từ ngày<input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} /></label>
-                    <label>Đến ngày<input type="date" min={dateFrom || undefined} value={dateTo} onChange={(event) => setDateTo(event.target.value)} /></label>
-                    <button type="submit"><i className="fa fa-search" /> Tải dữ liệu</button>
-                    <RealtimeBadge connected={connected} />
+                <div className="psfd-toolbar-controls">
+                    <div className="psfd-filter-controls">
+                        <label>Từ ngày<input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} /></label>
+                        <label>Đến ngày<input type="date" min={dateFrom || undefined} value={dateTo} onChange={(event) => setDateTo(event.target.value)} /></label>
+                        <button type="submit"><i className="fa fa-search" /> Tải dữ liệu</button>
+                    </div>
+                    <div className="psfd-live-slot">
+                        <RealtimeBadge connected={connected} />
+                    </div>
                 </div>
             </form>
 

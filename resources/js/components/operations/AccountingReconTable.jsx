@@ -19,13 +19,24 @@ function ProductTable({ items = [] }) {
     return (
         <table className="tb-in-sp ps-acc-product-table">
             <tbody>
-                {items.map((item, index) => (
-                    <tr className="row-sp" key={item.itemId ?? item.productName ?? index}>
-                        <td><span className="ten-sp">{item.productName}</span>{item.itemType === 'upsell' && <em className="ps-acc-upsell-tag">UP</em>}</td>
-                        <td className="text-center no-wrap">x{item.quantity}</td>
-                        <td className="text-right no-wrap">{formatNumber(item.unitPrice)}</td>
-                    </tr>
-                ))}
+                {items.map((item, index) => {
+                    const origin = String(item.origin ?? '').toLowerCase();
+                    const type = String(item.itemType ?? item.item_type ?? '').toLowerCase();
+                    const isUpsell = Boolean(item.isUpsell) || type === 'upsell' || origin.includes('upsell') || origin.includes('upsale');
+                    const hasDivider = isUpsell && !items.slice(0, index).some((previous) => {
+                        const previousOrigin = String(previous.origin ?? '').toLowerCase();
+                        const previousType = String(previous.itemType ?? previous.item_type ?? '').toLowerCase();
+                        return Boolean(previous.isUpsell) || previousType === 'upsell' || previousOrigin.includes('upsell') || previousOrigin.includes('upsale');
+                    });
+
+                    return (
+                        <tr className={`row-sp ${isUpsell ? 'is-upsell-line' : ''} ${hasDivider ? 'has-upsale-divider' : ''}`.trim()} key={item.itemId ?? item.productName ?? index}>
+                            <td><span className="ten-sp">{item.productName}</span>{isUpsell && <em className="ps-acc-upsell-tag" title="Upsale" aria-label="Upsale">UP</em>}</td>
+                            <td className="text-center no-wrap">x{item.quantity}</td>
+                            <td className="text-right no-wrap">{formatNumber(item.unitPrice)}</td>
+                        </tr>
+                    );
+                })}
             </tbody>
         </table>
     );

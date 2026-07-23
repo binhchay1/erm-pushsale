@@ -7,6 +7,7 @@ use App\Enums\PermissionLevel;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\LandingConnection;
+use App\Models\LandingConnectionSource;
 use App\Models\Product;
 use App\Models\Team;
 use App\Models\User;
@@ -131,7 +132,7 @@ final class LandingConnectionsController extends Controller
             'sources.*.id' => ['nullable', 'integer'],
             'sources.*.client_key' => ['required', 'string', 'max:64'],
             'sources.*.name' => ['required', 'string', 'max:255'],
-            'sources.*.source_type' => ['required', Rule::in(['main', 'upsell', 'thank_you'])],
+            'sources.*.source_type' => ['required', Rule::in([LandingConnectionSource::TYPE_MAIN, LandingConnectionSource::TYPE_UPSELL])],
             'sources.*.source_url' => ['required', 'url:http,https', 'max:2048'],
             'sources.*.redirect_url' => ['nullable', 'url:http,https', 'max:2048'],
             'sources.*.sort_order' => ['nullable', 'integer', 'min:0', 'max:1000'],
@@ -174,7 +175,7 @@ final class LandingConnectionsController extends Controller
                 }
             }
 
-            if ($sources->where('source_type', 'main')->count() !== 1) {
+            if ($sources->where('source_type', LandingConnectionSource::TYPE_MAIN)->count() !== 1) {
                 $validator->errors()->add('sources', 'Mỗi kết nối phải có đúng 1 Landing chính.');
             }
 
@@ -259,7 +260,9 @@ final class LandingConnectionsController extends Controller
             'notes' => (string) ($connection->metadata['notes'] ?? ''),
             'api_base_url' => $connection->apiBaseUrl(),
             'contacts' => (int) ($connection->marketingSource?->contacts ?? 0),
-            'sources' => $connection->sources->map(fn ($source): array => [
+            'sources' => $connection->sources
+                ->whereIn('source_type', [LandingConnectionSource::TYPE_MAIN, LandingConnectionSource::TYPE_UPSELL])
+                ->map(fn ($source): array => [
                 'id' => $source->id,
                 'client_key' => (string) ($source->metadata['client_key'] ?? $source->id),
                 'name' => $source->name,

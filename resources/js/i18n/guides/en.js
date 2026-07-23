@@ -167,6 +167,41 @@ export default [
         ],
     },
     {
+        path: '/admin/marketing/landing-connections',
+        title: 'Landing / website / Facebook connections',
+        intro: 'Marketing creates real lead intake sources, product mappings, budget, preferred sales owners, and upsell flow before launching ads.',
+        sections: [
+            {
+                heading: 'Standard flow from staff setup to closing',
+                items: [
+                    'Admin creates employees, assigns Marketing / Sales / Warehouse roles, and enables data receiving for users who can receive leads.',
+                    'Warehouse or Admin creates products / combos and enables them for Marketing selection.',
+                    'Marketing creates a connection: marketer owner, ad channel, budget, default products, and the main landing source.',
+                    'Admin approves the connection. Only approved active connections receive leads and route them to sales.',
+                    'Form lead enters the system → upsell hold window → sales receives data → sales closes order → warehouse posts shipment and tracks delivery.',
+                ],
+            },
+            {
+                heading: 'Ladipage / website form setup',
+                items: [
+                    'Copy the main landing submit URL and configure the form to POST to that URL.',
+                    'Phone is required: phone, customer_phone, or tel. Name, address, notes and product fields can use standard names or the landing driver mapping.',
+                    'For upsell, put the upsell page URL into the main landing Redirect field. The system appends ps_flow and saleops_session automatically.',
+                    'The upsell form posts to the upsell source submit URL and sends ps_flow from the query string, or repeats the phone, so the order is merged in the 90-second window.',
+                    'Do not create a separate thank-you source. The final page is only a destination URL after the main/upsell form is accepted.',
+                ],
+            },
+            {
+                heading: 'Product mapping & upsell display',
+                items: [
+                    'Default product rows are used when the landing page does not send a product code or the field mapping does not match.',
+                    'Rows with item_type = Upsell or an upsell source display the upsell marker in customer profile, sales operation, and warehouse operation screens.',
+                    'Every receiving source must have at least one applicable product/combo to avoid missing order lines when leads arrive.',
+                ],
+            },
+        ],
+    },
+    {
         path: '/admin/landing-approvals',
         title: 'Landing page approvals',
         intro: 'Approve marketing landing / campaign connections before they receive leads.',

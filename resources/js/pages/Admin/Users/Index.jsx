@@ -251,7 +251,7 @@ function BulkAccountDialog({ open, onClose, roles = [] }) {
     };
 
     return (
-        <PushsaleDialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()} title="THÊM NHIỀU TÀI KHOẢN" width="820px" bodyClassName="ps-employee-dialog-body ps-employee-bulk-dialog">
+        <PushsaleDialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()} title="THÊM NHIỀU TÀI KHOẢN" width="900px" bodyClassName="ps-employee-dialog-body ps-employee-bulk-dialog">
             <form className="ps-employee-form" onSubmit={submit}>
                 {Object.keys(form.errors).length > 0 && <div className="ps-employee-error">{Object.values(form.errors).join(' · ')}</div>}
                 <div className="ps-employee-form-row">
@@ -271,8 +271,15 @@ function BulkAccountDialog({ open, onClose, roles = [] }) {
                     </select>
                 </div>
                 <div className="ps-employee-form-row">
-                    <label>Tài khoản <span className="required">(*)</span>:<br /><span className="small-tip">Mỗi dòng một tài khoản</span></label>
-                    <textarea className="form-control" rows="9" value={form.data.accounts} onChange={(event) => form.setData('accounts', event.target.value)} required />
+                    <label>Tài khoản <span className="required">(*)</span>:<br /><span className="small-tip">Mỗi dòng một tài khoản, không nhập đuôi email</span></label>
+                    <textarea
+                                className="form-control"
+                                rows="10"
+                                value={form.data.accounts}
+                                onChange={(event) => form.setData('accounts', event.target.value)}
+                                required
+                                placeholder={`Mỗi dòng một tài khoản. Ví dụ:\nsale01\nsale02\nmarketing01`}
+                            />
                 </div>
                 <div className="ps-employee-form-row">
                     <label>Mật khẩu:</label>
@@ -285,7 +292,7 @@ function BulkAccountDialog({ open, onClose, roles = [] }) {
                     <label></label>
                     <label className="ps-employee-check"><input type="checkbox" checked={form.data.receive_data} onChange={(event) => form.setData('receive_data', event.target.checked)} /> Nhận dữ liệu ngay sau khi tạo</label>
                 </div>
-                <div className="ps-employee-dialog-note">Các tài khoản được tạo thật trong bảng users, sinh email theo đơn vị hiện tại và tự tạo hồ sơ vận hành để tham gia phân bổ data.</div>
+                <div className="ps-employee-dialog-note">Nhập mỗi dòng một mã tài khoản, ví dụ sale01, sale02, mkt01. Không nhập khoảng trắng hoặc đuôi email; hệ thống tự sinh email theo đơn vị hiện tại, tạo hồ sơ vận hành và đưa tài khoản vào luồng phân bổ data.</div>
                 <div className="ps-employee-action-row">
                     <button type="button" className="btn btn-default btn-sm" onClick={onClose}>Đóng</button>
                     <button className="btn btn-primary btn-sm" disabled={form.processing}><i className={`fa ${form.processing ? 'fa-spinner fa-spin' : 'fa-save'}`} /> Tạo tài khoản</button>
@@ -347,7 +354,7 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
 
     const title = <>Danh sách nhân viên <span className="ps-title-divider">|</span> <span className="ps-orange">Số TK: {visibleAccountCount}</span></>;
     const actions = (
-        <form className="ps-header-search" onSubmit={submit}>
+        <form className="ps-header-search ps-users-header-search" onSubmit={submit}>
             <input
                 type="text"
                 className="form-control"

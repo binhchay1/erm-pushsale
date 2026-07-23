@@ -199,13 +199,24 @@ function ProductLines({ products = [] }) {
     if (!products.length) return <span>—</span>;
     return (
         <div className="ps-split-stack ps-product-stack">
-            {products.map((product, index) => (
-                <div key={product.itemId ?? index} className="ps-split-row row-sp">
-                    <span className="ten-sp">{product.productName}</span>
-                    <span className="text-center no-wrap">x{product.quantity}</span>
-                    <span className="text-right no-wrap"><b>{money(product.unitPrice)}</b></span>
-                </div>
-            ))}
+            {products.map((product, index) => {
+                const origin = String(product.origin ?? '').toLowerCase();
+                const type = String(product.itemType ?? product.item_type ?? '').toLowerCase();
+                const isUpsell = Boolean(product.isUpsell) || type === 'upsell' || origin.includes('upsell') || origin.includes('upsale');
+                const hasDivider = isUpsell && !products.slice(0, index).some((previous) => {
+                    const previousOrigin = String(previous.origin ?? '').toLowerCase();
+                    const previousType = String(previous.itemType ?? previous.item_type ?? '').toLowerCase();
+                    return Boolean(previous.isUpsell) || previousType === 'upsell' || previousOrigin.includes('upsell') || previousOrigin.includes('upsale');
+                });
+
+                return (
+                    <div key={product.itemId ?? index} className={`ps-split-row row-sp ps-product-line ${isUpsell ? 'is-upsale-line' : 'is-main-line'} ${hasDivider ? 'has-upsale-divider' : ''}`.trim()}>
+                        <span className="ten-sp">{isUpsell ? <i className="fa fa-level-up ps-upsale-line-icon" title="Upsale" aria-label="Upsale" /> : null}{product.productName}</span>
+                        <span className="text-center no-wrap">x{product.quantity}</span>
+                        <span className="text-right no-wrap"><b>{money(product.unitPrice)}</b></span>
+                    </div>
+                );
+            })}
         </div>
     );
 }

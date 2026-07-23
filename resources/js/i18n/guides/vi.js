@@ -167,6 +167,41 @@ export default [
         ],
     },
     {
+        path: '/admin/marketing/landing-connections',
+        title: 'Kết nối landing / website / Facebook',
+        intro: 'Màn hình marketing tạo nguồn nhận lead thật, gắn sản phẩm, ngân sách, sale ưu tiên và luồng upsale trước khi chạy quảng cáo.',
+        sections: [
+            {
+                heading: 'Quy trình chuẩn từ nhân sự đến chốt đơn',
+                items: [
+                    'Admin tạo nhân viên, gán vai trò Marketing / Sale / Kho và bật quyền nhận dữ liệu cho người cần chia lead.',
+                    'Kho hoặc Admin tạo sản phẩm / gói sản phẩm, bật trạng thái đang dùng và cho phép Marketing chọn ở landing.',
+                    'Marketing tạo kết nối: chọn marketer phụ trách, kênh quảng cáo, ngân sách, sản phẩm mặc định và nguồn landing chính.',
+                    'Admin duyệt kết nối. Chỉ kết nối đã duyệt và đang hoạt động mới nhận lead để chia cho sale.',
+                    'Lead từ form vào hệ thống → giữ cửa sổ upsale → sale nhận data → sale chốt đơn → kho đăng đơn và theo dõi giao vận.',
+                ],
+            },
+            {
+                heading: 'Cấu hình form Ladipage / website',
+                items: [
+                    'Copy URL nhận dữ liệu của Landing chính, cấu hình form submit bằng POST tới URL đó.',
+                    'Field bắt buộc là số điện thoại: phone, customer_phone hoặc tel. Các field tên, địa chỉ, ghi chú có thể gửi theo tên chuẩn hoặc map bằng driver landing.',
+                    'Nếu có upsale, nhập URL trang upsale vào Redirect của Landing chính. Hệ thống tự thêm ps_flow và saleops_session khi chuyển trang.',
+                    'Form upsale gửi POST tới URL nhận dữ liệu của nguồn upsale; gửi kèm ps_flow từ query string hoặc gửi lại số điện thoại để gộp đúng đơn trong 90 giây.',
+                    'Không tạo nguồn đích cuối riêng. Trang kết thúc chỉ là URL sau khi đã nhận xong form chính/upsale.',
+                ],
+            },
+            {
+                heading: 'Mapping sản phẩm & upsale',
+                items: [
+                    'Dòng sản phẩm Mặc định dùng khi landing không gửi mã sản phẩm hoặc field map không khớp.',
+                    'Dòng item_type = Upsell hoặc nguồn áp dụng là Trang upsale sẽ hiển thị nhãn upsale ở hồ sơ khách hàng, sale tác nghiệp và thủ kho tác nghiệp.',
+                    'Mỗi nguồn nhận form phải có ít nhất một sản phẩm/gói áp dụng để tránh mất dòng hàng khi lead về.',
+                ],
+            },
+        ],
+    },
+    {
         path: '/admin/landing-approvals',
         title: 'Duyệt trang Landing',
         intro: 'Phê duyệt các kết nối landing / chiến dịch do marketing tạo trước khi nhận lead.',

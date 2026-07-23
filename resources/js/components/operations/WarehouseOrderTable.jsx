@@ -78,13 +78,18 @@ function ProductTable({ items = [] }) {
     if (!items.length) return <span>—</span>;
     return (
         <table className="tb-in-sp ps-wh-product-table"><tbody>
-            {items.map((item) => (
-                <tr className="row-sp" key={item.id}>
-                    <td><span className="ten-sp">{item.productName}</span>{item.isUpsell && <em className="ps-wh-upsell-tag">UP</em>}</td>
+            {items.map((item, index) => {
+                const isUpsell = Boolean(item.isUpsell);
+                const hasUpsellDivider = isUpsell && !items.slice(0, index).some((prev) => Boolean(prev.isUpsell));
+
+                return (
+                    <tr className={`row-sp ${isUpsell ? 'is-upsell-line' : ''} ${hasUpsellDivider ? 'has-upsale-divider' : ''}`.trim()} key={item.id}>
+                    <td><span className="ten-sp">{item.productName}</span>{isUpsell && <em className="ps-wh-upsell-tag" title="Upsale" aria-label="Upsale">UP</em>}</td>
                     <td className="text-center no-wrap">&nbsp; x{item.quantity} &nbsp;</td>
                     <td className="text-right">{formatNumber(item.unitPrice)}</td>
                 </tr>
-            ))}
+                );
+            })}
         </tbody></table>
     );
 }
@@ -103,7 +108,7 @@ function MoneyStack({ row }) {
 
 function ActionMenuButton({ title, icon, tone = 'success', onClick, disabled = false }) {
     return (
-        <button type="button" className={`n-button fam-${tone}`} fam-tooltip={title} title={title} onClick={onClick} disabled={disabled}>
+        <button type="button" className={`n-button ps-wh-action-button fam-${tone}`} fam-tooltip={title} title={title} onClick={onClick} disabled={disabled}>
             <i className={`fa fa-${icon}`} />
         </button>
     );
@@ -224,7 +229,7 @@ function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpen
                     <ActionMenuButton title="Cập nhật nhiều đơn theo mã Pushsale" icon="gears" tone="success" onClick={updateByOrderCode} disabled={!selectedCount} />
                 </div>
             </div>
-            <button type="button" className="main-action" id="warehouseMenuToggle" title={open ? 'Đóng chức năng' : 'Mở chức năng'} onClick={() => setOpen((value) => !value)}>
+            <button type="button" className="main-action ps-wh-main-action" id="warehouseMenuToggle" title={open ? 'Đóng chức năng' : 'Mở chức năng'} onClick={() => setOpen((value) => !value)}>
                 <i className="fa fa-bars" />
             </button>
         </nav>
