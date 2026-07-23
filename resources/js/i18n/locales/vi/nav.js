@@ -28,7 +28,7 @@ export default {
         campaign_report: 'Báo cáo chiến dịch',
         marketing_report_2: 'Tỉ lệ chốt đơn sản phẩm',
         marketing_report_3: 'Báo cáo công việc marketing',
-        upsale_report: 'Báo cáo upsale',
+        upsale_report: 'Báo cáo up sale',
         team_leader_stats: 'Thống kê trưởng nhóm',
         hourly_stats: 'Biểu đồ thống kê theo khung giờ',
         warehouse_report_1: 'Doanh số theo kho',

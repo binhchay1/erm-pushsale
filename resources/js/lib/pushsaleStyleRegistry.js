@@ -40,6 +40,14 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-v88-filter-info-upsale-actions.css', layer: 'final-contract', load: () => import('../../css/pushsale-v88-filter-info-upsale-actions.css') },
     { file: 'pushsale-v89-page-pagination-menu-fixes.css', layer: 'final-contract', load: () => import('../../css/pushsale-v89-page-pagination-menu-fixes.css') },
     { file: 'pushsale-v90-report-feature-ecommerce-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v90-report-feature-ecommerce-contract.css') },
+    { file: 'pushsale-v91-customer-operation-money-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v91-customer-operation-money-contract.css') },
+    { file: 'pushsale-v92-dashboard-menu-sales-report.css', layer: 'final-contract', load: () => import('../../css/pushsale-v92-dashboard-menu-sales-report.css') },
+    { file: 'pushsale-v93-system-reports-menu-scroll.css', layer: 'final-contract', load: () => import('../../css/pushsale-v93-system-reports-menu-scroll.css') },
+    { file: 'pushsale-v94-revenue-detail-report-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v94-revenue-detail-report-contract.css') },
+    { file: 'pushsale-v95-marketing-sales-report-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v95-marketing-sales-report-contract.css') },
+    { file: 'pushsale-v96-marketing-work-leader-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v96-marketing-work-leader-contract.css') },
+    { file: 'pushsale-v97-marketing-upsale-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v97-marketing-upsale-contract.css') },
+    { file: 'pushsale-v98-warehouse-flow-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v98-warehouse-flow-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {

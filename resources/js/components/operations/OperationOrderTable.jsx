@@ -8,6 +8,7 @@ import { CustomerMessagesDialog } from '@/components/customers/CustomerMessagesD
 import { OrderOperationHistoryDialog } from '@/components/customers/OrderOperationHistoryDialog';
 import { CustomerPurchaseHistoryDialog } from '@/components/customers/CustomerPurchaseHistoryDialog';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
+import { OrderMoneyBreakdown, OrderProductsBreakdown } from '@/components/operations/OrderLineBreakdown';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useTableSort } from '@/hooks/use-table-sort';
@@ -224,25 +225,12 @@ export function OperationOrderTable({
                                     )}
                                 </Td>
 
-                                <Td className="whitespace-normal text-sm">
-                                    {row.products?.map((p) => (
-                                        <div key={p.itemId ?? p.productName} className="flex justify-between items-center gap-4 border-b border-dashed border-gray-200 last:border-0 pb-1 mb-1 last:pb-0 last:mb-0">
-                                            <span className="flex-1">{p.productName}</span>
-                                            <span className="w-10 text-center">x{p.quantity}</span>
-                                            <span className="w-20 text-right">{formatCurrency(p.unitPrice)}</span>
-                                        </div>
-                                    ))}
+                                <Td className="whitespace-normal text-sm ps-order-products-cell">
+                                    <OrderProductsBreakdown items={row.products ?? []} />
                                 </Td>
 
-                                <Td className="text-right text-sm font-medium">
-                                    <div>{formatCurrency(row.subtotal)}</div>
-                                    <div className="text-muted-foreground font-normal">
-                                        {row.discount > 0 ? `-${formatCurrency(row.discount)}` : '0'}
-                                    </div>
-                                    <div className="text-muted-foreground font-normal">
-                                        {row.shippingFeeCollected > 0 ? formatCurrency(row.shippingFeeCollected) : '0'}
-                                    </div>
-                                    <div className="font-bold mt-1 text-black">{formatCurrency(row.total)}</div>
+                                <Td className="text-right text-sm font-medium ps-order-money-cell">
+                                    <OrderMoneyBreakdown row={row} />
                                 </Td>
 
                                 <Td className="text-center text-sm">

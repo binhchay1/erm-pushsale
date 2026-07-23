@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
+import { OrderMoneyBreakdown, OrderProductsBreakdown } from '@/components/operations/OrderLineBreakdown';
 import { formatCurrency } from '@/lib/format';
 import { PushsalePagination } from './PushsalePagination';
 
@@ -195,32 +196,6 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     );
 }
 
-function ProductLines({ products = [] }) {
-    if (!products.length) return <span>—</span>;
-    return (
-        <div className="ps-split-stack ps-product-stack">
-            {products.map((product, index) => {
-                const origin = String(product.origin ?? '').toLowerCase();
-                const type = String(product.itemType ?? product.item_type ?? '').toLowerCase();
-                const isUpsell = Boolean(product.isUpsell) || type === 'upsell' || origin.includes('upsell') || origin.includes('upsale');
-                const hasDivider = isUpsell && !products.slice(0, index).some((previous) => {
-                    const previousOrigin = String(previous.origin ?? '').toLowerCase();
-                    const previousType = String(previous.itemType ?? previous.item_type ?? '').toLowerCase();
-                    return Boolean(previous.isUpsell) || previousType === 'upsell' || previousOrigin.includes('upsell') || previousOrigin.includes('upsale');
-                });
-
-                return (
-                    <div key={product.itemId ?? index} className={`ps-split-row row-sp ps-product-line ${isUpsell ? 'is-upsale-line' : 'is-main-line'} ${hasDivider ? 'has-upsale-divider' : ''}`.trim()}>
-                        <span className="ten-sp">{isUpsell ? <i className="fa fa-level-up ps-upsale-line-icon" title="Upsale" aria-label="Upsale" /> : null}{product.productName}</span>
-                        <span className="text-center no-wrap">x{product.quantity}</span>
-                        <span className="text-right no-wrap"><b>{money(product.unitPrice)}</b></span>
-                    </div>
-                );
-            })}
-        </div>
-    );
-}
-
 function CallButton({ order, actionBaseUrl }) {
     const call = () => router.post(`${actionBaseUrl}/orders/${order.id}/call`, {}, {
         preserveScroll: true,
@@ -360,18 +335,12 @@ export function SaleWorkspaceTable({
                                     </td>
                                     <td className="text-center"><TimeRemaining order={order} /></td>
                                     <td>
-                                        <ProductLines products={order.products} />
+                                        <OrderProductsBreakdown items={order.products ?? []} />
                                         {order.isSupplementalOrder && <div className="ps-upsale-tag">UPSALE</div>}
                                         {order.awaitingLandingUpsell && <div className="ps-upsale-wait">Đang chờ upsale</div>}
                                     </td>
                                     <td className="text-right ps-money-cell">
-                                        <div className="ps-money-stack">
-                                            <div>{money(order.subtotal)}</div>
-                                            <div>{money(order.discount)}</div>
-                                            <div>{money(order.vat)}</div>
-                                            <div>{money(order.shippingFeeCollected)}</div>
-                                            <strong>{money(order.total)}</strong>
-                                        </div>
+                                        <OrderMoneyBreakdown row={order} />
                                     </td>
                                     <td className="text-right">{money(order.deposit)}</td>
                                     <td className={`text-center ttgh ttgh-${order.deliveryStatusValue || 'none'}`}>

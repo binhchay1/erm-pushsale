@@ -252,6 +252,16 @@ function MarketingLeaderFilter({ filters, filterOptions, routeUrl }) {
                             options={PER_PAGE_OPTIONS.map((value) => ({ value, label: value === '999999' ? '--Hiển thị tất--' : value }))}
                         />
                     </div>
+                    <div className="col-sm-2 form-group ps-leader-check-col">
+                        <label className="ps-report-check">
+                            <input
+                                type="checkbox"
+                                checked={Boolean(form.no_closing_date_limit)}
+                                onChange={(event) => set('no_closing_date_limit', event.target.checked ? 1 : 0)}
+                            />
+                            <span>Không giới hạn ngày chốt</span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -378,12 +388,13 @@ export default function TeamLeaderStats({
     filters = {},
     filterOptions = {},
     routeUrl,
+    activeMenuCode = '2.8.1',
 }) {
     const t = useT();
     const title = t('reports.team_leaders.title');
 
     return (
-        <AppLayout>
+        <AppLayout activeMenuCode={activeMenuCode}>
             <Head title={title} />
             <div className="ceo-report-pushsale ps-marketing-leader-page">
                 <MarketingLeaderFilter filters={filters} filterOptions={filterOptions} routeUrl={routeUrl} />

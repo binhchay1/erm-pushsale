@@ -26,6 +26,14 @@ return [
             'title' => 'Marketing revenue',
             'description' => 'Orders and revenue per marketer by delivery status.',
         ],
+        'marketing-sales-summary' => [
+            'title' => 'Sales report',
+            'description' => 'Pushsale-style warehouse sales report with revenue, orders, product volume, and upsell separated.',
+        ],
+        'marketing-sales-v2' => [
+            'title' => 'Sales report V2',
+            'description' => 'Warehouse sales V2 with contact funnel, highlighted metrics, and separated upsell.',
+        ],
         'marketing-2' => [
             'title' => 'Product close rate',
             'description' => 'Contacts, closed orders, close rate and average order value per product.',
@@ -35,7 +43,7 @@ return [
             'description' => 'Total contacts, unallocated contacts, closed orders and revenue per marketer.',
         ],
         'marketing-4' => [
-            'title' => 'Upsell report',
+            'title' => 'Upsale report',
             'description' => 'Per data source: contacts, close rate, product types & quantity sold, revenue and upsell contribution.',
         ],
         'kho-1' => [

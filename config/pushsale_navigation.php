@@ -352,15 +352,15 @@ return array (
           1 => 
           array (
             'title' => '2. Báo cáo doanh số',
-            'url' => '/admin/marketing/revenue',
-            'area' => 'marketing',
+            'url' => '/admin/reports/extra/marketing-sales-summary',
+            'area' => 'reports',
             'code' => '2.7.2',
           ),
           2 => 
           array (
             'title' => '3. Báo cáo doanh số V2',
-            'url' => '/admin/marketing/revenue',
-            'area' => 'marketing',
+            'url' => '/admin/reports/extra/marketing-sales-v2',
+            'area' => 'reports',
             'code' => '2.7.3',
           ),
           3 => 
@@ -373,7 +373,7 @@ return array (
           4 => 
           array (
             'title' => '5. Báo cáo công việc',
-            'url' => '/admin/reports/extra/marketing-3',
+            'url' => '/ld/thong-ke/bao-cao-cong-viec-mkt?menu=2.7.5',
             'area' => 'reports',
             'code' => '2.7.5',
           ),
@@ -383,22 +383,6 @@ return array (
             'url' => '/admin/reports/extra/kho-2',
             'area' => 'reports',
             'code' => '2.7.6',
-          ),
-          6 => 
-          array (
-            'title' => '7. Báo cáo tỉ lệ chốt sản phẩm',
-            'url' => '/admin/reports/extra/product-conversion',
-            'area' => 'reports',
-            'code' => '2.7.7',
-            'roles' => array ('admin', 'marketing'),
-          ),
-          7 => 
-          array (
-            'title' => '8. Báo cáo upsale',
-            'url' => '/admin/reports/extra/marketing-4',
-            'area' => 'reports',
-            'code' => '2.7.8',
-            'roles' => array ('admin', 'marketing'),
           ),
         ),
       ),
@@ -410,20 +394,23 @@ return array (
           0 => 
           array (
             'title' => '1. Thống kê trưởng nhóm',
-            'url' => '/admin/reports/team-leaders',
+            'url' => '/ld/marketing/thong-ke-truong-nhom',
             'area' => 'reports',
+            'code' => '2.8.1',
           ),
           1 => 
           array (
-            'title' => '2 . Báo cáo công việc',
-            'url' => '/admin/reports/extra/marketing-3',
+            'title' => '2. Báo cáo công việc',
+            'url' => '/ld/thong-ke/bao-cao-cong-viec-mkt?menu=2.8.2',
             'area' => 'reports',
+            'code' => '2.8.2',
           ),
           2 => 
           array (
             'title' => '3. Báo cáo up sale',
-            'url' => '/admin/reports/extra/marketing-4',
+            'url' => '/ld/thong-ke/bao-cao-up-sale?menu=2.8.3',
             'area' => 'reports',
+            'code' => '2.8.3',
           ),
         ),
       ),
@@ -969,8 +956,8 @@ return array (
           ),
           11 => 
           array (
-            'title' => '12. Báo cáo upsale',
-            'url' => '/admin/reports/extra/marketing-4',
+            'title' => '12. Báo cáo up sale',
+            'url' => '/ld/thong-ke/bao-cao-up-sale?menu=6.3.12',
             'area' => 'reports',
             'code' => '6.3.12',
             'roles' => array ('admin', 'accounting'),
@@ -1035,20 +1022,23 @@ return array (
           0 => 
           array (
             'title' => '1. Biểu đồ thống kê theo khung giờ',
-            'url' => '/admin/reports/hourly',
+            'url' => '/ld/thong-ke',
             'area' => 'reports',
+            'code' => '8.1.1',
           ),
           1 => 
           array (
             'title' => '2. Báo cáo doanh số marketing',
-            'url' => '/admin/reports/extra/marketing-1',
+            'url' => '/bao-cao/bao-cao-doanh-so-chi-tiet-marketing',
             'area' => 'reports',
+            'code' => '8.1.2',
           ),
           2 => 
           array (
             'title' => '3. Báo cáo up sale',
-            'url' => '/admin/reports/extra/marketing-4',
+            'url' => '/ld/thong-ke/bao-cao-up-sale?menu=8.1.3',
             'area' => 'reports',
+            'code' => '8.1.3',
           ),
         ),
       ),

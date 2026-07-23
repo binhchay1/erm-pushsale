@@ -38,7 +38,8 @@ class HourlyStatsController extends Controller
             $filterFields[] = 'marketer_id';
         }
 
-        $base = match ($user->role) {
+        $path = '/'.ltrim($request->path(), '/');
+        $base = $path === '/ld/thong-ke' ? '/ld/thong-ke' : match ($user->role) {
             UserRole::Admin => '/admin/reports/hourly',
             UserRole::Marketing => '/marketing/reports/hourly',
             UserRole::Sales => '/sales/reports/hourly',
@@ -52,6 +53,7 @@ class HourlyStatsController extends Controller
                 'totals' => $data['totals'],
                 'peak' => $data['peak'],
                 'routeUrl' => $base,
+                'activeMenuCode' => $path === '/ld/thong-ke' ? '8.1.1' : null,
                 'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
             ],
         ));

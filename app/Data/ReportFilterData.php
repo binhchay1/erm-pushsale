@@ -21,6 +21,7 @@ readonly class ReportFilterData
         public ?Carbon $dateFrom = null,
         public ?Carbon $dateTo = null,
         public DateType $dateType = DateType::DataArrival,
+        public ?string $customerType = null,
         public ?string $deliveryStatus = null,
         public ?string $reconciliationStatus = null,
         public DiscountMode $discountMode = DiscountMode::AfterDiscount,
@@ -59,35 +60,36 @@ readonly class ReportFilterData
     {
         $dateRange = ReportDateRange::fromRequest($request);
 
-        $saleId = $request->integer('sale_id') ?: null;
+        $saleId = self::optionalPositiveInt($request, 'sale_id');
         if ($user?->isSales() && ! self::isElevatedOperator($user)) {
             $saleId = $user->id;
         }
 
-        $marketerId = $request->integer('marketer_id') ?: null;
+        $marketerId = self::optionalPositiveInt($request, 'marketer_id');
         if ($user?->role === UserRole::Marketing && ! self::isElevatedOperator($user)) {
             $marketerId = $user->id;
         }
 
         return new self(
             sourceType: $request->input('source_type'),
-            marketingSourceId: $request->integer('marketing_source_id') ?: null,
+            marketingSourceId: self::optionalPositiveInt($request, 'marketing_source_id'),
             preset: $dateRange->preset,
             dateFrom: $dateRange->from,
             dateTo: $dateRange->to,
-            dateType: DateType::tryFrom($request->input('date_type', '')) ?? DateType::DataArrival,
+            dateType: self::normalizeDateType($request->input('date_type', '')),
+            customerType: self::normalizeCustomerType($request->input('customer_type')),
             deliveryStatus: $request->input('delivery_status'),
             reconciliationStatus: $request->input('reconciliation_status'),
             discountMode: DiscountMode::tryFrom($request->input('discount_mode', '')) ?? DiscountMode::AfterDiscount,
-            parentProductId: $request->integer('parent_product_id') ?: null,
-            productId: $request->integer('product_id') ?: null,
-            teamLeaderId: $request->integer('team_leader_id') ?: null,
-            teamId: $request->integer('team_id') ?: null,
+            parentProductId: self::optionalPositiveInt($request, 'parent_product_id'),
+            productId: self::optionalPositiveInt($request, 'product_id'),
+            teamLeaderId: self::optionalPositiveInt($request, 'team_leader_id'),
+            teamId: self::optionalPositiveInt($request, 'team_id'),
             saleId: $saleId,
-            marketingTeamLeaderId: $request->integer('marketing_team_leader_id') ?: null,
-            marketingTeamId: $request->integer('marketing_team_id') ?: null,
+            marketingTeamLeaderId: self::optionalPositiveInt($request, 'marketing_team_leader_id'),
+            marketingTeamId: self::optionalPositiveInt($request, 'marketing_team_id'),
             marketerId: $marketerId,
-            warehouseId: $request->integer('warehouse_id') ?: null,
+            warehouseId: self::optionalPositiveInt($request, 'warehouse_id'),
             shippingMethod: $request->input('shipping_method'),
             shippingProvider: $request->input('shipping_provider'),
             warehouseCareStatus: $request->input('warehouse_care_status'),
@@ -102,15 +104,44 @@ readonly class ReportFilterData
             operationResult: $request->input('operation_result'),
             closingStatus: $request->input('closing_status'),
             search: $request->input('search'),
-            orderId: $request->integer('order_id') ?: null,
+            orderId: self::optionalPositiveInt($request, 'order_id'),
             page: max(1, $request->integer('page', 1)),
-            perPage: min(100, max(10, $request->integer('per_page', 20))),
+            perPage: min(999999, max(10, $request->integer('per_page', 20))),
             noClosingDateLimit: $request->boolean('no_closing_date_limit'),
             hideZeroStatus: $request->boolean('hide_zero_status'),
             hideNoPhone: $request->boolean('hide_no_phone'),
         );
     }
 
+
+    private static function optionalPositiveInt(Request $request, string $key): ?int
+    {
+        $value = $request->integer($key);
+
+        return $value > 0 ? $value : null;
+    }
+
+    private static function normalizeDateType(mixed $value): DateType
+    {
+        return match ((string) $value) {
+            '1' => DateType::CareUpdate,
+            '2', '-1', '' => DateType::DataArrival,
+            '3' => DateType::SaleReceived,
+            '4' => DateType::Closing,
+            '5' => DateType::Posting,
+            '6' => DateType::DeliveryUpdate,
+            default => DateType::tryFrom((string) $value) ?? DateType::DataArrival,
+        };
+    }
+
+    private static function normalizeCustomerType(mixed $value): ?string
+    {
+        return match ((string) $value) {
+            'new', '0' => 'new',
+            'old', '1' => 'old',
+            default => null,
+        };
+    }
 
     private static function isElevatedOperator(User $user): bool
     {
@@ -178,6 +209,7 @@ readonly class ReportFilterData
             'date_from' => $this->dateFrom?->toDateString(),
             'date_to' => $this->dateTo?->toDateString(),
             'date_type' => $this->dateType->value,
+            'customer_type' => $this->customerType,
             'delivery_status' => $this->deliveryStatus,
             'reconciliation_status' => $this->reconciliationStatus,
             'discount_mode' => $this->discountMode->value,

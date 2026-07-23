@@ -1,0 +1,214 @@
+/* V96: Pushsale parity for Marketing work report (2.7.5) and Marketing Leader stats (2.8.1).
+   Scope only these pages; do not change global AdminLTE/sidebar/table behavior. */
+body.pushsale-app-body .ps-marketing-work-report,
+body.pushsale-app-body .ps-marketing-leader-page {
+    background: #fff;
+    font-size: 13px;
+}
+
+body.pushsale-app-body .ps-marketing-work-toolbar .ps-page-toolbar__main,
+body.pushsale-app-body .ps-marketing-leader-page .m-header {
+    min-height: 48px;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 16px 8px;
+}
+
+body.pushsale-app-body .ps-marketing-work-toolbar .ps-page-title,
+body.pushsale-app-body .ps-marketing-leader-page .module-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+    white-space: nowrap;
+}
+
+body.pushsale-app-body .ps-marketing-work-primary,
+body.pushsale-app-body .ps-marketing-work-advanced,
+body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter-body .row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 10px 22px;
+    align-items: center;
+}
+
+body.pushsale-app-body .ps-marketing-work-primary .ps-control,
+body.pushsale-app-body .ps-marketing-work-primary .ps-select,
+body.pushsale-app-body .ps-marketing-work-advanced .ps-control,
+body.pushsale-app-body .ps-marketing-work-advanced .ps-select,
+body.pushsale-app-body .ps-marketing-leader-page .ps-select,
+body.pushsale-app-body .ps-marketing-leader-page .ps-input {
+    height: 32px;
+    min-height: 32px;
+    border: 1px solid #cfd9e6;
+    border-radius: 0;
+    background: #fff;
+    font-size: 13px;
+}
+
+body.pushsale-app-body .ps-marketing-work-toolbar .ps-page-toolbar__advanced,
+body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter-body {
+    padding: 8px 16px 10px;
+    border-top: 1px solid #d8dee6;
+    border-bottom: 1px solid #d8dee6;
+    background: #fff;
+}
+
+body.pushsale-app-body .ps-marketing-work-toolbar .ps-page-body {
+    display: none;
+}
+
+body.pushsale-app-body .ps-marketing-work-toolbar .ps-page-toolbar {
+    border-bottom: 1px solid #d8dee6;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+}
+
+body.pushsale-app-body .ps-marketing-work-legend {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+    align-items: center;
+    gap: 24px;
+    padding: 22px 16px 16px;
+    background: #fff;
+}
+
+body.pushsale-app-body .ps-marketing-work-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 22px;
+    color: #111;
+}
+
+body.pushsale-app-body .ps-marketing-work-legend .color-swatch {
+    width: 30px;
+    height: 20px;
+    display: inline-block;
+    border: 1px solid rgba(0, 0, 0, .06);
+}
+
+body.pushsale-app-body .ps-marketing-work-scroll {
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    max-height: calc(100vh - 258px);
+    border-top: 1px solid #2b78c4;
+}
+
+body.pushsale-app-body .ps-marketing-work-table {
+    min-width: 1320px;
+    margin: 0;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+body.pushsale-app-body .ps-marketing-work-table th {
+    background: #3585d8;
+    color: #fff;
+    border-color: #2b78c4;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 700;
+    padding: 8px 6px;
+    white-space: nowrap;
+}
+
+body.pushsale-app-body .ps-marketing-work-table th small {
+    color: #fff;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+body.pushsale-app-body .ps-marketing-work-table td {
+    border: 1px solid #d6d6d6;
+    padding: 6px 7px;
+    vertical-align: middle;
+    background: #f8f8f8;
+}
+
+body.pushsale-app-body .ps-marketing-work-table tbody tr:nth-child(even) td {
+    background: #e9e9e9;
+}
+
+body.pushsale-app-body .ps-marketing-work-table .ps-total-row td {
+    background: #fff !important;
+    font-weight: 700;
+}
+
+body.pushsale-app-body .ps-marketing-work-table .withName {
+    min-width: 220px;
+    font-weight: 600;
+}
+
+body.pushsale-app-body .ps-marketing-work-report .color-alert,
+body.pushsale-app-body .ps-marketing-work-legend .color-alert {
+    background: #ff9da3 !important;
+}
+
+body.pushsale-app-body .ps-marketing-work-report .color-warning,
+body.pushsale-app-body .ps-marketing-work-legend .color-warning {
+    background: #c7c0c0 !important;
+}
+
+body.pushsale-app-body .ps-marketing-work-report .color-success,
+body.pushsale-app-body .ps-marketing-work-legend .color-success {
+    background: #a9f2c3 !important;
+}
+
+body.pushsale-app-body .ps-marketing-leader-page .ps-leader-check-col {
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+}
+
+body.pushsale-app-body .ps-marketing-leader-page .ps-report-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+body.pushsale-app-body .ps-marketing-leader-page .btn-note-header {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: #0b6fb3;
+    border: none;
+    box-shadow: none;
+    font-size: 22px;
+}
+
+body.pushsale-app-body .ps-marketing-leader-page .row-cards,
+body.pushsale-app-body .ps-marketing-leader-page .box-body > .ps-status-summary,
+body.pushsale-app-body .ps-marketing-leader-page .box-body > .pushsale-status-summary {
+    margin: 10px 16px 14px;
+}
+
+body.pushsale-app-body .ps-marketing-leader-page .table_marketing {
+    max-height: calc(100vh - 315px);
+    overflow: auto;
+    margin: 0 16px 0;
+}
+
+body.pushsale-app-body .ps-marketing-leader-page .ps-leader-table {
+    margin: 0;
+    min-width: 1360px;
+}
+
+@media (max-width: 1100px) {
+    body.pushsale-app-body .ps-marketing-work-toolbar .ps-page-toolbar__main,
+    body.pushsale-app-body .ps-marketing-leader-page .m-header {
+        grid-template-columns: 1fr;
+    }
+
+    body.pushsale-app-body .ps-marketing-work-legend {
+        grid-template-columns: 1fr;
+    }
+}

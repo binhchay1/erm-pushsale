@@ -1,7 +1,8 @@
 import { Head } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 
 import {
+    PushsaleActionMenu,
     PushsaleDateRange,
     PushsaleExportButton,
     PushsalePager,
@@ -49,88 +50,114 @@ function formatCell(value, format) {
     return value;
 }
 
-function CommonToolbar({ title, routeUrl, filters, filterOptions, filterFields = [], compact = false }) {
+function PER_PAGE_OPTIONS(t) {
+    return [20, 50, 100, 200, 500, 1000, 999999].map((value) => ({
+        value: String(value),
+        label: value === 999999 ? psText(t, 'per_page_all', '--Hiển thị tất--') : String(value),
+    }));
+}
+
+function hasValue(value) {
+    return value !== null && value !== undefined && value !== '' && value !== false;
+}
+
+function cleanReportPayload(values = {}) {
+    return Object.fromEntries(Object.entries(values).filter(([, value]) => hasValue(value)));
+}
+
+function ReportField({ field, draft, set, filterOptions, t }) {
+    switch (field) {
+        case 'date_type':
+            return <PushsaleSelect placeholder={psText(t, 'date_standard', '--Chuẩn Pushsale--')} value={draft.date_type ?? ''} options={filterOptions.dateTypes ?? []} onChange={(value) => set('date_type', value)} />;
+        case 'date_from':
+            return <PushsaleDateRange filters={draft} onChange={set} />;
+        case 'date_to':
+            return null;
+        case 'parent_product_id':
+            return <PushsaleSelect placeholder={psText(t, 'parent_product_placeholder', '--Sản phẩm cha--')} value={draft.parent_product_id ?? ''} options={filterOptions.parentProducts ?? []} onChange={(value) => set('parent_product_id', value)} />;
+        case 'product_id':
+            return <PushsaleSelect placeholder={psText(t, 'choose_product', '-- Sản phẩm --')} value={draft.product_id ?? ''} options={filterOptions.products ?? []} onChange={(value) => set('product_id', value)} />;
+        case 'discount_mode':
+            return <PushsaleSelect placeholder={psText(t, 'discount_after', 'Sau chiết khấu')} value={draft.discount_mode ?? 'after_discount'} options={filterOptions.discountModes ?? []} onChange={(value) => set('discount_mode', value)} />;
+        case 'customer_type':
+            return <PushsaleSelect placeholder={psText(t, 'all_customers', '-- Tất cả --')} value={draft.customer_type ?? ''} options={filterOptions.customerTypes ?? []} onChange={(value) => set('customer_type', value)} />;
+        case 'delivery_status':
+            return <PushsaleSelect placeholder={psText(t, 'delivery_status_placeholder', '-- Trạng thái giao hàng --')} value={draft.delivery_status ?? ''} options={filterOptions.deliveryStatuses ?? []} onChange={(value) => set('delivery_status', value)} />;
+        case 'reconciliation_status':
+            return <PushsaleSelect placeholder={psText(t, 'reconciliation_placeholder', '-- Đối soát --')} value={draft.reconciliation_status ?? ''} options={filterOptions.reconciliationStatuses ?? []} onChange={(value) => set('reconciliation_status', value)} />;
+        case 'warehouse_id':
+            return <PushsaleSelect placeholder={psText(t, 'choose_warehouse', '--Chọn kho--')} value={draft.warehouse_id ?? ''} options={filterOptions.warehouses ?? []} onChange={(value) => set('warehouse_id', value)} />;
+        case 'team_leader_id':
+            return <PushsaleSelect placeholder={psText(t, 'choose_team_leader', '--Trưởng nhóm--')} value={draft.team_leader_id ?? ''} options={filterOptions.teamLeaders ?? []} onChange={(value) => set('team_leader_id', value)} />;
+        case 'marketing_team_leader_id':
+            return <PushsaleSelect placeholder={psText(t, 'choose_team_leader', '--Trưởng nhóm--')} value={draft.marketing_team_leader_id ?? ''} options={filterOptions.marketingTeamLeaders ?? []} onChange={(value) => set('marketing_team_leader_id', value)} />;
+        case 'team_id':
+            return <PushsaleSelect placeholder={psText(t, 'choose_sales_team', '--Chọn nhóm--')} value={draft.team_id ?? ''} options={filterOptions.salesTeams ?? filterOptions.teams ?? []} onChange={(value) => set('team_id', value)} />;
+        case 'sale_id':
+            return <PushsaleSelect placeholder={psText(t, 'choose_sale', '--Chọn sale--')} value={draft.sale_id ?? ''} options={filterOptions.salesUsers ?? []} onChange={(value) => set('sale_id', value)} />;
+        case 'marketer_id':
+            return <PushsaleSelect placeholder={psText(t, 'choose_marketing', '--Marketing--')} value={draft.marketer_id ?? ''} options={filterOptions.marketingUsers ?? []} onChange={(value) => set('marketer_id', value)} />;
+        case 'marketing_team_id':
+            return <PushsaleSelect placeholder={psText(t, 'choose_marketing_team', '--Nhóm marketing--')} value={draft.marketing_team_id ?? ''} options={filterOptions.marketingTeams ?? []} onChange={(value) => set('marketing_team_id', value)} />;
+        case 'per_page':
+            return <PushsaleSelect placeholder="20" value={String(draft.per_page ?? '20')} options={PER_PAGE_OPTIONS(t)} onChange={(value) => set('per_page', value)} />;
+        case 'search':
+            return <input className="ps-control" value={draft.search ?? ''} placeholder={psText(t, 'search_placeholder', 'Từ khóa tìm kiếm')} onChange={(event) => set('search', event.target.value)} />;
+        case 'no_closing_date_limit':
+            return <label className="ps-report-check"><input type="checkbox" checked={Boolean(draft.no_closing_date_limit)} onChange={(event) => set('no_closing_date_limit', event.target.checked ? 1 : 0)} /><span>{psText(t, 'no_closing_date_limit', 'Không giới hạn ngày chốt')}</span></label>;
+        default:
+            return null;
+    }
+}
+
+function PushsaleReportToolbar({ title, routeUrl, filters, filterOptions, filterFields = [], className = '', primary = [], advanced = [], actionsExtra = null, exportLabel = null }) {
     const t = useT();
     const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
     const fields = new Set(filterFields);
+    const render = (field) => (fields.has(field) ? <ReportField key={field} field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
+    const visiblePrimary = primary.filter((field) => fields.has(field));
+    const visibleAdvanced = advanced.filter((field) => fields.has(field));
 
-    const filterControls = (
-        <div className="ps-extra-toolbar-controls ps-report-toolbar-controls">
-            {fields.has('date_type') && (
-                <PushsaleSelect
-                    placeholder={psText(t, 'date_sale_received', 'Ngày sale nhận data')}
-                    value={draft.date_type ?? ''}
-                    options={filterOptions.dateTypes ?? []}
-                    onChange={(value) => set('date_type', value)}
-                />
-            )}
-            {(fields.has('date_from') || fields.has('date_to')) && (
-                <PushsaleDateRange filters={draft} onChange={set} />
-            )}
-            {fields.has('sale_id') && (
-                <PushsaleSelect
-                    placeholder={psText(t, 'choose_sale', '--Chọn sale--')}
-                    value={draft.sale_id ?? ''}
-                    options={filterOptions.salesUsers ?? []}
-                    onChange={(value) => set('sale_id', value)}
-                />
-            )}
-            {fields.has('marketer_id') && (
-                <PushsaleSelect
-                    placeholder={psText(t, 'choose_marketing', '--Marketing--')}
-                    value={draft.marketer_id ?? ''}
-                    options={filterOptions.marketingUsers ?? []}
-                    onChange={(value) => set('marketer_id', value)}
-                />
-            )}
-            {fields.has('team_id') && (
-                <PushsaleSelect
-                    placeholder={psText(t, 'choose_sales_team', '--Nhóm sale--')}
-                    value={draft.team_id ?? ''}
-                    options={filterOptions.salesTeams ?? filterOptions.teams ?? []}
-                    onChange={(value) => set('team_id', value)}
-                />
-            )}
-            {fields.has('marketing_team_id') && (
-                <PushsaleSelect
-                    placeholder={psText(t, 'choose_marketing_team', '--Nhóm marketing--')}
-                    value={draft.marketing_team_id ?? ''}
-                    options={filterOptions.marketingTeams ?? []}
-                    onChange={(value) => set('marketing_team_id', value)}
-                />
-            )}
-            {fields.has('warehouse_id') && (
-                <PushsaleSelect
-                    placeholder={psText(t, 'choose_warehouse', '--Chọn kho--')}
-                    value={draft.warehouse_id ?? ''}
-                    options={filterOptions.warehouses ?? []}
-                    onChange={(value) => set('warehouse_id', value)}
-                />
-            )}
-            {fields.has('product_id') && (
-                <PushsaleSelect
-                    placeholder={psText(t, 'choose_product', '--Chọn sản phẩm--')}
-                    value={draft.product_id ?? ''}
-                    options={filterOptions.products ?? []}
-                    onChange={(value) => set('product_id', value)}
-                />
-            )}
+    const primaryFilters = visiblePrimary.length > 0 ? (
+        <div className="ps-report-v2-primary ps-report-toolbar-controls">
+            {visiblePrimary.map(render)}
         </div>
-    );
+    ) : null;
+
+    const advancedFilters = visibleAdvanced.length > 0 ? (
+        <div className="ps-report-v2-advanced ps-report-toolbar-controls">
+            {visibleAdvanced.map(render)}
+        </div>
+    ) : null;
 
     return (
         <PushsalePageShell
             title={title}
-            className={`ps-report-toolbar-shell ps-extra-toolbar ${compact ? 'is-compact' : ''}`}
-            primaryFilters={filterControls}
+            className={`ps-report-toolbar-shell ps-extra-toolbar ps-report-v2-toolbar ${className}`.trim()}
+            primaryFilters={primaryFilters}
+            advancedFilters={advancedFilters}
             actions={(
                 <div className="ps-report-toolbar-actions">
                     <PushsaleSearchButton onClick={() => apply()} />
-                    <PushsaleExportButton routeUrl={routeUrl} filters={draft} />
+                    <PushsaleExportButton routeUrl={routeUrl} filters={cleanReportPayload(draft)} label={exportLabel} />
+                    {actionsExtra}
                 </div>
             )}
-            compact={compact}
-            collapsible={false}
+        />
+    );
+}
+
+function CommonToolbar({ title, routeUrl, filters, filterOptions, filterFields = [], compact = false }) {
+    return (
+        <PushsaleReportToolbar
+            title={title}
+            routeUrl={routeUrl}
+            filters={filters}
+            filterOptions={filterOptions}
+            filterFields={filterFields}
+            className={compact ? 'is-compact' : ''}
+            primary={['date_type', 'date_from', 'date_to', 'warehouse_id', 'sale_id', 'marketer_id', 'search']}
+            advanced={['team_leader_id', 'team_id', 'marketing_team_id', 'parent_product_id', 'product_id', 'delivery_status', 'discount_mode', 'reconciliation_status', 'per_page', 'no_closing_date_limit']}
         />
     );
 }
@@ -405,6 +432,73 @@ function SaleKpiReport({ rows, totals, filters, filterOptions, filterFields, rou
     );
 }
 
+
+const REVENUE_DETAIL_FORMULAS = [
+    ['(1) Đơn chốt = ', 'Đơn chốt'],
+    ['(2) Xác nhận giao hàng = ', '(1) - [Chờ vận đơn] - [Hoãn giao hàng] - [Hủy vận đơn]'],
+    ['(3) Huỷ vận đơn = ', '[Huỷ vận đơn]'],
+    ['(4) Tổng giao = ', '(1) - [Chờ vận đơn] - [Giao ngay] - [Hoãn giao hàng] - [Hủy vận đơn] - [Hủy đăng đơn] - [Không lấy được hàng]'],
+    ['(5) Đã hoàn = ', '[Đã hoàn]'],
+    ['(6) Đang hoàn = ', '[Đang hoàn]'],
+    ['(7) Đã giao hàng = ', '[Đã giao hàng]'],
+    ['(8) Đã thanh toán = ', '[Đã thanh toán]'],
+    ['(9) Giao thành công = ', '[Đã giao hàng] + [Đã thanh toán] + [Giao hàng 1 phần]'],
+    ['(10) % Đã hoàn = ', '(5) / (4)'],
+    ['(11) % Huỷ VĐ = ', '(3) / (1)'],
+    ['(12) % XNGH = ', '(2) / (1)'],
+    ['(13) % Giao thành công = ', '(9) / (4)'],
+    ['(14) Contact: ', 'Số contact'],
+    ['(15) Tỷ lệ chốt = ', 'Số lượng đơn chốt / Số contact'],
+    ['(16) Số sản phẩm = ', 'Số sản phẩm đơn chốt'],
+    ['(17) Giá trị đơn = ', 'Doanh số đơn chốt / Số lượng đơn chốt'],
+    ['(18) % doanh số hoàn = ', '(doanh số đã hoàn / Xác nhận giao hàng) * 100%'],
+    ['(19) % Doanh số huỷ = ', '((Doanh số huỷ vận đơn + Doanh số huỷ đăng đơn) / Doanh số đơn chốt) * 100%'],
+    ['Upsale = ', 'Tách riêng SL/DS upsale trong cùng đơn chốt, nhưng không nhân đôi contact/đơn gốc'],
+];
+
+function formatReportDateLabel(value) {
+    if (!value) return '';
+    const [year, month, day] = String(value).split('-');
+    if (!year || !month || !day) return String(value);
+    return `${day}/${month}/${year}`;
+}
+
+function RevenueDetailDateRange({ draft, set }) {
+    const label = `${formatReportDateLabel(draft.date_from) || '...'} 00:00 - ${formatReportDateLabel(draft.date_to) || '...'} 23:59`;
+
+    return (
+        <div className="ps-revenue-detail-date-range" title="Bấm nửa trái để chọn từ ngày, nửa phải để chọn đến ngày">
+            <input className="ps-control ps-revenue-detail-date-label" value={label} readOnly />
+            <div className="ps-revenue-detail-date-native" aria-hidden="false">
+                <input
+                    type="date"
+                    value={draft.date_from ?? ''}
+                    onChange={(event) => set('date_from', event.target.value)}
+                    aria-label="Từ ngày"
+                />
+                <input
+                    type="date"
+                    value={draft.date_to ?? ''}
+                    onChange={(event) => set('date_to', event.target.value)}
+                    aria-label="Đến ngày"
+                />
+            </div>
+        </div>
+    );
+}
+
+function RevenueDetailFormulaLegend() {
+    return (
+        <div className="ps-revenue-detail-formulas">
+            {REVENUE_DETAIL_FORMULAS.map(([label, text]) => (
+                <div className="ps-revenue-detail-formula" key={label}>
+                    <span>{label}</span>{text}
+                </div>
+            ))}
+        </div>
+    );
+}
+
 const REVENUE_GROUPS = [
     ['Chốt đơn', 'closed_qty', 'closed_rev'],
     ['XNGH', 'xngh_qty', 'xngh_rev'],
@@ -419,28 +513,88 @@ const REVENUE_GROUPS = [
 
 function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const t = useT();
+    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const fields = new Set(filterFields);
+    const isMarketingReport = fields.has('marketer_id') || fields.has('marketing_team_id') || fields.has('marketing_team_leader_id') || title.toLowerCase().includes('marketing');
+    const personLabel = isMarketingReport ? psText(t, 'marketing_name', 'TÊN MARKETING') : psText(t, 'sale_name', 'TÊN SALE');
+    const renderIf = (field, node) => (fields.has(field) ? node : null);
+
+    const primaryFilters = (
+        <div className="ps-revenue-detail-primary ps-report-toolbar-controls">
+            {renderIf('date_type', <ReportField field="date_type" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            {(fields.has('date_from') || fields.has('date_to')) ? <RevenueDetailDateRange draft={draft} set={set} /> : null}
+            {renderIf('discount_mode', <ReportField field="discount_mode" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            {renderIf('reconciliation_status', <ReportField field="reconciliation_status" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+        </div>
+    );
+
+    const advancedFilters = (
+        <div className="ps-revenue-detail-advanced ps-report-toolbar-controls">
+            {isMarketingReport ? renderIf('marketing_team_leader_id', <ReportField field="marketing_team_leader_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />) : renderIf('team_leader_id', <ReportField field="team_leader_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            {isMarketingReport ? renderIf('marketing_team_id', <ReportField field="marketing_team_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />) : renderIf('team_id', <ReportField field="team_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            {renderIf('parent_product_id', <ReportField field="parent_product_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            {renderIf('product_id', <ReportField field="product_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            {renderIf('delivery_status', <ReportField field="delivery_status" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            {isMarketingReport ? renderIf('marketer_id', <ReportField field="marketer_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />) : renderIf('sale_id', <ReportField field="sale_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            {renderIf('no_closing_date_limit', <ReportField field="no_closing_date_limit" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            {renderIf('per_page', <ReportField field="per_page" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+        </div>
+    );
+
+    const actions = (
+        <div className="ps-revenue-detail-actions ps-report-toolbar-actions">
+            <PushsaleSearchButton onClick={() => apply()} />
+            <PushsaleExportButton routeUrl={routeUrl} filters={cleanReportPayload(draft)} />
+        </div>
+    );
 
     return (
-        <section className="ps-report-page ps-revenue-detail-report">
-            <CommonToolbar title={title} routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} filterFields={filterFields} />
-            <div className="ps-table-scroll">
-                <table className="ps-table ps-revenue-table">
+        <PushsalePageShell
+            title={title}
+            className={`ps-report-page ps-revenue-detail-page ps-report-toolbar-shell ${isMarketingReport ? 'ps-revenue-detail-marketing' : 'ps-revenue-detail-sale'}`}
+            headerClassName="ps-revenue-detail-header"
+            bodyClassName="ps-revenue-detail-body"
+            primaryFilters={primaryFilters}
+            advancedFilters={advancedFilters}
+            actions={actions}
+        >
+            <RevenueDetailFormulaLegend />
+            <div className="ps-table-scroll ps-revenue-detail-scroll">
+                <table className="table table-bordered table-striped ps-revenue-table ps-revenue-detail-table" id="tableReport">
                     <thead>
-                        <tr>
-                            <th rowSpan={2}>{psText(t, 'stt', 'STT')}</th>
-                            <th rowSpan={2}>{filterFields.includes('marketer_id') ? psText(t, 'marketing', 'MARKETING') : psText(t, 'sale', 'SALE')}</th>
-                            {REVENUE_GROUPS.map(([label]) => <th key={label} colSpan={2}>{label}</th>)}
-                            <th rowSpan={2}>{psText(t, 'return_rate', '% hoàn')}</th><th rowSpan={2}>{psText(t, 'cancel_rate', '% hủy')}</th><th rowSpan={2}>{psText(t, 'xngh_rate', '% XNGH')}</th>
-                            <th rowSpan={2}>{psText(t, 'success_rate', '% giao TC')}</th><th rowSpan={2}>{psText(t, 'contact', 'Contact')}</th><th rowSpan={2}>{psText(t, 'close_rate', 'Tỷ lệ chốt')}</th>
-                            <th rowSpan={2}>{psText(t, 'product_qty', 'Số SP')}</th><th rowSpan={2}>{psText(t, 'avg_order', 'Đơn TB')}</th><th rowSpan={2}>{psText(t, 'returned_revenue_rate', '% DS hoàn')}</th><th rowSpan={2}>{psText(t, 'cancelled_revenue_rate', '% DS hủy')}</th>
-                            <th colSpan={6} className="ps-upsell-group">UPSALE</th>
+                        <tr className="drags-area">
+                            <th className="text-center" rowSpan={2}>{psText(t, 'stt', 'STT')}</th>
+                            <th className="text-center ps-revenue-person-col" rowSpan={2}>{personLabel}</th>
+                            {REVENUE_GROUPS.map(([label], index) => <th className="text-center" key={label} colSpan={2}>{label.toUpperCase()} ({index + 1})</th>)}
+                            <th className="text-center" rowSpan={2}>{psText(t, 'return_rate', '% ĐÃ HOÀN (10)')}</th>
+                            <th className="text-center" rowSpan={2}>{psText(t, 'cancel_rate', '% HỦY (11)')}</th>
+                            <th className="text-center" rowSpan={2}>{psText(t, 'xngh_rate', '% XNGH (12)')}</th>
+                            <th className="text-center" rowSpan={2}>{psText(t, 'success_rate', '% GH Thành công (13)')}</th>
+                            <th className="text-center" rowSpan={2}>{psText(t, 'contact', 'Contact (14)')}</th>
+                            <th className="text-center" rowSpan={2}>{psText(t, 'close_rate', 'Tỷ lệ chốt (%) (15)')}</th>
+                            <th className="text-center" rowSpan={2}>{psText(t, 'product_qty', 'Số sản phẩm (16)')}</th>
+                            <th className="text-center" rowSpan={2}>{psText(t, 'avg_order', 'Giá trị đơn (17)')}</th>
+                            <th className="text-center" rowSpan={2}>{psText(t, 'returned_revenue_rate', '% DS ĐÃ HOÀN (18)')}</th>
+                            <th className="text-center" rowSpan={2}>{psText(t, 'cancelled_revenue_rate', '% DS HỦY (19)')}</th>
+                            <th className="text-center ps-upsell-group" colSpan={6}>UPSALE</th>
                         </tr>
-                        <tr>{REVENUE_GROUPS.flatMap(([label]) => [<th key={`${label}-q`}>{psText(t, 'quantity', 'SL')}</th>, <th key={`${label}-r`}>{psText(t, 'revenue', 'Doanh số')}</th>])}<th>{psText(t, 'original_product', 'SP gốc')}</th><th>{psText(t, 'original_revenue', 'DS gốc')}</th><th>{psText(t, 'upsale_qty', 'SL upsale')}</th><th>{psText(t, 'upsale_revenue', 'DS upsale')}</th><th>{psText(t, 'upsale_order_rate', '% đơn upsale')}</th><th>{psText(t, 'upsale_revenue_share', '% DS upsale')}</th></tr>
+                        <tr>
+                            {REVENUE_GROUPS.flatMap(([label]) => [
+                                <th className="text-center" key={`${label}-q`}>{psText(t, 'quantity', 'Số lượng')}</th>,
+                                <th className="text-center" key={`${label}-r`}>{psText(t, 'revenue', 'Doanh số')}</th>,
+                            ])}
+                            <th className="text-center">SP gốc</th>
+                            <th className="text-center">DS gốc</th>
+                            <th className="text-center">SL upsale</th>
+                            <th className="text-center">DS upsale</th>
+                            <th className="text-center">% đơn upsale</th>
+                            <th className="text-center">% DS upsale</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {totals && (
                             <tr className="ps-total-row">
-                                <td>1</td><td className="ps-text-left">Tổng</td>
+                                <td>1</td><td className="ps-text-left">Tổng:</td>
                                 {REVENUE_GROUPS.flatMap(([, qty, rev]) => [<td key={qty}>{formatNumber(totals[qty])}</td>, <td key={rev}>{formatCurrency(totals[rev])}</td>])}
                                 {['pct_returned','pct_cancel','pct_xngh','pct_success','contacts','close_rate','product_count','avg_order','pct_rev_returned','pct_rev_cancel'].map((key) => (
                                     <td key={key}>{formatCell(totals[key], key.includes('pct') || key === 'close_rate' ? 'percent' : key === 'avg_order' ? 'currency' : 'number')}</td>
@@ -462,10 +616,11 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
                                 <td>{formatCell(row.upsell_order_rate, 'percent')}</td><td>{formatCell(row.upsell_revenue_share, 'percent')}</td>
                             </tr>
                         ))}
+                        {rows.length === 0 && <tr><td colSpan={2 + REVENUE_GROUPS.length * 2 + 10 + 6} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
                     </tbody>
                 </table>
             </div>
-        </section>
+        </PushsalePageShell>
     );
 }
 
@@ -635,48 +790,301 @@ function RevenueGroupSelector({ groups, selectedKeys, onChange, defaultKeys = []
     );
 }
 
-function WarehouseSalesSummaryReport({ rows, totals, filters, filterOptions, filterFields, routeUrl, extra = {} }) {
+
+function SystemBusinessReport({ rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const t = useT();
-    const groups = extra.revenueGroups ?? [];
-    const defaultKeys = extra.defaultRevenueGroups ?? groups.slice(0, 4).map((group) => group.key);
-    const [selectedKeys, setSelectedKeys] = useState(defaultKeys);
-    const selected = new Set(selectedKeys);
-    const visibleGroups = groups.filter((group) => selected.has(group.key));
     const fields = [
-        ...visibleGroups.flatMap((group) => [
-            [`${group.key}_revenue`, 'currency'],
-            [`${group.key}_orders`, 'number'],
-            [`${group.key}_avg`, 'currency'],
-            [`${group.key}_products`, 'number'],
-            [`${group.key}_products_per_order`, 'number'],
-        ]),
+        ['active_warehouses', 'number'],
+        ['closed_qty', 'number'], ['revenue', 'currency'], ['avg', 'currency'],
+        ['new_phone_count', 'number'], ['new_rev', 'currency'], ['new_avg', 'currency'], ['new_share', 'percent'],
+        ['old_phone_count', 'number'], ['old_rev', 'currency'], ['old_avg', 'currency'], ['old_share', 'percent'],
+        ['warehouse_revenue_avg', 'currency'], ['new_avg_per_phone', 'currency'],
         ['upsell_qty', 'number'], ['upsell_revenue', 'currency'], ['upsell_share', 'percent'],
     ];
 
+    const renderCells = (record) => fields.map(([key, format]) => (
+        <td key={key} className={key.includes('share') ? 'ps-report-percent-cell' : ''}>{formatCell(record?.[key], format)}</td>
+    ));
+
     return (
-        <section className="ps-report-page ps-warehouse-sales-summary">
-            <CommonToolbar title="Báo cáo doanh số theo kho" routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} filterFields={filterFields} />
-            <RevenueGroupSelector groups={groups} selectedKeys={selectedKeys} onChange={setSelectedKeys} defaultKeys={defaultKeys} />
-            <div className="ps-table-scroll"><table className="ps-table ps-grouped-report-table"><thead>
-                <tr>
-                    <th rowSpan={2}>{psText(t, 'stt', 'STT')}</th><th rowSpan={2}>TÊN KHO</th>
-                    {visibleGroups.map((group) => <th key={group.key} colSpan={5} title={group.description}>{group.label} ({group.number})</th>)}
-                    <th colSpan={3} className="ps-upsell-group">UPSALE</th>
-                </tr>
-                <tr>
-                    {visibleGroups.flatMap((group) => ['Doanh số', 'Số đơn', 'TB/đơn', 'Số SP', 'SP/đơn'].map((label) => <th key={`${group.key}-${label}`}>{label}</th>))}
-                    <th>SL</th><th>Doanh số</th><th>Tỷ trọng</th>
-                </tr>
-            </thead><tbody>
-                <ReportTotalRow totals={totals} fields={fields} />
-                {rows.map((row, index) => <tr key={row.warehouse_id ?? index}><td>{index + 2}</td><td className="ps-text-left">{row.name}</td>{fields.map(([key, format]) => <td key={key}>{formatCell(row[key], format)}</td>)}</tr>)}
-                {rows.length === 0 && <tr><td colSpan={2 + fields.length} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
-            </tbody></table></div>
+        <section className="ps-report-page ps-system-business-report">
+            <PushsaleReportToolbar
+                title="Báo cáo kinh doanh hệ thống"
+                routeUrl={routeUrl}
+                filters={filters}
+                filterOptions={filterOptions}
+                filterFields={filterFields}
+                className="ps-system-business-toolbar"
+                primary={['date_from', 'date_to', 'discount_mode', 'delivery_status']}
+                advanced={['parent_product_id', 'product_id', 'reconciliation_status', 'per_page', 'warehouse_id', 'team_leader_id', 'team_id', 'no_closing_date_limit']}
+            />
+            <div className="ps-report-table-shell ps-system-business-shell">
+                <div className="ps-table-scroll ps-system-business-scroll">
+                    <table className="table table-bordered table-multi-select ps-system-business-table" id="tableReport">
+                        <thead>
+                            <tr>
+                                <th className="text-center" rowSpan={2}>STT</th>
+                                <th className="text-center ps-system-name-col" rowSpan={2}>TÊN KHO</th>
+                                <th className="text-center" rowSpan={2}>Số lượng<br />kho có<br />doanh số</th>
+                                <th className="text-center" colSpan={3}>TỔNG</th>
+                                <th className="text-center" colSpan={4}>KHÁCH HÀNG MỚI</th>
+                                <th className="text-center" colSpan={4}>KHÁCH HÀNG CŨ</th>
+                                <th className="text-center" rowSpan={2}>Doanh số TB/SL Kho</th>
+                                <th className="text-center" rowSpan={2}>Doanh số mới TB/SĐT</th>
+                                <th className="text-center ps-upsell-group" colSpan={3}>UPSALE</th>
+                            </tr>
+                            <tr className="drags-area">
+                                <th className="text-center">Số đơn chốt</th>
+                                <th className="text-center">Tổng doanh số</th>
+                                <th className="text-center">Doanh số TB</th>
+                                <th className="text-center">Số ĐT mới</th>
+                                <th className="text-center">Doanh số</th>
+                                <th className="text-center">Doanh số TB</th>
+                                <th className="text-center">Tỷ lệ doanh số mới (%)</th>
+                                <th className="text-center">Số ĐT cũ</th>
+                                <th className="text-center">Doanh số</th>
+                                <th className="text-center">Doanh số TB</th>
+                                <th className="text-center">Tỷ lệ doanh số cũ (%)</th>
+                                <th className="text-center">SL</th>
+                                <th className="text-center">Doanh số</th>
+                                <th className="text-center">Tỷ trọng</th>
+                            </tr>
+                            {totals ? (
+                                <tr className="rowsum ps-total-row">
+                                    <td colSpan={2} className="text-center font-weight-bold">Tổng:</td>
+                                    {renderCells(totals)}
+                                </tr>
+                            ) : null}
+                        </thead>
+                        <tbody>
+                            {rows.map((row, index) => (
+                                <tr key={row.warehouse_id ?? index}>
+                                    <td className="text-center">{index + 1}</td>
+                                    <td className="ps-text-left">{row.name}</td>
+                                    {renderCells(row)}
+                                </tr>
+                            ))}
+                            {rows.length === 0 && <tr><td colSpan={2 + fields.length} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
     );
 }
 
-function WarehouseSalesV2Report({ rows, totals, filters, filterOptions, filterFields, routeUrl, extra = {} }) {
+
+const REVENUE_DIMENSION_OPTIONS = [
+    { value: 'warehouse', label: '1.Kho' },
+    { value: 'products_per_order', label: '2.Số sản phẩm/đơn' },
+    { value: 'product', label: '3.Sản phẩm' },
+    { value: 'sale', label: '4.Sale' },
+    { value: 'marketing', label: '5.Marketing' },
+    { value: 'care', label: '6.Care đơn' },
+    { value: 'sale_team', label: '7.Nhóm sale' },
+    { value: 'marketing_team', label: '8.Nhóm marketing' },
+    { value: 'province', label: '9.Tỉnh/Thành phố' },
+    { value: 'channel', label: '10.Kênh quảng cáo' },
+    { value: 'customer_type', label: '11.Khách cũ/mới' },
+    { value: 'shipping_method', label: '12.Phương thức giao hàng' },
+];
+
+function RevenueDimensionField() {
+    return (
+        <select className="ps-control ps-revenue-view-select" value="warehouse" onChange={() => {}} title="Giai đoạn này đang chuẩn hóa theo mẫu 1.Kho của Pushsale">
+            {REVENUE_DIMENSION_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
+        </select>
+    );
+}
+
+function RevenueGroupCompactPicker({ groups, selectedKeys, onChange }) {
+    const selected = new Set(selectedKeys);
+    const addGroup = (key) => {
+        if (!key) return;
+        const next = new Set(selectedKeys);
+        next.add(key);
+        onChange(groups.filter((group) => next.has(group.key)).map((group) => group.key));
+    };
+    const removeGroup = (key) => {
+        if (selectedKeys.length <= 1) return;
+        onChange(selectedKeys.filter((item) => item !== key));
+    };
+
+    return (
+        <div className="ps-revenue-group-compact">
+            <div className="ps-revenue-group-tags">
+                {selectedKeys.slice(0, 2).map((key) => {
+                    const group = groups.find((item) => item.key === key);
+                    return group ? (
+                        <button type="button" key={key} className="ps-revenue-group-tag" onClick={() => removeGroup(key)} title={group.description}>
+                            <span>×</span> {group.number}.{group.label}
+                        </button>
+                    ) : null;
+                })}
+                {selectedKeys.length > 2 ? <span className="ps-revenue-group-more">+{selectedKeys.length - 2}</span> : null}
+            </div>
+            <select className="ps-control" value="" onChange={(event) => addGroup(event.target.value)}>
+                <option value="">-- Chọn nhóm doanh số --</option>
+                {groups.map((group) => <option key={group.key} value={group.key}>{group.number}. {group.label}</option>)}
+            </select>
+        </div>
+    );
+}
+
+function RevenueOverviewToolbar({ title, routeUrl, filters, filterOptions, filterFields, groups = [], selectedKeys = [], onSelectedKeys, variant = 'summary' }) {
+    const t = useT();
+    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const fields = new Set(filterFields);
+    const render = (field) => (fields.has(field) ? <ReportField field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
+
+    const primaryFilters = (
+        <div className="ps-revenue-overview-primary ps-report-toolbar-controls">
+            <RevenueDimensionField />
+            {render('parent_product_id')}
+            {render('product_id')}
+            {render('date_type')}
+            {(fields.has('date_from') || fields.has('date_to')) ? <RevenueDetailDateRange draft={draft} set={set} /> : null}
+        </div>
+    );
+
+    const advancedFilters = (
+        <div className="ps-revenue-overview-advanced ps-report-toolbar-controls">
+            {render('discount_mode')}
+            {render('delivery_status')}
+            {render('reconciliation_status')}
+            {render('warehouse_id')}
+            {groups.length > 0 ? <RevenueGroupCompactPicker groups={groups} selectedKeys={selectedKeys} onChange={onSelectedKeys} /> : null}
+            {render('marketing_team_leader_id') ?? render('team_leader_id')}
+            {render('marketing_team_id') ?? render('team_id')}
+            {render('per_page')}
+            {render('no_closing_date_limit')}
+        </div>
+    );
+
+    return (
+        <PushsalePageShell
+            title={title}
+            className={`ps-report-toolbar-shell ps-extra-toolbar ps-revenue-overview-toolbar ps-revenue-overview-toolbar-${variant}`}
+            headerClassName="ps-revenue-overview-header"
+            bodyClassName="ps-revenue-overview-body"
+            primaryFilters={primaryFilters}
+            advancedFilters={advancedFilters}
+            actions={(
+                <div className="ps-revenue-overview-actions ps-report-toolbar-actions">
+                    <PushsaleSearchButton onClick={() => apply()} />
+                    <button type="button" className="ps-report-gear" title="Cấu hình hiển thị">
+                        <i className="fa fa-gear" aria-hidden="true" />
+                    </button>
+                </div>
+            )}
+        />
+    );
+}
+
+function metricValue(record, key, format) {
+    return formatCell(record?.[key], format);
+}
+
+function revenueShare(record, groupKey) {
+    const total = Number(record?.total_revenue ?? 0);
+    const value = Number(record?.[`${groupKey}_revenue`] ?? 0);
+    return formatCell(total > 0 ? (value * 100) / total : 0, 'percent');
+}
+
+function WarehouseSalesSummaryReport({ title = 'Báo cáo doanh số theo kho', rows, totals, filters, filterOptions, filterFields, routeUrl, extra = {} }) {
+    const t = useT();
+    const groups = extra.revenueGroups ?? [];
+    const defaultKeys = extra.defaultRevenueGroups ?? groups.slice(0, 4).map((group) => group.key);
+    const [selectedKeys, setSelectedKeys] = useState(defaultKeys);
+    const selected = new Set(selectedKeys);
+    const visibleGroups = groups.filter((group) => selected.has(group.key));
+    const summaryColSpan = 2 + visibleGroups.length * 3 + 3;
+
+    const renderGroupCells = (record, group, rowKind) => {
+        const prefix = group.key;
+        if (rowKind === 'main') {
+            return [
+                <td key={`${prefix}-revenue`} className="ps-rsum-revenue">{metricValue(record, `${prefix}_revenue`, 'currency')}</td>,
+                <td key={`${prefix}-orders`} className="ps-rsum-orders">{metricValue(record, `${prefix}_orders`, 'number')}</td>,
+                <td key={`${prefix}-avg`} className="ps-rsum-avg">{metricValue(record, `${prefix}_avg`, 'currency')}</td>,
+            ];
+        }
+
+        return [
+            <td key={`${prefix}-share`} className="ps-rsum-share">{revenueShare(record, prefix)}</td>,
+            <td key={`${prefix}-products`} className="ps-rsum-products">{metricValue(record, `${prefix}_products`, 'number')}</td>,
+            <td key={`${prefix}-ppo`} className="ps-rsum-products-per-order">{metricValue(record, `${prefix}_products_per_order`, 'number')}</td>,
+        ];
+    };
+
+    const renderRecord = (record, index, isTotal = false) => {
+        const rowNumber = isTotal ? '' : index + 1;
+        const name = isTotal ? 'Tổng:' : record.name;
+        return (
+            <>
+                <tr className={isTotal ? 'ps-total-row ps-revenue-summary-main-row' : 'ps-revenue-summary-main-row'}>
+                    <td rowSpan={2} className="ps-rsum-stt">{rowNumber}</td>
+                    <td rowSpan={2} className="ps-text-left ps-rsum-name">{name}</td>
+                    {visibleGroups.flatMap((group) => renderGroupCells(record, group, 'main'))}
+                    <td rowSpan={2} className="ps-upsell-qty">{metricValue(record, 'upsell_qty', 'number')}</td>
+                    <td rowSpan={2} className="ps-upsell-revenue">{metricValue(record, 'upsell_revenue', 'currency')}</td>
+                    <td rowSpan={2} className="ps-upsell-share">{metricValue(record, 'upsell_share', 'percent')}</td>
+                </tr>
+                <tr className={isTotal ? 'ps-total-row ps-revenue-summary-sub-row' : 'ps-revenue-summary-sub-row'}>
+                    {visibleGroups.flatMap((group) => renderGroupCells(record, group, 'sub'))}
+                </tr>
+            </>
+        );
+    };
+
+    return (
+        <section className="ps-report-page ps-sales-revenue-summary ps-warehouse-sales-summary">
+            <RevenueOverviewToolbar
+                title={title}
+                routeUrl={routeUrl}
+                filters={filters}
+                filterOptions={filterOptions}
+                filterFields={filterFields}
+                groups={groups}
+                selectedKeys={selectedKeys}
+                onSelectedKeys={setSelectedKeys}
+                variant="summary"
+            />
+            <div className="ps-revenue-summary-legend">
+                <span className="is-revenue">Doanh số<br />Doanh số/Tổng doanh số</span>
+                <span className="is-orders">Số lượng đơn<br />Số sản phẩm</span>
+                <span className="is-avg">Giá trị đơn hàng<br />Số sản phẩm/Đơn</span>
+            </div>
+            <div className="ps-table-scroll ps-sales-revenue-scroll">
+                <table className="table table-bordered table-multi-select ps-grouped-report-table ps-sales-revenue-summary-table" id="tableReport">
+                    <thead>
+                        <tr>
+                            <th rowSpan={2}>STT</th>
+                            <th rowSpan={2}>TÊN KHO</th>
+                            {visibleGroups.map((group) => <th key={group.key} colSpan={3} title={group.description}>{group.label.toUpperCase()} ({group.number})<br /><small>{group.description}</small></th>)}
+                            <th colSpan={3} className="ps-upsell-group">UPSALE</th>
+                        </tr>
+                        <tr className="drags-area">
+                            {visibleGroups.flatMap((group) => [
+                                <th key={`${group.key}-ds`}>Doanh số</th>,
+                                <th key={`${group.key}-sl`}>Số lượng đơn</th>,
+                                <th key={`${group.key}-gt`}>Giá trị đơn hàng</th>,
+                            ])}
+                            <th>SL</th><th>Doanh số</th><th>Tỷ trọng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {totals ? renderRecord(totals, 0, true) : null}
+                        {rows.map((row, index) => <Fragment key={row.warehouse_id ?? index}>{renderRecord(row, index)}</Fragment>)}
+                        {rows.length === 0 && <tr><td colSpan={summaryColSpan} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    );
+}
+
+function WarehouseSalesV2Report({ title = 'Báo cáo doanh số V2', rows, totals, filters, filterOptions, filterFields, routeUrl, extra = {} }) {
     const t = useT();
     const groups = extra.revenueGroups ?? [];
     const defaultKeys = extra.defaultRevenueGroups ?? groups.slice(0, 4).map((group) => group.key);
@@ -684,36 +1092,62 @@ function WarehouseSalesV2Report({ rows, totals, filters, filterOptions, filterFi
     const selected = new Set(selectedKeys);
     const visibleGroups = groups.filter((group) => selected.has(group.key));
     const fields = [
-        ['contacts', 'number'], ['closed_contacts', 'number'], ['close_rate', 'percent'],
+        ['contacts', 'number', 'ps-rv2-contact'], ['closed_contacts', 'number', 'ps-rv2-closed'], ['close_rate', 'percent', 'ps-rv2-rate'],
         ...visibleGroups.flatMap((group) => [
-            [`${group.key}_orders`, 'number'],
-            [`${group.key}_products`, 'number'],
-            [`${group.key}_avg`, 'currency'],
-            [`${group.key}_revenue`, 'currency'],
+            [`${group.key}_orders`, 'number', 'ps-rv2-orders'],
+            [`${group.key}_products`, 'number', 'ps-rv2-products'],
+            [`${group.key}_avg`, 'currency', 'ps-rv2-avg'],
+            [`${group.key}_revenue`, 'currency', 'ps-rv2-revenue'],
         ]),
-        ['upsell_qty', 'number'], ['upsell_revenue', 'currency'], ['upsell_share', 'percent'],
+        ['upsell_qty', 'number', 'ps-rv2-upsell-qty'], ['upsell_revenue', 'currency', 'ps-rv2-upsell-revenue'], ['upsell_share', 'percent', 'ps-rv2-upsell-share'],
     ];
+    const colSpan = 2 + fields.length;
+
+    const renderRow = (record, index, isTotal = false) => (
+        <tr className={isTotal ? 'ps-total-row' : ''} key={isTotal ? 'total' : record.warehouse_id ?? index}>
+            <td>{isTotal ? '' : index + 1}</td>
+            <td className="ps-text-left">{isTotal ? 'Tổng:' : record.name}</td>
+            {fields.map(([key, format, className]) => <td key={key} className={className}>{formatCell(record?.[key], format)}</td>)}
+        </tr>
+    );
 
     return (
-        <section className="ps-report-page ps-warehouse-sales-v2">
-            <CommonToolbar title="Báo cáo doanh số V2" routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} filterFields={filterFields} />
-            <RevenueGroupSelector groups={groups} selectedKeys={selectedKeys} onChange={setSelectedKeys} defaultKeys={defaultKeys} />
-            <div className="ps-table-scroll"><table className="ps-table ps-grouped-report-table ps-v2-table"><thead>
-                <tr>
-                    <th rowSpan={2}>{psText(t, 'stt', 'STT')}</th><th rowSpan={2}>TÊN KHO</th><th colSpan={3}>PHỄU CONTACT</th>
-                    {visibleGroups.map((group) => <th key={group.key} colSpan={4} title={group.description}>{group.label} ({group.number})</th>)}
-                    <th colSpan={3} className="ps-upsell-group">UPSALE</th>
-                </tr>
-                <tr>
-                    <th>Contact</th><th>Chốt</th><th>Tỷ lệ</th>
-                    {visibleGroups.flatMap((group) => ['Số đơn', 'Số SP', 'TB/đơn', 'Doanh số'].map((label) => <th key={`${group.key}-${label}`}>{label}</th>))}
-                    <th>SL</th><th>Doanh số</th><th>Tỷ trọng</th>
-                </tr>
-            </thead><tbody>
-                <ReportTotalRow totals={totals} fields={fields} />
-                {rows.map((row, index) => <tr key={row.warehouse_id ?? index}><td>{index + 2}</td><td className="ps-text-left">{row.name}</td>{fields.map(([key, format]) => <td key={key}>{formatCell(row[key], format)}</td>)}</tr>)}
-                {rows.length === 0 && <tr><td colSpan={2 + fields.length} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
-            </tbody></table></div>
+        <section className="ps-report-page ps-sales-revenue-v2 ps-warehouse-sales-v2">
+            <RevenueOverviewToolbar
+                title={title}
+                routeUrl={routeUrl}
+                filters={filters}
+                filterOptions={filterOptions}
+                filterFields={filterFields}
+                groups={groups}
+                selectedKeys={selectedKeys}
+                onSelectedKeys={setSelectedKeys}
+                variant="v2"
+            />
+            <div className="ps-table-scroll ps-sales-revenue-scroll ps-sales-revenue-v2-scroll">
+                <table className="table table-bordered table-multi-select fixed-column-table fixed-2-row-top ps-grouped-report-table ps-sales-revenue-v2-table ps-v2-table" id="tableReport">
+                    <thead>
+                        <tr>
+                            <th rowSpan={2}>STT</th>
+                            <th rowSpan={2}>TÊN KHO</th>
+                            <th rowSpan={2}>Số contact</th>
+                            <th rowSpan={2}>Số đơn chốt</th>
+                            <th rowSpan={2}>Tỷ lệ chốt (%)</th>
+                            {visibleGroups.map((group) => <th key={group.key} colSpan={4} title={group.description}>{group.label.toUpperCase()} ({group.number})<br /><small>{group.description}</small></th>)}
+                            <th colSpan={3} className="ps-upsell-group">UPSALE</th>
+                        </tr>
+                        <tr className="drags-area">
+                            {visibleGroups.flatMap((group) => ['Số đơn', 'Số sp', 'Giá trị TB đơn', 'Doanh số'].map((label) => <th key={`${group.key}-${label}`}>{label}</th>))}
+                            <th>SL</th><th>Doanh số</th><th>Tỷ trọng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {totals ? renderRow(totals, 0, true) : null}
+                        {rows.map((row, index) => renderRow(row, index))}
+                        {rows.length === 0 && <tr><td colSpan={colSpan} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
+                    </tbody>
+                </table>
+            </div>
         </section>
     );
 }
@@ -756,6 +1190,308 @@ function ProductConversionMatrixReport({ rows, totals, extra, filters, filterOpt
                 {rows.map((row,index)=><tr key={row.product_key ?? index}><td>{index+2}</td><td>{row.product_id ?? '—'}</td><td className="ps-text-left ps-sticky-product">{row.name}</td>{core.map(([key,format])=><td key={key}>{formatCell(row[key],format)}</td>)}{groups.flatMap((group)=>renderMetrics(row,group.prefix))}</tr>)}
                 {rows.length===0 && <tr><td colSpan={11+groups.length*5} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
             </tbody></table></div>
+        </section>
+    );
+}
+
+
+
+function MarketingUpsaleReport({ title, rows, totals, filters, filterOptions, filterFields, routeUrl, extra = {} }) {
+    const t = useT();
+    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const [showNote, setShowNote] = useState(false);
+    const fields = new Set(filterFields);
+    const perPage = Math.max(1, Number(draft?.per_page ?? 20) || 20);
+    const [page, setPage] = useState(1);
+    const totalPages = Math.max(1, Math.ceil((rows?.length ?? 0) / perPage));
+    const safePage = Math.min(page, totalPages);
+    const visibleRows = (rows ?? []).slice((safePage - 1) * perPage, safePage * perPage);
+    const render = (field) => (fields.has(field) ? <ReportField key={field} field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
+    const currentPayload = cleanReportPayload(draft);
+    const sourceScopeOptions = [
+        { value: 'sale', label: 'Nhóm sale' },
+        { value: 'marketing', label: 'Nhóm Marketing' },
+    ];
+    const [scopeType, setScopeType] = useState('sale');
+    const scopeFields = scopeType === 'sale'
+        ? ['team_leader_id', 'team_id', 'sale_id']
+        : ['marketing_team_leader_id', 'marketing_team_id', 'marketer_id'];
+    const visibleColSpan = 13;
+    const renderNumber = (value, decimals = 0) => {
+        if (value === null || value === undefined || value === '') return '';
+        const number = Number(value);
+        if (!Number.isFinite(number)) return String(value);
+        if (decimals > 0) return number.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        return formatNumber(number);
+    };
+    const renderRow = (row, index) => (
+        <tr key={row.source_id ?? `${row.name}-${index}`}>
+            <td className="text-center">{(safePage - 1) * perPage + index + 1}</td>
+            <td className="text-center ps-upsale-source-name">{row.name}</td>
+            <td className="text-center">{row.channel}</td>
+            <td className="text-center ps-upsale-products">{row.products}</td>
+            <td className="text-center text-bold">{formatNumber(row.contacts)}</td>
+            <td className="text-center text-bold">{formatNumber(row.closed)}</td>
+            <td className="text-center">{renderNumber(row.rate_decimal, 2)}</td>
+            <td className="text-center">{formatNumber(row.product_types)}</td>
+            <td className="text-center">{formatNumber(row.qty_sold)}</td>
+            <td className="text-center">{formatCurrency(row.revenue)}</td>
+            <td className="text-center">{renderNumber(row.avg_order, 2)}</td>
+            <td className="text-center">{renderNumber(row.items_per_order, 2)}</td>
+            <td className="text-center ps-upsale-detail-cell">
+                {row.detail_url ? (
+                    <a href={row.detail_url} title="Hồ sơ khách hàng" className="ps-row-action-link">
+                        <i className="fa fa-list fs15" aria-hidden="true" />
+                    </a>
+                ) : null}
+            </td>
+        </tr>
+    );
+    const renderTotalRow = (row) => (
+        <tr className="rowsum ps-total-row">
+            <td className="text-center font-weight-bold" colSpan={4}>Tổng:</td>
+            <td className="text-center font-weight-bold">{formatNumber(row.contacts)}</td>
+            <td className="text-center font-weight-bold">{formatNumber(row.closed)}</td>
+            <td className="text-center font-weight-bold">{renderNumber(row.rate_decimal, 2)}</td>
+            <td className="text-center font-weight-bold">{formatNumber(row.product_types)}</td>
+            <td className="text-center font-weight-bold">{formatNumber(row.qty_sold)}</td>
+            <td className="text-center font-weight-bold">{formatCurrency(row.revenue)}</td>
+            <td className="text-center font-weight-bold">{renderNumber(row.avg_order, 2)}</td>
+            <td className="text-center font-weight-bold">{renderNumber(row.items_per_order, 2)}</td>
+            <td />
+        </tr>
+    );
+
+    return (
+        <section className="ps-report-page ps-marketing-upsale-report">
+            <PushsalePageShell
+                title={title}
+                className="ps-report-toolbar-shell ps-extra-toolbar ps-marketing-upsale-toolbar"
+                primaryFilters={(
+                    <div className="ps-upsale-primary ps-report-toolbar-controls">
+                        {fields.has('search') ? <input className="ps-control text-center" value={draft.search ?? ''} placeholder="Tên nguồn dữ liệu" onChange={(event) => set('search', event.target.value)} /> : null}
+                        {render('date_type')}
+                        {(fields.has('date_from') || fields.has('date_to')) ? <PushsaleDateRange filters={draft} onChange={set} /> : null}
+                    </div>
+                )}
+                advancedFilters={(
+                    <div className="ps-upsale-advanced-wrap">
+                        <div className="ps-upsale-advanced ps-report-toolbar-controls">
+                            {render('parent_product_id')}
+                            {render('product_id')}
+                            {render('customer_type')}
+                            {render('no_closing_date_limit')}
+                        </div>
+                        <div className="ps-upsale-advanced ps-report-toolbar-controls">
+                            <PushsaleSelect value={scopeType} options={sourceScopeOptions} placeholder="Nhóm sale" onChange={setScopeType} />
+                            {scopeFields.map(render)}
+                            {render('per_page')}
+                        </div>
+                    </div>
+                )}
+                actions={(
+                    <div className="ps-report-toolbar-actions ps-upsale-actions">
+                        <PushsaleSearchButton onClick={() => apply()} />
+                        <PushsaleActionMenu routeUrl={routeUrl} filters={currentPayload} onNote={() => setShowNote(true)} />
+                    </div>
+                )}
+            />
+
+            <div className="ps-upsale-pager-top">
+                <span />
+                <div className="btn-group">
+                    <button type="button" className="btn btn-default btn-sm">{rows.length > 0 ? `${(safePage - 1) * perPage + 1} - ${Math.min(safePage * perPage, rows.length)} / ${formatNumber(rows.length)}` : '0 / 0'}</button>
+                    <button type="button" className="btn btn-default btn-sm" disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}><i className="fa fa-caret-left" /></button>
+                    <button type="button" className="btn btn-default btn-sm" disabled={safePage >= totalPages} onClick={() => setPage(safePage + 1)}><i className="fa fa-caret-right" /></button>
+                </div>
+            </div>
+
+            <div className="ps-table-scroll ps-marketing-upsale-scroll dragscroll1 tableFixHead">
+                <table className="table table-bordered table-multi-select ps-marketing-upsale-table" id="tableReport">
+                    <thead>
+                        <tr className="drags-area">
+                            <th className="text-center">STT</th>
+                            <th className="text-center">Nguồn dữ liệu (1)</th>
+                            <th className="text-center">KÊNH (2)</th>
+                            <th className="text-center">SẢN PHẨM ĐĂNG KÝ TRÊN NGUỒN DỮ LIỆU (3)</th>
+                            <th className="text-center">CONTACT (4)</th>
+                            <th className="text-center">ĐƠN CHỐT (5)</th>
+                            <th className="text-center">TỈ LỆ CHỐT ĐƠN (6 = 5/4)</th>
+                            <th className="text-center">SỐ LOẠI SP ĐƯỢC BÁN RA (7)</th>
+                            <th className="text-center">SỐ LƯỢNG SP BÁN RA (8)</th>
+                            <th className="text-center">DOANH SỐ (9)</th>
+                            <th className="text-center">GIÁ TRỊ ĐƠN HÀNG TB (10 = 9/5)</th>
+                            <th className="text-center">SỐ SẢN PHẨM TB/ĐƠN (11 = 8/5)</th>
+                            <th className="text-center">CHI TIẾT ĐƠN HÀNG TỪ NGUỒN DỮ LIỆU (12)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {totals ? renderTotalRow(totals) : null}
+                        {visibleRows.map((row, index) => renderRow(row, index))}
+                        {rows.length === 0 ? <tr><td colSpan={visibleColSpan} className="ps-empty">Không có dữ liệu.</td></tr> : null}
+                    </tbody>
+                </table>
+            </div>
+            {totalPages > 1 ? <PushsalePager current={safePage} totalPages={totalPages} onPage={setPage} /> : null}
+
+            {showNote ? (
+                <div className="ps-modal-backdrop ps-upsale-note-modal" role="dialog" aria-modal="true">
+                    <div className="ps-modal-card modal-content">
+                        <div className="modal-header">
+                            <button type="button" className="close" aria-label="Close" onClick={() => setShowNote(false)}><span aria-hidden="true">×</span></button>
+                            <h4 className="modal-title">GIẢI THÍCH</h4>
+                        </div>
+                        <div className="modal-body">
+                            <table className="table table-bordered table-striped">
+                                <thead><tr><th>Chỉ số</th><th>Ý nghĩa</th><th>Công thức</th></tr></thead>
+                                <tbody>
+                                    {(extra.notes ?? []).map((note, index) => (
+                                        <tr key={index}>
+                                            <td className="text-left text-bold">{note.metric}</td>
+                                            <td className="text-left">{note.meaning}</td>
+                                            <td className="text-left">{note.formula}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+        </section>
+    );
+}
+
+
+function rateToneClass(value) {
+    const rate = Number(value);
+    if (!Number.isFinite(rate) || rate <= 0) return '';
+    if (rate < 50) return 'color-alert';
+    if (rate < 80) return 'color-warning';
+    return 'color-success';
+}
+
+function MarketingWorkToolbar({ title, routeUrl, filters, filterOptions, filterFields = [] }) {
+    const t = useT();
+    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const fields = new Set(filterFields);
+    const render = (field) => (fields.has(field) ? <ReportField key={field} field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
+
+    const primaryFilters = (
+        <div className="ps-marketing-work-primary ps-report-toolbar-controls">
+            {render('date_type')}
+            {(fields.has('date_from') || fields.has('date_to')) ? <PushsaleDateRange filters={draft} onChange={set} /> : null}
+            {render('customer_type')}
+        </div>
+    );
+
+    const advancedFilters = (
+        <div className="ps-marketing-work-advanced ps-report-toolbar-controls">
+            <PushsaleSelect placeholder="Sale" value="sale" options={[{ value: 'sale', label: 'Sale' }]} onChange={() => {}} />
+            {render('marketing_team_leader_id')}
+            {render('marketing_team_id')}
+            {render('team_id')}
+            {render('no_closing_date_limit')}
+            {render('marketer_id')}
+            {render('sale_id')}
+            {render('search')}
+            {render('parent_product_id')}
+            {render('product_id')}
+            {render('per_page')}
+        </div>
+    );
+
+    return (
+        <PushsalePageShell
+            title={title}
+            className="ps-report-toolbar-shell ps-extra-toolbar ps-marketing-work-toolbar"
+            primaryFilters={primaryFilters}
+            advancedFilters={advancedFilters}
+            actions={(
+                <div className="ps-report-toolbar-actions">
+                    <PushsaleSearchButton onClick={() => apply()} />
+                    <PushsaleExportButton routeUrl={routeUrl} filters={cleanReportPayload(draft)} />
+                </div>
+            )}
+        />
+    );
+}
+
+function MarketingWorkMatrixReport({ title, rows, totals, filters, filterOptions, filterFields, routeUrl, extra = {} }) {
+    const matrixRows = extra.matrixRows ?? rows ?? [];
+    const salesColumns = extra.salesColumns ?? [];
+    const totalColSpan = 5 + salesColumns.length * 2;
+    const perPage = Math.max(1, Number(filters?.per_page ?? 20) || 20);
+    const [page, setPage] = useState(1);
+    const totalPages = Math.max(1, Math.ceil(matrixRows.length / perPage));
+    const visibleMatrixRows = matrixRows.slice((page - 1) * perPage, page * perPage);
+    const cellFor = (row, saleId) => (row?.sale_cells ?? []).find((cell) => Number(cell.sale_id) === Number(saleId)) ?? {};
+    const renderRate = (value) => {
+        if (value === null || value === undefined || value === '') return '%';
+        return formatCell(value, 'percent');
+    };
+    const renderRow = (row, index, isTotal = false) => (
+        <tr key={isTotal ? 'total' : row.marketer_id ?? index} className={isTotal ? 'ps-total-row' : ''}>
+            <td className="text-center">{isTotal ? 1 : index + 2}</td>
+            <td className="text-left withName">
+                {isTotal ? 'Tổng:' : (
+                    <>
+                        {row.username ? `${row.username} ` : ''}{row.name ? `(${row.name})` : ''}
+                    </>
+                )}
+            </td>
+            <td className="text-center text-bold">{formatCell(row.contacts, 'number')}</td>
+            <td className="text-center">{row.unallocated ? formatCell(row.unallocated, 'number') : ''}</td>
+            <td className={`nowrap text-center ${rateToneClass(row.rate)}`}>{renderRate(row.rate)}</td>
+            {salesColumns.flatMap((sale) => {
+                const cell = cellFor(row, sale.id);
+                return [
+                    <td key={`${sale.id}-contacts`} className="nowrap text-center">{cell.contacts ? formatCell(cell.contacts, 'number') : ''}</td>,
+                    <td key={`${sale.id}-rate`} className={`nowrap text-center ${rateToneClass(cell.rate)}`}>{renderRate(cell.rate)}</td>,
+                ];
+            })}
+        </tr>
+    );
+
+    return (
+        <section className="ps-report-page ps-marketing-work-report">
+            <MarketingWorkToolbar title={title} routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} filterFields={filterFields} />
+            <div className="ps-marketing-work-legend">
+                <span><i className="color-swatch color-alert" />Dưới 50 %</span>
+                <span><i className="color-swatch color-warning" />Từ 50 đến 80 %</span>
+                <span><i className="color-swatch color-success" />Trên 80 %</span>
+            </div>
+            <div className="ps-table-scroll ps-marketing-work-scroll dragscroll1 tableFixHead">
+                <table className="table table-bordered table-multi-select ps-marketing-work-table">
+                    <thead>
+                        <tr className="drags-area">
+                            <th rowSpan={2} className="text-center">STT</th>
+                            <th rowSpan={2} className="text-center">MARKETING</th>
+                            <th rowSpan={2} className="text-center">Tổng contact</th>
+                            <th rowSpan={2} className="text-center">Tổng contact<br />chưa phân bổ</th>
+                            <th rowSpan={2} className="text-center">Tỷ lệ chốt<br />(%)</th>
+                            {salesColumns.map((sale) => (
+                                <th key={sale.id} colSpan={2} className="text-center">
+                                    {sale.name}<br />
+                                    <small>({sale.username})</small>
+                                </th>
+                            ))}
+                        </tr>
+                        <tr className="drags-area">
+                            {salesColumns.flatMap((sale) => [
+                                <th key={`${sale.id}-contacts`} className="text-center">Số contact</th>,
+                                <th key={`${sale.id}-rate`} className="text-center">Tỷ lệ chốt<br />(%)</th>,
+                            ])}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {totals ? renderRow(totals, 0, true) : null}
+                        {visibleMatrixRows.map((row, index) => renderRow(row, (page - 1) * perPage + index))}
+                        {matrixRows.length === 0 ? <tr><td colSpan={totalColSpan} className="ps-empty">Không có dữ liệu.</td></tr> : null}
+                    </tbody>
+                </table>
+            </div>
+            {totalPages > 1 ? <PushsalePager current={page} totalPages={totalPages} onPage={setPage} /> : null}
         </section>
     );
 }
@@ -814,12 +1550,18 @@ export default function ExtraReport({
         content = <SaleKpiReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
     } else if (meta.key === 'sale-5') {
         content = <AppointmentCardsReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
-    } else if (meta.key === 'warehouse-sales-summary') {
-        content = <WarehouseSalesSummaryReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} extra={extra} />;
-    } else if (meta.key === 'warehouse-sales-v2') {
-        content = <WarehouseSalesV2Report rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} extra={extra} />;
+    } else if (meta.key === 'kho-2') {
+        content = <SystemBusinessReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
+    } else if (['warehouse-sales-summary', 'marketing-sales-summary'].includes(meta.key)) {
+        content = <WarehouseSalesSummaryReport title={title} rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} extra={extra} />;
+    } else if (['warehouse-sales-v2', 'marketing-sales-v2'].includes(meta.key)) {
+        content = <WarehouseSalesV2Report title={title} rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} extra={extra} />;
     } else if (meta.key === 'product-conversion') {
         content = <ProductConversionMatrixReport rows={rows} totals={totals} extra={extra} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
+    } else if (meta.key === 'marketing-3') {
+        content = <MarketingWorkMatrixReport title={title} rows={rows} totals={totals} extra={extra} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
+    } else if (meta.key === 'marketing-4') {
+        content = <MarketingUpsaleReport title={title} rows={rows} totals={totals} extra={extra} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
     } else if (meta.key === 'kho-1') {
         content = <WarehousePendingReport rows={rows} filters={filters} filterOptions={filterOptions} routeUrl={routeUrl} />;
     } else if (isRevenueDetail) {

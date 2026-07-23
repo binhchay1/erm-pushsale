@@ -5,8 +5,9 @@ import { toast } from 'sonner';
 
 import { ShippingOrderDetailDialog } from '@/components/shipping/ShippingOrderDetailDialog';
 import { WarehouseActionDialogs } from '@/components/operations/WarehouseActionDialogs';
+import { OrderMoneyBreakdown, OrderProductsBreakdown } from '@/components/operations/OrderLineBreakdown';
 import { apiPost, apiRequest, getCsrfToken } from '@/lib/api';
-import { formatCurrency, formatDateTime, formatNumber } from '@/lib/format';
+import { formatCurrency, formatDateTime } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
 
 const statusTone = {
@@ -71,38 +72,6 @@ function InlineIconButton({ title, icon, onClick, disabled = false, className = 
         <button type="button" className={`btn-icon aoh ps-wh-inline-icon ${className}`} title={title} onClick={onClick} disabled={disabled}>
             <i className={`fa fa-${icon}`} />
         </button>
-    );
-}
-
-function ProductTable({ items = [] }) {
-    if (!items.length) return <span>—</span>;
-    return (
-        <table className="tb-in-sp ps-wh-product-table"><tbody>
-            {items.map((item, index) => {
-                const isUpsell = Boolean(item.isUpsell);
-                const hasUpsellDivider = isUpsell && !items.slice(0, index).some((prev) => Boolean(prev.isUpsell));
-
-                return (
-                    <tr className={`row-sp ${isUpsell ? 'is-upsell-line' : ''} ${hasUpsellDivider ? 'has-upsale-divider' : ''}`.trim()} key={item.id}>
-                    <td><span className="ten-sp">{item.productName}</span>{isUpsell && <em className="ps-wh-upsell-tag" title="Upsale" aria-label="Upsale">UP</em>}</td>
-                    <td className="text-center no-wrap">&nbsp; x{item.quantity} &nbsp;</td>
-                    <td className="text-right">{formatNumber(item.unitPrice)}</td>
-                </tr>
-                );
-            })}
-        </tbody></table>
-    );
-}
-
-function MoneyStack({ row }) {
-    return (
-        <table className="tb-in-sp ps-wh-money-stack"><tbody>
-            <tr><td><span title="Thành tiền">{formatCurrency(row.subtotal)}</span></td></tr>
-            <tr><td><span title="Chiết khấu">-{formatCurrency(row.discount)}</span></td></tr>
-            <tr><td><span title="Tiền VAT SP">{formatCurrency(row.vat)}</span></td></tr>
-            <tr><td><span title="Phí VC">{formatCurrency(row.shippingFeeCollected)}</span></td></tr>
-            <tr><td><strong title="Tổng tiền đơn hàng">{formatCurrency(row.total)}</strong></td></tr>
-        </tbody></table>
     );
 }
 
@@ -370,8 +339,8 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                     <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>
                                 </td>
                                 <td className="c-address-body"><span>{row.shippingAddress || 'Chưa có địa chỉ giao'}</span>{row.shippingNotes && <><br /><span className="small-tip ps-wh-magenta">{row.shippingNotes}</span></>}</td>
-                                <td className="text-left c-products-body"><ProductTable items={row.products || [...(row.mainProducts || []), ...(row.upsellProducts || [])]} /></td>
-                                <td className="no-wrap area3 text-right c-money-body"><MoneyStack row={row} /></td>
+                                <td className="text-left c-products-body"><OrderProductsBreakdown items={row.products || [...(row.mainProducts || []), ...(row.upsellProducts || [])]} /></td>
+                                <td className="no-wrap area3 text-right c-money-body"><OrderMoneyBreakdown row={row} /></td>
                                 <td className="text-right">{formatCurrency(row.deposit)}</td>
                                 <td className="text-right">{formatCurrency(row.codAmount || row.total)}</td>
                                 <td className="text-right">{formatCurrency(row.carrierServiceFee)}</td>

@@ -53,7 +53,7 @@ class TeamLeaderStatsService
         $marketerIds = $marketers->pluck('id')->map(fn ($id) => (int) $id)->all();
         $orders = $this->queries->orders($user, $filter)
             ->with([
-                'items:id,order_id,product_id,product_name,item_type,quantity,unit_price,discount_amount',
+                'items:id,order_id,product_id,product_name,item_type,origin,quantity,unit_price,discount_amount',
                 'marketerUser:id,name,email,role,team_id',
                 'marketerUser.team:id,name,leader_user_id,type',
                 'marketingSource:id,name,marketer_user_id,budget',
@@ -159,7 +159,7 @@ class TeamLeaderStatsService
         $newOrders = $closedOrders->where('is_returning_customer', false)->values();
         $oldOrders = $closedOrders->where('is_returning_customer', true)->values();
         $items = $closedOrders->flatMap(fn (Order $order) => $order->items);
-        $upsellItems = $items->where('item_type', 'upsell');
+        $upsellItems = $items->filter(fn (OrderItem $item): bool => $this->isUpsellItem($item));
 
         $newRevenue = $this->sumRevenue($newOrders, $filter->discountMode);
         $oldRevenue = $this->sumRevenue($oldOrders, $filter->discountMode);
@@ -301,6 +301,17 @@ class TeamLeaderStatsService
     private function pct(int|float $numerator, int|float $denominator): float
     {
         return $denominator > 0 ? round($numerator / $denominator * 100, 1) : 0.0;
+    }
+
+
+    private function isUpsellItem(OrderItem $item): bool
+    {
+        $itemType = strtolower((string) ($item->item_type ?? ''));
+        $origin = strtolower((string) ($item->origin ?? ''));
+
+        return $itemType === 'upsell'
+            || str_contains($origin, 'upsell')
+            || str_contains($origin, 'upsale');
     }
 
     /** null = xem toàn bộ. */

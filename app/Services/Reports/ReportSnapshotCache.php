@@ -25,7 +25,7 @@ class ReportSnapshotCache
     {
         return [
             'sale-1', 'sale-2', 'sale-3', 'sale-4', 'sale-5',
-            'marketing-1', 'marketing-2', 'marketing-3', 'marketing-4',
+            'marketing-1', 'marketing-sales-summary', 'marketing-sales-v2', 'marketing-2', 'marketing-3', 'marketing-4',
             'kho-1', 'warehouse-sales-summary', 'warehouse-sales-v2', 'product-conversion', 'kho-2',
         ];
     }

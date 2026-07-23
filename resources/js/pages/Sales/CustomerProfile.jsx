@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
 import { ReportPagination } from '@/components/reports/ReportPagination';
+import { OrderMoneyBreakdown, OrderProductsBreakdown } from '@/components/operations/OrderLineBreakdown';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
@@ -43,22 +44,6 @@ function dateLabel(value) {
 
 function safeText(value, fallback = '—') {
     return value === null || value === undefined || value === '' ? fallback : value;
-}
-
-function isUpsaleProduct(product, row = {}) {
-    const type = String(product?.itemType ?? product?.item_type ?? '').toLowerCase();
-    const origin = String(product?.origin ?? '').toLowerCase();
-
-    return Boolean(product?.isUpsell)
-        || type === 'upsell'
-        || type === 'upsale'
-        || origin.includes('upsell')
-        || origin.includes('upsale')
-        || Boolean(row?.isSupplementalOrder);
-}
-
-function productLineKey(product, row, index) {
-    return product.itemId ?? `${row.id}-${product.productName ?? 'product'}-${index}`;
 }
 
 function appendQuery(url, params) {
@@ -204,36 +189,11 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                     </div>
                                     {row.nextOperationAt ? <div className="item-noidung-other">Hẹn: {dateLabel(row.nextOperationAt)}</div> : null}
                                 </td>
-                                <td className="text-left">
-                                    <div className="ps-split-stack ps-product-stack">
-                                        {row.products?.length ? row.products.map((product, productIndex) => {
-                                            const isUpsellLine = isUpsaleProduct(product, row);
-                                            const previousWasUpsell = productIndex > 0 && isUpsaleProduct(row.products[productIndex - 1], row);
-
-                                            return (
-                                                <div
-                                                    className={`ps-split-row row-sp ps-product-line ${isUpsellLine ? 'is-upsale-line' : 'is-main-line'} ${isUpsellLine && !previousWasUpsell ? 'has-upsale-divider' : ''}`}
-                                                    key={productLineKey(product, row, productIndex)}
-                                                >
-                                                    <span className="ten-sp">
-                                                        {isUpsellLine ? <i className="fa fa-level-up ps-upsale-line-icon" title="Upsale" aria-label="Upsale" /> : null}
-                                                        <span>{product.productName}</span>
-                                                    </span>
-                                                    <span className="text-center no-wrap">x{product.quantity}</span>
-                                                    <span className="text-right no-wrap">{formatCurrency(product.unitPrice)}</span>
-                                                </div>
-                                            );
-                                        }) : <div className="ps-split-row"><span>—</span><span /><span /></div>}
-                                    </div>
+                                <td className="text-left ps-order-products-cell">
+                                    <OrderProductsBreakdown items={row.products ?? []} />
                                 </td>
-                                <td className="no-wrap area3 text-right">
-                                    <div className="ps-money-stack">
-                                        <div title="Thành tiền">{formatCurrency(row.subtotal)}</div>
-                                        <div title="Chiết khấu">-{formatCurrency(row.discount)}</div>
-                                        <div title="VAT">{formatCurrency(row.vat)}</div>
-                                        <div title="Phí VC">{formatCurrency(row.shippingFeeCollected)}</div>
-                                        <strong className="ps-order-total" title="Tổng tiền đơn hàng">{formatCurrency(row.total)}</strong>
-                                    </div>
+                                <td className="no-wrap area3 text-right ps-order-money-cell">
+                                    <OrderMoneyBreakdown row={row} />
                                 </td>
                                 <td className="text-right">{row.deposit ? formatCurrency(row.deposit) : ''}</td>
                                 <td className="text-center area4">

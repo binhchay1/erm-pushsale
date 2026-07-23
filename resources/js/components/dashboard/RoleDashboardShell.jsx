@@ -9,7 +9,9 @@ export function RoleDashboardShell({ role, title, children }) {
             <Head title={title} />
 
             <Deferred data="stats" fallback={<DashboardSkeleton role={role} />}>
-                {children}
+                <div className={`ps-role-dashboard ps-role-dashboard-${role}`}>
+                    {children}
+                </div>
             </Deferred>
         </AppLayout>
     );

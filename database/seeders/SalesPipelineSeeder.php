@@ -12,6 +12,7 @@ use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WarehouseInventoryMovement;
@@ -234,11 +235,61 @@ class SalesPipelineSeeder extends Seeder
             'order_id' => $order->id,
             'product_id' => $product->id,
             'product_name' => $product->name,
+            'item_type' => 'base',
+            'origin' => 'landing:base-demo',
             'quantity' => $qty,
             'unit_price' => $unitPrice,
         ]);
 
-        return $order;
+        if ($closed && ($seq % 4 === 0 || $seq % 9 === 0)) {
+            $this->attachDemoUpsell($order, $product, $seq);
+        }
+
+        return $order->refresh();
+    }
+
+
+    /** Bổ sung line upsale thật vào đơn chốt để báo cáo up sale, kho và doanh số dùng chung dữ liệu. */
+    private function attachDemoUpsell(Order $order, Product $baseProduct, int $seq): void
+    {
+        $upsellProduct = Product::query()
+            ->where('id', '!=', $baseProduct->id)
+            ->where('type', 'product')
+            ->orderBy('id')
+            ->skip($seq % 6)
+            ->first();
+
+        if (! $upsellProduct) {
+            return;
+        }
+
+        $quantity = 1 + ($seq % 5 === 0 ? 1 : 0);
+        $unitPrice = (int) $upsellProduct->unit_price;
+        $lineTotal = $quantity * $unitPrice;
+
+        OrderItem::query()->create([
+            'order_id' => $order->id,
+            'product_id' => $upsellProduct->id,
+            'product_name' => $upsellProduct->name,
+            'item_type' => 'upsell',
+            'origin' => 'landing:upsale-demo',
+            'quantity' => $quantity,
+            'unit_price' => $unitPrice,
+            'meta' => [
+                'seed' => true,
+                'base_product_id' => $baseProduct->id,
+                'source' => 'landing_upsale',
+            ],
+        ]);
+
+        $subtotal = (int) $order->subtotal + $lineTotal;
+        $total = max(0, $subtotal - (int) $order->discount);
+
+        $order->forceFill([
+            'subtotal' => $subtotal,
+            'total' => $total,
+            'amount_to_collect' => max(0, $total - (int) $order->deposit),
+        ])->save();
     }
 
     /**

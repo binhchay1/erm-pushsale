@@ -45,6 +45,7 @@ class TeamLeaderStatsController extends Controller
                 'totals' => $data['totals'] ?? [],
                 'statusSummary' => $data['statusSummary'] ?? [],
                 'routeUrl' => $routeUrl,
+                'activeMenuCode' => $request->is('ld/marketing/thong-ke-truong-nhom') || $request->routeIs('marketing.*') ? '2.8.1' : '2.8.1',
                 'cachedAt' => $cached['cachedAt'],
                 'fromCache' => $cached['fromCache'],
             ],

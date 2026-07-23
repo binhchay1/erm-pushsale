@@ -1054,38 +1054,77 @@ class PushsalePageService
 
     private function warehouseVouchers(): Collection
     {
-        return WarehouseInventoryMovement::query()->with(['warehouse:id,name'])->latest('id')->limit(2000)->get()->groupBy(fn ($m) => $m->reference_type.'-'.$m->reference_id.'-'.$m->created_at?->format('YmdHi'))->values()->map(function (Collection $group): array {
-            /** @var WarehouseInventoryMovement $first */
-            $first = $group->first();
-            return [
-                'id' => $first->id,
-                'warehouse' => $first->warehouse?->name,
-                'type' => WarehouseInventoryMovement::typeLabel($first->type),
-                'voucher_code' => $first->reference_id ? strtoupper((string) $first->reference_type).'-'.$first->reference_id : 'PXN-'.$first->id,
-                'performed_at' => $first->created_at?->toIso8601String(),
-                'total_quantity' => $group->sum('quantity'),
-                'total_value' => null,
-                'status' => 'Hoàn thành',
-                'note' => $first->note,
-                'internal_voucher' => '',
-                'updated_at' => $first->updated_at?->toIso8601String(),
-            ];
-        });
+        return WarehouseVoucher::query()
+            ->with(['warehouse:id,name', 'lines.product:id,name,sku', 'approver:id,name', 'creator:id,name'])
+            ->latest('document_date')
+            ->latest('id')
+            ->limit(2000)
+            ->get()
+            ->values()
+            ->map(function (WarehouseVoucher $voucher, int $index): array {
+                $quantity = (int) $voucher->lines->sum('quantity');
+                $value = (int) $voucher->lines->sum(fn (WarehouseVoucherLine $line): int => (int) $line->quantity * (int) $line->unit_cost);
+
+                return [
+                    'id' => $index + 1,
+                    'select' => '',
+                    'warehouse' => $voucher->warehouse?->name,
+                    'type' => $voucher->type === 'outbound' ? 'Xuất kho' : 'Nhập kho',
+                    'voucher_code' => $voucher->code,
+                    'performed_at' => $voucher->document_date?->toDateString(),
+                    'total_quantity' => $quantity,
+                    'total_value' => $value,
+                    'status' => match ($voucher->status) { 'confirmed' => 'Hoàn thành', 'draft' => 'Nháp', 'cancelled' => 'Đã hủy', default => (string) $voucher->status },
+                    'note' => $voucher->note,
+                    'internal_voucher' => 'PXNNB-'.$voucher->id,
+                    'updated_at' => $voucher->updated_at?->toIso8601String(),
+                    'actions' => '',
+                    '_record_id' => $voucher->id,
+                    '_warehouse_id' => $voucher->warehouse_id,
+                    '_product_ids' => $voucher->lines->pluck('product_id')->filter()->map(fn ($id) => (string) $id)->unique()->values()->all(),
+                    '_data_arrived_at' => $voucher->document_date?->toDateString(),
+                    '_created_by' => $voucher->creator?->name,
+                    '_approved_by' => $voucher->approver?->name,
+                ];
+            });
     }
 
     private function movements(): Collection
     {
-        return WarehouseInventoryMovement::query()->with(['warehouse:id,name', 'product:id,name,sku'])->latest('id')->limit(2500)->get()->values()->map(fn (WarehouseInventoryMovement $movement, int $index) => [
-            'index' => $index + 1,
-            'warehouse' => $movement->warehouse?->name,
-            'product' => trim(($movement->product?->name ?? '—').' ('.($movement->product?->sku ?? '').')'),
-            'type' => WarehouseInventoryMovement::typeLabel($movement->type),
-            'quantity' => (int) $movement->quantity,
-            'pending' => null,
-            'reference' => $movement->reference_id ? "{$movement->reference_type} #{$movement->reference_id}" : '',
-            'note' => $movement->note,
-            'created_at' => $movement->created_at?->toIso8601String(),
-        ]);
+        $voucherCodes = WarehouseVoucher::query()->pluck('code', 'id');
+
+        return WarehouseInventoryMovement::query()
+            ->with(['warehouse:id,name', 'product:id,name,sku', 'inventory:id,pending_sales_quantity'])
+            ->latest('id')
+            ->limit(2500)
+            ->get()
+            ->values()
+            ->map(function (WarehouseInventoryMovement $movement, int $index) use ($voucherCodes): array {
+                $reference = '';
+                if ($movement->reference_type === 'warehouse_voucher' && $movement->reference_id) {
+                    $reference = (string) ($voucherCodes[$movement->reference_id] ?? ('PXNNB-'.$movement->reference_id));
+                } elseif ($movement->reference_id) {
+                    $reference = Str::upper((string) $movement->reference_type).' #'.$movement->reference_id;
+                }
+
+                return [
+                    'index' => $index + 1,
+                    'warehouse' => $movement->warehouse?->name,
+                    'product' => trim(($movement->product?->name ?? '—').' ('.($movement->product?->sku ?? '').')'),
+                    'type' => WarehouseInventoryMovement::typeLabel($movement->type),
+                    'quantity' => (int) $movement->quantity,
+                    'pending' => (int) ($movement->inventory?->pending_sales_quantity ?? 0),
+                    'reference' => $reference,
+                    'note' => $movement->note,
+                    'created_at' => $movement->created_at?->toIso8601String(),
+                    'actions' => '',
+                    '_warehouse_id' => $movement->warehouse_id,
+                    '_product_ids' => [(string) $movement->product_id],
+                    '_data_arrived_at' => $movement->created_at?->toIso8601String(),
+                    '_reference_type' => $movement->reference_type,
+                    '_reference_id' => $movement->reference_id,
+                ];
+            });
     }
 
     private function inventoryDaily(): Collection

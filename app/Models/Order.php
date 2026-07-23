@@ -282,6 +282,15 @@ class Order extends Model
             $query->where('reconciliation_status', $filter->reconciliationStatus);
         }
 
+        if ($filter->customerType === 'new') {
+            $query->where(function (Builder $customerType): void {
+                $customerType->where('is_returning_customer', false)
+                    ->orWhereNull('is_returning_customer');
+            });
+        } elseif ($filter->customerType === 'old') {
+            $query->where('is_returning_customer', true);
+        }
+
         if ($filter->productId) {
             $query->where(function (Builder $productQuery) use ($filter): void {
                 $productQuery->where('product_id', $filter->productId)
@@ -290,7 +299,10 @@ class Order extends Model
         }
 
         if ($filter->parentProductId) {
-            $query->whereHas('product', fn ($q) => $q->where('parent_id', $filter->parentProductId));
+            $query->where(function (Builder $productQuery) use ($filter): void {
+                $productQuery->whereHas('product', fn (Builder $product) => $product->where('parent_id', $filter->parentProductId))
+                    ->orWhereHas('items.product', fn (Builder $product) => $product->where('parent_id', $filter->parentProductId));
+            });
         }
 
         if ($filter->teamLeaderId) {
@@ -319,6 +331,22 @@ class Order extends Model
 
         if ($filter->warehouseId) {
             $query->where('warehouse_id', $filter->warehouseId);
+        }
+
+        if ($filter->search) {
+            $term = '%'.trim((string) $filter->search).'%';
+            $query->where(function (Builder $search) use ($term): void {
+                $search->where('order_code', 'like', $term)
+                    ->orWhere('customer_name', 'like', $term)
+                    ->orWhere('customer_phone', 'like', $term)
+                    ->orWhereHas('marketingSource', fn (Builder $source) => $source
+                        ->where('name', 'like', $term)
+                        ->orWhere('ad_channel', 'like', $term)
+                        ->orWhere('utm_source', 'like', $term)
+                        ->orWhere('utm_campaign', 'like', $term))
+                    ->orWhereHas('saleUser', fn (Builder $sale) => $sale->where('name', 'like', $term)->orWhere('email', 'like', $term))
+                    ->orWhereHas('marketerUser', fn (Builder $marketer) => $marketer->where('name', 'like', $term)->orWhere('email', 'like', $term));
+            });
         }
 
         if ($filter->shippingMethod) {

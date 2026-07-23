@@ -87,7 +87,7 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose, on
     return createPortal(
         <div
             className="pushsale-third-menu"
-            style={{ top: flyout.top }}
+            style={{ top: flyout.top, maxHeight: flyout.maxHeight }}
             role="menu"
             aria-label={flyout.item.title}
             onMouseEnter={onMouseEnter}
@@ -183,12 +183,10 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
         document.addEventListener('mousedown', close);
         document.addEventListener('touchstart', close, { passive: true });
         window.addEventListener('resize', closeOnViewportChange);
-        window.addEventListener('scroll', closeOnViewportChange, true);
         return () => {
             document.removeEventListener('mousedown', close);
             document.removeEventListener('touchstart', close);
             window.removeEventListener('resize', closeOnViewportChange);
-            window.removeEventListener('scroll', closeOnViewportChange, true);
             clearFlyoutTimer();
         };
     }, []);
@@ -208,9 +206,10 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     const toggleFlyout = (event, item, key) => {
         clearFlyoutTimer();
         const rect = event.currentTarget.getBoundingClientRect();
-        const estimatedHeight = Math.max(61, (item.children?.length ?? 1) * 61);
-        const top = Math.max(50, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
-        setFlyout((current) => (current?.key === key ? null : { item, key, top }));
+        const estimatedHeight = Math.max(40, (item.children?.length ?? 1) * 40);
+        const maxHeight = Math.max(120, window.innerHeight - 58);
+        const top = Math.max(50, Math.min(rect.top, window.innerHeight - Math.min(estimatedHeight, maxHeight) - 8));
+        setFlyout((current) => (current?.key === key ? null : { item, key, top, maxHeight }));
     };
 
     return (
@@ -279,9 +278,10 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                 onMouseEnter={(event) => {
                                                                     clearFlyoutTimer();
                                                                     const rect = event.currentTarget.getBoundingClientRect();
-                                                                    const estimatedHeight = Math.max(61, (child.children?.length ?? 1) * 61);
-                                                                    const top = Math.max(50, Math.min(rect.top, window.innerHeight - estimatedHeight - 8));
-                                                                    setFlyout({ item: child, key, top });
+                                                                    const estimatedHeight = Math.max(40, (child.children?.length ?? 1) * 40);
+                                                                    const maxHeight = Math.max(120, window.innerHeight - 58);
+                                                                    const top = Math.max(50, Math.min(rect.top, window.innerHeight - Math.min(estimatedHeight, maxHeight) - 8));
+                                                                    setFlyout({ item: child, key, top, maxHeight });
                                                                 }}
                                                                 aria-expanded={flyoutOpen}
                                                                 title={child.title}

@@ -41,8 +41,16 @@ export function usePushsaleFilters(routeUrl, filters = {}) {
         if (!Object.prototype.hasOwnProperty.call(extra, 'page')) {
             payload.page = 1;
         }
+        const [path, query = ''] = String(routeUrl).split('?');
+        const routeParams = new URLSearchParams(query);
+        routeParams.forEach((value, key) => {
+            if (!Object.prototype.hasOwnProperty.call(payload, key)) {
+                payload[key] = value;
+            }
+        });
+
         router.get(
-            routeUrl,
+            path,
             payload,
             { preserveState: true, preserveScroll: true, replace: true },
         );
@@ -115,7 +123,8 @@ function exportUrl(routeUrl, filters) {
         }
     });
     params.set('export', 'xls');
-    return `${routeUrl}?${params.toString()}`;
+    const separator = routeUrl.includes('?') ? '&' : '?';
+    return `${routeUrl}${separator}${params.toString()}`;
 }
 
 export function PushsaleExportButton({ routeUrl, filters, label }) {
@@ -127,6 +136,45 @@ export function PushsaleExportButton({ routeUrl, filters, label }) {
             <i className="fa fa-file-excel-o" aria-hidden="true" />
             <span>{text}</span>
         </a>
+    );
+}
+
+export function PushsaleActionMenu({ routeUrl, filters, onNote, exportLabel, noteLabel }) {
+    const t = useT();
+    const [open, setOpen] = useState(false);
+    const textExport = exportLabel ?? t('reports.pushsale.export_excel');
+    const textNote = noteLabel ?? t('reports.pushsale.note');
+
+    return (
+        <div className="ps-action-menu">
+            <button
+                type="button"
+                className="ps-icon-btn ichucnang"
+                aria-expanded={open}
+                title={t('reports.pushsale.actions')}
+                onClick={() => setOpen((value) => !value)}
+            >
+                <i className="fa fa-gear" aria-hidden="true" />
+            </button>
+            {open ? (
+                <ul className="ps-action-menu__dropdown" role="menu">
+                    <li>
+                        <a href={exportUrl(routeUrl, filters)} role="menuitem" onClick={() => setOpen(false)}>
+                            <i className="fa fa-file-excel-o" aria-hidden="true" />
+                            <span>{textExport}</span>
+                        </a>
+                    </li>
+                    {onNote ? (
+                        <li>
+                            <button type="button" role="menuitem" onClick={() => { setOpen(false); onNote(); }}>
+                                <i className="fa fa-question-circle" aria-hidden="true" />
+                                <span>{textNote}</span>
+                            </button>
+                        </li>
+                    ) : null}
+                </ul>
+            ) : null}
+        </div>
     );
 }
 

@@ -45,6 +45,18 @@ final class LeadContactMetrics
             self::applyDateFilter($query, $filter);
         }
 
+        if ($filter?->customerType === 'old') {
+            $query->whereHas('order', fn (Builder $q) => $q->where('is_returning_customer', true));
+        } elseif ($filter?->customerType === 'new') {
+            $query->where(function (Builder $customerType): void {
+                $customerType->whereDoesntHave('order')
+                    ->orWhereHas('order', fn (Builder $q) => $q->where(function (Builder $orderType): void {
+                        $orderType->where('is_returning_customer', false)
+                            ->orWhereNull('is_returning_customer');
+                    }));
+            });
+        }
+
         return $query;
     }
 

@@ -50,6 +50,15 @@ class StagingTestController extends Controller
         ));
     }
 
+    public function demoUi(Request $request): JsonResponse
+    {
+        $this->guard($request, requireArtisan: true);
+
+        config(['staging_test.base_url' => $request->getSchemeAndHttpHost()]);
+
+        return response()->json($this->service->demoUi(reset: $request->boolean('reset', true)));
+    }
+
     public function flow(Request $request): JsonResponse
     {
         $this->guard($request, requireArtisan: true);

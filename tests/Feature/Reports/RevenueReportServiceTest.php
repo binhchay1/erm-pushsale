@@ -63,4 +63,63 @@ class RevenueReportServiceTest extends TestCase
         $this->assertArrayHasKey('attributedRevenue', $total);
         $this->assertArrayHasKey('roas', $total);
     }
+
+    public function test_for_sales_includes_upsell_metrics_in_closed_order_revenue(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-07-23 10:00:00'));
+
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $sale = User::factory()->create(['role' => UserRole::Sales, 'name' => 'Vũ Đức Long']);
+
+        $order = Order::query()->create([
+            'order_code' => 'ORD-UPSELL-REV-1',
+            'sale_user_id' => $sale->id,
+            'customer_name' => 'Khách upsale báo cáo',
+            'customer_phone' => '0900999888',
+            'delivery_status' => 'delivered',
+            'data_arrived_at' => now(),
+            'closed_at' => now(),
+            'subtotal' => 458_000,
+            'discount' => 0,
+            'total' => 458_000,
+            'carrier_service_fee' => 0,
+            'cod_fee' => 0,
+        ]);
+
+        $order->items()->createMany([
+            [
+                'product_name' => 'Gói máy dán cao cấp',
+                'item_type' => 'product',
+                'origin' => 'landing_main',
+                'quantity' => 1,
+                'unit_price' => 299_000,
+            ],
+            [
+                'product_name' => 'Gói máy dán — size nhỏ',
+                'item_type' => 'upsell',
+                'origin' => 'landing_upsell',
+                'quantity' => 1,
+                'unit_price' => 159_000,
+            ],
+        ]);
+
+        $filter = ReportFilterData::fromRequest(
+            Request::create('/admin/sales/revenue', 'GET', ['preset' => 'today']),
+            $admin,
+        );
+
+        $result = app(RevenueReportService::class)->forSales($filter, $admin);
+        $total = collect($result['rows'])->firstWhere('isTotalRow', true);
+        $saleRow = collect($result['rows'])->firstWhere('saleId', (string) $sale->id);
+
+        foreach ([$total, $saleRow] as $row) {
+            $this->assertNotNull($row);
+            $this->assertSame(1, (int) $row['closedOrders']['qty']);
+            $this->assertSame(458_000, (int) $row['closedOrders']['revenue']);
+            $this->assertSame(2, (int) $row['productCount']);
+            $this->assertSame(1, (int) $row['upsellQuantity']);
+            $this->assertSame(159_000, (int) $row['upsellRevenue']);
+            $this->assertSame(34.7, (float) $row['upsellRevenueShare']);
+        }
+    }
 }

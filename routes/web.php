@@ -106,6 +106,7 @@ Route::prefix('__erm-test')->name('staging-test.')->group(function () {
     Route::get('health', [\App\Http\Controllers\Testing\StagingTestController::class, 'health'])->name('health');
     Route::get('pages', [\App\Http\Controllers\Testing\StagingTestController::class, 'pages'])->name('pages');
     Route::get('bootstrap', [\App\Http\Controllers\Testing\StagingTestController::class, 'bootstrap'])->name('bootstrap');
+    Route::get('demo-ui', [\App\Http\Controllers\Testing\StagingTestController::class, 'demoUi'])->name('demo-ui');
     Route::get('flow', [\App\Http\Controllers\Testing\StagingTestController::class, 'flow'])->name('flow');
     Route::get('landing-flow', [\App\Http\Controllers\Testing\StagingTestController::class, 'landingFlow'])->name('landing-flow');
     Route::get('audit', [\App\Http\Controllers\Testing\StagingTestController::class, 'audit'])->name('audit');
@@ -139,6 +140,16 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::get('ld/unit-admin/cau-hinh-chuc-nang', [SettingsController::class, 'index'])->name('legacy.unit.feature-settings');
     Route::get('ld/unit-admin/cau-hinh-giao-hang', [ShippingPartnersController::class, 'index'])->name('legacy.unit.shipping-config');
     Route::get('ld/marketing/thong-ke-truong-nhom', TeamLeaderStatsController::class)->name('legacy.marketing.team-leader-stats');
+    Route::get('ld/thong-ke', HourlyStatsController::class)->name('legacy.reports.hourly');
+    Route::get('bao-cao/bao-cao-doanh-so-chi-tiet-marketing', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'marketing-1');
+    })->name('legacy.reports.marketing-revenue-detail');
+    Route::get('ld/thong-ke/bao-cao-cong-viec-mkt', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'marketing-3');
+    })->name('legacy.reports.marketing-work');
+    Route::get('ld/thong-ke/bao-cao-up-sale', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'marketing-4');
+    })->name('legacy.reports.marketing-upsale');
 
 
     // Hồ sơ khách hàng dùng chung cho các vai trò có quyền customers:view.
@@ -199,7 +210,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::middleware('role:'.User::ROLE_ADMIN)->prefix('admin')->name('admin.')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
         // "Tổng quan vận hành" đã gộp vào "Tổng quan điều hành" (dashboard). Giữ redirect cho link cũ.
-        Route::get('reports/business', fn () => redirect()->route('admin.dashboard'))->name('reports.business');
+        Route::get('reports/business', fn () => redirect()->route('admin.reports.extra', ['report' => 'kho-2']))->name('reports.business');
         Route::get('reports/ceo', CeoReportController::class)->name('reports.ceo');
         Route::get('reports/hourly', HourlyStatsController::class)->name('reports.hourly');
         Route::get('reports/team-leaders', TeamLeaderStatsController::class)->name('reports.team-leaders');

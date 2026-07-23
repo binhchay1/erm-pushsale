@@ -5506,6 +5506,7 @@ return array (
       array (
         'key' => 'index',
         'format' => 'text',
+        'align' => 'center',
       ),
       1 => 
       array (
@@ -5521,16 +5522,19 @@ return array (
       array (
         'key' => 'uom',
         'format' => 'text',
+        'align' => 'center',
       ),
       4 => 
       array (
         'key' => 'document_quantity',
         'format' => 'number',
+        'align' => 'right',
       ),
       5 => 
       array (
         'key' => 'quantity',
         'format' => 'number',
+        'align' => 'right',
       ),
       6 => 
       array (
@@ -5553,6 +5557,7 @@ return array (
       array (
         'key' => 'expiry_date',
         'format' => 'date',
+        'align' => 'center',
       ),
       10 => 
       array (
@@ -5568,6 +5573,7 @@ return array (
       array (
         'key' => 'actions',
         'format' => 'text',
+        'align' => 'center',
       ),
     ),
   ),
@@ -5651,69 +5657,65 @@ return array (
     array (
       0 => 
       array (
-        'key' => 'select',
-        'format' => 'text',
-      ),
-      1 => 
-      array (
         'key' => 'id',
         'format' => 'text',
+        'align' => 'center',
       ),
-      2 => 
+      1 => 
       array (
         'key' => 'warehouse',
         'format' => 'text',
       ),
-      3 => 
+      2 => 
       array (
         'key' => 'type',
         'format' => 'text',
+        'align' => 'center',
       ),
-      4 => 
+      3 => 
       array (
         'key' => 'voucher_code',
         'format' => 'text',
       ),
-      5 => 
+      4 => 
       array (
         'key' => 'performed_at',
-        'format' => 'datetime',
+        'format' => 'date',
+        'align' => 'center',
       ),
-      6 => 
+      5 => 
       array (
         'key' => 'total_quantity',
         'format' => 'number',
+        'align' => 'right',
       ),
-      7 => 
+      6 => 
       array (
         'key' => 'total_value',
         'format' => 'currency',
         'align' => 'right',
       ),
-      8 => 
+      7 => 
       array (
         'key' => 'status',
         'format' => 'status',
+        'align' => 'center',
       ),
-      9 => 
+      8 => 
       array (
         'key' => 'note',
         'format' => 'text',
       ),
-      10 => 
+      9 => 
       array (
         'key' => 'internal_voucher',
         'format' => 'text',
       ),
-      11 => 
+      10 => 
       array (
         'key' => 'updated_at',
         'format' => 'datetime',
-      ),
-      12 => 
-      array (
-        'key' => 'actions',
-        'format' => 'text',
+        'align' => 'center',
       ),
     ),
   ),
@@ -5786,6 +5788,7 @@ return array (
       array (
         'key' => 'index',
         'format' => 'text',
+        'align' => 'center',
       ),
       1 => 
       array (
@@ -5801,16 +5804,19 @@ return array (
       array (
         'key' => 'type',
         'format' => 'text',
+        'align' => 'center',
       ),
       4 => 
       array (
         'key' => 'quantity',
         'format' => 'number',
+        'align' => 'right',
       ),
       5 => 
       array (
         'key' => 'pending',
         'format' => 'number',
+        'align' => 'right',
       ),
       6 => 
       array (
@@ -5826,11 +5832,7 @@ return array (
       array (
         'key' => 'created_at',
         'format' => 'datetime',
-      ),
-      9 => 
-      array (
-        'key' => 'actions',
-        'format' => 'text',
+        'align' => 'center',
       ),
     ),
   ),

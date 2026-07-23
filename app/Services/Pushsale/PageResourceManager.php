@@ -354,37 +354,50 @@ class PageResourceManager
             throw ValidationException::withMessages(['user' => 'Không xác định được người thao tác.']);
         }
 
-        $voucher = WarehouseVoucher::query()->create([
-            'warehouse_id' => $validated['warehouse_id'],
-            'code' => $validated['code'],
-            'type' => $validated['type'],
-            'document_date' => $validated['document_date'] ?? now()->toDateString(),
-            'note' => $validated['note'] ?? null,
-            'status' => 'confirmed',
-            'approved_by_user_id' => $actor->id,
-            'created_by_user_id' => $actor->id,
-            'updated_by_user_id' => $actor->id,
-        ]);
-
-        WarehouseVoucherLine::query()->create([
-            'warehouse_voucher_id' => $voucher->id,
-            'product_id' => $validated['product_id'],
-            'document_quantity' => $validated['document_quantity'] ?? $validated['quantity'],
-            'quantity' => $validated['quantity'],
-            'unit_cost' => $validated['unit_cost'] ?? 0,
-            'batch_code' => $validated['batch_code'] ?? null,
-            'expiry_date' => $validated['expiry_date'] ?? null,
-            'location_code' => $validated['location_code'] ?? null,
-            'note' => $validated['note'] ?? null,
-        ]);
-
-        if ($validated['type'] === 'outbound') {
-            $this->inventory->export((int) $validated['warehouse_id'], (int) $validated['product_id'], abs((int) $validated['quantity']), $actor, $validated['note'] ?? null, $actor->id);
-        } else {
-            $this->inventory->intake((int) $validated['warehouse_id'], (int) $validated['product_id'], abs((int) $validated['quantity']), $actor, $validated['note'] ?? null, $actor->id);
+        $quantity = abs((int) ($validated['quantity'] ?? 0));
+        if ($quantity < 1) {
+            throw ValidationException::withMessages(['quantity' => 'Số lượng nhập/xuất phải lớn hơn 0.']);
         }
 
-        return $voucher->refresh();
+        return DB::transaction(function () use ($validated, $actor, $quantity): WarehouseVoucher {
+            $voucher = WarehouseVoucher::query()->create([
+                'warehouse_id' => $validated['warehouse_id'],
+                'code' => $validated['code'],
+                'type' => $validated['type'],
+                'document_date' => $validated['document_date'] ?? now()->toDateString(),
+                'note' => $validated['note'] ?? null,
+                'status' => 'confirmed',
+                'approved_by_user_id' => $actor->id,
+                'created_by_user_id' => $actor->id,
+                'updated_by_user_id' => $actor->id,
+            ]);
+
+            WarehouseVoucherLine::query()->create([
+                'warehouse_voucher_id' => $voucher->id,
+                'product_id' => $validated['product_id'],
+                'document_quantity' => (int) ($validated['document_quantity'] ?? $quantity),
+                'quantity' => $quantity,
+                'unit_cost' => (int) ($validated['unit_cost'] ?? 0),
+                'batch_code' => $validated['batch_code'] ?? null,
+                'expiry_date' => $validated['expiry_date'] ?? null,
+                'location_code' => $validated['location_code'] ?? null,
+                'note' => $validated['note'] ?? null,
+            ]);
+
+            $movement = $validated['type'] === 'outbound'
+                ? $this->inventory->export((int) $validated['warehouse_id'], (int) $validated['product_id'], $quantity, $actor, $validated['note'] ?? null, $actor->id)
+                : $this->inventory->intake((int) $validated['warehouse_id'], (int) $validated['product_id'], $quantity, $actor, $validated['note'] ?? null, $actor->id);
+
+            // Liên kết phiếu nhập/xuất thủ công với thẻ kho để 5.3.2 và 5.3.3
+            // cùng nhìn vào một sự kiện nghiệp vụ, không bị tách thành dữ liệu rời.
+            $movement->forceFill([
+                'reference_type' => 'warehouse_voucher',
+                'reference_id' => $voucher->id,
+                'unit_cost' => (int) ($validated['unit_cost'] ?? $movement->unit_cost ?? 0),
+            ])->save();
+
+            return $voucher->refresh();
+        });
     }
     /** @param array<string, mixed> $validated */
     private function updateWarehouseVoucher(WarehouseVoucher $voucher, array $validated, ?User $actor): WarehouseVoucher

@@ -1,5 +1,6 @@
 import { Copy, Heart } from 'lucide-react';
 
+import { OrderMoneyBreakdown, OrderProductsBreakdown } from '@/components/operations/OrderLineBreakdown';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { formatCurrency, formatDate, formatDateTime, formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
@@ -11,49 +12,6 @@ function money(value) {
 
 function dateTime(value) {
     return value ? formatDateTime(value) : '—';
-}
-
-function ProductTable({ items = [] }) {
-    if (!items.length) return <span>—</span>;
-
-    return (
-        <table className="tb-in-sp ps-acc-product-table">
-            <tbody>
-                {items.map((item, index) => {
-                    const origin = String(item.origin ?? '').toLowerCase();
-                    const type = String(item.itemType ?? item.item_type ?? '').toLowerCase();
-                    const isUpsell = Boolean(item.isUpsell) || type === 'upsell' || origin.includes('upsell') || origin.includes('upsale');
-                    const hasDivider = isUpsell && !items.slice(0, index).some((previous) => {
-                        const previousOrigin = String(previous.origin ?? '').toLowerCase();
-                        const previousType = String(previous.itemType ?? previous.item_type ?? '').toLowerCase();
-                        return Boolean(previous.isUpsell) || previousType === 'upsell' || previousOrigin.includes('upsell') || previousOrigin.includes('upsale');
-                    });
-
-                    return (
-                        <tr className={`row-sp ${isUpsell ? 'is-upsell-line' : ''} ${hasDivider ? 'has-upsale-divider' : ''}`.trim()} key={item.itemId ?? item.productName ?? index}>
-                            <td><span className="ten-sp">{item.productName}</span>{isUpsell && <em className="ps-acc-upsell-tag" title="Upsale" aria-label="Upsale">UP</em>}</td>
-                            <td className="text-center no-wrap">x{item.quantity}</td>
-                            <td className="text-right no-wrap">{formatNumber(item.unitPrice)}</td>
-                        </tr>
-                    );
-                })}
-            </tbody>
-        </table>
-    );
-}
-
-function MoneyStack({ row }) {
-    return (
-        <table className="tb-in-sp ps-acc-money-stack">
-            <tbody>
-                <tr><td><span title="Thành tiền">{money(row.subtotal)}</span></td></tr>
-                <tr><td><span title="Chiết khấu">{Number(row.discount ?? 0) > 0 ? `-${money(row.discount)}` : '—'}</span></td></tr>
-                <tr><td><span title="Tiền VAT SP">{money(row.vat)}</span></td></tr>
-                <tr><td><span title="Phí VC">{money(row.shippingFeeCollected)}</span></td></tr>
-                <tr><td><strong title="Tổng tiền đơn hàng">{money(row.total)}</strong></td></tr>
-            </tbody>
-        </table>
-    );
 }
 
 function ReconIcon({ value }) {
@@ -130,8 +88,8 @@ export function AccountingReconTable({ rows = [], totals, enableDeleteOrder = fa
                                 <span className="small-tip">{row.desiredDeliveryAt ? dateTime(row.desiredDeliveryAt) : '—'}</span>
                             </td>
                             <td className="text-center ps-col-recon"><ReconIcon value={row.internalReconNote} /></td>
-                            <td className="ps-col-products"><ProductTable items={row.products ?? []} /></td>
-                            <td className="text-right ps-col-money"><MoneyStack row={row} /></td>
+                            <td className="ps-col-products"><OrderProductsBreakdown items={row.products ?? []} /></td>
+                            <td className="text-right ps-col-money"><OrderMoneyBreakdown row={row} /></td>
                             <td className="text-right ps-col-deposit">{money(row.deposit)}</td>
                             <td className="text-right ps-col-collect"><strong className="text-success">{money(row.amountToCollect)}</strong></td>
                             <td className="text-right ps-col-vc">{money(row.carrierServiceFee)}</td>
@@ -160,7 +118,7 @@ export function AccountingReconTable({ rows = [], totals, enableDeleteOrder = fa
                         <tr className="ps-acc-total-row">
                             <td colSpan={7} className="text-right"><b>Tổng:</b></td>
                             <td className="text-center"><b>{formatNumber(totals.quantity ?? 0)}</b></td>
-                            <td className="text-right"><MoneyStack row={totals} /></td>
+                            <td className="text-right"><OrderMoneyBreakdown row={totals} /></td>
                             <td className="text-right"><b>{money(totals.deposit)}</b></td>
                             <td className="text-right"><b className="text-success">{money(totals.amountToCollect)}</b></td>
                             <td className="text-right"><b>{money(totals.carrierServiceFee)}</b></td>

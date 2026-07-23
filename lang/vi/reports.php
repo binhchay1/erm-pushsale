@@ -26,6 +26,14 @@ return [
             'title' => 'Báo cáo doanh số marketing',
             'description' => 'Đơn và doanh số theo từng nhân viên marketing, chia theo trạng thái giao hàng.',
         ],
+        'marketing-sales-summary' => [
+            'title' => 'Báo cáo doanh số',
+            'description' => 'Báo cáo doanh số theo kho dạng Pushsale, tách doanh số, số đơn, số sản phẩm và phần upsale.',
+        ],
+        'marketing-sales-v2' => [
+            'title' => 'Báo cáo doanh số V2',
+            'description' => 'Báo cáo doanh số V2 theo kho, có phễu contact, màu chỉ số và phần upsale đồng bộ.',
+        ],
         'marketing-2' => [
             'title' => 'Tỉ lệ chốt đơn sản phẩm',
             'description' => 'Contact, đơn chốt, tỷ lệ chốt và giá trị trung bình của từng sản phẩm.',
@@ -35,7 +43,7 @@ return [
             'description' => 'Tổng contact, contact chưa phân bổ, đơn chốt và doanh số theo từng nhân viên marketing.',
         ],
         'marketing-4' => [
-            'title' => 'Báo cáo upsale',
+            'title' => 'Báo cáo up sale',
             'description' => 'Hiệu quả theo nguồn dữ liệu: contact, tỷ lệ chốt, số loại & số lượng sản phẩm bán ra, doanh số và phần bán thêm (upsale).',
         ],
         'kho-1' => [

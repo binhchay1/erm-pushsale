@@ -4,6 +4,8 @@ export default {
         to_date: 'To date',
         search: 'Search',
         export_excel: 'Export Excel',
+        actions: 'Actions',
+        note: 'Note',
         pagination: 'Pagination',
         first_page: 'First page',
         prev_page: 'Previous page',
@@ -392,6 +394,14 @@ export default {
             title: 'Marketing revenue',
             description: 'Orders and revenue per marketer by delivery status.',
         },
+        'marketing-sales-summary': {
+            title: 'Sales report',
+            description: 'Pushsale-style warehouse sales report with revenue, orders, product volume, and upsell separated.',
+        },
+        'marketing-sales-v2': {
+            title: 'Sales report V2',
+            description: 'Warehouse sales V2 with contact funnel, highlighted metrics, and separated upsell.',
+        },
         'marketing-2': {
             title: 'Product close rate',
             description: 'Contacts, closed orders, close rate and average order value per product.',
@@ -409,8 +419,8 @@ export default {
             description: 'Total contacts, unallocated contacts, closed orders and revenue per marketer.',
         },
         'marketing-4': {
-            title: 'Upsell report',
-            description: 'Performance by data source, products sold, revenue and upsell contribution.',
+            title: 'Upsale report',
+            description: 'Performance by data source: contacts, closed orders, close rate, product variety, quantity sold, and estimated revenue.',
         },
         'warehouse-sales-summary': {
             title: 'Warehouse sales summary',

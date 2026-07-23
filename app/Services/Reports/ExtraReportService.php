@@ -4,6 +4,7 @@ namespace App\Services\Reports;
 
 use App\Data\ReportFilterData;
 use App\Enums\DateType;
+use App\Enums\DiscountMode;
 use App\Enums\OperationStage;
 use App\Enums\OrgLevel;
 use App\Enums\UserRole;
@@ -65,17 +66,19 @@ class ExtraReportService
         $defs = [
             'sale-1' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'operation_stage', 'team_id', 'product_id']],
             'sale-2' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
-            'sale-3' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
+            'sale-3' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_type', 'date_from', 'date_to', 'discount_mode', 'reconciliation_status', 'team_leader_id', 'team_id', 'parent_product_id', 'product_id', 'delivery_status', 'per_page', 'no_closing_date_limit']],
             'sale-4' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'product_id']],
             'sale-5' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'operation_stage', 'operation_result', 'team_id']],
-            'marketing-1' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
+            'marketing-1' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_type', 'date_from', 'date_to', 'discount_mode', 'reconciliation_status', 'marketing_team_leader_id', 'marketing_team_id', 'parent_product_id', 'product_id', 'delivery_status', 'per_page', 'no_closing_date_limit']],
+            'marketing-sales-summary' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'marketing_team_leader_id', 'marketing_team_id', 'per_page', 'no_closing_date_limit']],
+            'marketing-sales-v2' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'marketing_team_leader_id', 'marketing_team_id', 'per_page', 'no_closing_date_limit']],
             'marketing-2' => ['roles' => ['marketing', 'sales', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type']],
-            'marketing-3' => ['roles' => ['marketing', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
-            'marketing-4' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id']],
+            'marketing-3' => ['roles' => ['marketing', 'admin'], 'level' => 'staff', 'filters' => ['date_type', 'date_from', 'date_to', 'customer_type', 'marketing_team_leader_id', 'marketing_team_id', 'team_id', 'sale_id', 'marketer_id', 'parent_product_id', 'product_id', 'search', 'per_page', 'no_closing_date_limit']],
+            'marketing-4' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['search', 'date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'customer_type', 'no_closing_date_limit', 'team_leader_id', 'team_id', 'sale_id', 'marketing_team_leader_id', 'marketing_team_id', 'marketer_id', 'per_page']],
             'kho-1' => ['roles' => ['accounting', 'warehouse', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id', 'warehouse_id']],
-            'kho-2' => ['roles' => ['sales', 'marketing', 'warehouse', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'warehouse_id']],
-            'warehouse-sales-summary' => ['roles' => ['sales', 'warehouse', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'warehouse_id']],
-            'warehouse-sales-v2' => ['roles' => ['sales', 'warehouse', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id', 'warehouse_id']],
+            'kho-2' => ['roles' => ['sales', 'marketing', 'warehouse', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'team_leader_id', 'team_id', 'per_page', 'no_closing_date_limit']],
+            'warehouse-sales-summary' => ['roles' => ['sales', 'warehouse', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'team_leader_id', 'team_id', 'per_page', 'no_closing_date_limit']],
+            'warehouse-sales-v2' => ['roles' => ['sales', 'warehouse', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'team_leader_id', 'team_id', 'per_page', 'no_closing_date_limit']],
             'product-conversion' => ['roles' => ['sales', 'marketing', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id', 'team_id', 'marketing_team_id', 'warehouse_id']],
         ];
 
@@ -159,6 +162,8 @@ class ExtraReportService
             'sale-4' => $this->saleKpi($user, $filter),
             'sale-5' => $this->saleAppointments($user, $filter),
             'marketing-1' => $this->revenueDetail($user, $filter, 'marketing'),
+            'marketing-sales-summary' => $this->warehouseSalesSummary($user, $filter, scopeMarketing: true),
+            'marketing-sales-v2' => $this->warehouseSalesV2($user, $filter, scopeMarketing: true),
             'marketing-2' => $this->productClosing($user, $filter),
             'marketing-3' => $this->marketingWork($user, $filter),
             'marketing-4' => $this->upsaleReport($user, $filter),
@@ -323,7 +328,7 @@ class ExtraReportService
             $oldMoney = $metrics($oldClosedOrders);
             $totalMoney = $metrics($allClosedOrders);
             $closedItems = $allClosedOrders->flatMap(fn (Order $order) => $order->items);
-            $upsellItems = $closedItems->where('item_type', 'upsell');
+            $upsellItems = $closedItems->filter(fn (OrderItem $i) => $this->isUpsellItem($i));
             $totalClosed = $newClosedContacts->count() + $oldClosedContacts->count();
 
             return [
@@ -409,9 +414,9 @@ class ExtraReportService
             ? collect()
             : LeadContactMetrics::effectiveCountsByMarketer($filter, $orders);
 
-        $rows = $orders->groupBy($groupKey)->map(function (Collection $group, int|string $groupId) use ($bySale, $contactCounts) {
+        $rows = $orders->groupBy($groupKey)->map(function (Collection $group, int|string $groupId) use ($bySale, $contactCounts, $filter) {
             $closed = $this->closed($group);
-            $rev = fn (Collection $c) => (int) $c->sum(fn (Order $o) => $o->netRevenue());
+            $rev = fn (Collection $c) => (int) $c->sum(fn (Order $o): int => $this->reportRevenue($o, $filter));
 
             $closedRev = $rev($closed);
             $xngh = $this->bucket($closed, self::XNGH);
@@ -430,10 +435,10 @@ class ExtraReportService
                 ? $contactOrders->count()
                 : (int) $contactCounts->get((int) $groupId, 0);
             $closedItems = $closed->flatMap(fn (Order $order) => $order->items);
-            $upsellItems = $closedItems->where('item_type', 'upsell');
-            $baseItems = $closedItems->reject(fn (OrderItem $item): bool => $item->item_type === 'upsell');
-            $upsellOrderCount = $closed->filter(fn (Order $order): bool => $order->items->contains('item_type', 'upsell'))->count();
-            $upsellRevenue = (int) $upsellItems->sum(fn (OrderItem $item): int => $item->lineTotal());
+            $upsellItems = $closedItems->filter(fn (OrderItem $i) => $this->isUpsellItem($i));
+            $baseItems = $closedItems->reject(fn (OrderItem $item): bool => $this->isUpsellItem($item));
+            $upsellOrderCount = $closed->filter(fn (Order $order): bool => $order->items->contains(fn (OrderItem $item): bool => $this->isUpsellItem($item)))->count();
+            $upsellRevenue = (int) $upsellItems->sum(fn (OrderItem $item): int => $this->itemRevenue($item, $filter));
 
             return [
                 'name' => ($bySale ? $group->first()->saleUser?->name : $group->first()->marketerUser?->name) ?? '—',
@@ -467,7 +472,7 @@ class ExtraReportService
                 'pct_rev_returned' => self::pct($returnedRev, $closedRev),
                 'pct_rev_cancel' => self::pct($cancelRev, $closedRev),
                 'base_qty' => (int) $baseItems->sum('quantity'),
-                'base_rev' => (int) $baseItems->sum(fn (OrderItem $item): int => $item->lineTotal()),
+                'base_rev' => (int) $baseItems->sum(fn (OrderItem $item): int => $this->itemRevenue($item, $filter)),
                 'upsell_qty' => (int) $upsellItems->sum('quantity'),
                 'upsell_rev' => $upsellRevenue,
                 'upsell_order_count' => $upsellOrderCount,
@@ -579,7 +584,7 @@ class ExtraReportService
             $oldClosed = $closedContactOrders->where('is_returning_customer', true);
             $actual = $this->bucket($closedOrders, self::SUCCESS);
             $closedItems = $closedOrders->flatMap(fn (Order $order) => $order->items);
-            $upsellItems = $closedItems->where('item_type', 'upsell');
+            $upsellItems = $closedItems->filter(fn (OrderItem $i) => $this->isUpsellItem($i));
 
             $userPlans = collect($plans->get($saleId, collect()));
             $configuredBaseSalary = (int) $userPlans->sum('base_salary');
@@ -745,82 +750,214 @@ class ExtraReportService
     }
 
     /**
-     * Báo cáo công việc marketing — theo từng nhân viên marketing:
-     * tổng contact tạo ra, contact chưa phân bổ cho sale, đơn chốt, tỷ lệ chốt,
-     * số lượng sản phẩm bán ra & doanh số.
+     * Báo cáo công việc marketing — đúng màn 2.7.5 Pushsale.
+     *
+     * Trục dọc là nhân viên marketing, trục ngang là sale nhận data.
+     * Contact chỉ tính lead gốc (không cộng packet upsale), còn tỷ lệ chốt
+     * theo từng sale = số contact đã chốt / số contact sale đó nhận từ marketer.
      */
     private function marketingWork(User $user, ReportFilterData $filter): array
     {
         $orders = $this->fetchOrdersWithItems($user, $filter, scopeMarketing: true)
-            ->filter(fn (Order $o) => $o->marketer_user_id !== null);
+            ->loadMissing([
+                'saleUser:id,name,email,team_id',
+                'marketerUser:id,name,email,team_id',
+                'marketingSource:id,name,marketer_user_id',
+            ])
+            ->filter(fn (Order $o) => $o->marketer_user_id !== null)
+            ->values();
 
         $marketerIds = $this->visibleMarketerIds($user, $filter);
 
         $leadsQuery = LeadContactMetrics::countableQuery($filter)
-            ->with(['marketingSource:id,marketer_user_id,name', 'marketingSource.marketer:id,name'])
+            ->with(['marketingSource:id,marketer_user_id,name', 'marketingSource.marketer:id,name,email,team_id'])
             ->whereNotNull('marketing_source_id')
-            ->when($marketerIds !== null, function ($q) use ($marketerIds) {
+            ->when($marketerIds !== null, function ($q) use ($marketerIds): void {
                 $q->whereHas('marketingSource', fn ($sq) => $sq->whereIn('marketer_user_id', $marketerIds));
             })
-            ->when($filter->marketerId, function ($q) use ($filter) {
+            ->when($filter->marketerId, function ($q) use ($filter): void {
                 $q->whereHas('marketingSource', fn ($sq) => $sq->where('marketer_user_id', $filter->marketerId));
+            })
+            ->when($filter->search, function ($q) use ($filter): void {
+                $term = '%'.trim((string) $filter->search).'%';
+                $q->where(function ($search) use ($term): void {
+                    $search->where('customer_name', 'like', $term)
+                        ->orWhere('customer_phone', 'like', $term)
+                        ->orWhere('external_id', 'like', $term)
+                        ->orWhereHas('marketingSource', fn ($source) => $source->where('name', 'like', $term)->orWhereHas('marketer', fn ($marketer) => $marketer->where('name', 'like', $term)->orWhere('email', 'like', $term)));
+                });
+            })
+            ->when($filter->marketingTeamLeaderId, function ($q) use ($filter): void {
+                $q->whereHas('marketingSource.marketer.team', fn ($team) => $team->where('leader_user_id', $filter->marketingTeamLeaderId));
+            })
+            ->when($filter->marketingTeamId, function ($q) use ($filter): void {
+                $q->whereHas('marketingSource.marketer', fn ($marketer) => $marketer->where('team_id', $filter->marketingTeamId));
+            })
+            ->when($filter->saleId, function ($q) use ($filter): void {
+                $q->whereHas('order', fn ($order) => $order->where('sale_user_id', $filter->saleId));
+            })
+            ->when($filter->teamId, function ($q) use ($filter): void {
+                $q->whereHas('order.saleUser', fn ($sale) => $sale->where('team_id', $filter->teamId));
+            })
+            ->when($filter->teamLeaderId, function ($q) use ($filter): void {
+                $q->whereHas('order.saleUser.team', fn ($team) => $team->where('leader_user_id', $filter->teamLeaderId));
             });
 
         $leads = $leadsQuery->get();
         $contactCountsByMarketer = LeadContactMetrics::effectiveCountsByMarketer($filter, $orders);
+        $contactOrderIds = LeadContactMetrics::contactOrderIds($orders)->map(fn ($id): int => (int) $id);
+
+        $saleIds = $orders->pluck('sale_user_id')
+            ->when($filter->saleId, fn (Collection $ids) => $ids->push($filter->saleId))
+            ->filter()
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        $sales = $saleIds->isEmpty()
+            ? collect()
+            : User::query()
+                ->whereIn('id', $saleIds)
+                ->when($filter->teamId, fn ($q) => $q->where('team_id', $filter->teamId))
+                ->when($filter->teamLeaderId, fn ($q) => $q->whereHas('team', fn ($team) => $team->where('leader_user_id', $filter->teamLeaderId)))
+                ->orderBy('name')
+                ->get(['id', 'name', 'email', 'team_id']);
+
+        $salesColumns = $sales->map(fn (User $sale): array => [
+            'id' => (int) $sale->id,
+            'name' => $sale->name,
+            'username' => strstr((string) $sale->email, '@', true) ?: $sale->email,
+        ])->values()->all();
+
+        $marketerIdsInScope = $orders->pluck('marketer_user_id')
+            ->merge($leads->map(fn (LeadIngestion $lead) => $lead->marketingSource?->marketer_user_id))
+            ->filter()
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        $marketerUsers = $marketerIdsInScope->isEmpty()
+            ? collect()
+            : User::query()->whereIn('id', $marketerIdsInScope)->get(['id', 'name', 'email', 'team_id'])->keyBy('id');
+
+        $rows = $marketerIdsInScope->map(function (int $marketerId) use ($orders, $leads, $contactCountsByMarketer, $contactOrderIds, $sales, $marketerUsers): array {
+            $group = $orders->where('marketer_user_id', $marketerId)->values();
+            $marketerLeads = $leads->filter(fn (LeadIngestion $lead): bool => (int) $lead->marketingSource?->marketer_user_id === $marketerId);
+            $contactCount = (int) $contactCountsByMarketer->get($marketerId, 0);
+            $closedContactOrders = $group
+                ->whereIn('id', $contactOrderIds)
+                ->filter(fn (Order $order): bool => (string) $order->closing_status === 'closed');
+
+            $unallocated = $marketerLeads->filter(
+                fn (LeadIngestion $lead): bool => $lead->order_id === null
+                    && in_array($lead->status->value, ['pending', 'gathering'], true),
+            )->count() + $group->whereNull('sale_user_id')->count();
+
+            $saleCells = $sales->map(function (User $sale) use ($group, $contactOrderIds): array {
+                $saleOrders = $group->where('sale_user_id', $sale->id)->values();
+                $saleContacts = $saleOrders->whereIn('id', $contactOrderIds);
+                $saleClosed = $saleContacts->filter(fn (Order $order): bool => (string) $order->closing_status === 'closed');
+
+                return [
+                    'sale_id' => (int) $sale->id,
+                    'contacts' => $saleContacts->count(),
+                    'closed' => $saleClosed->count(),
+                    'rate' => self::pct($saleClosed->count(), $saleContacts->count()),
+                ];
+            })->values()->all();
+
+            $name = $marketerUsers->get($marketerId)?->name
+                ?? $group->first()?->marketerUser?->name
+                ?? $marketerLeads->first()?->marketingSource?->marketer?->name
+                ?? '—';
+            $email = $marketerUsers->get($marketerId)?->email
+                ?? $group->first()?->marketerUser?->email
+                ?? $marketerLeads->first()?->marketingSource?->marketer?->email
+                ?? null;
+
+            return [
+                'marketer_id' => $marketerId,
+                'name' => $name,
+                'username' => $email ? (strstr((string) $email, '@', true) ?: $email) : null,
+                'contacts' => $contactCount,
+                'unallocated' => $unallocated,
+                'closed' => $closedContactOrders->count(),
+                'rate' => self::pct($closedContactOrders->count(), $contactCount),
+                'sale_cells' => $saleCells,
+            ];
+        })->sortByDesc('contacts')->values()->all();
+
+        $totals = [
+            'name' => __('reports.grand_total'),
+            'contacts' => array_sum(array_column($rows, 'contacts')),
+            'unallocated' => array_sum(array_column($rows, 'unallocated')),
+            'closed' => array_sum(array_column($rows, 'closed')),
+        ];
+        $totals['rate'] = self::pct($totals['closed'], $totals['contacts']);
+        $totals['sale_cells'] = $sales->map(function (User $sale) use ($rows): array {
+            $contacts = array_sum(array_map(function (array $row) use ($sale): int {
+                $cell = collect($row['sale_cells'] ?? [])->firstWhere('sale_id', (int) $sale->id);
+
+                return (int) ($cell['contacts'] ?? 0);
+            }, $rows));
+            $closed = array_sum(array_map(function (array $row) use ($sale): int {
+                $cell = collect($row['sale_cells'] ?? [])->firstWhere('sale_id', (int) $sale->id);
+
+                return (int) ($cell['closed'] ?? 0);
+            }, $rows));
+
+            return [
+                'sale_id' => (int) $sale->id,
+                'contacts' => $contacts,
+                'closed' => $closed,
+                'rate' => self::pct($closed, $contacts),
+            ];
+        })->values()->all();
 
         $columns = [
             $this->col('marketer', 'name', 'text'),
             $this->col('contacts_total', 'contacts', 'number'),
             $this->col('unallocated', 'unallocated', 'number'),
-            $this->col('closed', 'closed', 'number'),
-            $this->col('rate', 'rate', 'percent', ['tone' => 'positive']),
-            $this->col('qty_sold', 'qty_sold', 'number'),
-            $this->col('revenue', 'revenue', 'currency'),
+            $this->col('rate', 'rate', 'percent'),
         ];
-
-        $marketerIdsInScope = $orders->pluck('marketer_user_id')
-            ->merge($leads->map(fn (LeadIngestion $l) => $l->marketingSource?->marketer_user_id))
-            ->filter()
-            ->unique()
-            ->values();
-
-        $rows = $marketerIdsInScope->map(function (int $marketerId) use ($orders, $leads, $contactCountsByMarketer) {
-            $group = $orders->where('marketer_user_id', $marketerId);
-            $marketerLeads = $leads->filter(fn (LeadIngestion $l) => (int) $l->marketingSource?->marketer_user_id === $marketerId);
-            $closed = $this->closed($group);
-            $closedContacts = $this->closed($this->contactOrders($group));
-            $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
-            $contactCount = (int) $contactCountsByMarketer->get($marketerId, 0);
-            $unallocated = $marketerLeads->filter(
-                fn (LeadIngestion $l) => $l->order_id === null
-                    && in_array($l->status->value, ['pending', 'gathering'], true),
-            )->count() + $group->whereNull('sale_user_id')->count();
-
-            $name = $group->first()?->marketerUser?->name
-                ?? $marketerLeads->first()?->marketingSource?->marketer?->name
-                ?? User::query()->find($marketerId)?->name
-                ?? '—';
-
-            return [
-                'name' => $name,
-                'contacts' => $contactCount,
-                'unallocated' => $unallocated,
-                'closed' => $closedContacts->count(),
-                'rate' => self::pct($closedContacts->count(), $contactCount),
-                'qty_sold' => (int) $closed->sum(fn (Order $o) => $o->items->sum('quantity')),
-                'revenue' => $revenue,
+        foreach ($salesColumns as $sale) {
+            $columns[] = [
+                'key' => 'sale_'.$sale['id'].'_contacts',
+                'label' => $sale['name'].' — Số contact',
+                'format' => 'number',
             ];
-        })->sortByDesc('revenue')->values()->all();
+            $columns[] = [
+                'key' => 'sale_'.$sale['id'].'_rate',
+                'label' => $sale['name'].' — Tỷ lệ chốt (%)',
+                'format' => 'percent',
+            ];
+        }
 
-        $totals = $this->sumTotals($columns, $rows);
-        $totals['rate'] = self::pct($totals['closed'] ?? 0, $totals['contacts'] ?? 0);
+        $exportRows = array_map(function (array $row) use ($salesColumns): array {
+            $flat = $row;
+            foreach ($salesColumns as $sale) {
+                $cell = collect($row['sale_cells'] ?? [])->firstWhere('sale_id', $sale['id']);
+                $flat['sale_'.$sale['id'].'_contacts'] = (int) ($cell['contacts'] ?? 0);
+                $flat['sale_'.$sale['id'].'_rate'] = $cell['rate'] ?? null;
+            }
 
-        return ['columns' => $columns, 'rows' => $rows, 'totals' => $totals];
+            return $flat;
+        }, $rows);
+
+        return [
+            'columns' => $columns,
+            'rows' => $exportRows,
+            'totals' => $totals,
+            'extra' => [
+                'mode' => 'marketing_work_matrix',
+                'salesColumns' => $salesColumns,
+                'matrixRows' => $rows,
+            ],
+        ];
     }
 
     /**
-     * Báo cáo upsale — theo từng NGUỒN DỮ LIỆU (chiến dịch):
+     * Báo cáo up sale — theo từng NGUỒN DỮ LIỆU (chiến dịch):
      * contact, đơn chốt, tỷ lệ chốt, số loại & số lượng SP bán ra, doanh số,
      * giá trị đơn TB, số SP TB/đơn, và riêng phần upsale (SL + doanh số) để đo
      * hiệu quả bán thêm ở trang cảm ơn.
@@ -828,61 +965,98 @@ class ExtraReportService
     private function upsaleReport(User $user, ReportFilterData $filter): array
     {
         $orders = $this->fetchOrdersWithItems($user, $filter, scopeMarketing: $user->role === UserRole::Marketing)
-            ->filter(fn (Order $o) => $o->marketing_source_id !== null);
+            ->filter(fn (Order $o) => $o->marketing_source_id !== null)
+            ->values();
         $contactCountsBySource = LeadContactMetrics::effectiveCountsBySource($filter, $orders);
 
         $columns = [
-            $this->col('source', 'name', 'text'),
-            $this->col('channel', 'channel', 'text'),
-            $this->col('contacts', 'contacts', 'number'),
-            $this->col('closed', 'closed', 'number'),
-            $this->col('rate', 'rate', 'percent', ['tone' => 'positive']),
-            $this->col('product_types', 'product_types', 'number'),
-            $this->col('qty_sold', 'qty_sold', 'number'),
-            $this->col('revenue', 'revenue', 'currency'),
-            $this->col('avg_order', 'avg_order', 'currency'),
-            $this->col('items_per_order', 'items_per_order', 'number'),
-            $this->col('upsell_qty', 'upsell_qty', 'number'),
-            $this->col('upsell_rev', 'upsell_rev', 'currency'),
+            ['key' => 'name', 'label' => 'Nguồn dữ liệu (1)', 'format' => 'text'],
+            ['key' => 'channel', 'label' => 'KÊNH (2)', 'format' => 'text'],
+            ['key' => 'products', 'label' => 'SẢN PHẨM ĐĂNG KÝ TRÊN NGUỒN DỮ LIỆU (3)', 'format' => 'text'],
+            ['key' => 'contacts', 'label' => 'CONTACT (4)', 'format' => 'number'],
+            ['key' => 'closed', 'label' => 'ĐƠN CHỐT (5)', 'format' => 'number'],
+            ['key' => 'rate_decimal', 'label' => 'TỈ LỆ CHỐT ĐƠN (6 = 5/4)', 'format' => 'number'],
+            ['key' => 'product_types', 'label' => 'SỐ LOẠI SP ĐƯỢC BÁN RA (7)', 'format' => 'number'],
+            ['key' => 'qty_sold', 'label' => 'SỐ LƯỢNG SP BÁN RA (8)', 'format' => 'number'],
+            ['key' => 'revenue', 'label' => 'DOANH SỐ (9)', 'format' => 'currency'],
+            ['key' => 'avg_order', 'label' => 'GIÁ TRỊ ĐƠN HÀNG TB (10 = 9/5)', 'format' => 'currency'],
+            ['key' => 'items_per_order', 'label' => 'SỐ SẢN PHẨM TB/ĐƠN (11 = 8/5)', 'format' => 'number'],
+            ['key' => 'detail_url', 'label' => 'CHI TIẾT ĐƠN HÀNG TỪ NGUỒN DỮ LIỆU (12)', 'format' => 'text'],
         ];
 
-        $rows = $orders->groupBy('marketing_source_id')->map(function (Collection $group, int|string $sourceId) use ($contactCountsBySource) {
-            $closed = $this->closed($group);
-            $closedContacts = $this->closed($this->contactOrders($group));
-            $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
-            $closedItems = $closed->flatMap(fn (Order $o) => $o->items);
-            $qtySold = (int) $closedItems->sum('quantity');
-            $upsellItems = $closedItems->filter(fn (OrderItem $i) => $i->item_type === 'upsell');
+        $rows = $orders->groupBy('marketing_source_id')->map(function (Collection $group, int|string $sourceId) use ($contactCountsBySource, $user, $filter) {
             $source = $group->first()->marketingSource;
+            $closedContacts = $this->closed($this->contactOrders($group));
             $contacts = (int) $contactCountsBySource->get((int) $sourceId, 0);
 
+            $closed = $this->closed($group);
+            $revenueOrders = $this->upsaleRevenueOrders($closed);
+            $revenue = (int) $revenueOrders->sum(fn (Order $order): int => $this->reportRevenue($order, $filter));
+            $soldItems = $revenueOrders->flatMap(fn (Order $order) => $order->items instanceof Collection ? $order->items : collect($order->items ?? []));
+            $qtySold = (int) $soldItems->sum(fn (OrderItem $item): int => max(0, (int) $item->quantity));
+            $upsellItems = $soldItems->filter(fn (OrderItem $i) => $this->isUpsellItem($i));
+
+            $productNames = collect([$source?->product?->name])
+                ->merge($soldItems->map(fn (OrderItem $item) => $item->product?->name ?? $item->product_name))
+                ->map(fn ($name): string => trim((string) $name))
+                ->filter()
+                ->unique(fn (string $name): string => mb_strtolower($name))
+                ->values();
+
+            $closedCount = $closedContacts->count();
+            $rate = self::pct($closedCount, $contacts);
+            $sourceIdInt = (int) $sourceId;
+
             return [
+                'source_id' => $sourceIdInt,
                 'name' => $source?->name ?? '—',
-                'channel' => $source?->ad_channel ?? '—',
+                'channel' => $this->formatChannel($source?->ad_channel ?? $source?->utm_source),
+                'products' => $productNames->isNotEmpty() ? $productNames->implode('; ') : 'Tất cả',
                 'contacts' => $contacts,
-                'closed' => $closedContacts->count(),
-                'rate' => self::pct($closedContacts->count(), $contacts),
-                'product_types' => $closedItems->map(fn (OrderItem $i) => $i->product_id ?? $i->product_name)->unique()->count(),
+                'closed' => $closedCount,
+                'rate' => $rate,
+                'rate_decimal' => $contacts > 0 ? round($closedCount / $contacts, 2) : null,
+                'product_types' => $soldItems->map(fn (OrderItem $i) => $i->product_id ?: mb_strtolower((string) $i->product_name))->filter()->unique()->count(),
                 'qty_sold' => $qtySold,
                 'revenue' => $revenue,
-                'avg_order' => $closed->count() > 0 ? (int) round($revenue / $closed->count()) : null,
-                'items_per_order' => $closed->count() > 0 ? round($qtySold / $closed->count(), 1) : null,
-                'upsell_qty' => (int) $upsellItems->sum('quantity'),
-                'upsell_rev' => (int) $upsellItems->sum(fn (OrderItem $i) => $i->lineTotal()),
+                'avg_order' => $closedCount > 0 ? round($revenue / $closedCount, 2) : null,
+                'items_per_order' => $closedCount > 0 ? round($qtySold / $closedCount, 2) : null,
+                'upsell_qty' => (int) $upsellItems->sum(fn (OrderItem $i): int => max(0, (int) $i->quantity)),
+                'upsell_rev' => (int) $upsellItems->sum(fn (OrderItem $i): int => $this->itemRevenue($i, $filter)),
+                'detail_url' => $this->customerProfileUrl($user, $sourceIdInt),
             ];
         })->sortByDesc('revenue')->values()->all();
 
-        $globalClosed = $this->closed($orders);
-        $globalClosedCount = $globalClosed->count();
-        $globalItems = $globalClosed->flatMap(fn (Order $o) => $o->items);
+        $globalRevenueOrders = $this->upsaleRevenueOrders($this->closed($orders));
+        $globalItems = $globalRevenueOrders->flatMap(fn (Order $o) => $o->items instanceof Collection ? $o->items : collect($o->items ?? []));
 
         $totals = $this->sumTotals($columns, $rows);
+        $totals['name'] = __('reports.grand_total');
+        $totals['channel'] = '';
+        $totals['products'] = '';
         $totals['rate'] = self::pct($totals['closed'] ?? 0, $totals['contacts'] ?? 0);
-        $totals['product_types'] = $globalItems->map(fn (OrderItem $i) => $i->product_id ?? $i->product_name)->unique()->count();
-        $totals['avg_order'] = $globalClosedCount > 0 ? (int) round(($totals['revenue'] ?? 0) / $globalClosedCount) : null;
-        $totals['items_per_order'] = $globalClosedCount > 0 ? round(($totals['qty_sold'] ?? 0) / $globalClosedCount, 1) : null;
+        $totals['rate_decimal'] = ($totals['contacts'] ?? 0) > 0 ? round(($totals['closed'] ?? 0) / $totals['contacts'], 2) : null;
+        $totals['product_types'] = $globalItems->map(fn (OrderItem $i) => $i->product_id ?: mb_strtolower((string) $i->product_name))->filter()->unique()->count();
+        $totals['avg_order'] = ($totals['closed'] ?? 0) > 0 ? round(($totals['revenue'] ?? 0) / $totals['closed'], 2) : null;
+        $totals['items_per_order'] = ($totals['closed'] ?? 0) > 0 ? round(($totals['qty_sold'] ?? 0) / $totals['closed'], 2) : null;
+        $totals['upsell_qty'] = array_sum(array_map(fn (array $row): int => (int) ($row['upsell_qty'] ?? 0), $rows));
+        $totals['upsell_rev'] = array_sum(array_map(fn (array $row): int => (int) ($row['upsell_rev'] ?? 0), $rows));
+        $totals['detail_url'] = null;
 
-        return ['columns' => $columns, 'rows' => $rows, 'totals' => $totals];
+        return [
+            'columns' => $columns,
+            'rows' => $rows,
+            'totals' => $totals,
+            'extra' => [
+                'mode' => 'marketing_upsale_source',
+                'notes' => [
+                    ['metric' => 'DOANH SỐ, ĐƠN CHỐT, SỐ SP BÁN RA TÍNH THEO DOANH SỐ TẠM TÍNH', 'meaning' => 'Doanh số sau khi đăng đơn, trừ đơn đã hoàn, hủy vận đơn và hủy đăng đơn.', 'formula' => 'DS = tổng giá trị đơn hợp lệ'],
+                    ['metric' => 'CONTACT (4)', 'meaning' => 'Chỉ đếm lead gốc đủ điều kiện, không nhân đôi packet upsale.', 'formula' => 'Lead counts_as_lead = true'],
+                    ['metric' => 'TỈ LỆ CHỐT (6)', 'meaning' => 'Tỷ lệ chốt theo nguồn dữ liệu.', 'formula' => 'Đơn chốt / Contact'],
+                    ['metric' => 'UPSALE', 'meaning' => 'Sản phẩm item_type=upsell hoặc origin chứa upsell/upsale được cộng vào số lượng/doanh số bán ra nhưng không tạo thêm contact.', 'formula' => 'Tách theo order_items'],
+                ],
+            ],
+        ];
     }
 
     /**
@@ -971,49 +1145,79 @@ class ExtraReportService
 
     private function systemBusiness(User $user, ReportFilterData $filter): array
     {
-        $orders = $this->fetchOrders($user, $filter)
-            ->filter(fn (Order $o) => $o->warehouse_id !== null);
+        $orders = $this->fetchOrdersWithItems($user, $filter)
+            ->filter(fn (Order $order): bool => $order->warehouse_id !== null);
 
         $columns = [
             $this->col('warehouse', 'name', 'text'),
+            $this->col('active_warehouses', 'active_warehouses', 'number'),
             $this->col('closed_qty', 'closed_qty', 'number'),
             $this->col('total_revenue', 'revenue', 'currency'),
             $this->col('avg_per_order', 'avg', 'currency'),
-            $this->col('new_qty', 'new_qty', 'number'),
+            $this->col('new_phone_count', 'new_phone_count', 'number'),
             $this->col('new_rev', 'new_rev', 'currency'),
+            $this->col('new_avg', 'new_avg', 'currency'),
             $this->col('new_share', 'new_share', 'percent'),
-            $this->col('old_qty', 'old_qty', 'number'),
+            $this->col('old_phone_count', 'old_phone_count', 'number'),
             $this->col('old_rev', 'old_rev', 'currency'),
+            $this->col('old_avg', 'old_avg', 'currency'),
             $this->col('old_share', 'old_share', 'percent'),
+            $this->col('warehouse_revenue_avg', 'warehouse_revenue_avg', 'currency'),
+            $this->col('new_avg_per_phone', 'new_avg_per_phone', 'currency'),
+            $this->col('upsell_qty', 'upsell_qty', 'number'),
+            $this->col('upsell_rev', 'upsell_revenue', 'currency'),
+            $this->col('upsell_revenue_share', 'upsell_share', 'percent'),
         ];
 
-        $rows = $orders->groupBy('warehouse_id')->map(function (Collection $group) {
+        $rows = $orders->groupBy('warehouse_id')->map(function (Collection $group) use ($filter): array {
             $closed = $this->closed($group);
-            $revenue = (int) $closed->sum(fn (Order $o) => $o->netRevenue());
+            $revenue = (int) $closed->sum(fn (Order $order): int => $this->reportRevenue($order, $filter));
             $new = $closed->where('is_returning_customer', false);
             $old = $closed->where('is_returning_customer', true);
-            $newRev = (int) $new->sum(fn (Order $o) => $o->netRevenue());
-            $oldRev = (int) $old->sum(fn (Order $o) => $o->netRevenue());
+            $newRev = (int) $new->sum(fn (Order $order): int => $this->reportRevenue($order, $filter));
+            $oldRev = (int) $old->sum(fn (Order $order): int => $this->reportRevenue($order, $filter));
+            $newPhoneCount = $this->phoneCount($new);
+            $oldPhoneCount = $this->phoneCount($old);
+            $upsellItems = $this->upsellItems($closed);
+            $upsellRevenue = (int) $upsellItems->sum(fn (OrderItem $item): int => $item->lineTotal());
 
             return [
-                'name' => $group->first()->warehouse?->name ?? '—',
+                'warehouse_id' => (int) $group->first()->warehouse_id,
+                'name' => $group->first()->warehouse?->name ?? 'Chưa chọn kho',
+                'active_warehouses' => 1,
                 'closed_qty' => $closed->count(),
                 'revenue' => $revenue,
-                'avg' => $closed->count() > 0 ? (int) round($revenue / $closed->count()) : null,
-                'new_qty' => $new->count(),
+                'avg' => $closed->count() > 0 ? (int) round($revenue / $closed->count()) : 0,
+                'new_phone_count' => $newPhoneCount,
                 'new_rev' => $newRev,
+                'new_avg' => $newPhoneCount > 0 ? (int) round($newRev / $newPhoneCount) : 0,
                 'new_share' => self::pct($newRev, $revenue),
-                'old_qty' => $old->count(),
+                'old_phone_count' => $oldPhoneCount,
                 'old_rev' => $oldRev,
+                'old_avg' => $oldPhoneCount > 0 ? (int) round($oldRev / $oldPhoneCount) : 0,
                 'old_share' => self::pct($oldRev, $revenue),
+                'warehouse_revenue_avg' => $revenue,
+                'new_avg_per_phone' => $newPhoneCount > 0 ? (int) round($newRev / $newPhoneCount) : 0,
+                'upsell_qty' => (int) $upsellItems->sum('quantity'),
+                'upsell_revenue' => $upsellRevenue,
+                'upsell_share' => self::pct($upsellRevenue, $revenue),
             ];
         })->sortByDesc('revenue')->values()->all();
 
         $totals = $this->sumTotals($columns, $rows);
-        $revenue = $totals['revenue'] ?? 0;
-        $totals['avg'] = ($totals['closed_qty'] ?? 0) > 0 ? (int) round($revenue / $totals['closed_qty']) : null;
+        $revenue = (int) ($totals['revenue'] ?? 0);
+        $closedQty = (int) ($totals['closed_qty'] ?? 0);
+        $newPhoneCount = (int) ($totals['new_phone_count'] ?? 0);
+        $oldPhoneCount = (int) ($totals['old_phone_count'] ?? 0);
+        $totals['active_warehouses'] = count($rows);
+        $totals['avg'] = $closedQty > 0 ? (int) round($revenue / $closedQty) : 0;
+        $totals['new_avg'] = $newPhoneCount > 0 ? (int) round(($totals['new_rev'] ?? 0) / $newPhoneCount) : 0;
+        $totals['old_avg'] = $oldPhoneCount > 0 ? (int) round(($totals['old_rev'] ?? 0) / $oldPhoneCount) : 0;
         $totals['new_share'] = self::pct($totals['new_rev'] ?? 0, $revenue);
         $totals['old_share'] = self::pct($totals['old_rev'] ?? 0, $revenue);
+        $totals['warehouse_revenue_avg'] = $totals['active_warehouses'] > 0 ? (int) round($revenue / $totals['active_warehouses']) : 0;
+        $totals['new_avg_per_phone'] = $newPhoneCount > 0 ? (int) round(($totals['new_rev'] ?? 0) / $newPhoneCount) : 0;
+        $totals['upsell_share'] = self::pct($totals['upsell_revenue'] ?? 0, $revenue);
 
         return ['columns' => $columns, 'rows' => $rows, 'totals' => $totals];
     }
@@ -1025,9 +1229,9 @@ class ExtraReportService
      * sản phẩm/đơn. Upsell được bổ sung thành nhóm riêng nhưng không làm tăng
      * contact hay số đơn chốt từ lead gốc.
      */
-    private function warehouseSalesSummary(User $user, ReportFilterData $filter): array
+    private function warehouseSalesSummary(User $user, ReportFilterData $filter, bool $scopeMarketing = false): array
     {
-        $orders = $this->fetchOrdersWithItems($user, $filter)
+        $orders = $this->fetchOrdersWithItems($user, $filter, scopeMarketing: $scopeMarketing)
             ->filter(fn (Order $order): bool => $order->warehouse_id !== null);
         $groups = $this->warehouseRevenueGroupDefinitions();
 
@@ -1044,7 +1248,7 @@ class ExtraReportService
         $columns[] = $this->col('upsell_rev', 'upsell_revenue', 'currency');
         $columns[] = $this->col('upsell_revenue_share', 'upsell_share', 'percent');
 
-        $rows = $orders->groupBy('warehouse_id')->map(function (Collection $warehouseOrders) use ($groups): array {
+        $rows = $orders->groupBy('warehouse_id')->map(function (Collection $warehouseOrders) use ($groups, $filter): array {
             $closed = $this->closed($warehouseOrders);
             $buckets = $this->warehouseRevenueBuckets($closed);
             $row = [
@@ -1054,7 +1258,7 @@ class ExtraReportService
 
             foreach ($groups as $group) {
                 $prefix = $group['key'];
-                $metrics = $this->warehouseRevenueMetrics($buckets[$prefix], $prefix === 'discount');
+                $metrics = $this->warehouseRevenueMetrics($buckets[$prefix], $prefix === 'discount', $filter);
                 $row["{$prefix}_revenue"] = $metrics['revenue'];
                 $row["{$prefix}_orders"] = $metrics['orders'];
                 $row["{$prefix}_avg"] = $metrics['avg'];
@@ -1062,9 +1266,7 @@ class ExtraReportService
                 $row["{$prefix}_products_per_order"] = $metrics['products_per_order'];
             }
 
-            $upsellItems = $closed
-                ->flatMap(fn (Order $order) => $order->items)
-                ->where('item_type', 'upsell');
+            $upsellItems = $this->upsellItems($closed);
             $upsellRevenue = (int) $upsellItems->sum(fn (OrderItem $item): int => $item->lineTotal());
             $row['upsell_qty'] = (int) $upsellItems->sum('quantity');
             $row['upsell_revenue'] = $upsellRevenue;
@@ -1099,9 +1301,9 @@ class ExtraReportService
      * thống mới, sau đó hiển thị đủ 12 nhóm doanh số Pushsale; mỗi nhóm gồm
      * số đơn, số sản phẩm, giá trị trung bình và doanh số.
      */
-    private function warehouseSalesV2(User $user, ReportFilterData $filter): array
+    private function warehouseSalesV2(User $user, ReportFilterData $filter, bool $scopeMarketing = false): array
     {
-        $orders = $this->fetchOrdersWithItems($user, $filter)
+        $orders = $this->fetchOrdersWithItems($user, $filter, scopeMarketing: $scopeMarketing)
             ->filter(fn (Order $order): bool => $order->warehouse_id !== null);
         $groups = $this->warehouseRevenueGroupDefinitions();
 
@@ -1122,7 +1324,7 @@ class ExtraReportService
         $columns[] = $this->col('upsell_rev', 'upsell_revenue', 'currency');
         $columns[] = $this->col('upsell_revenue_share', 'upsell_share', 'percent');
 
-        $rows = $orders->groupBy('warehouse_id')->map(function (Collection $warehouseOrders) use ($groups): array {
+        $rows = $orders->groupBy('warehouse_id')->map(function (Collection $warehouseOrders) use ($groups, $filter): array {
             $contacts = $this->contactOrders($warehouseOrders);
             $closedContacts = $this->closed($contacts);
             $closed = $this->closed($warehouseOrders);
@@ -1137,16 +1339,14 @@ class ExtraReportService
 
             foreach ($groups as $group) {
                 $prefix = $group['key'];
-                $metrics = $this->warehouseRevenueMetrics($buckets[$prefix], $prefix === 'discount');
+                $metrics = $this->warehouseRevenueMetrics($buckets[$prefix], $prefix === 'discount', $filter);
                 $row["{$prefix}_orders"] = $metrics['orders'];
                 $row["{$prefix}_products"] = $metrics['products'];
                 $row["{$prefix}_avg"] = $metrics['avg'];
                 $row["{$prefix}_revenue"] = $metrics['revenue'];
             }
 
-            $upsellItems = $closed
-                ->flatMap(fn (Order $order) => $order->items)
-                ->where('item_type', 'upsell');
+            $upsellItems = $this->upsellItems($closed);
             $upsellRevenue = (int) $upsellItems->sum(fn (OrderItem $item): int => $item->lineTotal());
             $row['upsell_qty'] = (int) $upsellItems->sum('quantity');
             $row['upsell_revenue'] = $upsellRevenue;
@@ -1212,12 +1412,12 @@ class ExtraReportService
     /**
      * @return array{revenue: int, orders: int, avg: int, products: int, products_per_order: float}
      */
-    private function warehouseRevenueMetrics(Collection $orders, bool $discountMetric = false): array
+    private function warehouseRevenueMetrics(Collection $orders, bool $discountMetric = false, ?ReportFilterData $filter = null): array
     {
         $orderCount = $orders->count();
         $revenue = $discountMetric
             ? (int) $orders->sum('discount')
-            : (int) $orders->sum(fn (Order $order): int => $order->netRevenue());
+            : (int) $orders->sum(fn (Order $order): int => $this->reportRevenue($order, $filter));
         $products = (int) $orders
             ->flatMap(fn (Order $order) => $order->items)
             ->sum(fn (OrderItem $item): int => max(0, (int) $item->quantity));
@@ -1299,7 +1499,7 @@ class ExtraReportService
             $closedOrderIds = $closedOrders->pluck('id');
             $closedEntries = $entries->filter(fn (array $entry): bool => $closedOrderIds->contains($entry['order']->id));
             $revenue = (int) $closedEntries->sum(fn (array $entry): int => $entry['item']->lineTotal());
-            $upsellEntries = $closedEntries->filter(fn (array $entry): bool => $entry['item']->item_type === 'upsell');
+            $upsellEntries = $closedEntries->filter(fn (array $entry): bool => $this->isUpsellItem($entry['item']));
             $row = [
                 'product_key' => $productKey,
                 'product_id' => $firstItem->product_id,
@@ -1386,6 +1586,43 @@ class ExtraReportService
         ];
     }
 
+    /** Doanh số tạm tính màn upsale loại các trạng thái hoàn/hủy đúng chú thích Pushsale. */
+    private function upsaleRevenueOrders(Collection $closed): Collection
+    {
+        return $closed->reject(function (Order $order): bool {
+            return in_array((string) $order->delivery_status, array_merge(self::RETURNED_DONE, self::CANCELLED), true);
+        })->values();
+    }
+
+    private function formatChannel(?string $channel): string
+    {
+        $normalized = mb_strtolower(trim((string) $channel));
+
+        return match ($normalized) {
+            'facebook', 'fb', 'facebook_ads', 'facebook ads' => 'Facebook ads',
+            'google', 'gg', 'google_ads', 'google ads' => 'Google ads',
+            'youtube', 'yt' => 'Youtube',
+            'tiktok', 'tiktok_ads', 'tiktok ads' => 'Tiktok ads',
+            'landing', 'ladipage' => 'Landing',
+            'zalo', 'zalo_ads', 'zalo ads' => 'Zalo ads',
+            default => $channel ? (string) $channel : '—',
+        };
+    }
+
+    private function customerProfileUrl(User $user, int $sourceId): string
+    {
+        $base = match ($user->role) {
+            UserRole::Admin => '/admin/marketing/customers',
+            UserRole::Marketing => '/marketing/customers',
+            UserRole::Sales => '/sales/customers',
+            UserRole::Warehouse => '/warehouse/customers',
+            UserRole::Accounting => '/accounting/customers',
+            default => '/customers',
+        };
+
+        return $base.'?source_id='.$sourceId;
+    }
+
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     private function fetchOrders(
@@ -1424,9 +1661,10 @@ class ExtraReportService
                 'marketerUser:id,name,email,role',
                 'warehouse:id,name',
                 'product:id,name,sku',
-                'marketingSource:id,name,ad_channel',
+                'marketingSource:id,name,ad_channel,utm_source,product_id,marketer_user_id',
                 'items:id,order_id,product_id,product_name,item_type,origin,quantity,unit_price,cost_price,discount_amount',
-                'items.product:id,name,sku',
+                'items.product:id,name,sku,parent_id',
+                'marketingSource.product:id,name,sku,parent_id',
             ])
             ->applyReportFilter($filter)
             ->when($saleIds !== null, fn ($q) => $q->whereIn('sale_user_id', $saleIds))
@@ -1503,6 +1741,59 @@ class ExtraReportService
     private function bucket(Collection $orders, array $statuses): Collection
     {
         return $orders->filter(fn (Order $o) => in_array((string) $o->delivery_status, $statuses, true));
+    }
+
+
+    private function itemRevenue(OrderItem $item, ?ReportFilterData $filter = null): int
+    {
+        if ($filter?->discountMode === DiscountMode::BeforeDiscount) {
+            return (int) max(0, (int) $item->unit_price * (int) $item->quantity);
+        }
+
+        return $item->lineTotal();
+    }
+
+    private function reportRevenue(Order $order, ?ReportFilterData $filter = null): int
+    {
+        if ($filter?->discountMode === DiscountMode::BeforeDiscount) {
+            $gross = (int) $order->subtotal;
+            if ($gross <= 0) {
+                $gross = (int) $order->effectiveRevenue() + (int) $order->discount;
+            }
+
+            return (int) max(0, $gross - $order->shippingCost());
+        }
+
+        return $order->netRevenue();
+    }
+
+    private function phoneCount(Collection $orders): int
+    {
+        return $orders
+            ->pluck('customer_phone')
+            ->map(fn ($phone): string => trim((string) $phone))
+            ->filter()
+            ->unique()
+            ->count();
+    }
+
+    /** @param  Collection<int, Order>  $orders @return Collection<int, OrderItem> */
+    private function upsellItems(Collection $orders): Collection
+    {
+        return $orders
+            ->flatMap(fn (Order $order) => $order->items instanceof Collection ? $order->items : collect($order->items ?? []))
+            ->filter(fn (OrderItem $item): bool => $this->isUpsellItem($item))
+            ->values();
+    }
+
+    private function isUpsellItem(OrderItem $item): bool
+    {
+        $itemType = strtolower((string) ($item->item_type ?? ''));
+        $origin = strtolower((string) ($item->origin ?? ''));
+
+        return $itemType === 'upsell'
+            || str_contains($origin, 'upsell')
+            || str_contains($origin, 'upsale');
     }
 
     private static function pct(float|int $numerator, float|int $denominator): ?float

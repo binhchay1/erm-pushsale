@@ -46,6 +46,10 @@ class FilterOptionsService
                 'value' => $e->value,
                 'label' => $e->label(),
             ])->values(),
+            'customerTypes' => [
+                ['value' => 'new', 'label' => 'Khách mới'],
+                ['value' => 'old', 'label' => 'Khách cũ'],
+            ],
             'deliveryStatuses' => collect(DeliveryStatus::cases())->map(fn ($e) => [
                 'value' => $e->value,
                 'label' => $e->label(),
@@ -212,6 +216,7 @@ class FilterOptionsService
             'product_id',
             'reconciliation_status',
             'per_page',
+            'no_closing_date_limit',
         ];
     }
 
@@ -289,6 +294,10 @@ class FilterOptionsService
                 'value' => $e->value,
                 'label' => $e->label(),
             ])->values(),
+            'customerTypes' => [
+                ['value' => 'new', 'label' => 'Khách mới'],
+                ['value' => 'old', 'label' => 'Khách cũ'],
+            ],
             'operationStages' => collect(OperationStage::cases())->map(fn ($e) => [
                 'value' => $e->value,
                 'label' => $e->label(),

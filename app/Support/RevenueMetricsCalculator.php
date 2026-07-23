@@ -59,6 +59,18 @@ final class RevenueMetricsCalculator
                 || (string) $order->closing_status === ClosingStatus::Closed->value,
         )->count();
 
+        $closedItems = $closedOrders->flatMap(
+            static fn (Order $order): Collection => $order->items instanceof Collection
+                ? $order->items
+                : collect($order->items ?? []),
+        );
+        $upsellItems = $closedItems->filter(static fn ($item): bool => self::isUpsellItem($item));
+        $upsellQuantity = (int) $upsellItems->sum(fn ($item): int => (int) ($item->quantity ?? 0));
+        $upsellRevenue = (int) $upsellItems->sum(fn ($item): int => method_exists($item, 'lineTotal')
+            ? $item->lineTotal()
+            : (int) ((int) ($item->quantity ?? 0) * (int) ($item->unit_price ?? 0) - (int) ($item->discount ?? 0))
+        );
+
         return [
             'closedOrders' => $closed->toArray(),
             'confirmedDelivery' => $confirmed->toArray(),
@@ -75,7 +87,10 @@ final class RevenueMetricsCalculator
             'successRate' => self::rate($successful->qty, $transferred->qty),
             'contacts' => $contacts,
             'closingRate' => self::rate($convertedContacts, $contacts),
-            'productCount' => (int) $closedOrders->sum(fn (Order $order) => $order->items->sum('quantity')),
+            'productCount' => (int) $closedItems->sum('quantity'),
+            'upsellQuantity' => $upsellQuantity,
+            'upsellRevenue' => $upsellRevenue,
+            'upsellRevenueShare' => self::rate($upsellRevenue, $closed->revenue),
             'averageOrderValue' => $closed->qty > 0 ? (int) round($closed->revenue / $closed->qty) : 0,
             'revenueReturnRate' => self::rate($returned->revenue, $confirmed->revenue),
             'revenueCancelRate' => self::rate($canceled->revenue, $closed->revenue),
@@ -107,6 +122,17 @@ final class RevenueMetricsCalculator
             $subset->count(),
             (int) $subset->sum(fn (Order $o) => $o->netRevenue()),
         );
+    }
+
+
+    private static function isUpsellItem(mixed $item): bool
+    {
+        $itemType = strtolower((string) ($item->item_type ?? ''));
+        $origin = strtolower((string) ($item->origin ?? ''));
+
+        return $itemType === 'upsell'
+            || str_contains($origin, 'upsell')
+            || str_contains($origin, 'upsale');
     }
 
     private static function mergePairs(MetricPairData $a, MetricPairData $b): MetricPairData

@@ -39,6 +39,10 @@ class TemplateSixReportsTest extends TestCase
         $this->assertArrayHasKey('warehouse-sales-v2', $registry);
         $this->assertArrayHasKey('product-conversion', $registry);
         $this->assertSame('leader', $registry['product-conversion']['level']);
+        $this->assertContains('discount_mode', $registry['marketing-1']['filters']);
+        $this->assertContains('marketing_team_leader_id', $registry['marketing-1']['filters']);
+        $this->assertContains('delivery_status', $registry['marketing-1']['filters']);
+        $this->assertContains('parent_product_id', $registry['sale-3']['filters']);
 
         $staff = User::factory()->create([
             'role' => UserRole::Sales,
@@ -55,6 +59,22 @@ class TemplateSixReportsTest extends TestCase
         $this->assertFalse($service->canView($staff, 'warehouse-sales-summary'));
         $this->assertTrue($service->canView($leader, 'warehouse-sales-summary'));
         $this->assertContains(DeliveryStatus::PartialDelivery->value, DeliveryStatus::revenueEligible());
+    }
+
+    public function test_admin_marketing_report_menu_keeps_pushsale_order(): void
+    {
+        $marketing = collect(config('pushsale_navigation'))->firstWhere('title', '2. Marketing');
+        $reports = collect($marketing['children'] ?? [])->firstWhere('title', '2.7 Báo cáo');
+        $items = collect($reports['children'] ?? [])->map(fn (array $item): string => $item['title'])->values()->all();
+
+        $this->assertSame([
+            '1. Báo cáo doanh số marketing',
+            '2. Báo cáo doanh số',
+            '3. Báo cáo doanh số V2',
+            '4. CEO Dashboard V2',
+            '5. Báo cáo công việc',
+            '6. Báo cáo kinh doanh hệ thống',
+        ], $items);
     }
 
     public function test_shared_reports_are_mounted_under_each_role_menu_without_leaking_the_admin_tree(): void
@@ -238,6 +258,13 @@ class TemplateSixReportsTest extends TestCase
         $this->assertSame(100.0, $revenueDetailData['totals']['close_rate']);
         $this->assertSame(450_000, $revenueDetail['upsell_rev']);
 
+        $marketingRevenueDetail = $reports->build('marketing-1', $admin, $filter)['rows'][0];
+        $this->assertSame(1, $marketingRevenueDetail['contacts']);
+        $this->assertSame(2, $marketingRevenueDetail['closed_qty']);
+        $this->assertSame(1_050_000, $marketingRevenueDetail['closed_rev']);
+        $this->assertSame(450_000, $marketingRevenueDetail['upsell_rev']);
+        $this->assertSame(42.9, $marketingRevenueDetail['upsell_revenue_share']);
+
         $warehouseV2 = $reports->build('warehouse-sales-v2', $admin, $filter)['rows'][0];
         $this->assertSame(1, $warehouseV2['contacts']);
         $this->assertSame(1, $warehouseV2['closed_contacts']);
@@ -257,6 +284,19 @@ class TemplateSixReportsTest extends TestCase
         $this->assertSame(4, $warehouseSummary['total_products']);
         $this->assertSame(2.0, $warehouseSummary['total_products_per_order']);
         $this->assertSame(1, $warehouseSummary['partial_orders']);
+
+        $systemBusiness = $reports->build('kho-2', $admin, $filter);
+        $systemRow = $systemBusiness['rows'][0];
+        $this->assertSame(1, $systemRow['active_warehouses']);
+        $this->assertSame(2, $systemRow['closed_qty']);
+        $this->assertSame(1_050_000, $systemRow['revenue']);
+        $this->assertSame(1, $systemRow['new_phone_count']);
+        $this->assertSame(900_000, $systemRow['new_rev']);
+        $this->assertSame(1, $systemRow['old_phone_count']);
+        $this->assertSame(150_000, $systemRow['old_rev']);
+        $this->assertSame(3, $systemRow['upsell_qty']);
+        $this->assertSame(450_000, $systemRow['upsell_revenue']);
+        $this->assertSame(42.9, $systemRow['upsell_share']);
 
         $matrix = collect($reports->build('product-conversion', $admin, $filter)['rows'])
             ->firstWhere('name', 'Sản phẩm upsale');

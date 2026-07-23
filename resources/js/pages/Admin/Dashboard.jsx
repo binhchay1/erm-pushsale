@@ -161,8 +161,8 @@ function AdminDashboardContent({ stats: initialStats, filters = {} }) {
                 </div>
                 <div className="psfd-toolbar-controls">
                     <div className="psfd-filter-controls">
-                        <label>Từ ngày<input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} /></label>
-                        <label>Đến ngày<input type="date" min={dateFrom || undefined} value={dateTo} onChange={(event) => setDateTo(event.target.value)} /></label>
+                        <label><span>Từ ngày</span><input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} /></label>
+                        <label><span>Đến ngày</span><input type="date" min={dateFrom || undefined} value={dateTo} onChange={(event) => setDateTo(event.target.value)} /></label>
                         <button type="submit"><i className="fa fa-search" /> Tải dữ liệu</button>
                     </div>
                     <div className="psfd-live-slot">

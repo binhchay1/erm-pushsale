@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
 use App\Models\WarehouseInventoryMovement;
+use App\Models\Pushsale\WarehouseVoucher;
+use App\Models\Pushsale\WarehouseVoucherLine;
 use App\Services\Inventory\InventoryIntakeService;
 use Illuminate\Database\Seeder;
 
@@ -51,10 +53,12 @@ class InventorySeeder extends Seeder
                 );
 
                 // Lùi ngày phiếu nhập về đầu kỳ để lịch sử trông tự nhiên
+                $timestamp = now()->subDays(45)->setTime(8, 30)->addMinutes($wIndex * 60 + $pIndex * 7);
                 $movement->forceFill([
-                    'created_at' => now()->subDays(45)->setTime(8, 30)->addMinutes($wIndex * 60 + $pIndex * 7),
-                    'updated_at' => now()->subDays(45),
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
                 ])->save();
+                $this->attachVoucher($movement, 'inbound', 'PNK', $staff, $head, $timestamp);
 
                 WarehouseInventory::query()
                     ->where('warehouse_id', $warehouse->id)
@@ -79,12 +83,50 @@ class InventorySeeder extends Seeder
             }
 
             $movement = $this->intakeService->export($hn->id, $product->id, $qty, $staff, $note, $head->id);
+            $timestamp = now()->subDays($daysAgo)->setTime(15, 0);
             $movement->forceFill([
-                'created_at' => now()->subDays($daysAgo)->setTime(15, 0),
-                'updated_at' => now()->subDays($daysAgo),
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
             ])->save();
+            $this->attachVoucher($movement, 'outbound', 'PXK', $staff, $head, $timestamp);
         }
 
         $this->command?->info('Đã nhập kho đầu kỳ ('.WarehouseInventoryMovement::query()->count().' phiếu có người duyệt).');
     }
+    private function attachVoucher(WarehouseInventoryMovement $movement, string $type, string $prefix, User $staff, User $head, $timestamp): void
+    {
+        $code = $prefix.'-'.$timestamp->format('Ymd').'-'.$movement->id;
+
+        $voucher = WarehouseVoucher::query()->create([
+            'warehouse_id' => $movement->warehouse_id,
+            'code' => $code,
+            'type' => $type,
+            'document_date' => $timestamp->toDateString(),
+            'note' => $movement->note,
+            'status' => 'confirmed',
+            'approved_by_user_id' => $head->id,
+            'created_by_user_id' => $staff->id,
+            'updated_by_user_id' => $staff->id,
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp,
+        ]);
+
+        WarehouseVoucherLine::query()->create([
+            'warehouse_voucher_id' => $voucher->id,
+            'product_id' => $movement->product_id,
+            'document_quantity' => abs((int) $movement->quantity),
+            'quantity' => abs((int) $movement->quantity),
+            'unit_cost' => (int) $movement->unit_cost,
+            'location_code' => $movement->inventory?->location_code,
+            'note' => $movement->note,
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp,
+        ]);
+
+        $movement->forceFill([
+            'reference_type' => 'warehouse_voucher',
+            'reference_id' => $voucher->id,
+        ])->save();
+    }
+
 }

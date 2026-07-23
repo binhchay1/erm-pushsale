@@ -88,8 +88,17 @@ class MarketingExtraReportsTest extends TestCase
         $data = app(ExtraReportService::class)->build('marketing-3', $admin, $filter);
 
         $this->assertNotEmpty($data['rows']);
-        $this->assertSame(1, $data['rows'][0]['closed']);
-        $this->assertSame(3, $data['rows'][0]['qty_sold']);
+        $this->assertSame('marketing_work_matrix', $data['extra']['mode']);
+        $this->assertNotEmpty($data['extra']['salesColumns']);
+        $this->assertNotEmpty($data['extra']['matrixRows']);
+
+        $row = $data['extra']['matrixRows'][0];
+        $this->assertSame(1, $row['contacts']);
+        $this->assertSame(1, $row['closed']);
+        $this->assertSame(100.0, $row['rate']);
+        $this->assertSame(1, $row['sale_cells'][0]['contacts']);
+        $this->assertSame(100.0, $row['sale_cells'][0]['rate']);
+        $this->assertSame(1, $data['totals']['contacts']);
     }
 
     public function test_upsale_report_separates_upsell_metrics(): void
@@ -101,10 +110,19 @@ class MarketingExtraReportsTest extends TestCase
 
         $row = $data['rows'][0];
         $this->assertSame('Landing combo', $row['name']);
+        $this->assertSame('Facebook ads', $row['channel']);
+        $this->assertStringContainsString('Main product', $row['products']);
+        $this->assertStringContainsString('Upsell product', $row['products']);
+        $this->assertSame(1, $row['contacts']);
+        $this->assertSame(1, $row['closed']);
+        $this->assertSame(1.0, $row['rate_decimal']);
+        $this->assertStringContainsString('/customers?source_id=', $row['detail_url']);
         $this->assertSame(2, $row['product_types']);
         $this->assertSame(3, $row['qty_sold']);
         $this->assertSame(2, $row['upsell_qty']);
         $this->assertSame(300_000, $row['upsell_rev']);
+        $this->assertSame('marketing_upsale_source', $data['extra']['mode']);
+        $this->assertSame('CHI TIẾT ĐƠN HÀNG TỪ NGUỒN DỮ LIỆU (12)', $data['columns'][11]['label'] ?? '');
     }
 
     public function test_revenue_detail_funnel_columns(): void

@@ -28,7 +28,7 @@ export default {
         campaign_report: 'Campaign report',
         marketing_report_2: 'Product close rate',
         marketing_report_3: 'Marketing activity report',
-        upsale_report: 'Upsell report',
+        upsale_report: 'Upsale report',
         team_leader_stats: 'Team leader statistics',
         hourly_stats: 'Hourly statistics chart',
         warehouse_report_1: 'Revenue by warehouse',

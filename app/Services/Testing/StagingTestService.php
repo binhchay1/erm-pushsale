@@ -2,6 +2,7 @@
 
 namespace App\Services\Testing;
 
+use App\Enums\UserRole;
 use App\Models\Company;
 use App\Models\LandingConnection;
 use App\Models\LandingConnectionProduct;
@@ -13,6 +14,7 @@ use App\Services\Orders\OrderClosingService;
 use App\Services\Shipping\ShippingWebhookService;
 use App\Models\LeadIngestion;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Shipment;
 use App\Models\User;
@@ -129,6 +131,82 @@ class StagingTestService
             'generated_at' => now()->toISOString(),
             'commands' => $commands,
             'counts' => $this->safeCounts(),
+        ];
+    }
+
+
+    /** Chuẩn bị một bộ dữ liệu demo đủ để mở nhanh các trang tác nghiệp và báo cáo Pushsale. */
+    public function demoUi(bool $reset = true): array
+    {
+        $commands = [];
+        $commands[] = $this->runArtisan('migrate', ['--force' => true]);
+        $commands[] = $this->seedDemoSafely();
+        $commands[] = $this->runArtisan('reports:aggregate-daily', ['date' => 'today']);
+        $commands[] = $this->runArtisan('reports:verify-facts', ['--days' => 14]);
+
+        $baseUrl = rtrim((string) config('staging_test.base_url'), '/');
+        $ok = collect($commands)->every(static fn ($row) => (int) ($row['exit_code'] ?? 1) === 0);
+
+        $accounts = User::withoutTenant()
+            ->select(['name', 'email', 'role'])
+            ->orderBy('role')
+            ->orderBy('email')
+            ->limit(30)
+            ->get()
+            ->map(fn (User $user) => [
+                'role' => $user->role instanceof UserRole ? $user->role->value : (string) $user->role,
+                'name' => $user->name,
+                'email' => $user->email,
+            ])
+            ->values();
+
+        $sampleUpsale = Order::withoutTenant()
+            ->whereHas('items', fn ($query) => $query->where('item_type', 'upsell')->orWhere('origin', 'like', '%upsale%')->orWhere('origin', 'like', '%upsell%'))
+            ->with(['marketingSource:id,name,ad_channel', 'items:id,order_id,product_name,item_type,origin,quantity,unit_price'])
+            ->latest('closed_at')
+            ->limit(5)
+            ->get()
+            ->map(fn (Order $order) => [
+                'order_code' => $order->order_code,
+                'source' => $order->marketingSource?->name,
+                'customer' => $order->customer_name,
+                'total' => (int) $order->total,
+                'items' => $order->items->map(fn (OrderItem $item) => [
+                    'name' => $item->product_name,
+                    'type' => $item->item_type,
+                    'origin' => $item->origin,
+                    'quantity' => (int) $item->quantity,
+                    'line_total' => $item->lineTotal(),
+                ])->values(),
+            ])->values();
+
+        $url = static fn (string $path): string => $baseUrl.'/'.ltrim($path, '/');
+
+        return [
+            'ok' => $ok,
+            'generated_at' => now()->toISOString(),
+            'commands' => $commands,
+            'counts' => $this->safeCounts(),
+            'accounts' => $accounts,
+            'operation_pages' => [
+                'admin_dashboard' => $url('/admin/dashboard'),
+                'marketing_dashboard' => $url('/admin/marketing/dashboard'),
+                'customer_profile' => $url('/admin/marketing/customers'),
+                'sale_workspace' => $url('/admin/sales/workspace'),
+                'warehouse_workspace' => $url('/admin/warehouse/operations'),
+                'accounting_workspace' => $url('/admin/accounting'),
+            ],
+            'report_pages' => [
+                '2.7.5_bao_cao_cong_viec' => $url('/ld/thong-ke/bao-cao-cong-viec-mkt?menu=2.7.5'),
+                '2.8.1_thong_ke_truong_nhom' => $url('/ld/marketing/thong-ke-truong-nhom'),
+                '2.8.2_bao_cao_cong_viec' => $url('/ld/thong-ke/bao-cao-cong-viec-mkt?menu=2.8.2'),
+                '2.8.3_bao_cao_up_sale' => $url('/ld/thong-ke/bao-cao-up-sale?menu=2.8.3'),
+                '8.1.1_bieu_do_theo_gio' => $url('/ld/thong-ke'),
+                '8.1.2_bao_cao_doanh_so_marketing' => $url('/bao-cao/bao-cao-doanh-so-chi-tiet-marketing'),
+                '8.1.3_bao_cao_up_sale' => $url('/ld/thong-ke/bao-cao-up-sale?menu=8.1.3'),
+            ],
+            'sample_upsale_orders' => $sampleUpsale,
+            'note' => 'Dữ liệu demo đi từ lead -> sale tác nghiệp -> chốt đơn -> kho trừ/nhập -> báo cáo; một phần đơn có item_type=upsell để kiểm tra báo cáo up sale.',
         ];
     }
 

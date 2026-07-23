@@ -4,6 +4,18 @@ Timeline milestone và spec — **mới nhất trước**. Chi tiết kỹ thu�
 
 ---
 
+## 2026-07-23 — V98 Warehouse 5.3 voucher/inventory linkage
+
+- Rebuild 3 template màn **5.3.1–5.3.3** từ `template-ten-1`: Phiếu nhập/xuất kho, Danh sách phiếu xuất/nhập kho, Lịch sử nhập/xuất kho.
+- Scope CSS mới `pushsale-v98-warehouse-flow-contract.css` cho nhóm kho, không ghi đè báo cáo/dashboard/menu đã làm.
+- Backend phiếu kho chạy transaction: voucher + voucher line + tồn kho + movement cùng commit/rollback.
+- Movement sinh từ phiếu kho được link bằng `reference_type=warehouse_voucher`, `reference_id`; 5.3.2 và 5.3.3 dùng cùng dữ liệu business.
+- Inventory seeder tạo thêm voucher demo để kiểm thử giao diện kho có dữ liệu thật.
+- Thêm test `WarehouseVoucherBusinessLinkTest`.
+- Thêm `PROJECT_VERSION_LOG.md` để tổng hợp ngắn toàn bộ version, tránh đọc quá nhiều handoff rời.
+
+---
+
 ## 2026-07-14 — V13 Landing Connection + layout/modal hardening
 
 - Thay luồng tạo campaign bằng menu 2.4.1 **Kết nối Landing**.
@@ -125,6 +137,18 @@ Timeline milestone và spec — **mới nhất trước**. Chi tiết kỹ thu�
 | P1 | Dashboard KPI, ranking UI, export |
 | P2 | Shipping API thật, VoIP, Shopee/Lazada OAuth, import Excel |
 | P3 | Permission granular, so sánh kỳ, drilldown |
+
+---
+
+## 2026-07-23 — V98 Warehouse 5.3 voucher/inventory linkage
+
+- Rebuild 3 template màn **5.3.1–5.3.3** từ `template-ten-1`: Phiếu nhập/xuất kho, Danh sách phiếu xuất/nhập kho, Lịch sử nhập/xuất kho.
+- Scope CSS mới `pushsale-v98-warehouse-flow-contract.css` cho nhóm kho, không ghi đè báo cáo/dashboard/menu đã làm.
+- Backend phiếu kho chạy transaction: voucher + voucher line + tồn kho + movement cùng commit/rollback.
+- Movement sinh từ phiếu kho được link bằng `reference_type=warehouse_voucher`, `reference_id`; 5.3.2 và 5.3.3 dùng cùng dữ liệu business.
+- Inventory seeder tạo thêm voucher demo để kiểm thử giao diện kho có dữ liệu thật.
+- Thêm test `WarehouseVoucherBusinessLinkTest`.
+- Thêm `PROJECT_VERSION_LOG.md` để tổng hợp ngắn toàn bộ version, tránh đọc quá nhiều handoff rời.
 
 ---
 
