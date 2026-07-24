@@ -310,8 +310,14 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('products/import/sample', [ProductController::class, 'importTemplate'])->name('products.import-template');
         Route::post('products/import', [ProductController::class, 'import'])->name('products.import');
         Route::post('products/categories', [ProductController::class, 'storeCategory'])->name('products.categories.store');
+        Route::patch('products/categories/{category}', [ProductController::class, 'updateCategory'])->name('products.categories.update');
+        Route::delete('products/categories/{category}', [ProductController::class, 'destroyCategory'])->name('products.categories.destroy');
         Route::post('products/attributes', [ProductController::class, 'storeAttribute'])->name('products.attributes.store');
+        Route::patch('products/attributes/{attribute}', [ProductController::class, 'updateAttribute'])->name('products.attributes.update');
+        Route::delete('products/attributes/{attribute}', [ProductController::class, 'destroyAttribute'])->name('products.attributes.destroy');
         Route::post('products/attribute-values', [ProductController::class, 'storeAttributeValue'])->name('products.attribute-values.store');
+        Route::patch('products/attribute-values/{attributeValue}', [ProductController::class, 'updateAttributeValue'])->name('products.attribute-values.update');
+        Route::delete('products/attribute-values/{attributeValue}', [ProductController::class, 'destroyAttributeValue'])->name('products.attribute-values.destroy');
         Route::resource('products', ProductController::class)->except(['show']);
         Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
         Route::delete('leads/{leadIngestion}', [LeadIngestionController::class, 'destroy'])->name('leads.destroy');

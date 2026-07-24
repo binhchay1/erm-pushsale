@@ -2,6 +2,8 @@
 
 namespace App\Models\Pushsale;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class ProductAttribute extends BusinessRecord
 {
     protected $table = 'product_attributes';
@@ -18,5 +20,10 @@ class ProductAttribute extends BusinessRecord
         return [
             'is_active' => 'boolean',
         ];
+    }
+
+    public function values(): HasMany
+    {
+        return $this->hasMany(ProductAttributeValue::class, 'product_attribute_id');
     }
 }

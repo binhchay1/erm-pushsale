@@ -1,0 +1,246 @@
+/* Pushsale import/contact + data distribution + feature information contract.
+   Keep scoped: no version suffix, no global override outside Pushsale app body. */
+
+/* Import contact page: header must start from the left like the source template. */
+html body.pushsale-app-body .pushsale-template-page-1-10 .m-header-wrap,
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header-wrap {
+    margin: 0 !important;
+    padding: 0 15px !important;
+    border-bottom: 1px solid #d2d6de !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-10 .m-header,
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header {
+    display: grid !important;
+    grid-template-columns: minmax(260px, 420px) minmax(160px, 220px) minmax(320px, 1fr) auto !important;
+    gap: 16px !important;
+    align-items: center !important;
+    justify-content: start !important;
+    min-height: 56px !important;
+    width: 100% !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-10 .m-header > [class*='col-'],
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header > [class*='col-'] {
+    float: none !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-10 .m-header .text,
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header .text {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 4px 0 0 !important;
+    color: #111 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 30px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-10 .m-header span[style*='darkcyan'],
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header span[style*='darkcyan'] {
+    display: inline-flex !important;
+    align-items: center !important;
+    color: #008b8b !important;
+    cursor: pointer !important;
+    font-size: 11px !important;
+    line-height: 30px !important;
+    text-decoration: none !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-10 .m-header select,
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header select,
+html body.pushsale-app-body .pushsale-template-page-1-10 .m-header input,
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header input {
+    height: 30px !important;
+    min-height: 30px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-10 .box-body,
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .box-body {
+    padding-left: 30px !important;
+    padding-right: 15px !important;
+}
+
+@media (max-width: 1180px) {
+    html body.pushsale-app-body .pushsale-template-page-1-10 .m-header,
+    html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header {
+        grid-template-columns: 1fr 220px 1fr auto !important;
+    }
+}
+
+/* Import guide dialog opened from the source "Xem hướng dẫn" affordance. */
+html body.pushsale-app-body .ps-import-guide-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 10050 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px !important;
+    background: rgba(0, 0, 0, .45) !important;
+}
+
+html body.pushsale-app-body .ps-import-guide-dialog {
+    width: min(980px, calc(100vw - 48px)) !important;
+    max-height: calc(100vh - 48px) !important;
+    overflow: auto !important;
+    background: #fff !important;
+    border: 1px solid #2f80d6 !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .25) !important;
+}
+
+html body.pushsale-app-body .ps-import-guide-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 38px !important;
+    padding: 0 14px !important;
+    background: #3b82d6 !important;
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-import-guide-header h3 {
+    margin: 0 !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+}
+
+html body.pushsale-app-body .ps-import-guide-header button {
+    border: 0 !important;
+    background: transparent !important;
+    color: #fff !important;
+    cursor: pointer !important;
+}
+
+html body.pushsale-app-body .ps-import-guide-body {
+    padding: 16px 18px 18px !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+}
+
+html body.pushsale-app-body .ps-import-guide-note {
+    border: 1px solid #f5a623 !important;
+    background: #fffef0 !important;
+    padding: 10px 14px !important;
+}
+
+html body.pushsale-app-body .ps-import-guide-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    margin-top: 14px !important;
+}
+
+html body.pushsale-app-body .ps-import-guide-grid h4 {
+    margin: 0 0 7px !important;
+    color: #ff5722 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-import-guide-actions {
+    margin-top: 14px !important;
+    text-align: right !important;
+}
+
+/* Phân bổ data: option checkboxes should breathe and line up from the left. */
+html body.pushsale-app-body .psdd-operation-policy {
+    margin-top: 8px !important;
+}
+
+html body.pushsale-app-body .psdd-options {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 10px 24px !important;
+    justify-content: flex-start !important;
+    padding: 10px 0 12px !important;
+    border: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .psdd-options .psdd-check {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    gap: 7px !important;
+    min-height: 24px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .psdd-options .psdd-check input[type='checkbox'] {
+    width: 15px !important;
+    height: 15px !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .psdd-options .psdd-check span {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 22px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #111 !important;
+    line-height: 22px !important;
+}
+
+/* Feature settings: make info icons actually show the explanation text. */
+html body.pushsale-app-body .ps-feature-settings-page .ps-feature-help {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #337ab7 !important;
+    cursor: help !important;
+}
+
+html body.pushsale-app-body .ps-feature-settings-page .ps-feature-help-popover {
+    position: absolute !important;
+    z-index: 20 !important;
+    top: 50% !important;
+    left: calc(100% + 10px) !important;
+    transform: translateY(-50%) !important;
+    display: none !important;
+    width: 360px !important;
+    max-width: 45vw !important;
+    padding: 9px 11px !important;
+    border: 1px solid #f5a623 !important;
+    background: #fffef0 !important;
+    color: #222 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .14) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1.45 !important;
+    text-align: left !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body .ps-feature-settings-page .ps-feature-help:hover .ps-feature-help-popover,
+html body.pushsale-app-body .ps-feature-settings-page .ps-feature-help:focus .ps-feature-help-popover {
+    display: block !important;
+}
+
+html body.pushsale-app-body .ps-feature-settings-page .ps-feature-table .col4 {
+    color: #333 !important;
+    font-size: 12px !important;
+}

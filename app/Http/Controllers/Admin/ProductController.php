@@ -13,6 +13,7 @@ use App\Repositories\WarehouseRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -26,6 +27,72 @@ class ProductController extends Controller
         private readonly ProductRepository $products,
         private readonly WarehouseRepository $warehouses,
     ) {}
+
+    /**
+     * @return array{id:int,name:string,is_active:bool,updated_by:?string,updated_at:?string}[]
+     */
+    private function productCategoryOptions(): array
+    {
+        return ProductCategory::query()
+            ->with('updater:id,name,email')
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (ProductCategory $category): array => [
+                'id' => (int) $category->id,
+                'name' => $category->name,
+                'is_active' => (bool) $category->is_active,
+                'updated_by' => $this->displayUser($category->updater),
+                'updated_at' => $category->updated_at?->format('d / m / Y H:i'),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array{id:int,name:string,is_active:bool,updated_by:?string,updated_at:?string,values:array<int,array<string,mixed>>}[]
+     */
+    private function productAttributeOptions(): array
+    {
+        return ProductAttribute::query()
+            ->with(['updater:id,name,email', 'values' => fn ($query) => $query->with('updater:id,name,email')->orderByDesc('id')])
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (ProductAttribute $attribute): array => [
+                'id' => (int) $attribute->id,
+                'name' => $attribute->name,
+                'is_active' => (bool) $attribute->is_active,
+                'updated_by' => $this->displayUser($attribute->updater),
+                'updated_at' => $attribute->updated_at?->format('d / m / Y H:i'),
+                'values' => $attribute->values->map(fn (ProductAttributeValue $value): array => [
+                    'id' => (int) $value->id,
+                    'product_attribute_id' => (int) $value->product_attribute_id,
+                    'attribute_name' => $attribute->name,
+                    'name' => $value->name,
+                    'updated_by' => $this->displayUser($value->updater),
+                    'updated_at' => $value->updated_at?->format('d / m / Y H:i'),
+                ])->values()->all(),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  array<int,array<string,mixed>>  $attributes
+     * @return array<int,array<string,mixed>>
+     */
+    private function productAttributeValueOptions(array $attributes): array
+    {
+        return collect($attributes)->flatMap(fn (array $attribute): array => $attribute['values'] ?? [])->values()->all();
+    }
+
+    private function displayUser(mixed $user): ?string
+    {
+        if (! $user) {
+            return null;
+        }
+
+        return $user->name ?: ($user->email ? Str::before($user->email, '@') : null);
+    }
 
     public function index(Request $request): Response
     {
@@ -91,11 +158,15 @@ class ProductController extends Controller
             'updated_at' => $product->updated_at?->format('d/m/Y H:i'),
         ]);
 
+        $categoryOptions = $this->productCategoryOptions();
+        $attributeOptions = $this->productAttributeOptions();
+
         return Inertia::render('Admin/Products/Index', [
             'products' => $products,
             'filters' => $filters,
-            'categories' => ProductCategory::query()->orderBy('sort_order')->orderBy('name')->get(['id', 'name', 'is_active']),
-            'attributes' => ProductAttribute::query()->with('values:id,product_attribute_id,name')->orderBy('name')->get(['id', 'name', 'is_active']),
+            'categories' => $categoryOptions,
+            'attributes' => $attributeOptions,
+            'attributeValues' => $this->productAttributeValueOptions($attributeOptions),
             'vatCodes' => Product::query()->whereNotNull('vat_code')->where('vat_code', '!=', '')->distinct()->orderBy('vat_code')->pluck('vat_code')->values(),
             'activeMenuCode' => '1.3.1',
         ]);
@@ -362,9 +433,8 @@ class ProductController extends Controller
 
     public function storeCategory(Request $request): RedirectResponse
     {
-        $data = $request->validate(['name' => ['required', 'string', 'max:255'], 'is_active' => ['sometimes', 'boolean']]);
+        $data = $this->validateTaxonomy($request, ProductCategory::class);
         ProductCategory::query()->create([
-            'company_id' => $request->user()->company_id,
             'name' => $data['name'],
             'is_active' => (bool) ($data['is_active'] ?? true),
             'created_by_user_id' => $request->user()->id,
@@ -373,17 +443,50 @@ class ProductController extends Controller
         return back()->with('success', 'Đã thêm phân loại sản phẩm.');
     }
 
+    public function updateCategory(Request $request, ProductCategory $category): RedirectResponse
+    {
+        $data = $this->validateTaxonomy($request, ProductCategory::class, $category->id);
+        $category->update([
+            'name' => $data['name'],
+            'is_active' => (bool) ($data['is_active'] ?? true),
+            'updated_by_user_id' => $request->user()->id,
+        ]);
+        return back()->with('success', 'Đã cập nhật phân loại sản phẩm.');
+    }
+
+    public function destroyCategory(ProductCategory $category): RedirectResponse
+    {
+        $category->delete();
+        return back()->with('success', 'Đã xóa phân loại sản phẩm.');
+    }
+
     public function storeAttribute(Request $request): RedirectResponse
     {
-        $data = $request->validate(['name' => ['required', 'string', 'max:255'], 'is_active' => ['sometimes', 'boolean']]);
+        $data = $this->validateTaxonomy($request, ProductAttribute::class);
         ProductAttribute::query()->create([
-            'company_id' => $request->user()->company_id,
             'name' => $data['name'],
             'is_active' => (bool) ($data['is_active'] ?? true),
             'created_by_user_id' => $request->user()->id,
             'updated_by_user_id' => $request->user()->id,
         ]);
         return back()->with('success', 'Đã thêm thuộc tính sản phẩm.');
+    }
+
+    public function updateAttribute(Request $request, ProductAttribute $attribute): RedirectResponse
+    {
+        $data = $this->validateTaxonomy($request, ProductAttribute::class, $attribute->id);
+        $attribute->update([
+            'name' => $data['name'],
+            'is_active' => (bool) ($data['is_active'] ?? true),
+            'updated_by_user_id' => $request->user()->id,
+        ]);
+        return back()->with('success', 'Đã cập nhật thuộc tính sản phẩm.');
+    }
+
+    public function destroyAttribute(ProductAttribute $attribute): RedirectResponse
+    {
+        $attribute->delete();
+        return back()->with('success', 'Đã xóa thuộc tính sản phẩm.');
     }
 
     public function storeAttributeValue(Request $request): RedirectResponse
@@ -393,13 +496,43 @@ class ProductController extends Controller
             'name' => ['required', 'string', 'max:255'],
         ]);
         ProductAttributeValue::query()->create([
-            'company_id' => $request->user()->company_id,
             'product_attribute_id' => $data['product_attribute_id'],
             'name' => $data['name'],
             'created_by_user_id' => $request->user()->id,
             'updated_by_user_id' => $request->user()->id,
         ]);
         return back()->with('success', 'Đã thêm giá trị thuộc tính.');
+    }
+
+    public function updateAttributeValue(Request $request, ProductAttributeValue $attributeValue): RedirectResponse
+    {
+        $data = $request->validate([
+            'product_attribute_id' => ['required', 'exists:product_attributes,id'],
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+        $attributeValue->update([
+            'product_attribute_id' => $data['product_attribute_id'],
+            'name' => $data['name'],
+            'updated_by_user_id' => $request->user()->id,
+        ]);
+        return back()->with('success', 'Đã cập nhật giá trị thuộc tính.');
+    }
+
+    public function destroyAttributeValue(ProductAttributeValue $attributeValue): RedirectResponse
+    {
+        $attributeValue->delete();
+        return back()->with('success', 'Đã xóa giá trị thuộc tính.');
+    }
+
+    /** @return array{name:string,is_active?:bool} */
+    private function validateTaxonomy(Request $request, string $modelClass, ?int $ignoreId = null): array
+    {
+        $table = (new $modelClass)->getTable();
+
+        return $request->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique($table, 'name')->ignore($ignoreId)->where(fn ($query) => $query->where('company_id', $request->user()->company_id))],
+            'is_active' => ['sometimes', 'boolean'],
+        ]);
     }
 
     /** @return list<array{id: int, name: string}> */

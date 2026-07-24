@@ -359,3 +359,385 @@ html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link,
 html body.pushsale-app-body div.pushsale-third-menu[role="menu"] .pushsale-third-link {
     background-image: none !important;
 }
+
+
+/* Product source dialogs: fit content without horizontal scroll. */
+html body.pushsale-app-body .ps-product-source-modal.ps-dialog-surface,
+html body.pushsale-app-body .ps-taxonomy-source-modal.ps-dialog-surface {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    left: 50% !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-dialog-body,
+html body.pushsale-app-body .ps-taxonomy-source-modal .ps-dialog-body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+html body.pushsale-app-body .ps-product-source-form {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 25px 36px 26px 18px !important;
+    overflow-x: hidden !important;
+}
+
+html body.pushsale-app-body .ps-product-source-grid {
+    width: 100% !important;
+    grid-template-columns: 95px minmax(140px, 1fr) 95px minmax(140px, 1fr) 95px minmax(140px, 1fr) 145px minmax(140px, 1fr) !important;
+    column-gap: 18px !important;
+    row-gap: 13px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-grid .form-control,
+html body.pushsale-app-body .ps-product-source-grid input,
+html body.pushsale-app-body .ps-product-source-grid select {
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+html body.pushsale-app-body .ps-product-permission-source {
+    width: 100% !important;
+    grid-template-columns: 120px minmax(0, 1fr) 28px 28px !important;
+}
+
+html body.pushsale-app-body .ps-product-guide {
+    width: calc(100% - 150px) !important;
+    max-width: none !important;
+    overflow: hidden !important;
+}
+
+@media (max-width: 1280px) {
+    html body.pushsale-app-body .ps-product-source-grid {
+        grid-template-columns: 95px minmax(0, 1fr) 95px minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .ps-product-field.span-2 > input,
+    html body.pushsale-app-body .ps-product-field.span-2 > select,
+    html body.pushsale-app-body .ps-product-field.span-2 > div {
+        grid-column: span 3 !important;
+    }
+}
+
+@media (max-width: 760px) {
+    html body.pushsale-app-body .ps-product-source-form {
+        padding-right: 18px !important;
+    }
+
+    html body.pushsale-app-body .ps-product-guide,
+    html body.pushsale-app-body .ps-source-check,
+    html body.pushsale-app-body .ps-save-button {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-product-source-grid,
+    html body.pushsale-app-body .ps-product-permission-source {
+        display: block !important;
+    }
+
+    html body.pushsale-app-body .ps-product-field,
+    html body.pushsale-app-body .ps-permission-row {
+        display: block !important;
+        margin-bottom: 10px !important;
+    }
+}
+
+/* Product taxonomy manager: iframe-style Pushsale popup with real backend data. */
+html body.pushsale-app-body .ps-taxonomy-source-modal.ps-dialog-surface {
+    min-height: min(760px, calc(100dvh - 20px)) !important;
+    max-height: calc(100dvh - 20px) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28) !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-body {
+    height: calc(100dvh - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-form {
+    width: 100% !important;
+    min-height: 668px !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    color: #111 !important;
+    font: 12px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-header-wrap {
+    margin: 0 !important;
+    border-bottom: 1px solid #d8d8d8 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-header-wrap .m-header {
+    min-height: 52px !important;
+    padding: 12px 18px !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-header-wrap .text {
+    color: #111 !important;
+    font: 700 16px/24px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-box .box-body {
+    padding: 15px 18px !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-search-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 30px !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-search-row .col-xs-6,
+html body.pushsale-app-body .ps-taxonomy-search-row .col-sm-3 {
+    float: none !important;
+    width: auto !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-search-row input.form-control {
+    width: 430px !important;
+    height: 31px !important;
+    border: 1px solid #c8d2dc !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-separator {
+    clear: both !important;
+    border-bottom: 1px solid #ddd !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-main {
+    padding: 18px !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-grid {
+    display: grid !important;
+    grid-template-columns: minmax(520px, 7fr) minmax(420px, 5fr) !important;
+    gap: 32px !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-list-pane,
+html body.pushsale-app-body .ps-taxonomy-info-pane {
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-table,
+html body.pushsale-app-body .ps-taxonomy-info-table {
+    width: 100% !important;
+    margin: 0 !important;
+    border-collapse: collapse !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-table th,
+html body.pushsale-app-body .ps-taxonomy-info-table th {
+    height: 31px !important;
+    padding: 6px 8px !important;
+    border: 1px solid #1f6fbf !important;
+    background: #347fd6 !important;
+    color: #fff !important;
+    font: 700 12px/18px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-table td,
+html body.pushsale-app-body .ps-taxonomy-info-table td {
+    min-height: 39px !important;
+    padding: 7px 8px !important;
+    border: 1px solid #d9d9d9 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-table tr:nth-child(odd) td {
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-id {
+    width: 60px !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-actions {
+    width: 80px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-actions .btn-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 24px !important;
+    margin: 0 3px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #1684f8 !important;
+    opacity: 0.45 !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-actions .btn-icon:hover {
+    opacity: 1 !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-info-table th {
+    text-align: left !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-label {
+    width: 150px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-value {
+    width: 250px !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-info-table .form-control {
+    height: 31px !important;
+    min-height: 31px !important;
+    padding: 5px 8px !important;
+    border: 0 !important;
+    border-bottom: 1px dotted #aaa !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-functions {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    color: #111 !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-functions .ps-link-button {
+    border: 0 !important;
+    background: transparent !important;
+    color: #1684f8 !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-functions input[type='checkbox'] {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 5px 0 0 !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-pager-row {
+    margin-top: 15px !important;
+}
+
+@media (max-width: 1100px) {
+    html body.pushsale-app-body .ps-taxonomy-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-form label {
+    display: inline !important;
+    grid-template-columns: none !important;
+    margin: 0 !important;
+}
+
+/* Product attribute dialog: match Pushsale DanhSachProp popup. */
+html body.pushsale-app-body .ps-taxonomy-update-note {
+    color: #ff0000 !important;
+    font: 12px/18px Arial, Helvetica, sans-serif !important;
+    text-align: left !important;
+    min-width: 260px !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-pager-row .pagination {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-pager-row .pagination li,
+html body.pushsale-app-body .ps-taxonomy-pager-row .pagination li button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-pager-row .pagination li button {
+    min-width: 30px !important;
+    height: 30px !important;
+    padding: 5px 10px !important;
+    margin-left: -1px !important;
+    border: 1px solid #ddd !important;
+    background: #fff !important;
+    color: #337ab7 !important;
+    font: 12px/18px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-pager-row .pagination li.active button {
+    border-color: #337ab7 !important;
+    background: #337ab7 !important;
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-pager-row .pagination li.disabled button {
+    color: #aaa !important;
+    cursor: not-allowed !important;
+    opacity: .65 !important;
+}
+
+/* Product attribute value dialog: match Pushsale DanhSachPropValue popup. */
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-search-row {
+    gap: 30px !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-search-row input.form-control,
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-search-row select.form-control {
+    width: 430px !important;
+    height: 31px !important;
+    min-height: 31px !important;
+    border: 1px solid #c8d2dc !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-grid {
+    grid-template-columns: minmax(620px, 7fr) minmax(520px, 5fr) !important;
+    gap: 32px !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table th:nth-child(3),
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table td:nth-child(3) {
+    min-width: 220px !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-table tr.ps-taxonomy-selected-row td {
+    background: #e8f3ff !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-info-table select.form-control {
+    border: 1px solid #d2d6de !important;
+    border-bottom: 1px solid #d2d6de !important;
+}

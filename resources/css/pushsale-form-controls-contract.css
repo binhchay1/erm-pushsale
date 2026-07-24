@@ -1,0 +1,192 @@
+/* Pushsale form controls contract.
+   Standardizes native import file pickers and checkbox/label spacing across captured templates. */
+
+html body.pushsale-app-body .pushsale-template-fragment .app-file-upload,
+html body.pushsale-app-body .ps-adminlte-page .app-file-upload,
+html body.pushsale-app-body .pushsale-template-fragment .ps-file-upload,
+html body.pushsale-app-body .ps-adminlte-page .ps-file-upload {
+    display: flex !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 0 !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment .app-file-upload .ps-file-name-wrap,
+html body.pushsale-app-body .ps-adminlte-page .app-file-upload .ps-file-name-wrap,
+html body.pushsale-app-body .pushsale-template-fragment .ps-file-upload .ps-file-name-wrap,
+html body.pushsale-app-body .ps-adminlte-page .ps-file-upload .ps-file-name-wrap {
+    float: none !important;
+    display: block !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment .app-file-upload .ps-file-upload-icon-wrap,
+html body.pushsale-app-body .ps-adminlte-page .app-file-upload .ps-file-upload-icon-wrap,
+html body.pushsale-app-body .pushsale-template-fragment .ps-file-upload .ps-file-upload-icon-wrap,
+html body.pushsale-app-body .ps-adminlte-page .ps-file-upload .ps-file-upload-icon-wrap {
+    float: none !important;
+    display: flex !important;
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment .app-file-upload > .app-file-upload-chooser.form-control,
+html body.pushsale-app-body .ps-adminlte-page .app-file-upload > .app-file-upload-chooser.form-control,
+html body.pushsale-app-body .pushsale-template-fragment .app-file-upload .ps-file-chooser.form-control,
+html body.pushsale-app-body .ps-adminlte-page .app-file-upload .ps-file-chooser.form-control,
+html body.pushsale-app-body .pushsale-template-fragment .ps-file-upload .ps-file-chooser.form-control,
+html body.pushsale-app-body .ps-adminlte-page .ps-file-upload .ps-file-chooser.form-control,
+html body.pushsale-app-body .pushsale-template-fragment label.app-file-upload-chooser.form-control,
+html body.pushsale-app-body .ps-adminlte-page label.app-file-upload-chooser.form-control {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 5px 10px !important;
+    border: 1px solid #cfd9e2 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+    text-align: left !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment .app-file-upload .ps-file-chooser.form-control,
+html body.pushsale-app-body .ps-adminlte-page .app-file-upload .ps-file-chooser.form-control {
+    justify-content: center !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment .app-file-upload .app-btn-upload-file,
+html body.pushsale-app-body .ps-adminlte-page .app-file-upload .app-btn-upload-file,
+html body.pushsale-app-body .pushsale-template-fragment .ps-file-upload-icon-wrap .btn,
+html body.pushsale-app-body .ps-adminlte-page .ps-file-upload-icon-wrap .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid #cfd9e2 !important;
+    border-left: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #1684f8 !important;
+    font-size: 15px !important;
+    line-height: 32px !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment .app-file-upload .app-btn-upload-file i,
+html body.pushsale-app-body .ps-adminlte-page .app-file-upload .app-btn-upload-file i,
+html body.pushsale-app-body .pushsale-template-fragment .ps-file-upload-icon-wrap .btn i,
+html body.pushsale-app-body .ps-adminlte-page .ps-file-upload-icon-wrap .btn i {
+    margin: 0 !important;
+    font-size: 15px !important;
+    line-height: 1 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment .app-file-upload .clearfix,
+html body.pushsale-app-body .ps-adminlte-page .app-file-upload .clearfix,
+html body.pushsale-app-body .pushsale-template-fragment .ps-file-upload .clearfix,
+html body.pushsale-app-body .ps-adminlte-page .ps-file-upload .clearfix {
+    display: none !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment input[type='file'].hidden,
+html body.pushsale-app-body .ps-adminlte-page input[type='file'].hidden {
+    display: none !important;
+}
+
+/* Checkbox + text spacing: templates often put checkbox and label text directly adjacent. */
+html body.pushsale-app-body .pushsale-template-fragment label,
+html body.pushsale-app-body .ps-adminlte-page label,
+html body.pushsale-app-body .ps-report-page label,
+html body.pushsale-app-body .checkbox label,
+html body.pushsale-app-body .radio label {
+    font-weight: 400 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment th label,
+html body.pushsale-app-body .ps-adminlte-page th label,
+html body.pushsale-app-body .ps-report-page th label {
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment label:has(> input[type='checkbox']),
+html body.pushsale-app-body .ps-adminlte-page label:has(> input[type='checkbox']),
+html body.pushsale-app-body .ps-report-page label:has(> input[type='checkbox']),
+html body.pushsale-app-body .pushsale-template-fragment label:has(> input[type='radio']),
+html body.pushsale-app-body .ps-adminlte-page label:has(> input[type='radio']),
+html body.pushsale-app-body .ps-report-page label:has(> input[type='radio']) {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-height: 22px !important;
+    margin: 0 14px 0 0 !important;
+    line-height: 22px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment input[type='checkbox'],
+html body.pushsale-app-body .ps-adminlte-page input[type='checkbox'],
+html body.pushsale-app-body .ps-report-page input[type='checkbox'],
+html body.pushsale-app-body .pushsale-template-fragment input[type='radio'],
+html body.pushsale-app-body .ps-adminlte-page input[type='radio'],
+html body.pushsale-app-body .ps-report-page input[type='radio'] {
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    margin: 0 6px 0 0 !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment input[type='checkbox'] + label,
+html body.pushsale-app-body .ps-adminlte-page input[type='checkbox'] + label,
+html body.pushsale-app-body .ps-report-page input[type='checkbox'] + label,
+html body.pushsale-app-body .pushsale-template-fragment input[type='radio'] + label,
+html body.pushsale-app-body .ps-adminlte-page input[type='radio'] + label,
+html body.pushsale-app-body .ps-report-page input[type='radio'] + label {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 22px !important;
+    margin: 0 14px 0 0 !important;
+    padding: 0 !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 22px !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .pushsale-template-fragment span > input[type='checkbox'] + label,
+html body.pushsale-app-body .ps-adminlte-page span > input[type='checkbox'] + label,
+html body.pushsale-app-body .ps-report-page span > input[type='checkbox'] + label {
+    margin-left: 0 !important;
+}
+
+html body.pushsale-app-body .psdd-options .psdd-check,
+html body.pushsale-app-body .psdd-options .psdd-check span {
+    font-weight: 400 !important;
+}

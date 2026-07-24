@@ -126,6 +126,12 @@ function ExcelColumnPicker({ control, value, onChange }) {
 }
 
 function SettingsRow({ row, values, onChange }) {
+    const helpText = row.help || row.business_help || row.controls?.find((control) => control.help)?.help || '';
+    const linkStatus = row.business_linked === true
+        ? 'Đã liên kết nghiệp vụ'
+        : (row.business_linked === false ? 'Đang lưu cấu hình, chưa bắt vào luồng xử lý chính' : '');
+    const note = [row.note, linkStatus].filter(Boolean).join(' — ');
+
     return (
         <tr className="ps-feature-row">
             <td className="col1">{row.label}</td>
@@ -146,13 +152,14 @@ function SettingsRow({ row, values, onChange }) {
                 )}
             </td>
             <td className="col3">
-                {(row.help || row.controls?.some((control) => control.help)) ? (
-                    <span className="ps-feature-help" title={row.help || row.controls?.find((control) => control.help)?.help}>
+                {helpText ? (
+                    <button type="button" className="ps-feature-help" aria-label={helpText} data-help={helpText} title={helpText}>
                         <i className="fa fa-question-circle" />
-                    </span>
+                        <span className="ps-feature-help-popover">{helpText}</span>
+                    </button>
                 ) : null}
             </td>
-            <td className="col4">{row.note}</td>
+            <td className="col4">{note}</td>
         </tr>
     );
 }

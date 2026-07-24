@@ -15,7 +15,95 @@ final class FeatureSettingsService
      */
     public function definition(): array
     {
-        return config('pushsale_feature_settings', []);
+        return $this->enrichDefinition(config('pushsale_feature_settings', []));
+    }
+
+
+    /**
+     * @param  array<int, array<string, mixed>>  $definition
+     * @return array<int, array<string, mixed>>
+     */
+    private function enrichDefinition(array $definition): array
+    {
+        return collect($definition)->map(function (array $tab): array {
+            $tab['rows'] = collect($tab['rows'] ?? [])->map(function (array $row): array {
+                $keys = collect($row['controls'] ?? [])->pluck('key')->filter()->map(fn ($key) => (string) $key)->values()->all();
+                $linked = $this->isBusinessLinked($keys);
+                $fallback = $this->fallbackHelp($row, $keys, $linked);
+
+                if (blank($row['help'] ?? '')) {
+                    $row['help'] = $fallback;
+                }
+
+                $row['business_help'] = $fallback;
+                $row['business_linked'] = $linked;
+                $row['controls'] = collect($row['controls'] ?? [])->map(function (array $control) use ($row, $fallback): array {
+                    if (blank($control['help'] ?? '')) {
+                        $control['help'] = $row['help'] ?? $fallback;
+                    }
+
+                    return $control;
+                })->values()->all();
+
+                return $row;
+            })->values()->all();
+
+            return $tab;
+        })->values()->all();
+    }
+
+    /** @param list<string> $keys */
+    private function isBusinessLinked(array $keys): ?bool
+    {
+        if ($keys === []) {
+            return null;
+        }
+
+        $linkedKeys = [
+            'SettingGhiChuGiaoHangSale',
+            'SettingMaDonPrefix',
+            'SettingKhoDangDon',
+            'SettingKhoHuyDangDon',
+            'SettingKeToanDangDon',
+            'SettingKeToanHuyDangDon',
+            'SettingGiaoVanCapNhatPTGH',
+            'SettingKhoSuaSanPham',
+            'SettingDangDonNguoiNhanSDT',
+            'SettingMaDonCoDinh',
+            'SettingNgayChotDonCoDinh',
+            'SettingDoanhSoTruChietKhau',
+            'SettingCheckDeviceIdentity',
+            'SettingKeywordMinLength',
+            'DefaultProductQuantity',
+            'SettingCheDoanhSoMKT',
+            'SettingCheDoanhSoSale',
+            'Use_Ecommerce',
+            'SettingExcelPermission',
+            'SettingExcelPermissionEX',
+            'SettingExcelAccounting',
+            'SettingExcelAll',
+            'HDDT_LamTronDonGia',
+            'HDDT_TenNguoiMuaMacDinh',
+            'HDDT_DonThuongBanChoNguoiTieuDung',
+            'HDDT_DonEcomBanChoNguoiTieuDung',
+            'XuatHoaDonDienTuTuDong',
+            'XuatHoaDonDienTuThoiDiemHour',
+        ];
+
+        return collect($keys)->contains(fn (string $key): bool => in_array($key, $linkedKeys, true));
+    }
+
+    /** @param list<string> $keys */
+    private function fallbackHelp(array $row, array $keys, ?bool $linked): string
+    {
+        $label = trim((string) ($row['label'] ?? 'Cấu hình'));
+        $controls = collect($row['controls'] ?? [])->pluck('label')->filter()->implode(', ');
+        $summary = $controls !== '' ? $controls : $label;
+        $impact = $linked === true
+            ? 'Cấu hình này đã được đọc bởi backend khi xử lý nghiệp vụ liên quan.'
+            : 'Cấu hình này được lưu tập trung để đồng bộ giao diện/quyền; nếu chưa nằm trong luồng xử lý chính thì backend sẽ giữ giá trị để tích hợp tiếp mà không mất dữ liệu.';
+
+        return "{$summary}. {$impact} Thay đổi nên kiểm tra lại luồng tương ứng trước khi áp dụng cho toàn đơn vị.";
     }
 
     /**

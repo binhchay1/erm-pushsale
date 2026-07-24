@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { CurrencyInput } from '@/components/ui/currency-input';
@@ -7,16 +7,17 @@ import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { formatCurrency, formatNumber } from '@/lib/format';
 
-function DialogShell({ title, open, onClose, children, wide = false, hiddenHeader = false, className = '', bodyClassName = '' }) {
+function DialogShell({ title, open, onClose, children, wide = false, hiddenHeader = false, className = '', bodyClassName = '', showClose = true }) {
     return (
         <PushsaleDialog
             open={open}
             onOpenChange={(nextOpen) => !nextOpen && onClose()}
             title={title}
-            width={wide ? '90vw' : '900px'}
+            width={wide ? '98vw' : '900px'}
             className={className}
             headerClassName={hiddenHeader ? 'sr-only' : undefined}
             bodyClassName={`ps-source-dialog-body ${bodyClassName}`}
+            showClose={showClose}
         >
             {children}
         </PushsaleDialog>
@@ -35,9 +36,60 @@ const emptyProduct = {
     available_care: true, category_ids: [], type: 'product', has_attributes: false,
 };
 
+const emptyTaxonomy = { id: '', name: '', product_attribute_id: '', is_active: true, clear_after_save: true, support_update: false };
 const currency = (value) => (Number(value) ? formatCurrency(value) : '');
 
-export default function ProductsIndex({ products, filters = {}, categories = [], attributes = [], vatCodes = [] }) {
+function taxonomyMeta(type) {
+    return {
+        category: {
+            title: 'Danh sách phân loại',
+            updateTitle: 'Cập nhật',
+            searchPlaceholder: '',
+            storeUrl: '/admin/products/categories',
+            label: 'Tên',
+            editTitle: 'Chỉnh sửa danh mục',
+            deleteTitle: 'Xóa danh mục',
+            deleteMessage: 'Chắc chắn bạn muốn xóa danh mục này?',
+        },
+        attribute: {
+            title: 'Danh sách thuộc tính sản phẩm',
+            updateTitle: 'Cập nhật',
+            searchPlaceholder: '',
+            storeUrl: '/admin/products/attributes',
+            label: 'Tên',
+            editTitle: 'Chỉnh sửa thuộc tính sản phẩm',
+            deleteTitle: 'Xóa thuộc tính sản phẩm',
+            updateNote: 'Chỉnh sửa tên thuộc tính sẽ tự động cập nhật các sản phẩm liên quan',
+            deleteMessage: 'Chắc chắn bạn muốn xóa thuộc tính này?',
+        },
+        value: {
+            title: 'Danh sách giá trị thuộc tính',
+            updateTitle: 'Cập nhật',
+            searchPlaceholder: '',
+            storeUrl: '/admin/products/attribute-values',
+            label: 'Tên',
+            editTitle: 'Chỉnh sửa giá trị thuộc tính',
+            deleteTitle: 'Xóa giá trị thuộc tính',
+            updateNote: 'Chỉnh sửa tên giá trị thuộc tính sẽ tự động cập nhật các sản phẩm liên quan',
+            deleteMessage: 'Chắc chắn bạn muốn xóa giá trị thuộc tính này?',
+        },
+    }[type] ?? null;
+}
+
+function cleanTaxonomyPayload(data, taxonomy) {
+    const payload = {
+        name: data.name,
+        is_active: Boolean(data.is_active),
+    };
+
+    if (taxonomy === 'value') {
+        payload.product_attribute_id = data.product_attribute_id;
+    }
+
+    return payload;
+}
+
+export default function ProductsIndex({ products, filters = {}, categories = [], attributes = [], attributeValues = [], vatCodes = [] }) {
     const [query, setQuery] = useState({
         search: filters.search ?? '', active: filters.active ?? '', category_id: filters.category_id ?? '',
         marketing: filters.marketing ?? '', sale: filters.sale ?? '', care: filters.care ?? '',
@@ -47,8 +99,11 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
     const [productOpen, setProductOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [taxonomy, setTaxonomy] = useState(null);
+    const [taxonomySearch, setTaxonomySearch] = useState('');
+    const [taxonomyAttributeFilter, setTaxonomyAttributeFilter] = useState('');
+    const [taxonomyPage, setTaxonomyPage] = useState(1);
     const productForm = useForm(emptyProduct);
-    const taxonomyForm = useForm({ name: '', product_attribute_id: '', is_active: true });
+    const taxonomyForm = useForm(emptyTaxonomy);
     const rows = products?.data ?? [];
 
     const submitFilters = (event) => {
@@ -84,14 +139,63 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
         else productForm.post('/admin/products', options);
     };
 
+    const openTaxonomy = (nextTaxonomy) => {
+        taxonomyForm.setData(emptyTaxonomy);
+        taxonomyForm.clearErrors();
+        setTaxonomySearch('');
+        setTaxonomyAttributeFilter('');
+        setTaxonomyPage(1);
+        setTaxonomy(nextTaxonomy);
+    };
+
+    const editTaxonomy = (row) => {
+        taxonomyForm.setData({
+            ...emptyTaxonomy,
+            id: row.id,
+            name: row.name ?? '',
+            product_attribute_id: row.product_attribute_id ?? '',
+            is_active: row.is_active ?? true,
+        });
+        taxonomyForm.clearErrors();
+    };
+
+    const resetTaxonomy = () => {
+        taxonomyForm.setData(emptyTaxonomy);
+        taxonomyForm.clearErrors();
+    };
+
     const saveTaxonomy = (event) => {
         event.preventDefault();
-        const urls = {
-            category: '/admin/products/categories',
-            attribute: '/admin/products/attributes',
-            value: '/admin/products/attribute-values',
+        const meta = taxonomyMeta(taxonomy);
+        if (!meta) return;
+
+        const payload = cleanTaxonomyPayload(taxonomyForm.data, taxonomy);
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => {
+                if (taxonomyForm.data.clear_after_save) {
+                    resetTaxonomy();
+                }
+            },
         };
-        taxonomyForm.post(urls[taxonomy], { preserveScroll: true, onSuccess: () => { taxonomyForm.reset(); setTaxonomy(null); } });
+
+        if (taxonomyForm.data.id) {
+            taxonomyForm.patch(`${meta.storeUrl}/${taxonomyForm.data.id}`, { ...options, data: payload });
+            return;
+        }
+
+        taxonomyForm.post(meta.storeUrl, { ...options, data: payload });
+    };
+
+    const removeTaxonomy = (row) => {
+        const meta = taxonomyMeta(taxonomy);
+        if (!meta || !row?.id || !window.confirm(meta.deleteMessage)) return;
+        router.delete(`${meta.storeUrl}/${row.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                if (String(taxonomyForm.data.id) === String(row.id)) resetTaxonomy();
+            },
+        });
     };
 
     const toggleSelected = (id) => setSelected((current) => {
@@ -115,7 +219,40 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
     };
 
     const allSelected = useMemo(() => rows.length > 0 && rows.every((row) => selected.has(row.id)), [rows, selected]);
-    const taxonomyTitle = taxonomy === 'category' ? 'PHÂN LOẠI SẢN PHẨM' : taxonomy === 'attribute' ? 'THUỘC TÍNH SẢN PHẨM' : 'THUỘC TÍNH GIÁ TRỊ';
+    const activeTaxonomyMeta = taxonomyMeta(taxonomy);
+    const taxonomyRows = useMemo(() => {
+        const source = taxonomy === 'category' ? categories : taxonomy === 'attribute' ? attributes : attributeValues;
+        const keyword = taxonomySearch.trim().toLowerCase();
+
+        return source.filter((row) => {
+            if (taxonomy === 'value' && taxonomyAttributeFilter && String(row.product_attribute_id ?? '') !== String(taxonomyAttributeFilter)) {
+                return false;
+            }
+
+            if (!keyword) {
+                return true;
+            }
+
+            return `${row.id} ${row.name} ${row.attribute_name ?? ''}`.toLowerCase().includes(keyword);
+        });
+    }, [taxonomy, taxonomySearch, taxonomyAttributeFilter, categories, attributes, attributeValues]);
+    const taxonomyPageSize = 15;
+    const taxonomyTotalPages = Math.max(1, Math.ceil(taxonomyRows.length / taxonomyPageSize));
+    const taxonomyPagedRows = taxonomyRows.slice((taxonomyPage - 1) * taxonomyPageSize, taxonomyPage * taxonomyPageSize);
+    const taxonomyPagerFrom = taxonomyRows.length ? ((taxonomyPage - 1) * taxonomyPageSize) + 1 : 0;
+    const taxonomyPagerTo = Math.min(taxonomyPage * taxonomyPageSize, taxonomyRows.length);
+    const taxonomyPageNumbers = useMemo(() => {
+        const start = Math.max(1, Math.min(taxonomyPage, Math.max(1, taxonomyTotalPages - 4)));
+        return Array.from({ length: Math.min(5, taxonomyTotalPages) }, (_, index) => start + index).filter((page) => page <= taxonomyTotalPages);
+    }, [taxonomyPage, taxonomyTotalPages]);
+
+    useEffect(() => {
+        setTaxonomyPage(1);
+    }, [taxonomySearch, taxonomyAttributeFilter, taxonomy]);
+
+    useEffect(() => {
+        if (taxonomyPage > taxonomyTotalPages) setTaxonomyPage(taxonomyTotalPages);
+    }, [taxonomyPage, taxonomyTotalPages]);
 
     return (
         <AppLayout>
@@ -149,9 +286,9 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
 
                 <div className="box-body ps-toolbar">
                     <button className="btn btn-sm btn-primary" type="button" onClick={openCreate}><i className="fa fa-plus" /> Thêm mới</button>
-                    <button className="btn btn-sm btn-primary" type="button" onClick={() => { taxonomyForm.reset(); setTaxonomy('category'); }}><i className="fa fa-list-alt" /> Phân loại sản phẩm</button>
-                    <button className="btn btn-sm btn-primary" type="button" onClick={() => { taxonomyForm.reset(); setTaxonomy('attribute'); }}><i className="fa fa-list-alt" /> Thuộc tính sản phẩm</button>
-                    <button className="btn btn-sm btn-primary" type="button" onClick={() => { taxonomyForm.reset(); setTaxonomy('value'); }}><i className="fa fa-list-alt" /> Thuộc tính giá trị</button>
+                    <button className="btn btn-sm btn-primary" type="button" onClick={() => openTaxonomy('category')}><i className="fa fa-list-alt" /> Phân loại sản phẩm</button>
+                    <button className="btn btn-sm btn-primary" type="button" onClick={() => openTaxonomy('attribute')}><i className="fa fa-list-alt" /> Thuộc tính sản phẩm</button>
+                    <button className="btn btn-sm btn-primary" type="button" onClick={() => openTaxonomy('value')}><i className="fa fa-list-alt" /> Thuộc tính giá trị</button>
                     <Link className="btn btn-sm btn-primary" href="/admin/products/import" target="_blank"><i className="fa fa-file-excel-o" /> Import sản phẩm</Link>
                     <button className="btn btn-sm btn-default" type="button" onClick={exportCsv}><i className="fa fa-file-excel-o" /> Export sản phẩm</button>
                     <button className="btn btn-sm btn-danger" type="button" disabled={!selected.size} onClick={deleteSelected}><i className="fa fa-file-excel-o" /> Xóa sản phẩm</button>
@@ -234,13 +371,56 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                 </form>
             </DialogShell>
 
-            <DialogShell title={taxonomyTitle} open={Boolean(taxonomy)} onClose={() => setTaxonomy(null)} wide hiddenHeader className="ps-taxonomy-source-modal" bodyClassName="ps-taxonomy-source-body">
-                <form onSubmit={saveTaxonomy} className="ps-taxonomy-form ps-taxonomy-source-form">
-                    <h4>{taxonomyTitle}</h4>
-                    {taxonomy === 'value' && <label>Thuộc tính<select className="form-control" value={taxonomyForm.data.product_attribute_id} onChange={(event) => taxonomyForm.setData('product_attribute_id', event.target.value)} required><option value="">--Chọn thuộc tính--</option>{attributes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>}
-                    <label>Tên<input className="form-control" value={taxonomyForm.data.name} onChange={(event) => taxonomyForm.setData('name', event.target.value)} required /></label>
-                    <button className="btn btn-primary" disabled={taxonomyForm.processing}><i className="fa fa-save" /> Lưu</button>
-                </form>
+            <DialogShell title={activeTaxonomyMeta?.title ?? ''} open={Boolean(taxonomy)} onClose={() => setTaxonomy(null)} wide hiddenHeader showClose={false} className="ps-taxonomy-source-modal" bodyClassName="ps-taxonomy-source-body">
+                <div className={`ps-taxonomy-source-form ps-taxonomy-${taxonomy ?? 'none'}`}>
+                    <div className="m-header-wrap ps-taxonomy-header-wrap">
+                        <div className="m-header"><div className="col-sm-9 form-group"><span className="text">{activeTaxonomyMeta?.title}</span></div><div className="col-sm-3 form-group" /></div>
+                    </div>
+                    <div className="box1 ps-taxonomy-box">
+                        <div className="box-body row ps-taxonomy-search-row">
+                            <div className="col-xs-6 col-sm-3"><input className="form-control" value={taxonomySearch} placeholder={activeTaxonomyMeta?.searchPlaceholder} onChange={(event) => setTaxonomySearch(event.target.value)} /></div>
+                            {taxonomy === 'value' && <div className="col-xs-6 col-sm-3"><select className="form-control ps-taxonomy-attribute-filter" value={taxonomyAttributeFilter} onChange={(event) => setTaxonomyAttributeFilter(event.target.value)}><option value="">--Chọn thuộc tính--</option>{attributes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>}
+                            <div className="col-xs-6 col-sm-3"><button type="button" className="btn btn-sm btn-primary mr15"><i className="fa fa-search" /> Tìm kiếm</button></div>
+                        </div>
+                    </div>
+                    <div className="ps-taxonomy-separator" />
+                    <div className="box-body ps-taxonomy-main">
+                        <div className="row ps-taxonomy-grid">
+                            <div className="ps-taxonomy-list-pane">
+                                <table className="table table-bordered ps-taxonomy-table">
+                                    <thead><tr><th className="text-center">Id</th><th className="text-left no-wrap">Tên</th>{taxonomy === 'value' && <th className="text-left no-wrap">Thuộc tính</th>}<th className="text-center no-wrap">Cập nhật</th><th className="text-center" /></tr></thead>
+                                    <tbody>
+                                        {taxonomyPagedRows.length ? taxonomyPagedRows.map((row) => <tr key={`${taxonomy}-${row.id}`} className={`item${row.id}${String(taxonomyForm.data.id) === String(row.id) ? ' ps-taxonomy-selected-row' : ''}`}>
+                                            <td className="text-center ps-taxonomy-id">{row.id}</td>
+                                            <td className="text-left">{row.name}</td>
+                                            {taxonomy === 'value' && <td className="text-left">{row.attribute_name}</td>}
+                                            <td className="text-center"><strong>{row.updated_by ?? ''}</strong><br />{row.updated_at ?? ''}</td>
+                                            <td className="text-center ps-taxonomy-actions"><button type="button" className="btn-icon aoh" aria-label={activeTaxonomyMeta?.editTitle} onClick={() => editTaxonomy(row)}><i className="fa fa-edit" /></button><button type="button" className="btn-icon aoh" aria-label={activeTaxonomyMeta?.deleteTitle} onClick={() => removeTaxonomy(row)}><i className="fa fa-trash" /></button></td>
+                                        </tr>) : <tr><td colSpan={taxonomy === 'value' ? 5 : 4} className="text-center">Không có dữ liệu.</td></tr>}
+                                    </tbody>
+                                </table>
+                                <div className="row ps-taxonomy-pager-row">
+                                    <div className="col-xs-6 text-left form-group"><div className="btn-group pull-left"><button type="button" className="btn btn-default btn-sm">{taxonomyPagerFrom} - {taxonomyPagerTo} <span style={{ fontWeight: 'normal' }}> / </span> {taxonomyRows.length}</button><button type="button" className="btn btn-default btn-sm" disabled={taxonomyPage <= 1} onClick={() => setTaxonomyPage((page) => Math.max(1, page - 1))}><i className="fa fa-caret-left" /></button><button type="button" className="btn btn-default btn-sm" disabled={taxonomyPage >= taxonomyTotalPages} onClick={() => setTaxonomyPage((page) => Math.min(taxonomyTotalPages, page + 1))}><i className="fa fa-caret-right" /></button></div></div>
+                                    <div className="col-xs-6 text-right form-group"><ul className="pagination pagination-sm no-margin pull-right"><li className={taxonomyPage <= 1 ? 'disabled' : ''}><button type="button" disabled={taxonomyPage <= 1} onClick={() => setTaxonomyPage((page) => Math.max(1, page - 1))}>«</button></li>{taxonomyPageNumbers.map((page) => <li key={page} className={page === taxonomyPage ? 'active' : ''}><button type="button" onClick={() => setTaxonomyPage(page)}>{page}</button></li>)}<li className={taxonomyPage >= taxonomyTotalPages ? 'disabled' : ''}><button type="button" disabled={taxonomyPage >= taxonomyTotalPages} onClick={() => setTaxonomyPage((page) => Math.min(taxonomyTotalPages, page + 1))}>»</button></li></ul></div>
+                                </div>
+                            </div>
+                            <div className="ps-taxonomy-info-pane">
+                                <form onSubmit={saveTaxonomy}>
+                                    <table className="table table-bordered table-line ps-taxonomy-info-table">
+                                        <tbody>
+                                            <tr><th colSpan="3">{activeTaxonomyMeta?.updateTitle}</th></tr>
+                                            <tr><td className="text-right ps-taxonomy-label">Id:</td><td className="ps-taxonomy-value"><span className="fb">{taxonomyForm.data.id}</span></td><td /></tr>
+                                            {taxonomy === 'value' && <tr><td className="text-right ps-taxonomy-label">Thuộc tính<span className="text-red"> (*)</span>:</td><td className="ps-taxonomy-value"><select className="form-control" value={taxonomyForm.data.product_attribute_id} onChange={(event) => taxonomyForm.setData('product_attribute_id', event.target.value)} required><option value="">--Chọn thuộc tính--</option>{attributes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></td><td /></tr>}
+                                            <tr><td className="text-right ps-taxonomy-label"><span>{activeTaxonomyMeta?.label}<span className="text-red"> (*)</span></span>:</td><td className="ps-taxonomy-value"><input className="form-control txt-dotted" maxLength="100" value={taxonomyForm.data.name} onChange={(event) => taxonomyForm.setData('name', event.target.value)} required /></td><td className="ps-taxonomy-update-note">{activeTaxonomyMeta?.updateNote}</td></tr>
+                                            <tr><td className="text-right" /><td colSpan="2"><div className="ps-taxonomy-functions"><button type="submit" className="mr15 ps-link-button" disabled={taxonomyForm.processing}><i className="fa fa-save" /> Cập nhật</button><button type="button" className="mr15 ps-link-button" onClick={resetTaxonomy}><i className="fa fa-refresh" /> Làm lại</button><span className="mr15"><input id="ps_taxonomy_clear" type="checkbox" checked={taxonomyForm.data.clear_after_save} onChange={(event) => taxonomyForm.setData('clear_after_save', event.target.checked)} /><label htmlFor="ps_taxonomy_clear">Xóa form nhập liệu</label></span><input id="ps_taxonomy_support" type="checkbox" checked={taxonomyForm.data.support_update} onChange={(event) => taxonomyForm.setData('support_update', event.target.checked)} /><label htmlFor="ps_taxonomy_support">Hỗ trợ cập nhật</label></div></td></tr>
+                                        </tbody>
+                                    </table>
+                                    {Object.keys(taxonomyForm.errors).length > 0 && <div className="alert alert-danger">{Object.values(taxonomyForm.errors).join(' · ')}</div>}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </DialogShell>
         </AppLayout>
     );

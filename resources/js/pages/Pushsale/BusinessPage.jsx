@@ -880,7 +880,7 @@ function SalesRankingCards({ rows = [] }) {
     );
 }
 
-function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, filterOptions, onCreate, onEdit, onDelete, onDeleteSelected, onPushsaleSave, selectedRecordIds, onToggleSelect }) {
+function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, filterOptions, onCreate, onEdit, onDelete, onDeleteSelected, onPushsaleSave, onShowImportGuide, selectedRecordIds, onToggleSelect }) {
     const gridEnabled = schema.grid_enabled !== false;
     const [rowAnchor, setRowAnchor] = useState(null);
     const [paginationAnchor, setPaginationAnchor] = useState(null);
@@ -1079,11 +1079,19 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
         const host = hostRef.current;
         if (!host) return undefined;
         const click = (event) => {
+            const text = String(event.target?.textContent ?? '').trim().toLocaleLowerCase('vi');
+            if (['1.10', '2.6.1'].includes(String(schema.code)) && text.includes('xem hướng dẫn')) {
+                event.preventDefault();
+                onShowImportGuide?.();
+                return;
+            }
+
             const actionNode = event.target.closest?.('[data-pushsale-action]');
             const action = actionNode?.dataset.pushsaleAction;
             if (action) {
                 event.preventDefault();
                 if (action === 'search') runSearch();
+                else if (action === 'guide') onShowImportGuide?.();
                 else if (action === 'reload') router.reload({ preserveScroll: true });
                 else if (action === 'export') {
                     const params = new URLSearchParams(window.location.search);
@@ -1146,7 +1154,7 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             host.removeEventListener('click', click);
             host.removeEventListener('input', input);
         };
-    }, [onCreate, onDeleteSelected, onPushsaleSave, routeUrl, runSearch, schema.template_url]);
+    }, [onCreate, onDeleteSelected, onPushsaleSave, onShowImportGuide, routeUrl, runSearch, schema.code, schema.template_url]);
 
     const rowProps = { schema, rows, onEdit, onDelete, selectedRecordIds, onToggleSelect };
     return (
@@ -1165,6 +1173,59 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             {gridEnabled && !rowAnchor && templateHtml && <div className="pushsale-template-fallback"><PushsaleFallbackGrid {...rowProps} pagination={pagination} routeUrl={routeUrl} /></div>}
             {!templateHtml && <div className="pushsale-template-loading"><i className="fa fa-spinner fa-spin" /> Chưa có nội dung template cho mã {schema.code}.</div>}
         </>
+    );
+}
+
+
+function ImportGuideDialog({ open, onClose, templateUrl }) {
+    if (!open) return null;
+
+    return (
+        <div className="ps-import-guide-modal" role="dialog" aria-modal="true" aria-label="Hướng dẫn import contact" onClick={onClose}>
+            <div className="ps-import-guide-dialog" onClick={(event) => event.stopPropagation()}>
+                <div className="ps-import-guide-header">
+                    <h3>Hướng dẫn import contact</h3>
+                    <button type="button" onClick={onClose} aria-label="Đóng"><i className="fa fa-times" /></button>
+                </div>
+                <div className="ps-import-guide-body">
+                    <div className="ps-import-guide-note">
+                        <b>Quy trình chuẩn</b>
+                        <ol>
+                            <li>Tải file mẫu Excel từ nút <b>B1. Tải mẫu Excel</b>.</li>
+                            <li>Nhập dữ liệu theo đúng các cột trong file mẫu, không đổi tên cột bắt buộc.</li>
+                            <li>Chọn file ở bước <b>B2</b>, sau đó bấm <b>Upload</b> ở bước <b>B3</b>.</li>
+                            <li>Bật <b>Kiểm trùng hệ thống</b> khi cần so số điện thoại với dữ liệu đang có trong hệ thống trước khi chia sale.</li>
+                            <li>Sau khi import, vào <b>Lịch sử import</b> để kiểm tra số dòng hợp lệ, số trùng, số lỗi và trạng thái xử lý.</li>
+                        </ol>
+                    </div>
+                    <div className="ps-import-guide-grid">
+                        <section>
+                            <h4>Quy tắc dữ liệu</h4>
+                            <ul>
+                                <li>File nên dưới 5.000 dòng mỗi lần import để queue xử lý ổn định.</li>
+                                <li>Số điện thoại là khóa chống trùng chính; hệ thống sẽ chuẩn hóa số trước khi ghi nhận.</li>
+                                <li>Các cột sản phẩm, nguồn dữ liệu, ghi chú, địa chỉ sẽ được map vào lead/customer/order draft theo cấu hình hiện tại.</li>
+                                <li>Dòng lỗi sẽ được lưu vào lịch sử import để rà soát, không ghi đè dữ liệu hợp lệ.</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h4>Liên kết nghiệp vụ</h4>
+                            <ul>
+                                <li>Lead hợp lệ đi vào hàng chờ phân bổ data.</li>
+                                <li>Nếu có sản phẩm/nguồn dữ liệu, luật phân quyền Marketing/Sale theo sản phẩm vẫn được áp dụng.</li>
+                                <li>Lead trùng hoặc khách cũ được đánh dấu để review, tránh chia trùng cho nhiều sale.</li>
+                                <li>Import không tự chốt đơn; sale vẫn phải tác nghiệp và chốt theo luồng hiện tại.</li>
+                            </ul>
+                        </section>
+                    </div>
+                    {templateUrl ? (
+                        <div className="ps-import-guide-actions">
+                            <a className="btn btn-sm btn-primary" href={templateUrl}><i className="fa fa-cloud-download" /> Tải file mẫu</a>
+                        </div>
+                    ) : null}
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -1212,6 +1273,7 @@ function requestFormData(url, formData) {
 export default function PushsaleBusinessPage({ schema, rows = [], pagination, summary = {}, routeUrl, templateHtml = '', dialogTemplates = {}, filterOptions = {}, pageRuntimeError = null }) {
     const [editor, setEditor] = useState({ open: false, row: null, dialogCode: null, dialogSchema: null });
     const [error, setError] = useState('');
+    const [importGuideOpen, setImportGuideOpen] = useState(false);
     const [selectedRecordIds, setSelectedRecordIds] = useState(() => new Set());
 
     const dialogEntries = Object.entries(schema.dialog_resource_schemas ?? {});
@@ -1406,10 +1468,14 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
                     onDelete={remove}
                     onDeleteSelected={removeSelected}
                     onPushsaleSave={handlePushsaleSave}
+                    onShowImportGuide={() => setImportGuideOpen(true)}
                     selectedRecordIds={selectedRecordIds}
                     onToggleSelect={toggleSelectedRecord}
                 />
             </div>
+            {['1.10', '2.6.1'].includes(String(schema.code)) ? (
+                <ImportGuideDialog open={importGuideOpen} onClose={() => setImportGuideOpen(false)} templateUrl={schema.template_url || '/admin/leads/import-template'} />
+            ) : null}
             <PushsaleEditorDialog
                 open={editor.open}
                 schema={schema}
