@@ -59,6 +59,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-product-source-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-product-source-contract.css') },
     { file: 'pushsale-import-distribution-feature-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-import-distribution-feature-contract.css') },
     { file: 'pushsale-form-controls-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-form-controls-contract.css') },
+    { file: 'pushsale-product-taxonomy-dialog-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-product-taxonomy-dialog-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {

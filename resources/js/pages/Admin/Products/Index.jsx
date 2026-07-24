@@ -377,15 +377,15 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                         <div className="m-header"><div className="col-sm-9 form-group"><span className="text">{activeTaxonomyMeta?.title}</span></div><div className="col-sm-3 form-group" /></div>
                     </div>
                     <div className="box1 ps-taxonomy-box">
-                        <div className="box-body row ps-taxonomy-search-row">
-                            <div className="col-xs-6 col-sm-3"><input className="form-control" value={taxonomySearch} placeholder={activeTaxonomyMeta?.searchPlaceholder} onChange={(event) => setTaxonomySearch(event.target.value)} /></div>
-                            {taxonomy === 'value' && <div className="col-xs-6 col-sm-3"><select className="form-control ps-taxonomy-attribute-filter" value={taxonomyAttributeFilter} onChange={(event) => setTaxonomyAttributeFilter(event.target.value)}><option value="">--Chọn thuộc tính--</option>{attributes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>}
-                            <div className="col-xs-6 col-sm-3"><button type="button" className="btn btn-sm btn-primary mr15"><i className="fa fa-search" /> Tìm kiếm</button></div>
+                        <div className="box-body ps-taxonomy-search-row">
+                            <div className="ps-taxonomy-search-control ps-taxonomy-keyword"><input className="form-control" value={taxonomySearch} placeholder={activeTaxonomyMeta?.searchPlaceholder} onChange={(event) => setTaxonomySearch(event.target.value)} /></div>
+                            {taxonomy === 'value' && <div className="ps-taxonomy-search-control ps-taxonomy-attribute-control"><select className="form-control ps-taxonomy-attribute-filter" value={taxonomyAttributeFilter} onChange={(event) => setTaxonomyAttributeFilter(event.target.value)}><option value="">--Chọn thuộc tính--</option>{attributes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>}
+                            <div className="ps-taxonomy-search-control ps-taxonomy-search-action"><button type="button" className="btn btn-sm btn-primary mr15"><i className="fa fa-search" /> Tìm kiếm</button></div>
                         </div>
                     </div>
                     <div className="ps-taxonomy-separator" />
                     <div className="box-body ps-taxonomy-main">
-                        <div className="row ps-taxonomy-grid">
+                        <div className="ps-taxonomy-grid">
                             <div className="ps-taxonomy-list-pane">
                                 <table className="table table-bordered ps-taxonomy-table">
                                     <thead><tr><th className="text-center">Id</th><th className="text-left no-wrap">Tên</th>{taxonomy === 'value' && <th className="text-left no-wrap">Thuộc tính</th>}<th className="text-center no-wrap">Cập nhật</th><th className="text-center" /></tr></thead>
