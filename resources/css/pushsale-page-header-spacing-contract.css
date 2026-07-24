@@ -1,0 +1,205 @@
+/*
+ * Final page header spacing contract.
+ * Purpose: remove the empty white band that old Pushsale/DNN templates and
+ * converted React reports can leave between the blue app header and the first
+ * page title/filter header.
+ *
+ * Rules:
+ * - The app header owns the only top offset via .content-wrapper top.
+ * - Page roots must start at y=0 inside .content-wrapper.
+ * - Header/filter rows must not add their own margin/padding/top spacer.
+ * - Only real body/content areas may add vertical space.
+ */
+
+html body.pushsale-app-body {
+    --ps-header-height: 50px;
+}
+
+html body.pushsale-app-body,
+html body.pushsale-app-body .pushsale-wrapper {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .pushsale-wrapper .content-wrapper,
+html body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper,
+html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper,
+html body.pushsale-app-body .content-wrapper {
+    position: fixed !important;
+    inset: var(--ps-header-height, 50px) 0 0 0 !important;
+    top: var(--ps-header-height, 50px) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: #fff !important;
+    transform: none !important;
+}
+
+html body.pushsale-app-body .content-wrapper > .content-inner,
+html body.pushsale-app-body .content-inner,
+html body.pushsale-app-body .content-inner > .ps-page-viewport,
+html body.pushsale-app-body .ps-page-viewport {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 0 28px !important;
+    border: 0 !important;
+    background: #fff !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-page-viewport > :first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-page-shell:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-report-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .pushsale-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-customer-profile-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-sale-workspace-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-wh-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-acc-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .space-y-6:first-child,
+html body.pushsale-app-body .ps-page-viewport > .space-y-8:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: 0 !important;
+}
+
+/* React report/page shells: the first visual row is the toolbar/header. */
+html body.pushsale-app-body .ps-page-viewport > .ps-page-shell:first-child > .ps-page-shell__header:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-report-page:first-child > .ps-page-shell__header:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-report-page:first-child > .ps-page-shell:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-report-page:first-child > .ps-report-topbar:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page:first-child > .m-header-wrap:first-child,
+html body.pushsale-app-body .ps-page-viewport > .pushsale-page:first-child .pushsale-template-host:first-child,
+html body.pushsale-app-body .ps-page-viewport > .pushsale-page:first-child .m-header-wrap:first-of-type,
+html body.pushsale-app-body .ps-page-viewport > .pushsale-page:first-child .content-header:first-of-type {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+}
+
+/* Old captured fragments sometimes keep their own app container/header spacers. */
+html body.pushsale-app-body .pushsale-template-host,
+html body.pushsale-app-body .pushsale-template-fragment,
+html body.pushsale-app-body .pushsale-page-fragment,
+html body.pushsale-app-body .pushsale-template-inner,
+html body.pushsale-app-body .pushsale-template-host .wrapper,
+html body.pushsale-app-body .pushsale-template-host .skin-blue-light,
+html body.pushsale-app-body .pushsale-template-host .bodyfake,
+html body.pushsale-app-body .pushsale-template-host .hold-transition,
+html body.pushsale-app-body .pushsale-template-host .contentPane,
+html body.pushsale-app-body .pushsale-template-host .DnnModule,
+html body.pushsale-app-body .pushsale-template-host [id$='_ContentPane'],
+html body.pushsale-app-body .pushsale-template-host [id$='_ModuleContent'] {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    min-height: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host .content-wrapper,
+html body.pushsale-app-body .pushsale-template-host .pushsale-nested-content-wrapper {
+    position: static !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+}
+
+/* Remove empty spacer nodes that appear before the first toolbar. */
+html body.pushsale-app-body .ps-page-viewport > :empty:first-child,
+html body.pushsale-app-body .content-inner > :empty:first-child,
+html body.pushsale-app-body .pushsale-template-host > :empty:first-child,
+html body.pushsale-app-body .pushsale-template-host .pushsale-template-empty-spacer,
+html body.pushsale-app-body .pushsale-template-host .pushsale-native-empty-spacer,
+html body.pushsale-app-body .pushsale-template-host .content-header.pushsale-template-empty-spacer,
+html body.pushsale-app-body .pushsale-template-host div[aria-hidden='true'].pushsale-template-empty-spacer,
+html body.pushsale-app-body .pushsale-template-host div[style*='height: 50px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height:50px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height: 60px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height:60px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height: 70px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height:70px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height: 80px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height:80px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height: 90px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height:90px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height: 100px']:empty,
+html body.pushsale-app-body .pushsale-template-host div[style*='height:100px']:empty {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host .pushsale-native-top-spacer,
+html body.pushsale-app-body .pushsale-template-host [style*='padding-top: 45px'],
+html body.pushsale-app-body .pushsale-template-host [style*='padding-top:45px'],
+html body.pushsale-app-body .pushsale-template-host [style*='padding-top: 50px'],
+html body.pushsale-app-body .pushsale-template-host [style*='padding-top:50px'],
+html body.pushsale-app-body .pushsale-template-host [style*='padding-top: 60px'],
+html body.pushsale-app-body .pushsale-template-host [style*='padding-top:60px'],
+html body.pushsale-app-body .pushsale-template-host [style*='padding-top: 70px'],
+html body.pushsale-app-body .pushsale-template-host [style*='padding-top:70px'] {
+    padding-top: 0 !important;
+}
+
+/* Header/title rows may keep their normal height but never an upper blank band. */
+html body.pushsale-app-body .ps-page-shell__header,
+html body.pushsale-app-body .ps-report-topbar,
+html body.pushsale-app-body .pushsale-page-titlebar,
+html body.pushsale-app-body .ps-customer-titlebar,
+html body.pushsale-app-body .ps-sale-filter-shell,
+html body.pushsale-app-body .ps-wh-filter-shell,
+html body.pushsale-app-body .ps-acc-filter-shell,
+html body.pushsale-app-body .ps-adminlte-page .m-header-wrap,
+html body.pushsale-app-body .pushsale-template-host .m-header-wrap:first-of-type,
+html body.pushsale-app-body .pushsale-template-host .content-header:first-of-type,
+html body.pushsale-app-body .pushsale-template-host .psm-topbar:first-of-type,
+html body.pushsale-app-body .pushsale-template-host .psr-topbar:first-of-type {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: 0 !important;
+    top: 0 !important;
+}
+
+/* Real content spacing starts after the header, not before it. */
+html body.pushsale-app-body .ps-page-shell__body,
+html body.pushsale-app-body .ps-report-page > .ps-table-scroll,
+html body.pushsale-app-body .pushsale-page .box-body,
+html body.pushsale-app-body .ps-adminlte-page .box-body {
+    margin-top: 0 !important;
+}
+
+/* Keep table areas readable while the outer page scrolls vertically. */
+html body.pushsale-app-body .ps-table-scroll,
+html body.pushsale-app-body .table-responsive,
+html body.pushsale-app-body .pushsale-table-scroll,
+html body.pushsale-app-body .ps-report-table-area {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}

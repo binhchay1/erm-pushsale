@@ -1,0 +1,165 @@
+/*
+ * Final report spacing + table readability contract.
+ * Fixes:
+ * - captured Pushsale templates carrying inline padding-top/height spacers above tables;
+ * - report shell leaving a white band between blue app header and first toolbar;
+ * - wide sale revenue detail tables needing readable columns and horizontal scroll;
+ * - Sales ranking table needing room for generated rows and horizontal scrolling.
+ */
+
+html body.pushsale-app-body .content-wrapper,
+html body.pushsale-app-body .content-inner,
+html body.pushsale-app-body .ps-page-viewport,
+html body.pushsale-app-body .ps-page-viewport > .ps-report-page,
+html body.pushsale-app-body .ps-page-viewport > .pushsale-page,
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+html body.pushsale-app-body .ps-report-page,
+html body.pushsale-app-body .pushsale-page,
+html body.pushsale-app-body .pushsale-page > .pushsale-template-fragment,
+html body.pushsale-app-body .pushsale-template-fragment > .content-wrapper,
+html body.pushsale-app-body .pushsale-template-fragment .content-wrapper,
+html body.pushsale-app-body .pushsale-template-fragment .contentPane,
+html body.pushsale-app-body .pushsale-template-fragment .DnnModule,
+html body.pushsale-app-body .pushsale-template-fragment [id$='_ModuleContent'] {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+html body.pushsale-app-body .ps-report-page .ps-page-shell__header,
+html body.pushsale-app-body .ps-report-page .ps-report-toolbar-shell,
+html body.pushsale-app-body .ps-report-page .ps-extra-toolbar,
+html body.pushsale-app-body .pushsale-page .m-header-wrap:first-child,
+html body.pushsale-app-body .pushsale-page .m-header:first-child {
+    margin-top: 0 !important;
+    top: 0 !important;
+}
+
+/* Captured templates often include empty spacer blocks such as padding-top:50px or height:100px. */
+html body.pushsale-app-body .pushsale-template-fragment .box-body[style*='padding-top: 50px'],
+html body.pushsale-app-body .pushsale-template-fragment .box-body[style*='padding-top:50px'],
+html body.pushsale-app-body .pushsale-template-fragment div[style*='height: 100px'],
+html body.pushsale-app-body .pushsale-template-fragment div[style*='height:100px'],
+html body.pushsale-app-body .pushsale-template-fragment .pushsale-template-empty-spacer {
+    padding-top: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-ranking .box-body[style*='padding-top'],
+html body.pushsale-app-body [data-page-code='4.3'] .box-body[style*='padding-top'] {
+    padding-top: 12px !important;
+}
+
+/* Make wide report tables readable and let the table, not the whole page, own horizontal scroll. */
+html body.pushsale-app-body .ps-table-scroll,
+html body.pushsale-app-body .pushsale-template-fragment [style*='overflow-x: auto'],
+html body.pushsale-app-body .pushsale-template-fragment [style*='overflow-x:auto'] {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-gutter: stable both-edges !important;
+}
+
+html body.pushsale-app-body .ps-table-scroll::-webkit-scrollbar,
+html body.pushsale-app-body .pushsale-template-fragment [style*='overflow-x: auto']::-webkit-scrollbar {
+    height: 12px !important;
+}
+
+html body.pushsale-app-body .ps-table-scroll::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .pushsale-template-fragment [style*='overflow-x: auto']::-webkit-scrollbar-thumb {
+    background: #9aa4af !important;
+    border-radius: 8px !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-scroll {
+    margin-top: 0 !important;
+    padding-bottom: 10px !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table {
+    width: max-content !important;
+    min-width: 2600px !important;
+    table-layout: fixed !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table th,
+html body.pushsale-app-body .ps-revenue-detail-table td {
+    min-width: 88px !important;
+    width: 96px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table .ps-revenue-person-col,
+html body.pushsale-app-body .ps-revenue-detail-table th:nth-child(2),
+html body.pushsale-app-body .ps-revenue-detail-table td:nth-child(2) {
+    min-width: 180px !important;
+    width: 210px !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table th:first-child,
+html body.pushsale-app-body .ps-revenue-detail-table td:first-child {
+    min-width: 54px !important;
+    width: 60px !important;
+}
+
+/* Ranking 4.3: use the captured Pushsale grouped header, but give generated data rows real space. */
+html body.pushsale-app-body [data-page-code='4.3'] .bxh-container {
+    width: 100% !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body [data-page-code='4.3'] .bxh-container > div[style*='overflow-x'] {
+    width: 100% !important;
+    overflow-x: auto !important;
+    padding-bottom: 10px !important;
+}
+
+html body.pushsale-app-body [data-page-code='4.3'] table[data-pushsale-grid-table='primary'],
+html body.pushsale-app-body [data-page-code='4.3'] .pushsale-data-table {
+    width: max-content !important;
+    min-width: 1900px !important;
+    table-layout: fixed !important;
+}
+
+html body.pushsale-app-body [data-page-code='4.3'] table[data-pushsale-grid-table='primary'] th,
+html body.pushsale-app-body [data-page-code='4.3'] table[data-pushsale-grid-table='primary'] td {
+    min-width: 92px !important;
+    width: 105px !important;
+    padding-left: 9px !important;
+    padding-right: 9px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body [data-page-code='4.3'] table[data-pushsale-grid-table='primary'] th:first-child,
+html body.pushsale-app-body [data-page-code='4.3'] table[data-pushsale-grid-table='primary'] td:first-child {
+    min-width: 54px !important;
+    width: 60px !important;
+}
+
+html body.pushsale-app-body [data-page-code='4.3'] table[data-pushsale-grid-table='primary'] th:nth-child(2),
+html body.pushsale-app-body [data-page-code='4.3'] table[data-pushsale-grid-table='primary'] td:nth-child(2) {
+    min-width: 190px !important;
+    width: 210px !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body [data-page-code='4.3'] tbody[data-pushsale-grid-anchor='primary'] td {
+    height: 38px !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body [data-page-code='4.3'] .pushsale-ranking-cards,
+html body.pushsale-app-body [data-page-code='4.3'] [data-pushsale-ranking-anchor] {
+    display: none !important;
+}

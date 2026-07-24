@@ -62,6 +62,8 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-product-taxonomy-dialog-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-product-taxonomy-dialog-contract.css') },
     { file: 'pushsale-sidebar-hover-cleanup-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-sidebar-hover-cleanup-contract.css') },
     { file: 'pushsale-page-scroll-filter-width-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-page-scroll-filter-width-contract.css') },
+    { file: 'pushsale-report-spacing-table-ranking-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-report-spacing-table-ranking-contract.css') },
+    { file: 'pushsale-page-header-spacing-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-page-header-spacing-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {
