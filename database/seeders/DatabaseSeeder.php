@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         app(TenantManager::class)->forCompany($company->id, function (): void {
             $this->call([
                 AccountSeeder::class,
+                SecurityAuditDemoSeeder::class,
                 CatalogSeeder::class,
                 ProductTaxonomyDemoSeeder::class,
                 InventorySeeder::class,

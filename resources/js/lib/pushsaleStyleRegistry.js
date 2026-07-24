@@ -60,6 +60,8 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-import-distribution-feature-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-import-distribution-feature-contract.css') },
     { file: 'pushsale-form-controls-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-form-controls-contract.css') },
     { file: 'pushsale-product-taxonomy-dialog-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-product-taxonomy-dialog-contract.css') },
+    { file: 'pushsale-sidebar-hover-cleanup-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-sidebar-hover-cleanup-contract.css') },
+    { file: 'pushsale-page-scroll-filter-width-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-page-scroll-filter-width-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {

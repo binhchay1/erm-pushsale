@@ -149,14 +149,24 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
         }
     };
 
+    const blurActiveMenuButton = () => {
+        if (typeof document === 'undefined') return;
+        const active = document.activeElement;
+        if (active?.matches?.('.pushsale-main-sidebar .li2 > button.pushsale-menu-link')) {
+            active.blur();
+        }
+    };
+
     const closeFlyout = () => {
         clearFlyoutTimer();
+        blurActiveMenuButton();
         setFlyout(null);
     };
 
     const scheduleFlyoutClose = (delay = 180) => {
         clearFlyoutTimer();
         flyoutTimerRef.current = window.setTimeout(() => {
+            blurActiveMenuButton();
             setFlyout(null);
             flyoutTimerRef.current = null;
         }, delay);
@@ -274,8 +284,9 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                         {hasGrandchildren ? (
                                                             <button
                                                                 type="button"
-                                                                className="a2 pushsale-menu-link"
+                                                                className="a2 pushsale-menu-link pushsale-second-parent-link"
                                                                 data-pushsale-second-parent="true"
+                                                                style={{ border: 0, outline: 0, boxShadow: 'none' }}
                                                                 onClick={(event) => toggleFlyout(event, child, key)}
                                                                 onMouseEnter={(event) => {
                                                                     clearFlyoutTimer();
@@ -285,6 +296,8 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                     const top = Math.max(50, Math.min(rect.top, window.innerHeight - Math.min(estimatedHeight, maxHeight) - 8));
                                                                     setFlyout({ item: child, key, top, maxHeight });
                                                                 }}
+                                                                onMouseLeave={(event) => event.currentTarget.blur()}
+                                                                onBlur={(event) => event.currentTarget.blur()}
                                                                 aria-expanded={flyoutOpen}
                                                                 aria-label={child.title}
                                                             >

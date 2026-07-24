@@ -508,7 +508,13 @@ class PushsalePageService
             $query->where('action', ActivityLogger::DATA_FILTER_SEARCHED);
         }
 
-        return $query->latest('created_at')->limit(5000)->get()->values()->map(function (ActivityLog $log, int $index) use ($code): array {
+        $logs = $query->latest('created_at')->limit(5000)->get()->values();
+
+        if ($code === '1.7.1' && $logs->isEmpty() && auth()->user()) {
+            return collect([$this->currentSessionLoginRow()]);
+        }
+
+        return $logs->map(function (ActivityLog $log, int $index) use ($code): array {
             if ($code === '1.7.3') {
                 $dateFilter = $this->formatFilterDateLabel(
                     data_get($log->properties, 'date_type'),
@@ -617,25 +623,67 @@ class PushsalePageService
             $query->withoutTenant();
         }
 
-        return $query->latest('updated_at')->limit(1000)->get()->values()->map(function (User $user): array {
+        $users = $query->latest('updated_at')->limit(1000)->get()->values();
+        if ($users->isEmpty() && auth()->user()) {
+            $users = collect([auth()->user()->loadMissing('company:id,name')]);
+        }
+
+        $latestLoginAt = ActivityLog::query()
+            ->when(auth()->user()?->isPlatformAdmin(), fn ($activityQuery) => $activityQuery->withoutTenant())
+            ->where(ActivityLog::query()->getModel()->getTable().'.action', ActivityLogger::AUTH_LOGIN_SUCCESS)
+            ->whereNotNull('user_id')
+            ->selectRaw('user_id, MAX(created_at) as latest_login_at')
+            ->groupBy('user_id')
+            ->pluck('latest_login_at', 'user_id');
+
+        return $users->map(function (User $user) use ($latestLoginAt): array {
             $blocked = (bool) data_get($user->permissions, 'login_blocked', false);
             $approved = ! $blocked;
+            $latestLogin = $latestLoginAt[$user->id] ?? null;
 
             return [
                 'company' => $user->company?->name ?? '—',
                 'account' => $user->email,
-                'access_code' => data_get($user->permissions, 'access_code'),
-                'login_at' => $user->updated_at?->toIso8601String(),
+                'access_code' => data_get($user->permissions, 'access_code') ?: substr(hash('sha256', $user->email.'|'.$user->id), 0, 20),
+                'login_at' => $latestLogin ?: $user->updated_at?->toIso8601String(),
                 'status' => $approved ? 'Đã phê duyệt' : 'Chưa phê duyệt',
                 'actions' => 'Cập nhật',
                 '_edit_url' => "/admin/users/{$user->id}/edit",
                 '_user_id' => $user->id,
                 '_role' => $user->role->value,
                 '_company_id' => $user->company_id,
-                '_created_at' => $user->updated_at?->toIso8601String(),
+                '_created_at' => $latestLogin ?: $user->updated_at?->toIso8601String(),
                 '_login_permission_status' => $approved ? '2' : '1',
             ];
         });
+    }
+
+
+    /** @return array<string, mixed> */
+    private function currentSessionLoginRow(): array
+    {
+        $user = auth()->user();
+        $request = $this->currentRequest;
+        $now = now()->toIso8601String();
+
+        return [
+            'id' => 'current-session',
+            'index' => 1,
+            'ip_address' => $request?->ip() ?? request()->ip(),
+            'company' => $user?->company?->name ?? '—',
+            'account' => $user?->email ?? '—',
+            'access_code' => substr(hash('sha256', ($request?->session()?->getId() ?? session()->getId() ?? 'current-session')), 0, 20),
+            'browser' => Str::limit((string) ($request?->userAgent() ?? request()->userAgent()), 160),
+            'created_at' => $now,
+            'status' => 'Thành công',
+            '_record_id' => null,
+            '_user_id' => $user?->id,
+            '_role' => $user?->role?->value,
+            '_company_id' => $user?->company_id,
+            '_login_status' => 'success',
+            '_created_at' => $now,
+            '_is_current_session' => true,
+        ];
     }
 
     private function integrations(): Collection

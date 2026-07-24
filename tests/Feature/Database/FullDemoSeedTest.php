@@ -45,6 +45,18 @@ class FullDemoSeedTest extends TestCase
             'Full seed phải có dữ liệu lịch sử lọc cho menu 1.7.3.'
         );
 
+        $this->assertGreaterThan(
+            0,
+            ActivityLog::query()->withoutTenant()->where('action', ActivityLogger::AUTH_LOGIN_SUCCESS)->count(),
+            'Full seed phải có dữ liệu lịch sử đăng nhập cho menu 1.7.1.'
+        );
+
+        $this->assertGreaterThan(
+            0,
+            User::query()->withoutGlobalScope(TenantScope::class)->whereNotNull('permissions')->count(),
+            'Full seed phải có dữ liệu quyền đăng nhập cho menu 1.7.2.'
+        );
+
         $this->assertGreaterThanOrEqual(60, ProductCategory::query()->count(), 'Full seed phải có dữ liệu phân loại sản phẩm cho popup.');
         $this->assertGreaterThanOrEqual(15, ProductAttribute::query()->count(), 'Full seed phải có dữ liệu thuộc tính sản phẩm cho popup.');
         $this->assertGreaterThanOrEqual(150, ProductAttributeValue::query()->count(), 'Full seed phải có dữ liệu giá trị thuộc tính cho popup.');

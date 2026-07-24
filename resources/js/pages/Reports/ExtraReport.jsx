@@ -1007,7 +1007,7 @@ function RevenueGroupCompactPicker({ groups, selectedKeys, onChange }) {
     return (
         <div className="ps-revenue-group-compact">
             <div className="ps-revenue-group-tags">
-                {selectedKeys.slice(0, 2).map((key) => {
+                {selectedKeys.slice(0, 3).map((key) => {
                     const group = groups.find((item) => item.key === key);
                     return group ? (
                         <button type="button" key={key} className="ps-revenue-group-tag" onClick={() => removeGroup(key)} title={group.description}>
@@ -1015,7 +1015,7 @@ function RevenueGroupCompactPicker({ groups, selectedKeys, onChange }) {
                         </button>
                     ) : null;
                 })}
-                {selectedKeys.length > 2 ? <span className="ps-revenue-group-more">+{selectedKeys.length - 2}</span> : null}
+                {selectedKeys.length > 3 ? <span className="ps-revenue-group-more">+{selectedKeys.length - 3}</span> : null}
             </div>
             <select className="ps-control" value="" onChange={(event) => addGroup(event.target.value)}>
                 <option value="">-- Chọn nhóm doanh số --</option>
