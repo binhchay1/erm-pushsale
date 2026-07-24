@@ -40,7 +40,9 @@ Route::delete('hr/care-distribution-rules/records/{record}', [\App\Http\Controll
 Route::redirect('pages/1-2-6-danh-sach-cau-hinh-chia-so-care-don', '/admin/hr/care-distribution-rules', 301);
 
 Route::redirect('catalog/products', '/admin/products', 301);
+Route::redirect('catalog/products/import', '/admin/products/import', 301);
 Route::redirect('pages/1-3-1-quan-ly-san-pham', '/admin/products', 301);
+Route::redirect('pages/1-3-1-import-san-pham', '/admin/products/import', 301);
 
 Route::get('catalog/combos', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_2Controller::class, 'index'])->name('catalog.combos');
 Route::post('catalog/combos/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_2Controller::class, 'store'])->name('catalog.combos.store');

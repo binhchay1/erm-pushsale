@@ -306,6 +306,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::delete('warehouses/{warehouse}', [WarehouseController::class, 'destroy'])->name('warehouses.destroy');
         Route::delete('warehouse-inventories/{inventory}', [WarehouseInventoryController::class, 'destroy'])->name('warehouse-inventories.destroy');
         Route::resource('teams', TeamController::class)->except(['show']);
+        Route::get('products/import', [ProductController::class, 'importPage'])->name('products.import-page');
+        Route::get('products/import/sample', [ProductController::class, 'importTemplate'])->name('products.import-template');
         Route::post('products/import', [ProductController::class, 'import'])->name('products.import');
         Route::post('products/categories', [ProductController::class, 'storeCategory'])->name('products.categories.store');
         Route::post('products/attributes', [ProductController::class, 'storeAttribute'])->name('products.attributes.store');

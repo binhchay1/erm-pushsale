@@ -12,7 +12,7 @@ class Product extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['parent_id', 'name', 'type', 'sku', 'unit', 'unit_price', 'cost_price', 'vat_percent', 'vat_code', 'weight_grams', 'is_active', 'available_marketing', 'available_sale', 'available_care'];
+    protected $fillable = ['parent_id', 'name', 'type', 'sku', 'unit', 'unit_price', 'cost_price', 'vat_percent', 'vat_code', 'barcode', 'weight_grams', 'length_cm', 'width_cm', 'height_cm', 'warehouse_location', 'is_active', 'available_marketing', 'available_sale', 'available_care'];
 
     protected $attributes = ['type' => 'product'];
 
@@ -27,6 +27,9 @@ class Product extends Model
             'cost_price' => 'integer',
             'vat_percent' => 'decimal:2',
             'weight_grams' => 'integer',
+            'length_cm' => 'decimal:2',
+            'width_cm' => 'decimal:2',
+            'height_cm' => 'decimal:2',
         ];
     }
 

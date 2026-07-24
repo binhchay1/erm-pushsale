@@ -59,12 +59,13 @@ function menuNumber(title = '') {
     return match ? Number(match[1]) : null;
 }
 
-function LeafLink({ item, className, onNavigate, children }) {
+function LeafLink({ item, className, onNavigate, children, style }) {
     if (item.url && !item.disabled) {
         return (
             <Link
                 href={item.url}
                 className={className}
+                style={style}
                 aria-label={item.title}
                 preserveScroll={false}
                 onClick={onNavigate}
@@ -75,7 +76,7 @@ function LeafLink({ item, className, onNavigate, children }) {
     }
 
     return (
-        <span className={cn(className, 'is-disabled')} aria-label={`${item.title} — chưa có màn hình tương ứng`}>
+        <span className={cn(className, 'is-disabled')} style={style} aria-label={`${item.title} — chưa có màn hình tương ứng`}>
             {children}
         </span>
     );
@@ -87,7 +88,7 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose, on
     return createPortal(
         <div
             className="pushsale-third-menu"
-            style={{ top: flyout.top, maxHeight: flyout.maxHeight }}
+            style={{ top: flyout.top, maxHeight: flyout.maxHeight, backgroundColor: '#0b8ff3', backgroundImage: 'none', color: '#fff' }}
             role="menu"
             aria-label={flyout.item.title}
             onMouseEnter={onMouseEnter}
@@ -101,6 +102,7 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose, on
                         <LeafLink
                             item={child}
                             className="pushsale-third-link"
+                            style={{ backgroundColor: active ? '#0560ad' : 'transparent', color: '#fff' }}
                             onNavigate={() => {
                                 onSelect?.(child);
                                 onClose();

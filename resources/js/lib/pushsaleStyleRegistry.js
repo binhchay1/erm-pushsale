@@ -56,6 +56,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-filter-toolbar-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-filter-toolbar-contract.css') },
     { file: 'pushsale-dashboard-toolbar-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-dashboard-toolbar-contract.css') },
     { file: 'pushsale-sidebar-menu-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-sidebar-menu-contract.css') },
+    { file: 'pushsale-product-source-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-product-source-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {

@@ -12,6 +12,11 @@ use App\Repositories\ProductRepository;
 use App\Repositories\WarehouseRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -70,6 +75,11 @@ class ProductController extends Controller
             'unit_price' => (int) $product->unit_price,
             'vat_percent' => (float) $product->vat_percent,
             'vat_code' => $product->vat_code,
+            'barcode' => $product->barcode,
+            'length_cm' => (float) $product->length_cm,
+            'width_cm' => (float) $product->width_cm,
+            'height_cm' => (float) $product->height_cm,
+            'warehouse_location' => $product->warehouse_location,
             'price_after_vat' => (int) round($product->unit_price * (1 + ((float) $product->vat_percent / 100))),
             'weight_grams' => (int) $product->weight_grams,
             'is_active' => (bool) $product->is_active,
@@ -97,6 +107,38 @@ class ProductController extends Controller
             'product' => null,
             'parents' => $this->parentOptions(),
             'activeMenuCode' => '1.3.1',
+        ]);
+    }
+
+    public function importPage(): Response
+    {
+        return Inertia::render('Admin/Products/Import', [
+            'activeMenuCode' => '1.3.1',
+        ]);
+    }
+
+    public function importTemplate(): StreamedResponse
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Import sản phẩm');
+        $headers = [
+            'Tên SP gốc', 'Mã SP', 'Phân loại', 'Đ.vị tính', 'Giá nhập', 'Đơn giá', 'Mã VAT', 'VAT (%)',
+            'KL(gram)', 'Mã vạch', 'Dài (cm)', 'Rộng (cm)', 'Cao (cm)', 'Mã vị trí',
+        ];
+        $sheet->fromArray($headers, null, 'A1');
+        $sheet->fromArray([
+            ['Sản phẩm mẫu', 'SP001', 'Nhóm mẫu', 'hộp', 100000, 150000, 'KCT', 0, 500, '893000000001', 10, 8, 5, 'A01'],
+        ], null, 'A2');
+
+        foreach (range('A', 'N') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        return response()->streamDownload(function () use ($spreadsheet): void {
+            (new Xlsx($spreadsheet))->save('php://output');
+        }, 'mau-import-san-pham.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
 
@@ -131,7 +173,12 @@ class ProductController extends Controller
                 'unit_price' => (int) $product->unit_price,
                 'vat_percent' => (float) $product->vat_percent,
                 'vat_code' => $product->vat_code,
+                'barcode' => $product->barcode,
                 'weight_grams' => (int) $product->weight_grams,
+                'length_cm' => (float) $product->length_cm,
+                'width_cm' => (float) $product->width_cm,
+                'height_cm' => (float) $product->height_cm,
+                'warehouse_location' => $product->warehouse_location,
                 'parent_id' => $product->parent_id,
                 'is_active' => (bool) $product->is_active,
                 'available_marketing' => (bool) $product->available_marketing,
@@ -181,42 +228,136 @@ class ProductController extends Controller
 
     public function import(Request $request): RedirectResponse
     {
-        $data = $request->validate(['file' => ['required', 'file', 'mimes:csv,txt', 'max:10240']]);
-        $handle = fopen($data['file']->getRealPath(), 'rb');
-        if ($handle === false) {
-            return back()->with('error', 'Không thể đọc file import.');
+        $data = $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt,xls,xlsx', 'max:20480'],
+        ]);
+
+        $rows = $this->readImportRows($data['file']);
+        if (count($rows) > 3000) {
+            return back()->with('error', 'File import vượt quá 3000 dòng.');
         }
 
-        $headers = fgetcsv($handle) ?: [];
-        $headers = array_map(fn ($value) => strtolower(trim((string) $value)), $headers);
         $count = 0;
+        foreach ($rows as $row) {
+            $name = trim((string) ($this->rowValue($row, ['name', 'ten', 'tên', 'ten sp goc', 'tên sp gốc', 'san pham', 'sản phẩm']) ?? ''));
+            $sku = trim((string) ($this->rowValue($row, ['sku', 'ma sp', 'mã sp', 'ma_sp', 'ma san pham', 'mã sản phẩm']) ?? ''));
 
-        while (($values = fgetcsv($handle)) !== false) {
-            $row = array_combine($headers, array_pad($values, count($headers), null));
-            if (! is_array($row)) continue;
-            $name = trim((string) ($row['name'] ?? $row['tên'] ?? $row['ten'] ?? ''));
-            $sku = trim((string) ($row['sku'] ?? $row['mã sp'] ?? $row['ma_sp'] ?? ''));
-            if ($name === '') continue;
+            if ($name === '') {
+                continue;
+            }
 
-            Product::query()->updateOrCreate(
+            $categoryName = trim((string) ($this->rowValue($row, ['phan loai', 'phân loại', 'category']) ?? ''));
+            $category = null;
+            if ($categoryName !== '') {
+                $category = ProductCategory::query()->firstOrCreate(
+                    ['company_id' => $request->user()->company_id, 'name' => $categoryName],
+                    [
+                        'is_active' => true,
+                        'created_by_user_id' => $request->user()->id,
+                        'updated_by_user_id' => $request->user()->id,
+                    ],
+                );
+            }
+
+            $product = Product::query()->updateOrCreate(
                 $sku !== '' ? ['sku' => $sku] : ['name' => $name, 'type' => 'product'],
                 [
                     'name' => $name,
                     'type' => 'product',
-                    'unit' => $row['unit'] ?? $row['đ.vị tính'] ?? null,
-                    'cost_price' => (int) ($row['cost_price'] ?? $row['giá nhập'] ?? 0),
-                    'unit_price' => (int) ($row['unit_price'] ?? $row['đơn giá'] ?? 0),
-                    'vat_percent' => (float) ($row['vat_percent'] ?? $row['vat'] ?? 0),
-                    'vat_code' => $row['vat_code'] ?? $row['mã vat'] ?? null,
-                    'weight_grams' => (int) ($row['weight_grams'] ?? $row['kl(gram)'] ?? 0),
+                    'unit' => $this->rowValue($row, ['unit', 'dv tinh', 'đv tính', 'd.vi tinh', 'đ.vị tính', 'don vi tinh', 'đơn vị tính']),
+                    'cost_price' => $this->numberValue($this->rowValue($row, ['cost_price', 'gia nhap', 'giá nhập'])),
+                    'unit_price' => $this->numberValue($this->rowValue($row, ['unit_price', 'don gia', 'đơn giá', 'gia ban', 'giá bán'])),
+                    'vat_percent' => $this->decimalValue($this->rowValue($row, ['vat_percent', 'vat', 'vat (%)'])),
+                    'vat_code' => $this->rowValue($row, ['vat_code', 'ma vat', 'mã vat']) ?: 'KCT',
+                    'barcode' => $this->rowValue($row, ['barcode', 'ma vach', 'mã vạch']),
+                    'weight_grams' => $this->numberValue($this->rowValue($row, ['weight_grams', 'kl(gram)', 'kl', 'khoi luong', 'khối lượng'])),
+                    'length_cm' => $this->decimalValue($this->rowValue($row, ['length_cm', 'dai (cm)', 'dài (cm)', 'dai', 'dài'])),
+                    'width_cm' => $this->decimalValue($this->rowValue($row, ['width_cm', 'rong (cm)', 'rộng (cm)', 'rong', 'rộng'])),
+                    'height_cm' => $this->decimalValue($this->rowValue($row, ['height_cm', 'cao (cm)', 'cao'])),
+                    'warehouse_location' => $this->rowValue($row, ['warehouse_location', 'ma vi tri', 'mã vị trí', 'vi tri', 'vị trí']),
                     'is_active' => true,
+                    'available_marketing' => true,
+                    'available_sale' => true,
+                    'available_care' => true,
                 ],
             );
+
+            if ($category) {
+                $product->categories()->syncWithoutDetaching([$category->id]);
+            }
+
             $count++;
         }
-        fclose($handle);
 
         return back()->with('success', "Đã import {$count} sản phẩm.");
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function readImportRows(\Illuminate\Http\UploadedFile $file): array
+    {
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (in_array($extension, ['xls', 'xlsx'], true)) {
+            $sheet = IOFactory::load($file->getRealPath())->getActiveSheet();
+            $rawRows = $sheet->toArray(null, true, true, false);
+        } else {
+            $handle = fopen($file->getRealPath(), 'rb');
+            if ($handle === false) {
+                return [];
+            }
+            $rawRows = [];
+            while (($values = fgetcsv($handle)) !== false) {
+                $rawRows[] = $values;
+            }
+            fclose($handle);
+        }
+
+        $headers = array_map(fn ($value): string => $this->normalizeHeader((string) $value), array_shift($rawRows) ?: []);
+        $rows = [];
+        foreach ($rawRows as $values) {
+            if (! array_filter($values, fn ($value): bool => trim((string) $value) !== '')) {
+                continue;
+            }
+            $row = [];
+            foreach ($headers as $index => $header) {
+                if ($header === '') {
+                    continue;
+                }
+                $row[$header] = $values[$index] ?? null;
+            }
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+    /** @param array<string, mixed> $row */
+    private function rowValue(array $row, array $keys): mixed
+    {
+        foreach ($keys as $key) {
+            $normalized = $this->normalizeHeader((string) $key);
+            if (array_key_exists($normalized, $row)) {
+                return $row[$normalized];
+            }
+        }
+
+        return null;
+    }
+
+    private function normalizeHeader(string $value): string
+    {
+        return Str::of($value)->lower()->ascii()->replace(['_', '-', '.', '/', '\\'], ' ')->squish()->toString();
+    }
+
+    private function numberValue(mixed $value): int
+    {
+        $normalized = preg_replace('/[^0-9\-]/', '', (string) $value);
+        return max(0, (int) $normalized);
+    }
+
+    private function decimalValue(mixed $value): float
+    {
+        $normalized = str_replace(',', '.', preg_replace('/[^0-9,\.\-]/', '', (string) $value) ?? '0');
+        return max(0, (float) $normalized);
     }
 
     public function storeCategory(Request $request): RedirectResponse
