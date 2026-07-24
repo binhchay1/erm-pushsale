@@ -50,6 +50,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-v98-warehouse-flow-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v98-warehouse-flow-contract.css') },
     { file: 'pushsale-v99-security-report-header-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v99-security-report-header-contract.css') },
     { file: 'pushsale-v100-sale-kpi-closing-summary-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v100-sale-kpi-closing-summary-contract.css') },
+    { file: 'pushsale-v101-page-top-spacing-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-v101-page-top-spacing-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {

@@ -759,6 +759,26 @@ function normalizeTemplateLayout(host) {
 
     host.classList.add('pushsale-template-host-v83');
 
+    // Captured Pushsale HTML often includes an inner `.content-wrapper` and
+    // one-off spacer styles (`padding-top: 50px`, `height: 100px`). In the
+    // React/Admin shell those clash with the real fixed content wrapper and
+    // create inconsistent blank bands at the top of many pages. Mark them here
+    // so the final CSS contract can neutralize only native-template artifacts.
+    host.querySelectorAll('.content-wrapper').forEach((node) => {
+        node.classList.add('pushsale-nested-content-wrapper');
+    });
+
+    host.querySelectorAll('[style]').forEach((node) => {
+        const inline = node.getAttribute('style') ?? '';
+        if (/padding-top\s*:\s*(?:4[5-9]|[5-9]\d|[1-9]\d{2,})px/i.test(inline)) {
+            node.classList.add('pushsale-native-top-spacer');
+        }
+        const isEmptyVisualSpacer = /height\s*:\s*(?:6\d|[7-9]\d|[1-9]\d{2,})px/i.test(inline)
+            && !node.textContent?.trim()
+            && !node.querySelector('input, select, textarea, button, a, table, [data-pushsale-grid-anchor], [data-pushsale-pagination-anchor]');
+        if (isEmptyVisualSpacer) node.classList.add('pushsale-native-empty-spacer');
+    });
+
     host.querySelectorAll('.content-header').forEach((node) => {
         if (!node.textContent?.trim() && !node.querySelector('input, select, textarea, button, a, table')) {
             node.classList.add('pushsale-template-empty-spacer');
