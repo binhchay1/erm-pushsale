@@ -82,6 +82,8 @@ class SecurityAuditDemoSeeder extends Seeder
             'company_id' => $user->company_id,
             'user_id' => $user->id,
             'action' => $action,
+            'subject_type' => 'user',
+            'subject_id' => $user->id,
             'subject_label' => $user->email,
             'properties' => [
                 'email' => $user->email,
@@ -91,6 +93,12 @@ class SecurityAuditDemoSeeder extends Seeder
                 'status' => $reason === 'success' ? 'success' : ($reason === 'logout' ? 'logout' : 'failed'),
                 'reason' => $reason,
                 'access_code' => substr(hash('sha256', $user->email.'|'.$createdAt->format(DATE_ATOM)), 0, 20),
+                '_request' => [
+                    'method' => $action === ActivityLogger::AUTH_LOGOUT ? 'POST' : 'POST',
+                    'path' => $action === ActivityLogger::AUTH_LOGOUT ? 'logout' : 'login',
+                    'route_name' => $action === ActivityLogger::AUTH_LOGOUT ? 'logout' : 'login',
+                    'referer' => '/login',
+                ],
             ],
             'ip_address' => $ipAddress,
             'user_agent' => $userAgent,

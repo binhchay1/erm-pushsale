@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Support\TenantManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Str;
 
 final class ActivityLogger
 {
@@ -58,6 +59,7 @@ final class ActivityLogger
     ): ActivityLog {
         $actor ??= auth()->user();
         $tenant = app(TenantManager::class);
+        $properties = self::withRequestContext($properties);
 
         return ActivityLog::query()->create([
             'company_id' => $tenant->hasContext() ? $tenant->id() : ($actor?->company_id),
@@ -71,6 +73,42 @@ final class ActivityLogger
             'user_agent' => Request::userAgent(),
             'created_at' => now(),
         ]);
+    }
+
+
+    /**
+     * @param  array<string, mixed>  $properties
+     * @return array<string, mixed>
+     */
+    private static function withRequestContext(array $properties): array
+    {
+        try {
+            $request = request();
+        } catch (\Throwable) {
+            return $properties;
+        }
+
+        if (! $request) {
+            return $properties;
+        }
+
+        $context = array_filter([
+            'method' => $request->method(),
+            'path' => $request->path(),
+            'route_name' => $request->route()?->getName(),
+            'referer' => $request->headers->get('referer') ? Str::limit((string) $request->headers->get('referer'), 180, '…') : null,
+        ], static fn ($value) => $value !== null && $value !== '');
+
+        if ($context === []) {
+            return $properties;
+        }
+
+        $properties['_request'] = array_merge(
+            $context,
+            is_array($properties['_request'] ?? null) ? $properties['_request'] : [],
+        );
+
+        return $properties;
     }
 
     private static function resolveSubjectLabel(?Model $subject): ?string

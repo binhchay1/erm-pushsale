@@ -18,12 +18,14 @@ use App\Models\Pushsale\CompanySubscriptionHistory;
 use App\Models\Pushsale\CustomerCareCampaign;
 use App\Models\Pushsale\DiscountCodRule;
 use App\Models\Pushsale\ElectronicInvoiceJob;
+use App\Models\Pushsale\ElectronicInvoiceConfig;
 use App\Models\Pushsale\Expense;
 use App\Models\Pushsale\ExpenseCategory;
 use App\Models\Pushsale\ExpenseGroup;
 use App\Models\Pushsale\ExpenseUnit;
 use App\Models\Pushsale\FacebookPageMapping;
 use App\Models\Pushsale\LeadDistributionRule;
+use App\Models\Pushsale\KpiCatalogItem;
 use App\Models\Pushsale\MonthlyKpiPlan;
 use App\Models\Pushsale\OperationCategory;
 use App\Models\Pushsale\OperationWorkflow;
@@ -92,6 +94,10 @@ class PushsalePageService
 
         // Các màn đã có luồng nghiệp vụ trong ERM phải dùng trực tiếp query/service thật.
         // Không đi qua collection demo hoặc dữ liệu chụp từ template.
+        if ($source === 'power_dashboard') {
+            return $this->powerDashboardResult($request);
+        }
+
         if ($live = $this->liveData->resolve($source, $request)) {
             return $live;
         }
@@ -133,6 +139,7 @@ class PushsalePageService
             'care_operations' => $this->careOperations(),
             'care_allocation' => $this->careAllocation(),
             'monthly_plan' => $this->monthlyPlan($code),
+            'kpi_catalog' => $this->kpiCatalog(),
             'trend' => $this->trend(),
             'power_dashboard' => $this->powerDashboard(),
             'repurchase' => $this->repurchase(),
@@ -155,6 +162,7 @@ class PushsalePageService
             'expense_groups' => $this->expenseGroups(),
             'expense_units' => $this->expenseUnits(),
             'electronic_invoice_jobs' => $this->electronicInvoiceJobs(),
+            'electronic_invoice_configs' => $this->electronicInvoiceConfigs(),
             default => collect(),
         };
 
@@ -1514,11 +1522,80 @@ class PushsalePageService
         ]);
     }
 
+
+    private function kpiCatalog(): Collection
+    {
+        $request = $this->currentRequest;
+        $position = trim((string) ($request?->query('position_key', $request?->query('role', 'marketing')) ?? 'marketing'));
+        if ($position === 'sale') {
+            $position = 'sales';
+        }
+
+        $query = KpiCatalogItem::query()->orderBy('sort_order')->orderBy('id');
+        if ($position !== '' && ! in_array($position, ['all', '-1'], true)) {
+            $query->where('position_key', $position);
+        }
+
+        return $query->limit(1000)->get()->values()->map(function (KpiCatalogItem $item, int $index): array {
+            return [
+                'index' => $index + 1,
+                'id' => $item->id,
+                'kpi_name' => $item->kpi_name,
+                'position_key' => $item->position_key,
+                'position_label' => $item->position_key === 'sales' ? 'Sale' : 'Marketing',
+                'daily_budget' => $item->daily_budget,
+                'daily_clicks' => $item->daily_clicks,
+                'daily_contacts' => $item->daily_contacts,
+                'daily_revenue' => $item->daily_revenue,
+                'daily_new_contacts' => $item->daily_new_contacts,
+                'daily_new_closed' => $item->daily_new_closed,
+                'daily_old_contacts' => $item->daily_old_contacts,
+                'daily_old_closed' => $item->daily_old_closed,
+                'is_active' => $item->is_active,
+                'sort_order' => $item->sort_order,
+                'updated_at' => $item->updated_at?->toIso8601String(),
+                '_record_id' => $item->id,
+                '_role' => $item->position_key,
+                '_form' => [
+                    'position_key' => $item->position_key,
+                    'kpi_name' => $item->kpi_name,
+                    'daily_budget' => $item->daily_budget,
+                    'daily_clicks' => $item->daily_clicks,
+                    'daily_contacts' => $item->daily_contacts,
+                    'daily_revenue' => $item->daily_revenue,
+                    'daily_new_contacts' => $item->daily_new_contacts,
+                    'daily_new_closed' => $item->daily_new_closed,
+                    'daily_old_contacts' => $item->daily_old_contacts,
+                    'daily_old_closed' => $item->daily_old_closed,
+                    'is_active' => $item->is_active,
+                    'sort_order' => $item->sort_order,
+                ],
+            ];
+        });
+    }
+
     private function monthlyPlan(string $code): Collection
     {
-        $plans = MonthlyKpiPlan::query()->with('user:id,name,role')->latest('year')->latest('month')->limit(1000)->get();
+        $query = MonthlyKpiPlan::query()->with('user:id,name,email,role,team_id,is_team_leader');
+        $resourceKey = $code === '7.1.1' ? '7.1.1' : '6.3.5';
 
-        return $plans->values()->map(function (MonthlyKpiPlan $plan, int $index): array {
+        if ($code === '7.1.1') {
+            $request = $this->currentRequest;
+            $now = now();
+            $year = max(2020, min(2100, (int) ($request?->query('year', $now->year) ?? $now->year)));
+            $monthFilter = (int) ($request?->query('month', $now->month) ?? $now->month);
+            $monthFilter = $monthFilter < 1 || $monthFilter > 12 ? $now->month : $monthFilter;
+            $department = trim((string) ($request?->query('department', 'marketing') ?? 'marketing'));
+
+            $query->where('year', $year)->where('month', $monthFilter);
+            if ($department !== '' && $department !== 'all') {
+                $query->whereHas('user', fn ($userQuery) => $userQuery->where('role', $department));
+            }
+        }
+
+        $plans = $query->latest('year')->latest('month')->orderBy('user_id')->limit(1000)->get();
+
+        return $plans->values()->map(function (MonthlyKpiPlan $plan, int $index) use ($resourceKey): array {
             $month = CarbonImmutable::create((int) $plan->year, (int) $plan->month, 1)->startOfDay();
             $periodOrders = Order::query()
                 ->where('sale_user_id', $plan->user_id)
@@ -1538,7 +1615,7 @@ class PushsalePageService
 
             return [
                 'index' => $index + 1,
-                'account' => $plan->user?->name,
+                'account' => trim(($plan->user?->name ?? '').($plan->user?->email ? "\n".$plan->user->email : '')),
                 'role' => $plan->user?->roleLabel(),
                 'kpi' => $plan->kpi_name,
                 'budget' => $plan->budget,
@@ -1552,6 +1629,7 @@ class PushsalePageService
                 'actual_revenue' => $actualRevenue,
                 'working_days' => $plan->working_days,
                 'actual_days' => $plan->actual_days,
+                'bonus_percent' => (float) $plan->bonus_percent,
                 'base_salary' => $payroll['base_salary'],
                 'bonus' => $bonus,
                 'income' => $payroll['total'],
@@ -1559,7 +1637,7 @@ class PushsalePageService
                 'locked' => $plan->locked,
                 'updated_at' => $plan->updated_at?->toIso8601String(),
                 '_record_id' => $plan->id,
-                '_form' => $this->formPayload('6.3.5', $plan),
+                '_form' => $this->formPayload($resourceKey, $plan),
             ];
         });
     }
@@ -1619,6 +1697,454 @@ class PushsalePageService
             }
             return $row;
         });
+    }
+
+
+    /**
+     * Power dashboard 8.5.9 phải lấy từ dữ liệu vận hành thật: lead/order/items/shipping.
+     * Component riêng dùng summary để dựng layout giống Pushsale, còn data giữ các dòng matrix cho export/test.
+     *
+     * @return array{data: array<int, array<string, mixed>>, meta: array<string, int>, summary: array<string, mixed>}
+     */
+    private function powerDashboardResult(Request $request): array
+    {
+        $reportDate = $this->powerDashboardReportDate($request);
+        $startDate = $reportDate->subDays(11)->startOfDay();
+        $endDate = $reportDate->endOfDay();
+
+        $orders = Order::query()
+            ->with([
+                'items:id,order_id,quantity,total,unit_price',
+                'saleUser:id,name,email,role',
+                'marketerUser:id,name,email,role',
+                'warehouseCareUser:id,name,email,role',
+                'marketingSource:id,name,budget,marketer_user_id',
+            ])
+            ->where(function ($query) use ($startDate, $endDate): void {
+                $query->whereBetween('data_arrived_at', [$startDate, $endDate])
+                    ->orWhereBetween('closed_at', [$startDate, $endDate])
+                    ->orWhereBetween('updated_at', [$startDate, $endDate])
+                    ->orWhereBetween('last_delivery_event_at', [$startDate, $endDate]);
+            })
+            ->get();
+
+        $sources = MarketingSource::query()
+            ->with('marketer:id,name,email,role')
+            ->where('is_active', true)
+            ->get(['id', 'name', 'budget', 'marketer_user_id', 'is_active']);
+
+        $marketingUsers = User::query()
+            ->where('role', User::ROLE_MARKETING)
+            ->orderBy('name')
+            ->limit(1000)
+            ->get(['id', 'name', 'email', 'role']);
+
+        $salesUsers = User::query()
+            ->where('role', User::ROLE_SALES)
+            ->orderBy('name')
+            ->limit(1000)
+            ->get(['id', 'name', 'email', 'role']);
+
+        $warehouseUsers = User::query()
+            ->where('role', User::ROLE_WAREHOUSE)
+            ->orderBy('name')
+            ->limit(1000)
+            ->get(['id', 'name', 'email', 'role']);
+
+        $days = collect(range(11, 0))->map(function (int $offset) use ($reportDate): array {
+            $date = $reportDate->subDays($offset);
+
+            return [
+                'offset' => $offset,
+                'key' => 'day_'.$offset,
+                'label' => $offset === 0 ? 'Ngày báo cáo (n)' : 'Ngày n-'.$offset,
+                'short_label' => $offset === 0 ? 'n' : 'n-'.$offset,
+                'date' => $date->toDateString(),
+                'display_date' => $date->format('d/m/Y'),
+            ];
+        })->values();
+
+        $daily = $days->mapWithKeys(function (array $day) use ($orders, $sources): array {
+            $date = $day['date'];
+            $arrived = $orders->filter(fn (Order $order): bool => $this->sameDate($order->data_arrived_at, $date));
+            $closed = $orders->filter(fn (Order $order): bool => $this->sameDate($order->closed_at, $date));
+            $delivered = $orders->filter(fn (Order $order): bool => $order->delivery_status === 'delivered' && $this->sameDate($order->last_delivery_event_at ?? $order->updated_at, $date));
+            $returned = $orders->filter(fn (Order $order): bool => in_array((string) $order->delivery_status, ['returned', 'returning'], true) && $this->sameDate($order->updated_at, $date));
+            $dayBudget = (int) round($sources->sum(fn (MarketingSource $source): float => ((float) ($source->budget ?? 0)) / 30));
+            $revenue = (int) $closed->sum(fn (Order $order): int => $order->effectiveRevenue());
+            $productQty = (int) $closed->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
+            $shippingCost = (int) $closed->sum(fn (Order $order): int => $order->shippingCost());
+
+            return [$day['key'] => [
+                'arrived' => $arrived,
+                'closed' => $closed,
+                'delivered' => $delivered,
+                'returned' => $returned,
+                'marketing_contacts' => $arrived->count(),
+                'marketing_budget' => $dayBudget,
+                'marketing_cost_per_contact' => $arrived->count() > 0 ? round($dayBudget / max(1, $arrived->count()), 2) : 0,
+                'marketing_budget_ratio' => $revenue > 0 ? round(($dayBudget / $revenue) * 100, 2) : 0,
+                'telesale_close_rate' => round(($closed->count() / max(1, $arrived->count())) * 100, 2),
+                'closed_orders' => $closed->count(),
+                'product_quantity' => $productQty,
+                'product_per_order' => $closed->count() > 0 ? round($productQty / max(1, $closed->count()), 2) : 0,
+                'revenue' => $revenue,
+                'delivery_success_rate' => round(($delivered->count() / max(1, $closed->count())) * 100, 2),
+                'shipping_cost_ratio' => $revenue > 0 ? round(($shippingCost / $revenue) * 100, 2) : 0,
+                'care_close_rate' => round(($closed->count() / max(1, $arrived->count())) * 100, 2),
+            ]];
+        });
+
+        $matrixDefinitions = [
+            ['MARKETING', 'Số data', 'marketing_contacts', 'number'],
+            ['MARKETING', 'Ngân sách MKT', 'marketing_budget', 'money'],
+            ['MARKETING', 'Giá data', 'marketing_cost_per_contact', 'money_decimal'],
+            ['MARKETING', 'Ngân sách/DS', 'marketing_budget_ratio', 'percent'],
+            ['TELESALE', 'Tỉ lệ chốt', 'telesale_close_rate', 'percent'],
+            ['TELESALE', 'Số đơn', 'closed_orders', 'number'],
+            ['TELESALE', 'Số sản phẩm', 'product_quantity', 'number'],
+            ['TELESALE', 'Số sp/đơn', 'product_per_order', 'decimal'],
+            ['TELESALE', 'Doanh số', 'revenue', 'money'],
+            ['GIAO HÀNG', 'Tỉ lệ TC', 'delivery_success_rate', 'percent'],
+            ['GIAO HÀNG', 'Chi phí/DS', 'shipping_cost_ratio', 'percent'],
+            ['CSKH', 'Tỉ lệ chốt', 'care_close_rate', 'percent'],
+            ['CSKH', 'Số đơn', 'closed_orders', 'number'],
+            ['CSKH', 'Số sản phẩm', 'product_quantity', 'number'],
+            ['CSKH', 'Số sp/đơn', 'product_per_order', 'decimal'],
+            ['CSKH', 'Doanh số', 'revenue', 'money'],
+        ];
+
+        $matrixRows = collect($matrixDefinitions)->map(function (array $definition) use ($days, $daily): array {
+            [$section, $metric, $key, $format] = $definition;
+            $values = $days->map(fn (array $day): float => (float) ($daily[$day['key']][$key] ?? 0))->values();
+            $total = in_array($format, ['percent', 'decimal', 'money_decimal'], true)
+                ? round((float) ($values->average() ?? 0), 2)
+                : round((float) $values->sum(), 2);
+            $average = round((float) ($values->average() ?? 0), 2);
+
+            $row = [
+                'section' => $section,
+                'metric' => $metric,
+                'format' => $format,
+                'total' => $total,
+                'average' => $average,
+                'days' => [],
+            ];
+
+            foreach ($days as $index => $day) {
+                $value = (float) ($values[$index] ?? 0);
+                $previous = $index > 0 ? (float) ($values[$index - 1] ?? 0) : 0;
+                $row['days'][] = [
+                    'key' => $day['key'],
+                    'value' => $value,
+                    'previous_delta' => $this->deltaPercent($value, $previous),
+                    'average_delta' => $this->deltaPercent($value, $average),
+                ];
+                $row[$day['key'].'_value'] = $value;
+                $row[$day['key'].'_previous'] = $this->deltaPercent($value, $previous);
+                $row[$day['key'].'_average'] = $this->deltaPercent($value, $average);
+            }
+
+            return $row;
+        })->values();
+
+        $todayKey = 'day_0';
+        $previousKey = 'day_1';
+        $todayRevenue = (int) ($daily[$todayKey]['revenue'] ?? 0);
+        $previousRevenue = (int) ($daily[$previousKey]['revenue'] ?? 0);
+        $averageRevenue = (float) collect(range(11, 1))->avg(fn (int $offset): float => (float) ($daily['day_'.$offset]['revenue'] ?? 0));
+
+        $panelDateOrders = $daily[$todayKey]['arrived'] ?? collect();
+        $panelClosedOrders = $daily[$todayKey]['closed'] ?? collect();
+
+        $summary = [
+            'filters' => [
+                'mode' => (string) $request->query('mode', 'day'),
+                'date_from' => $reportDate->toDateString(),
+                'date_to' => $reportDate->toDateString(),
+            ],
+            'top_cards' => [
+                [
+                    'title' => 'DOANH SỐ NGÀY N',
+                    'value' => $todayRevenue,
+                    'format' => 'money_short',
+                    'tone' => 'primary',
+                    'delta' => null,
+                ],
+                [
+                    'title' => 'SO VỚI NGÀY N - 1',
+                    'value' => $previousRevenue,
+                    'format' => 'money_short',
+                    'tone' => $todayRevenue >= $previousRevenue ? 'up' : 'down',
+                    'delta' => $this->deltaPercent($todayRevenue, $previousRevenue),
+                ],
+                [
+                    'title' => 'SO VỚI TRUNG BÌNH',
+                    'value' => (int) round($averageRevenue),
+                    'format' => 'money_short',
+                    'tone' => $todayRevenue >= $averageRevenue ? 'up' : 'down',
+                    'delta' => $this->deltaPercent($todayRevenue, $averageRevenue),
+                ],
+            ],
+            'panels' => [
+                'marketing' => $this->powerMarketingPanel($marketingUsers, $panelDateOrders, $panelClosedOrders, $sources, $orders, $reportDate),
+                'telesale' => $this->powerTelesalePanel($salesUsers, $panelDateOrders, $panelClosedOrders, $orders, $reportDate),
+                'shipping' => $this->powerShippingPanel($salesUsers->merge($warehouseUsers)->unique('id')->values(), $panelClosedOrders, $orders, $reportDate),
+                'care' => $this->powerCarePanel($salesUsers, $panelDateOrders, $panelClosedOrders, $orders, $reportDate),
+            ],
+            'days' => $days->all(),
+            'matrix_rows' => $matrixRows->all(),
+            'notes' => [
+                'Dữ liệu tính từ đơn, lead và item thật; doanh số đã gồm sản phẩm gốc + upsale trong cùng đơn.',
+                'Ngày báo cáo dùng ngày data về/chốt đơn/giao hàng theo luồng vận hành tương ứng.',
+            ],
+        ];
+
+        return [
+            'data' => $matrixRows->all(),
+            'meta' => [
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => $matrixRows->count(),
+                'total' => $matrixRows->count(),
+                'from' => $matrixRows->isEmpty() ? 0 : 1,
+                'to' => $matrixRows->count(),
+            ],
+            'summary' => $summary,
+        ];
+    }
+
+    private function powerDashboardReportDate(Request $request): CarbonImmutable
+    {
+        $candidate = $request->query('date_to')
+            ?: $request->query('to')
+            ?: $request->query('report_date')
+            ?: $request->query('date')
+            ?: now()->toDateString();
+
+        if (is_string($candidate) && str_contains($candidate, ' - ')) {
+            $parts = explode(' - ', $candidate);
+            $candidate = end($parts) ?: now()->toDateString();
+        }
+
+        try {
+            return CarbonImmutable::parse((string) $candidate)->startOfDay();
+        } catch (Throwable) {
+            return CarbonImmutable::now()->startOfDay();
+        }
+    }
+
+    private function sameDate($value, string $date): bool
+    {
+        if (! $value) {
+            return false;
+        }
+
+        try {
+            return CarbonImmutable::parse($value)->toDateString() === $date;
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    private function deltaPercent(float|int $value, float|int $base): float
+    {
+        $base = (float) $base;
+        if (abs($base) < 0.00001) {
+            return $value == 0 ? 0.0 : 100.0;
+        }
+
+        return round((((float) $value - $base) / abs($base)) * 100, 2);
+    }
+
+    private function powerPanelRow(string $label, array $metrics, array $previousMetrics = []): array
+    {
+        $row = ['label' => $label];
+        foreach ($metrics as $key => $value) {
+            $row[$key] = $value;
+            $row[$key.'_delta'] = $this->deltaPercent((float) $value, (float) ($previousMetrics[$key] ?? 0));
+        }
+
+        return $row;
+    }
+
+    private function powerMarketingPanel(Collection $users, Collection $arrived, Collection $closed, Collection $sources, Collection $allOrders, CarbonImmutable $date): array
+    {
+        $previousDate = $date->subDay()->toDateString();
+        $dailyBudget = (int) round($sources->sum(fn (MarketingSource $source): float => ((float) ($source->budget ?? 0)) / 30));
+        $totalRevenue = (int) $closed->sum(fn (Order $order): int => $order->effectiveRevenue());
+        $totalContacts = $arrived->count();
+        $total = [
+            'contacts' => $totalContacts,
+            'cost_per_contact' => $totalContacts > 0 ? round($dailyBudget / max(1, $totalContacts), 2) : 0,
+            'budget_ratio' => $totalRevenue > 0 ? round(($dailyBudget / $totalRevenue) * 100, 2) : 0,
+            'revenue' => $totalRevenue,
+        ];
+        $previousArrived = $allOrders->filter(fn (Order $order): bool => $this->sameDate($order->data_arrived_at, $previousDate));
+        $previousClosed = $allOrders->filter(fn (Order $order): bool => $this->sameDate($order->closed_at, $previousDate));
+        $previousRevenue = (int) $previousClosed->sum(fn (Order $order): int => $order->effectiveRevenue());
+        $previousBudget = $dailyBudget;
+        $previousContacts = $previousArrived->count();
+        $previousTotal = [
+            'contacts' => $previousContacts,
+            'cost_per_contact' => $previousContacts > 0 ? round($previousBudget / max(1, $previousContacts), 2) : 0,
+            'budget_ratio' => $previousRevenue > 0 ? round(($previousBudget / $previousRevenue) * 100, 2) : 0,
+            'revenue' => $previousRevenue,
+        ];
+
+        $rows = [
+            $this->powerPanelRow('Tổng', $total, $previousTotal),
+            $this->powerPanelRow('TB', [
+                'contacts' => round($total['contacts'] / max(1, $users->count()), 2),
+                'cost_per_contact' => $total['cost_per_contact'],
+                'budget_ratio' => $total['budget_ratio'],
+                'revenue' => round($total['revenue'] / max(1, $users->count()), 2),
+            ], [
+                'contacts' => round($previousTotal['contacts'] / max(1, $users->count()), 2),
+                'cost_per_contact' => $previousTotal['cost_per_contact'],
+                'budget_ratio' => $previousTotal['budget_ratio'],
+                'revenue' => round($previousTotal['revenue'] / max(1, $users->count()), 2),
+            ]),
+        ];
+
+        foreach ($users as $user) {
+            $userArrived = $arrived->filter(fn (Order $order): bool => (int) $order->marketer_user_id === (int) $user->id);
+            $userClosed = $closed->filter(fn (Order $order): bool => (int) $order->marketer_user_id === (int) $user->id);
+            $userSources = $sources->filter(fn (MarketingSource $source): bool => (int) $source->marketer_user_id === (int) $user->id);
+            $budget = (int) round($userSources->sum(fn (MarketingSource $source): float => ((float) ($source->budget ?? 0)) / 30));
+            $revenue = (int) $userClosed->sum(fn (Order $order): int => $order->effectiveRevenue());
+            $contacts = $userArrived->count();
+            if ($contacts === 0 && $revenue === 0 && $budget === 0) {
+                continue;
+            }
+            $rows[] = $this->powerPanelRow($user->name, [
+                'contacts' => $contacts,
+                'cost_per_contact' => $contacts > 0 ? round($budget / max(1, $contacts), 2) : 0,
+                'budget_ratio' => $revenue > 0 ? round(($budget / $revenue) * 100, 2) : 0,
+                'revenue' => $revenue,
+            ]);
+        }
+
+        return $rows;
+    }
+
+    private function powerTelesalePanel(Collection $users, Collection $arrived, Collection $closed, Collection $allOrders, CarbonImmutable $date): array
+    {
+        $previousDate = $date->subDay()->toDateString();
+        $previousArrived = $allOrders->filter(fn (Order $order): bool => $this->sameDate($order->data_arrived_at, $previousDate));
+        $previousClosed = $allOrders->filter(fn (Order $order): bool => $this->sameDate($order->closed_at, $previousDate));
+        $totalQty = (int) $closed->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
+        $previousQty = (int) $previousClosed->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
+        $total = [
+            'contacts' => $arrived->count(),
+            'closed' => $closed->count(),
+            'close_rate' => round(($closed->count() / max(1, $arrived->count())) * 100, 2),
+            'products_per_order' => $closed->count() > 0 ? round($totalQty / max(1, $closed->count()), 2) : 0,
+            'revenue' => (int) $closed->sum(fn (Order $order): int => $order->effectiveRevenue()),
+        ];
+        $previous = [
+            'contacts' => $previousArrived->count(),
+            'closed' => $previousClosed->count(),
+            'close_rate' => round(($previousClosed->count() / max(1, $previousArrived->count())) * 100, 2),
+            'products_per_order' => $previousClosed->count() > 0 ? round($previousQty / max(1, $previousClosed->count()), 2) : 0,
+            'revenue' => (int) $previousClosed->sum(fn (Order $order): int => $order->effectiveRevenue()),
+        ];
+        $rows = [
+            $this->powerPanelRow('Tổng', $total, $previous),
+            $this->powerPanelRow('TB', [
+                'contacts' => round($total['contacts'] / max(1, $users->count()), 2),
+                'closed' => round($total['closed'] / max(1, $users->count()), 2),
+                'close_rate' => $total['close_rate'],
+                'products_per_order' => $total['products_per_order'],
+                'revenue' => round($total['revenue'] / max(1, $users->count()), 2),
+            ], [
+                'contacts' => round($previous['contacts'] / max(1, $users->count()), 2),
+                'closed' => round($previous['closed'] / max(1, $users->count()), 2),
+                'close_rate' => $previous['close_rate'],
+                'products_per_order' => $previous['products_per_order'],
+                'revenue' => round($previous['revenue'] / max(1, $users->count()), 2),
+            ]),
+        ];
+
+        foreach ($users as $user) {
+            $userArrived = $arrived->filter(fn (Order $order): bool => (int) $order->sale_user_id === (int) $user->id);
+            $userClosed = $closed->filter(fn (Order $order): bool => (int) $order->sale_user_id === (int) $user->id);
+            $qty = (int) $userClosed->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
+            if ($userArrived->isEmpty() && $userClosed->isEmpty()) {
+                continue;
+            }
+            $rows[] = $this->powerPanelRow($user->name, [
+                'contacts' => $userArrived->count(),
+                'closed' => $userClosed->count(),
+                'close_rate' => round(($userClosed->count() / max(1, $userArrived->count())) * 100, 2),
+                'products_per_order' => $userClosed->count() > 0 ? round($qty / max(1, $userClosed->count()), 2) : 0,
+                'revenue' => (int) $userClosed->sum(fn (Order $order): int => $order->effectiveRevenue()),
+            ]);
+        }
+
+        return $rows;
+    }
+
+    private function powerShippingPanel(Collection $users, Collection $closed, Collection $allOrders, CarbonImmutable $date): array
+    {
+        $delivered = $closed->filter(fn (Order $order): bool => $order->delivery_status === 'delivered');
+        $totalRevenue = (int) $delivered->sum(fn (Order $order): int => $order->effectiveRevenue());
+        $total = [
+            'success_rate' => round(($delivered->count() / max(1, $closed->count())) * 100, 2),
+            'revenue' => $totalRevenue,
+        ];
+        $rows = [$this->powerPanelRow('Tổng', $total), $this->powerPanelRow('TB', [
+            'success_rate' => $total['success_rate'],
+            'revenue' => round($totalRevenue / max(1, $users->count()), 2),
+        ])];
+
+        foreach ($users as $user) {
+            $userClosed = $closed->filter(fn (Order $order): bool => (int) ($order->warehouse_care_user_id ?: $order->sale_user_id) === (int) $user->id);
+            $userDelivered = $userClosed->filter(fn (Order $order): bool => $order->delivery_status === 'delivered');
+            if ($userClosed->isEmpty() && $userDelivered->isEmpty()) {
+                continue;
+            }
+            $rows[] = $this->powerPanelRow($user->name, [
+                'success_rate' => round(($userDelivered->count() / max(1, $userClosed->count())) * 100, 2),
+                'revenue' => (int) $userDelivered->sum(fn (Order $order): int => $order->effectiveRevenue()),
+            ]);
+        }
+
+        return $rows;
+    }
+
+    private function powerCarePanel(Collection $users, Collection $arrived, Collection $closed, Collection $allOrders, CarbonImmutable $date): array
+    {
+        $qty = (int) $closed->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
+        $total = [
+            'close_rate' => round(($closed->count() / max(1, $arrived->count())) * 100, 2),
+            'closed' => $closed->count(),
+            'products_per_order' => $closed->count() > 0 ? round($qty / max(1, $closed->count()), 2) : 0,
+            'revenue' => (int) $closed->sum(fn (Order $order): int => $order->effectiveRevenue()),
+        ];
+        $rows = [$this->powerPanelRow('Tổng', $total), $this->powerPanelRow('TB', [
+            'close_rate' => $total['close_rate'],
+            'closed' => round($total['closed'] / max(1, $users->count()), 2),
+            'products_per_order' => $total['products_per_order'],
+            'revenue' => round($total['revenue'] / max(1, $users->count()), 2),
+        ])];
+
+        foreach ($users as $user) {
+            $userArrived = $arrived->filter(fn (Order $order): bool => (int) $order->sale_user_id === (int) $user->id);
+            $userClosed = $closed->filter(fn (Order $order): bool => (int) $order->sale_user_id === (int) $user->id);
+            $userQty = (int) $userClosed->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
+            if ($userArrived->isEmpty() && $userClosed->isEmpty()) {
+                continue;
+            }
+            $rows[] = $this->powerPanelRow($user->name, [
+                'close_rate' => round(($userClosed->count() / max(1, $userArrived->count())) * 100, 2),
+                'closed' => $userClosed->count(),
+                'products_per_order' => $userClosed->count() > 0 ? round($userQty / max(1, $userClosed->count()), 2) : 0,
+                'revenue' => (int) $userClosed->sum(fn (Order $order): int => $order->effectiveRevenue()),
+            ]);
+        }
+
+        return $rows;
     }
 
     private function repurchase(): Collection
@@ -1811,7 +2337,7 @@ class PushsalePageService
             'phone' => $row->phone,
             'reason' => $row->reason,
             'order_code' => $row->order?->order_code,
-            'creation_type' => $row->creation_type === 'automatic' ? 'Tự động' : 'Thủ công',
+            'creation_type' => match ($row->creation_type) { 'automatic' => 'Tự động', 'warehouse' => 'Kho cảnh báo', default => 'Thủ công' },
             'creator' => $row->creator?->name,
             'updated_at' => $row->updated_at?->toIso8601String(),
             '_record_id' => $row->id,
@@ -1986,6 +2512,25 @@ class PushsalePageService
             'created_at' => $row->created_at?->toIso8601String(),
             '_record_id' => $row->id,
             '_form' => $this->formPayload('6.4', $row),
+        ])->values();
+    }
+
+    private function electronicInvoiceConfigs(): Collection
+    {
+        return ElectronicInvoiceConfig::query()->with('creator:id,name')->latest('id')->get()->map(fn (ElectronicInvoiceConfig $row) => [
+            'id' => $row->id,
+            'account' => $row->account,
+            'tax_code' => $row->tax_code,
+            'invoice_template_code' => $row->invoice_template_code,
+            'invoice_series' => $row->invoice_series,
+            'business_name' => $row->business_name,
+            'phone' => $row->phone,
+            'email' => $row->email,
+            'is_active' => (bool) $row->is_active,
+            'creator' => $row->creator?->name,
+            'updated_at' => $row->updated_at?->toIso8601String(),
+            '_record_id' => $row->id,
+            '_form' => array_merge($this->formPayload('1.14.1', $row), ['password' => '']),
         ])->values();
     }
 

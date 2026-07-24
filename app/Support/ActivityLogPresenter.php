@@ -23,6 +23,26 @@ class ActivityLogPresenter
         return is_array($labels) && isset($labels[$action]) ? $labels[$action] : $action;
     }
 
+    public static function subjectTypeLabel(?string $subjectType): string
+    {
+        if (! $subjectType) {
+            return __('activity.system_actor');
+        }
+
+        $normalized = match ($subjectType) {
+            'marketing_source', 'App\\Models\\MarketingSource' => 'campaign',
+            'user', 'App\\Models\\User' => 'user',
+            'order', 'App\\Models\\Order' => 'order',
+            'lead_ingestion', 'App\\Models\\LeadIngestion' => 'lead',
+            'warehouse_inventory_movement', 'App\\Models\\WarehouseInventoryMovement' => 'inventory',
+            default => $subjectType,
+        };
+
+        $map = trans('activity.subjects');
+
+        return is_array($map) && isset($map[$normalized]) ? $map[$normalized] : class_basename($subjectType);
+    }
+
     /**
      * Câu tóm tắt 1 dòng: "Ghi nhận cuộc gọi đơn PS... — lần liên hệ thứ 3".
      */
@@ -39,24 +59,34 @@ class ActivityLogPresenter
             'order.closed' => self::joinParts([
                 isset($props['amount_to_collect']) ? __('activity.summary.collect', ['amount' => self::money($props['amount_to_collect'])]) : null,
                 isset($props['delivery_status']) ? self::deliveryLabel($props['delivery_status']) : null,
+                isset($props['customer_phone']) ? __('activity.summary.phone', ['phone' => $props['customer_phone']]) : null,
             ]),
             'order.updated' => self::joinParts([
                 isset($props['total']) ? __('activity.summary.total', ['amount' => self::money($props['total'])]) : null,
                 isset($props['items']) ? __('activity.summary.items', ['n' => $props['items']]) : null,
+                isset($props['changed_fields']) ? __('activity.summary.changed_fields', ['fields' => self::scalar($props['changed_fields'])]) : null,
             ]),
-            'inventory.movement_approved' => isset($props['quantity'])
-                ? __('activity.summary.quantity', ['n' => $props['quantity']])
-                : null,
+            'inventory.movement_approved' => self::joinParts([
+                isset($props['quantity']) ? __('activity.summary.quantity', ['n' => $props['quantity']]) : null,
+                isset($props['warehouse_id']) ? self::warehouseName($props['warehouse_id']) : null,
+            ]),
             'lead.ingested' => self::joinParts([
+                isset($props['customer_phone']) ? __('activity.summary.phone', ['phone' => $props['customer_phone']]) : null,
                 ! empty($props['upsell']) ? __('activity.summary.upsell') : null,
                 isset($props['order_total']) ? __('activity.summary.total', ['amount' => self::money($props['order_total'])]) : null,
             ]),
             'campaign.rejected' => isset($props['reason'])
                 ? __('activity.summary.reason', ['reason' => $props['reason']])
                 : null,
-            'user.created', 'user.updated' => isset($props['role'])
-                ? self::roleLabel($props['role'])
-                : null,
+            'user.created', 'user.updated' => self::joinParts([
+                isset($props['role']) ? self::roleLabel($props['role']) : null,
+                isset($props['email']) ? $props['email'] : null,
+            ]),
+            'data_filter.searched' => self::joinParts([
+                isset($props['page_title']) ? $props['page_title'] : null,
+                isset($props['filter_label']) ? $props['filter_label'] : null,
+                isset($props['result_count']) ? __('activity.summary.result_count', ['n' => $props['result_count']]) : null,
+            ]),
             default => null,
         };
 
@@ -80,6 +110,10 @@ class ActivityLogPresenter
         $rows = [];
 
         foreach ($props as $key => $value) {
+            if (str_starts_with((string) $key, '_')) {
+                continue;
+            }
+
             [$label, $display] = self::describeProperty((string) $key, $value);
 
             if ($display === null || $display === '') {
@@ -87,6 +121,67 @@ class ActivityLogPresenter
             }
 
             $rows[] = ['label' => $label, 'value' => $display];
+        }
+
+        return $rows;
+    }
+
+    /** @return list<array{label: string, value: string}> */
+    public static function metaDetails(ActivityLog $log): array
+    {
+        $props = is_array($log->properties) ? $log->properties : [];
+        $request = is_array($props['_request'] ?? null) ? $props['_request'] : [];
+
+        $rows = [
+            ['label' => __('activity.action_key'), 'value' => $log->action],
+            ['label' => __('activity.subject_type'), 'value' => self::subjectTypeLabel((string) $log->subject_type)],
+        ];
+
+        if ($log->subject_id) {
+            $rows[] = ['label' => __('activity.subject_id'), 'value' => (string) $log->subject_id];
+        }
+
+        if ($log->actor?->email) {
+            $rows[] = ['label' => __('activity.actor_email'), 'value' => $log->actor->email];
+        }
+
+        foreach ([
+            'method' => __('activity.request_method'),
+            'path' => __('activity.request_path'),
+            'route_name' => __('activity.request_route'),
+            'referer' => __('activity.request_referer'),
+        ] as $key => $label) {
+            if (! empty($request[$key])) {
+                $rows[] = ['label' => $label, 'value' => (string) $request[$key]];
+            }
+        }
+
+        if ($log->user_agent) {
+            $rows[] = ['label' => __('activity.user_agent'), 'value' => (string) $log->user_agent];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Raw properties are shown in the detail dialog as a compact audit fallback.
+     *
+     * @return list<array{label: string, value: string}>
+     */
+    public static function rawProperties(ActivityLog $log): array
+    {
+        $props = is_array($log->properties) ? $log->properties : [];
+        $rows = [];
+
+        foreach ($props as $key => $value) {
+            if (str_starts_with((string) $key, '_')) {
+                continue;
+            }
+
+            $rows[] = [
+                'label' => (string) $key,
+                'value' => self::scalar($value) ?? '',
+            ];
         }
 
         return $rows;
@@ -100,15 +195,15 @@ class ActivityLogPresenter
         $label = self::propertyLabel($key);
 
         $display = match ($key) {
-            'amount_to_collect', 'total', 'order_total', 'discount', 'total_budget' => self::money($value),
+            'amount_to_collect', 'total', 'order_total', 'discount', 'total_budget', 'cod_fee', 'shipping_fee', 'revenue', 'upsell_revenue' => self::money($value),
             'delivery_status' => self::deliveryLabel((string) $value),
             'role' => self::roleLabel((string) $value),
             'type' => \App\Models\WarehouseInventoryMovement::typeLabel((string) $value),
             'warehouse_id' => self::warehouseName($value),
             'product_id' => self::productName($value),
-            'marketer_user_id', 'created_by_user_id', 'approved_by_user_id' => self::userName($value),
+            'marketer_user_id', 'created_by_user_id', 'approved_by_user_id', 'sale_user_id', 'user_id' => self::userName($value),
             'upsell' => $value ? __('activity.yes') : __('activity.no'),
-            // ID nội bộ không cần khoe ra cho người dùng nghiệp vụ.
+            // ID nội bộ ít hữu ích trong khối nghiệp vụ, đã show ở meta nếu cần.
             'order_id', 'campaign_id' => null,
             default => self::scalar($value),
         };
@@ -133,7 +228,17 @@ class ActivityLogPresenter
         }
 
         if (is_array($value)) {
-            return (string) count($value);
+            if ($value === []) {
+                return null;
+            }
+
+            if (array_is_list($value)) {
+                return implode(', ', array_map(static fn ($item) => is_scalar($item) ? (string) $item : json_encode($item, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $value));
+            }
+
+            return collect($value)
+                ->map(static fn ($item, $key) => $key.': '.(is_scalar($item) || $item === null ? (string) $item : json_encode($item, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)))
+                ->implode(' · ');
         }
 
         if ($value === null) {

@@ -46,7 +46,11 @@ class ActivityLogRepository
             $term = '%'.$filters['search'].'%';
             $query->where(function (Builder $q) use ($term) {
                 $q->where('subject_label', 'like', $term)
-                    ->orWhere('action', 'like', $term);
+                    ->orWhere('action', 'like', $term)
+                    ->orWhere('properties', 'like', $term)
+                    ->orWhereHas('actor', fn (Builder $actor) => $actor
+                        ->where('name', 'like', $term)
+                        ->orWhere('email', 'like', $term));
             });
         }
 

@@ -1,0 +1,45 @@
+/* Final sidebar hover contract.
+   Fixes: level-2 parent rows leaving a faint blue border/focus ring after hovering a level-3 flyout,
+   and level-2 leaf rows losing hover background when another row is active. */
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:focus,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:active,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:focus-visible,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.flyout-open > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.flyout-open > .a2:focus {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2::before,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2::after {
+    content: none !important;
+    display: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover {
+    background: #f4f6f9 !important;
+    color: #222 !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.active > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.flyout-open > .a2 {
+    background: #0b8ff3 !important;
+    color: #fff !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.flyout-open:not(:hover) > .a2:not(:focus) {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}

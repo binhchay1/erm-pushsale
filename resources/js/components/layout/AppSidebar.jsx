@@ -280,6 +280,10 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                         onMouseEnter={() => {
                                                             if (!hasGrandchildren) closeFlyout();
                                                         }}
+                                                        onMouseLeave={(event) => {
+                                                            const button = event.currentTarget.querySelector('button.pushsale-second-parent-link');
+                                                            if (button) button.blur();
+                                                        }}
                                                     >
                                                         {hasGrandchildren ? (
                                                             <button

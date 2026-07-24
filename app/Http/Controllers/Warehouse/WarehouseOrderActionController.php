@@ -6,6 +6,7 @@ use App\Enums\DeliveryStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Pushsale\ElectronicInvoiceJob;
+use App\Models\Pushsale\ElectronicInvoiceConfig;
 use App\Services\Warehouse\WarehouseOrderActionService;
 use App\Support\ShippingProviders;
 use Illuminate\Http\JsonResponse;
@@ -75,14 +76,19 @@ class WarehouseOrderActionController extends Controller
 
         $batch = 'warehouse-'.now()->format('YmdHis').'-'.substr(md5(implode(',', $data['ids'])), 0, 8);
         $userId = $request->user()?->id;
+        $config = ElectronicInvoiceConfig::query()->where('is_active', true)->latest('id')->first();
+        $configNote = $config
+            ? sprintf(' · HĐĐT: %s/%s/MST %s', $config->invoice_template_code ?: '-', $config->invoice_series ?: '-', $config->tax_code ?: '-')
+            : ' · Chưa có cấu hình HĐĐT đang sử dụng';
         $count = 0;
         foreach (array_unique($data['ids']) as $id) {
             ElectronicInvoiceJob::query()->create([
                 'order_id' => $id,
+                'electronic_invoice_config_id' => $config?->id,
                 'code_type' => 'order_code',
                 'process_type' => 'warehouse_bulk_issue',
-                'status' => 'pending',
-                'note' => 'Tạo từ màn thủ kho tác nghiệp'.(($data['source'] ?? '') ? ' - '.$data['source'] : ''),
+                'status' => $config ? 'pending' : 'failed',
+                'note' => 'Tạo từ màn thủ kho tác nghiệp'.(($data['source'] ?? '') ? ' - '.$data['source'] : '').$configNote,
                 'batch_id' => $batch,
                 'created_by_user_id' => $userId,
                 'updated_by_user_id' => $userId,

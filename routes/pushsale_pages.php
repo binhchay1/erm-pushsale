@@ -97,6 +97,13 @@ Route::match(['put', 'patch'], 'security/phone-blacklist/records/{record}', [\Ap
 Route::delete('security/phone-blacklist/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_13_1Controller::class, 'destroy'])->whereNumber('record')->name('security.phone-blacklist.destroy');
 Route::redirect('pages/1-13-1-quan-ly-so-blacklist', '/admin/security/phone-blacklist', 301);
 
+
+Route::get('unit/electronic-invoice-configs', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_14_1Controller::class, 'index'])->name('unit.electronic-invoice-configs');
+Route::post('unit/electronic-invoice-configs/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_14_1Controller::class, 'store'])->name('unit.electronic-invoice-configs.store');
+Route::match(['put', 'patch'], 'unit/electronic-invoice-configs/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_14_1Controller::class, 'update'])->whereNumber('record')->name('unit.electronic-invoice-configs.update');
+Route::delete('unit/electronic-invoice-configs/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_14_1Controller::class, 'destroy'])->whereNumber('record')->name('unit.electronic-invoice-configs.destroy');
+Route::redirect('pages/1-14-1-danh-sach-cau-hinh-hoa-don-dien-tu', '/admin/unit/electronic-invoice-configs', 301);
+
 Route::get('marketing/customers', \App\Http\Controllers\Sales\CustomerProfileController::class)->name('marketing.customers');
 Route::redirect('pages/2-3-ho-so-khach-hang', '/admin/marketing/customers', 301);
 
@@ -281,6 +288,36 @@ Route::match(['put', 'patch'], 'accounting/electronic-invoices/records/{record}'
 Route::delete('accounting/electronic-invoices/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page6_4Controller::class, 'destroy'])->whereNumber('record')->name('accounting.electronic-invoices.destroy');
 Route::redirect('pages/6-4-danh-sach-xu-ly-xuat-hoa-don-dien-tu', '/admin/accounting/electronic-invoices', 301);
 
+Route::get('ceo/business-plan/monthly', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'index'])->name('ceo.business-plan.monthly');
+Route::post('ceo/business-plan/monthly/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'store'])->name('ceo.business-plan.monthly.store');
+Route::match(['put', 'patch'], 'ceo/business-plan/monthly/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'update'])->whereNumber('record')->name('ceo.business-plan.monthly.update');
+Route::delete('ceo/business-plan/monthly/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'destroy'])->whereNumber('record')->name('ceo.business-plan.monthly.destroy');
+Route::post('ceo/business-plan/monthly/add-missing', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'addMissing'])->name('ceo.business-plan.monthly.add-missing');
+Route::post('ceo/business-plan/monthly/copy-previous', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'copyPrevious'])->name('ceo.business-plan.monthly.copy-previous');
+Route::post('ceo/business-plan/monthly/lock-period', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'lockPeriod'])->name('ceo.business-plan.monthly.lock-period');
+Route::post('ceo/business-plan/monthly/bulk-save', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'bulkSave'])->name('ceo.business-plan.monthly.bulk-save');
+Route::redirect('pages/7-1-1-ke-hoach-kinh-doanh-thang', '/admin/ceo/business-plan/monthly', 301);
+Route::redirect('ld/unit-admin/thiet-lap-kpi', '/admin/ceo/business-plan/monthly', 301);
+Route::get('ceo/business-plan/yearly', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_2Controller::class, 'index'])->name('ceo.business-plan.yearly');
+Route::post('ceo/business-plan/yearly/planned-data', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_2Controller::class, 'storePlannedData'])->name('ceo.business-plan.yearly.planned-data');
+Route::redirect('pages/7-1-2-lap-ke-hoach-kinh-doanh-nam', '/admin/ceo/business-plan/yearly', 301);
+
+Route::get('ceo/business-plan/kpi-catalog', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_3Controller::class, 'index'])->name('ceo.business-plan.kpi-catalog');
+Route::post('ceo/business-plan/kpi-catalog/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_3Controller::class, 'store'])->name('ceo.business-plan.kpi-catalog.store');
+Route::match(['put', 'patch'], 'ceo/business-plan/kpi-catalog/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_3Controller::class, 'update'])->whereNumber('record')->name('ceo.business-plan.kpi-catalog.update');
+Route::delete('ceo/business-plan/kpi-catalog/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_3Controller::class, 'destroy'])->whereNumber('record')->name('ceo.business-plan.kpi-catalog.destroy');
+Route::post('ceo/business-plan/kpi-catalog/initialize-defaults', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_3Controller::class, 'initializeDefaults'])->name('ceo.business-plan.kpi-catalog.initialize-defaults');
+Route::post('ceo/business-plan/kpi-catalog/bulk-save', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_3Controller::class, 'bulkSave'])->name('ceo.business-plan.kpi-catalog.bulk-save');
+Route::redirect('pages/7-1-3-danh-muc-kpi', '/admin/ceo/business-plan/kpi-catalog', 301);
+Route::get('ceo/business-plan/revenue-bonus', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_4Controller::class, 'index'])->name('ceo.business-plan.revenue-bonus');
+Route::post('ceo/business-plan/revenue-bonus/bulk-save', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_4Controller::class, 'bulkSave'])->name('ceo.business-plan.revenue-bonus.bulk-save');
+Route::delete('ceo/business-plan/revenue-bonus/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_4Controller::class, 'destroy'])->whereNumber('record')->name('ceo.business-plan.revenue-bonus.destroy');
+Route::post('ceo/business-plan/revenue-bonus/copy-previous', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_4Controller::class, 'copyPrevious'])->name('ceo.business-plan.revenue-bonus.copy-previous');
+Route::post('ceo/business-plan/revenue-bonus/lock-period', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_4Controller::class, 'setLocked'])->name('ceo.business-plan.revenue-bonus.lock-period');
+Route::redirect('pages/7-1-4-khai-bao-thuong', '/admin/ceo/business-plan/revenue-bonus', 301);
+Route::redirect('ld/unit-admin/thiet-lap-thuong-theo-doanh-so', '/admin/ceo/business-plan/revenue-bonus', 301);
+Route::redirect('ld/thong-ke/lap-ke-hoach-kinh-doanh', '/admin/ceo/business-plan/yearly', 301);
+
 Route::get('reports/trends', [\App\Http\Controllers\Admin\Pushsale\Pages\Page8_5_4Controller::class, 'index'])->name('reports.trends');
 Route::redirect('pages/8-5-4-bieu-do-xu-huong', '/admin/reports/trends', 301);
 
@@ -289,6 +326,7 @@ Route::redirect('pages/8-5-5-bang-tong-hop-ket-qua-chia-data-trong-ngay', '/admi
 
 Route::get('reports/power-dashboard', [\App\Http\Controllers\Admin\Pushsale\Pages\Page8_5_9Controller::class, 'index'])->name('reports.power-dashboard');
 Route::redirect('pages/8-5-9-power-dashboard', '/admin/reports/power-dashboard', 301);
+Route::redirect('ld/ceo/power-dashboard', '/admin/reports/power-dashboard', 301);
 
 Route::get('reports/repurchase', [\App\Http\Controllers\Admin\Pushsale\Pages\Page8_5_10Controller::class, 'index'])->name('reports.repurchase');
 Route::redirect('pages/8-5-10-thong-ke-mua-lai', '/admin/reports/repurchase', 301);

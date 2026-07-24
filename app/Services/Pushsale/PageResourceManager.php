@@ -152,6 +152,9 @@ class PageResourceManager
             if ($resourceKey === '2.6.3' && trim((string) ($attributes['access_token'] ?? '')) === '') {
                 unset($attributes['access_token']);
             }
+            if ($resourceKey === '1.14.1' && trim((string) ($attributes['password'] ?? '')) === '') {
+                unset($attributes['password']);
+            }
             // Mã combo dùng làm mã danh mục tham chiếu cho đơn hàng/kho, không đổi sau khi tạo.
             if ($resourceKey === '1.3.2') {
                 unset($attributes['sku']);

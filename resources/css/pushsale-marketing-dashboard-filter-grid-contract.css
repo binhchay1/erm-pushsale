@@ -1,0 +1,95 @@
+/* Marketing dashboard filter contract: match Pushsale sample row rhythm and width. */
+html body.pushsale-app-body .psm-page .ps-page-shell__header,
+html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+html body.pushsale-app-body .psm-page .ps-page-shell__main-row {
+    display: grid !important;
+    grid-template-columns: 300px minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    column-gap: 28px !important;
+    min-height: 56px !important;
+}
+
+html body.pushsale-app-body .psm-page .ps-page-shell__main-row > h1,
+html body.pushsale-app-body .psm-page .ps-page-shell__main-row .ps-page-shell__title {
+    justify-self: start !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .psm-top-selects {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(240px, 1fr)) !important;
+    gap: 30px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .psm-filter-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .psm-filter-grid.is-first {
+    display: grid !important;
+    grid-template-columns: 250px 340px 250px 170px 225px 250px 240px !important;
+    gap: 30px !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .psm-filter-grid.is-second {
+    display: grid !important;
+    grid-template-columns: 265px 350px 205px 240px 170px 210px 180px minmax(110px, auto) !important;
+    gap: 12px 30px !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .psm-page .ps-control,
+html body.pushsale-app-body .psm-page .ps-date-range,
+html body.pushsale-app-body .psm-page .ps-select,
+html body.pushsale-app-body .psm-page select,
+html body.pushsale-app-body .psm-page input[type='text'] {
+    width: 100% !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .psm-page .ps-date-range {
+    min-width: 340px !important;
+}
+
+html body.pushsale-app-body .psm-page .ps-product-search-select-v82 {
+    width: 350px !important;
+    min-width: 350px !important;
+}
+
+html body.pushsale-app-body .psm-utm-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .psm-history-link {
+    justify-self: end !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+}
+
+@media (max-width: 1680px) {
+    html body.pushsale-app-body .psm-filter-grid.is-first,
+    html body.pushsale-app-body .psm-filter-grid.is-second {
+        grid-template-columns: repeat(4, minmax(220px, 1fr)) !important;
+        gap: 10px 30px !important;
+    }
+
+    html body.pushsale-app-body .psm-history-link {
+        justify-self: start !important;
+    }
+}

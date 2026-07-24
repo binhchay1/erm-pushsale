@@ -1,0 +1,112 @@
+.ps-kpi-catalog-page {
+    padding: 0 12px 24px;
+    background: #fff;
+    min-height: calc(100vh - 48px);
+}
+
+.ps-kpi-catalog-header {
+    min-height: 58px;
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(320px, 420px) auto auto;
+    gap: 10px;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    margin: 0 -12px 14px;
+    padding: 10px 12px;
+}
+
+.ps-kpi-catalog-title .text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111;
+}
+
+.ps-kpi-catalog-header .form-control {
+    height: 30px;
+    border-radius: 0;
+    border: 1px solid #c9d4df;
+    box-shadow: none;
+    font-size: 12px;
+}
+
+.ps-kpi-catalog-header .btn {
+    height: 30px;
+    border-radius: 2px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ps-kpi-catalog-message {
+    color: #0c509a;
+    font-weight: 600;
+    margin: 6px 0 10px;
+}
+
+.ps-kpi-catalog-table-wrap {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.ps-kpi-catalog-table {
+    min-width: 1260px;
+    margin-bottom: 0;
+    font-size: 12px;
+}
+
+.ps-kpi-catalog-table th {
+    background: #3b86d9 !important;
+    color: #fff !important;
+    border-color: #2c70bd !important;
+    vertical-align: middle !important;
+    height: 44px;
+    font-weight: 700;
+}
+
+.ps-kpi-catalog-table td {
+    border-color: #d7d7d7 !important;
+    vertical-align: middle !important;
+    height: 38px;
+}
+
+.ps-kpi-catalog-table .rowsum td {
+    background: #507ba7 !important;
+    color: #fff;
+}
+
+.ps-kpi-catalog-table .form-control {
+    height: 28px;
+    border-radius: 0;
+    border: 1px solid #cfd8e3;
+    font-size: 12px;
+    padding: 4px 6px;
+}
+
+.ps-kpi-catalog-link,
+.ps-kpi-catalog-icon {
+    border: 0;
+    background: transparent;
+    color: #007bff;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 2px 4px;
+}
+
+.ps-kpi-catalog-link:hover,
+.ps-kpi-catalog-icon:hover {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+.ps-kpi-catalog-empty {
+    color: #777;
+    height: 54px !important;
+}
+
+@media (max-width: 992px) {
+    .ps-kpi-catalog-header {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+}

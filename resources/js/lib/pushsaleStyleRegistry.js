@@ -68,6 +68,17 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-warehouse-delivery-handover-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-warehouse-delivery-handover-contract.css') },
     { file: 'pushsale-facebook-unit-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-facebook-unit-contract.css') },
     { file: 'pushsale-manual-lead-page.css', layer: 'final-contract', load: () => import('../../css/pushsale-manual-lead-page.css') },
+    { file: 'pushsale-monthly-kpi-plan.css', layer: 'final-contract', load: () => import('../../css/pushsale-monthly-kpi-plan.css') },
+    { file: 'pushsale-yearly-business-plan.css', layer: 'final-contract', load: () => import('../../css/pushsale-yearly-business-plan.css') },
+    { file: 'pushsale-kpi-catalog.css', layer: 'final-contract', load: () => import('../../css/pushsale-kpi-catalog.css') },
+    { file: 'pushsale-revenue-bonus-714.css', layer: 'final-contract', load: () => import('../../css/pushsale-revenue-bonus-714.css') },
+    { file: 'pushsale-marketing-dashboard-filter-grid-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-marketing-dashboard-filter-grid-contract.css') },
+    { file: 'pushsale-menu-hover-border-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-menu-hover-border-contract.css') },
+    { file: 'pushsale-blacklist-invoice-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-blacklist-invoice-contract.css') },
+    { file: 'pushsale-operation-columns-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-operation-columns-contract.css') },
+    { file: 'pushsale-ecommerce-new-flow-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-ecommerce-new-flow-contract.css') },
+    { file: 'pushsale-activity-product-report-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-activity-product-report-contract.css') },
+    { file: 'pushsale-power-dashboard-859.css', layer: 'final-contract', load: () => import('../../css/pushsale-power-dashboard-859.css') },
 ];
 
 export function assetMatchersForCssFile(file) {
@@ -76,7 +87,7 @@ export function assetMatchersForCssFile(file) {
     return [
         `/resources/css/${file}`,
         `/build/assets/${basename}-`,
-    ];
+];
 }
 
 export function isPushsaleRuntimeStylesheet(href = '') {

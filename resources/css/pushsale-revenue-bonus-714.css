@@ -1,0 +1,146 @@
+/* 7.1.4 - (UnitAdmin) Thiết lập tiền thưởng theo doanh số. */
+html body.pushsale-app-body .ps-revenue-bonus-page {
+    width: 100% !important;
+    min-height: calc(100dvh - var(--ps-header-height, 50px)) !important;
+    background: #fff !important;
+    color: #111 !important;
+    font: 12px/1.45 Arial, Helvetica, sans-serif !important;
+    padding: 0 12px 20px !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-header {
+    display: grid !important;
+    grid-template-columns: minmax(360px, 1fr) 130px 130px 320px auto auto !important;
+    align-items: center !important;
+    gap: 28px !important;
+    min-height: 58px !important;
+    margin: 0 -12px 14px !important;
+    padding: 10px 12px !important;
+    border-bottom: 1px solid #d6dce2 !important;
+    background: #fff !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .16) !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-title .text {
+    font: 700 14px/24px Arial, Helvetica, sans-serif !important;
+    color: #000 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-header .form-control {
+    width: 100% !important;
+    height: 31px !important;
+    min-height: 31px !important;
+    padding: 5px 10px !important;
+    border: 1px solid #c8d2dc !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font: 12px/20px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-header .btn {
+    height: 31px !important;
+    min-height: 31px !important;
+    padding: 5px 14px !important;
+    border-radius: 3px !important;
+    font: 700 12px/18px Arial, Helvetica, sans-serif !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-message {
+    margin: 0 0 8px !important;
+    padding: 7px 10px !important;
+    border: 1px solid #bce8f1 !important;
+    background: #d9edf7 !important;
+    color: #31708f !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-table {
+    width: 100% !important;
+    min-width: 1280px !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    margin: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-table th {
+    height: 39px !important;
+    padding: 8px 7px !important;
+    border: 1px solid #1f6fbf !important;
+    background: #347fd6 !important;
+    color: #fff !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    font: 700 12px/18px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-table td {
+    height: 35px !important;
+    padding: 6px 7px !important;
+    border: 1px solid #d9d9d9 !important;
+    background: #fff !important;
+    color: #111 !important;
+    vertical-align: middle !important;
+    font: 12px/18px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-table tr.rowsum td {
+    background: #5a80a7 !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-table tr:nth-child(even):not(.rowsum) td {
+    background: #f7f7f7 !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-table .form-control {
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 3px 6px !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-link,
+html body.pushsale-app-body .ps-revenue-bonus-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    margin: 0 8px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #1684f8 !important;
+    box-shadow: none !important;
+    font: 700 12px/18px Arial, Helvetica, sans-serif !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-link:hover,
+html body.pushsale-app-body .ps-revenue-bonus-icon:hover {
+    color: #005fae !important;
+    text-decoration: none !important;
+}
+
+html body.pushsale-app-body .ps-revenue-bonus-open { color: #888 !important; }
+html body.pushsale-app-body .ps-revenue-bonus-locked { color: #008000 !important; font-weight: 700 !important; }
+html body.pushsale-app-body .ps-revenue-bonus-empty { color: #777 !important; height: 52px !important; }
+
+@media (max-width: 1200px) {
+    html body.pushsale-app-body .ps-revenue-bonus-header {
+        grid-template-columns: minmax(260px, 1fr) repeat(3, minmax(140px, 1fr)) auto auto !important;
+        gap: 10px !important;
+    }
+}

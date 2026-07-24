@@ -11,6 +11,7 @@ class ElectronicInvoiceJob extends BusinessRecord
 
     protected $fillable = [
         'order_id',
+        'electronic_invoice_config_id',
         'code_type',
         'process_type',
         'processed_at',

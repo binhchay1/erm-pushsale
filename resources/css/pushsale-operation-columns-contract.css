@@ -1,0 +1,147 @@
+/* Final operation-column contract.
+   Keeps reused sale / warehouse / accounting / customer operation columns readable.
+   This file intentionally loads after the older parity contracts because several
+   legacy pages redefine c-money, c-result and c-next widths independently. */
+
+html body.pushsale-app-body .ps-sale-table-wrap,
+html body.pushsale-app-body .ps-wh-table-shell,
+html body.pushsale-app-body .ps-acc-table-wrap,
+html body.pushsale-app-body .ps-customer-profile-table-wrap,
+html body.pushsale-app-body .table-responsive:has(.ps-sale-operation-table),
+html body.pushsale-app-body .table-responsive:has(.ps-wh-legacy-table),
+html body.pushsale-app-body .table-responsive:has(.ps-acc-operation-table),
+html body.pushsale-app-body .table-responsive:has(.ps-customer-profile-table) {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* Sale operation table: give the money/result/next-operation columns enough room.
+   The previous 82px / 130px overrides clipped the currency suffix and caused the
+   inline history/refresh icons to sit on top of selects/text. */
+html body.pushsale-app-body .ps-sale-operation-table {
+    min-width: 2070px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table col.c-result {
+    width: 202px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table col.c-next {
+    width: 112px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table col.c-money {
+    width: 178px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-result-cell,
+html body.pushsale-app-body .ps-sale-operation-table .ps-next-cell {
+    position: relative !important;
+    padding-right: 30px !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-result-cell .ps-cell-action,
+html body.pushsale-app-body .ps-sale-operation-table .ps-next-cell .ps-cell-action {
+    position: absolute !important;
+    top: 8px !important;
+    right: 7px !important;
+    z-index: 4 !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-result-cell .ps-result-select {
+    width: calc(100% - 2px) !important;
+    min-width: 124px !important;
+    height: 31px !important;
+    padding-right: 26px !important;
+    margin-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-result-cell .ps-result-current,
+html body.pushsale-app-body .ps-sale-operation-table .ps-next-cell .small-tip,
+html body.pushsale-app-body .ps-sale-operation-table .ps-next-cell b,
+html body.pushsale-app-body .ps-sale-operation-table .ps-next-cell span:not(.fa) {
+    display: block !important;
+    max-width: 100% !important;
+    padding-right: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-next-cell {
+    line-height: 15px !important;
+}
+
+/* Shared money breakdown. Keep the right edge visible so the VND suffix is not
+   clipped even inside narrow legacy cells. */
+html body.pushsale-app-body .ps-sale-operation-table .ps-money-cell,
+html body.pushsale-app-body .ps-wh-legacy-table .c-money,
+html body.pushsale-app-body .ps-wh-legacy-table td.c-money,
+html body.pushsale-app-body .ps-acc-operation-table .ps-col-money,
+html body.pushsale-app-body .ps-customer-profile-table .ps-col-money,
+html body.pushsale-app-body .ps-customer-profile-table td.area3,
+html body.pushsale-app-body .ps-customer-profile-table td.ps-col-money {
+    min-width: 172px !important;
+    width: 172px !important;
+    max-width: none !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-wh-legacy-table .c-money,
+html body.pushsale-app-body .ps-wh-legacy-table th.c-money,
+html body.pushsale-app-body .ps-wh-legacy-table td.c-money {
+    width: 186px !important;
+    min-width: 186px !important;
+}
+
+html body.pushsale-app-body .ps-acc-operation-table .ps-col-money,
+html body.pushsale-app-body .ps-acc-operation-table th.ps-col-money,
+html body.pushsale-app-body .ps-acc-operation-table td.ps-col-money {
+    width: 186px !important;
+    min-width: 186px !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-table col.c-money,
+html body.pushsale-app-body .ps-customer-profile-table .area3.ps-col-money,
+html body.pushsale-app-body .ps-customer-profile-table .area3 {
+    width: 190px !important;
+    min-width: 190px !important;
+}
+
+html body.pushsale-app-body .ps-order-money-breakdown {
+    min-width: 146px !important;
+    width: 100% !important;
+    padding-right: 6px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+html body.pushsale-app-body .ps-order-money-breakdown > div,
+html body.pushsale-app-body .ps-order-money-breakdown > strong {
+    justify-content: flex-end !important;
+    padding-right: 4px !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+    text-align: right !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-wh-table .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-acc-operation-table .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-customer-profile-table .ps-order-money-breakdown {
+    min-width: 146px !important;
+}
+
+/* Tailwind based operation table fallback. These pages do not use colgroups, so
+   target the money header/cell class and keep the whole table horizontally scrollable. */
+html body.pushsale-app-body table.min-w-\[2720px\] th:has(.font-normal.text-xs),
+html body.pushsale-app-body table.min-w-\[2720px\] td:has(.ps-order-money-breakdown) {
+    min-width: 180px !important;
+}

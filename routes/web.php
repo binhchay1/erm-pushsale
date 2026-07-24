@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FailedPartnerOrderController;
 use App\Http\Controllers\Admin\IntegrationsController;
 use App\Http\Controllers\Admin\EcommerceConnectShopController;
+use App\Http\Controllers\Admin\Ecommerce\EcommerceController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\LandingApprovalController;
 use App\Http\Controllers\Admin\LeadIngestionController;
@@ -138,6 +139,9 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::get('ld/unit-admin/cau-hinh-chuc-nang', [SettingsController::class, 'index'])->name('legacy.unit.feature-settings');
+
+    Route::redirect('ld/unit-admin/phone-blacklist', '/admin/security/phone-blacklist', 301);
+    Route::redirect('ld/unit-admin/danh-sach-cau-hinh-hddt', '/admin/unit/electronic-invoice-configs', 301);
     Route::get('ld/unit-admin/cau-hinh-giao-hang', [ShippingPartnersController::class, 'index'])->name('legacy.unit.shipping-config');
     Route::get('ld/marketing/thong-ke-truong-nhom', TeamLeaderStatsController::class)->name('legacy.marketing.team-leader-stats');
     Route::get('ld/thong-ke', HourlyStatsController::class)->name('legacy.reports.hourly');
@@ -220,8 +224,17 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 
     Route::redirect('ld/facebook/cau-hinh-don-vi', '/admin/integrations/facebook-pages', 301)->name('legacy.facebook.unit-config');
+    Route::redirect('ld/unit-admin/thiet-lap-kpi', '/admin/ceo/business-plan/monthly', 301)->name('legacy.ceo.monthly-kpi');
+    Route::redirect('ld/thong-ke/lap-ke-hoach-kinh-doanh', '/admin/ceo/business-plan/yearly', 301)->name('legacy.ceo.yearly-business-plan');
+    Route::redirect('ld/unit-admin/danh-muc-kpi', '/admin/ceo/business-plan/kpi-catalog', 301)->name('legacy.ceo.kpi-catalog');
+    Route::redirect('ld/unit-admin/thiet-lap-thuong-theo-doanh-so', '/admin/ceo/business-plan/revenue-bonus', 301)->name('legacy.ceo.revenue-bonus');
+    Route::redirect('ld/ceo/power-dashboard', '/admin/reports/power-dashboard', 301)->name('legacy.ceo.power-dashboard');
     Route::redirect('connect-shop-list', '/admin/ecommerce/connect-shops', 301)->name('legacy.ecommerce.connect-shops');
     Route::redirect('ld/ecommerce/e-connect-shop-list', '/admin/ecommerce/connect-shops', 301)->name('legacy.ecommerce.connect-shops.ld');
+    Route::redirect('connect-product-list', '/admin/ecommerce/connect-products', 301)->name('legacy.ecommerce.connect-products');
+    Route::redirect('ld/ecommerce/e-connect-product-list', '/admin/ecommerce/connect-products', 301)->name('legacy.ecommerce.connect-products.ld');
+    Route::redirect('error-order-list', '/admin/ecommerce/sync-errors', 301)->name('legacy.ecommerce.sync-errors');
+    Route::redirect('ld/ecommerce/e-order-sync-error-list', '/admin/ecommerce/sync-errors', 301)->name('legacy.ecommerce.sync-errors.ld');
 
     // Mỗi mã menu là một màn hình nghiệp vụ với controller và route tĩnh riêng.
     // Các file template chỉ cung cấp content + dialog; header/sidebar do AppLayout quản lý.
@@ -326,7 +339,16 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::delete('failed-orders/{failedPartnerOrder}', [FailedPartnerOrderController::class, 'destroy'])->name('failed-orders.destroy');
         Route::get('orders/failed', FailedOrdersController::class)->name('orders.failed');
         Route::get('rankings', RankingController::class)->name('rankings');
-        Route::get('ecommerce/connect-shops', EcommerceConnectShopController::class)->name('ecommerce.connect-shops');
+        Route::get('ecommerce/connect-shops', [EcommerceController::class, 'shops'])->name('ecommerce.connect-shops');
+        Route::post('ecommerce/connect-shops', [EcommerceController::class, 'storeShop'])->name('ecommerce.connect-shops.store');
+        Route::patch('ecommerce/connect-shops/{shop}', [EcommerceController::class, 'updateShop'])->name('ecommerce.connect-shops.update');
+        Route::delete('ecommerce/connect-shops/{shop}', [EcommerceController::class, 'destroyShop'])->name('ecommerce.connect-shops.destroy');
+        Route::get('ecommerce/connect-products', [EcommerceController::class, 'products'])->name('ecommerce.connect-products');
+        Route::post('ecommerce/connect-products/sync', [EcommerceController::class, 'syncProducts'])->name('ecommerce.connect-products.sync');
+        Route::patch('ecommerce/connect-products/{link}', [EcommerceController::class, 'mapProduct'])->name('ecommerce.connect-products.map');
+        Route::get('ecommerce/sync-errors', [EcommerceController::class, 'errors'])->name('ecommerce.sync-errors');
+        Route::post('ecommerce/sync-errors/fetch-missing-orders', [EcommerceController::class, 'fetchMissingOrders'])->name('ecommerce.sync-errors.fetch-missing');
+        Route::get('ecommerce/sync-errors/export', [EcommerceController::class, 'exportErrors'])->name('ecommerce.sync-errors.export');
         Route::get('integrations', [IntegrationsController::class, 'index'])->name('integrations.index');
         Route::put('integrations/{platform}', [IntegrationsController::class, 'update'])->name('integrations.update');
         Route::post('integrations/{platform}/test', [IntegrationsController::class, 'testWebhook'])->name('integrations.test');

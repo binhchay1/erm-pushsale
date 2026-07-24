@@ -8,16 +8,19 @@ import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { formatCurrency, formatNumber } from '@/lib/format';
 
 function DialogShell({ title, open, onClose, children, wide = false, hiddenHeader = false, className = '', bodyClassName = '', showClose = true }) {
+    const isTaxonomy = String(className).includes('ps-taxonomy-source-modal');
+
     return (
         <PushsaleDialog
             open={open}
             onOpenChange={(nextOpen) => !nextOpen && onClose()}
             title={title}
-            width={wide ? '98vw' : '900px'}
+            width={isTaxonomy ? 'calc(100vw - 8px)' : (wide ? '98vw' : '900px')}
             className={className}
             headerClassName={hiddenHeader ? 'sr-only' : undefined}
             bodyClassName={`ps-source-dialog-body ${bodyClassName}`}
             showClose={showClose}
+            contentProps={isTaxonomy ? { style: { maxWidth: 'calc(100vw - 8px)', width: 'calc(100vw - 8px)', maxHeight: 'calc(100dvh - 8px)' } } : undefined}
         >
             {children}
         </PushsaleDialog>

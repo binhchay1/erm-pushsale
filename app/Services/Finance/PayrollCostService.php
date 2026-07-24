@@ -166,7 +166,12 @@ final class PayrollCostService
         $estimated = ! $plan->locked && $actualDays === 0;
         $payableDays = $estimated ? $workingDays : $actualDays;
         $baseSalary = (int) round(((int) $plan->base_salary * $payableDays) / $workingDays);
-        $commission = (int) round(max(0, $closedRevenue) * ((float) $plan->bonus_percent / 100));
+        $bonusRule = $this->revenueBonusRule($plan, $closedRevenue);
+        $commission = $bonusRule
+            ? ((int) $bonusRule->bonus_amount > 0
+                ? (int) $bonusRule->bonus_amount
+                : (int) round(max(0, $closedRevenue) * ((float) $bonusRule->bonus_percent / 100)))
+            : (int) round(max(0, $closedRevenue) * ((float) $plan->bonus_percent / 100));
 
         return [
             'base_salary' => max(0, $baseSalary),
@@ -177,6 +182,27 @@ final class PayrollCostService
             'payable_days' => $payableDays,
             'working_days' => $workingDays,
         ];
+    }
+
+
+    private function revenueBonusRule(MonthlyKpiPlan $plan, int $closedRevenue): ?\App\Models\Pushsale\RevenueBonusRule
+    {
+        $user = $plan->relationLoaded('user') ? $plan->user : $plan->user()->first(['id', 'role']);
+        $role = $user?->role;
+        $roleValue = $role instanceof \BackedEnum ? (string) $role->value : (string) $role;
+        $position = str_contains($roleValue, 'sale') ? 'sales' : 'marketing';
+
+        return \App\Models\Pushsale\RevenueBonusRule::query()
+            ->where('position_key', $position)
+            ->where('year', (int) $plan->year)
+            ->where('month', (int) $plan->month)
+            ->where('revenue_from', '<=', max(0, $closedRevenue))
+            ->where(function ($query) use ($closedRevenue): void {
+                $query->where('revenue_to', 0)->orWhere('revenue_to', '>', max(0, $closedRevenue));
+            })
+            ->orderByDesc('revenue_from')
+            ->orderBy('sort_order')
+            ->first();
     }
 
     private function allocateDay(int $total, int $daysInMonth, int $dayIndex): int

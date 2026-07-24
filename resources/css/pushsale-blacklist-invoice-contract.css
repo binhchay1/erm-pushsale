@@ -1,0 +1,187 @@
+/* Pushsale source parity for blacklist, invoice config, and product action columns. */
+html body.pushsale-app-body .ps-product-table th:last-child,
+html body.pushsale-app-body .ps-product-table td.ps-row-actions {
+    width: 88px !important;
+    min-width: 88px !important;
+    max-width: 88px !important;
+    padding: 0 6px !important;
+    vertical-align: middle !important;
+}
+html body.pushsale-app-body .ps-product-table td.ps-row-actions {
+    display: table-cell !important;
+    height: 52px !important;
+    white-space: nowrap !important;
+    background-clip: padding-box !important;
+}
+html body.pushsale-app-body .ps-product-table td.ps-row-actions button,
+html body.pushsale-app-body .ps-blacklist-table td.ps-row-actions button,
+html body.pushsale-app-body .ps-invoice-config-table td.ps-row-actions button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 26px !important;
+    height: 26px !important;
+    margin: 0 3px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #0d8bf2 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .ps-product-table td.ps-row-actions button:hover,
+html body.pushsale-app-body .ps-blacklist-table td.ps-row-actions button:hover,
+html body.pushsale-app-body .ps-invoice-config-table td.ps-row-actions button:hover {
+    color: #0057b4 !important;
+}
+
+html body.pushsale-app-body .ps-blacklist-page,
+html body.pushsale-app-body .ps-invoice-config-page {
+    min-height: calc(100vh - var(--ps-header-height, 50px)) !important;
+    padding: 0 14px 20px !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-blacklist-page .m-header-wrap,
+html body.pushsale-app-body .ps-invoice-config-page .m-header-wrap {
+    margin: 0 -14px 0 !important;
+    padding: 0 14px !important;
+    border-bottom: 1px solid #cfd8e3 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,.14) !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-blacklist-header,
+html body.pushsale-app-body .ps-invoice-config-header {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 50px !important;
+    margin: 0 !important;
+    padding: 8px 0 !important;
+}
+html body.pushsale-app-body .ps-blacklist-title .text,
+html body.pushsale-app-body .ps-invoice-config-header .ps-title {
+    color: #111 !important;
+    font: 700 14px/30px Arial, Helvetica, sans-serif !important;
+}
+html body.pushsale-app-body .ps-guide-link {
+    margin-left: 4px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #007bff !important;
+    font-size: 13px !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+}
+html body.pushsale-app-body .ps-blacklist-search,
+html body.pushsale-app-body .ps-invoice-config-search {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 100px !important;
+    gap: 10px !important;
+    align-items: center !important;
+    margin-bottom: 0 !important;
+}
+html body.pushsale-app-body .ps-blacklist-search .form-control,
+html body.pushsale-app-body .ps-invoice-config-search .form-control,
+html body.pushsale-app-body .ps-blacklist-form .form-control,
+html body.pushsale-app-body .ps-invoice-config-form .form-control {
+    height: 31px !important;
+    min-height: 31px !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+}
+html body.pushsale-app-body .ps-blacklist-toolbar,
+html body.pushsale-app-body .ps-blacklist-body,
+html body.pushsale-app-body .ps-invoice-config-body {
+    padding: 14px 0 0 !important;
+}
+html body.pushsale-app-body .ps-blacklist-table,
+html body.pushsale-app-body .ps-invoice-config-table {
+    min-width: 100% !important;
+    margin-bottom: 10px !important;
+}
+html body.pushsale-app-body .ps-blacklist-table th,
+html body.pushsale-app-body .ps-invoice-config-table th {
+    height: 30px !important;
+    border-color: #2875bb !important;
+    background: #357fd3 !important;
+    color: #fff !important;
+    font: 700 12px/18px Arial, Helvetica, sans-serif !important;
+}
+html body.pushsale-app-body .ps-blacklist-table td,
+html body.pushsale-app-body .ps-invoice-config-table td {
+    height: 34px !important;
+    border-color: #ddd !important;
+    font-size: 12px !important;
+    vertical-align: middle !important;
+}
+html body.pushsale-app-body .ps-blacklist-note-row {
+    margin-top: 6px !important;
+    font-size: 12px !important;
+}
+html body.pushsale-app-body .ps-action-col,
+html body.pushsale-app-body td.ps-row-actions-cell {
+    width: 90px !important;
+    min-width: 90px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-blacklist-dialog .ps-dialog-body,
+html body.pushsale-app-body .ps-invoice-config-dialog .ps-dialog-body,
+html body.pushsale-app-body .ps-blacklist-guide-dialog .ps-dialog-body {
+    padding: 16px !important;
+}
+html body.pushsale-app-body .ps-blacklist-form label {
+    display: grid !important;
+    grid-template-columns: 130px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    align-items: center !important;
+    margin-bottom: 12px !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+}
+html body.pushsale-app-body .ps-blacklist-form label > span b,
+html body.pushsale-app-body .ps-invoice-config-form label b { color: #f00 !important; }
+html body.pushsale-app-body .ps-dialog-footer {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    margin-top: 14px !important;
+}
+html body.pushsale-app-body .ps-guide-note {
+    border: 1px solid #ffb000 !important;
+    background: #fffef0 !important;
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    line-height: 19px !important;
+}
+
+html body.pushsale-app-body .ps-invoice-config-dialog.ps-dialog-surface {
+    max-width: 80vw !important;
+}
+html body.pushsale-app-body .ps-invoice-config-grid {
+    display: grid !important;
+    grid-template-columns: 120px minmax(260px, 1fr) 120px minmax(260px, 1fr) !important;
+    gap: 13px 20px !important;
+    align-items: center !important;
+}
+html body.pushsale-app-body .ps-invoice-config-grid label {
+    display: contents !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+}
+html body.pushsale-app-body .ps-invoice-config-grid label > span:first-child {
+    color: #111 !important;
+    line-height: 18px !important;
+}
+html body.pushsale-app-body .ps-invoice-config-grid .span-right { display: none !important; }
+html body.pushsale-app-body .ps-checkbox-inline {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    min-height: 31px !important;
+    font-weight: 400 !important;
+}
+html body.pushsale-app-body .ps-invoice-config-footer {
+    margin-top: 110px !important;
+}

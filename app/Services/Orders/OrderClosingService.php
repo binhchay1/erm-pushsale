@@ -9,6 +9,7 @@ use App\Enums\OperationStage;
 use App\Events\OrderClosed;
 use App\Models\Order;
 use App\Models\OrderOperationHistory;
+use App\Models\Pushsale\PhoneBlacklist;
 use App\Models\User;
 use App\Services\CustomerInteractions\OrderOperationHistoryService;
 use App\Services\Inventory\InventoryDeductionService;
@@ -53,6 +54,16 @@ class OrderClosingService
             throw ValidationException::withMessages([
                 'order' => __('messages.sale_ops.no_permission_close'),
             ]);
+        }
+
+        $normalizedPhone = preg_replace('/\D+/', '', (string) $order->customer_phone);
+        if ($normalizedPhone !== '') {
+            $blacklist = PhoneBlacklist::query()->where('phone', $normalizedPhone)->first();
+            if ($blacklist && ! (bool) ($payload['confirm_blacklist'] ?? false)) {
+                throw ValidationException::withMessages([
+                    'phone_blacklist' => 'Số điện thoại của khách đang nằm trong blacklist'.($blacklist->reason ? ': '.$blacklist->reason : '.').' Kiểm tra lại trước khi chốt đơn.',
+                ]);
+            }
         }
 
         $confirmInsufficient = (bool) ($payload['confirm_insufficient_stock'] ?? false);

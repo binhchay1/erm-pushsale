@@ -465,3 +465,58 @@ html body.pushsale-app-body .ps-taxonomy-functions label {
         width: min(430px, calc(100vw - 40px)) !important;
     }
 }
+
+/* Final hardening for PropValue dialog: do not let Radix inline max-width or legacy table rules collapse the modal. */
+html body.pushsale-app-body [role='dialog'].ps-taxonomy-source-modal.ps-dialog-surface,
+html body.pushsale-app-body .ps-taxonomy-source-modal.ps-dialog-surface,
+body .ps-taxonomy-source-modal.ps-dialog-surface {
+    width: calc(100vw - 8px) !important;
+    max-width: calc(100vw - 8px) !important;
+    min-width: 1180px !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(-50%) !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-modal .ps-dialog-body,
+body .ps-taxonomy-source-modal .ps-dialog-body {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-grid {
+    display: grid !important;
+    grid-template-columns: minmax(720px, 1fr) minmax(560px, 42%) !important;
+    column-gap: 28px !important;
+    align-items: start !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-list-pane,
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-info-pane {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table td,
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table th {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table th:nth-child(1),
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table td:nth-child(1) { width: 62px !important; }
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table th:nth-child(2),
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table td:nth-child(2) { width: 260px !important; }
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table th:nth-child(3),
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table td:nth-child(3) { width: 260px !important; }
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table th:nth-child(4),
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table td:nth-child(4) { width: 230px !important; }
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table th:nth-child(5),
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-table td:nth-child(5) { width: 78px !important; }
+
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-keyword input.form-control,
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-attribute-control select.form-control {
+    width: 360px !important;
+}

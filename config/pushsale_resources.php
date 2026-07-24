@@ -7,11 +7,13 @@ use App\Models\Pushsale\CompanySubscriptionHistory;
 use App\Models\Pushsale\CustomerCareCampaign;
 use App\Models\Pushsale\DiscountCodRule;
 use App\Models\Pushsale\ElectronicInvoiceJob;
+use App\Models\Pushsale\ElectronicInvoiceConfig;
 use App\Models\Pushsale\Expense;
 use App\Models\Pushsale\ExpenseCategory;
 use App\Models\Pushsale\ExpenseGroup;
 use App\Models\Pushsale\ExpenseUnit;
 use App\Models\Pushsale\LeadDistributionRule;
+use App\Models\Pushsale\KpiCatalogItem;
 use App\Models\Pushsale\MonthlyKpiPlan;
 use App\Models\Pushsale\OperationCategory;
 use App\Models\Pushsale\OperationWorkflow;
@@ -26,7 +28,6 @@ use App\Models\Pushsale\WarehouseVoucher;
 use App\Models\Pushsale\WorkShift;
 
 $commonAudit = ['created_by_user_id', 'updated_by_user_id'];
-
 return [
     '1.1.2' => [
         'model' => CompanySubscriptionHistory::class,
@@ -130,9 +131,9 @@ return [
             ['key' => 'phone', 'label' => 'Số blacklist', 'type' => 'tel', 'required' => true],
             ['key' => 'reason', 'label' => 'Lý do', 'type' => 'textarea'],
             ['key' => 'order_id', 'label' => 'Đơn hàng', 'type' => 'select', 'option_source' => 'orders'],
-            ['key' => 'creation_type', 'label' => 'Kiểu tạo', 'type' => 'select', 'options' => ['manual' => 'Thủ công', 'automatic' => 'Tự động']],
+            ['key' => 'creation_type', 'label' => 'Kiểu tạo', 'type' => 'select', 'options' => ['manual' => 'Thủ công', 'warehouse' => 'Kho cảnh báo', 'automatic' => 'Tự động']],
         ],
-        'rules' => ['phone' => ['required','string','max:32'], 'reason' => ['nullable','string'], 'order_id' => ['nullable','integer','exists:orders,id'], 'creation_type' => ['required','in:manual,automatic']],
+        'rules' => ['phone' => ['required','string','max:32'], 'reason' => ['nullable','string'], 'order_id' => ['nullable','integer','exists:orders,id'], 'creation_type' => ['required','in:manual,warehouse,automatic']],
     ],
     '2.6.4' => [
         'model' => SeedingPhoneNumber::class,
@@ -261,6 +262,57 @@ return [
             ['key' => 'locked', 'label' => 'Chốt dữ liệu', 'type' => 'checkbox'],
         ],
         'rules' => ['user_id' => ['required','integer','exists:users,id'], 'year' => ['required','integer','min:2000','max:2100'], 'month' => ['required','integer','between:1,12'], 'kpi_name' => ['nullable','string','max:255'], 'budget' => ['nullable','integer','min:0'], 'clicks_target' => ['nullable','integer','min:0'], 'contacts_target' => ['nullable','integer','min:0'], 'revenue_target' => ['nullable','integer','min:0'], 'bonus_percent' => ['nullable','numeric','min:0'], 'base_salary' => ['nullable','integer','min:0'], 'working_days' => ['nullable','integer','min:0'], 'actual_days' => ['nullable','integer','min:0'], 'locked' => ['boolean']],
+    ],
+    '7.1.1' => [
+        'model' => MonthlyKpiPlan::class,
+        'fields' => [
+            ['key' => 'user_id', 'label' => 'Tài khoản', 'type' => 'select', 'option_source' => 'users', 'required' => true],
+            ['key' => 'year', 'label' => 'Năm', 'type' => 'number', 'required' => true],
+            ['key' => 'month', 'label' => 'Tháng', 'type' => 'number', 'required' => true],
+            ['key' => 'kpi_name', 'label' => 'Tên KPI', 'type' => 'text'],
+            ['key' => 'budget', 'label' => 'Ngân sách / tháng', 'type' => 'currency'],
+            ['key' => 'clicks_target', 'label' => 'Số click / tháng', 'type' => 'number'],
+            ['key' => 'contacts_target', 'label' => 'Số contact / tháng', 'type' => 'number'],
+            ['key' => 'revenue_target', 'label' => 'Doanh số / tháng', 'type' => 'currency'],
+            ['key' => 'bonus_percent', 'label' => 'Tiền thưởng (%)', 'type' => 'number'],
+            ['key' => 'base_salary', 'label' => 'Lương cứng', 'type' => 'currency'],
+            ['key' => 'working_days', 'label' => 'Số ngày làm việc', 'type' => 'number'],
+            ['key' => 'actual_days', 'label' => 'Số ngày thực tế', 'type' => 'number'],
+            ['key' => 'locked', 'label' => 'Chốt dữ liệu', 'type' => 'checkbox'],
+        ],
+        'rules' => ['user_id' => ['required','integer','exists:users,id'], 'year' => ['required','integer','min:2000','max:2100'], 'month' => ['required','integer','between:1,12'], 'kpi_name' => ['nullable','string','max:255'], 'budget' => ['nullable','integer','min:0'], 'clicks_target' => ['nullable','integer','min:0'], 'contacts_target' => ['nullable','integer','min:0'], 'revenue_target' => ['nullable','integer','min:0'], 'bonus_percent' => ['nullable','numeric','min:0'], 'base_salary' => ['nullable','integer','min:0'], 'working_days' => ['nullable','integer','min:0'], 'actual_days' => ['nullable','integer','min:0'], 'locked' => ['boolean']],
+    ],
+
+    '7.1.3' => [
+        'model' => KpiCatalogItem::class,
+        'fields' => [
+            ['key' => 'position_key', 'label' => 'Chức vụ', 'type' => 'select', 'options' => ['marketing' => 'Marketing', 'sales' => 'Sale'], 'required' => true],
+            ['key' => 'kpi_name', 'label' => 'Tên KPI', 'type' => 'text', 'required' => true],
+            ['key' => 'daily_budget', 'label' => 'Ngân sách / ngày', 'type' => 'currency'],
+            ['key' => 'daily_clicks', 'label' => 'Số click / ngày', 'type' => 'number'],
+            ['key' => 'daily_contacts', 'label' => 'Số contact / ngày', 'type' => 'number'],
+            ['key' => 'daily_revenue', 'label' => 'Doanh số / ngày', 'type' => 'currency'],
+            ['key' => 'daily_new_contacts', 'label' => 'Số contact mới / ngày', 'type' => 'number'],
+            ['key' => 'daily_new_closed', 'label' => 'Chốt đơn mới / ngày', 'type' => 'number'],
+            ['key' => 'daily_old_contacts', 'label' => 'Số contact cũ / ngày', 'type' => 'number'],
+            ['key' => 'daily_old_closed', 'label' => 'Chốt đơn cũ / ngày', 'type' => 'number'],
+            ['key' => 'is_active', 'label' => 'Đang áp dụng', 'type' => 'checkbox', 'default' => true],
+            ['key' => 'sort_order', 'label' => 'Thứ tự', 'type' => 'number'],
+        ],
+        'rules' => [
+            'position_key' => ['required','in:marketing,sales'],
+            'kpi_name' => ['required','string','max:255'],
+            'daily_budget' => ['nullable','integer','min:0'],
+            'daily_clicks' => ['nullable','integer','min:0'],
+            'daily_contacts' => ['nullable','integer','min:0'],
+            'daily_revenue' => ['nullable','integer','min:0'],
+            'daily_new_contacts' => ['nullable','integer','min:0'],
+            'daily_new_closed' => ['nullable','integer','min:0'],
+            'daily_old_contacts' => ['nullable','integer','min:0'],
+            'daily_old_closed' => ['nullable','integer','min:0'],
+            'is_active' => ['boolean'],
+            'sort_order' => ['nullable','integer','min:0'],
+        ],
     ],
     '6.4' => [
         'model' => ElectronicInvoiceJob::class,
@@ -443,5 +495,41 @@ return [
             'is_active' => ['boolean'],
         ],
         'defaults' => ['type' => 'combo'],
+    ],
+
+    '1.14.1' => [
+        'model' => ElectronicInvoiceConfig::class,
+        'fields' => [
+            ['key' => 'account', 'label' => 'Tài khoản', 'type' => 'text', 'required' => true],
+            ['key' => 'password', 'label' => 'Mật khẩu', 'type' => 'text'],
+            ['key' => 'invoice_type_code', 'label' => 'Mã loại hóa đơn', 'type' => 'text'],
+            ['key' => 'tax_code', 'label' => 'Mã số thuế', 'type' => 'text', 'required' => true],
+            ['key' => 'invoice_template_code', 'label' => 'Mã mẫu hóa đơn', 'type' => 'text'],
+            ['key' => 'invoice_series', 'label' => 'Ký hiệu hóa đơn', 'type' => 'text'],
+            ['key' => 'business_name', 'label' => 'Tên doanh nghiệp', 'type' => 'text'],
+            ['key' => 'address', 'label' => 'Địa chỉ', 'type' => 'textarea'],
+            ['key' => 'phone', 'label' => 'Điện thoại', 'type' => 'text'],
+            ['key' => 'fax', 'label' => 'Số fax', 'type' => 'text'],
+            ['key' => 'email', 'label' => 'Email', 'type' => 'email'],
+            ['key' => 'bank_name', 'label' => 'Tên ngân hàng', 'type' => 'text'],
+            ['key' => 'bank_account', 'label' => 'Tài khoản ngân hàng', 'type' => 'text'],
+            ['key' => 'is_active', 'label' => 'Sử dụng', 'type' => 'checkbox', 'default' => true],
+        ],
+        'rules' => [
+            'account' => ['required','string','max:255'],
+            'password' => ['nullable','string','max:255'],
+            'invoice_type_code' => ['nullable','string','max:100'],
+            'tax_code' => ['required','string','max:50'],
+            'invoice_template_code' => ['nullable','string','max:100'],
+            'invoice_series' => ['nullable','string','max:100'],
+            'business_name' => ['nullable','string','max:255'],
+            'address' => ['nullable','string'],
+            'phone' => ['nullable','string','max:50'],
+            'fax' => ['nullable','string','max:50'],
+            'email' => ['nullable','email','max:255'],
+            'bank_name' => ['nullable','string','max:255'],
+            'bank_account' => ['nullable','string','max:100'],
+            'is_active' => ['boolean'],
+        ],
     ],
 ];

@@ -1269,21 +1269,86 @@ function AppointmentCardsReport({ rows, totals, filters, filterOptions, filterFi
 function ProductConversionMatrixReport({ rows, totals, extra, filters, filterOptions, filterFields, routeUrl }) {
     const t = useT();
     const groups = extra?.groups ?? [];
-    const core = [['contacts','number'],['closed','number'],['rate','percent'],['revenue','currency'],['avg','currency'],['upsell_qty','number'],['upsell_revenue','currency'],['upsell_share','percent']];
-    const personFields = [['contacts','number'],['closed','number'],['rate','percent'],['revenue','currency'],['avg','currency']];
-    const renderMetrics = (record, prefix='') => personFields.map(([key,format])=><td key={`${prefix}${key}`}>{formatCell(record?.[`${prefix}${key}`],format)}</td>);
+    const core = [
+        ['contacts', 'number', 'Contact'],
+        ['closed', 'number', 'Chốt đơn'],
+        ['rate', 'percent', 'Tỷ lệ'],
+        ['revenue', 'currency', 'Doanh số'],
+        ['avg', 'currency', 'AVG'],
+        ['upsell_qty', 'number', 'Upsale SL'],
+        ['upsell_revenue', 'currency', 'Upsale DS'],
+        ['upsell_share', 'percent', '% Upsale'],
+    ];
+    const personFields = [
+        ['contacts', 'number', 'Contact'],
+        ['closed', 'number', 'Chốt'],
+        ['rate', 'percent', 'Tỷ lệ'],
+        ['revenue', 'currency', 'Doanh số'],
+        ['avg', 'currency', 'AVG'],
+    ];
+    const tableMinWidth = Math.max(1440, 1120 + groups.length * 560);
+    const renderMetrics = (record, prefix = '', groupPrefix = '') => personFields.map(([key, format]) => (
+        <td key={`${groupPrefix}${prefix}${key}`} className={`ps-metric-cell ps-metric-${format}`}>
+            {formatCell(record?.[`${prefix}${key}`], format)}
+        </td>
+    ));
+
     return (
         <section className="ps-report-page ps-product-conversion-report">
             <CommonToolbar title="Tỉ lệ chốt đơn sản phẩm" routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} filterFields={filterFields} />
-            <div className="ps-matrix-legend"><span>Contact chỉ đếm lead gốc</span><span>Doanh số gồm sản phẩm gốc + upsale</span><span>Doanh số sản phẩm tính theo từng dòng hàng</span></div>
-            <div className="ps-table-scroll"><table className="ps-table ps-product-matrix-table"><thead>
-                <tr><th rowSpan={2}>{psText(t, 'stt', 'STT')}</th><th rowSpan={2}>ID</th><th rowSpan={2}>SẢN PHẨM</th><th colSpan={8}>TỔNG HỢP</th>{groups.map((group)=><th key={group.prefix} colSpan={5} className={group.role==='marketing'?'is-marketing':'is-sales'}>{group.label}</th>)}</tr>
-                <tr>{['Contact','Chốt đơn','Tỷ lệ','Doanh số','AVG','Upsale SL','Upsale DS','% Upsale'].map((label)=><th key={label}>{label}</th>)}{groups.flatMap((group)=>['Contact','Chốt','Tỷ lệ','Doanh số','AVG'].map((label)=><th key={`${group.prefix}${label}`}>{label}</th>))}</tr>
-            </thead><tbody>
-                {totals && <tr className="ps-total-row"><td>1</td><td /><td className="ps-text-left">Tổng</td>{core.map(([key,format])=><td key={key}>{formatCell(totals[key],format)}</td>)}{groups.flatMap((group)=>renderMetrics(totals,group.prefix))}</tr>}
-                {rows.map((row,index)=><tr key={row.product_key ?? index}><td>{index+2}</td><td>{row.product_id ?? '—'}</td><td className="ps-text-left ps-sticky-product">{row.name}</td>{core.map(([key,format])=><td key={key}>{formatCell(row[key],format)}</td>)}{groups.flatMap((group)=>renderMetrics(row,group.prefix))}</tr>)}
-                {rows.length===0 && <tr><td colSpan={11+groups.length*5} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
-            </tbody></table></div>
+            <div className="ps-matrix-legend">
+                <span>Contact chỉ đếm lead gốc</span>
+                <span>Doanh số gồm sản phẩm gốc + upsale</span>
+                <span>Doanh số sản phẩm tính theo từng dòng hàng</span>
+            </div>
+            <div className="ps-table-scroll ps-product-conversion-scroll">
+                <table className="ps-table ps-product-matrix-table" style={{ minWidth: tableMinWidth }}>
+                    <thead>
+                        <tr>
+                            <th rowSpan={2} className="ps-sticky-col ps-col-stt">{psText(t, 'stt', 'STT')}</th>
+                            <th rowSpan={2} className="ps-sticky-col ps-col-id">ID</th>
+                            <th rowSpan={2} className="ps-sticky-col ps-col-product">SẢN PHẨM</th>
+                            <th colSpan={8} className="ps-group-total">TỔNG HỢP</th>
+                            {groups.map((group) => (
+                                <th key={group.prefix} colSpan={5} className={group.role === 'marketing' ? 'is-marketing' : 'is-sales'} title={group.label}>
+                                    {group.label}
+                                </th>
+                            ))}
+                        </tr>
+                        <tr>
+                            {core.map(([, , label]) => <th key={label} className="ps-core-metric-head">{label}</th>)}
+                            {groups.flatMap((group) => personFields.map(([, , label]) => (
+                                <th key={`${group.prefix}${label}`} className="ps-person-metric-head">{label}</th>
+                            )))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {totals ? (
+                            <tr className="ps-total-row">
+                                <td className="ps-sticky-col ps-col-stt">1</td>
+                                <td className="ps-sticky-col ps-col-id">—</td>
+                                <td className="ps-text-left ps-sticky-col ps-col-product">Tổng</td>
+                                {core.map(([key, format]) => <td key={key} className={`ps-metric-cell ps-metric-${format}`}>{formatCell(totals[key], format)}</td>)}
+                                {groups.flatMap((group) => renderMetrics(totals, group.prefix, group.prefix))}
+                            </tr>
+                        ) : null}
+                        {rows.map((row, index) => (
+                            <tr key={row.product_key ?? index}>
+                                <td className="ps-sticky-col ps-col-stt">{index + 2}</td>
+                                <td className="ps-sticky-col ps-col-id">{row.product_id ?? '—'}</td>
+                                <td className="ps-text-left ps-sticky-col ps-col-product" title={row.name}>{row.name}</td>
+                                {core.map(([key, format]) => <td key={key} className={`ps-metric-cell ps-metric-${format}`}>{formatCell(row[key], format)}</td>)}
+                                {groups.flatMap((group) => renderMetrics(row, group.prefix, group.prefix))}
+                            </tr>
+                        ))}
+                        {rows.length === 0 && (
+                            <tr>
+                                <td colSpan={11 + groups.length * 5} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </section>
     );
 }

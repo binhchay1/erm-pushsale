@@ -112,6 +112,7 @@ return array (
       array (
         'title' => '1.6 Cấu hình chức năng',
         'url' => '/settings',
+        'code' => '1.6',
       ),
       6 => 
       array (
@@ -199,7 +200,8 @@ return array (
           0 => 
           array (
             'title' => '1. Danh sách cấu hình',
-            'url' => '/settings',
+            'url' => '/admin/unit/electronic-invoice-configs',
+            'code' => '1.14.1',
           ),
         ),
       ),
@@ -218,13 +220,16 @@ return array (
           1 => 
           array (
             'title' => '2. Danh sách kết nối sản phẩm',
-            'url' => '/admin/integrations',
-            'area' => 'connections',
+            'url' => '/admin/ecommerce/connect-products',
+            'area' => 'ecommerce',
+            'code' => '1.15.2',
           ),
           2 => 
           array (
             'title' => '3. Danh sách đơn hàng lỗi',
-            'url' => '/admin/orders/failed',
+            'url' => '/admin/ecommerce/sync-errors',
+            'area' => 'ecommerce',
+            'code' => '1.15.3',
           ),
         ),
       ),
@@ -429,13 +434,16 @@ return array (
           1 => 
           array (
             'title' => '2. Danh sách kết nối sản phẩm',
-            'url' => '/admin/integrations',
-            'area' => 'connections',
+            'url' => '/admin/ecommerce/connect-products',
+            'area' => 'ecommerce',
+            'code' => '2.9.2',
           ),
           2 => 
           array (
             'title' => '3. Danh sách đơn hàng lỗi',
-            'url' => '/admin/orders/failed',
+            'url' => '/admin/ecommerce/sync-errors',
+            'area' => 'ecommerce',
+            'code' => '2.9.3',
           ),
         ),
       ),
@@ -1079,23 +1087,26 @@ return array (
           0 => 
           array (
             'title' => '1. Kế hoạch kinh doanh tháng',
-            'url' => '/settings',
+            'url' => '/admin/ceo/business-plan/monthly',
+            'code' => '7.1.1',
           ),
           1 => 
           array (
             'title' => '2. Lập kế hoạch kinh doanh năm',
-            'url' => '/admin/reports/hourly',
-            'area' => 'reports',
+            'url' => '/admin/ceo/business-plan/yearly',
+            'code' => '7.1.2',
           ),
           2 => 
           array (
             'title' => '3. Danh mục KPI',
-            'url' => '/settings',
+            'url' => '/admin/ceo/business-plan/kpi-catalog',
+            'code' => '7.1.3',
           ),
           3 => 
           array (
             'title' => '4. Khai báo thưởng',
-            'url' => '/settings',
+            'url' => '/admin/ceo/business-plan/revenue-bonus',
+            'code' => '7.1.4',
           ),
         ),
       ),

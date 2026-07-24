@@ -39,10 +39,18 @@ class DatabaseSeeder extends Seeder
                 MarketingCampaignSeeder::class,
                 ManualMarketingContactSeeder::class,
                 SalesPipelineSeeder::class,
+                PhoneBlacklistSeeder::class,
+                KpiCatalogSeeder::class,
+                RevenueBonusRuleSeeder::class,
+                ElectronicInvoiceConfigSeeder::class,
+                BusinessKpiPlanSeeder::class,
+                AnnualBusinessPlanSeeder::class,
                 DataFilterHistorySeeder::class,
                 LandingFlowSeeder::class,
                 ShippingEventSeeder::class,
                 WarehouseDeliveryHandoverSeeder::class,
+                EcommerceDemoSeeder::class,
+                PowerDashboardSeeder::class,
                 DemoNotificationSeeder::class,
             ]);
         });

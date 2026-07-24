@@ -66,6 +66,9 @@ class ActivityLogController extends Controller
             'action_label' => ActivityLogPresenter::actionLabel($log->action),
             'summary' => ActivityLogPresenter::summary($log),
             'details' => ActivityLogPresenter::details($log),
+            'meta_details' => ActivityLogPresenter::metaDetails($log),
+            'raw_properties' => ActivityLogPresenter::rawProperties($log),
+            'subject_type_label' => ActivityLogPresenter::subjectTypeLabel((string) $log->subject_type),
             'subject_label' => $log->subject_label,
             'subject_type' => $log->subject_type,
             'subject_id' => $log->subject_id,
@@ -76,6 +79,7 @@ class ActivityLogController extends Controller
                 ->format('d/m/Y H:i:s'),
             'ip_address' => $log->ip_address,
             'properties' => $log->properties ?? [],
+            'user_agent' => $log->user_agent,
         ];
     }
 
@@ -112,6 +116,15 @@ class ActivityLogController extends Controller
             ActivityLogger::INVENTORY_MOVEMENT_APPROVED,
             ActivityLogger::LEAD_INGESTED,
             ActivityLogger::MARKETING_DAILY_METRICS_UPDATED,
+            ActivityLogger::DATA_FILTER_SEARCHED,
+            ActivityLogger::AUTH_LOGIN_SUCCESS,
+            ActivityLogger::AUTH_LOGIN_FAILED,
+            ActivityLogger::AUTH_LOGIN_BLOCKED,
+            ActivityLogger::AUTH_LOGOUT,
+            'customer360.campaign_created',
+            'customer360.campaign_customers_attached',
+            'customer360.segments_updated',
+            'customer.data_viewed',
         ];
 
         return collect($actions)->map(fn (string $action) => [
@@ -129,6 +142,8 @@ class ActivityLogController extends Controller
             ['value' => 'order', 'label' => __('activity.subjects.order')],
             ['value' => 'lead_ingestion', 'label' => __('activity.subjects.lead')],
             ['value' => 'warehouse_inventory_movement', 'label' => __('activity.subjects.inventory')],
+            ['value' => 'customer360', 'label' => __('activity.subjects.customer360')],
+            ['value' => 'report', 'label' => __('activity.subjects.report')],
         ];
     }
 }

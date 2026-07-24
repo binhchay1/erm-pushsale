@@ -1,235 +1,246 @@
-import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Eye, ScrollText } from 'lucide-react';
+import { Eye } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { PageHeader } from '@/components/layout/PageHeader';
-import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
-import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { useTableSort } from '@/hooks/use-table-sort';
+import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
+import { PushsalePager } from '@/components/reports/PushsaleReportChrome';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
-import { cn } from '@/lib/utils';
 
-function DetailsBlock({ rows, emptyText }) {
-    if (!rows || rows.length === 0) {
-        return <p className="text-sm text-muted-foreground">{emptyText}</p>;
+function cleanPayload(payload = {}) {
+    return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined && value !== null && value !== '' && value !== '-1'));
+}
+
+function DetailTable({ rows = [], emptyText }) {
+    if (!rows.length) {
+        return <div className="ps-activity-empty-detail">{emptyText}</div>;
     }
 
     return (
-        <dl className="divide-y divide-border/60 rounded-lg border">
-            {rows.map((row, index) => (
-                <div key={index} className="flex items-start justify-between gap-4 px-3 py-2">
-                    <dt className="text-xs font-medium text-muted-foreground">{row.label}</dt>
-                    <dd className="text-right text-sm font-medium">{row.value}</dd>
-                </div>
-            ))}
-        </dl>
+        <table className="table table-bordered table-condensed ps-activity-detail-table">
+            <tbody>
+                {rows.map((row, index) => (
+                    <tr key={`${row.label}-${index}`}>
+                        <th>{row.label}</th>
+                        <td>{row.value || '—'}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
     );
 }
 
-export default function ActivityLogsIndex({ logs, filters, actionOptions, subjectTypeOptions, users }) {
+function ActivityDetailModal({ selected, onClose, t }) {
+    if (!selected) return null;
+
+    const metaRows = selected.meta_details ?? [];
+    const detailRows = selected.details ?? [];
+    const rawRows = selected.raw_properties ?? [];
+
+    return (
+        <>
+            <div className="modal-backdrop fade in ps-activity-modal-backdrop" onClick={onClose} />
+            <div className="modal fade modal-common in ps-activity-detail-modal" role="dialog" aria-modal="true" style={{ display: 'block' }}>
+                <div className="modal-dialog modal-lg">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <button type="button" className="close" aria-label="Đóng" onClick={onClose}>×</button>
+                            <h4 className="modal-title">{selected.action_label}</h4>
+                        </div>
+                        <div className="modal-body">
+                            <div className="ps-activity-detail-summary">
+                                <div>
+                                    <span>Thời gian</span>
+                                    <strong>{selected.created_at || '—'}</strong>
+                                </div>
+                                <div>
+                                    <span>Người thực hiện</span>
+                                    <strong>{selected.actor_name || '—'}</strong>
+                                </div>
+                                <div>
+                                    <span>Đối tượng</span>
+                                    <strong>{selected.subject_label || selected.subject_type_label || '—'}</strong>
+                                </div>
+                                <div>
+                                    <span>IP</span>
+                                    <strong>{selected.ip_address || '—'}</strong>
+                                </div>
+                            </div>
+
+                            <section className="ps-activity-detail-section">
+                                <h5>Nội dung xử lý</h5>
+                                <div className="ps-activity-summary-box">{selected.summary || '—'}</div>
+                            </section>
+
+                            <section className="ps-activity-detail-section">
+                                <h5>Thông tin nghiệp vụ</h5>
+                                <DetailTable rows={detailRows} emptyText={t('activity.detail_empty')} />
+                            </section>
+
+                            <section className="ps-activity-detail-section">
+                                <h5>Thông tin kỹ thuật</h5>
+                                <DetailTable rows={metaRows} emptyText="Không có thông tin kỹ thuật bổ sung." />
+                            </section>
+
+                            {rawRows.length ? (
+                                <section className="ps-activity-detail-section">
+                                    <h5>Dữ liệu gốc đã lưu</h5>
+                                    <DetailTable rows={rawRows} emptyText="Không có dữ liệu gốc." />
+                                </section>
+                            ) : null}
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-sm btn-default" onClick={onClose}>Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
+
+export default function ActivityLogsIndex({ logs, filters, actionOptions = [], subjectTypeOptions = [], users = [] }) {
     const t = useT();
     const rows = logs?.data ?? [];
     const meta = logs?.meta ?? {};
-    const { sortedRows, sort, toggleSort } = useTableSort(rows, { defaultKey: 'id', defaultDir: 'desc' });
     const [selected, setSelected] = useState(null);
+    const [draft, setDraft] = useState(() => ({
+        action: filters?.action ?? '',
+        user_id: filters?.user_id ?? '',
+        subject_type: filters?.subject_type ?? '',
+        search: filters?.search ?? '',
+        date_from: filters?.date_from ?? '',
+        date_to: filters?.date_to ?? '',
+    }));
+
+    useEffect(() => {
+        setDraft({
+            action: filters?.action ?? '',
+            user_id: filters?.user_id ?? '',
+            subject_type: filters?.subject_type ?? '',
+            search: filters?.search ?? '',
+            date_from: filters?.date_from ?? '',
+            date_to: filters?.date_to ?? '',
+        });
+    }, [filters]);
+
+    const setField = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
 
     const search = (overrides = {}) => {
-        router.get('/admin/activity-logs', { ...filters, ...overrides }, { preserveState: true });
+        router.get('/admin/activity-logs', cleanPayload({ ...draft, ...overrides }), {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
     };
 
-    const goPage = (page) => search({ page });
+    const reset = () => {
+        router.get('/admin/activity-logs', {}, { preserveState: false, preserveScroll: false, replace: true });
+    };
+
+    const actionFilters = useMemo(() => (
+        <form className="ps-activity-filter-grid" onSubmit={(event) => { event.preventDefault(); search({ page: 1 }); }}>
+            <label>
+                <span>{t('activity.filter_action')}</span>
+                <select className="form-control input-sm" value={draft.action} onChange={(event) => setField('action', event.target.value)}>
+                    <option value="">{t('activity.all')}</option>
+                    {actionOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                </select>
+            </label>
+            <label>
+                <span>{t('activity.filter_user')}</span>
+                <select className="form-control input-sm" value={draft.user_id} onChange={(event) => setField('user_id', event.target.value)}>
+                    <option value="">{t('activity.all')}</option>
+                    {users.map((user) => <option key={user.id} value={user.id}>{user.name}</option>)}
+                </select>
+            </label>
+            <label>
+                <span>{t('activity.filter_subject')}</span>
+                <select className="form-control input-sm" value={draft.subject_type} onChange={(event) => setField('subject_type', event.target.value)}>
+                    <option value="">{t('activity.all')}</option>
+                    {subjectTypeOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                </select>
+            </label>
+            <label>
+                <span>{t('activity.filter_search')}</span>
+                <input className="form-control input-sm" value={draft.search} onChange={(event) => setField('search', event.target.value)} placeholder="Từ khóa / nhãn / đối tượng" />
+            </label>
+            <label>
+                <span>{t('activity.filter_date_from')}</span>
+                <input className="form-control input-sm" type="date" value={draft.date_from} onChange={(event) => setField('date_from', event.target.value)} />
+            </label>
+            <label>
+                <span>{t('activity.filter_date_to')}</span>
+                <input className="form-control input-sm" type="date" value={draft.date_to} onChange={(event) => setField('date_to', event.target.value)} />
+            </label>
+        </form>
+    ), [actionOptions, draft, subjectTypeOptions, t, users]);
+
+    const actions = (
+        <div className="ps-activity-actions">
+            <button type="button" className="btn btn-sm btn-primary" onClick={() => search({ page: 1 })}>
+                <i className="fa fa-search" aria-hidden="true" /> Tìm kiếm
+            </button>
+            <button type="button" className="btn btn-sm btn-default" onClick={reset} title="Xóa lọc">
+                <i className="fa fa-refresh" aria-hidden="true" />
+            </button>
+        </div>
+    );
 
     return (
         <AppLayout>
             <Head title={t('activity.title')} />
-
-            <div className="space-y-6">
-                <PageHeader title={t('activity.title')} description={t('activity.desc')} />
-
-                <div className="grid gap-3 rounded-lg border p-4 md:grid-cols-3 xl:grid-cols-6">
-                    <label className="space-y-1 text-xs">
-                        <span className="font-medium text-muted-foreground">{t('activity.filter_action')}</span>
-                        <select
-                            className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
-                            value={filters.action ?? ''}
-                            onChange={(e) => search({ action: e.target.value || undefined, page: 1 })}
-                        >
-                            <option value="">{t('activity.all')}</option>
-                            {actionOptions.map((opt) => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                        </select>
-                    </label>
-                    <label className="space-y-1 text-xs">
-                        <span className="font-medium text-muted-foreground">{t('activity.filter_user')}</span>
-                        <select
-                            className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
-                            value={filters.user_id ?? ''}
-                            onChange={(e) => search({ user_id: e.target.value || undefined, page: 1 })}
-                        >
-                            <option value="">{t('activity.all')}</option>
-                            {users.map((user) => (
-                                <option key={user.id} value={user.id}>{user.name}</option>
-                            ))}
-                        </select>
-                    </label>
-                    <label className="space-y-1 text-xs">
-                        <span className="font-medium text-muted-foreground">{t('activity.filter_subject')}</span>
-                        <select
-                            className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
-                            value={filters.subject_type ?? ''}
-                            onChange={(e) => search({ subject_type: e.target.value || undefined, page: 1 })}
-                        >
-                            <option value="">{t('activity.all')}</option>
-                            {subjectTypeOptions.map((opt) => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                        </select>
-                    </label>
-                    <label className="space-y-1 text-xs">
-                        <span className="font-medium text-muted-foreground">{t('activity.filter_search')}</span>
-                        <input
-                            className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
-                            defaultValue={filters.search ?? ''}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    search({ search: e.currentTarget.value || undefined, page: 1 });
-                                }
-                            }}
-                        />
-                    </label>
-                    <label className="space-y-1 text-xs">
-                        <span className="font-medium text-muted-foreground">{t('activity.filter_date_from')}</span>
-                        <input
-                            type="date"
-                            className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
-                            value={filters.date_from ?? ''}
-                            onChange={(e) => search({ date_from: e.target.value || undefined, page: 1 })}
-                        />
-                    </label>
-                    <label className="space-y-1 text-xs">
-                        <span className="font-medium text-muted-foreground">{t('activity.filter_date_to')}</span>
-                        <input
-                            type="date"
-                            className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
-                            value={filters.date_to ?? ''}
-                            onChange={(e) => search({ date_to: e.target.value || undefined, page: 1 })}
-                        />
-                    </label>
-                </div>
-
-                <ScrollDataTable>
-                    <table className="w-full min-w-[980px] border-collapse text-xs">
+            <PushsalePageShell
+                title={t('activity.title')}
+                subtitle={t('activity.desc')}
+                primaryFilters={actionFilters}
+                actions={actions}
+                className="ps-activity-log-page pushsale-page"
+                data-page-code="activity-logs"
+            >
+                <div className="ps-table-scroll ps-activity-table-wrap">
+                    <table className="table table-bordered table-striped table-condensed ps-activity-table">
                         <thead>
                             <tr>
-                                <Th sortable sortKey="created_at" sort={sort} onSort={toggleSort}>{t('activity.col_time')}</Th>
-                                <Th sortable sortKey="action_label" sort={sort} onSort={toggleSort}>{t('activity.col_action')}</Th>
-                                <Th>{t('activity.col_summary')}</Th>
-                                <Th sortable sortKey="actor_name" sort={sort} onSort={toggleSort}>{t('activity.col_actor')}</Th>
-                                <Th sortable sortKey="ip_address" sort={sort} onSort={toggleSort}>{t('activity.col_ip')}</Th>
-                                <Th />
+                                <th>{t('activity.col_time')}</th>
+                                <th>{t('activity.col_action')}</th>
+                                <th>{t('activity.col_summary')}</th>
+                                <th>{t('activity.col_actor')}</th>
+                                <th>{t('activity.col_ip')}</th>
+                                <th>{t('activity.view_detail')}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedRows.length ? (
-                                sortedRows.map((row) => (
-                                    <tr
-                                        key={row.id}
-                                        className="cursor-pointer hover:bg-muted/30"
-                                        onClick={() => setSelected(row)}
-                                    >
-                                        <Td className="whitespace-nowrap">{row.created_at}</Td>
-                                        <Td className="font-medium">{row.action_label}</Td>
-                                        <Td className="max-w-[380px] whitespace-normal text-muted-foreground">
-                                            {row.summary || row.subject_label || '—'}
-                                        </Td>
-                                        <Td>{row.actor_name}</Td>
-                                        <Td className="font-mono text-[10px]">{row.ip_address ?? '—'}</Td>
-                                        <Td>
-                                            <Button type="button" variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setSelected(row); }}>
-                                                <Eye className="size-3.5" />
-                                                {t('activity.view_detail')}
-                                            </Button>
-                                        </Td>
-                                    </tr>
-                                ))
-                            ) : (
+                            {rows.length ? rows.map((row) => (
+                                <tr key={row.id} onDoubleClick={() => setSelected(row)}>
+                                    <td className="nowrap">{row.created_at}</td>
+                                    <td className="ps-activity-action-cell">{row.action_label}</td>
+                                    <td className="ps-activity-content-cell">{row.summary || row.subject_label || '—'}</td>
+                                    <td>{row.actor_name}</td>
+                                    <td className="ps-activity-ip-cell">{row.ip_address ?? '—'}</td>
+                                    <td className="ps-activity-action-btn-cell">
+                                        <button type="button" className="btn btn-xs btn-default" onClick={() => setSelected(row)}>
+                                            <Eye className="size-3" /> Xem chi tiết
+                                        </button>
+                                    </td>
+                                </tr>
+                            )) : (
                                 <tr>
-                                    <Td colSpan={6} className="py-10 text-center text-muted-foreground">
-                                        <ScrollText className="mx-auto mb-2 size-6 opacity-50" />
-                                        {t('activity.empty')}
-                                    </Td>
+                                    <td colSpan="6" className="ps-empty">{t('activity.empty')}</td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
-                </ScrollDataTable>
+                </div>
 
-                {meta && (
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                            {meta.total} · {meta.current_page}/{meta.last_page}
-                        </span>
-                        <div className="flex gap-2">
-                            <Button type="button" variant="outline" size="sm" disabled={meta.current_page <= 1} onClick={() => goPage(meta.current_page - 1)}>
-                                ←
-                            </Button>
-                            <Button type="button" variant="outline" size="sm" disabled={meta.current_page >= meta.last_page} onClick={() => goPage(meta.current_page + 1)}>
-                                →
-                            </Button>
-                        </div>
+                <div className="ps-activity-pagination">
+                    <div className="ps-activity-record-info">
+                        {meta.total ?? 0} bản ghi · Trang {meta.current_page ?? 1}/{meta.last_page ?? 1}
                     </div>
-                )}
-            </div>
-
-            <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-                <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-                    {selected && (
-                        <>
-                            <DialogHeader>
-                                <DialogTitle>{selected.action_label}</DialogTitle>
-                                <DialogDescription>{selected.summary || '—'}</DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div>
-                                    <p className="text-xs font-medium text-muted-foreground">{t('activity.col_time')}</p>
-                                    <p className="text-sm">{selected.created_at}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs font-medium text-muted-foreground">{t('activity.col_actor')}</p>
-                                    <p className="text-sm">{selected.actor_name}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs font-medium text-muted-foreground">{t('activity.col_subject')}</p>
-                                    <p className="text-sm">{selected.subject_label ?? '—'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs font-medium text-muted-foreground">{t('activity.col_ip')}</p>
-                                    <p className="text-sm font-mono">{selected.ip_address ?? '—'}</p>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <p className="text-sm font-semibold">{t('activity.detail_properties')}</p>
-                                <DetailsBlock rows={selected.details} emptyText={t('activity.detail_empty')} />
-                            </div>
-                        </>
-                    )}
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setSelected(null)}>
-                            {t('common.close')}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                    <PushsalePager current={meta.current_page ?? 1} totalPages={meta.last_page ?? 1} onPage={(page) => search({ page })} />
+                </div>
+            </PushsalePageShell>
+            <ActivityDetailModal selected={selected} onClose={() => setSelected(null)} t={t} />
         </AppLayout>
     );
 }
