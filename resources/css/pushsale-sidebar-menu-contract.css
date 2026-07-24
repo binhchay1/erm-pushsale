@@ -58,3 +58,94 @@ html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2,
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .pushsale-menu-link {
     font-size: 14px !important;
 }
+
+/* Final menu flyout hardening: the third-level menu is portaled to <body>, so
+   it must be the last sidebar rule in the cascade and must not inherit legacy
+   white dropdown/select backgrounds. */
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] {
+    box-sizing: border-box !important;
+    display: block !important;
+    width: 252px !important;
+    min-width: 252px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-width: min(360px, calc(100vw - var(--ps-sidebar-width, 250px) - 18px)) !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    background: #0b8ff3 !important;
+    background-color: #0b8ff3 !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .32) !important;
+    color: #fff !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] *,
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] *::before,
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] *::after {
+    box-sizing: border-box !important;
+}
+
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"]::before,
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"]::after {
+    content: none !important;
+    display: none !important;
+}
+
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] .pushsale-third-item {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    list-style: none !important;
+}
+
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] .pushsale-third-link,
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] a.pushsale-third-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 20px !important;
+    gap: 8px !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    font: 400 14px/20px Arial, Helvetica, sans-serif !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] .pushsale-third-link > span {
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    color: inherit !important;
+    font: inherit !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] .pushsale-third-item.active > .pushsale-third-link,
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] .pushsale-third-link:hover,
+html body.pushsale-app-body div.pushsale-third-menu[role="menu"] .pushsale-third-link:focus {
+    background: #0560ad !important;
+    background-color: #0560ad !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+}

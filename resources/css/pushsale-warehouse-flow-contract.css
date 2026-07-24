@@ -1,4 +1,4 @@
-/* V98: Warehouse 5.3.x exact Pushsale-like flow, scoped to avoid overriding reports/dashboard pages. */
+/* Warehouse 5.3.x exact Pushsale-like flow, scoped to avoid overriding reports/dashboard pages. */
 .pushsale-page[data-page-code^="5.3"] {
     --ps-blue: #3c8dbc;
     --ps-blue-dark: #2f79ad;
@@ -269,5 +269,188 @@
     .pushsale-page[data-page-code^="5.3"] .dragscroll1,
     .pushsale-page[data-page-code^="5.3"] .tableFixHead {
         max-height: none;
+    }
+}
+
+/* Phiếu nhập / xuất kho: restore the original two-half Pushsale form rhythm.
+   The captured template already has label/input pairs that sum to 12 columns;
+   this contract keeps that structure instead of stretching the form across the
+   full 1920px viewport. */
+.pushsale-page[data-page-code="5.3.1"] {
+    --ps-voucher-width: 1200px;
+    --ps-voucher-label-width: 155px;
+    --ps-voucher-gap: 12px;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .pushsale-template-fragment,
+.pushsale-page[data-page-code="5.3.1"] .pushsale-template-inner,
+.pushsale-page[data-page-code="5.3.1"] .pushsale-nested-content-wrapper {
+    background: #fff !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .m-header-wrap {
+    margin: 0 14px 12px !important;
+    border-bottom: 1px solid #d2d6de !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08) !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .m-header {
+    display: block !important;
+    min-height: 48px !important;
+    padding: 10px 0 !important;
+    background: #fff !important;
+    text-align: left !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .m-header .col-xs-6:first-child {
+    float: none !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: var(--ps-voucher-width) !important;
+    margin: 0 auto !important;
+    padding: 0 14px !important;
+    text-align: center !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .m-header .text,
+.pushsale-page[data-page-code="5.3.1"] [id$="CapNhatPhieuXuatNhapKho_lblModuleTitle"] {
+    display: inline !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 28px !important;
+    color: #111 !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] [id$="CapNhatPhieuXuatNhapKho_btnDong"],
+.pushsale-page[data-page-code="5.3.1"] .m-header .col-xs-6.text-right.hidden-print {
+    display: none !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body,
+.pushsale-page[data-page-code="5.3.1"] .box-body[style*="max-width"] {
+    display: block !important;
+    width: calc(100% - 48px) !important;
+    max-width: var(--ps-voucher-width) !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row {
+    display: grid !important;
+    grid-template-columns: var(--ps-voucher-label-width) minmax(220px, 1fr) var(--ps-voucher-label-width) minmax(220px, 1fr) !important;
+    gap: 6px var(--ps-voucher-gap) !important;
+    align-items: center !important;
+    margin: 0 0 8px !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > [class*="col-xs-"] {
+    float: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-2:nth-child(1),
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-2:nth-child(3) {
+    grid-column: auto !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:first-child {
+    grid-template-columns: var(--ps-voucher-label-width) minmax(190px, 1fr) 120px 54px minmax(220px, 1fr) !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:nth-child(2) {
+    grid-template-columns: var(--ps-voucher-label-width) minmax(190px, 1fr) minmax(170px, .7fr) var(--ps-voucher-label-width) minmax(220px, 1fr) !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:nth-child(2) > .col-xs-2:nth-child(4),
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:nth-child(2) > .col-xs-4:nth-child(5) {
+    display: block !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:nth-child(6) {
+    grid-template-columns: var(--ps-voucher-label-width) minmax(220px, 1fr) var(--ps-voucher-label-width) 140px 140px !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:nth-child(7) {
+    grid-template-columns: var(--ps-voucher-label-width) minmax(220px, 1fr) 1fr 1fr !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:has(table.pushsale-data-table),
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:last-child {
+    display: block !important;
+    margin-top: 8px !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .h-label {
+    display: block !important;
+    min-height: 30px !important;
+    padding-top: 0 !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 30px !important;
+    white-space: nowrap !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .h-text {
+    display: block !important;
+    min-height: 30px !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 30px !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .form-control,
+.pushsale-page[data-page-code="5.3.1"] .pushsale-native-input,
+.pushsale-page[data-page-code="5.3.1"] .pushsale-native-select,
+.pushsale-page[data-page-code="5.3.1"] .ps-ddl {
+    height: 31px !important;
+    min-height: 31px !important;
+    width: 100% !important;
+    font-size: 12px !important;
+    line-height: 29px !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] table.pushsale-data-table {
+    margin-top: 8px !important;
+    table-layout: fixed !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] table.pushsale-data-table thead th {
+    height: 30px !important;
+    padding: 6px 7px !important;
+    font-size: 12px !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .notice,
+.pushsale-page[data-page-code="5.3.1"] [id$="lblLogs"] {
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .row .text-right.hidden-print {
+    text-align: right !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .btn,
+.pushsale-page[data-page-code="5.3.1"] .btn-icon,
+.pushsale-page[data-page-code="5.3.1"] a[role="button"] {
+    min-height: 30px !important;
+    font-size: 12px !important;
+    line-height: 20px !important;
+}
+
+@media (max-width: 1000px) {
+    .pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row,
+    .pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:first-child,
+    .pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:nth-child(2),
+    .pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:nth-child(6),
+    .pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row:nth-child(7) {
+        grid-template-columns: 135px minmax(0, 1fr) !important;
     }
 }

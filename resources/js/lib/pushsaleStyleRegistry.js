@@ -52,10 +52,10 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-sale-kpi-closing-summary-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-sale-kpi-closing-summary-contract.css') },
     { file: 'pushsale-page-spacing-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-page-spacing-contract.css') },
     { file: 'pushsale-operation-conversion-report.css', layer: 'final-contract', load: () => import('../../css/pushsale-operation-conversion-report.css') },
-    { file: 'pushsale-sidebar-menu-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-sidebar-menu-contract.css') },
     { file: 'pushsale-report-toolbar-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-report-toolbar-contract.css') },
     { file: 'pushsale-filter-toolbar-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-filter-toolbar-contract.css') },
     { file: 'pushsale-dashboard-toolbar-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-dashboard-toolbar-contract.css') },
+    { file: 'pushsale-sidebar-menu-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-sidebar-menu-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {
