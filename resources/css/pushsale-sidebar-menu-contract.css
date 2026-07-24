@@ -2,30 +2,31 @@
 html body.pushsale-app-body .pushsale-third-menu {
     width: 252px !important;
     min-width: 252px !important;
-    padding: 8px 0 !important;
+    padding: 8px 10px !important;
     border: 0 !important;
     border-radius: 0 !important;
     background: #0b8ff3 !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .32) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    z-index: 1038 !important;
+    z-index: 2075 !important;
 }
 
 html body.pushsale-app-body .pushsale-third-menu .pushsale-third-item {
     margin: 0 !important;
-    padding: 0 10px !important;
+    padding: 0 !important;
     list-style: none !important;
 }
 
 html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link {
-    height: 52px !important;
-    min-height: 52px !important;
+    height: 42px !important;
+    min-height: 42px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: flex-start !important;
+    width: 100% !important;
     gap: 8px !important;
-    padding: 0 22px !important;
+    padding: 0 20px !important;
     border: 0 !important;
     border-radius: 4px !important;
     background: transparent !important;

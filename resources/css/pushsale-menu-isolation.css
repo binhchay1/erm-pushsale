@@ -228,26 +228,29 @@ html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.active > .
     font-weight: 700 !important;
 }
 
-/* Level 3 flyout is portaled to body, so scope by its own class rather than sidebar. */
+/* Level 3 flyout is portaled to body, so scope by its own class rather than sidebar.
+   Keep this base layer blue too: the final contract repeats it, but this prevents
+   a cached/lazy CSS order from falling back to the old white Select2-like box. */
 html body.pushsale-app-body .pushsale-third-menu {
     position: fixed !important;
     left: var(--ps-sidebar-width, var(--ps-v80-sidebar-width)) !important;
     z-index: 2075 !important;
     display: block !important;
-    min-width: 235px !important;
+    width: 252px !important;
+    min-width: 252px !important;
     max-width: min(360px, calc(100vw - var(--ps-sidebar-width, var(--ps-v80-sidebar-width)) - 18px)) !important;
     max-height: calc(100vh - var(--ps-header-height, 50px) - 12px) !important;
     margin: 0 !important;
-    padding: 4px 0 !important;
+    padding: 8px 10px !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     list-style: none !important;
-    background: #fff !important;
-    border: 1px solid var(--ps-v80-border) !important;
+    background: var(--ps-v80-blue) !important;
+    border: 0 !important;
     border-radius: 0 !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,.18) !important;
-    color: #333 !important;
-    font: 12px var(--ps-v80-font) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.32) !important;
+    color: #fff !important;
+    font-family: var(--ps-v80-font) !important;
 }
 
 html body.pushsale-app-body .pushsale-third-menu .pushsale-third-item {
@@ -265,19 +268,30 @@ html body.pushsale-app-body .pushsale-third-menu .a3 {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    height: 30px !important;
-    min-height: 30px !important;
+    width: 100% !important;
+    height: 42px !important;
+    min-height: 42px !important;
     margin: 0 !important;
-    padding: 0 13px !important;
-    background: #fff !important;
+    padding: 0 20px !important;
+    background: transparent !important;
     border: 0 !important;
-    border-radius: 0 !important;
+    border-radius: 4px !important;
     box-shadow: none !important;
-    color: #333 !important;
-    font-size: 12px !important;
+    color: #fff !important;
+    font-size: 14px !important;
     font-weight: 400 !important;
-    line-height: 30px !important;
+    line-height: 20px !important;
     text-decoration: none !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link > span,
+html body.pushsale-app-body .pushsale-third-menu .a3 > span {
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    color: inherit !important;
+    text-overflow: ellipsis !important;
     white-space: nowrap !important;
 }
 
@@ -286,8 +300,10 @@ html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link:focus,
 html body.pushsale-app-body .pushsale-third-menu .pushsale-third-item.active > .pushsale-third-link,
 html body.pushsale-app-body .pushsale-third-menu .a3:hover,
 html body.pushsale-app-body .pushsale-third-menu .li3.active > .a3 {
-    background: #f5f5f5 !important;
-    color: var(--ps-v80-header-blue) !important;
+    background: #0560ad !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
 }
 
 /* Kill the old hover residue lines without removing the actual active/hover background. */

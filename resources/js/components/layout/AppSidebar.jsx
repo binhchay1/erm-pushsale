@@ -65,7 +65,7 @@ function LeafLink({ item, className, onNavigate, children }) {
             <Link
                 href={item.url}
                 className={className}
-                title={item.title}
+                aria-label={item.title}
                 preserveScroll={false}
                 onClick={onNavigate}
             >
@@ -75,7 +75,7 @@ function LeafLink({ item, className, onNavigate, children }) {
     }
 
     return (
-        <span className={cn(className, 'is-disabled')} title={`${item.title} — chưa có màn hình tương ứng`}>
+        <span className={cn(className, 'is-disabled')} aria-label={`${item.title} — chưa có màn hình tương ứng`}>
             {children}
         </span>
     );
@@ -240,7 +240,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                             className="a1 pushsale-menu-link"
                                             onClick={() => toggleRoot(rootIndex)}
                                             aria-expanded={rootOpen}
-                                            title={root.title}
+                                            aria-label={root.title}
                                         >
                                             <i className={`fa fa-${icon}`} aria-hidden="true" />
                                             <span>{root.title}</span>
@@ -284,7 +284,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                     setFlyout({ item: child, key, top, maxHeight });
                                                                 }}
                                                                 aria-expanded={flyoutOpen}
-                                                                title={child.title}
+                                                                aria-label={child.title}
                                                             >
                                                                 <span>{child.title}</span>
                                                                 <i className="fa fa-angle-right pull-right" aria-hidden="true" />
