@@ -37,6 +37,25 @@ class LoginTest extends TestCase
         $this->assertValidCredentialsRedirectToRoleHome(UserRole::Warehouse, '/warehouse/dashboard');
     }
 
+
+    public function test_login_blocked_user_cannot_authenticate(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'blocked@saleops.local',
+            'password' => 'password',
+            'role' => UserRole::Sales,
+            'permissions' => ['login_blocked' => true, 'access_code' => 'BLOCK-0001'],
+        ]);
+
+        $this->from('/login')->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect('/login')
+            ->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+    }
+
     public function test_invalid_credentials_return_email_validation_error(): void
     {
         User::factory()->create([

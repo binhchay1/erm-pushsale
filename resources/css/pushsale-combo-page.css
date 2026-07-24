@@ -261,3 +261,57 @@ body.pushsale-app-body .ps-combo-dialog.ps-dialog-surface {
 body.pushsale-app-body .ps-combo-dialog .ps-dialog-body {
     overflow-x: hidden !important;
 }
+
+/* Combo dialog polish — compact content, usable add-product row. */
+body.pushsale-app-body .ps-combo-dialog.ps-dialog-surface {
+    width: min(1080px, calc(100vw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+}
+body.pushsale-app-body .ps-combo-dialog .ps-dialog-body {
+    padding: 10px 14px !important;
+    overflow-x: hidden !important;
+}
+body.pushsale-app-body .ps-combo-dialog .ps-combo-section {
+    margin-bottom: 10px !important;
+}
+body.pushsale-app-body .ps-combo-dialog .ps-combo-section-title {
+    padding: 7px 10px !important;
+}
+body.pushsale-app-body .ps-combo-dialog .ps-combo-grid {
+    grid-template-columns: 1fr 1fr 1fr 150px !important;
+    gap: 8px 10px !important;
+    padding: 10px 12px !important;
+}
+body.pushsale-app-body .ps-combo-dialog .ps-combo-picker {
+    grid-template-columns: minmax(520px, 1fr) 160px !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    align-items: center !important;
+}
+body.pushsale-app-body .ps-combo-dialog .ps-combo-picker select.form-control {
+    min-width: 520px !important;
+    width: 100% !important;
+}
+body.pushsale-app-body .ps-combo-dialog .ps-combo-picker .btn {
+    height: 32px !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+}
+body.pushsale-app-body .ps-combo-dialog .ps-combo-items-wrap {
+    margin: 0 12px 8px !important;
+    overflow-x: auto !important;
+}
+body.pushsale-app-body .ps-combo-dialog .ps-combo-items-table {
+    min-width: 760px !important;
+}
+body.pushsale-app-body .ps-combo-dialog .ps-combo-note {
+    margin-bottom: 9px !important;
+}
+@media (max-width: 900px) {
+    body.pushsale-app-body .ps-combo-dialog .ps-combo-grid { grid-template-columns: 1fr 1fr !important; }
+    body.pushsale-app-body .ps-combo-dialog .ps-combo-picker { grid-template-columns: 1fr !important; }
+    body.pushsale-app-body .ps-combo-dialog .ps-combo-picker select.form-control { min-width: 0 !important; }
+}

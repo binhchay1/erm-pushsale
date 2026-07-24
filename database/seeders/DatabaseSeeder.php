@@ -33,12 +33,16 @@ class DatabaseSeeder extends Seeder
                 SecurityAuditDemoSeeder::class,
                 CatalogSeeder::class,
                 ProductTaxonomyDemoSeeder::class,
+                FacebookPageMappingSeeder::class,
+                DiscountCodRuleSeeder::class,
                 InventorySeeder::class,
                 MarketingCampaignSeeder::class,
+                ManualMarketingContactSeeder::class,
                 SalesPipelineSeeder::class,
                 DataFilterHistorySeeder::class,
                 LandingFlowSeeder::class,
                 ShippingEventSeeder::class,
+                WarehouseDeliveryHandoverSeeder::class,
                 DemoNotificationSeeder::class,
             ]);
         });

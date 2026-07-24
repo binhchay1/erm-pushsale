@@ -69,6 +69,45 @@ class MarketingCampaignSeeder extends Seeder
             ]);
         }
 
-        $this->command?->info('Đã tạo '.count($campaigns).' chiến dịch marketing (1 chiến dịch chờ duyệt).');
+        $channels = [
+            ['facebook', 'facebook'],
+            ['tiktok', 'tiktok'],
+            ['landing', 'ladipage'],
+            ['youtube', 'youtube'],
+            ['google', 'google'],
+            ['zalo', 'zalo'],
+        ];
+        $marketerEmails = array_values($marketers->keys()->all());
+        $extraProducts = Product::query()->where('type', 'product')->orderBy('id')->limit(24)->get();
+
+        foreach ($extraProducts as $index => $product) {
+            $email = $marketerEmails[$index % max(1, count($marketerEmails))] ?? 'marketing@saleops.local';
+            $marketer = $marketers->get($email);
+            [$channel, $utmSource] = $channels[$index % count($channels)];
+            $name = sprintf('%s — nguồn demo %02d', $product->name, $index + 1);
+
+            if (MarketingSource::query()->where('name', $name)->exists()) {
+                continue;
+            }
+
+            MarketingSource::query()->create([
+                'name' => $name,
+                'product_id' => $product->id,
+                'marketer_user_id' => $marketer?->id,
+                'created_by_user_id' => $marketer?->id,
+                'ad_channel' => $channel,
+                'utm_source' => $utmSource,
+                'utm_campaign' => $this->landing->utmCampaignFromName($name),
+                'webhook_token' => $this->landing->stableToken($this->landing->utmCampaignFromName($name)),
+                'budget' => 2_500_000 + ($index * 650_000),
+                'interactions' => 700 + ($index * 137),
+                'contacts' => 55 + ($index * 11),
+                'is_active' => true,
+                'is_approved' => $index % 9 !== 8,
+                'js_tracking_enabled' => $channel === 'landing',
+            ]);
+        }
+
+        $this->command?->info('Đã tạo nhiều chiến dịch/nguồn dữ liệu marketing để test dropdown, dashboard và báo cáo.');
     }
 }

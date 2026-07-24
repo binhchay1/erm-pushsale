@@ -32,6 +32,8 @@ class ManualLeadController extends Controller
             'phone' => ['required', 'string', 'max:30', new VietnameseMobilePhone],
             'address' => ['nullable', 'string', 'max:255'],
             'marketing_source_id' => ['nullable', 'integer', 'exists:marketing_sources,id'],
+            'product_ids' => ['nullable', 'array', 'max:20'],
+            'product_ids.*' => ['integer', 'exists:products,id'],
             'items' => ['nullable', 'array', 'max:50'],
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.item_type' => ['nullable', Rule::in(['product', 'combo'])],
@@ -60,6 +62,11 @@ class ManualLeadController extends Controller
             'close_order' => ['nullable', 'boolean'],
             'confirm_insufficient_stock' => ['nullable', 'boolean'],
             'note' => ['nullable', 'string', 'max:1000'],
+            'utm_source' => ['nullable', 'string', 'max:50'],
+            'utm_medium' => ['nullable', 'string', 'max:50'],
+            'utm_campaign' => ['nullable', 'string', 'max:50'],
+            'utm_content' => ['nullable', 'string', 'max:50'],
+            'utm_term' => ['nullable', 'string', 'max:50'],
         ] + $this->allocationRules($request));
 
         $sales = $this->resolveSales($request);

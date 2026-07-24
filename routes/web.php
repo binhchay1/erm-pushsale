@@ -219,6 +219,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
     Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 
+    Route::redirect('ld/facebook/cau-hinh-don-vi', '/admin/integrations/facebook-pages', 301)->name('legacy.facebook.unit-config');
     Route::redirect('connect-shop-list', '/admin/ecommerce/connect-shops', 301)->name('legacy.ecommerce.connect-shops');
     Route::redirect('ld/ecommerce/e-connect-shop-list', '/admin/ecommerce/connect-shops', 301)->name('legacy.ecommerce.connect-shops.ld');
 

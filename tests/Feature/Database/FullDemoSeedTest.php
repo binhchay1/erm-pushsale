@@ -3,6 +3,9 @@
 namespace Tests\Feature\Database;
 
 use App\Models\ActivityLog;
+use App\Models\LeadIngestion;
+use App\Models\MarketingSource;
+use App\Services\Pushsale\PushsalePageService;
 use App\Models\Order;
 use App\Models\Pushsale\ProductAttribute;
 use App\Models\Pushsale\ProductAttributeValue;
@@ -60,6 +63,13 @@ class FullDemoSeedTest extends TestCase
         $this->assertGreaterThanOrEqual(60, ProductCategory::query()->count(), 'Full seed phải có dữ liệu phân loại sản phẩm cho popup.');
         $this->assertGreaterThanOrEqual(15, ProductAttribute::query()->count(), 'Full seed phải có dữ liệu thuộc tính sản phẩm cho popup.');
         $this->assertGreaterThanOrEqual(150, ProductAttributeValue::query()->count(), 'Full seed phải có dữ liệu giá trị thuộc tính cho popup.');
+
+        $this->assertGreaterThanOrEqual(20, MarketingSource::query()->count(), 'Full seed phải có nhiều nguồn dữ liệu thật cho các dropdown marketing.');
+        $this->assertGreaterThanOrEqual(100, LeadIngestion::query()->where('platform', 'manual')->count(), 'Full seed phải có nhiều contact nhập tay cho menu 2.6.2.');
+
+        $manualRows = app(PushsalePageService::class)->rows('2.6.2', request())['data'];
+        $this->assertNotEmpty($manualRows, 'Menu 2.6.2 phải đọc được contact nhập tay từ business thật.');
+        $this->assertArrayHasKey('customer_phone', $manualRows[0]);
     }
 
     public function test_landing_flow_seeder_produces_new_flow_data(): void

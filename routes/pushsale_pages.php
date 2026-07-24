@@ -57,6 +57,8 @@ Route::get('security/login-history', [\App\Http\Controllers\Admin\Pushsale\Pages
 Route::redirect('pages/1-7-1-lich-su-dang-nhap', '/admin/security/login-history', 301);
 
 Route::get('security/login-access', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_7_2Controller::class, 'index'])->name('security.login-access');
+Route::patch('security/login-access/users/{user}/approve', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_7_2Controller::class, 'approve'])->whereNumber('user')->name('security.login-access.approve');
+Route::patch('security/login-access/users/{user}/block', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_7_2Controller::class, 'block'])->whereNumber('user')->name('security.login-access.block');
 Route::redirect('pages/1-7-2-quan-ly-cho-phep-tai-khoan-dang-nhap', '/admin/security/login-access', 301);
 
 Route::get('security/lead-filter-history', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_7_3Controller::class, 'index'])->name('security.lead-filter-history');
@@ -116,6 +118,8 @@ Route::get('marketing/leads/import', [\App\Http\Controllers\Admin\Pushsale\Pages
 Route::redirect('pages/2-6-1-import-contact', '/admin/marketing/leads/import', 301);
 
 Route::get('marketing/leads/manual', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_6_2Controller::class, 'index'])->name('marketing.leads.manual-page');
+Route::redirect('ld/marketing/nhap-contact', '/admin/marketing/leads/manual', 301);
+Route::redirect('ld/marketing/import-excel', '/admin/marketing/leads/import', 301);
 Route::redirect('pages/2-6-2-nhap-data-thu-cong', '/admin/marketing/leads/manual', 301);
 
 Route::get('marketing/partner-connections', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_6_3Controller::class, 'index'])->name('marketing.partner-connections');

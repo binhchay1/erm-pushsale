@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Product;
+use App\Models\Pushsale\ProductComboItem;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Database\Seeder;
@@ -46,27 +47,79 @@ class CatalogSeeder extends Seeder
             'unit_price' => 120_000,
         ]);
 
+        $extraProducts = [
+            ['SP-SON-01', 'Son môi thạch hoa NK', 189_000],
+            ['SP-DAU-01', 'Dầu gội phủ bạc NEZHA', 229_000],
+            ['SP-AU-INOX', 'Ấu inox đựng dầu mỡ', 159_000],
+            ['SP-BUT-01', 'Bút phủ bạc', 99_000],
+            ['SP-THANH-01', 'Thanh năng lượng mini', 79_000],
+            ['SP-PROTEIN-01', 'Thanh protein bar mini', 89_000],
+            ['SP-KHAN-01', 'Khăn choàng ren cổ điển', 249_000],
+            ['SP-TINHDAU-01', 'Tinh dầu dưỡng tóc Raip NK', 219_000],
+            ['SP-SET-01', 'Set 6 đôi khuyên tai mạ bạc NK', 329_000],
+            ['SP-HOPCAM-01', 'Hộp cam - Vị cay thơm', 129_000],
+            ['SP-HOPDO-01', 'Hộp đỏ - Vị BBQ', 129_000],
+            ['SP-HOPXANH-01', 'Hộp xanh - Nguyên vị', 129_000],
+            ['SP-NGOCNAU-01', 'Ngọc Nâu', 199_000],
+            ['SP-NGOCXANH-01', 'Ngọc Xanh', 199_000],
+            ['SP-NGOCTRANG-01', 'Ngọc Trắng', 199_000],
+            ['SP-DAILIT-01', 'Dầu xả 1 Lít', 119_000],
+            ['SP-DAILIT-03', 'Dầu xả 3 Lít', 289_000],
+            ['SP-CARE-01', 'Dail Care pack', 259_000],
+            ['SP-TRAVEL-01', 'Travel size pack', 149_000],
+            ['SP-FAMILY-01', 'Family combo pack', 499_000],
+        ];
+
+        foreach ($extraProducts as [$sku, $name, $price]) {
+            Product::query()->create([
+                'sku' => $sku,
+                'name' => $name,
+                'unit_price' => $price,
+            ]);
+        }
+
         // Combo bán kèm — hiển thị trong danh mục và cho phép chọn nhanh khi chốt đơn.
-        Product::query()->create([
+        $comboGoi = Product::query()->create([
             'sku' => 'CB-GOI-02',
             'name' => 'Combo 2 Gối mây đan cao cấp',
             'type' => 'combo',
             'unit_price' => 549_000,
         ]);
 
-        Product::query()->create([
+        $camera = Product::query()->where('sku', 'SP-CAM-01')->first();
+        $serum = Product::query()->where('sku', 'SP-SRM-01')->first();
+        $botDietCo = Product::query()->where('sku', 'SP-BDC-01')->first();
+
+        $comboSerumCamera = Product::query()->create([
             'sku' => 'CB-SRM-CAM',
             'name' => 'Combo Serum Vitamin C + Camera an ninh',
             'type' => 'combo',
             'unit_price' => 1_150_000,
         ]);
 
-        Product::query()->create([
+        $comboBotDietCo = Product::query()->create([
             'sku' => 'CB-BDC-03',
             'name' => 'Combo 3 Bột diệt cỏ sinh học',
             'type' => 'combo',
             'unit_price' => 320_000,
         ]);
+
+        foreach ([
+            [$comboGoi, $goi, 2],
+            [$comboSerumCamera, $serum, 1],
+            [$comboSerumCamera, $camera, 1],
+            [$comboBotDietCo, $botDietCo, 3],
+        ] as [$combo, $component, $quantity]) {
+            if (! $combo || ! $component) {
+                continue;
+            }
+            ProductComboItem::query()->create([
+                'combo_product_id' => $combo->id,
+                'component_product_id' => $component->id,
+                'quantity' => $quantity,
+                'unit_price' => (int) $component->unit_price,
+            ]);
+        }
 
         $warehouseHead = User::query()->where('email', 'warehouse@saleops.local')->first();
 

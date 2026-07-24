@@ -14,6 +14,8 @@ class WarehouseIncidentReport extends BusinessRecord
         'name',
         'document_date',
         'carrier',
+        'sender_name',
+        'receiver_name',
         'order_count',
         'product_count',
         'status',

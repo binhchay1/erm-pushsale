@@ -138,19 +138,27 @@ function ComboDialog({ open, mode, combo, products, onClose, onSaved, routeUrl }
     const title = isUpdate ? 'Cập nhật combo' : 'Thêm combo';
 
     const addProduct = () => {
-        if (!selectedProductId) return;
+        if (!selectedProductId) {
+            setError('Vui lòng chọn sản phẩm trước khi thêm vào combo.');
+            return;
+        }
         const product = productMap.get(String(selectedProductId));
-        if (!product) return;
-        setForm((current) => {
-            if (current.component_items.some((item) => String(item.product_id) === String(product.id))) return current;
-            return {
-                ...current,
-                component_items: [
-                    ...current.component_items,
-                    { product_id: Number(product.id), quantity: 1, unit_price: Number(product.unit_price || 0) },
-                ],
-            };
-        });
+        if (!product) {
+            setError('Sản phẩm đã chọn không còn tồn tại trong catalog.');
+            return;
+        }
+        if (form.component_items.some((item) => String(item.product_id) === String(product.id))) {
+            setError('Sản phẩm này đã nằm trong combo.');
+            return;
+        }
+        setForm((current) => ({
+            ...current,
+            component_items: [
+                ...current.component_items,
+                { product_id: Number(product.id), quantity: 1, unit_price: Number(product.unit_price || 0) },
+            ],
+        }));
+        setError('');
         setSelectedProductId('');
     };
 
@@ -194,7 +202,7 @@ function ComboDialog({ open, mode, combo, products, onClose, onSaved, routeUrl }
         <PushsaleDialog
             open={open}
             onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}
-            width="960px"
+            width="1080px"
             title={title}
             className="ps-combo-dialog"
             footer={(
@@ -257,7 +265,7 @@ function ComboDialog({ open, mode, combo, products, onClose, onSaved, routeUrl }
                 <section className="ps-combo-section">
                     <div className="ps-combo-section-title">Sản phẩm trong combo</div>
                     <div className="ps-combo-picker">
-                        <select className="form-control" value={selectedProductId} onChange={(event) => setSelectedProductId(event.target.value)}>
+                        <select className="form-control" value={selectedProductId} onChange={(event) => { setSelectedProductId(event.target.value); setError(''); }}>
                             <option value="">-- Chọn sản phẩm thêm vào combo --</option>
                             {products.map((product) => (
                                 <option key={product.id} value={product.id}>{product.label ?? product.name}</option>

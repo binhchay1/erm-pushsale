@@ -2689,11 +2689,15 @@ return array (
         'format' => 'datetime',
       ),
     ),
-    'source' => 'lead_ingestions',
+    'source' => 'manual_lead_ingestions',
     'kind' => 'form',
     'upsell' => true,
     'slug' => '2-6-2-nhap-data-thu-cong',
     'component' => 'Page_2_6_2',
+    'form_fields' => array (
+      0 => array ('key' => 'marketing_source_id', 'label' => 'Nguồn dữ liệu', 'type' => 'select', 'option_source' => 'sources'),
+      1 => array ('key' => 'product_ids', 'label' => 'Sản phẩm', 'type' => 'multiselect', 'option_source' => 'products'),
+    ),
   ),
   '2.6.3' => 
   array (
@@ -5922,42 +5926,59 @@ return array (
         'key' => 'document_date',
         'label' => 'Ngày biên bản',
         'type' => 'date',
+        'required' => true,
       ),
       3 => 
       array (
         'key' => 'carrier',
         'label' => 'Đơn vị giao hàng',
-        'type' => 'text',
+        'type' => 'select',
+        'option_source' => 'shippingProviders',
+        'required' => true,
       ),
       4 => 
+      array (
+        'key' => 'sender_name',
+        'label' => 'Bên giao',
+        'type' => 'text',
+        'required' => true,
+      ),
+      5 => 
+      array (
+        'key' => 'receiver_name',
+        'label' => 'Bên nhận',
+        'type' => 'text',
+        'required' => true,
+      ),
+      6 => 
       array (
         'key' => 'order_count',
         'label' => 'Số đơn',
         'type' => 'number',
       ),
-      5 => 
+      7 => 
       array (
         'key' => 'product_count',
         'label' => 'Số sản phẩm',
         'type' => 'number',
       ),
-      6 => 
+      8 => 
       array (
         'key' => 'status',
         'label' => 'Trạng thái',
         'type' => 'select',
         'options' => 
         array (
-          'draft' => 'Nháp',
-          'confirmed' => 'Đã xác nhận',
-          'closed' => 'Đã đóng',
+          'updating' => 'Đang cập nhật',
+          'closed' => 'Đã chốt',
         ),
       ),
-      7 => 
+      9 => 
       array (
         'key' => 'note',
         'label' => 'Ghi chú',
         'type' => 'textarea',
+        'required' => true,
       ),
     ),
     'display_columns' => 

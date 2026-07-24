@@ -10,6 +10,7 @@ use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Orders\DiscountCodRuleResolver;
 use Illuminate\Support\Facades\DB;
 
 class LeadOrderFactory
@@ -39,6 +40,9 @@ class LeadOrderFactory
             'shipping_fee_collected' => (int) ($payload['shipping_fee_collected'] ?? $extra['shipping_fee_collected'] ?? 0),
             'items' => $extra['items'] ?? [],
             'item_origin' => $payload['item_origin'] ?? 'landing',
+            'marketer_user_id' => filled($payload['marketer_user_id'] ?? null) ? (int) $payload['marketer_user_id'] : null,
+            'facebook_page_id' => $payload['facebook_page_id'] ?? null,
+            'facebook_page_name' => $payload['facebook_page_name'] ?? null,
         ];
     }
 
@@ -228,12 +232,26 @@ class LeadOrderFactory
         $subtotal = (int) $order->items->sum(fn ($item) => (int) $item->unit_price * (int) $item->quantity);
         $itemsDiscount = (int) $order->items->sum(fn ($item) => (int) $item->discount_amount);
 
+        // Combo được tính như một dòng catalog có giá riêng. Thiết lập 1.9 chỉ
+        // tự gợi/áp dụng khi đơn chưa có chiết khấu hoặc COD thu khách từ nguồn nhập.
+        $resolver = new DiscountCodRuleResolver;
+        $discount = (int) $order->discount;
+        if ($discount <= 0) {
+            $discount = $resolver->discountForSubtotal($subtotal);
+        }
+        $shippingFeeCollected = (int) $order->shipping_fee_collected;
+        if ($shippingFeeCollected <= 0) {
+            $shippingFeeCollected = $resolver->codFeeForSubtotal(max(0, $subtotal - $itemsDiscount - $discount));
+        }
+
         // Giá trị cuối đơn = tổng dòng − chiết khấu theo dòng − chiết khấu cấp đơn.
-        $total = max(0, $subtotal - $itemsDiscount - (int) $order->discount);
-        $amountToCollect = max(0, $total + (int) $order->shipping_fee_collected - (int) $order->deposit);
+        $total = max(0, $subtotal - $itemsDiscount - $discount);
+        $amountToCollect = max(0, $total + $shippingFeeCollected - (int) $order->deposit);
 
         $order->update([
             'subtotal' => $subtotal,
+            'discount' => $discount,
+            'shipping_fee_collected' => $shippingFeeCollected,
             'total' => $total,
             'amount_to_collect' => $amountToCollect,
         ]);
@@ -269,11 +287,14 @@ class LeadOrderFactory
         }
 
         return MarketingSource::query()->firstOrCreate(
-            ['name' => $lead->platform.' — '.($normalized['utm_campaign'] ?? 'default')],
+            ['name' => $lead->platform.' — '.($normalized['facebook_page_name'] ?? $normalized['utm_campaign'] ?? 'default')],
             [
+                'marketer_user_id' => $normalized['marketer_user_id'] ?? null,
                 'utm_source' => $normalized['utm_source'],
-                'utm_campaign' => $normalized['utm_campaign'],
-                'ad_channel' => $lead->platform,
+                'utm_campaign' => $normalized['facebook_page_id'] ?? $normalized['utm_campaign'],
+                'ad_channel' => $lead->platform === 'facebook' ? 'Facebook' : $lead->platform,
+                'is_active' => true,
+                'is_approved' => true,
             ]
         );
     }

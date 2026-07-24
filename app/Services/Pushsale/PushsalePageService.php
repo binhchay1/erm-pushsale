@@ -108,6 +108,7 @@ class PushsalePageService
             'facebook_page_mappings' => $this->facebookPageMappings(),
             'partner_connections' => $this->partnerConnections(),
             'lead_ingestions' => $this->leadIngestions(),
+            'manual_lead_ingestions' => $this->leadIngestions('manual'),
             'lead_imports' => $this->leadIngestions(),
             'customer_multidimensional' => $this->customerMultidimensional(),
             'customer_spending' => $this->customerSpending(),
@@ -307,6 +308,9 @@ class PushsalePageService
                 ['id' => '0', 'label' => 'Không được phép sử dụng'],
             ],
             'warehouses' => Warehouse::query()->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (Warehouse $warehouse) => ['id' => $warehouse->id, 'label' => $warehouse->name])->all(),
+            'shippingProviders' => collect(config('shipping_partners.providers', []))->map(
+                fn (array $provider, string $key): array => ['id' => $key, 'label' => (string) ($provider['label'] ?? strtoupper($key))]
+            )->values()->all(),
             'sources' => MarketingSource::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (MarketingSource $source) => ['id' => $source->id, 'label' => $source->name])->all(),
             'orders' => Order::query()->latest('id')->limit(1000)->get(['id', 'order_code', 'customer_name', 'customer_phone'])->map(fn (Order $order) => [
                 'id' => $order->id,
@@ -795,9 +799,16 @@ class PushsalePageService
             });
     }
 
-    private function leadIngestions(): Collection
+    private function leadIngestions(?string $platform = null): Collection
     {
-        return LeadIngestion::query()->latest('id')->limit(1000)->get()->values()->map(fn (LeadIngestion $lead, int $index) => [
+        return LeadIngestion::query()
+            ->with(['marketingSource:id,name,product_id', 'marketingSource.product:id,name'])
+            ->when($platform, fn ($query) => $query->where('platform', $platform))
+            ->latest('id')
+            ->limit(1000)
+            ->get()
+            ->values()
+            ->map(fn (LeadIngestion $lead, int $index) => [
             'index' => $index + 1,
             'customer_name' => $lead->customer_name,
             'customer_phone' => $lead->customer_phone,
@@ -805,6 +816,10 @@ class PushsalePageService
             'created_at' => $lead->created_at?->toIso8601String(),
             'status' => $lead->status?->value,
             'is_upsell' => $lead->isSupplementalPacket(),
+            'platform' => $lead->platform,
+            'source' => $lead->marketingSource?->name,
+            'product_interest' => data_get($lead->payload, 'product', $lead->product_interest ?: $lead->marketingSource?->product?->name),
+            '_marketing_source_id' => $lead->marketing_source_id,
         ]);
     }
 
@@ -1767,16 +1782,26 @@ class PushsalePageService
 
     private function discountCodRules(): Collection
     {
-        return DiscountCodRule::query()->orderBy('order_from')->get()->values()->map(fn (DiscountCodRule $row, int $index) => [
-            'index' => $index + 1,
-            'order_from' => $row->order_from,
-            'discount_value' => $row->discount_value,
-            'calculation_type' => $row->calculation_type === 'percent' ? 'Phần trăm' : 'Số tiền',
-            'updated_at' => $row->updated_at?->toIso8601String(),
-            'actions' => 'Cập nhật',
-            '_record_id' => $row->id,
-            '_form' => $this->formPayload('1.9', $row),
-        ]);
+        return DiscountCodRule::query()
+            ->orderByRaw("case when coalesce(rule_type, 'discount') = 'discount' then 0 else 1 end")
+            ->orderBy('order_from')
+            ->get()
+            ->values()
+            ->map(fn (DiscountCodRule $row, int $index) => [
+                'index' => $index + 1,
+                'rule_type' => $row->rule_type ?: 'discount',
+                'order_from' => $row->order_from,
+                'discount_value' => $row->discount_value,
+                'calculation_type_value' => $row->calculation_type,
+                'calculation_type' => $row->calculation_type === 'percent' ? 'Phần trăm' : 'Số tiền',
+                'cod_from' => $row->cod_from,
+                'cod_to' => $row->cod_to,
+                'is_active' => (bool) $row->is_active,
+                'updated_at' => $row->updated_at?->toIso8601String(),
+                'actions' => 'Cập nhật',
+                '_record_id' => $row->id,
+                '_form' => $this->formPayload('1.9', $row, ['rule_type' => $row->rule_type ?: 'discount']),
+            ]);
     }
 
     private function phoneBlacklists(): Collection
@@ -1846,19 +1871,47 @@ class PushsalePageService
 
     private function warehouseIncidents(): Collection
     {
-        return WarehouseIncidentReport::query()->with('manager:id,name')->latest('document_date')->get()->map(fn (WarehouseIncidentReport $row) => [
-            'id' => $row->id,
-            'manager' => $row->manager?->name,
-            'name' => $row->name,
-            'document_date' => $row->document_date?->toDateString(),
-            'carrier' => $row->carrier,
-            'order_count' => $row->order_count,
-            'product_count' => $row->product_count,
-            'status' => match ($row->status) { 'confirmed' => 'Đã xác nhận', 'closed' => 'Đã đóng', default => 'Nháp' },
-            'updated_at' => $row->updated_at?->toIso8601String(),
-            '_record_id' => $row->id,
-            '_form' => $this->formPayload('5.4', $row),
-        ])->values();
+        $providerLabels = collect(config('shipping_partners.providers', []))
+            ->mapWithKeys(fn (array $provider, string $key): array => [$key => (string) ($provider['label'] ?? strtoupper($key))]);
+
+        return WarehouseIncidentReport::query()
+            ->with(['manager:id,name', 'updater:id,name,email'])
+            ->latest('document_date')
+            ->latest('id')
+            ->get()
+            ->map(function (WarehouseIncidentReport $row) use ($providerLabels): array {
+                $carrierKey = (string) $row->carrier;
+                $statusKey = match ((string) $row->status) {
+                    'closed', 'confirmed' => 'closed',
+                    default => 'updating',
+                };
+
+                return [
+                    'id' => $row->id,
+                    'manager' => $row->manager?->name ?? $row->updater?->name ?? '—',
+                    'name' => $row->name,
+                    'document_date' => $row->document_date?->toDateString(),
+                    'carrier' => $providerLabels[$carrierKey] ?? ($row->carrier ?: '—'),
+                    'sender_name' => $row->sender_name,
+                    'receiver_name' => $row->receiver_name,
+                    'order_count' => (int) $row->order_count,
+                    'product_count' => (int) $row->product_count,
+                    'status' => $statusKey === 'closed' ? 'Đã chốt' : 'Đang cập nhật',
+                    'updated_at' => $row->updated_at?->toIso8601String(),
+                    '_record_id' => $row->id,
+                    '_shipping_method' => $carrierKey,
+                    '_status' => $statusKey,
+                    '_date_type' => 'document_date',
+                    '_data_arrived_at' => $row->document_date?->toDateString(),
+                    '_form' => array_merge($this->formPayload('5.4', $row), [
+                        'status' => $statusKey,
+                        'carrier' => $carrierKey,
+                        'sender_name' => $row->sender_name,
+                        'receiver_name' => $row->receiver_name,
+                    ]),
+                ];
+            })
+            ->values();
     }
 
     private function expenses(): Collection
@@ -2103,6 +2156,7 @@ class PushsalePageService
             'customer_type' => '_customer_type',
             'allocation_status' => '_allocation_status',
             'shipping_method' => '_shipping_method',
+            'handover_status' => '_status',
             'internal_reconciliation_status' => '_internal_reconciliation_status',
             'duplicate_status' => '_duplicate_status',
             'care_operation_status' => '_care_operation_status',

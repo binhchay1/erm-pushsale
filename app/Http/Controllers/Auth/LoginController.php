@@ -66,6 +66,15 @@ class LoginController extends Controller
 
         $user = Auth::user();
 
+        if (! $user->isPlatformAdmin() && (bool) data_get($user->permissions, 'login_blocked', false)) {
+            $this->logLoginAttempt($request, ActivityLogger::AUTH_LOGIN_BLOCKED, $user, $user->email, 'login_blocked');
+            Auth::guard('web')->logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Tài khoản này chưa được phê duyệt hoặc đang bị chặn đăng nhập.',
+            ]);
+        }
+
         if (! $user->isPlatformAdmin() && (! $user->company || ! $user->company->isActive())) {
             $this->logLoginAttempt($request, ActivityLogger::AUTH_LOGIN_BLOCKED, $user, $user->email, 'company_inactive');
             Auth::guard('web')->logout();

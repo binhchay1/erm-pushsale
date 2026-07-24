@@ -1,0 +1,124 @@
+body.pushsale-app-body .ps-discount-cod-page {
+    background: #fff;
+    min-height: calc(100vh - 50px);
+    font: 12px/1.35 Arial, Helvetica, sans-serif;
+    color: #111;
+}
+body.pushsale-app-body .ps-page-heading.ps-discount-cod-heading {
+    min-height: 62px;
+    display: flex;
+    align-items: center;
+    padding: 16px 14px;
+    border-bottom: 1px solid #d7dde5;
+    background: #fff;
+}
+body.pushsale-app-body .ps-discount-cod-heading .ps-page-title {
+    font-size: 18px;
+    line-height: 30px;
+    font-weight: 700;
+    color: #111;
+}
+body.pushsale-app-body .ps-discount-cod-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px 30px;
+    padding: 28px 10px 0;
+}
+body.pushsale-app-body .ps-discount-panel {
+    min-width: 0;
+}
+body.pushsale-app-body .ps-discount-panel .pu-caption {
+    margin: 0 0 14px;
+    padding: 0 0 8px;
+    border-bottom: 2px solid #ff5d28;
+    color: #ff4a13;
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+body.pushsale-app-body .ps-discount-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+body.pushsale-app-body .ps-discount-table {
+    min-width: 720px;
+    width: 100%;
+    table-layout: fixed;
+    margin-bottom: 0;
+}
+body.pushsale-app-body .ps-discount-table th {
+    background: #367fd0 !important;
+    border-color: #2d6eb7 !important;
+    color: #fff !important;
+    text-align: center;
+    vertical-align: middle !important;
+    padding: 9px 6px !important;
+    font-size: 12px;
+}
+body.pushsale-app-body .ps-discount-table td {
+    border-color: #d6dee8 !important;
+    vertical-align: middle !important;
+    padding: 8px 6px !important;
+    font-size: 12px;
+}
+body.pushsale-app-body .ps-discount-table tbody tr:nth-child(even) td {
+    background: #f3f7fc;
+}
+body.pushsale-app-body .ps-discount-edit-row td {
+    background: #e9f2fc !important;
+}
+body.pushsale-app-body .ps-discount-table .form-control {
+    height: 30px;
+    border-radius: 0;
+    border: 1px solid #c5d0dd;
+    box-shadow: none;
+    font-size: 12px;
+}
+body.pushsale-app-body .ps-btn-link {
+    border: 0;
+    background: transparent;
+    color: #087ec9;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0;
+}
+body.pushsale-app-body .ps-btn-link:disabled {
+    opacity: .65;
+}
+body.pushsale-app-body .ps-checkbox-inline {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+    font-weight: 400;
+    white-space: nowrap;
+}
+body.pushsale-app-body .ps-checkbox-inline input {
+    margin: 0 !important;
+}
+body.pushsale-app-body .ps-discount-note {
+    margin: 16px 10px 0 auto;
+    width: calc(50% - 20px);
+    min-height: 62px;
+    padding: 10px 12px;
+    border: 1px solid #ff9c00;
+    background: #fffde8;
+    font-size: 12px;
+    line-height: 18px;
+}
+body.pushsale-app-body .ps-discount-error,
+body.pushsale-app-body .ps-discount-page-error {
+    margin: 0 10px 10px;
+    padding: 8px 10px;
+    border-radius: 0;
+    font-size: 12px;
+}
+@media (max-width: 1100px) {
+    body.pushsale-app-body .ps-discount-cod-grid { grid-template-columns: 1fr; }
+    body.pushsale-app-body .ps-discount-note { width: auto; margin-right: 10px; }
+}

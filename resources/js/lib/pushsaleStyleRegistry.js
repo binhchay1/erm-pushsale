@@ -21,6 +21,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale.css', layer: 'legacy-base', load: () => import('../../css/pushsale.css') },
     { file: 'pushsale-page-polish.css', layer: 'page-fix', load: () => import('../../css/pushsale-page-polish.css') },
     { file: 'pushsale-combo-page.css', layer: 'page-fix', load: () => import('../../css/pushsale-combo-page.css') },
+    { file: 'pushsale-discount-cod-page.css', layer: 'page-fix', load: () => import('../../css/pushsale-discount-cod-page.css') },
     { file: 'pushsale-login-history.css', layer: 'page-fix', load: () => import('../../css/pushsale-login-history.css') },
     { file: 'pushsale-operation-categories.css', layer: 'page-fix', load: () => import('../../css/pushsale-operation-categories.css') },
     { file: 'pushsale-users-frame-toast.css', layer: 'page-fix', load: () => import('../../css/pushsale-users-frame-toast.css') },
@@ -64,6 +65,9 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-page-scroll-filter-width-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-page-scroll-filter-width-contract.css') },
     { file: 'pushsale-report-spacing-table-ranking-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-report-spacing-table-ranking-contract.css') },
     { file: 'pushsale-page-header-spacing-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-page-header-spacing-contract.css') },
+    { file: 'pushsale-warehouse-delivery-handover-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-warehouse-delivery-handover-contract.css') },
+    { file: 'pushsale-facebook-unit-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-facebook-unit-contract.css') },
+    { file: 'pushsale-manual-lead-page.css', layer: 'final-contract', load: () => import('../../css/pushsale-manual-lead-page.css') },
 ];
 
 export function assetMatchersForCssFile(file) {

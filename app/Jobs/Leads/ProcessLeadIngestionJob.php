@@ -112,7 +112,12 @@ class ProcessLeadIngestionJob implements ShouldQueue
                 foreach ($entry['changes'] ?? [] as $change) {
                     if (($change['field'] ?? '') === 'leadgen') {
                         $ingestionService->ingest($driver, [
-                            'entry' => [['changes' => [$change]]],
+                            'entry' => [[
+                                // Facebook gửi PageID ở entry.id. Giữ lại để menu 1.11
+                                // map Fanpage → Marketing chính xác khi job xử lý từng lead.
+                                'id' => $entry['id'] ?? null,
+                                'changes' => [$change],
+                            ]],
                         ]);
                     }
                 }

@@ -42,6 +42,8 @@ class SecurityMenuDataTest extends TestCase
             $this->assertNotEmpty($permissionRows);
             $this->assertArrayHasKey('account', $loginRows[0]);
             $this->assertArrayHasKey('access_code', $permissionRows[0]);
+            $this->assertContains('Đã phê duyệt', collect($permissionRows)->pluck('status')->all());
+            $this->assertContains('Chưa phê duyệt', collect($permissionRows)->pluck('status')->all());
         });
     }
 }

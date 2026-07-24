@@ -3,6 +3,7 @@
 namespace App\Services\Leads;
 
 use App\Contracts\Integrations\LeadPayloadNormalizer;
+use App\Enums\IntegrationPlatform;
 use App\Enums\LeadIngestionStatus;
 use App\Enums\LeadPacketType;
 use App\Enums\UserRole;
@@ -1333,8 +1334,70 @@ class LeadIngestionService
     public function ingest(LeadPayloadNormalizer $driver, array $rawPayload): LeadIngestion
     {
         $normalized = $driver->normalize($rawPayload);
+        $campaign = $this->resolveExternalCampaign($driver->platform(), $normalized);
 
-        return $this->ingestNormalized($driver, $rawPayload, $normalized);
+        return $this->ingestNormalized($driver, $rawPayload, $normalized, $campaign);
+    }
+
+    /**
+     * Nền tảng ngoài không đi qua landing connection vẫn cần map về chiến dịch nội bộ
+     * để báo cáo Marketing và quyền dữ liệu chạy đúng. Menu 1.11 quản lý mapping
+     * Facebook PageID → Marketing, vì vậy Facebook lead được tự động gom vào
+     * MarketingSource theo PageID.
+     *
+     * @param  array<string, mixed>  $normalized
+     */
+    private function resolveExternalCampaign(string $platform, array $normalized): ?MarketingSource
+    {
+        if ($platform !== IntegrationPlatform::Facebook->value) {
+            return null;
+        }
+
+        $pageId = trim((string) ($normalized['facebook_page_id'] ?? ''));
+        $campaignKey = $pageId !== '' ? $pageId : trim((string) ($normalized['utm_campaign'] ?? ''));
+
+        if ($campaignKey === '') {
+            return null;
+        }
+
+        $marketerId = filled($normalized['marketer_user_id'] ?? null) ? (int) $normalized['marketer_user_id'] : null;
+        $name = 'Facebook — '.trim((string) ($normalized['facebook_page_name'] ?? $campaignKey));
+        $source = MarketingSource::query()
+            ->where('utm_source', 'facebook')
+            ->where('utm_campaign', $campaignKey)
+            ->first();
+
+        if ($source) {
+            $updates = [];
+            if ($marketerId && ! $source->marketer_user_id) {
+                $updates['marketer_user_id'] = $marketerId;
+            }
+            if (! $source->ad_channel) {
+                $updates['ad_channel'] = 'Facebook';
+            }
+            if (! $source->is_active) {
+                $updates['is_active'] = true;
+            }
+            if (! $source->is_approved) {
+                $updates['is_approved'] = true;
+            }
+            if ($updates !== []) {
+                $source->forceFill($updates)->save();
+            }
+
+            return $source->fresh();
+        }
+
+        return MarketingSource::query()->create([
+            'name' => $name,
+            'marketer_user_id' => $marketerId,
+            'ad_channel' => 'Facebook',
+            'utm_source' => 'facebook',
+            'utm_campaign' => $campaignKey,
+            'budget' => 0,
+            'is_active' => true,
+            'is_approved' => true,
+        ]);
     }
 
     /**
@@ -1496,6 +1559,11 @@ class LeadIngestionService
         }
         if ((int) ($normalized['discount'] ?? 0) > 0) {
             $storedPayload['discount'] = (int) $normalized['discount'];
+        }
+        foreach (['facebook_page_id', 'facebook_page_name', 'facebook_creator_name', 'facebook_ad_id', 'marketer_user_id'] as $normalizedKey) {
+            if (array_key_exists($normalizedKey, $normalized) && filled($normalized[$normalizedKey])) {
+                $storedPayload[$normalizedKey] = $normalized[$normalizedKey];
+            }
         }
         if (filled($normalized['shipping_address'] ?? null)) {
             $storedPayload['shipping_address'] = $normalized['shipping_address'];

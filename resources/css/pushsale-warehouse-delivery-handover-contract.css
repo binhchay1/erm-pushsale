@@ -1,0 +1,258 @@
+.ps-handover-page {
+    padding: 0 14px 14px !important;
+    background: #fff !important;
+    min-height: calc(100vh - 50px) !important;
+}
+
+.ps-handover-page .ps-handover-header {
+    height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    border-bottom: 1px solid #d6dde5 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+    margin: 0 -2px 12px !important;
+    padding: 0 6px 0 0 !important;
+    background: #fff !important;
+}
+
+.ps-handover-title {
+    color: #000 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    line-height: 32px !important;
+    white-space: nowrap !important;
+}
+
+.ps-handover-search {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    min-width: 320px !important;
+}
+
+.ps-handover-search input,
+.ps-handover-filter-row select,
+.ps-handover-form input,
+.ps-handover-form select {
+    height: 31px !important;
+    min-height: 31px !important;
+    border: 1px solid #bccad8 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    padding: 5px 10px !important;
+    font-size: 13px !important;
+    color: #000 !important;
+}
+
+.ps-handover-search input {
+    width: 260px !important;
+}
+
+.ps-handover-page .btn.btn-primary,
+.ps-handover-modal .btn.btn-primary {
+    background: #2d8fc3 !important;
+    border-color: #237aaa !important;
+    border-radius: 3px !important;
+    color: #fff !important;
+    height: 31px !important;
+    line-height: 18px !important;
+    font-weight: 600 !important;
+    padding: 5px 13px !important;
+    font-size: 13px !important;
+}
+
+.ps-handover-filter-row {
+    display: grid !important;
+    grid-template-columns: minmax(240px, 300px) minmax(260px, 320px) 1fr auto !important;
+    gap: 26px !important;
+    align-items: center !important;
+    margin-bottom: 10px !important;
+}
+
+.ps-handover-filter-row select {
+    width: 100% !important;
+}
+
+.ps-handover-table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    margin-top: 6px !important;
+}
+
+.ps-handover-table {
+    width: 100% !important;
+    min-width: 1180px !important;
+    table-layout: fixed !important;
+    margin-bottom: 0 !important;
+    border-collapse: collapse !important;
+}
+
+.ps-handover-table th {
+    background: #3586d9 !important;
+    color: #fff !important;
+    border: 1px solid #2576c7 !important;
+    height: 31px !important;
+    padding: 7px 8px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    vertical-align: middle !important;
+}
+
+.ps-handover-table td {
+    height: 34px !important;
+    border: 1px solid #d7d7d7 !important;
+    padding: 6px 8px !important;
+    font-size: 13px !important;
+    color: #000 !important;
+    vertical-align: middle !important;
+}
+
+.ps-handover-table th:nth-child(1) { width: 38px !important; }
+.ps-handover-table th:nth-child(2) { width: 160px !important; }
+.ps-handover-table th:nth-child(3) { width: 230px !important; }
+.ps-handover-table th:nth-child(4) { width: 170px !important; }
+.ps-handover-table th:nth-child(5) { width: 230px !important; }
+.ps-handover-table th:nth-child(6) { width: 110px !important; }
+.ps-handover-table th:nth-child(7) { width: 135px !important; }
+.ps-handover-table th:nth-child(8) { width: 150px !important; }
+.ps-handover-table th:nth-child(9) { width: 165px !important; }
+.ps-handover-table th:nth-child(10) { width: 90px !important; }
+
+.ps-handover-table tbody tr:nth-child(even) td {
+    background: #f3f3f3 !important;
+}
+
+.ps-handover-table .ps-empty-row {
+    height: 120px !important;
+    color: #666 !important;
+}
+
+.ps-handover-status {
+    display: inline-block !important;
+    min-width: 96px !important;
+    padding: 3px 8px !important;
+    border-radius: 2px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+
+.ps-handover-status.is-updating {
+    color: #7a5b00 !important;
+    background: #fff5cd !important;
+    border: 1px solid #f1d67c !important;
+}
+
+.ps-handover-status.is-closed {
+    color: #0d6b2c !important;
+    background: #dff5e6 !important;
+    border: 1px solid #8bd8a5 !important;
+}
+
+.ps-handover-actions {
+    white-space: nowrap !important;
+}
+
+.ps-handover-actions .btn-icon {
+    appearance: none !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #1e93ff !important;
+    width: 24px !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    padding: 0 !important;
+    margin: 0 2px !important;
+    text-align: center !important;
+}
+
+.ps-handover-modal-backdrop {
+    position: fixed !important;
+    z-index: 1050 !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding-top: 5px !important;
+}
+
+.ps-handover-modal {
+    width: 600px !important;
+    max-width: calc(100vw - 22px) !important;
+    height: min(930px, calc(100vh - 12px)) !important;
+    background: #fff !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.32) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+.ps-handover-modal-title {
+    height: 54px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
+    border-bottom: 1px solid #d3d3d3 !important;
+    background: #fff !important;
+}
+
+.ps-handover-modal-title strong {
+    font-size: 18px !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+}
+
+.ps-handover-modal-title button {
+    border: 0 !important;
+    background: transparent !important;
+    font-size: 20px !important;
+    line-height: 20px !important;
+    color: #333 !important;
+}
+
+.ps-handover-form {
+    padding: 16px 16px 24px !important;
+}
+
+.ps-handover-form label {
+    display: grid !important;
+    grid-template-columns: 185px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    align-items: center !important;
+    margin: 0 0 12px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #000 !important;
+}
+
+.ps-handover-form label > span {
+    font-size: 13px !important;
+    line-height: 18px !important;
+    font-weight: 600 !important;
+}
+
+.ps-handover-form input,
+.ps-handover-form select {
+    width: 100% !important;
+}
+
+.ps-handover-modal-actions {
+    margin-left: 197px !important;
+    margin-top: 6px !important;
+}
+
+@media (max-width: 900px) {
+    .ps-handover-filter-row {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+    }
+
+    .ps-handover-filter-spacer {
+        display: none !important;
+    }
+}

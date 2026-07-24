@@ -115,6 +115,10 @@ class PageResourceManager
                 return $this->createWarehouseVoucher($validated, $actor);
             }
 
+            if ($resourceKey === '5.4' && empty($validated['manager_user_id']) && $actor) {
+                $validated['manager_user_id'] = $actor->id;
+            }
+
             /** @var class-string<Model> $modelClass */
             $modelClass = $definition['model'];
             $attributes = array_merge((array) ($definition['defaults'] ?? []), $this->modelAttributes($definition, $validated));
