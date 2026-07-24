@@ -1,0 +1,247 @@
+/*
+ * V87 final polish: pagination contract, body top breathing room,
+ * floating action bubbles, and explicit upsale product markers.
+ */
+
+html body.pushsale-app-body .ps-page-shell__body {
+    padding-top: 10px !important;
+}
+
+html body.pushsale-app-body .psm-table-area,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-table-scroll,
+html body.pushsale-app-body .pushsale-template-host-v83 .box,
+html body.pushsale-app-body .pushsale-template-fragment .box {
+    margin-top: 10px !important;
+}
+
+html body.pushsale-app-body .ps-page-shell__body .psm-table-area,
+html body.pushsale-app-body .ps-page-shell__body .table-responsive:first-child,
+html body.pushsale-app-body .ps-page-shell__body .ps-table-scroll:first-child {
+    margin-top: 0 !important;
+}
+
+/* One pagination contract for report pages, marketing dashboard, customer profile and legacy templates. */
+html body.pushsale-app-body .pushsale-pagination.ps-pagination-v81,
+html body.pushsale-app-body .ps-pagination-v81,
+html body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination.ps-pagination-v81 {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+    padding: 8px 14px !important;
+    border: 0 !important;
+    border-top: 1px solid #e2e8f0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-pagination-info {
+    justify-self: start !important;
+    color: #111 !important;
+    font-size: 13px !important;
+    line-height: 30px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-pagination-pages {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    justify-self: center !important;
+    min-height: 30px !important;
+}
+
+html body.pushsale-app-body .ps-pagination-pages button,
+html body.pushsale-app-body .ps-pagination-v81 .ps-pagination-pages button,
+html body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination.ps-pagination-v81 .ps-pagination-pages button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 30px !important;
+    width: auto !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    margin: 0 !important;
+    padding: 4px 9px !important;
+    border: 1px solid #d7dce2 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #337ab7 !important;
+    box-shadow: none !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+}
+
+html body.pushsale-app-body .ps-pagination-pages button.active,
+html body.pushsale-app-body .ps-pagination-pages button[aria-current='page'] {
+    border-color: #2e6da4 !important;
+    background: #337ab7 !important;
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-pagination-pages button:disabled {
+    color: #c4cbd3 !important;
+    background: #fafafa !important;
+    cursor: not-allowed !important;
+}
+
+html body.pushsale-app-body .ps-pagination-pages .ellipsis {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 24px !important;
+    height: 30px !important;
+    color: #8a93a0 !important;
+}
+
+html body.pushsale-app-body .ps-pagination-size {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    justify-self: end !important;
+    gap: 7px !important;
+    min-height: 30px !important;
+    margin: 0 !important;
+    color: #111 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 30px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-pagination-size select {
+    width: 72px !important;
+    height: 31px !important;
+    min-height: 31px !important;
+    padding: 3px 8px !important;
+    border: 1px solid #c8d2dc !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #111 !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+}
+
+/* Strong round-button contract. clip-path prevents legacy square !important rules from leaking through. */
+html body.pushsale-app-body nav.action-container.ps-floating-action-menu,
+html body.pushsale-app-body .ps-customer-profile-page nav.action-container.ps-floating-action-menu {
+    width: 64px !important;
+    height: 64px !important;
+    min-width: 64px !important;
+    min-height: 64px !important;
+    overflow: visible !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body nav.action-container.ps-floating-action-menu button.ps-v87-round-action,
+html body.pushsale-app-body nav.action-container.ps-floating-action-menu .ps-action-bubble,
+html body.pushsale-app-body nav.action-container.ps-floating-action-menu .main-action,
+html body.pushsale-app-body .ps-customer-profile-page nav.action-container.ps-floating-action-menu button.ps-v87-round-action,
+html body.pushsale-app-body .ps-customer-profile-page nav.action-container.ps-floating-action-menu .ps-action-bubble,
+html body.pushsale-app-body .ps-customer-profile-page nav.action-container.ps-floating-action-menu .main-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    max-width: 52px !important;
+    max-height: 52px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 9999px !important;
+    aspect-ratio: 1 / 1 !important;
+    clip-path: circle(50% at 50% 50%) !important;
+    color: #fff !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25) !important;
+    overflow: hidden !important;
+    transform: translateZ(0) !important;
+}
+
+html body.pushsale-app-body nav.action-container.ps-floating-action-menu .main-action,
+html body.pushsale-app-body .ps-customer-profile-page nav.action-container.ps-floating-action-menu .main-action {
+    width: 58px !important;
+    height: 58px !important;
+    min-width: 58px !important;
+    min-height: 58px !important;
+    max-width: 58px !important;
+    max-height: 58px !important;
+    background: #0073d8 !important;
+    font-size: 22px !important;
+}
+
+html body.pushsale-app-body nav.action-container.ps-floating-action-menu .hidden-actions,
+html body.pushsale-app-body .ps-customer-profile-page nav.action-container.ps-floating-action-menu .hidden-actions {
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body nav.action-container.ps-floating-action-menu .icon-row,
+html body.pushsale-app-body .ps-customer-profile-page nav.action-container.ps-floating-action-menu .icon-row {
+    gap: 14px !important;
+    min-height: 58px !important;
+}
+
+html body.pushsale-app-body nav.action-container.ps-floating-action-menu .ps-action-tooltip {
+    clip-path: none !important;
+}
+
+/* Upsale lines inside the customer-profile product cell. */
+html body.pushsale-app-body .ps-product-stack .ps-product-line {
+    position: relative !important;
+    min-height: 24px !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .ps-product-stack .ps-product-line.has-upsale-divider {
+    margin-top: 6px !important;
+    padding-top: 8px !important;
+    border-top: 1px dashed #97a6ba !important;
+}
+
+html body.pushsale-app-body .ps-product-stack .ps-product-line.is-upsale-line {
+    color: #0b68b7 !important;
+}
+
+html body.pushsale-app-body .ps-product-stack .ps-product-line .ten-sp {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-upsale-line-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    border-radius: 50% !important;
+    background: #0d8bf2 !important;
+    color: #fff !important;
+    font-size: 10px !important;
+    line-height: 16px !important;
+    cursor: help !important;
+}
+
+@media (max-width: 760px) {
+    html body.pushsale-app-body .pushsale-pagination.ps-pagination-v81,
+    html body.pushsale-app-body .ps-pagination-v81 {
+        grid-template-columns: 1fr !important;
+        justify-items: center !important;
+    }
+
+    html body.pushsale-app-body .ps-pagination-info,
+    html body.pushsale-app-body .ps-pagination-size {
+        justify-self: center !important;
+    }
+}

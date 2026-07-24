@@ -10,7 +10,7 @@ Mục tiêu: xử lý các regression còn lại sau V85 theo đúng contract Pu
 
 File thay đổi chính:
 
-- `resources/css/pushsale-v86-header-menu-dialog-polish.css`
+- `resources/css/pushsale-header-menu-dialog-polish.css`
 - `resources/js/lib/pushsaleStyleRegistry.js`
 - `resources/js/pages/Pushsale/BusinessPage.jsx`
 

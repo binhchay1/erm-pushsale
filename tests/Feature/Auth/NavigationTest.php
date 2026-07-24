@@ -25,7 +25,7 @@ class NavigationTest extends TestCase
             '/sales/dashboard',
             '/sales/workspace',
             '/sales/performance',
-            '/sales/reports/sale-1',
+            '/sales/reports/sale-work',
             '/sales/rankings',
             '/customers',
             '/org-chart',

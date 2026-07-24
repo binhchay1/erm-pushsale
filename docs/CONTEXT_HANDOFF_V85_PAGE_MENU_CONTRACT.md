@@ -44,7 +44,7 @@ Các adapter cũ vẫn đi qua shell:
 File mới:
 
 ```text
-resources/css/pushsale-v85-page-shell-menu-contract.css
+resources/css/pushsale-page-shell-menu-contract.css
 ```
 
 File này được load cuối qua registry:

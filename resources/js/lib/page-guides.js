@@ -16,6 +16,6 @@ export function findPageGuide(pathname, locale = 'vi') {
         }
     }
 
-    // Extra report child routes (e.g. /admin/reports/extra/sale-1) match parent prefix
+    // Extra report child routes (e.g. /admin/sales/reports/work) match parent prefix
     return best;
 }

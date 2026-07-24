@@ -29,13 +29,13 @@ File này đã được dựng lại từ các module CSS đã có ở V24:
 - `pushsale-landing-connections.css`
 - `pushsale-admin-finance-dashboard.css`
 - `pushsale-template-six-reports.css`
-- `pushsale-warehouse-v16.css`
-- `pushsale-system-v17.css`
-- `pushsale-data-distribution-v22.css`
-- `pushsale-shipping-config-v22.css`
-- `pushsale-system-v22.css`
-- `pushsale-system-v23.css`
-- `pushsale-system-v24.css`
+- `pushsale-warehouse.css`
+- `pushsale-system-foundation.css`
+- `pushsale-data-distribution.css`
+- `pushsale-shipping-config-contract.css`
+- `pushsale-system-layout.css`
+- `pushsale-system-components.css`
+- `pushsale-system-contract.css`
 
 Các file module vẫn được giữ lại trong source. `pushsale.css` không còn `@import` để tránh lỗi production build hoặc thứ tự import bị lệch.
 

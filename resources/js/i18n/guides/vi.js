@@ -66,7 +66,7 @@ export default [
         ],
     },
     {
-        path: '/admin/reports/ceo',
+        path: '/admin/reports/ceo-dashboard-v2',
         title: 'Báo cáo điều hành',
         intro: 'Báo cáo tổng hợp cấp cao: doanh thu, chi phí marketing, hiệu quả từng bộ phận.',
         sections: [
@@ -90,7 +90,7 @@ export default [
         ],
     },
     {
-        path: '/admin/reports/extra',
+        path: '/admin/reports',
         title: 'Bộ báo cáo nghiệp vụ',
         intro: 'Tập hợp các báo cáo chi tiết theo từng bộ phận. Dùng thanh thẻ phía trên để chuyển giữa các báo cáo.',
         sections: [

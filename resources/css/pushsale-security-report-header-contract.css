@@ -1,0 +1,355 @@
+/* Security pages 1.7.2/1.7.3 and shared report header/filter contract. */
+
+html body.pushsale-app-body .pushsale-page[data-page-code='1.7.2'],
+html body.pushsale-app-body .pushsale-page[data-page-code='1.7.3'] {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ecf0f5 !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code='1.7.2'] .pushsale-template-host,
+html body.pushsale-app-body .pushsale-page[data-page-code='1.7.3'] .pushsale-template-host,
+html body.pushsale-app-body .pushsale-page[data-page-code='1.7.2'] .content-wrapper,
+html body.pushsale-app-body .pushsale-page[data-page-code='1.7.3'] .content-wrapper {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ecf0f5 !important;
+    min-height: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .contentPane,
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .pushsale-template-inner,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .contentPane,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .pushsale-template-inner {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header-wrap,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .m-header-wrap {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    border-bottom: 1px solid #d2d6de !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .m-header {
+    min-height: 46px !important;
+    margin: 0 !important;
+    padding: 7px 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header {
+    justify-content: space-between !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .m-header {
+    justify-content: flex-start !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header > [class*='col-'],
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .m-header > [class*='col-'] {
+    float: none !important;
+    width: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header > .col-sm-6,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .m-header > .col-sm-8 {
+    flex: 0 0 auto !important;
+    max-width: calc(100% - 20px) !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header > .col-sm-4 {
+    flex: 0 1 520px !important;
+    width: min(520px, 46vw) !important;
+    max-width: 520px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header > .col-sm-4.form-group,
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header > .col-sm-4 .form-group {
+    margin-bottom: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header > .col-sm-4 > div:first-child {
+    width: calc(100% - 128px) !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header > .col-sm-4 > div:last-child {
+    width: 122px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .text[id$='lblModuleTitle'],
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .text[id$='lblModuleTitle'] {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #111 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 24px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header .form-control,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .m-header .form-control {
+    height: 30px !important;
+    min-height: 30px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header .btn,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .m-header .btn,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .box-body .btn {
+    height: 30px !important;
+    line-height: 18px !important;
+    border-radius: 3px !important;
+    font-size: 12px !important;
+    padding: 5px 10px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 #dnn_ctr1576_Main_QuanLyDangNhap_pnlSearch > .box-body,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body:first-of-type {
+    margin: 0 !important;
+    padding: 10px 15px 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 #dnn_ctr1576_Main_QuanLyDangNhap_pnlSearch > .box-body > .row {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(150px, 1fr)) !important;
+    gap: 10px 12px !important;
+    margin: 0 !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 #dnn_ctr1576_Main_QuanLyDangNhap_pnlSearch > .box-body > .row > [class*='col-'] {
+    width: 100% !important;
+    float: none !important;
+    padding: 0 !important;
+    margin: 0 0 10px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 select,
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .ps-ddl,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 select,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 input.form-control {
+    height: 30px !important;
+    min-height: 30px !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #333 !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .ps-ddl {
+    line-height: 28px !important;
+    position: relative !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .ps-ddl-display-text {
+    min-height: 28px !important;
+    padding: 0 28px 0 8px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .ps-ddl-arow {
+    height: 28px !important;
+    line-height: 28px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .ps-ddl-search-area {
+    top: 30px !important;
+    left: 0 !important;
+    right: auto !important;
+    width: 260px !important;
+    border: 1px solid #d2d6de !important;
+    background: #fff !important;
+    z-index: 1040 !important;
+    padding: 6px !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .18) !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .box-body:last-child,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body:last-child {
+    margin: 12px 15px 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .dragscroll1,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .table {
+    width: 100% !important;
+    overflow-x: auto !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .table,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .table {
+    margin-bottom: 8px !important;
+    background: #fff !important;
+    table-layout: auto !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .table > thead > tr > th,
+html body.pushsale-app-body .pushsale-template-page-1-7-2 .table > tbody > tr > td,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .table > thead > tr > th,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 .table > tbody > tr > td {
+    padding: 7px 8px !important;
+    vertical-align: middle !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row {
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row > div:first-child {
+    display: grid !important;
+    grid-template-columns: minmax(260px, 340px) minmax(180px, 240px) auto !important;
+    gap: 10px 12px !important;
+    align-items: center !important;
+    margin: 0 0 10px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row > div:first-child > [class*='col-'] {
+    width: auto !important;
+    float: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row > .col-sm-8,
+html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row > .col-sm-4 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row > .col-sm-8 {
+    width: calc(100% - 330px) !important;
+    padding-right: 14px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row > .col-sm-4 {
+    width: 330px !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar.ps-page-shell {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-page-shell__header {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    border-bottom: 1px solid #d2d6de !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-page-shell__main-row {
+    display: grid !important;
+    grid-template-columns: minmax(240px, max-content) minmax(420px, 1fr) auto !important;
+    gap: 12px !important;
+    align-items: center !important;
+    min-height: 48px !important;
+    padding: 8px 15px !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-page-shell__title-col,
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-page-shell__filters,
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-page-shell__actions {
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-page-shell__title {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 22px !important;
+    color: #111 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-primary,
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-advanced,
+html body.pushsale-app-body .pushsale-kind-report .ps-report-toolbar-controls {
+    display: grid !important;
+    gap: 8px 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-primary {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-advanced {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    padding: 0 15px 10px !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-report .ps-report-toolbar-actions,
+html body.pushsale-app-body .pushsale-kind-report .ps-page-shell__actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 8px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar input,
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar select,
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-control,
+html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-select {
+    height: 30px !important;
+    min-height: 30px !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+}
+
+@media (max-width: 1100px) {
+    html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header,
+    html body.pushsale-app-body .pushsale-template-page-1-7-3 .m-header,
+    html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-page-shell__main-row {
+        grid-template-columns: 1fr !important;
+        display: grid !important;
+        align-items: stretch !important;
+    }
+
+    html body.pushsale-app-body .pushsale-template-page-1-7-2 .m-header > .col-sm-4,
+    html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-page-shell__filters,
+    html body.pushsale-app-body .pushsale-kind-report .ps-report-v2-toolbar .ps-page-shell__actions {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    html body.pushsale-app-body .pushsale-template-page-1-7-2 #dnn_ctr1576_Main_QuanLyDangNhap_pnlSearch > .box-body > .row,
+    html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row > div:first-child {
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row > .col-sm-8,
+    html body.pushsale-app-body .pushsale-template-page-1-7-3 #dnn_ctr1745_Main_SearchFilterDataChotDonLog_pnlMain > .box-body > .row > .col-sm-4 {
+        width: 100% !important;
+        padding-right: 0 !important;
+    }
+}

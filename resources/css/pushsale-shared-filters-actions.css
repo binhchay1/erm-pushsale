@@ -1,0 +1,268 @@
+/* V78 - Shared date filter, customer profile cleanup and Pushsale floating actions */
+html body.pushsale-app-body .ps-date-filter {
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    width: 100%;
+    min-height: 34px;
+}
+
+html body.pushsale-app-body .ps-date-filter .ps-date-filter-input,
+html body.pushsale-app-body .ps-date-filter input[type='date'] {
+    width: 100% !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 6px 10px !important;
+    border: 1px solid #c9d6e2 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 13px !important;
+    line-height: 20px !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-date-filter .ps-date-filter-input:focus,
+html body.pushsale-app-body .ps-date-filter input[type='date']:focus {
+    border-color: #66afe9 !important;
+    outline: 0 !important;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 4px rgba(102,175,233,.45) !important;
+}
+
+html body.pushsale-app-body .ps-date-filter .ps-date-filter-separator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    color: #777;
+    font-size: 13px;
+}
+
+html body.pushsale-app-body .ps-date-filter.has-error .ps-date-filter-input {
+    border-color: #d73925 !important;
+}
+
+html body.pushsale-app-body .ps-date-filter .ps-date-filter-label {
+    grid-column: 1 / -1;
+    display: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #555;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+html body.pushsale-app-body .ps-date-filter .ps-date-filter-error {
+    grid-column: 1 / -1;
+    color: #d73925;
+    font-size: 11px;
+    line-height: 14px;
+}
+
+html body.pushsale-app-body .ps-report-date-filter,
+html body.pushsale-app-body .ps-acc-date-filter,
+html body.pushsale-app-body .ps-wh-date-range,
+html body.pushsale-app-body .ps-sale-date-range.ps-date-filter,
+html body.pushsale-app-body .ps-customer-profile-page .ps-date-range-control.ps-date-filter {
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-sale-date-range.ps-date-filter {
+    height: auto !important;
+    min-height: 34px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body .ps-sale-date-range.ps-date-filter .ps-date-filter-label {
+    display: block;
+}
+
+html body.pushsale-app-body .ps-acc-date-filter {
+    grid-template-columns: minmax(150px, 1fr) auto minmax(150px, 1fr);
+}
+
+/* Customer profile pagination/table cleanup: remove the orphan horizontal border band under the table. */
+html body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination,
+html body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination[class] {
+    margin: 10px 0 0 !important;
+    padding: 9px 0 0 !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-table-scroll {
+    margin-bottom: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table {
+    margin-bottom: 0 !important;
+}
+
+/* Pushsale floating action menu: round icon bubbles, no square blocks. */
+html body.pushsale-app-body .action-container,
+html body.pushsale-app-body nav.action-container,
+html body.pushsale-app-body .ps-floating-action-menu.action-container,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions {
+    position: fixed !important;
+    left: 24px !important;
+    bottom: 24px !important;
+    top: auto !important;
+    right: auto !important;
+    z-index: 2147482500 !important;
+    width: 58px !important;
+    height: 58px !important;
+    min-width: 58px !important;
+    min-height: 58px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .action-container .main-action,
+html body.pushsale-app-body .action-container .ps-action-bubble,
+html body.pushsale-app-body .action-container .n-button,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    max-width: 52px !important;
+    max-height: 52px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    color: #fff !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    overflow: visible !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25) !important;
+    transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease !important;
+}
+
+html body.pushsale-app-body .action-container .main-action,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action {
+    width: 58px !important;
+    height: 58px !important;
+    min-width: 58px !important;
+    min-height: 58px !important;
+    max-width: 58px !important;
+    max-height: 58px !important;
+    background: #0073d8 !important;
+    font-size: 22px !important;
+}
+
+html body.pushsale-app-body .action-container .ps-action-bubble:hover,
+html body.pushsale-app-body .action-container .n-button:hover,
+html body.pushsale-app-body .action-container .main-action:hover {
+    transform: translateY(-1px) scale(1.035) !important;
+    box-shadow: 0 6px 16px rgba(0,0,0,.3) !important;
+}
+
+html body.pushsale-app-body .action-container .hidden-actions,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .hidden-actions {
+    position: absolute !important;
+    left: 0 !important;
+    bottom: 68px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    width: max-content !important;
+    max-width: calc(100vw - 80px) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(12px) scale(.96) !important;
+    transform-origin: left bottom !important;
+    transition: opacity .18s ease, transform .18s ease, visibility .18s ease !important;
+}
+
+html body.pushsale-app-body .action-container.is-open .hidden-actions,
+html body.pushsale-app-body .action-container.open .hidden-actions,
+html body.pushsale-app-body .action-container:hover .hidden-actions,
+html body.pushsale-app-body .action-container:focus-within .hidden-actions,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions.open .hidden-actions,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions:hover .hidden-actions,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions:focus-within .hidden-actions {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+}
+
+html body.pushsale-app-body .action-container .icon-row,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .icon-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: max-content !important;
+    min-height: 52px !important;
+}
+
+html body.pushsale-app-body .action-container .fa,
+html body.pushsale-app-body .action-container i {
+    color: #fff !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+}
+
+html body.pushsale-app-body .action-container .fam-primary,
+html body.pushsale-app-body .action-container .ps-action-bubble-primary { background: #0585e5 !important; }
+html body.pushsale-app-body .action-container .fam-success,
+html body.pushsale-app-body .action-container .ps-action-bubble-success { background: #45a85a !important; }
+html body.pushsale-app-body .action-container .fam-warning,
+html body.pushsale-app-body .action-container .ps-action-bubble-warning { background: #ff8c00 !important; }
+html body.pushsale-app-body .action-container .fam-danger,
+html body.pushsale-app-body .action-container .ps-action-bubble-danger { background: #c9332e !important; }
+
+html body.pushsale-app-body .action-container .ps-action-count {
+    position: absolute !important;
+    left: 44px !important;
+    bottom: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    padding: 0 6px !important;
+    border-radius: 999px !important;
+    background: #f39c12 !important;
+    color: #fff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,.25) !important;
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-date-filter {
+        grid-template-columns: 1fr auto 1fr;
+        gap: 6px;
+    }
+
+    html body.pushsale-app-body .action-container,
+    html body.pushsale-app-body nav.action-container,
+    html body.pushsale-app-body .action-container.ps-wh-floating-actions {
+        left: 18px !important;
+        bottom: 18px !important;
+    }
+}

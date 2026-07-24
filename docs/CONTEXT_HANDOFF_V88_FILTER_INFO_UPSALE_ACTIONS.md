@@ -15,7 +15,7 @@ Bản V88 tiếp tục sau V87, xử lý các lỗi QA mới trên giao diện t
 
 ## File thay đổi chính
 
-- `resources/css/pushsale-v88-filter-info-upsale-actions.css`
+- `resources/css/pushsale-filter-info-upsale-actions.css`
 - `resources/js/lib/pushsaleStyleRegistry.js`
 - `resources/js/pages/Admin/Users/Index.jsx`
 - `resources/js/pages/Admin/Dashboard.jsx`

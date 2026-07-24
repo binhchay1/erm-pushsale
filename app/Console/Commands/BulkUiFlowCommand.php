@@ -213,9 +213,9 @@ class BulkUiFlowCommand extends Command
         $this->table(['Màn hình', 'URL', 'Ghi chú'], [
             ['Duyệt Landing', '/admin/landing-approvals', 'Có chiến dịch chờ duyệt + đã duyệt'],
             ['Phân bổ data', '/admin/leads', 'Pushsale-style data distribution'],
-            ['Báo cáo công việc sale', '/admin/reports/extra/sale-1', 'Filter: 7 ngày / tháng này'],
-            ['BC chốt đơn', '/admin/reports/extra/sale-2', ''],
-            ['BC doanh số sale', '/admin/reports/extra/sale-3', ''],
+            ['Báo cáo công việc sale', '/admin/sales/reports/work', 'Filter: 7 ngày / tháng này'],
+            ['BC chốt đơn', '/admin/sales/reports/closing-summary', ''],
+            ['BC doanh số sale', '/admin/sales/reports/revenue-detail', ''],
             ['Workspace telesale', '/sales/workspace', 'Đăng nhập sale được gán đơn'],
             ['Đối soát COD', '/admin/shipping/reconciliation', ''],
             ['Dashboard CEO', '/admin/dashboard', ''],

@@ -22,7 +22,7 @@
   - Added `PushsaleReportToolbar` as common report toolbar contract.
   - Added `SystemBusinessReport` matching Pushsale structure, with upsale columns appended.
   - Reused common toolbar on warehouse sales summary/V2 reports.
-- `resources/css/pushsale-v93-system-reports-menu-scroll.css`
+- `resources/css/pushsale-system-reports-menu-scroll.css`
   - Report toolbar/table styling.
   - System business table styling.
   - Scrollable sidebar and level-3 flyout menu.

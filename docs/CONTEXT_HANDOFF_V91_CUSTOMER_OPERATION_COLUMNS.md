@@ -41,7 +41,7 @@ This component is now used by:
 New final CSS file:
 
 ```text
-resources/css/pushsale-v91-customer-operation-money-contract.css
+resources/css/pushsale-customer-operation-money-contract.css
 ```
 
 Registered in:

@@ -32,15 +32,15 @@ if 'data-pushsale-login-user-summary="1"' not in login_template:
     errors.append("1.7.1.html does not expose the dynamic login-user anchor")
 
 app_css = (ROOT / "resources/css/app.css").read_text(encoding="utf-8")
-for forbidden in ("pushsale-layout.css", "public-shell.css", "pushsale-v12-fixes.css", "pushsale-v13-fixes.css"):
+for forbidden in ("pushsale-layout.css", "public-shell.css", "pushsale-legacy-fixes.css", "pushsale-legacy-adminlte-fixes.css"):
     if forbidden in app_css:
         errors.append(f"app.css still imports shell-specific stylesheet: {forbidden}")
 
 pushsale_css = (ROOT / "resources/css/pushsale.css").read_text(encoding="utf-8")
-if "pushsale-system-v17.css" not in pushsale_css:
+if "pushsale-system-foundation.css" not in pushsale_css:
     errors.append("pushsale.css does not load the V17 final contract")
 
-v17_css = (ROOT / "resources/css/pushsale-system-v17.css").read_text(encoding="utf-8")
+v17_css = (ROOT / "resources/css/pushsale-system-foundation.css").read_text(encoding="utf-8")
 for contract in (".pushsale-filter-row", ".pushsale-row-actions", ".ps-modal-surface", ".pushsale-login-user-summary"):
     if contract not in v17_css:
         errors.append(f"V17 CSS contract missing: {contract}")

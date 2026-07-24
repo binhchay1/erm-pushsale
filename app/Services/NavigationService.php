@@ -52,7 +52,7 @@ class NavigationService
     private function topLevelsForRole(UserRole $role): array
     {
         return match ($role) {
-            UserRole::Admin => [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            UserRole::Admin => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             UserRole::Sales => [3, 4, 8],
             UserRole::Marketing => [2, 3, 8],
             UserRole::Warehouse => [3, 5, 8],
@@ -115,8 +115,8 @@ class NavigationService
                 '/admin/customers' => '/sales/customers',
                 '/admin/rankings' => '/sales/rankings',
                 '/admin/sales/performance' => '/sales/performance',
-                '/admin/sales/revenue' => '/sales/reports/sale-3',
-                '/admin/reports/ceo' => '/sales/reports/sale-3',
+                '/admin/sales/revenue' => '/sales/reports/sale-revenue-detail',
+                '/admin/reports/ceo-dashboard-v2' => '/sales/reports/sale-revenue-detail',
                 '/admin/reports/team-leaders' => '/sales/performance',
             ],
             UserRole::Marketing => [
@@ -130,7 +130,7 @@ class NavigationService
                 '/admin/marketing/campaign-report' => '/marketing/campaign-report',
                 '/admin/reports/hourly' => '/marketing/reports/hourly',
                 '/admin/reports/team-leaders' => '/marketing/reports/team-leaders',
-                '/admin/reports/ceo' => '/marketing/reports/marketing-1',
+                '/admin/reports/ceo-dashboard-v2' => '/marketing/reports/marketing-1',
             ],
             UserRole::Warehouse => [
                 '/admin/warehouse/operations' => '/warehouse/workspace',
@@ -143,7 +143,7 @@ class NavigationService
             UserRole::Accounting => [
                 '/admin/accounting' => '/accounting/workspace',
                 '/admin/customers' => '/accounting/customers',
-                '/admin/reports/ceo' => '/accounting/reports/kho-1',
+                '/admin/reports/ceo-dashboard-v2' => '/accounting/reports/kho-1',
             ],
             UserRole::Allocator => [
                 '/admin/leads' => '/allocator/workspace',
@@ -158,12 +158,13 @@ class NavigationService
             return $exact[$url];
         }
 
-        if (preg_match('#^/admin/reports/extra/([a-z0-9-]+)$#', $url, $matches) === 1) {
+        $reportKey = $this->extraReportKeyFromUrl($url);
+        if ($reportKey !== null) {
             return match ($role) {
-                UserRole::Sales => '/sales/reports/'.$matches[1],
-                UserRole::Marketing => '/marketing/reports/'.$matches[1],
-                UserRole::Warehouse => '/warehouse/reports/'.$matches[1],
-                UserRole::Accounting => '/accounting/reports/'.$matches[1],
+                UserRole::Sales => '/sales/reports/'.$reportKey,
+                UserRole::Marketing => '/marketing/reports/'.$reportKey,
+                UserRole::Warehouse => '/warehouse/reports/'.$reportKey,
+                UserRole::Accounting => '/accounting/reports/'.$reportKey,
                 UserRole::Allocator => '/allocator/reports/allocation',
                 default => null,
             };
@@ -217,11 +218,19 @@ class NavigationService
 
     private function extraReportKeyFromUrl(string $url): ?string
     {
-        if (preg_match('#/(?:admin/reports/extra|sales/reports|marketing/reports|warehouse/reports|accounting/reports)/([a-z0-9-]+)$#', $url, $matches) !== 1) {
+        $path = strtok($url, '?') ?: $url;
+
+        foreach ((array) config('pushsale_report_routes', []) as $key => $route) {
+            if (($route['admin_path'] ?? null) === $path) {
+                return ExtraReportService::normalizeKey((string) $key);
+            }
+        }
+
+        if (preg_match('#/(?:admin/reports/extra|sales/reports|marketing/reports|warehouse/reports|accounting/reports)/([a-z0-9-]+)$#', $path, $matches) !== 1) {
             return null;
         }
 
-        return $matches[1];
+        return ExtraReportService::normalizeKey($matches[1]);
     }
 
 

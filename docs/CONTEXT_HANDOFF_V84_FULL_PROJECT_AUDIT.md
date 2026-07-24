@@ -97,7 +97,7 @@ resources/js/lib/uiShellStyles.js
 Added:
 
 ```text
-resources/css/pushsale-v84-stability-contract.css
+resources/css/pushsale-stability-contract.css
 ```
 
 This locks the highest-risk boundaries:
@@ -135,7 +135,7 @@ Summary: 33 pass, 12 warn, 0 fail.
 
 Warnings are expected technical debt, not new breakage:
 
-- old unused version CSS files `pushsale-v12-fixes.css` and `pushsale-v13-fixes.css`
+- old unused version CSS files `pushsale-legacy-fixes.css` and `pushsale-legacy-adminlte-fixes.css`
 - broad `table` selectors in older page-specific CSS
 - 64 legacy numeric React page files
 - 64 legacy numeric controller files

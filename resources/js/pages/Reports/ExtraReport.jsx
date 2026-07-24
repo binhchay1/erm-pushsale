@@ -419,7 +419,13 @@ function SaleKpiReport({ rows, totals, filters, filterOptions, filterFields, rou
                             <tr><td>{psText(t, 'time_rate', 'Tiến độ thời gian')}</td><td>{time.progress}%</td></tr>
                         </tbody>
                     </table>
+                    <div className="ps-kpi-time-note small-tip">{psText(t, 'actual_revenue_formula', '* Doanh số thực = [Doanh số] - [Chiết khấu] - [Giá dịch vụ COD]')}</div>
                 </div>
+            </div>
+            <div className="ps-kpi-notes small-tip">
+                <div>{psText(t, 'kpi_note_contacts', '* Số contact tính theo [ngày sale nhận data] nằm trong khoảng ngày đã chọn')}</div>
+                <div>{psText(t, 'kpi_note_closed', '* Số chốt đơn tính theo [ngày chốt đơn] nằm trong khoảng ngày đã chọn')}</div>
+                <div>{psText(t, 'kpi_note_upsale', '* Upsale cộng doanh thu và số lượng sản phẩm nhưng không tạo thêm contact/KPI lead.')}</div>
             </div>
         </section>
     );
@@ -1627,22 +1633,22 @@ export default function ExtraReport({
     const t = useT();
     const labels = useLabels();
     const title = reportText(t, meta.key, 'title', meta.title);
-    const isRevenueDetail = ['sale-3', 'marketing-1'].includes(meta.key);
+    const isRevenueDetail = ['sale-revenue-detail', 'sale-3', 'marketing-1'].includes(meta.key);
 
     let content;
-    if (meta.key === 'sale-1') {
+    if (['sale-work', 'sale-1'].includes(meta.key)) {
         content = <SaleWorkReport title={psText(t, 'sale_work_title', 'Báo cáo công việc sale')} rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
-    } else if (meta.key === 'sale-2') {
+    } else if (['sale-closing-summary', 'sale-2'].includes(meta.key)) {
         content = <SaleClosingSummaryReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
-    } else if (meta.key === 'sale-4') {
+    } else if (['sale-kpi', 'sale-4'].includes(meta.key)) {
         content = <SaleKpiReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
-    } else if (meta.key === 'sale-5') {
+    } else if (['sale-appointments', 'sale-5'].includes(meta.key)) {
         content = <AppointmentCardsReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
-    } else if (meta.key === 'kho-2') {
+    } else if (['system-business', 'kho-2'].includes(meta.key)) {
         content = <SystemBusinessReport rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
-    } else if (['warehouse-sales-summary', 'marketing-sales-summary'].includes(meta.key)) {
+    } else if (['sale-revenue', 'warehouse-sales-summary', 'marketing-sales-summary'].includes(meta.key)) {
         content = <WarehouseSalesSummaryReport title={title} rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} extra={extra} />;
-    } else if (['warehouse-sales-v2', 'marketing-sales-v2'].includes(meta.key)) {
+    } else if (['sale-revenue-v2', 'warehouse-sales-v2', 'marketing-sales-v2'].includes(meta.key)) {
         content = <WarehouseSalesV2Report title={title} rows={rows} totals={totals} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} extra={extra} />;
     } else if (meta.key === 'product-conversion') {
         content = <ProductConversionMatrixReport rows={rows} totals={totals} extra={extra} filters={filters} filterOptions={filterOptions} filterFields={filterFields} routeUrl={routeUrl} />;
@@ -1660,7 +1666,7 @@ export default function ExtraReport({
 
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
-            <Head title={meta.key === 'sale-4' ? psText(t, 'sale_kpi_title', 'Sale KPI 2') : title} />
+            <Head title={['sale-kpi', 'sale-4'].includes(meta.key) ? psText(t, 'sale_kpi_title', 'Sale KPI 2') : title} />
             {content}
         </AppLayout>
     );

@@ -66,7 +66,7 @@ export default [
         ],
     },
     {
-        path: '/admin/reports/ceo',
+        path: '/admin/reports/ceo-dashboard-v2',
         title: 'Executive report',
         intro: 'High-level summary: revenue, marketing spend, and performance by department.',
         sections: [
@@ -90,7 +90,7 @@ export default [
         ],
     },
     {
-        path: '/admin/reports/extra',
+        path: '/admin/reports',
         title: 'Business report suite',
         intro: 'Detailed reports by department. Use the tabs at the top to switch between reports.',
         sections: [

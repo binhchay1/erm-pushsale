@@ -371,6 +371,38 @@ export default {
         revenue_cancel_rate: 'Cancelled revenue % (19)',
     },
     extra: {
+        'sale-kpi': {
+            title: 'Sales KPI',
+            description: 'New vs returning contacts, close rate, expected and actual revenue.',
+        },
+        'sale-closing-summary': {
+            title: 'Closing summary',
+            description: 'Contacts, closed orders, close rate and revenue before/after discount per rep.',
+        },
+        'sale-work': {
+            title: 'Sales activity report',
+            description: 'Assigned contacts and call progress by operation stage per telesales rep.',
+        },
+        'sale-revenue-detail': {
+            title: 'Sales revenue report',
+            description: 'Closed orders by delivery status: in transit, delivered, paid, returned, cancelled.',
+        },
+        'sale-revenue': {
+            title: 'Sales report',
+            description: 'Telesales revenue report matching the Pushsale sales menu.',
+        },
+        'sale-revenue-v2': {
+            title: 'Sales report V2',
+            description: 'Sales report V2 with contact funnel, highlighted metrics, and separated upsell.',
+        },
+        'sale-appointments': {
+            title: 'Telesales appointments',
+            description: 'Customers with callbacks in the next 7 days — plan work by day.',
+        },
+        'system-business': {
+            title: 'System business report',
+            description: 'Revenue by warehouse split new vs returning customers.',
+        },
         'sale-1': {
             title: 'Sales activity report',
             description: 'Assigned contacts and call progress by operation stage per telesales rep.',

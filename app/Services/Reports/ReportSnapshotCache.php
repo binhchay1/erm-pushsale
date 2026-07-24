@@ -24,15 +24,15 @@ class ReportSnapshotCache
     public static function heavyExtraKeys(): array
     {
         return [
-            'sale-1', 'sale-2', 'sale-3', 'sale-4', 'sale-5',
+            'sale-kpi', 'sale-closing-summary', 'sale-work', 'sale-revenue-detail', 'sale-revenue', 'sale-revenue-v2', 'sale-appointments',
             'marketing-1', 'marketing-sales-summary', 'marketing-sales-v2', 'marketing-2', 'marketing-3', 'marketing-4',
-            'kho-1', 'warehouse-sales-summary', 'warehouse-sales-v2', 'product-conversion', 'kho-2',
+            'kho-1', 'warehouse-sales-summary', 'warehouse-sales-v2', 'product-conversion', 'system-business',
         ];
     }
 
     public static function isHeavyExtra(string $key): bool
     {
-        return in_array($key, self::heavyExtraKeys(), true);
+        return in_array(ExtraReportService::normalizeKey($key), self::heavyExtraKeys(), true);
     }
 
     /** @return list<string> */

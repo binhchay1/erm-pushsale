@@ -12,7 +12,7 @@ V98 xử lý lại 3 menu con cấp 3 của **5.3 Nhập, xuất kho** theo temp
 
 - Rebuild lại `public/pushsale-templates/5.3.1.html`, `5.3.2.html`, `5.3.3.html` từ HTML capture thật.
 - Giữ header, filter, form, table header, notice, action buttons theo Pushsale.
-- Thêm CSS scoped `resources/css/pushsale-v98-warehouse-flow-contract.css` và đăng ký trong `pushsaleStyleRegistry`.
+- Thêm CSS scoped `resources/css/pushsale-warehouse-flow-contract.css` và đăng ký trong `pushsaleStyleRegistry`.
 - CSS chỉ scope theo `.pushsale-page[data-page-code^="5.3"]`, không ghi đè các báo cáo/menu/dashboard đã làm ở V90–V97.
 - Table 5.3 dùng `data-pushsale-grid-anchor="primary"`, dữ liệu render từ backend thật, không dùng row mẫu trong HTML.
 

@@ -218,5 +218,5 @@ Trước khi bật một kết nối:
 - Gộp packet: `LeadIngestionService`
 - Chia Sale: `LeadRoutingService`
 - UI: `resources/js/pages/Pushsale/Pages/Page_2_4_1.jsx`
-- CSS: `pushsale-landing-connections.css`, `pushsale-v13-fixes.css`
+- CSS: `pushsale-landing-connections.css`, `pushsale-legacy-adminlte-fixes.css`
 - Test: `tests/Feature/Leads/LandingConnectionFlowTest.php`

@@ -14,8 +14,8 @@ Bản này xử lý lại phần CSS bị lệch sau khi dọn file và sau các
 
 ## File chính
 
-- `resources/css/pushsale-parity-v66.css`: final CSS authority, được load sau `pushsale.css`.
-- `resources/js/lib/uiShellStyles.js`: import thêm `pushsale-parity-v66.css` sau bundle Pushsale cũ.
+- `resources/css/pushsale-parity-base.css`: final CSS authority, được load sau `pushsale.css`.
+- `resources/js/lib/uiShellStyles.js`: import thêm `pushsale-parity-base.css` sau bundle Pushsale cũ.
 
 ## Ghi chú kỹ thuật
 

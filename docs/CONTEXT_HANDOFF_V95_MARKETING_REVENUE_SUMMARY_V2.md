@@ -49,7 +49,7 @@ This patch separates Marketing menu `2.7.2 Báo cáo doanh số` and `2.7.3 Báo
   - `WarehouseSalesSummaryReport` now renders the 2.7.2 compact revenue summary table.
   - `WarehouseSalesV2Report` now renders the 2.7.3 V2 table with colored cells.
   - `RevenueOverviewToolbar` standardizes the report header/filter shell for these two pages.
-- `resources/css/pushsale-v95-marketing-sales-report-contract.css`
+- `resources/css/pushsale-marketing-sales-report-contract.css`
   - Scoped CSS for summary and V2 report pages only.
   - Does not override the global sidebar/header table styles.
 - `pushsaleStyleRegistry.js`

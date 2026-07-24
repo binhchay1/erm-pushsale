@@ -17,19 +17,19 @@ Summary: 33 pass, 12 warn, 0 fail.
 - ✅ Required shared component exists: resources/js/lib/pushsaleStyleRegistry.js (resources/js/lib/pushsaleStyleRegistry.js)
 
 ## css-registry
-- ⚠️ Versioned CSS exists but is not loaded by registry: pushsale-v12-fixes.css (resources/css/pushsale-v12-fixes.css)
-- ⚠️ Versioned CSS exists but is not loaded by registry: pushsale-v13-fixes.css (resources/css/pushsale-v13-fixes.css)
+- ⚠️ Versioned CSS exists but is not loaded by registry: pushsale-legacy-fixes.css (resources/css/pushsale-legacy-fixes.css)
+- ⚠️ Versioned CSS exists but is not loaded by registry: pushsale-legacy-adminlte-fixes.css (resources/css/pushsale-legacy-adminlte-fixes.css)
 - ✅ Final stability contract CSS is registered (resources/js/lib/pushsaleStyleRegistry.js)
 
 ## css-scope
-- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-v12-fixes.css:189)
-- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-v70-page-polish.css:175)
-- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-v71-combo-page.css:106)
-- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-v72-login-history.css:78)
-- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-v73-operation-categories.css:166)
-- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-v74-users-frame-toast.css:189)
-- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-v75-teams-page.css:32)
-- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-v77-accounting-operations.css:181)
+- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-legacy-fixes.css:189)
+- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-page-polish.css:175)
+- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-combo-page.css:106)
+- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-login-history.css:78)
+- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-operation-categories.css:166)
+- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-users-frame-toast.css:189)
+- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-teams-page.css:32)
+- ⚠️ Potential broad selector 'table' in versioned CSS (resources/css/pushsale-accounting-operations.css:181)
 
 ## naming-debt
 - ⚠️ 64 legacy React page files still use Page_* names. Migrate by business cluster, not all at once. (resources/js/pages/Pushsale/Pages)

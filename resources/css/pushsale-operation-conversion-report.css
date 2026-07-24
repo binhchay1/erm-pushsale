@@ -1,0 +1,268 @@
+/* Menu 4.6.1 - Báo cáo tỉ lệ chốt đơn theo tác nghiệp. */
+
+html body.pushsale-app-body .ps-operation-conversion-report {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    min-height: calc(100vh - 48px);
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report .form-control,
+html body.pushsale-app-body .ps-operation-conversion-report .btn {
+    border-radius: 0 !important;
+    height: 34px;
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-header {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) 265px 410px auto minmax(250px, auto);
+    gap: 28px;
+    align-items: center;
+    min-height: 54px;
+    padding: 10px 15px 8px;
+    border-bottom: 1px solid #d7dce0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-control,
+html body.pushsale-app-body .ps-operation-conversion-date {
+    width: 100%;
+    border: 1px solid #bcc9d6 !important;
+    background-color: #fff;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    white-space: nowrap;
+    font-weight: 400;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-check input {
+    margin: 0;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-actions .btn-icon {
+    border: 0;
+    background: transparent;
+    color: #167fc1;
+    width: 26px;
+    height: 34px;
+    line-height: 34px;
+    padding: 0;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-actions .btn-primary,
+html body.pushsale-app-body .ps-operation-conversion-report .btn-primary {
+    background: #2d89bf !important;
+    border-color: #247aab !important;
+    color: #fff !important;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-actions .btn i {
+    margin-right: 5px;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-filter-row {
+    display: grid;
+    grid-template-columns: 265px 265px 265px 265px 120px;
+    gap: 28px;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #d7dce0;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-pager-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 14px 15px 10px;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-short-pager {
+    display: inline-flex;
+    align-items: center;
+    height: 31px;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-short-pager span {
+    min-width: 84px;
+    height: 31px;
+    line-height: 31px;
+    padding: 0 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-right: 0;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-short-pager .btn {
+    width: 33px;
+    height: 31px;
+    padding: 0;
+    color: #777;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-table-wrap {
+    height: calc(100vh - 245px);
+    min-height: 480px;
+    overflow: auto;
+    border-top: 1px solid #1f72bd;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table {
+    width: max-content;
+    min-width: 100%;
+    margin: 0 !important;
+    border-collapse: collapse !important;
+    table-layout: auto;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: #3f86d6 !important;
+    color: #fff !important;
+    border-color: #2c74bf !important;
+    vertical-align: middle !important;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.25;
+    padding: 8px 7px !important;
+    min-width: 72px;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table thead tr:nth-child(2) th {
+    top: 34px;
+    z-index: 4;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table th[rowspan="2"] {
+    z-index: 5;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table th:first-child,
+html body.pushsale-app-body .ps-operation-conversion-report table td:first-child {
+    min-width: 42px;
+    width: 42px;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table thead tr:first-child th:nth-child(2),
+html body.pushsale-app-body .ps-operation-conversion-report table tbody td:nth-child(2) {
+    min-width: 145px;
+    max-width: 190px;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table td {
+    border-color: #d7dce0 !important;
+    vertical-align: middle !important;
+    padding: 8px 7px !important;
+    font-size: 12px;
+    line-height: 1.25;
+    color: #000;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table tbody tr:nth-child(odd) td {
+    background: #f3f3f3;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table tbody tr:nth-child(even) td {
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table tbody tr.rowTong td {
+    background: #fff !important;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report table tbody tr:hover td {
+    background: #dfeffd !important;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-sale {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    white-space: normal;
+    line-height: 1.25;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-sale span {
+    font-weight: 600;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-sale small {
+    font-size: 12px;
+    color: #111;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-empty {
+    height: 80px;
+    color: #777 !important;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-bottom-pager {
+    display: inline-flex;
+    gap: 0;
+    padding: 14px 0 20px 0;
+    margin-left: 0;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-bottom-pager .btn {
+    min-width: 32px;
+    height: 31px;
+    padding: 0 10px;
+}
+
+html body.pushsale-app-body .ps-operation-conversion-report .nowrap {
+    white-space: nowrap;
+}
+
+@media (max-width: 1366px) {
+    html body.pushsale-app-body .ps-operation-conversion-header {
+        grid-template-columns: 270px 220px 320px auto minmax(235px, auto);
+        gap: 16px;
+    }
+
+    html body.pushsale-app-body .ps-operation-conversion-filter-row {
+        grid-template-columns: repeat(4, minmax(180px, 1fr)) 110px;
+        gap: 16px;
+    }
+}
+
+@media (max-width: 1100px) {
+    html body.pushsale-app-body .ps-operation-conversion-header,
+    html body.pushsale-app-body .ps-operation-conversion-filter-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    html body.pushsale-app-body .ps-operation-conversion-actions {
+        justify-content: flex-start;
+    }
+}

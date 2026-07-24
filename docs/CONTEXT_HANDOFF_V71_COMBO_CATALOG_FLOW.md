@@ -16,11 +16,11 @@
   - Working setting menu with export/reload.
   - Real table columns: mã combo, tên combo, sản phẩm trong combo, tổng SP, giá gốc, giá combo, ưu đãi, trạng thái, cập nhật, thao tác.
   - No legacy inline dialog HTML injection for combo edit/create.
-- `resources/css/pushsale-v71-combo-page.css`
+- `resources/css/pushsale-combo-page.css`
   - Page-specific CSS for combo table, filter, heading and dialogs.
   - Keeps table inside viewport and avoids horizontal scroll.
 - `resources/js/lib/uiShellStyles.js`
-  - Loads `pushsale-v71-combo-page.css` after V70 polish CSS.
+  - Loads `pushsale-combo-page.css` after V70 polish CSS.
 
 ## Backend
 

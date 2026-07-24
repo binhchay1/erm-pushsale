@@ -21,7 +21,7 @@
 - `ProductSearchSelect` is the shared single-select product/package control.
 - `ProductMultiAdder` lets the landing dialog add multiple products/packages at once.
 - `PushsalePagination` is the shared AdminLTE-style pager to replace ad-hoc page pagers.
-- Styles live in `pushsale-v81-dialog-pagination-products.css`, loaded after V80.
+- Styles live in `pushsale-dialog-pagination-products.css`, loaded after V80.
 
 ## Files changed
 
@@ -35,5 +35,5 @@
 - `resources/js/components/operations/WarehouseFilterPanel.jsx`
 - `resources/js/components/operations/AccountingOperationFilters.jsx`
 - `resources/js/components/reports/ReportFilterBar.jsx`
-- `resources/css/pushsale-v81-dialog-pagination-products.css`
+- `resources/css/pushsale-dialog-pagination-products.css`
 - `resources/js/lib/uiShellStyles.js`

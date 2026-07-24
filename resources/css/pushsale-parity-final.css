@@ -1,0 +1,567 @@
+/*
+ * V68 — restore missing legacy vendor/frontend contract from the pre-cleanup
+ * codebase instead of continuing to patch symptoms one by one.
+ *
+ * The old near-parity codebase had these static assets committed under
+ * /public/vendor: Bootstrap 3, AdminLTE 2, skin-blue-light, Select2 3.x,
+ * datepicker3.css, Glyphicons and FontAwesome 4.7 fonts. Removing those files
+ * makes .fa private unicode glyphs render with the wrong font, so menu/action
+ * icons become random symbols even when class names are correct.
+ */
+
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('/vendor/font-awesome/fonts/fontawesome-webfont.eot?v=4.7.0');
+    src: url('/vendor/font-awesome/fonts/fontawesome-webfont.eot?#iefix&v=4.7.0') format('embedded-opentype'),
+         url('/vendor/font-awesome/fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'),
+         url('/vendor/font-awesome/fonts/fontawesome-webfont.woff?v=4.7.0') format('woff'),
+         url('/vendor/font-awesome/fonts/fontawesome-webfont.ttf?v=4.7.0') format('truetype'),
+         url('/vendor/font-awesome/fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --ps-blue: #0d8bf2;
+    --ps-header-blue: #007bff;
+    --ps-header-height: 50px;
+    --ps-sidebar-width: 250px;
+    --ps-sidebar-bg: #f9fafc;
+    --ps-submenu-bg: #fff;
+    --ps-menu-text: #444;
+    --ps-submenu-text: #555;
+    --ps-border: #d2d6de;
+    --ps-font: Arial, Helvetica, sans-serif;
+}
+
+html[data-pushsale-styles-ready='1'] body.pushsale-app-body,
+html[data-pushsale-styles-ready='1'] body.pushsale-app-body * {
+    font-family: var(--ps-font) !important;
+}
+
+html[data-pushsale-styles-ready='1'] body.pushsale-app-body .fa,
+html[data-pushsale-styles-ready='1'] body.pushsale-app-body .fa::before,
+html[data-pushsale-styles-ready='1'] body.pushsale-app-body .fa:before {
+    font-family: 'FontAwesome' !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-variant: normal !important;
+    text-transform: none !important;
+    speak: none !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+body.pushsale-app-body {
+    min-width: 1180px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    font-size: 12px !important;
+}
+
+body.pushsale-app-body .pushsale-wrapper,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse {
+    position: fixed !important;
+    inset: 0 !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+    background: #fff !important;
+}
+
+/* Header: keep the old AdminLTE blue bar, 50px height and square hamburger. */
+body.pushsale-app-body .main-header.pushsale-main-header {
+    position: fixed !important;
+    inset: 0 0 auto 0 !important;
+    z-index: 2050 !important;
+    display: flex !important;
+    height: var(--ps-header-height) !important;
+    min-height: var(--ps-header-height) !important;
+    border: 0 !important;
+    background: var(--ps-header-blue) !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .pushsale-header-brand {
+    flex: 0 0 var(--ps-sidebar-width) !important;
+    width: var(--ps-sidebar-width) !important;
+    min-width: var(--ps-sidebar-width) !important;
+    height: var(--ps-header-height) !important;
+}
+body.pushsale-app-body .sidebar-toggle.pushsale-sidebar-toggle,
+body.pushsale-app-body .pushsale-sidebar-toggle {
+    width: 43px !important;
+    min-width: 43px !important;
+    height: var(--ps-header-height) !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-right: 1px solid #1183d6 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #fff !important;
+    line-height: var(--ps-header-height) !important;
+    text-align: center !important;
+}
+body.pushsale-app-body .sidebar-toggle.pushsale-sidebar-toggle::before,
+body.pushsale-app-body .sidebar-toggle.pushsale-sidebar-toggle:before,
+body.pushsale-app-body .pushsale-sidebar-toggle::before,
+body.pushsale-app-body .pushsale-sidebar-toggle:before {
+    display: none !important;
+    content: none !important;
+}
+body.pushsale-app-body .pushsale-sidebar-toggle .fa-bars {
+    width: 14px !important;
+    height: 14px !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    line-height: 14px !important;
+}
+body.pushsale-app-body .pushsale-logo {
+    height: var(--ps-header-height) !important;
+    padding: 0 10px !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    line-height: var(--ps-header-height) !important;
+    text-align: left !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .pushsale-header-info-trigger,
+body.pushsale-app-body .pushsale-language-trigger,
+body.pushsale-app-body .pushsale-notification-trigger,
+body.pushsale-app-body .pushsale-header-icon,
+body.pushsale-app-body .pushsale-user-trigger {
+    height: var(--ps-header-height) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .pushsale-header-info-trigger:hover,
+body.pushsale-app-body .pushsale-language-trigger:hover,
+body.pushsale-app-body .pushsale-notification-trigger:hover,
+body.pushsale-app-body .pushsale-header-icon:hover,
+body.pushsale-app-body .pushsale-user-trigger:hover {
+    background: rgba(0, 0, 0, .08) !important;
+}
+
+/* Overlay menu: hidden by default; hamburger opens without shrinking content. */
+body.pushsale-app-body .content-wrapper,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper,
+body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper {
+    position: fixed !important;
+    top: var(--ps-header-height) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: auto !important;
+    background: #fff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .content-inner {
+    width: 100% !important;
+    min-width: 1100px !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 0 28px !important;
+    background: #fff !important;
+}
+body.pushsale-app-body .main-sidebar.pushsale-main-sidebar,
+body.pushsale-app-body .left-side.pushsale-main-sidebar {
+    position: fixed !important;
+    top: var(--ps-header-height) !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 2040 !important;
+    width: var(--ps-sidebar-width) !important;
+    min-width: var(--ps-sidebar-width) !important;
+    max-width: var(--ps-sidebar-width) !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-right: 1px solid var(--ps-border) !important;
+    background: var(--ps-sidebar-bg) !important;
+    box-shadow: 2px 0 8px rgba(0,0,0,.12) !important;
+    transform: translate3d(calc(-1 * var(--ps-sidebar-width)), 0, 0) !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: transform .32s cubic-bezier(.22,.61,.36,1), visibility 0s linear .32s !important;
+}
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .main-sidebar.pushsale-main-sidebar,
+body.pushsale-app-body .pushsale-wrapper.sidebar-open .left-side.pushsale-main-sidebar {
+    transform: translate3d(0, 0, 0) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transition: transform .34s cubic-bezier(.22,.61,.36,1), visibility 0s !important;
+}
+body.pushsale-app-body .pushsale-sidebar,
+body.pushsale-app-body .left-side .sidebar,
+body.pushsale-app-body .main-sidebar .sidebar {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: var(--ps-sidebar-bg) !important;
+}
+
+/* Legacy menu classes copied from the captured Pushsale HTML. */
+body.pushsale-app-body #dnn_MenuLeft_lblMenu,
+body.pushsale-app-body .sidebar-menu.ul1,
+body.pushsale-app-body .sidebar-menu.ul1 ul {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+body.pushsale-app-body .sidebar-menu li {
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+body.pushsale-app-body .sidebar-menu .a1,
+body.pushsale-app-body .sidebar-menu .a2,
+body.pushsale-app-body .pushsale-third-menu .a3 {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    text-align: left !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+}
+body.pushsale-app-body .sidebar-menu .a1 {
+    height: 45px !important;
+    min-height: 45px !important;
+    padding: 0 48px 0 15px !important;
+    background: var(--ps-sidebar-bg) !important;
+    color: var(--ps-menu-text) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 45px !important;
+    letter-spacing: 0 !important;
+}
+body.pushsale-app-body .sidebar-menu .a1 > .ps-menu-root-icon,
+body.pushsale-app-body .sidebar-menu .a1 > .fa:first-child {
+    display: inline-block !important;
+    flex: 0 0 20px !important;
+    width: 20px !important;
+    min-width: 20px !important;
+    height: 45px !important;
+    margin: 0 !important;
+    color: var(--ps-menu-text) !important;
+    font-size: 14px !important;
+    line-height: 45px !important;
+    text-align: left !important;
+    vertical-align: middle !important;
+}
+body.pushsale-app-body .sidebar-menu .a1 .ps-menu-title,
+body.pushsale-app-body .sidebar-menu .a2 .ps-menu-title {
+    display: block !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    color: inherit !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .sidebar-menu .li1 > .a1:hover,
+body.pushsale-app-body .sidebar-menu .li1.menu-open > .a1 {
+    background: var(--ps-sidebar-bg) !important;
+    color: var(--ps-header-blue) !important;
+}
+body.pushsale-app-body .sidebar-menu .li1 > .a1:hover > .fa:first-child,
+body.pushsale-app-body .sidebar-menu .li1.menu-open > .a1 > .fa:first-child {
+    color: var(--ps-header-blue) !important;
+}
+body.pushsale-app-body .sidebar-menu .li1.active > .a1:not(:hover):not([aria-expanded='true']) {
+    background: var(--ps-sidebar-bg) !important;
+    color: var(--ps-menu-text) !important;
+}
+body.pushsale-app-body .ps-menu-caret {
+    position: absolute !important;
+    top: 0 !important;
+    right: 46px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 12px !important;
+    min-width: 12px !important;
+    height: 45px !important;
+    margin: 0 !important;
+    color: var(--ps-header-blue) !important;
+}
+body.pushsale-app-body .ps-menu-caret .i1 {
+    position: absolute !important;
+    inset: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 12px !important;
+    height: 45px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--ps-header-blue) !important;
+    font-size: 9px !important;
+    line-height: 45px !important;
+}
+body.pushsale-app-body .ps-menu-caret .ps-menu-caret-minus,
+body.pushsale-app-body .li1:not(.menu-open) > .a1 .ps-menu-caret-minus {
+    display: none !important;
+}
+body.pushsale-app-body .li1.menu-open > .a1 .ps-menu-caret-plus {
+    display: none !important;
+}
+body.pushsale-app-body .li1.menu-open > .a1 .ps-menu-caret-minus {
+    display: inline-flex !important;
+}
+body.pushsale-app-body .treeview-menu.ul2 {
+    display: block !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: var(--ps-submenu-bg) !important;
+    opacity: 0 !important;
+    transform: translate3d(0, -4px, 0) !important;
+    transition: max-height .36s cubic-bezier(.22,.61,.36,1), opacity .2s ease, transform .28s cubic-bezier(.22,.61,.36,1) !important;
+}
+body.pushsale-app-body .treeview-menu.ul2.is-open,
+body.pushsale-app-body .li1.menu-open > .treeview-menu.ul2 {
+    max-height: 1400px !important;
+    opacity: 1 !important;
+    transform: translate3d(0, 0, 0) !important;
+}
+body.pushsale-app-body .sidebar-menu .a2 {
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 34px 0 39px !important;
+    background: #fff !important;
+    color: var(--ps-submenu-text) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 34px !important;
+}
+body.pushsale-app-body .sidebar-menu .li2 > .a2:hover,
+body.pushsale-app-body .sidebar-menu .li2.flyout-open > .a2,
+body.pushsale-app-body .sidebar-menu .li2.active > .a2 {
+    background: var(--ps-blue) !important;
+    color: #fff !important;
+}
+body.pushsale-app-body .sidebar-menu .li2.active > .a2 {
+    font-weight: 700 !important;
+}
+body.pushsale-app-body .sidebar-menu .a2 .ps-menu-angle,
+body.pushsale-app-body .sidebar-menu .a2 > .fa-angle-right {
+    position: absolute !important;
+    top: 0 !important;
+    right: 22px !important;
+    width: 12px !important;
+    height: 34px !important;
+    color: inherit !important;
+    font-size: 10px !important;
+    line-height: 34px !important;
+    text-align: center !important;
+}
+body.pushsale-app-body .pushsale-third-menu.ul3,
+body.pushsale-app-body ul.ul3.pushsale-third-menu {
+    position: fixed !important;
+    left: var(--ps-sidebar-width) !important;
+    z-index: 2075 !important;
+    display: block !important;
+    min-width: 235px !important;
+    max-width: min(360px, calc(100vw - var(--ps-sidebar-width) - 18px)) !important;
+    max-height: calc(100vh - var(--ps-header-height) - 12px) !important;
+    margin: 0 !important;
+    padding: 4px 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    list-style: none !important;
+    background: #fff !important;
+    border: 1px solid var(--ps-border) !important;
+    border-radius: 0 !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,.18) !important;
+    color: #333 !important;
+    font: 12px var(--ps-font) !important;
+}
+body.pushsale-app-body .pushsale-third-menu .a3,
+body.pushsale-app-body .pushsale-third-menu .pushsale-third-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 13px !important;
+    background: #fff !important;
+    color: #333 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 30px !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .pushsale-third-menu .a3:hover,
+body.pushsale-app-body .pushsale-third-menu .li3.active > .a3,
+body.pushsale-app-body .pushsale-third-menu .pushsale-third-link:hover,
+body.pushsale-app-body .pushsale-third-menu .pushsale-third-item.active > .pushsale-third-link {
+    background: #f5f5f5 !important;
+    color: var(--ps-header-blue) !important;
+}
+
+/* Tiny/icon buttons and React SVG icon normalization. */
+body.pushsale-app-body .lucide,
+body.pushsale-app-body svg.lucide,
+body.pushsale-app-body button svg:not(.recharts-surface),
+body.pushsale-app-body a svg:not(.recharts-surface) {
+    width: 14px !important;
+    min-width: 14px !important;
+    height: 14px !important;
+    stroke-width: 2 !important;
+    vertical-align: -2px !important;
+}
+body.pushsale-app-body .btn .lucide,
+body.pushsale-app-body .ps-btn .lucide,
+body.pushsale-app-body .ps-action-button .lucide,
+body.pushsale-app-body .btn-icon .lucide {
+    width: 12px !important;
+    min-width: 12px !important;
+    height: 12px !important;
+}
+body.pushsale-app-body .ps-cell-action,
+body.pushsale-app-body .btn-icon,
+body.pushsale-app-body .ps-row-action,
+body.pushsale-app-body .ps-wh-inline-icon,
+body.pushsale-app-body .pushsale-info-btn,
+body.pushsale-app-body .ps-action-button.is-icon-only {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    line-height: 24px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+body.pushsale-app-body .ps-cell-action .fa,
+body.pushsale-app-body .btn-icon .fa,
+body.pushsale-app-body .ps-row-action .fa,
+body.pushsale-app-body .ps-wh-inline-icon.fa,
+body.pushsale-app-body .pushsale-info-btn .fa,
+body.pushsale-app-body .ps-action-button.is-icon-only .fa {
+    width: 12px !important;
+    min-width: 12px !important;
+    height: 12px !important;
+    font-size: 12px !important;
+    line-height: 12px !important;
+}
+
+/* Shared page chrome: avoid the accidental blank/padding/shadow drift. */
+body.pushsale-app-body .pushsale-page-header,
+body.pushsale-app-body .ps-page-chrome,
+body.pushsale-app-body .ps-report-topbar,
+body.pushsale-app-body .ps-adminlte-page .m-header,
+body.pushsale-app-body .ps-sale-filter-shell {
+    min-height: 50px !important;
+    margin: 0 !important;
+    padding: 8px 15px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #d4d4d4 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .ps-control,
+body.pushsale-app-body .ps-date-range,
+body.pushsale-app-body .pushsale-wrapper [data-slot='input'],
+body.pushsale-app-body .pushsale-wrapper select,
+body.pushsale-app-body .pushsale-wrapper textarea,
+body.pushsale-app-body .form-control,
+body.pushsale-app-body .select2-container .select2-choice,
+body.pushsale-app-body .select2-container--default .select2-selection--single {
+    min-height: 30px !important;
+    height: 30px !important;
+    border: 1px solid var(--ps-border) !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #111 !important;
+    font: 12px/18px var(--ps-font) !important;
+}
+body.pushsale-app-body .btn,
+body.pushsale-app-body .ps-btn,
+body.pushsale-app-body .ps-action-button,
+body.pushsale-app-body .ps-filter-search,
+body.pushsale-app-body button[data-slot='button'] {
+    min-height: 30px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font: 12px/18px var(--ps-font) !important;
+}
+
+/* Modal/dialog stays fixed after vendor restore. */
+body.pushsale-app-body [data-slot='dialog-content'],
+body.pushsale-app-body .ps-dialog-content,
+body.pushsale-app-body .ps-dialog-surface {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    z-index: 2147483010 !important;
+    width: min(var(--ps-dialog-width, 800px), calc(100vw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+    max-height: calc(100dvh - 48px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid var(--ps-border) !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,.5) !important;
+    transform: translate(-50%, -50%) !important;
+}
+body.pushsale-app-body [data-slot='dialog-overlay'],
+body.pushsale-app-body .ps-dialog-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483000 !important;
+    background: rgba(0,0,0,.38) !important;
+}
+
+@media (min-width: 768px) {
+    body.pushsale-app-body.sidebar-mini.sidebar-collapse .content-wrapper,
+    body.pushsale-app-body.sidebar-mini.sidebar-collapse .right-side,
+    body.pushsale-app-body.sidebar-mini.sidebar-collapse .main-footer,
+    body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper,
+    body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper {
+        margin-left: 0 !important;
+        left: 0 !important;
+    }
+}
+
+@media (max-width: 767px) {
+    body.pushsale-app-body {
+        min-width: 0 !important;
+    }
+    body.pushsale-app-body .content-inner {
+        min-width: 0 !important;
+    }
+}

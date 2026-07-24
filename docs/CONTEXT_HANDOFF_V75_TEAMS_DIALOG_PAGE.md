@@ -20,7 +20,7 @@
 ## Frontend files
 
 - `resources/js/pages/Admin/Teams/Index.jsx`
-- `resources/css/pushsale-v75-teams-page.css`
+- `resources/css/pushsale-teams-page.css`
 - `resources/js/lib/uiShellStyles.js`
 
 ## Backend files

@@ -25,7 +25,7 @@
   - Displays success/error/warning/info flash and validation errors globally.
 - `resources/js/app.jsx`
   - Sets Sonner options and class for stable Pushsale toast z-index.
-- `resources/css/pushsale-v74-users-frame-toast.css`
+- `resources/css/pushsale-users-frame-toast.css`
   - Shared full-bleed page titlebar border.
   - User page table/action/dialog CSS.
   - Global row action cell normalization.

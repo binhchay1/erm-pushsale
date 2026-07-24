@@ -28,6 +28,6 @@ Login attempts are written by `App\Http\Controllers\Auth\LoginController::logLog
 ## Files
 
 - `resources/js/pages/Pushsale/Pages/Page_1_7_1.jsx`
-- `resources/css/pushsale-v72-login-history.css`
+- `resources/css/pushsale-login-history.css`
 - `resources/js/lib/uiShellStyles.js`
 - `app/Services/Pushsale/PushsalePageService.php`

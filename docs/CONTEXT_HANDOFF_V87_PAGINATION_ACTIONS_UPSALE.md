@@ -16,7 +16,7 @@
   - `.ps-pagination-info`
   - `.ps-pagination-pages`
   - `.ps-pagination-size`
-- `resources/css/pushsale-v87-pagination-actions-upsale.css` enforces one final pager style for report pages, marketing dashboard, customer profile and captured-template pages.
+- `resources/css/pushsale-pagination-actions-upsale.css` enforces one final pager style for report pages, marketing dashboard, customer profile and captured-template pages.
 
 ### Body spacing
 
@@ -42,7 +42,7 @@
 
 ## Files changed
 
-- `resources/css/pushsale-v87-pagination-actions-upsale.css`
+- `resources/css/pushsale-pagination-actions-upsale.css`
 - `resources/js/lib/pushsaleStyleRegistry.js`
 - `resources/js/components/reports/ReportPagination.jsx`
 - `resources/js/pages/Sales/CustomerProfile.jsx`

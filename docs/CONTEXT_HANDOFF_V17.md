@@ -19,7 +19,7 @@ V17 là full source tích lũy từ V16, do đó vẫn bao gồm:
 - `resources/css/app.css`
 - `resources/css/public.css`
 - `resources/css/pushsale.css`
-- `resources/css/pushsale-system-v17.css`
+- `resources/css/pushsale-system-foundation.css`
 - `resources/views/app.blade.php`
 - `vite.config.js`
 - `resources/js/lib/uiShellStyles.js`

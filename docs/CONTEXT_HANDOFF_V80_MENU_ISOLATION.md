@@ -5,7 +5,7 @@
 - Do not touch page content, tables, filters, pagination, or floating actions.
 
 ## Changes
-- Added `resources/css/pushsale-v80-menu-isolation.css`.
+- Added `resources/css/pushsale-menu-isolation.css`.
 - Loaded it after V79 in `resources/js/lib/uiShellStyles.js`.
 
 ## Design rule

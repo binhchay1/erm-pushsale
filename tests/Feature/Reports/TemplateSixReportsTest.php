@@ -42,7 +42,7 @@ class TemplateSixReportsTest extends TestCase
         $this->assertContains('discount_mode', $registry['marketing-1']['filters']);
         $this->assertContains('marketing_team_leader_id', $registry['marketing-1']['filters']);
         $this->assertContains('delivery_status', $registry['marketing-1']['filters']);
-        $this->assertContains('parent_product_id', $registry['sale-3']['filters']);
+        $this->assertContains('parent_product_id', $registry['sale-revenue-detail']['filters']);
 
         $staff = User::factory()->create([
             'role' => UserRole::Sales,
@@ -106,13 +106,13 @@ class TemplateSixReportsTest extends TestCase
         $reports = app(ExtraReportService::class);
         $this->assertTrue($reports->canView($warehouseStaff, 'warehouse-sales-summary'));
         $this->assertTrue($reports->canView($warehouseStaff, 'warehouse-sales-v2'));
-        $this->assertTrue($reports->canView($accountingStaff, 'sale-2'));
+        $this->assertTrue($reports->canView($accountingStaff, 'sale-closing-summary'));
         $this->assertTrue($reports->canView($accountingStaff, 'marketing-4'));
 
         $navigation = app(NavigationService::class);
 
         $salesStaffUrls = $this->navigationUrls($navigation->forUser($salesStaff));
-        $this->assertContains('/sales/reports/sale-2', $salesStaffUrls);
+        $this->assertContains('/sales/reports/sale-closing-summary', $salesStaffUrls);
         $this->assertNotContains('/sales/reports/warehouse-sales-summary', $salesStaffUrls);
         $this->assertNotContains('/sales/reports/product-conversion', $salesStaffUrls);
 
@@ -125,7 +125,7 @@ class TemplateSixReportsTest extends TestCase
         $this->assertContains('/marketing/reports/marketing-1', $marketingUrls);
         $this->assertContains('/marketing/reports/product-conversion', $marketingUrls);
         $this->assertContains('/marketing/reports/marketing-4', $marketingUrls);
-        $this->assertNotContains('/sales/reports/sale-2', $marketingUrls);
+        $this->assertNotContains('/sales/reports/sale-closing-summary', $marketingUrls);
 
         $warehouseUrls = $this->navigationUrls($navigation->forUser($warehouseStaff));
         $this->assertContains('/warehouse/reports/warehouse-sales-summary', $warehouseUrls);
@@ -133,7 +133,7 @@ class TemplateSixReportsTest extends TestCase
         $this->assertNotContains('/warehouse/reports/product-conversion', $warehouseUrls);
 
         $accountingUrls = $this->navigationUrls($navigation->forUser($accountingStaff));
-        $this->assertContains('/accounting/reports/sale-2', $accountingUrls);
+        $this->assertContains('/accounting/reports/sale-closing-summary', $accountingUrls);
         $this->assertContains('/accounting/reports/marketing-1', $accountingUrls);
         $this->assertContains('/accounting/reports/marketing-4', $accountingUrls);
         $this->assertContains('/accounting/reports/product-conversion', $accountingUrls);
@@ -244,13 +244,13 @@ class TemplateSixReportsTest extends TestCase
         $filter = ReportFilterData::fromRequest(Request::create('/reports', 'GET', ['preset' => 'today']), $admin);
         $reports = app(ExtraReportService::class);
 
-        $closing = $reports->build('sale-2', $admin, $filter)['rows'][0];
+        $closing = $reports->build('sale-closing-summary', $admin, $filter)['rows'][0];
         $this->assertSame(1, $closing['new_contacts']);
         $this->assertSame(1, $closing['total_closed']);
         $this->assertSame(1_050_000, $closing['total_net']);
         $this->assertSame(450_000, $closing['upsell_revenue']);
 
-        $revenueDetailData = $reports->build('sale-3', $admin, $filter);
+        $revenueDetailData = $reports->build('sale-revenue-detail', $admin, $filter);
         $revenueDetail = $revenueDetailData['rows'][0];
         $this->assertSame(1, $revenueDetail['contacts']);
         $this->assertSame(2, $revenueDetail['closed_qty']);
@@ -285,7 +285,7 @@ class TemplateSixReportsTest extends TestCase
         $this->assertSame(2.0, $warehouseSummary['total_products_per_order']);
         $this->assertSame(1, $warehouseSummary['partial_orders']);
 
-        $systemBusiness = $reports->build('kho-2', $admin, $filter);
+        $systemBusiness = $reports->build('system-business', $admin, $filter);
         $systemRow = $systemBusiness['rows'][0];
         $this->assertSame(1, $systemRow['active_warehouses']);
         $this->assertSame(2, $systemRow['closed_qty']);

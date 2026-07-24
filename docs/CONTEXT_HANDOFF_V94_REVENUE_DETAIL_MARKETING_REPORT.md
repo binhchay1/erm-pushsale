@@ -22,7 +22,7 @@
   - các cột tỷ lệ 10–19.
   - nhóm `UPSALE` ở cuối để phù hợp business mới.
 
-### `resources/css/pushsale-v94-revenue-detail-report-contract.css`
+### `resources/css/pushsale-revenue-detail-report-contract.css`
 
 - Scope riêng `.ps-revenue-detail-page` để không ảnh hưởng page khác.
 - Ép toolbar/header/filter/table theo Pushsale.

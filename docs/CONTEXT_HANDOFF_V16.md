@@ -43,8 +43,8 @@ Frontend:
 - `resources/js/components/operations/WarehouseFilterPanel.jsx`
 - `resources/js/pages/Admin/ShippingPartners/Index.jsx`
 - `resources/js/components/shipping/ShippingPartnerCard.jsx`
-- `resources/css/pushsale-warehouse-v16.css`
-- `resources/css/pushsale-shipping-config-v16.css`
+- `resources/css/pushsale-warehouse.css`
+- `resources/css/pushsale-shipping-config.css`
 
 Tests:
 

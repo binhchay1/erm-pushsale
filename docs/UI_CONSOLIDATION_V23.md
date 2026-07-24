@@ -18,7 +18,7 @@ Những màn trước đây còn dùng kiểu card/rounded/Tailwind riêng đư�
 File mới:
 
 ```text
-resources/css/pushsale-system-v23.css
+resources/css/pushsale-system-components.css
 ```
 
 File này được import cuối trong:

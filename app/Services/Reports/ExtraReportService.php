@@ -59,16 +59,35 @@ class ExtraReportService
     ) {}
 
     /**
+     * Old numeric report slugs are kept as HTTP aliases only. New code, menu
+     * entries and exports use semantic slugs so the report intent is clear.
+     */
+    public static function normalizeKey(string $key): string
+    {
+        return match ($key) {
+            'sale-4' => 'sale-kpi',
+            'sale-2' => 'sale-closing-summary',
+            'sale-1' => 'sale-work',
+            'sale-3' => 'sale-revenue-detail',
+            'sale-5' => 'sale-appointments',
+            'kho-2' => 'system-business',
+            default => $key,
+        };
+    }
+
+    /**
      * @return array<string, array{title: string, description: string, roles: list<string>, level: string, filters: list<string>}>
      */
     public static function registry(): array
     {
         $defs = [
-            'sale-1' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'operation_stage', 'team_id', 'product_id']],
-            'sale-2' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'search', 'per_page']],
-            'sale-3' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_type', 'date_from', 'date_to', 'discount_mode', 'reconciliation_status', 'team_leader_id', 'team_id', 'parent_product_id', 'product_id', 'delivery_status', 'per_page', 'no_closing_date_limit']],
-            'sale-4' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'product_id']],
-            'sale-5' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'operation_stage', 'operation_result', 'team_id']],
+            'sale-kpi' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'product_id']],
+            'sale-closing-summary' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'search', 'per_page']],
+            'sale-work' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'date_type', 'operation_stage', 'team_id', 'product_id']],
+            'sale-revenue-detail' => ['roles' => ['sales', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_type', 'date_from', 'date_to', 'discount_mode', 'reconciliation_status', 'team_leader_id', 'team_id', 'parent_product_id', 'product_id', 'delivery_status', 'per_page', 'no_closing_date_limit']],
+            'sale-revenue' => ['roles' => ['sales', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'team_leader_id', 'team_id', 'per_page', 'no_closing_date_limit']],
+            'sale-revenue-v2' => ['roles' => ['sales', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'team_leader_id', 'team_id', 'per_page', 'no_closing_date_limit']],
+            'sale-appointments' => ['roles' => ['sales', 'admin'], 'level' => 'staff', 'filters' => ['date_from', 'date_to', 'operation_stage', 'operation_result', 'team_id']],
             'marketing-1' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'staff', 'filters' => ['date_type', 'date_from', 'date_to', 'discount_mode', 'reconciliation_status', 'marketing_team_leader_id', 'marketing_team_id', 'parent_product_id', 'product_id', 'delivery_status', 'per_page', 'no_closing_date_limit']],
             'marketing-sales-summary' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'marketing_team_leader_id', 'marketing_team_id', 'per_page', 'no_closing_date_limit']],
             'marketing-sales-v2' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'marketing_team_leader_id', 'marketing_team_id', 'per_page', 'no_closing_date_limit']],
@@ -76,7 +95,7 @@ class ExtraReportService
             'marketing-3' => ['roles' => ['marketing', 'admin'], 'level' => 'staff', 'filters' => ['date_type', 'date_from', 'date_to', 'customer_type', 'marketing_team_leader_id', 'marketing_team_id', 'team_id', 'sale_id', 'marketer_id', 'parent_product_id', 'product_id', 'search', 'per_page', 'no_closing_date_limit']],
             'marketing-4' => ['roles' => ['marketing', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['search', 'date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'customer_type', 'no_closing_date_limit', 'team_leader_id', 'team_id', 'sale_id', 'marketing_team_leader_id', 'marketing_team_id', 'marketer_id', 'per_page']],
             'kho-1' => ['roles' => ['accounting', 'warehouse', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id', 'warehouse_id']],
-            'kho-2' => ['roles' => ['sales', 'marketing', 'warehouse', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'team_leader_id', 'team_id', 'per_page', 'no_closing_date_limit']],
+            'system-business' => ['roles' => ['sales', 'marketing', 'warehouse', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'team_leader_id', 'team_id', 'per_page', 'no_closing_date_limit']],
             'warehouse-sales-summary' => ['roles' => ['sales', 'warehouse', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'team_leader_id', 'team_id', 'per_page', 'no_closing_date_limit']],
             'warehouse-sales-v2' => ['roles' => ['sales', 'warehouse', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_type', 'date_from', 'date_to', 'parent_product_id', 'product_id', 'discount_mode', 'delivery_status', 'reconciliation_status', 'warehouse_id', 'team_leader_id', 'team_id', 'per_page', 'no_closing_date_limit']],
             'product-conversion' => ['roles' => ['sales', 'marketing', 'accounting', 'admin'], 'level' => 'leader', 'filters' => ['date_from', 'date_to', 'date_type', 'product_id', 'team_id', 'marketing_team_id', 'warehouse_id']],
@@ -96,11 +115,12 @@ class ExtraReportService
 
     public function exists(string $key): bool
     {
-        return isset(self::registry()[$key]);
+        return isset(self::registry()[self::normalizeKey($key)]);
     }
 
     public function canView(User $user, string $key): bool
     {
+        $key = self::normalizeKey($key);
         $report = self::registry()[$key] ?? null;
 
         if (! $report || ! in_array($user->role->value, $report['roles'], true)) {
@@ -119,20 +139,18 @@ class ExtraReportService
         }
 
         return $user->role === UserRole::Warehouse
-            && in_array($key, ['kho-1', 'kho-2', 'warehouse-sales-summary', 'warehouse-sales-v2'], true);
+            && in_array($key, ['kho-1', 'system-business', 'warehouse-sales-summary', 'warehouse-sales-v2'], true);
     }
 
     /** Danh sách báo cáo user được xem — dùng cho tab điều hướng. */
     public function availableFor(User $user): array
     {
-        $base = $this->basePathFor($user);
-
         return collect(self::registry())
             ->filter(fn (array $report, string $key) => $this->canView($user, $key))
             ->map(fn (array $report, string $key) => [
                 'key' => $key,
                 'title' => $report['title'],
-                'url' => $base.'/'.$key,
+                'url' => $this->urlFor($user, $key),
             ])
             ->values()
             ->all();
@@ -141,7 +159,7 @@ class ExtraReportService
     public function basePathFor(User $user): string
     {
         return match ($user->role) {
-            UserRole::Admin => '/admin/reports/extra',
+            UserRole::Admin => '/admin/reports',
             UserRole::Sales => '/sales/reports',
             UserRole::Marketing => '/marketing/reports',
             UserRole::Accounting => '/accounting/reports',
@@ -150,17 +168,51 @@ class ExtraReportService
         };
     }
 
+    public function urlFor(User $user, string $key): string
+    {
+        $key = self::normalizeKey($key);
+
+        if ($user->role === UserRole::Admin) {
+            return $this->adminUrlFor($key);
+        }
+
+        return $this->basePathFor($user).'/'.$key;
+    }
+
+    public function adminUrlFor(string $key): string
+    {
+        $key = self::normalizeKey($key);
+        $route = config("pushsale_report_routes.{$key}.admin_path");
+
+        return is_string($route) && $route !== '' ? $route : '/admin/reports/'.$key;
+    }
+
+    /** @return array<string, string> */
+    public function adminReportPathMap(): array
+    {
+        return collect((array) config('pushsale_report_routes', []))
+            ->mapWithKeys(function (array $route, string $key): array {
+                $path = (string) ($route['admin_path'] ?? '');
+
+                return $path !== '' ? [$path => self::normalizeKey($key)] : [];
+            })
+            ->all();
+    }
+
     /** @return array{meta: array, columns: list<array>, rows: list<array>, totals: ?array} */
     public function build(string $key, User $user, ReportFilterData $filter): array
     {
+        $key = self::normalizeKey($key);
         $report = self::registry()[$key];
 
         $data = match ($key) {
-            'sale-1' => $this->saleWork($user, $filter),
-            'sale-2' => $this->saleClosing($user, $filter),
-            'sale-3' => $this->revenueDetail($user, $filter, 'sale'),
-            'sale-4' => $this->saleKpi($user, $filter),
-            'sale-5' => $this->saleAppointments($user, $filter),
+            'sale-kpi' => $this->saleKpi($user, $filter),
+            'sale-closing-summary' => $this->saleClosing($user, $filter),
+            'sale-work' => $this->saleWork($user, $filter),
+            'sale-revenue-detail' => $this->revenueDetail($user, $filter, 'sale'),
+            'sale-revenue' => $this->warehouseSalesSummary($user, $filter),
+            'sale-revenue-v2' => $this->warehouseSalesV2($user, $filter),
+            'sale-appointments' => $this->saleAppointments($user, $filter),
             'marketing-1' => $this->revenueDetail($user, $filter, 'marketing'),
             'marketing-sales-summary' => $this->warehouseSalesSummary($user, $filter, scopeMarketing: true),
             'marketing-sales-v2' => $this->warehouseSalesV2($user, $filter, scopeMarketing: true),
@@ -168,7 +220,7 @@ class ExtraReportService
             'marketing-3' => $this->marketingWork($user, $filter),
             'marketing-4' => $this->upsaleReport($user, $filter),
             'kho-1' => $this->warehousePending($filter),
-            'kho-2' => $this->systemBusiness($user, $filter),
+            'system-business' => $this->systemBusiness($user, $filter),
             'warehouse-sales-summary' => $this->warehouseSalesSummary($user, $filter),
             'warehouse-sales-v2' => $this->warehouseSalesV2($user, $filter),
             'product-conversion' => $this->productConversionMatrix($user, $filter),
@@ -178,7 +230,7 @@ class ExtraReportService
 
         // Admin có thể lọc theo từng nhân viên; các role khác đã bị giới hạn phạm vi sẵn
         if ($user->role === UserRole::Admin && $filterFields !== []) {
-            if (in_array($key, ['sale-1', 'sale-3', 'sale-4', 'sale-5'], true)) {
+            if (in_array($key, ['sale-work', 'sale-revenue-detail', 'sale-kpi', 'sale-appointments'], true)) {
                 $filterFields[] = 'sale_id';
             }
 
@@ -186,7 +238,7 @@ class ExtraReportService
                 $filterFields[] = 'marketer_id';
             }
         } elseif ($user->role === UserRole::Sales && $this->isElevated($user)) {
-            if (in_array($key, ['sale-1', 'sale-3', 'sale-4', 'sale-5'], true)) {
+            if (in_array($key, ['sale-work', 'sale-revenue-detail', 'sale-kpi', 'sale-appointments'], true)) {
                 $filterFields[] = 'sale_id';
             }
         } elseif ($user->role === UserRole::Marketing && $this->isElevated($user)) {

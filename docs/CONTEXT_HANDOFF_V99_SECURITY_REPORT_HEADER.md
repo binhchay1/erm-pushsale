@@ -26,7 +26,7 @@
 
 ## Frontend/CSS
 
-- CSS cuối chuỗi: `resources/css/pushsale-v99-security-report-header-contract.css`.
+- CSS cuối chuỗi: `resources/css/pushsale-security-report-header-contract.css`.
 - Đăng ký trong `resources/js/lib/pushsaleStyleRegistry.js` sau v98 để override contract cuối cùng.
 - `BusinessPage.jsx`:
   - không render `LiveDataSummary` nếu summary chỉ có `total_records`;

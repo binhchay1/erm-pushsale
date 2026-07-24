@@ -6,7 +6,7 @@ Sau khi dọn file, các asset legacy trong `/vendor/adminlte2` và `/vendor/fon
 
 ## Thay đổi
 
-- Thêm `resources/css/pushsale-parity-v67.css` làm CSS authority cuối cùng cho shell/menu/icon.
+- Thêm `resources/css/pushsale-parity-dialogs.css` làm CSS authority cuối cùng cho shell/menu/icon.
 - `resources/js/lib/uiShellStyles.js` load vendor CSS theo thứ tự giống Pushsale cũ, có CDN fallback khi local vendor bị xóa.
 - Force FontAwesome 4 CDN sau local để cứu case local CSS còn nhưng font file bị mất.
 - Giữ menu contract `left-side`, `sidebar-menu ul1`, `li1/a1`, `ul2/li2/a2`, `ul3/li3/a3`.

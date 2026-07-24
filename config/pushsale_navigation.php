@@ -345,28 +345,28 @@ return array (
           0 => 
           array (
             'title' => '1. Báo cáo doanh số marketing',
-            'url' => '/admin/reports/extra/marketing-1',
+            'url' => '/admin/marketing/reports/revenue-detail',
             'area' => 'reports',
             'code' => '2.7.1',
           ),
           1 => 
           array (
             'title' => '2. Báo cáo doanh số',
-            'url' => '/admin/reports/extra/marketing-sales-summary',
+            'url' => '/admin/marketing/reports/revenue',
             'area' => 'reports',
             'code' => '2.7.2',
           ),
           2 => 
           array (
             'title' => '3. Báo cáo doanh số V2',
-            'url' => '/admin/reports/extra/marketing-sales-v2',
+            'url' => '/admin/marketing/reports/revenue-v2',
             'area' => 'reports',
             'code' => '2.7.3',
           ),
           3 => 
           array (
             'title' => '4. CEO Dashboard V2',
-            'url' => '/admin/reports/ceo',
+            'url' => '/admin/reports/ceo-dashboard-v2',
             'area' => 'reports',
             'code' => '2.7.4',
           ),
@@ -380,7 +380,7 @@ return array (
           5 => 
           array (
             'title' => '6. Báo cáo kinh doanh hệ thống',
-            'url' => '/admin/reports/extra/kho-2',
+            'url' => '/admin/reports/system-business',
             'area' => 'reports',
             'code' => '2.7.6',
           ),
@@ -521,83 +521,115 @@ return array (
         array (
           0 => 
           array (
-            'title' => '1. Sale KPI 2',
-            'url' => '/admin/reports/extra/sale-4',
+            'title' => '1. Sale KPI',
+            'url' => '/admin/sales/reports/sale-kpi',
             'area' => 'reports',
             'code' => '4.5.1',
-            'roles' => array ('admin', 'sales'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'sales',
+            ),
           ),
           1 => 
           array (
             'title' => '2. Bảng tổng hợp chốt đơn',
-            'url' => '/admin/reports/extra/sale-2',
+            'url' => '/admin/sales/reports/closing-summary',
             'area' => 'reports',
             'code' => '4.5.2',
-            'roles' => array ('admin', 'sales', 'accounting'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'sales',
+              2 => 'accounting',
+            ),
           ),
           2 => 
           array (
             'title' => '3. Báo cáo công việc sale',
-            'url' => '/admin/reports/extra/sale-1',
+            'url' => '/admin/sales/reports/work',
             'area' => 'reports',
             'code' => '4.5.3',
-            'roles' => array ('admin', 'sales'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'sales',
+            ),
           ),
           3 => 
           array (
-            'title' => '4. Báo cáo doanh số chi tiết sale',
-            'url' => '/admin/reports/extra/sale-3',
+            'title' => '4. Báo cáo doanh số sale',
+            'url' => '/admin/sales/reports/revenue-detail',
             'area' => 'reports',
             'code' => '4.5.4',
-            'roles' => array ('admin', 'sales', 'accounting'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'sales',
+              2 => 'accounting',
+            ),
           ),
           4 => 
           array (
-            'title' => '5. Báo cáo doanh số theo kho',
-            'url' => '/admin/reports/extra/warehouse-sales-summary',
+            'title' => '5. Báo cáo doanh số',
+            'url' => '/admin/sales/reports/revenue',
             'area' => 'reports',
             'code' => '4.5.5',
-            'roles' => array ('admin', 'sales', 'warehouse', 'accounting'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'sales',
+            ),
           ),
           5 => 
           array (
             'title' => '6. Báo cáo doanh số V2',
-            'url' => '/admin/reports/extra/warehouse-sales-v2',
+            'url' => '/admin/sales/reports/revenue-v2',
             'area' => 'reports',
             'code' => '4.5.6',
-            'roles' => array ('admin', 'sales', 'warehouse', 'accounting'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'sales',
+            ),
           ),
           6 => 
           array (
             'title' => '7. CEO dashboard V2',
-            'url' => '/admin/reports/ceo',
+            'url' => '/admin/reports/ceo-dashboard-v2',
             'area' => 'reports',
             'code' => '4.5.7',
-            'roles' => array ('admin'),
+            'roles' => 
+            array (
+              0 => 'admin',
+            ),
           ),
           7 => 
           array (
             'title' => '8. Báo cáo lịch hẹn telesales',
-            'url' => '/admin/reports/extra/sale-5',
+            'url' => '/admin/sales/reports/appointments',
             'area' => 'reports',
             'code' => '4.5.8',
-            'roles' => array ('admin', 'sales'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'sales',
+            ),
           ),
           8 => 
           array (
             'title' => '9. Báo cáo kinh doanh hệ thống',
-            'url' => '/admin/reports/extra/kho-2',
+            'url' => '/admin/reports/system-business',
             'area' => 'reports',
             'code' => '4.5.9',
-            'roles' => array ('admin', 'sales', 'marketing', 'warehouse', 'accounting'),
-          ),
-          9 => 
-          array (
-            'title' => '10. Báo cáo tỉ lệ chốt sản phẩm',
-            'url' => '/admin/reports/extra/product-conversion',
-            'area' => 'reports',
-            'code' => '4.5.10',
-            'roles' => array ('admin', 'sales'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'sales',
+              2 => 'marketing',
+              3 => 'warehouse',
+              4 => 'accounting',
+            ),
           ),
         ),
       ),
@@ -732,7 +764,7 @@ return array (
           2 => 
           array (
             'title' => '3. Báo cáo kinh doanh hệ thống',
-            'url' => '/admin/reports/extra/kho-2',
+            'url' => '/admin/reports/system-business',
             'area' => 'reports',
             'code' => '5.5.3',
           ),
@@ -770,18 +802,26 @@ return array (
           8 => 
           array (
             'title' => '9. Báo cáo doanh số theo kho',
-            'url' => '/admin/reports/extra/warehouse-sales-summary',
+            'url' => '/admin/warehouse/reports/revenue',
             'area' => 'reports',
             'code' => '5.5.9',
-            'roles' => array ('admin', 'warehouse'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'warehouse',
+            ),
           ),
           9 => 
           array (
             'title' => '10. Báo cáo doanh số V2',
-            'url' => '/admin/reports/extra/warehouse-sales-v2',
+            'url' => '/admin/warehouse/reports/revenue-v2',
             'area' => 'reports',
             'code' => '5.5.10',
-            'roles' => array ('admin', 'warehouse'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'warehouse',
+            ),
           ),
         ),
       ),
@@ -870,89 +910,138 @@ return array (
           0 => 
           array (
             'title' => '1. CEO dashboard',
-            'url' => '/admin/reports/ceo',
+            'url' => '/admin/reports/ceo-dashboard-v2',
             'area' => 'reports',
             'code' => '6.3.1',
-            'roles' => array ('admin'),
+            'roles' => 
+            array (
+              0 => 'admin',
+            ),
           ),
           1 => 
           array (
             'title' => '2. Báo cáo doanh số theo kho',
-            'url' => '/admin/reports/extra/warehouse-sales-summary',
+            'url' => '/admin/warehouse/reports/revenue',
             'area' => 'reports',
             'code' => '6.3.2',
-            'roles' => array ('admin', 'accounting', 'warehouse'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'accounting',
+              2 => 'warehouse',
+            ),
           ),
           2 => 
           array (
             'title' => '3. Báo cáo doanh số V2',
-            'url' => '/admin/reports/extra/warehouse-sales-v2',
+            'url' => '/admin/warehouse/reports/revenue-v2',
             'area' => 'reports',
             'code' => '6.3.3',
-            'roles' => array ('admin', 'accounting', 'warehouse'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'accounting',
+              2 => 'warehouse',
+            ),
           ),
           3 => 
           array (
             'title' => '4. Báo cáo kinh doanh',
-            'url' => '/admin/reports/extra/kho-2',
+            'url' => '/admin/reports/system-business',
             'area' => 'reports',
             'code' => '6.3.4',
-            'roles' => array ('admin', 'accounting', 'warehouse'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'accounting',
+              2 => 'warehouse',
+            ),
           ),
           4 => 
           array (
             'title' => '5. Tổng kết lương tháng',
             'url' => '/admin/accounting/reports/monthly-plan',
             'code' => '6.3.5',
-            'roles' => array ('admin', 'accounting'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'accounting',
+            ),
           ),
           5 => 
           array (
             'title' => '6. Báo cáo doanh số chi tiết',
-            'url' => '/admin/reports/extra/sale-3',
+            'url' => '/admin/sales/reports/revenue-detail',
             'area' => 'reports',
             'code' => '6.3.6',
-            'roles' => array ('admin', 'accounting', 'sales'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'accounting',
+              2 => 'sales',
+            ),
           ),
           6 => 
           array (
             'title' => '7. CEO dashboard V2',
-            'url' => '/admin/reports/ceo',
+            'url' => '/admin/reports/ceo-dashboard-v2',
             'area' => 'reports',
             'code' => '6.3.7',
-            'roles' => array ('admin'),
+            'roles' => 
+            array (
+              0 => 'admin',
+            ),
           ),
           7 => 
           array (
             'title' => '8. Báo cáo kinh doanh hệ thống',
-            'url' => '/admin/reports/extra/kho-2',
+            'url' => '/admin/reports/system-business',
             'area' => 'reports',
             'code' => '6.3.8',
-            'roles' => array ('admin', 'accounting', 'warehouse'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'accounting',
+              2 => 'warehouse',
+            ),
           ),
           8 => 
           array (
             'title' => '9. Báo cáo tỉ lệ chốt đơn sản phẩm',
-            'url' => '/admin/reports/extra/product-conversion',
+            'url' => '/admin/reports/product-conversion',
             'area' => 'reports',
             'code' => '6.3.9',
-            'roles' => array ('admin', 'accounting', 'sales', 'marketing'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'accounting',
+              2 => 'sales',
+              3 => 'marketing',
+            ),
           ),
           9 => 
           array (
             'title' => '10. Bảng tổng hợp chốt đơn',
-            'url' => '/admin/reports/extra/sale-2',
+            'url' => '/admin/sales/reports/closing-summary',
             'area' => 'reports',
             'code' => '6.3.10',
-            'roles' => array ('admin', 'accounting'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'accounting',
+            ),
           ),
           10 => 
           array (
             'title' => '11. Báo cáo doanh số marketing',
-            'url' => '/admin/reports/extra/marketing-1',
+            'url' => '/admin/marketing/reports/revenue-detail',
             'area' => 'reports',
             'code' => '6.3.11',
-            'roles' => array ('admin', 'accounting'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'accounting',
+            ),
           ),
           11 => 
           array (
@@ -960,7 +1049,11 @@ return array (
             'url' => '/ld/thong-ke/bao-cao-up-sale?menu=6.3.12',
             'area' => 'reports',
             'code' => '6.3.12',
-            'roles' => array ('admin', 'accounting'),
+            'roles' => 
+            array (
+              0 => 'admin',
+              1 => 'accounting',
+            ),
           ),
         ),
       ),
@@ -1050,7 +1143,7 @@ return array (
           0 => 
           array (
             'title' => '1. Báo cáo công việc sale',
-            'url' => '/admin/reports/extra/sale-1',
+            'url' => '/admin/sales/reports/work',
             'area' => 'reports',
           ),
           1 => 
@@ -1062,7 +1155,7 @@ return array (
           2 => 
           array (
             'title' => '3. Báo cáo lịch hẹn telesales',
-            'url' => '/admin/reports/extra/sale-5',
+            'url' => '/admin/sales/reports/appointments',
             'area' => 'reports',
           ),
         ),
@@ -1081,7 +1174,7 @@ return array (
           1 => 
           array (
             'title' => '2. Bảng tổng hợp chờ xuất theo ngày',
-            'url' => '/admin/reports/extra/kho-1',
+            'url' => '/admin/accounting/reports/ceo-dashboard',
             'area' => 'reports',
           ),
           2 => 
@@ -1093,7 +1186,7 @@ return array (
           3 => 
           array (
             'title' => '4. Báo cáo kinh doanh hệ thống',
-            'url' => '/admin/reports/extra/kho-2',
+            'url' => '/admin/reports/system-business',
             'area' => 'reports',
           ),
         ),
@@ -1106,7 +1199,7 @@ return array (
           0 => 
           array (
             'title' => '1. Báo cáo kinh doanh',
-            'url' => '/admin/reports/extra/kho-2',
+            'url' => '/admin/reports/system-business',
             'area' => 'reports',
           ),
         ),
@@ -1119,13 +1212,13 @@ return array (
           0 => 
           array (
             'title' => '1. CEO dashboard',
-            'url' => '/admin/reports/ceo',
+            'url' => '/admin/reports/ceo-dashboard-v2',
             'area' => 'reports',
           ),
           1 => 
           array (
             'title' => '2. CEO dashboard V2',
-            'url' => '/admin/reports/ceo',
+            'url' => '/admin/reports/ceo-dashboard-v2',
             'area' => 'reports',
           ),
           2 => 
@@ -1303,6 +1396,66 @@ return array (
           array (
             'title' => '4. Quản lý SMS',
             'url' => '/notifications',
+          ),
+        ),
+      ),
+    ),
+  ),
+  9 => 
+  array (
+    'title' => '10. Vận hành hệ thống',
+    'icon' => 'server',
+    'roles' => 
+    array (
+      0 => 'admin',
+    ),
+    'children' => 
+    array (
+      0 => 
+      array (
+        'title' => '10.1 Giám sát & nhật ký',
+        'children' => 
+        array (
+          0 => 
+          array (
+            'title' => '1. Giám sát hệ thống',
+            'url' => '/admin/system-monitor',
+            'code' => '10.1.1',
+            'roles' => 
+            array (
+              0 => 'admin',
+            ),
+          ),
+          1 => 
+          array (
+            'title' => '2. Nhật ký hoạt động',
+            'url' => '/admin/activity-logs',
+            'code' => '10.1.2',
+            'roles' => 
+            array (
+              0 => 'admin',
+            ),
+          ),
+          2 => 
+          array (
+            'title' => '3. Báo cáo tỉ lệ chốt đơn sản phẩm',
+            'url' => '/admin/reports/product-conversion?menu=10.1.3',
+            'area' => 'reports',
+            'code' => '10.1.3',
+            'roles' => 
+            array (
+              0 => 'admin',
+            ),
+          ),
+          3 => 
+          array (
+            'title' => '4. Cấu hình hệ thống',
+            'url' => '/settings',
+            'code' => '10.1.4',
+            'roles' => 
+            array (
+              0 => 'admin',
+            ),
           ),
         ),
       ),

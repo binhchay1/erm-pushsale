@@ -65,7 +65,7 @@ class CeoReportController extends Controller
 
         return Inertia::render('Admin/Reports/CeoReport', array_merge($this->reportPageProps($request, [
             'report' => $report,
-            'routeUrl' => '/admin/reports/ceo',
+            'routeUrl' => '/admin/reports/ceo-dashboard-v2',
             'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
         ]), [
             'filterFields' => $filterOptions->ceoReportFilterFields(),

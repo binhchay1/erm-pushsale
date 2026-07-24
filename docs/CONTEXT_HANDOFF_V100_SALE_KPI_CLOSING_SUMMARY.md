@@ -23,7 +23,7 @@
     - Contact nhận trước đó = assigned before range + closed in range.
     - Gross/discount/net values derive from order revenue methods.
     - Account uses operational profile employee code when present, else email local-part.
-- `resources/css/pushsale-v100-sale-kpi-closing-summary-contract.css`
+- `resources/css/pushsale-sale-kpi-closing-summary-contract.css`
   - Final scoped CSS for Sale KPI footer cleanup and menu 4.5.2 Pushsale/AdminLTE table parity.
 - `resources/js/lib/pushsaleStyleRegistry.js`
   - Registered V100 CSS after V99.

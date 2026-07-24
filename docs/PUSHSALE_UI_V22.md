@@ -27,7 +27,7 @@ Màn `/admin/shipping-partners` bỏ layout cũ và chuyển sang layout Pushsal
 
 ## 4. Menu và shell CSS
 
-`pushsale-system-v22.css` là lớp cuối cho giao diện nội bộ:
+`pushsale-system-layout.css` là lớp cuối cho giao diện nội bộ:
 
 - Font Arial toàn bộ ERM nội bộ.
 - Header cao 50px, màu `#007bff`.

@@ -27,7 +27,7 @@
   - Họ tên / Số điện thoại
   - Địa chỉ / Ghi chú giao hàng
   - Thao tác
-- Added scoped CSS: `resources/css/pushsale-v77-accounting-operations.css`.
+- Added scoped CSS: `resources/css/pushsale-accounting-operations.css`.
 - Loaded the CSS through `resources/js/lib/uiShellStyles.js` after V76 so it wins cascade for accounting page only.
 
 ## Business wiring

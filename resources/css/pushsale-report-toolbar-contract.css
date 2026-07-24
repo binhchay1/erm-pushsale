@@ -1,0 +1,192 @@
+/* Shared report toolbar contract: one layout for every Pushsale-style report. */
+html body.pushsale-app-body .ps-report-page {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-shell.ps-page-shell,
+html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__header,
+html body.pushsale-app-body .ps-extra-toolbar.ps-page-shell,
+html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__header {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__main-row,
+html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__main-row {
+    display: grid !important;
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) auto !important;
+    min-height: 56px !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 8px 15px !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__title-col,
+html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__title-col {
+    min-width: 0 !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__title,
+html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__title,
+html body.pushsale-app-body .ps-report-topbar h1 {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #111 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 22px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__filters,
+html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__filters {
+    min-width: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-controls,
+html body.pushsale-app-body .ps-report-v2-primary,
+html body.pushsale-app-body .ps-closing-summary-filters {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 18px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-controls > *,
+html body.pushsale-app-body .ps-report-v2-primary > *,
+html body.pushsale-app-body .ps-closing-summary-filters > * {
+    flex: 1 1 210px !important;
+    min-width: 160px !important;
+    max-width: 420px !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-controls .ps-date-range,
+html body.pushsale-app-body .ps-closing-summary-filters .ps-date-range {
+    flex-basis: 360px !important;
+    max-width: 560px !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-actions,
+html body.pushsale-app-body .ps-page-shell__actions {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 5px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__advanced-row,
+html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__advanced-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 18px !important;
+    margin: 0 !important;
+    padding: 10px 15px !important;
+    border-top: 1px solid #e5e5e5 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__advanced-row .ps-report-toolbar-controls,
+html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__advanced-row .ps-report-toolbar-controls {
+    flex-wrap: wrap !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-shell .ps-control,
+html body.pushsale-app-body .ps-report-topbar .ps-control,
+html body.pushsale-app-body .ps-report-toolbar-shell .ps-date-range,
+html body.pushsale-app-body .ps-report-topbar .ps-date-range {
+    height: 30px !important;
+    min-height: 30px !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+}
+
+html body.pushsale-app-body .ps-report-topbar {
+    display: grid !important;
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) !important;
+    min-height: 56px !important;
+    align-items: center !important;
+    gap: 14px !important;
+    margin: 0 !important;
+    padding: 8px 15px !important;
+    border-bottom: 1px solid #d2d6de !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-kpi-toolbar-controls,
+html body.pushsale-app-body .ps-topbar-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-kpi-toolbar-controls .ps-control,
+html body.pushsale-app-body .ps-kpi-toolbar-controls .ps-date-range {
+    min-width: 260px !important;
+    max-width: 520px !important;
+}
+
+html body.pushsale-app-body .ps-kpi-notes,
+html body.pushsale-app-body .ps-kpi-time-note {
+    color: #777 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+}
+
+html body.pushsale-app-body .ps-kpi-time-note {
+    margin-top: 6px !important;
+}
+
+html body.pushsale-app-body .ps-kpi-notes {
+    margin: 6px 15px 0 !important;
+}
+
+@media (max-width: 1200px) {
+    html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__main-row,
+    html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__main-row,
+    html body.pushsale-app-body .ps-report-topbar {
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.pushsale-app-body .ps-report-toolbar-controls,
+    html body.pushsale-app-body .ps-report-v2-primary,
+    html body.pushsale-app-body .ps-closing-summary-filters,
+    html body.pushsale-app-body .ps-kpi-toolbar-controls {
+        flex-wrap: wrap !important;
+        justify-content: flex-start !important;
+    }
+
+    html body.pushsale-app-body .ps-report-toolbar-actions,
+    html body.pushsale-app-body .ps-page-shell__actions,
+    html body.pushsale-app-body .ps-topbar-actions {
+        justify-content: flex-start !important;
+    }
+}

@@ -6,7 +6,7 @@ V22 là full source tích lũy từ V13 đến V21, bổ sung:
 2. Backend phân bổ data theo sản phẩm, Sale, team, khoảng ngày, nguồn data và trạng thái nhận data.
 3. Bảng `data_distribution_batches` lưu batch phân bổ.
 4. Cấu hình giao hàng Pushsale-style, bỏ giao diện shipping cũ.
-5. CSS menu/header/hamburger nội bộ chuẩn hóa lại bằng `pushsale-system-v22.css`.
+5. CSS menu/header/hamburger nội bộ chuẩn hóa lại bằng `pushsale-system-layout.css`.
 
 Route chính:
 

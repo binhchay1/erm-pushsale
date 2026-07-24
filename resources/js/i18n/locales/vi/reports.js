@@ -371,6 +371,38 @@ export default {
         revenue_cancel_rate: '% DS hủy (19)',
     },
     extra: {
+        'sale-kpi': {
+            title: 'Sale KPI',
+            description: 'Contact khách mới / khách cũ, tỷ lệ chốt, doanh số dự kiến và doanh số thực nhận.',
+        },
+        'sale-closing-summary': {
+            title: 'Bảng tổng hợp chốt đơn',
+            description: 'Số contact, đơn chốt, tỷ lệ chốt và doanh số trước / sau chiết khấu theo telesale.',
+        },
+        'sale-work': {
+            title: 'Báo cáo công việc sale',
+            description: 'Số khách được gán và tiến độ gọi theo từng bước tác nghiệp của mỗi telesale.',
+        },
+        'sale-revenue-detail': {
+            title: 'Báo cáo doanh số sale',
+            description: 'Đơn chốt theo từng trạng thái giao hàng: đang giao, đã giao, đã thanh toán, hoàn, hủy.',
+        },
+        'sale-revenue': {
+            title: 'Báo cáo doanh số',
+            description: 'Báo cáo doanh số tổng hợp đúng menu Pushsale của khối telesale.',
+        },
+        'sale-revenue-v2': {
+            title: 'Báo cáo doanh số V2',
+            description: 'Báo cáo doanh số V2 có phễu contact, màu chỉ số và phần upsale đồng bộ.',
+        },
+        'sale-appointments': {
+            title: 'Báo cáo lịch hẹn telesales',
+            description: 'Số khách đã hẹn gọi lại trong 7 ngày tới — sắp xếp công việc theo ngày.',
+        },
+        'system-business': {
+            title: 'Báo cáo kinh doanh hệ thống',
+            description: 'Doanh số theo kho, tách khách mới và khách mua lại để đánh giá chất lượng tệp khách.',
+        },
         'sale-1': {
             title: 'Báo cáo công việc sale',
             description: 'Số khách được gán và tiến độ gọi theo từng bước tác nghiệp của mỗi telesale.',

@@ -908,26 +908,42 @@ class PushsalePageService
     private function saleOperationRate(): Collection
     {
         $stages = ['call_1', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6', 'care_1', 'care_2', 'care_3', 'skipped'];
+        $sortMetric = trim((string) $this->currentRequest?->query('sort_metric', 'total_revenue'));
 
-        return $this->ordersGroupedBySale()->values()->map(function (array $row, int $index) use ($stages): array {
-            $result = [
-                'index' => $index + 1,
-                'sale' => $row['name'],
-                'total_contacts' => $row['contacts'],
-                'total_closed' => $row['closed'],
-                'total_rate' => round(($row['closed'] / max(1, $row['contacts'])) * 100, 2),
-                'revenue' => $row['revenue'],
-            ];
-            foreach ($stages as $stage) {
-                $metric = $row['stage_metrics'][$stage] ?? ['contacts' => 0, 'closed' => 0, 'revenue' => 0];
-                $result[$stage.'_contacts'] = $metric['contacts'];
-                $result[$stage.'_closed'] = $metric['closed'];
-                $result[$stage.'_rate'] = round(($metric['closed'] / max(1, $metric['contacts'])) * 100, 2);
-                $result[$stage.'_revenue'] = $metric['revenue'];
-            }
+        return $this->ordersGroupedBySale()
+            ->values()
+            ->map(function (array $row, int $index) use ($stages): array {
+                $result = [
+                    'index' => $index + 1,
+                    'sale' => $row['name'],
+                    'sale_account' => $row['account'],
+                    'total_contacts' => $row['contacts'],
+                    'total_closed' => $row['closed'],
+                    'total_rate' => round(($row['closed'] / max(1, $row['contacts'])) * 100, 2),
+                    'revenue' => $row['revenue'],
+                ];
+                foreach ($stages as $stage) {
+                    $metric = $row['stage_metrics'][$stage] ?? ['contacts' => 0, 'closed' => 0, 'revenue' => 0];
+                    $result[$stage.'_contacts'] = $metric['contacts'];
+                    $result[$stage.'_closed'] = $metric['closed'];
+                    $result[$stage.'_rate'] = round(($metric['closed'] / max(1, $metric['contacts'])) * 100, 2);
+                    $result[$stage.'_revenue'] = $metric['revenue'];
+                }
 
-            return $result;
-        });
+                return $result;
+            })
+            ->sortByDesc(match ($sortMetric) {
+                'total_contacts' => 'total_contacts',
+                'total_closed' => 'total_closed',
+                'total_rate' => 'total_rate',
+                default => 'revenue',
+            })
+            ->values()
+            ->map(function (array $row, int $index): array {
+                $row['index'] = $index + 1;
+
+                return $row;
+            });
     }
 
     private function saleWork(): Collection
@@ -1818,7 +1834,7 @@ class PushsalePageService
         $query = Order::query()
             ->with([
                 'team:id,name,leader_user_id',
-                'saleUser:id,name,team_id,permissions',
+                'saleUser:id,name,email,team_id,permissions',
                 'marketerUser:id,name,team_id',
                 'items:id,order_id,product_id,quantity,item_type,unit_price,discount_amount',
             ]);
@@ -1832,6 +1848,16 @@ class PushsalePageService
                 ->when($request->integer('sale_leader_id'), fn ($q, int $id) => $q->whereHas('team', fn ($team) => $team->where('leader_user_id', $id)))
                 ->when($request->integer('marketer_team_id'), fn ($q, int $id) => $q->whereHas('marketerUser', fn ($user) => $user->where('team_id', $id)))
                 ->when($request->integer('product_id'), fn ($q, int $id) => $q->whereHas('items', fn ($items) => $items->where('product_id', $id)));
+
+            $operationStage = $this->normalizedOperationStage((string) $request->query('operation_stage', ''));
+            if ($operationStage !== null) {
+                $aliases = $this->operationStageAliases($operationStage);
+                $query->where(function ($stageQuery) use ($aliases): void {
+                    foreach ($aliases as $alias) {
+                        $stageQuery->orWhere('operation_stage', $alias);
+                    }
+                });
+            }
         }
 
         return $query->latest('data_arrived_at')->get();
@@ -1869,6 +1895,7 @@ class PushsalePageService
             return [
                 'id' => (int) $saleId,
                 'name' => $first->saleUser?->name ?? 'Chưa phân sale',
+                'account' => $first->saleUser?->email ? Str::before($first->saleUser->email, '@') : '',
                 'receive_data' => (bool) data_get($first->saleUser?->permissions, 'receive_data', true),
                 'contacts' => $orders->count(),
                 'untouched' => $orders->filter(fn (Order $order) => blank($order->operation_stage) && blank($order->operation_result))->count(),
@@ -1912,17 +1939,35 @@ class PushsalePageService
     private function normalizedOperationStage(string $stage): ?string
     {
         return match (Str::lower(trim($stage))) {
-            'call_1', 'call1', 'gọi lần 1' => 'call_1',
-            'call_2', 'call2', 'gọi lần 2' => 'call_2',
-            'call_3', 'call3', 'gọi lần 3' => 'call_3',
-            'call_4', 'call4', 'gọi lần 4' => 'call_4',
-            'call_5', 'call5', 'gọi lần 5' => 'call_5',
-            'call_6', 'call6', 'gọi lần 6' => 'call_6',
-            'care_1', 'care1', 'chăm sóc lần 1' => 'care_1',
-            'care_2', 'care2', 'chăm sóc lần 2' => 'care_2',
-            'care_3', 'care3', 'chăm sóc lần 3' => 'care_3',
-            'skipped', 'ignore', 'bỏ qua' => 'skipped',
+            '102133', 'call_1', 'call1', 'gọi lần 1' => 'call_1',
+            '102134', 'call_2', 'call2', 'gọi lần 2' => 'call_2',
+            '102135', 'call_3', 'call3', 'gọi lần 3' => 'call_3',
+            '102136', 'call_4', 'call4', 'gọi lần 4' => 'call_4',
+            '102137', 'call_5', 'call5', 'gọi lần 5' => 'call_5',
+            '102138', 'call_6', 'call6', 'gọi lần 6' => 'call_6',
+            '102139', 'care_1', 'care1', 'chăm sóc lần 1' => 'care_1',
+            '102140', 'care_2', 'care2', 'chăm sóc lần 2' => 'care_2',
+            '102141', 'care_3', 'care3', 'chăm sóc lần 3' => 'care_3',
+            '102142', 'skipped', 'ignore', 'bỏ qua' => 'skipped',
             default => null,
+        };
+    }
+
+    /** @return list<string> */
+    private function operationStageAliases(string $stage): array
+    {
+        return match ($stage) {
+            'call_1' => ['call_1', 'call1', 'Gọi lần 1', 'gọi lần 1'],
+            'call_2' => ['call_2', 'call2', 'Gọi lần 2', 'gọi lần 2'],
+            'call_3' => ['call_3', 'call3', 'Gọi lần 3', 'gọi lần 3'],
+            'call_4' => ['call_4', 'call4', 'Gọi lần 4', 'gọi lần 4'],
+            'call_5' => ['call_5', 'call5', 'Gọi lần 5', 'gọi lần 5'],
+            'call_6' => ['call_6', 'call6', 'Gọi lần 6', 'gọi lần 6'],
+            'care_1' => ['care_1', 'care1', 'Chăm sóc lần 1', 'chăm sóc lần 1'],
+            'care_2' => ['care_2', 'care2', 'Chăm sóc lần 2', 'chăm sóc lần 2'],
+            'care_3' => ['care_3', 'care3', 'Chăm sóc lần 3', 'chăm sóc lần 3'],
+            'skipped' => ['skipped', 'ignore', 'Bỏ qua', 'bỏ qua'],
+            default => [$stage],
         };
     }
 

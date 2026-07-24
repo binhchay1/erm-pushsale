@@ -8,7 +8,7 @@ V82 fixes the regressions reported after V81 without touching the sidebar/conten
 
 - Added `PushsalePageShell` as the shared page contract: header + body.
 - Converted `PageHeader`, `PushsalePageChrome`, and `PushsalePageFrame` into adapters that render through the same page shell.
-- Added scoped CSS `pushsale-v82-page-contract-products.css` with three boundaries only:
+- Added scoped CSS `pushsale-product-page-contract.css` with three boundaries only:
   1. `.ps-page-shell` for page header/body layout.
   2. `.pushsale-main-sidebar` / `.pushsale-third-menu` for sidebar level-3 menu colors.
   3. `.ps-product-search-select-v82` for product/combo select behavior.

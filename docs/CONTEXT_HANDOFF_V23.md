@@ -4,7 +4,7 @@ V23 tiếp nối V22, tập trung xử lý yêu cầu: mọi phần còn dùng g
 
 ## Đã thay đổi
 
-- Thêm `resources/css/pushsale-system-v23.css` và import cuối trong `pushsale.css`.
+- Thêm `resources/css/pushsale-system-components.css` và import cuối trong `pushsale.css`.
 - Đồng bộ các component UI chung (`Card`, `Button`, `Input`, `Dialog`, `StatusBadge`) về Pushsale-style trong scope nội bộ ERM.
 - Gắn wrapper cho các màn riêng: System Monitor, Integrations/Pancake extension, Shipping Orders, Shipping Reconciliation.
 - Chỉnh modal Customer Messages/Pancake Chat sang class contract mới `ps-customer-chat-modal`, `ps-chat-tabs`, `ps-chat-thread`, `ps-chat-composer`.

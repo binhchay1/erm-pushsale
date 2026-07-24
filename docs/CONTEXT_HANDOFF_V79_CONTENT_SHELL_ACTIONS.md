@@ -10,7 +10,7 @@
 ## Key files
 
 - `resources/js/layouts/AppLayout.jsx`
-- `resources/css/pushsale-v79-content-shell-actions.css`
+- `resources/css/pushsale-content-shell-actions.css`
 - `resources/js/lib/uiShellStyles.js`
 
 ## Notes

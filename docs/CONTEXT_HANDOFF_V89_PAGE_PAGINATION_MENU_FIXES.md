@@ -52,7 +52,7 @@ This pass continues from V88 and fixes the regressions reported on staging:
   - Separates mandatory row loading from optional filter-option loading.
   - Prevents the generic migrate/cache banner when table data loaded successfully but filter options had an optional failure.
 
-- `resources/css/pushsale-v89-page-pagination-menu-fixes.css`
+- `resources/css/pushsale-page-pagination-menu-fixes.css`
   - Admin page gutters.
   - Shared pagination final layout.
   - Third-level menu border/hairline cleanup.

@@ -550,7 +550,7 @@ function MarketingTable({ rows, allRows, t }) {
     );
 }
 
-export default function CeoReport({ filters, filterOptions, report, routeUrl = '/admin/reports/ceo' }) {
+export default function CeoReport({ filters, filterOptions, report, routeUrl = '/admin/reports/ceo-dashboard-v2' }) {
     const t = useT();
     const [helpOpen, setHelpOpen] = useState(false);
     const [summaryCollapsed, setSummaryCollapsed] = useState(false);

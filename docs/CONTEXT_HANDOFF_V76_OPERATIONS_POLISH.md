@@ -37,7 +37,7 @@
 
 - `resources/js/components/operations/pushsale/SaleWorkspaceTable.jsx`
 - `resources/js/lib/uiShellStyles.js`
-- `resources/css/pushsale-v76-operations-polish.css`
+- `resources/css/pushsale-operations-polish.css`
 
 ## Deploy
 

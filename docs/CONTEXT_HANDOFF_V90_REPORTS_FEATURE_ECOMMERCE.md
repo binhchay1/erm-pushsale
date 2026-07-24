@@ -15,7 +15,7 @@ This pass continues the V85–V89 shared-shell cleanup. It focuses on the live Q
 
 ### CSS/UI contract
 
-- `resources/css/pushsale-v90-report-feature-ecommerce-contract.css`
+- `resources/css/pushsale-report-feature-ecommerce-contract.css`
   - shared report toolbar spacing
   - shared report pagination rhythm
   - CEO V2 table height/gap fix

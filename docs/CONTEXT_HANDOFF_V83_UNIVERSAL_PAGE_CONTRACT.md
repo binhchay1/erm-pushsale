@@ -8,7 +8,7 @@ V83 adds a final scoped CSS authority and a tiny host marker for legacy template
 
 ## Changes
 
-- Adds `resources/css/pushsale-v83-universal-page-contract.css`.
+- Adds `resources/css/pushsale-universal-page-contract.css`.
 - Adds `pushsale-template-host-v83` marker in `normalizeTemplateLayout()`.
 - Loads V83 after V82 in `resources/js/lib/uiShellStyles.js`.
 - Restores level-2/level-3 menu background and hover strictly inside `.pushsale-main-sidebar` / `.pushsale-third-menu`.

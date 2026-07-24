@@ -151,8 +151,31 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         return $controller($request, 'marketing-4');
     })->name('legacy.reports.marketing-upsale');
     Route::get('ld/sale/bang-tong-hop-ban-hang', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
-        return $controller($request, 'sale-2');
+        return $controller($request, 'sale-closing-summary');
     })->name('legacy.reports.sale-closing-summary');
+
+
+    Route::get('ld/sale/sale-kpi', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'sale-kpi');
+    })->name('legacy.reports.sale-kpi');
+    Route::get('ld/sale/bao-cao/bao-cao-cong-viec-sale', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'sale-work');
+    })->name('legacy.reports.sale-work');
+    Route::get('ld/sale/bao-cao-doanh-so-chi-tiet', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'sale-revenue-detail');
+    })->name('legacy.reports.sale-revenue-detail');
+    Route::get('ld/sale/bao-cao/bao-cao-doanh-so', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'sale-revenue');
+    })->name('legacy.reports.sale-revenue');
+    Route::get('ld/sale/bao-cao/bao-cao-doanh-so-v2', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'sale-revenue-v2');
+    })->name('legacy.reports.sale-revenue-v2');
+    Route::get('ld/thong-ke/bao-cao-lich-hen-telesales', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'sale-appointments');
+    })->name('legacy.reports.sale-appointments');
+    Route::get('ld/thong-ke/bao-cao-kinh-doanh-he-thong', function (Illuminate\Http\Request $request, ExtraReportController $controller) {
+        return $controller($request, 'system-business');
+    })->name('legacy.reports.system-business');
 
 
     // Hồ sơ khách hàng dùng chung cho các vai trò có quyền customers:view.
@@ -213,8 +236,22 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::middleware('role:'.User::ROLE_ADMIN)->prefix('admin')->name('admin.')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
         // "Tổng quan vận hành" đã gộp vào "Tổng quan điều hành" (dashboard). Giữ redirect cho link cũ.
-        Route::get('reports/business', fn () => redirect()->route('admin.reports.extra', ['report' => 'kho-2']))->name('reports.business');
+        Route::get('reports/business', fn () => redirect()->route('admin.reports.system-business'))->name('reports.business');
+        foreach ((array) config('pushsale_report_routes', []) as $reportKey => $routeConfig) {
+            $adminPath = (string) ($routeConfig['admin_path'] ?? '');
+            $routeName = (string) ($routeConfig['route_name'] ?? '');
+
+            if ($adminPath === '' || $routeName === '' || ! str_starts_with($adminPath, '/admin/')) {
+                continue;
+            }
+
+            Route::get(substr($adminPath, strlen('/admin/')), function (Illuminate\Http\Request $request, ExtraReportController $controller) use ($reportKey) {
+                return $controller($request, (string) $reportKey);
+            })->name($routeName);
+        }
         Route::get('reports/ceo', CeoReportController::class)->name('reports.ceo');
+        Route::get('reports/ceo-dashboard-v2', CeoReportController::class)->name('reports.ceo-dashboard-v2');
+        Route::redirect('sales/reports/ceo-dashboard-v2', '/admin/reports/ceo-dashboard-v2', 301)->name('sales.reports.ceo-dashboard-v2.redirect');
         Route::get('reports/hourly', HourlyStatsController::class)->name('reports.hourly');
         Route::get('reports/team-leaders', TeamLeaderStatsController::class)->name('reports.team-leaders');
         Route::get('reports/extra/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');

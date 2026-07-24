@@ -1,0 +1,59 @@
+/* Sidebar/flyout parity with the original Pushsale AdminLTE menu. */
+html body.pushsale-app-body .pushsale-third-menu {
+    width: 252px !important;
+    min-width: 252px !important;
+    padding: 8px 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #0b8ff3 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .32) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    z-index: 1038 !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-item {
+    margin: 0 !important;
+    padding: 0 10px !important;
+    list-style: none !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link {
+    height: 52px !important;
+    min-height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    padding: 0 22px !important;
+    border: 0 !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link span {
+    color: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-item.active .pushsale-third-link,
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link:hover,
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link:focus {
+    background: #0560ad !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .pushsale-menu-link {
+    font-size: 14px !important;
+}

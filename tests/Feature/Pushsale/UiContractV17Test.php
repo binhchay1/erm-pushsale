@@ -99,8 +99,8 @@ class UiContractV17Test extends TestCase
         $this->assertStringNotContainsString('pushsale-layout.css', $appCss);
         $this->assertStringNotContainsString('public-shell.css', $appCss);
         $this->assertStringContainsString('public-shell.css', $publicCss);
-        $this->assertStringContainsString('pushsale-system-v17.css', $pushsaleCss);
-        $this->assertFileDoesNotExist(resource_path('css/pushsale-v12-fixes.css'));
-        $this->assertFileDoesNotExist(resource_path('css/pushsale-v13-fixes.css'));
+        $this->assertStringContainsString('pushsale-system-foundation.css', $pushsaleCss);
+        $this->assertFileDoesNotExist(resource_path('css/pushsale-legacy-fixes.css'));
+        $this->assertFileDoesNotExist(resource_path('css/pushsale-legacy-adminlte-fixes.css'));
     }
 }

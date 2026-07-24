@@ -64,8 +64,8 @@ if (exists('resources/js/lib/pushsaleStyleRegistry.js')) {
         const base = path.basename(file);
         if (!registeredCss.includes(base)) warn('css-registry', `Versioned CSS exists but is not loaded by registry: ${base}`, file);
     }
-    if (registeredCss.includes('pushsale-v84-stability-contract.css')) pass('css-registry', 'Final stability contract CSS is registered', 'resources/js/lib/pushsaleStyleRegistry.js');
-    else fail('css-registry', 'pushsale-v84-stability-contract.css is not registered', 'resources/js/lib/pushsaleStyleRegistry.js');
+    if (registeredCss.includes('pushsale-stability-contract.css')) pass('css-registry', 'Final stability contract CSS is registered', 'resources/js/lib/pushsaleStyleRegistry.js');
+    else fail('css-registry', 'pushsale-stability-contract.css is not registered', 'resources/js/lib/pushsaleStyleRegistry.js');
 }
 
 // CSS risk scan: final version CSS should not introduce global selectors.

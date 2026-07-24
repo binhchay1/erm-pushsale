@@ -9,8 +9,8 @@
 
 ## Implementation
 
-- Added `resources/css/pushsale-v70-page-polish.css` as the last loaded page-polish layer.
-- Updated `resources/js/lib/uiShellStyles.js` to load `pushsale.css` then `pushsale-v70-page-polish.css`.
+- Added `resources/css/pushsale-page-polish.css` as the last loaded page-polish layer.
+- Updated `resources/js/lib/uiShellStyles.js` to load `pushsale.css` then `pushsale-page-polish.css`.
 - Updated `Page_2_4_1.jsx` so the Radix dialog outer body uses `pslc-dialog-shell`; the actual form keeps one scroll body and one footer.
 
 ## Notes

@@ -7,7 +7,7 @@ Timeline milestone và spec — **mới nhất trước**. Chi tiết kỹ thu�
 ## 2026-07-23 — V98 Warehouse 5.3 voucher/inventory linkage
 
 - Rebuild 3 template màn **5.3.1–5.3.3** từ `template-ten-1`: Phiếu nhập/xuất kho, Danh sách phiếu xuất/nhập kho, Lịch sử nhập/xuất kho.
-- Scope CSS mới `pushsale-v98-warehouse-flow-contract.css` cho nhóm kho, không ghi đè báo cáo/dashboard/menu đã làm.
+- Scope CSS mới `pushsale-warehouse-flow-contract.css` cho nhóm kho, không ghi đè báo cáo/dashboard/menu đã làm.
 - Backend phiếu kho chạy transaction: voucher + voucher line + tồn kho + movement cùng commit/rollback.
 - Movement sinh từ phiếu kho được link bằng `reference_type=warehouse_voucher`, `reference_id`; 5.3.2 và 5.3.3 dùng cùng dữ liệu business.
 - Inventory seeder tạo thêm voucher demo để kiểm thử giao diện kho có dữ liệu thật.
@@ -143,7 +143,7 @@ Timeline milestone và spec — **mới nhất trước**. Chi tiết kỹ thu�
 ## 2026-07-23 — V98 Warehouse 5.3 voucher/inventory linkage
 
 - Rebuild 3 template màn **5.3.1–5.3.3** từ `template-ten-1`: Phiếu nhập/xuất kho, Danh sách phiếu xuất/nhập kho, Lịch sử nhập/xuất kho.
-- Scope CSS mới `pushsale-v98-warehouse-flow-contract.css` cho nhóm kho, không ghi đè báo cáo/dashboard/menu đã làm.
+- Scope CSS mới `pushsale-warehouse-flow-contract.css` cho nhóm kho, không ghi đè báo cáo/dashboard/menu đã làm.
 - Backend phiếu kho chạy transaction: voucher + voucher line + tồn kho + movement cùng commit/rollback.
 - Movement sinh từ phiếu kho được link bằng `reference_type=warehouse_voucher`, `reference_id`; 5.3.2 và 5.3.3 dùng cùng dữ liệu business.
 - Inventory seeder tạo thêm voucher demo để kiểm thử giao diện kho có dữ liệu thật.
@@ -167,7 +167,7 @@ Timeline milestone và spec — **mới nhất trước**. Chi tiết kỹ thu�
 ## 2026-07-15 — V17 UI system, dynamic filters và modal contract
 
 - Tách CSS thành ba entry: shared (`app.css`), public/login (`public.css`) và ERM nội bộ (`pushsale.css`).
-- Loại các patch CSS V12/V13 khỏi source; `pushsale-system-v17.css` trở thành contract cuối.
+- Loại các patch CSS V12/V13 khỏi source; `pushsale-system-foundation.css` trở thành contract cuối.
 - Scope 79 template; loại generated Select2/Chosen DOM, script và dữ liệu tenant Pushsale capture.
 - Chuẩn hóa filter Bootstrap thành grid 12 cột, tự bỏ cột trống đầu hàng.
 - Chuẩn hóa action cell, không còn border/hộp con quanh icon.

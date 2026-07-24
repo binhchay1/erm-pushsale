@@ -42,7 +42,7 @@ The Pushsale source has:
   - Uses `PushsalePageShell` and shared report controls.
   - Adds threshold color classes matching Pushsale legend.
 
-- `resources/css/pushsale-v96-marketing-work-leader-contract.css`
+- `resources/css/pushsale-marketing-work-leader-contract.css`
   - Scoped styles only for `.ps-marketing-work-report` and `.ps-marketing-leader-page`.
   - Does not introduce broad global table/sidebar overrides.
 

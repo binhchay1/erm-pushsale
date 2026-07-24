@@ -1,0 +1,224 @@
+/* Sale KPI footer notes and menu 4.5.2 closing summary report contract. */
+html body.pushsale-app-body .ps-sale-kpi-report .ps-kpi-progress-bar {
+    display: none !important;
+}
+
+html body.pushsale-app-body .ps-sale-kpi-report .ps-kpi-layout > div:first-child {
+    padding-bottom: 0 !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report {
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-toolbar.ps-page-shell {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-toolbar .ps-page-shell__header {
+    margin: 0 !important;
+    padding: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-toolbar .ps-page-shell__main-row {
+    display: grid !important;
+    grid-template-columns: minmax(230px, max-content) minmax(620px, 1fr) auto !important;
+    min-height: 56px !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 10px 15px !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-toolbar .ps-page-shell__title {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #111 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 22px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-filters {
+    display: grid !important;
+    grid-template-columns: minmax(320px, 2fr) minmax(190px, .8fr) minmax(120px, .55fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-filters .ps-date-range {
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-filters .ps-control,
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-toolbar .ps-control {
+    height: 30px !important;
+    min-height: 30px !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #111 !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-sale-search {
+    text-align: center !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-pager-row {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    padding: 12px 15px 10px !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-short-record-pager {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-short-record-pager .btn {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 5px 10px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 2px !important;
+    background: #f9f9f9 !important;
+    color: #333 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-short-record-pager .btn[disabled] {
+    opacity: .55 !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-short-record-pager .btn:first-child[disabled] {
+    opacity: 1 !important;
+    color: #111 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-scroll {
+    width: calc(100% - 30px) !important;
+    max-width: none !important;
+    height: calc(100vh - 250px) !important;
+    min-height: 520px !important;
+    margin: 0 15px !important;
+    overflow: auto !important;
+    border: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table {
+    width: max(100%, 1740px) !important;
+    min-width: 1740px !important;
+    margin: 0 !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    table-layout: auto !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table th,
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table td {
+    min-width: 88px !important;
+    height: 40px !important;
+    padding: 7px 8px !important;
+    border: 1px solid #d9d9d9 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    line-height: 16px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table th:first-child,
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table td:first-child {
+    min-width: 155px !important;
+    width: 155px !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table thead th {
+    position: sticky !important;
+    z-index: 2 !important;
+    background: #3782dc !important;
+    border-color: #2d73c2 !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table thead tr:nth-child(1) th {
+    top: 0 !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table thead tr:nth-child(2) th {
+    top: 39px !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table thead tr:nth-child(3) th {
+    top: 78px !important;
+    background: #3782dc !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    font-size: 11px !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table tbody tr:nth-child(odd) td {
+    background: #f3f3f3 !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table tbody tr:nth-child(even) td {
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-table tbody tr:hover td {
+    background: #f9fbff !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-account-cell strong {
+    display: block !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 17px !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-account-cell span {
+    display: block !important;
+    margin-top: 2px !important;
+    color: #8a8a8a !important;
+    font-size: 11px !important;
+    line-height: 15px !important;
+}
+
+html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-notes {
+    margin: 8px 15px 0 !important;
+    color: #666 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+}
+
+@media (max-width: 1200px) {
+    html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-toolbar .ps-page-shell__main-row,
+    html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-filters {
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.pushsale-app-body .ps-closing-summary-report .ps-closing-summary-toolbar .ps-page-shell__actions,
+    html body.pushsale-app-body .ps-closing-summary-report .ps-report-toolbar-actions {
+        justify-content: flex-start !important;
+    }
+}

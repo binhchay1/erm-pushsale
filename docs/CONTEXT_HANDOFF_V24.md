@@ -6,7 +6,7 @@
   - collapsed 42px sidebar,
   - overlay sidebar,
   - content-left 42px override.
-- V24 adds one final CSS contract loaded last: `resources/css/pushsale-system-v24.css`.
+- V24 adds one final CSS contract loaded last: `resources/css/pushsale-system-contract.css`.
 - Desktop behavior is now deterministic:
   - menu opens by default;
   - content starts after the full 252px sidebar;

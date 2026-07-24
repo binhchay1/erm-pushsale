@@ -32,17 +32,17 @@ Trang public/login không tải Bootstrap, AdminLTE hoặc lớp CSS của ERM.
 
 ### ERM nội bộ
 
-`resources/css/pushsale.css` là entry duy nhất cho shell nội bộ. Các lớp cũ được nạp theo thứ tự cố định và `pushsale-system-v17.css` luôn được nạp cuối cùng để làm hợp đồng cuối:
+`resources/css/pushsale.css` là entry duy nhất cho shell nội bộ. Các lớp cũ được nạp theo thứ tự cố định và `pushsale-system-foundation.css` luôn được nạp cuối cùng để làm hợp đồng cuối:
 
 ```text
 layout
 → common
 → page modules
 → reports / warehouse / shipping
-→ pushsale-system-v17.css
+→ pushsale-system-foundation.css
 ```
 
-Hai file vá lịch sử `pushsale-v12-fixes.css` và `pushsale-v13-fixes.css` đã bị loại bỏ khỏi source. Quy tắc cuối không còn phân tán ở nhiều file patch.
+Hai file vá lịch sử `pushsale-legacy-fixes.css` và `pushsale-legacy-adminlte-fixes.css` đã bị loại bỏ khỏi source. Quy tắc cuối không còn phân tán ở nhiều file patch.
 
 ### Font
 
@@ -185,7 +185,7 @@ Khối top 10 chụp từ Pushsale đã bị xóa. `SalesRankingCards` render to
 Khi thêm trang mới:
 
 1. Không import CSS page vào `app.css`.
-2. CSS trang nội bộ phải được import từ `pushsale.css` trước `pushsale-system-v17.css`.
+2. CSS trang nội bộ phải được import từ `pushsale.css` trước `pushsale-system-foundation.css`.
 3. CSS lấy từ HTML capture phải scope bằng `data-template-code`.
 4. Không giữ option hoặc row dữ liệu chụp trong template.
 5. Filter nhân viên/sản phẩm/kho/nguồn phải lấy từ `filterOptions()` hoặc service nghiệp vụ tương ứng.

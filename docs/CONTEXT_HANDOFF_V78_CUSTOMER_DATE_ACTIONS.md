@@ -14,7 +14,7 @@
   - Auto-corrects `date_to` when it is earlier than `date_from`.
   - Shows toast warning: `Ngày đến không thể nhỏ hơn ngày từ.`
   - Supports compact layout and optional display label.
-- `resources/css/pushsale-v78-shared-filters-actions.css`
+- `resources/css/pushsale-shared-filters-actions.css`
   - Final scoped CSS for date filters, customer profile pagination cleanup and floating action menu.
 
 ## Customer Profile

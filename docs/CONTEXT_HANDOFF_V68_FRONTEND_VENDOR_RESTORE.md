@@ -20,7 +20,7 @@ After the cleanup around commit `6b722cf9760729b0e308dd80b0defce047c1d4a9`, the 
 
 This does **not** roll the app back to the old codebase. New React routes/business logic stay in place. V68 only restores the static frontend contract the current shell expects.
 
-`resources/js/lib/uiShellStyles.js` now loads local vendor CSS first, with CDN only as a last-resort fallback. `resources/css/pushsale-parity-v68.css` is imported last and pins the FontAwesome `@font-face`, sidebar contract, menu row/icon sizing, action icons, shared controls, and dialog positioning.
+`resources/js/lib/uiShellStyles.js` now loads local vendor CSS first, with CDN only as a last-resort fallback. `resources/css/pushsale-parity-final.css` is imported last and pins the FontAwesome `@font-face`, sidebar contract, menu row/icon sizing, action icons, shared controls, and dialog positioning.
 
 ## Deploy note
 
@@ -28,7 +28,7 @@ The project is PNPM-only. `package-lock.json` must not be tracked. After applyin
 
 ```bash
 git rm package-lock.json 2>/dev/null || true
-git add public/vendor resources/js/lib/uiShellStyles.js resources/css/pushsale-parity-v68.css docs/CONTEXT_HANDOFF_V68_FRONTEND_VENDOR_RESTORE.md
+git add public/vendor resources/js/lib/uiShellStyles.js resources/css/pushsale-parity-final.css docs/CONTEXT_HANDOFF_V68_FRONTEND_VENDOR_RESTORE.md
 git commit -m "Restore legacy frontend vendor assets and menu icon CSS"
 git push ssd main
 ```
