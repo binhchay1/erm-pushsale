@@ -2373,3 +2373,46 @@ html body.pushsale-app-body .ps-status {
 html body.pushsale-app-body .ps-status-ok { background: #e8f8ef !important; color: #0a9b52 !important; }
 html body.pushsale-app-body .ps-status-warning { background: #fff5d7 !important; color: #c17d00 !important; }
 html body.pushsale-app-body .ps-status-danger { background: #ffe4e4 !important; color: #dd4b39 !important; }
+
+/* v121: absolute last-resort override for level-2 menu items without flyout.
+   Several old AdminLTE/Pushsale rules target .active/.hover with white background;
+   this selector paints both li and direct menu link so no upper blue border/white bg leaks through. */
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > a,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > button,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > span,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > a:hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > button:hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > span:hover,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > a,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > button,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > span,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > a:hover,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > button:hover,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > span:hover {
+    background: #1e95ec !important;
+    background-color: #1e95ec !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > a *,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > button *,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > span *,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > a:hover *,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > button:hover *,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > span:hover * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > a::before,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2:hover > a::after,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > a:hover::before,
+html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > a:hover::after {
+    content: none !important;
+    display: none !important;
+}

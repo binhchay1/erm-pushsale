@@ -48,9 +48,7 @@ class LandingApprovalController extends Controller
             'highlightCampaignId' => $request->integer('campaign') ?: null,
             'fieldMapping' => $this->fieldMappingGuide(),
             'canApprove' => true,
-            'approveBaseUrl' => $user->isAdmin()
-                ? '/admin/landing-approvals'
-                : '/marketing/landing-approvals',
+            'approveBaseUrl' => '/admin/marketing/landing-approvals',
             'activeMenuCode' => '2.4.3',
         ]);
     }

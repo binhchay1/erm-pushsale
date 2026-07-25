@@ -175,6 +175,9 @@ function cleanPayload(data) {
             unit_price_override: product.unit_price_override === '' ? null : product.unit_price_override,
         }));
     payload.success_url = payload.success_url || urls[0] || '';
+    // Luồng mới: form tạo/sửa nguồn landing không duyệt trực tiếp.
+    // Menu duyệt riêng sẽ gắn sản phẩm/gói + ngân sách rồi mới bật duyệt.
+    payload.is_approved = false;
     delete payload.upsell_urls_text;
     return payload;
 }
@@ -561,9 +564,9 @@ export default function LandingConnectionsPage({
                             </div>
 
                             <div></div>
-                            <div className="pslc-dialog-checks">
+                            <div className="pslc-dialog-checks pslc-dialog-checks-single">
                                 <label><input type="checkbox" checked={form.data.manual_import} onChange={(event) => form.setData('manual_import', event.target.checked)} /> Nhập thủ công</label>
-                                <label title={!canApprove ? 'Chỉ Admin được duyệt kết nối' : ''}><input type="checkbox" disabled={!canApprove} checked={form.data.is_approved} onChange={(event) => form.setData('is_approved', event.target.checked)} /> Duyệt</label>
+                                <span className="small-tip">Duyệt sản phẩm/gói và ngân sách ở menu duyệt kết nối.</span>
                             </div>
                         </div>
                         {Object.keys(form.errors).length > 0 && <div className="alert alert-danger pslc-errors">{Object.entries(form.errors).map(([key, message]) => <div key={key}><strong>{key}:</strong> {message}</div>)}</div>}

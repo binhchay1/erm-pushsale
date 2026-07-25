@@ -14,9 +14,12 @@ use App\Models\User;
 use App\Services\Marketing\LandingConnectionManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator as LaravelValidator;
+use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -73,17 +76,64 @@ final class LandingConnectionsController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $this->authorizeManage($request->user());
-        $this->manager->create($this->validated($request), $request->user());
 
-        return back()->with('success', 'Đã tạo kết nối landing và luồng nhận dữ liệu.');
+        try {
+            $payload = $this->validated($request);
+            // Luồng mới: tạo nguồn landing trước, duyệt/gắn sản phẩm ở menu duyệt riêng.
+            // Vì vậy form tạo không được tự bật duyệt để tránh 500/validation khi chưa có sản phẩm.
+            if (empty($payload['products'])) {
+                $payload['is_approved'] = false;
+            }
+
+            $this->manager->create($payload, $request->user());
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            Log::error('landing_connections.store_failed', [
+                'user_id' => $request->user()?->id,
+                'company_id' => $request->user()?->company_id,
+                'message' => $exception->getMessage(),
+                'exception' => $exception,
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors(['landing_connection' => 'Không lưu được kết nối landing. Chi tiết đã ghi vào log; chạy php artisan erm:test-all --route-smoke --smoke-limit=80 --json để copy lỗi nếu còn lặp lại.'])
+                ->with('error', 'Không lưu được kết nối landing, hệ thống đã chặn không cho rơi ra trang 500.');
+        }
+
+        return redirect('/admin/marketing/landing-connections')->with('success', 'Đã tạo kết nối landing. Chờ duyệt ở menu duyệt kết nối để gắn sản phẩm/gói và ngân sách.');
     }
 
     public function update(Request $request, LandingConnection $record): RedirectResponse
     {
         $this->authorizeManage($request->user());
-        $this->manager->update($record, $this->validated($request), $request->user());
 
-        return back()->with('success', 'Đã cập nhật kết nối landing.');
+        try {
+            $payload = $this->validated($request);
+            if (empty($payload['products'])) {
+                $payload['is_approved'] = false;
+            }
+
+            $this->manager->update($record, $payload, $request->user());
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            Log::error('landing_connections.update_failed', [
+                'record_id' => $record->id,
+                'user_id' => $request->user()?->id,
+                'company_id' => $request->user()?->company_id,
+                'message' => $exception->getMessage(),
+                'exception' => $exception,
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors(['landing_connection' => 'Không cập nhật được kết nối landing. Chi tiết đã ghi vào log; copy block route-smoke/log lên đây nếu còn lặp lại.'])
+                ->with('error', 'Không cập nhật được kết nối landing, hệ thống đã chặn không cho rơi ra trang 500.');
+        }
+
+        return redirect('/admin/marketing/landing-connections')->with('success', 'Đã cập nhật kết nối landing.');
     }
 
     public function destroy(Request $request, LandingConnection $record): RedirectResponse

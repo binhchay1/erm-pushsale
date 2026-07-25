@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class RuntimeSchemaContract
@@ -52,7 +53,93 @@ class RuntimeSchemaContract
             $changes[] = 'shipping_partner_connections.metadata';
         }
 
+        // V121: landing connection flow now creates a landing/source first, then
+        // an approval menu attaches products and budget. Older staging DBs may
+        // still have a stricter marketing_sources.product_id or miss some
+        // campaign columns, which made POST /admin/marketing/landing-connections/records fall into 500.
+        if (Schema::hasTable('marketing_sources')) {
+            foreach ([
+                'company_id' => ['type' => 'foreign_id', 'after' => 'id'],
+                'marketer_user_id' => ['type' => 'foreign_id', 'after' => 'product_id'],
+                'created_by_user_id' => ['type' => 'foreign_id', 'after' => 'marketer_user_id'],
+                'webhook_token' => ['type' => 'string64', 'after' => 'utm_campaign'],
+                'is_active' => ['type' => 'bool_true', 'after' => 'contacts'],
+                'is_approved' => ['type' => 'bool', 'after' => 'is_active'],
+                'lead_allocation' => ['type' => 'string20', 'after' => 'is_approved'],
+                'js_tracking_enabled' => ['type' => 'bool', 'after' => 'lead_allocation'],
+                'approved_by_user_id' => ['type' => 'foreign_id', 'after' => 'is_approved'],
+                'approved_at' => ['type' => 'timestamp', 'after' => 'approved_by_user_id'],
+                'rejected_by_user_id' => ['type' => 'foreign_id', 'after' => 'approved_at'],
+                'rejected_at' => ['type' => 'timestamp', 'after' => 'rejected_by_user_id'],
+                'rejection_reason' => ['type' => 'string', 'after' => 'rejected_at'],
+            ] as $column => $meta) {
+                if (Schema::hasColumn('marketing_sources', $column)) {
+                    continue;
+                }
 
+                Schema::table('marketing_sources', function (Blueprint $table) use ($column, $meta): void {
+                    $definition = match ($meta['type']) {
+                        'foreign_id' => $table->unsignedBigInteger($column)->nullable(),
+                        'string64' => $table->string($column, 64)->nullable(),
+                        'string20' => $table->string($column, 20)->default('inherit'),
+                        'string' => $table->string($column)->nullable(),
+                        'timestamp' => $table->timestamp($column)->nullable(),
+                        'bool_true' => $table->boolean($column)->default(true),
+                        'bool' => $table->boolean($column)->default(false),
+                        default => $table->string($column)->nullable(),
+                    };
+                    $after = $meta['after'] ?? null;
+                    if ($after && Schema::hasColumn('marketing_sources', $after)) {
+                        $definition->after($after);
+                    }
+                });
+                $changes[] = 'marketing_sources.'.$column;
+            }
+
+            if (Schema::hasColumn('marketing_sources', 'product_id')) {
+                try {
+                    DB::statement('ALTER TABLE marketing_sources MODIFY product_id BIGINT UNSIGNED NULL');
+                    $changes[] = 'marketing_sources.product_id nullable';
+                } catch (\Throwable) {
+                    // MySQL variants may reject MODIFY because of FK/index naming; keeping
+                    // the UI-level error guard still prevents a raw 500.
+                }
+            }
+        }
+
+        if (Schema::hasTable('landing_connections')) {
+            foreach ([
+                'budget_type' => ['type' => 'string20', 'after' => 'allocation_method'],
+                'budget_amount' => ['type' => 'bigint', 'after' => 'budget_type'],
+                'budget_start_date' => ['type' => 'date', 'after' => 'budget_amount'],
+                'budget_end_date' => ['type' => 'date', 'after' => 'budget_start_date'],
+                'metadata' => ['type' => 'json', 'after' => 'is_active'],
+                'approved_by_user_id' => ['type' => 'foreign_id', 'after' => 'metadata'],
+                'approved_at' => ['type' => 'timestamp', 'after' => 'approved_by_user_id'],
+                'updated_by_user_id' => ['type' => 'foreign_id', 'after' => 'created_by_user_id'],
+            ] as $column => $meta) {
+                if (Schema::hasColumn('landing_connections', $column)) {
+                    continue;
+                }
+
+                Schema::table('landing_connections', function (Blueprint $table) use ($column, $meta): void {
+                    $definition = match ($meta['type']) {
+                        'foreign_id' => $table->unsignedBigInteger($column)->nullable(),
+                        'string20' => $table->string($column, 20)->default($column === 'budget_type' ? 'total' : ''),
+                        'bigint' => $table->unsignedBigInteger($column)->default(0),
+                        'date' => $table->date($column)->nullable(),
+                        'timestamp' => $table->timestamp($column)->nullable(),
+                        'json' => $table->json($column)->nullable(),
+                        default => $table->string($column)->nullable(),
+                    };
+                    $after = $meta['after'] ?? null;
+                    if ($after && Schema::hasColumn('landing_connections', $after)) {
+                        $definition->after($after);
+                    }
+                });
+                $changes[] = 'landing_connections.'.$column;
+            }
+        }
 
 
         if (Schema::hasTable('teams')) {
