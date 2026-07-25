@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { PushsaleSelect } from '@/components/pushsale/PushsaleSelect';
+import { AddressSelect, oldDistrictOptions, oldProvinceOptions, oldWardOptions, newProvinceOptions, newWardOptions, combinedProvinceOptions } from '@/components/pushsale/PushsaleAddressSelect';
 
 const emptyWarehouse = {
     name: '',
@@ -46,6 +48,24 @@ function optionNodes(items, placeholder) {
     );
 }
 
+
+function toChoiceOptions(items, currentValue = '') {
+    const mapped = (items ?? []).map((item) => {
+        if (typeof item === 'string') return { value: item, label: item };
+        return {
+            value: String(item.id ?? item.value ?? item.key ?? item.name ?? ''),
+            label: String(item.name ?? item.label ?? item.title ?? item.key ?? ''),
+            subLabel: item.subLabel,
+        };
+    }).filter((item) => item.value !== '');
+
+    if (currentValue && !mapped.some((item) => String(item.value) === String(currentValue))) {
+        mapped.unshift({ value: String(currentValue), label: String(currentValue), subLabel: 'Giá trị đang lưu' });
+    }
+
+    return mapped;
+}
+
 function DialogShell({ title, open, onClose, children, wide = false, className = '' }) {
     return (
         <PushsaleDialog
@@ -61,11 +81,12 @@ function DialogShell({ title, open, onClose, children, wide = false, className =
     );
 }
 
-function WarehouseForm({ form, managers, provinces, districts, editing, onSubmit, onAppendProvinces }) {
-    const wards = useMemo(() => {
-        const current = form.data.pick_ward ? [form.data.pick_ward] : [];
-        return Array.from(new Set([...current, ...DEFAULT_WARDS]));
-    }, [form.data.pick_ward]);
+function WarehouseForm({ form, managers, locations, editing, onSubmit, onAppendProvinces }) {
+    const twoLevelMode = Boolean(form.data.use_two_level_address);
+    const managerOptions = useMemo(() => toChoiceOptions(managers, form.data.manager_user_id), [managers, form.data.manager_user_id]);
+    const provinceOptionsMode = twoLevelMode ? 'new2025' : 'old';
+    const districtDisabled = twoLevelMode || !form.data.pick_province;
+    const wardDisabled = twoLevelMode ? !form.data.pick_province : !form.data.pick_district;
 
     return (
         <form onSubmit={onSubmit} className="ps-warehouse-form">
@@ -74,18 +95,18 @@ function WarehouseForm({ form, managers, provinces, districts, editing, onSubmit
                 <label><span>Số thứ tự</span><input className="form-control" type="number" min="0" value={form.data.sort_order ?? ''} onChange={(event) => form.setData('sort_order', event.target.value)} /></label>
 
                 <label><span>Mã kho</span><input className="form-control" value={form.data.code ?? ''} onChange={(event) => form.setData('code', event.target.value)} /></label>
-                <label><span>Quản kho</span><select className="form-control" value={form.data.manager_user_id ?? ''} onChange={(event) => form.setData('manager_user_id', event.target.value)}>{optionNodes(managers, '--Chọn quản kho--')}</select></label>
+                <label><span>Quản kho</span><PushsaleSelect searchable options={managerOptions} value={form.data.manager_user_id ?? ''} onChange={(value) => form.setData('manager_user_id', value)} placeholder="--Quản kho--" /></label>
 
-                <label className="ps-checkbox-row"><span>Địa chỉ 2 cấp</span><span className="ps-checkbox-inline"><input type="checkbox" checked={Boolean(form.data.use_two_level_address)} onChange={(event) => form.setData('use_two_level_address', event.target.checked)} /> Sử dụng địa chỉ 2 cấp</span></label>
+                <label className="ps-checkbox-row"><span>Địa chỉ 2 cấp</span><span className="ps-checkbox-inline"><input type="checkbox" checked={Boolean(form.data.use_two_level_address)} onChange={(event) => { form.setData('use_two_level_address', event.target.checked); form.setData('pick_province', ''); form.setData('pick_district', ''); form.setData('pick_ward', ''); }} /> Sử dụng địa chỉ 2 cấp</span></label>
                 <label><span>Số ĐT quản kho</span><input className="form-control" value={form.data.phone ?? ''} onChange={(event) => form.setData('phone', event.target.value)} /></label>
 
-                <label><span>Tỉnh/TP <b>(*)</b></span><select className="form-control" required value={form.data.pick_province ?? ''} onChange={(event) => form.setData('pick_province', event.target.value)}>{optionNodes(provinces, '--Chọn Tỉnh/TP--')}</select></label>
+                <label><span>Tỉnh/TP <b>(*)</b></span><AddressSelect type="province" mode={provinceOptionsMode} locations={locations} value={form.data.pick_province ?? ''} onChange={(value) => { form.setData('pick_province', value); form.setData('pick_district', ''); form.setData('pick_ward', ''); }} placeholder="--Chọn Tỉnh/TP" /></label>
                 <label><span>Đăng đơn người gửi</span><input className="form-control" value={form.data.sender_registration_name ?? ''} onChange={(event) => form.setData('sender_registration_name', event.target.value)} /></label>
 
-                <label><span>Quận/Huyện <b>(*)</b></span><select className="form-control" required value={form.data.pick_district ?? ''} onChange={(event) => form.setData('pick_district', event.target.value)}>{optionNodes(districts, '--Quận/Huyện--')}</select></label>
+                <label><span>Quận/Huyện <b>(*)</b></span><AddressSelect type="district" locations={locations} province={form.data.pick_province ?? ''} value={form.data.pick_district ?? ''} onChange={(value) => { form.setData('pick_district', value); form.setData('pick_ward', ''); }} placeholder={twoLevelMode ? 'Địa chỉ 2 cấp 2025' : '--Quận/Huyện--'} disabled={districtDisabled} /></label>
                 <label className="ps-textarea-label"><span>In đơn người gửi</span><textarea className="form-control" value={form.data.sender_print_note ?? ''} onChange={(event) => form.setData('sender_print_note', event.target.value)} placeholder="Thông tin người gửi khi in đơn" /></label>
 
-                <label><span>Phường/Xã <b>(*)</b></span><select className="form-control" required value={form.data.pick_ward ?? ''} onChange={(event) => form.setData('pick_ward', event.target.value)}>{optionNodes(wards, '--Phường/Xã--')}</select></label>
+                <label><span>Phường/Xã <b>(*)</b></span><AddressSelect type="ward" mode={twoLevelMode ? 'new2025' : 'old'} locations={locations} province={form.data.pick_province ?? ''} district={form.data.pick_district ?? ''} value={form.data.pick_ward ?? ''} onChange={(value) => form.setData('pick_ward', value)} placeholder={twoLevelMode ? '--Chọn Phường/Xã 2025--' : '--Phường/Xã--'} disabled={wardDisabled} /></label>
                 <div />
 
                 <label><span>Địa chỉ <b>(*)</b></span><input className="form-control" required value={form.data.address ?? ''} onChange={(event) => form.setData('address', event.target.value)} /></label>
@@ -176,7 +197,7 @@ function ShippingAccountDialog({ open, warehouse, providers, form, selectedProvi
     );
 }
 
-export default function WarehouseIndex({ warehouses, filters = {}, managers = [], provinces = [], districts = [], shippingProviders = [] }) {
+export default function WarehouseIndex({ warehouses, filters = {}, managers = [], provinces = [], districts = [], locations = {}, shippingProviders = [] }) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [manager, setManager] = useState(filters.manager_user_id ?? '');
     const [province, setProvince] = useState(filters.province ?? '');
@@ -191,6 +212,14 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
     const rows = warehouses?.data ?? [];
 
     const providerOptions = shippingProviders.length ? shippingProviders : [{ key: 'manual', label: 'Thủ công', services: [{ code: 'manual', label: 'Giao hàng thủ công' }] }];
+    const filterProvinceOptions = useMemo(() => combinedProvinceOptions(locations, province), [locations, province]);
+    const filterDistrictOptions = useMemo(() => {
+        if (!province || province === 'Địa chỉ 2 cấp 2025') return toChoiceOptions(districts, district);
+        const oldOptions = oldDistrictOptions(locations, province, district);
+        const newOptions = newWardOptions(locations, province, district);
+        return oldOptions.length ? oldOptions : newOptions;
+    }, [district, districts, locations, province]);
+    const managerOptions = useMemo(() => toChoiceOptions(managers, manager), [managers, manager]);
 
     const submitFilters = (event) => {
         event.preventDefault();
@@ -279,9 +308,9 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                     <div className="m-header ps-warehouse-header">
                         <div className="ps-title">Danh sách kho</div>
                         <div className="ps-warehouse-filters">
-                            <select className="form-control" value={province} onChange={(event) => { setProvince(event.target.value); setDistrict(''); }}>{optionNodes(provinces, '--Chọn Tỉnh/TP')}</select>
-                            <select className="form-control" value={district} onChange={(event) => setDistrict(event.target.value)}>{optionNodes(districts, '--Quận/Huyện--')}</select>
-                            <select className="form-control" value={manager} onChange={(event) => setManager(event.target.value)}>{optionNodes(managers, '--Quản kho--')}</select>
+                            <PushsaleSelect searchable options={filterProvinceOptions} value={province} onChange={(value) => { setProvince(value); setDistrict(''); }} placeholder="--Chọn Tỉnh/TP" />
+                            <PushsaleSelect searchable options={filterDistrictOptions} value={district} onChange={setDistrict} placeholder={province === 'Địa chỉ 2 cấp 2025' ? '--Chọn Phường/Xã 2025--' : '--Quận/Huyện--'} disabled={!province && filterDistrictOptions.length === 0} />
+                            <PushsaleSelect searchable options={managerOptions} value={manager} onChange={setManager} placeholder="--Quản kho--" />
                             <input className="form-control" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Mã, tên, số điện thoại" />
                             <button className="btn btn-sm btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
                         </div>
@@ -307,10 +336,12 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                             <td className="text-center">{row.vtp_code}</td>
                             <td className="text-center">{row.ghtk_pick_address_id}</td>
                             <td className="text-center no-wrap">{row.updated_at}</td>
-                            <td className="text-center no-wrap ps-row-actions ps-warehouse-actions">
-                                <button type="button" title="Chỉnh sửa" onClick={() => openEdit(row)}><i className="fa fa-edit" /></button>
-                                <button type="button" title="Cấu hình tài khoản giao hàng" onClick={() => openShippingConfig(row)}><i className="fa fa-bank" /></button>
-                                <button type="button" title="Xóa" onClick={() => window.confirm(`Khi xóa kho các đơn liên quan đến kho sẽ được cập nhật thành không sử dụng kho, lịch sử liên quan đến kho này sẽ bị xóa, sản phẩm kho cũng sẽ bị xóa theo. Bạn có chắc chắn bạn muốn xóa?`) && router.delete(`/admin/warehouses/${row.id}`, { preserveScroll: true })}><i className="fa fa-trash" /></button>
+                            <td className="text-center no-wrap ps-row-actions-cell ps-warehouse-actions-cell">
+                                <div className="ps-row-actions ps-action-icon-row ps-warehouse-actions">
+                                    <button type="button" className="ps-action-icon" title="Chỉnh sửa" aria-label="Chỉnh sửa" onClick={() => openEdit(row)}><i className="fa fa-edit" /></button>
+                                    <button type="button" className="ps-action-icon" title="Cấu hình tài khoản giao hàng" aria-label="Cấu hình tài khoản giao hàng" onClick={() => openShippingConfig(row)}><i className="fa fa-bank" /></button>
+                                    <button type="button" className="ps-action-icon" title="Xóa" aria-label="Xóa" onClick={() => window.confirm(`Khi xóa kho các đơn liên quan đến kho sẽ được cập nhật thành không sử dụng kho, lịch sử liên quan đến kho này sẽ bị xóa, sản phẩm kho cũng sẽ bị xóa theo. Bạn có chắc chắn bạn muốn xóa?`) && router.delete(`/admin/warehouses/${row.id}`, { preserveScroll: true })}><i className="fa fa-trash" /></button>
+                                </div>
                             </td>
                         </tr>) : <tr><td colSpan="12" className="ps-empty">Chưa có kho phù hợp.</td></tr>}</tbody>
                     </table>
@@ -319,7 +350,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
             </section>
 
             <DialogShell open={open} onClose={() => setOpen(false)} title={editing ? 'Cập nhật kho' : 'Thêm mới kho'}>
-                <WarehouseForm form={form} managers={managers} provinces={provinces} districts={districts} editing={Boolean(editing)} onSubmit={save} onAppendProvinces={appendProvinces} />
+                <WarehouseForm form={form} managers={managers} locations={locations} editing={Boolean(editing)} onSubmit={save} onAppendProvinces={appendProvinces} />
             </DialogShell>
 
             <ShippingAccountDialog

@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
+use App\Support\VietnamDivisions;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -40,8 +41,20 @@ class WarehouseController extends Controller
             $query->where(fn ($builder) => $builder->where('name', 'like', "%{$term}%")->orWhere('phone', 'like', "%{$term}%")->orWhere('address', 'like', "%{$term}%"));
         }
         if ($filters['manager_user_id'] !== '') $query->where('manager_user_id', $filters['manager_user_id']);
-        if ($filters['province'] !== '') $query->where('pick_province', $filters['province']);
-        if ($filters['district'] !== '') $query->where('pick_district', $filters['district']);
+        if ($filters['province'] !== '') {
+            $province = $filters['province'];
+            $query->where(fn ($builder) => $builder
+                ->where('pick_province', $province)
+                ->orWhere('pick_province', 'like', "%{$province}%"));
+        }
+        if ($filters['district'] !== '') {
+            $district = $filters['district'];
+            $query->where(fn ($builder) => $builder
+                ->where('pick_district', $district)
+                ->orWhere('pick_ward', $district)
+                ->orWhere('pick_district', 'like', "%{$district}%")
+                ->orWhere('pick_ward', 'like', "%{$district}%"));
+        }
 
         $warehouses = $query->orderBy('name')->paginate(20)->withQueryString()->through(fn (Warehouse $warehouse): array => [
             'id' => $warehouse->id,
@@ -74,6 +87,7 @@ class WarehouseController extends Controller
             'managers' => $this->managerOptions(),
             'provinces' => $this->provinceOptions(),
             'districts' => $this->districtOptions($filters['province']),
+            'locations' => $this->locationOptions(),
             'shippingProviders' => $this->shippingProviderOptions(),
             'activeMenuCode' => '5.2.1',
         ]);
@@ -221,6 +235,10 @@ class WarehouseController extends Controller
     /** @return list<string> */
     protected function provinceOptions(): array
     {
+        $locations = $this->locationOptions();
+        $known = array_map(fn (array $item): string => (string) $item['name'], $locations['old']['provinces']);
+        $current = array_map(fn (array $item): string => (string) $item['name'], $locations['new2025']['provinces']);
+
         $fromData = Warehouse::query()
             ->whereNotNull('pick_province')
             ->where('pick_province', '!=', '')
@@ -230,13 +248,21 @@ class WarehouseController extends Controller
             ->all();
 
         return array_values(array_unique(array_filter(array_merge([
-            'Địa chỉ 2 cấp 2025', 'Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Phú Thọ', 'Cần Thơ',
-        ], $fromData))));
+            'Địa chỉ 2 cấp 2025',
+        ], $current, $known, $fromData))));
     }
 
     /** @return list<string> */
     protected function districtOptions(string $province = ''): array
     {
+        $locations = $this->locationOptions();
+        $fromAddressBook = $province !== ''
+            ? array_map(fn (array $item): string => (string) $item['name'], $locations['old']['districts'][$province] ?? [])
+            : [];
+        $from2025Wards = $province !== ''
+            ? array_map(fn (array $item): string => (string) $item['name'], $locations['new2025']['wards'][$province] ?? [])
+            : [];
+
         $query = Warehouse::query()->whereNotNull('pick_district')->where('pick_district', '!=', '');
         if ($province !== '') {
             $query->where('pick_province', $province);
@@ -244,9 +270,95 @@ class WarehouseController extends Controller
 
         $fromData = $query->distinct()->orderBy('pick_district')->pluck('pick_district')->all();
 
-        return array_values(array_unique(array_filter(array_merge([
-            'Thành phố Hà Nội', 'Phú Thọ', 'Quận Ba Đình', 'Quận Cầu Giấy',
-        ], $fromData))));
+        return array_values(array_unique(array_filter(array_merge($fromAddressBook, $from2025Wards, $fromData))));
+    }
+
+    /** @return array<string,mixed> */
+    protected function locationOptions(): array
+    {
+        $oldProvinces = [];
+        $oldDistricts = [];
+        $oldWards = [];
+
+        foreach (VietnamDivisions::provinces() as $province) {
+            $provinceName = $this->cleanDivisionName((string) $province['name']);
+            $oldProvinces[] = [
+                'code' => (string) $province['code'],
+                'name' => $provinceName,
+                'value' => $provinceName,
+                'label' => $provinceName,
+                'mode' => 'old',
+            ];
+
+            foreach (VietnamDivisions::districts((string) $province['code']) as $district) {
+                $districtName = $this->cleanDistrictName((string) $district['name']);
+                $oldDistricts[$provinceName][] = [
+                    'code' => (string) $district['code'],
+                    'name' => $districtName,
+                    'value' => $districtName,
+                    'label' => $districtName,
+                    'mode' => 'old',
+                ];
+
+                $wardKey = $provinceName.'||'.$districtName;
+                foreach (VietnamDivisions::wards((string) $district['code']) as $ward) {
+                    $wardName = (string) $ward['name'];
+                    $oldWards[$wardKey][] = [
+                        'code' => (string) $ward['code'],
+                        'name' => $wardName,
+                        'value' => $wardName,
+                        'label' => $wardName,
+                        'mode' => 'old',
+                    ];
+                }
+            }
+        }
+
+        $newProvinces = [];
+        $newWards = [];
+        foreach (VietnamDivisions::newProvinces() as $province) {
+            $provinceName = $this->cleanDivisionName((string) $province['name']);
+            $newProvinces[] = [
+                'code' => (string) $province['code'],
+                'name' => $provinceName,
+                'value' => $provinceName,
+                'label' => $provinceName,
+                'mode' => 'new2025',
+            ];
+
+            foreach (VietnamDivisions::newWards((string) $province['code']) as $ward) {
+                $wardName = (string) $ward['name'];
+                $newWards[$provinceName][] = [
+                    'code' => (string) $ward['code'],
+                    'name' => $wardName,
+                    'value' => $wardName,
+                    'label' => $wardName,
+                    'mode' => 'new2025',
+                ];
+            }
+        }
+
+        return [
+            'old' => [
+                'provinces' => $oldProvinces,
+                'districts' => $oldDistricts,
+                'wards' => $oldWards,
+            ],
+            'new2025' => [
+                'provinces' => $newProvinces,
+                'wards' => $newWards,
+            ],
+        ];
+    }
+
+    protected function cleanDivisionName(string $name): string
+    {
+        return trim(preg_replace('/^(Tỉnh|Thành phố)\s+/u', '', $name) ?: $name);
+    }
+
+    protected function cleanDistrictName(string $name): string
+    {
+        return trim($name);
     }
 
     /** @return list<array<string,mixed>> */

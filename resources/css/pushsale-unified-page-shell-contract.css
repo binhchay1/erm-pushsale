@@ -1565,3 +1565,234 @@ html body.pushsale-app-body .ps-shipping-help-box p {
         margin-left: 0 !important;
     }
 }
+
+/* v116: 5.2.1 warehouse final alignment/action icons/shipping dialog sizing. */
+html body.pushsale-app-body .ps-warehouse-page {
+    --ps-wh-gutter: 12px;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-list-header-wrap,
+html body.pushsale-app-body .ps-warehouse-page .m-header-wrap,
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-toolbar,
+html body.pushsale-app-body .ps-warehouse-page .box-body.ps-toolbar.ps-warehouse-toolbar {
+    padding-left: var(--ps-wh-gutter) !important;
+    padding-right: var(--ps-wh-gutter) !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-table-wrap,
+html body.pushsale-app-body .ps-warehouse-page .ps-table-scroll.ps-warehouse-table-wrap {
+    padding-left: var(--ps-wh-gutter) !important;
+    padding-right: var(--ps-wh-gutter) !important;
+    margin-top: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    box-sizing: border-box !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-toolbar + .ps-warehouse-table-wrap,
+html body.pushsale-app-body .ps-warehouse-page .ps-toolbar + .ps-table-scroll.ps-warehouse-table-wrap {
+    margin-top: 0 !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-table {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-table th.ps-action-th,
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-table td.ps-warehouse-actions-cell {
+    width: 132px !important;
+    min-width: 132px !important;
+    max-width: 132px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
+
+html body.pushsale-app-body .ps-action-icon-row,
+html body.pushsale-app-body .ps-warehouse-page .ps-action-icon-row.ps-warehouse-actions {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 84px !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+}
+
+html body.pushsale-app-body .ps-action-icon-row .ps-action-icon,
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-actions .ps-action-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #1685e5 !important;
+    font-size: 13px !important;
+    line-height: 20px !important;
+    vertical-align: middle !important;
+    opacity: 1 !important;
+}
+
+html body.pushsale-app-body .ps-action-icon-row .ps-action-icon:hover,
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-actions .ps-action-icon:hover {
+    color: #005cad !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body .ps-shipping-account-dialog.ps-dialog-surface {
+    width: min(1540px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100dvh - 28px) !important;
+}
+
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-dialog-body,
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-source-dialog-body {
+    max-height: calc(100dvh - 86px) !important;
+    padding: 12px 18px 20px !important;
+    overflow: auto !important;
+}
+
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-default-panel,
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-config-panel {
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-default-row {
+    grid-template-columns: 250px minmax(320px, 1fr) 72px !important;
+    gap: 22px !important;
+}
+
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-config-body {
+    grid-template-columns: 180px minmax(0, 1fr) !important;
+    gap: 26px !important;
+}
+
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-provider-tabs {
+    min-height: 470px !important;
+}
+
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-provider-grid label {
+    grid-template-columns: 300px minmax(320px, 1fr) !important;
+    gap: 18px !important;
+}
+
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-provider-actions {
+    margin-left: 300px !important;
+}
+
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-provider-grid input,
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-provider-grid select,
+html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-default-row select {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 980px) {
+    html body.pushsale-app-body .ps-shipping-account-dialog.ps-dialog-surface {
+        width: calc(100vw - 12px) !important;
+        max-width: calc(100vw - 12px) !important;
+    }
+
+    html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-default-row,
+    html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-config-body,
+    html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-provider-grid label {
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-provider-tabs {
+        min-height: 0 !important;
+        grid-template-columns: repeat(2, minmax(120px, 1fr)) !important;
+    }
+
+    html body.pushsale-app-body .ps-shipping-account-dialog .ps-shipping-provider-actions {
+        margin-left: 0 !important;
+    }
+}
+
+/* v116b: table border must start on the same vertical line as the page title/add button. */
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-table-wrap,
+html body.pushsale-app-body .ps-warehouse-page .ps-table-scroll.ps-warehouse-table-wrap {
+    padding-left: 0 !important;
+    padding-right: var(--ps-wh-gutter) !important;
+}
+
+/* v117: searchable address select2 parity for warehouse filters/dialogs. */
+html body.pushsale-app-body .ps-select__search-wrap {
+    position: relative !important;
+    height: 31px !important;
+    border-bottom: 1px solid #d2d6de !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-select__search-wrap .ps-select__search {
+    width: 100% !important;
+    height: 31px !important;
+    padding: 4px 28px 4px 7px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+    line-height: 21px !important;
+}
+
+html body.pushsale-app-body .ps-select__search-wrap > .fa {
+    position: absolute !important;
+    top: 50% !important;
+    right: 8px !important;
+    transform: translateY(-50%) !important;
+    color: #6d747b !important;
+    font-size: 14px !important;
+    pointer-events: none !important;
+}
+
+html body.pushsale-app-body .ps-address-select .ps-select__menu,
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters .ps-select__menu,
+html body.pushsale-app-body .ps-warehouse-dialog .ps-address-select .ps-select__menu {
+    min-width: 300px !important;
+    width: max(100%, 300px) !important;
+    border-color: #2f7ed8 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,.18) !important;
+}
+
+html body.pushsale-app-body .ps-address-select .ps-select__options,
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters .ps-select__options {
+    max-height: 390px !important;
+}
+
+html body.pushsale-app-body .ps-address-select .ps-select__option,
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters .ps-select__option {
+    min-height: 27px !important;
+    padding: 5px 8px !important;
+    line-height: 17px !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters {
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters > .ps-select,
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters > input.form-control {
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-form-grid .ps-select__control {
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-form-grid .ps-select.is-disabled .ps-select__control {
+    background: #f5f5f5 !important;
+    color: #777 !important;
+    cursor: not-allowed !important;
+}

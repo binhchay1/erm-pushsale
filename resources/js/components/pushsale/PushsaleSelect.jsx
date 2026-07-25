@@ -83,13 +83,16 @@ export function PushsaleSelect({
             {open && !disabled && (
                 <div className="ps-select__menu" role="listbox">
                     {searchable && (
-                        <input
-                            className="form-control ps-select__search"
-                            autoFocus
-                            value={keyword}
-                            placeholder={searchPlaceholder}
-                            onChange={(event) => setKeyword(event.target.value)}
-                        />
+                        <div className="ps-select__search-wrap">
+                            <input
+                                className="form-control ps-select__search"
+                                autoFocus
+                                value={keyword}
+                                placeholder={searchPlaceholder}
+                                onChange={(event) => setKeyword(event.target.value)}
+                            />
+                            <i className="fa fa-search" aria-hidden="true" />
+                        </div>
                     )}
                     <button type="button" className={`ps-select__option is-empty ${String(value) === '' ? 'active' : ''}`} onClick={() => selectValue('')}>
                         {placeholder}
@@ -179,13 +182,16 @@ export function PushsaleMultiSelect({
             {open && (
                 <div className="ps-select__menu" role="listbox">
                     {searchable && (
-                        <input
-                            className="form-control ps-select__search"
-                            autoFocus
-                            value={keyword}
-                            placeholder={searchPlaceholder || `Tìm ${label.toLowerCase()}...`}
-                            onChange={(event) => setKeyword(event.target.value)}
-                        />
+                        <div className="ps-select__search-wrap">
+                            <input
+                                className="form-control ps-select__search"
+                                autoFocus
+                                value={keyword}
+                                placeholder={searchPlaceholder || `Tìm ${label.toLowerCase()}...`}
+                                onChange={(event) => setKeyword(event.target.value)}
+                            />
+                            <i className="fa fa-search" aria-hidden="true" />
+                        </div>
                     )}
                     <button type="button" className={`ps-select__option ${allSelected ? 'active' : ''}`} onClick={setAll}>
                         <span>{allLabel || `Tất cả ${label} đều có quyền`}</span>
