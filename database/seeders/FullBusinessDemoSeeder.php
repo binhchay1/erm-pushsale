@@ -16,6 +16,7 @@ use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
 use App\Models\WarehouseInventoryMovement;
 use App\Services\Tenant\CompanyProvisioningService;
+use App\Support\RuntimeSchemaContract;
 use App\Support\TenantManager;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
@@ -60,6 +61,8 @@ class FullBusinessDemoSeeder extends Seeder
 
     public function run(): void
     {
+        app(RuntimeSchemaContract::class)->ensure();
+
         $this->call(DemoResetSeeder::class);
 
         $company = CompanyProvisioningService::internalCompany();

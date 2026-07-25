@@ -8,6 +8,7 @@ use App\Models\MarketingSource;
 use App\Models\Pushsale\FacebookPageMapping;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class FacebookPageMappingSeeder extends Seeder
@@ -65,15 +66,23 @@ class FacebookPageMappingSeeder extends Seeder
         }
 
         $connection = IntegrationConnection::forPlatform(IntegrationPlatform::Facebook);
-        $connection->forceFill([
+        $payload = [
             'is_enabled' => true,
             'verify_token' => $connection->verify_token ?: 'sale-loop-facebook-demo',
             'webhook_secret' => $connection->webhook_secret ?: Str::random(32),
-            'metadata' => array_merge($connection->metadata ?? [], [
+        ];
+
+        // Một số DB staging đã chạy migration cleanup cũ làm mất cột metadata.
+        // Seeder phải chạy được cả trước và sau khi migrate bản restore mới, tránh chết giữa chừng khi QA dữ liệu.
+        if (Schema::hasColumn('integration_connections', 'metadata')) {
+            $metadata = is_array($connection->metadata ?? null) ? $connection->metadata : [];
+            $payload['metadata'] = array_merge($metadata, [
                 'configured_from' => 'menu_1_11_seed',
                 'page_mapping_count' => count($pages),
-            ]),
-        ])->save();
+            ]);
+        }
+
+        $connection->forceFill($payload)->save();
 
         $this->command?->info('Đã tạo cấu hình Facebook đơn vị mẫu cho '.count($pages).' Fanpage.');
     }

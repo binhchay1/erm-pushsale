@@ -22,7 +22,10 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Shipment;
 use App\Models\User;
+use Illuminate\Contracts\Http\Kernel as HttpKernel;
+use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -99,7 +102,9 @@ class StagingTestService
             'count' => count(Route::getRoutes()),
         ];
 
-        $ok = collect($checks)->every(static fn ($check) => (bool) ($check['ok'] ?? false));
+        $ok = collect($checks)
+            ->filter(static fn ($check): bool => is_array($check) && array_key_exists('ok', $check))
+            ->every(static fn ($check): bool => (bool) ($check['ok'] ?? false));
 
         return [
             'ok' => $ok,
@@ -233,7 +238,7 @@ class StagingTestService
     /** @param list<string>|null $urls
      *  @return array<string, mixed>
      */
-    public function scanPages(?array $urls = null, bool $allStatic = false): array
+    public function scanPages(?array $urls = null, bool $allStatic = false, int $failedLimit = 20): array
     {
         $baseUrl = rtrim((string) config('staging_test.base_url'), '/');
         $timeout = max(5, (int) config('staging_test.timeout', 20));
@@ -262,6 +267,7 @@ class StagingTestService
                     || str_contains($body, 'Không tải được dữ liệu bộ lọc');
 
                 $ok = $response->status() >= 200 && $response->status() < 400 && ! $hasPhpError;
+                $errorType = $this->classifySmokeFailure($response->status(), $hasPhpError, null);
 
                 $results[] = [
                     'url' => $url,
@@ -271,6 +277,7 @@ class StagingTestService
                     'title' => $title,
                     'inertia_root' => $hasInertiaRoot,
                     'bytes' => strlen($body),
+                    'error_type' => $ok ? null : $errorType,
                     'error_hint' => $hasPhpError ? 'php_error_signature_in_body' : (! $ok ? $this->compactErrorHint($body) : null),
                 ];
             } catch (\Throwable $e) {
@@ -282,12 +289,14 @@ class StagingTestService
                     'title' => null,
                     'inertia_root' => false,
                     'bytes' => 0,
-                    'error_hint' => $e->getMessage(),
+                    'error_type' => 'exception',
+                    'error_hint' => get_class($e).': '.$e->getMessage(),
                 ];
             }
         }
 
         $failed = array_values(array_filter($results, static fn ($row) => ! (bool) $row['ok']));
+        $summary = $this->summarizeSmokeResults($results, $failedLimit);
 
         return [
             'ok' => count($failed) === 0,
@@ -295,23 +304,176 @@ class StagingTestService
             'all_static' => $allStatic,
             'generated_at' => now()->toISOString(),
             'total' => count($results),
+            'passed' => count($results) - count($failed),
             'failed' => count($failed),
-            'failed_results' => $failed,
+            'summary' => $summary,
+            'summary_text' => $this->formatSmokeSummaryText('pages:scan', $summary),
+            'failed_results' => array_slice($failed, 0, $failedLimit),
             'results' => $results,
         ];
     }
 
 
     /** @return array<string, mixed> */
-    public function scanRoutableViewRoutes(bool $queryNoise = true, int $limit = 320): array
+    public function scanRoutableViewRoutes(bool $queryNoise = true, int $limit = 320, int $failedLimit = 20): array
     {
         $urls = $this->routableViewUrls($queryNoise, $limit);
-        $result = $this->scanPages($urls, false);
+        $result = $this->scanInternalPages($urls, $failedLimit);
         $result['route_smoke'] = true;
         $result['query_noise'] = $queryNoise;
         $result['generated_urls'] = $urls;
 
         return $result;
+    }
+
+    /**
+     * Route smoke phải chạy bên trong Laravel kernel với user thật theo role.
+     * Nếu dùng HTTP ngoài server mà chưa bật auto-login thì 300+ route protected
+     * sẽ trả 401 và che mất lỗi 500 thật.
+     *
+     * @param list<string> $urls
+     * @return array<string, mixed>
+     */
+    private function scanInternalPages(array $urls, int $failedLimit = 20): array
+    {
+        $results = [];
+
+        foreach ($urls as $url) {
+            $started = microtime(true);
+            $url = '/'.ltrim((string) $url, '/');
+
+            try {
+                $user = $this->userForSmokeUrl($url);
+                $response = $this->dispatchInternalGet($url, $user);
+                $status = $response->getStatusCode();
+                $body = '';
+                try {
+                    $content = method_exists($response, 'getContent') ? $response->getContent() : '';
+                    $body = is_string($content) ? $content : '';
+                } catch (\Throwable) {
+                    $body = '';
+                }
+                $title = $this->extractTitle($body);
+                $hasInertiaRoot = str_contains($body, 'data-page=') || str_contains($body, 'id="app"');
+                $hasPhpError = str_contains($body, 'Whoops')
+                    || str_contains($body, 'Symfony\Component\ErrorHandler')
+                    || str_contains($body, 'Illuminate\Database')
+                    || str_contains($body, 'Stack trace')
+                    || str_contains($body, 'Trang này đang thiếu dữ liệu')
+                    || str_contains($body, 'Không tải được dữ liệu bộ lọc');
+
+                $ok = $status >= 200 && $status < 400 && ! $hasPhpError;
+                $errorType = $this->classifySmokeFailure($status, $hasPhpError, null);
+
+                $results[] = [
+                    'url' => $url,
+                    'status' => $status,
+                    'ok' => $ok,
+                    'ms' => (int) round((microtime(true) - $started) * 1000),
+                    'title' => $title,
+                    'inertia_root' => $hasInertiaRoot,
+                    'bytes' => strlen($body),
+                    'user' => $user ? ['id' => $user->id, 'role' => $user->role instanceof UserRole ? $user->role->value : (string) $user->role] : null,
+                    'error_type' => $ok ? null : $errorType,
+                    'error_hint' => $hasPhpError ? 'php_error_signature_in_body' : (! $ok ? $this->compactErrorHint($body) : null),
+                ];
+            } catch (\Throwable $e) {
+                $results[] = [
+                    'url' => $url,
+                    'status' => 0,
+                    'ok' => false,
+                    'ms' => (int) round((microtime(true) - $started) * 1000),
+                    'title' => null,
+                    'inertia_root' => false,
+                    'bytes' => 0,
+                    'user' => null,
+                    'error_type' => 'exception',
+                    'error_hint' => get_class($e).': '.$e->getMessage(),
+                ];
+            }
+        }
+
+        $failed = array_values(array_filter($results, static fn ($row) => ! (bool) $row['ok']));
+        $summary = $this->summarizeSmokeResults($results, $failedLimit);
+
+        return [
+            'ok' => count($failed) === 0,
+            'base_url' => config('app.url'),
+            'internal_kernel' => true,
+            'generated_at' => now()->toISOString(),
+            'total' => count($results),
+            'passed' => count($results) - count($failed),
+            'failed' => count($failed),
+            'summary' => $summary,
+            'summary_text' => $this->formatSmokeSummaryText('routes:view-smoke', $summary),
+            'failed_results' => array_slice($failed, 0, $failedLimit),
+            'results' => $results,
+        ];
+    }
+
+    private function dispatchInternalGet(string $url, ?User $user): \Symfony\Component\HttpFoundation\Response
+    {
+        $kernel = app(HttpKernel::class);
+        $appUrl = (string) config('app.url');
+        $host = parse_url($appUrl, PHP_URL_HOST) ?: 'localhost';
+        $https = str_starts_with($appUrl, 'https://');
+
+        $request = HttpRequest::create($url, 'GET', [], [], [], [
+            'HTTP_HOST' => $host,
+            'HTTPS' => $https ? 'on' : 'off',
+            'HTTP_ACCEPT' => 'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8',
+            'REMOTE_ADDR' => '127.0.0.1',
+        ]);
+        $request->setLaravelSession(app('session')->driver());
+
+        Auth::logout();
+        if ($user) {
+            Auth::login($user);
+            $request->setUserResolver(static fn () => $user);
+        }
+
+        try {
+            $response = $kernel->handle($request);
+            $kernel->terminate($request, $response);
+
+            return $response;
+        } finally {
+            Auth::logout();
+        }
+    }
+
+    private function userForSmokeUrl(string $url): ?User
+    {
+        $path = strtolower(parse_url($url, PHP_URL_PATH) ?: $url);
+        $role = User::ROLE_ADMIN;
+
+        if (str_starts_with($path, '/sales') || str_contains($path, '/ld/sale/')) {
+            $role = User::ROLE_SALES;
+        } elseif (str_starts_with($path, '/marketing') || str_contains($path, '/ld/marketing') || str_contains($path, '/bao-cao/bao-cao-doanh-so-chi-tiet-marketing')) {
+            $role = User::ROLE_MARKETING;
+        } elseif (str_starts_with($path, '/warehouse') || str_contains($path, '/warehouse/')) {
+            $role = User::ROLE_WAREHOUSE;
+        } elseif (str_starts_with($path, '/accounting') || str_contains($path, '/accounting')) {
+            $role = User::ROLE_ACCOUNTING;
+        }
+
+        return $this->sampleUserByRole($role)
+            ?: $this->sampleUserByRole(User::ROLE_ADMIN)
+            ?: User::withoutTenant()->orderBy('id')->first();
+    }
+
+    private function sampleUserByRole(string $role): ?User
+    {
+        try {
+            $query = User::withoutTenant()->where('role', $role)->orderBy('id');
+            if (Schema::hasColumn('users', 'is_active')) {
+                $query->where('is_active', true);
+            }
+
+            return $query->first();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /** @return array<string, mixed> */
@@ -926,6 +1088,144 @@ class StagingTestService
         $query = $model::query();
 
         return method_exists($model, 'scopeWithoutTenant') ? $model::withoutTenant() : $query;
+    }
+
+    /**
+     * @param list<array<string, mixed>> $results
+     * @return array<string, mixed>
+     */
+    private function summarizeSmokeResults(array $results, int $failedLimit = 20): array
+    {
+        $total = count($results);
+        $failedRows = array_values(array_filter($results, static fn (array $row): bool => ! (bool) ($row['ok'] ?? false)));
+        $statusCounts = [];
+        $errorCounts = [];
+
+        foreach ($results as $row) {
+            $status = (string) ((int) ($row['status'] ?? 0));
+            $statusCounts[$status] = ($statusCounts[$status] ?? 0) + 1;
+
+            if (! (bool) ($row['ok'] ?? false)) {
+                $type = (string) ($row['error_type'] ?? $this->classifySmokeFailure((int) ($row['status'] ?? 0), false, (string) ($row['error_hint'] ?? '')));
+                $errorCounts[$type] = ($errorCounts[$type] ?? 0) + 1;
+            }
+        }
+
+        ksort($statusCounts);
+        arsort($errorCounts);
+
+        $failedTop = array_map(function (array $row): array {
+            $compact = [
+                'url' => (string) ($row['url'] ?? ''),
+                'status' => (int) ($row['status'] ?? 0),
+                'ms' => (int) ($row['ms'] ?? 0),
+                'type' => (string) ($row['error_type'] ?? 'unknown'),
+                'hint' => $this->shortSmokeHint((string) ($row['error_hint'] ?? '')),
+            ];
+
+            if (isset($row['user']) && is_array($row['user'])) {
+                $compact['user'] = trim(($row['user']['role'] ?? 'user').'#'.($row['user']['id'] ?? ''));
+            }
+
+            return $compact;
+        }, array_slice($failedRows, 0, max(1, min(100, $failedLimit))));
+
+        return [
+            'total' => $total,
+            'passed' => $total - count($failedRows),
+            'failed' => count($failedRows),
+            'status_counts' => $statusCounts,
+            'error_counts' => $errorCounts,
+            'failed_top' => $failedTop,
+            'copy_hint' => 'Copy block này lên ChatGPT là đủ: summary + failed_top, không cần paste toàn bộ generated_urls/results.',
+        ];
+    }
+
+    /** @param array<string, mixed> $summary */
+    private function formatSmokeSummaryText(string $name, array $summary): string
+    {
+        $lines = [];
+        $lines[] = strtoupper($name).' SUMMARY';
+        $lines[] = sprintf(
+            'total=%d passed=%d failed=%d',
+            (int) ($summary['total'] ?? 0),
+            (int) ($summary['passed'] ?? 0),
+            (int) ($summary['failed'] ?? 0),
+        );
+        $lines[] = 'status_counts='.json_encode($summary['status_counts'] ?? [], JSON_UNESCAPED_UNICODE);
+        $lines[] = 'error_counts='.json_encode($summary['error_counts'] ?? [], JSON_UNESCAPED_UNICODE);
+
+        $failedTop = $summary['failed_top'] ?? [];
+        if (is_array($failedTop) && $failedTop !== []) {
+            $lines[] = 'failed_top=';
+            foreach ($failedTop as $index => $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+
+                $lines[] = sprintf(
+                    '%02d. [%s/%s] %s (%sms) user=%s hint=%s',
+                    $index + 1,
+                    (string) ($row['status'] ?? 0),
+                    (string) ($row['type'] ?? 'unknown'),
+                    (string) ($row['url'] ?? ''),
+                    (string) ($row['ms'] ?? 0),
+                    (string) ($row['user'] ?? '-'),
+                    (string) ($row['hint'] ?? ''),
+                );
+            }
+        }
+
+        $lines[] = 'copy_hint='.($summary['copy_hint'] ?? '');
+
+        return implode(PHP_EOL, $lines);
+    }
+
+    private function classifySmokeFailure(int $status, bool $hasPhpError, ?string $hint): ?string
+    {
+        if ($hasPhpError) {
+            return 'php_error_signature';
+        }
+
+        if ($status === 0) {
+            return 'exception';
+        }
+
+        if ($status === 401) {
+            return 'unauthenticated_401';
+        }
+
+        if ($status === 403) {
+            return 'forbidden_403';
+        }
+
+        if ($status === 404) {
+            return 'not_found_404';
+        }
+
+        if ($status >= 500) {
+            return 'http_5xx';
+        }
+
+        if ($status >= 400) {
+            return 'http_4xx';
+        }
+
+        if ($hint && $hint !== '') {
+            return 'content_error';
+        }
+
+        return null;
+    }
+
+    private function shortSmokeHint(string $hint): string
+    {
+        $hint = trim(preg_replace('/\s+/', ' ', $hint) ?: '');
+        if ($hint === '') {
+            return '';
+        }
+
+        return mb_substr($hint, 0, 220);
     }
 
     private function compactErrorHint(string $body): ?string

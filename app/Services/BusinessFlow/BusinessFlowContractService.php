@@ -52,7 +52,16 @@ class BusinessFlowContractService
         $issues = collect();
         $warnings = collect();
 
-        $users = User::query()->where('company_id', $company->id)->get(['id', 'name', 'role', 'is_active']);
+        $userColumns = ['id', 'name', 'role'];
+        $hasUserActive = Schema::hasColumn('users', 'is_active');
+        if ($hasUserActive) {
+            $userColumns[] = 'is_active';
+        }
+
+        $users = User::query()->where('company_id', $company->id)->get($userColumns);
+        if (! $hasUserActive) {
+            $users->each(fn (User $user) => $user->setAttribute('is_active', true));
+        }
         $this->checkRoles($users, $issues, $warnings);
         $this->checkProducts($company, $issues, $warnings);
         $this->checkLandingConnections($company, $issues, $warnings);

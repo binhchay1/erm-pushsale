@@ -23,6 +23,8 @@ class ErmTestAllCommand extends Command
                             {--all-pages : With --pages, scan all GET/navigation pages}
                             {--route-smoke : Scan all safe GET/view routes, including dynamic routes with sampled IDs}
                             {--no-route-query-noise : With --route-smoke, do not append safe query params}
+                            {--smoke-limit=20 : Number of failed page/route rows printed in compact smoke summaries}
+                            {--full-json : With --json, include full verbose result payloads instead of compact QA summary}
                             {--base-url= : Override APP_URL/staging base URL for HTTP page/flow scans}
                             {--phone= : Phone number used by flow checks}
                             {--quick : Seed + critical backend audits only}
@@ -68,6 +70,7 @@ class ErmTestAllCommand extends Command
         $this->line('Mode: '.($standard ? 'standard' : ($quick ? 'quick' : 'custom')));
         $this->newLine();
 
+        $this->record('schema:contract-repair', fn () => $this->artisan('erm:repair-schema-contract'));
         $this->record('health', fn () => $this->healthPayload($staging));
 
         if ((bool) $this->option('fresh')) {
@@ -82,7 +85,7 @@ class ErmTestAllCommand extends Command
                 '--force' => true,
             ]));
             $this->record('reports:aggregate-today', fn () => $this->artisan('reports:aggregate-daily', ['date' => 'today']));
-            $this->record('reports:verify-facts', fn () => $this->artisan('reports:verify-facts', ['--days' => 14]));
+            $this->record('reports:verify-facts', fn () => $this->artisan('reports:verify-facts', ['--days' => 14, '--repair' => true]));
         }
 
         if ($runBuild) {
@@ -90,12 +93,7 @@ class ErmTestAllCommand extends Command
         }
 
         if ($runPhpunit) {
-            $params = [];
-            $filter = trim((string) $this->option('filter'));
-            if ($filter !== '') {
-                $params['--filter'] = $filter;
-            }
-            $this->record('phpunit', fn () => $this->artisan('test', $params));
+            $this->record('phpunit', fn () => $this->runPhpunit());
         }
 
         if ($runAudit) {
@@ -120,7 +118,8 @@ class ErmTestAllCommand extends Command
 
         if ($runRouteSmoke) {
             $queryNoise = ! (bool) $this->option('no-route-query-noise');
-            $this->record('routes:view-smoke', fn () => $this->jsonCheck($staging->scanRoutableViewRoutes($queryNoise)));
+            $smokeLimit = max(1, min(100, (int) $this->option('smoke-limit')));
+            $this->record('routes:view-smoke', fn () => $this->jsonCheck($staging->scanRoutableViewRoutes($queryNoise, 320, $smokeLimit)));
         }
 
         $failed = collect($this->results)->filter(fn (array $row): bool => ! $row['ok'])->values();
@@ -133,13 +132,17 @@ class ErmTestAllCommand extends Command
         );
 
         if ((bool) $this->option('json')) {
-            $this->line(json_encode([
+            $payload = [
                 'ok' => $ok,
                 'generated_at' => now()->toISOString(),
                 'base_url' => config('staging_test.base_url') ?: config('app.url'),
                 'failed' => $failed->pluck('name')->all(),
-                'results' => $this->results,
-            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+                'results' => (bool) $this->option('full-json')
+                    ? $this->results
+                    : array_map(fn (array $row): array => $this->compactResultForJson($row), $this->results),
+            ];
+
+            $this->line(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
         }
 
         if (! $ok) {
@@ -205,6 +208,52 @@ class ErmTestAllCommand extends Command
         ];
     }
 
+    /**
+     * @param array{name:string, ok:bool, ms:int, output?:?string, error?:?string, data?:mixed} $row
+     * @return array<string, mixed>
+     */
+    private function compactResultForJson(array $row): array
+    {
+        $compact = [
+            'name' => $row['name'],
+            'ok' => (bool) $row['ok'],
+            'ms' => (int) $row['ms'],
+        ];
+
+        if (! empty($row['error'])) {
+            $compact['error'] = $row['error'];
+        }
+
+        $data = $row['data'] ?? null;
+        if (is_array($data)) {
+            foreach (['total', 'failed', 'passed', 'base_url', 'internal_kernel', 'route_smoke', 'query_noise'] as $key) {
+                if (array_key_exists($key, $data)) {
+                    $compact[$key] = $data[$key];
+                }
+            }
+
+            if (isset($data['summary']) && is_array($data['summary'])) {
+                $compact['summary'] = $data['summary'];
+            } elseif (isset($data['counts']) && is_array($data['counts'])) {
+                $compact['counts'] = $data['counts'];
+            } elseif (isset($data['checks']) && is_array($data['checks'])) {
+                $compact['checks'] = array_map(static function ($check) {
+                    if (! is_array($check)) {
+                        return $check;
+                    }
+
+                    return array_intersect_key($check, array_flip(['ok', 'version', 'env', 'connection', 'store', 'default', 'count', 'error']));
+                }, $data['checks']);
+            }
+        }
+
+        if (! (bool) $row['ok'] && ! isset($compact['summary']) && ! empty($row['output'])) {
+            $compact['output_tail'] = mb_substr((string) $row['output'], -2000);
+        }
+
+        return $compact;
+    }
+
     /** @return array{ok:bool, ms:int, output:string} */
     private function artisan(string $command, array $parameters = []): array
     {
@@ -215,6 +264,36 @@ class ErmTestAllCommand extends Command
             'ok' => $exitCode === 0,
             'ms' => (int) round((microtime(true) - $started) * 1000),
             'output' => trim(Artisan::output()),
+        ];
+    }
+
+    /** @return array{ok:bool, ms:int, output:string, error?:string} */
+    private function runPhpunit(): array
+    {
+        $filter = trim((string) $this->option('filter'));
+        $params = [];
+        if ($filter !== '') {
+            $params['--filter'] = $filter;
+        }
+
+        if (array_key_exists('test', Artisan::all())) {
+            return $this->artisan('test', $params);
+        }
+
+        $phpunit = base_path('vendor/bin/phpunit');
+        if (is_file($phpunit)) {
+            $command = 'php '.escapeshellarg($phpunit);
+            if ($filter !== '') {
+                $command .= ' --filter '.escapeshellarg($filter);
+            }
+
+            return $this->process($command, 300);
+        }
+
+        return [
+            'ok' => true,
+            'ms' => 0,
+            'output' => 'SKIP: php artisan test/vendor/bin/phpunit không có trên server này. Production deploy đang composer install --no-dev nên PHPUnit không được cài. Backend smoke/flow/audit vẫn chạy bằng erm:test-all.',
         ];
     }
 
@@ -241,8 +320,28 @@ class ErmTestAllCommand extends Command
         return [
             'ok' => (bool) ($payload['ok'] ?? false),
             'data' => $payload,
-            'output' => json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?: '',
+            'output' => $this->compactPayloadForConsole($payload),
         ];
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function compactPayloadForConsole(array $payload): string
+    {
+        if (! empty($payload['summary_text'])) {
+            return (string) $payload['summary_text'];
+        }
+
+        if (isset($payload['summary']) && is_array($payload['summary'])) {
+            return json_encode([
+                'ok' => (bool) ($payload['ok'] ?? false),
+                'total' => $payload['total'] ?? null,
+                'passed' => $payload['passed'] ?? null,
+                'failed' => $payload['failed'] ?? null,
+                'summary' => $payload['summary'],
+            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?: '';
+        }
+
+        return json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?: '';
     }
 
     /** @return array{ok:bool, data:array<string, mixed>, output:string} */
