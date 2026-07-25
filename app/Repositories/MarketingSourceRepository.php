@@ -27,7 +27,7 @@ class MarketingSourceRepository
 
         $query = MarketingSource::query()
             ->whereNull('parent_id')
-            ->with(['marketer:id,name', 'creator:id,name', 'approver:id,name', 'rejector:id,name'])
+            ->with(['marketer:id,name,email', 'creator:id,name,email', 'approver:id,name,email', 'rejector:id,name'])
             ->withCount('orders')
             ->select('marketing_sources.*')
             ->selectRaw("COALESCE((
@@ -82,12 +82,13 @@ class MarketingSourceRepository
         $query = MarketingSource::query()
             ->whereNull('parent_id')
             ->with([
-                'marketer:id,name',
-                'creator:id,name',
-                'approver:id,name',
-                'rejector:id,name',
+                'marketer:id,name,email',
+                'creator:id,name,email',
+                'approver:id,name,email',
+                'rejector:id,name,email',
                 'product:id,name,sku,unit_price',
                 'landingConnection.sources',
+                'landingConnection.products.product:id,name,sku,type,unit_price',
             ])
             ->latest('id');
 

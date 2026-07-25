@@ -120,7 +120,7 @@ class LandingConnectionDemoSeeder extends Seeder
                         'is_active' => true,
                     ],
                 ],
-                'products' => [[
+                'products' => $index % 7 === 6 ? [] : [[
                     'product_id' => $product->id,
                     'source_key' => 'main_'.$index,
                     'item_type' => $product->type === 'combo' ? 'combo' : 'product',

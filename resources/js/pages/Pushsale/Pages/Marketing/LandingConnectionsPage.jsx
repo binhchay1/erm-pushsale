@@ -105,7 +105,7 @@ const blankForm = (marketerId = '') => {
         notes: '',
         upsell_urls_text: '',
         sources: [{ ...source, name: 'Nguồn dữ liệu' }],
-        products: [blankProduct(source.client_key)],
+        products: [],
         sale_user_ids: [],
     };
 };
@@ -165,13 +165,15 @@ function cleanPayload(data) {
         is_active: true,
     };
     payload.sources = [mainSource, ...sources.filter((source) => source.source_type !== 'main')];
-    payload.products = (payload.products ?? []).map((product, index) => ({
-        ...product,
-        source_key: product.source_key || mainSource.client_key,
-        is_default: index === 0 ? true : Boolean(product.is_default),
-        quantity: Number(product.quantity || 1),
-        unit_price_override: product.unit_price_override === '' ? null : product.unit_price_override,
-    }));
+    payload.products = (payload.products ?? [])
+        .filter((product) => product?.product_id)
+        .map((product, index) => ({
+            ...product,
+            source_key: product.source_key || mainSource.client_key,
+            is_default: index === 0 ? true : Boolean(product.is_default),
+            quantity: Number(product.quantity || 1),
+            unit_price_override: product.unit_price_override === '' ? null : product.unit_price_override,
+        }));
     payload.success_url = payload.success_url || urls[0] || '';
     delete payload.upsell_urls_text;
     return payload;
@@ -268,11 +270,6 @@ export default function LandingConnectionsPage({
     const openCreate = () => {
         setEditingId(null);
         const data = blankForm(query.marketer_user_id || defaultMarketerId);
-        const firstProduct = productCatalog[0];
-        if (firstProduct) {
-            data.products[0].product_id = String(firstProduct.id);
-            data.products[0].item_type = firstProduct.type === 'combo' ? 'combo' : 'product';
-        }
         form.setData(data);
         form.clearErrors();
         setOpen(true);
@@ -309,7 +306,7 @@ export default function LandingConnectionsPage({
                     unit_price_override: product.unit_price_override ?? '',
                     is_default: index === 0 ? true : Boolean(product.is_default),
                 }))
-                : [blankProduct(mainSource.client_key)],
+                : [],
             sale_user_ids: row.sale_user_ids ?? [],
             current_submit_url: row.sources?.find((source) => source.source_type === 'main')?.submit_url ?? '',
         });
@@ -483,7 +480,7 @@ export default function LandingConnectionsPage({
                                                 <td className="text-center pslc-td-marketer">{row.marketer ?? '—'}<br />{row.marketer_email && <span className="small-tip">({row.marketer_email})</span>}</td>
                                                 <td className="text-left pslc-td-source">{row.name}<br /><span className="small-tip">{mainSource?.source_url ?? '—'}</span></td>
                                                 <td className="text-center">Nguồn dữ liệu<div className="pslc-channel">({channelOptions.find((item) => item.value === row.ad_channel)?.label ?? row.ad_channel ?? 'Facebook ads'})</div></td>
-                                                <td className="text-left pslc-products-cell">{row.products?.length ? row.products.map((mapping) => <div key={mapping.id}>{mapping.product_name}</div>) : '—'}</td>
+                                                <td className="text-left pslc-products-cell">{row.products?.length ? row.products.map((mapping) => <div key={mapping.id}>{mapping.product_name}</div>) : <span className="text-muted">Chờ duyệt gắn sản phẩm</span>}</td>
                                                 <td className="text-left">{row.sale_names?.length ? row.sale_names.map((name, saleIndex) => <div key={`${name}-${saleIndex}`}>{saleIndex + 1}. {name}</div>) : ''}</td>
                                                 <td className="text-left">{allocationLabels[row.allocation_method] ?? ''}</td>
                                                 <td className="text-center pslc-api-cell">
@@ -537,9 +534,6 @@ export default function LandingConnectionsPage({
 
                             <label>Kênh quảng cáo <span className="required">(*)</span></label>
                             <PushsaleSelect options={channelOptions} value={form.data.ad_channel} onChange={(value) => form.setData('ad_channel', value || 'facebook_ads')} searchable />
-
-                            <label>Sản phẩm <span className="required">(*)</span></label>
-                            <PushsaleSelect options={productOptions} value={form.data.products?.[0]?.product_id ?? ''} placeholder="Tất cả sản phẩm" searchable onChange={updateFirstProduct} />
 
                             <label>Upsale URL</label>
                             <input className="form-control" type="url" value={form.data.upsell_urls_text ?? ''} onChange={(event) => form.setData('upsell_urls_text', event.target.value)} placeholder="Không bắt buộc" />

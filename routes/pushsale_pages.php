@@ -108,6 +108,7 @@ Route::get('marketing/customers', \App\Http\Controllers\Sales\CustomerProfileCon
 Route::redirect('pages/2-3-ho-so-khach-hang', '/admin/marketing/customers', 301);
 
 Route::get('marketing/landing-connections', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'index'])->name('marketing.landing-connections');
+Route::get('marketing/landing-connections/records', fn () => redirect('/admin/marketing/landing-connections'));
 Route::post('marketing/landing-connections/records', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'store'])->name('marketing.landing-connections.store');
 Route::delete('marketing/landing-connections/records', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'destroyMany'])->name('marketing.landing-connections.destroy-many');
 Route::match(['put', 'patch'], 'marketing/landing-connections/records/{record}', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'update'])->whereNumber('record')->name('marketing.landing-connections.update');
@@ -116,12 +117,15 @@ Route::redirect('pages/2-4-1-ket-noi-du-lieu', '/admin/marketing/landing-connect
 Route::redirect('pages/2-4-1-ket-noi-landing', '/admin/marketing/landing-connections', 301);
 
 Route::get('marketing/website-connections', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'index'])->name('marketing.website-connections');
+Route::get('marketing/website-connections/records', fn () => redirect('/admin/marketing/website-connections'));
 Route::post('marketing/website-connections/records', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'store'])->name('marketing.website-connections.store');
 Route::delete('marketing/website-connections/records', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'destroyMany'])->name('marketing.website-connections.destroy-many');
 Route::match(['put', 'patch'], 'marketing/website-connections/records/{record}', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'update'])->whereNumber('record')->name('marketing.website-connections.update');
 Route::delete('marketing/website-connections/records/{record}', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'destroy'])->whereNumber('record')->name('marketing.website-connections.destroy');
 Route::redirect('pages/2-4-2-ket-noi-du-lieu', '/admin/marketing/website-connections', 301);
-Route::redirect('marketing/landing-approvals', '/admin/landing-approvals', 302)->name('marketing.landing-approvals');
+Route::get('marketing/landing-approvals', [\App\Http\Controllers\Admin\LandingApprovalController::class, 'index'])->name('marketing.landing-approvals');
+Route::post('marketing/landing-approvals/{campaign}/approve', [\App\Http\Controllers\Admin\LandingApprovalController::class, 'approve'])->whereNumber('campaign')->name('marketing.landing-approvals.approve');
+Route::post('marketing/landing-approvals/{campaign}/reject', [\App\Http\Controllers\Admin\LandingApprovalController::class, 'reject'])->whereNumber('campaign')->name('marketing.landing-approvals.reject');
 
 Route::get('marketing/leads/import', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_6_1Controller::class, 'index'])->name('marketing.leads.import-page');
 Route::redirect('pages/2-6-1-import-contact', '/admin/marketing/leads/import', 301);

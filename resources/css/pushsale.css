@@ -14335,3 +14335,22 @@ html body.pushsale-app-body .ps-employee-error {
     color: #b00020 !important;
     font-size: 12px !important;
 }
+
+/* v120: hard override for second-level menu hover */
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:focus {
+    background: #1e95ec !important;
+    background-color: #1e95ec !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border-top: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2 *,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover *,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:focus * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}

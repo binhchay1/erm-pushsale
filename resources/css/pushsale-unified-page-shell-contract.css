@@ -2275,3 +2275,101 @@ html body.pushsale-app-body .pslc-source-form-v119 .ps-select__control i {
         flex-basis: 180px !important;
     }
 }
+
+/* v120: final menu hover and landing approval contract */
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:focus,
+html body.pushsale-app-body .main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2,
+html body.pushsale-app-body .main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover,
+html body.pushsale-app-body .main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:focus,
+html body.pushsale-app-body .left-side .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2,
+html body.pushsale-app-body .left-side .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover,
+html body.pushsale-app-body .left-side .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:focus,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:focus {
+    background: #1e95ec !important;
+    background-color: #1e95ec !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2 *,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover *,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:focus * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2::before,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover::before,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:focus::before,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2::after,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover::after,
+html body.pushsale-app-body .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:focus::after {
+    display: none !important;
+    content: none !important;
+}
+html body.pushsale-app-body .pslc-page-v119 .pslc-tabs {
+    align-items: center !important;
+    gap: 8px !important;
+    border-bottom: 1px solid #d2d6de !important;
+}
+html body.pushsale-app-body .pslc-page-v119 .pslc-tabs > button:not(.pslc-delete-auto) {
+    flex: 0 0 190px !important;
+    max-width: 190px !important;
+    height: 38px !important;
+    border: 0 !important;
+    background: #eee !important;
+    color: #777 !important;
+}
+html body.pushsale-app-body .pslc-page-v119 .pslc-tabs > button.active:not(.pslc-delete-auto) {
+    border-top: 3px solid #2d86da !important;
+    background: #fff !important;
+    color: #1f7ed0 !important;
+}
+html body.pushsale-app-body .pslc-page-v119 .pslc-delete-auto {
+    margin-left: auto !important;
+    margin-right: 4px !important;
+}
+html body.pushsale-app-body .pslc-page-v119 .pslc-table th.pslc-col-add,
+html body.pushsale-app-body .pslc-page-v119 .pslc-table th.pslc-col-add .btn-icon,
+html body.pushsale-app-body .pslc-page-v119 .pslc-table th.pslc-col-add .btn-icon * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    opacity: 1 !important;
+}
+html body.pushsale-app-body .pslc-source-form-v119 .pslc-source-simple-form {
+    grid-template-columns: 250px minmax(0, 1fr) !important;
+}
+html body.pushsale-app-body .pslc-source-form-v119 .pslc-dialog-checks {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    align-items: center !important;
+}
+html body.pushsale-app-body .pslc-approval-page .pslc-approval-filters {
+    grid-template-columns: 220px minmax(320px, 560px) !important;
+    justify-content: end !important;
+}
+html body.pushsale-app-body .pslc-approval-table {
+    width: max(100%, 1400px) !important;
+    min-width: 1400px !important;
+}
+html body.pushsale-app-body .pslc-approval-simple-form {
+    grid-template-columns: 230px minmax(0, 1fr) !important;
+}
+html body.pushsale-app-body .ps-status {
+    display: inline-block !important;
+    min-width: 72px !important;
+    padding: 2px 8px !important;
+    border-radius: 2px !important;
+    font-weight: 700 !important;
+    font-size: 11px !important;
+    line-height: 20px !important;
+}
+html body.pushsale-app-body .ps-status-ok { background: #e8f8ef !important; color: #0a9b52 !important; }
+html body.pushsale-app-body .ps-status-warning { background: #fff5d7 !important; color: #c17d00 !important; }
+html body.pushsale-app-body .ps-status-danger { background: #ffe4e4 !important; color: #dd4b39 !important; }
