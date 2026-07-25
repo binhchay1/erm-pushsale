@@ -158,3 +158,708 @@ html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .t
     color: #fff !important;
     -webkit-text-fill-color: #fff !important;
 }
+
+/* v131 — canonical final: page header alignment + real second-level menu hover.
+ * This file is loaded last by pushsaleStyleRegistry. Keep broad UI fixes here,
+ * not in new one-off files, so later prompts do not stack another override layer. */
+html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 8px !important;
+    padding: 0 12px !important;
+    background: #fff !important;
+    border: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 .ps-page-header-main {
+    display: grid !important;
+    grid-template-columns: minmax(230px, 320px) minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: 12px !important;
+    min-height: 54px !important;
+    margin: 0 !important;
+    padding: 7px 0 !important;
+}
+html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 .ps-page-title {
+    justify-self: start !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 24px !important;
+}
+html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 .pslc-approval-filters {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 930px !important;
+    margin: 0 0 0 auto !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+}
+html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 .pslc-approval-filters .ps-select {
+    flex: 0 0 220px !important;
+    width: 220px !important;
+    min-width: 220px !important;
+}
+html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 .pslc-approval-filters .pslc-approval-keyword {
+    flex: 1 1 520px !important;
+    min-width: 360px !important;
+    width: auto !important;
+}
+html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 .pslc-approval-filters .ps-btn-search,
+html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 .pslc-approval-filters .btn {
+    flex: 0 0 118px !important;
+    width: 118px !important;
+    min-width: 118px !important;
+    height: 31px !important;
+    min-height: 31px !important;
+    margin: 0 !important;
+}
+html body.pushsale-app-body .pslc-approval-table-card {
+    margin-top: 8px !important;
+}
+
+html body.pushsale-app-body .psm-page.ps-page-shell,
+html body.pushsale-app-body .psm-page {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+html body.pushsale-app-body .psm-page .ps-page-shell__header {
+    margin: 0 !important;
+    padding: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .psm-page .ps-page-shell__main-row {
+    display: grid !important;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    column-gap: 12px !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+    padding: 7px 12px !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .psm-page .ps-page-shell__title-col {
+    justify-self: start !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+}
+html body.pushsale-app-body .psm-page .ps-page-shell__title {
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+    font: 700 15px/22px Arial, Helvetica, sans-serif !important;
+}
+html body.pushsale-app-body .psm-page .psm-top-selects {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(200px, 1fr)) !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 920px !important;
+    margin-left: auto !important;
+}
+html body.pushsale-app-body .psm-page .ps-page-shell__actions {
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+}
+html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row {
+    margin: 0 !important;
+    padding: 8px 24px 10px 24px !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .psm-page .psm-filter-panel {
+    display: grid !important;
+    grid-template-rows: 31px 31px !important;
+    gap: 8px !important;
+    width: 100% !important;
+}
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-first,
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
+    display: grid !important;
+    align-items: center !important;
+    gap: 8px 12px !important;
+    width: 100% !important;
+}
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-first {
+    grid-template-columns: repeat(7, minmax(120px, 1fr)) !important;
+}
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
+    grid-template-columns: repeat(8, minmax(112px, 1fr)) !important;
+}
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-first > *,
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-second > * {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > a.a2,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > span.a2 {
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > a.a2::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > span.a2::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2::before {
+    display: none !important;
+    content: none !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"],
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover > .a2,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .a2 {
+    background: #0b8ff3 !important;
+    background-color: #0b8ff3 !important;
+    background-image: none !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2 *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover > .a2 *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .a2 * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+
+@media (max-width: 980px) {
+    html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 .ps-page-header-main,
+    html body.pushsale-app-body .psm-page .ps-page-shell__main-row {
+        grid-template-columns: 1fr !important;
+        row-gap: 8px !important;
+    }
+    html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 .pslc-approval-filters,
+    html body.pushsale-app-body .psm-page .psm-top-selects {
+        max-width: none !important;
+        width: 100% !important;
+        flex-wrap: wrap !important;
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* V132: final sidebar hover contract. This is intentionally broad inside the
+   Pushsale sidebar because older AdminLTE/theme CSS injects white hover layers. */
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > a,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > button,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > .pushsale-menu-link {
+    border: 0 !important;
+    border-top: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2::after,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > a::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > button::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > .pushsale-menu-link::before {
+    display: none !important;
+    content: none !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"],
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > a,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > button,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > .pushsale-menu-link,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > a,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > button,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > .pushsale-menu-link,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > a,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > button,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .pushsale-menu-link {
+    background: #0b8ff3 !important;
+    background-color: #0b8ff3 !important;
+    background-image: none !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > a *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > button *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > .pushsale-menu-link *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > a *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > button *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > .pushsale-menu-link *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > a *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > button *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .pushsale-menu-link * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* V133 canonical control/header/sidebar reset.
+ * Keep these global Pushsale/AdminLTE fixes here only. Do not add new one-off
+ * sidebar/filter override files unless this contract is intentionally changed. */
+html body.pushsale-app-body {
+    --ps-control-h: 31px;
+    --ps-control-border: #c8d2df;
+    --ps-control-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 9 6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' fill='none' stroke='%23777777' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* Unified select arrows: covers native select filters that lost their caret. */
+html body.pushsale-app-body select,
+html body.pushsale-app-body select.form-control,
+html body.pushsale-app-body select.ps-control,
+html body.pushsale-app-body .pushsale-wrapper select,
+html body.pushsale-app-body .ps-page-shell select,
+html body.pushsale-app-body .m-header select,
+html body.pushsale-app-body .box-body select,
+html body.pushsale-app-body .pushsale-template-fragment select,
+html body.pushsale-app-body .pushsale-dialog-fragment select {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    height: var(--ps-control-h) !important;
+    min-height: var(--ps-control-h) !important;
+    line-height: 19px !important;
+    padding: 5px 28px 5px 10px !important;
+    border: 1px solid var(--ps-control-border) !important;
+    border-radius: 0 !important;
+    background-color: #fff !important;
+    background-image: var(--ps-control-arrow) !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 9px 6px !important;
+    box-shadow: none !important;
+    color: #111 !important;
+    font: 12px/19px Arial, Helvetica, sans-serif !important;
+}
+html body.pushsale-app-body select::-ms-expand { display: none !important; }
+html body.pushsale-app-body select:focus,
+html body.pushsale-app-body select.form-control:focus {
+    border-color: #66afe9 !important;
+    outline: 0 !important;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 4px rgba(102,175,233,.38) !important;
+}
+
+/* Custom React select must visually match native select. */
+html body.pushsale-app-body .ps-select,
+html body.pushsale-app-body .ps-select--multi {
+    position: relative !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+html body.pushsale-app-body .ps-select__control,
+html body.pushsale-app-body button.ps-select__control.form-control {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: var(--ps-control-h) !important;
+    min-height: var(--ps-control-h) !important;
+    padding: 5px 28px 5px 10px !important;
+    border: 1px solid var(--ps-control-border) !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #111 !important;
+    font: 12px/19px Arial, Helvetica, sans-serif !important;
+    text-align: left !important;
+}
+html body.pushsale-app-body .ps-select__control > .fa,
+html body.pushsale-app-body .ps-select__control > i.fa {
+    position: absolute !important;
+    right: 10px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 9px !important;
+    height: 9px !important;
+    margin: 0 !important;
+    color: #777 !important;
+    font-size: 9px !important;
+    line-height: 9px !important;
+    text-align: center !important;
+}
+html body.pushsale-app-body .ps-select__control > span {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* Unified date/range controls: restore visible, clickable native date inputs. */
+html body.pushsale-app-body .ps-date-filter,
+html body.pushsale-app-body .ps-date-range,
+html body.pushsale-app-body .ps-date-range-control,
+html body.pushsale-app-body .date-range-wrap,
+html body.pushsale-app-body .legacy-range,
+html body.pushsale-app-body .psdd-date-range,
+html body.pushsale-app-body .ps-login-date-range,
+html body.pushsale-app-body .ps-revenue-detail-date-range,
+html body.pushsale-app-body .ps-sales-revenue-date-range,
+html body.pushsale-app-body .ps-wh-date-range {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: var(--ps-control-h) !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+html body.pushsale-app-body .ps-date-range::after,
+html body.pushsale-app-body .ps-date-filter::after,
+html body.pushsale-app-body .date-range-wrap::after,
+html body.pushsale-app-body .legacy-range::after {
+    content: '-' !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 10px !important;
+    color: #777 !important;
+    font-size: 12px !important;
+    pointer-events: none !important;
+}
+html body.pushsale-app-body .ps-date-filter .ps-date-filter-separator,
+html body.pushsale-app-body .ps-date-range > span:not(.ps-date-range-label),
+html body.pushsale-app-body .ps-date-range-control > span:not(.ps-date-range-label),
+html body.pushsale-app-body .date-range-wrap > span:not(.ps-date-range-label),
+html body.pushsale-app-body .legacy-range > span:not(.ps-date-range-label) {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 10px !important;
+    color: #777 !important;
+    font-size: 12px !important;
+}
+html body.pushsale-app-body input[type='date'],
+html body.pushsale-app-body input.ps-input[type='date'],
+html body.pushsale-app-body .ps-date-filter input[type='date'],
+html body.pushsale-app-body .ps-date-range input[type='date'],
+html body.pushsale-app-body .ps-date-range-control input[type='date'],
+html body.pushsale-app-body .date-range-wrap input[type='date'],
+html body.pushsale-app-body .legacy-range input[type='date'],
+html body.pushsale-app-body .psdd-date-range input[type='date'],
+html body.pushsale-app-body .ps-login-date-range input[type='date'],
+html body.pushsale-app-body .ps-revenue-detail-date-range input[type='date'],
+html body.pushsale-app-body .ps-sales-revenue-date-range input[type='date'],
+html body.pushsale-app-body .ps-wh-date-range input[type='date'] {
+    position: relative !important;
+    z-index: 2 !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: var(--ps-control-h) !important;
+    min-height: var(--ps-control-h) !important;
+    padding: 4px 8px !important;
+    border: 1px solid var(--ps-control-border) !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: none !important;
+    font: 12px/20px Arial, Helvetica, sans-serif !important;
+    cursor: pointer !important;
+    -webkit-appearance: auto !important;
+    appearance: auto !important;
+}
+html body.pushsale-app-body .ps-date-range input[type='date']:first-of-type,
+html body.pushsale-app-body .ps-date-filter input[type='date']:first-of-type,
+html body.pushsale-app-body .date-range-wrap input[type='date']:first-of-type,
+html body.pushsale-app-body .legacy-range input[type='date']:first-of-type { grid-column: 1 !important; grid-row: 1 !important; }
+html body.pushsale-app-body .ps-date-range input[type='date']:last-of-type,
+html body.pushsale-app-body .ps-date-filter input[type='date']:last-of-type,
+html body.pushsale-app-body .date-range-wrap input[type='date']:last-of-type,
+html body.pushsale-app-body .legacy-range input[type='date']:last-of-type { grid-column: 3 !important; grid-row: 1 !important; }
+html body.pushsale-app-body .ps-date-range-label,
+html body.pushsale-app-body .ps-date-filter-label {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+/* Page headers in rebuilt AdminLTE pages must start close to the left edge. */
+html body.pushsale-app-body .ps-page-shell__main-row {
+    grid-template-columns: minmax(160px, 250px) minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    min-height: 50px !important;
+    padding: 7px 14px !important;
+    margin: 0 !important;
+}
+html body.pushsale-app-body .ps-page-shell__title-col,
+html body.pushsale-app-body .ps-page-shell__title {
+    justify-self: start !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+html body.pushsale-app-body .ps-page-shell__title {
+    font: 700 15px/22px Arial, Helvetica, sans-serif !important;
+}
+html body.pushsale-app-body .ps-page-heading.ps-combo-heading,
+html body.pushsale-app-body .ps-page-heading.ps-discount-cod-heading {
+    display: grid !important;
+    grid-template-columns: minmax(170px, 250px) minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-height: 50px !important;
+    padding: 7px 14px !important;
+    margin: 0 !important;
+    border-bottom: 1px solid #d5dbe4 !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-combo-heading .ps-page-title,
+html body.pushsale-app-body .ps-discount-cod-heading .ps-page-title {
+    flex: none !important;
+    justify-self: start !important;
+    text-align: left !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font: 700 15px/22px Arial, Helvetica, sans-serif !important;
+}
+html body.pushsale-app-body .ps-combo-heading-actions {
+    width: 100% !important;
+    justify-content: flex-end !important;
+    margin-left: auto !important;
+}
+html body.pushsale-app-body .ps-combo-heading-actions .form-control { max-width: 360px !important; }
+
+/* Broad final sidebar hover. Covers items with/without submenu, disabled spans,
+   Link anchors, and buttons. This intentionally ignores older white hover rules. */
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > a,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > button,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > span,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > .pushsale-menu-link {
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'],
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover > a,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover > button,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover > span,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover > .pushsale-menu-link,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover > a,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover > button,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover > span,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover > .pushsale-menu-link,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'] > a,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'] > button,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'] > span,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'] > .pushsale-menu-link {
+    background: #0b8ff3 !important;
+    background-color: #0b8ff3 !important;
+    background-image: none !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover > * *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover > * *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'] > * * {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li::after,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > *::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > *::after {
+    display: none !important;
+    content: none !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 1280px) {
+    html body.pushsale-app-body .ps-page-shell__main-row,
+    html body.pushsale-app-body .ps-page-heading.ps-combo-heading,
+    html body.pushsale-app-body .ps-page-heading.ps-discount-cod-heading {
+        grid-template-columns: 1fr !important;
+        row-gap: 8px !important;
+    }
+    html body.pushsale-app-body .ps-combo-heading-actions { justify-content: flex-start !important; }
+}
+
+/* V134 — canonical fixes: page title alignment, combo dialog table fit, and operation category interactions. */
+html body.pushsale-app-body .ps-teams-page .ps-page-shell__main-row,
+html body.pushsale-app-body .ps-operation-categories-page .ps-page-shell__main-row,
+html body.pushsale-app-body .ps-combo-page .ps-page-heading.ps-combo-heading {
+    grid-template-columns: 200px minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+    min-height: 49px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+}
+html body.pushsale-app-body .ps-teams-page .ps-page-shell__title-col,
+html body.pushsale-app-body .ps-operation-categories-page .ps-page-shell__title-col,
+html body.pushsale-app-body .ps-combo-page .ps-page-heading.ps-combo-heading > .ps-page-title,
+html body.pushsale-app-body .ps-combo-page .ps-combo-heading .ps-page-title {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    align-self: center !important;
+    text-align: left !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    max-width: 200px !important;
+}
+html body.pushsale-app-body .ps-teams-page .ps-page-shell__filters--primary,
+html body.pushsale-app-body .ps-operation-categories-page .ps-page-shell__filters--primary {
+    grid-column: 2 !important;
+    justify-self: stretch !important;
+}
+html body.pushsale-app-body .ps-teams-page .ps-page-shell__actions,
+html body.pushsale-app-body .ps-operation-categories-page .ps-page-shell__actions {
+    grid-column: 3 !important;
+    justify-self: end !important;
+}
+
+html body.pushsale-app-body .ps-combo-dialog.ps-dialog-surface {
+    width: min(1160px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+}
+html body.pushsale-app-body .ps-combo-dialog .ps-dialog-body {
+    overflow-x: hidden !important;
+    padding: 10px 14px 12px !important;
+}
+html body.pushsale-app-body .ps-combo-dialog .ps-combo-section {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+html body.pushsale-app-body .ps-combo-dialog .ps-combo-picker {
+    grid-template-columns: minmax(0, 1fr) 160px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+html body.pushsale-app-body .ps-combo-dialog .ps-combo-picker select.form-control {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+html body.pushsale-app-body .ps-combo-dialog .ps-combo-items-wrap {
+    width: auto !important;
+    max-width: calc(100% - 24px) !important;
+    margin-left: 12px !important;
+    margin-right: 12px !important;
+    overflow-x: auto !important;
+    box-sizing: border-box !important;
+}
+html body.pushsale-app-body .ps-combo-dialog .ps-combo-items-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+html body.pushsale-app-body .ps-combo-dialog .ps-combo-items-table th,
+html body.pushsale-app-body .ps-combo-dialog .ps-combo-items-table td {
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+html body.pushsale-app-body .ps-combo-dialog .ps-combo-note {
+    width: auto !important;
+    max-width: calc(100% - 24px) !important;
+}
+
+html body.pushsale-app-body .ps-operation-categories-page input,
+html body.pushsale-app-body .ps-operation-categories-page select,
+html body.pushsale-app-body .ps-operation-categories-page button {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+html body.pushsale-app-body .ps-operation-categories-page .ps-op-grid-two {
+    grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.02fr) !important;
+    gap: 12px !important;
+}
+html body.pushsale-app-body .ps-operation-categories-page .ps-op-table-wrap {
+    overflow-x: auto !important;
+}
+html body.pushsale-app-body .ps-operation-categories-page .ps-op-table {
+    min-width: 0 !important;
+}
+html body.pushsale-app-body .ps-operation-categories-page .ps-op-result-table .id-col { width: 58px !important; }
+html body.pushsale-app-body .ps-operation-categories-page .ps-op-result-table .check-col { width: 72px !important; }
+html body.pushsale-app-body .ps-operation-categories-page .ps-op-result-table .actions-col { width: 74px !important; }
+html body.pushsale-app-body .ps-operation-categories-page .ps-op-result-table .updated-col { width: 230px !important; }
+html body.pushsale-app-body .ps-operation-categories-page .ps-op-icon-button {
+    cursor: pointer !important;
+}
+
+/* V134 sidebar fallback without relying on body/aside specificity. */
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover,
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2,
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > a.a2,
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > button.a2,
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > span.a2,
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover,
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover > .a2,
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'],
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'] > .a2 {
+    background: #0b8ff3 !important;
+    background-color: #0b8ff3 !important;
+    background-image: none !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    box-shadow: none !important;
+}
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2 *,
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover > .a2 *,
+.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'] > .a2 * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}

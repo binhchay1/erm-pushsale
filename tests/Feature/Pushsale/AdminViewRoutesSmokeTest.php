@@ -5,6 +5,7 @@ namespace Tests\Feature\Pushsale;
 use App\Enums\LeadIngestionStatus;
 use App\Models\Company;
 use App\Models\LandingConnection;
+use App\Models\LandingConnectionSource;
 use App\Models\LeadIngestion;
 use App\Models\Order;
 use App\Models\Product;
@@ -221,6 +222,92 @@ class AdminViewRoutesSmokeTest extends TestCase
         $this->assertNull($connection->marketing_source_id);
         $this->assertCount(1, $connection->sources()->get());
         $this->assertCount(0, $connection->products()->get());
+    }
+
+
+    public function test_landing_connection_source_update_does_not_require_product_mapping_for_upsell_source(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $admin = $this->loginAsDemoAdmin();
+        $marketer = User::withoutTenant()
+            ->where('company_id', $admin->company_id)
+            ->where('role', User::ROLE_MARKETING)
+            ->firstOrFail();
+        $sale = User::withoutTenant()
+            ->where('company_id', $admin->company_id)
+            ->where('role', User::ROLE_SALES)
+            ->firstOrFail();
+
+        $createPayload = [
+            'name' => 'Landing nguồn v130',
+            'marketer_user_id' => $marketer->id,
+            'connection_type' => 'landing',
+            'ad_channel' => 'facebook_ads',
+            'allocation_method' => 'inherit',
+            'manual_import' => true,
+            'request_approval' => true,
+            'is_approved' => false,
+            'is_active' => true,
+            'sources' => [[
+                'client_key' => 'main-v130',
+                'name' => 'Landing nguồn v130',
+                'source_type' => LandingConnectionSource::TYPE_MAIN,
+                'source_url' => 'https://landing.example.test/main-v130',
+                'redirect_url' => 'https://landing.example.test/thanks-v130',
+                'sort_order' => 0,
+                'is_active' => true,
+            ], [
+                'client_key' => 'upsell-v130',
+                'name' => 'Trang upsale 1',
+                'source_type' => LandingConnectionSource::TYPE_UPSELL,
+                'source_url' => 'https://landing.example.test/upsell-v130',
+                'redirect_url' => null,
+                'sort_order' => 1,
+                'is_active' => true,
+            ]],
+            'sale_user_ids' => [$sale->id],
+        ];
+
+        $this->post('/admin/marketing/landing-connections/records', $createPayload)
+            ->assertRedirect('/admin/marketing/landing-connections')
+            ->assertSessionHas('success');
+
+        $connection = LandingConnection::withoutTenant()->where('name', 'Landing nguồn v130')->firstOrFail();
+
+        $this->put('/admin/marketing/landing-connections/records/'.$connection->id, [
+            ...$createPayload,
+            'name' => 'Landing nguồn v130 sửa',
+            'products' => [],
+        ])->assertRedirect('/admin/marketing/landing-connections')
+            ->assertSessionHas('success')
+            ->assertSessionDoesntHaveErrors(['sources.1.name', 'products']);
+
+        $connection->refresh();
+        $this->assertFalse((bool) $connection->is_approved);
+        $this->assertTrue((bool) $connection->manual_import);
+        $this->assertTrue((bool) ($connection->metadata['request_approval'] ?? false));
+    }
+
+    public function test_landing_connection_flags_endpoint_forces_manual_import_and_approval_request(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $admin = $this->loginAsDemoAdmin();
+        $connection = LandingConnection::withoutTenant()->where('company_id', $admin->company_id)->firstOrFail();
+
+        $connection->forceFill([
+            'manual_import' => false,
+            'metadata' => ['request_approval' => false],
+        ])->save();
+
+        $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
+            'manual_import' => false,
+            'request_approval' => false,
+        ])->assertSessionHas('success');
+
+        $connection->refresh();
+        $this->assertTrue((bool) $connection->manual_import);
+        $this->assertTrue((bool) ($connection->metadata['request_approval'] ?? false));
+        $this->assertTrue((bool) ($connection->metadata['pending_approval_flow'] ?? false));
     }
 
 

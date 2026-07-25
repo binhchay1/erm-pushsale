@@ -106,3 +106,30 @@ Because AdminLTE legacy CSS can override hover selectors, `AppSidebar.jsx` also 
 
 - `AppSidebar.jsx` không được dùng biến của scope menu cấp 2 trong `ThirdLevelFlyout`.
 - Khi sửa menu, phải kiểm tra runtime bằng thao tác mở hamburger + hover/click menu cấp 2/cấp 3 trên ít nhất một trang như `/admin/products/import`.
+
+## v130 Landing source flags
+
+- Trang 2.4.1 không được validate/gắn sản phẩm ở form tạo/sửa nguồn dữ liệu.
+- `manual_import` luôn bật cho nguồn landing.
+- `metadata.request_approval` luôn bật; muốn chạy live phải duyệt ở menu duyệt kết nối.
+- Checkbox `Nhập TC` và `Duyệt` trong bảng chỉ là thao tác bật nhanh/hiển thị trạng thái contract, không thay thế bước duyệt chính.
+
+## v131 UI Contract Addendum
+- Page header alignment is centralized in `pushsale-adminlte-canonical-contract.css`.
+- Marketing dashboard and landing approval headers must use the canonical title-left/filter-right rhythm; no page should add another broad header override file.
+- Sidebar second-level menu hover must be handled in `AppSidebar.jsx` plus canonical CSS only. Do not add `pushsale-sidebar-*` files for future hover fixes.
+
+## v133 UI contract update
+
+- The final visual contract for native selects, React `PushsaleSelect`, date range filters, rebuilt page headers, and sidebar second-level hover lives in `resources/css/pushsale-adminlte-canonical-contract.css`.
+- Date range filters must remain clickable native inputs. Do not hide them with `opacity: 0` overlays in later page CSS.
+- Native selects must keep the canonical right-side caret. Do not remove appearance/caret per page.
+- Second-level sidebar hover must use the same blue background as active menu items, including menu items that do not have a third-level submenu.
+- Rebuilt AdminLTE pages should use a left-aligned title with a small gutter, then primary filters/actions to the right.
+
+## v134 operation/category and modal contract
+
+- Menu `1.8.1` is not demo-only. The left table writes `operation_categories`, the bottom table writes `operation_workflows`, and the right table writes `operation_result_settings`.
+- A result with `closes_order = true` calls the same real close-order service used by sale operation, so it must be treated as business configuration.
+- Combo modal tables must stay inside the dialog frame; use canonical `.ps-combo-dialog` rules rather than per-dialog inline widths.
+- PageFrame title alignment must start from the 14px page gutter; do not center title text inside menu group 1/2 pages unless the original Pushsale HTML does so explicitly.

@@ -120,6 +120,45 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose, on
     );
 }
 
+function SidebarHoverRuntimeStyle() {
+    return (
+        <style>{`
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"],
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .a2,
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > a.a2,
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > button.a2,
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > span.a2 {
+                background: #0b8ff3 !important;
+                background-color: #0b8ff3 !important;
+                background-image: none !important;
+                color: #fff !important;
+                -webkit-text-fill-color: #fff !important;
+                border: 0 !important;
+                border-top: 0 !important;
+                border-bottom: 0 !important;
+                outline: 0 !important;
+                box-shadow: none !important;
+            }
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .a2 *,
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > a.a2 *,
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > button.a2 *,
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > span.a2 * {
+                color: #fff !important;
+                -webkit-text-fill-color: #fff !important;
+            }
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2::before,
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .a2::before,
+            html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"]::before {
+                display: none !important;
+                content: none !important;
+                border: 0 !important;
+                background: transparent !important;
+                box-shadow: none !important;
+            }
+        `}</style>
+    );
+}
+
 export function AppSidebar({ collapsed = true, onNavigate }) {
     const { props, url } = usePage();
     const { navigation = [], activeMenuCode = null } = props;
@@ -218,6 +257,48 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
         setOpenRoot((current) => (current === index ? null : index));
     };
 
+    const forceSecondLevelHover = (element, enabled, active = false) => {
+        if (!element) return;
+
+        const link = element.querySelector(':scope > .a2, :scope > a, :scope > button, :scope > span');
+        const apply = (node) => {
+            if (!node) return;
+            if (enabled) {
+                node.style.setProperty('background', '#0b8ff3', 'important');
+                node.style.setProperty('background-color', '#0b8ff3', 'important');
+                node.style.setProperty('background-image', 'none', 'important');
+                node.style.setProperty('color', '#fff', 'important');
+                node.style.setProperty('-webkit-text-fill-color', '#fff', 'important');
+                node.style.setProperty('border', '0', 'important');
+                node.style.setProperty('border-top', '0', 'important');
+                node.style.setProperty('border-bottom', '0', 'important');
+                node.style.setProperty('outline', '0', 'important');
+                node.style.setProperty('box-shadow', 'none', 'important');
+                return;
+            }
+
+            ['background', 'background-color', 'background-image', 'color', '-webkit-text-fill-color', 'border', 'border-top', 'border-bottom', 'outline', 'box-shadow'].forEach((property) => node.style.removeProperty(property));
+        };
+
+        if (enabled) {
+            element.setAttribute('data-ps-second-hover', 'true');
+        } else {
+            element.removeAttribute('data-ps-second-hover');
+        }
+
+        apply(element);
+        apply(link);
+        link?.querySelectorAll?.('span, i').forEach((node) => {
+            if (enabled) {
+                node.style.setProperty('color', '#fff', 'important');
+                node.style.setProperty('-webkit-text-fill-color', '#fff', 'important');
+            } else {
+                node.style.removeProperty('color');
+                node.style.removeProperty('-webkit-text-fill-color');
+            }
+        });
+    };
+
     const secondLevelInlineStyle = (key, active = false) => {
         const reset = {
             border: 0,
@@ -239,6 +320,36 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
         };
     };
 
+    useEffect(() => {
+        const sidebar = sidebarRef.current;
+        if (!sidebar) return undefined;
+
+        let hovered = null;
+        const activate = (event) => {
+            const item = event.target?.closest?.('.treeview-menu.ul2 > li.li2');
+            if (!item || !sidebar.contains(item)) return;
+            if (hovered && hovered !== item) forceSecondLevelHover(hovered, false, false);
+            hovered = item;
+            forceSecondLevelHover(item, true, false);
+        };
+
+        const deactivate = (event) => {
+            const item = event.target?.closest?.('.treeview-menu.ul2 > li.li2');
+            if (!item || !sidebar.contains(item)) return;
+            if (item.contains(event.relatedTarget)) return;
+            forceSecondLevelHover(item, false, false);
+            if (hovered === item) hovered = null;
+        };
+
+        sidebar.addEventListener('pointerover', activate);
+        sidebar.addEventListener('pointerout', deactivate);
+
+        return () => {
+            sidebar.removeEventListener('pointerover', activate);
+            sidebar.removeEventListener('pointerout', deactivate);
+        };
+    }, []);
+
     const toggleFlyout = (event, item, key) => {
         clearFlyoutTimer();
         const rect = event.currentTarget.getBoundingClientRect();
@@ -250,6 +361,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
 
     return (
         <>
+            <SidebarHoverRuntimeStyle />
             <aside className="main-sidebar pushsale-main-sidebar" aria-label="Điều hướng chính">
                 <section
                     className="sidebar pushsale-sidebar"
@@ -302,11 +414,13 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                         key={key}
                                                         className={cn('li2', childActive && 'active', flyoutOpen && 'flyout-open', hoverSecondKey === key && !childActive && 'ui-hover')}
                                                         style={!childActive && hoverSecondKey === key ? { backgroundColor: '#0b8ff3', backgroundImage: 'none', border: 0, boxShadow: 'none' } : undefined}
-                                                        onMouseEnter={() => {
+                                                        onMouseEnter={(event) => {
                                                             setHoverSecondKey(key);
+                                                            forceSecondLevelHover(event.currentTarget, true, childActive);
                                                             if (!hasGrandchildren) closeFlyout();
                                                         }}
                                                         onMouseLeave={(event) => {
+                                                            forceSecondLevelHover(event.currentTarget, false, childActive);
                                                             setHoverSecondKey((current) => current === key ? null : current);
                                                             const button = event.currentTarget.querySelector('button.pushsale-second-parent-link');
                                                             if (button) button.blur();

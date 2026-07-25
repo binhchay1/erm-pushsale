@@ -156,7 +156,9 @@ function mergeUpsellSources(currentSources = [], urls = []) {
 
 function cleanPayload(data) {
     const payload = { ...data };
-    payload.request_approval = payload.request_approval ?? true;
+    // Contract v130: nguồn landing luôn nhập thủ công và luôn phải qua menu duyệt.
+    payload.manual_import = true;
+    payload.request_approval = true;
     const urls = splitUpsellUrls(payload.upsell_urls_text);
     const sources = mergeUpsellSources(payload.sources, urls);
     const main = sources.find((source) => source.source_type === 'main') ?? blankSource('main');
@@ -167,15 +169,9 @@ function cleanPayload(data) {
         is_active: true,
     };
     payload.sources = [mainSource, ...sources.filter((source) => source.source_type !== 'main')];
-    payload.products = (payload.products ?? [])
-        .filter((product) => product?.product_id)
-        .map((product, index) => ({
-            ...product,
-            source_key: product.source_key || mainSource.client_key,
-            is_default: index === 0 ? true : Boolean(product.is_default),
-            quantity: Number(product.quantity || 1),
-            unit_price_override: product.unit_price_override === '' ? null : product.unit_price_override,
-        }));
+    // Trang 2.4.1 chỉ tạo/sửa nguồn dữ liệu. Product/package được xử lý duy nhất ở menu duyệt.
+    // Không gửi products từ dialog này để tránh validate theo flow cũ khi nguồn có upsell.
+    delete payload.products;
     payload.success_url = payload.success_url || '';
     // Luồng mới: form tạo/sửa nguồn landing không duyệt trực tiếp.
     // Menu duyệt riêng sẽ gắn sản phẩm/gói + ngân sách rồi mới bật duyệt.
@@ -297,8 +293,8 @@ export default function LandingConnectionsPage({
             budget_start_date: row.budget_start_date ?? defaultBudgetDates().start,
             budget_end_date: row.budget_end_date ?? defaultBudgetDates().end,
             success_url: row.success_url ?? '',
-            manual_import: Boolean(row.manual_import ?? true),
-            request_approval: Boolean(row.request_approval ?? true),
+            manual_import: true,
+            request_approval: true,
             is_approved: Boolean(row.is_approved),
             is_active: Boolean(row.is_active),
             notes: row.notes ?? '',
@@ -369,6 +365,19 @@ export default function LandingConnectionsPage({
             document.execCommand('copy');
             node.remove();
         }
+    };
+
+
+    const updateFlags = (row, flags) => {
+        if (!row?.id) return;
+        router.patch(`${recordsUrl}/${row.id}/flags`, {
+            manual_import: flags.manual_import ?? true,
+            request_approval: flags.request_approval ?? true,
+        }, {
+            preserveScroll: true,
+            preserveState: true,
+            only: ['connections', 'flash'],
+        });
     };
 
     const toggleSelected = (id) => setSelected((current) => {
@@ -502,8 +511,8 @@ export default function LandingConnectionsPage({
                                                         <button type="button" className="btn-icon" onClick={() => copy(mainSource?.submit_url ?? row.api_base_url)}><i className="fa fa-copy" /> Copy</button>
                                                     </div>
                                                 </td>
-                                                <td className="text-center"><input type="checkbox" readOnly checked={Boolean(row.manual_import)} /></td>
-                                                <td className="text-center"><input type="checkbox" readOnly checked={Boolean(row.is_approved || row.request_approval)} /></td>
+                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.manual_import)} onChange={() => updateFlags(row, { manual_import: true })} title="Bật nhập thủ công cho nguồn landing" /></td>
+                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.request_approval || row.is_approved)} onChange={() => updateFlags(row, { request_approval: true })} title="Nguồn landing bắt buộc qua duyệt trước khi chạy" /></td>
                                                 <td className="text-center">{row.updated_by ?? 'admin'}<br />{row.updated_at}</td>
                                                 <td className="text-center pslc-actions"><button type="button" className="btn-icon" onClick={() => openEdit(row)} title="Chỉnh sửa"><i className="fa fa-edit" /></button></td>
                                             </tr>
@@ -574,8 +583,8 @@ export default function LandingConnectionsPage({
 
                             <div></div>
                             <div className="pslc-dialog-checks pslc-dialog-checks-two">
-                                <label><input type="checkbox" checked={Boolean(form.data.manual_import)} onChange={(event) => form.setData('manual_import', event.target.checked)} /> Nhập thủ công</label>
-                                <label><input type="checkbox" checked={Boolean(form.data.request_approval)} onChange={(event) => form.setData('request_approval', event.target.checked)} /> Duyệt</label>
+                                <label><input type="checkbox" checked readOnly /> Nhập thủ công</label>
+                                <label><input type="checkbox" checked readOnly /> Duyệt</label>
                                 <span className="small-tip">Sản phẩm/gói và ngân sách duyệt ở menu duyệt kết nối.</span>
                             </div>
                         </div>

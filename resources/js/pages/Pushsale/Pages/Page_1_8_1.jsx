@@ -215,12 +215,16 @@ function OperationCategoriesTable({ rows, setRows, onSave, onDelete, askBeforeDe
     );
 }
 
-function OperationResultsTable({ results }) {
+function OperationResultsTable({ results, setResults, onSave, savingValue }) {
+    const updateRow = (index, patch) => {
+        setResults((current) => current.map((row, rowIndex) => (rowIndex === index ? { ...row, ...patch } : row)));
+    };
+
     return (
         <section className="ps-op-panel ps-op-panel-right">
             <div className="ps-op-panel-title">
                 <span>Danh sách kết quả tác nghiệp</span>
-                <span className="ps-op-business-chip" title="Kết quả tác nghiệp là enum nghiệp vụ ổn định, không phải dữ liệu mẫu.">Business enum</span>
+                <span className="ps-op-business-chip" title="Kết quả tác nghiệp là cấu hình nghiệp vụ thật. Chọn Chốt đơn sẽ gọi luồng chốt đơn, trừ tồn kho và ghi doanh thu.">Business config</span>
             </div>
             <div className="ps-op-table-wrap">
                 <table className="table table-bordered table-striped ps-op-table ps-op-result-table">
@@ -229,19 +233,27 @@ function OperationResultsTable({ results }) {
                             <th className="id-col">Id</th>
                             <th>Tên</th>
                             <th className="check-col">Chốt đơn</th>
+                            <th className="check-col">Áp dụng</th>
                             <th className="updated-col">Ảnh hưởng nghiệp vụ</th>
+                            <th className="actions-col">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         {results.map((result, index) => {
-                            const closed = result.value === 'closed_success';
+                            const saving = savingValue === result.value;
                             return (
-                                <tr key={result.value}>
+                                <tr key={result.value} className={!result.is_active ? 'is-inactive' : ''}>
                                     <td className="text-center">{result.legacy_id ?? (109117 + index)}</td>
-                                    <td><input className="form-control input-sm" value={result.label} readOnly /></td>
-                                    <td className="text-center"><input type="checkbox" checked={closed} readOnly /></td>
+                                    <td>
+                                        <input className="form-control input-sm" value={result.label ?? ''} onChange={(event) => updateRow(index, { label: event.target.value })} />
+                                    </td>
+                                    <td className="text-center"><input type="checkbox" checked={Boolean(result.closes_order)} onChange={(event) => updateRow(index, { closes_order: event.target.checked })} /></td>
+                                    <td className="text-center"><input type="checkbox" checked={result.is_active !== false} onChange={(event) => updateRow(index, { is_active: event.target.checked })} /></td>
                                     <td className="ps-op-business-effect">
-                                        {closed ? 'Chốt đơn, khóa mã đơn, trừ tồn kho và ghi nhận doanh thu.' : 'Cập nhật kết quả sale, chuyển bước theo luồng bên dưới.'}
+                                        {result.closes_order ? 'Chốt đơn, khóa mã đơn, trừ tồn kho và ghi nhận doanh thu.' : 'Cập nhật kết quả sale, chuyển bước theo luồng bên dưới.'}
+                                    </td>
+                                    <td className="text-center">
+                                        <IconButton title="Lưu" icon={saving ? 'fa-spinner fa-spin' : 'fa-save'} disabled={saving} onClick={() => onSave(result)} />
                                     </td>
                                 </tr>
                             );
@@ -250,7 +262,7 @@ function OperationResultsTable({ results }) {
                 </table>
             </div>
             <label className="ps-op-confirm-delete">
-                <input type="checkbox" checked readOnly /> Kết quả đang được khóa theo business để tránh lệch lịch sử đơn
+                <input type="checkbox" checked readOnly /> Cấu hình này được dùng trực tiếp khi sale cập nhật kết quả tác nghiệp.
             </label>
         </section>
     );
@@ -374,14 +386,19 @@ export default function OperationCategoriesPage({ schema, rows = [], filterOptio
     const [workflowSavingId, setWorkflowSavingId] = useState(null);
     const [flash, setFlash] = useState(null);
 
-    const results = useMemo(() => {
+    const initialResults = useMemo(() => {
         const source = filterOptions.operationResults ?? [];
         return source.map((item, index) => ({
             value: item.value ?? item.id,
             label: item.label ?? item.name ?? item.value ?? '',
             legacy_id: item.legacy_id ?? (109117 + index),
+            sort_order: item.sort_order ?? (index + 1),
+            closes_order: Boolean(item.closes_order),
+            is_active: item.is_active !== false,
         })).filter((item) => item.value && item.label);
     }, [filterOptions.operationResults]);
+    const [results, setResults] = useState(() => initialResults);
+    const [resultSavingValue, setResultSavingValue] = useState(null);
 
     const activeCount = categories.filter((item) => item.is_active !== false).length;
 
@@ -426,6 +443,30 @@ export default function OperationCategoriesPage({ schema, rows = [], filterOptio
         }
     };
 
+    const saveResult = async (row) => {
+        const payload = {
+            label: String(row.label ?? '').trim(),
+            closes_order: Boolean(row.closes_order),
+            is_active: row.is_active !== false,
+            sort_order: Number(row.sort_order || 0),
+        };
+        if (!payload.label) {
+            setFlash({ type: 'danger', message: 'Vui lòng nhập tên kết quả tác nghiệp.' });
+            return;
+        }
+
+        setResultSavingValue(row.value);
+        try {
+            await requestJson(`${routeUrl}/results/${encodeURIComponent(row.value)}`, 'PATCH', { payload });
+            setFlash({ type: 'success', message: 'Đã lưu kết quả tác nghiệp.' });
+            router.reload({ preserveScroll: true });
+        } catch (exception) {
+            setFlash({ type: 'danger', message: exception.message });
+        } finally {
+            setResultSavingValue(null);
+        }
+    };
+
     const pageActions = (
         <>
             <button type="button" className="btn btn-primary btn-sm" onClick={() => setCategories((current) => [...current, createDraftCategory()])}>
@@ -458,7 +499,7 @@ export default function OperationCategoriesPage({ schema, rows = [], filterOptio
 
                 <div className="ps-op-grid-two">
                     <OperationCategoriesTable rows={categories} setRows={setCategories} onSave={saveCategory} onDelete={deleteCategory} askBeforeDelete={askBeforeDelete} savingId={savingId} />
-                    <OperationResultsTable results={results} />
+                    <OperationResultsTable results={results} setResults={setResults} onSave={saveResult} savingValue={resultSavingValue} />
                 </div>
 
                 <OperationWorkflowTable

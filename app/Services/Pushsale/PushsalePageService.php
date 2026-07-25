@@ -29,6 +29,7 @@ use App\Models\Pushsale\KpiCatalogItem;
 use App\Models\Pushsale\MonthlyKpiPlan;
 use App\Models\Pushsale\OperationCategory;
 use App\Models\Pushsale\OperationWorkflow;
+use App\Models\Pushsale\OperationResultSetting;
 use App\Models\Pushsale\PartnerConnection;
 use App\Models\Pushsale\PhoneBlacklist;
 use App\Models\Pushsale\ProductAttribute;
@@ -350,12 +351,15 @@ class PushsalePageService
         }
 
         if ($pageCode === '1.8.1') {
-            $options['operationResults'] = collect(OperationResult::selectableOptions())
+            $options['operationResults'] = collect(OperationResultSetting::optionRows())
                 ->values()
                 ->map(fn (array $item, int $index): array => [
                     'value' => $item['value'],
                     'label' => $item['label'],
-                    'legacy_id' => 109117 + $index,
+                    'legacy_id' => $item['legacy_id'] ?: (109117 + $index),
+                    'sort_order' => $item['sort_order'] ?? ($index + 1),
+                    'closes_order' => (bool) ($item['closes_order'] ?? false),
+                    'is_active' => (bool) ($item['is_active'] ?? true),
                 ])
                 ->all();
             $options['operationWorkflowsFull'] = $this->operationWorkflows()->all();

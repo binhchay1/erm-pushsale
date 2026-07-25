@@ -22,6 +22,25 @@ class RuntimeSchemaContract
     {
         $changes = [];
 
+        if (! Schema::hasTable('operation_result_settings') && Schema::hasTable('companies')) {
+            Schema::create('operation_result_settings', function (Blueprint $table): void {
+                $table->id();
+                $table->unsignedBigInteger('company_id');
+                $table->string('value', 80);
+                $table->string('label');
+                $table->unsignedInteger('legacy_id')->nullable()->index();
+                $table->unsignedInteger('sort_order')->default(0)->index();
+                $table->boolean('closes_order')->default(false)->index();
+                $table->boolean('is_active')->default(true)->index();
+                $table->unsignedBigInteger('created_by_user_id')->nullable();
+                $table->unsignedBigInteger('updated_by_user_id')->nullable();
+                $table->softDeletes();
+                $table->timestamps();
+                $table->unique(['company_id', 'value'], 'operation_result_settings_company_value_unique');
+            });
+            $changes[] = 'operation_result_settings table';
+        }
+
         if (Schema::hasTable('users') && ! Schema::hasColumn('users', 'is_active')) {
             Schema::table('users', function (Blueprint $table): void {
                 $column = $table->boolean('is_active')->default(true);

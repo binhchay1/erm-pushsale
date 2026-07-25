@@ -147,19 +147,18 @@ function MarketingLeaderFilter({ filters, filterOptions, routeUrl }) {
     return (
         <div className="ps-leader-filter">
             <div className="m-header-wrap">
-                <div className="m-header">
+                <div className="m-header ps-leader-header-v132">
                     <div className="form-group ps-title-col">
                         <span className="module-title">{t('reports.team_leaders.title')}</span>
                     </div>
-                    <div className="form-group">
+
+                    <div className="ps-leader-primary-row" role="search" aria-label="Bộ lọc chính thống kê trưởng nhóm">
                         <Select
                             value={form.date_type}
                             onChange={(value) => set('date_type', value)}
                             options={filterOptions?.dateTypes ?? []}
                             placeholder="--Chuẩn Pushsale--"
                         />
-                    </div>
-                    <div className="form-group">
                         <div className="date-range-wrap legacy-range">
                             <input
                                 type="date"
@@ -174,32 +173,20 @@ function MarketingLeaderFilter({ filters, filterOptions, routeUrl }) {
                                 onChange={(event) => set('date_to', event.target.value)}
                             />
                         </div>
-                    </div>
-                    <div className="form-group">
-                        <Select
-                            value={form.discount_mode}
-                            onChange={(value) => set('discount_mode', value)}
-                            options={filterOptions?.discountModes ?? []}
-                            placeholder="Sau chiết khấu"
-                        />
-                    </div>
-                    <div className="form-group">
                         <Select
                             value={form.delivery_status}
                             onChange={(value) => set('delivery_status', value)}
                             options={filterOptions?.deliveryStatuses ?? []}
                             placeholder="-- Chọn trạng thái giao hàng --"
                         />
-                    </div>
-                    <div className="form-group search-group">
-                        <button type="button" className="btn-icon ps-header-toggle" title="Thu gọn">
-                            <i className="fa fa-angle-double-up" />
-                        </button>
-                        <button type="button" className="btn btn-sm btn-primary mb10" onClick={submit}>
+                        <Select
+                            value={form.discount_mode}
+                            onChange={(value) => set('discount_mode', value)}
+                            options={filterOptions?.discountModes ?? []}
+                            placeholder="Sau chiết khấu"
+                        />
+                        <button type="button" className="btn btn-sm btn-primary ps-leader-search-btn" onClick={submit}>
                             <Search className="size-3.5" /> {t('common.search')}
-                        </button>
-                        <button type="button" className="btn-note-header" title="Chú thích">
-                            <i className="fa fa-question-circle" />
                         </button>
                     </div>
                 </div>

@@ -394,7 +394,8 @@ class LandingConnectionManager
             'budget_start_date' => filled($data['budget_start_date'] ?? null) ? $data['budget_start_date'] : null,
             'budget_end_date' => filled($data['budget_end_date'] ?? null) ? $data['budget_end_date'] : null,
             'success_url' => filled($data['success_url'] ?? null) ? trim((string) $data['success_url']) : null,
-            'manual_import' => (bool) ($data['manual_import'] ?? false),
+            // Contract v130: landing source is always manually accepted and must pass approval before live use.
+            'manual_import' => true,
             'is_approved' => $approved,
             'is_active' => (bool) ($data['is_active'] ?? true),
             'approved_by_user_id' => $approved ? ($existing?->approved_by_user_id ?: $actor->id) : null,
@@ -403,7 +404,7 @@ class LandingConnectionManager
                 'version' => 2,
                 'notes' => $data['notes'] ?? null,
                 'pending_approval_flow' => true,
-                'request_approval' => (bool) ($data['request_approval'] ?? true),
+                'request_approval' => true,
             ], static fn ($value): bool => $value !== null && $value !== ''),
         ];
     }

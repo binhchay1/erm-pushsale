@@ -84,7 +84,7 @@ final class LandingConnectionsController extends Controller
             $payload = $this->validated($request);
             // Luồng mới: tạo nguồn landing trước, duyệt/gắn sản phẩm ở menu duyệt riêng.
             // Vì vậy form tạo không được tự bật duyệt để tránh 500/validation khi chưa có sản phẩm.
-            if (empty($payload['products'])) {
+            if (! collect($payload['products'] ?? [])->contains(fn ($row): bool => is_array($row) && filled($row['product_id'] ?? null))) {
                 $payload['is_approved'] = false;
             }
 
@@ -118,7 +118,7 @@ final class LandingConnectionsController extends Controller
 
         try {
             $payload = $this->validated($request);
-            if (empty($payload['products'])) {
+            if (! collect($payload['products'] ?? [])->contains(fn ($row): bool => is_array($row) && filled($row['product_id'] ?? null))) {
                 $payload['is_approved'] = false;
             }
 
@@ -145,6 +145,30 @@ final class LandingConnectionsController extends Controller
         }
 
         return redirect('/admin/marketing/landing-connections')->with('success', 'Đã cập nhật kết nối landing.');
+    }
+
+
+    public function updateFlags(Request $request, LandingConnection $record): RedirectResponse
+    {
+        $this->authorizeManage($request->user());
+
+        $validated = $request->validate([
+            'manual_import' => ['nullable', 'boolean'],
+            'request_approval' => ['nullable', 'boolean'],
+        ]);
+
+        $metadata = (array) ($record->metadata ?? []);
+        // Contract v130: nguồn landing luôn nhập thủ công và luôn phải qua menu duyệt trước khi chạy.
+        $metadata['request_approval'] = true;
+        $metadata['pending_approval_flow'] = true;
+
+        $record->forceFill([
+            'manual_import' => true,
+            'metadata' => $metadata,
+            'updated_by_user_id' => $request->user()?->id,
+        ])->save();
+
+        return back()->with('success', 'Đã cập nhật trạng thái nhập thủ công và yêu cầu duyệt cho nguồn landing.');
     }
 
     public function destroy(Request $request, LandingConnection $record): RedirectResponse
@@ -176,6 +200,15 @@ final class LandingConnectionsController extends Controller
     private function validated(Request $request): array
     {
         $companyId = $this->resolveCompanyId($request->user());
+
+        // Contract v130: form 2.4.1/2.4.2 chỉ tạo nguồn dữ liệu.
+        // Product/package và ngân sách chỉ được xử lý ở menu duyệt, nên bỏ mọi product payload cũ gửi kèm.
+        $request->merge([
+            'products' => [],
+            'manual_import' => true,
+            'request_approval' => true,
+            'is_approved' => false,
+        ]);
 
         if (! $request->filled('marketer_user_id')) {
             $fallbackMarketer = $request->user()?->role === UserRole::Marketing
@@ -331,7 +364,12 @@ final class LandingConnectionsController extends Controller
             }
         });
 
-        return $validator->validate();
+        $validated = $validator->validate();
+        // Contract v130: form tạo/sửa nguồn landing luôn nhập thủ công và luôn vào hàng chờ duyệt.
+        $validated['manual_import'] = true;
+        $validated['request_approval'] = true;
+
+        return $validated;
     }
 
 

@@ -212,3 +212,171 @@ body.pushsale-app-body .ps-marketing-leader-page .ps-leader-table {
         grid-template-columns: 1fr;
     }
 }
+
+/* V132: canonical filter layout for /ld/marketing/thong-ke-truong-nhom.
+   Keep this scoped to the marketing leader report only. */
+html body.pushsale-app-body .ps-marketing-leader-page {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter .m-header-wrap {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid #d3dde8 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .12) !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .m-header.ps-leader-header-v132 {
+    min-height: 52px !important;
+    display: grid !important;
+    grid-template-columns: 280px minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: 14px !important;
+    padding: 8px 14px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .m-header.ps-leader-header-v132 .ps-title-col {
+    margin: 0 !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .m-header.ps-leader-header-v132 .module-title {
+    display: block !important;
+    font-size: 16px !important;
+    line-height: 32px !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-primary-row {
+    display: grid !important;
+    grid-template-columns: minmax(170px, 190px) minmax(250px, 300px) minmax(210px, 260px) minmax(130px, 160px) 118px !important;
+    gap: 8px !important;
+    justify-content: end !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-primary-row > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .legacy-range {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 6px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-select,
+html body.pushsale-app-body .ps-marketing-leader-page .ps-input {
+    height: 32px !important;
+    min-height: 32px !important;
+    line-height: 30px !important;
+    padding: 4px 10px !important;
+    border: 1px solid #cbd6e2 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background-color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-search-btn {
+    height: 32px !important;
+    min-height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-header-toggle,
+html body.pushsale-app-body .ps-marketing-leader-page .btn-note-header {
+    display: none !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter-body {
+    margin: 0 !important;
+    padding: 7px 14px 8px !important;
+    border-top: 0 !important;
+    border-bottom: 1px solid #cfd8e3 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter-body .row {
+    display: grid !important;
+    grid-template-columns: minmax(160px, 1fr) minmax(160px, 1fr) minmax(160px, 1fr) minmax(160px, 1fr) minmax(170px, 1fr) minmax(210px, 1.25fr) !important;
+    gap: 8px 14px !important;
+    align-items: center !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter-body .form-group,
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter-body [class*="col-sm-"] {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    float: none !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .split-controls {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 72px !important;
+    gap: 7px !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-check-col {
+    min-height: 32px !important;
+    justify-content: flex-start !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .box,
+html body.pushsale-app-body .ps-marketing-leader-page .box > .box-body {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .row-cards,
+html body.pushsale-app-body .ps-marketing-leader-page .box-body > .ps-status-summary,
+html body.pushsale-app-body .ps-marketing-leader-page .box-body > .pushsale-status-summary {
+    margin: 16px 14px 14px !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .table_marketing {
+    margin: 0 14px !important;
+    max-height: calc(100vh - 300px) !important;
+    border-top: 1px solid #2f7fcf !important;
+}
+
+@media (max-width: 1280px) {
+    html body.pushsale-app-body .ps-marketing-leader-page .m-header.ps-leader-header-v132 {
+        grid-template-columns: 1fr !important;
+        row-gap: 8px !important;
+    }
+    html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-primary-row,
+    html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter-body .row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        justify-content: stretch !important;
+    }
+}

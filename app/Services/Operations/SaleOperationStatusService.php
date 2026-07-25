@@ -12,6 +12,7 @@ use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Orders\OrderClosingService;
 use App\Models\OrderOperationHistory;
 use App\Services\CustomerInteractions\OrderOperationHistoryService;
+use App\Models\Pushsale\OperationResultSetting;
 use App\Support\ActivityLogger;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -104,7 +105,7 @@ class SaleOperationStatusService
             ]);
         }
 
-        if ($result === OperationResult::ClosedSuccess) {
+        if (OperationResultSetting::closesOrder($result->value)) {
             $confirm = (bool) ($payload['confirm_insufficient_stock'] ?? false);
             $this->inventory->assertCanClose($order, $confirm);
 

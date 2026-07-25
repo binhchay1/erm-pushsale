@@ -68,6 +68,7 @@ Route::get('sales/operation-categories', [\App\Http\Controllers\Admin\Pushsale\P
 Route::post('sales/operation-categories/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_8_1Controller::class, 'store'])->name('sales.operation-categories.store');
 Route::match(['put', 'patch'], 'sales/operation-categories/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_8_1Controller::class, 'update'])->whereNumber('record')->name('sales.operation-categories.update');
 Route::delete('sales/operation-categories/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_8_1Controller::class, 'destroy'])->whereNumber('record')->name('sales.operation-categories.destroy');
+Route::patch('sales/operation-categories/results/{value}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_8_1Controller::class, 'updateResult'])->where('value', '[A-Za-z0-9_\-]+')->name('sales.operation-categories.results.update');
 Route::redirect('pages/1-8-1-quan-ly-danh-muc-tac-nghiep', '/admin/sales/operation-categories', 301);
 
 Route::get('sales/operation-workflows', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_8_2Controller::class, 'index'])->name('sales.operation-workflows');
@@ -111,6 +112,7 @@ Route::get('marketing/landing-connections', [\App\Http\Controllers\Admin\Marketi
 Route::get('marketing/landing-connections/records', fn () => redirect('/admin/marketing/landing-connections'));
 Route::post('marketing/landing-connections/records', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'store'])->name('marketing.landing-connections.store');
 Route::delete('marketing/landing-connections/records', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'destroyMany'])->name('marketing.landing-connections.destroy-many');
+Route::patch('marketing/landing-connections/records/{record}/flags', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'updateFlags'])->whereNumber('record')->name('marketing.landing-connections.flags');
 Route::match(['put', 'patch'], 'marketing/landing-connections/records/{record}', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'update'])->whereNumber('record')->name('marketing.landing-connections.update');
 Route::delete('marketing/landing-connections/records/{record}', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'destroy'])->whereNumber('record')->name('marketing.landing-connections.destroy');
 Route::redirect('pages/2-4-1-ket-noi-du-lieu', '/admin/marketing/landing-connections', 301);
@@ -120,6 +122,7 @@ Route::get('marketing/website-connections', [\App\Http\Controllers\Admin\Marketi
 Route::get('marketing/website-connections/records', fn () => redirect('/admin/marketing/website-connections'));
 Route::post('marketing/website-connections/records', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'store'])->name('marketing.website-connections.store');
 Route::delete('marketing/website-connections/records', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'destroyMany'])->name('marketing.website-connections.destroy-many');
+Route::patch('marketing/website-connections/records/{record}/flags', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'updateFlags'])->whereNumber('record')->name('marketing.website-connections.flags');
 Route::match(['put', 'patch'], 'marketing/website-connections/records/{record}', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'update'])->whereNumber('record')->name('marketing.website-connections.update');
 Route::delete('marketing/website-connections/records/{record}', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'destroy'])->whereNumber('record')->name('marketing.website-connections.destroy');
 Route::redirect('pages/2-4-2-ket-noi-du-lieu', '/admin/marketing/website-connections', 301);
