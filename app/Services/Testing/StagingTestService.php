@@ -432,12 +432,20 @@ class StagingTestService
             $request->setUserResolver(static fn () => $user);
         }
 
+        // Route-smoke chạy trong CLI/staging với APP_DEBUG=false nên Laravel thường
+        // render trang lỗi chung “Liên hệ …” và che mất exception thật. Bật debug
+        // tạm trong đúng request nội bộ này để failed_top in ra SQL/Controller error
+        // đủ ngắn cho việc copy log, rồi khôi phục config ngay sau đó.
+        $originalDebug = config('app.debug');
+        config(['app.debug' => true]);
+
         try {
             $response = $kernel->handle($request);
             $kernel->terminate($request, $response);
 
             return $response;
         } finally {
+            config(['app.debug' => $originalDebug]);
             Auth::logout();
         }
     }

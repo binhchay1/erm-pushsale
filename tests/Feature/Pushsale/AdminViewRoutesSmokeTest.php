@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\LeadIngestion;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Team;
 use App\Models\Pushsale\WarehouseVoucher;
 use App\Models\Shipment;
 use App\Models\User;
@@ -88,6 +89,58 @@ class AdminViewRoutesSmokeTest extends TestCase
         $this->assertTrue((bool) $product->available_marketing);
         $this->assertTrue((bool) $product->available_sale);
         $this->assertTrue((bool) $product->available_care);
+    }
+
+
+    public function test_product_permission_assignment_persists_team_and_user_ids(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->loginAsDemoAdmin();
+
+        $product = Product::withoutTenant()->where('type', 'product')->firstOrFail();
+        $marketingTeam = Team::withoutTenant()->where('type', 'marketing')->firstOrFail();
+        $saleTeam = Team::withoutTenant()->where('type', 'sale')->firstOrFail();
+        $marketingUser = User::withoutTenant()->where('role', User::ROLE_MARKETING)->where('team_id', $marketingTeam->id)->firstOrFail();
+        $saleUser = User::withoutTenant()->where('role', User::ROLE_SALES)->where('team_id', $saleTeam->id)->firstOrFail();
+
+        $payload = [
+            'name' => $product->name,
+            'type' => 'product',
+            'sku' => $product->sku,
+            'unit' => $product->unit,
+            'cost_price' => (int) $product->cost_price,
+            'unit_price' => max(1, (int) $product->unit_price),
+            'vat_percent' => (float) $product->vat_percent,
+            'vat_code' => $product->vat_code ?: 'KCT',
+            'barcode' => $product->barcode,
+            'weight_grams' => (int) $product->weight_grams,
+            'length_cm' => (float) $product->length_cm,
+            'width_cm' => (float) $product->width_cm,
+            'height_cm' => (float) $product->height_cm,
+            'warehouse_location' => $product->warehouse_location,
+            'is_active' => true,
+            'available_marketing' => true,
+            'available_sale' => true,
+            'available_care' => true,
+            'marketing_team_ids' => [$marketingTeam->id],
+            'marketing_user_ids' => [$marketingUser->id],
+            'sale_team_ids' => [$saleTeam->id],
+            'sale_user_ids' => [$saleUser->id],
+            'care_team_ids' => [$saleTeam->id],
+            'care_user_ids' => [$saleUser->id],
+            'category_ids' => $product->categories()->pluck('product_categories.id')->all(),
+            'attribute_value_ids' => $product->attributeValues()->pluck('product_attribute_values.id')->all(),
+        ];
+
+        $this->put("/admin/products/{$product->id}", $payload)->assertRedirect('/admin/products');
+
+        $product->refresh();
+        $this->assertSame([(int) $marketingTeam->id], $product->marketing_team_ids);
+        $this->assertSame([(int) $marketingUser->id], $product->marketing_user_ids);
+        $this->assertSame([(int) $saleTeam->id], $product->sale_team_ids);
+        $this->assertSame([(int) $saleUser->id], $product->sale_user_ids);
+        $this->assertSame([(int) $saleTeam->id], $product->care_team_ids);
+        $this->assertSame([(int) $saleUser->id], $product->care_user_ids);
     }
 
     private function safeResponseBody(mixed $response): string

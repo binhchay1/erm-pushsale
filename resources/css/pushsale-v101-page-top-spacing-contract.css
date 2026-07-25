@@ -1,0 +1,79 @@
+/* V101: normalize native Pushsale template top spacing.
+   The real application uses AppLayout's fixed .content-wrapper. Captured HTML
+   also contains inner .content-wrapper nodes and inline spacers from the old
+   DNN pages. Those artifacts caused large, inconsistent blank bands above
+   headers/filters on reports such as menu 4.3. */
+
+html body.pushsale-app-body .pushsale-page[data-page-code] {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] > .pushsale-template-host,
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-template-fragment,
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-page-fragment,
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-template-inner,
+html body.pushsale-app-body .pushsale-page[data-page-code] .contentPane {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Stronger than the broad application .content-wrapper rules in pushsale.css. */
+html body.pushsale-app-body .pushsale-wrapper .content-wrapper .pushsale-page[data-page-code] .pushsale-template-host .pushsale-template-fragment .content-wrapper,
+html body.pushsale-app-body .pushsale-wrapper .content-wrapper .pushsale-page[data-page-code] .pushsale-template-host .pushsale-page-fragment .content-wrapper,
+html body.pushsale-app-body .pushsale-wrapper .content-wrapper .pushsale-page[data-page-code] .pushsale-template-host .pushsale-nested-content-wrapper {
+    position: static !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-template-empty-spacer,
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-native-empty-spacer,
+html body.pushsale-app-body .pushsale-page[data-page-code] div[style*="height: 80px"]:empty,
+html body.pushsale-app-body .pushsale-page[data-page-code] div[style*="height: 100px"]:empty,
+html body.pushsale-app-body .pushsale-page[data-page-code] div[style*="height:100px"]:empty {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Old reports sometimes put padding-top:50px on the table body just to create a visual gap.
+   Keep a small Pushsale-like separation, not a giant blank block. */
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-native-top-spacer,
+html body.pushsale-app-body .pushsale-page[data-page-code] .box-body[style*="padding-top: 50px"],
+html body.pushsale-app-body .pushsale-page[data-page-code] .box-body[style*="padding-top:50px"],
+html body.pushsale-app-body .pushsale-page[data-page-code] .box-body[style*="padding-top: 60px"],
+html body.pushsale-app-body .pushsale-page[data-page-code] .box-body[style*="padding-top:60px"] {
+    padding-top: 8px !important;
+}
+
+/* Menu 4.3 / sales rankings: title/filter starts immediately under the blue app header;
+   secondary filter row then table uses one consistent gap. */
+html body.pushsale-app-body .pushsale-template-page-4-3 .m-header-wrap,
+html body.pushsale-app-body .pushsale-template-page-4-3 #dnn_ctr1489_Main_SaleDashboard_pnlMain > .box-body:first-of-type,
+html body.pushsale-app-body .pushsale-template-page-4-3 #dnn_ctr1489_Main_SaleDashboard_pnlMain > .box-body:nth-of-type(2) {
+    margin-top: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-4-3 #dnn_ctr1489_Main_SaleDashboard_pnlMain > .box-body:nth-of-type(2) {
+    padding-top: 8px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-4-3 .bxh-container {
+    margin-top: 0 !important;
+}

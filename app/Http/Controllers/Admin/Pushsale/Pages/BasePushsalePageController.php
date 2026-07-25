@@ -101,6 +101,17 @@ abstract class BasePushsalePageController extends Controller
         ]);
     }
 
+
+    protected function activeMenuCodeFromRequest(Request $request): string
+    {
+        $queryCode = trim((string) $request->query('menu_code', ''));
+        if ($queryCode !== '') {
+            return $queryCode;
+        }
+
+        return $this->pageCode;
+    }
+
     public function store(Request $request): RedirectResponse|JsonResponse
     {
         $this->authorizePage($request);

@@ -1,0 +1,416 @@
+/* V92 final polish: dashboard toolbar, Pushsale sidebar tone, revenue report table. */
+
+/* Admin dashboard toolbar: straight baseline, LIVE pinned right. */
+.psfd-toolbar-v88 {
+    display: grid !important;
+    grid-template-columns: minmax(320px, 1fr) auto !important;
+    align-items: end !important;
+    gap: 16px !important;
+    padding: 8px 14px 10px !important;
+    margin: 0 !important;
+    min-height: 86px !important;
+    border-bottom: 1px solid #d3dce5 !important;
+    background: #fff !important;
+}
+
+.psfd-toolbar-v88 .psfd-toolbar-copy {
+    align-self: end !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.psfd-toolbar-v88 .psfd-toolbar-copy h1 {
+    margin: 0 0 3px !important;
+    font-size: 16px !important;
+    line-height: 20px !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+}
+
+.psfd-toolbar-v88 .psfd-toolbar-copy p {
+    margin: 0 !important;
+    max-width: 460px !important;
+    font-size: 12px !important;
+    line-height: 16px !important;
+    color: #4f5f73 !important;
+}
+
+.psfd-toolbar-v88 .psfd-toolbar-controls,
+.psfd-toolbar-v88 .psfd-filter-controls {
+    display: flex !important;
+    align-items: end !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+}
+
+.psfd-toolbar-v88 .psfd-filter-controls label {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    margin: 0 !important;
+    font-size: 12px !important;
+    line-height: 16px !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+}
+
+.psfd-toolbar-v88 .psfd-filter-controls label > span {
+    display: block !important;
+    min-height: 16px !important;
+}
+
+.psfd-toolbar-v88 .psfd-filter-controls input[type='date'] {
+    width: 145px !important;
+    height: 34px !important;
+    padding: 5px 10px !important;
+    border: 1px solid #bfcdda !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+
+.psfd-toolbar-v88 .psfd-filter-controls button[type='submit'] {
+    height: 34px !important;
+    min-width: 108px !important;
+    margin: 0 !important;
+    align-self: flex-end !important;
+}
+
+.psfd-toolbar-v88 .psfd-live-slot {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    min-width: 62px !important;
+    margin-left: 24px !important;
+}
+
+.ps-role-dashboard .ps-page-shell,
+.ps-role-dashboard .space-y-6 {
+    margin: 0 !important;
+    padding: 10px 14px 16px !important;
+}
+
+.ps-role-dashboard .ps-page-shell__header {
+    margin: 0 0 10px !important;
+}
+
+/* Sidebar visual tuned closer to Pushsale sample: lighter, smaller, tighter. */
+.pushsale-main-sidebar {
+    width: 252px !important;
+    background: #f8f9fb !important;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, .14) !important;
+}
+
+.pushsale-main-sidebar .sidebar-menu,
+.pushsale-main-sidebar .ul1,
+.pushsale-main-sidebar .ul2 {
+    background: #f8f9fb !important;
+}
+
+.pushsale-main-sidebar .a1 {
+    min-height: 42px !important;
+    height: 42px !important;
+    padding: 0 12px 0 14px !important;
+    font-size: 13px !important;
+    line-height: 42px !important;
+    font-weight: 700 !important;
+    color: #415064 !important;
+    letter-spacing: 0 !important;
+}
+
+.pushsale-main-sidebar .a1 i:first-child,
+.pushsale-main-sidebar .a1 .fa:first-child {
+    width: 15px !important;
+    min-width: 15px !important;
+    margin-right: 7px !important;
+    font-size: 13px !important;
+    color: #6e7e8c !important;
+}
+
+.pushsale-main-sidebar .a1 .pull-right,
+.pushsale-main-sidebar .a1 .fa-plus,
+.pushsale-main-sidebar .a1 .fa-minus {
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    color: #007fff !important;
+}
+
+.pushsale-main-sidebar .li1.active > .a1,
+.pushsale-main-sidebar .li1.is-open > .a1,
+.pushsale-main-sidebar .li1:hover > .a1 {
+    background: #f2f4f7 !important;
+    color: #0a7ee7 !important;
+}
+
+.pushsale-main-sidebar .a2 {
+    min-height: 40px !important;
+    height: 40px !important;
+    padding: 0 12px 0 38px !important;
+    font-size: 13px !important;
+    line-height: 40px !important;
+    font-weight: 400 !important;
+    color: #52606f !important;
+}
+
+.pushsale-main-sidebar .li2.active > .a2,
+.pushsale-main-sidebar .li2.is-open > .a2,
+.pushsale-main-sidebar .li2:hover > .a2 {
+    background: #0d8bf2 !important;
+    color: #fff !important;
+}
+
+.pushsale-main-sidebar .li1,
+.pushsale-main-sidebar .li2,
+.pushsale-main-sidebar .a1,
+.pushsale-main-sidebar .a2 {
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+
+.pushsale-third-menu,
+.pushsale-third-menu * {
+    border-top: 0 !important;
+    outline: 0 !important;
+}
+
+.pushsale-third-menu {
+    min-width: 252px !important;
+    padding: 0 !important;
+    background: #0d8bf2 !important;
+    border: 0 !important;
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, .22) !important;
+}
+
+.pushsale-third-menu .a3,
+.pushsale-third-menu .pushsale-third-link {
+    min-height: 40px !important;
+    padding: 0 16px !important;
+    font-size: 13px !important;
+    line-height: 40px !important;
+    font-weight: 400 !important;
+    color: #fff !important;
+    background: #0d8bf2 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.pushsale-third-menu .a3:hover,
+.pushsale-third-menu .pushsale-third-link:hover {
+    background: #0868b8 !important;
+    color: #fff !important;
+    text-decoration: none !important;
+}
+
+/* Sales revenue report copied from Pushsale structure and extended with upsale metrics. */
+.ps-sales-revenue-page {
+    background: #fff !important;
+}
+
+.ps-sales-revenue-header {
+    padding: 0 !important;
+    border-bottom: 1px solid #d7dfe7 !important;
+    background: #fff !important;
+}
+
+.ps-sales-revenue-page .ps-page-shell__main-row {
+    display: grid !important;
+    grid-template-columns: 260px minmax(820px, 1fr) auto !important;
+    align-items: center !important;
+    gap: 14px !important;
+    min-height: 52px !important;
+    padding: 8px 14px !important;
+}
+
+.ps-sales-revenue-page .ps-page-shell__title {
+    margin: 0 !important;
+    font-size: 16px !important;
+    line-height: 20px !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+}
+
+.ps-sales-revenue-primary {
+    display: grid !important;
+    grid-template-columns: minmax(190px, 1fr) minmax(260px, 1.25fr) minmax(180px, 1fr) minmax(180px, 1fr) !important;
+    gap: 14px !important;
+    align-items: center !important;
+}
+
+.ps-sales-revenue-advanced {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(150px, 1fr)) !important;
+    gap: 10px 18px !important;
+    padding: 0 14px 10px !important;
+    align-items: center !important;
+}
+
+.ps-sales-revenue-page .ps-control,
+.ps-sales-revenue-page select,
+.ps-sales-revenue-page input[type='date'] {
+    height: 32px !important;
+    border: 1px solid #bfcdda !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+    line-height: 20px !important;
+}
+
+.ps-sales-revenue-date-range {
+    position: relative !important;
+    min-width: 260px !important;
+}
+
+.ps-sales-revenue-date-label {
+    width: 100% !important;
+    cursor: pointer !important;
+    background: #fff !important;
+}
+
+.ps-sales-revenue-date-native {
+    position: absolute !important;
+    inset: 0 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    opacity: .01 !important;
+}
+
+.ps-sales-revenue-date-native input {
+    width: 100% !important;
+    height: 32px !important;
+    cursor: pointer !important;
+}
+
+.ps-sales-revenue-page .ps-page-shell__actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+}
+
+.ps-sales-revenue-page .ps-btn,
+.ps-sales-revenue-page .ps-btn-primary {
+    height: 32px !important;
+    min-width: 86px !important;
+    padding: 6px 12px !important;
+    border-radius: 2px !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+}
+
+.ps-sales-revenue-check {
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    height: 32px !important;
+    margin: 0 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+}
+
+.ps-sales-revenue-check input {
+    margin: 0 !important;
+}
+
+.ps-sales-revenue-body {
+    padding: 0 !important;
+}
+
+.ps-sales-revenue-formulas {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(260px, 1fr)) !important;
+    gap: 10px 24px !important;
+    padding: 14px !important;
+    border-bottom: 1px solid #ddd !important;
+    background: #fff !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+}
+
+.ps-sales-revenue-formula span {
+    font-weight: 700 !important;
+    color: #ff0000 !important;
+}
+
+.ps-sales-revenue-table-wrap {
+    width: 100% !important;
+    overflow: auto !important;
+    background: #fff !important;
+}
+
+.ps-sales-revenue-table {
+    min-width: 2600px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+}
+
+.ps-sales-revenue-table th {
+    padding: 7px 6px !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+    background: #3782dc !important;
+    color: #fff !important;
+    border: 1px solid #276fbe !important;
+    font-size: 11px !important;
+    line-height: 15px !important;
+    font-weight: 700 !important;
+    white-space: normal !important;
+}
+
+.ps-sales-revenue-table td {
+    padding: 5px 6px !important;
+    vertical-align: middle !important;
+    border: 1px solid #d6d6d6 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    color: #111 !important;
+    white-space: nowrap !important;
+}
+
+.ps-sales-revenue-table .ps-sales-revenue-name-col {
+    width: 150px !important;
+}
+
+.ps-sales-revenue-name-cell {
+    min-width: 150px !important;
+    font-weight: 600 !important;
+}
+
+.ps-sales-revenue-total-row td {
+    font-weight: 700 !important;
+    background: #fff !important;
+}
+
+.ps-sales-revenue-table tbody tr:nth-child(even):not(.ps-sales-revenue-total-row) td {
+    background: #ececec !important;
+}
+
+.ps-sales-revenue-table .ps-empty-row {
+    height: 44px !important;
+    color: #777 !important;
+}
+
+@media (max-width: 1200px) {
+    .psfd-toolbar-v88,
+    .ps-sales-revenue-page .ps-page-shell__main-row {
+        grid-template-columns: 1fr !important;
+        align-items: stretch !important;
+    }
+
+    .psfd-toolbar-v88 .psfd-toolbar-controls,
+    .ps-sales-revenue-page .ps-page-shell__actions {
+        justify-content: flex-start !important;
+    }
+
+    .ps-sales-revenue-primary,
+    .ps-sales-revenue-advanced,
+    .ps-sales-revenue-formulas {
+        grid-template-columns: repeat(2, minmax(180px, 1fr)) !important;
+    }
+}

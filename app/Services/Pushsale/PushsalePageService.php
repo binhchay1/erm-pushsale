@@ -227,7 +227,7 @@ class PushsalePageService
             ->orderBy('name')
             ->limit(2000)
             ->get(['id', 'parent_id', 'name', 'type', 'unit_price', 'sku', 'is_active']);
-        $teamLeaderIds = Team::query()->whereNotNull('leader_id')->pluck('leader_id')->map(fn ($id) => (int) $id);
+        $teamLeaderIds = Team::query()->whereNotNull('leader_user_id')->pluck('leader_user_id')->map(fn ($id) => (int) $id);
         $loginCounts = $pageCode === '1.7.1'
             ? tap(ActivityLog::query(), function ($query): void {
                 if (auth()->user()?->isPlatformAdmin()) {
@@ -398,7 +398,7 @@ class PushsalePageService
             'parent' => $team->parent?->name,
             'updated_at' => $team->updated_at?->toIso8601String(),
             'actions' => 'Cập nhật',
-            '_team_leader_id' => $team->leader_id,
+            '_team_leader_id' => $team->leader_user_id,
             '_edit_url' => "/admin/teams/{$team->id}/edit",
         ]);
     }

@@ -6,6 +6,7 @@ import { CurrencyInput } from '@/components/ui/currency-input';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { formatCurrency, formatNumber } from '@/lib/format';
+import { PushsaleMultiSelect, PushsaleSelect } from '@/components/pushsale/PushsaleSelect';
 
 function DialogShell({ title, open, onClose, children, wide = false, hiddenHeader = false, className = '', bodyClassName = '', showClose = true }) {
     const isTaxonomy = String(className).includes('ps-taxonomy-source-modal');
@@ -79,11 +80,92 @@ function OptionSearchSelect({ options = [], value = '', onChange, placeholder = 
     );
 }
 
+
+function toIntArray(value) {
+    if (!Array.isArray(value)) return [];
+    return value.map((item) => Number(item)).filter((item, index, source) => item > 0 && source.indexOf(item) === index);
+}
+
+function idsEqual(left, right) {
+    const a = toIntArray(left).sort((x, y) => x - y);
+    const b = toIntArray(right).sort((x, y) => x - y);
+    return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
+function PermissionMultiSelect({ label, enabled, selectedIds = [], options = [], onEnabledChange, onChange, placeholder }) {
+    const [open, setOpen] = useState(false);
+    const [keyword, setKeyword] = useState('');
+    const rootRef = useRef(null);
+    const ids = toIntArray(selectedIds);
+    const allSelected = enabled && ids.length === 0;
+    const optionMap = useMemo(() => new Map(options.map((option) => [Number(option.value), option])), [options]);
+    const filtered = useMemo(() => {
+        const needle = normalizeOptionText(keyword);
+        if (!needle) return options;
+        return options.filter((option) => normalizeOptionText(`${option.label} ${option.subLabel ?? ''}`).includes(needle));
+    }, [keyword, options]);
+
+    useEffect(() => {
+        if (!open) return undefined;
+        const close = (event) => {
+            if (!rootRef.current?.contains(event.target)) setOpen(false);
+        };
+        document.addEventListener('mousedown', close);
+        return () => document.removeEventListener('mousedown', close);
+    }, [open]);
+
+    const displayText = (() => {
+        if (!enabled) return '';
+        if (allSelected) return `Tất cả ${label} đều có quyền`;
+        const names = ids.map((id) => optionMap.get(id)?.label).filter(Boolean);
+        if (names.length <= 2) return names.join(', ');
+        return `${names.slice(0, 2).join(', ')} +${names.length - 2}`;
+    })();
+
+    const toggleId = (id) => {
+        const numberId = Number(id);
+        const next = ids.includes(numberId) ? ids.filter((item) => item !== numberId) : [...ids, numberId];
+        onEnabledChange(next.length > 0 || enabled);
+        onChange(next);
+    };
+
+    return (
+        <div ref={rootRef} className="ps-permission-select">
+            <button type="button" className={`form-control ps-permission-select-button ${!enabled ? 'is-empty' : ''}`} onClick={() => setOpen((current) => !current)}>
+                <span>{displayText || placeholder || `--Chọn ${label}--`}</span><i className="fa fa-caret-down" />
+            </button>
+            {open && (
+                <div className="ps-permission-select-menu">
+                    <input className="form-control ps-permission-search" autoFocus value={keyword} placeholder={`Tìm ${label.toLowerCase()}...`} onChange={(event) => setKeyword(event.target.value)} />
+                    <button type="button" className={`ps-permission-option ${allSelected ? 'active' : ''}`} onClick={() => { onEnabledChange(true); onChange([]); setKeyword(''); }}>
+                        <span>Tất cả {label} đều có quyền</span>
+                    </button>
+                    <button type="button" className={`ps-permission-option ${!enabled ? 'active' : ''}`} onClick={() => { onEnabledChange(false); onChange([]); setKeyword(''); }}>
+                        <span>Không cho {label} sử dụng sản phẩm này</span>
+                    </button>
+                    <div className="ps-permission-options">
+                        {filtered.length ? filtered.map((option) => {
+                            const checked = ids.includes(Number(option.value));
+                            return (
+                                <button key={option.value} type="button" className={`ps-permission-option ${checked ? 'active' : ''}`} onClick={() => toggleId(option.value)}>
+                                    <input type="checkbox" readOnly checked={checked} />
+                                    <span>{option.label}{option.subLabel && <small>{option.subLabel}</small>}</span>
+                                </button>
+                            );
+                        }) : <div className="ps-search-select-empty">Không có dữ liệu.</div>}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 const emptyProduct = {
     name: '', sku: '', unit: '', cost_price: 0, unit_price: 0, vat_percent: 0,
     vat_code: 'KCT', barcode: '', weight_grams: 0, length_cm: 0, width_cm: 0, height_cm: 0,
     warehouse_location: '', is_active: true, available_marketing: true, available_sale: true,
-    available_care: true, category_ids: [], attribute_ids: ['', ''], attribute_value_ids: [], type: 'product', has_attributes: false,
+    available_care: true, marketing_team_ids: [], marketing_user_ids: [], sale_team_ids: [], sale_user_ids: [],
+    care_team_ids: [], care_user_ids: [], category_ids: [], attribute_ids: ['', ''], attribute_value_ids: [], type: 'product', has_attributes: false,
 };
 
 const emptyTaxonomy = { id: '', name: '', product_attribute_id: '', is_active: true, clear_after_save: true, support_update: false };
@@ -139,7 +221,7 @@ function cleanTaxonomyPayload(data, taxonomy) {
     return payload;
 }
 
-export default function ProductsIndex({ products, filters = {}, categories = [], attributes = [], attributeValues = [], vatCodes = [] }) {
+export default function ProductsIndex({ products, filters = {}, categories = [], attributes = [], attributeValues = [], vatCodes = [], permissionOptions = {} }) {
     const [query, setQuery] = useState({
         search: filters.search ?? '', active: filters.active ?? '', category_id: filters.category_id ?? '',
         marketing: filters.marketing ?? '', sale: filters.sale ?? '', care: filters.care ?? '',
@@ -156,6 +238,64 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
     const productForm = useForm(emptyProduct);
     const taxonomyForm = useForm(emptyTaxonomy);
     const rows = products?.data ?? [];
+    const marketingTeams = permissionOptions.marketingTeams ?? [];
+    const marketingUsers = permissionOptions.marketingUsers ?? [];
+    const saleTeams = permissionOptions.saleTeams ?? [];
+    const saleUsers = permissionOptions.saleUsers ?? [];
+    const careTeams = permissionOptions.careTeams ?? [];
+    const careUsers = permissionOptions.careUsers ?? [];
+
+    const setPermissionEnabled = (scope, enabled) => {
+        productForm.setData(`available_${scope}`, Boolean(enabled));
+    };
+
+    const setPermissionUsers = (scope, ids) => {
+        const userKey = `${scope}_user_ids`;
+        productForm.setData(userKey, toIntArray(ids));
+    };
+
+    const setPermissionTeams = (scope, ids, teams, fillMembers = true) => {
+        const teamIds = toIntArray(ids);
+        const userIds = fillMembers
+            ? teams.filter((team) => teamIds.includes(Number(team.value))).flatMap((team) => team.member_ids ?? [])
+            : productForm.data[`${scope}_user_ids`] ?? [];
+
+        productForm.setData({
+            ...productForm.data,
+            [`${scope}_team_ids`]: teamIds,
+            [`${scope}_user_ids`]: toIntArray(userIds),
+            [`available_${scope}`]: true,
+        });
+    };
+
+    const resetPermission = (scope) => {
+        productForm.setData({
+            ...productForm.data,
+            [`${scope}_team_ids`]: [],
+            [`${scope}_user_ids`]: [],
+            [`available_${scope}`]: false,
+        });
+    };
+
+    const refillPermissionFromTeam = (scope, teams) => {
+        const teamIds = toIntArray(productForm.data[`${scope}_team_ids`]);
+        if (teamIds.length === 0) {
+            productForm.setData({
+                ...productForm.data,
+                [`${scope}_user_ids`]: [],
+                [`available_${scope}`]: true,
+            });
+            return;
+        }
+
+        const userIds = teams.filter((team) => teamIds.includes(Number(team.value))).flatMap((team) => team.member_ids ?? []);
+        productForm.setData({
+            ...productForm.data,
+            [`${scope}_user_ids`]: toIntArray(userIds),
+            [`available_${scope}`]: true,
+        });
+    };
+
 
     const submitFilters = (event) => {
         event.preventDefault();
@@ -177,7 +317,11 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
             barcode: row.barcode ?? '', weight_grams: row.weight_grams ?? 0, length_cm: row.length_cm ?? 0,
             width_cm: row.width_cm ?? 0, height_cm: row.height_cm ?? 0, warehouse_location: row.warehouse_location ?? '',
             is_active: row.is_active, available_marketing: row.available_marketing, available_sale: row.available_sale,
-            available_care: row.available_care, category_ids: row.category_ids ?? [],
+            available_care: row.available_care,
+            marketing_team_ids: toIntArray(row.marketing_team_ids), marketing_user_ids: toIntArray(row.marketing_user_ids),
+            sale_team_ids: toIntArray(row.sale_team_ids), sale_user_ids: toIntArray(row.sale_user_ids),
+            care_team_ids: toIntArray(row.care_team_ids), care_user_ids: toIntArray(row.care_user_ids),
+            category_ids: row.category_ids ?? [],
             attribute_ids: attributeValues
                 .filter((value) => (row.attribute_value_ids ?? []).map(String).includes(String(value.id)))
                 .map((value) => String(value.product_attribute_id))
@@ -447,7 +591,7 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
 
                     <div className="ps-product-source-grid">
                         <label className="ps-product-field span-2"><span>Tên SP gốc <b>(*)</b></span><input className="form-control" value={productForm.data.name} onChange={(event) => productForm.setData('name', event.target.value)} required /></label>
-                        <label className="ps-product-field span-2"><span>Phân loại</span><OptionSearchSelect options={categoryOptions} value={productForm.data.category_ids?.[0] ?? ''} placeholder="--Phân loại--" onChange={(value) => productForm.setData('category_ids', value ? [Number(value)] : [])} /></label>
+                        <label className="ps-product-field span-2"><span>Phân loại</span><PushsaleSelect searchable options={categoryOptions} value={productForm.data.category_ids?.[0] ?? ''} placeholder="--Phân loại--" onChange={(value) => productForm.setData('category_ids', value ? [Number(value)] : [])} /></label>
                         <label className="ps-product-field"><span>Mã SP</span><input className="form-control" value={productForm.data.sku} onChange={(event) => productForm.setData('sku', event.target.value)} /></label>
                         <label className="ps-product-field"><span>KL(gram)</span><input className="form-control" type="number" min="0" value={productForm.data.weight_grams} onChange={(event) => productForm.setData('weight_grams', Number(event.target.value))} /></label>
                         <label className="ps-product-field"><span>Đ.vị tính</span><input className="form-control" value={productForm.data.unit} onChange={(event) => productForm.setData('unit', event.target.value)} /></label>
@@ -471,9 +615,9 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                                 return (
                                     <div className="ps-product-attribute-row" key={slot}>
                                         <span>Thuộc tính {slot + 1}</span>
-                                        <OptionSearchSelect options={filteredAttributeOptions} value={attributeId} placeholder="--Chọn thuộc tính--" onChange={(value) => setProductAttribute(slot, value)} />
+                                        <PushsaleSelect searchable options={filteredAttributeOptions} value={attributeId} placeholder="--Chọn thuộc tính--" onChange={(value) => setProductAttribute(slot, value)} />
                                         <span>Giá trị</span>
-                                        <OptionSearchSelect options={valuesByAttribute[String(attributeId)] ?? []} value={attributeId ? selectedValueForAttribute(attributeId) : ''} placeholder="--Chọn giá trị--" disabled={!attributeId} onChange={(value) => setProductAttributeValue(attributeId, value)} />
+                                        <PushsaleSelect searchable options={valuesByAttribute[String(attributeId)] ?? []} value={attributeId ? selectedValueForAttribute(attributeId) : ''} placeholder="--Chọn giá trị--" disabled={!attributeId} onChange={(value) => setProductAttributeValue(attributeId, value)} />
                                     </div>
                                 );
                             })}
@@ -483,12 +627,12 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
 
                     <h4>PHÂN QUYỀN</h4>
                     <div className="ps-product-permission-source">
-                        <div className="ps-permission-row"><span>Chọn nhanh Marketing<br />từ Nhóm Marketing</span><input className="form-control" /><button type="button"><i className="fa fa-refresh" /></button><button type="button"><i className="fa fa-trash" /></button><small>* Chọn nhóm mkt sẽ tự động điền danh sách mkt vào trong phân chọn ưu tiên mkt phía dưới</small></div>
-                        <div className="ps-permission-row"><span>Marketing</span><input className="form-control" readOnly value={productForm.data.available_marketing ? 'Được sử dụng' : ''} onClick={() => productForm.setData('available_marketing', !productForm.data.available_marketing)} /><small>* Cấu hình các Marketing được làm việc với sản phẩm.</small></div>
-                        <div className="ps-permission-row"><span>Chọn nhanh sale từ<br />Nhóm sale</span><input className="form-control" /><button type="button"><i className="fa fa-refresh" /></button><button type="button"><i className="fa fa-trash" /></button><small>* Chọn nhóm sale sẽ tự động điền danh sách mkt vào trong phân chọn ưu tiên sale phía dưới</small></div>
-                        <div className="ps-permission-row"><span>Sale</span><input className="form-control" readOnly value={productForm.data.available_sale ? 'Được sử dụng' : ''} onClick={() => productForm.setData('available_sale', !productForm.data.available_sale)} /><small>* Cấu hình các Sale được chia số nếu số về từ nguồn dữ liệu có cấu hình sản phẩm hiện tại.</small></div>
-                        <div className="ps-permission-row"><span>Chọn nhanh CSKH từ<br />Nhóm CSKH</span><input className="form-control" /><button type="button"><i className="fa fa-refresh" /></button><button type="button"><i className="fa fa-trash" /></button><small>* Chọn nhóm cskh sẽ tự động điền danh sách cskh vào trong phân chọn ưu tiên cskh phía dưới</small></div>
-                        <div className="ps-permission-row"><span>CSKH</span><input className="form-control" readOnly value={productForm.data.available_care ? 'Được sử dụng' : ''} onClick={() => productForm.setData('available_care', !productForm.data.available_care)} /><small>* Cấu hình các CSKH được chia số nếu số về từ nguồn dữ liệu có cấu hình sản phẩm hiện tại.</small></div>
+                        <div className="ps-permission-row"><span>Chọn nhanh Marketing<br />từ Nhóm Marketing</span><PushsaleSelect searchable options={marketingTeams} value={productForm.data.marketing_team_ids?.[0] ?? ''} placeholder="--Chọn nhóm Marketing--" onChange={(value) => setPermissionTeams('marketing', value ? [Number(value)] : [], marketingTeams)} /><button type="button" onClick={() => refillPermissionFromTeam('marketing', marketingTeams)} title="Nạp lại danh sách marketing theo nhóm"><i className="fa fa-refresh" /></button><button type="button" onClick={() => resetPermission('marketing')} title="Xóa phân quyền marketing"><i className="fa fa-trash" /></button><small>* Chọn nhóm mkt sẽ tự động điền danh sách mkt vào trong phân chọn ưu tiên mkt phía dưới</small></div>
+                        <div className="ps-permission-row"><span>Marketing</span><PushsaleMultiSelect label="Marketing" enabled={productForm.data.available_marketing} selectedIds={productForm.data.marketing_user_ids} options={marketingUsers} onEnabledChange={(enabled) => setPermissionEnabled('marketing', enabled)} onChange={(ids) => setPermissionUsers('marketing', ids)} /><small>* Cấu hình các Marketing được làm việc với sản phẩm. Nếu chọn “Tất cả” thì sản phẩm mở cho toàn bộ marketing đang hoạt động.</small></div>
+                        <div className="ps-permission-row"><span>Chọn nhanh sale từ<br />Nhóm sale</span><PushsaleSelect searchable options={saleTeams} value={productForm.data.sale_team_ids?.[0] ?? ''} placeholder="--Chọn nhóm sale--" onChange={(value) => setPermissionTeams('sale', value ? [Number(value)] : [], saleTeams)} /><button type="button" onClick={() => refillPermissionFromTeam('sale', saleTeams)} title="Nạp lại danh sách sale theo nhóm"><i className="fa fa-refresh" /></button><button type="button" onClick={() => resetPermission('sale')} title="Xóa phân quyền sale"><i className="fa fa-trash" /></button><small>* Chọn nhóm sale sẽ tự động điền danh sách sale vào trong phân chọn ưu tiên sale phía dưới</small></div>
+                        <div className="ps-permission-row"><span>Sale</span><PushsaleMultiSelect label="Sale" enabled={productForm.data.available_sale} selectedIds={productForm.data.sale_user_ids} options={saleUsers} onEnabledChange={(enabled) => setPermissionEnabled('sale', enabled)} onChange={(ids) => setPermissionUsers('sale', ids)} /><small>* Cấu hình các Sale được chia số nếu số về từ nguồn dữ liệu có cấu hình sản phẩm hiện tại.</small></div>
+                        <div className="ps-permission-row"><span>Chọn nhanh CSKH từ<br />Nhóm CSKH</span><PushsaleSelect searchable options={careTeams} value={productForm.data.care_team_ids?.[0] ?? ''} placeholder="--Chọn nhóm CSKH--" onChange={(value) => setPermissionTeams('care', value ? [Number(value)] : [], careTeams)} /><button type="button" onClick={() => refillPermissionFromTeam('care', careTeams)} title="Nạp lại danh sách CSKH theo nhóm"><i className="fa fa-refresh" /></button><button type="button" onClick={() => resetPermission('care')} title="Xóa phân quyền CSKH"><i className="fa fa-trash" /></button><small>* Chọn nhóm cskh sẽ tự động điền danh sách cskh vào trong phân chọn ưu tiên cskh phía dưới</small></div>
+                        <div className="ps-permission-row"><span>CSKH</span><PushsaleMultiSelect label="CSKH" enabled={productForm.data.available_care} selectedIds={productForm.data.care_user_ids} options={careUsers} onEnabledChange={(enabled) => setPermissionEnabled('care', enabled)} onChange={(ids) => setPermissionUsers('care', ids)} /><small>* Cấu hình các CSKH được chia số nếu số về từ nguồn dữ liệu có cấu hình sản phẩm hiện tại.</small></div>
                     </div>
                     {Object.keys(productForm.errors).length > 0 && <div className="alert alert-danger">{Object.values(productForm.errors).join(' · ')}</div>}
                     <button className="btn btn-primary ps-save-button" disabled={productForm.processing}><i className="fa fa-save" /> Lưu</button>

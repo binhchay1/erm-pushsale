@@ -1,0 +1,273 @@
+/* V98: Warehouse 5.3.x exact Pushsale-like flow, scoped to avoid overriding reports/dashboard pages. */
+.pushsale-page[data-page-code^="5.3"] {
+    --ps-blue: #3c8dbc;
+    --ps-blue-dark: #2f79ad;
+    --ps-line: #d2d6de;
+    --ps-row-alt: #eeeeee;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+.pushsale-page[data-page-code^="5.3"] .pushsale-live-data-summary {
+    margin: 0 10px 8px;
+}
+
+.pushsale-page[data-page-code^="5.3"] .pushsale-template-fragment,
+.pushsale-page[data-page-code^="5.3"] .pushsale-template-inner,
+.pushsale-page[data-page-code^="5.3"] .content-wrapper {
+    background: #fff !important;
+    min-height: calc(100vh - 50px);
+    overflow: visible !important;
+}
+
+.pushsale-page[data-page-code^="5.3"] .m-header-wrap {
+    background: #fff;
+    border-bottom: 1px solid var(--ps-line);
+    margin: 0 0 12px;
+    min-height: 50px;
+}
+
+.pushsale-page[data-page-code^="5.3"] .m-header {
+    align-items: center;
+    background: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    min-height: 50px;
+    padding: 10px 14px;
+    position: relative !important;
+    top: auto !important;
+    z-index: 2;
+}
+
+.pushsale-page[data-page-code^="5.3"] .m-header .text,
+.pushsale-page[data-page-code^="5.3"] [id$="lblModuleTitle"] {
+    color: #111;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 30px;
+}
+
+.pushsale-page[data-page-code^="5.3"] .box,
+.pushsale-page[data-page-code^="5.3"] .box-body {
+    background: #fff;
+    border: 0;
+    box-shadow: none;
+    margin: 0;
+    padding: 10px 14px;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .box-body[style*="max-width"] {
+    display: block !important;
+    max-width: none !important;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.pushsale-page[data-page-code^="5.3"] .row {
+    margin-left: -7px;
+    margin-right: -7px;
+}
+
+.pushsale-page[data-page-code^="5.3"] [class*="col-"] {
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+.pushsale-page[data-page-code^="5.3"] .form-group {
+    margin-bottom: 8px;
+}
+
+.pushsale-page[data-page-code^="5.3"] .h-label {
+    color: #111;
+    display: inline-block;
+    font-weight: 700;
+    min-height: 30px;
+    line-height: 30px;
+}
+
+.pushsale-page[data-page-code^="5.3"] .form-control,
+.pushsale-page[data-page-code^="5.3"] .pushsale-native-select,
+.pushsale-page[data-page-code^="5.3"] .pushsale-native-input,
+.pushsale-page[data-page-code^="5.3"] .ps-ddl {
+    border: 1px solid #cfd8e3 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 13px !important;
+    height: 32px;
+    line-height: 30px;
+    min-height: 32px;
+    width: 100%;
+}
+
+.pushsale-page[data-page-code^="5.3"] .ps-ddl {
+    align-items: center;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    position: relative;
+}
+
+.pushsale-page[data-page-code^="5.3"] .ps-ddl-display-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    padding: 0 28px 0 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pushsale-page[data-page-code^="5.3"] .ps-ddl-arow {
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 28px;
+}
+
+.pushsale-page[data-page-code^="5.3"] .ps-ddl-search-area:not(.hidden) {
+    background: #fff;
+    border: 1px solid #cfd8e3;
+    box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    left: -1px;
+    max-height: 260px;
+    overflow-y: auto;
+    position: absolute;
+    right: -1px;
+    top: 31px;
+    z-index: 40;
+}
+
+.pushsale-page[data-page-code^="5.3"] .pushsale-ddl-result {
+    background: #fff;
+    border: 0;
+    display: block;
+    padding: 7px 10px;
+    text-align: left;
+    width: 100%;
+}
+
+.pushsale-page[data-page-code^="5.3"] .pushsale-ddl-result:hover {
+    background: #e8f3fc;
+}
+
+.pushsale-page[data-page-code^="5.3"] .btn,
+.pushsale-page[data-page-code^="5.3"] .btn-icon,
+.pushsale-page[data-page-code^="5.3"] a[role="button"] {
+    border-radius: 0 !important;
+    font-size: 13px;
+    line-height: 20px;
+    min-height: 30px;
+}
+
+.pushsale-page[data-page-code^="5.3"] .btn-primary,
+.pushsale-page[data-page-code^="5.3"] .btn-icon,
+.pushsale-page[data-page-code^="5.3"] a[id*="btnSearch"],
+.pushsale-page[data-page-code^="5.3"] a[id*="btnXuatExcel"],
+.pushsale-page[data-page-code^="5.3"] a[id*="LinkButton1"] {
+    background: var(--ps-blue) !important;
+    border-color: var(--ps-blue-dark) !important;
+    color: #fff !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+}
+
+.pushsale-page[data-page-code^="5.3"] a[id*="btnXuatExcel"],
+.pushsale-page[data-page-code^="5.3"] a[id*="LinkButton1"] {
+    text-decoration: none !important;
+}
+
+.pushsale-page[data-page-code^="5.3"] .dragscroll1,
+.pushsale-page[data-page-code^="5.3"] .tableFixHead,
+.pushsale-page[data-page-code^="5.3"] .table_sale {
+    border: 0;
+    height: auto !important;
+    max-height: calc(100vh - 255px);
+    min-height: 220px;
+    overflow: auto !important;
+    width: 100%;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .dragscroll1,
+.pushsale-page[data-page-code="5.3.1"] .tableFixHead {
+    max-height: 420px;
+    min-height: 160px;
+}
+
+.pushsale-page[data-page-code^="5.3"] table.pushsale-data-table {
+    border-collapse: collapse !important;
+    margin-bottom: 0; table-layout: auto;
+    width: 100%;
+}
+
+.pushsale-page[data-page-code^="5.3"] table.pushsale-data-table thead th {
+    background: #3c8dbc !important;
+    border: 1px solid #337ab7 !important;
+    color: #fff !important;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+    padding: 8px 7px;
+    position: sticky;
+    text-align: center;
+    top: 0;
+    vertical-align: middle;
+    z-index: 3;
+}
+
+.pushsale-page[data-page-code^="5.3"] table.pushsale-data-table tbody td {
+    border: 1px solid #ddd !important;
+    color: #111;
+    font-size: 13px;
+    line-height: 1.35;
+    padding: 7px 8px;
+    vertical-align: middle;
+}
+
+.pushsale-page[data-page-code^="5.3"] table.pushsale-data-table tbody tr:nth-child(even) td {
+    background: var(--ps-row-alt);
+}
+
+.pushsale-page[data-page-code^="5.3"] .pushsale-empty-cell {
+    height: 64px;
+    text-align: center;
+}
+
+.pushsale-page[data-page-code^="5.3"] .pagination,
+.pushsale-page[data-page-code^="5.3"] [data-pushsale-pagination-anchor] {
+    margin: 8px 0 0;
+}
+
+.pushsale-page[data-page-code^="5.3"] .notice {
+    color: #555;
+    font-style: italic;
+    line-height: 1.55;
+}
+
+.pushsale-page[data-page-code^="5.3"] .pushsale-row-actions {
+    justify-content: center;
+}
+
+.pushsale-page[data-page-code^="5.3"] .pushsale-icon-action {
+    background: transparent;
+    border: 0;
+    color: #188bdc;
+    min-height: auto;
+    padding: 0 4px;
+}
+
+@media (max-width: 991px) {
+    .pushsale-page[data-page-code^="5.3"] .m-header {
+        display: block;
+    }
+
+    .pushsale-page[data-page-code^="5.3"] .dragscroll1,
+    .pushsale-page[data-page-code^="5.3"] .tableFixHead {
+        max-height: none;
+    }
+}

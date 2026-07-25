@@ -41,12 +41,29 @@ export default function AppLayout({ children }) {
     // đăng nhập, nạp vendor CSS trước khi render để không xuất hiện HTML thô rồi mới F5.
     useLayoutEffect(() => {
         let active = true;
-        document.body.classList.remove('public-app-body');
-        document.body.classList.add('pushsale-app-body', 'hold-transition', 'skin-blue-light', 'sidebar-mini', 'fixed');
+        const applyPushsaleShell = () => {
+            document.body.classList.remove('public-app-body');
+            document.body.classList.add('pushsale-app-body', 'hold-transition', 'skin-blue-light', 'sidebar-mini', 'fixed');
+        };
+
+        applyPushsaleShell();
         ensurePushsaleStyles().finally(() => active && setStylesReady(true));
+
+        const restoreFromBrowserBack = (event) => {
+            // Chrome/Safari can restore an Inertia page from BFCache with body classes or
+            // runtime CSS links detached. Re-apply the shell instead of leaving a blank page
+            // until the user presses F5.
+            if (!event.persisted) return;
+            applyPushsaleShell();
+            setStylesReady(false);
+            ensurePushsaleStyles().finally(() => active && setStylesReady(true));
+        };
+
+        window.addEventListener('pageshow', restoreFromBrowserBack);
 
         return () => {
             active = false;
+            window.removeEventListener('pageshow', restoreFromBrowserBack);
             document.body.classList.remove('pushsale-app-body', 'hold-transition', 'skin-blue-light', 'sidebar-mini', 'fixed');
         };
     }, []);

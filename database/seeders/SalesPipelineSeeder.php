@@ -172,9 +172,23 @@ class SalesPipelineSeeder extends Seeder
         string $phone,
         Carbon $arrivedAt,
     ): Order {
-        $product = $campaign->product;
+        $product = $campaign->product ?: Product::query()
+            ->where('type', 'product')
+            ->where('is_active', true)
+            ->orderBy('id')
+            ->first();
+
+        if (! $product) {
+            throw new \RuntimeException('SalesPipelineSeeder cần ít nhất 1 sản phẩm đang kinh doanh để tạo đơn demo.');
+        }
+
+        if (! $campaign->product_id) {
+            $campaign->forceFill(['product_id' => $product->id])->save();
+            $campaign->setRelation('product', $product);
+        }
+
         $qty = 1 + ($leadIndex % 3 === 0 ? 1 : 0);
-        $unitPrice = (int) $product->unit_price;
+        $unitPrice = max(1, (int) ($product->unit_price ?? 0));
         $subtotal = $qty * $unitPrice;
         $discount = $leadIndex % 5 === 0 ? (int) round($subtotal * 0.05) : 0;
         $shipFee = 30_000;
@@ -264,7 +278,7 @@ class SalesPipelineSeeder extends Seeder
         }
 
         $quantity = 1 + ($seq % 5 === 0 ? 1 : 0);
-        $unitPrice = (int) $upsellProduct->unit_price;
+        $unitPrice = max(1, (int) ($upsellProduct->unit_price ?? 0));
         $lineTotal = $quantity * $unitPrice;
 
         OrderItem::query()->create([

@@ -81,6 +81,14 @@ class DataDistributionService
             throw ValidationException::withMessages(['sale_user_ids' => 'Chọn ít nhất một Sale nhận data.']);
         }
 
+        $allowedSaleIds = $this->allowedSaleIdsForProducts($productAllocations->pluck('product_id')->map(fn ($id) => (int) $id)->all());
+        if (is_array($allowedSaleIds)) {
+            $saleIds = $saleIds->intersect($allowedSaleIds)->values();
+            if ($saleIds->isEmpty()) {
+                throw ValidationException::withMessages(['sale_user_ids' => 'Các Sale đã chọn chưa được phân quyền nhận data của sản phẩm này. Vào Quản lý sản phẩm → Phân quyền để cấu hình lại.']);
+            }
+        }
+
         $flags = [
             'delete_operation_history' => (bool) ($payload['delete_operation_history'] ?? false),
             'delete_internal_messages' => (bool) ($payload['delete_internal_messages'] ?? false),
@@ -157,6 +165,44 @@ class DataDistributionService
             'date_from' => Arr::get($filters, 'date_from') ?: now()->subMonth()->toDateString(),
             'date_to' => Arr::get($filters, 'date_to') ?: now()->toDateString(),
         ];
+    }
+
+
+    /**
+     * Product permission contract:
+     * - sale_user_ids = [] and available_sale = true: all sales may receive data.
+     * - sale_user_ids has values: only those sales may receive data.
+     * - available_sale = false: product is blocked from sale distribution.
+     *
+     * @param list<int> $productIds
+     * @return list<int>|null null means unrestricted
+     */
+    private function allowedSaleIdsForProducts(array $productIds): ?array
+    {
+        $productIds = array_values(array_unique(array_filter(array_map('intval', $productIds))));
+        if ($productIds === [] || ! Schema::hasColumn('products', 'sale_user_ids')) {
+            return null;
+        }
+
+        $products = Product::query()
+            ->whereIn('id', $productIds)
+            ->get(['id', 'available_sale', 'sale_user_ids']);
+
+        $allowed = null;
+        foreach ($products as $product) {
+            if (! (bool) $product->available_sale) {
+                return [];
+            }
+
+            $ids = is_array($product->sale_user_ids) ? array_values(array_unique(array_filter(array_map('intval', $product->sale_user_ids)))) : [];
+            if ($ids === []) {
+                continue;
+            }
+
+            $allowed = $allowed === null ? $ids : array_values(array_intersect($allowed, $ids));
+        }
+
+        return $allowed;
     }
 
     /** @return list<array<string, mixed>> */

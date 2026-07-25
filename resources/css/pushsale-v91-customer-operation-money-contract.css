@@ -1,0 +1,240 @@
+/* V91 — Customer profile header + shared order product/money columns.
+   One visual contract for Hồ sơ khách hàng, Sale tác nghiệp, Kho tác nghiệp,
+   Kế toán đối soát, plus the legacy operation order table. */
+
+html body.pushsale-app-body .ps-customer-profile-page {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    padding-bottom: 18px !important;
+    box-sizing: border-box !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-titlebar,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-panel {
+    margin-left: -14px !important;
+    margin-right: -14px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    width: calc(100% + 28px) !important;
+    box-sizing: border-box !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-titlebar {
+    display: grid !important;
+    grid-template-columns: 280px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 16px !important;
+    min-height: 58px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 1px solid #cfd8e3 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-titlebar h1 {
+    margin: 0 !important;
+    font-size: 18px !important;
+    line-height: 34px !important;
+    font-weight: 700 !important;
+    color: #000 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-title-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-title-actions .ps-header-search {
+    width: min(520px, 100%) !important;
+    min-width: 260px !important;
+    height: 34px !important;
+    flex: 0 1 520px !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-title-actions .btn {
+    height: 34px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-panel {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid #d7dce2 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-table-scroll {
+    width: 100% !important;
+    margin: 10px 0 0 !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+@media (max-width: 1100px) {
+    html body.pushsale-app-body .ps-customer-profile-page .ps-customer-titlebar {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+
+    html body.pushsale-app-body .ps-customer-profile-page .ps-customer-title-actions {
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+    }
+
+    html body.pushsale-app-body .ps-customer-profile-page .ps-customer-title-actions .ps-header-search {
+        flex-basis: 360px !important;
+    }
+}
+
+/* Shared product / money cells. The same component is reused across profile,
+   sale, warehouse and accounting operation pages, so selector is intentionally
+   class-scoped and does not target raw tables globally. */
+html body.pushsale-app-body .ps-order-products-cell,
+html body.pushsale-app-body .c-products-body,
+html body.pushsale-app-body .ps-col-products:has(.ps-order-products-breakdown) {
+    padding: 4px 6px !important;
+    vertical-align: top !important;
+}
+
+html body.pushsale-app-body .ps-order-money-cell,
+html body.pushsale-app-body .c-money-body,
+html body.pushsale-app-body .ps-col-money:has(.ps-order-money-breakdown) {
+    padding: 4px 6px !important;
+    vertical-align: top !important;
+}
+
+html body.pushsale-app-body .ps-order-products-breakdown,
+html body.pushsale-app-body .ps-order-money-breakdown {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+}
+
+html body.pushsale-app-body .ps-order-products-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 42px minmax(72px, 96px) !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-height: 27px !important;
+    padding: 3px 0 !important;
+    border-bottom: 1px dashed #bec9d5 !important;
+    color: #000 !important;
+}
+
+html body.pushsale-app-body .ps-order-products-row:last-child {
+    border-bottom: 0 !important;
+}
+
+html body.pushsale-app-body .ps-order-products-row.has-upsale-divider {
+    margin-top: 3px !important;
+    padding-top: 7px !important;
+    border-top: 1px dashed #98abc0 !important;
+}
+
+html body.pushsale-app-body .ps-order-product-name {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    gap: 5px !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+    font-weight: 400 !important;
+}
+
+html body.pushsale-app-body .ps-order-products-row.is-upsale-line .ps-order-product-name {
+    color: #0071ce !important;
+    font-weight: 600 !important;
+}
+
+html body.pushsale-app-body .ps-order-product-qty,
+html body.pushsale-app-body .ps-order-product-price {
+    white-space: nowrap !important;
+    color: #000 !important;
+}
+
+html body.pushsale-app-body .ps-order-product-qty {
+    text-align: center !important;
+}
+
+html body.pushsale-app-body .ps-order-product-price {
+    text-align: right !important;
+}
+
+html body.pushsale-app-body .ps-order-upsale-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    border-radius: 50% !important;
+    background: #0d8bf2 !important;
+    color: #fff !important;
+    font-size: 9px !important;
+    line-height: 16px !important;
+}
+
+html body.pushsale-app-body .ps-order-upsale-icon .fa {
+    font-size: 9px !important;
+    line-height: 1 !important;
+}
+
+html body.pushsale-app-body .ps-order-money-breakdown {
+    display: grid !important;
+    grid-template-rows: repeat(5, minmax(24px, auto)) !important;
+    gap: 0 !important;
+    text-align: right !important;
+}
+
+html body.pushsale-app-body .ps-order-money-breakdown > div,
+html body.pushsale-app-body .ps-order-money-breakdown > strong {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    min-height: 24px !important;
+    padding: 2px 0 !important;
+    border-bottom: 1px dashed #d7dce2 !important;
+    white-space: nowrap !important;
+    font-weight: 400 !important;
+    color: #000 !important;
+}
+
+html body.pushsale-app-body .ps-order-money-breakdown > strong {
+    border-bottom: 0 !important;
+    font-weight: 700 !important;
+}
+
+/* Decommission old per-page upsell styles once the shared component is used. */
+html body.pushsale-app-body .ps-upsale-line-icon,
+html body.pushsale-app-body .ps-wh-upsell-tag,
+html body.pushsale-app-body .ps-acc-upsell-tag {
+    display: none !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-order-products-breakdown,
+html body.pushsale-app-body .ps-wh-table .ps-order-products-breakdown,
+html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-breakdown,
+html body.pushsale-app-body .ps-customer-profile-table .ps-order-products-breakdown {
+    min-width: 220px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-wh-table .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-acc-operation-table .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-customer-profile-table .ps-order-money-breakdown {
+    min-width: 110px !important;
+}

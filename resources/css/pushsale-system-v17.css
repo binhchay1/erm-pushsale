@@ -1,0 +1,627 @@
+/*
+ * ERM Pushsale UI contract V17.
+ * This is the only final authority for the internal shell, template geometry,
+ * action cells and modal viewport behavior. Legacy V12/V13 patch files are no
+ * longer loaded.
+ */
+@layer components {
+  /* Chuẩn màu header bảng dùng chung toàn hệ thống. Bảng đặc biệt có thể opt-out bằng data-table-theme="neutral". */
+  body.pushsale-app-body table:not([data-table-theme='neutral']) > thead > tr > th {
+    background-color: #3782dc !important;
+    border-color: #2f72c4 !important;
+    color: #ffffff !important;
+  }
+
+  body.pushsale-app-body table:not([data-table-theme='neutral']) > thead > tr > th svg {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+}
+
+/* Company information page — scoped so it does not affect legacy report templates. */
+.pushsale-company-profile {
+    min-height: calc(100vh - 42px);
+    background: #f5f7fa;
+    padding: 14px;
+}
+.pushsale-page-titlebar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    border-top: 3px solid #1684d6;
+    border-bottom: 1px solid #d9dee5;
+    background: #fff;
+    padding: 13px 15px;
+}
+.pushsale-page-titlebar h1 {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: #1d2733;
+}
+.pushsale-page-titlebar p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #687383;
+}
+.pushsale-company-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px 16px;
+    font-size: 12px;
+    color: #657180;
+}
+.pushsale-company-card {
+    margin-top: 12px;
+    border-radius: 0;
+    box-shadow: none;
+}
+@media (max-width: 767px) {
+    .pushsale-page-titlebar { flex-direction: column; }
+    .pushsale-company-meta { justify-content: flex-start; }
+}
+
+/* Dữ liệu tổng hợp thật của từng màn Pushsale. Không dùng số chụp trong template. */
+.pushsale-live-data-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    margin: 0 0 10px;
+    border: 1px solid #d5dce5;
+    background: #d5dce5;
+}
+.pushsale-live-data-summary-item {
+    min-width: 170px;
+    flex: 1 1 170px;
+    padding: 8px 12px;
+    background: #fff;
+}
+.pushsale-live-data-summary-item span {
+    display: block;
+    color: #687789;
+    font-size: 12px;
+    font-weight: 400;
+}
+.pushsale-live-data-summary-item strong {
+    display: block;
+    margin-top: 2px;
+    color: #172b4d;
+    font-size: 16px;
+    font-weight: 600;
+}
+.pushsale-dialog-live-records {
+    margin-bottom: 12px;
+    border: 1px solid #d8dee6;
+    background: #fff;
+}
+.pushsale-dialog-live-records-title {
+    padding: 7px 10px;
+    border-bottom: 1px solid #d8dee6;
+    background: #f5f7fa;
+    font-weight: 600;
+}
+.pushsale-dialog-live-records .table { margin-bottom: 0; }
+.pushsale-live-trend-chart { min-height: 220px; padding: 8px 12px; background: #fff; }
+.pushsale-live-trend-title { margin-bottom: 4px; font-weight: 600; color: #2f4054; }
+.pushsale-live-trend-chart svg { display: block; width: 100%; height: 190px; }
+.pushsale-chart-value { font-size: 10px; fill: #425466; }
+.pushsale-chart-empty { display: flex; min-height: 180px; align-items: center; justify-content: center; color: #8996a5; }
+
+
+
+
+
+/* --------------------------------------------------------------------------
+   Global internal typography and coordinate system
+   -------------------------------------------------------------------------- */
+body.pushsale-app-body,
+body.pushsale-app-body button,
+body.pushsale-app-body input,
+body.pushsale-app-body select,
+body.pushsale-app-body textarea,
+body.pushsale-app-body table,
+body.pushsale-app-body .main-header,
+body.pushsale-app-body .main-sidebar,
+body.pushsale-app-body .sidebar-menu,
+body.pushsale-app-body .content-wrapper {
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+body.pushsale-app-body .fa,
+body.pushsale-app-body .fa::before {
+    font-family: FontAwesome !important;
+}
+
+body.pushsale-app-body .content-wrapper {
+    top: var(--ps-header-height, 50px) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: var(--ps-sidebar-width, 230px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: auto !important;
+    background: #fff !important;
+}
+body.pushsale-app-body.sidebar-collapse .content-wrapper {
+    left: var(--ps-sidebar-collapsed-width, 50px) !important;
+}
+body.pushsale-app-body .content-inner {
+    position: relative !important;
+    width: 100% !important;
+    min-width: 1100px !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 0 24px !important;
+    background: #fff !important;
+}
+body.pushsale-app-body .content-inner > :first-child,
+body.pushsale-app-body .content-inner > :first-child > :first-child,
+body.pushsale-app-body .pushsale-template-host,
+body.pushsale-app-body .pushsale-template-fragment,
+body.pushsale-app-body .pushsale-page,
+body.pushsale-app-body .ps-adminlte-page,
+body.pushsale-app-body .psm-page,
+body.pushsale-app-body .psr-page,
+body.pushsale-app-body .ps-warehouse-operations-page {
+    margin-top: 0 !important;
+}
+body.pushsale-app-body .content-header:empty,
+body.pushsale-app-body .pushsale-template-fragment > .content-header:empty,
+body.pushsale-app-body .pushsale-template-fragment .content-header[aria-hidden='true'],
+body.pushsale-app-body .pushsale-template-empty-spacer {
+    display: none !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Deterministic 12-column geometry for captured Pushsale filter/header rows.
+   Bootstrap float widths are intentionally disabled only on rows marked by
+   TemplateHost, so table/action layouts are not affected.
+   -------------------------------------------------------------------------- */
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row {
+    display: grid !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    column-gap: 14px !important;
+    row-gap: 8px !important;
+}
+body.pushsale-app-body .pushsale-template-fragment .box-body > .pushsale-filter-row {
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+}
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > [class*='col-'],
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > [class*='col-'] {
+    float: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-1,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-1 { grid-column: span 1; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-2,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-2 { grid-column: span 2; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-3,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-3 { grid-column: span 3; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-4,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-4 { grid-column: span 4; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-5,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-5 { grid-column: span 5; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-6,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-6 { grid-column: span 6; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-7,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-7 { grid-column: span 7; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-8,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-8 { grid-column: span 8; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-9,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-9 { grid-column: span 9; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-10,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-10 { grid-column: span 10; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-11,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-11 { grid-column: span 11; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .col-sm-12,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .col-sm-12 { grid-column: span 12; }
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row > .hidden,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row > .hidden,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-empty-column {
+    display: none !important;
+}
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row .form-group,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row .form-group {
+    margin-bottom: 0 !important;
+}
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row select,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row input.form-control,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-filter-row .ps-ddl,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row input.form-control,
+body.pushsale-app-body .pushsale-template-fragment .pushsale-header-row select {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Action cells: retain the table grid, remove accidental nested boxes.
+   -------------------------------------------------------------------------- */
+body.pushsale-app-body .pushsale-row-actions {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .pushsale-row-actions::before,
+body.pushsale-app-body .pushsale-row-actions::after,
+body.pushsale-app-body .pushsale-row-actions > *::before,
+body.pushsale-app-body .pushsale-row-actions > *::after {
+    box-shadow: none !important;
+}
+body.pushsale-app-body .pushsale-row-actions > * {
+    margin: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .pushsale-icon-action,
+body.pushsale-app-body a.pushsale-icon-action,
+body.pushsale-app-body button.pushsale-icon-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    color: #0b84f3 !important;
+    box-shadow: none !important;
+    line-height: 22px !important;
+}
+body.pushsale-app-body .pushsale-icon-action:hover,
+body.pushsale-app-body .pushsale-icon-action:focus {
+    border: 0 !important;
+    background: rgba(11, 132, 243, .09) !important;
+    color: #086bbf !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .pushsale-icon-action.is-danger { color: #e64b45 !important; }
+body.pushsale-app-body .pushsale-grid tbody td:has(> .pushsale-row-actions),
+body.pushsale-app-body table tbody td:has(> .pushsale-row-actions) {
+    background-clip: padding-box !important;
+    padding-right: 5px !important;
+    padding-left: 5px !important;
+    text-align: center !important;
+}
+
+/* --------------------------------------------------------------------------
+   One modal system. Header/footer never scroll; only the body scrolls.
+   Width is supplied through --ps-modal-width and always stays in viewport.
+   -------------------------------------------------------------------------- */
+body.pushsale-app-body [data-slot='dialog-overlay'] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 12000 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    background: rgba(0, 0, 0, .48) !important;
+}
+body.pushsale-app-body [data-slot='dialog-content']:not(.ps-modal-surface) {
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+}
+body.pushsale-app-body [data-slot='dialog-content'].ps-modal-surface {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    z-index: 12010 !important;
+    display: flex !important;
+    width: min(var(--ps-modal-width, 800px), calc(100vw - 24px)) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 24px) !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    transform: translate(-50%, -50%) !important;
+    border: 1px solid rgba(0, 0, 0, .24) !important;
+    border-radius: 4px !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .38) !important;
+}
+body.pushsale-app-body .ps-modal-header {
+    flex: 0 0 auto !important;
+    min-height: 46px !important;
+    padding: 13px 42px 10px 15px !important;
+    border-bottom: 1px solid #e5e5e5 !important;
+    background: #fff !important;
+}
+body.pushsale-app-body .ps-modal-header [data-slot='dialog-title'] {
+    margin: 0 !important;
+    color: #111 !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    line-height: 20px !important;
+}
+body.pushsale-app-body .ps-modal-header [data-slot='dialog-description'] {
+    margin-top: 3px !important;
+    color: #777 !important;
+    font-size: 11px !important;
+}
+body.pushsale-app-body .ps-modal-body {
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+    padding: 14px 15px !important;
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+}
+body.pushsale-app-body .ps-modal-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    flex: 0 0 auto !important;
+    min-height: 52px !important;
+    padding: 9px 15px !important;
+    border-top: 1px solid #e5e5e5 !important;
+    background: #fff !important;
+    text-align: right !important;
+}
+body.pushsale-app-body .ps-modal-footer:empty { display: none !important; }
+body.pushsale-app-body .ps-modal-surface .pushsale-dialog-close {
+    position: absolute !important;
+    top: 8px !important;
+    right: 9px !important;
+    z-index: 2 !important;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #777 !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .ps-modal-surface .pushsale-dialog-close:hover {
+    background: #f1f1f1 !important;
+    color: #333 !important;
+}
+
+/* Legacy shells still receive the same viewport contract while they are
+   progressively migrated to PushsaleModal. */
+body.pushsale-app-body .pushsale-modal-layer,
+body.pushsale-app-body .psm-modal-layer,
+body.pushsale-app-body .pslc-modal-layer,
+body.pushsale-app-body .ps-modal-backdrop,
+body.pushsale-app-body .modal-note-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 12000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    overflow: auto !important;
+}
+body.pushsale-app-body .pushsale-modal-dialog,
+body.pushsale-app-body .psm-modal,
+body.pushsale-app-body .pslc-modal,
+body.pushsale-app-body .ps-source-modal,
+body.pushsale-app-body .modal-note-panel {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    display: flex !important;
+    width: min(var(--ps-modal-width, 1120px), calc(100vw - 24px)) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 24px) !important;
+    flex-direction: column !important;
+    margin: auto !important;
+    overflow: hidden !important;
+    transform: none !important;
+}
+body.pushsale-app-body .pushsale-modal-body,
+body.pushsale-app-body .psm-modal-body,
+body.pushsale-app-body .pslc-modal-body,
+body.pushsale-app-body .ps-source-modal-body,
+body.pushsale-app-body .modal-note-body {
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: auto !important;
+}
+
+/* Customer dialogs now use the shared shell; retain only content-specific rules. */
+body.pushsale-app-body .ps-customer-modal {
+    font-size: 12px !important;
+}
+body.pushsale-app-body .ps-customer-modal-header,
+body.pushsale-app-body .ps-customer-modal-body,
+body.pushsale-app-body .ps-customer-modal-footer {
+    display: contents !important;
+}
+body.pushsale-app-body .ps-history-table-wrap {
+    width: 100% !important;
+    max-height: none !important;
+    overflow: auto !important;
+}
+body.pushsale-app-body .ps-history-table {
+    width: 100% !important;
+    min-width: 1000px !important;
+    margin-bottom: 0 !important;
+}
+
+/* Dynamic login-user selector replacing captured Pushsale sample accounts. */
+body.pushsale-app-body .pushsale-login-user-summary {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 6px 18px !important;
+    padding: 8px 6px 12px !important;
+}
+body.pushsale-app-body .pushsale-login-user-chip {
+    display: flex !important;
+    min-width: 0 !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 4px 5px !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: #222 !important;
+    text-align: left !important;
+}
+body.pushsale-app-body .pushsale-login-user-chip:hover,
+body.pushsale-app-body .pushsale-login-user-chip.is-active {
+    border-color: #f3a847 !important;
+    background: #fffaf1 !important;
+}
+body.pushsale-app-body .pushsale-login-user-chip .flag {
+    width: 20px !important;
+    height: 14px !important;
+    flex: 0 0 20px !important;
+    background: #ff4b16 !important;
+}
+body.pushsale-app-body .pushsale-login-user-chip .label {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+    color: #222 !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .pushsale-login-user-chip .count {
+    flex: 0 0 auto !important;
+    color: #ff7a00 !important;
+    font-size: 10px !important;
+}
+@media (max-width: 1380px) {
+    body.pushsale-app-body .pushsale-login-user-summary { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+
+/* Radix dialogs that already provide DialogHeader/DialogFooter also share the
+   same surface contract. Their first content section is the only scroll area. */
+body.pushsale-app-body .ps-modal-surface > [data-slot='dialog-header'] {
+    flex: 0 0 auto !important;
+}
+body.pushsale-app-body .ps-modal-surface > [data-slot='dialog-footer'] {
+    flex: 0 0 auto !important;
+}
+body.pushsale-app-body .ps-modal-surface > :not([data-slot='dialog-header']):not([data-slot='dialog-footer']):not(.ps-modal-header):not(.ps-modal-footer):not(.pushsale-dialog-close) {
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+}
+
+/* Dynamic ranking cards. Captured employee names/revenue are removed and this
+   section is rendered from the same backend rows as the detail table. */
+body.pushsale-app-body .pushsale-ranking-cards {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(180px, 1fr)) !important;
+    gap: 9px !important;
+    width: 100% !important;
+    padding: 10px 0 4px !important;
+}
+body.pushsale-app-body .pushsale-ranking-card {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    min-height: 66px !important;
+    gap: 9px !important;
+    padding: 8px 10px 8px 42px !important;
+    border: 1px solid #d7dde5 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+body.pushsale-app-body .pushsale-ranking-card.rank-1 { border-top: 3px solid #f0b429 !important; }
+body.pushsale-app-body .pushsale-ranking-card.rank-2 { border-top: 3px solid #9aa5b1 !important; }
+body.pushsale-app-body .pushsale-ranking-card.rank-3 { border-top: 3px solid #c7834c !important; }
+body.pushsale-app-body .pushsale-ranking-position {
+    position: absolute !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    display: flex !important;
+    width: 32px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #eef4fb !important;
+    color: #2d6ca8 !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+}
+body.pushsale-app-body .pushsale-ranking-avatar {
+    display: flex !important;
+    width: 38px !important;
+    height: 38px !important;
+    flex: 0 0 38px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    background: #3782dc !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+}
+body.pushsale-app-body .pushsale-ranking-copy {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+}
+body.pushsale-app-body .pushsale-ranking-copy strong,
+body.pushsale-app-body .pushsale-ranking-copy span {
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+body.pushsale-app-body .pushsale-ranking-copy strong {
+    color: #222 !important;
+    font-size: 12px !important;
+}
+body.pushsale-app-body .pushsale-ranking-copy span {
+    margin-top: 4px !important;
+    color: #e46d00 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+body.pushsale-app-body .pushsale-ranking-empty {
+    padding: 28px 12px !important;
+    border: 1px dashed #ccd4df !important;
+    color: #7a8796 !important;
+    text-align: center !important;
+}
+@media (max-width: 1450px) {
+    body.pushsale-app-body .pushsale-ranking-cards { grid-template-columns: repeat(4, minmax(180px, 1fr)) !important; }
+}

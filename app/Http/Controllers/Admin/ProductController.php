@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
+use App\Enums\TeamType;
 use App\Models\Product;
+use App\Models\Team;
+use App\Models\User;
 use App\Models\Pushsale\ProductAttribute;
 use App\Models\Pushsale\ProductAttributeValue;
 use App\Models\Pushsale\ProductCategory;
@@ -153,6 +156,12 @@ class ProductController extends Controller
             'available_marketing' => (bool) $product->available_marketing,
             'available_sale' => (bool) $product->available_sale,
             'available_care' => (bool) $product->available_care,
+            'marketing_team_ids' => $this->integerArray($product->marketing_team_ids),
+            'marketing_user_ids' => $this->integerArray($product->marketing_user_ids),
+            'sale_team_ids' => $this->integerArray($product->sale_team_ids),
+            'sale_user_ids' => $this->integerArray($product->sale_user_ids),
+            'care_team_ids' => $this->integerArray($product->care_team_ids),
+            'care_user_ids' => $this->integerArray($product->care_user_ids),
             'category_ids' => $product->categories->pluck('id')->map(fn ($id) => (int) $id)->all(),
             'attribute_value_ids' => $product->attributeValues->pluck('id')->map(fn ($id) => (int) $id)->all(),
             'category_names' => $product->categories->pluck('name')->implode(', '),
@@ -169,6 +178,7 @@ class ProductController extends Controller
             'attributes' => $attributeOptions,
             'attributeValues' => $this->productAttributeValueOptions($attributeOptions),
             'vatCodes' => Product::query()->whereNotNull('vat_code')->where('vat_code', '!=', '')->distinct()->orderBy('vat_code')->pluck('vat_code')->values(),
+            'permissionOptions' => $this->permissionOptions(),
             'activeMenuCode' => '1.3.1',
         ]);
     }
@@ -220,6 +230,7 @@ class ProductController extends Controller
         $categoryIds = $data['category_ids'] ?? [];
         $attributeValueIds = $data['attribute_value_ids'] ?? [];
         unset($data['category_ids'], $data['attribute_value_ids']);
+        $this->normalizePermissionAssignmentPayload($data);
         $data['is_active'] = (bool) ($data['is_active'] ?? true);
         $data['available_marketing'] = (bool) ($data['available_marketing'] ?? true);
         $data['available_sale'] = (bool) ($data['available_sale'] ?? true);
@@ -258,6 +269,12 @@ class ProductController extends Controller
                 'available_marketing' => (bool) $product->available_marketing,
                 'available_sale' => (bool) $product->available_sale,
                 'available_care' => (bool) $product->available_care,
+                'marketing_team_ids' => $this->integerArray($product->marketing_team_ids),
+                'marketing_user_ids' => $this->integerArray($product->marketing_user_ids),
+                'sale_team_ids' => $this->integerArray($product->sale_team_ids),
+                'sale_user_ids' => $this->integerArray($product->sale_user_ids),
+                'care_team_ids' => $this->integerArray($product->care_team_ids),
+                'care_user_ids' => $this->integerArray($product->care_user_ids),
                 'category_ids' => $product->categories->pluck('id')->map(fn ($id) => (int) $id)->all(),
                 'attribute_value_ids' => $product->attributeValues->pluck('id')->map(fn ($id) => (int) $id)->all(),
             ],
@@ -274,6 +291,7 @@ class ProductController extends Controller
         $categoryIds = $data['category_ids'] ?? [];
         $attributeValueIds = $data['attribute_value_ids'] ?? [];
         unset($data['category_ids'], $data['attribute_value_ids']);
+        $this->normalizePermissionAssignmentPayload($data);
 
         foreach (['is_active', 'available_marketing', 'available_sale', 'available_care'] as $flag) {
             if ($request->has($flag)) {
@@ -569,6 +587,153 @@ class ProductController extends Controller
             'name' => ['required', 'string', 'max:255', Rule::unique($table, 'name')->ignore($ignoreId)->where(fn ($query) => $query->where('company_id', $request->user()->company_id))],
             'is_active' => ['sometimes', 'boolean'],
         ]);
+    }
+
+
+    /** @return array<string, array<int, array<string, mixed>>> */
+    private function permissionOptions(): array
+    {
+        $teams = Team::query()
+            ->with(['users' => fn ($query) => $query->where('is_active', true)->orderBy('name')])
+            ->whereIn('type', [TeamType::Marketing->value, TeamType::Sale->value])
+            ->orderBy('type')
+            ->orderBy('name')
+            ->get(['id', 'name', 'type']);
+
+        $users = User::query()
+            ->with('team:id,name,type')
+            ->where('is_active', true)
+            ->whereIn('role', [User::ROLE_MARKETING, User::ROLE_SALES])
+            ->orderBy('role')
+            ->orderBy('team_id')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email', 'role', 'team_id']);
+
+        $teamOption = fn (Team $team): array => [
+            'value' => (int) $team->id,
+            'label' => $team->name,
+            'member_ids' => $team->users->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
+        ];
+
+        $userOption = fn (User $user): array => [
+            'value' => (int) $user->id,
+            'label' => $user->name,
+            'subLabel' => trim(($user->email ?? '').($user->team?->name ? ' · '.$user->team->name : '')),
+            'team_id' => $user->team_id ? (int) $user->team_id : null,
+        ];
+
+        $marketingTeams = $teams->filter(fn (Team $team): bool => $team->type === TeamType::Marketing)->map($teamOption)->values()->all();
+        $saleTeams = $teams->filter(fn (Team $team): bool => $team->type === TeamType::Sale)->map($teamOption)->values()->all();
+        $marketingUsers = $users->filter(fn (User $user): bool => $this->roleValue($user) === User::ROLE_MARKETING)->map($userOption)->values()->all();
+        $saleUsers = $users->filter(fn (User $user): bool => $this->roleValue($user) === User::ROLE_SALES)->map($userOption)->values()->all();
+
+        return [
+            'marketingTeams' => $marketingTeams,
+            'marketingUsers' => $marketingUsers,
+            'saleTeams' => $saleTeams,
+            'saleUsers' => $saleUsers,
+            // Hiện hệ thống chưa tách role CSKH độc lập; CSKH sau bán dùng cùng tập sale/team sale.
+            // Khi bổ sung role CSKH riêng, chỉ cần đổi nguồn dữ liệu ở đây, form và backend vẫn dùng care_*_ids.
+            'careTeams' => $saleTeams,
+            'careUsers' => array_map(fn (array $row): array => [
+                ...$row,
+                'subLabel' => trim((string) ($row['subLabel'] ?? '').' · CSKH sau bán'),
+            ], $saleUsers),
+        ];
+    }
+
+    private function roleValue(User $user): string
+    {
+        return $user->role instanceof \BackedEnum ? (string) $user->role->value : (string) $user->role;
+    }
+
+    /** @param array<string, mixed> $data */
+    private function normalizePermissionAssignmentPayload(array &$data): void
+    {
+        foreach ([
+            'marketing' => User::ROLE_MARKETING,
+            'sale' => User::ROLE_SALES,
+            // CSKH đang sử dụng nhân sự sale/care sau bán trong business hiện tại.
+            'care' => User::ROLE_SALES,
+        ] as $scope => $role) {
+            $teamKey = $scope.'_team_ids';
+            $userKey = $scope.'_user_ids';
+            $availableKey = 'available_'.$scope;
+
+            $teamIds = $this->validTeamIds($data[$teamKey] ?? [], $scope === 'marketing' ? TeamType::Marketing : TeamType::Sale);
+            $userIds = $this->validUserIds($data[$userKey] ?? [], $role, $teamIds);
+
+            $data[$teamKey] = $teamIds;
+            $data[$userKey] = $userIds;
+
+            if (array_key_exists($availableKey, $data)) {
+                $data[$availableKey] = (bool) $data[$availableKey];
+            }
+        }
+    }
+
+    /** @return list<int> */
+    private function validTeamIds(mixed $ids, TeamType $type): array
+    {
+        $ids = $this->integerArray($ids);
+        if ($ids === []) {
+            return [];
+        }
+
+        return Team::query()
+            ->whereIn('id', $ids)
+            ->where('type', $type->value)
+            ->orderByRaw('FIELD(id, '.implode(',', $ids).')')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    /** @param list<int> $teamIds @return list<int> */
+    private function validUserIds(mixed $ids, string $role, array $teamIds = []): array
+    {
+        $ids = $this->integerArray($ids);
+        if ($ids === []) {
+            return [];
+        }
+
+        $query = User::query()
+            ->whereIn('id', $ids)
+            ->where('role', $role)
+            ->where('is_active', true);
+
+        // Nếu đã chọn nhanh theo team, chỉ nhận nhân sự nằm trong team đó để tránh cấu hình chéo.
+        if ($teamIds !== []) {
+            $query->whereIn('team_id', $teamIds);
+        }
+
+        return $query
+            ->orderByRaw('FIELD(id, '.implode(',', $ids).')')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    /** @return list<int> */
+    private function integerArray(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            $value = json_last_error() === JSON_ERROR_NONE ? $decoded : [$value];
+        }
+
+        if (! is_array($value)) {
+            return [];
+        }
+
+        return collect($value)
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id): bool => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /** @return list<array{id: int, name: string}> */

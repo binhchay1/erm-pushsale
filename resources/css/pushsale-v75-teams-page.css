@@ -1,0 +1,239 @@
+/* V75 — team management: dialog flow, table action cells, compact Pushsale page chrome. */
+body.pushsale-app-body .ps-teams-page .pushsale-page-content {
+    padding-top: 0 !important;
+}
+
+body.pushsale-app-body .ps-teams-page .pushsale-page-filters {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+body.pushsale-app-body .ps-teams-page .ps-team-filter-row {
+    grid-template-columns: minmax(190px, 1fr) minmax(220px, 1.1fr) minmax(220px, 1.1fr) auto;
+    gap: 12px 26px;
+}
+
+body.pushsale-app-body .ps-team-add-btn {
+    min-width: 126px;
+    height: 30px !important;
+    border-radius: 0 !important;
+    justify-self: end;
+    white-space: nowrap;
+}
+
+body.pushsale-app-body .ps-teams-table-wrap {
+    width: 100%;
+    overflow-x: visible !important;
+    border-top: 0;
+}
+
+body.pushsale-app-body .ps-team-table {
+    width: 100% !important;
+    table-layout: fixed;
+    margin: 0 !important;
+    border-collapse: collapse;
+}
+
+body.pushsale-app-body .ps-team-table > thead > tr > th {
+    background: #2f80d7 !important;
+    color: #fff !important;
+    border-color: #216fbf !important;
+    height: 31px;
+    padding: 5px 6px !important;
+    text-align: center;
+    vertical-align: middle !important;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+body.pushsale-app-body .ps-team-table > tbody > tr > td {
+    border-color: #d6d6d6 !important;
+    padding: 7px 6px !important;
+    vertical-align: middle !important;
+    font-size: 12px;
+    line-height: 1.35;
+    min-height: 36px;
+    word-break: break-word;
+}
+
+body.pushsale-app-body .ps-team-table > tbody > tr:nth-child(even) > td { background: #eaf4ff; }
+body.pushsale-app-body .ps-team-table > tbody > tr:nth-child(odd) > td { background: #fff; }
+body.pushsale-app-body .ps-team-table > tbody > tr:hover > td { background: #e4f0ff !important; }
+
+body.pushsale-app-body .ps-team-table .ps-col-stt { width: 46px; }
+body.pushsale-app-body .ps-team-table th:nth-child(2) { width: 120px; }
+body.pushsale-app-body .ps-team-table th:nth-child(3) { width: 82px; }
+body.pushsale-app-body .ps-team-table th:nth-child(4) { width: 130px; }
+body.pushsale-app-body .ps-team-table th:nth-child(5) { width: 170px; }
+body.pushsale-app-body .ps-team-table th:nth-child(6) { width: 95px; }
+body.pushsale-app-body .ps-team-table th:nth-child(7) { width: 250px; }
+body.pushsale-app-body .ps-team-table th:nth-child(8) { width: 180px; }
+body.pushsale-app-body .ps-team-table th:nth-child(9) { width: 120px; }
+body.pushsale-app-body .ps-team-table th:nth-child(10) { width: 112px; }
+
+body.pushsale-app-body .ps-team-table small {
+    display: block;
+    color: #777;
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+body.pushsale-app-body .ps-team-table .ps-members-cell span {
+    display: block;
+    white-space: normal;
+    line-height: 1.45;
+}
+
+body.pushsale-app-body .ps-team-table .ps-row-actions-cell {
+    width: 112px !important;
+    min-width: 112px !important;
+    padding: 4px 6px !important;
+    background-clip: padding-box;
+}
+
+body.pushsale-app-body .ps-team-table .ps-row-actions {
+    min-height: 28px !important;
+    gap: 9px !important;
+}
+
+body.pushsale-app-body .ps-team-table .ps-row-actions button {
+    cursor: pointer;
+}
+
+body.pushsale-app-body .ps-teams-page .ps-floating-add {
+    display: none !important;
+}
+
+body.pushsale-app-body .ps-team-pagination {
+    margin-top: 10px;
+    align-items: center;
+}
+
+body.pushsale-app-body .ps-team-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2050;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 16px 16px;
+    background: rgba(0,0,0,.42);
+}
+
+body.pushsale-app-body .ps-team-modal {
+    width: min(760px, calc(100vw - 32px));
+    max-height: calc(100vh - 72px);
+    background: #fff;
+    border: 1px solid #1d78b8;
+    box-shadow: 0 4px 20px rgba(0,0,0,.35);
+    display: flex;
+    flex-direction: column;
+}
+
+body.pushsale-app-body .ps-team-modal .ps-modal-header {
+    height: 36px;
+    min-height: 36px;
+    background: #3c97c4;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+body.pushsale-app-body .ps-team-modal .ps-modal-close {
+    width: 24px;
+    height: 24px;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 18px;
+    line-height: 20px;
+    padding: 0;
+}
+
+body.pushsale-app-body .ps-team-modal-body {
+    padding: 12px 14px;
+    overflow-y: auto;
+}
+
+body.pushsale-app-body .ps-team-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 18px;
+}
+
+body.pushsale-app-body .ps-team-form-grid .ps-field {
+    display: grid;
+    grid-template-columns: 145px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-weight: 400;
+}
+
+body.pushsale-app-body .ps-team-form-grid .ps-field > span {
+    font-weight: 700;
+    color: #111;
+}
+
+body.pushsale-app-body .ps-team-form-grid .ps-field-wide {
+    grid-column: 1 / -1;
+}
+
+body.pushsale-app-body .ps-team-form-grid .form-control {
+    height: 30px;
+    border: 1px solid #c8d4df;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+body.pushsale-app-body .ps-team-business-note {
+    margin-top: 12px;
+    padding: 8px 10px;
+    border: 1px solid #d8e8f7;
+    background: #f4fbff;
+    color: #444;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+body.pushsale-app-body .ps-team-modal .ps-modal-footer {
+    padding: 9px 14px;
+    border-top: 1px solid #d2d6de;
+    background: #f7f7f7;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+body.pushsale-app-body .ps-team-modal .btn {
+    border-radius: 0;
+    min-width: 84px;
+}
+
+@media (max-width: 900px) {
+    body.pushsale-app-body .ps-teams-page .ps-team-filter-row {
+        grid-template-columns: 1fr;
+    }
+    body.pushsale-app-body .ps-team-add-btn {
+        justify-self: stretch;
+    }
+    body.pushsale-app-body .ps-teams-table-wrap {
+        overflow-x: auto !important;
+    }
+    body.pushsale-app-body .ps-team-table {
+        min-width: 980px;
+    }
+    body.pushsale-app-body .ps-team-form-grid {
+        grid-template-columns: 1fr;
+    }
+    body.pushsale-app-body .ps-team-form-grid .ps-field {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+}

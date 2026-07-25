@@ -437,3 +437,377 @@ html body.pushsale-app-body .ps-products-page .ps-product-status-toggle input[ty
     cursor: wait !important;
     opacity: .55 !important;
 }
+
+/* V109 — server QA sweep: remove the global white band under the blue header.
+ * A later legacy menu contract made .content-wrapper relative + margin-top: 50px,
+ * so every page started with an empty area. The admin sidebar is an overlay in
+ * this product, therefore content must stay fixed below the header and start at
+ * y=0 inside the scroll viewport. */
+html body.pushsale-app-body .pushsale-wrapper .content-wrapper,
+html body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper,
+html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper,
+html body.pushsale-app-body .content-wrapper {
+    position: fixed !important;
+    top: var(--ps-header-height, var(--ps-v85-header-height, 50px)) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: #fff !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+html body.pushsale-app-body .content-inner,
+html body.pushsale-app-body .content-inner > .ps-page-viewport,
+html body.pushsale-app-body .ps-page-viewport {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-page-viewport > :first-child,
+html body.pushsale-app-body .ps-page-viewport > form:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .pushsale-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-customer360-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-products-page:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: 0 !important;
+}
+
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-header,
+html body.pushsale-app-body .ps-customer360-page .m-header-wrap:first-child,
+html body.pushsale-app-body .ps-customer360-page .m-header-wrap:first-child > .m-header,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap:first-of-type,
+html body.pushsale-app-body .ps-adminlte-page .m-header-wrap:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    min-height: 0 !important;
+}
+
+/* V109 — product page filter contract. Keep the title/search line compact,
+ * then place sort/status/category/marketing in the first filter row and
+ * sale/care in the second row, matching the Pushsale table pages. */
+html body.pushsale-app-body .ps-products-page .m-header.ps-product-header,
+html body.pushsale-app-body .ps-products-page .ps-product-header {
+    display: grid !important;
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr) !important;
+    column-gap: 28px !important;
+    align-items: center !important;
+    min-height: 42px !important;
+    padding: 5px 14px !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-header h3,
+html body.pushsale-app-body .ps-products-page .ps-product-header .m-title {
+    margin: 0 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-search {
+    width: 100% !important;
+    max-width: 780px !important;
+    margin: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(180px, 288px) minmax(260px, 1fr) auto !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-self: start !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-filters {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(220px, 1fr)) !important;
+    gap: 10px 28px !important;
+    align-items: center !important;
+    padding: 12px 14px 10px !important;
+    margin: 0 !important;
+    border-top: 1px solid #d2d6de !important;
+    border-bottom: 1px solid #d2d6de !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-filters select,
+html body.pushsale-app-body .ps-products-page .ps-product-filters input,
+html body.pushsale-app-body .ps-products-page .ps-product-search select,
+html body.pushsale-app-body .ps-products-page .ps-product-search input {
+    height: 34px !important;
+    width: 100% !important;
+}
+
+/* V109 — submenu level-2 hover. Items 2.1/2.2/2.3 have no third-level child,
+ * but they must still receive the same blue hover treatment as expandable
+ * submenu rows. */
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:hover > .a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > .a2.pushsale-menu-link:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > button.a2.pushsale-menu-link:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > a.a2.pushsale-menu-link:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.active > .a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.has-open-flyout > .a2.pushsale-menu-link {
+    background: #0b8ff3 !important;
+    color: #fff !important;
+    border-color: #0b8ff3 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:hover > .a2.pushsale-menu-link i,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:hover > .a2.pushsale-menu-link span,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > .a2.pushsale-menu-link:hover i,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > .a2.pushsale-menu-link:hover span,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.active > .a2.pushsale-menu-link i,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.active > .a2.pushsale-menu-link span {
+    color: #fff !important;
+}
+
+@media (max-width: 1180px) {
+    html body.pushsale-app-body .ps-products-page .ps-product-header {
+        grid-template-columns: 1fr !important;
+        row-gap: 8px !important;
+    }
+
+    html body.pushsale-app-body .ps-products-page .ps-product-search,
+    html body.pushsale-app-body .ps-products-page .ps-product-filters {
+        grid-template-columns: 1fr !important;
+        max-width: none !important;
+    }
+}
+
+/* V111 — common Pushsale select contract + product page alignment. */
+html body.pushsale-app-body select.form-control,
+html body.pushsale-app-body .ps-select__control {
+    height: 31px !important;
+    min-height: 31px !important;
+    border: 1px solid #c8d6e5 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 19px !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-select {
+    position: relative !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-select__control {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 5px 9px !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-select__control > span {
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+html body.pushsale-app-body .ps-select__control > span.is-placeholder,
+html body.pushsale-app-body .ps-select.is-disabled-value .ps-select__control > span {
+    color: #777 !important;
+}
+
+html body.pushsale-app-body .ps-select__control > .fa {
+    flex: 0 0 auto !important;
+    margin-left: 8px !important;
+    color: #777 !important;
+    font-size: 10px !important;
+}
+
+html body.pushsale-app-body .ps-select__menu {
+    position: absolute !important;
+    z-index: 100000 !important;
+    top: calc(100% + 1px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    min-width: 260px !important;
+    max-height: 412px !important;
+    overflow: hidden !important;
+    border: 1px solid #2f7ed8 !important;
+    background: #fff !important;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .16) !important;
+}
+
+html body.pushsale-app-body .ps-select__search {
+    height: 31px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-select__options {
+    max-height: 350px !important;
+    overflow-y: auto !important;
+}
+
+html body.pushsale-app-body .ps-select__option {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 7px !important;
+    width: 100% !important;
+    min-height: 28px !important;
+    padding: 5px 8px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    text-align: left !important;
+}
+
+html body.pushsale-app-body .ps-select__option:hover,
+html body.pushsale-app-body .ps-select__option.active {
+    background: #347dd8 !important;
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-select__option input[type="checkbox"] {
+    flex: 0 0 auto !important;
+    margin: 2px 0 0 !important;
+}
+
+html body.pushsale-app-body .ps-select__option span,
+html body.pushsale-app-body .ps-select__option small {
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-select__option small {
+    display: block !important;
+    margin-top: 1px !important;
+    color: inherit !important;
+    opacity: .82 !important;
+    font-size: 11px !important;
+}
+
+html body.pushsale-app-body .ps-select__empty {
+    padding: 8px !important;
+    color: #777 !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-products-page {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    border: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-products-page .m-header-wrap,
+html body.pushsale-app-body .ps-products-page .box-body,
+html body.pushsale-app-body .ps-products-page .ps-toolbar,
+html body.pushsale-app-body .ps-products-page .ps-table-scroll {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-products-page .m-header.ps-product-header,
+html body.pushsale-app-body .ps-products-page .ps-product-header {
+    display: grid !important;
+    grid-template-columns: minmax(180px, auto) minmax(0, 1fr) !important;
+    column-gap: 16px !important;
+    align-items: center !important;
+    min-height: 50px !important;
+    padding: 7px 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 20px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-search {
+    justify-self: end !important;
+    width: min(760px, 100%) !important;
+    max-width: 760px !important;
+    display: grid !important;
+    grid-template-columns: 290px minmax(260px, 1fr) auto !important;
+    gap: 14px !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-search .btn {
+    height: 31px !important;
+    min-width: 91px !important;
+    padding: 5px 12px !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-filters {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 30px !important;
+    align-items: center !important;
+    padding-top: 13px !important;
+    padding-bottom: 11px !important;
+    margin: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-toolbar {
+    padding-top: 12px !important;
+    padding-bottom: 10px !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-table-scroll {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: auto !important;
+    scrollbar-gutter: stable !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-table {
+    width: 100% !important;
+    min-width: 1580px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+@media (max-width: 1280px) {
+    html body.pushsale-app-body .ps-products-page .ps-product-search {
+        width: 100% !important;
+        grid-template-columns: 220px minmax(220px, 1fr) auto !important;
+        gap: 10px !important;
+    }
+
+    html body.pushsale-app-body .ps-products-page .ps-product-filters {
+        gap: 14px !important;
+    }
+}
+
+@media (max-width: 992px) {
+    html body.pushsale-app-body .ps-products-page .ps-product-header,
+    html body.pushsale-app-body .ps-products-page .ps-product-search,
+    html body.pushsale-app-body .ps-products-page .ps-product-filters {
+        grid-template-columns: 1fr !important;
+        justify-self: stretch !important;
+    }
+}

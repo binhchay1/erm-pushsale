@@ -922,3 +922,134 @@ html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-sour
     font-size: 11px !important;
     line-height: 15px !important;
 }
+
+/* v110: Product permission assignment controls from real team/user data */
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-row > .ps-search-select,
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-row > .ps-permission-select {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-search-select-button,
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-select-button {
+    height: 31px !important;
+    min-height: 31px !important;
+    padding: 5px 8px !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    text-align: left !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-select-button.is-empty span {
+    color: #999 !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-permission-select {
+    position: relative !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-permission-select-menu {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: calc(100% + 2px) !important;
+    z-index: 100000 !important;
+    max-height: 410px !important;
+    overflow: hidden !important;
+    border: 1px solid #2f7ed8 !important;
+    background: #fff !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .18) !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-permission-search {
+    height: 31px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-permission-options {
+    max-height: 330px !important;
+    overflow-y: auto !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-permission-option {
+    width: 100% !important;
+    min-height: 28px !important;
+    padding: 5px 8px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    text-align: left !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 7px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-permission-option:hover,
+html body.pushsale-app-body .ps-product-source-modal .ps-permission-option.active {
+    background: #347dd8 !important;
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-permission-option input[type="checkbox"] {
+    margin-top: 2px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-permission-option small {
+    display: block !important;
+    margin-top: 2px !important;
+    color: inherit !important;
+    opacity: .82 !important;
+    font-size: 11px !important;
+}
+
+/* V111 — product dialog uses the shared PushsaleSelect controls. */
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field > .ps-select,
+html body.pushsale-app-body .ps-product-source-modal .ps-product-attribute-row > .ps-select,
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-row > .ps-select {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-row {
+    grid-template-columns: 120px minmax(0, 1fr) 28px 28px !important;
+    gap: 4px 12px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-select__control {
+    height: 31px !important;
+    min-height: 31px !important;
+    padding: 5px 8px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-select__menu {
+    max-height: 420px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-select__options {
+    max-height: 350px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-row > button {
+    width: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #0073ff !important;
+    text-align: center !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-row > button:hover {
+    color: #005bbf !important;
+}

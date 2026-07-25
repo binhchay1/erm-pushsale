@@ -52,6 +52,28 @@ class RuntimeSchemaContract
             $changes[] = 'shipping_partner_connections.metadata';
         }
 
+
+        if (Schema::hasTable('products')) {
+            foreach ([
+                'marketing_team_ids' => 'available_care',
+                'marketing_user_ids' => 'marketing_team_ids',
+                'sale_team_ids' => 'marketing_user_ids',
+                'sale_user_ids' => 'sale_team_ids',
+                'care_team_ids' => 'sale_user_ids',
+                'care_user_ids' => 'care_team_ids',
+            ] as $column => $after) {
+                if (! Schema::hasColumn('products', $column)) {
+                    Schema::table('products', function (Blueprint $table) use ($column, $after): void {
+                        $definition = $table->json($column)->nullable();
+                        if (Schema::hasColumn('products', $after)) {
+                            $definition->after($after);
+                        }
+                    });
+                    $changes[] = 'products.'.$column;
+                }
+            }
+        }
+
         return $changes;
     }
 }
