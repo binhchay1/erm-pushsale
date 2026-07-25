@@ -21,6 +21,7 @@ if ! command -v pnpm >/dev/null 2>&1; then
 fi
 
 pnpm install --frozen-lockfile
+bash deploy/fix-build-permissions.sh
 pnpm run build
 
 echo "=== MIGRATE ==="

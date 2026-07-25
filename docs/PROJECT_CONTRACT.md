@@ -50,3 +50,9 @@ php artisan erm:test-all --landing-flow --flow --json
 ```
 
 Route smoke chỉ fail khi có lỗi nặng như 500/exception/PHP error. 403/404 được tính warning để log không nhiễu.
+
+## Deploy permission contract
+
+- `public/build` is generated output. It must stay writable by the deploy user before `pnpm build`.
+- Use `deploy/fix-build-permissions.sh` before Vite build in every deploy path.
+- Do not run a manual root-owned build without restoring owner to `deploy:www-data`.
