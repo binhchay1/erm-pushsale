@@ -126,7 +126,7 @@ class DataDistributionService
                 if ($ids === []) continue;
                 $sale = $sales->firstWhere('id', (int) $saleId);
                 if (! $sale) continue;
-                $count = $this->allocator->allocate($ids, $sale, $actor);
+                $count = $this->allocator->allocate($ids, $sale, $actor, ['operation_policy' => (string) ($payload['operation_policy'] ?? 'keep')]);
                 $allocated += $count;
                 $productAllocated += $count;
             }

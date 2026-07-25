@@ -43,3 +43,43 @@ html body.pushsale-app-body input.pslc-api-preview[readonly] {
     color: #777 !important;
     cursor: not-allowed !important;
 }
+
+/* v125 final runtime contract: force leaf second-level menu hover without relying on legacy cascade. */
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > a.a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > span.a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > button.a2 {
+    background: #0b8ff3 !important;
+    background-color: #0b8ff3 !important;
+    background-image: none !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > .a2 *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > a.a2 *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > span.a2 *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > button.a2 * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+html body.pushsale-app-body .pushsale-route-loading {
+    position: fixed;
+    top: 58px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2200;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 30px;
+    padding: 6px 14px;
+    border: 1px solid #b9daf4;
+    background: #eef8ff;
+    color: #1a689b;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .10);
+    pointer-events: none;
+}

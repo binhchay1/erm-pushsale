@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Pushsale;
 
+use App\Enums\LeadIngestionStatus;
 use App\Models\Company;
 use App\Models\LandingConnection;
 use App\Models\LeadIngestion;
@@ -220,6 +221,63 @@ class AdminViewRoutesSmokeTest extends TestCase
         $this->assertNull($connection->marketing_source_id);
         $this->assertCount(1, $connection->sources()->get());
         $this->assertCount(0, $connection->products()->get());
+    }
+
+
+    public function test_manual_data_distribution_allocates_pending_lead_to_sale(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $admin = $this->loginAsDemoAdmin();
+        $product = Product::withoutTenant()
+            ->where('company_id', $admin->company_id)
+            ->where('is_active', true)
+            ->firstOrFail();
+        $sale = User::withoutTenant()
+            ->where('company_id', $admin->company_id)
+            ->where('role', User::ROLE_SALES)
+            ->firstOrFail();
+
+        $lead = LeadIngestion::withoutTenant()->create([
+            'company_id' => $admin->company_id,
+            'platform' => 'manual',
+            'external_id' => 'manual-qa-'.Str::random(8),
+            'status' => LeadIngestionStatus::Pending,
+            'packet_type' => 'base',
+            'counts_as_lead' => true,
+            'customer_name' => 'Khách test phân bổ',
+            'customer_phone' => '0932999001',
+            'product_interest' => $product->name,
+            'payload' => ['product_id' => $product->id, 'name' => $product->name],
+        ]);
+
+        $this->post('/admin/leads/distribute', [
+            'filters' => [
+                'data_scope' => 'all',
+                'date_from' => now()->subDay()->toDateString(),
+                'date_to' => now()->addDay()->toDateString(),
+            ],
+            'product_allocations' => [[
+                'product_id' => $product->id,
+                'quantity' => 1,
+            ]],
+            'sale_user_ids' => [$sale->id],
+            'operation_policy' => 'new_customer',
+            'delete_operation_history' => false,
+            'delete_internal_messages' => false,
+            'hide_sales_not_receiving' => true,
+            'skip_sales_not_receiving' => true,
+            'hide_locked_sales' => true,
+            'skip_locked_sales' => true,
+        ])->assertSessionHas('success');
+
+        $lead->refresh();
+        $this->assertNotNull($lead->order_id);
+        $this->assertSame(LeadIngestionStatus::Processed, $lead->status);
+        $this->assertDatabaseHas('orders', [
+            'id' => $lead->order_id,
+            'sale_user_id' => $sale->id,
+            'operation_stage' => 'new_customer',
+        ]);
     }
 
     private function safeResponseBody(mixed $response): string

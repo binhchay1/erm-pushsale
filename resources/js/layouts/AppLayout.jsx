@@ -31,6 +31,7 @@ export default function AppLayout({ children }) {
     useRealtimeNotifications();
 
     const [pendingDashboardRole, setPendingDashboardRole] = useState(null);
+    const [pageTransitioning, setPageTransitioning] = useState(false);
     const [stylesReady, setStylesReady] = useState(() => document.documentElement.dataset.pushsaleStylesReady === '1' || Boolean(document.getElementById('pushsale-adminlte')));
     // Menu ERM mặc định ẩn để trang tác nghiệp/report mở full màn hình.
     // Người dùng bấm hamburger mới mở menu 252px. Không lưu localStorage để tránh
@@ -69,6 +70,14 @@ export default function AppLayout({ children }) {
     }, []);
 
     useEffect(() => {
+        let transitionTimer = null;
+        const clearTransitionTimer = () => {
+            if (transitionTimer) {
+                window.clearTimeout(transitionTimer);
+                transitionTimer = null;
+            }
+        };
+
         const start = router.on('start', (event) => {
             const visit = event?.detail?.visit;
             const targetUrl = visit?.url;
@@ -92,13 +101,18 @@ export default function AppLayout({ children }) {
                 // Fall through to the normal dashboard skeleton detection.
             }
 
+            clearTransitionTimer();
+            transitionTimer = window.setTimeout(() => setPageTransitioning(true), 160);
             setPendingDashboardRole(dashboardRoleFromUrl(targetUrl));
         });
         const finish = router.on('finish', () => {
+            clearTransitionTimer();
             setPendingDashboardRole(null);
+            setPageTransitioning(false);
         });
 
         return () => {
+            clearTransitionTimer();
             start();
             finish();
         };
@@ -156,6 +170,9 @@ export default function AppLayout({ children }) {
                 <main className="content-wrapper">
                     <div className="content-inner">
                         <div className="ps-page-viewport">
+                            {pageTransitioning && !pendingDashboardRole && (
+                                <div className="pushsale-route-loading" aria-live="polite"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>
+                            )}
                             {pendingDashboardRole ? (
                                 <DashboardSkeleton role={pendingDashboardRole} />
                             ) : (

@@ -208,3 +208,34 @@ html body.pushsale-app-body .psm-page .ps-date-range {
         grid-template-columns: repeat(4, minmax(160px, 1fr)) !important;
     }
 }
+
+/* v125: strict two-row dashboard filter, no underline/bottom border below advanced filters. */
+html body.pushsale-app-body .psm-page .ps-page-shell__header,
+html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row,
+html body.pushsale-app-body .psm-page .ps-page-shell__body {
+    border-bottom: 0 !important;
+}
+html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row {
+    padding: 8px 30px 8px 30px !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .psm-page .psm-filter-panel {
+    display: grid !important;
+    grid-template-rows: 31px 31px !important;
+    gap: 8px !important;
+}
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-first {
+    grid-template-columns: 1fr 1fr .95fr .95fr .95fr .95fr .95fr !important;
+}
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
+    grid-template-columns: 1fr 1fr .95fr .95fr .95fr .95fr .82fr .9fr !important;
+}
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-first,
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
+    gap: 8px 14px !important;
+}
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-first > *,
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-second > * {
+    height: 31px !important;
+}

@@ -3,6 +3,7 @@
 namespace App\Services\Leads;
 
 use App\Enums\LeadIngestionStatus;
+use App\Enums\OperationStage;
 use App\Enums\UserRole;
 use App\Events\LeadPoolChanged;
 use App\Events\SaleWorkspaceChanged;
@@ -25,10 +26,31 @@ class ManualLeadAllocationService
         private readonly CustomerPhoneAssignmentService $phoneAssignment,
     ) {}
 
+    /** @param array<string, mixed> $options */
+    private function applyAllocationOptions(Order $order, array $options): void
+    {
+        $policy = (string) ($options['operation_policy'] ?? 'keep');
+        $updates = [];
+
+        if ($policy === 'new_customer') {
+            $updates['operation_stage'] = OperationStage::NewCustomer->value;
+            $updates['operation_result'] = null;
+            $updates['closing_status'] = null;
+        } elseif ($policy === 'follow_up') {
+            $updates['operation_stage'] = OperationStage::Call2->value;
+            $updates['operation_result'] = null;
+            $updates['closing_status'] = null;
+        }
+
+        if (! empty($updates)) {
+            $order->forceFill($updates)->save();
+        }
+    }
+
     /**
      * @param  list<int>  $leadIds
      */
-    public function allocate(array $leadIds, User $saleUser, User $actor): int
+    public function allocate(array $leadIds, User $saleUser, User $actor, array $options = []): int
     {
         if ($saleUser->role !== UserRole::Sales) {
             throw ValidationException::withMessages([
@@ -48,7 +70,7 @@ class ManualLeadAllocationService
         $landingOrders = [];
         $affectedSaleIds = [];
 
-        DB::transaction(function () use ($leadIds, $saleUser, &$allocated, &$landingOrders, &$affectedSaleIds) {
+        DB::transaction(function () use ($leadIds, $saleUser, $options, &$allocated, &$landingOrders, &$affectedSaleIds) {
             // Khoá hàng lead để tránh đua với chia tự động / phiên chia tay khác.
             $leads = LeadIngestion::query()
                 ->whereIn('id', $leadIds)
@@ -77,6 +99,7 @@ class ManualLeadAllocationService
                 $phoneConflict = (int) $effectiveSale->id !== (int) $saleUser->id;
                 $affectedSaleIds[(int) $effectiveSale->id] = (int) $effectiveSale->id;
                 $order = $this->orderFactory->createFromLead($lead, $normalized, $effectiveSale);
+                $this->applyAllocationOptions($order, $options);
                 $lock = $this->phoneAssignment->attachOrder($order, $effectiveSale, 'manual_lead_allocated');
 
                 if ($phoneConflict) {

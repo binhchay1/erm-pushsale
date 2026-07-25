@@ -249,8 +249,8 @@ final class LandingConnectionsController extends Controller
         ]);
 
         $validator->after(function (LaravelValidator $validator) use ($request): void {
-            $sources = collect($request->input('sources', []))->filter('is_array')->values();
-            $products = collect($request->input('products', []))->filter('is_array')->values();
+            $sources = collect($request->input('sources', []))->filter(fn ($row): bool => is_array($row))->values();
+            $products = collect($request->input('products', []))->filter(fn ($row): bool => is_array($row))->values();
             $sourceKeys = $sources->pluck('client_key')->filter()->map('strval')->values();
 
             if ((int) $request->input('budget_amount', 0) > 0) {

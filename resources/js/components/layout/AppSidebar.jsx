@@ -141,6 +141,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
 
     const [openRoot, setOpenRoot] = useState(null);
     const [flyout, setFlyout] = useState(null);
+    const [hoverSecondKey, setHoverSecondKey] = useState(null);
 
     const clearFlyoutTimer = () => {
         if (flyoutTimerRef.current) {
@@ -175,6 +176,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     useEffect(() => {
         if (collapsed) {
             setOpenRoot(null);
+            setHoverSecondKey(null);
             closeFlyout();
             return;
         }
@@ -182,6 +184,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     }, [activeRootIndex, collapsed]);
 
     useEffect(() => {
+        setHoverSecondKey(null);
         closeFlyout();
     }, [url]);
 
@@ -213,6 +216,20 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     const toggleRoot = (index) => {
         closeFlyout();
         setOpenRoot((current) => (current === index ? null : index));
+    };
+
+    const secondLevelInlineStyle = (key, active = false) => {
+        if (active || hoverSecondKey !== key) return undefined;
+
+        return {
+            backgroundColor: '#0b8ff3',
+            backgroundImage: 'none',
+            color: '#fff',
+            WebkitTextFillColor: '#fff',
+            borderTop: '0',
+            borderBottom: '0',
+            boxShadow: 'none',
+        };
     };
 
     const toggleFlyout = (event, item, key) => {
@@ -276,11 +293,13 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                 return (
                                                     <li
                                                         key={key}
-                                                        className={cn('li2', childActive && 'active', flyoutOpen && 'flyout-open')}
+                                                        className={cn('li2', childActive && 'active', flyoutOpen && 'flyout-open', hoverSecondKey === key && !childActive && 'ui-hover')}
                                                         onMouseEnter={() => {
+                                                            setHoverSecondKey(key);
                                                             if (!hasGrandchildren) closeFlyout();
                                                         }}
                                                         onMouseLeave={(event) => {
+                                                            setHoverSecondKey((current) => current === key ? null : current);
                                                             const button = event.currentTarget.querySelector('button.pushsale-second-parent-link');
                                                             if (button) button.blur();
                                                         }}
@@ -290,7 +309,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                 type="button"
                                                                 className="a2 pushsale-menu-link pushsale-second-parent-link"
                                                                 data-pushsale-second-parent="true"
-                                                                style={{ border: 0, outline: 0, boxShadow: 'none' }}
+                                                                style={secondLevelInlineStyle(key, childActive) ?? { border: 0, outline: 0, boxShadow: 'none' }}
                                                                 onClick={(event) => toggleFlyout(event, child, key)}
                                                                 onMouseEnter={(event) => {
                                                                     clearFlyoutTimer();
@@ -312,6 +331,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                             <LeafLink
                                                                 item={child}
                                                                 className="a2 pushsale-menu-link"
+                                                                style={secondLevelInlineStyle(key, childActive)}
                                                                 onNavigate={() => {
                                                                     rememberSelection(child);
                                                                     closeFlyout();

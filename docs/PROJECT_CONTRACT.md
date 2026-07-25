@@ -56,3 +56,23 @@ Route smoke chỉ fail khi có lỗi nặng như 500/exception/PHP error. 403/40
 - `public/build` is generated output. It must stay writable by the deploy user before `pnpm build`.
 - Use `deploy/fix-build-permissions.sh` before Vite build in every deploy path.
 - Do not run a manual root-owned build without restoring owner to `deploy:www-data`.
+
+## 6. Manual data distribution contract
+
+Menu 1.5 `/admin/leads` is a real manual allocation workflow, not a demo table:
+
+- UI posts explicit payload to `/admin/leads/distribute`.
+- Backend service `DataDistributionService` chooses pending `lead_ingestions` by product/filter.
+- `ManualLeadAllocationService` creates sale orders and attaches phone locks to avoid two sales calling the same customer.
+- Product permission is enforced before allocation.
+- Any new filter must be added to both `normalizeFilters()` and the frontend payload; do not create visual-only filters.
+
+## 7. Sidebar/menu hover contract
+
+Second-level menu leaves and second-level parents must use one visual contract:
+
+- active: blue background, white text;
+- hover: blue background, white text;
+- no top/bottom blue border artifacts.
+
+Because AdminLTE legacy CSS can override hover selectors, `AppSidebar.jsx` also applies a React hover class/inline fallback. Do not remove this until AdminLTE CSS is fully retired.

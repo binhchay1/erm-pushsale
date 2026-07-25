@@ -54,6 +54,7 @@ export default function DataDistributionIndex({ filters = {}, products = [], sal
 
     const [selectedProducts, setSelectedProducts] = useState(() => new Map());
     const [selectedSales, setSelectedSales] = useState(() => new Set(sales.filter((sale) => sale.can_receive).map((sale) => String(sale.id))));
+    const [distributing, setDistributing] = useState(false);
 
     const form = useForm({
         filters: localFilters,
@@ -110,13 +111,25 @@ export default function DataDistributionIndex({ filters = {}, products = [], sal
             sale_user_ids: [...selectedSales].map((id) => Number(id)),
         };
 
-        form.transform(() => payload).post(submitUrl(), {
+        if (payload.product_allocations.length === 0) {
+            toast.error('Nhập số lượng data cần phân bổ cho ít nhất một sản phẩm.');
+            return;
+        }
+        if (payload.sale_user_ids.length === 0) {
+            toast.error('Chọn ít nhất một Sale nhận data.');
+            return;
+        }
+
+        setDistributing(true);
+        router.post(submitUrl(), payload, {
             preserveScroll: true,
+            preserveState: false,
             onSuccess: () => {
                 toast.success('Đã phân bổ data cho Sale.');
                 setSelectedProducts(new Map());
             },
             onError: (errors) => toast.error(Object.values(errors)[0] ?? 'Không thể phân bổ data.'),
+            onFinish: () => setDistributing(false),
         });
     };
 
@@ -254,7 +267,7 @@ export default function DataDistributionIndex({ filters = {}, products = [], sal
 
                         <div className="psdd-actions">
                             <span>Đang chọn <b>{selectedTotal}</b> contact / <b>{selectedSales.size}</b> sale</span>
-                            <button type="submit" disabled={form.processing || selectedTotal <= 0 || selectedSales.size <= 0}>Phân bổ data</button>
+                            <button type="submit" disabled={distributing || selectedTotal <= 0 || selectedSales.size <= 0}>{distributing ? 'Đang phân bổ…' : 'Phân bổ data'}</button>
                         </div>
                     </section>
                 </div>

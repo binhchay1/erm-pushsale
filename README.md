@@ -1,16 +1,16 @@
 # ERM Pushsale
 
-Dự án Laravel/Inertia mô phỏng giao diện Pushsale theo business ERM: quản trị đơn vị, marketing/landing, telesale, kho, kế toán và báo cáo.
+Laravel/Inertia ERM Pushsale project.
 
-## Nguyên tắc làm tiếp
+## Project contracts
 
-- Dùng chung shell `AppLayout` + `AppSidebar` + `PushsalePageShell`/`PushsalePageHeader` cho mọi trang admin.
-- CSS Pushsale runtime chỉ đăng ký qua `resources/js/lib/pushsaleStyleRegistry.js`.
-- CSS sửa cuối cùng nằm trong `resources/css/pushsale-adminlte-canonical-contract.css`; không đẻ thêm file CSS vặt nếu chỉ để override global.
-- Page CSS phải scope bằng class trang, ví dụ `.psm-page`, `.pslc-page`, `.ps-warehouses-page`.
-- Không xóa `public/vendor/font-awesome` và `public/vendor/adminlte2` khi thay source, vì legacy icon/AdminLTE còn dùng trực tiếp.
+Read these files before changing UI/business flow:
 
-## Lệnh deploy/test tối thiểu
+- `docs/PROJECT_CONTRACT.md`
+- `docs/LANDING_CONNECTION_BACKEND_RESET_V122.md`
+- `docs/context-history/README_v125_manual_distribution_landing_fix.md`
+
+## Deploy checklist
 
 ```bash
 php artisan optimize:clear
@@ -20,4 +20,8 @@ pnpm build
 php artisan erm:test-all --route-smoke --smoke-limit=30 --json
 ```
 
-Tài liệu chi tiết nằm trong `docs/PROJECT_CONTRACT.md`.
+Do not delete legacy runtime vendor assets unless all references are migrated:
+
+- `public/vendor/font-awesome`
+- `public/vendor/adminlte2`
+- `public/vendor/bootstrap`
