@@ -361,3 +361,79 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-com
         max-width: none !important;
     }
 }
+
+/* V105 — hard guard for the page title whitespace shown on product/legacy pages. */
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page:first-child,
+html body.pushsale-app-body .ps-page-viewport > .pushsale-page:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page:first-child > form:first-child,
+html body.pushsale-app-body .ps-page-viewport > .pushsale-page:first-child > form:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page:first-child > form:first-child > .m-header-wrap:first-child,
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page:first-child > .m-header-wrap:first-child,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap:first-of-type {
+    min-height: 0 !important;
+    height: auto !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: 0 !important;
+    box-sizing: border-box !important;
+}
+
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page:first-child > form:first-child > .m-header-wrap:first-child > .m-header,
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page:first-child > .m-header-wrap:first-child > .m-header,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap:first-of-type > .m-header {
+    min-height: 42px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .ps-products-page .m-header-wrap:first-child > .m-header.ps-product-header {
+    min-height: 42px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-table-scroll {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-table {
+    min-width: 1640px !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-status-cell {
+    width: 52px !important;
+    min-width: 52px !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-status-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-status-toggle input[type="checkbox"] {
+    cursor: pointer !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-product-status-toggle input[type="checkbox"]:disabled {
+    cursor: wait !important;
+    opacity: .55 !important;
+}

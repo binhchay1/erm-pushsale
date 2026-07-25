@@ -101,13 +101,15 @@ function normalizeComboPayload(form) {
     };
 }
 
-function ComboDialog({ open, mode, combo, products, onClose, onSaved, routeUrl }) {
+function ComboDialog({ open, mode, combo, products = [], onClose, onSaved, routeUrl = '/admin/catalog/combos' }) {
+    const safeProducts = Array.isArray(products) ? products : [];
+    const safeRouteUrl = routeUrl || '/admin/catalog/combos';
     const initial = useMemo(() => {
         const data = combo?._form ?? combo ?? {};
         const items = (data.component_items ?? []).length
             ? data.component_items
             : (data.component_product_ids ?? []).map((id) => {
-                const product = products.find((item) => String(item.id) === String(id));
+                const product = safeProducts.find((item) => String(item.id) === String(id));
                 return { product_id: Number(id), quantity: 1, unit_price: Number(product?.unit_price || 0) };
             });
 
@@ -120,9 +122,9 @@ function ComboDialog({ open, mode, combo, products, onClose, onSaved, routeUrl }
                 quantity: Math.max(1, Number(item.quantity || 1)),
                 unit_price: Math.max(0, Number(item.unit_price || 0)),
             })).filter((item) => item.product_id > 0),
-            is_active: data.is_active ?? String(data.status ?? '').toLowerCase().includes('áp dụng') ?? true,
+            is_active: data.is_active ?? combo?._is_active ?? (String(data.status ?? '').trim() === '' ? true : !String(data.status ?? '').toLowerCase().includes('ngừng')),
         };
-    }, [combo, products]);
+    }, [combo, safeProducts]);
 
     const [form, setForm] = useState(initial);
     const [selectedProductId, setSelectedProductId] = useState('');
@@ -131,7 +133,7 @@ function ComboDialog({ open, mode, combo, products, onClose, onSaved, routeUrl }
 
     if (!open) return null;
 
-    const productMap = new Map(products.map((item) => [String(item.id), item]));
+    const productMap = new Map(safeProducts.map((item) => [String(item.id), item]));
     const originalTotal = form.component_items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.unit_price || 0)), 0);
     const difference = originalTotal - Number(form.unit_price || 0);
     const isUpdate = mode === 'update';
@@ -187,7 +189,7 @@ function ComboDialog({ open, mode, combo, products, onClose, onSaved, routeUrl }
         setSaving(true);
         setError('');
         try {
-            const url = isUpdate ? `${routeUrl}/records/${combo._record_id ?? combo.id}` : `${routeUrl}/records`;
+            const url = isUpdate ? `${safeRouteUrl}/records/${combo._record_id ?? combo.id}` : `${safeRouteUrl}/records`;
             await requestJson(url, isUpdate ? 'PUT' : 'POST', { payload });
             onSaved?.();
             onClose();
@@ -267,7 +269,7 @@ function ComboDialog({ open, mode, combo, products, onClose, onSaved, routeUrl }
                     <div className="ps-combo-picker">
                         <select className="form-control" value={selectedProductId} onChange={(event) => { setSelectedProductId(event.target.value); setError(''); }}>
                             <option value="">-- Chọn sản phẩm thêm vào combo --</option>
-                            {products.map((product) => (
+                            {safeProducts.map((product) => (
                                 <option key={product.id} value={product.id}>{product.label ?? product.name}</option>
                             ))}
                         </select>
@@ -330,8 +332,11 @@ function ComboDialog({ open, mode, combo, products, onClose, onSaved, routeUrl }
     );
 }
 
-export default function Page({ schema, rows = [], pagination = {}, routeUrl, filterOptions = {}, pageRuntimeError = null }) {
-    const productOptions = useMemo(() => (filterOptions.products ?? [])
+export default function Page({ schema = {}, rows = [], pagination = {}, routeUrl = '/admin/catalog/combos', filterOptions = {}, pageRuntimeError = null }) {
+    const safeRows = Array.isArray(rows) ? rows : [];
+    const safePagination = pagination && typeof pagination === 'object' ? pagination : {};
+    const safeRouteUrl = routeUrl || '/admin/catalog/combos';
+    const productOptions = useMemo(() => (filterOptions?.products ?? [])
         .filter((product) => product.type !== 'combo')
         .map((product) => ({ ...product, sku: product.sku ?? String(product.label ?? '').match(/\(([^)]+)\)$/)?.[1] ?? '' })), [filterOptions.products]);
 
@@ -344,10 +349,10 @@ export default function Page({ schema, rows = [], pagination = {}, routeUrl, fil
     const [sort, setSort] = useState(currentParam('sort', 'created_desc'));
     const [error, setError] = useState(pageRuntimeError || '');
 
-    const total = Number(pagination.total ?? rows.length ?? 0);
-    const currentPage = Number(pagination.current_page || 1);
-    const lastPage = Number(pagination.last_page || 1);
-    const perPage = Number(pagination.per_page || 20);
+    const total = Number(safePagination.total ?? safeRows.length ?? 0);
+    const currentPage = Number(safePagination.current_page || 1);
+    const lastPage = Number(safePagination.last_page || 1);
+    const perPage = Number(safePagination.per_page || 20);
 
     const visit = (page = 1, override = {}) => {
         const params = new URLSearchParams(window.location.search);
@@ -365,7 +370,7 @@ export default function Page({ schema, rows = [], pagination = {}, routeUrl, fil
         Object.entries(next).forEach(([key, value]) => {
             if (value && !['-1', 'all'].includes(String(value))) params.set(key, String(value)); else params.delete(key);
         });
-        router.get(routeUrl, Object.fromEntries(params.entries()), { preserveState: false, preserveScroll: false, replace: true });
+        router.get(safeRouteUrl, Object.fromEntries(params.entries()), { preserveState: false, preserveScroll: false, replace: true });
     };
 
     const reloadAfterSave = () => {
@@ -377,7 +382,7 @@ export default function Page({ schema, rows = [], pagination = {}, routeUrl, fil
         if (!row?._record_id || !window.confirm(`Xóa combo "${row.name}"?`)) return;
         setError('');
         try {
-            await requestJson(`${routeUrl}/records/${row._record_id}`, 'DELETE');
+            await requestJson(`${safeRouteUrl}/records/${row._record_id}`, 'DELETE');
             router.reload({ preserveScroll: true, only: ['rows', 'pagination'] });
         } catch (exception) {
             setError(exception.message);
@@ -387,7 +392,7 @@ export default function Page({ schema, rows = [], pagination = {}, routeUrl, fil
     const exportUrl = () => {
         const params = new URLSearchParams(window.location.search);
         params.set('export', '1');
-        return `${routeUrl}?${params.toString()}`;
+        return `${safeRouteUrl}?${params.toString()}`;
     };
 
     return (
@@ -459,9 +464,9 @@ export default function Page({ schema, rows = [], pagination = {}, routeUrl, fil
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.length ? rows.map((row, index) => (
+                            {safeRows.length ? safeRows.map((row, index) => (
                                 <tr key={row._record_id ?? row.id}>
-                                    <td className="text-center">{pagination.from ? Number(pagination.from) + index : index + 1}</td>
+                                    <td className="text-center">{safePagination.from ? Number(safePagination.from) + index : index + 1}</td>
                                     <td><strong>{row.code}</strong></td>
                                     <td>{row.name}</td>
                                     <td className="ps-combo-components-cell">{row.components || '—'}</td>
@@ -484,7 +489,7 @@ export default function Page({ schema, rows = [], pagination = {}, routeUrl, fil
                 </div>
 
                 <div className="pushsale-pagination-wrap ps-combo-pagination">
-                    <div className="pushsale-record-info">Hiển thị <b>{pagination.from ?? 0}</b> - <b>{pagination.to ?? 0}</b> / <b>{numberFormatter.format(total)}</b> combo</div>
+                    <div className="pushsale-record-info">Hiển thị <b>{safePagination.from ?? 0}</b> - <b>{safePagination.to ?? 0}</b> / <b>{numberFormatter.format(total)}</b> combo</div>
                     <ul className="pagination pagination-sm no-margin">
                         <li className={currentPage <= 1 ? 'disabled' : ''}><button type="button" onClick={() => currentPage > 1 && visit(1)}>«</button></li>
                         <li className={currentPage <= 1 ? 'disabled' : ''}><button type="button" onClick={() => currentPage > 1 && visit(currentPage - 1)}>‹</button></li>
@@ -496,7 +501,7 @@ export default function Page({ schema, rows = [], pagination = {}, routeUrl, fil
                         const params = new URLSearchParams(window.location.search);
                         params.set('page', '1');
                         params.set('per_page', event.target.value);
-                        router.get(routeUrl, Object.fromEntries(params.entries()), { preserveState: false, preserveScroll: false, replace: true });
+                        router.get(safeRouteUrl, Object.fromEntries(params.entries()), { preserveState: false, preserveScroll: false, replace: true });
                     }}><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option></select><span>dòng</span></label>
                 </div>
             </div>
@@ -507,7 +512,7 @@ export default function Page({ schema, rows = [], pagination = {}, routeUrl, fil
                 mode={dialog.mode}
                 combo={dialog.combo}
                 products={productOptions}
-                routeUrl={routeUrl}
+                routeUrl={safeRouteUrl}
                 onClose={() => setDialog({ open: false, mode: 'create', combo: null })}
                 onSaved={reloadAfterSave}
             />

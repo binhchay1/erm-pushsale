@@ -10,8 +10,12 @@ use App\Models\LandingConnectionSale;
 use App\Models\LandingConnectionSource;
 use App\Models\MarketingSource;
 use App\Models\Warehouse;
+use App\Models\WarehouseInventory;
+use App\Models\WarehouseInventoryMovement;
+use App\Models\Pushsale\WarehouseVoucher;
 use App\Services\Orders\OrderClosingService;
 use App\Services\Shipping\ShippingWebhookService;
+use Database\Seeders\FullBusinessDemoSeeder;
 use App\Models\LeadIngestion;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -253,7 +257,9 @@ class StagingTestService
                 $hasPhpError = str_contains($body, 'Whoops')
                     || str_contains($body, 'Symfony\\Component\\ErrorHandler')
                     || str_contains($body, 'Illuminate\\Database')
-                    || str_contains($body, 'Stack trace');
+                    || str_contains($body, 'Stack trace')
+                    || str_contains($body, 'Trang này đang thiếu dữ liệu')
+                    || str_contains($body, 'Không tải được dữ liệu bộ lọc');
 
                 $ok = $response->status() >= 200 && $response->status() < 400 && ! $hasPhpError;
 
@@ -293,6 +299,19 @@ class StagingTestService
             'failed_results' => $failed,
             'results' => $results,
         ];
+    }
+
+
+    /** @return array<string, mixed> */
+    public function scanRoutableViewRoutes(bool $queryNoise = true, int $limit = 320): array
+    {
+        $urls = $this->routableViewUrls($queryNoise, $limit);
+        $result = $this->scanPages($urls, false);
+        $result['route_smoke'] = true;
+        $result['query_noise'] = $queryNoise;
+        $result['generated_urls'] = $urls;
+
+        return $result;
     }
 
     /** @return array<string, mixed> */
@@ -594,7 +613,7 @@ class StagingTestService
         ]);
 
         try {
-            return $this->runArtisan('db:seed', ['--force' => true]);
+            return $this->runArtisan('db:seed', ['--class' => FullBusinessDemoSeeder::class, '--force' => true]);
         } finally {
             config([
                 'reporting.enabled' => $reportingEnabled,
@@ -610,6 +629,10 @@ class StagingTestService
             'companies' => [Company::class, 'companies'],
             'users' => [User::class, 'users'],
             'products' => [Product::class, 'products'],
+            'warehouses' => [Warehouse::class, 'warehouses'],
+            'inventories' => [WarehouseInventory::class, 'warehouse_inventories'],
+            'inventory_movements' => [WarehouseInventoryMovement::class, 'warehouse_inventory_movements'],
+            'warehouse_vouchers' => [WarehouseVoucher::class, 'warehouse_vouchers'],
             'landing_connections' => [LandingConnection::class, 'landing_connections'],
             'lead_ingestions' => [LeadIngestion::class, 'lead_ingestions'],
             'orders' => [Order::class, 'orders'],
@@ -713,6 +736,170 @@ class StagingTestService
         }
 
         return $this->normalizeUrls($urls);
+    }
+
+
+    /** @return list<string> */
+    private function routableViewUrls(bool $queryNoise = true, int $limit = 320): array
+    {
+        $urls = [];
+
+        foreach (Route::getRoutes() as $route) {
+            if (! in_array('GET', $route->methods(), true)) {
+                continue;
+            }
+
+            $uri = trim($route->uri(), '/');
+            $name = (string) ($route->getName() ?? '');
+            if ($this->shouldSkipRouteSmoke($uri, $name)) {
+                continue;
+            }
+
+            $materialized = $this->materializeRouteUri($uri);
+            if ($materialized === null) {
+                continue;
+            }
+
+            $url = '/'.ltrim($materialized, '/');
+            $url = $url === '/' ? '/' : rtrim($url, '/');
+            if ($queryNoise && $this->shouldAppendRouteSmokeQuery($url)) {
+                $separator = str_contains($url, '?') ? '&' : '?';
+                $url .= $separator.http_build_query([
+                    '_qa_route_smoke' => 1,
+                    'page' => 1,
+                    'per_page' => 20,
+                    'search' => 'QA route smoke',
+                    'sort' => 'created_desc',
+                ]);
+            }
+
+            $urls[] = $url;
+            if (count($urls) >= max(1, $limit)) {
+                break;
+            }
+        }
+
+        return $this->normalizeUrls($urls);
+    }
+
+    private function shouldAppendRouteSmokeQuery(string $url): bool
+    {
+        return str_starts_with($url, '/admin/')
+            || str_starts_with($url, '/bao-cao/')
+            || str_starts_with($url, '/ld/')
+            || str_starts_with($url, '/docs');
+    }
+
+    private function shouldSkipRouteSmoke(string $uri, string $name): bool
+    {
+        $path = '/'.ltrim($uri, '/');
+        $lower = strtolower($path.' '.$name);
+
+        foreach ([
+            '/_ignition', '/api/', '/__erm-test', '/broadcasting/', '/sanctum/', '/horizon',
+            '/storage/', '/webhooks/', '/livewire/', '/telescope', '/pulse', '/logout', '/download/',
+        ] as $blocked) {
+            if (str_contains($lower, $blocked)) {
+                return true;
+            }
+        }
+
+        return str_contains($lower, 'password')
+            || str_contains($lower, 'verification')
+            || str_contains($lower, 'two-factor')
+            || str_contains($lower, 'signed')
+            || str_contains($lower, 'token}');
+    }
+
+    private function materializeRouteUri(string $uri): ?string
+    {
+        if ($uri === '') {
+            return '/';
+        }
+
+        $path = preg_replace_callback('/\{([^}:?]+)[^}]*\}/', function (array $matches) use ($uri): string {
+            $value = $this->sampleRouteParameter((string) $matches[1], $uri);
+
+            return $value === null ? '__SKIP_ROUTE_SMOKE__' : rawurlencode((string) $value);
+        }, $uri);
+
+        if (! $path || str_contains($path, '__SKIP_ROUTE_SMOKE__')) {
+            return null;
+        }
+
+        return $path;
+    }
+
+    private function sampleRouteParameter(string $name, string $uri): string|int|null
+    {
+        $key = Str::of($name)->lower()->snake()->toString();
+
+        return match ($key) {
+            'product' => $this->sampleModelId(Product::class) ?? 1,
+            'warehouse' => $this->sampleModelId(Warehouse::class) ?? 1,
+            'order' => $this->sampleModelId(Order::class) ?? 1,
+            'lead_ingestion' => $this->sampleModelId(LeadIngestion::class) ?? 1,
+            'shipment' => $this->sampleModelId(Shipment::class) ?? 1,
+            'user', 'admin' => $this->sampleModelId(User::class) ?? 1,
+            'company', 'company_id' => $this->sampleModelId(Company::class) ?? 1,
+            'category' => $this->sampleTableId('product_categories') ?? 1,
+            'attribute' => $this->sampleTableId('product_attributes') ?? 1,
+            'attribute_value' => $this->sampleTableId('product_attribute_values') ?? 1,
+            'inventory' => $this->sampleTableId('warehouse_inventories') ?? 1,
+            'campaign' => $this->sampleTableId('customer_care_campaigns') ?? 1,
+            'report' => 'business',
+            'id' => 1,
+            'province' => '01',
+            'district' => '001',
+            'provider' => 'manual',
+            'record' => $this->sampleRecordForRoute($uri),
+            default => null,
+        };
+    }
+
+    private function sampleRecordForRoute(string $uri): int|null
+    {
+        $lower = strtolower($uri);
+        if (str_contains($lower, 'catalog/combos')) {
+            return $this->sampleProductIdByType('combo');
+        }
+        if (str_contains($lower, 'warehouse/vouchers')) {
+            return $this->sampleModelId(WarehouseVoucher::class);
+        }
+
+        return null;
+    }
+
+    /** @param class-string $model */
+    private function sampleModelId(string $model): ?int
+    {
+        try {
+            return (int) ($this->modelQueryWithoutTenant($model)->orderBy('id')->value('id') ?: 0) ?: null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function sampleProductIdByType(string $type): ?int
+    {
+        try {
+            return (int) (Product::withoutTenant()->where('type', $type)->orderBy('id')->value('id') ?: 0) ?: null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function sampleTableId(string $table): ?int
+    {
+        try {
+            if (! Schema::hasTable($table)) {
+                return null;
+            }
+
+            return (int) (DB::table($table)->orderBy('id')->value('id') ?: 0) ?: null;
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /** @param list<string> $urls

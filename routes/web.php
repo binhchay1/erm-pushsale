@@ -334,6 +334,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::post('products/attribute-values', [ProductController::class, 'storeAttributeValue'])->name('products.attribute-values.store');
         Route::patch('products/attribute-values/{attributeValue}', [ProductController::class, 'updateAttributeValue'])->name('products.attribute-values.update');
         Route::delete('products/attribute-values/{attributeValue}', [ProductController::class, 'destroyAttributeValue'])->name('products.attribute-values.destroy');
+        Route::patch('products/{product}/business-status', [ProductController::class, 'updateBusinessStatus'])->name('products.business-status');
         Route::resource('products', ProductController::class)->except(['show']);
         Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
         Route::delete('leads/{leadIngestion}', [LeadIngestionController::class, 'destroy'])->name('leads.destroy');

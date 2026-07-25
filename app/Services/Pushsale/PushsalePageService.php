@@ -2838,8 +2838,22 @@ class PushsalePageService
         $dateFrom = trim((string) $request->query('date_from', ''));
         $dateTo = trim((string) $request->query('date_to', ''));
         if ($dateFrom !== '' || $dateTo !== '') {
-            $from = $dateFrom !== '' ? CarbonImmutable::parse($dateFrom)->startOfDay() : null;
-            $to = $dateTo !== '' ? CarbonImmutable::parse($dateTo)->endOfDay() : null;
+            try {
+                $from = $dateFrom !== '' ? CarbonImmutable::parse($dateFrom)->startOfDay() : null;
+            } catch (Throwable) {
+                $from = null;
+            }
+
+            try {
+                $to = $dateTo !== '' ? CarbonImmutable::parse($dateTo)->endOfDay() : null;
+            } catch (Throwable) {
+                $to = null;
+            }
+
+            if (! $from && ! $to) {
+                return $rows->values();
+            }
+
             $dateType = trim((string) $request->query('date_type', ''));
             $dateKey = match ($dateType) {
                 'SaleTacNghiepNgayCapNhat' => '_sale_operation_updated_at',

@@ -152,6 +152,7 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
     const [taxonomySearch, setTaxonomySearch] = useState('');
     const [taxonomyAttributeFilter, setTaxonomyAttributeFilter] = useState('');
     const [taxonomyPage, setTaxonomyPage] = useState(1);
+    const [statusUpdating, setStatusUpdating] = useState(null);
     const productForm = useForm(emptyProduct);
     const taxonomyForm = useForm(emptyTaxonomy);
     const rows = products?.data ?? [];
@@ -265,6 +266,18 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
     const deleteSelected = () => {
         if (!selected.size || !window.confirm(`Xóa ${selected.size} sản phẩm đã chọn?`)) return;
         [...selected].forEach((id) => router.delete(`/admin/products/${id}`, { preserveScroll: true, onFinish: () => setSelected(new Set()) }));
+    };
+
+    const toggleBusinessStatus = (row, event) => {
+        if (!row?.id || statusUpdating === row.id) return;
+
+        const stopBusiness = event.target.checked;
+        setStatusUpdating(row.id);
+        router.patch(`/admin/products/${row.id}/business-status`, { is_active: !stopBusiness }, {
+            preserveScroll: true,
+            preserveState: false,
+            onFinish: () => setStatusUpdating(null),
+        });
     };
 
     const exportCsv = () => {
@@ -405,7 +418,7 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                                 <td className="text-center">{row.vat_percent} %</td>
                                 <td className="text-center">{row.vat_code}</td>
                                 <td className="text-center">{formatNumber(row.weight_grams)}</td>
-                                <td className="text-center"><input type="checkbox" readOnly checked={!row.is_active} /></td>
+                                <td className="text-center ps-product-status-cell"><label className="ps-product-status-toggle" title={row.is_active ? `Ngừng kinh doanh ${row.name}` : `Mở kinh doanh lại ${row.name}`}><input type="checkbox" checked={!row.is_active} disabled={statusUpdating === row.id} onChange={(event) => toggleBusinessStatus(row, event)} /></label></td>
                                 <td className="text-center">{row.available_marketing ? <i className="fa fa-check text-green" /> : ''}</td>
                                 <td className="text-center">{row.available_sale ? <i className="fa fa-check text-green" /> : ''}</td>
                                 <td className="text-center">{row.available_care ? <i className="fa fa-check text-green" /> : ''}</td>

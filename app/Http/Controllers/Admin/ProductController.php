@@ -270,6 +270,7 @@ class ProductController extends Controller
     {
         $data = $request->validated();
         $hasCategoryIds = $request->has('category_ids');
+        $hasAttributeValueIds = $request->has('attribute_value_ids');
         $categoryIds = $data['category_ids'] ?? [];
         $attributeValueIds = $data['attribute_value_ids'] ?? [];
         unset($data['category_ids'], $data['attribute_value_ids']);
@@ -291,6 +292,33 @@ class ProductController extends Controller
         }
 
         return redirect()->route('admin.products.index')->with('success', __('messages.product_updated'));
+    }
+
+
+    public function updateBusinessStatus(Request $request, Product $product): RedirectResponse
+    {
+        abort_unless($request->user()?->isAdmin(), 403);
+
+        $data = $request->validate([
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        $isActive = (bool) $data['is_active'];
+
+        $product->forceFill([
+            'is_active' => $isActive,
+            // Khi ngừng kinh doanh, sản phẩm không được đưa vào các luồng phát sinh mới.
+            // Dữ liệu lịch sử đơn, tồn kho và báo cáo cũ vẫn giữ nguyên để đối soát.
+            'available_marketing' => $isActive,
+            'available_sale' => $isActive,
+            'available_care' => $isActive,
+        ])->save();
+
+        $message = $isActive
+            ? sprintf('Đã mở kinh doanh lại mặt hàng "%s".', $product->name)
+            : sprintf('Đã ngừng kinh doanh mặt hàng "%s". Sản phẩm sẽ không còn được chọn cho marketing, sale, CSKH và các luồng phát sinh mới.', $product->name);
+
+        return back()->with('success', $message);
     }
 
     public function destroy(Product $product): RedirectResponse

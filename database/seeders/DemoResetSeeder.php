@@ -11,34 +11,88 @@ use Illuminate\Support\Facades\Schema;
  * trước khi seed lại từ đầu, đảm bảo `php artisan db:seed --force`
  * luôn cho ra một bộ dữ liệu đồng bộ, kể cả trên production.
  *
- * Giữ lại: cấu hình kết nối nền tảng (integration_connections),
- * cấu hình hãng vận chuyển (shipping_partner_connections), cache, queue.
+ * Giữ lại: cache/queue/job tables và các cấu hình tích hợp thật như
+ * integration_connections, shipping_partner_connections, settings.
  */
 class DemoResetSeeder extends Seeder
 {
     /** Thứ tự không quan trọng vì đã tắt kiểm tra khóa ngoại. */
     private const TABLES = [
+        // Reporting/caches first so late model observers cannot see stale facts.
+        'report_query_snapshots',
+        'report_daily_inventory_facts',
+        'report_daily_cashflow_facts',
+        'report_daily_product_facts',
+        'report_daily_order_facts',
+        'report_daily_lead_facts',
+        'report_dirty_dates',
+        'report_daily_closures',
+        'analytics_cold_records',
+        'analytics_archive_manifests',
+
+        // Customer/operation audit trails.
         'activity_logs',
+        'order_operation_histories',
+        'customer_internal_messages',
+        'pancake_customer_messages',
+        'pancake_sync_records',
+        'pancake_user_mappings',
+        'customer_phone_locks',
         'landing_sessions',
         'user_notifications',
+        'data_distribution_batches',
+
+        // Warehouse / shipping / reconciliation.
+        'warehouse_return_receipt_lines',
+        'warehouse_return_receipts',
         'warehouse_inventory_movements',
+        'warehouse_voucher_lines',
+        'warehouse_vouchers',
         'warehouse_incident_reports',
         'warehouse_inventories',
+        'shipping_status_events',
         'shipping_api_logs',
         'shipments',
         'shipping_webhook_events',
+        'carrier_settlement_lines',
+        'carrier_settlement_batches',
+
+        // Marketplace / invoice / failed partner rows.
         'ecommerce_product_links',
         'ecommerce_shop_connections',
         'failed_partner_orders',
+        'electronic_invoice_jobs',
+        'electronic_invoice_configs',
+
+        // Lead -> order flow.
         'lead_ingestions',
+        'inbound_events',
         'order_items',
         'orders',
+        'landing_connection_sales',
+        'landing_connection_products',
+        'landing_connection_sources',
+        'landing_connections',
+
+        // Catalog, settings and Pushsale business pages.
         'product_combo_items',
         'facebook_page_mappings',
+        'partner_connections',
+        'company_subscription_histories',
+        'work_shifts',
+        'operation_workflows',
+        'operation_categories',
+        'lead_distribution_rules',
+        'care_distribution_rules',
+        'report_access_rules',
+        'seeding_phone_numbers',
+        'customer_care_campaigns',
+        'expenses',
+        'expense_categories',
+        'expense_groups',
+        'expense_units',
         'discount_cod_rules',
         'phone_blacklists',
-        'electronic_invoice_configs',
-        'electronic_invoice_jobs',
         'annual_business_plan_metrics',
         'revenue_bonus_rules',
         'monthly_kpi_plans',
@@ -48,18 +102,20 @@ class DemoResetSeeder extends Seeder
         'product_attribute_values',
         'product_attributes',
         'product_categories',
+        'marketing_source_daily_metrics',
         'marketing_sources',
+        'legacy_module_records',
         'products',
         'warehouses',
+
+        // Org / auth / tenant.
+        'user_operational_profiles',
         'teams',
         'user_preferences',
         'personal_access_tokens',
         'sessions',
         'users',
         'companies',
-        'inbound_events',
-        'carrier_settlement_lines',
-        'carrier_settlement_batches',
     ];
 
     public function run(): void
