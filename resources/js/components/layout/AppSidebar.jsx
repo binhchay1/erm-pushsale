@@ -109,7 +109,7 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose, on
                                 onNavigate?.();
                             }}
                         >
-                            <span style={!childActive && hoverSecondKey === key ? { color: '#fff', WebkitTextFillColor: '#fff' } : undefined}>{child.title}</span>
+                            <span>{child.title}</span>
                             {(child.children?.length ?? 0) > 0 && <i className="fa fa-angle-right" aria-hidden="true" />}
                         </LeafLink>
                     </div>

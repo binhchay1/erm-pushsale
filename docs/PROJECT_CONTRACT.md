@@ -101,3 +101,8 @@ Because AdminLTE legacy CSS can override hover selectors, `AppSidebar.jsx` also 
 - Fallback SĐT không được nối nhầm đơn cũ: chỉ auto append khi order còn cửa sổ hold; nếu không đủ điều kiện thì ghi packet review.
 - Mọi payload landing phải lưu `_landing_webhook_mapping` trong `lead_ingestions.payload` để thấy đủ field đã nhận, item đã map, và field sản phẩm chưa map.
 - Không trả 500/422 chỉ vì chưa map sản phẩm. Trường hợp này trả `202 Accepted`, `mapping_review=true`, lưu `needs_review`.
+
+## v129 Sidebar runtime guard
+
+- `AppSidebar.jsx` không được dùng biến của scope menu cấp 2 trong `ThirdLevelFlyout`.
+- Khi sửa menu, phải kiểm tra runtime bằng thao tác mở hamburger + hover/click menu cấp 2/cấp 3 trên ít nhất một trang như `/admin/products/import`.
