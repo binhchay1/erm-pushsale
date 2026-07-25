@@ -23,6 +23,9 @@ const budgetTypeOptions = [
 ];
 
 const formatMoney = (value) => new Intl.NumberFormat('vi-VN').format(Number(value || 0));
+const MAX_BUDGET = 999999999999999;
+const parseMoney = (value) => Math.min(MAX_BUDGET, Number(String(value ?? '').replace(/[^0-9]/g, '') || 0));
+const formatMoneyInput = (value) => formatMoney(parseMoney(value));
 
 function defaultDates(row = {}) {
     const pad = (value) => String(value).padStart(2, '0');
@@ -58,11 +61,12 @@ export default function LandingApprovalPage({
 }) {
     const [selected, setSelected] = useState(null);
     const [status, setStatus] = useState('pending');
+    const [searchDraft, setSearchDraft] = useState('');
     const [search, setSearch] = useState('');
     const form = useForm({
         product_ids: [],
         budget_type: 'total',
-        budget_amount: 0,
+        budget_amount: '0',
         budget_start_date: '',
         budget_end_date: '',
     });
@@ -90,7 +94,7 @@ export default function LandingApprovalPage({
         form.setData({
             product_ids: (row.product_ids || []).map(Number),
             budget_type: row.budget_type || 'total',
-            budget_amount: Number(row.budget || 0),
+            budget_amount: formatMoney(row.budget || 0),
             budget_start_date: dates.start,
             budget_end_date: dates.end,
         });
@@ -100,10 +104,18 @@ export default function LandingApprovalPage({
     const approve = (event) => {
         event.preventDefault();
         if (!selected) return;
-        form.post(`${approveBaseUrl}/${selected.id}/approve`, {
+        form.transform((data) => ({
+            ...data,
+            budget_amount: parseMoney(data.budget_amount),
+        })).post(`${approveBaseUrl}/${selected.id}/approve`, {
             preserveScroll: true,
             onSuccess: () => setSelected(null),
         });
+    };
+
+    const applyFilters = (event) => {
+        event?.preventDefault();
+        setSearch(searchDraft);
     };
 
     const reject = (row) => {
@@ -116,7 +128,7 @@ export default function LandingApprovalPage({
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title="Duyệt kết nối dữ liệu" />
             <section className="ps-adminlte-page pslc-page pslc-approval-page" data-page-code={activeMenuCode}>
-                <form className="ps-page-header ps-page-header-v119 pslc-approval-header" onSubmit={(event) => event.preventDefault()}>
+                <form className="ps-page-header ps-page-header-v119 pslc-approval-header" onSubmit={applyFilters}>
                     <div className="ps-page-header-main">
                         <div className="ps-title ps-page-title">Duyệt kết nối dữ liệu</div>
                         <div className="ps-page-primary-filters pslc-approval-filters">
@@ -131,7 +143,8 @@ export default function LandingApprovalPage({
                                 searchable={false}
                                 onChange={(value) => setStatus(value || 'pending')}
                             />
-                            <input className="form-control" value={search} placeholder="Tên nguồn dữ liệu / marketing / URL" onChange={(event) => setSearch(event.target.value)} />
+                            <input className="form-control pslc-approval-keyword" value={searchDraft} placeholder="Tên nguồn dữ liệu / marketing / URL" onChange={(event) => setSearchDraft(event.target.value)} />
+                            <button className="btn btn-primary ps-btn-search" type="submit"><i className="fa fa-search" /> Tìm kiếm</button>
                         </div>
                     </div>
                 </form>
@@ -142,23 +155,23 @@ export default function LandingApprovalPage({
                             <thead>
                                 <tr>
                                     <th className="text-center pslc-col-stt">STT</th>
-                                    <th className="text-center">Marketing</th>
-                                    <th className="text-center pslc-col-source">Tên nguồn kết nối<br /><span>Url nguồn dữ liệu</span></th>
-                                    <th className="text-center">Kênh quảng cáo</th>
-                                    <th className="text-center">Sản phẩm / gói sản phẩm</th>
-                                    <th className="text-center">Ngân sách</th>
-                                    <th className="text-center">Trạng thái</th>
-                                    <th className="text-center">Cập nhật</th>
-                                    <th className="text-center">Thao tác</th>
+                                    <th className="text-center pslc-col-marketer">Marketing</th>
+                                    <th className="text-center pslc-col-source pslc-approval-source">Tên nguồn kết nối<br /><span>Url nguồn dữ liệu</span></th>
+                                    <th className="text-center pslc-approval-channel">Kênh quảng cáo</th>
+                                    <th className="text-center pslc-approval-products">Sản phẩm / gói sản phẩm</th>
+                                    <th className="text-center pslc-approval-budget">Ngân sách</th>
+                                    <th className="text-center pslc-approval-status">Trạng thái</th>
+                                    <th className="text-center pslc-approval-updated">Cập nhật</th>
+                                    <th className="text-center pslc-approval-actions-col">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {rows.length ? rows.map((row, index) => (
                                     <tr key={row.id}>
                                         <td className="text-center">{index + 1} -</td>
-                                        <td className="text-center">{row.marketer || '—'}<br />{row.marketer_email && <span className="small-tip">({row.marketer_email})</span>}</td>
-                                        <td className="text-left">{row.name}<br /><span className="small-tip">{row.source_url || row.webhook_url || '—'}</span></td>
-                                        <td className="text-center">{channelLabels[row.ad_channel] || row.ad_channel || '—'}</td>
+                                        <td className="text-center pslc-td-marketer">{row.marketer || '—'}<br />{row.marketer_email && <span className="small-tip">({row.marketer_email})</span>}</td>
+                                        <td className="text-left pslc-td-source">{row.name}<br /><span className="small-tip">{row.source_url || row.webhook_url || '—'}</span></td>
+                                        <td className="text-center pslc-type-cell"><div>Nguồn dữ liệu</div><div className="pslc-channel">({channelLabels[row.ad_channel] || row.ad_channel || '—'})</div></td>
                                         <td className="text-left">{row.products?.length ? row.products.map((item) => <div key={item.id}>{item.product_name}</div>) : <span className="text-muted">Chưa gắn sản phẩm/gói</span>}</td>
                                         <td className="text-right">{formatMoney(row.budget)} đ<br /><span className="small-tip">{row.budget_type === 'daily' ? 'Theo ngày' : 'Tổng'}</span></td>
                                         <td className="text-center">
@@ -204,7 +217,7 @@ export default function LandingApprovalPage({
                             <PushsaleSelect options={budgetTypeOptions} value={form.data.budget_type} searchable={false} onChange={(value) => form.setData('budget_type', value || 'total')} />
 
                             <label>Ngân sách</label>
-                            <input className="form-control text-right" type="number" min="0" value={form.data.budget_amount} onChange={(event) => form.setData('budget_amount', event.target.value)} />
+                            <div className="pslc-money-input"><input className="form-control text-right" type="text" inputMode="numeric" value={form.data.budget_amount} onChange={(event) => form.setData('budget_amount', formatMoneyInput(event.target.value))} /><span>đ</span></div>
 
                             <label>Từ ngày</label>
                             <input className="form-control" type="date" value={form.data.budget_start_date || ''} onChange={(event) => form.setData('budget_start_date', event.target.value)} />

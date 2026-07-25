@@ -83,3 +83,40 @@ html body.pushsale-app-body .pushsale-route-loading {
     box-shadow: 0 2px 8px rgba(0, 0, 0, .10);
     pointer-events: none;
 }
+
+/* v126 — absolute last sidebar hover reset, covers link and li layers. */
+html body .pushsale-main-sidebar .ul2 > li.li2:hover,
+html body .main-sidebar.pushsale-main-sidebar .ul2 > li.li2:hover,
+html body .pushsale-main-sidebar .sidebar-menu .treeview-menu > li.li2:hover {
+    background: #0b8ff3 !important;
+    background-color: #0b8ff3 !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    box-shadow: none !important;
+}
+html body .pushsale-main-sidebar .ul2 > li.li2:hover > .a2,
+html body .pushsale-main-sidebar .ul2 > li.li2:hover > a,
+html body .pushsale-main-sidebar .ul2 > li.li2:hover > button,
+html body .main-sidebar.pushsale-main-sidebar .ul2 > li.li2:hover > .a2,
+html body .pushsale-main-sidebar .sidebar-menu .treeview-menu > li.li2:hover > .a2 {
+    display: block !important;
+    width: 100% !important;
+    background: #0b8ff3 !important;
+    background-color: #0b8ff3 !important;
+    background-image: none !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+html body .pushsale-main-sidebar .ul2 > li.li2:hover > .a2 *,
+html body .pushsale-main-sidebar .ul2 > li.li2:hover > a *,
+html body .pushsale-main-sidebar .ul2 > li.li2:hover > button *,
+html body .main-sidebar.pushsale-main-sidebar .ul2 > li.li2:hover > .a2 * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}

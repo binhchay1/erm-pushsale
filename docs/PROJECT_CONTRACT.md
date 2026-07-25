@@ -76,3 +76,12 @@ Second-level menu leaves and second-level parents must use one visual contract:
 - no top/bottom blue border artifacts.
 
 Because AdminLTE legacy CSS can override hover selectors, `AppSidebar.jsx` also applies a React hover class/inline fallback. Do not remove this until AdminLTE CSS is fully retired.
+
+## v126 landing approval UI contract
+
+- Menu 2.4.1 only creates/edits landing source information. Product/package and budget are not part of this form.
+- `request_approval` is a UI/business flag for the source table `Duyệt` checkbox. It does not replace final approval.
+- Menu 2.4.3 is the only place that approves landing source, attaches product/package, and syncs legacy `marketing_sources`.
+- Money inputs in approval UI must display VNĐ format and submit sanitized integer values to Laravel.
+- Pushsale table URL fields should be borderless by default; focus/double-click may show border/shadow for copy.
+

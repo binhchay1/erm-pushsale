@@ -403,7 +403,8 @@ class LandingConnectionManager
                 'version' => 2,
                 'notes' => $data['notes'] ?? null,
                 'pending_approval_flow' => true,
-            ]),
+                'request_approval' => (bool) ($data['request_approval'] ?? true),
+            ], static fn ($value): bool => $value !== null && $value !== ''),
         ];
     }
 }

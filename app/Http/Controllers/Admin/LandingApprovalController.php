@@ -52,12 +52,16 @@ class LandingApprovalController extends Controller
 
     public function approve(Request $request, LandingConnection $connection): RedirectResponse
     {
+        $request->merge([
+            'budget_amount' => $this->moneyToInt($request->input('budget_amount')),
+        ]);
+
         abort_unless($request->user() && ($request->user()->isAdmin() || $request->user()->allows(\App\Enums\PermissionArea::Marketing, \App\Enums\PermissionLevel::Full) || $request->user()->allows(\App\Enums\PermissionArea::Integrations, \App\Enums\PermissionLevel::Full)), 403);
 
         $validated = $request->validate([
             'product_ids' => ['required', 'array', 'min:1', 'max:50'],
             'product_ids.*' => ['required', 'integer', 'distinct', Rule::exists('products', 'id')->where(fn ($query) => $query
-                ->where('company_id', $request->user()->company_id)
+                ->where('company_id', (int) $connection->company_id)
                 ->where('is_active', true)
                 ->where('available_marketing', true))],
             'budget_type' => ['nullable', Rule::in(['total', 'daily'])],
@@ -128,6 +132,22 @@ class LandingApprovalController extends Controller
         $this->manager->reject($connection, (string) $validated['reason'], $request->user());
 
         return back()->with('success', __('messages.landing_rejected'));
+    }
+
+
+    private function moneyToInt(mixed $value): int
+    {
+        if (is_int($value)) {
+            return max(0, $value);
+        }
+
+        if (is_float($value)) {
+            return max(0, (int) $value);
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', (string) $value) ?: '0';
+
+        return max(0, min(999999999999999, (int) $digits));
     }
 
     /** @return array<string, mixed> */

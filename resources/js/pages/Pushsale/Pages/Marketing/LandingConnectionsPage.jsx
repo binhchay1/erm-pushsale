@@ -99,7 +99,8 @@ const blankForm = (marketerId = '') => {
         budget_start_date: budgetDates.start,
         budget_end_date: budgetDates.end,
         success_url: '',
-        manual_import: false,
+        manual_import: true,
+        request_approval: true,
         is_approved: false,
         is_active: true,
         notes: '',
@@ -155,6 +156,7 @@ function mergeUpsellSources(currentSources = [], urls = []) {
 
 function cleanPayload(data) {
     const payload = { ...data };
+    payload.request_approval = payload.request_approval ?? true;
     const urls = splitUpsellUrls(payload.upsell_urls_text);
     const sources = mergeUpsellSources(payload.sources, urls);
     const main = sources.find((source) => source.source_type === 'main') ?? blankSource('main');
@@ -295,7 +297,8 @@ export default function LandingConnectionsPage({
             budget_start_date: row.budget_start_date ?? defaultBudgetDates().start,
             budget_end_date: row.budget_end_date ?? defaultBudgetDates().end,
             success_url: row.success_url ?? '',
-            manual_import: Boolean(row.manual_import),
+            manual_import: Boolean(row.manual_import ?? true),
+            request_approval: Boolean(row.request_approval ?? true),
             is_approved: Boolean(row.is_approved),
             is_active: Boolean(row.is_active),
             notes: row.notes ?? '',
@@ -459,16 +462,16 @@ export default function LandingConnectionsPage({
                                 <thead>
                                     <tr>
                                         <th className="text-center pslc-col-stt"><input type="checkbox" checked={rows.length > 0 && rows.every((row) => selected.has(row.id))} onChange={toggleAll} /><br />STT</th>
-                                        <th className="text-center">Marketing</th>
+                                        <th className="text-center pslc-col-marketer">Marketing</th>
                                         <th className="text-center pslc-col-source">Tên nguồn kết nối<br /><span>Url nguồn dữ liệu</span></th>
-                                        <th className="text-center no-wrap">Loại kết nối<br /><span>Kênh quảng cáo</span></th>
+                                        <th className="text-center no-wrap pslc-col-type">Loại kết nối<br /><span>Kênh quảng cáo</span></th>
                                         <th className="text-center pslc-col-products">Sản phẩm</th>
-                                        <th className="text-center">Ưu tiên sale</th>
-                                        <th className="text-center">Cấu hình chia số</th>
+                                        <th className="text-center pslc-col-sales">Ưu tiên sale</th>
+                                        <th className="text-center pslc-col-allocation">Cấu hình chia số</th>
                                         <th className="text-center pslc-col-api">Url kết nối V2</th>
-                                        <th className="text-center" title="Nhập thủ công">Nhập TC</th>
-                                        <th className="text-center">Duyệt</th>
-                                        <th className="text-center">Cập nhật</th>
+                                        <th className="text-center pslc-col-small" title="Nhập thủ công">Nhập TC</th>
+                                        <th className="text-center pslc-col-small">Duyệt</th>
+                                        <th className="text-center pslc-col-updated">Cập nhật</th>
                                         <th className="text-center pslc-col-add">
                                             {canManage ? <button type="button" className="btn-icon pslc-add-link" onClick={openCreate}><i className="fa fa-plus" /> <span>Thêm</span></button> : null}
                                         </th>
@@ -482,19 +485,25 @@ export default function LandingConnectionsPage({
                                                 <td className="text-center"><input type="checkbox" checked={selected.has(row.id)} onChange={() => toggleSelected(row.id)} /><br />{(connections.from ?? 1) + index} -</td>
                                                 <td className="text-center pslc-td-marketer">{row.marketer ?? '—'}<br />{row.marketer_email && <span className="small-tip">({row.marketer_email})</span>}</td>
                                                 <td className="text-left pslc-td-source">{row.name}<br /><span className="small-tip">{mainSource?.source_url ?? '—'}</span></td>
-                                                <td className="text-center">Nguồn dữ liệu<div className="pslc-channel">({channelOptions.find((item) => item.value === row.ad_channel)?.label ?? row.ad_channel ?? 'Facebook ads'})</div></td>
+                                                <td className="text-center pslc-type-cell"><div>Nguồn dữ liệu</div><div className="pslc-channel">({channelOptions.find((item) => item.value === row.ad_channel)?.label ?? row.ad_channel ?? 'Facebook ads'})</div></td>
                                                 <td className="text-left pslc-products-cell">{row.products?.length ? row.products.map((mapping) => <div key={mapping.id}>{mapping.product_name}</div>) : <span className="text-muted">Chờ duyệt gắn sản phẩm</span>}</td>
                                                 <td className="text-left">{row.sale_names?.length ? row.sale_names.map((name, saleIndex) => <div key={`${name}-${saleIndex}`}>{saleIndex + 1}. {name}</div>) : ''}</td>
                                                 <td className="text-left">{allocationLabels[row.allocation_method] ?? ''}</td>
                                                 <td className="text-center pslc-api-cell">
-                                                    <input className="form-control" readOnly value={mainSource?.submit_url ?? row.api_base_url ?? ''} />
-                                                    <span className="no-wrap">
+                                                    <input
+                                                        className="form-control pslc-api-copy-input"
+                                                        readOnly
+                                                        value={mainSource?.submit_url ?? row.api_base_url ?? ''}
+                                                        title="Double click để chọn/copy URL"
+                                                        onDoubleClick={(event) => { event.currentTarget.select(); copy(event.currentTarget.value); }}
+                                                    />
+                                                    <div className="pslc-api-actions">
                                                         <button type="button" className="btn-icon" onClick={() => copy(mainSource?.submit_url ?? row.api_base_url)}><i className="fa fa-link" /> Kết nối</button>
                                                         <button type="button" className="btn-icon" onClick={() => copy(mainSource?.submit_url ?? row.api_base_url)}><i className="fa fa-copy" /> Copy</button>
-                                                    </span>
+                                                    </div>
                                                 </td>
                                                 <td className="text-center"><input type="checkbox" readOnly checked={Boolean(row.manual_import)} /></td>
-                                                <td className="text-center"><input type="checkbox" readOnly checked={Boolean(row.is_approved)} /></td>
+                                                <td className="text-center"><input type="checkbox" readOnly checked={Boolean(row.is_approved || row.request_approval)} /></td>
                                                 <td className="text-center">{row.updated_by ?? 'admin'}<br />{row.updated_at}</td>
                                                 <td className="text-center pslc-actions"><button type="button" className="btn-icon" onClick={() => openEdit(row)} title="Chỉnh sửa"><i className="fa fa-edit" /></button></td>
                                             </tr>
@@ -564,9 +573,10 @@ export default function LandingConnectionsPage({
                             </div>
 
                             <div></div>
-                            <div className="pslc-dialog-checks pslc-dialog-checks-single">
-                                <label><input type="checkbox" checked={form.data.manual_import} onChange={(event) => form.setData('manual_import', event.target.checked)} /> Nhập thủ công</label>
-                                <span className="small-tip">Duyệt sản phẩm/gói và ngân sách ở menu duyệt kết nối.</span>
+                            <div className="pslc-dialog-checks pslc-dialog-checks-two">
+                                <label><input type="checkbox" checked={Boolean(form.data.manual_import)} onChange={(event) => form.setData('manual_import', event.target.checked)} /> Nhập thủ công</label>
+                                <label><input type="checkbox" checked={Boolean(form.data.request_approval)} onChange={(event) => form.setData('request_approval', event.target.checked)} /> Duyệt</label>
+                                <span className="small-tip">Sản phẩm/gói và ngân sách duyệt ở menu duyệt kết nối.</span>
                             </div>
                         </div>
                         {Object.keys(form.errors).length > 0 && <div className="alert alert-danger pslc-errors">{Object.entries(form.errors).map(([key, message]) => <div key={key}><strong>{key}:</strong> {message}</div>)}</div>}

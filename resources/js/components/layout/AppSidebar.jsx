@@ -294,6 +294,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                     <li
                                                         key={key}
                                                         className={cn('li2', childActive && 'active', flyoutOpen && 'flyout-open', hoverSecondKey === key && !childActive && 'ui-hover')}
+                                                        style={!childActive && hoverSecondKey === key ? { backgroundColor: '#0b8ff3', backgroundImage: 'none', border: 0, boxShadow: 'none' } : undefined}
                                                         onMouseEnter={() => {
                                                             setHoverSecondKey(key);
                                                             if (!hasGrandchildren) closeFlyout();
