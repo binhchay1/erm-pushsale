@@ -40,6 +40,7 @@ class FullBusinessDemoSeeder extends Seeder
         DiscountCodRuleSeeder::class,
         InventorySeeder::class,
         MarketingCampaignSeeder::class,
+        LandingConnectionDemoSeeder::class,
         ManualMarketingContactSeeder::class,
         SalesPipelineSeeder::class,
         PhoneBlacklistSeeder::class,

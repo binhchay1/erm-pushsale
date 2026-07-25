@@ -45,6 +45,8 @@ final class LandingConnectionsController extends Controller
             ->when($request->filled('marketer_user_id'), fn ($query) => $query->where('marketer_user_id', $request->integer('marketer_user_id')))
             ->when($request->filled('product_id'), fn ($query) => $query->whereHas('products', fn ($product) => $product->where('product_id', $request->integer('product_id'))))
             ->when($request->filled('connection_type'), fn ($query) => $query->where('connection_type', $request->string('connection_type')->value()))
+            ->when($request->filled('ad_channel'), fn ($query) => $query->where('ad_channel', $request->string('ad_channel')->value()))
+            ->when($request->filled('approved'), fn ($query) => $query->where('is_approved', $request->boolean('approved')))
             ->when($request->filled('active'), fn ($query) => $query->where('is_active', $request->boolean('active')))
             ->latest('id');
 
@@ -55,7 +57,7 @@ final class LandingConnectionsController extends Controller
 
         return Inertia::render('Pushsale/Pages/Marketing/LandingConnectionsPage', [
             'connections' => $connections,
-            'filters' => $request->only(['search', 'marketer_user_id', 'product_id', 'connection_type', 'active', 'per_page']),
+            'filters' => $request->only(['search', 'marketer_user_id', 'product_id', 'connection_type', 'ad_channel', 'approved', 'active', 'per_page']),
             'routeUrl' => $routeUrl,
             'recordsUrl' => $recordsUrl,
             'marketers' => User::query()->whereIn('role', [UserRole::Marketing, UserRole::Admin])->orderBy('name')->get(['id', 'name', 'email']),

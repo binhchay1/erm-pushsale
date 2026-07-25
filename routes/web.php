@@ -144,6 +144,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::redirect('ld/unit-admin/phone-blacklist', '/admin/security/phone-blacklist', 301);
     Route::redirect('ld/unit-admin/danh-sach-cau-hinh-hddt', '/admin/unit/electronic-invoice-configs', 301);
     Route::get('ld/unit-admin/cau-hinh-giao-hang', [ShippingPartnersController::class, 'index'])->name('legacy.unit.shipping-config');
+    Route::redirect('ld/unit-admin/ket-noi-landing-website', '/admin/marketing/landing-connections', 301)->name('legacy.unit.landing-connections');
+    Route::redirect('ld/unit-admin/ket-noi-landing-website/c1654/ThemNguonDuLieu/mode/normal', '/admin/marketing/landing-connections', 301)->name('legacy.unit.landing-connections.create-popup');
     Route::get('ld/marketing/thong-ke-truong-nhom', TeamLeaderStatsController::class)->name('legacy.marketing.team-leader-stats');
     Route::get('ld/thong-ke', HourlyStatsController::class)->name('legacy.reports.hourly');
     Route::get('bao-cao/bao-cao-doanh-so-chi-tiet-marketing', function (Illuminate\Http\Request $request, ExtraReportController $controller) {

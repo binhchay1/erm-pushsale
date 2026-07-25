@@ -2,16 +2,15 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
-import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleSelect, PushsaleMultiSelect } from '@/components/pushsale/PushsaleSelect';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 
 const connectionTabs = [
-    ['', 'TẤT CẢ'],
     ['facebook', 'KẾT NỐI FACEBOOK'],
     ['landing', 'KẾT NỐI NGUỒN DỮ LIỆU'],
     ['website', 'KẾT NỐI WEBSITE'],
+    ['', 'TẤT CẢ'],
 ];
 
 const connectionTypeOptions = [
@@ -212,12 +211,15 @@ export default function LandingConnectionsPage({
         marketer_user_id: filters.marketer_user_id ?? '',
         product_id: filters.product_id ?? '',
         connection_type: filters.connection_type ?? '',
+        ad_channel: filters.ad_channel ?? '',
+        approved: filters.approved ?? '',
         active: filters.active ?? '',
         per_page: filters.per_page ?? 20,
     });
     const [editingId, setEditingId] = useState(null);
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState(new Set());
+    const [advancedOpen, setAdvancedOpen] = useState(false);
     const [allProducts, setAllProducts] = useState(!filters.product_id);
     const form = useForm(blankForm(defaultMarketerId));
     const rows = connections?.data ?? [];
@@ -241,6 +243,11 @@ export default function LandingConnectionsPage({
         ...product,
         type: product.type ?? product.product_type ?? 'product',
     })), [products]);
+    const productOptions = useMemo(() => productCatalog.map((product) => ({
+        value: String(product.id),
+        label: product.name,
+        subLabel: product.sku ? `${product.sku}${product.type === 'combo' ? ' · Gói sản phẩm' : ''}` : (product.type === 'combo' ? 'Gói sản phẩm' : ''),
+    })), [productCatalog]);
 
     const search = (event) => {
         event?.preventDefault();
@@ -389,46 +396,51 @@ export default function LandingConnectionsPage({
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title="Kết nối dữ liệu" />
-            <section className="ps-adminlte-page pslc-page pslc-page-v118" data-page-code={activeMenuCode}>
-                <form className="pslc-filter" onSubmit={search}>
-                    <div className="m-header-wrap">
-                        <div className="m-header pslc-header">
-                            <div className="ps-title">Kết nối dữ liệu</div>
-                            <div className="pslc-header-controls">
-                                <label className="pslc-check">
-                                    <input type="checkbox" checked={allProducts} onChange={(event) => {
-                                        const checked = event.target.checked;
-                                        setAllProducts(checked);
-                                        if (checked) setQuery((old) => ({ ...old, product_id: '' }));
-                                    }} /> Chỉ lọc tất cả sản phẩm
-                                </label>
-                                <PushsaleSelect
-                                    className="pslc-filter-select"
-                                    searchable
-                                    options={marketerOptions}
-                                    value={query.marketer_user_id}
-                                    placeholder="--Chọn marketing--"
-                                    onChange={(value) => setQuery((old) => ({ ...old, marketer_user_id: value }))}
-                                />
-                                <ProductSearchSelect
-                                    className="pslc-filter-product"
-                                    disabled={allProducts}
-                                    products={productCatalog}
-                                    value={query.product_id}
-                                    placeholder="--Chọn sản phẩm--"
-                                    showPrice={false}
-                                    onChange={(value) => {
-                                        setAllProducts(false);
-                                        setQuery((old) => ({ ...old, product_id: value }));
-                                    }}
-                                />
-                                <input className="form-control" placeholder="Tên nguồn dữ liệu / Tài khoản marketing" value={query.search} onChange={(event) => setQuery((old) => ({ ...old, search: event.target.value }))} />
-                                <button className="btn btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
-                                <button type="button" className="btn btn-default pslc-cog" title="Chức năng"><i className="fa fa-gear" /></button>
-                                <button type="button" className="btn-icon pslc-toggle" title="Bộ lọc nâng cao"><i className="fa fa-angle-double-down" /></button>
-                            </div>
+            <section className="ps-adminlte-page pslc-page pslc-page-v119" data-page-code={activeMenuCode}>
+                <form className="pslc-filter ps-page-header ps-page-header-v119" onSubmit={search}>
+                    <div className="ps-page-header-main">
+                        <div className="ps-title ps-page-title">Kết nối dữ liệu</div>
+                        <div className="ps-page-primary-filters pslc-header-controls">
+                            <label className="pslc-check">
+                                <input type="checkbox" checked={allProducts} onChange={(event) => {
+                                    const checked = event.target.checked;
+                                    setAllProducts(checked);
+                                    if (checked) setQuery((old) => ({ ...old, product_id: '' }));
+                                }} /> Chỉ lọc tất cả sản phẩm
+                            </label>
+                            <PushsaleSelect
+                                className="pslc-filter-select"
+                                searchable
+                                options={marketerOptions}
+                                value={query.marketer_user_id}
+                                placeholder="--Chọn marketing--"
+                                onChange={(value) => setQuery((old) => ({ ...old, marketer_user_id: value }))}
+                            />
+                            <PushsaleSelect
+                                className="pslc-filter-product"
+                                disabled={allProducts}
+                                searchable
+                                options={productOptions}
+                                value={query.product_id}
+                                placeholder="--Chọn sản phẩm--"
+                                onChange={(value) => {
+                                    setAllProducts(false);
+                                    setQuery((old) => ({ ...old, product_id: value }));
+                                }}
+                            />
+                            <input className="form-control pslc-keyword" placeholder="Tên nguồn dữ liệu / Tài khoản marketing" value={query.search} onChange={(event) => setQuery((old) => ({ ...old, search: event.target.value }))} />
+                            <button className="btn btn-primary ps-btn-search"><i className="fa fa-search" /> Tìm kiếm</button>
+                            <button type="button" className="btn btn-default pslc-cog" title="Chức năng"><i className="fa fa-gear" /></button>
+                            <button type="button" className="btn-icon pslc-toggle" title="Bộ lọc nâng cao" onClick={() => setAdvancedOpen((value) => !value)}><i className={`fa ${advancedOpen ? 'fa-angle-double-up' : 'fa-angle-double-down'}`} /></button>
                         </div>
                     </div>
+                    {advancedOpen && (
+                        <div className="ps-page-advanced-filters">
+                            <PushsaleSelect options={connectionTypeOptions} value={query.connection_type} placeholder="--Loại kết nối--" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, connection_type: value }))} />
+                            <PushsaleSelect options={channelOptions} value={query.ad_channel ?? ''} placeholder="--Kênh quảng cáo--" searchable onChange={(value) => setQuery((old) => ({ ...old, ad_channel: value }))} />
+                            <PushsaleSelect options={[{ value: '1', label: 'Đã duyệt' }, { value: '0', label: 'Chưa duyệt' }]} value={query.approved ?? ''} placeholder="--Trạng thái duyệt--" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, approved: value }))} />
+                        </div>
+                    )}
                 </form>
 
                 <div className="box-body pslc-tabs-shell">
@@ -499,7 +511,7 @@ export default function LandingConnectionsPage({
             </section>
 
             <PageDialog open={open} title={editingId ? 'CHỈNH SỬA NGUỒN DỮ LIỆU' : 'THÊM MỚI NGUỒN DỮ LIỆU'} onClose={() => setOpen(false)}>
-                <form className="pslc-form pslc-source-form-v118" onSubmit={save}>
+                <form className="pslc-form pslc-source-form-v118 pslc-source-form-v119" onSubmit={save}>
                     <div className="pslc-dialog-body">
                         <div className="pslc-source-simple-form">
                             <label>Loại kết nối <span className="required">(*)</span></label>
@@ -527,7 +539,7 @@ export default function LandingConnectionsPage({
                             <PushsaleSelect options={channelOptions} value={form.data.ad_channel} onChange={(value) => form.setData('ad_channel', value || 'facebook_ads')} searchable />
 
                             <label>Sản phẩm <span className="required">(*)</span></label>
-                            <ProductSearchSelect products={productCatalog} value={form.data.products?.[0]?.product_id ?? ''} placeholder="Tất cả sản phẩm" onChange={updateFirstProduct} />
+                            <PushsaleSelect options={productOptions} value={form.data.products?.[0]?.product_id ?? ''} placeholder="Tất cả sản phẩm" searchable onChange={updateFirstProduct} />
 
                             <label>Upsale URL</label>
                             <input className="form-control" type="url" value={form.data.upsell_urls_text ?? ''} onChange={(event) => form.setData('upsell_urls_text', event.target.value)} placeholder="Không bắt buộc" />
@@ -555,10 +567,10 @@ export default function LandingConnectionsPage({
                             </div>
 
                             <div></div>
-                            <label className="pslc-dialog-checks">
-                                <span><input type="checkbox" checked={form.data.manual_import} onChange={(event) => form.setData('manual_import', event.target.checked)} /> Nhập thủ công</span>
-                                <span title={!canApprove ? 'Chỉ Admin được duyệt kết nối' : ''}><input type="checkbox" disabled={!canApprove} checked={form.data.is_approved} onChange={(event) => form.setData('is_approved', event.target.checked)} /> Duyệt</span>
-                            </label>
+                            <div className="pslc-dialog-checks">
+                                <label><input type="checkbox" checked={form.data.manual_import} onChange={(event) => form.setData('manual_import', event.target.checked)} /> Nhập thủ công</label>
+                                <label title={!canApprove ? 'Chỉ Admin được duyệt kết nối' : ''}><input type="checkbox" disabled={!canApprove} checked={form.data.is_approved} onChange={(event) => form.setData('is_approved', event.target.checked)} /> Duyệt</label>
+                            </div>
                         </div>
                         {Object.keys(form.errors).length > 0 && <div className="alert alert-danger pslc-errors">{Object.entries(form.errors).map(([key, message]) => <div key={key}><strong>{key}:</strong> {message}</div>)}</div>}
                     </div>
