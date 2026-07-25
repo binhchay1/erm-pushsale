@@ -70,7 +70,29 @@ export default function AppLayout({ children }) {
 
     useEffect(() => {
         const start = router.on('start', (event) => {
-            setPendingDashboardRole(dashboardRoleFromUrl(event.detail.visit.url));
+            const visit = event?.detail?.visit;
+            const targetUrl = visit?.url;
+            if (!targetUrl) {
+                setPendingDashboardRole(null);
+                return;
+            }
+
+            // Partial reloads (notifications, realtime refresh, table-only reloads) must
+            // not swap the whole dashboard with a skeleton. That was the cause of the
+            // continuous blinking/reset when many test notifications/toasts arrived.
+            try {
+                const target = new URL(targetUrl, window.location.origin);
+                const current = new URL(window.location.href);
+                const only = Array.isArray(visit.only) ? visit.only : [];
+                if (target.pathname === current.pathname && only.length > 0) {
+                    setPendingDashboardRole(null);
+                    return;
+                }
+            } catch {
+                // Fall through to the normal dashboard skeleton detection.
+            }
+
+            setPendingDashboardRole(dashboardRoleFromUrl(targetUrl));
         });
         const finish = router.on('finish', () => {
             setPendingDashboardRole(null);

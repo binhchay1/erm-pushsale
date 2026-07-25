@@ -189,7 +189,12 @@ class User extends Authenticatable
 
     public function roleLabel(): string
     {
-        return $this->role->label();
+        if ($this->role instanceof UserRole) {
+            return $this->role->label();
+        }
+
+        $role = trim((string) $this->role);
+        return $role !== '' ? \Illuminate\Support\Str::headline($role) : '—';
     }
 
     public function team(): BelongsTo

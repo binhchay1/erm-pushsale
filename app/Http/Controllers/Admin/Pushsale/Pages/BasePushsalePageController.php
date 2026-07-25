@@ -84,7 +84,7 @@ abstract class BasePushsalePageController extends Controller
 
         return Inertia::render($component, [
             'schema' => array_merge($schema, [
-                'form_fields' => $schema['form_fields'] ?? ($schema['resource_key'] ?? null ? $this->resources->formFields((string) $schema['resource_key']) : []),
+                'form_fields' => $schema['form_fields'] ?? ($schema['resource_key'] ?? null ? $this->safeFormFields((string) $schema['resource_key']) : []),
                 'dialog_resource_schemas' => $dialogResources,
             ]),
             'rows' => $result['data'],
@@ -177,6 +177,18 @@ abstract class BasePushsalePageController extends Controller
             : back()->with('success', 'Đã xóa dữ liệu dialog.');
     }
 
+    /** @return array<int, array<string, mixed>> */
+    protected function safeFormFields(string $resourceKey): array
+    {
+        try {
+            return $this->resources->formFields($resourceKey);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return [];
+        }
+    }
+
     protected function mainResourceKey(): ?string
     {
         $schema = $this->pages->schema($this->pageCode);
@@ -220,7 +232,13 @@ abstract class BasePushsalePageController extends Controller
 
     protected function authorizePage(Request $request): void
     {
-        $tree = $this->navigation->forUser($request->user());
+        try {
+            $tree = $this->navigation->forUser($request->user());
+        } catch (Throwable $exception) {
+            report($exception);
+            abort(403, 'Không tải được cây menu phân quyền.');
+        }
+
         abort_unless($this->treeContainsCode($tree, $this->pageCode), 403);
     }
 

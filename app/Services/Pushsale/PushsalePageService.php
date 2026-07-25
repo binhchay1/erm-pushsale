@@ -1578,70 +1578,79 @@ class PushsalePageService
 
     private function monthlyPlan(string $code): Collection
     {
-        $query = MonthlyKpiPlan::query()->with('user:id,name,email,role,team_id,is_team_leader');
-        $resourceKey = $code === '7.1.1' ? '7.1.1' : '6.3.5';
-
-        if ($code === '7.1.1') {
-            $request = $this->currentRequest;
-            $now = now();
-            $year = max(2020, min(2100, (int) ($request?->query('year', $now->year) ?? $now->year)));
-            $monthFilter = (int) ($request?->query('month', $now->month) ?? $now->month);
-            $monthFilter = $monthFilter < 1 || $monthFilter > 12 ? $now->month : $monthFilter;
-            $department = trim((string) ($request?->query('department', 'marketing') ?? 'marketing'));
-
-            $query->where('year', $year)->where('month', $monthFilter);
-            if ($department !== '' && $department !== 'all') {
-                $query->whereHas('user', fn ($userQuery) => $userQuery->where('role', $department));
-            }
+        if (! Schema::hasTable('monthly_kpi_plans')) {
+            return collect();
         }
 
-        $plans = $query->latest('year')->latest('month')->orderBy('user_id')->limit(1000)->get();
+        try {
+            $query = MonthlyKpiPlan::withoutTenant()->with('user:id,name,email,role,team_id,is_team_leader');
+            $resourceKey = $code === '7.1.1' ? '7.1.1' : '6.3.5';
 
-        return $plans->values()->map(function (MonthlyKpiPlan $plan, int $index) use ($resourceKey): array {
-            $month = CarbonImmutable::create((int) $plan->year, (int) $plan->month, 1)->startOfDay();
-            $periodOrders = Order::query()
-                ->where('sale_user_id', $plan->user_id)
-                ->whereBetween('data_arrived_at', [$month, $month->endOfMonth()])
-                ->get();
-            $closedPeriodOrders = Order::query()
-                ->where('sale_user_id', $plan->user_id)
-                ->whereBetween('closed_at', [$month, $month->endOfMonth()])
-                ->get();
-            $payroll = $this->payroll->forPlan($plan);
-            $actualRevenue = $payroll['closed_revenue'];
-            $bonus = $payroll['commission'];
-            $new = $periodOrders->where('is_returning_customer', false);
-            $old = $periodOrders->where('is_returning_customer', true);
-            $newClosed = $closedPeriodOrders->where('is_returning_customer', false);
-            $oldClosed = $closedPeriodOrders->where('is_returning_customer', true);
+            if ($code === '7.1.1') {
+                $request = $this->currentRequest;
+                $now = now();
+                $year = max(2020, min(2100, (int) ($request?->query('year', $now->year) ?? $now->year)));
+                $monthFilter = (int) ($request?->query('month', $now->month) ?? $now->month);
+                $monthFilter = $monthFilter < 1 || $monthFilter > 12 ? $now->month : $monthFilter;
+                $department = trim((string) ($request?->query('department', 'marketing') ?? 'marketing'));
 
-            return [
-                'index' => $index + 1,
-                'account' => trim(($plan->user?->name ?? '').($plan->user?->email ? "\n".$plan->user->email : '')),
-                'role' => $plan->user?->roleLabel(),
-                'kpi' => $plan->kpi_name,
-                'budget' => $plan->budget,
-                'clicks' => $plan->clicks_target,
-                'contacts' => $plan->contacts_target,
-                'revenue_target' => $plan->revenue_target,
-                'new_contacts_target' => $new->count(),
-                'old_contacts_target' => $old->count(),
-                'new_closed_target' => $newClosed->count(),
-                'old_closed_target' => $oldClosed->count(),
-                'actual_revenue' => $actualRevenue,
-                'working_days' => $plan->working_days,
-                'actual_days' => $plan->actual_days,
-                'bonus_percent' => (float) $plan->bonus_percent,
-                'base_salary' => $payroll['base_salary'],
-                'bonus' => $bonus,
-                'income' => $payroll['total'],
-                'salary_basis' => $payroll['estimated'] ? 'Dự kiến đủ ngày công' : $payroll['payable_days'].'/'.$payroll['working_days'].' ngày công',
-                'locked' => $plan->locked,
-                'updated_at' => $plan->updated_at?->toIso8601String(),
-                '_record_id' => $plan->id,
-                '_form' => $this->formPayload($resourceKey, $plan),
-            ];
-        });
+                $query->where('year', $year)->where('month', $monthFilter);
+                if ($department !== '' && $department !== 'all') {
+                    $query->whereHas('user', fn ($userQuery) => $userQuery->where('role', $department));
+                }
+            }
+
+            $plans = $query->latest('year')->latest('month')->orderBy('user_id')->limit(1000)->get();
+
+            return $plans->values()->map(function (MonthlyKpiPlan $plan, int $index) use ($resourceKey): array {
+                $month = CarbonImmutable::create((int) $plan->year, (int) $plan->month, 1)->startOfDay();
+                $periodOrders = Schema::hasTable('orders')
+                    ? Order::query()->where('sale_user_id', $plan->user_id)->whereBetween('data_arrived_at', [$month, $month->endOfMonth()])->get()
+                    : collect();
+                $closedPeriodOrders = Schema::hasTable('orders')
+                    ? Order::query()->where('sale_user_id', $plan->user_id)->whereBetween('closed_at', [$month, $month->endOfMonth()])->get()
+                    : collect();
+                $payroll = $this->payroll->forPlan($plan);
+                $actualRevenue = $payroll['closed_revenue'];
+                $bonus = $payroll['commission'];
+                $new = $periodOrders->where('is_returning_customer', false);
+                $old = $periodOrders->where('is_returning_customer', true);
+                $newClosed = $closedPeriodOrders->where('is_returning_customer', false);
+                $oldClosed = $closedPeriodOrders->where('is_returning_customer', true);
+                $roleValue = $plan->user?->role instanceof \BackedEnum ? $plan->user->role->value : (string) ($plan->user?->role ?? '');
+
+                return [
+                    'index' => $index + 1,
+                    'account' => trim(($plan->user?->name ?? '').($plan->user?->email ? "\n".$plan->user->email : '')),
+                    'role' => $roleValue !== '' ? \Illuminate\Support\Str::headline($roleValue) : '—',
+                    'kpi' => $plan->kpi_name,
+                    'budget' => $plan->budget,
+                    'clicks' => $plan->clicks_target,
+                    'contacts' => $plan->contacts_target,
+                    'revenue_target' => $plan->revenue_target,
+                    'new_contacts_target' => $new->count(),
+                    'old_contacts_target' => $old->count(),
+                    'new_closed_target' => $newClosed->count(),
+                    'old_closed_target' => $oldClosed->count(),
+                    'actual_revenue' => $actualRevenue,
+                    'working_days' => $plan->working_days,
+                    'actual_days' => $plan->actual_days,
+                    'bonus_percent' => (float) $plan->bonus_percent,
+                    'base_salary' => $payroll['base_salary'],
+                    'bonus' => $bonus,
+                    'income' => $payroll['total'],
+                    'salary_basis' => $payroll['estimated'] ? 'Dự kiến đủ ngày công' : $payroll['payable_days'].'/'.$payroll['working_days'].' ngày công',
+                    'locked' => $plan->locked,
+                    'updated_at' => $plan->updated_at?->toIso8601String(),
+                    '_record_id' => $plan->id,
+                    '_form' => $this->formPayload($resourceKey, $plan),
+                ];
+            });
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return collect();
+        }
     }
 
     private function trend(): Collection
@@ -2261,19 +2270,36 @@ class PushsalePageService
 
     private function subscriptions(): Collection
     {
-        return CompanySubscriptionHistory::query()->with('company:id,name')->latest('paid_at')->latest('id')->limit(2000)->get()->values()->map(fn (CompanySubscriptionHistory $row, int $index) => [
-            'id' => $index + 1,
-            'unit_payment' => trim(($row->company?->name ?? '—')."\n".($row->payment_code ?: '—')),
-            'contract_type' => $row->contract_type,
-            'description' => $row->description,
-            'amount' => $row->amount,
-            'paid_at' => $row->paid_at?->toIso8601String(),
-            'duration_months' => $row->duration_months,
-            'expires_at' => $row->expires_at?->toIso8601String(),
-            'updated_at' => $row->updated_at?->toIso8601String(),
-            '_record_id' => $row->id,
-            '_form' => $this->formPayload('1.1.2', $row),
-        ]);
+        if (! Schema::hasTable('company_subscription_histories')) {
+            return collect();
+        }
+
+        try {
+            return CompanySubscriptionHistory::withoutTenant()
+                ->with('company:id,name')
+                ->latest('paid_at')
+                ->latest('id')
+                ->limit(2000)
+                ->get()
+                ->values()
+                ->map(fn (CompanySubscriptionHistory $row, int $index) => [
+                    'id' => $index + 1,
+                    'unit_payment' => trim(($row->company?->name ?? '—')."\n".($row->payment_code ?: '—')),
+                    'contract_type' => $row->contract_type,
+                    'description' => $row->description,
+                    'amount' => $row->amount,
+                    'paid_at' => $row->paid_at?->toIso8601String(),
+                    'duration_months' => $row->duration_months,
+                    'expires_at' => $row->expires_at?->toIso8601String(),
+                    'updated_at' => $row->updated_at?->toIso8601String(),
+                    '_record_id' => $row->id,
+                    '_form' => $this->formPayload('1.1.2', $row),
+                ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return collect();
+        }
     }
 
     private function workShifts(): Collection
@@ -2415,17 +2441,31 @@ class PushsalePageService
 
     private function phoneBlacklists(): Collection
     {
-        return PhoneBlacklist::query()->with(['order:id,order_code', 'creator:id,name'])->latest()->get()->map(fn (PhoneBlacklist $row) => [
-            'id' => $row->id,
-            'phone' => $row->phone,
-            'reason' => $row->reason,
-            'order_code' => $row->order?->order_code,
-            'creation_type' => match ($row->creation_type) { 'automatic' => 'Tự động', 'warehouse' => 'Kho cảnh báo', default => 'Thủ công' },
-            'creator' => $row->creator?->name,
-            'updated_at' => $row->updated_at?->toIso8601String(),
-            '_record_id' => $row->id,
-            '_form' => $this->formPayload('1.13.1', $row),
-        ])->values();
+        if (! Schema::hasTable('phone_blacklists')) {
+            return collect();
+        }
+
+        try {
+            return PhoneBlacklist::withoutTenant()
+                ->with(['order:id,order_code', 'creator:id,name'])
+                ->latest()
+                ->get()
+                ->map(fn (PhoneBlacklist $row) => [
+                    'id' => $row->id,
+                    'phone' => $row->phone,
+                    'reason' => $row->reason,
+                    'order_code' => $row->order?->order_code,
+                    'creation_type' => $row->creation_type,
+                    'creator' => $row->creator?->name,
+                    'updated_at' => $row->updated_at?->toIso8601String(),
+                    '_record_id' => $row->id,
+                    '_form' => $this->formPayload('1.13.1', $row),
+                ])->values();
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return collect();
+        }
     }
 
     private function seedingPhoneNumbers(): Collection

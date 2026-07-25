@@ -278,7 +278,7 @@ class StagingTestService
                     'inertia_root' => $hasInertiaRoot,
                     'bytes' => strlen($body),
                     'error_type' => $ok ? null : $errorType,
-                    'error_hint' => $hasPhpError ? 'php_error_signature_in_body' : (! $ok ? $this->compactErrorHint($body) : null),
+                    'error_hint' => ! $ok ? ($this->extractLaravelExceptionHint($body) ?: ($hasPhpError ? 'php_error_signature_in_body' : $this->compactErrorHint($body))) : null,
                 ];
             } catch (\Throwable $e) {
                 $results[] = [
@@ -375,7 +375,7 @@ class StagingTestService
                     'bytes' => strlen($body),
                     'user' => $user ? ['id' => $user->id, 'role' => $user->role instanceof UserRole ? $user->role->value : (string) $user->role] : null,
                     'error_type' => $ok ? null : $errorType,
-                    'error_hint' => $hasPhpError ? 'php_error_signature_in_body' : (! $ok ? $this->compactErrorHint($body) : null),
+                    'error_hint' => ! $ok ? ($this->extractLaravelExceptionHint($body) ?: ($hasPhpError ? 'php_error_signature_in_body' : $this->compactErrorHint($body))) : null,
                 ];
             } catch (\Throwable $e) {
                 $results[] = [
@@ -968,6 +968,7 @@ class StagingTestService
         foreach ([
             '/_ignition', '/api/', '/__erm-test', '/broadcasting/', '/sanctum/', '/horizon',
             '/storage/', '/webhooks/', '/livewire/', '/telescope', '/pulse', '/logout', '/download/',
+            '/export', '/sample', '/label', '/import-template', '/avatar',
         ] as $blocked) {
             if (str_contains($lower, $blocked)) {
                 return true;
@@ -1234,6 +1235,28 @@ class StagingTestService
         }
 
         return mb_substr($hint, 0, 220);
+    }
+
+    private function extractLaravelExceptionHint(string $body): ?string
+    {
+        $plain = trim(html_entity_decode(preg_replace('/\s+/', ' ', strip_tags($body)) ?: '', ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        if ($plain === '') {
+            return null;
+        }
+
+        foreach ([
+            '/(SQLSTATE\[[^\]]+\]:[^#]{1,420})/u',
+            '/(Call to undefined method [^#]{1,260})/u',
+            '/(Undefined (?:variable|array key|property|method)[^#]{1,260})/u',
+            '/(Class [^#]{1,220} not found)/u',
+            '/(Table [^#]{1,220} doesn\\?\'?t exist)/u',
+        ] as $pattern) {
+            if (preg_match($pattern, $plain, $matches) === 1) {
+                return trim($matches[1]);
+            }
+        }
+
+        return null;
     }
 
     private function compactErrorHint(string $body): ?string

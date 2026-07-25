@@ -1,5 +1,5 @@
 import { router, usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import { getEcho } from '@/lib/echo';
@@ -29,6 +29,7 @@ export function useRealtimeNotifications() {
     const { t, locale } = useI18n();
     const { auth, reverb, preferences } = usePage().props;
     const prefs = preferences?.notifications ?? {};
+    const reloadTimer = useRef(null);
 
     useEffect(() => {
         if (!auth?.user?.id || !reverb?.key) {
@@ -41,6 +42,22 @@ export function useRealtimeNotifications() {
         }
 
         const channelName = `App.Models.User.${auth.user.id}`;
+        const scheduleNotificationReload = () => {
+            if (reloadTimer.current) {
+                clearTimeout(reloadTimer.current);
+            }
+
+            // A test flow can create many notifications in seconds. Reloading Inertia
+            // props for every single toast makes dashboards flash/repaint nonstop.
+            // Debounce the bell count refresh; the toast itself still appears instantly.
+            reloadTimer.current = setTimeout(() => {
+                router.reload({
+                    only: ['notifications', 'notificationsUnread'],
+                    preserveScroll: true,
+                    preserveState: true,
+                });
+            }, 2500);
+        };
 
         const channel = echo
             .private(channelName)
@@ -60,14 +77,14 @@ export function useRealtimeNotifications() {
                     });
                 }
 
-                router.reload({
-                    only: ['notifications', 'notificationsUnread'],
-                    preserveScroll: true,
-                    preserveState: true,
-                });
+                scheduleNotificationReload();
             });
 
         return () => {
+            if (reloadTimer.current) {
+                clearTimeout(reloadTimer.current);
+                reloadTimer.current = null;
+            }
             channel.stopListening('.notification.created');
             echo.leave(channelName);
         };
