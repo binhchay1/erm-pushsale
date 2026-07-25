@@ -44,6 +44,8 @@ class ProductRequest extends FormRequest
             'available_care' => ['sometimes', 'boolean'],
             'category_ids' => ['sometimes', 'array'],
             'category_ids.*' => ['integer', 'exists:product_categories,id'],
+            'attribute_value_ids' => ['sometimes', 'array', 'max:2'],
+            'attribute_value_ids.*' => ['integer', 'distinct', 'exists:product_attribute_values,id'],
             'parent_id' => ['nullable', 'exists:products,id', Rule::notIn([$productId])],
             'is_active' => ['sometimes', 'boolean'],
         ];

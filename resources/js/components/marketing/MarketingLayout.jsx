@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 const NAV = [
     { href: '/features', key: 'marketing.nav_features' },
     { href: '/solutions', key: 'marketing.nav_solutions' },
+    { href: '/docs', key: 'marketing.nav_docs' },
     { href: '/about', key: 'marketing.nav_about' },
     { href: '/contact', key: 'marketing.nav_contact' },
 ];
@@ -120,6 +121,7 @@ export function MarketingLayout({ children }) {
                         <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
                             <li><Link href="/features" className="hover:text-foreground">{t('marketing.nav_features')}</Link></li>
                             <li><Link href="/solutions" className="hover:text-foreground">{t('marketing.nav_solutions')}</Link></li>
+                            <li><Link href="/docs" className="hover:text-foreground">{t('marketing.nav_docs')}</Link></li>
                             <li><Link href="/login" className="hover:text-foreground">{t('marketing.sign_in')}</Link></li>
                         </ul>
                     </div>

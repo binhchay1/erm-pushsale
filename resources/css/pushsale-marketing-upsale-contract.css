@@ -158,7 +158,8 @@
 }
 
 .ps-marketing-upsale-report .ps-marketing-upsale-scroll {
-    height: 596px;
+    max-height: 596px;
+    height: auto;
     overflow: auto;
     background: #fff;
     border-top: 1px solid #d0d7df;
@@ -298,4 +299,9 @@
         justify-content: flex-start;
         width: 100%;
     }
+}
+
+/* Keep the bottom scrollbar directly under the report table; do not reserve a fake empty viewport. */
+.ps-marketing-upsale-report .ps-marketing-upsale-table {
+    margin-bottom: 0 !important;
 }

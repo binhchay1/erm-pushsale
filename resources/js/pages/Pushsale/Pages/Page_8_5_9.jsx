@@ -187,7 +187,7 @@ function MatrixTable({ days = [], rows = [] }) {
     );
 }
 
-export default function PowerDashboardPage({ summary = {}, rows = [], routeUrl = '/admin/reports/power-dashboard', activeMenuCode = '8.5.9' }) {
+export default function PowerDashboardPage({ summary = {}, rows = [], routeUrl = '/admin/reports/power-dashboard', activeMenuCode = '8.5.9', pageRuntimeError = null }) {
     const query = currentQuery();
     const filters = summary.filters ?? {};
     const [draft, setDraft] = useState({
@@ -223,6 +223,10 @@ export default function PowerDashboardPage({ summary = {}, rows = [], routeUrl =
                         <i className="fa fa-search" /> Tìm kiếm
                     </button>
                 </div>
+
+                {pageRuntimeError ? (
+                    <div className="ps-power-runtime-error"><i className="fa fa-exclamation-triangle" /> {pageRuntimeError}</div>
+                ) : null}
 
                 <div className="ps-power-panels-grid">
                     <PowerPanel type="marketing" rows={panels.marketing ?? []} />

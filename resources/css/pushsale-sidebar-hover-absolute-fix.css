@@ -1,0 +1,64 @@
+/* Final sidebar interaction contract: no pale focus/border residue and hover must work while another item is active. */
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2.pushsale-menu-link::before,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2.pushsale-menu-link::after {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2.pushsale-menu-link:focus,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2.pushsale-menu-link:active,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.flyout-open > button.a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.flyout-open:not(:hover) > button.a2.pushsale-menu-link {
+    border-color: transparent !important;
+    outline-color: transparent !important;
+    box-shadow: none !important;
+    background-clip: padding-box !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:not(.active):not(.flyout-open):hover > a.a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:not(.active):not(.flyout-open) > a.a2.pushsale-menu-link:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:not(.active):not(.flyout-open):hover > span.a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:not(.active):not(.flyout-open) > span.a2.pushsale-menu-link:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:not(.active):not(.flyout-open):hover > button.a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:not(.active):not(.flyout-open) > button.a2.pushsale-menu-link:hover {
+    background: #f4f6f8 !important;
+    color: #333 !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.active > .a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.flyout-open > .a2.pushsale-menu-link {
+    background: #1592e6 !important;
+    color: #fff !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2.pushsale-menu-link:focus-visible {
+    outline: 0 !important;
+    box-shadow: inset 0 0 0 0 transparent !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu {
+    background: #1293ec !important;
+    background-image: none !important;
+    color: #fff !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .22) !important;
+}
+
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link,
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link:hover,
+html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link:focus {
+    color: #fff !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+}

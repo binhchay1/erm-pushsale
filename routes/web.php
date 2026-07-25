@@ -97,6 +97,7 @@ Route::get('/', HomeController::class)->name('home');
 // Trang vệ tinh công khai (SEO) — không cần đăng nhập.
 Route::get('features', [MarketingController::class, 'features'])->name('marketing.features');
 Route::get('solutions', [MarketingController::class, 'solutions'])->name('marketing.solutions');
+Route::get('docs', [MarketingController::class, 'docs'])->name('marketing.docs');
 Route::get('about', [MarketingController::class, 'about'])->name('marketing.about');
 Route::get('contact', [MarketingController::class, 'contact'])->name('marketing.contact');
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
@@ -229,6 +230,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::redirect('ld/unit-admin/danh-muc-kpi', '/admin/ceo/business-plan/kpi-catalog', 301)->name('legacy.ceo.kpi-catalog');
     Route::redirect('ld/unit-admin/thiet-lap-thuong-theo-doanh-so', '/admin/ceo/business-plan/revenue-bonus', 301)->name('legacy.ceo.revenue-bonus');
     Route::redirect('ld/ceo/power-dashboard', '/admin/reports/power-dashboard', 301)->name('legacy.ceo.power-dashboard');
+    Route::redirect('settings', '/admin/system/settings', 301)->name('legacy.system.settings');
     Route::redirect('connect-shop-list', '/admin/ecommerce/connect-shops', 301)->name('legacy.ecommerce.connect-shops');
     Route::redirect('ld/ecommerce/e-connect-shop-list', '/admin/ecommerce/connect-shops', 301)->name('legacy.ecommerce.connect-shops.ld');
     Route::redirect('connect-product-list', '/admin/ecommerce/connect-products', 301)->name('legacy.ecommerce.connect-products');
@@ -354,6 +356,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::post('integrations/{platform}/test', [IntegrationsController::class, 'testWebhook'])->name('integrations.test');
         Route::get('system-monitor', [SystemMonitorController::class, 'index'])->name('system-monitor.index');
         Route::get('system-monitor/events/{inboundEvent}', [SystemMonitorController::class, 'show'])->name('system-monitor.show');
+        Route::get('system/settings', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'index'])->name('system.settings');
+        Route::put('system/settings', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'update'])->name('system.settings.update');
         Route::get('leads', [DataDistributionController::class, 'index'])->name('leads.index');
         Route::post('leads/distribute', [DataDistributionController::class, 'store'])->name('leads.distribute');
         Route::get('customers', CustomerProfileController::class)->name('customers.index');
@@ -411,6 +415,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::delete('orders/{order}', [SaleOrderDeletionController::class, 'destroy'])->name('orders.destroy');
         Route::post('orders/{order}/close', [OrderClosingController::class, 'store'])->name('orders.close');
         Route::get('customers', CustomerProfileController::class)->name('customers');
+        Route::get('reports/hourly', HourlyStatsController::class)->name('reports.hourly');
         Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');
     });
 

@@ -109,7 +109,7 @@ class ProductController extends Controller
 
         $query = Product::query()
             ->where('type', 'product')
-            ->with(['parent:id,name', 'categories:id,name'])
+            ->with(['parent:id,name', 'categories:id,name', 'attributeValues:id'])
             ->withCount('children');
 
         if ($filters['search'] !== '') {
@@ -154,6 +154,7 @@ class ProductController extends Controller
             'available_sale' => (bool) $product->available_sale,
             'available_care' => (bool) $product->available_care,
             'category_ids' => $product->categories->pluck('id')->map(fn ($id) => (int) $id)->all(),
+            'attribute_value_ids' => $product->attributeValues->pluck('id')->map(fn ($id) => (int) $id)->all(),
             'category_names' => $product->categories->pluck('name')->implode(', '),
             'updated_at' => $product->updated_at?->format('d/m/Y H:i'),
         ]);
@@ -217,7 +218,8 @@ class ProductController extends Controller
     {
         $data = $request->validated();
         $categoryIds = $data['category_ids'] ?? [];
-        unset($data['category_ids']);
+        $attributeValueIds = $data['attribute_value_ids'] ?? [];
+        unset($data['category_ids'], $data['attribute_value_ids']);
         $data['is_active'] = (bool) ($data['is_active'] ?? true);
         $data['available_marketing'] = (bool) ($data['available_marketing'] ?? true);
         $data['available_sale'] = (bool) ($data['available_sale'] ?? true);
@@ -225,13 +227,14 @@ class ProductController extends Controller
 
         $product = Product::query()->create($data);
         $product->categories()->sync($categoryIds);
+        $product->attributeValues()->sync($attributeValueIds);
 
         return redirect()->route('admin.products.index')->with('success', __('messages.product_created'));
     }
 
     public function edit(Product $product): Response
     {
-        $product->loadMissing('categories:id,name');
+        $product->loadMissing(['categories:id,name', 'attributeValues:id']);
 
         return Inertia::render('Admin/Products/Form', [
             'product' => [
@@ -255,7 +258,8 @@ class ProductController extends Controller
                 'available_marketing' => (bool) $product->available_marketing,
                 'available_sale' => (bool) $product->available_sale,
                 'available_care' => (bool) $product->available_care,
-                'category_ids' => $product->categories->pluck('id')->all(),
+                'category_ids' => $product->categories->pluck('id')->map(fn ($id) => (int) $id)->all(),
+                'attribute_value_ids' => $product->attributeValues->pluck('id')->map(fn ($id) => (int) $id)->all(),
             ],
             'parents' => $this->parentOptions(excludeId: $product->id),
             'activeMenuCode' => '1.3.1',
@@ -267,7 +271,8 @@ class ProductController extends Controller
         $data = $request->validated();
         $hasCategoryIds = $request->has('category_ids');
         $categoryIds = $data['category_ids'] ?? [];
-        unset($data['category_ids']);
+        $attributeValueIds = $data['attribute_value_ids'] ?? [];
+        unset($data['category_ids'], $data['attribute_value_ids']);
 
         foreach (['is_active', 'available_marketing', 'available_sale', 'available_care'] as $flag) {
             if ($request->has($flag)) {
@@ -280,6 +285,9 @@ class ProductController extends Controller
         $product->update($data);
         if ($hasCategoryIds) {
             $product->categories()->sync($categoryIds);
+        }
+        if ($hasAttributeValueIds) {
+            $product->attributeValues()->sync($attributeValueIds);
         }
 
         return redirect()->route('admin.products.index')->with('success', __('messages.product_updated'));

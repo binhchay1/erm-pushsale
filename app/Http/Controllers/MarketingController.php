@@ -35,4 +35,11 @@ class MarketingController extends Controller
             'seo' => app(Seo::class)->page('contact'),
         ]);
     }
+
+    public function docs(): Response
+    {
+        return Inertia::render('Marketing/Docs', [
+            'seo' => app(Seo::class)->page('docs'),
+        ]);
+    }
 }

@@ -28,6 +28,11 @@ final class LandingConnectionsController extends Controller
     {
         $this->authorizeView($request->user());
 
+        $isWebsiteRoute = $request->is('admin/marketing/website-connections*');
+        $routeUrl = $isWebsiteRoute ? '/admin/marketing/website-connections' : '/admin/marketing/landing-connections';
+        $recordsUrl = $routeUrl.'/records';
+        $activeMenuCode = $isWebsiteRoute ? '2.4.2' : '2.4.1';
+
         $query = LandingConnection::query()
             ->with($this->manager->relations())
             ->when($request->filled('search'), function ($query) use ($request): void {
@@ -51,13 +56,15 @@ final class LandingConnectionsController extends Controller
         return Inertia::render('Pushsale/Pages/Marketing/LandingConnectionsPage', [
             'connections' => $connections,
             'filters' => $request->only(['search', 'marketer_user_id', 'product_id', 'connection_type', 'active', 'per_page']),
+            'routeUrl' => $routeUrl,
+            'recordsUrl' => $recordsUrl,
             'marketers' => User::query()->whereIn('role', [UserRole::Marketing, UserRole::Admin])->orderBy('name')->get(['id', 'name']),
             'sales' => User::query()->where('role', UserRole::Sales)->orderBy('name')->get(['id', 'name', 'team_id']),
             'saleTeams' => Team::query()->where('type', 'sale')->with('users:id,name,team_id')->orderBy('name')->get(['id', 'name']),
             'products' => Product::query()->where('is_active', true)->where('available_marketing', true)->orderBy('type')->orderBy('name')->get(['id', 'name', 'sku', 'type', 'unit_price']),
             'canManage' => $this->canManage($request->user()),
-            'canApprove' => $request->user()->isAdmin(),
-            'activeMenuCode' => '2.4.1',
+            'canApprove' => $this->canApprove($request->user()),
+            'activeMenuCode' => $activeMenuCode,
         ]);
     }
 
@@ -315,4 +322,12 @@ final class LandingConnectionsController extends Controller
         return $user->allows(PermissionArea::Marketing, PermissionLevel::Full)
             || $user->allows(PermissionArea::Integrations, PermissionLevel::Full);
     }
+
+    private function canApprove(User $user): bool
+    {
+        return $user->isAdmin()
+            || $user->allows(PermissionArea::Marketing, PermissionLevel::Full)
+            || $user->allows(PermissionArea::Integrations, PermissionLevel::Full);
+    }
 }
+

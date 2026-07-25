@@ -22,6 +22,11 @@ return [
             'description' => 'ERM SaleOps là nền tảng điều hành bán hàng & vận hành được xây dựng cho các doanh nghiệp telesale tại Việt Nam, tập trung vào dữ liệu tách biệt, bảo mật và tốc độ.',
             'keywords' => 'về ERM SaleOps, nền tảng bán hàng, công ty công nghệ, SaaS Việt Nam',
         ],
+        'docs' => [
+            'title' => 'Hướng dẫn sử dụng',
+            'description' => 'Tài liệu hướng dẫn vận hành ERM SaleOps theo luồng thật: sản phẩm, marketing, phân bổ data, telesale, kho vận, kế toán và báo cáo.',
+            'keywords' => 'hướng dẫn ERM SaleOps, tài liệu sử dụng, hướng dẫn telesale, hướng dẫn kho vận, quy trình bán hàng',
+        ],
         'contact' => [
             'title' => 'Liên hệ',
             'description' => 'Liên hệ ERM SaleOps để được tư vấn triển khai, cấp tài khoản doanh nghiệp và demo nền tảng điều hành bán hàng & vận hành.',

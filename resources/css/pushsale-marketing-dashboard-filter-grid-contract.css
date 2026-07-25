@@ -93,3 +93,62 @@ html body.pushsale-app-body .psm-history-link {
         justify-self: start !important;
     }
 }
+
+/* Marketing dashboard filter should use the same calm grid rhythm as Pushsale sample. */
+html body.pushsale-app-body .psm-page .ps-page-shell__main-row {
+    grid-template-columns: 310px minmax(0, 1fr) auto !important;
+    column-gap: 28px !important;
+}
+
+html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+html body.pushsale-app-body .psm-filter-panel {
+    gap: 10px !important;
+}
+
+html body.pushsale-app-body .psm-filter-grid.is-first,
+html body.pushsale-app-body .psm-filter-grid.is-second {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(180px, 1fr)) !important;
+    align-items: center !important;
+    gap: 12px 30px !important;
+}
+
+html body.pushsale-app-body .psm-filter-grid.is-first > *,
+html body.pushsale-app-body .psm-filter-grid.is-second > * {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .psm-page .ps-product-search-select-v82,
+html body.pushsale-app-body .psm-page .ps-product-search-select-v82 .ps-product-search-control,
+html body.pushsale-app-body .psm-page .ps-product-search-select-v82 button {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .psm-history-link {
+    justify-self: start !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+@media (max-width: 1900px) {
+    html body.pushsale-app-body .psm-filter-grid.is-first,
+    html body.pushsale-app-body .psm-filter-grid.is-second {
+        grid-template-columns: repeat(4, minmax(240px, 1fr)) !important;
+    }
+}
+
+@media (max-width: 1320px) {
+    html body.pushsale-app-body .psm-page .ps-page-shell__main-row {
+        grid-template-columns: 260px minmax(0, 1fr) auto !important;
+    }
+    html body.pushsale-app-body .psm-filter-grid.is-first,
+    html body.pushsale-app-body .psm-filter-grid.is-second {
+        grid-template-columns: repeat(3, minmax(220px, 1fr)) !important;
+    }
+}

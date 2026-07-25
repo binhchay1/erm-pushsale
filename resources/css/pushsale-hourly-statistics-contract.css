@@ -1,0 +1,310 @@
+/* Pushsale parity for menu 8.1.1: /ld/thong-ke and shared hourly report routes. */
+.ps-hourly-report {
+    min-height: calc(100vh - 50px);
+    background: #f5f5f5;
+    color: #111;
+    font-size: 12px;
+}
+
+.ps-hourly-report .ps-hourly-header-wrap {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.12);
+}
+
+.ps-hourly-report .ps-hourly-header {
+    min-height: 62px;
+    display: flex;
+    align-items: center;
+    padding: 0 13px;
+}
+
+.ps-hourly-report .ps-hourly-header h1 {
+    margin: 0;
+    color: #111;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.ps-hourly-report .box {
+    margin: 14px 12px 0;
+    border: 1px solid #ddd;
+    border-radius: 0;
+    background: #fff;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.12);
+}
+
+.ps-hourly-report .box-body {
+    padding: 14px;
+}
+
+.ps-hourly-filter-row {
+    display: grid;
+    grid-template-columns: minmax(280px, 5fr) minmax(280px, 5fr) minmax(100px, 2fr);
+    gap: 28px;
+    align-items: center;
+}
+
+.ps-hourly-report .ps-control,
+.ps-hourly-report .ps-date-range-input,
+.ps-hourly-report select,
+.ps-hourly-report input {
+    height: 32px;
+    min-height: 32px;
+    border: 1px solid #cfd6de;
+    border-radius: 0;
+    background: #fff;
+    color: #222;
+    font-size: 12px;
+    font-weight: 400;
+    box-shadow: none;
+}
+
+.ps-hourly-report .ps-date-range {
+    width: 100%;
+}
+
+.ps-hourly-report .ps-date-range-input {
+    text-align: left;
+}
+
+.ps-hourly-action-wrap {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.ps-hourly-report .ps-btn {
+    height: 32px;
+    min-width: 92px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid #1c78ad;
+    border-radius: 3px;
+    background: #3c8dbc;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ps-hourly-chart-box {
+    margin-top: 18px;
+}
+
+.ps-hourly-chart-box .box-body {
+    padding: 16px 22px 6px;
+}
+
+.ps-hourly-chart {
+    position: relative;
+    width: 100%;
+    min-height: 400px;
+    padding: 20px 48px 28px 34px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.ps-hourly-chart h2 {
+    margin: 0 0 16px;
+    color: #222;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.2;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.ps-hourly-chart-menu {
+    position: absolute;
+    top: 26px;
+    right: 11px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #555;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.ps-hourly-chart-body {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) 42px;
+    align-items: stretch;
+    gap: 8px;
+    min-height: 280px;
+}
+
+.ps-hourly-day-label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 6px;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.ps-hourly-heatmap {
+    display: grid;
+    grid-template-columns: repeat(24, minmax(30px, 1fr));
+    min-width: 720px;
+    border-top: 1px solid #7cb5ec;
+    border-left: 1px solid #7cb5ec;
+}
+
+.ps-hourly-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+    border-right: 1px solid #7cb5ec;
+    border-bottom: 1px solid #7cb5ec;
+    color: #000;
+    font-size: 13px;
+    font-weight: 700;
+    text-shadow: 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.ps-hourly-legend {
+    display: grid;
+    grid-template-columns: 12px 1fr;
+    gap: 8px;
+    align-items: stretch;
+    padding-top: 1px;
+}
+
+.ps-hourly-legend-bar {
+    width: 12px;
+    min-height: 280px;
+}
+
+.ps-hourly-legend-rate .ps-hourly-legend-bar {
+    background: linear-gradient(to bottom, #fff, #da1b1b);
+}
+
+.ps-hourly-legend-closed .ps-hourly-legend-bar {
+    background: linear-gradient(to bottom, #fff, #23d46b);
+}
+
+.ps-hourly-legend-contacts .ps-hourly-legend-bar {
+    background: linear-gradient(to bottom, #fff, #4d86e8);
+}
+
+.ps-hourly-legend-labels {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: #666;
+    font-size: 11px;
+    line-height: 1;
+}
+
+.ps-hourly-xaxis {
+    display: grid;
+    grid-template-columns: 48px repeat(24, minmax(30px, 1fr)) 42px;
+    gap: 8px;
+    min-width: 818px;
+    padding-top: 8px;
+    color: #666;
+    font-size: 11px;
+    text-align: center;
+}
+
+.ps-hourly-credit {
+    position: absolute;
+    right: 20px;
+    bottom: 3px;
+    color: #999;
+    font-size: 9px;
+}
+
+.ps-hourly-chart-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 22px;
+    margin-top: 22px;
+}
+
+.ps-hourly-chart-grid .ps-hourly-chart {
+    min-height: 390px;
+    padding-left: 24px;
+    padding-right: 42px;
+}
+
+.ps-hourly-chart-grid .ps-hourly-cell {
+    min-height: 250px;
+    font-size: 12px;
+}
+
+.ps-hourly-chart-grid .ps-hourly-chart-body {
+    min-height: 250px;
+    grid-template-columns: 44px minmax(0, 1fr) 38px;
+}
+
+.ps-hourly-chart-grid .ps-hourly-legend-bar,
+.ps-hourly-chart-grid .ps-hourly-heatmap {
+    min-height: 250px;
+}
+
+.ps-hourly-chart-grid .ps-hourly-xaxis {
+    grid-template-columns: 44px repeat(24, minmax(24px, 1fr)) 38px;
+    min-width: 680px;
+}
+
+.ps-hourly-chart-grid .ps-hourly-heatmap {
+    grid-template-columns: repeat(24, minmax(24px, 1fr));
+    min-width: 576px;
+}
+
+.ps-hourly-summary {
+    display: flex;
+    gap: 22px;
+    margin: 8px 12px 0;
+    padding: 8px 0 14px;
+    color: #333;
+    font-size: 12px;
+}
+
+.ps-hourly-summary strong {
+    color: #000;
+}
+
+@media (max-width: 1200px) {
+    .ps-hourly-filter-row {
+        grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;
+        gap: 12px;
+    }
+
+    .ps-hourly-chart-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .ps-hourly-filter-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ps-hourly-action-wrap {
+        justify-content: flex-start;
+    }
+
+    .ps-hourly-chart {
+        overflow-x: auto;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .ps-hourly-summary {
+        flex-direction: column;
+        gap: 4px;
+    }
+}

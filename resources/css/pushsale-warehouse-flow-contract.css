@@ -454,3 +454,167 @@
         grid-template-columns: 135px minmax(0, 1fr) !important;
     }
 }
+
+/* V103: menu 5.3.1 must keep the captured Pushsale voucher form left-aligned.
+   Earlier generic grid overrides made the form drift to the center and broke the
+   two-column AdminLTE rhythm from the source template. */
+.pushsale-page[data-page-code="5.3.1"] .m-header-wrap {
+    margin: 0 0 12px !important;
+    border-bottom: 1px solid #d2d6de !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,.12) !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .m-header {
+    display: block !important;
+    min-height: 48px !important;
+    padding: 10px 0 !important;
+    background: #fff !important;
+    text-align: left !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .m-header::before,
+.pushsale-page[data-page-code="5.3.1"] .m-header::after,
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row::before,
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row::after {
+    display: table !important;
+    content: " " !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .m-header::after,
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row::after {
+    clear: both !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .m-header .col-xs-6:first-child {
+    float: left !important;
+    display: block !important;
+    width: 50% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 15px !important;
+    text-align: left !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .m-header .col-xs-6.text-right.hidden-print {
+    float: right !important;
+    display: block !important;
+    width: 50% !important;
+    padding: 0 15px !important;
+    text-align: right !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] [id$="CapNhatPhieuXuatNhapKho_btnDong"] {
+    display: inline-block !important;
+    color: #111 !important;
+    font-size: 13px !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .m-header .text,
+.pushsale-page[data-page-code="5.3.1"] [id$="CapNhatPhieuXuatNhapKho_lblModuleTitle"] {
+    display: inline !important;
+    color: #111 !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 28px !important;
+    text-align: left !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body,
+.pushsale-page[data-page-code="5.3.1"] .box-body[style*="max-width"] {
+    display: inline-block !important;
+    width: auto !important;
+    max-width: 1200px !important;
+    margin: 0 0 0 14px !important;
+    padding: 0 !important;
+    vertical-align: top !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row {
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    align-items: initial !important;
+    margin-right: -15px !important;
+    margin-left: -15px !important;
+    margin-bottom: 10px !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > [class*="col-xs-"] {
+    float: left !important;
+    display: block !important;
+    min-height: 1px !important;
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+    margin: 0 !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-1 { width: 8.33333333% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-2 { width: 16.66666667% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-3 { width: 25% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-4 { width: 33.33333333% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-5 { width: 41.66666667% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-6 { width: 50% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-7 { width: 58.33333333% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-8 { width: 66.66666667% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-9 { width: 75% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-10 { width: 83.33333333% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-11 { width: 91.66666667% !important; }
+.pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body > .row > .col-xs-12 { width: 100% !important; }
+
+.pushsale-page[data-page-code="5.3.1"] .h-label,
+.pushsale-page[data-page-code="5.3.1"] .h-text {
+    min-height: 30px !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 30px !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] table.pushsale-data-table {
+    width: 100% !important;
+    min-width: 1120px !important;
+    margin-top: 8px !important;
+    table-layout: fixed !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .pushsale-voucher-draft-row td {
+    background: #fff !important;
+    padding: 4px 5px !important;
+    vertical-align: middle !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .pushsale-voucher-line-input {
+    height: 26px !important;
+    min-height: 26px !important;
+    padding: 2px 5px !important;
+    font-size: 12px !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .pushsale-voucher-product-hint,
+.pushsale-page[data-page-code="5.3.1"] .pushsale-voucher-total-hint {
+    display: inline-block !important;
+    color: #666 !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+}
+
+.pushsale-page[data-page-code="5.3.1"] .pushsale-voucher-add-dot {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 14px !important;
+    height: 14px !important;
+    border: 2px solid #007bff !important;
+    border-radius: 50% !important;
+    color: transparent !important;
+}
+
+@media (max-width: 1000px) {
+    .pushsale-page[data-page-code="5.3.1"] #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo > .box-body {
+        display: block !important;
+        width: calc(100% - 28px) !important;
+        margin: 0 14px !important;
+    }
+}

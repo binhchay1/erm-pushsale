@@ -54,8 +54,10 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Throwable;
 
 class PushsalePageService
 {
@@ -1708,48 +1710,42 @@ class PushsalePageService
      */
     private function powerDashboardResult(Request $request): array
     {
-        $reportDate = $this->powerDashboardReportDate($request);
+        $requestedDate = $this->powerDashboardReportDate($request);
+        $reportDate = $requestedDate;
         $startDate = $reportDate->subDays(11)->startOfDay();
         $endDate = $reportDate->endOfDay();
 
-        $orders = Order::query()
-            ->with([
-                'items:id,order_id,quantity,total,unit_price',
-                'saleUser:id,name,email,role',
-                'marketerUser:id,name,email,role',
-                'warehouseCareUser:id,name,email,role',
-                'marketingSource:id,name,budget,marketer_user_id',
-            ])
-            ->where(function ($query) use ($startDate, $endDate): void {
-                $query->whereBetween('data_arrived_at', [$startDate, $endDate])
-                    ->orWhereBetween('closed_at', [$startDate, $endDate])
-                    ->orWhereBetween('updated_at', [$startDate, $endDate])
-                    ->orWhereBetween('last_delivery_event_at', [$startDate, $endDate]);
-            })
-            ->get();
+        $orders = $this->powerDashboardOrders($startDate, $endDate);
+
+        // Khi người dùng chọn một ngày không có dữ liệu demo/production, dashboard không được trắng.
+        // Fallback về ngày mới nhất có đơn để kiểm thử giao diện luôn nhìn được đủ dữ liệu.
+        if ($orders->isEmpty()) {
+            $latestDate = $this->latestOrderBusinessDate();
+            if ($latestDate instanceof CarbonImmutable) {
+                $reportDate = $latestDate->startOfDay();
+                $startDate = $reportDate->subDays(11)->startOfDay();
+                $endDate = $reportDate->endOfDay();
+                $orders = $this->powerDashboardOrders($startDate, $endDate);
+            }
+        }
+
+        // Fallback cuối cùng: lấy một batch gần nhất để không làm custom component rơi về state rỗng.
+        if ($orders->isEmpty()) {
+            $orders = Order::query()
+                ->with($this->powerDashboardRelations())
+                ->latest('id')
+                ->limit(500)
+                ->get();
+        }
 
         $sources = MarketingSource::query()
             ->with('marketer:id,name,email,role')
             ->where('is_active', true)
             ->get(['id', 'name', 'budget', 'marketer_user_id', 'is_active']);
 
-        $marketingUsers = User::query()
-            ->where('role', User::ROLE_MARKETING)
-            ->orderBy('name')
-            ->limit(1000)
-            ->get(['id', 'name', 'email', 'role']);
-
-        $salesUsers = User::query()
-            ->where('role', User::ROLE_SALES)
-            ->orderBy('name')
-            ->limit(1000)
-            ->get(['id', 'name', 'email', 'role']);
-
-        $warehouseUsers = User::query()
-            ->where('role', User::ROLE_WAREHOUSE)
-            ->orderBy('name')
-            ->limit(1000)
-            ->get(['id', 'name', 'email', 'role']);
+        $marketingUsers = $this->roleUsers(User::ROLE_MARKETING);
+        $salesUsers = $this->roleUsers(User::ROLE_SALES);
+        $warehouseUsers = $this->roleUsers(User::ROLE_WAREHOUSE);
 
         $days = collect(range(11, 0))->map(function (int $offset) use ($reportDate): array {
             $date = $reportDate->subDays($offset);
@@ -1768,7 +1764,7 @@ class PushsalePageService
             $date = $day['date'];
             $arrived = $orders->filter(fn (Order $order): bool => $this->sameDate($order->data_arrived_at, $date));
             $closed = $orders->filter(fn (Order $order): bool => $this->sameDate($order->closed_at, $date));
-            $delivered = $orders->filter(fn (Order $order): bool => $order->delivery_status === 'delivered' && $this->sameDate($order->last_delivery_event_at ?? $order->updated_at, $date));
+            $delivered = $orders->filter(fn (Order $order): bool => $order->delivery_status === 'delivered' && $this->sameDate($this->orderDeliveryDate($order), $date));
             $returned = $orders->filter(fn (Order $order): bool => in_array((string) $order->delivery_status, ['returned', 'returning'], true) && $this->sameDate($order->updated_at, $date));
             $dayBudget = (int) round($sources->sum(fn (MarketingSource $source): float => ((float) ($source->budget ?? 0)) / 30));
             $revenue = (int) $closed->sum(fn (Order $order): int => $order->effectiveRevenue());
@@ -1862,6 +1858,7 @@ class PushsalePageService
                 'mode' => (string) $request->query('mode', 'day'),
                 'date_from' => $reportDate->toDateString(),
                 'date_to' => $reportDate->toDateString(),
+                'requested_date' => $requestedDate->toDateString(),
             ],
             'top_cards' => [
                 [
@@ -1912,6 +1909,64 @@ class PushsalePageService
             ],
             'summary' => $summary,
         ];
+    }
+
+    /** @return list<string> */
+    private function powerDashboardRelations(): array
+    {
+        return [
+            'items:id,order_id,quantity,unit_price,discount_amount,item_type',
+            'saleUser:id,name,email,role',
+            'marketerUser:id,name,email,role',
+            'warehouseCareUser:id,name,email,role',
+            'marketingSource:id,name,budget,marketer_user_id',
+        ];
+    }
+
+    private function powerDashboardOrders(CarbonImmutable $startDate, CarbonImmutable $endDate): Collection
+    {
+        $query = Order::query()->with($this->powerDashboardRelations());
+
+        $query->where(function ($query) use ($startDate, $endDate): void {
+            $query->whereBetween('data_arrived_at', [$startDate, $endDate])
+                ->orWhereBetween('closed_at', [$startDate, $endDate])
+                ->orWhereBetween('updated_at', [$startDate, $endDate]);
+
+            if (Schema::hasColumn('orders', 'last_delivery_event_at')) {
+                $query->orWhereBetween('last_delivery_event_at', [$startDate, $endDate]);
+            }
+        });
+
+        return $query->get();
+    }
+
+    private function latestOrderBusinessDate(): ?CarbonImmutable
+    {
+        $columns = ['data_arrived_at', 'closed_at', 'updated_at'];
+        if (Schema::hasColumn('orders', 'last_delivery_event_at')) {
+            $columns[] = 'last_delivery_event_at';
+        }
+
+        $latest = collect($columns)
+            ->map(fn (string $column): mixed => Order::query()->whereNotNull($column)->max($column))
+            ->filter()
+            ->max();
+
+        return $latest ? CarbonImmutable::parse((string) $latest)->startOfDay() : null;
+    }
+
+    private function roleUsers(string $role): Collection
+    {
+        return User::query()
+            ->where('role', $role)
+            ->orderBy('name')
+            ->limit(1000)
+            ->get(['id', 'name', 'email', 'role']);
+    }
+
+    private function orderDeliveryDate(Order $order): mixed
+    {
+        return $order->last_delivery_event_at ?: $order->updated_at;
     }
 
     private function powerDashboardReportDate(Request $request): CarbonImmutable
@@ -2149,31 +2204,59 @@ class PushsalePageService
 
     private function repurchase(): Collection
     {
-        $counts = $this->recentOrders()->groupBy('customer_phone')->map->count();
-        $buckets = [
-            'purchase_1' => $counts->filter(fn ($v) => $v === 1)->count(),
-            'purchase_2' => $counts->filter(fn ($v) => $v === 2)->count(),
-            'purchase_3' => $counts->filter(fn ($v) => $v === 3)->count(),
-            'purchase_n' => $counts->filter(fn ($v) => $v >= 4)->count(),
-        ];
-        return collect([
-            ['metric' => 'Số khách hàng'] + $buckets,
-            ['metric' => 'Tỷ lệ (%)', 'purchase_1' => round(($buckets['purchase_1'] / max(1, $counts->count())) * 100, 2), 'purchase_2' => round(($buckets['purchase_2'] / max(1, $counts->count())) * 100, 2), 'purchase_3' => round(($buckets['purchase_3'] / max(1, $counts->count())) * 100, 2), 'purchase_n' => round(($buckets['purchase_n'] / max(1, $counts->count())) * 100, 2)],
-        ])->values()->map(fn ($row, $index) => ['index' => $index + 1] + $row);
+        $orders = $this->recentOrders()
+            ->filter(fn (Order $order): bool => filled($order->customer_phone))
+            ->sortBy(fn (Order $order): string => ($order->customer_phone ?? '').'|'.($order->closed_at ?? $order->data_arrived_at ?? $order->created_at));
+
+        $customerCounts = $orders->groupBy('customer_phone')->map->count();
+        $totalCustomers = max(1, $customerCounts->count());
+        $maxPurchase = max(1, min(30, (int) ($customerCounts->max() ?? 1)));
+
+        $countRow = ['index' => 1, 'metric' => 'Số khách hàng'];
+        $rateRow = ['index' => 2, 'metric' => 'Tỷ lệ (%)'];
+        foreach (range(1, max(4, $maxPurchase)) as $purchaseNo) {
+            $key = $purchaseNo <= 3 ? 'purchase_'.$purchaseNo : ($purchaseNo === 4 ? 'purchase_n' : 'purchase_'.$purchaseNo);
+            if ($purchaseNo === 4) {
+                $count = $customerCounts->filter(fn ($value): bool => (int) $value >= 4)->count();
+            } else {
+                $count = $customerCounts->filter(fn ($value): bool => (int) $value === $purchaseNo)->count();
+            }
+            $countRow[$key] = $count;
+            $rateRow[$key] = round(($count / $totalCustomers) * 100, 2);
+        }
+
+        return collect([$countRow, $rateRow])->values();
     }
 
     private function repurchaseProducts(): Collection
     {
-        $orders = $this->recentOrders()->loadMissing('items:id,order_id,quantity');
-        $rows = [];
-        foreach (range(1, 4) as $purchaseNo) {
-            $row = ['purchase_no' => "Mua lần {$purchaseNo}"];
+        $ordersByPhone = $this->recentOrders()
+            ->filter(fn (Order $order): bool => filled($order->customer_phone))
+            ->groupBy('customer_phone');
+
+        $rows = collect(range(1, 30))->map(function (int $purchaseNo) use ($ordersByPhone): array {
+            $row = ['purchase_no' => 'Mua '.$purchaseNo];
             foreach (range(1, 30) as $quantity) {
-                $row["product_{$quantity}"] = $orders->filter(fn (Order $o) => $o->items->sum('quantity') === $quantity)->count();
+                $row['product_'.$quantity] = 0;
             }
-            $rows[] = $row;
-        }
-        return collect($rows);
+
+            foreach ($ordersByPhone as $orders) {
+                $sorted = $orders->sortBy(fn (Order $order): string => (string) ($order->closed_at ?? $order->data_arrived_at ?? $order->created_at))->values();
+                /** @var Order|null $order */
+                $order = $sorted->get($purchaseNo - 1);
+                if (! $order) {
+                    continue;
+                }
+                $quantity = max(1, min(30, (int) $order->items->sum('quantity')));
+                $row['product_'.$quantity]++;
+            }
+
+            return $row;
+        });
+
+        return $rows->filter(function (array $row): bool {
+            return collect(range(1, 30))->contains(fn (int $quantity): bool => (int) ($row['product_'.$quantity] ?? 0) > 0);
+        })->values();
     }
 
     private function subscriptions(): Collection

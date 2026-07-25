@@ -59,6 +59,11 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
         if (editing) form.put(`/admin/warehouses/${editing}`, options); else form.post('/admin/warehouses', options);
     };
 
+    const openVoucherEntry = (warehouseId = null) => {
+        const query = warehouseId ? `?warehouse_id=${encodeURIComponent(warehouseId)}` : '';
+        router.visit(`/admin/warehouse/vouchers/entry${query}`);
+    };
+
     return (
         <AppLayout>
             <Head title="Danh sách kho" />
@@ -79,6 +84,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                     <button type="button" className="btn btn-sm btn-default"><i className="fa fa-truck" /> Danh người gửi Viettel Post</button>
                     <button type="button" className="btn btn-sm btn-default"><i className="fa fa-truck" /> Danh sách kho Shippo</button>
                     <button type="button" className="btn btn-sm btn-default"><i className="fa fa-truck" /> Danh sách cửa hàng Giao hàng nhanh</button>
+                    <button type="button" className="btn btn-sm btn-info" onClick={() => openVoucherEntry()}><i className="fa fa-exchange" /> Lập phiếu xuất / nhập</button>
                     <button type="button" className="btn btn-sm btn-primary" onClick={openCreate}><i className="fa fa-plus" /> Thêm</button>
                 </div>
 
@@ -86,7 +92,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                     <table className="table table-bordered ps-source-table ps-warehouse-table">
                         <thead><tr><th>#</th><th>Tên kho</th><th>Số điện thoại</th><th>Tỉnh/TP</th><th>Quận/Huyện</th><th>Phường/Xã</th><th>Địa chỉ</th><th>Quản kho</th><th>Mã VTP</th><th>Mã GHN</th><th>Cập nhật</th><th /></tr></thead>
                         <tbody>{rows.length ? rows.map((row) => <tr key={row.id}>
-                            <td className="text-center">{row.id}</td><td><strong>{row.name}</strong>{row.code && <small>({row.code})</small>}</td><td className="text-center">{row.phone}</td><td>{row.pick_province}</td><td>{row.pick_district}</td><td>{row.pick_ward}</td><td>{row.address}</td><td className="text-center">{row.manager_name}</td><td className="text-center">{row.vtp_code}</td><td className="text-center">{row.ghtk_pick_address_id}</td><td className="text-center">{row.updated_at}</td><td className="text-center ps-row-actions"><button type="button" onClick={() => openEdit(row)}><i className="fa fa-pencil-square-o" /></button><button type="button" onClick={() => window.confirm(`Xóa kho ${row.name}?`) && router.delete(`/admin/warehouses/${row.id}`, { preserveScroll: true })}><i className="fa fa-trash" /></button></td>
+                            <td className="text-center">{row.id}</td><td><strong>{row.name}</strong>{row.code && <small>({row.code})</small>}</td><td className="text-center">{row.phone}</td><td>{row.pick_province}</td><td>{row.pick_district}</td><td>{row.pick_ward}</td><td>{row.address}</td><td className="text-center">{row.manager_name}</td><td className="text-center">{row.vtp_code}</td><td className="text-center">{row.ghtk_pick_address_id}</td><td className="text-center">{row.updated_at}</td><td className="text-center ps-row-actions"><button type="button" title="Lập phiếu xuất / nhập kho" onClick={() => openVoucherEntry(row.id)}><i className="fa fa-exchange" /></button><button type="button" onClick={() => openEdit(row)}><i className="fa fa-pencil-square-o" /></button><button type="button" onClick={() => window.confirm(`Xóa kho ${row.name}?`) && router.delete(`/admin/warehouses/${row.id}`, { preserveScroll: true })}><i className="fa fa-trash" /></button></td>
                         </tr>) : <tr><td colSpan="12" className="ps-empty">Chưa có kho phù hợp.</td></tr>}</tbody>
                     </table>
                 </div>

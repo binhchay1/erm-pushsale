@@ -1,0 +1,363 @@
+/*
+ * V102 — final shared page chrome contract.
+ * Purpose: every captured Pushsale template and every React page must use one
+ * visual structure: fixed blue app header, then a white page header with title
+ * left / search actions right, then filter row/body. This file loads last and
+ * only targets the ERM app shell to avoid leaking into login/public pages.
+ */
+html body.pushsale-app-body {
+    --ps102-blue: #0d8bf2;
+    --ps102-table-blue: #3c8dbc;
+    --ps102-border: #d2d6de;
+    --ps102-soft-border: #e2e7ee;
+    --ps102-control-h: 34px;
+    --ps102-page-x: 16px;
+    --ps102-font: Arial, Helvetica, sans-serif;
+}
+
+html body.pushsale-app-body,
+html body.pushsale-app-body .pushsale-wrapper,
+html body.pushsale-app-body .content-wrapper,
+html body.pushsale-app-body .content-inner,
+html body.pushsale-app-body .ps-page-viewport {
+    overflow-x: hidden !important;
+}
+
+html body.pushsale-app-body {
+    overflow-y: auto !important;
+}
+
+html body.pushsale-app-body .pushsale-wrapper .content-wrapper,
+html body.pushsale-app-body .pushsale-wrapper.sidebar-open .content-wrapper,
+html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .content-wrapper {
+    margin-top: var(--ps-v85-header-height, 50px) !important;
+    padding-top: 0 !important;
+    background: #fff !important;
+}
+
+/* Captured templates often bring their own AdminLTE .content-wrapper. It must
+ * not create an extra shell or top white band inside the real React shell. */
+html body.pushsale-app-body .pushsale-template-host .content-wrapper,
+html body.pushsale-app-body .pushsale-template-host .pushsale-nested-content-wrapper,
+html body.pushsale-app-body .pushsale-template-fragment .content-wrapper,
+html body.pushsale-app-body .pushsale-template-inner .content-wrapper {
+    position: static !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: #fff !important;
+    overflow: visible !important;
+    transform: none !important;
+}
+
+html body.pushsale-app-body .pushsale-native-top-spacer,
+html body.pushsale-app-body .pushsale-native-empty-spacer,
+html body.pushsale-app-body .pushsale-template-empty-spacer {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+}
+
+/* Shared page header: match Pushsale sample, not the old centered/header-card
+ * variants. */
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap:first-of-type,
+html body.pushsale-app-body .ps-page-shell__header,
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page > .m-header-wrap:first-child {
+    display: block !important;
+    width: 100% !important;
+    min-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--ps102-border) !important;
+    border-top: 0 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .12) !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap.pushsale-primary-header-wrap > .m-header,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap:first-of-type > .m-header,
+html body.pushsale-app-body .ps-page-shell__main-row,
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page > .m-header-wrap:first-child > .m-header {
+    display: grid !important;
+    grid-template-columns: minmax(220px, 1fr) minmax(360px, 1.45fr) auto !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-height: 50px !important;
+    margin: 0 !important;
+    padding: 8px var(--ps102-page-x) !important;
+    background: #fff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    text-align: left !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap.pushsale-primary-header-wrap > .m-header::before,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap.pushsale-primary-header-wrap > .m-header::after,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap:first-of-type > .m-header::before,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap:first-of-type > .m-header::after {
+    display: none !important;
+    content: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .pushsale-header-title-col,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header > .col-sm-7:first-child,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header > .col-sm-8:first-child,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header > .col-sm-6:first-child,
+html body.pushsale-app-body .ps-page-shell__title-col {
+    float: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .pushsale-header-actions-col,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header > .col-sm-5.form-group,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header > .col-sm-4.form-group,
+html body.pushsale-app-body .ps-page-shell__filters,
+html body.pushsale-app-body .ps-page-shell__actions {
+    float: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header [style*="float"],
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header [style*="calc"] {
+    float: none !important;
+    width: auto !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .pushsale-header-actions-col > div:first-child,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header > .col-sm-5.form-group > div:first-child,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header > .col-sm-4.form-group > div:first-child {
+    flex: 1 1 360px !important;
+    min-width: 240px !important;
+    max-width: 640px !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .pushsale-header-actions-col > div:last-child,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header > .col-sm-5.form-group > div:last-child,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header > .col-sm-4.form-group > div:last-child {
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .text,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header [id$='lblModuleTitle'],
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .module-title,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .ps-title,
+html body.pushsale-app-body .ps-page-shell__title {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    min-height: 22px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #000 !important;
+    font: 700 15px/22px var(--ps102-font) !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header input.form-control,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header select.form-control,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .pushsale-native-input,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .pushsale-native-select,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .ps-ddl,
+html body.pushsale-app-body .ps-page-shell .form-control,
+html body.pushsale-app-body .ps-page-shell .ps-control,
+html body.pushsale-app-body .ps-page-shell .ps-select-trigger,
+html body.pushsale-app-body .ps-page-shell .ps-product-search-trigger {
+    width: 100% !important;
+    height: var(--ps102-control-h) !important;
+    min-height: var(--ps102-control-h) !important;
+    border: 1px solid #c7d1dc !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font: 400 13px/20px var(--ps102-font) !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .btn,
+html body.pushsale-app-body .ps-page-shell .btn,
+html body.pushsale-app-body .ps-page-shell .ps-btn-primary,
+html body.pushsale-app-body .ps-page-shell .ps-search-button {
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 6px 12px !important;
+    border-radius: 2px !important;
+    font: 700 13px/18px var(--ps102-font) !important;
+    white-space: nowrap !important;
+}
+
+/* Filter/body split below the header. */
+html body.pushsale-app-body .pushsale-page[data-page-code] .box-body {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 10px var(--ps102-page-x) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-composite-filter-row {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 10px 16px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-filter-row > [class*='col-'],
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-composite-filter-row > .pushsale-filter-cell {
+    float: none !important;
+    flex: 1 1 260px !important;
+    width: auto !important;
+    min-width: 220px !important;
+    max-width: 360px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-composite-filter-row > .pushsale-main-table-cell {
+    float: none !important;
+    flex: 1 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-filter-row .text-right,
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-composite-filter-row .text-right {
+    text-align: right !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-filter-row .form-control,
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-filter-row .ps-ddl,
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-composite-filter-row .form-control,
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-composite-filter-row .ps-ddl {
+    width: 100% !important;
+    height: var(--ps102-control-h) !important;
+    min-height: var(--ps102-control-h) !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-empty-column {
+    display: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] .table-responsive,
+html body.pushsale-app-body .pushsale-page[data-page-code] [style*="overflow-x: auto"],
+html body.pushsale-app-body .pushsale-page[data-page-code] [style*="overflow-x:auto"] {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] table.pushsale-data-table,
+html body.pushsale-app-body .pushsale-page[data-page-code] table#tableReport {
+    width: 100% !important;
+    margin: 0 !important;
+    border-collapse: collapse !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] table.pushsale-data-table th,
+html body.pushsale-app-body .pushsale-page[data-page-code] table#tableReport th {
+    background: var(--ps102-table-blue) !important;
+    color: #fff !important;
+    border-color: #2f79ad !important;
+    font: 700 12px/16px var(--ps102-font) !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] table.pushsale-data-table td,
+html body.pushsale-app-body .pushsale-page[data-page-code] table#tableReport td {
+    border-color: #d9d9d9 !important;
+    font: 400 12px/17px var(--ps102-font) !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code] table.pushsale-data-table tbody tr:nth-child(even) td,
+html body.pushsale-app-body .pushsale-page[data-page-code] table#tableReport tbody tr:nth-child(even) td {
+    background: #eeeeee !important;
+}
+
+/* Page-specific backward compatibility while the numbered files are being
+ * retired. The rule below fixes the current Warehouse voucher list mismatch. */
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .m-header-wrap:first-of-type > .m-header {
+    grid-template-columns: minmax(300px, 1fr) minmax(520px, 1.8fr) auto !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .m-header > .pushsale-header-title-col,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .m-header > .col-sm-7:first-child {
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .m-header > .pushsale-header-actions-col,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .m-header > .col-sm-5.form-group {
+    justify-content: flex-end !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-composite-filter-row > .pushsale-filter-cell {
+    flex-basis: 270px !important;
+}
+
+@media (max-width: 1280px) {
+    html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap:first-of-type > .m-header,
+    html body.pushsale-app-body .ps-page-shell__main-row {
+        grid-template-columns: minmax(180px, 260px) minmax(260px, 1fr) auto !important;
+        gap: 10px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap:first-of-type > .m-header,
+    html body.pushsale-app-body .ps-page-shell__main-row {
+        grid-template-columns: 1fr !important;
+        align-items: stretch !important;
+    }
+
+    html body.pushsale-app-body .pushsale-page[data-page-code] .m-header .pushsale-header-actions-col,
+    html body.pushsale-app-body .pushsale-page[data-page-code] .m-header > .col-sm-5.form-group,
+    html body.pushsale-app-body .ps-page-shell__filters,
+    html body.pushsale-app-body .ps-page-shell__actions {
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        white-space: normal !important;
+    }
+
+    html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-filter-row > [class*='col-'],
+    html body.pushsale-app-body .pushsale-page[data-page-code] .pushsale-composite-filter-row > .pushsale-filter-cell {
+        flex-basis: 100% !important;
+        max-width: none !important;
+    }
+}

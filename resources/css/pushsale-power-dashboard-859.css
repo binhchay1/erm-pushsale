@@ -334,3 +334,12 @@
         justify-self: start;
     }
 }
+
+html body.pushsale-app-body .ps-power-runtime-error {
+    margin: 10px 0 14px;
+    padding: 9px 12px;
+    color: #c0392b;
+    background: #fff5f3;
+    border: 1px solid #e74c3c;
+    font-weight: 600;
+}

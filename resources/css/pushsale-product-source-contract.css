@@ -741,3 +741,184 @@ html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxon
     border: 1px solid #d2d6de !important;
     border-bottom: 1px solid #d2d6de !important;
 }
+
+/* Override product modal rows to prevent source-template display:contents collisions. */
+html body.pushsale-app-body .ps-product-source-modal .ps-product-source-form {
+    min-width: 1320px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-source-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(270px, 1fr)) !important;
+    align-items: center !important;
+    gap: 13px 24px !important;
+    margin-bottom: 14px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field {
+    display: grid !important;
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+    color: #111 !important;
+    font: 400 12px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field.span-2 {
+    grid-column: span 2 !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field.span-2 > input,
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field.span-2 > select,
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field.span-2 > div {
+    grid-column: auto !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field > span {
+    align-self: center !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field > input,
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field > select,
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field > .ps-search-select,
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field > div:not(.ps-search-select-menu) {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-source-inline-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-height: 31px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    font: 400 12px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-vat-field > div {
+    display: grid !important;
+    grid-template-columns: 96px minmax(70px, 1fr) !important;
+    gap: 10px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-attribute-builder {
+    margin: 2px 0 16px 150px !important;
+    padding: 10px 12px !important;
+    border: 1px solid #d9e4f3 !important;
+    background: #f8fbff !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-attribute-help {
+    margin-bottom: 8px !important;
+    color: #777 !important;
+    font-size: 11px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-attribute-row {
+    display: grid !important;
+    grid-template-columns: 90px minmax(220px, 1fr) 60px minmax(220px, 1fr) !important;
+    align-items: center !important;
+    gap: 10px 14px !important;
+    margin-top: 8px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-search-select {
+    position: relative !important;
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-search-select-button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 31px !important;
+    min-height: 31px !important;
+    padding: 5px 9px !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    text-align: left !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-search-select-button > span {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-search-select-menu {
+    position: absolute !important;
+    top: calc(100% + 1px) !important;
+    left: 0 !important;
+    z-index: 12050 !important;
+    width: 100% !important;
+    min-width: 260px !important;
+    max-height: 285px !important;
+    overflow: auto !important;
+    padding: 6px !important;
+    border: 1px solid #c7d3df !important;
+    background: #fff !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .18) !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-search-select-input {
+    height: 30px !important;
+    margin-bottom: 5px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-search-select-option {
+    display: block !important;
+    width: 100% !important;
+    min-height: 30px !important;
+    padding: 6px 8px !important;
+    border: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    text-align: left !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-search-select-option:hover,
+html body.pushsale-app-body .ps-product-source-modal .ps-search-select-option.active {
+    background: #e8f2ff !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-search-select-option small {
+    display: block !important;
+    margin-top: 2px !important;
+    color: #777 !important;
+    font-size: 11px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: 6px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-row {
+    display: grid !important;
+    grid-template-columns: 120px minmax(0, 1fr) 28px 28px !important;
+    align-items: center !important;
+    gap: 4px 12px !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-row > small {
+    grid-column: 2 / 5 !important;
+    margin: -2px 0 0 !important;
+    color: #999 !important;
+    font-size: 11px !important;
+    line-height: 15px !important;
+}

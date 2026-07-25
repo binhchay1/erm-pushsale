@@ -110,6 +110,7 @@ export default {
     marketing: {
         nav_features: 'Tính năng',
         nav_solutions: 'Giải pháp',
+        nav_docs: 'Hướng dẫn',
         nav_about: 'Về chúng tôi',
         nav_contact: 'Liên hệ',
         sign_in: 'Đăng nhập',

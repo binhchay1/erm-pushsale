@@ -80,6 +80,54 @@ function normalizeEditableSources(sources = []) {
 }
 
 
+function splitUpsellUrls(value = '') {
+    return String(value ?? '')
+        .split(/\r?\n/)
+        .map((url) => url.trim())
+        .filter(Boolean)
+        .filter((url, index, source) => source.indexOf(url) === index);
+}
+
+function upsellUrlsText(sources = []) {
+    return (sources ?? [])
+        .filter((source) => source.source_type === 'upsell')
+        .map((source) => source.source_url)
+        .filter(Boolean)
+        .join('\n');
+}
+
+function mergeUpsellSources(currentSources = [], urls = []) {
+    const mainSources = (currentSources ?? []).filter((source) => source.source_type === 'main');
+    const oldUpsells = (currentSources ?? []).filter((source) => source.source_type === 'upsell');
+    const nextUpsells = urls.map((url, index) => {
+        const old = oldUpsells.find((source) => source.source_url === url) ?? oldUpsells[index];
+        return {
+            ...(old ?? blankSource('upsell')),
+            client_key: old?.client_key ?? blankKey(),
+            name: old?.name || `Trang upsale ${index + 1}`,
+            source_type: 'upsell',
+            source_url: url,
+            sort_order: index + 1,
+            is_active: old?.is_active ?? true,
+        };
+    });
+    const main = mainSources.length ? mainSources : [blankSource('main')];
+    return [...main, ...nextUpsells].map((source, index) => ({ ...source, sort_order: index }));
+}
+
+function cleanPayload(data) {
+    const payload = { ...data };
+    const urls = splitUpsellUrls(payload.upsell_urls_text);
+    payload.sources = mergeUpsellSources(payload.sources, urls).map((source) => (
+        source.source_type === 'main' && urls[0] && !source.redirect_url
+            ? { ...source, redirect_url: urls[0] }
+            : source
+    ));
+    delete payload.upsell_urls_text;
+    return payload;
+}
+
+
 const blankForm = () => {
     const mainSource = blankSource('main');
     const budgetDates = defaultBudgetDates();
@@ -99,6 +147,7 @@ const blankForm = () => {
         is_approved: false,
         is_active: true,
         notes: '',
+        upsell_urls_text: '',
         sources: [mainSource],
         products: [blankProduct(true, mainSource.client_key)],
         sale_user_ids: [],
@@ -156,14 +205,17 @@ export default function LandingConnectionsPage({
     sales = [],
     saleTeams = [],
     products = [],
+    routeUrl = '/admin/marketing/landing-connections',
+    recordsUrl = '/admin/marketing/landing-connections/records',
     canManage = false,
     canApprove = false,
+    activeMenuCode = '2.4.1',
 }) {
     const [query, setQuery] = useState({
         search: filters.search ?? '',
         marketer_user_id: filters.marketer_user_id ?? '',
         product_id: filters.product_id ?? '',
-        connection_type: filters.connection_type ?? 'landing',
+        connection_type: filters.connection_type ?? '',
         active: filters.active ?? '',
         per_page: filters.per_page ?? 20,
     });
@@ -184,7 +236,7 @@ export default function LandingConnectionsPage({
     const search = (event) => {
         event?.preventDefault();
         const payload = Object.fromEntries(Object.entries(query).filter(([, value]) => value !== '' && value !== null));
-        router.get('/admin/marketing/landing-connections', payload, { preserveState: true, replace: true, preserveScroll: true });
+        router.get(routeUrl, payload, { preserveState: true, replace: true, preserveScroll: true });
     };
 
     const openCreate = () => {
@@ -214,6 +266,7 @@ export default function LandingConnectionsPage({
             is_approved: Boolean(row.is_approved),
             is_active: Boolean(row.is_active),
             notes: row.notes ?? '',
+            upsell_urls_text: upsellUrlsText(editableSources),
             sources: editableSources,
             products: (row.products ?? []).length
                 ? row.products.map((product) => ({
@@ -231,9 +284,10 @@ export default function LandingConnectionsPage({
     const save = (event) => {
         event.preventDefault();
         const options = { preserveScroll: true, onSuccess: () => setOpen(false) };
+        form.transform(cleanPayload);
         editingId
-            ? form.put(`/admin/marketing/landing-connections/records/${editingId}`, options)
-            : form.post('/admin/marketing/landing-connections/records', options);
+            ? form.put(`${recordsUrl}/${editingId}`, options)
+            : form.post(recordsUrl, options);
     };
 
     const updateSource = (index, key, value) => form.setData('sources', form.data.sources.map((row, rowIndex) => rowIndex === index ? { ...row, [key]: value } : row));
@@ -246,6 +300,7 @@ export default function LandingConnectionsPage({
         });
     };
     const addSource = (type = 'upsell') => form.setData('sources', [...form.data.sources, { ...blankSource(type), sort_order: form.data.sources.length }]);
+    const applyUpsellUrls = () => form.setData('sources', mergeUpsellSources(form.data.sources, splitUpsellUrls(form.data.upsell_urls_text)));
     const updateProduct = (index, key, value) => form.setData('products', form.data.products.map((row, rowIndex) => rowIndex === index ? { ...row, [key]: value } : row));
     const removeProduct = (index) => form.setData('products', form.data.products.filter((_, rowIndex) => rowIndex !== index));
     const addProduct = () => {
@@ -316,7 +371,7 @@ export default function LandingConnectionsPage({
         const ids = [...selected];
         if (!ids.length || !window.confirm(`Xóa ${ids.length} kết nối đã chọn?`)) return;
 
-        router.visit('/admin/marketing/landing-connections/records', {
+        router.visit(recordsUrl, {
             method: 'delete',
             data: { ids },
             preserveScroll: true,
@@ -325,9 +380,9 @@ export default function LandingConnectionsPage({
     };
 
     return (
-        <AppLayout>
-            <Head title="Kết nối dữ liệu landing" />
-            <section className="ps-adminlte-page pslc-page" data-page-code="2.4.1">
+        <AppLayout activeMenuCode={activeMenuCode}>
+            <Head title="Kết nối dữ liệu" />
+            <section className="ps-adminlte-page pslc-page" data-page-code={activeMenuCode}>
                 <form className="pslc-filter" onSubmit={search}>
                     <div className="m-header-wrap">
                         <div className="m-header pslc-header">
@@ -357,6 +412,7 @@ export default function LandingConnectionsPage({
                                 <input className="form-control" placeholder="Tìm kiếm tên nguồn hoặc URL" value={query.search} onChange={(event) => setQuery((old) => ({ ...old, search: event.target.value }))} />
                                 <button className="btn btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
                                 <button type="button" className="btn btn-default" title="Cài đặt"><i className="fa fa-cog" /></button>
+                                <a className="btn btn-default pslc-approval-link" href="/admin/marketing/landing-approvals" title="Duyệt kết nối dữ liệu"><i className="fa fa-check-circle" /> Duyệt</a>
                                 
                             </div>
                         </div>
@@ -372,14 +428,14 @@ export default function LandingConnectionsPage({
                             onClick={() => {
                                 const next = { ...query, connection_type: value };
                                 setQuery(next);
-                                router.get('/admin/marketing/landing-connections', Object.fromEntries(Object.entries(next).filter(([, item]) => item !== '')), { preserveState: true, replace: true });
+                                router.get(routeUrl, Object.fromEntries(Object.entries(next).filter(([, item]) => item !== '')), { preserveState: true, replace: true });
                             }}
                         >{label}</button>
                     ))}
                     <button type="button" className={!query.connection_type ? 'active' : ''} onClick={() => {
                         const next = { ...query, connection_type: '' };
                         setQuery(next);
-                        router.get('/admin/marketing/landing-connections', Object.fromEntries(Object.entries(next).filter(([, item]) => item !== '')), { preserveState: true, replace: true });
+                        router.get(routeUrl, Object.fromEntries(Object.entries(next).filter(([, item]) => item !== '')), { preserveState: true, replace: true });
                     }}>TẤT CẢ</button>
                 </nav>
 
@@ -446,7 +502,7 @@ export default function LandingConnectionsPage({
                                     <td className="text-center"><strong>{row.updated_at}</strong></td>
                                     <td className="text-center pslc-actions">
                                         <button type="button" disabled={!canManage} onClick={() => openEdit(row)} title="Cập nhật"><i className="fa fa-pencil-square-o" /></button>
-                                        <button type="button" disabled={!canManage} onClick={() => window.confirm(`Xóa kết nối ${row.name}?`) && router.delete(`/admin/marketing/landing-connections/records/${row.id}`, { preserveScroll: true, onSuccess: () => setSelected((current) => { const next = new Set(current); next.delete(row.id); return next; }) })} title="Xóa"><i className="fa fa-trash" /></button>
+                                        <button type="button" disabled={!canManage} onClick={() => window.confirm(`Xóa kết nối ${row.name}?`) && router.delete(`${recordsUrl}/${row.id}`, { preserveScroll: true, onSuccess: () => setSelected((current) => { const next = new Set(current); next.delete(row.id); return next; }) })} title="Xóa"><i className="fa fa-trash" /></button>
                                     </td>
                                 </tr>
                             )) : <tr><td colSpan="14" className="ps-empty">Chưa có kết nối phù hợp. Hãy tạo đầy đủ nguồn, sản phẩm và cấu hình chia số trước khi nhận lead.</td></tr>}
@@ -456,7 +512,7 @@ export default function LandingConnectionsPage({
 
                 <PushsalePagination
                     meta={connections}
-                    routeUrl="/admin/marketing/landing-connections"
+                    routeUrl={routeUrl}
                     filters={query}
                     itemLabel="nguồn dữ liệu"
                 />
@@ -531,6 +587,13 @@ export default function LandingConnectionsPage({
                                 <strong>Ladipage / form website:</strong> đặt method POST tới URL nhận dữ liệu, field bắt buộc là số điện thoại (<code>phone</code>, <code>customer_phone</code> hoặc <code>tel</code>). Các field tên, địa chỉ, ghi chú, sản phẩm được map bằng bảng sản phẩm bên dưới; nếu landing không gửi mã sản phẩm thì dòng Mặc định sẽ được dùng.
                                 <br />
                                 <strong>Facebook Ads:</strong> dùng cùng kết nối để quy hoạch ngân sách/sản phẩm/marketing; nguồn Facebook sẽ đi qua webhook Facebook riêng, không cần tạo thêm nguồn đích cuối riêng.
+                            </div>
+                            <div className="pslc-upsell-url-row">
+                                <label>
+                                    <span>URL trang upsale<br /><small>Mỗi URL một dòng</small></span>
+                                    <textarea className="form-control pslc-upsell-textarea" value={form.data.upsell_urls_text ?? ''} onChange={(event) => form.setData('upsell_urls_text', event.target.value)} placeholder={"https://landing.example/upsale-1\nhttps://landing.example/upsale-2"} />
+                                </label>
+                                <button type="button" className="btn btn-xs btn-primary" onClick={applyUpsellUrls}><i className="fa fa-refresh" /> Áp dụng danh sách upsale</button>
                             </div>
                             <div className="pslc-source-editor">
                                 {form.data.sources.map((source, index) => (

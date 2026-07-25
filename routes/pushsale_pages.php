@@ -115,11 +115,13 @@ Route::delete('marketing/landing-connections/records/{record}', [\App\Http\Contr
 Route::redirect('pages/2-4-1-ket-noi-du-lieu', '/admin/marketing/landing-connections', 301);
 Route::redirect('pages/2-4-1-ket-noi-landing', '/admin/marketing/landing-connections', 301);
 
-Route::get('marketing/website-connections', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_2Controller::class, 'index'])->name('marketing.website-connections');
-Route::post('marketing/website-connections/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_2Controller::class, 'store'])->name('marketing.website-connections.store');
-Route::match(['put', 'patch'], 'marketing/website-connections/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_2Controller::class, 'update'])->whereNumber('record')->name('marketing.website-connections.update');
-Route::delete('marketing/website-connections/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_4_2Controller::class, 'destroy'])->whereNumber('record')->name('marketing.website-connections.destroy');
+Route::get('marketing/website-connections', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'index'])->name('marketing.website-connections');
+Route::post('marketing/website-connections/records', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'store'])->name('marketing.website-connections.store');
+Route::delete('marketing/website-connections/records', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'destroyMany'])->name('marketing.website-connections.destroy-many');
+Route::match(['put', 'patch'], 'marketing/website-connections/records/{record}', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'update'])->whereNumber('record')->name('marketing.website-connections.update');
+Route::delete('marketing/website-connections/records/{record}', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'destroy'])->whereNumber('record')->name('marketing.website-connections.destroy');
 Route::redirect('pages/2-4-2-ket-noi-du-lieu', '/admin/marketing/website-connections', 301);
+Route::redirect('marketing/landing-approvals', '/admin/landing-approvals', 302)->name('marketing.landing-approvals');
 
 Route::get('marketing/leads/import', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_6_1Controller::class, 'index'])->name('marketing.leads.import-page');
 Route::redirect('pages/2-6-1-import-contact', '/admin/marketing/leads/import', 301);
@@ -207,13 +209,13 @@ Route::redirect('pages/5-2-1-danh-sach-kho', '/admin/warehouses', 301);
 Route::redirect('warehouse/products', '/admin/warehouse/inventory', 301);
 Route::redirect('pages/5-2-2-danh-sach-san-pham-kho', '/admin/warehouse/inventory', 301);
 
-Route::get('warehouse/vouchers/entry', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_3_1Controller::class, 'index'])->name('warehouse.vouchers.entry');
-Route::post('warehouse/vouchers/entry/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_3_1Controller::class, 'store'])->name('warehouse.vouchers.entry.store');
-Route::match(['put', 'patch'], 'warehouse/vouchers/entry/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_3_1Controller::class, 'update'])->whereNumber('record')->name('warehouse.vouchers.entry.update');
-Route::delete('warehouse/vouchers/entry/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_3_1Controller::class, 'destroy'])->whereNumber('record')->name('warehouse.vouchers.entry.destroy');
+Route::get('warehouse/vouchers/entry', [\App\Http\Controllers\Admin\Pushsale\Warehouse\WarehouseVoucherEntryController::class, 'index'])->name('warehouse.vouchers.entry');
+Route::post('warehouse/vouchers/entry/records', [\App\Http\Controllers\Admin\Pushsale\Warehouse\WarehouseVoucherEntryController::class, 'store'])->name('warehouse.vouchers.entry.store');
+Route::match(['put', 'patch'], 'warehouse/vouchers/entry/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Warehouse\WarehouseVoucherEntryController::class, 'update'])->whereNumber('record')->name('warehouse.vouchers.entry.update');
+Route::delete('warehouse/vouchers/entry/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Warehouse\WarehouseVoucherEntryController::class, 'destroy'])->whereNumber('record')->name('warehouse.vouchers.entry.destroy');
 Route::redirect('pages/5-3-1-phieu-nhap-xuat-kho', '/admin/warehouse/vouchers/entry', 301);
 
-Route::get('warehouse/vouchers', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_3_2Controller::class, 'index'])->name('warehouse.vouchers.index-page');
+Route::get('warehouse/vouchers', [\App\Http\Controllers\Admin\Pushsale\Warehouse\WarehouseVoucherListController::class, 'index'])->name('warehouse.vouchers.index-page');
 Route::redirect('pages/5-3-2-danh-sach-phieu-xuat-nhap-kho', '/admin/warehouse/vouchers', 301);
 
 Route::get('warehouse/movement-history', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_3_3Controller::class, 'index'])->name('warehouse.movement-history');

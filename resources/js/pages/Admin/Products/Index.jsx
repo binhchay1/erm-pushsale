@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { CurrencyInput } from '@/components/ui/currency-input';
@@ -32,11 +32,58 @@ function currentFilters() {
     return Object.fromEntries(new URLSearchParams(window.location.search).entries());
 }
 
+
+function normalizeOptionText(value) {
+    return String(value ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function OptionSearchSelect({ options = [], value = '', onChange, placeholder = '--Chọn--', disabled = false, className = '' }) {
+    const [open, setOpen] = useState(false);
+    const [keyword, setKeyword] = useState('');
+    const rootRef = useRef(null);
+    const selected = options.find((option) => String(option.value) === String(value));
+    const filtered = useMemo(() => {
+        const needle = normalizeOptionText(keyword);
+        if (!needle) return options;
+        return options.filter((option) => normalizeOptionText(`${option.label} ${option.subLabel ?? ''}`).includes(needle));
+    }, [keyword, options]);
+
+    useEffect(() => {
+        if (!open) return undefined;
+        const close = (event) => {
+            if (!rootRef.current?.contains(event.target)) setOpen(false);
+        };
+        document.addEventListener('mousedown', close);
+        return () => document.removeEventListener('mousedown', close);
+    }, [open]);
+
+    return (
+        <div ref={rootRef} className={`ps-search-select ${className}`.trim()}>
+            <button type="button" className="form-control ps-search-select-button" disabled={disabled} onClick={() => setOpen((current) => !current)}>
+                <span>{selected?.label || placeholder}</span><i className="fa fa-caret-down" />
+            </button>
+            {open && !disabled && (
+                <div className="ps-search-select-menu">
+                    <input className="form-control ps-search-select-input" autoFocus value={keyword} placeholder="Tìm theo tên, mã..." onChange={(event) => setKeyword(event.target.value)} />
+                    <button type="button" className="ps-search-select-option is-empty" onClick={() => { onChange(''); setOpen(false); setKeyword(''); }}>{placeholder}</button>
+                    <div className="ps-search-select-options">
+                        {filtered.length ? filtered.map((option) => (
+                            <button key={option.value} type="button" className={`ps-search-select-option ${String(option.value) === String(value) ? 'active' : ''}`} onClick={() => { onChange(option.value); setOpen(false); setKeyword(''); }}>
+                                <span>{option.label}</span>{option.subLabel && <small>{option.subLabel}</small>}
+                            </button>
+                        )) : <div className="ps-search-select-empty">Không có dữ liệu.</div>}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 const emptyProduct = {
     name: '', sku: '', unit: '', cost_price: 0, unit_price: 0, vat_percent: 0,
     vat_code: 'KCT', barcode: '', weight_grams: 0, length_cm: 0, width_cm: 0, height_cm: 0,
     warehouse_location: '', is_active: true, available_marketing: true, available_sale: true,
-    available_care: true, category_ids: [], type: 'product', has_attributes: false,
+    available_care: true, category_ids: [], attribute_ids: ['', ''], attribute_value_ids: [], type: 'product', has_attributes: false,
 };
 
 const emptyTaxonomy = { id: '', name: '', product_attribute_id: '', is_active: true, clear_after_save: true, support_update: false };
@@ -129,7 +176,15 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
             barcode: row.barcode ?? '', weight_grams: row.weight_grams ?? 0, length_cm: row.length_cm ?? 0,
             width_cm: row.width_cm ?? 0, height_cm: row.height_cm ?? 0, warehouse_location: row.warehouse_location ?? '',
             is_active: row.is_active, available_marketing: row.available_marketing, available_sale: row.available_sale,
-            available_care: row.available_care, category_ids: row.category_ids ?? [], type: 'product', has_attributes: false,
+            available_care: row.available_care, category_ids: row.category_ids ?? [],
+            attribute_ids: attributeValues
+                .filter((value) => (row.attribute_value_ids ?? []).map(String).includes(String(value.id)))
+                .map((value) => String(value.product_attribute_id))
+                .filter((value, index, source) => source.indexOf(value) === index)
+                .slice(0, 2)
+                .concat(['', ''])
+                .slice(0, 2),
+            attribute_value_ids: row.attribute_value_ids ?? [], type: 'product', has_attributes: (row.attribute_value_ids ?? []).length > 0,
         });
         productForm.clearErrors();
         setProductOpen(true);
@@ -183,11 +238,11 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
         };
 
         if (taxonomyForm.data.id) {
-            taxonomyForm.patch(`${meta.storeUrl}/${taxonomyForm.data.id}`, { ...options, data: payload });
+            router.patch(`${meta.storeUrl}/${taxonomyForm.data.id}`, payload, options);
             return;
         }
 
-        taxonomyForm.post(meta.storeUrl, { ...options, data: payload });
+        router.post(meta.storeUrl, payload, options);
     };
 
     const removeTaxonomy = (row) => {
@@ -248,6 +303,41 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
         const start = Math.max(1, Math.min(taxonomyPage, Math.max(1, taxonomyTotalPages - 4)));
         return Array.from({ length: Math.min(5, taxonomyTotalPages) }, (_, index) => start + index).filter((page) => page <= taxonomyTotalPages);
     }, [taxonomyPage, taxonomyTotalPages]);
+
+
+    const categoryOptions = useMemo(() => categories.map((item) => ({ value: item.id, label: item.name })), [categories]);
+    const attributeOptions = useMemo(() => attributes.map((item) => ({ value: item.id, label: item.name })), [attributes]);
+    const valueMetaById = useMemo(() => new Map(attributeValues.map((value) => [String(value.id), value])), [attributeValues]);
+    const valuesByAttribute = useMemo(() => attributeValues.reduce((carry, value) => {
+        const key = String(value.product_attribute_id ?? '');
+        carry[key] ??= [];
+        carry[key].push({ value: value.id, label: value.name, subLabel: value.attribute_name });
+        return carry;
+    }, {}), [attributeValues]);
+
+    const setProductAttribute = (index, attributeId) => {
+        const oldAttributeId = productForm.data.attribute_ids?.[index] ?? '';
+        const nextAttributes = [...(productForm.data.attribute_ids ?? ['', ''])].concat(['', '']).slice(0, 2);
+        nextAttributes[index] = attributeId;
+        const oldValueIds = new Set(attributeValues.filter((value) => String(value.product_attribute_id) === String(oldAttributeId)).map((value) => String(value.id)));
+        productForm.setData({
+            ...productForm.data,
+            attribute_ids: nextAttributes,
+            attribute_value_ids: (productForm.data.attribute_value_ids ?? []).filter((valueId) => !oldValueIds.has(String(valueId))),
+        });
+    };
+
+    const setProductAttributeValue = (attributeId, valueId) => {
+        const attributeValueIds = new Set(attributeValues.filter((value) => String(value.product_attribute_id) === String(attributeId)).map((value) => String(value.id)));
+        const nextValues = (productForm.data.attribute_value_ids ?? []).filter((current) => !attributeValueIds.has(String(current)));
+        if (valueId) nextValues.push(Number(valueId));
+        productForm.setData('attribute_value_ids', nextValues.slice(0, 2));
+    };
+
+    const selectedValueForAttribute = (attributeId) => (productForm.data.attribute_value_ids ?? []).find((valueId) => {
+        const value = valueMetaById.get(String(valueId));
+        return String(value?.product_attribute_id ?? '') === String(attributeId);
+    }) ?? '';
 
     useEffect(() => {
         setTaxonomyPage(1);
@@ -340,11 +430,11 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                         <span>- Lưu ý: Khi chỉnh sửa thêm bớt thuộc tính của sản phẩm, cần bấm “Tạo SP” trước khi bấm Lưu để hệ thống sinh sản phẩm mới và cập nhật.</span>
                     </div>
 
-                    <label className="ps-source-check"><input type="checkbox" checked={productForm.data.has_attributes} onChange={(event) => productForm.setData('has_attributes', event.target.checked)} disabled={Boolean(editingId)} /> Sản phẩm có thuộc tính</label>
+                    <label className="ps-source-check"><input type="checkbox" checked={productForm.data.has_attributes} onChange={(event) => productForm.setData({ ...productForm.data, has_attributes: event.target.checked, attribute_ids: event.target.checked ? (productForm.data.attribute_ids ?? ['', '']) : ['', ''], attribute_value_ids: event.target.checked ? (productForm.data.attribute_value_ids ?? []) : [] })} /> Sản phẩm có thuộc tính</label>
 
                     <div className="ps-product-source-grid">
                         <label className="ps-product-field span-2"><span>Tên SP gốc <b>(*)</b></span><input className="form-control" value={productForm.data.name} onChange={(event) => productForm.setData('name', event.target.value)} required /></label>
-                        <label className="ps-product-field span-2"><span>Phân loại</span><select className="form-control" value={productForm.data.category_ids?.[0] ?? ''} onChange={(event) => productForm.setData('category_ids', event.target.value ? [Number(event.target.value)] : [])}><option value="">--Phân loại--</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+                        <label className="ps-product-field span-2"><span>Phân loại</span><OptionSearchSelect options={categoryOptions} value={productForm.data.category_ids?.[0] ?? ''} placeholder="--Phân loại--" onChange={(value) => productForm.setData('category_ids', value ? [Number(value)] : [])} /></label>
                         <label className="ps-product-field"><span>Mã SP</span><input className="form-control" value={productForm.data.sku} onChange={(event) => productForm.setData('sku', event.target.value)} /></label>
                         <label className="ps-product-field"><span>KL(gram)</span><input className="form-control" type="number" min="0" value={productForm.data.weight_grams} onChange={(event) => productForm.setData('weight_grams', Number(event.target.value))} /></label>
                         <label className="ps-product-field"><span>Đ.vị tính</span><input className="form-control" value={productForm.data.unit} onChange={(event) => productForm.setData('unit', event.target.value)} /></label>
@@ -358,6 +448,24 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                         <label className="ps-product-field"><span>Cao (cm)</span><input className="form-control" type="number" min="0" step="0.01" value={productForm.data.height_cm} onChange={(event) => productForm.setData('height_cm', Number(event.target.value))} /></label>
                         <label className="ps-product-field"><span>Mã vị trí</span><input className="form-control" value={productForm.data.warehouse_location} onChange={(event) => productForm.setData('warehouse_location', event.target.value)} /></label>
                     </div>
+                    {productForm.data.has_attributes && (
+                        <div className="ps-product-attribute-builder">
+                            <div className="ps-product-attribute-help">Chọn tối đa 2 thuộc tính và giá trị để hệ thống sinh/ghi nhận biến thể sản phẩm. Danh sách lấy trực tiếp từ nút “Thuộc tính sản phẩm” và “Thuộc tính giá trị”.</div>
+                            {[0, 1].map((slot) => {
+                                const attributeId = productForm.data.attribute_ids?.[slot] ?? '';
+                                const otherAttributeId = productForm.data.attribute_ids?.[slot === 0 ? 1 : 0] ?? '';
+                                const filteredAttributeOptions = attributeOptions.filter((option) => !otherAttributeId || String(option.value) !== String(otherAttributeId));
+                                return (
+                                    <div className="ps-product-attribute-row" key={slot}>
+                                        <span>Thuộc tính {slot + 1}</span>
+                                        <OptionSearchSelect options={filteredAttributeOptions} value={attributeId} placeholder="--Chọn thuộc tính--" onChange={(value) => setProductAttribute(slot, value)} />
+                                        <span>Giá trị</span>
+                                        <OptionSearchSelect options={valuesByAttribute[String(attributeId)] ?? []} value={attributeId ? selectedValueForAttribute(attributeId) : ''} placeholder="--Chọn giá trị--" disabled={!attributeId} onChange={(value) => setProductAttributeValue(attributeId, value)} />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                     <button className="btn btn-primary ps-save-button" disabled={productForm.processing}><i className="fa fa-save" /> Lưu</button>
 
                     <h4>PHÂN QUYỀN</h4>

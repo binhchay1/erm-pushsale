@@ -280,6 +280,13 @@ return array (
             'area' => 'connections',
             'code' => '2.4.2',
           ),
+          2 => 
+          array (
+            'title' => '3. Duyệt kết nối dữ liệu',
+            'url' => '/admin/marketing/landing-approvals',
+            'area' => 'connections',
+            'code' => '2.4.3',
+          ),
         ),
       ),
       4 => 
@@ -918,7 +925,8 @@ return array (
           0 => 
           array (
             'title' => '1. CEO dashboard',
-            'url' => '/admin/reports/ceo-dashboard-v2',
+            'url' => '/admin/accounting/reports/ceo-dashboard?menu=8.5.1',
+            'code' => '8.5.1',
             'area' => 'reports',
             'code' => '6.3.1',
             'roles' => 
@@ -1185,13 +1193,13 @@ return array (
           1 => 
           array (
             'title' => '2. Bảng tổng hợp chờ xuất theo ngày',
-            'url' => '/admin/accounting/reports/ceo-dashboard',
+            'url' => '/admin/warehouse/reports/pending-export',
             'area' => 'reports',
           ),
           2 => 
           array (
             'title' => '3. Báo cáo giá vốn sản phẩm',
-            'url' => '/admin/reports/hourly',
+            'url' => '/admin/warehouse/reports/movement-summary',
             'area' => 'reports',
           ),
           3 => 
@@ -1223,19 +1231,22 @@ return array (
           0 => 
           array (
             'title' => '1. CEO dashboard',
-            'url' => '/admin/reports/ceo-dashboard-v2',
+            'url' => '/admin/accounting/reports/ceo-dashboard?menu=8.5.1',
+            'code' => '8.5.1',
             'area' => 'reports',
           ),
           1 => 
           array (
             'title' => '2. CEO dashboard V2',
-            'url' => '/admin/reports/ceo-dashboard-v2',
+            'url' => '/admin/reports/ceo-dashboard-v2?menu=8.5.2',
+            'code' => '8.5.2',
             'area' => 'reports',
           ),
           2 => 
           array (
             'title' => '3. Phong thần bảng',
-            'url' => '/admin/rankings',
+            'url' => '/admin/rankings?menu=8.5.3',
+            'code' => '8.5.3',
           ),
           3 => 
           array (
@@ -1257,13 +1268,13 @@ return array (
           6 => 
           array (
             'title' => '7. Báo cáo doanh số',
-            'url' => '/admin/reports/hourly',
+            'url' => '/admin/sales/reports/revenue?menu=8.5.7',
             'area' => 'reports',
           ),
           7 => 
           array (
             'title' => '8. Báo cáo doanh số V2',
-            'url' => '/admin/reports/hourly',
+            'url' => '/admin/sales/reports/revenue-v2?menu=8.5.8',
             'area' => 'reports',
           ),
           8 => 
@@ -1289,19 +1300,22 @@ return array (
           11 => 
           array (
             'title' => '12. Thống kê KH mua lại theo sản phẩm',
-            'url' => '/admin/reports/hourly',
+            'url' => '/admin/reports/repurchase-products?menu=8.5.12&variant=product',
+            'code' => '8.5.12',
             'area' => 'reports',
           ),
           12 => 
           array (
             'title' => '13. Báo cáo thao tác nhập số',
-            'url' => '/admin/reports/hourly',
+            'disabled' => true,
+            'code' => '8.5.13',
             'area' => 'reports',
           ),
           13 => 
           array (
             'title' => '14. Báo cáo tỉ lệ chốt đơn sản phẩm',
-            'url' => '/admin/reports/hourly',
+            'url' => '/admin/reports/product-conversion?menu=8.5.14',
+            'code' => '8.5.14',
             'area' => 'reports',
           ),
           14 => 
@@ -1338,8 +1352,8 @@ return array (
           0 => 
           array (
             'title' => '1. Thống kê khách hàng đa chiều',
-            'url' => '/admin/reports/hourly',
-            'area' => 'reports',
+            'url' => '/admin/customers/reports/multidimensional',
+            'area' => 'customers',
           ),
         ),
       ),
@@ -1461,7 +1475,7 @@ return array (
           3 => 
           array (
             'title' => '4. Cấu hình hệ thống',
-            'url' => '/settings',
+            'url' => '/admin/system/settings',
             'code' => '10.1.4',
             'roles' => 
             array (

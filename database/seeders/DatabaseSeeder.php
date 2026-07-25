@@ -51,6 +51,7 @@ class DatabaseSeeder extends Seeder
                 WarehouseDeliveryHandoverSeeder::class,
                 EcommerceDemoSeeder::class,
                 PowerDashboardSeeder::class,
+                HourlyStatsSeeder::class,
                 DemoNotificationSeeder::class,
             ]);
         });

@@ -8,6 +8,7 @@ use App\Http\Controllers\Concerns\InteractsWithReportSnapshots;
 use App\Http\Controllers\Controller;
 use App\Services\Reports\HourlyStatsService;
 use Illuminate\Http\Request;
+use Carbon\CarbonInterface;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -52,10 +53,34 @@ class HourlyStatsController extends Controller
                 'rows' => $data['rows'],
                 'totals' => $data['totals'],
                 'peak' => $data['peak'],
+                'dayLabel' => $this->dayLabel($filter->dateFrom, $filter->dateTo),
                 'routeUrl' => $base,
                 'activeMenuCode' => $path === '/ld/thong-ke' ? '8.1.1' : null,
                 'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
             ],
         ));
     }
+
+    private function dayLabel(?CarbonInterface $from, ?CarbonInterface $to): string
+    {
+        if (! $from || ! $to) {
+            return 'Tổng';
+        }
+
+        if (! $from->isSameDay($to)) {
+            return 'Tổng';
+        }
+
+        return match ((int) $to->dayOfWeekIso) {
+            1 => 'Thứ 2',
+            2 => 'Thứ 3',
+            3 => 'Thứ 4',
+            4 => 'Thứ 5',
+            5 => 'Thứ 6',
+            6 => 'Thứ 7',
+            7 => 'CN',
+            default => 'Tổng',
+        };
+    }
+
 }

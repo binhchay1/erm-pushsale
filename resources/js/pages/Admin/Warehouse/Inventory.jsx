@@ -45,6 +45,14 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
         movement.post(mode === 'intake' ? intakeUrl : exportUrl, { preserveScroll: true, onSuccess: () => setMovementOpen(false) });
     };
 
+    const openVoucherEntry = () => {
+        const params = new URLSearchParams();
+        if (filters.warehouse_id) params.set('warehouse_id', filters.warehouse_id);
+        if (filters.product_id) params.set('product_id', filters.product_id);
+        const query = params.toString();
+        router.visit(`/admin/warehouse/vouchers/entry${query ? `?${query}` : ''}`);
+    };
+
     const exportCsv = () => {
         const headers = ['ID', 'Kho', 'Sản phẩm', 'SKU', 'Đơn vị tính', 'Mã lô', 'Ngày hết hạn', 'Vị trí', 'Tồn kho', 'Chờ xuất', 'Ngừng KD'];
         const lines = rows.map((row) => [row.id, row.warehouseName, row.productName, row.sku, row.uom, row.batchCode, row.expiryDate, row.locationCode, row.stockQuantity, row.pendingSalesQuantity, row.isDiscontinued ? 'Có' : 'Không']);
@@ -68,7 +76,7 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
                     </div>
                 </form>
                 <div className="box-body ps-toolbar">
-                    <button type="button" className="btn btn-sm btn-primary" onClick={() => openMovement('intake')}><i className="fa fa-exchange" /> Xuất / nhập kho</button>
+                    <button type="button" className="btn btn-sm btn-primary" onClick={openVoucherEntry}><i className="fa fa-exchange" /> Xuất / nhập kho</button>
                     <button type="button" className="btn btn-sm btn-default" onClick={() => openMovement('intake')}><i className="fa fa-map-marker" /> Cập nhật vị trí</button>
                     <button type="button" className="btn btn-sm btn-default" onClick={exportCsv}><i className="fa fa-file-excel-o" /> Xuất Excel</button>
                     <input ref={importRef} type="file" hidden />

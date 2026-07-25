@@ -96,7 +96,7 @@ abstract class BasePushsalePageController extends Controller
             'dialogTemplates' => collect($schema['dialogs'] ?? [])->mapWithKeys(
                 fn (string $dialog): array => [$dialog => $this->templateHtml($dialog)],
             )->all(),
-            'activeMenuCode' => $this->pageCode,
+            'activeMenuCode' => $this->activeMenuCodeFromRequest($request),
             'pageRuntimeError' => $pageRuntimeError,
         ]);
     }

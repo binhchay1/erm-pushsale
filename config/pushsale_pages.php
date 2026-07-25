@@ -7907,6 +7907,7 @@ return array (
     'kind' => 'table',
     'slug' => '7-1-1-ke-hoach-kinh-doanh-thang',
     'component' => 'Page_7_1_1',
+    'requires_template' => false,
     'resource_key' => '7.1.1',
     'template_alias' => '7.1.1',
     'form_fields' => 
@@ -7935,6 +7936,7 @@ return array (
     'kind' => 'report',
     'slug' => '7-1-2-lap-ke-hoach-kinh-doanh-nam',
     'component' => 'Page_7_1_2',
+    'requires_template' => false,
     'resource_key' => '7.1.2',
     'template_alias' => '7.1.2',
   ),
@@ -7962,6 +7964,7 @@ return array (
     'kind' => 'table',
     'slug' => '7-1-3-danh-muc-kpi',
     'component' => 'Page_7_1_3',
+    'requires_template' => false,
     'resource_key' => '7.1.3',
     'template_alias' => '7.1.3',
     'form_fields' => 
@@ -7998,6 +8001,7 @@ return array (
     'kind' => 'table',
     'slug' => '7-1-4-khai-bao-thuong',
     'component' => 'Page_7_1_4',
+    'requires_template' => false,
     'resource_key' => '7.1.4',
     'template_alias' => '7.1.4',
   ),
@@ -9053,6 +9057,7 @@ return array (
     'editable' => true,
     'slug' => '1-14-1-danh-sach-cau-hinh-hoa-don',
     'component' => 'Page_1_14_1',
+    'requires_template' => false,
     'resource_key' => '1.14.1',
   ),
 );

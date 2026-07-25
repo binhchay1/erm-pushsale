@@ -22,6 +22,11 @@ return [
             'description' => 'ERM SaleOps is a sales & operations platform built for telesale businesses, focused on isolated data, security and speed.',
             'keywords' => 'about ERM SaleOps, sales platform, technology company, SaaS',
         ],
+        'docs' => [
+            'title' => 'User guide',
+            'description' => 'ERM SaleOps operating guide for real workflows: products, marketing, lead routing, telesale, warehouse, accounting and reports.',
+            'keywords' => 'ERM SaleOps guide, user documentation, telesale guide, warehouse guide, sales operations workflow',
+        ],
         'contact' => [
             'title' => 'Contact',
             'description' => 'Contact ERM SaleOps for onboarding consultation, company account provisioning and a demo of the sales & operations platform.',

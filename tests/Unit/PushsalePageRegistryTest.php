@@ -14,7 +14,7 @@ class PushsalePageRegistryTest extends TestCase
         $uris = [];
         $names = [];
 
-        $this->assertSame(array_keys($pages), array_keys($routes));
+        $this->assertEmpty(array_diff(array_keys($pages), array_keys($routes)), 'Every pushsale page must have a semantic route entry. Extra route entries are allowed for native React pages that are not captured-template pages.');
 
         foreach ($pages as $code => $page) {
             $route = $routes[$code];
@@ -36,7 +36,9 @@ class PushsalePageRegistryTest extends TestCase
             $template = $root.'/public/pushsale-templates/'.$templateCode.'.html';
 
             $this->assertFileExists($component, "Missing component for page {$code}");
-            $this->assertFileExists($template, "Missing template for page {$code}");
+            if (($page['requires_template'] ?? true) !== false) {
+                $this->assertFileExists($template, "Missing template for page {$code}");
+            }
         }
     }
 

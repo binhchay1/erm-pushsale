@@ -207,13 +207,86 @@ function Pagination({ pagination, routeUrl }) {
     );
 }
 
+function voucherTypeOptions() {
+    return [
+        { id: 'inbound', label: 'Nhập kho' },
+        { id: 'outbound', label: 'Xuất kho' },
+    ];
+}
+
+function toNumberInputValue(value, fallback = '') {
+    const normalized = String(value ?? '').replaceAll(',', '').trim();
+    if (normalized === '') return fallback;
+    const number = Number(normalized);
+    return Number.isFinite(number) ? number : fallback;
+}
+
+function selectedDropdownOption(host, suffixes) {
+    const suffixList = Array.isArray(suffixes) ? suffixes : [suffixes];
+    for (const suffix of suffixList) {
+        const selected = host?.querySelector(`[id$="${suffix}"] .ps-ddl-selected-item`);
+        const id = Number(selected?.getAttribute('item-id'));
+        if (Number.isFinite(id) && id > 0) {
+            let data = null;
+            try { data = JSON.parse(selected?.dataset.optionData || 'null'); } catch { data = null; }
+            return { id, data };
+        }
+    }
+    return { id: null, data: null };
+}
+
+function voucherFieldValue(host, name) {
+    return String(host?.querySelector(`[data-pushsale-voucher-field="${name}"]`)?.value ?? '').trim();
+}
+
+function VoucherDraftRow({ columns }) {
+    const render = (column) => {
+        switch (column.key) {
+            case 'index':
+                return <span className="pushsale-voucher-add-dot">+</span>;
+            case 'product':
+                return <span className="pushsale-voucher-product-hint">Chọn sản phẩm phía trên rồi nhập số lượng</span>;
+            case 'document_quantity':
+                return <input className="form-control pushsale-voucher-line-input" type="number" min="1" defaultValue="1" data-pushsale-voucher-field="document_quantity" aria-label="Số lượng chứng từ" />;
+            case 'quantity':
+                return <input className="form-control pushsale-voucher-line-input" type="number" min="1" defaultValue="1" data-pushsale-voucher-field="quantity" aria-label="Số lượng thực nhập/xuất" />;
+            case 'unit_cost':
+                return <input className="form-control pushsale-voucher-line-input" type="number" min="0" step="1000" data-pushsale-voucher-field="unit_cost" aria-label="Giá nhập" />;
+            case 'batch_code':
+                return <input className="form-control pushsale-voucher-line-input" data-pushsale-voucher-field="batch_code" aria-label="Lô" />;
+            case 'expiry_date':
+                return <input className="form-control pushsale-voucher-line-input" type="date" data-pushsale-voucher-field="expiry_date" aria-label="Ngày hết hạn" />;
+            case 'location':
+                return <input className="form-control pushsale-voucher-line-input" data-pushsale-voucher-field="location_code" aria-label="Mã vị trí" />;
+            case 'note':
+                return <input className="form-control pushsale-voucher-line-input" data-pushsale-voucher-field="note" aria-label="Ghi chú dòng phiếu" />;
+            case 'total':
+                return <span className="pushsale-voucher-total-hint">Tự tính</span>;
+            default:
+                return '';
+        }
+    };
+
+    return (
+        <tr className="pushsale-voucher-draft-row">
+            {columns.map((column) => (
+                <td key={`draft-${column.key}`} className={column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : ''}>
+                    {render(column)}
+                </td>
+            ))}
+        </tr>
+    );
+}
+
 function PushsaleRows({ schema, rows, onEdit, onDelete, selectedRecordIds, onToggleSelect }) {
     const columns = schema.display_columns ?? schema.columns ?? [];
     const showTotals = ['report', 'trend', 'power_dashboard'].includes(schema.kind);
+    const isVoucherEntry = String(schema.code) === '5.3.1';
 
     return (
         <>
             {showTotals && <TotalsRow columns={columns} rows={rows} />}
+            {isVoucherEntry && <VoucherDraftRow columns={columns} />}
             {rows.length ? rows.map((row, rowIndex) => (
                 <tr key={row._record_id ?? row.id ?? row.order_code ?? `${schema.code}-${rowIndex}`} className={row.is_upsell ? 'pushsale-row-upsale' : ''}>
                     {columns.map((column) => (
@@ -226,13 +299,13 @@ function PushsaleRows({ schema, rows, onEdit, onDelete, selectedRecordIds, onTog
                         </td>
                     ))}
                 </tr>
-            )) : (
+            )) : (!isVoucherEntry && (
                 <tr>
                     <td colSpan={Math.max(columns.length, 1)} className="pushsale-empty-cell">
                         Chưa có dữ liệu phù hợp với bộ lọc.
                     </td>
                 </tr>
-            )}
+            ))}
         </>
     );
 }
@@ -747,6 +820,7 @@ function optionsForControl(id, filterOptions) {
     if (source.includes('nhommkt') || source.includes('teammarketing')) return filterOptions?.marketingTeams ?? filterOptions?.teams ?? [];
     if (source.includes('marketinguserid') || source.includes('idmarketing') || source.includes('ddlmarketing') || source.includes('ddlmarketings')) return filterOptions?.marketers ?? [];
     if ((source.includes('ddlsale') || source.includes('ddlsales')) && !source.includes('leader')) return filterOptions?.sales ?? [];
+    if (source.includes('nghiepvukho') || source.includes('loaiphieu')) return filterOptions?.warehouseVoucherTypes ?? voucherTypeOptions();
     if (source.includes('sanpham') || source.includes('product')) return filterOptions?.products ?? [];
     if (source.includes('landing') || source.includes('nguon')) return filterOptions?.sources ?? [];
     if (source.includes('kho') || source.includes('warehouse')) return filterOptions?.warehouses ?? [];
@@ -786,11 +860,18 @@ function normalizeTemplateLayout(host) {
         }
     });
 
-    host.querySelectorAll('.m-header').forEach((row) => {
+    host.querySelectorAll('.m-header-wrap').forEach((wrap, index) => {
+        wrap.classList.toggle('pushsale-primary-header-wrap', index === 0);
+        wrap.dataset.pushsaleChromeRole = index === 0 ? 'primary-header' : 'secondary-header';
+    });
+
+    host.querySelectorAll('.m-header').forEach((row, index) => {
         row.classList.add('pushsale-header-row');
+        row.dataset.pushsaleHeaderRow = index === 0 ? 'primary' : 'secondary';
+
         [...row.children].forEach((column) => {
             if (!column.matches?.('[class*="col-"]')) return;
-            const hasTitle = Boolean(column.querySelector('[id$="lblModuleTitle"], .module-title, .ps-title'));
+            const hasTitle = Boolean(column.querySelector('[id$="lblModuleTitle"], .module-title, .ps-title, .text'));
             const hasSearchAction = Boolean(column.querySelector('[data-pushsale-action="search"], [id$="btnSearch"], .btn-reload'));
             const hasControls = Boolean(column.querySelector('select, .ps-ddl, input:not([type="hidden"]):not([type="file"]), textarea'));
             column.classList.toggle('pushsale-header-title-col', hasTitle);
@@ -798,15 +879,28 @@ function normalizeTemplateLayout(host) {
             column.classList.toggle('pushsale-header-filter-col', !hasTitle && !hasSearchAction && hasControls);
         });
     });
+
     host.querySelectorAll('.box-body .row, .m-header-wrap .row').forEach((row) => {
         if (row.closest('[role="dialog"]')) return;
         const controls = row.querySelectorAll('select, .ps-ddl, input:not([type="hidden"]):not([type="file"]), textarea');
         const hasDataGrid = row.querySelector('table, [data-pushsale-grid-anchor], [data-pushsale-pagination-anchor]');
         const hasBootstrapColumns = [...row.children].some((child) => /(^|\s)col-(xs|sm|md|lg)-\d+/.test(child.className ?? ''));
-        if (controls.length >= 1 && hasBootstrapColumns && !hasDataGrid) row.classList.add('pushsale-filter-row');
+
+        if (controls.length >= 1 && hasBootstrapColumns && !hasDataGrid) {
+            row.classList.add('pushsale-filter-row');
+        }
+
+        if (controls.length >= 1 && hasBootstrapColumns && hasDataGrid) {
+            row.classList.add('pushsale-composite-filter-row');
+            [...row.children].forEach((column) => {
+                const columnHasGrid = Boolean(column.querySelector('table, [data-pushsale-grid-anchor], [data-pushsale-pagination-anchor]'));
+                column.classList.toggle('pushsale-main-table-cell', columnHasGrid);
+                column.classList.toggle('pushsale-filter-cell', !columnHasGrid);
+            });
+        }
     });
 
-    host.querySelectorAll('.pushsale-filter-row, .pushsale-header-row').forEach((row) => {
+    host.querySelectorAll('.pushsale-filter-row, .pushsale-composite-filter-row, .pushsale-header-row').forEach((row) => {
         [...row.children].forEach((column) => {
             if (!column.matches?.('[class*="col-"]')) return;
             const hasInteractive = column.querySelector('input:not([type="hidden"]), select, textarea, button, a, .ps-ddl, table');
@@ -1050,7 +1144,13 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
                 node.textContent = String(option.label ?? option.name ?? option.id);
                 select.appendChild(node);
             });
-            if ([...select.options].some((option) => option.value === current)) select.value = current;
+            const sourceForSelect = `${select.id ?? ''} ${select.name ?? ''}`.toLowerCase();
+            const isVoucherTypeSelect = sourceForSelect.includes('nghiepvukho') || sourceForSelect.includes('loaiphieu');
+            if ([...select.options].some((option) => option.value === current)) {
+                select.value = current;
+            } else if (isVoucherTypeSelect && options.length) {
+                select.value = String(options[0].id);
+            }
             select.disabled = false;
             select.classList.remove('aspNetDisabled');
         });
@@ -1403,6 +1503,53 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
                 });
                 controls.forEach((control) => { if (control.tagName === 'SELECT') control.value = ''; else control.value = ''; });
                 router.reload({ preserveScroll: true, only: ['rows', 'pagination'] });
+            } catch (exception) {
+                setError(exception.message);
+            }
+            return;
+        }
+
+
+        if (schema.code === '5.3.1') {
+            const findValue = (suffix) => String(host?.querySelector(`[id$="${suffix}"]`)?.value ?? '').trim();
+            const warehouseId = Number(findValue('__IdKho')) || null;
+            const typeRaw = findValue('__IdNghiepVuKho');
+            const type = ['1', 'inbound', 'nhap', 'nhập kho'].includes(typeRaw.toLocaleLowerCase('vi')) ? 'inbound' : 'outbound';
+            const selectedProduct = selectedDropdownOption(host, ['ddlIdSanPham', 'ddlIdSanPhamTonKho']);
+            const quantity = toNumberInputValue(voucherFieldValue(host, 'quantity'), 0) || toNumberInputValue(voucherFieldValue(host, 'document_quantity'), 0);
+            const documentQuantity = toNumberInputValue(voucherFieldValue(host, 'document_quantity'), quantity);
+            const unitCost = toNumberInputValue(voucherFieldValue(host, 'unit_cost'), 0);
+            const codePrefix = type === 'inbound' ? 'PNK' : 'PXK';
+            const code = findValue('__MaPhieu') || `${codePrefix}-${Date.now()}`;
+            const documentDate = toIsoDate(findValue('__NgayThucHien')) || new Date().toISOString().slice(0, 10);
+
+            if (!warehouseId) { setError('Vui lòng chọn kho cho phiếu nhập / xuất.'); return; }
+            if (!selectedProduct.id) { setError('Vui lòng chọn sản phẩm cho phiếu nhập / xuất.'); return; }
+            if (!quantity || quantity <= 0) { setError('Vui lòng nhập số lượng lớn hơn 0.'); return; }
+
+            setError('');
+            try {
+                await requestJson(`${routeUrl}/records`, 'POST', {
+                    payload: {
+                        warehouse_id: warehouseId,
+                        code,
+                        type,
+                        document_date: documentDate,
+                        product_id: selectedProduct.id,
+                        document_quantity: documentQuantity || quantity,
+                        quantity,
+                        unit_cost: unitCost || 0,
+                        batch_code: voucherFieldValue(host, 'batch_code'),
+                        expiry_date: voucherFieldValue(host, 'expiry_date') || null,
+                        location_code: voucherFieldValue(host, 'location_code'),
+                        note: voucherFieldValue(host, 'note'),
+                    },
+                });
+                host?.querySelectorAll('[data-pushsale-voucher-field]').forEach((field) => {
+                    if (field.dataset.pushsaleVoucherField === 'document_quantity' || field.dataset.pushsaleVoucherField === 'quantity') field.value = '1';
+                    else field.value = '';
+                });
+                router.reload({ preserveScroll: true, only: ['rows', 'pagination', 'summary', 'filterOptions'] });
             } catch (exception) {
                 setError(exception.message);
             }

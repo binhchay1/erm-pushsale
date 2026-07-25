@@ -110,6 +110,7 @@ export default {
     marketing: {
         nav_features: 'Features',
         nav_solutions: 'Solutions',
+        nav_docs: 'Docs',
         nav_about: 'About',
         nav_contact: 'Contact',
         sign_in: 'Sign in',

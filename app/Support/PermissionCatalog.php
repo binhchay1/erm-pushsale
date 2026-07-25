@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\PermissionArea;
 use App\Enums\PermissionLevel;
 use App\Enums\UserRole;
+use App\Models\AppSetting;
 
 /**
  * Quyền mặc định theo vai trò (để null permissions vẫn giữ nguyên hành vi cũ,
@@ -19,6 +20,29 @@ final class PermissionCatalog
      * @return array<string, string>
      */
     public static function defaultsForRole(UserRole $role): array
+    {
+        $base = self::baseDefaultsForRole($role);
+        $raw = AppSetting::getPlatform('role_permission_defaults', '{}') ?: '{}';
+        $stored = json_decode($raw, true);
+
+        if (! is_array($stored) || ! is_array($stored[$role->value] ?? null)) {
+            return $base;
+        }
+
+        $allowed = ['none', 'view', 'full'];
+        $override = [];
+        foreach (PermissionArea::cases() as $area) {
+            $level = (string) ($stored[$role->value][$area->value] ?? '');
+            if (in_array($level, $allowed, true)) {
+                $override[$area->value] = $level;
+            }
+        }
+
+        return array_replace($base, $override);
+    }
+
+    /** @return array<string, string> */
+    public static function baseDefaultsForRole(UserRole $role): array
     {
         $f = PermissionLevel::Full->value;
         $v = PermissionLevel::View->value;
@@ -43,7 +67,6 @@ final class PermissionCatalog
             UserRole::Warehouse => [
                 PermissionArea::Warehouse->value => $f,
                 PermissionArea::Shipping->value => $f,
-                // Kho là bộ phận trực tiếp xử lý đơn nên mặc định được trao đổi nội bộ với khách hàng.
                 PermissionArea::Customers->value => $f,
                 PermissionArea::CustomerChat->value => $v,
                 PermissionArea::Pancake->value => $v,

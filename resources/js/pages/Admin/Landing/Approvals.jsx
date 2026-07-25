@@ -104,7 +104,7 @@ export default function LandingApprovals({
     }, [highlightCampaignId, campaigns]);
 
     return (
-        <AppLayout>
+        <AppLayout activeMenuCode="2.4.3">
             <Head title={t('pages.landing.title')} />
 
             <div className="space-y-6">

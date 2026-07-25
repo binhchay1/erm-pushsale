@@ -1,5 +1,5 @@
-import PushsaleBusinessPage from '@/pages/Pushsale/BusinessPage';
+import { RepurchaseProductsReport } from './AdminReport85Page';
 
 export default function Page(props) {
-    return <PushsaleBusinessPage {...props} />;
+    return <RepurchaseProductsReport {...props} />;
 }

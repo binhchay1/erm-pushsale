@@ -1,106 +1,188 @@
 import { Head } from '@inertiajs/react';
-import { Clock, PhoneCall, ShoppingCart, Wallet } from 'lucide-react';
 
-import { OrdersBarChart } from '@/components/charts/OrdersBarChart';
-import { StatCard } from '@/components/charts/StatCard';
-import { PageHeader } from '@/components/layout/PageHeader';
-import { ReportExportButton } from '@/components/reports/ReportExportButton';
-import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
-import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
-import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
+import {
+    PushsaleDateRange,
+    PushsaleSearchButton,
+    PushsaleSelect,
+    usePushsaleFilters,
+} from '@/components/reports/PushsaleReportChrome';
 import AppLayout from '@/layouts/AppLayout';
+import { formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
+
+const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
+
+function psText(t, key, fallback) {
+    const value = t(key);
+    return value === key ? fallback : value;
+}
+
+function normalizeChartRows(rows = []) {
+    const byHour = new Map(rows.map((row) => [Number(row.hour), row]));
+
+    return HOURS.map((hour) => {
+        const row = byHour.get(hour) ?? {};
+        return {
+            hour,
+            label: row.label ?? `${hour}h`,
+            contacts: Number(row.contacts ?? 0),
+            closed: Number(row.closed ?? 0),
+            revenue: Number(row.revenue ?? 0),
+            rate: row.rate === null || row.rate === undefined ? 0 : Number(row.rate),
+        };
+    });
+}
+
+function colorFor(metric, value, maxValue) {
+    const safeValue = Number(value) || 0;
+    if (safeValue <= 0) {
+        return '#fff';
+    }
+
+    const ratio = metric === 'rate'
+        ? Math.min(1, Math.max(0, safeValue / 100))
+        : Math.min(1, Math.max(0, safeValue / Math.max(1, maxValue)));
+
+    if (metric === 'closed') {
+        const lightness = Math.round(94 - ratio * 42);
+        const saturation = Math.round(54 + ratio * 20);
+        return `hsl(146, ${saturation}%, ${lightness}%)`;
+    }
+
+    if (metric === 'contacts') {
+        const lightness = Math.round(95 - ratio * 38);
+        const saturation = Math.round(54 + ratio * 18);
+        return `hsl(215, ${saturation}%, ${lightness}%)`;
+    }
+
+    const lightness = Math.round(96 - ratio * 40);
+    const saturation = Math.round(62 + ratio * 18);
+    return `hsl(0, ${saturation}%, ${lightness}%)`;
+}
+
+function formatCell(metric, value) {
+    if (metric === 'rate') {
+        if (!Number.isFinite(Number(value))) return '0';
+        return Number(value).toLocaleString('en-US', { maximumFractionDigits: 2 });
+    }
+
+    return formatNumber(value ?? 0);
+}
+
+function HeatmapChart({ title, rows, metric, dayLabel, className = '' }) {
+    const maxValue = Math.max(1, ...rows.map((row) => Number(row[metric]) || 0));
+    const legendMax = metric === 'rate' ? 100 : maxValue;
+    const legendSteps = metric === 'rate'
+        ? [0, 20, 40, 60, 80, 100]
+        : [0, Math.round(legendMax * 0.25), Math.round(legendMax * 0.5), Math.round(legendMax * 0.75), legendMax];
+
+    return (
+        <div className={`ps-hourly-chart ${className}`.trim()}>
+            <button type="button" className="ps-hourly-chart-menu" aria-label="Biểu đồ">
+                <i className="fa fa-bars" aria-hidden="true" />
+            </button>
+            <h2>{title}</h2>
+            <div className="ps-hourly-chart-body">
+                <div className="ps-hourly-day-label">{dayLabel}</div>
+                <div className="ps-hourly-heatmap" role="table" aria-label={title}>
+                    {rows.map((row) => {
+                        const value = row[metric] ?? 0;
+                        return (
+                            <div
+                                key={`${metric}-${row.hour}`}
+                                className="ps-hourly-cell"
+                                role="cell"
+                                title={`${dayLabel} thời điểm ${row.hour}h: ${formatCell(metric, value)}`}
+                                style={{ backgroundColor: colorFor(metric, value, maxValue) }}
+                            >
+                                {formatCell(metric, value)}
+                            </div>
+                        );
+                    })}
+                </div>
+                <div className={`ps-hourly-legend ps-hourly-legend-${metric}`} aria-hidden="true">
+                    <div className="ps-hourly-legend-bar" />
+                    <div className="ps-hourly-legend-labels">
+                        {legendSteps.map((step, index) => (
+                            <span key={`${metric}-legend-${index}`}>{formatNumber(step)}</span>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            <div className="ps-hourly-xaxis">
+                <span />
+                {rows.map((row) => <span key={`${metric}-axis-${row.hour}`}>{row.hour}h</span>)}
+                <span />
+            </div>
+            <div className="ps-hourly-credit">pushsale.vn</div>
+        </div>
+    );
+}
 
 export default function HourlyStats({
     rows = [],
     totals = {},
-    peak = {},
-    filters,
-    filterOptions,
-    filterFields = [],
+    filters = {},
+    filterOptions = {},
     routeUrl,
+    dayLabel = 'Tổng',
 }) {
     const t = useT();
-
-    const title = t('reports.hourly.title');
-    const contactSeries = rows.map((r) => ({ label: r.label, value: r.contacts }));
-    const closedSeries = rows.map((r) => ({ label: r.label, value: r.closed }));
-
-    const peakContact = peak.contact_hour === null || peak.contact_hour === undefined ? '—' : `${String(peak.contact_hour).padStart(2, '0')}h`;
-    const peakClosed = peak.closed_hour === null || peak.closed_hour === undefined ? '—' : `${String(peak.closed_hour).padStart(2, '0')}h`;
+    const title = psText(t, 'reports.hourly.title', 'Biểu đồ thống kê theo khung giờ');
+    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const chartRows = normalizeChartRows(rows);
 
     return (
         <AppLayout>
             <Head title={title} />
-
-            <div className="space-y-6">
-                <PageHeader
-                    icon={Clock}
-                    title={title}
-                    description={t('reports.hourly.description')}
-                    actions={<ReportExportButton routeUrl={routeUrl} filters={filters} />}
-                />
-
-                <ReportFilterBar
-                    routeUrl={routeUrl}
-                    filters={filters}
-                    filterOptions={filterOptions}
-                    filterFields={filterFields}
-                />
-
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <StatCard title={t('reports.hourly.total_contacts')} value={formatNumber(totals.contacts ?? 0)} icon={PhoneCall} />
-                    <StatCard title={t('reports.hourly.total_closed')} value={formatNumber(totals.closed ?? 0)} icon={ShoppingCart} />
-                    <StatCard title={t('reports.hourly.total_revenue')} value={formatCurrency(totals.revenue ?? 0)} accent icon={Wallet} />
-                    <StatCard
-                        title={t('reports.hourly.peak')}
-                        value={peakClosed}
-                        hint={t('reports.hourly.peak_hint', { contact: peakContact })}
-                        icon={Clock}
-                    />
+            <section className="ps-hourly-report ps-report-page">
+                <div className="ps-hourly-header-wrap">
+                    <div className="ps-hourly-header">
+                        <h1>{title}</h1>
+                    </div>
                 </div>
 
-                <div className="grid gap-4 xl:grid-cols-2">
-                    <OrdersBarChart data={contactSeries} title={t('reports.hourly.contacts_chart')} />
-                    <OrdersBarChart data={closedSeries} title={t('reports.hourly.closed_chart')} />
+                <div className="ps-hourly-filter-box box">
+                    <div className="box-body">
+                        <div className="ps-hourly-filter-row">
+                            <PushsaleSelect
+                                value={draft.sale_id ?? ''}
+                                placeholder="-- Chọn sale --"
+                                options={filterOptions.salesUsers ?? []}
+                                onChange={(value) => set('sale_id', value)}
+                                className="ps-hourly-sale-select"
+                            />
+                            <PushsaleDateRange filters={draft} onChange={set} className="ps-hourly-date-range" />
+                            <div className="ps-hourly-action-wrap">
+                                <PushsaleSearchButton onClick={() => apply()} />
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <ScrollDataTable>
-                    <table className="w-full min-w-max text-sm">
-                        <thead>
-                            <tr>
-                                <Th>{t('reports.hourly.col_hour')}</Th>
-                                <Th className="text-right">{t('reports.columns.contacts')}</Th>
-                                <Th className="text-right">{t('reports.columns.closed')}</Th>
-                                <Th className="text-right">{t('reports.columns.rate')}</Th>
-                                <Th className="text-right">{t('reports.columns.revenue')}</Th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {rows.map((row) => (
-                                <tr key={row.hour}>
-                                    <Td className="font-medium">{row.label}</Td>
-                                    <Td className="text-right tabular-nums">{formatNumber(row.contacts)}</Td>
-                                    <Td className="text-right tabular-nums">{formatNumber(row.closed)}</Td>
-                                    <Td className="text-right tabular-nums">{row.rate === null ? '—' : formatPercent(row.rate)}</Td>
-                                    <Td className="text-right tabular-nums text-emerald-700 dark:text-emerald-400">
-                                        {formatCurrency(row.revenue)}
-                                    </Td>
-                                </tr>
-                            ))}
-                        </tbody>
-                        <tfoot>
-                            <tr className="border-t-2 border-border bg-muted/60 font-semibold">
-                                <Td>{t('common.grand_total')}</Td>
-                                <Td className="text-right tabular-nums">{formatNumber(totals.contacts ?? 0)}</Td>
-                                <Td className="text-right tabular-nums">{formatNumber(totals.closed ?? 0)}</Td>
-                                <Td className="text-right tabular-nums">—</Td>
-                                <Td className="text-right tabular-nums">{formatCurrency(totals.revenue ?? 0)}</Td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </ScrollDataTable>
-            </div>
+                <div className="ps-hourly-chart-box box">
+                    <div className="box-body">
+                        <HeatmapChart
+                            title="THỐNG KÊ TỶ LỆ CHỐT ĐƠN"
+                            rows={chartRows}
+                            metric="rate"
+                            dayLabel={dayLabel}
+                            className="ps-hourly-chart-main"
+                        />
+
+                        <div className="ps-hourly-chart-grid">
+                            <HeatmapChart title="THỐNG KÊ SỐ CHỐT ĐƠN" rows={chartRows} metric="closed" dayLabel={dayLabel} />
+                            <HeatmapChart title="THỐNG KÊ SỐ CONTACT" rows={chartRows} metric="contacts" dayLabel={dayLabel} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="ps-hourly-summary">
+                    <span>Contact: <strong>{formatNumber(totals.contacts ?? 0)}</strong></span>
+                    <span>Chốt đơn: <strong>{formatNumber(totals.closed ?? 0)}</strong></span>
+                    <span>Doanh số: <strong>{formatNumber(totals.revenue ?? 0)} ₫</strong></span>
+                </div>
+            </section>
         </AppLayout>
     );
 }

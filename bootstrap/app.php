@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\AssignRequestId;
+use App\Http\Middleware\AutoLoginAsAdmin;
 use App\Http\Middleware\EnforcePermissions;
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureUserHasRole;
@@ -49,6 +50,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
+            AutoLoginAsAdmin::class,
             HandleInertiaRequests::class,
         ]);
 

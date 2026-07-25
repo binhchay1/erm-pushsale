@@ -23,6 +23,7 @@ return [
     '2.3' => ['uri' => 'marketing/customers', 'name' => 'marketing.customers'],
     '2.4.1' => ['uri' => 'marketing/landing-connections', 'name' => 'marketing.landing-connections'],
     '2.4.2' => ['uri' => 'marketing/website-connections', 'name' => 'marketing.website-connections'],
+    '2.4.3' => ['uri' => 'marketing/landing-approvals', 'name' => 'marketing.landing-approvals'],
     '2.6.1' => ['uri' => 'marketing/leads/import', 'name' => 'marketing.leads.import-page'],
     '2.6.2' => ['uri' => 'marketing/leads/manual', 'name' => 'marketing.leads.manual-page'],
     '2.6.3' => ['uri' => 'marketing/partner-connections', 'name' => 'marketing.partner-connections'],

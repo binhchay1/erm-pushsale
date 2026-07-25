@@ -1,0 +1,173 @@
+html body.pushsale-app-body .ps-system-settings-page {
+    background: #fff;
+    min-height: calc(100vh - 52px);
+    padding: 0 14px 30px;
+    color: #111;
+}
+
+html body.pushsale-app-body .ps-system-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin: 0 -14px 12px;
+    padding: 14px 16px;
+    background: #fff;
+    border-bottom: 1px solid #d6dde5;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+}
+
+html body.pushsale-app-body .ps-system-header h1 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-system-header p {
+    margin: 0;
+    color: #657083;
+    font-size: 13px;
+}
+
+html body.pushsale-app-body .ps-system-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 14px 0;
+    border-bottom: 1px solid #d9e0e7;
+}
+
+html body.pushsale-app-body .ps-system-tabs button {
+    border: 1px solid #d9e0e7;
+    border-bottom: 0;
+    background: #f7f9fb;
+    height: 34px;
+    padding: 0 14px;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-system-tabs button.active {
+    color: #fff;
+    background: #3185dc;
+    border-color: #2473c3;
+}
+
+html body.pushsale-app-body .ps-system-card {
+    background: #fff;
+    border: 1px solid #d9e0e7;
+    padding: 12px;
+}
+
+html body.pushsale-app-body .ps-system-note {
+    border: 1px solid #ff9f1a;
+    background: #fffbe8;
+    padding: 9px 12px;
+    margin-bottom: 12px;
+    color: #222;
+}
+
+html body.pushsale-app-body .ps-system-error {
+    border: 1px solid #e74c3c;
+    background: #fff5f3;
+    color: #c0392b;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-system-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 12px;
+}
+
+html body.pushsale-app-body .ps-system-table {
+    width: 100%;
+    min-width: 960px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+html body.pushsale-app-body .ps-system-table th {
+    background: #3185dc;
+    border: 1px solid #2473c3;
+    color: #fff;
+    text-align: center;
+    padding: 9px 7px;
+}
+
+html body.pushsale-app-body .ps-system-table td {
+    border: 1px solid #d8d8d8;
+    padding: 7px;
+    vertical-align: middle;
+}
+
+html body.pushsale-app-body .ps-system-table tbody tr:nth-child(odd) td {
+    background: #f1f1f1;
+}
+
+html body.pushsale-app-body .ps-system-table .role-col {
+    width: 170px;
+}
+
+html body.pushsale-app-body .ps-system-table .role-name {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-system-table select.form-control {
+    height: 30px !important;
+    border-radius: 0 !important;
+    font-size: 13px !important;
+}
+
+html body.pushsale-app-body .ps-system-table.is-users {
+    min-width: 1220px;
+}
+
+html body.pushsale-app-body .ps-system-table.is-users small {
+    display: block;
+    color: #6e7684;
+    margin-top: 3px;
+}
+
+html body.pushsale-app-body .ps-system-permission-badge {
+    display: inline-block;
+    min-width: 78px;
+    margin: 2px 4px 2px 0;
+    padding: 3px 7px;
+    border-radius: 2px;
+    text-align: center;
+    font-size: 12px;
+    border: 1px solid #d4dbe3;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-system-permission-badge.is-full {
+    background: #e8f7ee;
+    color: #16813a;
+    border-color: #9de0b5;
+}
+
+html body.pushsale-app-body .ps-system-permission-badge.is-view {
+    background: #e9f4ff;
+    color: #1b6ec2;
+    border-color: #a5cdf6;
+}
+
+html body.pushsale-app-body .ps-system-permission-badge.is-none {
+    background: #f7f7f7;
+    color: #777;
+}
+
+html body.pushsale-app-body .ps-system-actions {
+    text-align: right;
+}
+
+html body.pushsale-app-body .ps-system-rules h3 {
+    margin-top: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-system-rules p {
+    margin: 0 0 10px;
+    line-height: 1.5;
+}

@@ -2,6 +2,8 @@
 
 namespace App\Services\Marketing;
 
+use App\Enums\PermissionArea;
+use App\Enums\PermissionLevel;
 use App\Models\LandingConnection;
 use App\Models\LandingConnectionProduct;
 use App\Models\LandingConnectionSale;
@@ -170,7 +172,9 @@ class LandingConnectionManager
     /** @param array<string, mixed> $data */
     private function connectionPayload(array $data, User $actor, ?LandingConnection $existing = null): array
     {
-        $canApprove = $actor->isAdmin();
+        $canApprove = $actor->isAdmin()
+            || $actor->allows(PermissionArea::Marketing, PermissionLevel::Full)
+            || $actor->allows(PermissionArea::Integrations, PermissionLevel::Full);
         $approved = $canApprove
             ? (bool) ($data['is_approved'] ?? false)
             : (bool) ($existing?->is_approved ?? false);
@@ -214,7 +218,11 @@ class LandingConnectionManager
             default => 'inherit',
         };
 
-        $approved = $actor->isAdmin()
+        $canApprove = $actor->isAdmin()
+            || $actor->allows(PermissionArea::Marketing, PermissionLevel::Full)
+            || $actor->allows(PermissionArea::Integrations, PermissionLevel::Full);
+
+        $approved = $canApprove
             ? (bool) ($data['is_approved'] ?? false)
             : (bool) ($existing?->is_approved ?? false);
 
