@@ -58,7 +58,208 @@ class LandingConnectionPayloadMapper
             $payload['product_interest'] = $payload['products'];
         }
 
+        $mappingReport = $this->mappingReport($connection, $source, $input, $items, $flowToken);
+        $payload['_landing_webhook_mapping'] = $mappingReport;
+        if (blank($payload['product_interest'] ?? null) && $mappingReport['product_candidate_text'] !== '') {
+            $payload['product_interest'] = $mappingReport['product_candidate_text'];
+        }
+
         return $payload;
+    }
+
+    /**
+     * Build an audit-friendly map of what the webhook actually sent and what the backend mapped.
+     *
+     * LadiPage/landing builders often send dynamic field names instead of stable product ids.  This
+     * report is deliberately stored with each lead packet so operators can see every received field,
+     * which fields were used for customer/session matching, which candidate product fields matched a
+     * configured product, and which candidate values still need manual mapping.
+     *
+     * @param array<string, mixed> $input
+     * @param list<array<string, mixed>> $mappedItems
+     * @return array<string, mixed>
+     */
+    public function mappingReport(
+        LandingConnection $connection,
+        LandingConnectionSource $source,
+        array $input,
+        array $mappedItems = [],
+        ?string $flowToken = null,
+    ): array {
+        $fields = $this->flattenSubmittedFields($input);
+        $mappedFieldKeys = collect($mappedItems)
+            ->map(fn (array $item): ?string => is_scalar($item['meta']['external_field'] ?? null) ? $this->normalize($item['meta']['external_field']) : null)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+        $mappedExternalValues = collect($mappedItems)
+            ->map(fn (array $item): ?string => is_scalar($item['meta']['external_value'] ?? null) ? $this->normalize($item['meta']['external_value']) : null)
+            ->filter()
+            ->flatMap(fn (string $value) => preg_split('/\s*\|\s*/', $value) ?: [])
+            ->map(fn (string $value): string => $this->normalize($value))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $received = [];
+        $productCandidates = [];
+        $unmappedProductFields = [];
+        $flowFields = [];
+        $customerFields = [];
+
+        foreach ($fields as $field) {
+            $normalizedKey = $this->normalize($field['key']);
+            $normalizedValue = $this->normalize($field['value']);
+            $role = $this->fieldRole($normalizedKey, $normalizedValue);
+            $field['role'] = $role;
+            $field['mapped'] = false;
+
+            if ($role === 'flow_key') {
+                $flowFields[] = $field;
+                $field['mapped'] = true;
+            } elseif (in_array($role, ['customer_name', 'customer_phone', 'customer_address', 'customer_note'], true)) {
+                $customerFields[] = $field;
+                $field['mapped'] = true;
+            } elseif ($role === 'product_candidate') {
+                $fieldMatched = in_array($normalizedKey, $mappedFieldKeys, true)
+                    || ($normalizedValue !== '' && in_array($normalizedValue, $mappedExternalValues, true));
+                $field['mapped'] = $fieldMatched;
+                $productCandidates[] = $field;
+                if (! $fieldMatched) {
+                    $unmappedProductFields[] = $field;
+                }
+            }
+
+            $received[] = $field;
+        }
+
+        $mappedItemSummary = collect($mappedItems)->map(fn (array $item): array => [
+            'product_id' => $item['product_id'] ?? null,
+            'name' => $item['product_name'] ?? $item['name'] ?? null,
+            'quantity' => (int) ($item['quantity'] ?? 1),
+            'unit_price' => (int) ($item['unit_price'] ?? $item['price'] ?? 0),
+            'item_type' => $item['item_type'] ?? $item['type'] ?? ($source->isSupplemental() ? 'upsell' : 'product'),
+            'external_field' => $item['meta']['external_field'] ?? null,
+            'external_value' => $item['meta']['external_value'] ?? null,
+        ])->values()->all();
+
+        $candidateText = collect($productCandidates)
+            ->pluck('value')
+            ->filter(fn ($value): bool => is_string($value) && trim($value) !== '')
+            ->unique()
+            ->implode(', ');
+
+        return [
+            'version' => 'v128',
+            'connection_id' => $connection->id,
+            'source_id' => $source->id,
+            'source_type' => $source->source_type,
+            'source_url' => $source->source_url,
+            'flow_token' => $flowToken,
+            'match_keys_present' => collect($flowFields)->pluck('key')->values()->all(),
+            'customer_fields' => $customerFields,
+            'received_field_count' => count($received),
+            'received_fields' => $received,
+            'product_candidate_text' => $candidateText,
+            'product_candidates' => $productCandidates,
+            'mapped_items' => $mappedItemSummary,
+            'unmapped_product_fields' => $unmappedProductFields,
+            'has_product_mapping_gap' => $mappedItemSummary === [] && $productCandidates !== [],
+            'has_no_product_signal' => $mappedItemSummary === [] && $productCandidates === [],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $input
+     * @return list<array{key:string,label:string,value:string,path:string}>
+     */
+    private function flattenSubmittedFields(array $input): array
+    {
+        $fields = [];
+        $put = function (string $key, mixed $value, string $path) use (&$fields): void {
+            if (! is_scalar($value)) {
+                return;
+            }
+            $value = trim((string) $value);
+            if ($value === '') {
+                return;
+            }
+            $label = trim($key) !== '' ? trim($key) : $path;
+            $fields[] = [
+                'key' => Str::of($label)->ascii()->lower()->replaceMatches('/[^a-z0-9]+/', '_')->trim('_')->value(),
+                'label' => $label,
+                'value' => mb_substr($value, 0, 500),
+                'path' => $path,
+            ];
+        };
+
+        foreach ($input as $key => $value) {
+            if (! is_string($key) || str_starts_with($key, '_')) {
+                continue;
+            }
+            if (in_array($key, ['fields', 'form_data', 'items'], true)) {
+                continue;
+            }
+            $put($key, $value, $key);
+        }
+
+        foreach ((array) Arr::get($input, 'fields', []) as $index => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $name = (string) ($row['name'] ?? $row['key'] ?? $row['field'] ?? 'field_'.$index);
+            $put($name, $row['value'] ?? $row['answer'] ?? $row['values'] ?? null, 'fields.'.$index);
+        }
+
+        foreach ((array) Arr::get($input, 'form_data', []) as $index => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $name = (string) ($row['name'] ?? $row['key'] ?? $row['field'] ?? 'form_data_'.$index);
+            $put($name, $row['value'] ?? $row['answer'] ?? $row['values'] ?? null, 'form_data.'.$index);
+        }
+
+        foreach ((array) Arr::get($input, 'items', []) as $index => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $name = (string) ($row['name'] ?? $row['product_name'] ?? 'items_'.$index);
+            $put('items_'.$index, $name, 'items.'.$index.'.name');
+        }
+
+        return collect($fields)
+            ->unique(fn (array $field): string => $field['path'].'|'.$field['key'].'|'.$field['value'])
+            ->values()
+            ->all();
+    }
+
+    private function fieldRole(string $normalizedKey, string $normalizedValue): string
+    {
+        if (preg_match('/(^|_)(ps_flow|saleops_session|session_id|session_key|saleops_client_ref|flow_token|client_ref|parent_ref|parent_submission_id)($|_)/', $normalizedKey)) {
+            return 'flow_key';
+        }
+        if (preg_match('/(^|_)(phone|dien_thoai|so_dien_thoai|sdt|mobile|tel|landing_phone|phone_landing)($|_)/', $normalizedKey)) {
+            return 'customer_phone';
+        }
+        if (preg_match('/(^|_)(name|full_name|ho_ten|customer_name)($|_)/', $normalizedKey)) {
+            return 'customer_name';
+        }
+        if (preg_match('/(^|_)(address|dia_chi|diachi|shipping_address)($|_)/', $normalizedKey)) {
+            return 'customer_address';
+        }
+        if (preg_match('/(^|_)(message|note|ghi_chu|tin_nhan)($|_)/', $normalizedKey)) {
+            return 'customer_note';
+        }
+        if (preg_match('/(combo|package|goi|san_pham|product|mua_them|muathem|upsell|addon|add_on|sku|sp)/', $normalizedKey)) {
+            return 'product_candidate';
+        }
+        if (preg_match('/(combo|goi|mua them|upsell|san pham|product|\d+\s*k|\d+\s*vn)/i', $normalizedValue)) {
+            return 'product_candidate';
+        }
+
+        return 'unmapped_field';
     }
 
     /** @param array<string, mixed> $input @return list<array<string, mixed>> */

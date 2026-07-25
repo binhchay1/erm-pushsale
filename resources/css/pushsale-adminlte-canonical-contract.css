@@ -120,3 +120,41 @@ html body .main-sidebar.pushsale-main-sidebar .ul2 > li.li2:hover > .a2 * {
     color: #fff !important;
     -webkit-text-fill-color: #fff !important;
 }
+
+/* v127 canonical reset — sidebar second-level hover must never inherit white focus/border from legacy AdminLTE. */
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2 > .a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2 > a.a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2 > button.a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2 > span.a2 {
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover > .a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover > .a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover > a.a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover > a.a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover > button.a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover > button.a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover > span.a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover > span.a2 {
+    background: #0b8ff3 !important;
+    background-color: #0b8ff3 !important;
+    background-image: none !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover > .a2 *,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover > .a2 * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}

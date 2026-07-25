@@ -109,7 +109,7 @@ function ThirdLevelFlyout({ flyout, activeKey, onNavigate, onSelect, onClose, on
                                 onNavigate?.();
                             }}
                         >
-                            <span>{child.title}</span>
+                            <span style={!childActive && hoverSecondKey === key ? { color: '#fff', WebkitTextFillColor: '#fff' } : undefined}>{child.title}</span>
                             {(child.children?.length ?? 0) > 0 && <i className="fa fa-angle-right" aria-hidden="true" />}
                         </LeafLink>
                     </div>
@@ -219,16 +219,23 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     };
 
     const secondLevelInlineStyle = (key, active = false) => {
-        if (active || hoverSecondKey !== key) return undefined;
+        const reset = {
+            border: 0,
+            borderTop: 0,
+            borderBottom: 0,
+            outline: 0,
+            boxShadow: 'none',
+            backgroundImage: 'none',
+        };
+
+        if (active) return reset;
+        if (hoverSecondKey !== key) return reset;
 
         return {
+            ...reset,
             backgroundColor: '#0b8ff3',
-            backgroundImage: 'none',
             color: '#fff',
             WebkitTextFillColor: '#fff',
-            borderTop: '0',
-            borderBottom: '0',
-            boxShadow: 'none',
         };
     };
 
@@ -325,7 +332,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                 aria-expanded={flyoutOpen}
                                                                 aria-label={child.title}
                                                             >
-                                                                <span>{child.title}</span>
+                                                                <span style={!childActive && hoverSecondKey === key ? { color: '#fff', WebkitTextFillColor: '#fff' } : undefined}>{child.title}</span>
                                                                 <i className="fa fa-angle-right pull-right" aria-hidden="true" />
                                                             </button>
                                                         ) : (
@@ -339,7 +346,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                     onNavigate?.();
                                                                 }}
                                                             >
-                                                                <span>{child.title}</span>
+                                                                <span style={!childActive && hoverSecondKey === key ? { color: '#fff', WebkitTextFillColor: '#fff' } : undefined}>{child.title}</span>
                                                             </LeafLink>
                                                         )}
                                                     </li>

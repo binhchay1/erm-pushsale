@@ -520,3 +520,79 @@ html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxon
 html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-attribute-control select.form-control {
     width: 360px !important;
 }
+
+/* v127 — taxonomy dialogs use the shared dialog but must keep Pushsale full-window popup behavior and a visible close action. */
+html body.pushsale-app-body [role='dialog'].ps-taxonomy-source-modal.ps-dialog-surface,
+html body.pushsale-app-body .ps-taxonomy-source-modal.ps-dialog-surface {
+    position: fixed !important;
+    inset: 4px !important;
+    left: 4px !important;
+    top: 4px !important;
+    right: 4px !important;
+    bottom: 4px !important;
+    width: calc(100vw - 8px) !important;
+    max-width: calc(100vw - 8px) !important;
+    min-width: 0 !important;
+    height: calc(100dvh - 8px) !important;
+    max-height: calc(100dvh - 8px) !important;
+    transform: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+html body.pushsale-app-body .ps-taxonomy-source-modal .ps-dialog-header {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    border: 0 !important;
+    margin: -1px !important;
+    padding: 0 !important;
+}
+html body.pushsale-app-body .ps-taxonomy-source-modal .pushsale-dialog-close {
+    top: 11px !important;
+    right: 13px !important;
+    z-index: 5 !important;
+    color: #555 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .ps-taxonomy-close-cell {
+    margin-left: auto !important;
+    text-align: right !important;
+}
+html body.pushsale-app-body .ps-taxonomy-close {
+    display: inline-flex !important;
+    width: 28px !important;
+    height: 28px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #555 !important;
+    font-size: 14px !important;
+}
+html body.pushsale-app-body .ps-taxonomy-search-row {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 300px) minmax(180px, 300px) auto 1fr !important;
+    gap: 10px !important;
+}
+html body.pushsale-app-body .ps-taxonomy-keyword input.form-control,
+html body.pushsale-app-body .ps-taxonomy-attribute-control select.form-control {
+    width: 100% !important;
+}
+html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-grid,
+html body.pushsale-app-body .ps-taxonomy-grid {
+    display: grid !important;
+    grid-template-columns: minmax(560px, 1fr) minmax(460px, 38%) !important;
+    gap: 20px !important;
+    width: 100% !important;
+}
+@media (max-width: 1180px) {
+    html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-value .ps-taxonomy-grid,
+    html body.pushsale-app-body .ps-taxonomy-grid { grid-template-columns: 1fr !important; }
+    html body.pushsale-app-body .ps-taxonomy-search-row { grid-template-columns: 1fr auto !important; }
+}

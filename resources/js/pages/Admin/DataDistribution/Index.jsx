@@ -121,14 +121,18 @@ export default function DataDistributionIndex({ filters = {}, products = [], sal
         }
 
         setDistributing(true);
+        toast.loading('Đang phân bổ data…', { id: 'manual-data-distribution' });
         router.post(submitUrl(), payload, {
             preserveScroll: true,
-            preserveState: false,
+            preserveState: true,
+            replace: true,
             onSuccess: () => {
-                toast.success('Đã phân bổ data cho Sale.');
+                toast.success('Đã phân bổ data cho Sale.', { id: 'manual-data-distribution' });
                 setSelectedProducts(new Map());
             },
-            onError: (errors) => toast.error(Object.values(errors)[0] ?? 'Không thể phân bổ data.'),
+            onError: (errors) => {
+                toast.error(Object.values(errors || {})[0] ?? 'Không thể phân bổ data.', { id: 'manual-data-distribution' });
+            },
             onFinish: () => setDistributing(false),
         });
     };
@@ -267,7 +271,7 @@ export default function DataDistributionIndex({ filters = {}, products = [], sal
 
                         <div className="psdd-actions">
                             <span>Đang chọn <b>{selectedTotal}</b> contact / <b>{selectedSales.size}</b> sale</span>
-                            <button type="submit" disabled={distributing || selectedTotal <= 0 || selectedSales.size <= 0}>{distributing ? 'Đang phân bổ…' : 'Phân bổ data'}</button>
+                            <button type="button" onClick={distribute} disabled={distributing || selectedTotal <= 0 || selectedSales.size <= 0}>{distributing ? 'Đang phân bổ…' : 'Phân bổ data'}</button>
                         </div>
                     </section>
                 </div>

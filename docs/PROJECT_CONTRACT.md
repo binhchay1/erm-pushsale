@@ -85,3 +85,19 @@ Because AdminLTE legacy CSS can override hover selectors, `AppSidebar.jsx` also 
 - Money inputs in approval UI must display VNĐ format and submit sanitized integer values to Laravel.
 - Pushsale table URL fields should be borderless by default; focus/double-click may show border/shadow for copy.
 
+
+## v127 interaction contract
+
+- Manual data distribution must always show visible feedback: pending toast, success toast, or validation/error toast.
+- Landing approval must validate selected product IDs before submit and must use a stable explicit payload to backend.
+- Taxonomy dialogs are full-window Pushsale-style popups with visible close action.
+- Sidebar second-level leaf hover is controlled in both React state and canonical CSS; no page CSS may override `.pushsale-main-sidebar .ul2 > li.li2:hover` back to white.
+
+
+## v128 Landing webhook mapping contract
+
+- Trang tạo kết nối landing không bắt buộc sản phẩm/gói. Duyệt có thể gắn sản phẩm/gói + ngân sách, nhưng webhook vẫn phải nhận và lưu payload dù chưa map được.
+- Webhook match theo thứ tự: `ps_flow/saleops_session/session_id/saleops_client_ref` → fallback SĐT trong `LEAD_PHONE_MERGE_WINDOW_MINUTES`.
+- Fallback SĐT không được nối nhầm đơn cũ: chỉ auto append khi order còn cửa sổ hold; nếu không đủ điều kiện thì ghi packet review.
+- Mọi payload landing phải lưu `_landing_webhook_mapping` trong `lead_ingestions.payload` để thấy đủ field đã nhận, item đã map, và field sản phẩm chưa map.
+- Không trả 500/422 chỉ vì chưa map sản phẩm. Trường hợp này trả `202 Accepted`, `mapping_review=true`, lưu `needs_review`.

@@ -1,5 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleSelect, PushsaleMultiSelect } from '@/components/pushsale/PushsaleSelect';
@@ -63,6 +64,8 @@ export default function LandingApprovalPage({
     const [status, setStatus] = useState('pending');
     const [searchDraft, setSearchDraft] = useState('');
     const [search, setSearch] = useState('');
+    const [approvalErrors, setApprovalErrors] = useState({});
+    const [approvalProcessing, setApprovalProcessing] = useState(false);
     const form = useForm({
         product_ids: [],
         budget_type: 'total',
@@ -99,17 +102,45 @@ export default function LandingApprovalPage({
             budget_end_date: dates.end,
         });
         form.clearErrors();
+        setApprovalErrors({});
     };
 
     const approve = (event) => {
         event.preventDefault();
-        if (!selected) return;
-        form.transform((data) => ({
-            ...data,
-            budget_amount: parseMoney(data.budget_amount),
-        })).post(`${approveBaseUrl}/${selected.id}/approve`, {
+        if (!selected || approvalProcessing) return;
+
+        const productIds = Array.isArray(form.data.product_ids)
+            ? form.data.product_ids.map((id) => Number(id)).filter((id, index, source) => id > 0 && source.indexOf(id) === index)
+            : [];
+
+        if (productIds.length === 0) {
+            const message = 'Cần chọn ít nhất 1 sản phẩm hoặc gói sản phẩm trước khi duyệt.';
+            setApprovalErrors({ product_ids: message });
+            toast.error(message);
+            return;
+        }
+
+        setApprovalErrors({});
+        setApprovalProcessing(true);
+        router.post(`${approveBaseUrl}/${selected.id}/approve`, {
+            product_ids: productIds,
+            budget_type: form.data.budget_type || 'total',
+            budget_amount: parseMoney(form.data.budget_amount),
+            budget_start_date: form.data.budget_start_date || null,
+            budget_end_date: form.data.budget_end_date || null,
+        }, {
             preserveScroll: true,
-            onSuccess: () => setSelected(null),
+            preserveState: true,
+            onSuccess: () => {
+                toast.success('Đã cập nhật và duyệt kết nối dữ liệu.');
+                setSelected(null);
+            },
+            onError: (errors) => {
+                setApprovalErrors(errors || {});
+                const first = Object.values(errors || {})[0];
+                toast.error(first || 'Không duyệt được kết nối dữ liệu.');
+            },
+            onFinish: () => setApprovalProcessing(false),
         });
     };
 
@@ -225,9 +256,9 @@ export default function LandingApprovalPage({
                             <label>Đến ngày</label>
                             <input className="form-control" type="date" value={form.data.budget_end_date || ''} onChange={(event) => form.setData('budget_end_date', event.target.value)} />
                         </div>
-                        {Object.keys(form.errors).length > 0 && <div className="alert alert-danger pslc-errors">{Object.entries(form.errors).map(([key, message]) => <div key={key}><strong>{key}:</strong> {message}</div>)}</div>}
+                        {Object.keys({ ...form.errors, ...approvalErrors }).length > 0 && <div className="alert alert-danger pslc-errors">{Object.entries({ ...form.errors, ...approvalErrors }).map(([key, message]) => <div key={key}><strong>{key}:</strong> {message}</div>)}</div>}
                     </div>
-                    <footer className="pslc-dialog-footer"><button className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> Cập nhật & duyệt</button></footer>
+                    <footer className="pslc-dialog-footer"><button type="submit" className="btn btn-primary" disabled={form.processing || approvalProcessing}><i className="fa fa-save" /> {approvalProcessing ? 'Đang duyệt…' : 'Cập nhật & duyệt'}</button></footer>
                 </form>
             </ApprovalDialog>
         </AppLayout>

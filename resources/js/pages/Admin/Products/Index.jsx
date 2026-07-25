@@ -639,10 +639,10 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                 </form>
             </DialogShell>
 
-            <DialogShell title={activeTaxonomyMeta?.title ?? ''} open={Boolean(taxonomy)} onClose={() => setTaxonomy(null)} wide hiddenHeader showClose={false} className="ps-taxonomy-source-modal" bodyClassName="ps-taxonomy-source-body">
+            <DialogShell title={activeTaxonomyMeta?.title ?? ''} open={Boolean(taxonomy)} onClose={() => setTaxonomy(null)} wide hiddenHeader={false} showClose className="ps-taxonomy-source-modal" bodyClassName="ps-taxonomy-source-body">
                 <div className={`ps-taxonomy-source-form ps-taxonomy-${taxonomy ?? 'none'}`}>
                     <div className="m-header-wrap ps-taxonomy-header-wrap">
-                        <div className="m-header"><div className="col-sm-9 form-group"><span className="text">{activeTaxonomyMeta?.title}</span></div><div className="col-sm-3 form-group" /></div>
+                        <div className="m-header"><div className="col-sm-9 form-group"><span className="text">{activeTaxonomyMeta?.title}</span></div><div className="col-sm-3 form-group ps-taxonomy-close-cell"><button type="button" className="ps-taxonomy-close" onClick={() => setTaxonomy(null)} aria-label="Đóng"><i className="fa fa-times" /></button></div></div>
                     </div>
                     <div className="box1 ps-taxonomy-box">
                         <div className="box-body ps-taxonomy-search-row">

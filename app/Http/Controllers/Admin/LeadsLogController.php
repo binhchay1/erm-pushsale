@@ -223,6 +223,22 @@ class LeadsLogController extends Controller
             }
         }
 
+        $mapping = is_array($payload['_landing_webhook_mapping'] ?? null) ? $payload['_landing_webhook_mapping'] : [];
+        $candidateText = $mapping['product_candidate_text'] ?? null;
+        if (is_scalar($candidateText) && trim((string) $candidateText) !== '') {
+            return trim((string) $candidateText);
+        }
+
+        $unmapped = collect((array) ($mapping['unmapped_product_fields'] ?? []))
+            ->map(fn ($field) => is_array($field) ? trim((string) ($field['value'] ?? '')) : '')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+        if ($unmapped !== []) {
+            return 'Chưa map: '.implode(', ', $unmapped);
+        }
+
         return $lead->product_interest;
     }
     /** @param list<string> $keys */

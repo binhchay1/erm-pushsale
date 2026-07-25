@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\InboundEventSource;
 use App\Enums\LeadIngestionStatus;
+use App\Enums\LeadPacketType;
 use App\Http\Controllers\Controller;
 use App\Integrations\IntegrationDriverFactory;
 use App\Models\LandingConnection;
 use App\Models\LandingConnectionSource;
 use App\Models\LandingSession;
+use App\Models\LeadIngestion;
+use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Services\Inbound\InboundEventRecorder;
 use App\Services\Leads\LeadIngestionService;
@@ -58,11 +61,11 @@ class LandingConnectionSubmissionController extends Controller
             return $this->failure($request, 'Nguồn này chỉ dùng làm trang đích, không nhận dữ liệu form.', 405);
         }
 
-        if (! $connection->is_active || ! $source->is_active || ! $connection->marketingSource?->is_active) {
+        if (! $connection->is_active || ! $source->is_active || ($connection->marketingSource && ! $connection->marketingSource->is_active)) {
             return $this->failure($request, 'Kết nối landing đang tạm dừng.', 403);
         }
 
-        if (! $connection->is_approved || ! $connection->marketingSource?->is_approved) {
+        if (! $connection->is_approved || ($connection->marketingSource && ! $connection->marketingSource->is_approved)) {
             return $this->failure($request, 'Kết nối landing chưa được duyệt.', 403);
         }
 
@@ -87,8 +90,24 @@ class LandingConnectionSubmissionController extends Controller
                     throw new HttpException(422, 'Vui lòng gửi số điện thoại hợp lệ của khách hàng.');
                 }
 
-                if (empty($normalized['items']) || ! is_array($normalized['items'])) {
-                    throw new HttpException(422, 'Không xác định được sản phẩm từ cấu hình kết nối và dữ liệu form.');
+                if (! $connection->marketingSource || empty($normalized['items']) || ! is_array($normalized['items'])) {
+                    $lead = $this->recordMappingReviewPacket(
+                        $driver->platform(),
+                        $connection,
+                        $source,
+                        $payload,
+                        $normalized,
+                        $flowToken,
+                    );
+
+                    return [
+                        'flow_token' => $flowToken,
+                        'lead_id' => $lead->id,
+                        'order_id' => $lead->order_id ?: $lead->related_order_id,
+                        'status' => $lead->status instanceof LeadIngestionStatus ? $lead->status->value : (string) $lead->status,
+                        'requires_review' => true,
+                        'mapping_review' => true,
+                    ];
                 }
 
                 $lead = $source->isSupplemental()
@@ -146,9 +165,9 @@ class LandingConnectionSubmissionController extends Controller
             if ($request->expectsJson() || $request->wantsJson()) {
                 return response()->json([
                     'ok' => true,
-                    ...Arr::only($result, ['flow_token', 'status', 'requires_review']),
+                    ...Arr::only($result, ['flow_token', 'status', 'requires_review', 'mapping_review']),
                     'redirect_url' => $this->redirectUrl($source, $connection, $result),
-                ], 201);
+                ], ! empty($result['mapping_review']) ? 202 : 201);
             }
 
             if ($redirect = $this->redirectUrl($source, $connection, $result)) {
@@ -170,6 +189,120 @@ class LandingConnectionSubmissionController extends Controller
 
             return $this->failure($request, 'Không thể ghi nhận dữ liệu. Vui lòng thử lại.', 500);
         }
+    }
+
+    /**
+     * Store a webhook packet that was received correctly but cannot be converted into
+     * catalog items yet. This is intentionally not a hard failure: operators must see
+     * all submitted fields and mapping gaps instead of losing the packet.
+     *
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $normalized
+     */
+    private function recordMappingReviewPacket(
+        string $platform,
+        LandingConnection $connection,
+        LandingConnectionSource $source,
+        array $payload,
+        array $normalized,
+        string $flowToken,
+    ): LeadIngestion {
+        $isSupplemental = $source->isSupplemental();
+        $phone = $this->normalizePhone($normalized['customer_phone'] ?? null);
+        $relatedOrder = $isSupplemental ? $this->recentRelatedOrder($connection, $phone, $flowToken) : null;
+        $externalId = is_scalar($normalized['external_id'] ?? null)
+            ? (string) $normalized['external_id']
+            : 'lc_map_'.substr(hash('sha256', $connection->id.'|'.$source->id.'|'.$flowToken.'|'.json_encode($payload)), 0, 32);
+
+        if ($isSupplemental && ! str_ends_with($externalId, ':upsell')) {
+            $externalId .= ':upsell';
+        }
+
+        $existing = LeadIngestion::query()
+            ->where('platform', $platform)
+            ->where('external_id', $externalId)
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $storedPayload = $payload;
+        $storedPayload['_landing_webhook_mapping'] = $payload['_landing_webhook_mapping'] ?? [];
+        $storedPayload['_landing_webhook_mapping']['mapping_review_reason'] = $isSupplemental
+            ? 'upsell_product_unmapped'
+            : 'base_product_unmapped';
+        $storedPayload['_landing_webhook_mapping']['match_strategy'] = $flowToken ? 'flow_token_or_phone' : 'phone_only';
+        $storedPayload['items'] = [];
+        $storedPayload['client_ref'] = $flowToken;
+        $storedPayload['landing_connection_id'] = $connection->id;
+        $storedPayload['landing_connection_source_id'] = $source->id;
+
+        $lead = LeadIngestion::query()->create([
+            'platform' => $platform,
+            'external_id' => $externalId,
+            'status' => LeadIngestionStatus::NeedsReview,
+            'packet_type' => $isSupplemental ? LeadPacketType::Upsell : LeadPacketType::Lead,
+            'counts_as_lead' => ! $isSupplemental,
+            'customer_name' => is_scalar($normalized['customer_name'] ?? null) ? (string) $normalized['customer_name'] : null,
+            'customer_phone' => $phone,
+            'product_interest' => is_scalar($normalized['product_interest'] ?? null) ? (string) $normalized['product_interest'] : null,
+            'utm_source' => is_scalar($normalized['utm_source'] ?? null) ? (string) $normalized['utm_source'] : null,
+            'utm_campaign' => is_scalar($normalized['utm_campaign'] ?? null) ? (string) $normalized['utm_campaign'] : null,
+            'marketing_source_id' => $connection->marketing_source_id,
+            'landing_connection_id' => $connection->id,
+            'landing_connection_source_id' => $source->id,
+            'payload' => $storedPayload,
+            'related_order_id' => $relatedOrder?->id,
+            'requires_review' => true,
+            'error_message' => $isSupplemental
+                ? 'Đã nhận packet upsale nhưng chưa map được sản phẩm/gói sản phẩm. Cần kiểm tra mapping field LadiPage.'
+                : 'Đã nhận webhook landing nhưng chưa map được sản phẩm/gói sản phẩm. Cần cấu hình mapping ở menu duyệt.',
+            'processed_at' => now(),
+        ]);
+
+        if (! $isSupplemental && $connection->marketing_source_id) {
+            MarketingSource::query()->withoutTenant()->whereKey($connection->marketing_source_id)->increment('contacts');
+        }
+
+        $session = LandingSession::query()
+            ->where('session_key', $flowToken)
+            ->first();
+        if ($session) {
+            $session->forceFill([
+                'landing_connection_id' => $connection->id,
+                'landing_connection_source_id' => $session->landing_connection_source_id ?: $source->id,
+                'lead_ingestion_id' => $session->lead_ingestion_id ?: $lead->id,
+                'customer_phone' => $session->customer_phone ?: $phone,
+                'last_activity_at' => now(),
+            ])->save();
+        }
+
+        return $lead;
+    }
+
+    private function recentRelatedOrder(LandingConnection $connection, ?string $phone, ?string $flowToken): ?Order
+    {
+        if ($flowToken) {
+            $session = LandingSession::query()->where('session_key', $flowToken)->latest('id')->first();
+            if ($session?->order_id) {
+                $order = Order::query()->whereKey($session->order_id)->first();
+                if ($order && (int) $order->landing_connection_id === (int) $connection->id) {
+                    return $order;
+                }
+            }
+        }
+
+        if (! $phone) {
+            return null;
+        }
+
+        return Order::query()
+            ->where('landing_connection_id', $connection->id)
+            ->where('customer_phone', $phone)
+            ->where('created_at', '>=', now()->subMinutes((int) config('saleops.landing.phone_merge_window_minutes', 60)))
+            ->latest('id')
+            ->first();
     }
 
     private function resolveFlowToken(
@@ -199,7 +332,7 @@ class LandingConnectionSubmissionController extends Controller
             $recent = LandingSession::query()
                 ->where('landing_connection_id', $connection->id)
                 ->where('customer_phone', $phone)
-                ->where('created_at', '>=', now()->subSeconds((int) config('saleops.landing.hold_seconds', 90)))
+                ->where('created_at', '>=', now()->subMinutes((int) config('saleops.landing.phone_merge_window_minutes', 60)))
                 ->latest('id')
                 ->value('session_key');
 

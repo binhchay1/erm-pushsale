@@ -233,6 +233,116 @@ class LandingConnectionFlowTest extends TestCase
         $this->assertSame($upsell->id, $packets[1]->fresh()->landingConnectionSource?->id);
     }
 
+
+    public function test_upsell_without_flow_token_can_fallback_to_recent_phone_session_and_merge(): void
+    {
+        config()->set('saleops.landing.phone_merge_window_minutes', 60);
+
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $marketer = User::factory()->create(['role' => UserRole::Marketing]);
+        $selectedSale = User::factory()->create(['role' => UserRole::Sales, 'name' => 'Sale fallback']);
+
+        $baseProduct = Product::query()->create([
+            'name' => 'Gói chính fallback',
+            'sku' => 'LC-FB-BASE',
+            'unit_price' => 150_000,
+            'cost_price' => 80_000,
+            'is_active' => true,
+            'available_marketing' => true,
+        ]);
+        $upsellProduct = Product::query()->create([
+            'name' => 'Gói upsale fallback',
+            'sku' => 'LC-FB-UP',
+            'unit_price' => 70_000,
+            'cost_price' => 30_000,
+            'is_active' => true,
+            'available_marketing' => true,
+        ]);
+
+        $connection = app(LandingConnectionManager::class)->create([
+            'name' => 'Luồng fallback phone',
+            'marketer_user_id' => $marketer->id,
+            'connection_type' => 'landing',
+            'allocation_method' => 'round_robin',
+            'is_approved' => true,
+            'is_active' => true,
+            'sources' => [
+                ['client_key' => 'main', 'name' => 'Landing chính', 'source_type' => 'main', 'source_url' => 'https://landing.example/main', 'redirect_url' => 'https://landing.example/up', 'is_active' => true],
+                ['client_key' => 'upsell', 'name' => 'Upsale', 'source_type' => 'upsell', 'source_url' => 'https://landing.example/up', 'is_active' => true],
+            ],
+            'products' => [
+                ['product_id' => $baseProduct->id, 'source_key' => 'main', 'item_type' => 'product', 'quantity' => 1, 'is_default' => true],
+                ['product_id' => $upsellProduct->id, 'source_key' => 'upsell', 'item_type' => 'upsell', 'quantity' => 1, 'is_default' => true],
+            ],
+            'sale_user_ids' => [$selectedSale->id],
+        ], $admin);
+
+        $main = $connection->sources->firstWhere('source_type', 'main');
+        $upsell = $connection->sources->firstWhere('source_type', 'upsell');
+
+        $this->postJson($this->submitPath($connection, $main->public_token), [
+            'submission_id' => 'fallback-main-001',
+            'name' => 'Khách fallback phone',
+            'phone' => '0909000911',
+        ])->assertCreated()->assertJsonPath('ok', true);
+
+        // Trang cảm ơn chỉ gửi lại phone/landing_phone từ URL, không gửi ps_flow.
+        $this->postJson($this->submitPath($connection, $upsell->public_token), [
+            'submission_id' => 'fallback-up-001',
+            'landing_phone' => '0909000911',
+        ])->assertCreated()->assertJsonPath('ok', true);
+
+        $order = Order::query()->where('customer_phone', '0909000911')->with('items')->firstOrFail();
+        $this->assertCount(2, $order->items);
+        $this->assertSame(220_000, (int) $order->total);
+        $this->assertSame(1, Order::query()->where('customer_phone', '0909000911')->count());
+    }
+
+    public function test_unmapped_landing_payload_is_kept_for_review_with_full_field_mapping_report(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $marketer = User::factory()->create(['role' => UserRole::Marketing]);
+        User::factory()->create(['role' => UserRole::Sales]);
+
+        $connection = app(LandingConnectionManager::class)->create([
+            'name' => 'Luồng chưa map sản phẩm',
+            'marketer_user_id' => $marketer->id,
+            'connection_type' => 'landing',
+            'allocation_method' => 'manual',
+            'is_approved' => true,
+            'is_active' => true,
+            'sources' => [
+                ['client_key' => 'main', 'name' => 'Landing chính', 'source_type' => 'main', 'source_url' => 'https://landing.example/main', 'is_active' => true],
+            ],
+            'products' => [],
+            'sale_user_ids' => [],
+        ], $admin);
+
+        $main = $connection->sources->firstWhere('source_type', 'main');
+
+        $this->postJson($this->submitPath($connection, $main->public_token), [
+            'submission_id' => 'unmapped-main-001',
+            'name' => 'Khách chưa map',
+            'phone' => '0909000999',
+            'fields' => [
+                ['name' => 'chon_combo', 'value' => 'Combo lạ chưa cấu hình 299k'],
+                ['name' => 'dia_chi', 'value' => 'Hà Nội'],
+            ],
+        ])->assertAccepted()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('mapping_review', true)
+            ->assertJsonPath('requires_review', true);
+
+        $lead = LeadIngestion::query()->where('customer_phone', '0909000999')->firstOrFail();
+        $payload = $lead->payload;
+        $this->assertSame(LeadIngestionStatus::NeedsReview, $lead->status);
+        $this->assertTrue($lead->requires_review);
+        $this->assertSame($connection->id, (int) $lead->landing_connection_id);
+        $this->assertSame('Combo lạ chưa cấu hình 299k', $payload['_landing_webhook_mapping']['product_candidates'][0]['value'] ?? null);
+        $this->assertNotEmpty($payload['_landing_webhook_mapping']['unmapped_product_fields'] ?? []);
+        $this->assertDatabaseCount('orders', 0);
+    }
+
     public function test_thank_you_source_is_registry_only_and_cannot_receive_form_data(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
