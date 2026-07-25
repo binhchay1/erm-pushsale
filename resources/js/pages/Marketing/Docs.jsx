@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
 import {
     BarChart3,
     BookOpen,
@@ -22,6 +23,7 @@ import {
 import { Seo } from '@/components/marketing/Seo';
 import { useT } from '@/providers/I18nProvider';
 import { cn } from '@/lib/utils';
+import '../../../css/pushsale-docs-page.css';
 
 const LOCALES = {
     vi: {
@@ -67,6 +69,7 @@ const SIDEBAR = [
             ['#start', '7 bước để bắt đầu cùng ERM SaleOps'],
             ['#screenshots', 'Prompt ảnh minh hoạ AI'],
             ['#access', 'Truy cập staging cho AI'],
+            ['#role-guides', 'Hướng dẫn theo role/menu'],
         ],
     },
     {
@@ -220,6 +223,25 @@ const QA_ITEMS = [
     ['qa-upsell', 'Upsale được gộp thế nào?', 'Upsell trong cửa sổ hợp lệ được gộp với lead/đơn chính theo submission reference. Upsell muộn, orphan upsell hoặc upsell sau khi sale đã khóa tác nghiệp sẽ chuyển review để người có quyền quyết định gộp hay tạo đơn bổ sung.'],
 ];
 
+const ROLE_GUIDES = [
+    ['Admin / Super Admin', 'Tạo đơn vị, tài khoản, phân quyền, duyệt nguồn landing, kiểm tra toàn bộ dashboard và báo cáo CEO. Luồng quan trọng: 1.1 → 1.2 → 1.3 → 1.5 → 1.7 → 7.CEO.'],
+    ['Marketing', 'Tạo chiến dịch, kết nối landing/Facebook/Pancake, theo dõi ngân sách, chất lượng lead và báo cáo nguồn. Luồng quan trọng: 2.1 → 2.3 → 2.4 → 2.5 → báo cáo marketing.'],
+    ['Sale / Telesale', 'Nhận data đã chia, gọi khách, ghi TN cần, hẹn chăm sóc, chốt đơn và xem lịch sử khách hàng. Luồng quan trọng: 4.Telesale → Hồ sơ khách hàng 360 → báo cáo sale.'],
+    ['Kho', 'Nhận đơn đã chốt, tạo phiếu 5.3.1, cập nhật xuất/nhập, bàn giao vận chuyển và xử lý hoàn. Luồng quan trọng: 5.Kho → 5.3.1 Phiếu nhập/xuất → giao vận → tồn kho.'],
+    ['Kế toán', 'Đối soát COD, phí vận chuyển, phí hoàn, doanh thu ghi nhận và báo cáo dòng tiền. Luồng quan trọng: 6.Kế toán → đối soát → báo cáo doanh thu.'],
+];
+
+const MENU_GUIDES = [
+    ['1. Quản trị đơn vị', 'Cấu hình nền: thông tin đơn vị, nhân sự, sản phẩm, phân quyền sản phẩm, kết nối giao hàng, bảo mật và cấu hình Facebook.'],
+    ['2. Marketing', 'Quản lý dashboard, xếp hạng, hồ sơ khách, nguồn landing/website/Facebook và tiện ích marketing.'],
+    ['3. Khách hàng 360', 'Một màn gom thông tin khách: sale phụ trách, marketing nguồn, lịch sử mua, ghi chú, tin nhắn nội bộ và chat khách.'],
+    ['4. Telesale', 'Màn làm việc chính của sale: nhận số, cập nhật kết quả, tạo/chốt đơn và theo dõi lịch sử tác nghiệp.'],
+    ['5. Kho', 'Vận hành tồn kho, phiếu nhập/xuất, vận chuyển, hoàn hàng và trạng thái bàn giao.'],
+    ['6. Kế toán', 'Đối soát tiền thu, COD chưa thu, chi phí, lợi nhuận và dữ liệu khớp báo cáo.'],
+    ['7. CEO', 'Tổng hợp KPI điều hành, kế hoạch tháng/năm, ngân sách, doanh thu, chi phí, kiểm soát vận hành.'],
+];
+
+
 function useLocaleCopy() {
     const locale = String(usePage().props?.locale ?? 'vi').toLowerCase();
     return LOCALES[locale.startsWith('en') ? 'en' : 'vi'];
@@ -227,18 +249,18 @@ function useLocaleCopy() {
 
 function Sidebar() {
     return (
-        <aside className="hidden w-72 shrink-0 border-r border-slate-200 bg-slate-50/70 px-5 py-6 lg:block">
+        <aside className="ps-docs-sidebar hidden w-72 shrink-0 border-r border-slate-200 bg-slate-50/70 px-5 py-6 lg:block">
             <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <BookOpen className="size-5 text-blue-600" />
                 ERM SaleOps Docs
             </Link>
-            <nav className="mt-8 space-y-7 text-sm">
+            <nav className="ps-docs-nav mt-8 space-y-7 text-sm">
                 {SIDEBAR.map((group) => (
-                    <section key={group.title}>
+                    <section key={group.title} className="ps-docs-nav-section">
                         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{group.title}</h3>
-                        <div className="space-y-1">
+                        <div className="ps-docs-nav-items space-y-1">
                             {group.items.map(([href, label]) => (
-                                <a key={href} href={href} className="flex items-center justify-between rounded-md px-2 py-1.5 text-slate-700 hover:bg-white hover:text-blue-700">
+                                <a key={href} href={href} className="ps-docs-tab flex items-center justify-between rounded-md px-2 py-1.5 text-slate-700 hover:bg-white hover:text-blue-700">
                                     <span>{label}</span>
                                     <ChevronRight className="size-3.5 text-slate-400" />
                                 </a>
@@ -257,7 +279,7 @@ function Sidebar() {
 
 function Topbar({ copy, t }) {
     return (
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <header className="ps-docs-topbar sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
             <div className="flex h-16 items-center justify-between gap-4 px-4 lg:px-6">
                 <div className="flex items-center gap-3 lg:hidden">
                     <BookOpen className="size-5 text-blue-600" />
@@ -333,7 +355,7 @@ function RightRail({ copy }) {
         ['#access', 'AI access'],
     ];
     return (
-        <aside className="hidden w-60 shrink-0 px-6 py-8 xl:block">
+        <aside className="ps-docs-rail hidden w-60 shrink-0 px-6 py-8 xl:block">
             <div className="sticky top-24 text-sm">
                 <h3 className="mb-3 font-semibold text-slate-900">{copy.onThisPage}</h3>
                 <div className="space-y-2 border-l border-slate-200 pl-4">
@@ -350,17 +372,38 @@ export default function Docs({ seo }) {
     const copy = useLocaleCopy();
     const t = useT();
 
+    useEffect(() => {
+        const html = document.documentElement;
+        const body = document.body;
+        const previousClass = body.className;
+        const previousHtmlOverflow = html.style.overflow;
+        const previousBodyOverflow = body.style.overflow;
+
+        body.classList.remove('pushsale-app-body', 'hold-transition', 'skin-blue-light', 'sidebar-mini', 'sidebar-collapse', 'fixed');
+        body.classList.add('ps-docs-body');
+        html.classList.add('ps-docs-html');
+        html.style.overflow = 'auto';
+        body.style.overflow = 'auto';
+
+        return () => {
+            body.className = previousClass;
+            html.classList.remove('ps-docs-html');
+            html.style.overflow = previousHtmlOverflow;
+            body.style.overflow = previousBodyOverflow;
+        };
+    }, []);
+
     return (
-        <div className="min-h-screen bg-white text-slate-900">
+        <div className="ps-docs-page min-h-screen bg-white text-slate-900">
             <Head title={seo?.title ?? copy.guideTitle} />
             <Seo seo={seo} />
-            <div className="flex min-h-screen">
+            <div className="ps-docs-shell flex min-h-screen">
                 <Sidebar />
-                <div className="flex min-w-0 flex-1 flex-col">
+                <div className="ps-docs-main flex min-w-0 flex-1 flex-col">
                     <Topbar copy={copy} t={t} />
-                    <div className="flex flex-1">
-                        <main className="min-w-0 flex-1 px-5 py-10 md:px-10 lg:px-14">
-                            <article id="start" className="mx-auto max-w-3xl scroll-mt-24">
+                    <div className="ps-docs-content-wrap flex flex-1">
+                        <main className="ps-docs-content min-w-0 flex-1 px-5 py-10 md:px-10 lg:px-14">
+                            <article id="start" className="ps-docs-article mx-auto max-w-3xl scroll-mt-24">
                                 <div className="mb-8 flex items-center gap-2 text-sm text-slate-500">
                                     <span>{copy.guideTitle}</span>
                                     <ChevronRight className="size-4" />
@@ -385,6 +428,38 @@ export default function Docs({ seo }) {
                                 <div className="space-y-10">
                                     {STEPS.map((step) => <StepBlock key={step.id} step={step} />)}
                                 </div>
+
+                                <section id="role-guides" className="ps-docs-role-section mt-12 scroll-mt-24 border-t border-slate-200 pt-8">
+                                    <div className="flex items-start gap-4">
+                                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
+                                            <Users className="size-5" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-bold tracking-tight text-slate-950">Hướng dẫn theo vai trò và menu</h2>
+                                            <p className="mt-3 leading-7 text-slate-700">Phần này dùng để khách hàng đọc theo đúng menu đang thấy trên hệ thống. Khi training, chỉ cần chọn role/menu tương ứng rồi đi theo checklist bên dưới.</p>
+                                        </div>
+                                    </div>
+                                    <div className="ps-docs-guide-grid mt-6">
+                                        <div className="ps-docs-guide-card">
+                                            <h3>Đi theo vai trò</h3>
+                                            {ROLE_GUIDES.map(([role, body]) => (
+                                                <div key={role} className="ps-docs-mini-item">
+                                                    <b>{role}</b>
+                                                    <p>{body}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="ps-docs-guide-card">
+                                            <h3>Đi theo menu lớn</h3>
+                                            {MENU_GUIDES.map(([menu, body]) => (
+                                                <div key={menu} className="ps-docs-mini-item">
+                                                    <b>{menu}</b>
+                                                    <p>{body}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
 
                                 <section id="screenshots" className="mt-12 scroll-mt-24 border-t border-slate-200 pt-8">
                                     <div className="flex items-start gap-4">

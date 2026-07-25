@@ -111,7 +111,7 @@ return array (
       5 => 
       array (
         'title' => '1.6 Cấu hình chức năng',
-        'url' => '/settings',
+        'url' => '/ld/unit-admin/cau-hinh-chuc-nang',
         'code' => '1.6',
       ),
       6 => 

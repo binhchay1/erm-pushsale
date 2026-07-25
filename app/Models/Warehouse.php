@@ -14,7 +14,19 @@ class Warehouse extends Model
     protected $fillable = [
         'name', 'phone', 'address', 'pick_province', 'pick_district', 'pick_ward',
         'manager_user_id', 'vtp_code', 'ghtk_pick_address_id', 'code',
+        'sort_order', 'use_two_level_address', 'sender_registration_name',
+        'sender_print_note', 'default_delivery_provinces',
+        'default_shipping_provider', 'default_shipping_service', 'shipping_account_settings',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'use_two_level_address' => 'boolean',
+            'sort_order' => 'integer',
+            'shipping_account_settings' => 'array',
+        ];
+    }
 
     public function orders(): HasMany
     {

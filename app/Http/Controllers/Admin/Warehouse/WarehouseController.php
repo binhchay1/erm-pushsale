@@ -12,6 +12,8 @@ use App\Repositories\UserRepository;
 use App\Repositories\WarehouseRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,6 +31,7 @@ class WarehouseController extends Controller
             'search' => trim((string) $request->query('search', '')),
             'manager_user_id' => (string) $request->query('manager_user_id', ''),
             'province' => (string) $request->query('province', ''),
+            'district' => (string) $request->query('district', ''),
         ];
 
         $query = Warehouse::query()->with('manager:id,name')->withCount('inventories');
@@ -38,6 +41,7 @@ class WarehouseController extends Controller
         }
         if ($filters['manager_user_id'] !== '') $query->where('manager_user_id', $filters['manager_user_id']);
         if ($filters['province'] !== '') $query->where('pick_province', $filters['province']);
+        if ($filters['district'] !== '') $query->where('pick_district', $filters['district']);
 
         $warehouses = $query->orderBy('name')->paginate(20)->withQueryString()->through(fn (Warehouse $warehouse): array => [
             'id' => $warehouse->id,
@@ -52,6 +56,14 @@ class WarehouseController extends Controller
             'vtp_code' => $warehouse->vtp_code,
             'ghtk_pick_address_id' => $warehouse->ghtk_pick_address_id,
             'code' => $warehouse->code,
+            'sort_order' => $warehouse->sort_order,
+            'use_two_level_address' => (bool) $warehouse->use_two_level_address,
+            'sender_registration_name' => $warehouse->sender_registration_name,
+            'sender_print_note' => $warehouse->sender_print_note,
+            'default_delivery_provinces' => $warehouse->default_delivery_provinces,
+            'default_shipping_provider' => $warehouse->default_shipping_provider,
+            'default_shipping_service' => $warehouse->default_shipping_service,
+            'shipping_account_settings' => $warehouse->shipping_account_settings ?? [],
             'products_count' => (int) $warehouse->inventories_count,
             'updated_at' => $warehouse->updated_at?->format('d/m/Y H:i'),
         ]);
@@ -60,7 +72,9 @@ class WarehouseController extends Controller
             'warehouses' => $warehouses,
             'filters' => $filters,
             'managers' => $this->managerOptions(),
-            'provinces' => Warehouse::query()->whereNotNull('pick_province')->where('pick_province', '!=', '')->distinct()->orderBy('pick_province')->pluck('pick_province')->values(),
+            'provinces' => $this->provinceOptions(),
+            'districts' => $this->districtOptions($filters['province']),
+            'shippingProviders' => $this->shippingProviderOptions(),
             'activeMenuCode' => '5.2.1',
         ]);
     }
@@ -131,6 +145,11 @@ class WarehouseController extends Controller
                 'ghtk_pick_address_id' => $warehouse->ghtk_pick_address_id,
                 'manager_user_id' => $warehouse->manager_user_id,
                 'vtp_code' => $warehouse->vtp_code,
+                'sort_order' => $warehouse->sort_order,
+                'use_two_level_address' => (bool) $warehouse->use_two_level_address,
+                'sender_registration_name' => $warehouse->sender_registration_name,
+                'sender_print_note' => $warehouse->sender_print_note,
+                'default_delivery_provinces' => $warehouse->default_delivery_provinces,
             ],
             'activeMenuCode' => '5.2.1',
         ]);
@@ -141,6 +160,44 @@ class WarehouseController extends Controller
         $warehouse->update($request->validated());
 
         return redirect()->route('admin.warehouses.index')->with('success', __('messages.warehouse_updated'));
+    }
+
+    public function updateShippingAccount(Request $request, Warehouse $warehouse): RedirectResponse
+    {
+        $providers = array_keys((array) config('shipping_partners.providers', []));
+
+        $validated = $request->validate([
+            'default_shipping_provider' => ['nullable', 'string', Rule::in($providers)],
+            'default_shipping_service' => ['nullable', 'string', 'max:80'],
+            'shipping_account_settings' => ['nullable', 'array'],
+        ]);
+
+        $settings = [];
+        foreach ((array) ($validated['shipping_account_settings'] ?? []) as $provider => $payload) {
+            if (! in_array($provider, $providers, true) || ! is_array($payload)) {
+                continue;
+            }
+
+            $settings[$provider] = Arr::only($payload, [
+                'account',
+                'api_token',
+                'shop_id',
+                'customer_code',
+                'store_code',
+                'pickup_time',
+                'pickup_method',
+                'order_label_note',
+                'fixed_receiver_phone',
+            ]);
+        }
+
+        $warehouse->update([
+            'default_shipping_provider' => $validated['default_shipping_provider'] ?? null,
+            'default_shipping_service' => $validated['default_shipping_service'] ?? null,
+            'shipping_account_settings' => $settings,
+        ]);
+
+        return back()->with('success', 'Đã lưu cấu hình tài khoản giao hàng cho kho.');
     }
 
     public function destroy(Warehouse $warehouse): RedirectResponse
@@ -159,5 +216,58 @@ class WarehouseController extends Controller
     protected function managerOptions(): array
     {
         return $this->users->nameOptionsByRoles([UserRole::Admin, UserRole::Warehouse]);
+    }
+
+    /** @return list<string> */
+    protected function provinceOptions(): array
+    {
+        $fromData = Warehouse::query()
+            ->whereNotNull('pick_province')
+            ->where('pick_province', '!=', '')
+            ->distinct()
+            ->orderBy('pick_province')
+            ->pluck('pick_province')
+            ->all();
+
+        return array_values(array_unique(array_filter(array_merge([
+            'Địa chỉ 2 cấp 2025', 'Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Phú Thọ', 'Cần Thơ',
+        ], $fromData))));
+    }
+
+    /** @return list<string> */
+    protected function districtOptions(string $province = ''): array
+    {
+        $query = Warehouse::query()->whereNotNull('pick_district')->where('pick_district', '!=', '');
+        if ($province !== '') {
+            $query->where('pick_province', $province);
+        }
+
+        $fromData = $query->distinct()->orderBy('pick_district')->pluck('pick_district')->all();
+
+        return array_values(array_unique(array_filter(array_merge([
+            'Thành phố Hà Nội', 'Phú Thọ', 'Quận Ba Đình', 'Quận Cầu Giấy',
+        ], $fromData))));
+    }
+
+    /** @return list<array<string,mixed>> */
+    protected function shippingProviderOptions(): array
+    {
+        return collect(config('shipping_partners.providers', []))
+            ->map(fn (array $provider, string $key): array => [
+                'key' => $key,
+                'label' => (string) ($provider['label'] ?? $key),
+                'description' => (string) ($provider['description'] ?? ''),
+                'integration_mode' => (string) ($provider['integration_mode'] ?? 'direct'),
+                'services' => collect($provider['services'] ?? [])
+                    ->map(fn (array $service): array => [
+                        'code' => (string) ($service['code'] ?? ''),
+                        'label' => (string) ($service['label'] ?? ($service['code'] ?? '')),
+                    ])
+                    ->filter(fn (array $service): bool => $service['code'] !== '')
+                    ->values()
+                    ->all(),
+            ])
+            ->values()
+            ->all();
     }
 }

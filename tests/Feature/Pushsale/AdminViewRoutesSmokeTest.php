@@ -143,6 +143,34 @@ class AdminViewRoutesSmokeTest extends TestCase
         $this->assertSame([(int) $saleUser->id], $product->care_user_ids);
     }
 
+
+    public function test_warehouse_shipping_account_configuration_persists(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->loginAsDemoAdmin();
+
+        $warehouse = Warehouse::withoutTenant()->firstOrFail();
+
+        $this->put("/admin/warehouses/{$warehouse->id}/shipping-account", [
+            'default_shipping_provider' => 'manual',
+            'default_shipping_service' => 'manual',
+            'shipping_account_settings' => [
+                'manual' => [
+                    'account' => 'Kho thủ công',
+                    'api_token' => 'demo-token',
+                    'pickup_time' => 'Sáng',
+                    'pickup_method' => 'carrier_pickup',
+                    'order_label_note' => 'Thông tin người gửi khi in đơn',
+                ],
+            ],
+        ])->assertSessionHas('success');
+
+        $warehouse->refresh();
+        $this->assertSame('manual', $warehouse->default_shipping_provider);
+        $this->assertSame('manual', $warehouse->default_shipping_service);
+        $this->assertSame('Kho thủ công', $warehouse->shipping_account_settings['manual']['account']);
+    }
+
     private function safeResponseBody(mixed $response): string
     {
         try {

@@ -1053,3 +1053,54 @@ html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-sour
 html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-source .ps-permission-row > button:hover {
     color: #005bbf !important;
 }
+
+
+/* V113 — import file chooser must fit inside its bordered cell like Pushsale. */
+html body.pushsale-app-body .ps-import-table td:has(.ps-file-upload) {
+    padding: 4px 5px !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-file-upload {
+    display: flex !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 31px !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-file-name-wrap {
+    float: none !important;
+    display: block !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-file-upload-icon-wrap {
+    float: none !important;
+    display: block !important;
+    flex: 0 0 31px !important;
+    width: 31px !important;
+    min-width: 31px !important;
+}
+
+html body.pushsale-app-body .ps-file-chooser.form-control {
+    height: 31px !important;
+    min-height: 31px !important;
+    width: 100% !important;
+    border-right: 0 !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+}
+
+html body.pushsale-app-body .ps-file-upload-icon-wrap .btn {
+    width: 31px !important;
+    min-width: 31px !important;
+    height: 31px !important;
+    min-height: 31px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    border-left: 1px solid #c8d6e5 !important;
+}

@@ -319,6 +319,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::get('warehouses/{warehouse}', [WarehouseController::class, 'show'])->name('warehouses.show');
         Route::get('warehouses/{warehouse}/edit', [WarehouseController::class, 'edit'])->name('warehouses.edit');
         Route::put('warehouses/{warehouse}', [WarehouseController::class, 'update'])->name('warehouses.update');
+        Route::put('warehouses/{warehouse}/shipping-account', [WarehouseController::class, 'updateShippingAccount'])->name('warehouses.shipping-account.update');
         Route::delete('warehouses/{warehouse}', [WarehouseController::class, 'destroy'])->name('warehouses.destroy');
         Route::delete('warehouse-inventories/{inventory}', [WarehouseInventoryController::class, 'destroy'])->name('warehouse-inventories.destroy');
         Route::resource('teams', TeamController::class)->except(['show']);

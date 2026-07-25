@@ -25,6 +25,11 @@ class WarehouseRequest extends FormRequest
             'ghtk_pick_address_id' => ['nullable', 'string', 'max:80'],
             'manager_user_id' => ['nullable', 'exists:users,id'],
             'vtp_code' => ['nullable', 'string', 'max:80'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'use_two_level_address' => ['nullable', 'boolean'],
+            'sender_registration_name' => ['nullable', 'string', 'max:255'],
+            'sender_print_note' => ['nullable', 'string', 'max:2000'],
+            'default_delivery_provinces' => ['nullable', 'string', 'max:2000'],
         ];
     }
 }

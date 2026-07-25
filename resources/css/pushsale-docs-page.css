@@ -1,0 +1,168 @@
+
+/* V113 — public docs shell, independent from AdminLTE/pushsale fixed layout. */
+html.ps-docs-html,
+html.ps-docs-html body.ps-docs-body,
+html.ps-docs-html body.ps-docs-body #app {
+    width: 100% !important;
+    min-height: 100% !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background: #fff !important;
+}
+
+body.ps-docs-body {
+    margin: 0 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
+.ps-docs-page,
+.ps-docs-page * {
+    box-sizing: border-box;
+}
+
+.ps-docs-page {
+    min-height: 100vh !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+    color: #0f172a !important;
+}
+
+.ps-docs-shell {
+    min-height: 100vh !important;
+    align-items: stretch !important;
+}
+
+.ps-docs-sidebar {
+    display: block !important;
+    width: 286px !important;
+    min-width: 286px !important;
+    max-width: 286px !important;
+    position: sticky !important;
+    top: 0 !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    border-right: 1px solid #e5e7eb !important;
+    background: #f8fafc !important;
+}
+
+.ps-docs-main {
+    min-width: 0 !important;
+    width: calc(100% - 286px) !important;
+}
+
+.ps-docs-topbar {
+    height: 58px !important;
+    top: 0 !important;
+    z-index: 20 !important;
+}
+
+.ps-docs-content-wrap {
+    min-height: calc(100vh - 58px) !important;
+}
+
+.ps-docs-content {
+    min-height: calc(100vh - 58px) !important;
+    padding-top: 34px !important;
+    padding-bottom: 80px !important;
+}
+
+.ps-docs-article {
+    max-width: 820px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.ps-docs-nav-section h3 {
+    color: #64748b !important;
+}
+
+.ps-docs-tab {
+    min-height: 31px !important;
+    color: #334155 !important;
+    text-decoration: none !important;
+    border-left: 3px solid transparent !important;
+    transition: background .12s ease, color .12s ease, border-color .12s ease !important;
+}
+
+.ps-docs-tab:hover,
+.ps-docs-tab:focus {
+    background: #eaf4ff !important;
+    color: #0b78d0 !important;
+    border-left-color: #178de8 !important;
+}
+
+.ps-docs-rail {
+    width: 230px !important;
+    min-width: 230px !important;
+}
+
+.ps-docs-guide-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+}
+
+.ps-docs-guide-card {
+    border: 1px solid #dbe5f2 !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    padding: 16px !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04) !important;
+}
+
+.ps-docs-guide-card h3 {
+    margin: 0 0 12px !important;
+    font-size: 16px !important;
+    color: #0f172a !important;
+}
+
+.ps-docs-mini-item {
+    border-top: 1px solid #eef2f7 !important;
+    padding: 11px 0 !important;
+}
+
+.ps-docs-mini-item:first-of-type {
+    border-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.ps-docs-mini-item b {
+    display: block !important;
+    color: #0b78d0 !important;
+    font-size: 13px !important;
+}
+
+.ps-docs-mini-item p {
+    margin: 4px 0 0 !important;
+    color: #475569 !important;
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+}
+
+@media (max-width: 1100px) {
+    .ps-docs-sidebar {
+        position: relative !important;
+        width: 240px !important;
+        min-width: 240px !important;
+        max-width: 240px !important;
+    }
+    .ps-docs-main { width: calc(100% - 240px) !important; }
+    .ps-docs-rail { display: none !important; }
+}
+
+@media (max-width: 820px) {
+    .ps-docs-shell { display: block !important; }
+    .ps-docs-sidebar {
+        position: relative !important;
+        height: auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        border-right: 0 !important;
+        border-bottom: 1px solid #e5e7eb !important;
+    }
+    .ps-docs-main { width: 100% !important; }
+    .ps-docs-guide-grid { grid-template-columns: 1fr !important; }
+}

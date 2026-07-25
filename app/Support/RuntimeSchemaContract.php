@@ -181,6 +181,42 @@ class RuntimeSchemaContract
             }
         }
 
+
+        if (Schema::hasTable('warehouses')) {
+            foreach ([
+                'sort_order' => ['type' => 'uint', 'after' => 'code'],
+                'use_two_level_address' => ['type' => 'bool', 'after' => 'address'],
+                'sender_registration_name' => ['type' => 'string', 'after' => 'manager_user_id'],
+                'sender_print_note' => ['type' => 'text', 'after' => 'sender_registration_name'],
+                'default_delivery_provinces' => ['type' => 'text', 'after' => 'sender_print_note'],
+                'default_shipping_provider' => ['type' => 'string50', 'after' => 'default_delivery_provinces'],
+                'default_shipping_service' => ['type' => 'string80', 'after' => 'default_shipping_provider'],
+                'shipping_account_settings' => ['type' => 'json', 'after' => 'default_shipping_service'],
+            ] as $column => $meta) {
+                if (Schema::hasColumn('warehouses', $column)) {
+                    continue;
+                }
+
+                Schema::table('warehouses', function (Blueprint $table) use ($column, $meta): void {
+                    $definition = match ($meta['type']) {
+                        'uint' => $table->unsignedInteger($column)->default(0),
+                        'bool' => $table->boolean($column)->default(false),
+                        'string50' => $table->string($column, 50)->nullable(),
+                        'string80' => $table->string($column, 80)->nullable(),
+                        'text' => $table->text($column)->nullable(),
+                        'json' => $table->json($column)->nullable(),
+                        default => $table->string($column)->nullable(),
+                    };
+
+                    $after = $meta['after'] ?? null;
+                    if ($after && Schema::hasColumn('warehouses', $after)) {
+                        $definition->after($after);
+                    }
+                });
+                $changes[] = 'warehouses.'.$column;
+            }
+        }
+
         return $changes;
     }
 }
