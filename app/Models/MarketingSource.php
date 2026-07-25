@@ -30,7 +30,7 @@ class MarketingSource extends Model
     }
 
     protected $fillable = [
-        'parent_id', 'name', 'product_id', 'marketer_user_id', 'created_by_user_id', 'ad_channel',
+        'company_id', 'parent_id', 'name', 'product_id', 'marketer_user_id', 'created_by_user_id', 'ad_channel',
         'utm_source', 'utm_campaign', 'webhook_token', 'budget', 'interactions', 'contacts',
         'is_active', 'is_approved', 'lead_allocation', 'js_tracking_enabled', 'approved_by_user_id', 'approved_at',
         'rejected_by_user_id', 'rejected_at', 'rejection_reason',

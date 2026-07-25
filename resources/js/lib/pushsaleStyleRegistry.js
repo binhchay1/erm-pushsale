@@ -85,6 +85,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-system-settings-admin.css', layer: 'final-contract', load: () => import('../../css/pushsale-system-settings-admin.css') },
     { file: 'pushsale-sidebar-hover-absolute-fix.css', layer: 'final-contract', load: () => import('../../css/pushsale-sidebar-hover-absolute-fix.css') },
     { file: 'pushsale-unified-page-shell-contract.css', layer: 'final-contract-last', load: () => import('../../css/pushsale-unified-page-shell-contract.css') },
+    { file: 'pushsale-adminlte-canonical-contract.css', layer: 'canonical-last', load: () => import('../../css/pushsale-adminlte-canonical-contract.css') },
 ];
 
 export function assetMatchersForCssFile(file) {

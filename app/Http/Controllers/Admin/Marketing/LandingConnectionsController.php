@@ -7,6 +7,7 @@ use App\Enums\PermissionLevel;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\LandingConnection;
+use App\Models\Company;
 use App\Models\LandingConnectionSource;
 use App\Models\Product;
 use App\Models\Team;
@@ -15,10 +16,12 @@ use App\Services\Marketing\LandingConnectionManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator as LaravelValidator;
+use App\Support\TenantManager;
 use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -96,10 +99,14 @@ final class LandingConnectionsController extends Controller
                 'exception' => $exception,
             ]);
 
+            $message = app()->isProduction()
+                ? 'Không lưu được kết nối landing. Chi tiết đã ghi vào log.'
+                : get_class($exception).': '.$exception->getMessage();
+
             return back()
                 ->withInput()
-                ->withErrors(['landing_connection' => 'Không lưu được kết nối landing. Chi tiết đã ghi vào log; chạy php artisan erm:test-all --route-smoke --smoke-limit=80 --json để copy lỗi nếu còn lặp lại.'])
-                ->with('error', 'Không lưu được kết nối landing, hệ thống đã chặn không cho rơi ra trang 500.');
+                ->withErrors(['landing_connection' => $message])
+                ->with('error', 'Không lưu được kết nối landing.');
         }
 
         return redirect('/admin/marketing/landing-connections')->with('success', 'Đã tạo kết nối landing. Chờ duyệt ở menu duyệt kết nối để gắn sản phẩm/gói và ngân sách.');
@@ -127,10 +134,14 @@ final class LandingConnectionsController extends Controller
                 'exception' => $exception,
             ]);
 
+            $message = app()->isProduction()
+                ? 'Không cập nhật được kết nối landing. Chi tiết đã ghi vào log.'
+                : get_class($exception).': '.$exception->getMessage();
+
             return back()
                 ->withInput()
-                ->withErrors(['landing_connection' => 'Không cập nhật được kết nối landing. Chi tiết đã ghi vào log; copy block route-smoke/log lên đây nếu còn lặp lại.'])
-                ->with('error', 'Không cập nhật được kết nối landing, hệ thống đã chặn không cho rơi ra trang 500.');
+                ->withErrors(['landing_connection' => $message])
+                ->with('error', 'Không cập nhật được kết nối landing.');
         }
 
         return redirect('/admin/marketing/landing-connections')->with('success', 'Đã cập nhật kết nối landing.');
@@ -164,7 +175,21 @@ final class LandingConnectionsController extends Controller
     /** @return array<string, mixed> */
     private function validated(Request $request): array
     {
-        $companyId = (int) $request->user()->company_id;
+        $companyId = $this->resolveCompanyId($request->user());
+
+        if (! $request->filled('marketer_user_id')) {
+            $fallbackMarketer = $request->user()?->role === UserRole::Marketing
+                ? $request->user()
+                : User::query()
+                    ->where('company_id', $companyId)
+                    ->whereIn('role', [UserRole::Marketing, UserRole::Admin])
+                    ->orderBy('name')
+                    ->first();
+
+            if ($fallbackMarketer) {
+                $request->merge(['marketer_user_id' => $fallbackMarketer->id]);
+            }
+        }
 
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
@@ -178,8 +203,8 @@ final class LandingConnectionsController extends Controller
             'connection_type' => ['required', Rule::in(['landing', 'website', 'facebook'])],
             'ad_channel' => ['nullable', 'string', 'max:64'],
             'allocation_method' => ['required', Rule::in(['inherit', 'round_robin', 'priority', 'manual'])],
-            'budget_type' => ['required', Rule::in(['total', 'daily'])],
-            'budget_amount' => ['required', 'integer', 'min:0', 'max:999999999999999'],
+            'budget_type' => ['nullable', Rule::in(['total', 'daily'])],
+            'budget_amount' => ['nullable', 'integer', 'min:0', 'max:999999999999999'],
             'budget_start_date' => ['nullable', 'date'],
             'budget_end_date' => ['nullable', 'date', 'after_or_equal:budget_start_date'],
             'success_url' => ['nullable', 'url:http,https', 'max:2048'],
@@ -306,6 +331,41 @@ final class LandingConnectionsController extends Controller
         });
 
         return $validator->validate();
+    }
+
+
+    private function resolveCompanyId(?User $user): int
+    {
+        $candidate = (int) ($user?->company_id ?? 0);
+        if ($candidate > 0) {
+            return $candidate;
+        }
+
+        $tenantId = (int) (app(TenantManager::class)->id() ?? 0);
+        if ($tenantId > 0) {
+            return $tenantId;
+        }
+
+        $company = Company::query()
+            ->where(function ($query): void {
+                if (Schema::hasColumn('companies', 'is_internal')) {
+                    $query->where('is_internal', true);
+                }
+            })
+            ->orderBy('id')
+            ->first(['id']);
+
+        if (! $company) {
+            $company = Company::query()->orderBy('id')->first(['id']);
+        }
+
+        if (! $company) {
+            throw ValidationException::withMessages([
+                'company_id' => 'Chưa có công ty/đơn vị để tạo kết nối landing.',
+            ]);
+        }
+
+        return (int) $company->id;
     }
 
     /** @return array<string, mixed> */

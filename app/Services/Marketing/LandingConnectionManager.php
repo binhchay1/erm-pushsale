@@ -2,15 +2,20 @@
 
 namespace App\Services\Marketing;
 
+use App\Enums\CampaignLeadAllocation;
 use App\Enums\PermissionArea;
 use App\Enums\PermissionLevel;
+use App\Models\Company;
 use App\Models\LandingConnection;
 use App\Models\LandingConnectionProduct;
 use App\Models\LandingConnectionSale;
 use App\Models\LandingConnectionSource;
 use App\Models\MarketingSource;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use App\Support\TenantManager;
 use Illuminate\Support\Str;
 
 class LandingConnectionManager
@@ -19,16 +24,22 @@ class LandingConnectionManager
     public function create(array $data, User $actor): LandingConnection
     {
         return DB::transaction(function () use ($data, $actor): LandingConnection {
-            $marketingSource = MarketingSource::query()->create($this->marketingSourcePayload($data, $actor));
-
-            $connection = LandingConnection::query()->create([
+            // Luồng mới: tạo kết nối landing trước, chưa tạo campaign/marketing_sources nếu chưa duyệt.
+            // Đây là điểm cắt với flow cũ để không còn lỗi DB vì product_id/ngân sách/sản phẩm chưa có.
+            $payload = [
                 ...$this->connectionPayload($data, $actor),
-                'marketing_source_id' => $marketingSource->id,
+                'marketing_source_id' => null,
                 'created_by_user_id' => $actor->id,
                 'updated_by_user_id' => $actor->id,
-            ]);
+            ];
 
-            $this->syncChildren($connection, $data);
+            $connection = LandingConnection::query()->create($this->onlyExistingColumns('landing_connections', $payload));
+
+            $this->syncChildren($connection, $this->pendingPayload($data));
+
+            if ($this->shouldPublishMarketingSource($data, $connection)) {
+                $this->syncMarketingSource($connection->fresh($this->relations()), $actor);
+            }
 
             return $connection->fresh($this->relations());
         });
@@ -38,17 +49,75 @@ class LandingConnectionManager
     public function update(LandingConnection $connection, array $data, User $actor): LandingConnection
     {
         return DB::transaction(function () use ($connection, $data, $actor): LandingConnection {
-            $connection->update([
+            $payload = [
                 ...$this->connectionPayload($data, $actor, $connection),
                 'updated_by_user_id' => $actor->id,
-            ]);
+            ];
 
-            $source = $connection->marketingSource;
-            if ($source) {
-                $source->update($this->marketingSourcePayload($data, $actor, $source));
+            $connection->update($this->onlyExistingColumns('landing_connections', $payload));
+
+            $this->syncChildren($connection, $this->pendingPayload($data));
+
+            $connection = $connection->fresh($this->relations());
+            if ($this->shouldPublishMarketingSource($data, $connection) || $connection->marketingSource) {
+                $this->syncMarketingSource($connection, $actor);
             }
 
-            $this->syncChildren($connection, $data);
+            return $connection->fresh($this->relations());
+        });
+    }
+
+    /**
+     * Đồng bộ campaign legacy chỉ ở bước duyệt, sau khi đã có sản phẩm/gói.
+     * @param array<string, mixed> $options
+     */
+    public function approve(LandingConnection $connection, array $options, User $actor): LandingConnection
+    {
+        return DB::transaction(function () use ($connection, $options, $actor): LandingConnection {
+            $connection->update($this->onlyExistingColumns('landing_connections', [
+                'budget_type' => (string) ($options['budget_type'] ?? $connection->budget_type ?: 'total'),
+                'budget_amount' => max(0, (int) ($options['budget_amount'] ?? $connection->budget_amount ?? 0)),
+                'budget_start_date' => filled($options['budget_start_date'] ?? null) ? (string) $options['budget_start_date'] : null,
+                'budget_end_date' => filled($options['budget_end_date'] ?? null) ? (string) $options['budget_end_date'] : null,
+                'is_approved' => true,
+                'is_active' => true,
+                'approved_by_user_id' => $actor->id,
+                'approved_at' => now(),
+                'updated_by_user_id' => $actor->id,
+            ]));
+
+            $campaign = $this->syncMarketingSource($connection->fresh($this->relations()), $actor);
+            $campaign->forceFill([
+                'is_approved' => true,
+                'approved_by_user_id' => $actor->id,
+                'approved_at' => now(),
+                'is_active' => true,
+            ])->save();
+
+            return $connection->fresh($this->relations());
+        });
+    }
+
+    public function reject(LandingConnection $connection, string $reason, User $actor): LandingConnection
+    {
+        return DB::transaction(function () use ($connection, $reason, $actor): LandingConnection {
+            $metadata = (array) ($connection->metadata ?? []);
+            $metadata['rejected_at'] = now()->toISOString();
+            $metadata['rejected_by_user_id'] = $actor->id;
+            $metadata['rejection_reason'] = $reason;
+
+            $connection->update($this->onlyExistingColumns('landing_connections', [
+                'is_approved' => false,
+                'metadata' => $metadata,
+                'updated_by_user_id' => $actor->id,
+            ]));
+
+            $connection->marketingSource?->update([
+                'is_approved' => false,
+                'rejected_by_user_id' => $actor->id,
+                'rejected_at' => now(),
+                'rejection_reason' => $reason,
+            ]);
 
             return $connection->fresh($this->relations());
         });
@@ -71,12 +140,35 @@ class LandingConnectionManager
     {
         return [
             'marketer:id,name,email',
-            'marketingSource:id,name,webhook_token,contacts,budget,is_active,is_approved',
+            'marketingSource:id,name,webhook_token,contacts,budget,is_active,is_approved,approved_by_user_id,approved_at,rejected_by_user_id,rejected_at,rejection_reason,product_id',
             'sources',
             'products.product:id,name,sku,unit_price,type',
             'products.source:id,name',
             'sales.user:id,name,email,team_id',
+            'createdBy:id,name,email',
+            'updatedBy:id,name,email',
+            'approver:id,name,email',
         ];
+    }
+
+    /** @param array<string, mixed> $data */
+    private function pendingPayload(array $data): array
+    {
+        // Bảo vệ flow mới: product/budget duyệt riêng; form tạo nguồn không tự publish.
+        if (empty($data['products'])) {
+            $data['products'] = [];
+        }
+        $data['is_approved'] = (bool) ($data['is_approved'] ?? false);
+
+        return $data;
+    }
+
+    /** @param array<string, mixed> $data */
+    private function shouldPublishMarketingSource(array $data, LandingConnection $connection): bool
+    {
+        $hasProduct = collect($data['products'] ?? [])->contains(fn ($row): bool => is_array($row) && filled($row['product_id'] ?? null));
+
+        return (bool) ($data['is_approved'] ?? false) && $hasProduct && $connection->products()->exists();
     }
 
     /** @param array<string, mixed> $data */
@@ -98,7 +190,7 @@ class LandingConnectionManager
 
             $payload = [
                 'company_id' => $companyId,
-                'name' => trim((string) ($row['name'] ?? '')),
+                'name' => trim((string) ($row['name'] ?? $connection->name)),
                 'source_type' => (string) ($row['source_type'] ?? LandingConnectionSource::TYPE_MAIN),
                 'source_url' => trim((string) ($row['source_url'] ?? '')),
                 'redirect_url' => filled($row['redirect_url'] ?? null) ? trim((string) $row['redirect_url']) : null,
@@ -109,6 +201,8 @@ class LandingConnectionManager
                     'notes' => $row['notes'] ?? null,
                 ]),
             ];
+
+            $payload = $this->onlyExistingColumns('landing_connection_sources', $payload);
 
             if ($source) {
                 $source->update($payload);
@@ -130,43 +224,152 @@ class LandingConnectionManager
             $connection->sources()->whereKey($retiredSourceIds->all())->delete();
         }
 
-        $connection->products()->delete();
-        foreach (array_values((array) ($data['products'] ?? [])) as $index => $row) {
-            if (! is_array($row) || empty($row['product_id'])) {
-                continue;
-            }
+        if (array_key_exists('products', $data)) {
+            $connection->products()->delete();
+            foreach (array_values((array) ($data['products'] ?? [])) as $index => $row) {
+                if (! is_array($row) || empty($row['product_id'])) {
+                    continue;
+                }
 
-            $sourceKey = (string) ($row['source_key'] ?? '');
-            LandingConnectionProduct::query()->create([
-                'company_id' => $companyId,
-                'landing_connection_id' => $connection->id,
-                'landing_connection_source_id' => $sourceKey !== '' ? ($sourceMap[$sourceKey] ?? null) : null,
-                'product_id' => (int) $row['product_id'],
-                'item_type' => (string) ($row['item_type'] ?? 'product'),
-                'external_field' => filled($row['external_field'] ?? null) ? trim((string) $row['external_field']) : null,
-                'external_value' => filled($row['external_value'] ?? null) ? trim((string) $row['external_value']) : null,
-                'quantity' => max(1, (int) ($row['quantity'] ?? 1)),
-                'unit_price_override' => filled($row['unit_price_override'] ?? null) ? max(0, (int) $row['unit_price_override']) : null,
-                'is_default' => (bool) ($row['is_default'] ?? false),
-                'sort_order' => (int) ($row['sort_order'] ?? $index),
-            ]);
+                $sourceKey = (string) ($row['source_key'] ?? '');
+                LandingConnectionProduct::query()->create($this->onlyExistingColumns('landing_connection_products', [
+                    'company_id' => $companyId,
+                    'landing_connection_id' => $connection->id,
+                    'landing_connection_source_id' => $sourceKey !== '' ? ($sourceMap[$sourceKey] ?? null) : null,
+                    'product_id' => (int) $row['product_id'],
+                    'item_type' => (string) ($row['item_type'] ?? 'product'),
+                    'external_field' => filled($row['external_field'] ?? null) ? trim((string) $row['external_field']) : null,
+                    'external_value' => filled($row['external_value'] ?? null) ? trim((string) $row['external_value']) : null,
+                    'quantity' => max(1, (int) ($row['quantity'] ?? 1)),
+                    'unit_price_override' => filled($row['unit_price_override'] ?? null) ? max(0, (int) $row['unit_price_override']) : null,
+                    'is_default' => (bool) ($row['is_default'] ?? false),
+                    'sort_order' => (int) ($row['sort_order'] ?? $index),
+                ]));
+            }
         }
 
-        $connection->sales()->delete();
-        foreach (array_values(array_unique(array_map('intval', (array) ($data['sale_user_ids'] ?? [])))) as $index => $userId) {
-            if ($userId <= 0) {
-                continue;
-            }
+        if (array_key_exists('sale_user_ids', $data)) {
+            $connection->sales()->delete();
+            foreach (array_values(array_unique(array_map('intval', (array) ($data['sale_user_ids'] ?? [])))) as $index => $userId) {
+                if ($userId <= 0) {
+                    continue;
+                }
 
-            LandingConnectionSale::query()->create([
-                'company_id' => $companyId,
-                'landing_connection_id' => $connection->id,
-                'user_id' => $userId,
-                'priority' => $index + 1,
-                'weight' => 1,
-                'is_active' => true,
-            ]);
+                LandingConnectionSale::query()->create($this->onlyExistingColumns('landing_connection_sales', [
+                    'company_id' => $companyId,
+                    'landing_connection_id' => $connection->id,
+                    'user_id' => $userId,
+                    'priority' => $index + 1,
+                    'weight' => 1,
+                    'is_active' => true,
+                ]));
+            }
         }
+    }
+
+    private function syncMarketingSource(LandingConnection $connection, User $actor): MarketingSource
+    {
+        $connection->loadMissing(['products.product', 'marketingSource']);
+        $firstProductId = $connection->products->pluck('product_id')->filter()->map(fn ($id) => (int) $id)->first();
+
+        if (! $firstProductId) {
+            throw new \RuntimeException('Không thể duyệt kết nối landing khi chưa có sản phẩm/gói sản phẩm.');
+        }
+
+        $campaign = $connection->marketingSource;
+        $budgetTotal = $this->budgetTotal($connection);
+        $payload = array_filter([
+            'company_id' => $connection->company_id,
+            'name' => $connection->name,
+            'product_id' => $firstProductId,
+            'marketer_user_id' => $connection->marketer_user_id,
+            'created_by_user_id' => $campaign?->created_by_user_id ?: ($connection->created_by_user_id ?: $actor->id),
+            'ad_channel' => $connection->ad_channel ?: 'landing',
+            'utm_source' => 'landing_connection',
+            'utm_campaign' => Str::slug((string) $connection->name) ?: 'landing-connection',
+            'budget' => $budgetTotal,
+            'is_active' => (bool) $connection->is_active,
+            'is_approved' => (bool) $connection->is_approved,
+            'lead_allocation' => $this->legacyAllocation($connection->allocation_method),
+            'js_tracking_enabled' => false,
+            'approved_by_user_id' => $connection->is_approved ? ($connection->approved_by_user_id ?: $actor->id) : null,
+            'approved_at' => $connection->is_approved ? ($connection->approved_at ?: now()) : null,
+        ], fn ($value) => $value !== null);
+
+        $payload = $this->onlyExistingMarketingSourceColumns($payload);
+
+        if ($campaign) {
+            $campaign->forceFill($payload)->save();
+        } else {
+            $campaign = new MarketingSource;
+            $campaign->forceFill($payload)->save();
+            $connection->forceFill(['marketing_source_id' => $campaign->id])->save();
+        }
+
+        return $campaign->fresh();
+    }
+
+    private function legacyAllocation(?string $allocation): string
+    {
+        return match ($allocation ?: 'inherit') {
+            'manual' => CampaignLeadAllocation::Manual->value,
+            'round_robin', 'priority' => CampaignLeadAllocation::Auto->value,
+            default => CampaignLeadAllocation::Inherit->value,
+        };
+    }
+
+    private function budgetTotal(LandingConnection $connection): int
+    {
+        $amount = max(0, (int) $connection->budget_amount);
+        if ($connection->budget_type !== 'daily' || ! $connection->budget_start_date || ! $connection->budget_end_date) {
+            return $amount;
+        }
+
+        return $amount * ($connection->budget_start_date->diffInDays($connection->budget_end_date) + 1);
+    }
+
+
+    /** @param array<string, mixed> $payload */
+    private function onlyExistingColumns(string $table, array $payload): array
+    {
+        if (! Schema::hasTable($table)) {
+            return $payload;
+        }
+
+        return array_filter(
+            $payload,
+            static fn ($value, string $key): bool => Schema::hasColumn($table, $key),
+            ARRAY_FILTER_USE_BOTH,
+        );
+    }
+
+    private function companyIdForActor(User $actor): int
+    {
+        $candidate = (int) ($actor->company_id ?? 0);
+        if ($candidate > 0) {
+            return $candidate;
+        }
+
+        $tenantId = (int) (app(TenantManager::class)->id() ?? 0);
+        if ($tenantId > 0) {
+            return $tenantId;
+        }
+
+        return (int) (Company::query()->orderBy('id')->value('id') ?? 0);
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function onlyExistingMarketingSourceColumns(array $payload): array
+    {
+        if (! Schema::hasTable('marketing_sources')) {
+            return $payload;
+        }
+
+        return array_filter(
+            $payload,
+            static fn ($value, string $key): bool => Schema::hasColumn('marketing_sources', $key),
+            ARRAY_FILTER_USE_BOTH,
+        );
     }
 
     /** @param array<string, mixed> $data */
@@ -180,7 +383,7 @@ class LandingConnectionManager
             : (bool) ($existing?->is_approved ?? false);
 
         return [
-            'company_id' => $actor->company_id,
+            'company_id' => $this->companyIdForActor($actor),
             'name' => trim((string) $data['name']),
             'marketer_user_id' => (int) $data['marketer_user_id'],
             'connection_type' => (string) ($data['connection_type'] ?? 'landing'),
@@ -197,60 +400,10 @@ class LandingConnectionManager
             'approved_by_user_id' => $approved ? ($existing?->approved_by_user_id ?: $actor->id) : null,
             'approved_at' => $approved ? ($existing?->approved_at ?: now()) : null,
             'metadata' => array_filter([
-                'version' => 1,
+                'version' => 2,
                 'notes' => $data['notes'] ?? null,
+                'pending_approval_flow' => true,
             ]),
-        ];
-    }
-
-    /** @param array<string, mixed> $data */
-    private function marketingSourcePayload(array $data, User $actor, ?MarketingSource $existing = null): array
-    {
-        $productId = collect((array) ($data['products'] ?? []))
-            ->pluck('product_id')
-            ->filter()
-            ->map(fn ($id) => (int) $id)
-            ->first();
-
-        $allocation = match ((string) ($data['allocation_method'] ?? 'inherit')) {
-            'manual' => 'manual',
-            'round_robin', 'priority' => 'auto',
-            default => 'inherit',
-        };
-
-        $canApprove = $actor->isAdmin()
-            || $actor->allows(PermissionArea::Marketing, PermissionLevel::Full)
-            || $actor->allows(PermissionArea::Integrations, PermissionLevel::Full);
-
-        $approved = $canApprove
-            ? (bool) ($data['is_approved'] ?? false)
-            : (bool) ($existing?->is_approved ?? false);
-
-        $budgetAmount = max(0, (int) ($data['budget_amount'] ?? 0));
-        $budgetTotal = $budgetAmount;
-        if (($data['budget_type'] ?? 'total') === 'daily'
-            && filled($data['budget_start_date'] ?? null)
-            && filled($data['budget_end_date'] ?? null)) {
-            $start = \Illuminate\Support\Carbon::parse((string) $data['budget_start_date'])->startOfDay();
-            $end = \Illuminate\Support\Carbon::parse((string) $data['budget_end_date'])->startOfDay();
-            $budgetTotal = $budgetAmount * ($start->diffInDays($end) + 1);
-        }
-
-        return [
-            'name' => trim((string) $data['name']),
-            'product_id' => $productId,
-            'marketer_user_id' => (int) $data['marketer_user_id'],
-            'created_by_user_id' => $existing?->created_by_user_id ?: $actor->id,
-            'ad_channel' => filled($data['ad_channel'] ?? null) ? trim((string) $data['ad_channel']) : 'landing',
-            'utm_source' => 'landing_connection',
-            'utm_campaign' => Str::slug((string) $data['name']) ?: 'landing-connection',
-            'budget' => $budgetTotal,
-            'is_active' => (bool) ($data['is_active'] ?? true),
-            'is_approved' => $approved,
-            'lead_allocation' => $allocation,
-            'js_tracking_enabled' => false,
-            'approved_by_user_id' => $approved ? ($existing?->approved_by_user_id ?: $actor->id) : null,
-            'approved_at' => $approved ? ($existing?->approved_at ?: now()) : null,
         ];
     }
 }

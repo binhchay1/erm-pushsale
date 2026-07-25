@@ -139,7 +139,7 @@ class ErmTestAllCommand extends Command
                 'failed' => $failed->pluck('name')->all(),
                 'results' => (bool) $this->option('full-json')
                     ? $this->results
-                    : array_map(fn (array $row): array => $this->compactResultForJson($row), $this->results),
+                    : array_values(array_filter(array_map(fn (array $row): array => $this->compactResultForJson($row), $this->results), fn (array $row): bool => !($row['ok'] ?? false) || in_array($row['name'] ?? '', ['schema:contract-repair', 'health'], true))),
             ];
 
             $this->line(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
@@ -233,7 +233,12 @@ class ErmTestAllCommand extends Command
             }
 
             if (isset($data['summary']) && is_array($data['summary'])) {
-                $compact['summary'] = $data['summary'];
+                $summary = $data['summary'];
+                if (isset($summary['failed_top']) && is_array($summary['failed_top'])) {
+                    $summary['failed_top'] = array_slice($summary['failed_top'], 0, 5);
+                }
+                unset($summary['copy_hint']);
+                $compact['summary'] = $summary;
             } elseif (isset($data['counts']) && is_array($data['counts'])) {
                 $compact['counts'] = $data['counts'];
             } elseif (isset($data['checks']) && is_array($data['checks'])) {

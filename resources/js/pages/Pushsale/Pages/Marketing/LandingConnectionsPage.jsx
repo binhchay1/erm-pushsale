@@ -174,7 +174,7 @@ function cleanPayload(data) {
             quantity: Number(product.quantity || 1),
             unit_price_override: product.unit_price_override === '' ? null : product.unit_price_override,
         }));
-    payload.success_url = payload.success_url || urls[0] || '';
+    payload.success_url = payload.success_url || '';
     // Luồng mới: form tạo/sửa nguồn landing không duyệt trực tiếp.
     // Menu duyệt riêng sẽ gắn sản phẩm/gói + ngân sách rồi mới bật duyệt.
     payload.is_approved = false;
@@ -529,8 +529,8 @@ export default function LandingConnectionsPage({
                             <label>Url nguồn dữ liệu <span className="required">(*)</span></label>
                             <input className="form-control" type="url" required value={form.data.sources?.[0]?.source_url ?? ''} onChange={(event) => updateMainSource('source_url', event.target.value)} />
 
-                            <label>Url API <span className="required">(*)</span></label>
-                            <input className="form-control" readOnly disabled value={form.data.current_submit_url ?? ''} />
+                            <label>Url API</label>
+                            <input className="form-control pslc-api-preview" readOnly disabled value={form.data.current_submit_url ?? ''} placeholder="Tự sinh sau khi lưu nguồn landing" />
 
                             <label>Sử dụng woocommerce</label>
                             <label className="pslc-inline-checkbox"><input type="checkbox" checked={Boolean(form.data.metadata?.woocommerce)} onChange={() => {}} /> Sử dụng woocommerce</label>

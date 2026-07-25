@@ -289,6 +289,10 @@ class FilterOptionsService
     /** @return array<string, mixed> */
     public function forRankings(?User $user = null): array
     {
+        $allTeams = $this->teams->optionsWithType();
+        $salesTeams = $allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Sale)->values();
+        $marketingTeams = $allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Marketing)->values();
+
         return [
             'discountModes' => collect(DiscountMode::cases())->map(fn ($e) => [
                 'value' => $e->value,

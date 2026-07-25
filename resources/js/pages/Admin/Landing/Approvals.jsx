@@ -20,7 +20,7 @@ export default function LandingApprovals({
     products = [],
     highlightCampaignId,
     fieldMapping,
-    approveBaseUrl = '/admin/landing-approvals',
+    approveBaseUrl = '/admin/marketing/landing-approvals',
 }) {
     const t = useT();
     const rowRefs = useRef({});

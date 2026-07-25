@@ -344,3 +344,17 @@ body.pushsale-app-body .pslc-form .pslc-upsell-textarea {
         gap: 8px !important;
     }
 }
+
+/* V122 — pending landing flow polish */
+html body.pushsale-app-body .pslc-source-form-v119 input[disabled],
+html body.pushsale-app-body .pslc-source-form-v119 input[readonly][disabled],
+html body.pushsale-app-body .pslc-source-form-v119 .form-control[disabled] {
+    background: #f1f1f1 !important;
+    color: #777 !important;
+    cursor: not-allowed !important;
+    opacity: 1 !important;
+}
+html body.pushsale-app-body .pslc-source-form-v119 .pslc-api-preview {
+    background: #f1f1f1 !important;
+    border-color: #c9d3df !important;
+}

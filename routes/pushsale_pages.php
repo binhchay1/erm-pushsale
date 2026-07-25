@@ -124,8 +124,8 @@ Route::match(['put', 'patch'], 'marketing/website-connections/records/{record}',
 Route::delete('marketing/website-connections/records/{record}', [\App\Http\Controllers\Admin\Marketing\LandingConnectionsController::class, 'destroy'])->whereNumber('record')->name('marketing.website-connections.destroy');
 Route::redirect('pages/2-4-2-ket-noi-du-lieu', '/admin/marketing/website-connections', 301);
 Route::get('marketing/landing-approvals', [\App\Http\Controllers\Admin\LandingApprovalController::class, 'index'])->name('marketing.landing-approvals');
-Route::post('marketing/landing-approvals/{campaign}/approve', [\App\Http\Controllers\Admin\LandingApprovalController::class, 'approve'])->whereNumber('campaign')->name('marketing.landing-approvals.approve');
-Route::post('marketing/landing-approvals/{campaign}/reject', [\App\Http\Controllers\Admin\LandingApprovalController::class, 'reject'])->whereNumber('campaign')->name('marketing.landing-approvals.reject');
+Route::post('marketing/landing-approvals/{connection}/approve', [\App\Http\Controllers\Admin\LandingApprovalController::class, 'approve'])->whereNumber('connection')->name('marketing.landing-approvals.approve');
+Route::post('marketing/landing-approvals/{connection}/reject', [\App\Http\Controllers\Admin\LandingApprovalController::class, 'reject'])->whereNumber('connection')->name('marketing.landing-approvals.reject');
 
 Route::get('marketing/leads/import', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_6_1Controller::class, 'index'])->name('marketing.leads.import-page');
 Route::redirect('pages/2-6-1-import-contact', '/admin/marketing/leads/import', 301);

@@ -18,7 +18,7 @@ return [
         '/admin/catalog/combos',
         '/admin/leads',
         '/admin/marketing/landing-connections',
-        '/admin/landing-approvals',
+        '/admin/marketing/landing-approvals',
         '/admin/marketing/dashboard',
         '/admin/marketing/revenue',
         '/admin/customer-management',

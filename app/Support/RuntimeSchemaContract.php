@@ -107,6 +107,15 @@ class RuntimeSchemaContract
             }
         }
 
+        if (Schema::hasTable('landing_connections') && Schema::hasColumn('landing_connections', 'marketing_source_id')) {
+            try {
+                DB::statement('ALTER TABLE landing_connections MODIFY marketing_source_id BIGINT UNSIGNED NULL');
+                $changes[] = 'landing_connections.marketing_source_id nullable';
+            } catch (\Throwable) {
+                // Some DB engines/FK variants reject MODIFY; pending landing create no longer needs a legacy campaign.
+            }
+        }
+
         if (Schema::hasTable('landing_connections')) {
             foreach ([
                 'budget_type' => ['type' => 'string20', 'after' => 'allocation_method'],

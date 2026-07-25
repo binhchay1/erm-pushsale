@@ -53,7 +53,7 @@ function ApprovalDialog({ open, onClose, children }) {
 export default function LandingApprovalPage({
     campaigns = [],
     products = [],
-    approveBaseUrl = '/admin/landing-approvals',
+    approveBaseUrl = '/admin/marketing/landing-approvals',
     activeMenuCode = '2.4.3',
 }) {
     const [selected, setSelected] = useState(null);

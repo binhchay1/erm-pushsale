@@ -2416,3 +2416,41 @@ html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > a:hover::
     content: none !important;
     display: none !important;
 }
+
+/* V122 final sidebar hover override — last rule wins. */
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > button.a2,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > button.a2:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > button.a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > button.a2:hover {
+    background: #1e9bf0 !important;
+    background-color: #1e9bf0 !important;
+    color: #fff !important;
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2 *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > button.a2 *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > button.a2:hover *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2 *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > button.a2 *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2:hover *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > button.a2:hover * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > a.a2::after,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > button.a2::before,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2 > button.a2::after {
+    border-color: transparent !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}

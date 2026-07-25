@@ -279,8 +279,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
         Route::put('marketing/dashboard/daily-metrics', [MarketingDashboardDataController::class, 'saveDailyMetrics'])->name('marketing.dashboard.daily-metrics.update');
         Route::get('marketing/dashboard/export', [MarketingDashboardDataController::class, 'export'])->name('marketing.dashboard.export');
         Route::get('landing-approvals', [LandingApprovalController::class, 'index'])->name('landing-approvals.index');
-        Route::post('landing-approvals/{campaign}/approve', [LandingApprovalController::class, 'approve'])->name('landing-approvals.approve');
-        Route::post('landing-approvals/{campaign}/reject', [LandingApprovalController::class, 'reject'])->name('landing-approvals.reject');
+        Route::post('landing-approvals/{connection}/approve', [LandingApprovalController::class, 'approve'])->name('landing-approvals.approve');
+        Route::post('landing-approvals/{connection}/reject', [LandingApprovalController::class, 'reject'])->name('landing-approvals.reject');
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::get('activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
         Route::get('marketing/revenue', MarketingRevenueReportController::class)->name('marketing.revenue');
@@ -445,8 +445,8 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
             abort(410, 'Luồng xóa chiến dịch đã được thay bằng Kết nối landing.');
         })->whereNumber('campaign')->name('campaigns.destroy');
         Route::get('landing-approvals', [LandingApprovalController::class, 'index'])->name('landing-approvals.index');
-        Route::post('landing-approvals/{campaign}/approve', [LandingApprovalController::class, 'approve'])->name('landing-approvals.approve');
-        Route::post('landing-approvals/{campaign}/reject', [LandingApprovalController::class, 'reject'])->name('landing-approvals.reject');
+        Route::post('landing-approvals/{connection}/approve', [LandingApprovalController::class, 'approve'])->name('landing-approvals.approve');
+        Route::post('landing-approvals/{connection}/reject', [LandingApprovalController::class, 'reject'])->name('landing-approvals.reject');
         Route::get('revenue', MarketingRevenueReportController::class)->name('revenue');
         Route::get('campaign-report', MarketingCampaignReportController::class)->name('campaign-report');
         Route::patch('campaigns/{campaign}/budget', [CampaignBudgetController::class, 'update'])->name('campaigns.budget');

@@ -1,0 +1,45 @@
+/* v123 canonical Pushsale/AdminLTE contract.
+   Last-loaded CSS only. Keep page CSS scoped, and keep sidebar hover behavior here. */
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2,
+html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover {
+    background: #0b8ff3 !important;
+    background-color: #0b8ff3 !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2 *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2 *,
+html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:focus,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:focus-visible,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:active {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2::before,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2::after {
+    content: none !important;
+    display: none !important;
+}
+html body.pushsale-app-body .pslc-api-preview:disabled,
+html body.pushsale-app-body input.pslc-api-preview[disabled],
+html body.pushsale-app-body input.pslc-api-preview[readonly] {
+    background: #f3f3f3 !important;
+    color: #777 !important;
+    cursor: not-allowed !important;
+}

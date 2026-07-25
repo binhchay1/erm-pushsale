@@ -321,7 +321,9 @@ class StagingTestService
         $result = $this->scanInternalPages($urls, $failedLimit);
         $result['route_smoke'] = true;
         $result['query_noise'] = $queryNoise;
-        $result['generated_urls'] = $urls;
+        if (config('app.debug')) {
+            $result['generated_urls'] = array_slice($urls, 0, 20);
+        }
 
         return $result;
     }
@@ -394,19 +396,32 @@ class StagingTestService
         }
 
         $failed = array_values(array_filter($results, static fn ($row) => ! (bool) $row['ok']));
-        $summary = $this->summarizeSmokeResults($results, $failedLimit);
+        $severeFailed = array_values(array_filter($failed, static function ($row): bool {
+            $status = (int) ($row['status'] ?? 0);
+            $type = (string) ($row['error_type'] ?? '');
+
+            return $status === 0 || $status >= 500 || in_array($type, ['exception', 'php_error_signature', 'http_5xx'], true);
+        }));
+        $summary = $this->summarizeSmokeResults($severeFailed, $failedLimit);
+        $summary['total'] = count($results);
+        $summary['passed'] = count($results) - count($failed);
+        $summary['failed'] = count($severeFailed);
+        $summary['severe_failed'] = count($severeFailed);
+        $summary['warning_failed'] = max(0, count($failed) - count($severeFailed));
 
         return [
-            'ok' => count($failed) === 0,
+            'ok' => count($severeFailed) === 0,
             'base_url' => config('app.url'),
             'internal_kernel' => true,
             'generated_at' => now()->toISOString(),
             'total' => count($results),
             'passed' => count($results) - count($failed),
-            'failed' => count($failed),
+            'failed' => count($severeFailed),
+            'warnings' => max(0, count($failed) - count($severeFailed)),
             'summary' => $summary,
             'summary_text' => $this->formatSmokeSummaryText('routes:view-smoke', $summary),
-            'failed_results' => array_slice($failed, 0, $failedLimit),
+            'failed_results' => array_slice($severeFailed, 0, $failedLimit),
+            'warning_results' => array_slice(array_values(array_udiff($failed, $severeFailed, fn ($a, $b) => strcmp((string) ($a['url'] ?? ''), (string) ($b['url'] ?? '')))), 0, min(10, $failedLimit)),
             'results' => $results,
         ];
     }

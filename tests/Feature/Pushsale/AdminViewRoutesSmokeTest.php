@@ -3,6 +3,7 @@
 namespace Tests\Feature\Pushsale;
 
 use App\Models\Company;
+use App\Models\LandingConnection;
 use App\Models\LeadIngestion;
 use App\Models\Order;
 use App\Models\Product;
@@ -169,6 +170,56 @@ class AdminViewRoutesSmokeTest extends TestCase
         $this->assertSame('manual', $warehouse->default_shipping_provider);
         $this->assertSame('manual', $warehouse->default_shipping_service);
         $this->assertSame('Kho thủ công', $warehouse->shipping_account_settings['manual']['account']);
+    }
+
+
+    public function test_landing_connection_can_be_created_without_product_before_approval(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $admin = $this->loginAsDemoAdmin();
+        $marketer = User::withoutTenant()
+            ->where('company_id', $admin->company_id)
+            ->where('role', User::ROLE_MARKETING)
+            ->firstOrFail();
+        $sale = User::withoutTenant()
+            ->where('company_id', $admin->company_id)
+            ->where('role', User::ROLE_SALES)
+            ->firstOrFail();
+
+        $payload = [
+            'name' => 'Landing chờ duyệt QA',
+            'marketer_user_id' => $marketer->id,
+            'connection_type' => 'landing',
+            'ad_channel' => 'facebook_ads',
+            'allocation_method' => 'inherit',
+            'manual_import' => true,
+            'is_approved' => false,
+            'is_active' => true,
+            'sources' => [[
+                'client_key' => 'main-source',
+                'name' => 'Landing chờ duyệt QA',
+                'source_type' => 'main',
+                'source_url' => 'https://landing.example.test/form-a',
+                'redirect_url' => null,
+                'sort_order' => 0,
+                'is_active' => true,
+            ]],
+            'products' => [],
+            'sale_user_ids' => [$sale->id],
+        ];
+
+        $this->post('/admin/marketing/landing-connections/records', $payload)
+            ->assertRedirect('/admin/marketing/landing-connections')
+            ->assertSessionHas('success');
+
+        $connection = LandingConnection::withoutTenant()
+            ->where('name', 'Landing chờ duyệt QA')
+            ->firstOrFail();
+
+        $this->assertFalse((bool) $connection->is_approved);
+        $this->assertNull($connection->marketing_source_id);
+        $this->assertCount(1, $connection->sources()->get());
+        $this->assertCount(0, $connection->products()->get());
     }
 
     private function safeResponseBody(mixed $response): string
