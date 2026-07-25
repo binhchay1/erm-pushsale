@@ -34,7 +34,7 @@ final class LandingConnectionsController extends Controller
         $activeMenuCode = $isWebsiteRoute ? '2.4.2' : '2.4.1';
 
         $query = LandingConnection::query()
-            ->with($this->manager->relations())
+            ->with(array_merge($this->manager->relations(), ['updatedBy:id,name,email']))
             ->when($request->filled('search'), function ($query) use ($request): void {
                 $keyword = trim((string) $request->input('search'));
                 $query->where(function ($query) use ($keyword): void {
@@ -58,9 +58,9 @@ final class LandingConnectionsController extends Controller
             'filters' => $request->only(['search', 'marketer_user_id', 'product_id', 'connection_type', 'active', 'per_page']),
             'routeUrl' => $routeUrl,
             'recordsUrl' => $recordsUrl,
-            'marketers' => User::query()->whereIn('role', [UserRole::Marketing, UserRole::Admin])->orderBy('name')->get(['id', 'name']),
-            'sales' => User::query()->where('role', UserRole::Sales)->orderBy('name')->get(['id', 'name', 'team_id']),
-            'saleTeams' => Team::query()->where('type', 'sale')->with('users:id,name,team_id')->orderBy('name')->get(['id', 'name']),
+            'marketers' => User::query()->whereIn('role', [UserRole::Marketing, UserRole::Admin])->orderBy('name')->get(['id', 'name', 'email']),
+            'sales' => User::query()->where('role', UserRole::Sales)->orderBy('name')->get(['id', 'name', 'email', 'team_id']),
+            'saleTeams' => Team::query()->where('type', 'sale')->with('users:id,name,email,team_id')->orderBy('name')->get(['id', 'name']),
             'products' => Product::query()->where('is_active', true)->where('available_marketing', true)->orderBy('type')->orderBy('name')->get(['id', 'name', 'sku', 'type', 'unit_price']),
             'canManage' => $this->canManage($request->user()),
             'canApprove' => $this->canApprove($request->user()),
@@ -252,6 +252,7 @@ final class LandingConnectionsController extends Controller
             'name' => $connection->name,
             'marketer_user_id' => $connection->marketer_user_id,
             'marketer' => $connection->marketer?->name,
+            'marketer_email' => $connection->marketer?->email,
             'connection_type' => $connection->connection_type,
             'ad_channel' => $connection->ad_channel,
             'allocation_method' => $connection->allocation_method,
@@ -300,6 +301,7 @@ final class LandingConnectionsController extends Controller
             'sale_user_ids' => $connection->sales->pluck('user_id')->values(),
             'sale_names' => $connection->sales->pluck('user.name')->filter()->values(),
             'updated_at' => $connection->updated_at?->format('d/m/Y H:i'),
+            'updated_by' => $connection->updatedBy?->name ?? $connection->updatedBy?->email,
         ];
     }
 

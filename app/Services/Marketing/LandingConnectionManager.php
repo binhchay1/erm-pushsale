@@ -70,12 +70,12 @@ class LandingConnectionManager
     public function relations(): array
     {
         return [
-            'marketer:id,name',
+            'marketer:id,name,email',
             'marketingSource:id,name,webhook_token,contacts,budget,is_active,is_approved',
             'sources',
-            'products.product:id,name,sku,unit_price',
+            'products.product:id,name,sku,unit_price,type',
             'products.source:id,name',
-            'sales.user:id,name,team_id',
+            'sales.user:id,name,email,team_id',
         ];
     }
 

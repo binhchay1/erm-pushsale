@@ -65,6 +65,16 @@ class LandingConnection extends Model
         return $this->belongsTo(User::class, 'approved_by_user_id');
     }
 
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by_user_id');
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
     public function sources(): HasMany
     {
         return $this->hasMany(LandingConnectionSource::class)->orderBy('sort_order')->orderBy('id');
