@@ -29,7 +29,7 @@ html body.pushsale-app-body .ps-date-filter .ps-date-filter-input:focus,
 html body.pushsale-app-body .ps-date-filter input[type='date']:focus {
     border-color: #66afe9 !important;
     outline: 0 !important;
-    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 4px rgba(102,175,233,.45) !important;
+    box-shadow: none !important;
 }
 
 html body.pushsale-app-body .ps-date-filter .ps-date-filter-separator {

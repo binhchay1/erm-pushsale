@@ -237,17 +237,31 @@ html body.pushsale-app-body .ps-page-shell .ps-title-divider {
     font-weight: 700 !important;
 }
 
-/* Sale workspace advanced filter grid inside shell */
+/* Sale workspace advanced filter grid inside shell — gom 1 hàng gọn. */
 html body.pushsale-app-body .ps-page-shell .ps-sale-extra-filters {
     display: grid !important;
-    grid-template-columns: minmax(220px, 1.2fr) repeat(4, minmax(140px, 1fr)) !important;
-    gap: 10px 14px !important;
+    grid-template-columns: minmax(200px, 1.15fr) repeat(8, minmax(110px, 1fr)) auto !important;
+    gap: 8px 10px !important;
     align-items: center !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
     border: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell .ps-sale-extra-filters .form-control,
+html body.pushsale-app-body .ps-page-shell .ps-sale-extra-filters select,
+html body.pushsale-app-body .ps-page-shell .ps-sale-extra-filters .ps-select__control,
+html body.pushsale-app-body .ps-page-shell .ps-sale-extra-filters .ps-date-filter,
+html body.pushsale-app-body .ps-page-shell .ps-sale-extra-filters .ps-date-filter input,
+html body.pushsale-app-body .ps-page-shell .ps-sale-primary-filters .form-control,
+html body.pushsale-app-body .ps-page-shell .ps-sale-primary-filters select,
+html body.pushsale-app-body .ps-page-shell .ps-sale-search-wrap .form-control {
+    border: 1px solid #c8d2df !important;
+    box-shadow: none !important;
+    filter: none !important;
+    border-radius: 0 !important;
 }
 
 html body.pushsale-app-body .ps-page-shell .ps-sale-check {

@@ -229,7 +229,7 @@ html body.pushsale-app-body select:focus,
 html body.pushsale-app-body select.form-control:focus {
     border-color: #66afe9 !important;
     outline: 0 !important;
-    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 4px rgba(102,175,233,.38) !important;
+    box-shadow: none !important;
 }
 
 /* Custom React select must visually match native select. */
@@ -1554,16 +1554,16 @@ html body.pushsale-app-body .ps-order-flag {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 18px !important;
-    height: 18px !important;
-    min-width: 18px !important;
-    min-height: 18px !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
     padding: 0 !important;
     border: 1px solid currentColor !important;
     border-radius: 50% !important;
     background: #fff !important;
     box-shadow: none !important;
-    font-size: 10px !important;
+    font-size: 9px !important;
     line-height: 1 !important;
     vertical-align: middle !important;
 }
@@ -1574,6 +1574,7 @@ html body.pushsale-app-body button.ps-order-flag {
 
 html body.pushsale-app-body .ps-order-flag.is-returning {
     color: #e53935 !important;
+    border-color: #e53935 !important;
 }
 
 html body.pushsale-app-body .ps-order-flag.is-returning .fa-heart {
@@ -1581,15 +1582,18 @@ html body.pushsale-app-body .ps-order-flag.is-returning .fa-heart {
 }
 
 html body.pushsale-app-body .ps-order-flag.is-duplicate {
-    color: #1976d2 !important;
+    color: #f0ad00 !important;
+    border-color: #f0ad00 !important;
 }
 
 html body.pushsale-app-body .ps-order-flag.is-upsale {
     color: #fb8c00 !important;
+    border-color: #fb8c00 !important;
 }
 
 html body.pushsale-app-body .ps-order-flag.is-waiting-upsale {
     color: #7b61ff !important;
+    border-color: #7b61ff !important;
 }
 
 html body.pushsale-app-body .ps-order-flag-inner {
@@ -1639,7 +1643,10 @@ html body.pushsale-app-body .ps-order-products-section + .ps-order-products-sect
     border-top: 1px dashed #b9cce0 !important;
 }
 
-html body.pushsale-app-body .ps-order-products-section-label,
+html body.pushsale-app-body .ps-order-products-section-label {
+    display: none !important;
+}
+
 html body.pushsale-app-body .ps-order-products-pending-upsale {
     display: inline-flex !important;
     align-items: center !important;
@@ -1648,18 +1655,11 @@ html body.pushsale-app-body .ps-order-products-pending-upsale {
     margin: 0 0 4px !important;
     padding: 2px 5px !important;
     border-radius: 2px !important;
-    background: #eef5ff !important;
-    color: #1976d2 !important;
+    background: #fff3e0 !important;
+    color: #ef6c00 !important;
     font-size: 10px !important;
     font-weight: 700 !important;
     line-height: 1.15 !important;
-    text-transform: uppercase !important;
-}
-
-html body.pushsale-app-body .ps-order-products-section.is-upsale-section .ps-order-products-section-label,
-html body.pushsale-app-body .ps-order-products-pending-upsale {
-    background: #fff3e0 !important;
-    color: #ef6c00 !important;
 }
 
 html body.pushsale-app-body .ps-order-products-row {
@@ -2047,4 +2047,105 @@ html body.pushsale-app-body .ps-customer-profile-table .ps-phone-line .ps-contac
 html body.pushsale-app-body .ps-customer-profile-table .ps-code-cell .ps-order-flags,
 html body.pushsale-app-body .ps-sale-operation-table .ps-code-cell .ps-order-flags {
     margin-top: 0 !important;
+}
+
+/* Sale / ngày nhận data: thùng rác nằm cạnh tên. */
+html body.pushsale-app-body .ps-sale-operation-table .ps-sale-name-row {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+    max-width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-sale-name-row > b {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-sale-delete,
+html body.pushsale-app-body .ps-sale-operation-table .ps-sale-delete.btn-icon {
+    position: static !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #c0392b !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-sale-delete:hover {
+    color: #922b21 !important;
+}
+
+/* Bỏ viền khó chịu quanh icon/nút trong bảng tác nghiệp & hồ sơ KH. */
+html body.pushsale-app-body .ps-sale-operation-table .btn-icon,
+html body.pushsale-app-body .ps-sale-operation-table .btn-icon.ps-cell-action,
+html body.pushsale-app-body .ps-customer-profile-table .btn-icon,
+html body.pushsale-app-body .ps-customer-profile-table .btn-icon.aoh,
+html body.pushsale-app-body .ps-customer-profile-table .ps-row-actions .btn-icon,
+html body.pushsale-app-body .ps-sale-operation-table .ps-row-actions .btn-icon,
+html body.pushsale-app-body .ps-sale-operation-table .ps-row-actions button,
+html body.pushsale-app-body .ps-customer-profile-table .ps-row-actions button {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .btn-icon .fa,
+html body.pushsale-app-body .ps-customer-profile-table .btn-icon .fa,
+html body.pushsale-app-body .ps-sale-operation-table .ps-row-actions .fa,
+html body.pushsale-app-body .ps-customer-profile-table .ps-row-actions .fa {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    line-height: 1 !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-filter-grid .form-control,
+html body.pushsale-app-body .ps-customer-profile-page .ps-filter-grid select,
+html body.pushsale-app-body .ps-customer-profile-page .ps-filter-grid .ps-select__control,
+html body.pushsale-app-body .ps-customer-profile-page .ps-filter-grid .ps-date-filter input,
+html body.pushsale-app-body .ps-customer-profile-page .ps-filter-grid .ps-product-search-input {
+    border: 1px solid #c8d2df !important;
+    box-shadow: none !important;
+    filter: none !important;
+    border-radius: 0 !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-filter-grid .ps-date-filter,
+html body.pushsale-app-body .ps-customer-profile-page .ps-filter-grid .ps-date-range-control,
+html body.pushsale-app-body .ps-customer-profile-page .ps-filter-grid .ps-select {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-filter-grid {
+    gap: 8px !important;
+}
+
+/* Upsale chỉ còn icon cạnh tim — ẩn text badge còn sót. */
+html body.pushsale-app-body .ps-order-products-pending-upsale,
+html body.pushsale-app-body .ps-order-products-section-label {
+    display: none !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-cell-actions-right {
+    display: none !important;
 }

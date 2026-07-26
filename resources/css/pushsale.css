@@ -8721,9 +8721,9 @@ body.pushsale-app-body .ps-sale-title-row {
     padding: 10px 20px !important;
 }
 body.pushsale-app-body .ps-sale-extra-filters {
-    grid-template-columns: minmax(360px, 2fr) minmax(210px, 1fr) minmax(210px, 1fr) minmax(230px, 1.1fr) minmax(210px, .9fr) !important;
-    gap: 14px 24px !important;
-    padding: 14px 20px 12px !important;
+    grid-template-columns: minmax(200px, 1.15fr) repeat(8, minmax(110px, 1fr)) auto !important;
+    gap: 8px 10px !important;
+    padding: 8px 20px 8px !important;
 }
 body.pushsale-app-body .ps-sale-title-row .form-control,
 body.pushsale-app-body .ps-sale-extra-filters .form-control,
@@ -13499,9 +13499,9 @@ body.pushsale-app-body .ps-sale-title-spacer {
 }
 
 body.pushsale-app-body .ps-sale-extra-filters {
-    grid-template-columns: minmax(285px, 2fr) minmax(190px, 1fr) minmax(190px, 1fr) minmax(220px, 1fr) minmax(210px, 1fr) !important;
-    gap: 12px 30px !important;
-    padding: 14px 16px 10px !important;
+    grid-template-columns: minmax(200px, 1.15fr) repeat(8, minmax(110px, 1fr)) auto !important;
+    gap: 8px 10px !important;
+    padding: 8px 16px 8px !important;
 }
 
 body.pushsale-app-body .ps-sale-stage-tabs {
@@ -13543,17 +13543,14 @@ body.pushsale-app-body .ps-sale-operation-table > tbody > tr > td {
     height: 90px !important;
     padding: 8px 6px !important;
 }
+body.pushsale-app-body .ps-sale-operation-table .ps-sale-name-row {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+}
 body.pushsale-app-body .ps-sale-operation-table .ps-cell-actions-right {
-    position: absolute !important;
-    top: 5px !important;
-    right: 5px !important;
-    z-index: 3 !important;
-}
-body.pushsale-app-body .ps-sale-operation-table .ps-cell-actions-right .btn-icon {
-    color: #cae7fb !important;
-}
-body.pushsale-app-body .ps-sale-operation-table .ps-cell-actions-right .btn-icon:hover {
-    color: #d32f2f !important;
+    display: none !important;
 }
 
 body.pushsale-app-body .ps-sale-operation-table .ps-product-stack,

@@ -69,7 +69,7 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {}, ch
     const advancedFilters = (
         <div className="ps-sale-extra-filters">
             <DateRangeFilter
-                className="ps-sale-date-range form-control"
+                className="ps-sale-date-range"
                 from={form.date_from}
                 to={form.date_to}
                 displayLabel
@@ -87,15 +87,6 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {}, ch
                 <option value="complaint_done">Hoàn tất xử lý khiếu nại</option>
             </select>
             <Select value={form.marketing_source_id} onChange={(value) => update('marketing_source_id', value)} placeholder="--Chọn nguồn dữ liệu--" options={filterOptions.marketingSources} />
-            <label className="ps-sale-check">
-                <input
-                    type="checkbox"
-                    checked={Boolean(form.hide_zero_status)}
-                    onChange={(event) => update('hide_zero_status', event.target.checked ? 1 : '')}
-                />
-                Ẩn tác nghiệp không số
-            </label>
-
             <ProductSearchSelect
                 products={filterOptions.products ?? []}
                 value={form.product_id}
@@ -112,6 +103,14 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {}, ch
             <Select value={form.operation_result} onChange={(value) => update('operation_result', value)} placeholder="--Chọn kết quả tác nghiệp--" options={filterOptions.operationResults} />
             <Select value={form.closing_status} onChange={(value) => update('closing_status', value)} placeholder="--Trạng thái chốt đơn--" options={filterOptions.closingStatuses} />
             <Select value={form.delivery_status} onChange={(value) => update('delivery_status', value)} placeholder="--Chọn trạng thái giao hàng--" options={filterOptions.deliveryStatuses} />
+            <label className="ps-sale-check">
+                <input
+                    type="checkbox"
+                    checked={Boolean(form.hide_zero_status)}
+                    onChange={(event) => update('hide_zero_status', event.target.checked ? 1 : '')}
+                />
+                Ẩn tác nghiệp không số
+            </label>
         </div>
     );
 
@@ -124,7 +123,7 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {}, ch
             defaultFiltersCollapsed={false}
             collapsible
             className="ps-sale-workspace-shell"
-            data-page-code="4.1"
+            pageCode="4.1"
         >
             {children}
         </PushsalePageShell>

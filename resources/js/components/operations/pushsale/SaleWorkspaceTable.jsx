@@ -301,10 +301,15 @@ export function SaleWorkspaceTable({
                                         <span className="small-tip">({dateTime(order.dataArrivedAt)})</span>
                                     </td>
                                     <td className="text-center ps-sale-cell">
-                                        <div className="ps-cell-actions-right">
-                                            {order.canDeleteData ? <button type="button" className="btn-icon" onClick={() => deleteData(order)} title="Xóa data"><i className="fa fa-trash" /></button> : null}
+                                        <div className="ps-sale-name-row">
+                                            <b>{order.saleName}</b>
+                                            {order.canDeleteData ? (
+                                                <button type="button" className="btn-icon ps-sale-delete" onClick={() => deleteData(order)} title="Xóa data" aria-label="Xóa data">
+                                                    <i className="fa fa-trash" />
+                                                </button>
+                                            ) : null}
                                         </div>
-                                        <b>{order.saleName}</b><br /><span className="small-tip">({dateTime(order.assignedAt)})</span>
+                                        <span className="small-tip">({dateTime(order.assignedAt)})</span>
                                     </td>
                                     <td className="ps-customer-cell">
                                         <button type="button" className="btn-icon ps-cell-action" onClick={() => onEdit(order, false)} title="Cập nhật đơn"><i className="fa fa-pencil-square-o" /></button>

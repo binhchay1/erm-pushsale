@@ -500,20 +500,15 @@ export default function LandingConnectionsPage({
                         </>
                     )}
                     advanced={(
-                        <>
-                            <div className="pslc-advanced-row">
-                                <PushsaleSelect options={channelTranslatedOptions} value={query.ad_channel ?? ''} placeholder={l('channel_placeholder')} searchable onChange={(value) => setQuery((old) => ({ ...old, ad_channel: value }))} />
-                                <PushsaleSelect options={creationTypeOptions} value={query.creation_type ?? ''} placeholder="-- Chọn kiểu khởi tạo --" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, creation_type: value }))} />
-                                <PushsaleSelect options={approvalOptions} value={query.approved ?? ''} placeholder={l('approval_placeholder')} searchable={false} onChange={(value) => setQuery((old) => ({ ...old, approved: value }))} />
-                                <PushsaleSelect options={saleOptions} value={query.sale_user_id ?? ''} placeholder="--Chọn sale--" searchable onChange={(value) => setQuery((old) => ({ ...old, sale_user_id: value }))} />
-                                <PushsaleSelect options={importTypeOptions} value={query.import_type ?? ''} placeholder="--Chọn loại nhập--" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, import_type: value }))} />
-                                <PushsaleSelect options={allocationTranslatedOptions} value={query.allocation_method ?? ''} placeholder="--Chọn cấu hình chia số--" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, allocation_method: value }))} />
-                            </div>
-                            <div className="pslc-advanced-row is-tail">
-                                <PushsaleSelect options={perPageOptions} value={String(query.per_page ?? 20)} searchable={false} onChange={(value) => setQuery((old) => ({ ...old, per_page: value }))} />
-                                <button type="button" className="btn btn-primary ps-btn-search" onClick={search}><i className="fa fa-search" /> {l('search')}</button>
-                            </div>
-                        </>
+                        <div className="pslc-advanced-row">
+                            <PushsaleSelect options={channelTranslatedOptions} value={query.ad_channel ?? ''} placeholder={l('channel_placeholder')} searchable onChange={(value) => setQuery((old) => ({ ...old, ad_channel: value }))} />
+                            <PushsaleSelect options={creationTypeOptions} value={query.creation_type ?? ''} placeholder="-- Chọn kiểu khởi tạo --" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, creation_type: value }))} />
+                            <PushsaleSelect options={approvalOptions} value={query.approved ?? ''} placeholder={l('approval_placeholder')} searchable={false} onChange={(value) => setQuery((old) => ({ ...old, approved: value }))} />
+                            <PushsaleSelect options={saleOptions} value={query.sale_user_id ?? ''} placeholder="--Chọn sale--" searchable onChange={(value) => setQuery((old) => ({ ...old, sale_user_id: value }))} />
+                            <PushsaleSelect options={importTypeOptions} value={query.import_type ?? ''} placeholder="--Chọn loại nhập--" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, import_type: value }))} />
+                            <PushsaleSelect options={allocationTranslatedOptions} value={query.allocation_method ?? ''} placeholder="--Chọn cấu hình chia số--" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, allocation_method: value }))} />
+                            <PushsaleSelect options={perPageOptions} value={String(query.per_page ?? 20)} searchable={false} onChange={(value) => setQuery((old) => ({ ...old, per_page: value }))} />
+                        </div>
                     )}
                 />
 

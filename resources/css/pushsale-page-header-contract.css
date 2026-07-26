@@ -197,18 +197,77 @@ html body.pushsale-app-body .ps-page-header__actions {
     white-space: nowrap !important;
 }
 
+/* Chỉ style control thật — KHÔNG gắn border lên wrapper (.ps-select / .ps-date-filter)
+ * kẻo tạo đôi viền nhìn như đổ bóng dày. */
 html body.pushsale-app-body .ps-page-header .form-control,
 html body.pushsale-app-body .ps-page-header .btn,
 html body.pushsale-app-body .ps-page-header select,
+html body.pushsale-app-body .ps-page-header .ps-select__control,
+html body.pushsale-app-body .ps-page-header button.ps-select__control,
+html body.pushsale-app-body .ps-page-header .ps-input,
+html body.pushsale-app-body .ps-page-header .ps-date-filter input,
+html body.pushsale-app-body .ps-page-header .ps-date-filter-input,
+html body.pushsale-app-body .ps-page-header .ps-date-range-control input,
+html body.pushsale-app-body .ps-page-header .date-range-wrap input,
+html body.pushsale-app-body .ps-page-header .legacy-range input,
+html body.pushsale-app-body .ps-page-header .ps-search-select__control,
+html body.pushsale-app-body .ps-page-header .ps-product-search-input,
 html body.pushsale-app-body .ps-page-header input[type="text"],
 html body.pushsale-app-body .ps-page-header input[type="search"],
-html body.pushsale-app-body .ps-page-header input[type="date"] {
+html body.pushsale-app-body .ps-page-header input[type="date"],
+html body.pushsale-app-body .ps-page-header input[type="number"] {
     height: var(--ps-header-control-h) !important;
     min-height: var(--ps-header-control-h) !important;
     margin: 0 !important;
+    border: 1px solid #c8d2df !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    filter: none !important;
+    outline: 0 !important;
     font-size: 13px !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-select,
+html body.pushsale-app-body .ps-page-header .ps-search-select,
+html body.pushsale-app-body .ps-page-header .ps-product-search-select,
+html body.pushsale-app-body .ps-page-header .ps-date-filter,
+html body.pushsale-app-body .ps-page-header .ps-date-range-control,
+html body.pushsale-app-body .ps-page-header .date-range-wrap,
+html body.pushsale-app-body .ps-page-header .legacy-range,
+html body.pushsale-app-body .ps-page-header .ps-sale-date-range {
+    border: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    background: transparent !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-header .form-control:focus,
+html body.pushsale-app-body .ps-page-header select:focus,
+html body.pushsale-app-body .ps-page-header .ps-select__control:focus,
+html body.pushsale-app-body .ps-page-header button.ps-select__control:focus,
+html body.pushsale-app-body .ps-page-header input:focus {
+    border-color: #66afe9 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+/* Nút primary/default trong header giữ màu, vẫn không đổ bóng. */
+html body.pushsale-app-body .ps-page-header .btn.btn-primary,
+html body.pushsale-app-body .ps-page-header .btn.btn-default,
+html body.pushsale-app-body .ps-page-header .btn.btn-danger {
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+html body.pushsale-app-body .ps-page-header .btn.btn-primary {
+    border-color: #2e6da4 !important;
+}
+
+html body.pushsale-app-body .ps-page-header .btn.btn-default {
+    border-color: #ccc !important;
 }
 
 html body.pushsale-app-body .ps-page-header .btn-icon,
@@ -297,7 +356,7 @@ html body.pushsale-app-body .ps-customer-profile-header .ps-customer-filter-pane
     width: 100% !important;
 }
 
-/* Kết nối dữ liệu (2.4.1): hàng 2 gồm 6 select + hàng 3 chọn số dòng. */
+/* Kết nối dữ liệu (2.4.1): filter bổ sung gom 1 dòng gọn. */
 html body.pushsale-app-body .pslc-header .pslc-check {
     display: inline-flex !important;
     align-items: center !important;
@@ -308,38 +367,124 @@ html body.pushsale-app-body .pslc-header .pslc-check {
 }
 
 html body.pushsale-app-body .pslc-header .pslc-keyword {
-    width: min(320px, 30vw) !important;
-    min-width: 180px !important;
+    width: min(280px, 26vw) !important;
+    min-width: 160px !important;
 }
 
 html body.pushsale-app-body .pslc-header .pslc-filter-select,
 html body.pushsale-app-body .pslc-header .pslc-filter-product {
-    width: 170px !important;
-    min-width: 150px !important;
+    width: 160px !important;
+    min-width: 140px !important;
 }
 
 html body.pushsale-app-body .pslc-header .pslc-advanced-row {
     display: grid !important;
-    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) minmax(72px, 90px) !important;
     gap: 8px !important;
-    margin-bottom: 8px !important;
+    margin: 0 !important;
+    align-items: center !important;
 }
 
-html body.pushsale-app-body .pslc-header .pslc-advanced-row.is-tail {
-    grid-template-columns: 120px auto !important;
-    justify-content: start !important;
-    margin-bottom: 0 !important;
+html body.pushsale-app-body .pslc-header .pslc-advanced-row > .ps-select,
+html body.pushsale-app-body .pslc-header .pslc-advanced-row > select,
+html body.pushsale-app-body .pslc-header .pslc-advanced-row > .form-control {
+    width: 100% !important;
+    min-width: 0 !important;
 }
 
 @media (max-width: 1199px) {
     html body.pushsale-app-body .pslc-header .pslc-advanced-row {
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     }
 }
 
 @media (max-width: 767px) {
     html body.pushsale-app-body .pslc-header .pslc-advanced-row {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+/* Sale tác nghiệp (4.1): header portal ra ngoài .ps-page-shell — style theo .ps-page-header. */
+html body.pushsale-app-body .ps-page-header .ps-sale-primary-filters {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-sale-search-wrap {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 260px) auto !important;
+    gap: 8px !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-sale-extra-filters {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 1.1fr) repeat(8, minmax(100px, 1fr)) auto !important;
+    gap: 8px 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-sale-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+}
+
+/* Hồ sơ KH: filter nâng cao gọn hơn, 1 hàng dày (cuộn ngang nếu thiếu chỗ). */
+html body.pushsale-app-body .ps-customer-profile-header .ps-filter-grid {
+    display: grid !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: minmax(130px, 1fr) !important;
+    grid-template-columns: none !important;
+    gap: 8px !important;
+    align-items: center !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    padding-bottom: 2px !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-header .ps-filter-grid > * {
+    min-width: 130px !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-header .ps-filter-grid .ps-date-range-control {
+    min-width: 220px !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-header .ps-filter-grid .ps-filter-reset {
+    min-width: 92px !important;
+}
+
+@media (max-width: 1399px) {
+    html body.pushsale-app-body .ps-page-header .ps-sale-extra-filters {
+        grid-template-columns: repeat(5, minmax(120px, 1fr)) !important;
+    }
+
+    html body.pushsale-app-body .ps-customer-profile-header .ps-filter-grid {
+        grid-auto-flow: dense !important;
+        grid-template-columns: repeat(6, minmax(130px, 1fr)) !important;
+        grid-auto-columns: unset !important;
+        overflow-x: visible !important;
+    }
+}
+
+@media (max-width: 1199px) {
+    html body.pushsale-app-body .ps-page-header .ps-sale-primary-filters,
+    html body.pushsale-app-body .ps-page-header .ps-sale-extra-filters {
+        grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
     }
 }
 

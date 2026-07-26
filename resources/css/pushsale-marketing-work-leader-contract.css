@@ -225,8 +225,7 @@ html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter .m-heade
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
-    border-bottom: 1px solid #d3dde8 !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .12) !important;
+    border-bottom: 0 !important;
     background: #fff !important;
 }
 
@@ -259,7 +258,7 @@ html body.pushsale-app-body .ps-marketing-leader-page .m-header.ps-leader-header
 
 html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-primary-row {
     display: grid !important;
-    grid-template-columns: minmax(170px, 190px) minmax(250px, 300px) minmax(210px, 260px) minmax(130px, 160px) 118px !important;
+    grid-template-columns: minmax(140px, 170px) minmax(220px, 280px) minmax(180px, 230px) minmax(120px, 150px) !important;
     gap: 8px !important;
     justify-content: end !important;
     align-items: center !important;
@@ -278,16 +277,21 @@ html body.pushsale-app-body .ps-marketing-leader-page .legacy-range {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
     gap: 6px !important;
     width: 100% !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }
 
 html body.pushsale-app-body .ps-marketing-leader-page .ps-select,
-html body.pushsale-app-body .ps-marketing-leader-page .ps-input {
+html body.pushsale-app-body .ps-marketing-leader-page .ps-input,
+html body.pushsale-app-body .ps-marketing-leader-page select.ps-select {
     height: 32px !important;
     min-height: 32px !important;
     line-height: 30px !important;
     padding: 4px 10px !important;
-    border: 1px solid #cbd6e2 !important;
+    border: 1px solid #c8d2df !important;
     box-shadow: none !important;
+    filter: none !important;
     border-radius: 0 !important;
     background-color: #fff !important;
 }
@@ -302,20 +306,37 @@ html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-search-btn {
     margin: 0 !important;
     padding: 0 14px !important;
     white-space: nowrap !important;
-}
-
-html body.pushsale-app-body .ps-marketing-leader-page .ps-header-toggle,
-html body.pushsale-app-body .ps-marketing-leader-page .btn-note-header {
-    display: none !important;
-}
-
-html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter-body {
-    margin: 0 !important;
-    padding: 7px 14px 8px !important;
-    border-top: 0 !important;
-    border-bottom: 1px solid #cfd8e3 !important;
     box-shadow: none !important;
-    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-advanced-row {
+    display: grid !important;
+    grid-template-columns: minmax(140px, 160px) minmax(200px, 240px) repeat(7, minmax(110px, 1fr)) minmax(72px, 90px) auto !important;
+    gap: 8px !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-advanced-row > * {
+    min-width: 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-report-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    font-weight: 400 !important;
+}
+
+@media (max-width: 1199px) {
+    html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-primary-row,
+    html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-advanced-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
 }
 
 html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter-body .row {

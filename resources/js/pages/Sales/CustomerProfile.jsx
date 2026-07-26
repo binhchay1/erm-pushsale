@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
 import { ReportPagination } from '@/components/reports/ReportPagination';
-import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags, orderHasUpsell } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
@@ -128,15 +128,6 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                 <td className="text-center ps-code-cell">
                                     <div className="ps-order-code-stack">
                                         <span className="item-md ps-order-code-text">{row.orderCode || '—'}</span>
-                                        {orderHasUpsell(row) ? (
-                                            <span
-                                                className={`ps-order-flag is-upsale ${row.awaitingLandingUpsell || Number(row.pendingSupplementCount ?? 0) > 0 ? 'is-waiting-upsale' : ''}`.trim()}
-                                                title={row.awaitingLandingUpsell || Number(row.pendingSupplementCount ?? 0) > 0 ? 'Có upsale đang chờ xử lý' : 'Đơn có upsale'}
-                                                aria-label="Đơn có upsale"
-                                            >
-                                                <i className="fa fa-level-up" aria-hidden="true" />
-                                            </span>
-                                        ) : null}
                                         <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onOpenDialog('view', row)} title="Xem lịch sử xem thông tin số">
                                             <i className="fa fa-history" />
                                         </button>
@@ -172,7 +163,7 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                                 <i className="fa fa-phone" aria-hidden="true" />
                                             </a>
                                         ) : null}
-                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell={false} />
+                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell />
                                     </div>
                                     {row.phoneCarrier ? <span className={`ps-carrier ps-carrier-${row.phoneCarrierKey ?? 'other'}`}>{row.phoneCarrier}</span> : null}
                                 </td>

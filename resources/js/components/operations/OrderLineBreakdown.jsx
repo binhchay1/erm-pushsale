@@ -45,33 +45,27 @@ export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, c
         return null;
     }
 
-    const duplicateIcon = (
-        <span className="ps-order-flag-inner">
-            <i className="fa fa-clone" aria-hidden="true" />
-        </span>
-    );
-
     return (
         <span className={`ps-order-flags ${className}`.trim()} aria-label="Dấu hiệu khách hàng và đơn hàng">
             {hasReturning ? (
                 <span className="ps-order-flag is-returning" title="Khách hàng cũ" aria-label="Khách hàng cũ">
-                    <i className="fa fa-heart" aria-hidden="true" />
+                    <span className="ps-order-flag-inner"><i className="fa fa-heart" aria-hidden="true" /></span>
                 </span>
             ) : null}
             {hasDuplicate ? (
                 onDuplicate ? (
                     <button type="button" className="ps-order-flag is-duplicate" title="Trùng số điện thoại" aria-label="Trùng số điện thoại" onClick={onDuplicate}>
-                        {duplicateIcon}
+                        <span className="ps-order-flag-inner"><i className="fa fa-clone" aria-hidden="true" /></span>
                     </button>
                 ) : (
                     <span className="ps-order-flag is-duplicate" title="Trùng số điện thoại" aria-label="Trùng số điện thoại">
-                        {duplicateIcon}
+                        <span className="ps-order-flag-inner"><i className="fa fa-clone" aria-hidden="true" /></span>
                     </span>
                 )
             ) : null}
             {hasUpsell ? (
                 <span className={`ps-order-flag is-upsale ${isWaitingUpsell ? 'is-waiting-upsale' : ''}`.trim()} title={isWaitingUpsell ? 'Có upsale đang chờ xử lý' : 'Có đơn upsale'} aria-label={isWaitingUpsell ? 'Có upsale đang chờ xử lý' : 'Có đơn upsale'}>
-                    <i className="fa fa-level-up" aria-hidden="true" />
+                    <span className="ps-order-flag-inner"><i className="fa fa-level-up" aria-hidden="true" /></span>
                 </span>
             ) : null}
         </span>
@@ -121,13 +115,11 @@ export function OrderProductsBreakdown({ items = [], order = null, empty = '—'
     const forceWholeOrderUpsell = Boolean(order?.isSupplementalOrder) && !hasExplicitUpsellLine;
     const mainItems = forceWholeOrderUpsell ? [] : items.filter((item) => !isUpsellOrderItem(item));
     const upsellItems = forceWholeOrderUpsell ? items : items.filter((item) => isUpsellOrderItem(item));
-    const hasBothSections = mainItems.length > 0 && upsellItems.length > 0;
 
     return (
         <div className="ps-order-products-breakdown" role="list" aria-label="Sản phẩm trong đơn">
-            <ProductSection label={hasBothSections ? 'Đơn chính' : ''} type="main" items={mainItems} />
-            <ProductSection label={hasBothSections || forceWholeOrderUpsell ? 'Upsale' : ''} type="upsale" items={upsellItems} forceUpsell={forceWholeOrderUpsell} />
-            {order?.awaitingLandingUpsell ? <div className="ps-order-products-pending-upsale">Đang chờ upsale</div> : null}
+            <ProductSection label="" type="main" items={mainItems} />
+            <ProductSection label="" type="upsale" items={upsellItems} forceUpsell={forceWholeOrderUpsell} />
         </div>
     );
 }
