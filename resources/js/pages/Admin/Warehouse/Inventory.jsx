@@ -2,6 +2,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 
@@ -65,16 +66,25 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
         <AppLayout>
             <Head title="Danh sách sản phẩm kho" />
             <section className="ps-adminlte-page ps-inventory-page" data-page-code="5.2.2">
-                <form onSubmit={search}>
-                    <div className="m-header-wrap"><div className="m-header ps-inventory-header"><div className="ps-title">Danh sách sản phẩm kho</div><div className="ps-header-search"><input className="form-control" placeholder="Tên sản phẩm" value={filters.search} onChange={(event) => setFilters((old) => ({ ...old, search: event.target.value }))} /><button className="btn btn-sm btn-primary"><i className="fa fa-search" /> Tìm kiếm</button></div></div></div>
-                    <div className="box-body ps-filter-row ps-inventory-filters">
-                        <select className="form-control" value={filters.warehouse_id} onChange={(event) => setFilters((old) => ({ ...old, warehouse_id: event.target.value }))}><option value="">--Chọn kho--</option>{(filterOptions.warehouses ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
-                        <select className="form-control" value={filters.product_id} onChange={(event) => setFilters((old) => ({ ...old, product_id: event.target.value }))}><option value="">--Chọn sản phẩm--</option>{(filterOptions.products ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}{item.sku ? ` (${item.sku})` : ''}</option>)}</select>
-                        <input className="form-control" placeholder="Mã vị trí" value={filters.location_code} onChange={(event) => setFilters((old) => ({ ...old, location_code: event.target.value }))} />
-                        <input className="form-control" placeholder="Mã lô" value={filters.batch_code} onChange={(event) => setFilters((old) => ({ ...old, batch_code: event.target.value }))} />
-                        <select className="form-control" value={filters.business_status} onChange={(event) => setFilters((old) => ({ ...old, business_status: event.target.value }))}><option value="">--Trạng thái kinh doanh--</option><option value="active">Đang kinh doanh</option><option value="stopped">Ngừng kinh doanh</option></select>
-                    </div>
-                </form>
+                <PageHeader
+                    title="Danh sách sản phẩm kho"
+                    pageCode="5.2.2"
+                    actions={(
+                        <form className="ps-header-search" onSubmit={search}>
+                            <input className="form-control" placeholder="Tên sản phẩm" value={filters.search} onChange={(event) => setFilters((old) => ({ ...old, search: event.target.value }))} />
+                            <button className="btn btn-sm btn-primary" type="submit"><i className="fa fa-search" /> Tìm kiếm</button>
+                        </form>
+                    )}
+                    advanced={(
+                        <form className="ps-filter-row ps-inventory-filters" onSubmit={search}>
+                            <select className="form-control" value={filters.warehouse_id} onChange={(event) => setFilters((old) => ({ ...old, warehouse_id: event.target.value }))}><option value="">--Chọn kho--</option>{(filterOptions.warehouses ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
+                            <select className="form-control" value={filters.product_id} onChange={(event) => setFilters((old) => ({ ...old, product_id: event.target.value }))}><option value="">--Chọn sản phẩm--</option>{(filterOptions.products ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}{item.sku ? ` (${item.sku})` : ''}</option>)}</select>
+                            <input className="form-control" placeholder="Mã vị trí" value={filters.location_code} onChange={(event) => setFilters((old) => ({ ...old, location_code: event.target.value }))} />
+                            <input className="form-control" placeholder="Mã lô" value={filters.batch_code} onChange={(event) => setFilters((old) => ({ ...old, batch_code: event.target.value }))} />
+                            <select className="form-control" value={filters.business_status} onChange={(event) => setFilters((old) => ({ ...old, business_status: event.target.value }))}><option value="">--Trạng thái kinh doanh--</option><option value="active">Đang kinh doanh</option><option value="stopped">Ngừng kinh doanh</option></select>
+                        </form>
+                    )}
+                />
                 <div className="box-body ps-toolbar">
                     <button type="button" className="btn btn-sm btn-primary" onClick={openVoucherEntry}><i className="fa fa-exchange" /> Xuất / nhập kho</button>
                     <button type="button" className="btn btn-sm btn-default" onClick={() => openMovement('intake')}><i className="fa fa-map-marker" /> Cập nhật vị trí</button>

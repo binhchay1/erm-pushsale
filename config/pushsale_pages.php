@@ -71,7 +71,7 @@ return array (
       2 => 'date_range',
     ),
     'slug' => '1-1-2-lich-su-dang-ky-goi-dich-vu',
-    'component' => 'Page_1_1_2',
+    'component' => 'Admin/Company/SubscriptionHistory',
     'resource_key' => '1.1.2',
     'form_fields' => 
     array (
@@ -292,7 +292,7 @@ return array (
       4 => 'search',
     ),
     'slug' => '1-2-1-danh-sach-nhan-vien',
-    'component' => 'Page_1_2_1',
+    'component' => 'Admin/Users/Index',
   ),
   '1.2.2' => 
   array (
@@ -369,7 +369,7 @@ return array (
       2 => 'search',
     ),
     'slug' => '1-2-2-quan-ly-doi-nhom',
-    'component' => 'Page_1_2_2',
+    'component' => 'Admin/Teams/Index',
   ),
   '1.2.3' => 
   array (
@@ -411,7 +411,7 @@ return array (
     'editable' => true,
     'kind' => 'inline_settings',
     'slug' => '1-2-3-ca-lam-viec',
-    'component' => 'Page_1_2_3',
+    'component' => 'Admin/Hr/WorkShifts',
     'resource_key' => '1.2.3',
     'form_fields' => 
     array (
@@ -549,7 +549,7 @@ return array (
     'source' => 'lead_distribution_rules',
     'editable' => true,
     'slug' => '1-2-4-danh-sach-cau-hinh-chia-so',
-    'component' => 'Page_1_2_4',
+    'component' => 'Admin/Hr/LeadDistributionRules',
     'resource_key' => '1.2.4',
     'form_fields' => 
     array (
@@ -719,7 +719,7 @@ return array (
     'source' => 'report_access_rules',
     'editable' => true,
     'slug' => '1-2-5-cau-hinh-tai-khoan-xem-bao-cao',
-    'component' => 'Page_1_2_5',
+    'component' => 'Admin/Hr/ReportAccessRules',
     'resource_key' => '1.2.5',
     'form_fields' => 
     array (
@@ -811,7 +811,7 @@ return array (
     'source' => 'care_distribution_rules',
     'editable' => true,
     'slug' => '1-2-6-danh-sach-cau-hinh-chia-so-care-don',
-    'component' => 'Page_1_2_6',
+    'component' => 'Admin/Hr/CareDistributionRules',
     'resource_key' => '1.2.6',
     'form_fields' => 
     array (
@@ -967,7 +967,7 @@ return array (
       3 => '1.3.1-dialog-thu#U1ed9c t#U00ednh gi#U00e1 tr#U1ecb',
     ),
     'slug' => '1-3-1-quan-ly-san-pham',
-    'component' => 'Page_1_3_1',
+    'component' => 'Admin/Products/Index',
     'editable' => true,
     'resource_key' => '1.3.1:product',
     'form_fields' => 
@@ -1177,7 +1177,7 @@ return array (
     'editable' => true,
     'dialogs' => ['1.3.2-dialog-create'],
     'slug' => '1-3-2-danh-sach-combo',
-    'component' => 'Page_1_3_2',
+    'component' => 'Admin/Catalog/ProductCombos',
     'resource_key' => '1.3.2',
     'form_fields' => [
       ['key' => 'name', 'label' => 'Tên combo', 'type' => 'text', 'required' => true],
@@ -1263,7 +1263,7 @@ return array (
       5 => 'date_range',
     ),
     'slug' => '1-7-1-lich-su-dang-nhap',
-    'component' => 'Page_1_7_1',
+    'component' => 'Admin/Security/LoginHistory',
     'display_columns' => 
     array (
       0 => 
@@ -1358,7 +1358,7 @@ return array (
     'source' => 'login_permissions',
     'editable' => false,
     'slug' => '1-7-2-quan-ly-cho-phep-tai-khoan-dang-nhap',
-    'component' => 'Page_1_7_2',
+    'component' => 'Admin/Security/LoginAccess',
     'display_columns' => 
     array (
       0 => 
@@ -1448,7 +1448,7 @@ return array (
     ),
     'source' => 'activity_logs',
     'slug' => '1-7-3-lich-su-loc-data-chot-don',
-    'component' => 'Page_1_7_3',
+    'component' => 'Admin/Security/LeadFilterHistory',
   ),
   '1.8.1' => 
   array (
@@ -1507,7 +1507,7 @@ return array (
     'source' => 'operation_categories',
     'editable' => true,
     'slug' => '1-8-1-quan-ly-danh-muc-tac-nghiep',
-    'component' => 'Page_1_8_1',
+    'component' => 'Admin/OperationsConfig/OperationCategories',
     'resource_key' => '1.8.1',
     'form_fields' => 
     array (
@@ -1640,7 +1640,7 @@ return array (
     'source' => 'operation_workflows',
     'editable' => true,
     'slug' => '1-8-2-thiet-lap-tac-nghiep',
-    'component' => 'Page_1_8_2',
+    'component' => 'Admin/OperationsConfig/OperationWorkflows',
     'resource_key' => '1.8.2',
     'form_fields' => 
     array (
@@ -1781,7 +1781,7 @@ return array (
     'editable' => true,
     'kind' => 'split',
     'slug' => '1-9-thiet-lap-chiet-khau-cod',
-    'component' => 'Page_1_9',
+    'component' => 'Admin/OperationsConfig/DiscountCodRules',
     'resource_key' => '1.9',
     'form_fields' => 
     array (
@@ -1916,7 +1916,7 @@ return array (
     'source' => 'lead_imports',
     'kind' => 'import',
     'slug' => '1-10-import-contact',
-    'component' => 'Page_1_10',
+    'component' => 'Admin/Integrations/LeadImportPage',
     'grid_enabled' => false,
     'import_url' => '/admin/leads/import',
     'template_url' => '/admin/leads/import-template',
@@ -1954,7 +1954,7 @@ return array (
     'source' => 'facebook_page_mappings',
     'editable' => true,
     'slug' => '1-11-cau-hinh-facebook-cua-don-vi',
-    'component' => 'Page_1_11',
+    'component' => 'Admin/Integrations/UnitFacebookPages',
     'grid_enabled' => true,
     'kind' => 'table',
     'resource_key' => '1.11',
@@ -2033,7 +2033,7 @@ return array (
     'source' => 'phone_blacklists',
     'editable' => true,
     'slug' => '1-13-1-quan-ly-so-blacklist',
-    'component' => 'Page_1_13_1',
+    'component' => 'Admin/Security/PhoneBlacklist',
     'resource_key' => '1.13.1',
     'form_fields' => 
     array (
@@ -2218,7 +2218,7 @@ return array (
     'kind' => 'customer_profile',
     'upsell' => true,
     'slug' => '2-3-ho-so-khach-hang',
-    'component' => 'Page_2_3',
+    'component' => 'Sales/CustomerProfile',
     'template_alias' => '4.2',
     'display_columns' => 
     array (
@@ -2386,7 +2386,7 @@ return array (
     'source' => 'landing_connections',
     'template_alias' => '2.4.1',
     'slug' => '2-4-1-ket-noi-du-lieu',
-    'component' => 'Marketing/LandingConnectionsPage',
+    'component' => 'Admin/Marketing/LandingConnectionsPage',
     'resource_key' => '2.4.1',
     'editable' => true,
     'grid_enabled' => true,
@@ -2534,7 +2534,7 @@ return array (
     ),
     'source' => 'marketing_sources',
     'slug' => '2-4-2-ket-noi-du-lieu',
-    'component' => 'Page_2_4_2',
+    'component' => 'Admin/Marketing/LandingConnectionsPage',
     'resource_key' => '2.4.2',
     'editable' => true,
     'grid_enabled' => true,
@@ -2648,7 +2648,7 @@ return array (
     'kind' => 'import',
     'template_alias' => '1.10',
     'slug' => '2-6-1-import-contact',
-    'component' => 'Page_2_6_1',
+    'component' => 'Admin/Marketing/LeadImport',
     'grid_enabled' => false,
     'import_url' => '/admin/leads/import',
     'template_url' => '/admin/leads/import-template',
@@ -2693,7 +2693,7 @@ return array (
     'kind' => 'form',
     'upsell' => true,
     'slug' => '2-6-2-nhap-data-thu-cong',
-    'component' => 'Page_2_6_2',
+    'component' => 'Admin/Marketing/ManualLeadEntry',
     'form_fields' => array (
       0 => array ('key' => 'marketing_source_id', 'label' => 'Nguồn dữ liệu', 'type' => 'select', 'option_source' => 'sources'),
       1 => array ('key' => 'product_ids', 'label' => 'Sản phẩm', 'type' => 'multiselect', 'option_source' => 'products'),
@@ -2780,7 +2780,7 @@ return array (
     'source' => 'partner_connections',
     'editable' => true,
     'slug' => '2-6-3-ket-noi-cac-don-vi-doi-tac',
-    'component' => 'Page_2_6_3',
+    'component' => 'Admin/Marketing/PartnerConnections',
     'display_columns' => 
     array (
       0 => 
@@ -2885,7 +2885,7 @@ return array (
     'source' => 'seeding_phone_numbers',
     'editable' => true,
     'slug' => '2-6-4-kho-so-seeding-toi-da-1000',
-    'component' => 'Page_2_6_4',
+    'component' => 'Admin/Marketing/SeedingNumbers',
     'resource_key' => '2.6.4',
     'form_fields' => 
     array (
@@ -3038,7 +3038,7 @@ return array (
     'kind' => 'customer_profile',
     'upsell' => true,
     'slug' => '3-1-quan-ly-khach-hang',
-    'component' => 'Page_3_1',
+    'component' => 'Customers/Management',
     'template_alias' => '4.2',
     'display_columns' => 
     array (
@@ -3188,7 +3188,7 @@ return array (
     'source' => 'care_campaigns',
     'editable' => true,
     'slug' => '3-2-quan-ly-chien-dich-cham-soc',
-    'component' => 'Page_3_2',
+    'component' => 'Admin/Customers/CareCampaigns',
     'resource_key' => '3.2',
     'form_fields' => 
     array (
@@ -3324,7 +3324,7 @@ return array (
     'source' => 'customer_multidimensional',
     'kind' => 'report',
     'slug' => '3-3-1-thong-ke-khach-hang-da-chieu',
-    'component' => 'Page_3_3_1',
+    'component' => 'Admin/Customers/MultidimensionalReport',
   ),
   '3.3.2' => 
   array (
@@ -3371,7 +3371,7 @@ return array (
     'source' => 'customer_spending',
     'kind' => 'report',
     'slug' => '3-3-2-thong-ke-khach-hang-chi-tra',
-    'component' => 'Page_3_3_2',
+    'component' => 'Admin/Customers/SpendingReport',
     'display_columns' => 
     array (
       0 => 
@@ -3496,7 +3496,7 @@ return array (
     'kind' => 'customer_profile',
     'upsell' => true,
     'slug' => '4-2-ho-so-khach-hang',
-    'component' => 'Page_4_2',
+    'component' => 'Sales/CustomerProfile',
     'display_columns' => 
     array (
       0 => 
@@ -3621,7 +3621,7 @@ return array (
     'source' => 'sales_ranking',
     'kind' => 'ranking',
     'slug' => '4-3-bang-xep-hang-sales',
-    'component' => 'Page_4_3',
+    'component' => 'Admin/Sales/SalesRankings',
     'display_columns' => 
     array (
       0 => 
@@ -3823,7 +3823,7 @@ return array (
     'source' => 'sale_operation_rate',
     'kind' => 'report',
     'slug' => '4-6-1-bao-cao-ti-le-chot-don-theo-tac-nghiep',
-    'component' => 'Page_4_6_1',
+    'component' => 'Admin/Sales/OperationConversionReport',
     'display_columns' => 
     array (
       0 => 
@@ -4162,7 +4162,7 @@ return array (
     'source' => 'sale_work',
     'kind' => 'report',
     'slug' => '4-6-2-bao-cao-cong-viec-sale',
-    'component' => 'Page_4_6_2',
+    'component' => 'Admin/Sales/SalesWorkReport',
     'display_columns' => 
     array (
       0 => 
@@ -4344,7 +4344,7 @@ return array (
     'source' => 'sale_team',
     'kind' => 'report',
     'slug' => '4-6-3-bao-cao-nhom-sale',
-    'component' => 'Page_4_6_3',
+    'component' => 'Admin/Sales/SalesTeamReport',
     'display_columns' => 
     array (
       0 => 
@@ -4521,7 +4521,7 @@ return array (
     'source' => 'sale_data',
     'kind' => 'report',
     'slug' => '4-6-4-bao-cao-data-sale',
-    'component' => 'Page_4_6_4',
+    'component' => 'Admin/Sales/SalesDataReport',
     'display_columns' => 
     array (
       0 => 
@@ -4640,7 +4640,7 @@ return array (
     'source' => 'sale_optimization',
     'kind' => 'report',
     'slug' => '4-6-5-bao-cao-toi-uu-sale',
-    'component' => 'Page_4_6_5',
+    'component' => 'Admin/Sales/SalesOptimizationReport',
     'display_columns' => 
     array (
       0 => 
@@ -4880,7 +4880,7 @@ return array (
     'kind' => 'warehouse_operations',
     'upsell' => true,
     'slug' => '5-1-tac-nghiep-van-don',
-    'component' => 'Page_5_1',
+    'component' => 'Admin/Warehouse/Operations',
     'display_columns' => 
     array (
       0 => 
@@ -5043,7 +5043,7 @@ return array (
       0 => '5.2.1-create-dialog',
     ),
     'slug' => '5-2-1-danh-sach-kho',
-    'component' => 'Page_5_2_1',
+    'component' => 'Admin/Warehouse/Index',
     'editable' => true,
     'resource_key' => '5.2.1',
     'form_fields' => 
@@ -5259,7 +5259,7 @@ return array (
     ),
     'source' => 'inventory',
     'slug' => '5-2-2-danh-sach-san-pham-kho',
-    'component' => 'Page_5_2_2',
+    'component' => 'Admin/Warehouse/Inventory',
     'display_columns' => 
     array (
       0 => 
@@ -5416,7 +5416,7 @@ return array (
     'kind' => 'warehouse_voucher',
     'editable' => true,
     'slug' => '5-3-1-phieu-nhap-xuat-kho',
-    'component' => 'Page_5_3_1',
+    'component' => 'Admin/Warehouse/VoucherEntry',
     'resource_key' => '5.3.1',
     'form_fields' => 
     array (
@@ -5656,7 +5656,7 @@ return array (
     'source' => 'warehouse_vouchers',
     'editable' => false,
     'slug' => '5-3-2-danh-sach-phieu-xuat-nhap-kho',
-    'component' => 'Page_5_3_2',
+    'component' => 'Admin/Warehouse/VoucherList',
     'display_columns' => 
     array (
       0 => 
@@ -5785,7 +5785,7 @@ return array (
     ),
     'source' => 'movements',
     'slug' => '5-3-3-lich-su-nhap-xuat-kho-the-kho',
-    'component' => 'Page_5_3_3',
+    'component' => 'Admin/Warehouse/StockCardHistory',
     'display_columns' => 
     array (
       0 => 
@@ -5903,7 +5903,7 @@ return array (
     'source' => 'warehouse_incidents',
     'editable' => true,
     'slug' => '5-4-danh-sach-bien-ban',
-    'component' => 'Page_5_4',
+    'component' => 'Admin/Warehouse/WarehouseIncidents',
     'resource_key' => '5.4',
     'form_fields' => 
     array (
@@ -6104,7 +6104,7 @@ return array (
     'source' => 'inventory_daily',
     'kind' => 'report',
     'slug' => '5-5-1-bang-tong-hop-san-pham-nhap-xuat-theo-ngay',
-    'component' => 'Page_5_5_1',
+    'component' => 'Admin/Warehouse/DailyStockReport',
     'display_columns' => 
     array (
       0 => 
@@ -6276,7 +6276,7 @@ return array (
     'source' => 'inventory_pending',
     'kind' => 'report',
     'slug' => '5-5-2-bang-tong-hop-cho-xuat-theo-ngay',
-    'component' => 'Page_5_5_2',
+    'component' => 'Admin/Warehouse/PendingExportReport',
     'display_columns' => 
     array (
       0 => 
@@ -6382,7 +6382,7 @@ return array (
     'source' => 'inventory_summary',
     'kind' => 'report',
     'slug' => '5-5-4-bao-cao-tong-hop-phat-sinh-kho',
-    'component' => 'Page_5_5_4',
+    'component' => 'Admin/Warehouse/MovementSummaryReport',
     'display_columns' => 
     array (
       0 => 
@@ -6492,7 +6492,7 @@ return array (
     'source' => 'care_report',
     'kind' => 'report',
     'slug' => '5-5-5-bao-cao-care-don',
-    'component' => 'Page_5_5_5',
+    'component' => 'Admin/Warehouse/WarehouseCareOrderReport',
     'display_columns' => 
     array (
       0 => 
@@ -6601,7 +6601,7 @@ return array (
     'source' => 'phone_corrections',
     'kind' => 'report',
     'slug' => '5-5-6-bao-cao-sua-so-dien-thoai-giao-hang',
-    'component' => 'Page_5_5_6',
+    'component' => 'Admin/Warehouse/PhoneCorrectionReport',
     'display_columns' => 
     array (
       0 => 
@@ -6698,7 +6698,7 @@ return array (
     'source' => 'delivery_by_care',
     'kind' => 'report',
     'slug' => '5-5-7-tong-hop-trang-thai-giao-hang-theo-van-don',
-    'component' => 'Page_5_5_7',
+    'component' => 'Admin/Warehouse/DeliveryStatusReport',
     'display_columns' => 
     array (
       0 => 
@@ -6770,7 +6770,7 @@ return array (
     'source' => 'care_operations',
     'kind' => 'report',
     'slug' => '5-5-8-bao-cao-tac-nghiep-care-don',
-    'component' => 'Page_5_5_8',
+    'component' => 'Admin/Warehouse/CareOperationReport',
   ),
   '5.8.2' => 
   array (
@@ -6811,7 +6811,7 @@ return array (
     'source' => 'care_distribution_rules',
     'editable' => true,
     'slug' => '5-8-2-phan-bo-data-care-don',
-    'component' => 'Page_5_8_2',
+    'component' => 'Admin/Warehouse/CareDistribution',
     'resource_key' => '1.2.6',
     'form_fields' => 
     array (
@@ -6978,7 +6978,7 @@ return array (
     'source' => 'expenses',
     'editable' => true,
     'slug' => '6-2-1-quan-ly-chi-phi-don-vi',
-    'component' => 'Page_6_2_1',
+    'component' => 'Admin/Accounting/UnitExpenses',
     'resource_key' => '6.2.1',
     'form_fields' => 
     array (
@@ -7163,7 +7163,7 @@ return array (
     'source' => 'expense_categories',
     'editable' => true,
     'slug' => '6-2-2-danh-muc-chi-phi',
-    'component' => 'Page_6_2_2',
+    'component' => 'Admin/Accounting/ExpenseCategories',
     'resource_key' => '6.2.2',
     'form_fields' => 
     array (
@@ -7243,7 +7243,7 @@ return array (
     'source' => 'expense_groups',
     'editable' => true,
     'slug' => '6-2-3-danh-muc-nhom-chi-phi',
-    'component' => 'Page_6_2_3',
+    'component' => 'Admin/Accounting/ExpenseGroups',
     'resource_key' => '6.2.3',
     'form_fields' => 
     array (
@@ -7311,7 +7311,7 @@ return array (
     'source' => 'expense_units',
     'editable' => true,
     'slug' => '6-2-4-danh-muc-don-vi-tinh',
-    'component' => 'Page_6_2_4',
+    'component' => 'Admin/Accounting/ExpenseUnits',
     'resource_key' => '6.2.4',
     'form_fields' => 
     array (
@@ -7458,7 +7458,7 @@ return array (
     'editable' => true,
     'kind' => 'report',
     'slug' => '6-3-5-tong-ket-ke-hoach-thang',
-    'component' => 'Page_6_3_5',
+    'component' => 'Admin/Accounting/MonthlyPlanSummary',
     'resource_key' => '6.3.5',
     'form_fields' => 
     array (
@@ -7736,7 +7736,7 @@ return array (
     'source' => 'electronic_invoice_jobs',
     'editable' => true,
     'slug' => '6-4-danh-sach-xu-ly-xuat-hoa-don-dien-tu',
-    'component' => 'Page_6_4',
+    'component' => 'Admin/Accounting/ElectronicInvoices',
     'resource_key' => '6.4',
     'form_fields' => 
     array (
@@ -7906,7 +7906,7 @@ return array (
     'editable' => true,
     'kind' => 'table',
     'slug' => '7-1-1-ke-hoach-kinh-doanh-thang',
-    'component' => 'Page_7_1_1',
+    'component' => 'Admin/Ceo/MonthlyBusinessPlan',
     'requires_template' => false,
     'resource_key' => '7.1.1',
     'template_alias' => '7.1.1',
@@ -7935,7 +7935,7 @@ return array (
     'editable' => true,
     'kind' => 'report',
     'slug' => '7-1-2-lap-ke-hoach-kinh-doanh-nam',
-    'component' => 'Page_7_1_2',
+    'component' => 'Admin/Ceo/YearlyBusinessPlan',
     'requires_template' => false,
     'resource_key' => '7.1.2',
     'template_alias' => '7.1.2',
@@ -7963,7 +7963,7 @@ return array (
     'editable' => true,
     'kind' => 'table',
     'slug' => '7-1-3-danh-muc-kpi',
-    'component' => 'Page_7_1_3',
+    'component' => 'Admin/Ceo/KpiCatalog',
     'requires_template' => false,
     'resource_key' => '7.1.3',
     'template_alias' => '7.1.3',
@@ -8000,7 +8000,7 @@ return array (
     'editable' => true,
     'kind' => 'table',
     'slug' => '7-1-4-khai-bao-thuong',
-    'component' => 'Page_7_1_4',
+    'component' => 'Admin/Ceo/RevenueBonus',
     'requires_template' => false,
     'resource_key' => '7.1.4',
     'template_alias' => '7.1.4',
@@ -8039,7 +8039,7 @@ return array (
     'source' => 'trend',
     'kind' => 'trend',
     'slug' => '8-5-4-bieu-do-xu-huong',
-    'component' => 'Page_8_5_4',
+    'component' => 'Admin/Reports/TrendsReport',
     'display_columns' => 
     array (
       0 => 
@@ -8148,7 +8148,7 @@ return array (
     'source' => 'allocation_summary',
     'kind' => 'report',
     'slug' => '8-5-5-bang-tong-hop-ket-qua-chia-data-trong-ngay',
-    'component' => 'Page_8_5_5',
+    'component' => 'Admin/Reports/DataAllocationReport',
     'display_columns' => 
     array (
       0 => 
@@ -8304,7 +8304,7 @@ return array (
     'source' => 'power_dashboard',
     'kind' => 'power_dashboard',
     'slug' => '8-5-9-power-dashboard',
-    'component' => 'Page_8_5_9',
+    'component' => 'Admin/Reports/PowerDashboard',
     'display_columns' => 
     array (
       0 => 
@@ -8554,7 +8554,7 @@ return array (
     'source' => 'repurchase',
     'kind' => 'report',
     'slug' => '8-5-10-thong-ke-mua-lai',
-    'component' => 'Page_8_5_10',
+    'component' => 'Admin/Reports/RepurchaseReport',
     'display_columns' => 
     array (
       0 => 
@@ -8769,7 +8769,7 @@ return array (
     'source' => 'repurchase_products',
     'kind' => 'report',
     'slug' => '8-5-11-thong-ke-mua-lai-theo-so-san-pham',
-    'component' => 'Page_8_5_11',
+    'component' => 'Admin/Reports/RepurchaseByProductReport',
   ),
   '8.5.15' => 
   array (
@@ -8840,7 +8840,7 @@ return array (
     'source' => 'allocation_v2',
     'kind' => 'report',
     'slug' => '8-5-15-bang-tong-hop-chia-data-trong-ngay-v2',
-    'component' => 'Page_8_5_15',
+    'component' => 'Admin/Reports/DataAllocationV2Report',
   ),
   '8.5.16' => 
   array (
@@ -8918,7 +8918,7 @@ return array (
     'kind' => 'report',
     'template_alias' => '5.5.5',
     'slug' => '8-5-16-bao-cao-care-don',
-    'component' => 'Page_8_5_16',
+    'component' => 'Admin/Reports/CareOrderReport',
     'display_columns' => 
     array (
       0 => 
@@ -9033,7 +9033,7 @@ return array (
     'source' => 'care_allocation_daily',
     'kind' => 'report',
     'slug' => '8-5-17-bang-tong-hop-chia-so-care-don-trong-ngay',
-    'component' => 'Page_8_5_17',
+    'component' => 'Admin/Reports/CareAllocationReport',
   ),
 
   '1.14.1' => 
@@ -9056,7 +9056,7 @@ return array (
     'source' => 'electronic_invoice_configs',
     'editable' => true,
     'slug' => '1-14-1-danh-sach-cau-hinh-hoa-don',
-    'component' => 'Page_1_14_1',
+    'component' => 'Admin/Company/ElectronicInvoiceConfigs',
     'requires_template' => false,
     'resource_key' => '1.14.1',
   ),

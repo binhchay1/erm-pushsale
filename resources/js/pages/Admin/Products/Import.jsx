@@ -1,6 +1,7 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 
 export default function ProductImport() {
@@ -36,16 +37,8 @@ export default function ProductImport() {
     return (
         <AppLayout>
             <Head title="Import sản phẩm" />
+            <PageHeader title="Import sản phẩm" pageCode="1.3.1-import" />
             <section className="ps-adminlte-page ps-product-import-page" data-page-code="1.3.1-import">
-                <div className="m-header-wrap">
-                    <div className="m-header">
-                        <div className="col-sm-6 form-group">
-                            <span className="text ps-title">Import sản phẩm</span>
-                        </div>
-                        <div className="col-sm-3 form-group" />
-                    </div>
-                </div>
-
                 <div className="box-body ps-product-import-body">
                     <div className="row">
                         <div className="col-xs-12 huong-dan form-group">

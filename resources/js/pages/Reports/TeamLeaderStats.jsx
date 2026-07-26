@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { PushsaleStatusSummary } from '@/components/reports/ceo/PushsaleStatusSummary';
 import { useReportSearch } from '@/hooks/useReportSearch';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
@@ -145,14 +146,11 @@ function MarketingLeaderFilter({ filters, filterOptions, routeUrl }) {
     }, [filterOptions?.marketingTeams, form.marketing_team_leader_id]);
 
     return (
-        <div className="ps-leader-filter">
-            <div className="m-header-wrap">
-                <div className="m-header ps-leader-header-v132">
-                    <div className="form-group ps-title-col">
-                        <span className="module-title">{t('reports.team_leaders.title')}</span>
-                    </div>
-
-                    <div className="ps-leader-primary-row" role="search" aria-label="Bộ lọc chính thống kê trưởng nhóm">
+        <PageHeader
+            title={t('reports.team_leaders.title')}
+            className="ps-leader-filter"
+            filters={(
+                <div className="ps-leader-primary-row" role="search" aria-label="Bộ lọc chính thống kê trưởng nhóm">
                         <Select
                             value={form.date_type}
                             onChange={(value) => set('date_type', value)}
@@ -188,12 +186,11 @@ function MarketingLeaderFilter({ filters, filterOptions, routeUrl }) {
                         <button type="button" className="btn btn-sm btn-primary ps-leader-search-btn" onClick={submit}>
                             <Search className="size-3.5" /> {t('common.search')}
                         </button>
-                    </div>
                 </div>
-            </div>
-
-            <div className="box-body ps-leader-filter-body">
-                <div className="row">
+            )}
+            advanced={(
+                <div className="ps-leader-filter-body">
+                    <div className="row">
                     <div className="col-sm-2 form-group">
                         <Select
                             value={form.marketing_team_leader_id}
@@ -249,9 +246,10 @@ function MarketingLeaderFilter({ filters, filterOptions, routeUrl }) {
                             <span>Không giới hạn ngày chốt</span>
                         </label>
                     </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            )}
+        />
     );
 }
 

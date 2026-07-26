@@ -283,7 +283,6 @@ html body.pushsale-app-body .ps-date-range,
 html body.pushsale-app-body .ps-date-range-control,
 html body.pushsale-app-body .date-range-wrap,
 html body.pushsale-app-body .legacy-range,
-html body.pushsale-app-body .psdd-date-range,
 html body.pushsale-app-body .ps-login-date-range,
 html body.pushsale-app-body .ps-revenue-detail-date-range,
 html body.pushsale-app-body .ps-sales-revenue-date-range,
@@ -331,6 +330,44 @@ html body.pushsale-app-body .legacy-range > span:not(.ps-date-range-label) {
     color: #777 !important;
     font-size: 12px !important;
 }
+/* Biến thể "boxed": [ngày][00:00] - [ngày][23:59] nằm trong đúng một khung viền. */
+html body.pushsale-app-body .ps-date-filter.is-boxed {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    gap: 0 !important;
+    padding: 0 8px !important;
+    border: 1px solid var(--ps-v141-control-border, #c8d0db) !important;
+    background: #fff !important;
+    min-height: var(--ps-control-h) !important;
+}
+
+html body.pushsale-app-body .ps-date-filter.is-boxed .ps-date-filter-side {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-date-filter.is-boxed .ps-date-filter-time {
+    color: #6b7783 !important;
+    font-size: 12px !important;
+    font-style: normal !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-date-filter.is-boxed input[type='date'] {
+    min-width: 0 !important;
+    width: auto !important;
+    flex: 1 1 auto !important;
+    border: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-date-filter.is-boxed .ps-date-filter-separator {
+    padding: 0 6px !important;
+}
+
 html body.pushsale-app-body input[type='date'],
 html body.pushsale-app-body input.ps-input[type='date'],
 html body.pushsale-app-body .ps-date-filter input[type='date'],
@@ -875,8 +912,8 @@ html body.pushsale-app-body .ps-customer360-page .ps-customer360-header {
     padding: 0 !important;
     background: #fff !important;
     border: 0 !important;
-    border-bottom: 1px solid var(--ps-v141-border) !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .12) !important;
+    border-bottom: 0 !important;
+    box-shadow: 0 2px 6px rgba(15, 42, 66, .14) !important;
 }
 
 html body.pushsale-app-body .pushsale-template-host-v83 .m-header-wrap:first-of-type .m-header,

@@ -7,6 +7,9 @@ const rel = (file) => path.relative(root, file).replaceAll(path.sep, '/');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const exists = (file) => fs.existsSync(path.join(root, file));
 
+// `_archive/` giữ file cũ có chủ đích (AGENTS.md §3.5) nên không tính là nợ contract.
+const IGNORED_DIRS = new Set(['_archive', 'node_modules', 'vendor']);
+
 function walk(dir, predicate = () => true) {
     const base = path.join(root, dir);
     if (!fs.existsSync(base)) return [];
@@ -16,8 +19,11 @@ function walk(dir, predicate = () => true) {
         const current = stack.pop();
         for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
             const full = path.join(current, entry.name);
-            if (entry.isDirectory()) stack.push(full);
-            else if (predicate(full)) out.push(rel(full));
+            if (entry.isDirectory()) {
+                if (!IGNORED_DIRS.has(entry.name)) stack.push(full);
+            } else if (predicate(full)) {
+                out.push(rel(full));
+            }
         }
     }
     return out.sort();
@@ -86,13 +92,13 @@ for (const file of cssFiles.filter((name) => /pushsale-v\d+.*\.css$/.test(name))
     }
 }
 
-// Legacy page naming debt.
-const legacyPageFiles = walk('resources/js/pages/Pushsale/Pages', (file) => /Page_\d/.test(path.basename(file)) && file.endsWith('.jsx'));
-const legacyControllerFiles = walk('app/Http/Controllers/Admin/Pushsale/Pages', (file) => /Page\d/.test(path.basename(file)) && file.endsWith('.php'));
-if (legacyPageFiles.length) warn('naming-debt', `${legacyPageFiles.length} legacy React page files still use Page_* names. Migrate by business cluster, not all at once.`, 'resources/js/pages/Pushsale/Pages');
-else pass('naming-debt', 'No legacy React Page_* files remain');
-if (legacyControllerFiles.length) warn('naming-debt', `${legacyControllerFiles.length} legacy controller files still use Page* names. Keep redirects while migrating.`, 'app/Http/Controllers/Admin/Pushsale/Pages');
-else pass('naming-debt', 'No legacy Pushsale Page* controllers remain');
+// Naming debt: nothing may be named after a menu number.
+const legacyPageFiles = walk('resources/js/pages', (file) => /^Page_\d/.test(path.basename(file)) && file.endsWith('.jsx'));
+const legacyControllerFiles = walk('app/Http/Controllers', (file) => /^Page\d/.test(path.basename(file)) && file.endsWith('.php'));
+if (legacyPageFiles.length) fail('naming-debt', `${legacyPageFiles.length} React page files are still named by menu number: ${legacyPageFiles.join(', ')}`, 'resources/js/pages');
+else pass('naming-debt', 'No React page files named by menu number');
+if (legacyControllerFiles.length) fail('naming-debt', `${legacyControllerFiles.length} controllers are still named by menu number: ${legacyControllerFiles.join(', ')}`, 'app/Http/Controllers');
+else pass('naming-debt', 'No controllers named by menu number');
 
 // Business services contract.
 [
@@ -108,9 +114,8 @@ else pass('naming-debt', 'No legacy Pushsale Page* controllers remain');
     'app/Services/Pushsale/PushsalePageService.php',
 ].forEach((file) => exists(file) ? pass('business-service', `Business service exists: ${file}`, file) : fail('business-service', `Missing business service: ${file}`, file));
 
-// Route coverage for critical workflows.
-const routeText = exists('routes/web.php') ? read('routes/web.php') : '';
-const pushsaleRouteText = exists('routes/pushsale_pages.php') ? read('routes/pushsale_pages.php') : '';
+// Route coverage for critical workflows. Routes live in web.php + routes/admin + routes/roles.
+const routeText = walk('routes', (file) => file.endsWith('.php')).map(read).join('\n');
 [
     ['sales workspace', 'sales/workspace'],
     ['warehouse operations', 'warehouse/operations'],
@@ -120,8 +125,7 @@ const pushsaleRouteText = exists('routes/pushsale_pages.php') ? read('routes/pus
     ['teams resource', "resource('teams'"],
     ['users quick update', 'quick-update'],
 ].forEach(([label, needle]) => {
-    const haystack = `${routeText}\n${pushsaleRouteText}`;
-    haystack.includes(needle) ? pass('routes', `Route present: ${label}`) : warn('routes', `Could not find expected route marker: ${label} (${needle})`);
+    routeText.includes(needle) ? pass('routes', `Route present: ${label}`) : warn('routes', `Could not find expected route marker: ${label} (${needle})`);
 });
 
 // Test coverage landmarks.

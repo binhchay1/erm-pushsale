@@ -34,11 +34,11 @@ export function firstUpsellDivider(items = [], index = 0) {
     return !items.slice(0, index).some((item) => isUpsellOrderItem(item));
 }
 
-export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, className = '' }) {
+export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, className = '', showUpsell = true }) {
     const data = row ?? order ?? {};
     const hasDuplicate = Boolean(data.isDuplicatePhone);
     const hasReturning = Boolean(data.isReturningCustomer);
-    const hasUpsell = orderHasUpsell(data);
+    const hasUpsell = showUpsell && orderHasUpsell(data);
     const isWaitingUpsell = Boolean(data.awaitingLandingUpsell) || Number(data.pendingSupplementCount ?? 0) > 0;
 
     if (!hasDuplicate && !hasReturning && !hasUpsell) {

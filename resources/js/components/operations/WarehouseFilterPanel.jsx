@@ -2,6 +2,9 @@ import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
+import { PageHeader } from '@/components/layout/PageHeader';
+
+const FORM_ID = 'ps-wh-filter-form';
 
 function options(list = []) {
     return list.map((item) => {
@@ -44,32 +47,28 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
     };
 
     return (
-        <form className="ps-wh-filter ps-wh-legacy-filter" onSubmit={submit}>
+        <form id={FORM_ID} className="ps-wh-filter ps-wh-legacy-filter" onSubmit={submit}>
             <input type="hidden" name="date_from" value={dateFrom} readOnly />
             <input type="hidden" name="date_to" value={dateTo} readOnly />
 
-            <div className="m-header-wrap ps-wh-search-header">
-                <div className="m-header">
-                    <div className="row ps-wh-header-row">
-                        <div className="col-xs-12 col-sm-6 form-group ps-wh-title-col">
-                            <span className="text">{title}</span>
-                        </div>
-                        <div className="col-xs-12 col-sm-2 form-group text-right ps-wh-check-col">
-                            <label><input type="checkbox" name="hide_zero_status" value="1" defaultChecked={Boolean(filters.hide_zero_status)} /> <span>Ẩn trạng thái không số</span></label>
-                        </div>
-                        <div className="col-xs-12 col-sm-4 form-group ps-wh-search-col">
-                            <div className="ps-wh-keyword"><input className="form-control" name="search" defaultValue={filters.search ?? ''} placeholder="Họ tên, số điện thoại" /></div>
-                            <div className="ps-wh-search-actions">
-                                <button type="submit" className="btn btn-sm btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
-                                <button type="button" className="btn-icon ps-wh-summary-toggle" onClick={() => setSummaryOpen((open) => !open)} title={summaryOpen ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}>
-                                    <i className={`fa fa-angle-double-${summaryOpen ? 'up' : 'down'}`} />
-                                </button>
-                            </div>
-                            <div className="clearfix" />
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                title={title}
+                className="ps-wh-search-header"
+                filters={(
+                    <label className="ps-wh-check-col">
+                        <input type="checkbox" form={FORM_ID} name="hide_zero_status" value="1" defaultChecked={Boolean(filters.hide_zero_status)} /> <span>Ẩn trạng thái không số</span>
+                    </label>
+                )}
+                actions={(
+                    <>
+                        <input className="form-control ps-wh-keyword" form={FORM_ID} name="search" defaultValue={filters.search ?? ''} placeholder="Họ tên, số điện thoại" />
+                        <button type="submit" form={FORM_ID} className="btn btn-sm btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
+                        <button type="button" className="btn-icon ps-wh-summary-toggle" onClick={() => setSummaryOpen((open) => !open)} title={summaryOpen ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}>
+                            <i className={`fa fa-angle-double-${summaryOpen ? 'up' : 'down'}`} />
+                        </button>
+                    </>
+                )}
+            />
 
             {summaryOpen && (
                 <div className="box-body ps-wh-filter-body">

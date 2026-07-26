@@ -30,8 +30,10 @@ class PushsalePageRegistryTest extends TestCase
             $uris[$uri] = $code;
             $names[$name] = $code;
 
-            $componentName = $page['component'] ?? 'Page_'.str_replace('.', '_', $code);
-            $component = $root.'/resources/js/pages/Pushsale/Pages/'.$componentName.'.jsx';
+            $componentName = (string) ($page['component'] ?? '');
+            $this->assertNotSame('', $componentName, "Page {$code} is missing an Inertia component path");
+            $this->assertDoesNotMatchRegularExpression('/(^|\/)Page_\d/', $componentName, "Page {$code} still names its component by menu number");
+            $component = $root.'/resources/js/pages/'.$componentName.'.jsx';
             $templateCode = $page['template_alias'] ?? $code;
             $template = $root.'/public/pushsale-templates/'.$templateCode.'.html';
 

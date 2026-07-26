@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { ReportPagination } from '@/components/reports/ReportPagination';
@@ -227,21 +228,24 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
         <AppLayout>
             <Head title={resolvedPageTitle} />
             <section className="ps-customer360-page">
-                <div className="m-header-wrap ps-customer360-header">
-                    <div className="m-header">
-                        <div className="ps-customer360-title"><span>{resolvedPageTitle}</span></div>
-                        <div className="ps-customer360-header-spacer" />
-                        <input className="form-control date-range" value={dateRange} onChange={(event) => setDateRange(event.target.value)} onBlur={() => setForm((current) => ({ ...current, ...(parseDateRange(dateRange) ?? {}) }))} />
-                        <SelectBox value={form.campaign_id} onChange={(value) => setField('campaign_id', value)} options={filterOptions.campaigns} placeholder={c('select_campaign')} />
-                        <input className="form-control" value={form.keyword ?? ''} placeholder={c('keyword_placeholder')} onChange={(event) => setField('keyword', event.target.value)} onKeyDown={(event) => event.key === 'Enter' && search()} />
-                        <button type="button" className="btn-icon ps-filter-toggle" onClick={() => setFiltersOpen((current) => !current)} title={c('advanced_filter')}><i className={`fa ${filtersOpen ? 'fa-angle-double-up' : 'fa-angle-double-down'}`} /></button>
-                        <button type="button" className="btn btn-sm btn-primary" onClick={search}><i className="fa fa-search" /> {c('search')}</button>
-                        <button type="button" className="btn btn-sm btn-primary" onClick={exportCsv}><i className="fa fa-file-excel-o" /> {c('export_excel')}</button>
-                    </div>
-                </div>
-
-                {filtersOpen ? (
-                    <div className="box-body ps-customer360-advanced">
+                <PageHeader
+                    title={resolvedPageTitle}
+                    className="ps-customer360-header"
+                    filters={(
+                        <>
+                            <input className="form-control date-range" value={dateRange} onChange={(event) => setDateRange(event.target.value)} onBlur={() => setForm((current) => ({ ...current, ...(parseDateRange(dateRange) ?? {}) }))} />
+                            <SelectBox value={form.campaign_id} onChange={(value) => setField('campaign_id', value)} options={filterOptions.campaigns} placeholder={c('select_campaign')} />
+                            <input className="form-control" value={form.keyword ?? ''} placeholder={c('keyword_placeholder')} onChange={(event) => setField('keyword', event.target.value)} onKeyDown={(event) => event.key === 'Enter' && search()} />
+                        </>
+                    )}
+                    actions={(
+                        <>
+                            <button type="button" className="btn-icon ps-filter-toggle" onClick={() => setFiltersOpen((current) => !current)} title={c('advanced_filter')}><i className={`fa ${filtersOpen ? 'fa-angle-double-up' : 'fa-angle-double-down'}`} /></button>
+                            <button type="button" className="btn btn-sm btn-primary" onClick={search}><i className="fa fa-search" /> {c('search')}</button>
+                            <button type="button" className="btn btn-sm btn-primary" onClick={exportCsv}><i className="fa fa-file-excel-o" /> {c('export_excel')}</button>
+                        </>
+                    )}
+                    advanced={filtersOpen ? (
                         <div className="ps-customer360-filter-grid">
                             <SelectBox value={form.sale_id} onChange={(value) => setField('sale_id', value)} options={filterOptions.sales} placeholder={c('select_sale')} />
                             <SelectBox value={form.marketer_id} onChange={(value) => setField('marketer_id', value)} options={filterOptions.marketers} placeholder={c('select_marketing')} />
@@ -267,8 +271,9 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
                             <SelectBox value={form.reject_reason} onChange={(value) => setField('reject_reason', value)} options={[]} placeholder={c('reject_reason')} />
                             <SelectBox value={form.per_page} onChange={(value) => setField('per_page', value)} options={[20, 50, 100, 200, 500, 1000, 3000].map((value) => ({ value, label: value }))} placeholder="20" />
                         </div>
-                    </div>
-                ) : null}
+                    ) : null}
+                    collapsible={false}
+                />
 
                 <div className="box-body ps-customer360-actions">
                     <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('createCampaign')}><i className="fa fa-plus" /> {c('create_campaign_from_filter')}</button>

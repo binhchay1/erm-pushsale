@@ -1,6 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
@@ -304,18 +305,20 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
         <AppLayout>
             <Head title="Danh sách kho" />
             <section className="ps-adminlte-page ps-warehouse-page" data-page-code="5.2.1">
-                <form onSubmit={submitFilters} className="m-header-wrap ps-warehouse-list-header-wrap">
-                    <div className="m-header ps-warehouse-header">
-                        <div className="ps-title">Danh sách kho</div>
-                        <div className="ps-warehouse-filters">
+                <PageHeader
+                    title="Danh sách kho"
+                    pageCode="5.2.1"
+                    className="ps-warehouse-list-header-wrap"
+                    filters={(
+                        <form className="ps-warehouse-filters" onSubmit={submitFilters}>
                             <PushsaleSelect searchable options={filterProvinceOptions} value={province} onChange={(value) => { setProvince(value); setDistrict(''); }} placeholder="--Chọn Tỉnh/TP" />
                             <PushsaleSelect searchable options={filterDistrictOptions} value={district} onChange={setDistrict} placeholder={province === 'Địa chỉ 2 cấp 2025' ? '--Chọn Phường/Xã 2025--' : '--Quận/Huyện--'} disabled={!province && filterDistrictOptions.length === 0} />
                             <PushsaleSelect searchable options={managerOptions} value={manager} onChange={setManager} placeholder="--Quản kho--" />
                             <input className="form-control" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Mã, tên, số điện thoại" />
-                            <button className="btn btn-sm btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
-                        </div>
-                    </div>
-                </form>
+                            <button className="btn btn-sm btn-primary" type="submit"><i className="fa fa-search" /> Tìm kiếm</button>
+                        </form>
+                    )}
+                />
 
                 <div className="box-body ps-toolbar ps-warehouse-toolbar">
                     <button type="button" className="btn btn-sm btn-primary" onClick={openCreate}><i className="fa fa-plus" /> Thêm</button>

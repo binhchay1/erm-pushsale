@@ -111,7 +111,7 @@ return array (
       5 => 
       array (
         'title' => '1.6 Cấu hình chức năng',
-        'url' => '/ld/unit-admin/cau-hinh-chuc-nang',
+        'url' => '/admin/settings/features',
         'code' => '1.6',
       ),
       6 => 
@@ -276,7 +276,7 @@ return array (
           1 => 
           array (
             'title' => '2. Kết nối website',
-            'url' => '/admin/marketing/website-connections?connection_type=website&per_page=20',
+            'url' => '/admin/marketing/website-connections',
             'area' => 'connections',
             'code' => '2.4.2',
           ),
@@ -298,7 +298,7 @@ return array (
           0 => 
           array (
             'title' => '1. Tạo nguồn dữ liệu',
-            'url' => '/admin/marketing/website-connections?connection_type=website&per_page=20',
+            'url' => '/admin/marketing/website-connections',
             'area' => 'connections',
             'code' => '2.5.1',
           ),
@@ -388,7 +388,7 @@ return array (
           4 => 
           array (
             'title' => '5. Báo cáo công việc',
-            'url' => '/ld/thong-ke/bao-cao-cong-viec-mkt?menu=2.7.5',
+            'url' => '/admin/marketing/reports/work',
             'area' => 'reports',
             'code' => '2.7.5',
           ),
@@ -409,21 +409,21 @@ return array (
           0 => 
           array (
             'title' => '1. Thống kê trưởng nhóm',
-            'url' => '/ld/marketing/thong-ke-truong-nhom',
+            'url' => '/admin/reports/team-leaders',
             'area' => 'reports',
             'code' => '2.8.1',
           ),
           1 => 
           array (
             'title' => '2. Báo cáo công việc',
-            'url' => '/ld/thong-ke/bao-cao-cong-viec-mkt?menu=2.8.2',
+            'url' => '/admin/marketing/reports/work',
             'area' => 'reports',
             'code' => '2.8.2',
           ),
           2 => 
           array (
             'title' => '3. Báo cáo up sale',
-            'url' => '/ld/thong-ke/bao-cao-up-sale?menu=2.8.3',
+            'url' => '/admin/marketing/reports/upsale',
             'area' => 'reports',
             'code' => '2.8.3',
           ),
@@ -1065,7 +1065,7 @@ return array (
           11 => 
           array (
             'title' => '12. Báo cáo up sale',
-            'url' => '/ld/thong-ke/bao-cao-up-sale?menu=6.3.12',
+            'url' => '/admin/marketing/reports/upsale',
             'area' => 'reports',
             'code' => '6.3.12',
             'roles' => 
@@ -1137,7 +1137,7 @@ return array (
           0 => 
           array (
             'title' => '1. Biểu đồ thống kê theo khung giờ',
-            'url' => '/ld/thong-ke',
+            'url' => '/admin/reports/hourly',
             'area' => 'reports',
             'code' => '8.1.1',
           ),
@@ -1151,7 +1151,7 @@ return array (
           2 => 
           array (
             'title' => '3. Báo cáo up sale',
-            'url' => '/ld/thong-ke/bao-cao-up-sale?menu=8.1.3',
+            'url' => '/admin/marketing/reports/upsale',
             'area' => 'reports',
             'code' => '8.1.3',
           ),

@@ -7001,25 +7001,12 @@ body.pushsale-app-body .psdd-page button {
     font-family: Arial, Helvetica, sans-serif !important;
     font-size: 12px !important;
 }
-body.pushsale-app-body .psdd-topbar {
-    display: grid;
-    grid-template-columns: 300px 270px 270px 270px minmax(260px, 1fr) 86px;
-    align-items: center;
-    gap: 28px;
-    min-height: 54px;
-    padding: 7px 15px;
-    border-bottom: 1px solid #ddd;
-    background: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,.16);
-}
 body.pushsale-app-body .psdd-title {
     font-size: 16px !important;
     font-weight: 700;
     color: #111;
 }
 body.pushsale-app-body .psdd-topbar select,
-body.pushsale-app-body .psdd-date-range,
-body.pushsale-app-body .psdd-date-range input,
 body.pushsale-app-body .psdd-table input,
 body.pushsale-app-body .psdd-operation-policy,
 body.pushsale-app-body .psdd-chipbox select {
@@ -7032,17 +7019,9 @@ body.pushsale-app-body .psdd-chipbox select {
     box-shadow: none !important;
     outline: none !important;
 }
-body.pushsale-app-body .psdd-topbar select { width: 100%; padding: 4px 9px !important; }
+body.pushsale-app-body .psdd-topbar select { min-width: 190px; padding: 4px 9px !important; }
 body.pushsale-app-body .psdd-date-range {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 0 8px;
-}
-body.pushsale-app-body .psdd-date-range input {
-    width: 103px !important;
-    border: 0 !important;
-    padding: 0 !important;
+    min-width: 260px;
 }
 body.pushsale-app-body .psdd-search {
     height: 30px !important;
@@ -7178,7 +7157,6 @@ body.pushsale-app-body .psdd-last-batch {
     font-style: italic;
 }
 @media (max-width: 1320px) {
-    body.pushsale-app-body .psdd-topbar { grid-template-columns: 250px repeat(3, 1fr) 1.4fr 86px; gap: 14px; }
     body.pushsale-app-body .psdd-columns { grid-template-columns: 1fr 1fr; }
 }
 
@@ -10531,9 +10509,9 @@ body.pushsale-app-body .psfd-toolbar {
     gap: 10px 18px !important;
     padding: 8px 14px !important;
     border-top: 0 !important;
-    border-bottom: 1px solid #d2d6de !important;
+    border-bottom: 0 !important;
     background: #fff !important;
-    box-shadow: none !important;
+    box-shadow: 0 2px 6px rgba(15, 42, 66, .14) !important;
 }
 body.pushsale-app-body .ps-page-chrome__primary {
     display: contents !important;

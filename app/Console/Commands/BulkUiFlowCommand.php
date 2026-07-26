@@ -211,7 +211,7 @@ class BulkUiFlowCommand extends Command
         $this->newLine();
         $this->info('=== DỮ LIỆU SẴN SÀNG TRÊN UI ===');
         $this->table(['Màn hình', 'URL', 'Ghi chú'], [
-            ['Duyệt Landing', '/admin/landing-approvals', 'Có chiến dịch chờ duyệt + đã duyệt'],
+            ['Duyệt Landing', '/admin/marketing/landing-approvals', 'Có chiến dịch chờ duyệt + đã duyệt'],
             ['Phân bổ data', '/admin/leads', 'Pushsale-style data distribution'],
             ['Báo cáo công việc sale', '/admin/sales/reports/work', 'Filter: 7 ngày / tháng này'],
             ['BC chốt đơn', '/admin/sales/reports/closing-summary', ''],

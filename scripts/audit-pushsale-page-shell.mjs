@@ -31,10 +31,23 @@ for (const code of pageCodes) {
   }
 }
 
-const numberedControllers = fs.readdirSync(path.join(root, 'app/Http/Controllers/Admin/Pushsale/Pages'))
-  .filter((name) => /^Page\d/.test(name));
-const numberedComponents = fs.readdirSync(path.join(root, 'resources/js/pages/Pushsale/Pages'))
-  .filter((name) => /^Page_\d/.test(name));
+function findNamedByMenuNumber(dir, pattern) {
+  const base = path.join(root, dir);
+  if (!fs.existsSync(base)) return [];
+  const found = [];
+  const stack = [base];
+  while (stack.length) {
+    for (const entry of fs.readdirSync(stack.pop(), { withFileTypes: true })) {
+      const full = path.join(entry.parentPath ?? entry.path, entry.name);
+      if (entry.isDirectory()) stack.push(full);
+      else if (pattern.test(entry.name)) found.push(entry.name);
+    }
+  }
+  return found;
+}
+
+const numberedControllers = findNamedByMenuNumber('app/Http/Controllers', /^Page\d/);
+const numberedComponents = findNamedByMenuNumber('resources/js/pages', /^Page_\d/);
 
 console.log(`Pushsale pages: ${pageCodes.length}`);
 console.log(`Legacy numbered controllers still present: ${numberedControllers.length}`);

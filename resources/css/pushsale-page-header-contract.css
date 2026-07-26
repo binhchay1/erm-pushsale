@@ -1,0 +1,379 @@
+/*
+ * Pushsale page header — single source of truth.
+ *
+ * Áp cho cả hai loại trang:
+ *  - Trang React: <PageHeader> render .m-header-wrap.ps-page-header > .m-header.ps-page-header__row
+ *  - Trang template inject HTML: .m-header-wrap > .m-header (giữ nguyên cột bootstrap bên trong)
+ *
+ * Quy ước chốt với bro:
+ *  - có box-shadow, KHÔNG có border-bottom
+ *  - khoảng cách title ↔ filter ↔ nút thống nhất
+ *  - filter nâng cao nằm ngoài .m-header
+ *  - header dính khi cuộn
+ *
+ * File này load sau page-frame và trước sidebar-canonical. Mọi thay đổi style
+ * header phải sửa ở đây, không thêm file mới, không đè từ CSS trang.
+ */
+html body.pushsale-app-body {
+    --ps-header-x: 14px;
+    --ps-header-min-h: 50px;
+    --ps-header-gap: 12px;
+    --ps-header-control-h: 32px;
+    --ps-header-title-size: 15px;
+    --ps-header-shadow: 0 2px 6px rgba(15, 42, 66, .14);
+    --ps-header-top: var(--ps-v85-header-height, 50px);
+}
+
+/* Sticky chỉ hoạt động khi tổ tiên không tạo scroll container riêng.
+ * `clip` chặn tràn ngang mà vẫn cho trục dọc visible. */
+html body.pushsale-app-body .content-inner,
+html body.pushsale-app-body .ps-page-viewport {
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+}
+
+html body.pushsale-app-body .ps-page-header-outlet:empty {
+    display: none !important;
+}
+
+/* ---------------------------------------------------------------- 1. Khung */
+html body.pushsale-app-body .m-header-wrap,
+html body.pushsale-app-body .ps-page-header,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap:first-of-type,
+html body.pushsale-app-body .pushsale-template-host-v83 .m-header-wrap:first-of-type,
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page > .m-header-wrap:first-child {
+    display: block !important;
+    position: relative;
+    z-index: 20;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: var(--ps-header-shadow) !important;
+}
+
+/* Thanh xanh của app fixed 50px nên header trang phải dính ngay dưới nó. */
+html body.pushsale-app-body .ps-page-header.is-sticky,
+html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page > .m-header-wrap:first-child {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 30 !important;
+}
+
+/* Header trong dialog không dính và không đổ bóng. */
+html body.pushsale-app-body [role="dialog"] .m-header-wrap.m-header-wrap.m-header-wrap,
+html body.pushsale-app-body .ps-taxonomy-header-wrap.ps-taxonomy-header-wrap.ps-taxonomy-header-wrap {
+    position: static !important;
+    box-shadow: none !important;
+}
+
+/* Đè các khai báo viền header rải rác trong CSS trang (specificity cao hơn
+ * mọi rule dạng `body.pushsale-app-body .ps-xxx-page .m-header-wrap`). */
+html body.pushsale-app-body .m-header-wrap.m-header-wrap.m-header-wrap,
+html body.pushsale-app-body .m-header.m-header.m-header,
+html body.pushsale-app-body .ps-page-header.ps-page-header.ps-page-header,
+html body.pushsale-app-body .ps-page-shell__header.ps-page-shell__header.ps-page-shell__header,
+html body.pushsale-app-body .ps-customer360-header.ps-customer360-header.ps-customer360-header,
+html body.pushsale-app-body .ps-report-topbar.ps-report-topbar.ps-report-topbar,
+html body.pushsale-app-body .psm-topbar.psm-topbar.psm-topbar,
+html body.pushsale-app-body .psr-topbar.psr-topbar.psr-topbar,
+html body.pushsale-app-body .psfd-toolbar.psfd-toolbar.psfd-toolbar,
+html body.pushsale-app-body .pushsale-page-header.pushsale-page-header.pushsale-page-header {
+    border-bottom: 0 !important;
+}
+
+html body.pushsale-app-body .m-header-wrap.m-header-wrap.m-header-wrap,
+html body.pushsale-app-body .ps-page-header.ps-page-header.ps-page-header {
+    box-shadow: var(--ps-header-shadow) !important;
+}
+
+/* Header thứ hai trở đi trong cùng trang (template cũ) không nhân đôi đổ bóng. */
+html body.pushsale-app-body .m-header-wrap.m-header-wrap ~ .m-header-wrap.m-header-wrap {
+    box-shadow: none !important;
+}
+
+/* ------------------------------------------------------------- 2. Hàng chính */
+html body.pushsale-app-body .ps-page-header > .m-header,
+html body.pushsale-app-body .ps-page-header__row {
+    display: grid !important;
+    grid-template-columns: minmax(200px, max-content) minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: var(--ps-header-gap) !important;
+    width: 100% !important;
+    min-height: var(--ps-header-min-h) !important;
+    margin: 0 !important;
+    padding: 8px var(--ps-header-x) !important;
+    background: #fff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    text-align: left !important;
+}
+
+html body.pushsale-app-body .ps-page-header:not(.has-filters) > .m-header {
+    grid-template-columns: minmax(200px, 1fr) auto !important;
+}
+
+html body.pushsale-app-body .ps-page-header > .m-header::before,
+html body.pushsale-app-body .ps-page-header > .m-header::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* --------------------------------------------------------------- 3. Tiêu đề */
+html body.pushsale-app-body .ps-page-header__title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    width: auto !important;
+}
+
+html body.pushsale-app-body .ps-page-header__title > .text,
+html body.pushsale-app-body .m-header-wrap .m-header .text,
+html body.pushsale-app-body .m-header-wrap .m-header [id$="lblModuleTitle"],
+html body.pushsale-app-body .m-header-wrap .m-header .module-title {
+    display: inline-block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #111 !important;
+    font: 700 var(--ps-header-title-size)/22px Arial, Helvetica, sans-serif !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+html body.pushsale-app-body .ps-page-header__icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    color: #2e91c7 !important;
+    font-size: 15px !important;
+}
+
+html body.pushsale-app-body .ps-page-header__icon svg {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+html body.pushsale-app-body .ps-page-header__subtitle {
+    margin: 0 0 0 8px !important;
+    color: #7a8794 !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    line-height: 16px !important;
+    white-space: nowrap !important;
+}
+
+/* ------------------------------------------- 4. Filter chính + nhóm nút phải */
+html body.pushsale-app-body .ps-page-header__filters {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    width: auto !important;
+    flex-wrap: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-page-header__actions {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    width: auto !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-page-header .form-control,
+html body.pushsale-app-body .ps-page-header .btn,
+html body.pushsale-app-body .ps-page-header select,
+html body.pushsale-app-body .ps-page-header input[type="text"],
+html body.pushsale-app-body .ps-page-header input[type="search"],
+html body.pushsale-app-body .ps-page-header input[type="date"] {
+    height: var(--ps-header-control-h) !important;
+    min-height: var(--ps-header-control-h) !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 13px !important;
+}
+
+html body.pushsale-app-body .ps-page-header .btn-icon,
+html body.pushsale-app-body .ps-page-header__toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 28px !important;
+    height: var(--ps-header-control-h) !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #5c6b7a !important;
+    cursor: pointer !important;
+}
+
+html body.pushsale-app-body .ps-page-header .btn-icon:hover,
+html body.pushsale-app-body .ps-page-header__toggle:hover {
+    color: #2e91c7 !important;
+}
+
+/* ---------------------------------------------------- 5. Filter nâng cao */
+html body.pushsale-app-body .ps-page-header__advanced {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 var(--ps-header-x) 10px !important;
+    background: #fff !important;
+    border: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-header__advanced[hidden] {
+    display: none !important;
+}
+
+html body.pushsale-app-body .ps-page-header__advanced > .row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin: 0 !important;
+}
+
+/* ------------------------------------ 6. Chuẩn hóa các biến thể header cũ */
+html body.pushsale-app-body .ps-page-chrome,
+html body.pushsale-app-body .pushsale-page-header,
+html body.pushsale-app-body .ps-report-topbar,
+html body.pushsale-app-body .ps-extra-toolbar,
+html body.pushsale-app-body .ps-sale-title-row,
+html body.pushsale-app-body .psm-topbar,
+html body.pushsale-app-body .psr-topbar,
+html body.pushsale-app-body .psfd-toolbar,
+html body.pushsale-app-body .ps-page-shell__header,
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-header,
+html body.pushsale-app-body .ps-products-page .m-header-wrap:first-of-type {
+    border-bottom: 0 !important;
+    box-shadow: var(--ps-header-shadow) !important;
+}
+
+/* Header cũ nằm liền ngay dưới header dùng chung thì bỏ bóng để không kẻ đôi. */
+html body.pushsale-app-body .ps-page-header-outlet + * .ps-page-chrome,
+html body.pushsale-app-body .ps-page-header-outlet + * .pushsale-page-header,
+html body.pushsale-app-body .ps-page-header-outlet + * .ps-report-topbar,
+html body.pushsale-app-body .ps-page-header-outlet + * .psm-topbar,
+html body.pushsale-app-body .ps-page-header-outlet + * .psr-topbar {
+    box-shadow: none !important;
+}
+
+/* Hồ sơ khách hàng (4.2): ô tìm kiếm rộng theo mẫu, filter nâng cao là box-body. */
+html body.pushsale-app-body .ps-customer-profile-header .ps-customer-title-actions {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-header .ps-header-search {
+    width: min(420px, 42vw) !important;
+    min-width: 220px !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-header .ps-customer-filter-panel {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    width: 100% !important;
+}
+
+/* Kết nối dữ liệu (2.4.1): hàng 2 gồm 6 select + hàng 3 chọn số dòng. */
+html body.pushsale-app-body .pslc-header .pslc-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pslc-header .pslc-keyword {
+    width: min(320px, 30vw) !important;
+    min-width: 180px !important;
+}
+
+html body.pushsale-app-body .pslc-header .pslc-filter-select,
+html body.pushsale-app-body .pslc-header .pslc-filter-product {
+    width: 170px !important;
+    min-width: 150px !important;
+}
+
+html body.pushsale-app-body .pslc-header .pslc-advanced-row {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+}
+
+html body.pushsale-app-body .pslc-header .pslc-advanced-row.is-tail {
+    grid-template-columns: 120px auto !important;
+    justify-content: start !important;
+    margin-bottom: 0 !important;
+}
+
+@media (max-width: 1199px) {
+    html body.pushsale-app-body .pslc-header .pslc-advanced-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .pslc-header .pslc-advanced-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+/* --------------------------------------------- 7. Khoảng cách xuống body */
+html body.pushsale-app-body .ps-page-header + *,
+html body.pushsale-app-body .ps-page-header-outlet + * {
+    margin-top: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-header-outlet + .ps-page-shell > .ps-page-shell__toolbar,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__toolbar {
+    padding: 8px var(--ps-header-x) !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body {
+    padding-top: 10px !important;
+}
+
+/* --------------------------------------------------------- 8. Responsive */
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-page-header > .m-header,
+    html body.pushsale-app-body .ps-page-header__row {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header__filters,
+    html body.pushsale-app-body .ps-page-header__actions {
+        flex-wrap: wrap !important;
+        justify-content: flex-start !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header.is-sticky {
+        position: relative !important;
+    }
+}

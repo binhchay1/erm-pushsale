@@ -19,7 +19,7 @@ final class FacebookConnectController extends Controller
 {
     public function connect(Request $request): Response
     {
-        return Inertia::render('Pushsale/Pages/Marketing/FacebookConnectPage', [
+        return Inertia::render('Admin/Marketing/FacebookConnectPage', [
             'activeMenuCode' => '2.5.2',
             'syncUrl' => '/admin/marketing/facebook/connect/sync',
             'postsUrl' => '/admin/marketing/facebook/posts',
@@ -74,7 +74,7 @@ final class FacebookConnectController extends Controller
                 'query' => $request->query(),
             ]);
 
-        return Inertia::render('Pushsale/Pages/Marketing/FacebookPostsPage', [
+        return Inertia::render('Admin/Marketing/FacebookPostsPage', [
             'activeMenuCode' => '2.5.3',
             'filters' => $filters,
             'posts' => $posts,

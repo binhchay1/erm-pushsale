@@ -10,6 +10,7 @@ import {
     PushsaleSelect,
     usePushsaleFilters,
 } from '@/components/reports/PushsaleReportChrome';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { useLabels } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
@@ -208,9 +209,11 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
 
     return (
         <section className="ps-report-page ps-sale-work-report">
-            <div className="ps-report-topbar ps-extra-toolbar ps-sale-work-toolbar">
-                <h1>{title}</h1>
-                <div className="ps-extra-toolbar-controls">
+            <PageHeader
+                title={title}
+                className="ps-extra-toolbar ps-sale-work-toolbar"
+                actions={(
+                    <div className="ps-extra-toolbar-controls">
                     {fields.has('date_type') && (
                         <PushsaleSelect
                             placeholder={psText(t, 'date_sale_received', 'Ngày sale nhận data')}
@@ -243,8 +246,9 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
                         <PushsaleSearchButton onClick={submit} />
                         <PushsaleExportButton routeUrl={routeUrl} filters={draft} />
                     </div>
-                </div>
-            </div>
+                    </div>
+                )}
+            />
             <div className="ps-sale-work-secondary">
                 {fields.has('sale_id') && (
                     <PushsaleSelect
@@ -359,22 +363,25 @@ function SaleKpiReport({ rows, totals, filters, filterOptions, filterFields, rou
 
     return (
         <section className="ps-report-page ps-sale-kpi-report">
-            <div className="ps-report-topbar ps-extra-toolbar">
-                <h1>{psText(t, 'sale_kpi_title', 'Sale KPI 2')}</h1>
-                <div className="ps-kpi-toolbar-controls">
-                    {fields.has('sale_id') && (
-                        <PushsaleSelect
-                            placeholder={psText(t, 'choose_sale', '--Chọn sale--')}
-                            value={draft.sale_id ?? ''}
-                            options={filterOptions.salesUsers ?? []}
-                            onChange={(value) => set('sale_id', value)}
-                        />
-                    )}
-                    <PushsaleDateRange filters={draft} onChange={set} />
-                    <PushsaleSearchButton onClick={() => apply()} />
-                    <PushsaleExportButton routeUrl={routeUrl} filters={draft} />
-                </div>
-            </div>
+            <PageHeader
+                title={psText(t, 'sale_kpi_title', 'Sale KPI 2')}
+                className="ps-extra-toolbar"
+                actions={(
+                    <div className="ps-kpi-toolbar-controls">
+                        {fields.has('sale_id') && (
+                            <PushsaleSelect
+                                placeholder={psText(t, 'choose_sale', '--Chọn sale--')}
+                                value={draft.sale_id ?? ''}
+                                options={filterOptions.salesUsers ?? []}
+                                onChange={(value) => set('sale_id', value)}
+                            />
+                        )}
+                        <PushsaleDateRange filters={draft} onChange={set} />
+                        <PushsaleSearchButton onClick={() => apply()} />
+                        <PushsaleExportButton routeUrl={routeUrl} filters={draft} />
+                    </div>
+                )}
+            />
 
             <div className="ps-kpi-layout">
                 <div>
@@ -634,9 +641,7 @@ function WarehousePendingReport({ rows, filters, filterOptions, routeUrl }) {
 
     return (
         <section className="ps-report-page ps-warehouse-pending-report">
-            <div className="ps-report-topbar ps-warehouse-pending-title">
-                <h1>{psText(t, 'warehouse_pending_title', 'Bảng tổng hợp chờ xuất theo ngày')}</h1>
-            </div>
+            <PageHeader title={psText(t, 'warehouse_pending_title', 'Bảng tổng hợp chờ xuất theo ngày')} className="ps-warehouse-pending-title" />
             <div className="ps-warehouse-pending-filters">
                 <PushsaleDateRange filters={draft} onChange={set} />
                 <PushsaleSelect
@@ -1252,14 +1257,20 @@ function AppointmentCardsReport({ rows, totals, filters, filterOptions, filterFi
     const fields = new Set(filterFields);
     return (
         <section className="ps-report-page ps-appointment-report">
-            <div className="ps-report-topbar ps-extra-toolbar"><h1>Báo cáo lịch hẹn telesales</h1><div className="ps-extra-toolbar-controls">
-                <PushsaleDateRange filters={draft} onChange={set} />
-                {fields.has('operation_stage') && <PushsaleSelect placeholder="--Tác nghiệp--" value={draft.operation_stage ?? ''} options={filterOptions.operationStages ?? []} onChange={(value)=>set('operation_stage',value)} />}
-                {fields.has('operation_result') && <PushsaleSelect placeholder="--Kết quả--" value={draft.operation_result ?? ''} options={filterOptions.operationResults ?? []} onChange={(value)=>set('operation_result',value)} />}
-                {fields.has('team_id') && <PushsaleSelect placeholder={psText(t, 'choose_sales_team', '--Nhóm sale--')} value={draft.team_id ?? ''} options={filterOptions.salesTeams ?? filterOptions.teams ?? []} onChange={(value)=>set('team_id',value)} />}
-                {fields.has('sale_id') && <PushsaleSelect placeholder={psText(t, 'choose_sale', '--Chọn sale--')} value={draft.sale_id ?? ''} options={filterOptions.salesUsers ?? []} onChange={(value)=>set('sale_id',value)} />}
-                <PushsaleSearchButton onClick={()=>apply()} /><PushsaleExportButton routeUrl={routeUrl} filters={draft} />
-            </div></div>
+            <PageHeader
+                title="Báo cáo lịch hẹn telesales"
+                className="ps-extra-toolbar"
+                actions={(
+                    <div className="ps-extra-toolbar-controls">
+                        <PushsaleDateRange filters={draft} onChange={set} />
+                        {fields.has('operation_stage') && <PushsaleSelect placeholder="--Tác nghiệp--" value={draft.operation_stage ?? ''} options={filterOptions.operationStages ?? []} onChange={(value)=>set('operation_stage',value)} />}
+                        {fields.has('operation_result') && <PushsaleSelect placeholder="--Kết quả--" value={draft.operation_result ?? ''} options={filterOptions.operationResults ?? []} onChange={(value)=>set('operation_result',value)} />}
+                        {fields.has('team_id') && <PushsaleSelect placeholder={psText(t, 'choose_sales_team', '--Nhóm sale--')} value={draft.team_id ?? ''} options={filterOptions.salesTeams ?? filterOptions.teams ?? []} onChange={(value)=>set('team_id',value)} />}
+                        {fields.has('sale_id') && <PushsaleSelect placeholder={psText(t, 'choose_sale', '--Chọn sale--')} value={draft.sale_id ?? ''} options={filterOptions.salesUsers ?? []} onChange={(value)=>set('sale_id',value)} />}
+                        <PushsaleSearchButton onClick={()=>apply()} /><PushsaleExportButton routeUrl={routeUrl} filters={draft} />
+                    </div>
+                )}
+            />
             <div className="ps-appointment-summary"><span>Tổng lịch hẹn</span><strong>{formatNumber(totals?.count ?? 0)}</strong><small>Không nhân đôi bởi packet upsale</small></div>
             <div className="ps-appointment-grid">{rows.map((row,index)=><article key={row.date_iso ?? index} className={`ps-appointment-card ${row.overdue ? 'is-overdue' : ''}`}><div className="ps-appointment-card-head"><span>{row.weekday}</span><strong>{row.date}</strong></div><div className="ps-appointment-count">{formatNumber(row.count)}</div><div className="ps-appointment-label">lịch hẹn gọi lại</div><div className="ps-appointment-sales" title={row.sales}>{row.sales}</div></article>)}</div>
         </section>

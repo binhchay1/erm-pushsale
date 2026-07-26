@@ -208,7 +208,7 @@ class LiveUiFlowCommand extends Command
         $this->info('=== XEM TRÊN GIAO DIỆN (đăng nhập password: password) ===');
         $this->table(['Vai trò', 'Email', 'URL'], [
             ['Marketing', 'marketing@saleops.local', '/marketing/campaigns'],
-            ['Admin', 'admin@saleops.local', '/admin/landing-approvals'],
+            ['Admin', 'admin@saleops.local', '/admin/marketing/landing-approvals'],
             ['Admin', 'admin@saleops.local', '/admin/leads'],
             ['Telesale', $saleUser->email, '/sales/workspace'],
             ['Telesale', $saleUser->email, '/sales/dashboard'],

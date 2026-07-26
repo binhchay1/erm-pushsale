@@ -5,7 +5,7 @@ import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { formatCurrency } from '@/lib/format';
-import { PushsalePageFrame } from '@/pages/Pushsale/components/PushsalePageFrame';
+import { PushsalePageFrame } from '@/components/pushsale/PushsalePageFrame';
 
 function currentFilters() {
     if (typeof window === 'undefined') return {};

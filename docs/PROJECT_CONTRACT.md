@@ -8,8 +8,11 @@ Living contract. Agent conventions: root `AGENTS.md`. Historical prompt notes: `
 | --- | --- |
 | Menu tree / codes | `config/pushsale_navigation.php` |
 | Page schemas | `config/pushsale_pages.php` |
-| Admin menu routes + legacy 301 | `routes/pushsale_pages.php` (required from `web.php`) |
+| Admin menu routes | `routes/admin/{domain}.php` (required from `web.php`) |
+| Role workspace routes | `routes/roles/{role}.php` |
+| Legacy 301 | `routes/legacy.php` |
 | CSS load order | `resources/js/lib/pushsaleStyleRegistry.js` |
+| Page header | `components/layout/PageHeader.jsx` + `pushsale-page-header-contract.css` |
 | Page frame | `PushsalePageShell.jsx` + `pushsale-page-frame-contract.css` |
 | Sidebar + L3 | `AppSidebar.jsx` + `usePushsaleSidebarMenu.js` + `pushsale-sidebar-canonical-contract.css` |
 | Orphan CSS | `resources/css/_archive/` (not loaded) |
@@ -20,11 +23,13 @@ Do **not** create new `CONTEXT_HANDOFF_V*` / versioned UI docs per prompt. Updat
 
 Tất cả trang admin phải đi qua `AppLayout`. Trang nghiệp vụ dùng:
 
-- `resources/js/components/layout/PushsalePageShell.jsx`: title + primary filters/actions + advanced filters + toolbar + body.
-- Layout variants: `is-title-only` | `is-title-actions` | `has-primary-filters`.
-- `data-page-code` = mã menu Pushsale khi có (vd. `1.2.1`, `2.1`).
+- `resources/js/components/layout/PageHeader.jsx`: header duy nhất của trang (title + filters/actions + advanced). Nội dung được portal lên `PageHeaderOutlet` trong `AppLayout` nên không thể có 2 header cùng lúc.
+- `resources/js/components/layout/PushsalePageShell.jsx`: bọc `PageHeader` + notice + toolbar + body.
+- DOM header cố định theo mẫu Pushsale: `.m-header-wrap.ps-page-header > .m-header.ps-page-header__row`, filter nâng cao nằm ở `.ps-page-header__advanced.box-body` **ngoài** `.m-header`.
+- `data-page-code` = mã menu Pushsale khi có (vd. `1.2.1`, `2.1`), truyền qua prop `pageCode`.
+- Button submit đặt trong `actions`/`filters` phải trỏ `form="<id form>"` vì nó bị portal ra khỏi `<form>`.
 
-Không viết mỗi trang một bộ header/filter riêng. Thiếu use case → mở rộng shell.
+Không viết mỗi trang một bộ header/filter riêng. Thiếu use case → mở rộng `PageHeader`/shell.
 
 ## 2. CSS contract
 
@@ -36,11 +41,13 @@ Thứ tự CSS runtime nằm ở `resources/js/lib/pushsaleStyleRegistry.js`.
   1. `pushsale-unified-page-shell-contract.css`
   2. `pushsale-adminlte-canonical-contract.css`
   3. `pushsale-page-frame-contract.css`
-  4. `pushsale-sidebar-canonical-contract.css` (**absolute last**)
+  4. `pushsale-page-header-contract.css`
+  5. `pushsale-sidebar-canonical-contract.css` (**absolute last**)
 
 Quy tắc:
 
-- Selector global sidebar/header chỉ ở `pushsale-sidebar-canonical-contract.css` (+ phần chrome liên quan trong adminlte-canonical nếu cần).
+- Selector global sidebar chỉ ở `pushsale-sidebar-canonical-contract.css` (+ phần chrome liên quan trong adminlte-canonical nếu cần).
+- Style header trang (`.m-header-wrap` / `.ps-page-header`) chỉ ở `pushsale-page-header-contract.css`: có `box-shadow`, **không** `border-bottom`, spacing title ↔ filter thống nhất, sticky khi scroll. Page CSS không được set lại 2 thuộc tính này.
 - Page CSS scope bằng class trang; không đụng `.main-sidebar` / `.ul2` / navbar.
 - Không thêm file `pushsale-sidebar-*` mới để vá hover.
 - File không load → `resources/css/_archive/`.
@@ -149,7 +156,7 @@ Do **not** add another sidebar override CSS file. Page CSS must not override `.p
 - Checkbox `Nhập TC` và `Duyệt` trong bảng chỉ là thao tác bật nhanh/hiển thị trạng thái contract, không thay thế bước duyệt chính.
 
 ## v131 UI Contract Addendum
-- Page header/frame rhythm: `PushsalePageShell` + `pushsale-page-frame-contract.css` (+ adminlte-canonical cho control chrome).
+- Page header/frame rhythm: `PushsalePageShell` + `pushsale-page-frame-contract.css` (+ adminlte-canonical cho control chrome). *(Phần header đã chuyển sang `PageHeader` — xem mục “Route, naming và header dùng chung” ở cuối file.)*
 - Marketing dashboard and landing approval headers must use the shared shell; no page should add another broad header override file.
 - Sidebar hover: hook + `pushsale-sidebar-canonical-contract.css` only.
 
@@ -202,3 +209,24 @@ Do not create another product taxonomy CSS override file.
 ### Toast realtime / phân bổ data
 - Notification realtime được coalesce theo id `pushsale-realtime-notification`.
 - Phân bổ data dùng toast id `manual-data-distribution` để không spam liên tục.
+
+## Route, naming và header dùng chung
+
+### Route
+- `routes/pushsale_pages.php` đã bị bỏ. Route menu nằm ở `routes/admin/{domain}.php` (13 file: `company`, `hr`, `catalog`, `security`, `operations-config`, `integrations`, `marketing`, `customers`, `sales`, `warehouse`, `accounting`, `ceo`, `reports`).
+- Workspace theo role: `routes/roles/{sales,marketing,warehouse,accounting,allocator,platform}.php`.
+- Mọi 301 từ URL cũ (`/ld/...`, `/admin/pages/...`) gom về `routes/legacy.php`. Redirect `/admin/pages/{code}-slug` đã xóa hẳn.
+- `web.php` chỉ giữ public/auth/profile/shared + `require`.
+- Bắt buộc: `php artisan route:list` không được trùng tên route.
+
+### Naming
+- Controller theo nghiệp vụ trong `App\Http\Controllers\Admin\{Domain}\`; mã menu chỉ là dữ liệu (`protected $pageCode`). Không còn `PageX_Y_ZController`.
+- React page ở `resources/js/pages/Admin/{Domain}/` (hoặc `Sales/`, `Warehouse/`); khóa `component` trong `config/pushsale_pages.php` là đường dẫn Inertia đầy đủ. Không còn `Page_X_Y_Z.jsx`.
+- `scripts/audit-pushsale-contract.mjs` fail nếu còn file đặt tên theo mã menu.
+
+### Header dùng chung
+- Component: `resources/js/components/layout/PageHeader.jsx` + `PageHeaderProvider`/`PageHeaderOutlet` trong `AppLayout.jsx`. Header được portal lên outlet nên mỗi trang chỉ có một header.
+- CSS: `resources/css/pushsale-page-header-contract.css`, load sau `page-frame` và trước `sidebar-canonical`. Có `box-shadow`, không `border-bottom`, sticky khi scroll.
+- Filter nâng cao thuộc `.ps-page-header__advanced.box-body`, không nằm trong `.m-header` — đúng mẫu Pushsale.
+- Trang mẫu đã áp: `Sales/CustomerProfile.jsx` (4.2 — kèm tách `Đơn chính`/`Upsale` và cờ upsale ở ô mã đơn) và `Admin/Marketing/LandingConnectionsPage.jsx` (2.4.1 — 6 select hàng 2 + chọn số dòng, tabs kết nối).
+- Filter ngày dùng `components/filters/DateRangeFilter.jsx`; biến thể `boxed` gói `[ngày][00:00] – [ngày][23:59]` trong một control có viền.

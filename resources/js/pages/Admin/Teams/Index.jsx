@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
-import { PushsalePageFrame } from '@/pages/Pushsale/components/PushsalePageFrame';
+import { PushsalePageFrame } from '@/components/pushsale/PushsalePageFrame';
 
 function currentFilters() {
     if (typeof window === 'undefined') return {};

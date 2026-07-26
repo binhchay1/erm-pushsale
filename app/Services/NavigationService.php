@@ -124,7 +124,7 @@ class NavigationService
                 '/admin/marketing/dashboard' => '/marketing/workspace',
                 '/admin/customers' => '/marketing/customers',
                 '/admin/rankings' => '/marketing/rankings',
-                '/admin/landing-approvals' => '/marketing/landing-approvals',
+                '/admin/marketing/landing-approvals' => '/marketing/landing-approvals',
                 '/admin/leads' => '/marketing/leads',
                 '/admin/integrations' => '/marketing/campaigns',
                 '/admin/marketing/revenue' => '/marketing/revenue',

@@ -76,9 +76,9 @@ html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page > .m-header-wr
     padding: 0 !important;
     background: #fff !important;
     border: 0 !important;
-    border-bottom: 1px solid var(--ps102-border) !important;
+    border-bottom: 0 !important;
     border-top: 0 !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .12) !important;
+    box-shadow: 0 2px 6px rgba(15, 42, 66, .14) !important;
 }
 
 html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap.pushsale-primary-header-wrap > .m-header,

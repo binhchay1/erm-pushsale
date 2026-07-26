@@ -38,7 +38,7 @@ php artisan route:list --path=activity-logs | head -10
 php artisan route:list --path=landing-approvals | head -15
 
 echo "=== HTTPS ENDPOINTS ==="
-for path in /login /admin/activity-logs /admin/landing-approvals /marketing/campaigns /admin/shipping/reconciliation; do
+for path in /login /admin/activity-logs /admin/marketing/landing-approvals /marketing/campaigns /admin/shipping/reconciliation; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "https://erm-pushsale.duckdns.org${path}")
   echo "${path} -> ${code}"
 done

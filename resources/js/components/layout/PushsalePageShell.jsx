@@ -1,15 +1,14 @@
-import { useState } from 'react';
-
+import { PageHeader } from '@/components/layout/PageHeader';
 import { cn } from '@/lib/utils';
 
 /**
  * Shared Pushsale page frame used by every menu page.
  *
- * Structure (matches Pushsale m-header + body):
- * 1) Header main row: title | primaryFilters | actions (search / gear / help)
- * 2) Optional advanced filter row below the header
- * 3) Optional toolbar row (list actions)
- * 4) Body content (table / form / report)
+ * Header (title | primaryFilters | actions | advancedFilters) được đẩy qua
+ * PageHeader nên nó render ở outlet của AppLayout, dùng chung DOM/CSS
+ * `.m-header-wrap > .m-header` với các trang template.
+ *
+ * Phần còn lại giữ nguyên tại chỗ: notice → toolbar → body.
  */
 export function PushsalePageShell({
     title,
@@ -28,80 +27,25 @@ export function PushsalePageShell({
     compact = false,
     defaultFiltersCollapsed = false,
     collapsible = true,
+    pageCode = undefined,
     ...props
 }) {
-    const [filtersCollapsed, setFiltersCollapsed] = useState(defaultFiltersCollapsed);
-    const resolvedPrimaryFilters = primaryFilters ?? filters;
-    const hasPrimaryFilters = Boolean(resolvedPrimaryFilters);
-    const hasAdvancedFilters = Boolean(advancedFilters);
-    const hasActions = Boolean(actions) || (collapsible && hasAdvancedFilters);
     const hasToolbar = Boolean(toolbar);
 
-    const mainRowLayout = cn(
-        'ps-page-shell__main-row',
-        !hasPrimaryFilters && !hasActions && 'is-title-only',
-        !hasPrimaryFilters && hasActions && 'is-title-actions',
-        hasPrimaryFilters && 'has-primary-filters',
-    );
-
     return (
-        <section
-            className={cn(
-                'ps-page-shell',
-                compact && 'is-compact',
-                hasAdvancedFilters && 'has-advanced-filters',
-                filtersCollapsed && 'is-filter-collapsed',
-                className,
-            )}
-            {...props}
-        >
-            <header
-                className={cn(
-                    'ps-page-shell__header',
-                    hasAdvancedFilters && 'has-advanced-filters',
-                    filtersCollapsed && 'is-filter-collapsed',
-                    headerClassName,
-                )}
-            >
-                <div className={mainRowLayout}>
-                    <div className="ps-page-shell__title-col">
-                        <h1 className="ps-page-shell__title">
-                            {icon ? <span className="ps-page-shell__icon">{icon}</span> : null}
-                            <span className="ps-page-shell__title-text">{title}</span>
-                        </h1>
-                        {subtitle ? <div className="ps-page-shell__subtitle">{subtitle}</div> : null}
-                    </div>
-
-                    {hasPrimaryFilters ? (
-                        <div className="ps-page-shell__filters ps-page-shell__filters--primary">
-                            {resolvedPrimaryFilters}
-                        </div>
-                    ) : null}
-
-                    {hasActions ? (
-                        <div className="ps-page-shell__actions">
-                            {actions}
-                            {collapsible && hasAdvancedFilters ? (
-                                <button
-                                    type="button"
-                                    className="ps-page-shell__toggle"
-                                    aria-expanded={!filtersCollapsed}
-                                    title={filtersCollapsed ? 'Mở bộ lọc nâng cao' : 'Thu gọn bộ lọc nâng cao'}
-                                    onClick={() => setFiltersCollapsed((value) => !value)}
-                                >
-                                    <i className={cn('fa', filtersCollapsed ? 'fa-angle-double-down' : 'fa-angle-double-up')} aria-hidden="true" />
-                                </button>
-                            ) : null}
-                        </div>
-                    ) : null}
-                </div>
-
-                {hasAdvancedFilters ? (
-                    <div className="ps-page-shell__advanced-row" hidden={filtersCollapsed || undefined}>
-                        {advancedFilters}
-                    </div>
-                ) : null}
-            </header>
+        <section className={cn('ps-page-shell', compact && 'is-compact', className)} {...props}>
+            <PageHeader
+                title={title}
+                subtitle={subtitle}
+                icon={icon}
+                primaryFilters={primaryFilters ?? filters}
+                actions={actions}
+                advanced={advancedFilters}
+                pageCode={pageCode}
+                className={headerClassName}
+                defaultCollapsed={defaultFiltersCollapsed}
+                collapsible={collapsible}
+            />
 
             {notice ? <div className="ps-page-shell__notice">{notice}</div> : null}
 

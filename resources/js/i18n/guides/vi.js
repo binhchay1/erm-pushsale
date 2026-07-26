@@ -202,7 +202,7 @@ export default [
         ],
     },
     {
-        path: '/admin/landing-approvals',
+        path: '/admin/marketing/landing-approvals',
         title: 'Duyệt trang Landing',
         intro: 'Phê duyệt các kết nối landing / chiến dịch do marketing tạo trước khi nhận lead.',
         sections: [

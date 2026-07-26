@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { CurrencyInput } from '@/components/ui/currency-input';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
@@ -528,31 +529,32 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
         <AppLayout>
             <Head title="Quản lý sản phẩm" />
             <section className="ps-adminlte-page ps-products-page" data-page-code="1.3.1">
-                <form onSubmit={submitFilters}>
-                    <div className="m-header-wrap">
-                        <div className="m-header ps-product-header">
-                            <div className="ps-title">Quản lý sản phẩm</div>
-                            <div className="ps-header-search ps-product-search">
-                                <select className="form-control" value={query.vat} onChange={(event) => setQuery((old) => ({ ...old, vat: event.target.value }))}>
-                                    <option value="">---VAT---</option>
-                                    {vatCodes.map((code) => <option key={code} value={code}>{code}</option>)}
-                                </select>
-                                <input className="form-control" placeholder="Tên" value={query.search} onChange={(event) => setQuery((old) => ({ ...old, search: event.target.value }))} />
-                                <button className="btn btn-sm btn-primary"><i className="fa fa-search" /> Tìm kiếm</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="box-body ps-filter-row ps-product-filters">
-                        <select className="form-control" value={query.sort} onChange={(event) => setQuery((old) => ({ ...old, sort: event.target.value }))}>
-                            <option value="newest">Sắp xếp theo ngày tạo</option><option value="oldest">Cũ nhất</option><option value="name">Theo tên</option><option value="price_asc">Giá tăng dần</option><option value="price_desc">Giá giảm dần</option>
-                        </select>
-                        <select className="form-control" value={query.active} onChange={(event) => setQuery((old) => ({ ...old, active: event.target.value }))}><option value="">--Trạng thái kinh doanh--</option><option value="1">Đang kinh doanh</option><option value="0">Ngừng kinh doanh</option></select>
-                        <select className="form-control" value={query.category_id} onChange={(event) => setQuery((old) => ({ ...old, category_id: event.target.value }))}><option value="">--Chọn phân loại--</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
-                        <select className="form-control" value={query.marketing} onChange={(event) => setQuery((old) => ({ ...old, marketing: event.target.value }))}><option value="">--Chọn marketing--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
-                        <select className="form-control" value={query.sale} onChange={(event) => setQuery((old) => ({ ...old, sale: event.target.value }))}><option value="">--Chọn sale--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
-                        <select className="form-control" value={query.care} onChange={(event) => setQuery((old) => ({ ...old, care: event.target.value }))}><option value="">--Chọn CSKH--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
-                    </div>
-                </form>
+                <PageHeader
+                    title="Quản lý sản phẩm"
+                    pageCode="1.3.1"
+                    actions={(
+                        <form className="ps-header-search ps-product-search" onSubmit={submitFilters}>
+                            <select className="form-control" value={query.vat} onChange={(event) => setQuery((old) => ({ ...old, vat: event.target.value }))}>
+                                <option value="">---VAT---</option>
+                                {vatCodes.map((code) => <option key={code} value={code}>{code}</option>)}
+                            </select>
+                            <input className="form-control" placeholder="Tên" value={query.search} onChange={(event) => setQuery((old) => ({ ...old, search: event.target.value }))} />
+                            <button className="btn btn-sm btn-primary" type="submit"><i className="fa fa-search" /> Tìm kiếm</button>
+                        </form>
+                    )}
+                    advanced={(
+                        <form className="ps-filter-row ps-product-filters" onSubmit={submitFilters}>
+                            <select className="form-control" value={query.sort} onChange={(event) => setQuery((old) => ({ ...old, sort: event.target.value }))}>
+                                <option value="newest">Sắp xếp theo ngày tạo</option><option value="oldest">Cũ nhất</option><option value="name">Theo tên</option><option value="price_asc">Giá tăng dần</option><option value="price_desc">Giá giảm dần</option>
+                            </select>
+                            <select className="form-control" value={query.active} onChange={(event) => setQuery((old) => ({ ...old, active: event.target.value }))}><option value="">--Trạng thái kinh doanh--</option><option value="1">Đang kinh doanh</option><option value="0">Ngừng kinh doanh</option></select>
+                            <select className="form-control" value={query.category_id} onChange={(event) => setQuery((old) => ({ ...old, category_id: event.target.value }))}><option value="">--Chọn phân loại--</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
+                            <select className="form-control" value={query.marketing} onChange={(event) => setQuery((old) => ({ ...old, marketing: event.target.value }))}><option value="">--Chọn marketing--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
+                            <select className="form-control" value={query.sale} onChange={(event) => setQuery((old) => ({ ...old, sale: event.target.value }))}><option value="">--Chọn sale--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
+                            <select className="form-control" value={query.care} onChange={(event) => setQuery((old) => ({ ...old, care: event.target.value }))}><option value="">--Chọn CSKH--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
+                        </form>
+                    )}
+                />
 
                 <div className="box-body ps-toolbar">
                     <button className="btn btn-sm btn-primary" type="button" onClick={openCreate}><i className="fa fa-plus" /> Thêm mới</button>

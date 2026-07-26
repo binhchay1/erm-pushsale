@@ -21,7 +21,7 @@ echo "=== SCHEMA CHECK ==="
 php artisan tinker --execute="echo (\Illuminate\Support\Facades\Schema::hasTable('activity_logs') ? 'activity_logs OK' : 'activity_logs MISSING') . PHP_EOL; echo (\Illuminate\Support\Facades\Schema::hasColumn('marketing_sources','approved_by_user_id') ? 'approval cols OK' : 'approval cols MISSING') . PHP_EOL;"
 
 echo "=== HTTP SMOKE (nginx local) ==="
-for path in / /login /admin/dashboard /admin/activity-logs /admin/landing-approvals /marketing/campaigns; do
+for path in / /login /admin/dashboard /admin/activity-logs /admin/marketing/landing-approvals /marketing/campaigns; do
   code=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: erm-pushsale.duckdns.org' "http://127.0.0.1${path}")
   echo "${path} -> ${code}"
 done

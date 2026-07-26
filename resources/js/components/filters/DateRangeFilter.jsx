@@ -56,6 +56,9 @@ export function DateRangeFilter({
     label,
     displayLabel = false,
     withTimeLabel = true,
+    // Gói cả hai ô ngày + mốc giờ vào một control có viền, giống input
+    // `.date-range` của Pushsale.
+    boxed = false,
     disabled = false,
 }) {
     const [touched, setTouched] = useState(false);
@@ -94,28 +97,39 @@ export function DateRangeFilter({
         onChange?.({ date_from: nextFrom, date_to: nextTo });
     };
 
+    const fromInput = (
+        <input
+            type="date"
+            className={`form-control ps-date-filter-input ${inputClassName}`.trim()}
+            value={normalizedFrom}
+            max={normalizedTo || undefined}
+            onChange={(event) => setFrom(event.target.value)}
+            aria-label="Từ ngày"
+            disabled={disabled}
+        />
+    );
+
+    const toInput = (
+        <input
+            type="date"
+            className={`form-control ps-date-filter-input ${inputClassName}`.trim()}
+            value={normalizedTo}
+            min={normalizedFrom || undefined}
+            onChange={(event) => setTo(event.target.value)}
+            aria-label="Đến ngày"
+            disabled={disabled}
+        />
+    );
+
     return (
-        <div className={`ps-date-filter ${invalid ? 'has-error' : ''} ${touched ? 'is-touched' : ''} ${className}`.trim()} title={title}>
+        <div
+            className={`ps-date-filter ${boxed ? 'is-boxed' : ''} ${invalid ? 'has-error' : ''} ${touched ? 'is-touched' : ''} ${className}`.trim()}
+            title={title}
+        >
             {label ? <span className="ps-date-filter-title">{label}</span> : null}
-            <input
-                type="date"
-                className={`form-control ps-date-filter-input ${inputClassName}`.trim()}
-                value={normalizedFrom}
-                max={normalizedTo || undefined}
-                onChange={(event) => setFrom(event.target.value)}
-                aria-label="Từ ngày"
-                disabled={disabled}
-            />
+            {boxed ? <span className="ps-date-filter-side">{fromInput}<em className="ps-date-filter-time">00:00</em></span> : fromInput}
             <span className="ps-date-filter-separator">{separator}</span>
-            <input
-                type="date"
-                className={`form-control ps-date-filter-input ${inputClassName}`.trim()}
-                value={normalizedTo}
-                min={normalizedFrom || undefined}
-                onChange={(event) => setTo(event.target.value)}
-                aria-label="Đến ngày"
-                disabled={disabled}
-            />
+            {boxed ? <span className="ps-date-filter-side">{toInput}<em className="ps-date-filter-time">23:59</em></span> : toInput}
             {displayLabel ? <span className="ps-date-filter-label">{title}</span> : null}
             {invalid ? <span className="ps-date-filter-error">Ngày đến không thể nhỏ hơn ngày từ</span> : null}
         </div>

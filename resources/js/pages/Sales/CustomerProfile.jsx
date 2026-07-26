@@ -4,10 +4,11 @@ import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
 import { ReportPagination } from '@/components/reports/ReportPagination';
-import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags, orderHasUpsell } from '@/components/operations/OrderLineBreakdown';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
+import { PageHeader } from '@/components/layout/PageHeader';
 import {
     PushsaleCustomerMessagesDialog,
     PushsaleDataViewHistoryDialog,
@@ -127,6 +128,15 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                 <td className="text-center ps-code-cell">
                                     <div className="ps-order-code-stack">
                                         <span className="item-md ps-order-code-text">{row.orderCode || '—'}</span>
+                                        {orderHasUpsell(row) ? (
+                                            <span
+                                                className={`ps-order-flag is-upsale ${row.awaitingLandingUpsell || Number(row.pendingSupplementCount ?? 0) > 0 ? 'is-waiting-upsale' : ''}`.trim()}
+                                                title={row.awaitingLandingUpsell || Number(row.pendingSupplementCount ?? 0) > 0 ? 'Có upsale đang chờ xử lý' : 'Đơn có upsale'}
+                                                aria-label="Đơn có upsale"
+                                            >
+                                                <i className="fa fa-level-up" aria-hidden="true" />
+                                            </span>
+                                        ) : null}
                                         <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onOpenDialog('view', row)} title="Xem lịch sử xem thông tin số">
                                             <i className="fa fa-history" />
                                         </button>
@@ -162,7 +172,7 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                                 <i className="fa fa-phone" aria-hidden="true" />
                                             </a>
                                         ) : null}
-                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" />
+                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell={false} />
                                     </div>
                                     {row.phoneCarrier ? <span className={`ps-carrier ps-carrier-${row.phoneCarrierKey ?? 'other'}`}>{row.phoneCarrier}</span> : null}
                                 </td>
@@ -396,7 +406,7 @@ function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
     );
 }
 
-export default function CustomerProfile({ filters = {}, filterOptions = {}, report, routeUrl = '/customers', saleWorkspaceUrl = null, warehouseOperationsUrl = null, pageTitle = 'Hồ sơ khách hàng' }) {
+export default function CustomerProfile({ filters = {}, filterOptions = {}, report, routeUrl = '/customers', saleWorkspaceUrl = null, warehouseOperationsUrl = null, pageTitle = 'Hồ sơ khách hàng', activeMenuCode = '4.2' }) {
     const rows = report?.rows?.data ?? [];
     const pagination = report?.rows?.meta ?? { current_page: 1, last_page: 1, per_page: 20, total: 0, from: 0, to: 0 };
     const [form, setForm] = useState(filters);
@@ -442,27 +452,43 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
         <AppLayout>
             <Head title={pageTitle} />
             <section className="ps-customer-profile-page">
-                <div className="ps-customer-titlebar">
-                    <h1>{pageTitle}</h1>
-                    <div className="ps-customer-title-actions">
-                        <input
-                            type="text"
-                            className="form-control ps-header-search"
-                            value={form.search ?? ''}
-                            placeholder="Họ tên, số điện thoại"
-                            onChange={(event) => setField('search', event.target.value)}
-                            onKeyDown={(event) => event.key === 'Enter' && search()}
-                        />
-                        <button type="button" className="btn btn-primary" onClick={search}><i className="fa fa-search" /> Tìm kiếm</button>
-                        <button type="button" className="btn btn-default ps-filter-toggle" onClick={() => setFiltersOpen((current) => !current)} title={filtersOpen ? 'Thu gọn bộ lọc' : 'Mở bộ lọc'}>
-                            <i className={`fa ${filtersOpen ? 'fa-angle-double-up' : 'fa-angle-double-down'}`} />
-                        </button>
-                    </div>
-                </div>
-
-                {filtersOpen ? (
-                    <div className="ps-customer-filter-panel">
-                        <div className="ps-filter-grid">
+                <PageHeader
+                    title={pageTitle}
+                    pageCode={activeMenuCode}
+                    className="ps-customer-profile-header"
+                    collapsible={false}
+                    actions={(
+                        <div className="ps-customer-title-actions">
+                            <input
+                                type="text"
+                                className="form-control ps-header-search"
+                                value={form.search ?? ''}
+                                placeholder="Họ tên, số điện thoại"
+                                onChange={(event) => setField('search', event.target.value)}
+                                onKeyDown={(event) => event.key === 'Enter' && search()}
+                            />
+                            <button type="button" className="btn btn-sm btn-primary" onClick={search}><i className="fa fa-search" /> Tìm kiếm</button>
+                            <a
+                                role="button"
+                                tabIndex={0}
+                                className="btn-icon ps-filter-toggle"
+                                title={filtersOpen ? 'Thu gọn bộ lọc' : 'Mở bộ lọc'}
+                                aria-expanded={filtersOpen}
+                                onClick={() => setFiltersOpen((current) => !current)}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault();
+                                        setFiltersOpen((current) => !current);
+                                    }
+                                }}
+                            >
+                                <i className={`fa ${filtersOpen ? 'fa-angle-double-up' : 'fa-angle-double-down'}`} />
+                            </a>
+                        </div>
+                    )}
+                    advanced={filtersOpen ? (
+                        <div className="ps-customer-filter-panel">
+                            <div className="ps-filter-grid">
                             <DateRangeFilter
                                 className="ps-date-range-control"
                                 inputClassName="ps-filter-control"
@@ -495,10 +521,10 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                             <FilterSelect value={form.allocation_status} onChange={(value) => setField('allocation_status', value)} options={filterOptions.allocationStatuses} placeholder="--Phân bổ--" />
                             <FilterSelect value={form.shipping_method} onChange={(value) => setField('shipping_method', value)} options={filterOptions.shippingMethods} placeholder="--PTGH--" />
                             <button type="button" className="btn btn-default ps-filter-reset" onClick={reset}><i className="fa fa-refresh" /> Đặt lại</button>
-                            <button type="button" className="btn btn-primary ps-filter-search" onClick={search}><i className="fa fa-search" /> Tìm kiếm</button>
+                            </div>
                         </div>
-                    </div>
-                ) : null}
+                    ) : null}
+                />
 
                 <CustomerProfileTable rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onOpenDialog={openDialog} saleWorkspaceUrl={saleWorkspaceUrl} warehouseOperationsUrl={warehouseOperationsUrl} />
 

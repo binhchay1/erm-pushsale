@@ -8,6 +8,7 @@ import {
     PushsaleSelect,
     usePushsaleFilters,
 } from '@/components/reports/PushsaleReportChrome';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { formatNumber } from '@/lib/format';
 
@@ -164,30 +165,36 @@ export default function MarketingRanking({ report = {}, filters = {}, filterOpti
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title={pageTitle} />
             <section className="psr-page">
-                <div className="psr-topbar">
-                    <h1>{pageTitle}</h1>
-                    <div className="psr-primary-filters">
-                        <PushsaleDateRange filters={draft} onChange={set} />
-                        <PushsaleSelect value={draft.discount_mode ?? ''} onChange={(value) => set('discount_mode', value)} options={filterOptions.discountModes ?? []} placeholder="Sau chiết khấu" />
-                        <PushsaleSelect value={draft.operation_scope ?? ''} onChange={(value) => set('operation_scope', value)} options={filterOptions.operationScopes ?? []} placeholder="Tác nghiệp cần" />
-                    </div>
-                    <div className="psr-actions">
-                        <button type="button" className="psr-collapse" onClick={() => setCollapsed((value) => !value)}><i className={`fa fa-angle-double-${collapsed ? 'down' : 'up'}`} /></button>
-                        <PushsaleSearchButton onClick={() => apply()} />
-                        <div className="psr-gear" ref={gearRef}>
-                            <button type="button" className="psr-square-button" onClick={() => setGearOpen((value) => !value)}><i className="fa fa-cog" /></button>
-                            {gearOpen && <div className="psr-gear-menu"><button type="button" onClick={() => window.print()}><i className="fa fa-print" /> In bảng xếp hạng</button><button type="button" onClick={() => apply()}><i className="fa fa-refresh" /> Làm mới dữ liệu</button></div>}
+                <PageHeader
+                    title={pageTitle}
+                    pageCode={activeMenuCode}
+                    className="psr-topbar"
+                    filters={(
+                        <div className="psr-primary-filters">
+                            <PushsaleDateRange filters={draft} onChange={set} />
+                            <PushsaleSelect value={draft.discount_mode ?? ''} onChange={(value) => set('discount_mode', value)} options={filterOptions.discountModes ?? []} placeholder="Sau chiết khấu" />
+                            <PushsaleSelect value={draft.operation_scope ?? ''} onChange={(value) => set('operation_scope', value)} options={filterOptions.operationScopes ?? []} placeholder="Tác nghiệp cần" />
                         </div>
-                        <button type="button" className="psr-help" title="Bảng xếp hạng được tính từ dữ liệu contact và đơn chốt thực tế"><i className="fa fa-question-circle" /></button>
-                    </div>
-                </div>
-
-                {!collapsed && (
-                    <div className="psr-filter-row">
-                        <PushsaleSelect value={draft.team_leader_id ?? ''} onChange={(value) => { set('team_leader_id', value); set('team_id', ''); }} options={filterOptions.teamLeaders ?? []} placeholder="--Chọn trưởng nhóm--" />
-                        <PushsaleSelect value={draft.team_id ?? ''} onChange={(value) => set('team_id', value)} options={teams} placeholder="--Chọn nhóm--" />
-                    </div>
-                )}
+                    )}
+                    actions={(
+                        <div className="psr-actions">
+                            <button type="button" className="psr-collapse" onClick={() => setCollapsed((value) => !value)}><i className={`fa fa-angle-double-${collapsed ? 'down' : 'up'}`} /></button>
+                            <PushsaleSearchButton onClick={() => apply()} />
+                            <div className="psr-gear" ref={gearRef}>
+                                <button type="button" className="psr-square-button" onClick={() => setGearOpen((value) => !value)}><i className="fa fa-cog" /></button>
+                                {gearOpen && <div className="psr-gear-menu"><button type="button" onClick={() => window.print()}><i className="fa fa-print" /> In bảng xếp hạng</button><button type="button" onClick={() => apply()}><i className="fa fa-refresh" /> Làm mới dữ liệu</button></div>}
+                            </div>
+                            <button type="button" className="psr-help" title="Bảng xếp hạng được tính từ dữ liệu contact và đơn chốt thực tế"><i className="fa fa-question-circle" /></button>
+                        </div>
+                    )}
+                    advanced={!collapsed ? (
+                        <div className="psr-filter-row">
+                            <PushsaleSelect value={draft.team_leader_id ?? ''} onChange={(value) => { set('team_leader_id', value); set('team_id', ''); }} options={filterOptions.teamLeaders ?? []} placeholder="--Chọn trưởng nhóm--" />
+                            <PushsaleSelect value={draft.team_id ?? ''} onChange={(value) => set('team_id', value)} options={teams} placeholder="--Chọn nhóm--" />
+                        </div>
+                    ) : null}
+                    collapsible={false}
+                />
 
                 <div className="psr-content">
                     <Podium items={report.top ?? []} />

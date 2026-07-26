@@ -38,6 +38,10 @@ final class LandingConnectionsController extends Controller
         $routeUrl = $isWebsiteRoute ? '/admin/marketing/website-connections' : '/admin/marketing/landing-connections';
         $recordsUrl = $routeUrl.'/records';
         $activeMenuCode = $isWebsiteRoute ? '2.4.2' : '2.4.1';
+        // URL quyết định loại nguồn, không cần ?connection_type= trong link menu.
+        if ($isWebsiteRoute && ! $request->filled('connection_type')) {
+            $request->merge(['connection_type' => 'website']);
+        }
 
         $query = LandingConnection::query()
             ->with(array_merge($this->manager->relations(), ['updatedBy:id,name,email']))
@@ -54,6 +58,13 @@ final class LandingConnectionsController extends Controller
             ->when($request->filled('ad_channel'), fn ($query) => $query->where('ad_channel', $request->string('ad_channel')->value()))
             ->when($request->filled('approved'), fn ($query) => $query->where('is_approved', $request->boolean('approved')))
             ->when($request->filled('active'), fn ($query) => $query->where('is_active', $request->boolean('active')))
+            ->when($request->filled('allocation_method'), fn ($query) => $query->where('allocation_method', $request->string('allocation_method')->value()))
+            ->when($request->filled('import_type'), fn ($query) => $query->where('manual_import', $request->string('import_type')->value() === 'manual'))
+            // Nguồn do hệ thống đồng bộ về không có người tạo => "tạo tự động".
+            ->when($request->filled('creation_type'), fn ($query) => $request->string('creation_type')->value() === 'auto'
+                ? $query->whereNull('created_by_user_id')
+                : $query->whereNotNull('created_by_user_id'))
+            ->when($request->filled('sale_user_id'), fn ($query) => $query->whereHas('sales', fn ($sale) => $sale->where('user_id', $request->integer('sale_user_id'))))
             ->latest('id');
 
         $perPage = max(10, min(100, $request->integer('per_page', 20)));
@@ -61,9 +72,13 @@ final class LandingConnectionsController extends Controller
             fn (LandingConnection $connection): array => $this->serialize($connection),
         );
 
-        return Inertia::render('Pushsale/Pages/Marketing/LandingConnectionsPage', [
+        return Inertia::render('Admin/Marketing/LandingConnectionsPage', [
             'connections' => $connections,
-            'filters' => $request->only(['search', 'marketer_user_id', 'product_id', 'connection_type', 'ad_channel', 'approved', 'active', 'per_page']),
+            'filters' => $request->only([
+                'search', 'marketer_user_id', 'product_id', 'connection_type', 'ad_channel',
+                'approved', 'active', 'allocation_method', 'import_type', 'creation_type',
+                'sale_user_id', 'per_page',
+            ]),
             'routeUrl' => $routeUrl,
             'recordsUrl' => $recordsUrl,
             'marketers' => User::query()->whereIn('role', [UserRole::Marketing, UserRole::Admin])->orderBy('name')->get(['id', 'name', 'email']),

@@ -1879,7 +1879,7 @@ class LeadIngestionService
         ?MarketingSource $campaign = null,
     ): void {
         $adminUrl = $campaign && ! $campaign->is_approved
-            ? '/admin/landing-approvals?campaign='.$campaign->id
+            ? '/admin/marketing/landing-approvals?campaign='.$campaign->id
             : '/admin/leads';
 
         $data = [

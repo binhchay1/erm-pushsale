@@ -2,6 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 
 const normalize = (value) => String(value ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -210,20 +211,21 @@ export default function SettingsIndex({ definition = [], values = {}, activityUr
     return (
         <AppLayout>
             <Head title="Cấu hình chức năng" />
-            <form className="ps-feature-settings-page" onSubmit={submit}>
-                <div className="m-header-wrap ps-feature-header-wrap">
-                    <div className="m-header ps-feature-header">
-                        <div className="ps-feature-title"><span className="text">Cấu hình chức năng</span></div>
+            <form id="ps-feature-settings-form" className="ps-feature-settings-page" onSubmit={submit}>
+                <PageHeader
+                    title="Cấu hình chức năng"
+                    className="ps-feature-header-wrap"
+                    actions={(
                         <div className="ps-feature-actions">
                             <Link className="mr15 ps-feature-history" href={activityUrl}>
                                 <i className="fa fa-history" /> Lịch sử hoạt động
                             </Link>
-                            <button type="submit" className="btn btn-sm btn-primary" disabled={processing}>
+                            <button type="submit" form="ps-feature-settings-form" className="btn btn-sm btn-primary" disabled={processing}>
                                 <i className="fa fa-save" /> {processing ? 'Đang cập nhật' : 'Cập nhật'}
                             </button>
                         </div>
-                    </div>
-                </div>
+                    )}
+                />
 
                 <div className="ps-feature-body">
                     <aside className="ps-feature-tabs" aria-label="Nhóm cấu hình">

@@ -120,13 +120,13 @@ class CampaignDelegationAndApprovalTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->post("/admin/landing-approvals/{$campaign->id}/approve")
+            ->post("/admin/marketing/landing-approvals/{$campaign->id}/approve")
             ->assertSessionHasErrors('campaign');
 
         $this->assertFalse($campaign->fresh()->is_approved);
 
         $this->actingAs($admin)
-            ->post("/admin/landing-approvals/{$campaign->id}/approve", ['product_id' => $product->id])
+            ->post("/admin/marketing/landing-approvals/{$campaign->id}/approve", ['product_id' => $product->id])
             ->assertRedirect();
 
         $campaign->refresh();

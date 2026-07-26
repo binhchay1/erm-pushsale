@@ -68,7 +68,7 @@ class NotificationService
             'landing_approval',
             null,
             null,
-            '/admin/landing-approvals?campaign='.$campaign->id,
+            '/admin/marketing/landing-approvals?campaign='.$campaign->id,
             [
                 'campaign_name' => $campaign->name,
                 'creator' => $creatorName,

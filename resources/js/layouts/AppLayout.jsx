@@ -5,6 +5,7 @@ import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { LocaleSync } from '@/components/layout/LocaleSync';
+import { PageHeaderOutlet, PageHeaderProvider } from '@/components/layout/PageHeader';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useFlashToast } from '@/hooks/useFlashToast';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
@@ -167,20 +168,23 @@ export default function AppLayout({ children }) {
                 <AppHeader onToggleSidebar={toggleSidebar} />
                 <AppSidebar collapsed={!sidebarOpen} onNavigate={closeSidebar} />
 
-                <main className="content-wrapper">
-                    <div className="content-inner">
-                        <div className="ps-page-viewport">
-                            {pageTransitioning && !pendingDashboardRole && (
-                                <div className="pushsale-route-loading" aria-live="polite"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>
-                            )}
-                            {pendingDashboardRole ? (
-                                <DashboardSkeleton role={pendingDashboardRole} />
-                            ) : (
-                                children
-                            )}
+                <PageHeaderProvider>
+                    <main className="content-wrapper">
+                        <div className="content-inner">
+                            <div className="ps-page-viewport">
+                                <PageHeaderOutlet />
+                                {pageTransitioning && !pendingDashboardRole && (
+                                    <div className="pushsale-route-loading" aria-live="polite"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>
+                                )}
+                                {pendingDashboardRole ? (
+                                    <DashboardSkeleton role={pendingDashboardRole} />
+                                ) : (
+                                    children
+                                )}
+                            </div>
                         </div>
-                    </div>
-                </main>
+                    </main>
+                </PageHeaderProvider>
 
                 <button
                     type="button"

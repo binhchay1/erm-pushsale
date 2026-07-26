@@ -82,6 +82,8 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-adminlte-canonical-contract.css', layer: 'canonical-last', load: () => import('../../css/pushsale-adminlte-canonical-contract.css') },
     // Page frame before sidebar so menu chrome still wins conflicts.
     { file: 'pushsale-page-frame-contract.css', layer: 'page-frame-last', load: () => import('../../css/pushsale-page-frame-contract.css') },
+    // Single source of truth for the page title bar (.m-header-wrap > .m-header).
+    { file: 'pushsale-page-header-contract.css', layer: 'page-header-last', load: () => import('../../css/pushsale-page-header-contract.css') },
     // Absolute last: single source of truth for sidebar + L3 flyout chrome.
     { file: 'pushsale-sidebar-canonical-contract.css', layer: 'menu-canonical-last', load: () => import('../../css/pushsale-sidebar-canonical-contract.css') },
 ];

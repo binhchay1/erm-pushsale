@@ -44,17 +44,62 @@ class PushsaleUnifiedShellContractTest extends TestCase
         $this->assertSame('pushsale-sidebar-canonical-contract.css', $lastCss);
     }
 
+    public function test_page_header_css_sits_between_page_frame_and_sidebar_canonical(): void
+    {
+        $registry = file_get_contents(dirname(__DIR__, 2).'/resources/js/lib/pushsaleStyleRegistry.js');
+        $this->assertIsString($registry);
+
+        $pageHeader = strrpos($registry, 'pushsale-page-header-contract.css');
+        $pageFrame = strrpos($registry, 'pushsale-page-frame-contract.css');
+        $sidebarCanonical = strrpos($registry, 'pushsale-sidebar-canonical-contract.css');
+
+        $this->assertNotFalse($pageHeader);
+        $this->assertGreaterThan($pageFrame, $pageHeader);
+        $this->assertGreaterThan($pageHeader, $sidebarCanonical);
+    }
+
+    public function test_shared_page_header_renders_pushsale_markup_and_owns_a_single_slot(): void
+    {
+        $header = file_get_contents(dirname(__DIR__, 2).'/resources/js/components/layout/PageHeader.jsx');
+        $layout = file_get_contents(dirname(__DIR__, 2).'/resources/js/layouts/AppLayout.jsx');
+
+        $this->assertIsString($header);
+        $this->assertIsString($layout);
+
+        $this->assertStringContainsString('m-header-wrap ps-page-header', $header);
+        $this->assertStringContainsString('m-header ps-page-header__row', $header);
+        $this->assertStringContainsString('ps-page-header__advanced box-body', $header);
+        $this->assertStringContainsString('createPortal', $header);
+
+        $this->assertStringContainsString('PageHeaderProvider', $layout);
+        $this->assertStringContainsString('<PageHeaderOutlet', $layout);
+    }
+
+    public function test_page_header_contract_keeps_shadow_without_bottom_border(): void
+    {
+        $css = file_get_contents(dirname(__DIR__, 2).'/resources/css/pushsale-page-header-contract.css');
+        $this->assertIsString($css);
+
+        $this->assertStringContainsString('--ps-header-shadow', $css);
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.ps-page-header[^{]*\{[^}]*border-bottom:\s*1px/s',
+            $css,
+            'Header dùng chung không được kẻ viền dưới, chỉ dùng đổ bóng.'
+        );
+    }
+
     public function test_page_shell_exposes_shared_frame_slots(): void
     {
         $shell = file_get_contents(dirname(__DIR__, 2).'/resources/js/components/layout/PushsalePageShell.jsx');
         $this->assertIsString($shell);
-        $this->assertStringContainsString('ps-page-shell__main-row', $shell);
-        $this->assertStringContainsString('ps-page-shell__advanced-row', $shell);
+        // Header đã gộp về PageHeader dùng chung; shell chỉ còn notice → toolbar → body.
+        $this->assertStringContainsString('PageHeader', $shell);
+        $this->assertStringContainsString('primaryFilters', $shell);
+        $this->assertStringContainsString('advancedFilters', $shell);
+        $this->assertStringContainsString('ps-page-shell__notice', $shell);
         $this->assertStringContainsString('ps-page-shell__toolbar', $shell);
         $this->assertStringContainsString('ps-page-shell__body', $shell);
-        $this->assertStringContainsString('is-title-only', $shell);
-        $this->assertStringContainsString('is-title-actions', $shell);
-        $this->assertStringContainsString('has-primary-filters', $shell);
+        $this->assertStringNotContainsString('<header', $shell);
     }
 
     public function test_key_pages_use_shared_page_shell_frame(): void
@@ -92,7 +137,7 @@ class PushsaleUnifiedShellContractTest extends TestCase
 
     public function test_captured_templates_are_normalized_before_rendering_rows(): void
     {
-        $page = file_get_contents(dirname(__DIR__, 2).'/resources/js/pages/Pushsale/BusinessPage.jsx');
+        $page = file_get_contents(dirname(__DIR__, 2).'/resources/js/components/pushsale/BusinessPage.jsx');
         $this->assertIsString($page);
         $this->assertStringContainsString('pushsale-primary-header-wrap', $page);
         $this->assertStringContainsString('pushsale-composite-filter-row', $page);

@@ -34,7 +34,7 @@ class LandingApprovalController extends Controller
             ->map(fn (LandingConnection $connection): array => $this->presentForApproval($connection, $landing))
             ->values();
 
-        return Inertia::render('Pushsale/Pages/Marketing/LandingApprovalPage', [
+        return Inertia::render('Admin/Marketing/LandingApprovalPage', [
             'campaigns' => $connections,
             'products' => Product::query()
                 ->where('is_active', true)

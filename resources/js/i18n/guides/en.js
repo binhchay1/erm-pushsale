@@ -202,7 +202,7 @@ export default [
         ],
     },
     {
-        path: '/admin/landing-approvals',
+        path: '/admin/marketing/landing-approvals',
         title: 'Landing page approvals',
         intro: 'Approve marketing landing / campaign connections before they receive leads.',
         sections: [

@@ -2,6 +2,8 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 
 function currentPath() {
@@ -141,31 +143,38 @@ export default function DataDistributionIndex({ filters = {}, products = [], sal
         <AppLayout activeMenuCode="1.5">
             <Head title="Phân bổ data" />
             <form className="psdd-page" onSubmit={distribute}>
-                <div className="psdd-topbar">
-                    <div className="psdd-title">Phân bổ data</div>
-                    <select value={localFilters.returning_scope} onChange={(event) => setLocalFilters({ ...localFilters, returning_scope: event.target.value })}>
-                        <option value="">--Chọn khách cũ--</option>
-                        <option value="new">Khách mới</option>
-                        <option value="old">Khách cũ / trùng cần xử lý</option>
-                    </select>
-                    <select value={localFilters.data_scope} onChange={(event) => setLocalFilters({ ...localFilters, data_scope: event.target.value })}>
-                        <option value="all">--Toàn bộ--</option>
-                        <option value="landing">Landing</option>
-                        <option value="pancake">Pancake</option>
-                        <option value="manual">Nhập tay</option>
-                    </select>
-                    <select value={localFilters.operation_stage} onChange={(event) => setLocalFilters({ ...localFilters, operation_stage: event.target.value })}>
-                        <option value="">--Chọn tác nghiệp--</option>
-                        {operationOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                    </select>
-                    <div className="psdd-date-range">
-                        <input type="date" value={normalizeDate(localFilters.date_from)} onChange={(event) => setLocalFilters({ ...localFilters, date_from: event.target.value })} />
-                        <span>00:00 -</span>
-                        <input type="date" value={normalizeDate(localFilters.date_to)} onChange={(event) => setLocalFilters({ ...localFilters, date_to: event.target.value })} />
-                        <span>23:59</span>
-                    </div>
-                    <button type="button" className="psdd-search" onClick={applyFilters}><i className="fa fa-search" /> Tìm kiếm</button>
-                </div>
+                <PageHeader
+                    title="Phân bổ data"
+                    pageCode="1.5"
+                    className="psdd-topbar"
+                    filters={(
+                        <>
+                            <select value={localFilters.returning_scope} onChange={(event) => setLocalFilters({ ...localFilters, returning_scope: event.target.value })}>
+                                <option value="">--Chọn khách cũ--</option>
+                                <option value="new">Khách mới</option>
+                                <option value="old">Khách cũ / trùng cần xử lý</option>
+                            </select>
+                            <select value={localFilters.data_scope} onChange={(event) => setLocalFilters({ ...localFilters, data_scope: event.target.value })}>
+                                <option value="all">--Toàn bộ--</option>
+                                <option value="landing">Landing</option>
+                                <option value="pancake">Pancake</option>
+                                <option value="manual">Nhập tay</option>
+                            </select>
+                            <select value={localFilters.operation_stage} onChange={(event) => setLocalFilters({ ...localFilters, operation_stage: event.target.value })}>
+                                <option value="">--Chọn tác nghiệp--</option>
+                                {operationOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                            </select>
+                            <DateRangeFilter
+                                boxed
+                                className="psdd-date-range"
+                                from={localFilters.date_from}
+                                to={localFilters.date_to}
+                                onChange={({ date_from, date_to }) => setLocalFilters({ ...localFilters, date_from, date_to })}
+                            />
+                        </>
+                    )}
+                    actions={<button type="button" className="psdd-search" onClick={applyFilters}><i className="fa fa-search" /> Tìm kiếm</button>}
+                />
 
                 <div className="psdd-notice">
                     - Mỗi lần phân bổ tối đa {stats.max_batch_size ?? 5000} bản ghi<br />

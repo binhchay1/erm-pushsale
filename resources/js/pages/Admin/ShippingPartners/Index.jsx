@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { ShippingPartnerCard } from '@/components/shipping/ShippingPartnerCard';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 
 const providerOrder = [
@@ -131,14 +132,7 @@ export default function ShippingPartnersIndex({ providers = [], defaultConfig = 
         <AppLayout activeMenuCode="1.4">
             <Head title="Cấu hình giao vận" />
             <section className="pssp-page ps-legacy-page">
-                <div className="m-header-wrap pssp-header-wrap">
-                    <div className="m-header">
-                        <div className="col-xs-9 form-group">
-                            <span className="text">Cấu hình giao vận</span>
-                        </div>
-                        <div className="col-xs-3 form-group text-right" />
-                    </div>
-                </div>
+                <PageHeader title="Cấu hình giao vận" pageCode="1.4" className="pssp-header-wrap" />
 
                 <div className="box-body pssp-page-body">
                     <ShippingDefaultPanel providers={providers} defaultConfig={defaultConfig} />
