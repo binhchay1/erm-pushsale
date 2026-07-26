@@ -133,3 +133,19 @@ Because AdminLTE legacy CSS can override hover selectors, `AppSidebar.jsx` also 
 - A result with `closes_order = true` calls the same real close-order service used by sale operation, so it must be treated as business configuration.
 - Combo modal tables must stay inside the dialog frame; use canonical `.ps-combo-dialog` rules rather than per-dialog inline widths.
 - PageFrame title alignment must start from the 14px page gutter; do not center title text inside menu group 1/2 pages unless the original Pushsale HTML does so explicitly.
+
+## v135 taxonomy modal contract
+
+Product taxonomy popups (`Danh sách phân loại`, `Danh sách thuộc tính sản phẩm`, `Danh sách giá trị thuộc tính`) are full-viewport Pushsale-style dialogs. They must not rely on raw Bootstrap columns for body layout. The canonical layout is:
+
+- full viewport dialog surface,
+- compact header with close button,
+- search/filter row at the top,
+- two-pane body: list table left, edit/update form right.
+
+Change only these files for future taxonomy modal work:
+
+- `resources/js/pages/Admin/Products/Index.jsx`
+- `resources/css/pushsale-adminlte-canonical-contract.css`
+
+Do not create another product taxonomy CSS override file.

@@ -21,7 +21,7 @@ function DialogShell({ title, open, onClose, children, wide = false, hiddenHeade
             headerClassName={hiddenHeader ? 'sr-only' : undefined}
             bodyClassName={`ps-source-dialog-body ${bodyClassName}`}
             showClose={showClose}
-            contentProps={isTaxonomy ? { style: { maxWidth: 'calc(100vw - 8px)', width: 'calc(100vw - 8px)', maxHeight: 'calc(100dvh - 8px)' } } : undefined}
+            contentProps={isTaxonomy ? { style: { position: 'fixed', inset: '4px', left: '4px', top: '4px', right: '4px', bottom: '4px', transform: 'none', maxWidth: 'calc(100vw - 8px)', width: 'calc(100vw - 8px)', height: 'calc(100dvh - 8px)', maxHeight: 'calc(100dvh - 8px)', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' } } : undefined}
         >
             {children}
         </PushsaleDialog>
@@ -640,7 +640,7 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
             </DialogShell>
 
             <DialogShell title={activeTaxonomyMeta?.title ?? ''} open={Boolean(taxonomy)} onClose={() => setTaxonomy(null)} wide hiddenHeader={false} showClose className="ps-taxonomy-source-modal" bodyClassName="ps-taxonomy-source-body">
-                <div className={`ps-taxonomy-source-form ps-taxonomy-${taxonomy ?? 'none'}`}>
+                <div className={`ps-taxonomy-source-form ps-taxonomy-canonical-v135 ps-taxonomy-${taxonomy ?? 'none'}`}>
                     <div className="m-header-wrap ps-taxonomy-header-wrap">
                         <div className="m-header"><div className="col-sm-9 form-group"><span className="text">{activeTaxonomyMeta?.title}</span></div><div className="col-sm-3 form-group ps-taxonomy-close-cell"><button type="button" className="ps-taxonomy-close" onClick={() => setTaxonomy(null)} aria-label="Đóng"><i className="fa fa-times" /></button></div></div>
                     </div>
@@ -652,9 +652,9 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                         </div>
                     </div>
                     <div className="ps-taxonomy-separator" />
-                    <div className="box-body ps-taxonomy-main">
-                        <div className="ps-taxonomy-grid">
-                            <div className="ps-taxonomy-list-pane">
+                    <div className="box-body ps-taxonomy-main" style={{ flex: '1 1 auto', minHeight: 0 }}>
+                        <div className="ps-taxonomy-grid" style={{ display: 'grid', gridTemplateColumns: taxonomy === 'value' ? 'minmax(560px, 1fr) minmax(520px, 0.85fr)' : 'minmax(520px, 0.72fr) minmax(520px, 1fr)', gap: 18, width: '100%', alignItems: 'start' }}>
+                            <div className="ps-taxonomy-list-pane" style={{ minWidth: 0, width: '100%' }}>
                                 <table className="table table-bordered ps-taxonomy-table">
                                     <thead><tr><th className="text-center">Id</th><th className="text-left no-wrap">Tên</th>{taxonomy === 'value' && <th className="text-left no-wrap">Thuộc tính</th>}<th className="text-center no-wrap">Cập nhật</th><th className="text-center" /></tr></thead>
                                     <tbody>
@@ -672,7 +672,7 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                                     <div className="col-xs-6 text-right form-group"><ul className="pagination pagination-sm no-margin pull-right"><li className={taxonomyPage <= 1 ? 'disabled' : ''}><button type="button" disabled={taxonomyPage <= 1} onClick={() => setTaxonomyPage((page) => Math.max(1, page - 1))}>«</button></li>{taxonomyPageNumbers.map((page) => <li key={page} className={page === taxonomyPage ? 'active' : ''}><button type="button" onClick={() => setTaxonomyPage(page)}>{page}</button></li>)}<li className={taxonomyPage >= taxonomyTotalPages ? 'disabled' : ''}><button type="button" disabled={taxonomyPage >= taxonomyTotalPages} onClick={() => setTaxonomyPage((page) => Math.min(taxonomyTotalPages, page + 1))}>»</button></li></ul></div>
                                 </div>
                             </div>
-                            <div className="ps-taxonomy-info-pane">
+                            <div className="ps-taxonomy-info-pane" style={{ minWidth: 0, width: '100%' }}>
                                 <form onSubmit={saveTaxonomy}>
                                     <table className="table table-bordered table-line ps-taxonomy-info-table">
                                         <tbody>
