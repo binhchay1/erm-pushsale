@@ -117,6 +117,7 @@ export default {
         send: 'Gửi',
         send_failed: 'Không gửi được tin nhắn.',
         send_hint: 'Ctrl/Cmd + Enter để gửi',
+        same_phone_link: 'Xem tin nhắn cùng số điện thoại',
         read_only: 'Bạn chỉ có quyền xem. Cần quyền Khách hàng mức Toàn quyền để gửi tin nhắn nội bộ.',
         pancake_read_only: 'Bạn chỉ có quyền xem. Chỉ Admin, Sales hoặc người được cấp quyền Chat khách hàng Pancake mức Toàn quyền mới được gửi tin cho khách.',
         purchase_title: 'Lịch sử mua hàng của khách',

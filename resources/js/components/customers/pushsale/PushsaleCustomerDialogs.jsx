@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { apiGet, apiPost } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 function LoadingBlock() {
     return <div className="ps-customer-dialog-loading"><i className="fa fa-spinner fa-spin" /> Đang tải dữ liệu…</div>;
@@ -37,7 +38,14 @@ function messageDate(message) {
     return message.createdAt ?? message.sentAt;
 }
 
+function messageDirectionClass(message = {}) {
+    const direction = String(message.direction ?? message.messageDirection ?? '').toLowerCase();
+    if (direction === 'outbound' || direction === 'sale' || direction === 'agent') return 'is-outbound';
+    return 'is-inbound';
+}
+
 export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
+    const t = useT();
     const [tab, setTab] = useState('internal');
     const [loading, setLoading] = useState(false);
     const [customer, setCustomer] = useState(null);
@@ -58,7 +66,7 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
                 setMessages(data.messages ?? []);
                 setCanWrite(Boolean(data.canWrite));
             })
-            .catch((error) => active && toast.error(error.message ?? 'Không tải được tin nhắn.'))
+            .catch((error) => active && toast.error(error.message ?? t('operations.customer_interactions.load_failed')))
             .finally(() => active && setLoading(false));
         return () => { active = false; };
     }, [open, order?.id]);
@@ -81,7 +89,7 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
             })
             .catch((error) => {
                 if (!active) return;
-                toast.error(error.message ?? 'Không tải được chat Pancake.');
+                toast.error(error.message ?? t('operations.customer_interactions.load_failed'));
                 setPancake((current) => ({ ...current, loaded: true, loading: false }));
             });
         return () => { active = false; };
@@ -115,7 +123,7 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
             }
             setDraft('');
         } catch (error) {
-            toast.error(error.message ?? 'Không gửi được tin nhắn.');
+            toast.error(error.message ?? t('operations.customer_interactions.send_failed'));
         } finally {
             setSending(false);
         }
@@ -125,60 +133,66 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
         <CustomerDialogShell
             open={open}
             onOpenChange={onOpenChange}
-            width="800px"
-            title={`Tin nhắn: ${customer?.name ?? order?.customerName ?? '-'}`}
+            width="980px"
+            title={`${t('operations.customer_interactions.messages_title')}: ${customer?.name ?? order?.customerName ?? '-'}`}
         >
-            <div className="ps-dialog-customer-line">
-                <a href="#" onClick={(event) => event.preventDefault()}>{customer?.name ?? order?.customerName ?? '—'}</a>
-                <span> / </span>
-                <a href={`tel:${customer?.phone ?? order?.customerPhone ?? ''}`}>{customer?.phone ?? order?.customerPhone ?? '—'}</a>
-            </div>
-            <div className="ps-dialog-address">{customer?.address ?? order?.effectiveShippingAddress ?? '—'}</div>
-
-            <div className="ps-customer-tabs">
-                <button type="button" className={tab === 'internal' ? 'active' : ''} onClick={() => setTab('internal')}>Tin nhắn nội bộ</button>
-                <button type="button" className={tab === 'pancake' ? 'active' : ''} onClick={() => setTab('pancake')}>Chat khách hàng (Pancake)</button>
-            </div>
-
-            {tab === 'pancake' && pancake.loaded && !pancake.connected ? (
-                <div className="alert alert-warning ps-compact-alert">Tài khoản chưa kết nối Pancake hoặc chưa ánh xạ hội thoại khách hàng.</div>
-            ) : null}
-
-            <div className="ps-message-composer">
-                <input
-                    type="text"
-                    className="form-control"
-                    value={draft}
-                    onChange={(event) => setDraft(event.target.value)}
-                    onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                            event.preventDefault();
-                            send();
-                        }
-                    }}
-                    disabled={!currentCanWrite || sending}
-                    placeholder={currentCanWrite ? 'Nhập nội dung tin nhắn' : 'Bạn chỉ có quyền xem'}
-                />
-                <button type="button" className="btn btn-primary" disabled={!currentCanWrite || !draft.trim() || sending} onClick={send}>
-                    {sending ? <i className="fa fa-spinner fa-spin" /> : null} Gửi
-                </button>
-            </div>
-
-            <div className="ps-message-list">
-                {currentLoading ? <LoadingBlock /> : currentMessages.length ? currentMessages.map((message) => (
-                    <div className="ps-message-row" key={`${tab}-${message.id ?? message.externalId ?? Math.random()}`}>
-                        <div className="ps-message-meta">
-                            <strong>{messageAuthor(message)}</strong>
-                            {message.orderCode ? <span> · {message.orderCode}</span> : null}
-                            <span className="pull-right">{formatDateTime(messageDate(message))}</span>
-                        </div>
-                        <div className="ps-message-text">{message.message ?? '—'}</div>
+            <div className="ps-message-dialog-card">
+                <div className="ps-message-dialog-head">
+                    <div>
+                        <div className="ps-message-dialog-customer">{customer?.name ?? order?.customerName ?? '—'} / {customer?.phone ?? order?.customerPhone ?? '—'}</div>
+                        <div className="ps-message-dialog-meta">{customer?.address ?? order?.effectiveShippingAddress ?? '—'}</div>
                     </div>
-                )) : <div className="ps-empty-message">Chưa có tin nhắn.</div>}
+                    <div className="ps-message-dialog-meta text-right">
+                        <div>{tab === 'pancake' ? t('operations.customer_interactions.pancake_messages_title') : t('operations.customer_interactions.internal_messages_title')}</div>
+                        {pancake.source?.pageName ? <div>Page: {pancake.source.pageName}</div> : null}
+                    </div>
+                </div>
+
+                <div className="ps-customer-tabs ps-message-tabs">
+                    <button type="button" className={tab === 'internal' ? 'active' : ''} onClick={() => setTab('internal')}>{t('operations.customer_interactions.internal_tab')}</button>
+                    <button type="button" className={tab === 'pancake' ? 'active' : ''} onClick={() => setTab('pancake')}>{t('operations.customer_interactions.pancake_tab')}</button>
+                </div>
+
+                {tab === 'pancake' && pancake.loaded && !pancake.connected ? (
+                    <div className="alert alert-warning ps-compact-alert">{t('operations.customer_interactions.pancake_not_connected')}</div>
+                ) : null}
+
+                <div className="ps-message-composer">
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={draft}
+                        onChange={(event) => setDraft(event.target.value)}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                                event.preventDefault();
+                                send();
+                            }
+                        }}
+                        disabled={!currentCanWrite || sending}
+                        placeholder={currentCanWrite ? (tab === 'pancake' ? t('operations.customer_interactions.pancake_message_placeholder') : t('operations.customer_interactions.message_placeholder')) : t('operations.customer_interactions.read_only')}
+                    />
+                    <button type="button" className="btn btn-primary" disabled={!currentCanWrite || !draft.trim() || sending} onClick={send}>
+                        {sending ? <i className="fa fa-spinner fa-spin" /> : null} {t('operations.customer_interactions.send')}
+                    </button>
+                </div>
+
+                <div className="ps-message-list">
+                    {currentLoading ? <LoadingBlock /> : currentMessages.length ? currentMessages.map((message) => (
+                        <div className={`ps-message-row ${messageDirectionClass(message)} ${tab === 'pancake' ? 'is-pancake' : 'is-internal'}`} key={`${tab}-${message.id ?? message.externalId ?? Math.random()}`}>
+                            <div className="ps-message-meta">
+                                <strong>{messageAuthor(message)}</strong>
+                                {message.orderCode ? <span> · {message.orderCode}</span> : null}
+                                <span className="pull-right">{formatDateTime(messageDate(message))}</span>
+                            </div>
+                            <div className="ps-message-text">{message.message ?? '—'}</div>
+                        </div>
+                    )) : <div className="ps-empty-message">{tab === 'pancake' ? t('operations.customer_interactions.pancake_messages_empty') : t('operations.customer_interactions.messages_empty')}</div>}
+                </div>
             </div>
 
             <button type="button" className="ps-same-phone-link" onClick={() => setTab('internal')}>
-                <i className="fa fa-link" /> Xem tin nhắn cùng số điện thoại
+                <i className="fa fa-link" /> {t('operations.customer_interactions.same_phone_link')}
             </button>
         </CustomerDialogShell>
     );

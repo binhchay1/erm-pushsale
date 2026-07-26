@@ -149,3 +149,22 @@ Change only these files for future taxonomy modal work:
 - `resources/css/pushsale-adminlte-canonical-contract.css`
 
 Do not create another product taxonomy CSS override file.
+
+## v136 Contract bổ sung
+
+### Sidebar hover
+- Source of truth: `AppSidebar.jsx` + `pushsale-adminlte-canonical-contract.css`.
+- Không tạo file CSS mới để sửa hover menu. Menu cấp 2 hover phải dùng `data-ps-second-hover` hoặc `:hover` canonical rule.
+
+### Dialog khách hàng / Pancake
+- Dialog React mới dùng `PushsaleDialog`; không nhúng lại nút close cũ trong body.
+- Tab nội bộ và Pancake dùng chung `PushsaleCustomerMessagesDialog` để tránh lệch UI.
+- Kiểm tra cấu hình Pancake bằng `php artisan pancake:doctor --json` trước khi test chat thật.
+
+### Product breakdown cells
+- Cột `Sản phẩm - Số lượng - Đơn giá` dùng `OrderProductsBreakdown`.
+- Không viết lại HTML product breakdown theo từng trang; chỉ sửa CSS shared/canonical.
+
+### Toast realtime / phân bổ data
+- Notification realtime được coalesce theo id `pushsale-realtime-notification`.
+- Phân bổ data dùng toast id `manual-data-distribution` để không spam liên tục.

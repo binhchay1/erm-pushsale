@@ -121,17 +121,17 @@ export default function DataDistributionIndex({ filters = {}, products = [], sal
         }
 
         setDistributing(true);
-        toast.loading('Đang phân bổ data…', { id: 'manual-data-distribution' });
+        toast.loading('Đang phân bổ data…', { id: 'manual-data-distribution', duration: 9000 });
         router.post(submitUrl(), payload, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
             onSuccess: () => {
-                toast.success('Đã phân bổ data cho Sale.', { id: 'manual-data-distribution' });
+                toast.success('Đã phân bổ data cho Sale.', { id: 'manual-data-distribution', duration: 6500 });
                 setSelectedProducts(new Map());
             },
             onError: (errors) => {
-                toast.error(Object.values(errors || {})[0] ?? 'Không thể phân bổ data.', { id: 'manual-data-distribution' });
+                toast.error(Object.values(errors || {})[0] ?? 'Không thể phân bổ data.', { id: 'manual-data-distribution', duration: 8000 });
             },
             onFinish: () => setDistributing(false),
         });

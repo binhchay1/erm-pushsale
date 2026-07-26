@@ -164,6 +164,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
     const { navigation = [], activeMenuCode = null } = props;
     const sidebarRef = useRef(null);
     const flyoutTimerRef = useRef(null);
+    const hoveredSecondItemRef = useRef(null);
     const [rememberedMenuCode, setRememberedMenuCode] = useState(() =>
         typeof window === 'undefined' ? null : window.sessionStorage.getItem('pushsale-active-menu-code'),
     );
@@ -261,9 +262,25 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
         if (!element) return;
 
         const link = element.querySelector(':scope > .a2, :scope > a, :scope > button, :scope > span');
-        const apply = (node) => {
-            if (!node) return;
-            if (enabled) {
+        const descendants = link ? Array.from(link.querySelectorAll('span, i, svg, small, b, em')) : [];
+        const nodes = [element, link, ...descendants].filter(Boolean);
+        const paint = enabled && !active;
+
+        if (paint) {
+            element.setAttribute('data-ps-second-hover', 'true');
+            hoveredSecondItemRef.current = element;
+        } else {
+            element.removeAttribute('data-ps-second-hover');
+            if (hoveredSecondItemRef.current === element) hoveredSecondItemRef.current = null;
+        }
+
+        const properties = [
+            'background', 'background-color', 'background-image', 'color', '-webkit-text-fill-color',
+            'border', 'border-top', 'border-right', 'border-bottom', 'border-left', 'outline', 'box-shadow', 'text-shadow',
+        ];
+
+        nodes.forEach((node) => {
+            if (paint) {
                 node.style.setProperty('background', '#0b8ff3', 'important');
                 node.style.setProperty('background-color', '#0b8ff3', 'important');
                 node.style.setProperty('background-image', 'none', 'important');
@@ -274,79 +291,61 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                 node.style.setProperty('border-bottom', '0', 'important');
                 node.style.setProperty('outline', '0', 'important');
                 node.style.setProperty('box-shadow', 'none', 'important');
-                return;
-            }
-
-            ['background', 'background-color', 'background-image', 'color', '-webkit-text-fill-color', 'border', 'border-top', 'border-bottom', 'outline', 'box-shadow'].forEach((property) => node.style.removeProperty(property));
-        };
-
-        if (enabled) {
-            element.setAttribute('data-ps-second-hover', 'true');
-        } else {
-            element.removeAttribute('data-ps-second-hover');
-        }
-
-        apply(element);
-        apply(link);
-        link?.querySelectorAll?.('span, i').forEach((node) => {
-            if (enabled) {
-                node.style.setProperty('color', '#fff', 'important');
-                node.style.setProperty('-webkit-text-fill-color', '#fff', 'important');
+                node.style.setProperty('text-shadow', 'none', 'important');
             } else {
-                node.style.removeProperty('color');
-                node.style.removeProperty('-webkit-text-fill-color');
+                properties.forEach((property) => node.style.removeProperty(property));
             }
         });
     };
 
-    const secondLevelInlineStyle = (key, active = false) => {
-        const reset = {
-            border: 0,
-            borderTop: 0,
-            borderBottom: 0,
-            outline: 0,
-            boxShadow: 'none',
-            backgroundImage: 'none',
-        };
-
-        if (active) return reset;
-        if (hoverSecondKey !== key) return reset;
-
-        return {
-            ...reset,
-            backgroundColor: '#0b8ff3',
-            color: '#fff',
-            WebkitTextFillColor: '#fff',
-        };
-    };
+    const secondLevelInlineStyle = (key, active = false) => ({
+        border: 0,
+        borderTop: 0,
+        borderBottom: 0,
+        outline: 0,
+        boxShadow: 'none',
+        backgroundImage: 'none',
+    });
 
     useEffect(() => {
         const sidebar = sidebarRef.current;
         if (!sidebar) return undefined;
 
-        let hovered = null;
+        const findItem = (target) => target?.closest?.('.treeview-menu.ul2 > li.li2');
+
         const activate = (event) => {
-            const item = event.target?.closest?.('.treeview-menu.ul2 > li.li2');
+            const item = findItem(event.target);
             if (!item || !sidebar.contains(item)) return;
-            if (hovered && hovered !== item) forceSecondLevelHover(hovered, false, false);
-            hovered = item;
-            forceSecondLevelHover(item, true, false);
+            if (hoveredSecondItemRef.current && hoveredSecondItemRef.current !== item) {
+                forceSecondLevelHover(hoveredSecondItemRef.current, false, false);
+            }
+            const active = item.classList.contains('active');
+            forceSecondLevelHover(item, true, active);
         };
 
         const deactivate = (event) => {
-            const item = event.target?.closest?.('.treeview-menu.ul2 > li.li2');
+            const item = findItem(event.target);
             if (!item || !sidebar.contains(item)) return;
             if (item.contains(event.relatedTarget)) return;
-            forceSecondLevelHover(item, false, false);
-            if (hovered === item) hovered = null;
+            forceSecondLevelHover(item, false, item.classList.contains('active'));
         };
 
-        sidebar.addEventListener('pointerover', activate);
-        sidebar.addEventListener('pointerout', deactivate);
+        const clearAll = () => {
+            sidebar.querySelectorAll('.treeview-menu.ul2 > li.li2[data-ps-second-hover="true"]').forEach((item) => {
+                forceSecondLevelHover(item, false, item.classList.contains('active'));
+            });
+        };
+
+        sidebar.addEventListener('pointerover', activate, true);
+        sidebar.addEventListener('pointermove', activate, true);
+        sidebar.addEventListener('pointerout', deactivate, true);
+        sidebar.addEventListener('mouseleave', clearAll, true);
 
         return () => {
-            sidebar.removeEventListener('pointerover', activate);
-            sidebar.removeEventListener('pointerout', deactivate);
+            sidebar.removeEventListener('pointerover', activate, true);
+            sidebar.removeEventListener('pointermove', activate, true);
+            sidebar.removeEventListener('pointerout', deactivate, true);
+            sidebar.removeEventListener('mouseleave', clearAll, true);
         };
     }, []);
 
@@ -413,10 +412,11 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                     <li
                                                         key={key}
                                                         className={cn('li2', childActive && 'active', flyoutOpen && 'flyout-open', hoverSecondKey === key && !childActive && 'ui-hover')}
-                                                        style={!childActive && hoverSecondKey === key ? { backgroundColor: '#0b8ff3', backgroundImage: 'none', border: 0, boxShadow: 'none' } : undefined}
+                                                        style={{ border: 0, boxShadow: 'none', backgroundImage: 'none' }}
                                                         onMouseEnter={(event) => {
                                                             setHoverSecondKey(key);
                                                             forceSecondLevelHover(event.currentTarget, true, childActive);
+                                                            window.requestAnimationFrame(() => forceSecondLevelHover(event.currentTarget, true, childActive));
                                                             if (!hasGrandchildren) closeFlyout();
                                                         }}
                                                         onMouseLeave={(event) => {
@@ -446,7 +446,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                 aria-expanded={flyoutOpen}
                                                                 aria-label={child.title}
                                                             >
-                                                                <span style={!childActive && hoverSecondKey === key ? { color: '#fff', WebkitTextFillColor: '#fff' } : undefined}>{child.title}</span>
+                                                                <span>{child.title}</span>
                                                                 <i className="fa fa-angle-right pull-right" aria-hidden="true" />
                                                             </button>
                                                         ) : (
@@ -460,7 +460,7 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
                                                                     onNavigate?.();
                                                                 }}
                                                             >
-                                                                <span style={!childActive && hoverSecondKey === key ? { color: '#fff', WebkitTextFillColor: '#fff' } : undefined}>{child.title}</span>
+                                                                <span>{child.title}</span>
                                                             </LeafLink>
                                                         )}
                                                     </li>

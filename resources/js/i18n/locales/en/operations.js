@@ -117,6 +117,7 @@ export default {
         send: 'Send',
         send_failed: 'Could not send the message.',
         send_hint: 'Ctrl/Cmd + Enter to send',
+        same_phone_link: 'View messages with the same phone',
         read_only: 'You have read-only access. Full Customer permission is required to send internal messages.',
         pancake_read_only: 'You have read-only access. Only Admin, Sales, or users with Full Pancake customer chat permission can message customers.',
         purchase_title: 'Customer purchase history',

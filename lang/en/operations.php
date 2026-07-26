@@ -7,6 +7,7 @@ return [
         'pancake_read_only' => 'You have read-only access. Only Admin, Sales, or users with Full Pancake customer chat permission can message customers.',
         'read_only' => 'You have read-only access. Full Customer permission is required to send messages.',
         'message_required' => 'Please enter a message.',
+        'same_phone_link' => 'View messages with the same phone',
         'pancake_missing_conversation' => 'The Pancake webhook does not contain a valid conversation_id.',
         'system_actor' => 'System',
         'history_before_tracking' => 'This current-state snapshot predates detailed operation-history tracking.',

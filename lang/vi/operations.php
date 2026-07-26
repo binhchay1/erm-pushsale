@@ -7,6 +7,7 @@ return [
         'pancake_read_only' => 'Bạn chỉ có quyền xem. Chỉ Admin, Sales hoặc người được cấp quyền Chat khách hàng Pancake mức Toàn quyền mới được gửi tin cho khách.',
         'read_only' => 'Bạn chỉ có quyền xem. Cần quyền Khách hàng mức Toàn quyền để gửi tin nhắn.',
         'message_required' => 'Vui lòng nhập nội dung tin nhắn.',
+        'same_phone_link' => 'Xem tin nhắn cùng số điện thoại',
         'pancake_missing_conversation' => 'Webhook Pancake không có conversation_id hợp lệ.',
         'system_actor' => 'Hệ thống',
         'history_before_tracking' => 'Dữ liệu hiện tại được tạo trước khi hệ thống bắt đầu lưu lịch sử chi tiết.',

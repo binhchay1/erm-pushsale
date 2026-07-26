@@ -47,7 +47,7 @@ createInertiaApp({
                         themes={pageProps.themes}
                     >
                         <App {...props} />
-                        <Toaster richColors position="top-right" closeButton visibleToasts={5} offset={18} toastOptions={{ className: 'pushsale-toast' }} />
+                        <Toaster richColors position="top-right" closeButton visibleToasts={3} offset={18} toastOptions={{ className: 'pushsale-toast', duration: 5500 }} />
                     </ThemeProvider>
                 </ErrorBoundary>
             </I18nProvider>

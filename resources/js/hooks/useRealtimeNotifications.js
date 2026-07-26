@@ -30,6 +30,8 @@ export function useRealtimeNotifications() {
     const { auth, reverb, preferences } = usePage().props;
     const prefs = preferences?.notifications ?? {};
     const reloadTimer = useRef(null);
+    const realtimeToastTimer = useRef(null);
+    const pendingRealtimeToast = useRef(null);
 
     useEffect(() => {
         if (!auth?.user?.id || !reverb?.key) {
@@ -56,7 +58,7 @@ export function useRealtimeNotifications() {
                     preserveScroll: true,
                     preserveState: true,
                 });
-            }, 2500);
+            }, 4500);
         };
 
         const channel = echo
@@ -65,16 +67,26 @@ export function useRealtimeNotifications() {
                 if (shouldShowToast(payload.type, prefs)) {
                     const { title, message } = getNotificationText(payload, t, locale);
 
-                    toast.info(title, {
-                        description: message || undefined,
-                        duration: 6000,
-                        action: payload.url
-                            ? {
-                                  label: t('notifications.view'),
-                                  onClick: () => router.visit(payload.url),
-                              }
-                            : undefined,
-                    });
+                    pendingRealtimeToast.current = { title, message, url: payload.url };
+                    if (!realtimeToastTimer.current) {
+                        realtimeToastTimer.current = setTimeout(() => {
+                            const latest = pendingRealtimeToast.current;
+                            pendingRealtimeToast.current = null;
+                            realtimeToastTimer.current = null;
+                            if (!latest) return;
+                            toast.info(latest.title, {
+                                id: 'pushsale-realtime-notification',
+                                description: latest.message || undefined,
+                                duration: 8000,
+                                action: latest.url
+                                    ? {
+                                          label: t('notifications.view'),
+                                          onClick: () => router.visit(latest.url),
+                                      }
+                                    : undefined,
+                            });
+                        }, 700);
+                    }
                 }
 
                 scheduleNotificationReload();
@@ -85,6 +97,11 @@ export function useRealtimeNotifications() {
                 clearTimeout(reloadTimer.current);
                 reloadTimer.current = null;
             }
+            if (realtimeToastTimer.current) {
+                clearTimeout(realtimeToastTimer.current);
+                realtimeToastTimer.current = null;
+            }
+            pendingRealtimeToast.current = null;
             channel.stopListening('.notification.created');
             echo.leave(channelName);
         };
