@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiGet } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 const money = (value) => formatCurrency(Number(value ?? 0));
 
@@ -71,7 +72,7 @@ export function DesiredDeliveryDialog({ order, open, onOpenChange, actionBaseUrl
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-dialog ps-desired-date-dialog" aria-describedby={undefined}>
+            <DialogContent className="ps-sale-dialog ps-sale-modal ps-desired-date-modal ps-desired-date-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Cập nhật ngày muốn giao hàng</DialogTitle></DialogHeader>
                 <form onSubmit={submit} className="ps-desired-date-body">
                     <table className="table table-bordered table-striped">
@@ -135,11 +136,11 @@ export function OperationResultDialog({ order, result, open, onOpenChange, actio
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-dialog ps-operation-result-dialog" aria-describedby={undefined}>
+            <DialogContent className="ps-sale-dialog ps-sale-modal ps-operation-result-modal ps-operation-result-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Cập nhật tác nghiệp</DialogTitle></DialogHeader>
                 <form onSubmit={submit} className="ps-operation-result-body">
                     <div className="form-group"><label>Khách hàng</label><div className="ps-static-value">{order.customerName} - {order.customerPhone}</div></div>
-                    <div className="form-group"><label>Tác nghiệp cần</label><div className="ps-static-value">{order.currentOperation || 'Gọi lần 1'}</div></div>
+                    <div className="form-group"><label>Tác nghiệp cần</label><div className="ps-static-value ps-operation-needed-static"><b>{order.currentOperation || 'Gọi lần 1'}</b>{order.saleOperationNote ? <span>{order.saleOperationNote}</span> : <small>{t('operations.sale_workspace.note_empty_hint')}</small>}</div></div>
                     <div className="form-group"><label>Kết quả tác nghiệp</label><div className="ps-static-value"><b>{result.label}</b></div></div>
                     {needsDate && <div className="form-group"><label>Tác nghiệp tiếp (*)</label><input required className="form-control" type="datetime-local" value={nextAt} onChange={(event) => setNextAt(event.target.value)} /></div>}
                     <div className="form-group"><label>Ghi chú</label><textarea className="form-control" rows={4} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} /></div>
@@ -176,7 +177,7 @@ export function SaleOperationHistoryDialog({ order, context = 'sale', open, onOp
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-dialog ps-operation-history-dialog" aria-describedby={undefined}>
+            <DialogContent className="ps-sale-dialog ps-sale-modal ps-operation-history-modal ps-operation-history-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{dialogTitle}: <span className="ps-history-title-code">{order.orderCode || `#${order.id}`}</span></DialogTitle></DialogHeader>
                 <div className="ps-history-customer-line">
                     <b>{data.customer?.name ?? order.customerName}</b> · {data.customer?.phone ?? order.customerPhone} · {order.orderCode || `Đơn chưa chốt #${order.id}`}
@@ -192,7 +193,7 @@ export function SaleOperationHistoryDialog({ order, context = 'sale', open, onOp
                                     <tr key={history.id} className={autoRow ? 'ps-history-auto-row' : 'ps-history-manual-row'}>
                                         <td className="text-center">{index + 1}</td>
                                         <td><b>{history.actionLabel}</b><br /><span>{history.actorName}</span>{history.actorRole ? <><br /><small>{history.actorRole}</small></> : null}</td>
-                                        <td>{history.stageBefore || history.stageAfter || '—'}</td>
+                                        <td>{history.action === 'note_updated' && history.note ? history.note : (history.stageBefore || history.stageAfter || '—')}</td>
                                         <td>{history.result || '—'}</td>
                                         <td>{history.stageAfter || '—'}{history.nextOperationAt ? <><br /><small>{formatDateTime(history.nextOperationAt)}</small></> : null}</td>
                                         <td className="ps-history-note"><HistoryNote history={history} /></td>
@@ -245,7 +246,7 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange }) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-dialog ps-duplicate-phone-dialog ps-duplicate-phone-dialog-legacy" aria-describedby={undefined}>
+            <DialogContent className="ps-sale-dialog ps-sale-modal ps-duplicate-phone-modal ps-duplicate-phone-dialog ps-duplicate-phone-dialog-legacy" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header ps-duplicate-phone-header">
                     <DialogTitle>Danh sách đơn cùng số điện thoại</DialogTitle>
                     <label className="ps-duplicate-closed-filter"><input type="checkbox" checked={closedOnly} onChange={(event) => setClosedOnly(event.target.checked)} /> Đã chốt đơn</label>
@@ -319,7 +320,7 @@ export function BulkCloseDialog({ orderIds = [], rows = [], actionBaseUrl, open,
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-dialog ps-bulk-close-dialog" aria-describedby={undefined}>
+            <DialogContent className="ps-sale-dialog ps-sale-modal ps-bulk-close-modal ps-bulk-close-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Chốt đơn nhiều</DialogTitle></DialogHeader>
                 <div className="ps-bulk-close-body">
                     <div className="alert alert-info">Đã chọn <b>{orderIds.length}</b> đơn. Mã đơn sẽ chỉ được sinh cho các đơn chốt thành công.</div>

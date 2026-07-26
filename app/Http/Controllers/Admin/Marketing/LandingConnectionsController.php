@@ -118,9 +118,10 @@ final class LandingConnectionsController extends Controller
 
         try {
             $payload = $this->validated($request);
-            if (! collect($payload['products'] ?? [])->contains(fn ($row): bool => is_array($row) && filled($row['product_id'] ?? null))) {
-                $payload['is_approved'] = false;
-            }
+            $payload['preserve_product_mappings'] = true;
+            $payload['is_approved'] = $record->products()->exists()
+                ? (bool) $record->is_approved
+                : false;
 
             $this->manager->update($record, $payload, $request->user());
         } catch (ValidationException $exception) {
@@ -158,17 +159,23 @@ final class LandingConnectionsController extends Controller
         ]);
 
         $metadata = (array) ($record->metadata ?? []);
-        // Contract v130: nguồn landing luôn nhập thủ công và luôn phải qua menu duyệt trước khi chạy.
-        $metadata['request_approval'] = true;
-        $metadata['pending_approval_flow'] = true;
+        $manualImport = array_key_exists('manual_import', $validated)
+            ? (bool) $validated['manual_import']
+            : (bool) $record->manual_import;
+        $requestApproval = array_key_exists('request_approval', $validated)
+            ? (bool) $validated['request_approval']
+            : (bool) ($metadata['request_approval'] ?? true);
+
+        $metadata['request_approval'] = $requestApproval;
+        $metadata['pending_approval_flow'] = $requestApproval;
 
         $record->forceFill([
-            'manual_import' => true,
+            'manual_import' => $manualImport,
             'metadata' => $metadata,
             'updated_by_user_id' => $request->user()?->id,
         ])->save();
 
-        return back()->with('success', 'Đã cập nhật trạng thái nhập thủ công và yêu cầu duyệt cho nguồn landing.');
+        return back()->with('success', 'Đã cập nhật trạng thái nhập thủ công/yêu cầu duyệt cho nguồn landing.');
     }
 
     public function destroy(Request $request, LandingConnection $record): RedirectResponse

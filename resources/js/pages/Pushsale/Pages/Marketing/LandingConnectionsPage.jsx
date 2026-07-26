@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleSelect, PushsaleMultiSelect } from '@/components/pushsale/PushsaleSelect';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
 
 const connectionTabs = [
     ['facebook', 'KẾT NỐI FACEBOOK'],
@@ -222,6 +223,7 @@ export default function LandingConnectionsPage({
     const [editingId, setEditingId] = useState(null);
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState(new Set());
+    const [confirmAction, setConfirmAction] = useState(null);
     const [advancedOpen, setAdvancedOpen] = useState(false);
     const [allProducts, setAllProducts] = useState(!filters.product_id);
     const form = useForm(blankForm(defaultMarketerId));
@@ -370,10 +372,11 @@ export default function LandingConnectionsPage({
 
     const updateFlags = (row, flags) => {
         if (!row?.id) return;
-        router.patch(`${recordsUrl}/${row.id}/flags`, {
-            manual_import: flags.manual_import ?? true,
-            request_approval: flags.request_approval ?? true,
-        }, {
+        const payload = {};
+        if (Object.prototype.hasOwnProperty.call(flags, 'manual_import')) payload.manual_import = Boolean(flags.manual_import);
+        if (Object.prototype.hasOwnProperty.call(flags, 'request_approval')) payload.request_approval = Boolean(flags.request_approval);
+        if (Object.keys(payload).length === 0) return;
+        router.patch(`${recordsUrl}/${row.id}/flags`, payload, {
             preserveScroll: true,
             preserveState: true,
             only: ['connections', 'flash'],
@@ -394,14 +397,22 @@ export default function LandingConnectionsPage({
         return next;
     });
 
-    const deleteSelected = () => {
-        const ids = [...selected];
-        if (!ids.length || !window.confirm(`Xóa ${ids.length} kết nối đã chọn?`)) return;
+    const performDeleteSelected = (ids) => {
         router.visit(recordsUrl, {
             method: 'delete',
             data: { ids },
             preserveScroll: true,
             onSuccess: () => setSelected(new Set()),
+        });
+    };
+
+    const deleteSelected = () => {
+        const ids = [...selected];
+        if (!ids.length) return;
+        setConfirmAction({
+            title: 'Xóa kết nối landing?',
+            description: `Xóa ${ids.length} kết nối landing đã chọn? Nguồn nhận data và chia số liên quan sẽ ngừng hoạt động.`,
+            onConfirm: () => performDeleteSelected(ids),
         });
     };
 
@@ -511,8 +522,8 @@ export default function LandingConnectionsPage({
                                                         <button type="button" className="btn-icon" onClick={() => copy(mainSource?.submit_url ?? row.api_base_url)}><i className="fa fa-copy" /> Copy</button>
                                                     </div>
                                                 </td>
-                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.manual_import)} onChange={() => updateFlags(row, { manual_import: true })} title="Bật nhập thủ công cho nguồn landing" /></td>
-                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.request_approval || row.is_approved)} onChange={() => updateFlags(row, { request_approval: true })} title="Nguồn landing bắt buộc qua duyệt trước khi chạy" /></td>
+                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.manual_import)} onChange={(event) => updateFlags(row, { manual_import: event.target.checked })} title="Bật/tắt nhập thủ công cho nguồn landing" /></td>
+                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.request_approval)} onChange={(event) => updateFlags(row, { request_approval: event.target.checked })} title="Bật/tắt yêu cầu duyệt trước khi chạy" /></td>
                                                 <td className="text-center">{row.updated_by ?? 'admin'}<br />{row.updated_at}</td>
                                                 <td className="text-center pslc-actions"><button type="button" className="btn-icon" onClick={() => openEdit(row)} title="Chỉnh sửa"><i className="fa fa-edit" /></button></td>
                                             </tr>
@@ -593,6 +604,17 @@ export default function LandingConnectionsPage({
                     <footer className="pslc-dialog-footer"><button className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> Lưu</button></footer>
                 </form>
             </PageDialog>
+            <ConfirmActionDialog
+                open={Boolean(confirmAction)}
+                title={confirmAction?.title}
+                description={confirmAction?.description}
+                onCancel={() => setConfirmAction(null)}
+                onConfirm={() => {
+                    const action = confirmAction?.onConfirm;
+                    setConfirmAction(null);
+                    action?.();
+                }}
+            />
         </AppLayout>
     );
 }

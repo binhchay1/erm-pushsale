@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
 import { ReportPagination } from '@/components/reports/ReportPagination';
-import { OrderMoneyBreakdown, OrderProductsBreakdown } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
@@ -124,12 +124,14 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                         <label htmlFor={`customer-row-${row.id}`}>{start + index}</label>
                                     </span>
                                 </td>
-                                <td className="text-center">
-                                    <span className="item-md">{row.orderCode}</span>
-                                    <button type="button" className="btn-icon aoh" onClick={() => onOpenDialog('view', row)} title="Xem lịch sử xem thông tin số">
-                                        <i className="fa fa-history" />
-                                    </button>
-                                    {row.isSupplementalOrder ? <span className="ps-upsale-badge" title={`Đơn upsale từ ${row.supplementalOriginalOrderCode ?? 'đơn gốc'}`}>UPSALE</span> : null}
+                                <td className="text-center ps-code-cell">
+                                    <div className="ps-order-code-stack">
+                                        <span className="item-md ps-order-code-text">{row.orderCode || '—'}</span>
+                                        <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onOpenDialog('view', row)} title="Xem lịch sử xem thông tin số">
+                                            <i className="fa fa-history" />
+                                        </button>
+                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} />
+                                    </div>
                                 </td>
                                 <td className="text-center">
                                     <span className="span-col span-col-width cancel-col">
@@ -156,8 +158,6 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                     </div>
                                     <div className="no-wrap ps-phone-line">
                                         <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('purchase', row)}>{safeText(row.customerPhone)}</button>
-                                        {row.isDuplicatePhone ? <i className="fa fa-clone text-danger" title="Số điện thoại trùng" /> : null}
-                                        {row.isReturningCustomer ? <i className="fa fa-heart text-danger" title="Khách hàng cũ" /> : null}
                                     </div>
                                     {row.phoneCarrier ? <span className={`ps-carrier ps-carrier-${row.phoneCarrierKey ?? 'other'}`}>{row.phoneCarrier}</span> : null}
                                 </td>
@@ -190,7 +190,7 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                     {row.nextOperationAt ? <div className="item-noidung-other">Hẹn: {dateLabel(row.nextOperationAt)}</div> : null}
                                 </td>
                                 <td className="text-left ps-order-products-cell">
-                                    <OrderProductsBreakdown items={row.products ?? []} />
+                                    <OrderProductsBreakdown items={row.products ?? []} order={row} />
                                 </td>
                                 <td className="no-wrap area3 text-right ps-order-money-cell">
                                     <OrderMoneyBreakdown row={row} />

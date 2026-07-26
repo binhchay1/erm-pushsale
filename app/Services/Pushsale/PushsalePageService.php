@@ -228,7 +228,12 @@ class PushsalePageService
             ->orderBy('name')
             ->limit(2000)
             ->get(['id', 'parent_id', 'name', 'type', 'unit_price', 'sku', 'is_active']);
-        $teamLeaderIds = Team::query()->whereNotNull('leader_user_id')->pluck('leader_user_id')->map(fn ($id) => (int) $id);
+        $teamOptionQuery = Team::query();
+        if (auth()->user()?->isPlatformAdmin()) {
+            $teamOptionQuery->withoutTenant();
+        }
+        $allTeams = $teamOptionQuery->orderBy('name')->limit(1000)->get(['id', 'name', 'type', 'leader_user_id']);
+        $teamLeaderIds = $allTeams->pluck('leader_user_id')->filter()->map(fn ($id) => (int) $id);
         $loginCounts = $pageCode === '1.7.1'
             ? tap(ActivityLog::query(), function ($query): void {
                 if (auth()->user()?->isPlatformAdmin()) {
@@ -284,16 +289,16 @@ class PushsalePageService
                 ['id' => 'ip', 'label' => 'Sắp xếp theo IP'],
                 ['id' => 'user', 'label' => 'Sắp xếp theo tài khoản'],
             ],
-            'sales' => $mapUsers(User::query()->where('role', User::ROLE_SALES)->orderBy('name')->limit(500)->get(['id', 'name', 'email'])),
-            'saleLeaders' => $mapUsers(User::query()->where('role', User::ROLE_SALES)->where('is_team_leader', true)->orderBy('name')->limit(300)->get(['id', 'name', 'email'])),
-            'marketers' => $mapUsers(User::query()->where('role', User::ROLE_MARKETING)->orderBy('name')->limit(500)->get(['id', 'name', 'email'])),
-            'marketingLeaders' => $mapUsers(User::query()->where('role', User::ROLE_MARKETING)->where('is_team_leader', true)->orderBy('name')->limit(300)->get(['id', 'name', 'email'])),
-            'warehouseUsers' => $mapUsers(User::query()->where('role', User::ROLE_WAREHOUSE)->orderBy('name')->limit(500)->get(['id', 'name', 'email'])),
-            'careUsers' => $mapUsers(User::query()->whereIn('role', [User::ROLE_WAREHOUSE, User::ROLE_SALES])->orderBy('name')->limit(800)->get(['id', 'name', 'email'])),
-            'teams' => $mapTeams(Team::query()->orderBy('name')->limit(1000)->get(['id', 'name'])),
-            'saleTeams' => $mapTeams(Team::query()->where('type', TeamType::Sale->value)->orderBy('name')->limit(500)->get(['id', 'name'])),
-            'marketingTeams' => $mapTeams(Team::query()->where('type', TeamType::Marketing->value)->orderBy('name')->limit(500)->get(['id', 'name'])),
-            'warehouseTeams' => $mapTeams(Team::query()->where('type', TeamType::Warehouse->value)->orderBy('name')->limit(500)->get(['id', 'name'])),
+            'sales' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Sales)->values()),
+            'saleLeaders' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Sales && (bool) $user->is_team_leader)->values()),
+            'marketers' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Marketing)->values()),
+            'marketingLeaders' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Marketing && (bool) $user->is_team_leader)->values()),
+            'warehouseUsers' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Warehouse)->values()),
+            'careUsers' => $mapUsers($allUsers->filter(fn (User $user): bool => in_array($user->role, [UserRole::Warehouse, UserRole::Sales], true))->values()),
+            'teams' => $mapTeams($allTeams),
+            'saleTeams' => $mapTeams($allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Sale)->values()),
+            'marketingTeams' => $mapTeams($allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Marketing)->values()),
+            'warehouseTeams' => $mapTeams($allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Warehouse)->values()),
             'teamLeaders' => $mapUsers($allUsers->filter(
                 fn (User $user): bool => (bool) $user->is_team_leader || $teamLeaderIds->contains((int) $user->id),
             )->values()),
@@ -964,8 +969,11 @@ class PushsalePageService
         // vừa migrate/seed tài khoản nhưng chưa có đơn, vẫn phải render được bảng
         // bằng chính user sales thật trong hệ thống thay vì để trống như template mẫu.
         if ($groups->isEmpty()) {
-            $sales = User::query()
-                ->with('team:id,name,leader_user_id')
+            $salesQuery = User::query()->with('team:id,name,leader_user_id');
+            if (auth()->user()?->isPlatformAdmin()) {
+                $salesQuery->withoutTenant();
+            }
+            $sales = $salesQuery
                 ->where('role', UserRole::Sales)
                 ->orderBy('name')
                 ->limit(20)
@@ -2664,8 +2672,11 @@ class PushsalePageService
     private function recentOrders(): Collection
     {
         $request = $this->currentRequest;
-        $query = Order::query()
-            ->with([
+        $query = Order::query();
+        if ($request?->user()?->isPlatformAdmin()) {
+            $query->withoutTenant();
+        }
+        $query->with([
                 'team:id,name,leader_user_id',
                 'saleUser:id,name,email,team_id,permissions',
                 'marketerUser:id,name,team_id',

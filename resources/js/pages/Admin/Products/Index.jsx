@@ -5,6 +5,7 @@ import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
 import { formatCurrency, formatNumber } from '@/lib/format';
 import { PushsaleMultiSelect, PushsaleSelect } from '@/components/pushsale/PushsaleSelect';
 
@@ -228,6 +229,7 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
         vat: filters.vat ?? '', sort: filters.sort ?? 'newest',
     });
     const [selected, setSelected] = useState(new Set());
+    const [confirmAction, setConfirmAction] = useState(null);
     const [productOpen, setProductOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [taxonomy, setTaxonomy] = useState(null);
@@ -390,14 +392,24 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
         router.post(meta.storeUrl, payload, options);
     };
 
-    const removeTaxonomy = (row) => {
+    const performRemoveTaxonomy = (row) => {
         const meta = taxonomyMeta(taxonomy);
-        if (!meta || !row?.id || !window.confirm(meta.deleteMessage)) return;
+        if (!meta || !row?.id) return;
         router.delete(`${meta.storeUrl}/${row.id}`, {
             preserveScroll: true,
             onSuccess: () => {
                 if (String(taxonomyForm.data.id) === String(row.id)) resetTaxonomy();
             },
+        });
+    };
+
+    const removeTaxonomy = (row) => {
+        const meta = taxonomyMeta(taxonomy);
+        if (!meta || !row?.id) return;
+        setConfirmAction({
+            title: 'Xóa cấu hình sản phẩm?',
+            description: `Xóa "${row.name ?? meta.label}"? Những sản phẩm đang gắn cấu hình này có thể bị ảnh hưởng.`,
+            onConfirm: () => performRemoveTaxonomy(row),
         });
     };
 
@@ -407,9 +419,17 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
         return next;
     });
 
-    const deleteSelected = () => {
-        if (!selected.size || !window.confirm(`Xóa ${selected.size} sản phẩm đã chọn?`)) return;
+    const performDeleteSelected = () => {
         [...selected].forEach((id) => router.delete(`/admin/products/${id}`, { preserveScroll: true, onFinish: () => setSelected(new Set()) }));
+    };
+
+    const deleteSelected = () => {
+        if (!selected.size) return;
+        setConfirmAction({
+            title: 'Xóa các sản phẩm đã chọn?',
+            description: `Bạn đang xóa ${selected.size} sản phẩm. Đơn hàng và báo cáo cũ vẫn giữ lịch sử, nhưng cấu hình sản phẩm sẽ không còn dùng tiếp.`,
+            onConfirm: performDeleteSelected,
+        });
     };
 
     const toggleBusinessStatus = (row, event) => {
@@ -567,7 +587,7 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                                 <td className="text-center">{row.available_sale ? <i className="fa fa-check text-green" /> : ''}</td>
                                 <td className="text-center">{row.available_care ? <i className="fa fa-check text-green" /> : ''}</td>
                                 <td className="text-center"><strong>{row.updated_at}</strong></td>
-                                <td className="text-center ps-row-actions"><button type="button" onClick={() => openEdit(row)} aria-label="Cập nhật"><i className="fa fa-pencil-square-o" /></button><button type="button" onClick={() => window.confirm(`Xóa sản phẩm ${row.name}?`) && router.delete(`/admin/products/${row.id}`, { preserveScroll: true })} aria-label="Xóa"><i className="fa fa-trash" /></button></td>
+                                <td className="text-center ps-row-actions"><button type="button" onClick={() => openEdit(row)} aria-label="Cập nhật"><i className="fa fa-pencil-square-o" /></button><button type="button" onClick={() => setConfirmAction({ title: 'Xóa sản phẩm?', description: `Xóa sản phẩm "${row.name}"? Đơn hàng và báo cáo cũ vẫn giữ lịch sử, nhưng cấu hình sản phẩm sẽ không còn dùng tiếp.`, onConfirm: () => router.delete(`/admin/products/${row.id}`, { preserveScroll: true }) })} aria-label="Xóa"><i className="fa fa-trash" /></button></td>
                             </tr>) : <tr><td colSpan="16" className="ps-empty">Chưa có sản phẩm phù hợp.</td></tr>}
                         </tbody>
                     </table>
@@ -690,6 +710,17 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                     </div>
                 </div>
             </DialogShell>
+            <ConfirmActionDialog
+                open={Boolean(confirmAction)}
+                title={confirmAction?.title}
+                description={confirmAction?.description}
+                onCancel={() => setConfirmAction(null)}
+                onConfirm={() => {
+                    const action = confirmAction?.onConfirm;
+                    setConfirmAction(null);
+                    action?.();
+                }}
+            />
         </AppLayout>
     );
 }

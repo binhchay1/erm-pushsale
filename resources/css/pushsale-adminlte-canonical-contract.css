@@ -1209,3 +1209,846 @@ html body.pushsale-app-body .ps-empty-message {
     background: #fafafa !important;
     border: 1px dashed #d3dde8 !important;
 }
+
+/* V141 — canonical header/filter/table correction contract.
+   This is intentionally loaded last. The goal is to stop every menu page from
+   reinventing header spacing: title left, controls right, compact two-row filter
+   when needed, no double borders, no random heavy select shadows. */
+html body.pushsale-app-body {
+    --ps-v141-gutter-x: 12px;
+    --ps-v141-control-height: 32px;
+    --ps-v141-border: #d2d6de;
+    --ps-v141-control-border: #cbd6e2;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 select,
+html body.pushsale-app-body .pushsale-template-host-v83 input.form-control,
+html body.pushsale-app-body .pushsale-template-host-v83 .form-control,
+html body.pushsale-app-body .pslc-page .form-control,
+html body.pushsale-app-body .pslc-page .ps-search-select-button,
+html body.pushsale-app-body .ps-products-page .form-control,
+html body.pushsale-app-body .ps-customer360-page .form-control {
+    min-height: var(--ps-v141-control-height) !important;
+    height: var(--ps-v141-control-height) !important;
+    line-height: calc(var(--ps-v141-control-height) - 2px) !important;
+    border: 1px solid var(--ps-v141-control-border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background-color: #fff !important;
+    font-size: 13px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .m-header-wrap:first-of-type,
+html body.pushsale-app-body .pslc-page .pslc-filter,
+html body.pushsale-app-body .ps-products-page .m-header-wrap:first-of-type,
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-header {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--ps-v141-border) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .12) !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .m-header-wrap:first-of-type .m-header,
+html body.pushsale-app-body .pslc-page .ps-page-header-main,
+html body.pushsale-app-body .ps-products-page .ps-product-header,
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-header .m-header {
+    min-height: 48px !important;
+    padding: 7px var(--ps-v141-gutter-x) !important;
+    margin: 0 !important;
+    align-items: center !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .pushsale-template-host-v83 .m-header-wrap:first-of-type .m-header > [class*="col-"],
+html body.pushsale-app-body .pushsale-template-host-v83 .box-body > .row > [class*="col-"] {
+    float: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin: 0 !important;
+}
+
+/* 4.3 Bảng xếp hạng Sales — compact header, working advanced filter row, no extra help icon. */
+html body.pushsale-app-body [data-page-code="4.3"] .m-header-wrap:first-of-type .m-header {
+    display: grid !important;
+    grid-template-columns: minmax(220px, 300px) minmax(360px, 1fr) minmax(150px, 190px) minmax(220px, 420px) auto !important;
+    gap: 8px !important;
+}
+html body.pushsale-app-body [data-page-code="4.3"] [id$="lblModuleTitle"],
+html body.pushsale-app-body [data-page-code="4.3"] .module-title {
+    display: block !important;
+    margin: 0 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: var(--ps-v141-control-height) !important;
+    color: #111 !important;
+    white-space: nowrap !important;
+}
+html body.pushsale-app-body [data-page-code="4.3"] .m-header-wrap:first-of-type .divSearch {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-height: var(--ps-v141-control-height) !important;
+}
+html body.pushsale-app-body [data-page-code="4.3"] [id$="btnNote"],
+html body.pushsale-app-body [data-page-code="4.3"] [id$="btnNote"] * {
+    display: none !important;
+}
+html body.pushsale-app-body [data-page-code="4.3"] .m-header-wrap:first-of-type .btn-icon,
+html body.pushsale-app-body [data-page-code="4.3"] .m-header-wrap:first-of-type [id$="btnToggleSummary"] {
+    width: 28px !important;
+    height: var(--ps-v141-control-height) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+html body.pushsale-app-body [data-page-code="4.3"] .m-header-wrap:first-of-type + .box-body {
+    padding: 7px var(--ps-v141-gutter-x) 8px !important;
+    margin: 0 !important;
+    border-bottom: 1px solid var(--ps-v141-border) !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body [data-page-code="4.3"] .m-header-wrap:first-of-type + .box-body .row {
+    display: grid !important;
+    grid-template-columns: minmax(190px, 280px) minmax(190px, 280px) minmax(0, 1fr) !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    align-items: center !important;
+}
+html body.pushsale-app-body [data-page-code="4.3"] .bxh-container,
+html body.pushsale-app-body [data-page-code="4.3"] .tableFixHead,
+html body.pushsale-app-body [data-page-code="4.3"] .table-responsive {
+    margin-left: var(--ps-v141-gutter-x) !important;
+    margin-right: var(--ps-v141-gutter-x) !important;
+}
+html body.pushsale-app-body [data-page-code="4.3"] .table,
+html body.pushsale-app-body [data-page-code="4.3"] table {
+    margin-top: 12px !important;
+}
+
+/* Customer care/report pages: same contract as the product page sample. */
+html body.pushsale-app-body [data-page-code="3.2"] .m-header-wrap:first-of-type .m-header,
+html body.pushsale-app-body [data-page-code="3.3.1"] .m-header-wrap:first-of-type .m-header,
+html body.pushsale-app-body [data-page-code="3.3.2"] .m-header-wrap:first-of-type .m-header {
+    display: grid !important;
+    grid-template-columns: minmax(260px, 420px) minmax(0, 1fr) !important;
+    gap: 12px !important;
+}
+html body.pushsale-app-body [data-page-code="3.2"] .m-header-wrap:first-of-type .m-header > [class*="col-"]:first-child,
+html body.pushsale-app-body [data-page-code="3.3.1"] .m-header-wrap:first-of-type .m-header > [class*="col-"]:first-child,
+html body.pushsale-app-body [data-page-code="3.3.2"] .m-header-wrap:first-of-type .m-header > [class*="col-"]:first-child {
+    justify-self: start !important;
+}
+html body.pushsale-app-body [data-page-code="3.2"] .m-header-wrap:first-of-type .m-header > [class*="col-"]:not(:first-child),
+html body.pushsale-app-body [data-page-code="3.3.1"] .m-header-wrap:first-of-type .m-header > [class*="col-"]:not(:first-child),
+html body.pushsale-app-body [data-page-code="3.3.2"] .m-header-wrap:first-of-type .m-header > [class*="col-"]:not(:first-child) {
+    justify-self: end !important;
+}
+html body.pushsale-app-body [data-page-code="3.2"] .box-body:first-of-type,
+html body.pushsale-app-body [data-page-code="3.3.1"] .box-body:first-of-type,
+html body.pushsale-app-body [data-page-code="3.3.2"] .box-body:first-of-type {
+    padding: 7px var(--ps-v141-gutter-x) 8px !important;
+    border-bottom: 1px solid var(--ps-v141-border) !important;
+}
+html body.pushsale-app-body [data-page-code="3.2"] .m-header-wrap + .box-body,
+html body.pushsale-app-body [data-page-code="3.3.1"] .m-header-wrap + .box-body,
+html body.pushsale-app-body [data-page-code="3.3.2"] .m-header-wrap + .box-body {
+    margin-top: 0 !important;
+}
+
+/* Landing connections: normalize header and remove thick select/shadow effect. */
+html body.pushsale-app-body .pslc-page .ps-page-header-main {
+    display: grid !important;
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr) !important;
+    column-gap: 12px !important;
+}
+html body.pushsale-app-body .pslc-page .pslc-header-controls {
+    display: grid !important;
+    grid-template-columns: max-content minmax(180px, 240px) minmax(180px, 240px) minmax(260px, 1fr) 116px 32px !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+}
+html body.pushsale-app-body .pslc-page .ps-search-select,
+html body.pushsale-app-body .pslc-page .pslc-filter-select,
+html body.pushsale-app-body .pslc-page .ps-page-primary-filters > * {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+html body.pushsale-app-body .pslc-page .pslc-check {
+    width: auto !important;
+    min-width: max-content !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+html body.pushsale-app-body .pslc-page .pslc-tabs-shell,
+html body.pushsale-app-body .pslc-page .pslc-tabs,
+html body.pushsale-app-body .pslc-page .pslc-table-wrap {
+    margin-left: var(--ps-v141-gutter-x) !important;
+    margin-right: var(--ps-v141-gutter-x) !important;
+}
+
+/* Carry-forward: Customer 360 single-line header. */
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-header .m-header {
+    display: grid !important;
+    grid-template-columns: max-content 190px 330px minmax(240px, 1fr) 28px 118px 132px !important;
+    gap: 10px !important;
+}
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-header-spacer {
+    display: none !important;
+}
+
+/* Carry-forward: Team leader delivery summary cards expand evenly. */
+html body.pushsale-app-body .ps-marketing-leader-page .row-cards,
+html body.pushsale-app-body .ps-marketing-leader-page .box-body > .ps-status-summary .row-cards,
+html body.pushsale-app-body .ps-marketing-leader-page .box-body > .pushsale-status-summary .row-cards {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(118px, 1fr)) !important;
+    gap: 18px !important;
+    width: 100% !important;
+    align-items: start !important;
+}
+html body.pushsale-app-body .ps-marketing-leader-page .row-cards .col-card {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: initial !important;
+}
+
+/* Customer profile/order operation tables: product/upsell content stays inside product column. */
+html body.pushsale-app-body .ps-result-cell,
+html body.pushsale-app-body td.ps-result-cell {
+    overflow: hidden !important;
+    max-width: 132px !important;
+}
+html body.pushsale-app-body .ps-result-cell .ps-row-actions,
+html body.pushsale-app-body .ps-result-cell .ps-action-icons {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    max-width: 100% !important;
+}
+html body.pushsale-app-body .ps-result-cell a,
+html body.pushsale-app-body .ps-result-cell button,
+html body.pushsale-app-body .ps-result-cell span {
+    max-width: 100% !important;
+}
+html body.pushsale-app-body .ps-order-products-cell,
+html body.pushsale-app-body td.ps-order-products-cell {
+    overflow: hidden !important;
+}
+html body.pushsale-app-body .ps-order-products-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(64px, 84px) !important;
+    column-gap: 6px !important;
+    align-items: start !important;
+}
+html body.pushsale-app-body .ps-order-product-name {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+}
+html body.pushsale-app-body .ps-order-upsale-icon {
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    margin-right: 4px !important;
+}
+
+/* Money columns: numeric values lean closer to the right border on all operation tables. */
+html body.pushsale-app-body .ps-order-money-cell,
+html body.pushsale-app-body .c-money-body,
+html body.pushsale-app-body .ps-col-money,
+html body.pushsale-app-body td.text-right,
+html body.pushsale-app-body .ps-money-cell {
+    text-align: right !important;
+    padding-left: 3px !important;
+    padding-right: 4px !important;
+}
+html body.pushsale-app-body .ps-order-money-breakdown > div,
+html body.pushsale-app-body .ps-order-money-breakdown > strong,
+html body.pushsale-app-body .c-money-body > div,
+html body.pushsale-app-body .c-money-body > strong {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+    text-align: right !important;
+}
+
+/* Shared delete/confirm dialog. */
+html body.pushsale-app-body .ps-confirm-body {
+    padding: 14px 16px !important;
+}
+html body.pushsale-app-body .ps-confirm-action {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    color: #222 !important;
+    line-height: 1.45 !important;
+}
+html body.pushsale-app-body .ps-confirm-icon {
+    width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    background: #fdecea !important;
+    color: #d73925 !important;
+}
+html body.pushsale-app-body .ps-confirm-copy {
+    padding-top: 2px !important;
+    font-size: 13px !important;
+}
+
+@media (max-width: 1280px) {
+    html body.pushsale-app-body [data-page-code="4.3"] .m-header-wrap:first-of-type .m-header,
+    html body.pushsale-app-body .pslc-page .ps-page-header-main,
+    html body.pushsale-app-body .ps-customer360-page .ps-customer360-header .m-header {
+        grid-template-columns: 1fr !important;
+        row-gap: 8px !important;
+    }
+    html body.pushsale-app-body .pslc-page .pslc-header-controls,
+    html body.pushsale-app-body [data-page-code="4.3"] .m-header-wrap:first-of-type + .box-body .row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    html body.pushsale-app-body .ps-marketing-leader-page .row-cards {
+        grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
+    }
+}
+
+
+/* V142 — operation table action-icon spacing.
+   Reserve a safe action area in sale / result cells so the trash/history icons
+   no longer overlap the sale-assigned text or the result select control. */
+html body.pushsale-app-body .ps-sale-operation-table td.ps-sale-cell {
+    padding-top: 8px !important;
+    padding-right: 30px !important;
+    text-align: center !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table td.ps-sale-cell > b,
+html body.pushsale-app-body .ps-sale-operation-table td.ps-sale-cell > .small-tip,
+html body.pushsale-app-body .ps-sale-operation-table td.ps-sale-cell > span:not(.ps-cell-actions-right):not(.fa) {
+    display: block !important;
+    max-width: 100% !important;
+    padding-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-cell-actions-right {
+    top: 7px !important;
+    right: 6px !important;
+    width: 20px !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table td.ps-result-cell {
+    padding-right: 32px !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table td.ps-result-cell .ps-result-select {
+    display: block !important;
+    width: calc(100% - 24px) !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 24px) !important;
+    margin-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table td.ps-result-cell .ps-cell-action {
+    top: 10px !important;
+    right: 7px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table td.ps-result-cell .ps-result-current,
+html body.pushsale-app-body .ps-sale-operation-table td.ps-result-cell > b,
+html body.pushsale-app-body .ps-sale-operation-table td.ps-result-cell > .small-tip {
+    display: block !important;
+    max-width: calc(100% - 24px) !important;
+}
+
+
+/* V143 — Sale operation dialog/table consolidation.
+   Fixes: large order dialog, message dialog spacing, code/product columns,
+   and makes TN cần visible in operation history instead of feeling isolated. */
+html body.pushsale-app-body .ps-sale-dialog[data-slot='dialog-content'],
+html body.pushsale-app-body .ps-sale-modal[data-slot='dialog-content'] {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 18px) !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid #bfc5cb !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 11px !important;
+    box-shadow: 0 5px 18px rgba(0,0,0,.32) !important;
+}
+
+html body.pushsale-app-body .ps-sale-dialog-header,
+html body.pushsale-app-body .ps-sale-modal-header {
+    min-height: 42px !important;
+    padding: 11px 16px 8px !important;
+    border-bottom: 1px solid #287fb0 !important;
+    background: #3c8dbc !important;
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-sale-dialog-header [data-slot='dialog-title'],
+html body.pushsale-app-body .ps-sale-modal-header [data-slot='dialog-title'] {
+    margin: 0 !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 20px !important;
+}
+
+html body.pushsale-app-body .ps-sale-dialog > button[data-slot='dialog-close'],
+html body.pushsale-app-body .ps-sale-modal > button[data-slot='dialog-close'] {
+    top: 10px !important;
+    right: 13px !important;
+    color: #666 !important;
+    opacity: .9 !important;
+}
+
+html body.pushsale-app-body .ps-sale-order-dialog[data-slot='dialog-content'],
+html body.pushsale-app-body .ps-sale-order-modal[data-slot='dialog-content'] {
+    width: min(1660px, calc(100vw - 18px)) !important;
+}
+
+html body.pushsale-app-body .ps-sale-order-body {
+    display: grid !important;
+    grid-template-columns: minmax(520px, 39%) minmax(760px, 61%) !important;
+    max-height: calc(100dvh - 62px) !important;
+    overflow: auto !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-order-left-panel {
+    gap: 12px 30px !important;
+    padding: 17px 18px 28px 28px !important;
+}
+
+html body.pushsale-app-body .ps-order-right-panel {
+    min-width: 0 !important;
+    padding: 17px 28px 30px 12px !important;
+}
+
+html body.pushsale-app-body .ps-order-right-panel > .table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+}
+
+html body.pushsale-app-body .ps-order-product-table {
+    min-width: 920px !important;
+    table-layout: fixed !important;
+}
+
+html body.pushsale-app-body .ps-order-product-table > thead > tr > th:first-child { width: 38% !important; }
+html body.pushsale-app-body .ps-order-product-table > thead > tr > th:nth-child(2) { width: 12% !important; }
+html body.pushsale-app-body .ps-order-product-table > thead > tr > th:nth-child(3) { width: 8% !important; }
+html body.pushsale-app-body .ps-order-product-table > thead > tr > th:nth-child(4) { width: 12% !important; }
+html body.pushsale-app-body .ps-order-product-table > thead > tr > th:nth-child(5) { width: 8% !important; }
+html body.pushsale-app-body .ps-order-product-table > thead > tr > th:nth-child(6) { width: 10% !important; }
+html body.pushsale-app-body .ps-order-product-table > thead > tr > th:nth-child(7) { width: 7% !important; }
+html body.pushsale-app-body .ps-order-product-table > thead > tr > th:nth-child(8) { width: 5% !important; }
+
+html body.pushsale-app-body .ps-order-product-table th,
+html body.pushsale-app-body .ps-order-product-table td {
+    white-space: normal !important;
+    word-break: normal !important;
+}
+
+html body.pushsale-app-body .ps-operation-needed-static b {
+    display: block !important;
+    margin-bottom: 4px !important;
+}
+html body.pushsale-app-body .ps-operation-needed-static span {
+    display: block !important;
+    color: #d71920 !important;
+    font-weight: 600 !important;
+    white-space: pre-wrap !important;
+}
+html body.pushsale-app-body .ps-operation-needed-static small {
+    display: block !important;
+    color: #777 !important;
+    font-size: 11px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table td.ps-code-cell {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    text-align: center !important;
+}
+html body.pushsale-app-body .ps-sale-operation-table td.ps-code-cell .ps-order-code-link {
+    display: block !important;
+    max-width: 100% !important;
+    margin: 0 auto 5px !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    line-height: 13px !important;
+    text-align: center !important;
+}
+html body.pushsale-app-body .ps-sale-operation-table td.ps-code-cell .ps-cell-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: static !important;
+    margin: 4px auto 0 !important;
+}
+html body.pushsale-app-body .ps-sale-operation-table td.ps-code-cell .ps-order-code-empty {
+    display: block !important;
+    min-height: 18px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table col.c-products {
+    width: 275px !important;
+}
+html body.pushsale-app-body .ps-sale-operation-table .ps-order-products-cell,
+html body.pushsale-app-body .ps-customer-profile-table .ps-order-products-cell,
+html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-cell,
+html body.pushsale-app-body .ps-wh-table .ps-order-products-cell {
+    min-width: 260px !important;
+    overflow: hidden !important;
+}
+html body.pushsale-app-body .ps-order-products-breakdown {
+    width: 100% !important;
+}
+html body.pushsale-app-body .ps-order-products-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(82px, 92px) !important;
+    gap: 6px !important;
+    align-items: start !important;
+    min-height: 22px !important;
+    padding: 3px 0 !important;
+    border-bottom: 1px dashed #cfd8e3 !important;
+}
+html body.pushsale-app-body .ps-order-products-row:last-child {
+    border-bottom: 0 !important;
+}
+html body.pushsale-app-body .ps-order-product-name {
+    display: flex !important;
+    min-width: 0 !important;
+    align-items: flex-start !important;
+    gap: 5px !important;
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+}
+html body.pushsale-app-body .ps-order-product-qty {
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+html body.pushsale-app-body .ps-order-product-price {
+    text-align: right !important;
+    white-space: nowrap !important;
+}
+html body.pushsale-app-body .ps-order-upsale-icon {
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin-top: 1px !important;
+    border-radius: 2px !important;
+    background: #ff7a00 !important;
+    color: #fff !important;
+    font-size: 10px !important;
+    line-height: 16px !important;
+}
+html body.pushsale-app-body .ps-order-type-badge,
+html body.pushsale-app-body .ps-upsale-tag,
+html body.pushsale-app-body .ps-upsale-wait {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-top: 5px !important;
+    padding: 2px 5px !important;
+    border-radius: 2px !important;
+    background: #ff7a00 !important;
+    color: #fff !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    line-height: 13px !important;
+}
+html body.pushsale-app-body .ps-order-type-badge.is-waiting-upsell,
+html body.pushsale-app-body .ps-upsale-wait {
+    background: #287db9 !important;
+}
+
+html body.pushsale-app-body .ps-customer-dialog.ps-dialog-surface {
+    width: min(1120px, calc(100vw - 42px)) !important;
+}
+html body.pushsale-app-body .ps-customer-dialog .ps-dialog-body {
+    padding: 14px 18px 12px !important;
+}
+html body.pushsale-app-body .ps-message-dialog-card {
+    border: 1px solid #d3dde8 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .ps-message-dialog-head {
+    padding: 10px 12px !important;
+    background: #f8fbff !important;
+    border-bottom: 1px solid #d8e1ea !important;
+}
+html body.pushsale-app-body .ps-customer-tabs.ps-message-tabs {
+    padding: 7px 12px 0 !important;
+    border-bottom: 1px solid #d8e1ea !important;
+}
+html body.pushsale-app-body .ps-message-composer {
+    padding: 12px !important;
+    border-top: 0 !important;
+    border-bottom: 1px solid #d8e1ea !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-message-list {
+    height: 300px !important;
+    padding: 14px !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-empty-message {
+    height: 100% !important;
+    border: 1px dashed #d3dde8 !important;
+    background: #fff !important;
+}
+
+
+/* V144 — canonical order-code flags + product breakdown sections.
+   Applies to all operation/customer profile style tables that share
+   Mã đơn and Sản phẩm - Số lượng - Đơn giá columns. */
+html body.pushsale-app-body .ps-order-code-stack {
+    display: inline-flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    line-height: 1.25 !important;
+}
+
+html body.pushsale-app-body .ps-order-code-text,
+html body.pushsale-app-body .ps-code-cell .item-md,
+html body.pushsale-app-body .ps-code-cell .ps-order-code-link {
+    display: block !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    text-align: center !important;
+    line-height: 14px !important;
+}
+
+html body.pushsale-app-body .ps-code-cell .ps-cell-action,
+html body.pushsale-app-body .ps-code-cell .btn-icon.aoh.ps-cell-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: static !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    margin: 0 auto !important;
+}
+
+html body.pushsale-app-body .ps-order-code-empty {
+    display: block !important;
+    min-height: 14px !important;
+}
+
+html body.pushsale-app-body .ps-order-flags {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    max-width: 100% !important;
+    margin-top: 1px !important;
+}
+
+html body.pushsale-app-body .ps-order-flag {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    padding: 0 !important;
+    border: 1px solid currentColor !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body button.ps-order-flag {
+    cursor: pointer !important;
+}
+
+html body.pushsale-app-body .ps-order-flag.is-returning {
+    color: #e53935 !important;
+}
+
+html body.pushsale-app-body .ps-order-flag.is-returning .fa-heart {
+    color: #e53935 !important;
+}
+
+html body.pushsale-app-body .ps-order-flag.is-duplicate {
+    color: #1976d2 !important;
+}
+
+html body.pushsale-app-body .ps-order-flag.is-upsale {
+    color: #fb8c00 !important;
+}
+
+html body.pushsale-app-body .ps-order-flag.is-waiting-upsale {
+    color: #7b61ff !important;
+}
+
+html body.pushsale-app-body .ps-order-flag-inner {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-table .ps-phone-line .fa-heart,
+html body.pushsale-app-body .ps-customer-profile-table .ps-phone-line .fa-clone {
+    display: none !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table col.c-products {
+    width: 315px !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-table .ps-col-products,
+html body.pushsale-app-body .ps-customer-profile-table th.ps-col-products,
+html body.pushsale-app-body .ps-customer-profile-table td.ps-order-products-cell,
+html body.pushsale-app-body .ps-sale-operation-table .ps-order-products-cell,
+html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-cell,
+html body.pushsale-app-body .ps-wh-table .ps-order-products-cell,
+html body.pushsale-app-body .ps-wh-table .c-products-body {
+    min-width: 300px !important;
+    width: 300px !important;
+    max-width: none !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-order-products-breakdown {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-order-products-section {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-order-products-section + .ps-order-products-section {
+    margin-top: 6px !important;
+    padding-top: 6px !important;
+    border-top: 1px dashed #b9cce0 !important;
+}
+
+html body.pushsale-app-body .ps-order-products-section-label,
+html body.pushsale-app-body .ps-order-products-pending-upsale {
+    display: inline-flex !important;
+    align-items: center !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    margin: 0 0 4px !important;
+    padding: 2px 5px !important;
+    border-radius: 2px !important;
+    background: #eef5ff !important;
+    color: #1976d2 !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    text-transform: uppercase !important;
+}
+
+html body.pushsale-app-body .ps-order-products-section.is-upsale-section .ps-order-products-section-label,
+html body.pushsale-app-body .ps-order-products-pending-upsale {
+    background: #fff3e0 !important;
+    color: #ef6c00 !important;
+}
+
+html body.pushsale-app-body .ps-order-products-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 34px 92px !important;
+    column-gap: 7px !important;
+    row-gap: 2px !important;
+    align-items: start !important;
+    width: 100% !important;
+    min-height: 22px !important;
+    padding: 3px 0 !important;
+    border-bottom: 1px dashed #cfd8e3 !important;
+}
+
+html body.pushsale-app-body .ps-order-products-row:last-child {
+    border-bottom: 0 !important;
+}
+
+html body.pushsale-app-body .ps-order-product-name {
+    display: block !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+}
+
+html body.pushsale-app-body .ps-order-product-name > span {
+    display: block !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body .ps-order-product-qty {
+    display: block !important;
+    min-width: 30px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-order-product-price {
+    display: block !important;
+    min-width: 88px !important;
+    max-width: none !important;
+    overflow: visible !important;
+    text-align: right !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-order-type-badge,
+html body.pushsale-app-body .ps-upsale-badge {
+    display: none !important;
+}

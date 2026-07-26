@@ -88,7 +88,7 @@ export function AccountingReconTable({ rows = [], totals, enableDeleteOrder = fa
                                 <span className="small-tip">{row.desiredDeliveryAt ? dateTime(row.desiredDeliveryAt) : '—'}</span>
                             </td>
                             <td className="text-center ps-col-recon"><ReconIcon value={row.internalReconNote} /></td>
-                            <td className="ps-col-products"><OrderProductsBreakdown items={row.products ?? []} /></td>
+                            <td className="ps-col-products"><OrderProductsBreakdown items={row.products ?? []} order={row} /></td>
                             <td className="text-right ps-col-money"><OrderMoneyBreakdown row={row} /></td>
                             <td className="text-right ps-col-deposit">{money(row.deposit)}</td>
                             <td className="text-right ps-col-collect"><strong className="text-success">{money(row.amountToCollect)}</strong></td>

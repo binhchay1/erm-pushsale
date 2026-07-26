@@ -1,5 +1,3 @@
-import { Copy, Heart } from 'lucide-react';
-
 import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { CloseOrderButton } from '@/components/operations/CloseOrderButton';
 import { OperationCallButton } from '@/components/operations/OperationCallButton';
@@ -8,7 +6,7 @@ import { CustomerMessagesDialog } from '@/components/customers/CustomerMessagesD
 import { OrderOperationHistoryDialog } from '@/components/customers/OrderOperationHistoryDialog';
 import { CustomerPurchaseHistoryDialog } from '@/components/customers/CustomerPurchaseHistoryDialog';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
-import { OrderMoneyBreakdown, OrderProductsBreakdown } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useTableSort } from '@/hooks/use-table-sort';
@@ -147,22 +145,14 @@ export function OperationOrderTable({
                         sortedRows.map((row) => (
                             <tr key={row.id} className="align-middle hover:bg-muted/30 border-b">
 
-                                <Td className="text-center font-medium">
-                                    <div>{row.orderCode}</div>
-                                    {row.isSupplementalOrder && (
-                                        <div
-                                            className="mx-auto mt-1 w-fit rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:bg-violet-950/50 dark:text-violet-300"
-                                            title={t('operations.order_table.supplemental_order_hint', {
-                                                code: row.supplementalOriginalOrderCode || '—',
-                                            })}
-                                        >
-                                            {t('operations.order_table.supplemental_order')}
-                                            {row.supplementalOriginalOrderCode ? ` · ${row.supplementalOriginalOrderCode}` : ''}
-                                        </div>
-                                    )}
-                                    {row.pendingSupplementCount > 0 && (
-                                        <CustomerSupplementPacketsDialog order={row} count={row.pendingSupplementCount} />
-                                    )}
+                                <Td className="text-center font-medium ps-code-cell">
+                                    <div className="ps-order-code-stack">
+                                        <div className="ps-order-code-text">{row.orderCode || '—'}</div>
+                                        <OrderStatusFlags row={row} className="ps-order-flags-compact" />
+                                        {row.pendingSupplementCount > 0 && (
+                                            <CustomerSupplementPacketsDialog order={row} count={row.pendingSupplementCount} />
+                                        )}
+                                    </div>
                                 </Td>
 
                                 <Td className="text-center text-sm">
@@ -180,8 +170,7 @@ export function OperationOrderTable({
                                     <div className="text-blue-500 font-medium">{row.customerName}</div>
                                     <div className="flex items-center gap-2 mt-1">
                                         <span className="text-blue-500">{row.customerPhone}</span>
-                                        <Copy className="size-3.5 text-red-500 cursor-pointer" />
-                                        {row.isReturningCustomer && <Heart className="size-3.5 fill-red-500 text-red-500" />}
+
                                     </div>
                                     <CarrierBadge carrier={row.phoneCarrier} carrierKey={row.phoneCarrierKey} />
                                 </Td>
@@ -226,7 +215,7 @@ export function OperationOrderTable({
                                 </Td>
 
                                 <Td className="whitespace-normal text-sm ps-order-products-cell">
-                                    <OrderProductsBreakdown items={row.products ?? []} />
+                                    <OrderProductsBreakdown items={row.products ?? []} order={row} />
                                 </Td>
 
                                 <Td className="text-right text-sm font-medium ps-order-money-cell">

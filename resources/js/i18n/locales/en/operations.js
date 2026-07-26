@@ -84,6 +84,10 @@ export default {
         total_row: 'Total:',
         no_data: 'No orders',
     },
+    sale_workspace: {
+        note_helper: 'Saved to operation history and customer profile',
+        note_empty_hint: 'No needed action note yet. Fill the TN cần column to save it to operation history.',
+    },
     customer_interactions: {
         history_title: 'Operation history',
         messages_title: 'Customer messages',

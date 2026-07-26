@@ -59,8 +59,16 @@ class LandingConnectionManager
             $this->syncChildren($connection, $this->pendingPayload($data));
 
             $connection = $connection->fresh($this->relations());
-            if ($this->shouldPublishMarketingSource($data, $connection) || $connection->marketingSource) {
+            if ($this->shouldPublishMarketingSource($data, $connection)) {
                 $this->syncMarketingSource($connection, $actor);
+            } elseif ($connection->marketingSource) {
+                $connection->marketingSource->forceFill($this->onlyExistingMarketingSourceColumns([
+                    'name' => $connection->name,
+                    'is_active' => (bool) $connection->is_active,
+                    'is_approved' => false,
+                    'approved_by_user_id' => null,
+                    'approved_at' => null,
+                ]))->save();
             }
 
             return $connection->fresh($this->relations());
@@ -167,6 +175,9 @@ class LandingConnectionManager
     private function shouldPublishMarketingSource(array $data, LandingConnection $connection): bool
     {
         $hasProduct = collect($data['products'] ?? [])->contains(fn ($row): bool => is_array($row) && filled($row['product_id'] ?? null));
+        if (! $hasProduct && ! empty($data['preserve_product_mappings'])) {
+            $hasProduct = $connection->products()->exists();
+        }
 
         return (bool) ($data['is_approved'] ?? false) && $hasProduct && $connection->products()->exists();
     }
@@ -224,7 +235,7 @@ class LandingConnectionManager
             $connection->sources()->whereKey($retiredSourceIds->all())->delete();
         }
 
-        if (array_key_exists('products', $data)) {
+        if (array_key_exists('products', $data) && empty($data['preserve_product_mappings'])) {
             $connection->products()->delete();
             foreach (array_values((array) ($data['products'] ?? [])) as $index => $row) {
                 if (! is_array($row) || empty($row['product_id'])) {

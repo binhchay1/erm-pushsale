@@ -4,8 +4,9 @@ import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
-import { OrderMoneyBreakdown, OrderProductsBreakdown } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { formatCurrency } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 import { PushsalePagination } from './PushsalePagination';
 
 const money = (value) => formatCurrency(Number(value ?? 0));
@@ -44,6 +45,7 @@ function TimeRemaining({ order }) {
 }
 
 function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
+    const t = useT();
     const [value, setValue] = useState(order.saleOperationNote ?? '');
     const [pinned, setPinned] = useState(false);
     const [hoverOpen, setHoverOpen] = useState(false);
@@ -161,7 +163,7 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
                 }}
                 aria-label={`Tác nghiệp cần của ${order.customerName ?? order.customerPhone}`}
             />
-            <div className="ps-note-floating-counter">{value.length}/500 · Ctrl+Enter để lưu</div>
+            <div className="ps-note-floating-counter">{value.length}/500 · {t('operations.sale_workspace.note_helper')} · Ctrl+Enter để lưu</div>
         </div>,
         document.body,
     ) : null;
@@ -281,10 +283,13 @@ export function SaleWorkspaceTable({
                                         <div className="ps-row-number">{Number(meta?.from ?? 1) + index}</div>
                                     </td>
                                     <td className="text-center ps-code-cell">
-                                        {order.orderCode ? (
-                                            <button type="button" className="ps-order-code-link" onClick={() => onDataViewHistory(order)}>{order.orderCode}</button>
-                                        ) : <span className="ps-order-code-empty" title="Mã đơn chỉ sinh sau khi chốt đơn">&nbsp;</span>}
-                                        <button type="button" className="btn-icon ps-cell-action" onClick={() => onDataViewHistory(order)} title="Lịch sử xem thông tin số"><i className="fa fa-history" /></button>
+                                        <div className="ps-order-code-stack">
+                                            {order.orderCode ? (
+                                                <button type="button" className="ps-order-code-link" onClick={() => onDataViewHistory(order)}>{order.orderCode}</button>
+                                            ) : <span className="ps-order-code-empty" title="Mã đơn chỉ sinh sau khi chốt đơn">&nbsp;</span>}
+                                            <button type="button" className="btn-icon ps-cell-action" onClick={() => onDataViewHistory(order)} title="Lịch sử xem thông tin số"><i className="fa fa-history" /></button>
+                                            <OrderStatusFlags row={order} onDuplicate={onDuplicateOrders ? () => onDuplicateOrders(order) : null} />
+                                        </div>
                                     </td>
                                     <td className="text-center">
                                         {externalHref(order.sourceUrl) ? (
@@ -334,10 +339,8 @@ export function SaleWorkspaceTable({
                                         {order.nextOperationAt ? <span className="small-tip">{dateTime(order.nextOperationAt)}</span> : '—'}
                                     </td>
                                     <td className="text-center"><TimeRemaining order={order} /></td>
-                                    <td>
-                                        <OrderProductsBreakdown items={order.products ?? []} />
-                                        {order.isSupplementalOrder && <div className="ps-upsale-tag">UPSALE</div>}
-                                        {order.awaitingLandingUpsell && <div className="ps-upsale-wait">Đang chờ upsale</div>}
+                                    <td className="ps-order-products-cell">
+                                        <OrderProductsBreakdown items={order.products ?? []} order={order} />
                                     </td>
                                     <td className="text-right ps-money-cell">
                                         <OrderMoneyBreakdown row={order} />

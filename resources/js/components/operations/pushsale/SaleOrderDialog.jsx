@@ -272,7 +272,7 @@ export function SaleOrderDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-dialog ps-sale-order-dialog" aria-describedby={undefined}>
+            <DialogContent className="ps-sale-dialog ps-sale-modal ps-sale-order-modal ps-sale-order-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{order ? `${closeIntent ? 'Chốt đơn' : 'Cập nhật đơn'}: ${order.orderCode || 'Đơn chưa chốt'}` : 'Nhập đơn mới: --'}</DialogTitle></DialogHeader>
                 <div className="ps-sale-order-body">
                     <section className="ps-order-left-panel">

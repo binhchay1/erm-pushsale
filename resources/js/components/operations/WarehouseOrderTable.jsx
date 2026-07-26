@@ -339,7 +339,7 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                     <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>
                                 </td>
                                 <td className="c-address-body"><span>{row.shippingAddress || 'Chưa có địa chỉ giao'}</span>{row.shippingNotes && <><br /><span className="small-tip ps-wh-magenta">{row.shippingNotes}</span></>}</td>
-                                <td className="text-left c-products-body"><OrderProductsBreakdown items={row.products || [...(row.mainProducts || []), ...(row.upsellProducts || [])]} /></td>
+                                <td className="text-left c-products-body"><OrderProductsBreakdown items={row.products || [...(row.mainProducts || []), ...(row.upsellProducts || [])]} order={row} /></td>
                                 <td className="no-wrap area3 text-right c-money-body"><OrderMoneyBreakdown row={row} /></td>
                                 <td className="text-right">{formatCurrency(row.deposit)}</td>
                                 <td className="text-right">{formatCurrency(row.codAmount || row.total)}</td>

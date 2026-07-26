@@ -84,6 +84,10 @@ export default {
         total_row: 'Tổng:',
         no_data: 'Không có đơn nào',
     },
+    sale_workspace: {
+        note_helper: 'Lưu vào lịch sử tác nghiệp và hồ sơ khách hàng',
+        note_empty_hint: 'Chưa có TN cần. Nhập tại cột TN cần để lưu vào lịch sử tác nghiệp.',
+    },
     customer_interactions: {
         history_title: 'Lịch sử tác nghiệp',
         messages_title: 'Tin nhắn khách hàng',

@@ -249,7 +249,7 @@ export function PushsaleOperationHistoryDialog({ order, open, onOpenChange }) {
                                         <strong>{history.actionLabel}</strong><br />
                                         <span className="small-tip">{history.actorName}{history.actorRole ? ` (${history.actorRole})` : ''}</span>
                                     </td>
-                                    <td>{history.stageBefore || '—'}</td>
+                                    <td>{history.action === 'note_updated' && history.note ? history.note : (history.stageBefore || '—')}</td>
                                     <td>{history.result || '—'}</td>
                                     <td>
                                         {history.stageAfter || '—'}

@@ -7,6 +7,7 @@ import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { CustomerPurchaseHistoryDialog } from '@/components/customers/CustomerPurchaseHistoryDialog';
 import { OrderOperationHistoryDialog } from '@/components/customers/OrderOperationHistoryDialog';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
@@ -1186,6 +1187,20 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
                 return;
             }
 
+            const summaryToggle = event.target.closest?.('[id$="btnToggleSummary"], .btnToggleSummary, .ps-header-toggle');
+            if (summaryToggle) {
+                event.preventDefault();
+                const wrap = summaryToggle.closest('.m-header-wrap');
+                const target = wrap?.nextElementSibling;
+                if (target) target.classList.toggle('hidden');
+                const icon = summaryToggle.querySelector?.('i') || summaryToggle;
+                if (icon?.classList) {
+                    icon.classList.toggle('fa-angle-double-up');
+                    icon.classList.toggle('fa-angle-double-down');
+                }
+                return;
+            }
+
             const actionNode = event.target.closest?.('[data-pushsale-action]');
             const action = actionNode?.dataset.pushsaleAction;
             if (action) {
@@ -1375,6 +1390,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
     const [error, setError] = useState('');
     const [importGuideOpen, setImportGuideOpen] = useState(false);
     const [selectedRecordIds, setSelectedRecordIds] = useState(() => new Set());
+    const [confirmAction, setConfirmAction] = useState(null);
 
     const dialogEntries = Object.entries(schema.dialog_resource_schemas ?? {});
     const resolveDialog = useCallback((actionNode = null) => {
@@ -1422,8 +1438,8 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
         }
     };
 
-    const remove = async (row) => {
-        if (!row._record_id || !window.confirm('Xóa bản ghi này?')) return;
+    const performRemove = useCallback(async (row) => {
+        if (!row?._record_id) return;
         setError('');
         try {
             await requestJson(`${routeUrl}/records/${row._record_id}`, 'DELETE');
@@ -1431,7 +1447,17 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
         } catch (exception) {
             setError(exception.message);
         }
-    };
+    }, [routeUrl]);
+
+    const remove = useCallback((row) => {
+        if (!row?._record_id) return;
+        const label = row.name || row.title || row.code || row._display || `#${row._record_id}`;
+        setConfirmAction({
+            title: 'Xóa dữ liệu?',
+            description: `Xóa "${label}"? Nếu dữ liệu này đang được dùng ở tác nghiệp, đơn hàng hoặc báo cáo thì các phần liên quan có thể bị ảnh hưởng.`,
+            onConfirm: () => performRemove(row),
+        });
+    }, [performRemove]);
 
     const toggleSelectedRecord = useCallback((recordId) => {
         setSelectedRecordIds((current) => {
@@ -1442,10 +1468,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
         });
     }, []);
 
-    const removeSelected = useCallback(async () => {
-        const ids = [...selectedRecordIds];
-        if (!ids.length) { setError('Vui lòng chọn ít nhất một bản ghi có thể xóa.'); return; }
-        if (!window.confirm(`Xóa ${ids.length} bản ghi đã chọn?`)) return;
+    const performRemoveSelected = useCallback(async (ids) => {
         setError('');
         try {
             await Promise.all(ids.map((id) => requestJson(`${routeUrl}/records/${id}`, 'DELETE')));
@@ -1454,7 +1477,17 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
         } catch (exception) {
             setError(exception.message);
         }
-    }, [routeUrl, selectedRecordIds]);
+    }, [routeUrl]);
+
+    const removeSelected = useCallback(() => {
+        const ids = [...selectedRecordIds];
+        if (!ids.length) { setError('Vui lòng chọn ít nhất một bản ghi có thể xóa.'); return; }
+        setConfirmAction({
+            title: 'Xóa các bản ghi đã chọn?',
+            description: `Bạn đang xóa ${ids.length} bản ghi. Nếu dữ liệu này đang được dùng ở tác nghiệp, đơn hàng hoặc báo cáo thì các phần liên quan có thể bị ảnh hưởng.`,
+            onConfirm: () => performRemoveSelected(ids),
+        });
+    }, [performRemoveSelected, selectedRecordIds]);
 
     const handlePushsaleSave = useCallback(async (host) => {
         if (schema.code === '1.2.3') {
@@ -1632,6 +1665,17 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
                 filterOptions={filterOptions}
                 onClose={() => setEditor({ open: false, row: null, dialogCode: null, dialogSchema: null })}
                 onSaved={save}
+            />
+            <ConfirmActionDialog
+                open={Boolean(confirmAction)}
+                title={confirmAction?.title}
+                description={confirmAction?.description}
+                onCancel={() => setConfirmAction(null)}
+                onConfirm={async () => {
+                    const action = confirmAction?.onConfirm;
+                    setConfirmAction(null);
+                    await action?.();
+                }}
             />
         </AppLayout>
     );
