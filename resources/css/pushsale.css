@@ -14877,3 +14877,275 @@ html body.pushsale-app-body .ps-order-type-badge,
 html body.pushsale-app-body .ps-upsale-badge {
     display: none !important;
 }
+
+
+/* V145 — canonical Pushsale header/filter cleanup + Facebook connection pages.
+   Keep page title on the left and make filters/action buttons sit in a compact,
+   single-line right area before falling back responsively. */
+html body.pushsale-app-body .pslc-page .ps-page-header-main {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 270px) minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-height: 48px !important;
+    padding: 7px 14px !important;
+}
+html body.pushsale-app-body .pslc-page .pslc-header-controls {
+    display: grid !important;
+    grid-template-columns: max-content minmax(185px, 238px) minmax(185px, 238px) minmax(260px, 420px) 116px 32px 32px !important;
+    justify-content: end !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+}
+html body.pushsale-app-body .pslc-page .pslc-keyword {
+    max-width: 420px !important;
+}
+html body.pushsale-app-body .pslc-page .ps-search-select,
+html body.pushsale-app-body .pslc-page .ps-search-select__control,
+html body.pushsale-app-body .pslc-page .pslc-header-controls .form-control,
+html body.pushsale-app-body .pslc-page .pslc-header-controls select,
+html body.pushsale-app-body .pslc-page .pslc-header-controls input[type="text"] {
+    height: 31px !important;
+    min-height: 31px !important;
+    border: 1px solid #cbd6e2 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background-color: #fff !important;
+}
+html body.pushsale-app-body .pslc-page .ps-page-advanced-filters {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(190px, 260px)) !important;
+    justify-content: end !important;
+    gap: 8px !important;
+    padding: 7px 14px 8px !important;
+    border-top: 1px solid #d2d6de !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .pslc-page .pslc-tabs-shell,
+html body.pushsale-app-body .pslc-page .pslc-table-card {
+    margin-left: 14px !important;
+    margin-right: 14px !important;
+}
+html body.pushsale-app-body .pslc-page .pslc-table-card {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Customer 360: one canonical desktop line like the product/header pages. */
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-header .m-header {
+    display: grid !important;
+    grid-template-columns: max-content minmax(230px, 330px) minmax(260px, 360px) minmax(260px, 1fr) 28px 118px 132px !important;
+    grid-auto-flow: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-height: 48px !important;
+    padding: 7px 14px !important;
+}
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-header-spacer {
+    display: none !important;
+}
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-header .form-control,
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-header .ps-filter-control {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 31px !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .ps-customer360-page .ps-customer360-actions {
+    border-top: 1px solid #d2d6de !important;
+    padding: 14px !important;
+}
+
+/* Facebook connect + post list pages copied from Pushsale style, but wired to ERM backend. */
+html body.pushsale-app-body .ps-facebook-connect-page {
+    min-height: calc(100vh - 90px) !important;
+    background: #fff !important;
+    padding-top: 18px !important;
+}
+html body.pushsale-app-body .ps-facebook-connect-card {
+    width: min(680px, calc(100% - 28px)) !important;
+    margin: 0 auto !important;
+}
+html body.pushsale-app-body .ps-facebook-connect-card .m-header-wrap {
+    border: 1px solid #d2d6de !important;
+    border-bottom: 0 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12) !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-facebook-connect-card .m-header {
+    min-height: 56px !important;
+    padding: 15px 18px !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+}
+html body.pushsale-app-body .ps-facebook-connect-card .box {
+    border: 1px solid #d2d6de !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12) !important;
+}
+html body.pushsale-app-body .ps-facebook-connect-card .btn-facebook {
+    height: 46px !important;
+    background: #1877f2 !important;
+    color: #fff !important;
+    border: 0 !important;
+    border-radius: 3px !important;
+    font-size: 18px !important;
+}
+html body.pushsale-app-body .ps-facebook-connect-card .btn-facebook .fa {
+    font-size: 28px !important;
+    margin-right: 12px !important;
+    vertical-align: middle !important;
+}
+html body.pushsale-app-body .ps-facebook-connect-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    margin-top: 14px !important;
+}
+html body.pushsale-app-body .ps-facebook-page-list {
+    width: min(980px, calc(100% - 28px)) !important;
+    margin: 22px auto 0 !important;
+}
+html body.pushsale-app-body .ps-facebook-page-list h4 {
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-facebook-posts-page {
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-facebook-posts-page > .m-header-wrap {
+    margin: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12) !important;
+}
+html body.pushsale-app-body .ps-facebook-posts-page > .m-header-wrap .m-header {
+    min-height: 62px !important;
+    padding: 14px 18px !important;
+    align-items: center !important;
+}
+html body.pushsale-app-body .ps-facebook-posts-page .ps-page-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+}
+html body.pushsale-app-body .ps-facebook-post-filter {
+    display: grid !important;
+    grid-template-columns: minmax(240px, .9fr) minmax(180px, 260px) minmax(280px, 1fr) 105px 128px !important;
+    gap: 28px !important;
+    align-items: center !important;
+    margin: 14px 14px 0 !important;
+    padding: 14px 18px !important;
+    border: 1px solid #d2d6de !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,.12) !important;
+    background: #fff !important;
+}
+html body.pushsale-app-body .ps-facebook-post-filter .ps-search-select,
+html body.pushsale-app-body .ps-facebook-post-filter .ps-search-select__control,
+html body.pushsale-app-body .ps-facebook-post-filter .form-control {
+    height: 31px !important;
+    min-height: 31px !important;
+    border: 1px solid #cbd6e2 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+html body.pushsale-app-body .ps-facebook-post-table-wrap {
+    margin: 0 14px !important;
+    overflow-x: auto !important;
+}
+html body.pushsale-app-body .ps-facebook-post-table {
+    min-width: 1320px !important;
+    margin: 0 !important;
+    border-collapse: collapse !important;
+}
+html body.pushsale-app-body .ps-facebook-post-table th {
+    background: #3782dc !important;
+    color: #fff !important;
+    border-color: #2f72c4 !important;
+    text-align: center !important;
+}
+html body.pushsale-app-body .ps-facebook-post-content {
+    max-width: 520px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+@media (max-width: 1280px) {
+    html body.pushsale-app-body .pslc-page .pslc-header-controls,
+    html body.pushsale-app-body .ps-facebook-post-filter,
+    html body.pushsale-app-body .ps-customer360-page .ps-customer360-header .m-header {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        justify-content: stretch !important;
+    }
+}
+
+html body.pushsale-app-body .pslc-page .pslc-header-controls .ps-select,
+html body.pushsale-app-body .pslc-page .pslc-header-controls .ps-select__control,
+html body.pushsale-app-body .ps-facebook-post-filter .ps-select,
+html body.pushsale-app-body .ps-facebook-post-filter .ps-select__control {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 31px !important;
+    min-height: 31px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+html body.pushsale-app-body .pslc-page .pslc-header-controls .ps-select__control,
+html body.pushsale-app-body .ps-facebook-post-filter .ps-select__control {
+    border: 1px solid #cbd6e2 !important;
+    background: #fff !important;
+}
+
+
+/* V146 — warehouse/order update dialog full-width editor.
+   Product lines in the update-order modal should fit on desktop without horizontal scrolling. */
+html body.pushsale-app-body .ps-wh-dialog.wide,
+html body.pushsale-app-body [data-slot="dialog-content"].ps-wh-dialog.wide {
+    width: min(1560px, calc(100vw - 28px)) !important;
+    max-width: none !important;
+}
+
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-dialog-body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor,
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-return-editor {
+    overflow-x: visible !important;
+}
+
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor table {
+    min-width: 0 !important;
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor th,
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor td {
+    padding: 6px !important;
+}
+
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor th:nth-child(1),
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor td:nth-child(1) { width: 33% !important; }
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor th:nth-child(2),
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor td:nth-child(2) { width: 17% !important; }
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor th:nth-child(3),
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor td:nth-child(3) { width: 9% !important; }
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor th:nth-child(4),
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor td:nth-child(4) { width: 17% !important; }
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor th:nth-child(5),
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor td:nth-child(5) { width: 13% !important; }
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor th:nth-child(6),
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor td:nth-child(6) {
+    width: 11% !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor input,
+html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor select {
+    min-width: 0 !important;
+}
+
+/* V146 — Sales ranking reuses the Pushsale marketing-ranking chrome. */
+html body.pushsale-app-body .psr-page .psr-topbar h1 {
+    min-width: 220px !important;
+}

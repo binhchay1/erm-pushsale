@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { ReportPagination } from '@/components/reports/ReportPagination';
 import { apiRequest } from '@/lib/api';
+import { useT } from '@/providers/I18nProvider';
 
 function optionValue(option) {
     return String(option?.value ?? option?.id ?? '');
@@ -56,6 +57,8 @@ function DialogShell({ title, open, onClose, children, footer }) {
 }
 
 function Customer360Table({ rows, pagination, selected, setSelected, onAdd }) {
+    const t = useT();
+    const c = (key, params = {}) => t(`pages.customer360.${key}`, params);
     const allSelected = rows.length > 0 && rows.every((row) => selected.has(String(row.id)));
 
     const toggleAll = (checked) => {
@@ -85,19 +88,19 @@ function Customer360Table({ rows, pagination, selected, setSelected, onAdd }) {
                                 <label htmlFor="customer360-check-all">&nbsp;</label>
                             </span>
                         </th>
-                        <th className="text-center">Sale</th>
-                        <th className="text-center">Marketing</th>
-                        <th className="text-center">Mã KH</th>
-                        <th className="text-center">Tên KH</th>
-                        <th className="text-center">Tuổi</th>
-                        <th className="text-center">Số điện thoại</th>
-                        <th className="text-center">Giới tính</th>
-                        <th className="text-center">Lời nhắn</th>
-                        <th className="text-center">Ngày tạo</th>
-                        <th className="text-center">Cập nhật</th>
+                        <th className="text-center">{c('col_sale')}</th>
+                        <th className="text-center">{c('col_marketing')}</th>
+                        <th className="text-center">{c('col_customer_code')}</th>
+                        <th className="text-center">{c('col_customer_name')}</th>
+                        <th className="text-center">{c('col_age')}</th>
+                        <th className="text-center">{c('col_phone')}</th>
+                        <th className="text-center">{c('col_gender')}</th>
+                        <th className="text-center">{c('col_message')}</th>
+                        <th className="text-center">{c('col_created_at')}</th>
+                        <th className="text-center">{c('col_updated_at')}</th>
                         <th className="text-center no-wrap">
-                            <button type="button" className="btn-icon ps-customer360-add" title="Thêm khách hàng" onClick={onAdd}>
-                                <i className="fa fa-plus" /> <span className="text">Thêm</span>
+                            <button type="button" className="btn-icon ps-customer360-add" title={c('add_customer')} onClick={onAdd}>
+                                <i className="fa fa-plus" /> <span className="text">{c('add')}</span>
                             </button>
                         </th>
                     </tr>
@@ -124,15 +127,15 @@ function Customer360Table({ rows, pagination, selected, setSelected, onAdd }) {
                                 <td className="text-center no-wrap">{row.createdAt ?? ''}</td>
                                 <td className="text-center no-wrap">{row.updatedAt ?? ''}</td>
                                 <td className="text-center ps-customer360-row-actions">
-                                    <a href={`/admin/customers?search=${encodeURIComponent(row.customerPhone ?? '')}`} title="Mở hồ sơ khách hàng"><i className="fa fa-external-link" /></a>
-                                    <button type="button" title="Thêm vào chiến dịch" onClick={() => toggleOne(row.id, true)}><i className="fa fa-user-plus" /></button>
+                                    <a href={`/admin/customers?search=${encodeURIComponent(row.customerPhone ?? '')}`} title={c('open_customer_profile')}><i className="fa fa-external-link" /></a>
+                                    <button type="button" title={c('add_to_campaign')} onClick={() => toggleOne(row.id, true)}><i className="fa fa-user-plus" /></button>
                                 </td>
                             </tr>
                         );
                     }) : (
                         <tr>
                             <td colSpan={12} className="text-left">
-                                <span className="tbl-chk"><input id="customer360-confirm-delete" type="checkbox" defaultChecked /><label htmlFor="customer360-confirm-delete">Hỏi lại khi xóa</label></span>
+                                <span className="tbl-chk"><input id="customer360-confirm-delete" type="checkbox" defaultChecked /><label htmlFor="customer360-confirm-delete">{c('ask_before_delete')}</label></span>
                             </td>
                         </tr>
                     )}
@@ -143,6 +146,9 @@ function Customer360Table({ rows, pagination, selected, setSelected, onAdd }) {
 }
 
 export default function Customer360Management({ filters = {}, filterOptions = {}, report, routeUrl = '/admin/customer-management', pageTitle = 'Khách hàng 360' }) {
+    const t = useT();
+    const c = (key, params = {}) => t(`pages.customer360.${key}`, params);
+    const resolvedPageTitle = c('title') || pageTitle;
     const rows = report?.rows?.data ?? [];
     const pagination = report?.rows?.meta ?? { current_page: 1, last_page: 1, per_page: 20, total: 0, from: 0, to: 0 };
     const [form, setForm] = useState({ ...filters, keyword: filters.search ?? '' });
@@ -183,91 +189,91 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
             setDialog(null);
             router.reload({ preserveScroll: true });
         } catch (error) {
-            toast.error(error.message ?? 'Không thực hiện được thao tác.');
+            toast.error(error.message ?? c('action_failed'));
         }
     };
 
     const createCampaign = () => {
         const name = campaignName.trim();
         if (!name) {
-            toast.warning('Nhập tên chiến dịch trước khi lưu.');
+            toast.warning(c('enter_campaign_name'));
             return;
         }
-        postJson(`${routeUrl}/campaigns`, { name, filters: normalizedForm(), customer_ids: selectedIds }, 'Đã tạo chiến dịch.');
+        postJson(`${routeUrl}/campaigns`, { name, filters: normalizedForm(), customer_ids: selectedIds }, c('created_campaign'));
     };
 
     const attachCampaign = () => {
         if (!campaignId) {
-            toast.warning('Chọn chiến dịch trước khi thêm khách hàng.');
+            toast.warning(c('select_campaign_warning'));
             return;
         }
         if (!selectedIds.length) {
-            toast.warning('Tích chọn ít nhất một khách hàng.');
+            toast.warning(c('select_customer_warning'));
             return;
         }
-        postJson(`${routeUrl}/campaigns/attach`, { campaign_id: Number(campaignId), customer_ids: selectedIds }, 'Đã thêm khách hàng vào chiến dịch.');
+        postJson(`${routeUrl}/campaigns/attach`, { campaign_id: Number(campaignId), customer_ids: selectedIds }, c('attached_customers'));
     };
 
     const saveSegments = () => {
         const clean = segments.map((segment) => ({ name: String(segment.name ?? '').trim(), color: segment.color ?? '#337ab7' })).filter((segment) => segment.name);
         if (!clean.length) {
-            toast.warning('Cần ít nhất một nhóm phân loại.');
+            toast.warning(c('segment_required'));
             return;
         }
-        postJson(`${routeUrl}/segments`, { segments: clean }, 'Đã lưu phân loại khách hàng.');
+        postJson(`${routeUrl}/segments`, { segments: clean }, c('saved_segments'));
     };
 
     return (
         <AppLayout>
-            <Head title={pageTitle} />
+            <Head title={resolvedPageTitle} />
             <section className="ps-customer360-page">
                 <div className="m-header-wrap ps-customer360-header">
                     <div className="m-header">
-                        <div className="ps-customer360-title"><span>{pageTitle}</span></div>
+                        <div className="ps-customer360-title"><span>{resolvedPageTitle}</span></div>
                         <div className="ps-customer360-header-spacer" />
                         <input className="form-control date-range" value={dateRange} onChange={(event) => setDateRange(event.target.value)} onBlur={() => setForm((current) => ({ ...current, ...(parseDateRange(dateRange) ?? {}) }))} />
-                        <SelectBox value={form.campaign_id} onChange={(value) => setField('campaign_id', value)} options={filterOptions.campaigns} placeholder="-- Chọn chiến dịch để thiết lập điều kiện tìm kiếm --" />
-                        <input className="form-control" value={form.keyword ?? ''} placeholder="Tên, phone, mã kh" onChange={(event) => setField('keyword', event.target.value)} onKeyDown={(event) => event.key === 'Enter' && search()} />
-                        <button type="button" className="btn-icon ps-filter-toggle" onClick={() => setFiltersOpen((current) => !current)} title="Bộ lọc nâng cao"><i className={`fa ${filtersOpen ? 'fa-angle-double-up' : 'fa-angle-double-down'}`} /></button>
-                        <button type="button" className="btn btn-sm btn-primary" onClick={search}><i className="fa fa-search" /> Tìm kiếm</button>
-                        <button type="button" className="btn btn-sm btn-primary" onClick={exportCsv}><i className="fa fa-file-excel-o" /> Xuất excel</button>
+                        <SelectBox value={form.campaign_id} onChange={(value) => setField('campaign_id', value)} options={filterOptions.campaigns} placeholder={c('select_campaign')} />
+                        <input className="form-control" value={form.keyword ?? ''} placeholder={c('keyword_placeholder')} onChange={(event) => setField('keyword', event.target.value)} onKeyDown={(event) => event.key === 'Enter' && search()} />
+                        <button type="button" className="btn-icon ps-filter-toggle" onClick={() => setFiltersOpen((current) => !current)} title={c('advanced_filter')}><i className={`fa ${filtersOpen ? 'fa-angle-double-up' : 'fa-angle-double-down'}`} /></button>
+                        <button type="button" className="btn btn-sm btn-primary" onClick={search}><i className="fa fa-search" /> {c('search')}</button>
+                        <button type="button" className="btn btn-sm btn-primary" onClick={exportCsv}><i className="fa fa-file-excel-o" /> {c('export_excel')}</button>
                     </div>
                 </div>
 
                 {filtersOpen ? (
                     <div className="box-body ps-customer360-advanced">
                         <div className="ps-customer360-filter-grid">
-                            <SelectBox value={form.sale_id} onChange={(value) => setField('sale_id', value)} options={filterOptions.sales} placeholder="--Chọn sale--" />
-                            <SelectBox value={form.marketer_id} onChange={(value) => setField('marketer_id', value)} options={filterOptions.marketers} placeholder="--Chọn marketing--" />
-                            <SelectBox value={form.customer_type} onChange={(value) => setField('customer_type', value)} options={filterOptions.customerTypes} placeholder="-- Số lần mua lại --" />
-                            <SelectBox value={form.segment_id} onChange={(value) => setField('segment_id', value)} options={segments.map((segment) => ({ value: segment.id, label: segment.name }))} placeholder="-- Nhóm khách hàng --" />
-                            <input className="form-control" placeholder="Tuổi từ" value={form.age_from ?? ''} onChange={(event) => setField('age_from', event.target.value)} />
-                            <input className="form-control" placeholder="Tuổi đến" value={form.age_to ?? ''} onChange={(event) => setField('age_to', event.target.value)} />
-                            <SelectBox value={form.province} onChange={(value) => setField('province', value)} options={[]} placeholder="--Chọn Tỉnh/TP" />
-                            <SelectBox value={form.district} onChange={(value) => setField('district', value)} options={[]} placeholder="--Chọn Quận/Huyện" />
-                            <SelectBox value={form.ward} onChange={(value) => setField('ward', value)} options={[]} placeholder="--Chọn Phường/Xã--" />
-                            <SelectBox value={form.gender} onChange={(value) => setField('gender', value)} options={[{ value: 'male', label: 'Nam' }, { value: 'female', label: 'Nữ' }]} placeholder="-- Giới tính KHĐ --" />
-                            <SelectBox value={form.birth_month} onChange={(value) => setField('birth_month', value)} options={Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `Tháng ${i + 1}` }))} placeholder="Tháng sinh" />
-                            <SelectBox value={form.job} onChange={(value) => setField('job', value)} options={[]} placeholder="-- Nghề nghiệp --" />
-                            <SelectBox value={form.religion} onChange={(value) => setField('religion', value)} options={[]} placeholder="-- Tôn giáo --" />
-                            <SelectBox value={form.income_from} onChange={(value) => setField('income_from', value)} options={[]} placeholder="-- Thu nhập TB tháng từ --" />
-                            <SelectBox value={form.income_to} onChange={(value) => setField('income_to', value)} options={[]} placeholder="-- Thu nhập TB tháng đến --" />
-                            <SelectBox value={form.spending_from} onChange={(value) => setField('spending_from', value)} options={[]} placeholder="-- Chi tiêu TB tháng từ --" />
-                            <SelectBox value={form.spending_to} onChange={(value) => setField('spending_to', value)} options={[]} placeholder="-- Chi tiêu TB tháng từ --" />
-                            <SelectBox value={form.customer_status} onChange={(value) => setField('customer_status', value)} options={[]} placeholder="-- Tình trạng khách hàng --" />
-                            <SelectBox value={form.usage_effectiveness} onChange={(value) => setField('usage_effectiveness', value)} options={[]} placeholder="-- Hiệu quả sử dụng--" />
-                            <SelectBox value={form.usage_status} onChange={(value) => setField('usage_status', value)} options={[]} placeholder="-- Tình trạng sử dụng--" />
-                            <SelectBox value={form.data_quality} onChange={(value) => setField('data_quality', value)} options={[]} placeholder="-- Chất lượng data --" />
-                            <SelectBox value={form.reject_reason} onChange={(value) => setField('reject_reason', value)} options={[]} placeholder="-- Lý do từ chối --" />
+                            <SelectBox value={form.sale_id} onChange={(value) => setField('sale_id', value)} options={filterOptions.sales} placeholder={c('select_sale')} />
+                            <SelectBox value={form.marketer_id} onChange={(value) => setField('marketer_id', value)} options={filterOptions.marketers} placeholder={c('select_marketing')} />
+                            <SelectBox value={form.customer_type} onChange={(value) => setField('customer_type', value)} options={filterOptions.customerTypes} placeholder={c('purchase_times')} />
+                            <SelectBox value={form.segment_id} onChange={(value) => setField('segment_id', value)} options={segments.map((segment) => ({ value: segment.id, label: segment.name }))} placeholder={c('customer_segment')} />
+                            <input className="form-control" placeholder={c('age_from')} value={form.age_from ?? ''} onChange={(event) => setField('age_from', event.target.value)} />
+                            <input className="form-control" placeholder={c('age_to')} value={form.age_to ?? ''} onChange={(event) => setField('age_to', event.target.value)} />
+                            <SelectBox value={form.province} onChange={(value) => setField('province', value)} options={[]} placeholder={c('province_placeholder')} />
+                            <SelectBox value={form.district} onChange={(value) => setField('district', value)} options={[]} placeholder={c('district_placeholder')} />
+                            <SelectBox value={form.ward} onChange={(value) => setField('ward', value)} options={[]} placeholder={c('ward_placeholder')} />
+                            <SelectBox value={form.gender} onChange={(value) => setField('gender', value)} options={[{ value: 'male', label: c('male') }, { value: 'female', label: c('female') }]} placeholder={c('gender_placeholder')} />
+                            <SelectBox value={form.birth_month} onChange={(value) => setField('birth_month', value)} options={Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `${c('month')} ${i + 1}` }))} placeholder={c('birth_month')} />
+                            <SelectBox value={form.job} onChange={(value) => setField('job', value)} options={[]} placeholder={c('job_placeholder')} />
+                            <SelectBox value={form.religion} onChange={(value) => setField('religion', value)} options={[]} placeholder={c('religion_placeholder')} />
+                            <SelectBox value={form.income_from} onChange={(value) => setField('income_from', value)} options={[]} placeholder={c('income_from')} />
+                            <SelectBox value={form.income_to} onChange={(value) => setField('income_to', value)} options={[]} placeholder={c('income_to')} />
+                            <SelectBox value={form.spending_from} onChange={(value) => setField('spending_from', value)} options={[]} placeholder={c('spending_from')} />
+                            <SelectBox value={form.spending_to} onChange={(value) => setField('spending_to', value)} options={[]} placeholder={c('spending_from')} />
+                            <SelectBox value={form.customer_status} onChange={(value) => setField('customer_status', value)} options={[]} placeholder={c('customer_status')} />
+                            <SelectBox value={form.usage_effectiveness} onChange={(value) => setField('usage_effectiveness', value)} options={[]} placeholder={c('usage_effectiveness')} />
+                            <SelectBox value={form.usage_status} onChange={(value) => setField('usage_status', value)} options={[]} placeholder={c('usage_status')} />
+                            <SelectBox value={form.data_quality} onChange={(value) => setField('data_quality', value)} options={[]} placeholder={c('data_quality')} />
+                            <SelectBox value={form.reject_reason} onChange={(value) => setField('reject_reason', value)} options={[]} placeholder={c('reject_reason')} />
                             <SelectBox value={form.per_page} onChange={(value) => setField('per_page', value)} options={[20, 50, 100, 200, 500, 1000, 3000].map((value) => ({ value, label: value }))} placeholder="20" />
                         </div>
                     </div>
                 ) : null}
 
                 <div className="box-body ps-customer360-actions">
-                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('createCampaign')}><i className="fa fa-plus" /> Tạo chiến dịch từ bộ lọc tìm kiếm</button>
-                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('attachCampaign')}><i className="fa fa-user-plus" /> Thêm khách hàng vào chiến dịch</button>
-                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('segments')}><i className="fa fa-diamond" /> Quản lý phân loại khách hàng</button>
+                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('createCampaign')}><i className="fa fa-plus" /> {c('create_campaign_from_filter')}</button>
+                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('attachCampaign')}><i className="fa fa-user-plus" /> {c('attach_customers_to_campaign')}</button>
+                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('segments')}><i className="fa fa-diamond" /> {c('manage_segments')}</button>
                 </div>
 
                 <Customer360Table rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onAdd={() => setDialog('createCustomer')} />
@@ -275,32 +281,32 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
             </section>
 
             <DialogShell
-                title="Tạo chiến dịch theo điều kiện tìm kiếm lọc"
+                title={c('create_campaign_dialog_title')}
                 open={dialog === 'createCampaign'}
                 onClose={() => setDialog(null)}
-                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>Đóng</button><button type="button" className="btn btn-primary" onClick={createCampaign}><i className="fa fa-save" /> Lưu</button></>}
+                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>{c('close')}</button><button type="button" className="btn btn-primary" onClick={createCampaign}><i className="fa fa-save" /> {c('save')}</button></>}
             >
-                <label>Tên chiến dịch</label>
-                <input className="form-control" value={campaignName} onChange={(event) => setCampaignName(event.target.value)} placeholder="Nhập tên chiến dịch chăm sóc" />
-                <p className="small-tip mt-2">Chiến dịch sẽ lưu bộ lọc hiện tại và danh sách khách hàng đã tích chọn nếu có.</p>
+                <label>{c('campaign_name')}</label>
+                <input className="form-control" value={campaignName} onChange={(event) => setCampaignName(event.target.value)} placeholder={c('campaign_name_placeholder')} />
+                <p className="small-tip mt-2">{c('campaign_filter_hint')}</p>
             </DialogShell>
 
             <DialogShell
-                title="Thêm khách hàng vào chiến dịch"
+                title={c('attach_campaign_dialog_title')}
                 open={dialog === 'attachCampaign'}
                 onClose={() => setDialog(null)}
-                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>Đóng</button><button type="button" className="btn btn-primary" onClick={attachCampaign}><i className="fa fa-save" /> Lưu</button></>}
+                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>{c('close')}</button><button type="button" className="btn btn-primary" onClick={attachCampaign}><i className="fa fa-save" /> {c('save')}</button></>}
             >
-                <label>Chiến dịch</label>
-                <SelectBox value={campaignId} onChange={setCampaignId} options={filterOptions.campaigns} placeholder="-- Chọn chiến dịch --" />
-                <p className="small-tip mt-2">Đã chọn {selectedIds.length} khách hàng.</p>
+                <label>{c('campaign')}</label>
+                <SelectBox value={campaignId} onChange={setCampaignId} options={filterOptions.campaigns} placeholder={c('select_campaign_short')} />
+                <p className="small-tip mt-2">{c('selected_customers', { count: selectedIds.length })}</p>
             </DialogShell>
 
             <DialogShell
-                title="Quản lý phân loại khách hàng"
+                title={c('segments_dialog_title')}
                 open={dialog === 'segments'}
                 onClose={() => setDialog(null)}
-                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>Đóng</button><button type="button" className="btn btn-primary" onClick={saveSegments}><i className="fa fa-save" /> Lưu</button></>}
+                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>{c('close')}</button><button type="button" className="btn btn-primary" onClick={saveSegments}><i className="fa fa-save" /> {c('save')}</button></>}
             >
                 <div className="ps-segment-editor">
                     {segments.map((segment, index) => (
@@ -310,17 +316,17 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
                             <button type="button" className="btn-icon" onClick={() => setSegments((current) => current.filter((_, i) => i !== index))}><i className="fa fa-trash" /></button>
                         </div>
                     ))}
-                    <button type="button" className="btn btn-default btn-sm" onClick={() => setSegments((current) => [...current, { id: Date.now(), name: 'Nhóm khách hàng mới', color: '#337ab7' }])}><i className="fa fa-plus" /> Thêm nhóm</button>
+                    <button type="button" className="btn btn-default btn-sm" onClick={() => setSegments((current) => [...current, { id: Date.now(), name: c('new_segment_name'), color: '#337ab7' }])}><i className="fa fa-plus" /> {c('add_segment')}</button>
                 </div>
             </DialogShell>
 
             <DialogShell
-                title="Thêm khách hàng"
+                title={c('add_customer')}
                 open={dialog === 'createCustomer'}
                 onClose={() => setDialog(null)}
-                footer={<button type="button" className="btn btn-default" onClick={() => setDialog(null)}>Đóng</button>}
+                footer={<button type="button" className="btn btn-default" onClick={() => setDialog(null)}>{c('close')}</button>}
             >
-                <p>Màn này dùng dữ liệu khách hàng phát sinh từ lead/đơn hàng thật. Để thêm khách mới, dùng luồng nhập data thủ công hoặc import lead để đảm bảo đi đúng phân bổ.</p>
+                <p>{c('create_customer_hint')}</p>
             </DialogShell>
         </AppLayout>
     );

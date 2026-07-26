@@ -1243,3 +1243,56 @@ Multiple pages were still rendering their own page headers independently, so tit
 - `resources/css/pushsale-sale-workspace.css`
 - `resources/css/pushsale-customer-operation-money-contract.css`
 - `resources/css/pushsale.css`
+
+
+## V145 – Facebook menu/pages, i18n sweep, and header/filter cleanup
+
+### Scope
+- Menu group `2.5 Kết nối facebook`
+- `/admin/marketing/landing-connections`
+- `/admin/marketing/website-connections`
+- `/admin/customer-management`
+- Shared Pushsale select component
+
+### Changes
+- Menu `2.5.1` now opens the same Website connection page as `2.4.2`, with the Website tab/query selected.
+- Added real routes/backend/controller/model/migration for:
+  - `2.5.2` Facebook Fanpage sync: `/admin/marketing/facebook/connect`
+  - `2.5.3` Facebook post list: `/admin/marketing/facebook/posts`
+- Added UI pages matching the provided Pushsale Facebook sync and post-list references.
+- Added backend-safe demo sync actions so the pages have usable data before a real Meta OAuth app is wired.
+- Added `facebook_post_mappings` table for post/source mapping.
+- Expanded EN/VI translations for landing connections, Customer 360, Facebook connection/post pages, and shared select empty/search labels.
+- Normalized Landing/Website connection filter layout: compact right-side filter group, shorter keyword input, no thick shadow/border on select controls.
+- Re-strengthened Customer 360 single-line header layout.
+- Shared `PushsaleSelect` now uses the runtime translation dictionary for its search/empty text.
+
+### Files touched
+- `app/Http/Controllers/Admin/Marketing/FacebookConnectController.php`
+- `app/Models/Pushsale/FacebookPostMapping.php`
+- `database/migrations/2026_07_26_090000_create_facebook_post_mappings_table.php`
+- `routes/pushsale_pages.php`
+- `config/pushsale_navigation.php`
+- `config/pushsale_routes.php`
+- `app/Services/NavigationService.php`
+- `resources/js/pages/Pushsale/Pages/Marketing/FacebookConnectPage.jsx`
+- `resources/js/pages/Pushsale/Pages/Marketing/FacebookPostsPage.jsx`
+- `resources/js/pages/Pushsale/Pages/Marketing/LandingConnectionsPage.jsx`
+- `resources/js/pages/Customers/Management.jsx`
+- `resources/js/components/pushsale/PushsaleSelect.jsx`
+- `resources/js/i18n/locales/vi/pages.js`
+- `resources/js/i18n/locales/en/pages.js`
+- `resources/css/pushsale-adminlte-canonical-contract.css`
+- `resources/css/pushsale.css`
+- `lang/en/pushsale_navigation.php`
+- `lang/en/facebook.php`
+- `lang/vi/facebook.php`
+
+
+## V146 – Wider order update dialog + Sales ranking rebuilt
+
+- Widened the warehouse/order update dialog (`ps-wh-dialog wide`) so the product editor fits desktop width without horizontal scrolling.
+- Removed the fixed `min-width: 800px` behavior inside the update-order product table for the wide modal and assigned stable column widths.
+- Rebuilt menu `4.3` `/admin/sales/rankings` to use the same Pushsale ranking chrome/table/podium as marketing rankings.
+- Added `SalesLeaderboardService` so the Sales ranking page is calculated from real sales users, sale-assigned contacts, closed orders, product quantity, discounts, COD, fees and final revenue.
+- Kept rows visible even when demo orders have low/zero revenue, because the ranking is generated from real sales users first, then sorted by revenue.

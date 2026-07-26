@@ -6,12 +6,13 @@ import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleSelect, PushsaleMultiSelect } from '@/components/pushsale/PushsaleSelect';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
+import { useT } from '@/providers/I18nProvider';
 
 const connectionTabs = [
-    ['facebook', 'KẾT NỐI FACEBOOK'],
-    ['landing', 'KẾT NỐI NGUỒN DỮ LIỆU'],
-    ['website', 'KẾT NỐI WEBSITE'],
-    ['', 'TẤT CẢ'],
+    ['facebook', 'tab_facebook'],
+    ['landing', 'tab_landing'],
+    ['website', 'tab_website'],
+    ['', 'tab_all'],
 ];
 
 const connectionTypeOptions = [
@@ -209,6 +210,8 @@ export default function LandingConnectionsPage({
     canApprove = false,
     activeMenuCode = '2.4.1',
 }) {
+    const t = useT();
+    const l = (key, params = {}) => t(`pages.landing_connections.${key}`, params);
     const defaultMarketerId = String(marketers[0]?.id ?? '');
     const [query, setQuery] = useState({
         search: filters.search ?? '',
@@ -253,6 +256,13 @@ export default function LandingConnectionsPage({
         label: product.name,
         subLabel: product.sku ? `${product.sku}${product.type === 'combo' ? ' · Gói sản phẩm' : ''}` : (product.type === 'combo' ? 'Gói sản phẩm' : ''),
     })), [productCatalog]);
+    const connectionTypeTranslatedOptions = useMemo(() => connectionTypeOptions.map((option) => ({ ...option, label: l(`connection_type.${option.value}`) })), [t]);
+    const channelTranslatedOptions = useMemo(() => channelOptions.map((option) => ({ ...option, label: l(`channel.${option.value}`) })), [t]);
+    const allocationTranslatedOptions = useMemo(() => allocationOptions.map((option) => ({ ...option, label: l(`allocation.${option.value}`) })), [t]);
+    const approvalOptions = useMemo(() => [
+        { value: '1', label: l('approved') },
+        { value: '0', label: l('pending_approval') },
+    ], [t]);
 
     const search = (event) => {
         event?.preventDefault();
@@ -410,33 +420,33 @@ export default function LandingConnectionsPage({
         const ids = [...selected];
         if (!ids.length) return;
         setConfirmAction({
-            title: 'Xóa kết nối landing?',
-            description: `Xóa ${ids.length} kết nối landing đã chọn? Nguồn nhận data và chia số liên quan sẽ ngừng hoạt động.`,
+            title: l('delete_confirm_title'),
+            description: l('delete_confirm_desc', { count: ids.length }),
             onConfirm: () => performDeleteSelected(ids),
         });
     };
 
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
-            <Head title="Kết nối dữ liệu" />
+            <Head title={l('title')} />
             <section className="ps-adminlte-page pslc-page pslc-page-v119" data-page-code={activeMenuCode}>
                 <form className="pslc-filter ps-page-header ps-page-header-v119" onSubmit={search}>
                     <div className="ps-page-header-main">
-                        <div className="ps-title ps-page-title">Kết nối dữ liệu</div>
+                        <div className="ps-title ps-page-title">{l('title')}</div>
                         <div className="ps-page-primary-filters pslc-header-controls">
                             <label className="pslc-check">
                                 <input type="checkbox" checked={allProducts} onChange={(event) => {
                                     const checked = event.target.checked;
                                     setAllProducts(checked);
                                     if (checked) setQuery((old) => ({ ...old, product_id: '' }));
-                                }} /> Chỉ lọc tất cả sản phẩm
+                                }} /> {l('filter_all_products')}
                             </label>
                             <PushsaleSelect
                                 className="pslc-filter-select"
                                 searchable
                                 options={marketerOptions}
                                 value={query.marketer_user_id}
-                                placeholder="--Chọn marketing--"
+                                placeholder={l('select_marketing')}
                                 onChange={(value) => setQuery((old) => ({ ...old, marketer_user_id: value }))}
                             />
                             <PushsaleSelect
@@ -445,34 +455,34 @@ export default function LandingConnectionsPage({
                                 searchable
                                 options={productOptions}
                                 value={query.product_id}
-                                placeholder="--Chọn sản phẩm--"
+                                placeholder={l('select_product')}
                                 onChange={(value) => {
                                     setAllProducts(false);
                                     setQuery((old) => ({ ...old, product_id: value }));
                                 }}
                             />
-                            <input className="form-control pslc-keyword" placeholder="Tên nguồn dữ liệu / Tài khoản marketing" value={query.search} onChange={(event) => setQuery((old) => ({ ...old, search: event.target.value }))} />
-                            <button className="btn btn-primary ps-btn-search"><i className="fa fa-search" /> Tìm kiếm</button>
-                            <button type="button" className="btn btn-default pslc-cog" title="Chức năng"><i className="fa fa-gear" /></button>
-                            <button type="button" className="btn-icon pslc-toggle" title="Bộ lọc nâng cao" onClick={() => setAdvancedOpen((value) => !value)}><i className={`fa ${advancedOpen ? 'fa-angle-double-up' : 'fa-angle-double-down'}`} /></button>
+                            <input className="form-control pslc-keyword" placeholder={l('keyword_placeholder')} value={query.search} onChange={(event) => setQuery((old) => ({ ...old, search: event.target.value }))} />
+                            <button className="btn btn-primary ps-btn-search"><i className="fa fa-search" /> {l('search')}</button>
+                            <button type="button" className="btn btn-default pslc-cog" title={l('actions')}><i className="fa fa-gear" /></button>
+                            <button type="button" className="btn-icon pslc-toggle" title={l('advanced_filter')} onClick={() => setAdvancedOpen((value) => !value)}><i className={`fa ${advancedOpen ? 'fa-angle-double-up' : 'fa-angle-double-down'}`} /></button>
                         </div>
                     </div>
                     {advancedOpen && (
                         <div className="ps-page-advanced-filters">
-                            <PushsaleSelect options={connectionTypeOptions} value={query.connection_type} placeholder="--Loại kết nối--" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, connection_type: value }))} />
-                            <PushsaleSelect options={channelOptions} value={query.ad_channel ?? ''} placeholder="--Kênh quảng cáo--" searchable onChange={(value) => setQuery((old) => ({ ...old, ad_channel: value }))} />
-                            <PushsaleSelect options={[{ value: '1', label: 'Đã duyệt' }, { value: '0', label: 'Chưa duyệt' }]} value={query.approved ?? ''} placeholder="--Trạng thái duyệt--" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, approved: value }))} />
+                            <PushsaleSelect options={connectionTypeTranslatedOptions} value={query.connection_type} placeholder={l('connection_type_placeholder')} searchable={false} onChange={(value) => setQuery((old) => ({ ...old, connection_type: value }))} />
+                            <PushsaleSelect options={channelTranslatedOptions} value={query.ad_channel ?? ''} placeholder={l('channel_placeholder')} searchable onChange={(value) => setQuery((old) => ({ ...old, ad_channel: value }))} />
+                            <PushsaleSelect options={approvalOptions} value={query.approved ?? ''} placeholder={l('approval_placeholder')} searchable={false} onChange={(value) => setQuery((old) => ({ ...old, approved: value }))} />
                         </div>
                     )}
                 </form>
 
                 <div className="box-body pslc-tabs-shell">
                     <nav className="pslc-tabs">
-                        {connectionTabs.map(([value, label]) => (
-                            <button key={value || 'all'} type="button" className={String(query.connection_type ?? '') === String(value) ? 'active' : ''} onClick={() => switchTab(value)}>{label}</button>
+                        {connectionTabs.map(([value, labelKey]) => (
+                            <button key={value || 'all'} type="button" className={String(query.connection_type ?? '') === String(value) ? 'active' : ''} onClick={() => switchTab(value)}>{l(labelKey)}</button>
                         ))}
                         <button type="button" className="btn btn-danger pslc-delete-auto" disabled={!canManage || selected.size === 0} onClick={deleteSelected}>
-                            <i className="fa fa-trash" /> Xóa nguồn dữ liệu tự động
+                            <i className="fa fa-trash" /> {l('delete_auto_sources')}
                         </button>
                     </nav>
 
@@ -483,17 +493,17 @@ export default function LandingConnectionsPage({
                                     <tr>
                                         <th className="text-center pslc-col-stt"><input type="checkbox" checked={rows.length > 0 && rows.every((row) => selected.has(row.id))} onChange={toggleAll} /><br />STT</th>
                                         <th className="text-center pslc-col-marketer">Marketing</th>
-                                        <th className="text-center pslc-col-source">Tên nguồn kết nối<br /><span>Url nguồn dữ liệu</span></th>
-                                        <th className="text-center no-wrap pslc-col-type">Loại kết nối<br /><span>Kênh quảng cáo</span></th>
-                                        <th className="text-center pslc-col-products">Sản phẩm</th>
-                                        <th className="text-center pslc-col-sales">Ưu tiên sale</th>
-                                        <th className="text-center pslc-col-allocation">Cấu hình chia số</th>
-                                        <th className="text-center pslc-col-api">Url kết nối V2</th>
-                                        <th className="text-center pslc-col-small" title="Nhập thủ công">Nhập TC</th>
-                                        <th className="text-center pslc-col-small">Duyệt</th>
-                                        <th className="text-center pslc-col-updated">Cập nhật</th>
+                                        <th className="text-center pslc-col-source">{l('col_source')}<br /><span>{l('col_source_url')}</span></th>
+                                        <th className="text-center no-wrap pslc-col-type">{l('col_type')}<br /><span>{l('col_channel')}</span></th>
+                                        <th className="text-center pslc-col-products">{l('col_product')}</th>
+                                        <th className="text-center pslc-col-sales">{l('col_sale_priority')}</th>
+                                        <th className="text-center pslc-col-allocation">{l('col_allocation')}</th>
+                                        <th className="text-center pslc-col-api">{l('col_api_url')}</th>
+                                        <th className="text-center pslc-col-small" title={l('manual_import')}>{l('manual_import')}</th>
+                                        <th className="text-center pslc-col-small">{l('approve')}</th>
+                                        <th className="text-center pslc-col-updated">{l('updated')}</th>
                                         <th className="text-center pslc-col-add">
-                                            {canManage ? <button type="button" className="btn-icon pslc-add-link" onClick={openCreate}><i className="fa fa-plus" /> <span>Thêm</span></button> : null}
+                                            {canManage ? <button type="button" className="btn-icon pslc-add-link" onClick={openCreate}><i className="fa fa-plus" /> <span>{l('add')}</span></button> : null}
                                         </th>
                                     </tr>
                                 </thead>
@@ -505,103 +515,103 @@ export default function LandingConnectionsPage({
                                                 <td className="text-center"><input type="checkbox" checked={selected.has(row.id)} onChange={() => toggleSelected(row.id)} /><br />{(connections.from ?? 1) + index} -</td>
                                                 <td className="text-center pslc-td-marketer">{row.marketer ?? '—'}<br />{row.marketer_email && <span className="small-tip">({row.marketer_email})</span>}</td>
                                                 <td className="text-left pslc-td-source">{row.name}<br /><span className="small-tip">{mainSource?.source_url ?? '—'}</span></td>
-                                                <td className="text-center pslc-type-cell"><div>Nguồn dữ liệu</div><div className="pslc-channel">({channelOptions.find((item) => item.value === row.ad_channel)?.label ?? row.ad_channel ?? 'Facebook ads'})</div></td>
-                                                <td className="text-left pslc-products-cell">{row.products?.length ? row.products.map((mapping) => <div key={mapping.id}>{mapping.product_name}</div>) : <span className="text-muted">Chờ duyệt gắn sản phẩm</span>}</td>
+                                                <td className="text-center pslc-type-cell"><div>{l('source_data')}</div><div className="pslc-channel">({channelOptions.find((item) => item.value === row.ad_channel)?.label ?? row.ad_channel ?? 'Facebook ads'})</div></td>
+                                                <td className="text-left pslc-products-cell">{row.products?.length ? row.products.map((mapping) => <div key={mapping.id}>{mapping.product_name}</div>) : <span className="text-muted">{l('waiting_product_approval')}</span>}</td>
                                                 <td className="text-left">{row.sale_names?.length ? row.sale_names.map((name, saleIndex) => <div key={`${name}-${saleIndex}`}>{saleIndex + 1}. {name}</div>) : ''}</td>
-                                                <td className="text-left">{allocationLabels[row.allocation_method] ?? ''}</td>
+                                                <td className="text-left">{l(`allocation_label.${row.allocation_method}`)}</td>
                                                 <td className="text-center pslc-api-cell">
                                                     <input
                                                         className="form-control pslc-api-copy-input"
                                                         readOnly
                                                         value={mainSource?.submit_url ?? row.api_base_url ?? ''}
-                                                        title="Double click để chọn/copy URL"
+                                                        title={l('copy_api_hint')}
                                                         onDoubleClick={(event) => { event.currentTarget.select(); copy(event.currentTarget.value); }}
                                                     />
                                                     <div className="pslc-api-actions">
-                                                        <button type="button" className="btn-icon" onClick={() => copy(mainSource?.submit_url ?? row.api_base_url)}><i className="fa fa-link" /> Kết nối</button>
-                                                        <button type="button" className="btn-icon" onClick={() => copy(mainSource?.submit_url ?? row.api_base_url)}><i className="fa fa-copy" /> Copy</button>
+                                                        <button type="button" className="btn-icon" onClick={() => copy(mainSource?.submit_url ?? row.api_base_url)}><i className="fa fa-link" /> {l('connect')}</button>
+                                                        <button type="button" className="btn-icon" onClick={() => copy(mainSource?.submit_url ?? row.api_base_url)}><i className="fa fa-copy" /> {l('copy')}</button>
                                                     </div>
                                                 </td>
-                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.manual_import)} onChange={(event) => updateFlags(row, { manual_import: event.target.checked })} title="Bật/tắt nhập thủ công cho nguồn landing" /></td>
-                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.request_approval)} onChange={(event) => updateFlags(row, { request_approval: event.target.checked })} title="Bật/tắt yêu cầu duyệt trước khi chạy" /></td>
+                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.manual_import)} onChange={(event) => updateFlags(row, { manual_import: event.target.checked })} title={l('toggle_manual_import')} /></td>
+                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.request_approval)} onChange={(event) => updateFlags(row, { request_approval: event.target.checked })} title={l('toggle_approval')} /></td>
                                                 <td className="text-center">{row.updated_by ?? 'admin'}<br />{row.updated_at}</td>
-                                                <td className="text-center pslc-actions"><button type="button" className="btn-icon" onClick={() => openEdit(row)} title="Chỉnh sửa"><i className="fa fa-edit" /></button></td>
+                                                <td className="text-center pslc-actions"><button type="button" className="btn-icon" onClick={() => openEdit(row)} title={l('edit')}><i className="fa fa-edit" /></button></td>
                                             </tr>
                                         );
                                     }) : (
-                                        <tr><td colSpan="12" className="text-center text-muted">Không có dữ liệu kết nối.</td></tr>
+                                        <tr><td colSpan="12" className="text-center text-muted">{l('empty')}</td></tr>
                                     )}
                                 </tbody>
                             </table>
                         </div>
-                        <PushsalePagination meta={connections} routeUrl={routeUrl} filters={query} itemLabel="nguồn" />
+                        <PushsalePagination meta={connections} routeUrl={routeUrl} filters={query} itemLabel={l('item_label')} />
                     </div>
                 </div>
             </section>
 
-            <PageDialog open={open} title={editingId ? 'CHỈNH SỬA NGUỒN DỮ LIỆU' : 'THÊM MỚI NGUỒN DỮ LIỆU'} onClose={() => setOpen(false)}>
+            <PageDialog open={open} title={editingId ? l('edit_dialog_title') : l('add_dialog_title')} onClose={() => setOpen(false)}>
                 <form className="pslc-form pslc-source-form-v118 pslc-source-form-v119" onSubmit={save}>
                     <div className="pslc-dialog-body">
                         <div className="pslc-source-simple-form">
-                            <label>Loại kết nối <span className="required">(*)</span></label>
-                            <PushsaleSelect options={connectionTypeOptions} value={form.data.connection_type} onChange={(value) => form.setData('connection_type', value || 'landing')} searchable={false} />
+                            <label>{l('connection_type_label')} <span className="required">(*)</span></label>
+                            <PushsaleSelect options={connectionTypeTranslatedOptions} value={form.data.connection_type} onChange={(value) => form.setData('connection_type', value || 'landing')} searchable={false} />
 
-                            <label>Cấu hình chia số</label>
-                            <PushsaleSelect options={allocationOptions} value={form.data.allocation_method} onChange={(value) => form.setData('allocation_method', value || 'inherit')} searchable />
+                            <label>{l('allocation_config')}</label>
+                            <PushsaleSelect options={allocationTranslatedOptions} value={form.data.allocation_method} onChange={(value) => form.setData('allocation_method', value || 'inherit')} searchable />
 
-                            <label>Tên nguồn dữ liệu <span className="required">(*)</span></label>
+                            <label>{l('source_name')} <span className="required">(*)</span></label>
                             <input className="form-control" required value={form.data.name} onChange={(event) => {
                                 form.setData('name', event.target.value);
                                 updateMainSource('name', event.target.value);
                             }} />
 
-                            <label>Url nguồn dữ liệu <span className="required">(*)</span></label>
+                            <label>{l('source_url')} <span className="required">(*)</span></label>
                             <input className="form-control" type="url" required value={form.data.sources?.[0]?.source_url ?? ''} onChange={(event) => updateMainSource('source_url', event.target.value)} />
 
                             <label>Url API</label>
-                            <input className="form-control pslc-api-preview" readOnly disabled value={form.data.current_submit_url ?? ''} placeholder="Tự sinh sau khi lưu nguồn landing" />
+                            <input className="form-control pslc-api-preview" readOnly disabled value={form.data.current_submit_url ?? ''} placeholder={l('auto_generated_after_save')} />
 
-                            <label>Sử dụng woocommerce</label>
-                            <label className="pslc-inline-checkbox"><input type="checkbox" checked={Boolean(form.data.metadata?.woocommerce)} onChange={() => {}} /> Sử dụng woocommerce</label>
+                            <label>{l('use_woocommerce')}</label>
+                            <label className="pslc-inline-checkbox"><input type="checkbox" checked={Boolean(form.data.metadata?.woocommerce)} onChange={() => {}} /> {l('use_woocommerce')}</label>
 
-                            <label>Kênh quảng cáo <span className="required">(*)</span></label>
-                            <PushsaleSelect options={channelOptions} value={form.data.ad_channel} onChange={(value) => form.setData('ad_channel', value || 'facebook_ads')} searchable />
+                            <label>{l('ad_channel')} <span className="required">(*)</span></label>
+                            <PushsaleSelect options={channelTranslatedOptions} value={form.data.ad_channel} onChange={(value) => form.setData('ad_channel', value || 'facebook_ads')} searchable />
 
-                            <label>Upsale URL</label>
-                            <input className="form-control" type="url" value={form.data.upsell_urls_text ?? ''} onChange={(event) => form.setData('upsell_urls_text', event.target.value)} placeholder="Không bắt buộc" />
+                            <label>{l('upsale_url')}</label>
+                            <input className="form-control" type="url" value={form.data.upsell_urls_text ?? ''} onChange={(event) => form.setData('upsell_urls_text', event.target.value)} placeholder={l('optional')} />
 
-                            <label>Chọn nhanh sale từ Nhóm sale</label>
+                            <label>{l('quick_sale_by_team')}</label>
                             <div className="pslc-inline-action-field">
-                                <PushsaleSelect options={saleTeamOptions} value="" placeholder="--Chọn nhóm sale--" searchable onChange={applyTeam} />
-                                <button type="button" className="btn-icon" title="Xóa chọn nhóm" onClick={() => form.setData('sale_user_ids', [])}><i className="fa fa-trash" /></button>
-                                <button type="button" className="btn-icon" title="Làm mới danh sách sale"><i className="fa fa-refresh" /></button>
+                                <PushsaleSelect options={saleTeamOptions} value="" placeholder={l('select_sale_team')} searchable onChange={applyTeam} />
+                                <button type="button" className="btn-icon" title={l('clear_team')} onClick={() => form.setData('sale_user_ids', [])}><i className="fa fa-trash" /></button>
+                                <button type="button" className="btn-icon" title={l('refresh_sale_list')}><i className="fa fa-refresh" /></button>
                             </div>
 
-                            <label>Ưu tiên sale <span className="required">(*)</span></label>
+                            <label>{l('sale_priority')} <span className="required">(*)</span></label>
                             <div className="pslc-inline-action-field">
                                 <PushsaleMultiSelect
-                                    label="Sale"
+                                    label={l('sale')}
                                     options={saleOptions}
                                     selectedIds={form.data.sale_user_ids ?? []}
                                     enabled
                                     onEnabledChange={() => {}}
                                     onChange={(ids) => form.setData('sale_user_ids', ids)}
-                                    allLabel="Tất cả Sale đều có quyền"
-                                    placeholder="--Chọn sale ưu tiên--"
+                                    allLabel={l('all_sales_allowed')}
+                                    placeholder={l('select_priority_sale')}
                                 />
-                                <button type="button" className="btn-icon" title="Xóa sale" onClick={() => form.setData('sale_user_ids', [])}><i className="fa fa-trash" /></button>
+                                <button type="button" className="btn-icon" title={l('clear_sale')} onClick={() => form.setData('sale_user_ids', [])}><i className="fa fa-trash" /></button>
                             </div>
 
                             <div></div>
                             <div className="pslc-dialog-checks pslc-dialog-checks-two">
-                                <label><input type="checkbox" checked readOnly /> Nhập thủ công</label>
-                                <label><input type="checkbox" checked readOnly /> Duyệt</label>
-                                <span className="small-tip">Sản phẩm/gói và ngân sách duyệt ở menu duyệt kết nối.</span>
+                                <label><input type="checkbox" checked readOnly /> {l('manual_import')}</label>
+                                <label><input type="checkbox" checked readOnly /> {l('approve')}</label>
+                                <span className="small-tip">{l('approval_hint')}</span>
                             </div>
                         </div>
                         {Object.keys(form.errors).length > 0 && <div className="alert alert-danger pslc-errors">{Object.entries(form.errors).map(([key, message]) => <div key={key}><strong>{key}:</strong> {message}</div>)}</div>}
                     </div>
-                    <footer className="pslc-dialog-footer"><button className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> Lưu</button></footer>
+                    <footer className="pslc-dialog-footer"><button className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> {l('save')}</button></footer>
                 </form>
             </PageDialog>
             <ConfirmActionDialog

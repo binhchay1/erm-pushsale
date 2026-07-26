@@ -276,7 +276,7 @@ return array (
           1 => 
           array (
             'title' => '2. Kết nối website',
-            'url' => '/admin/marketing/website-connections',
+            'url' => '/admin/marketing/website-connections?connection_type=website&per_page=20',
             'area' => 'connections',
             'code' => '2.4.2',
           ),
@@ -298,20 +298,23 @@ return array (
           0 => 
           array (
             'title' => '1. Tạo nguồn dữ liệu',
-            'url' => '/admin/integrations',
+            'url' => '/admin/marketing/website-connections?connection_type=website&per_page=20',
             'area' => 'connections',
+            'code' => '2.5.1',
           ),
           1 => 
           array (
             'title' => '2. Kết nối Fanpage Facebook',
-            'url' => '/admin/integrations',
+            'url' => '/admin/marketing/facebook/connect',
             'area' => 'connections',
+            'code' => '2.5.2',
           ),
           2 => 
           array (
             'title' => '3. Danh sách bài post Facebook',
-            'url' => '/admin/integrations',
+            'url' => '/admin/marketing/facebook/posts',
             'area' => 'connections',
+            'code' => '2.5.3',
           ),
         ),
       ),

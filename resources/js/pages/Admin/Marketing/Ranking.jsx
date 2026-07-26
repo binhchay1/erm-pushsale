@@ -140,7 +140,7 @@ function RankingTable({ report = {} }) {
     );
 }
 
-export default function MarketingRanking({ report = {}, filters = {}, filterOptions = {}, filterRouteUrl = '/admin/rankings', activeMenuCode = '2.2' }) {
+export default function MarketingRanking({ report = {}, filters = {}, filterOptions = {}, filterRouteUrl = '/admin/rankings', activeMenuCode = '2.2', pageTitle = 'Bảng xếp hạng' }) {
     const { draft, set, apply } = usePushsaleFilters(filterRouteUrl, filters);
     const [collapsed, setCollapsed] = useState(false);
     const [gearOpen, setGearOpen] = useState(false);
@@ -162,10 +162,10 @@ export default function MarketingRanking({ report = {}, filters = {}, filterOpti
 
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
-            <Head title="Bảng xếp hạng" />
+            <Head title={pageTitle} />
             <section className="psr-page">
                 <div className="psr-topbar">
-                    <h1>Bảng xếp hạng</h1>
+                    <h1>{pageTitle}</h1>
                     <div className="psr-primary-filters">
                         <PushsaleDateRange filters={draft} onChange={set} />
                         <PushsaleSelect value={draft.discount_mode ?? ''} onChange={(value) => set('discount_mode', value)} options={filterOptions.discountModes ?? []} placeholder="Sau chiết khấu" />

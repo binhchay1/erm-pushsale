@@ -105,7 +105,8 @@ class NavigationService
             static fn (array $route): string => '/admin/'.ltrim((string) ($route['uri'] ?? ''), '/'),
             (array) config('pushsale_routes', []),
         );
-        if (in_array($url, $pushsaleUrls, true)) {
+        $urlWithoutQuery = strtok($url, '?') ?: $url;
+        if (in_array($urlWithoutQuery, $pushsaleUrls, true)) {
             return $url;
         }
 

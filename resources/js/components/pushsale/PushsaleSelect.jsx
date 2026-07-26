@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { translate } from '@/i18n/translate';
 
 export function normalizeOptionText(value) {
     return String(value ?? '')
@@ -51,8 +52,9 @@ export function PushsaleSelect({
     placeholder = '--Chọn--',
     disabled = false,
     searchable = false,
-    searchPlaceholder = 'Tìm kiếm...',
+    searchPlaceholder,
     className = '',
+    emptyLabel,
 }) {
     const [open, setOpen] = useState(false);
     const [keyword, setKeyword] = useState('');
@@ -88,7 +90,7 @@ export function PushsaleSelect({
                                 className="form-control ps-select__search"
                                 autoFocus
                                 value={keyword}
-                                placeholder={searchPlaceholder}
+                                placeholder={searchPlaceholder || translate('common.search')}
                                 onChange={(event) => setKeyword(event.target.value)}
                             />
                             <i className="fa fa-search" aria-hidden="true" />
@@ -108,7 +110,7 @@ export function PushsaleSelect({
                                 <span>{option.label}</span>
                                 {option.subLabel && <small>{option.subLabel}</small>}
                             </button>
-                        )) : <div className="ps-select__empty">Không có dữ liệu.</div>}
+                        )) : <div className="ps-select__empty">{emptyLabel || translate('pages.empty_data')}</div>}
                     </div>
                 </div>
             )}
@@ -208,7 +210,7 @@ export function PushsaleMultiSelect({
                                     <span>{option.label}{option.subLabel && <small>{option.subLabel}</small>}</span>
                                 </button>
                             );
-                        }) : <div className="ps-select__empty">Không có dữ liệu.</div>}
+                        }) : <div className="ps-select__empty">{emptyLabel || translate('pages.empty_data')}</div>}
                     </div>
                 </div>
             )}
