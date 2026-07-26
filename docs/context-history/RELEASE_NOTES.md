@@ -1296,3 +1296,22 @@ Multiple pages were still rendering their own page headers independently, so tit
 - Rebuilt menu `4.3` `/admin/sales/rankings` to use the same Pushsale ranking chrome/table/podium as marketing rankings.
 - Added `SalesLeaderboardService` so the Sales ranking page is calculated from real sales users, sale-assigned contacts, closed orders, product quantity, discounts, COD, fees and final revenue.
 - Kept rows visible even when demo orders have low/zero revenue, because the ranking is generated from real sales users first, then sorted by revenue.
+
+
+## V147 – Move customer/order flags beside phone icon
+
+### Scope
+- Customer profile table
+- Sale operation table
+- Shared operation table
+- Warehouse operation customer column
+- Accounting reconciliation customer column
+
+### Changes
+- Returning-customer, duplicate-phone and upsale flags no longer live under `Mã đơn`.
+- The `Mã đơn` column keeps only the order code and its history/action control.
+- Flags now render in the `Họ tên / Số điện thoại` cell, immediately after the phone icon.
+- The returning-customer heart keeps the existing red circular outline form from V144.
+- Duplicate and upsale keep the same compact circular-outline visual language so all three states read as one icon group.
+- Warehouse and accounting customer cells now consume the same `OrderStatusFlags` component instead of page-specific heart/copy rendering.
+- `CustomerSupplementPacketsDialog` in the generic shared operation table moves with the contact/status group instead of remaining under the order code.

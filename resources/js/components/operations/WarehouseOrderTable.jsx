@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 import { ShippingOrderDetailDialog } from '@/components/shipping/ShippingOrderDetailDialog';
 import { WarehouseActionDialogs } from '@/components/operations/WarehouseActionDialogs';
-import { OrderMoneyBreakdown, OrderProductsBreakdown } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { apiPost, apiRequest, getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
@@ -334,7 +334,15 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                     </div>
                                     <div className="sline text-left">{row.effectiveReceiverName || row.customerName}</div>
                                     <span className="nha-mang text-left">{row.carrierLabel || ''}</span>
-                                    <div className="no-wrap"><a className="text-left" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a></div>
+                                    <div className="no-wrap ps-contact-phone-row">
+                                        <a className="text-left" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a>
+                                        {(row.effectiveReceiverPhone || row.customerPhone) ? (
+                                            <a className="ps-contact-phone-icon" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.effectiveReceiverPhone || row.customerPhone}`}>
+                                                <i className="fa fa-phone" aria-hidden="true" />
+                                            </a>
+                                        ) : null}
+                                        <OrderStatusFlags row={row} className="ps-contact-flags" />
+                                    </div>
                                     <div className="text-left khkn sline">{row.customerNote || ''}</div>
                                     <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>
                                 </td>

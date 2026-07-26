@@ -148,10 +148,6 @@ export function OperationOrderTable({
                                 <Td className="text-center font-medium ps-code-cell">
                                     <div className="ps-order-code-stack">
                                         <div className="ps-order-code-text">{row.orderCode || '—'}</div>
-                                        <OrderStatusFlags row={row} className="ps-order-flags-compact" />
-                                        {row.pendingSupplementCount > 0 && (
-                                            <CustomerSupplementPacketsDialog order={row} count={row.pendingSupplementCount} />
-                                        )}
                                     </div>
                                 </Td>
 
@@ -168,9 +164,17 @@ export function OperationOrderTable({
 
                                 <Td>
                                     <div className="text-blue-500 font-medium">{row.customerName}</div>
-                                    <div className="flex items-center gap-2 mt-1">
+                                    <div className="flex items-center gap-2 mt-1 ps-contact-phone-row">
                                         <span className="text-blue-500">{row.customerPhone}</span>
-
+                                        {row.customerPhone ? (
+                                            <a className="ps-contact-phone-icon" href={`tel:${row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.customerPhone}`}>
+                                                <i className="fa fa-phone" aria-hidden="true" />
+                                            </a>
+                                        ) : null}
+                                        <OrderStatusFlags row={row} className="ps-contact-flags" />
+                                        {row.pendingSupplementCount > 0 && (
+                                            <CustomerSupplementPacketsDialog order={row} count={row.pendingSupplementCount} />
+                                        )}
                                     </div>
                                     <CarrierBadge carrier={row.phoneCarrier} carrierKey={row.phoneCarrierKey} />
                                 </Td>

@@ -130,7 +130,6 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                         <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onOpenDialog('view', row)} title="Xem lịch sử xem thông tin số">
                                             <i className="fa fa-history" />
                                         </button>
-                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} />
                                     </div>
                                 </td>
                                 <td className="text-center">
@@ -156,8 +155,14 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                             <span>{safeText(row.customerName)}</span>
                                         )}
                                     </div>
-                                    <div className="no-wrap ps-phone-line">
+                                    <div className="no-wrap ps-phone-line ps-contact-phone-row">
                                         <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('purchase', row)}>{safeText(row.customerPhone)}</button>
+                                        {row.customerPhone ? (
+                                            <a className="ps-contact-phone-icon" href={`tel:${row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.customerPhone}`}>
+                                                <i className="fa fa-phone" aria-hidden="true" />
+                                            </a>
+                                        ) : null}
+                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" />
                                     </div>
                                     {row.phoneCarrier ? <span className={`ps-carrier ps-carrier-${row.phoneCarrierKey ?? 'other'}`}>{row.phoneCarrier}</span> : null}
                                 </td>

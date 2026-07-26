@@ -50,46 +50,7 @@ html body.pushsale-app-body .sidebar-toggle.pushsale-sidebar-toggle svg {
     transform: none !important;
 }
 
-html body.pushsale-app-body .pushsale-third-menu,
-html body.pushsale-app-body .pushsale-third-menu.ul3,
-html body.pushsale-app-body ul.ul3.pushsale-third-menu {
-    margin: 0 !important;
-    padding: 8px 10px !important;
-    list-style: none !important;
-    border: 0 !important;
-    outline: 0 !important;
-}
-
-html body.pushsale-app-body .pushsale-third-menu .pushsale-third-item,
-html body.pushsale-app-body .pushsale-third-menu .li3,
-html body.pushsale-app-body .pushsale-third-menu li {
-    margin: 0 !important;
-    padding: 0 !important;
-    list-style: none !important;
-    border: 0 !important;
-    border-bottom: 0 !important;
-    box-shadow: none !important;
-    outline: 0 !important;
-}
-
-html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link,
-html body.pushsale-app-body .pushsale-third-menu .a3,
-html body.pushsale-app-body .pushsale-third-menu a {
-    margin: 0 !important;
-    border: 0 !important;
-    border-bottom: 0 !important;
-    box-shadow: none !important;
-    outline: 0 !important;
-    text-decoration: none !important;
-}
-
-html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link::before,
-html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link::after,
-html body.pushsale-app-body .pushsale-third-menu .a3::before,
-html body.pushsale-app-body .pushsale-third-menu .a3::after {
-    display: none !important;
-    content: none !important;
-}
+/* Sidebar / L3 flyout chrome moved to pushsale-sidebar-canonical-contract.css. */
 
 html body.pushsale-app-body .ps-page-shell__main-row {
     min-height: 58px !important;

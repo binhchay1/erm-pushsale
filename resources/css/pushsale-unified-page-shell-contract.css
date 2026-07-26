@@ -543,29 +543,7 @@ html body.pushsale-app-body .ps-products-page .ps-product-search input {
     width: 100% !important;
 }
 
-/* V109 — submenu level-2 hover. Items 2.1/2.2/2.3 have no third-level child,
- * but they must still receive the same blue hover treatment as expandable
- * submenu rows. */
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:hover > .a2.pushsale-menu-link,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > .a2.pushsale-menu-link:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > button.a2.pushsale-menu-link:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > a.a2.pushsale-menu-link:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.active > .a2.pushsale-menu-link,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.has-open-flyout > .a2.pushsale-menu-link {
-    background: #0b8ff3 !important;
-    color: #fff !important;
-    border-color: #0b8ff3 !important;
-    box-shadow: none !important;
-}
-
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:hover > .a2.pushsale-menu-link i,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:hover > .a2.pushsale-menu-link span,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > .a2.pushsale-menu-link:hover i,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > .a2.pushsale-menu-link:hover span,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.active > .a2.pushsale-menu-link i,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.active > .a2.pushsale-menu-link span {
-    color: #fff !important;
-}
+/* V109 — submenu level-2 hover moved to pushsale-sidebar-canonical-contract.css. */
 
 @media (max-width: 1180px) {
     html body.pushsale-app-body .ps-products-page .ps-product-header {
@@ -813,28 +791,7 @@ html body.pushsale-app-body .ps-products-page .ps-product-table {
 }
 
 
-/* V113 — final submenu hover and form select contract. */
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:hover > .a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > a.a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > button.a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > span.a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.flyout-open > .a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.has-open-flyout > .a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.active > .a2 {
-    background: #1592e6 !important;
-    background-color: #1592e6 !important;
-    color: #fff !important;
-    border-color: #1592e6 !important;
-    box-shadow: none !important;
-}
-
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:hover > .a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:hover *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.flyout-open > .a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.active > .a2 * {
-    color: #fff !important;
-}
+/* V113 — submenu hover moved to pushsale-sidebar-canonical-contract.css. */
 
 html body.pushsale-app-body select,
 html body.pushsale-app-body select.form-control,
@@ -1797,34 +1754,7 @@ html body.pushsale-app-body .ps-warehouse-form-grid .ps-select.is-disabled .ps-s
     cursor: not-allowed !important;
 }
 
-/* v118: final fix for level-2 sidebar hover and landing connection parity */
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > a.a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > button.a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > span.a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > a.a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > span.a2:hover {
-    background: #1e95f2 !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-}
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > a.a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > button.a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > span.a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > a.a2:hover *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2:hover *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > span.a2:hover * {
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-}
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > a.a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > span.a2 {
-    display: block !important;
-    width: 100% !important;
-    min-height: 38px !important;
-}
+/* Level-2 sidebar hover moved to pushsale-sidebar-canonical-contract.css. */
 
 body.pushsale-app-body .pslc-page-v118 .m-header-wrap,
 body.pushsale-app-body .pslc-page-v118 .box-body,

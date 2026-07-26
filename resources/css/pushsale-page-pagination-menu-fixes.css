@@ -81,53 +81,7 @@ html body.pushsale-app-body .pushsale-pagination.ps-pagination-v81 .ps-paginatio
     }
 }
 
-/* Sidebar/flyout: no inherited blue top hairline, no link underlines, clean flyout. */
-html body.pushsale-app-body .pushsale-third-menu,
-html body.pushsale-app-body .pushsale-third-menu.ul3,
-html body.pushsale-app-body ul.ul3.pushsale-third-menu {
-    border: 0 !important;
-    border-top: 0 !important;
-    outline: 0 !important;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, .24) !important;
-    overflow: hidden !important;
-}
-
-html body.pushsale-app-body .pushsale-third-menu::before,
-html body.pushsale-app-body .pushsale-third-menu::after,
-html body.pushsale-app-body .pushsale-third-menu *::before,
-html body.pushsale-app-body .pushsale-third-menu *::after {
-    border: 0 !important;
-    box-shadow: none !important;
-    text-decoration: none !important;
-}
-
-html body.pushsale-app-body .pushsale-third-menu .pushsale-third-item,
-html body.pushsale-app-body .pushsale-third-menu .li3 {
-    border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-    outline: 0 !important;
-}
-
-html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link,
-html body.pushsale-app-body .pushsale-third-menu .a3,
-html body.pushsale-app-body .pushsale-third-menu a {
-    border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-    text-decoration: none !important;
-}
-
-html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link:hover,
-html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link:focus,
-html body.pushsale-app-body .pushsale-third-menu .a3:hover,
-html body.pushsale-app-body .pushsale-third-menu .a3:focus {
-    border: 0 !important;
-    outline: 0 !important;
-    box-shadow: inset 0 0 0 999px rgba(255,255,255,.10) !important;
-}
+/* Sidebar / L3 flyout chrome moved to pushsale-sidebar-canonical-contract.css. */
 
 /* Import contact captured template: remove legacy nested content-wrapper gap. */
 html body.pushsale-app-body .pushsale-page[data-page-code="1.10"],

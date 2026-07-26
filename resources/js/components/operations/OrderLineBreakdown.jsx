@@ -52,7 +52,7 @@ export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, c
     );
 
     return (
-        <span className={`ps-order-flags ${className}`.trim()} aria-label="Dấu hiệu đơn hàng">
+        <span className={`ps-order-flags ${className}`.trim()} aria-label="Dấu hiệu khách hàng và đơn hàng">
             {hasReturning ? (
                 <span className="ps-order-flag is-returning" title="Khách hàng cũ" aria-label="Khách hàng cũ">
                     <i className="fa fa-heart" aria-hidden="true" />

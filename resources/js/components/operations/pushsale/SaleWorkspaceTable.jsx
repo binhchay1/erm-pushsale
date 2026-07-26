@@ -288,7 +288,6 @@ export function SaleWorkspaceTable({
                                                 <button type="button" className="ps-order-code-link" onClick={() => onDataViewHistory(order)}>{order.orderCode}</button>
                                             ) : <span className="ps-order-code-empty" title="Mã đơn chỉ sinh sau khi chốt đơn">&nbsp;</span>}
                                             <button type="button" className="btn-icon ps-cell-action" onClick={() => onDataViewHistory(order)} title="Lịch sử xem thông tin số"><i className="fa fa-history" /></button>
-                                            <OrderStatusFlags row={order} onDuplicate={onDuplicateOrders ? () => onDuplicateOrders(order) : null} />
                                         </div>
                                     </td>
                                     <td className="text-center">
@@ -311,7 +310,11 @@ export function SaleWorkspaceTable({
                                         <button type="button" className="btn-icon ps-cell-action" onClick={() => onEdit(order, false)} title="Cập nhật đơn"><i className="fa fa-pencil-square-o" /></button>
                                         <button type="button" className="ps-customer-name-link" onClick={() => onPurchaseHistory(order)}>{order.customerName || '—'}</button><br />
                                         {order.phoneCarrier && <><span className={`ps-carrier ps-carrier-${order.phoneCarrierKey}`}>[{order.phoneCarrier}]</span><br /></>}
-                                        <button type="button" className="ps-phone-link" onClick={() => onDuplicateOrders(order)} title="Danh sách trùng số">{order.customerPhone}</button> <CallButton order={order} actionBaseUrl={actionBaseUrl} /><br />
+                                        <div className="ps-contact-phone-row">
+                                            <button type="button" className="ps-phone-link" onClick={() => onDuplicateOrders(order)} title="Danh sách trùng số">{order.customerPhone}</button>
+                                            <CallButton order={order} actionBaseUrl={actionBaseUrl} />
+                                            <OrderStatusFlags row={order} onDuplicate={onDuplicateOrders ? () => onDuplicateOrders(order) : null} className="ps-contact-flags" />
+                                        </div>
                                         {order.desiredDeliveryAt && <span className="small-tip">{dateTime(order.desiredDeliveryAt)}</span>}
                                         {order.pendingSupplementCount > 0 && <CustomerSupplementPacketsDialog order={order} count={order.pendingSupplementCount} />}
                                     </td>

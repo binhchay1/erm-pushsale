@@ -1,69 +1,11 @@
-/* v123 canonical Pushsale/AdminLTE contract.
-   Last-loaded CSS only. Keep page CSS scoped, and keep sidebar hover behavior here. */
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover {
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-    box-shadow: none !important;
-    outline: 0 !important;
-}
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open):hover > .a2 *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu .li2:not(.active):not(.flyout-open) > .a2:hover * {
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-}
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:focus,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:focus-visible,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2:active {
-    border: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2::before,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2 > .a2::after {
-    content: none !important;
-    display: none !important;
-}
+﻿/* Sidebar/flyout menu chrome moved to pushsale-sidebar-canonical-contract.css. Removed 30 conflicting blocks. */
+
 html body.pushsale-app-body .pslc-api-preview:disabled,
 html body.pushsale-app-body input.pslc-api-preview[disabled],
 html body.pushsale-app-body input.pslc-api-preview[readonly] {
     background: #f3f3f3 !important;
     color: #777 !important;
     cursor: not-allowed !important;
-}
-
-/* v125 final runtime contract: force leaf second-level menu hover without relying on legacy cascade. */
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > .a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > a.a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > span.a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > button.a2 {
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    background-image: none !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    border: 0 !important;
-    border-top: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > .a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > a.a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > span.a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu .li2.ui-hover > button.a2 * {
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
 }
 html body.pushsale-app-body .pushsale-route-loading {
     position: fixed;
@@ -82,81 +24,6 @@ html body.pushsale-app-body .pushsale-route-loading {
     font-size: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .10);
     pointer-events: none;
-}
-
-/* v126 — absolute last sidebar hover reset, covers link and li layers. */
-html body .pushsale-main-sidebar .ul2 > li.li2:hover,
-html body .main-sidebar.pushsale-main-sidebar .ul2 > li.li2:hover,
-html body .pushsale-main-sidebar .sidebar-menu .treeview-menu > li.li2:hover {
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    background-image: none !important;
-    border: 0 !important;
-    border-top: 0 !important;
-    box-shadow: none !important;
-}
-html body .pushsale-main-sidebar .ul2 > li.li2:hover > .a2,
-html body .pushsale-main-sidebar .ul2 > li.li2:hover > a,
-html body .pushsale-main-sidebar .ul2 > li.li2:hover > button,
-html body .main-sidebar.pushsale-main-sidebar .ul2 > li.li2:hover > .a2,
-html body .pushsale-main-sidebar .sidebar-menu .treeview-menu > li.li2:hover > .a2 {
-    display: block !important;
-    width: 100% !important;
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    background-image: none !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-}
-html body .pushsale-main-sidebar .ul2 > li.li2:hover > .a2 *,
-html body .pushsale-main-sidebar .ul2 > li.li2:hover > a *,
-html body .pushsale-main-sidebar .ul2 > li.li2:hover > button *,
-html body .main-sidebar.pushsale-main-sidebar .ul2 > li.li2:hover > .a2 * {
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-}
-
-/* v127 canonical reset — sidebar second-level hover must never inherit white focus/border from legacy AdminLTE. */
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2 > .a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2 > a.a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2 > button.a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2 > span.a2 {
-    border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-    background-image: none !important;
-}
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover > .a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover > .a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover > a.a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover > a.a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover > button.a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover > button.a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover > span.a2,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover > span.a2 {
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    background-image: none !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    border: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2:hover > .a2 *,
-html body.pushsale-app-body .main-sidebar.pushsale-main-sidebar .sidebar-menu .treeview-menu.ul2 > li.li2.ui-hover > .a2 * {
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
 }
 
 /* v131 — canonical final: page header alignment + real second-level menu hover.
@@ -305,51 +172,6 @@ html body.pushsale-app-body .psm-page .psm-filter-grid.is-second > * {
     width: 100% !important;
 }
 
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > a.a2,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > span.a2 {
-    border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-    background-image: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > a.a2::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > span.a2::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2::before {
-    display: none !important;
-    content: none !important;
-    border: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"],
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover > .a2,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .a2 {
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    background-image: none !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    border: 0 !important;
-    border-top: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2 *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover > .a2 *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .a2 * {
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-}
-
 @media (max-width: 980px) {
     html body.pushsale-app-body .pslc-approval-header.ps-page-header-v119 .ps-page-header-main,
     html body.pushsale-app-body .psm-page .ps-page-shell__main-row {
@@ -363,65 +185,6 @@ html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treev
         flex-wrap: wrap !important;
         grid-template-columns: 1fr !important;
     }
-}
-
-/* V132: final sidebar hover contract. This is intentionally broad inside the
-   Pushsale sidebar because older AdminLTE/theme CSS injects white hover layers. */
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > a,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > button,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > .pushsale-menu-link {
-    border: 0 !important;
-    border-top: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2::after,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > a::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > button::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2 > .pushsale-menu-link::before {
-    display: none !important;
-    content: none !important;
-    border: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"],
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > a,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > button,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > .pushsale-menu-link,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > a,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > button,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > .pushsale-menu-link,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > a,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > button,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .pushsale-menu-link {
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    background-image: none !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    border: 0 !important;
-    border-top: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > a *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > button *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2:hover > .pushsale-menu-link *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > a *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > button *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2.ui-hover > .pushsale-menu-link *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > a *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > button *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu.ul2 > li.li2[data-ps-second-hover="true"] > .pushsale-menu-link * {
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    background: transparent !important;
-    background-color: transparent !important;
 }
 
 /* V133 canonical control/header/sidebar reset.
@@ -662,65 +425,6 @@ html body.pushsale-app-body .ps-combo-heading-actions {
 }
 html body.pushsale-app-body .ps-combo-heading-actions .form-control { max-width: 360px !important; }
 
-/* Broad final sidebar hover. Covers items with/without submenu, disabled spans,
-   Link anchors, and buttons. This intentionally ignores older white hover rules. */
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > a,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > button,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > span,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > .pushsale-menu-link {
-    border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-    background-image: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'],
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover > a,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover > button,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover > span,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover > .pushsale-menu-link,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover > a,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover > button,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover > span,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover > .pushsale-menu-link,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'] > a,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'] > button,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'] > span,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'] > .pushsale-menu-link {
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    background-image: none !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li:hover > * *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li.ui-hover > * *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li[data-ps-second-hover='true'] > * * {
-    background: transparent !important;
-    background-color: transparent !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li::after,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > *::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .treeview-menu > li > *::after {
-    display: none !important;
-    content: none !important;
-    border: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-
 @media (max-width: 1280px) {
     html body.pushsale-app-body .ps-page-shell__main-row,
     html body.pushsale-app-body .ps-page-heading.ps-combo-heading,
@@ -836,32 +540,6 @@ html body.pushsale-app-body .ps-operation-categories-page .ps-op-result-table .a
 html body.pushsale-app-body .ps-operation-categories-page .ps-op-result-table .updated-col { width: 230px !important; }
 html body.pushsale-app-body .ps-operation-categories-page .ps-op-icon-button {
     cursor: pointer !important;
-}
-
-/* V134 sidebar fallback without relying on body/aside specificity. */
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover,
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2,
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > a.a2,
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > button.a2,
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > span.a2,
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover,
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover > .a2,
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'],
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'] > .a2 {
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    background-image: none !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    border: 0 !important;
-    border-top: 0 !important;
-    box-shadow: none !important;
-}
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2 *,
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover > .a2 *,
-.main-sidebar.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'] > .a2 * {
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
 }
 
 /* V135 — final taxonomy modal layout: force the product taxonomy dialogs to use the full
@@ -1022,55 +700,6 @@ html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-canonical-v135 
     html body.pushsale-app-body .ps-taxonomy-source-form.ps-taxonomy-canonical-v135 .ps-taxonomy-search-row {
         grid-template-columns: 1fr !important;
     }
-}
-
-/* v136 canonical last-mile cleanup: one hover contract, one dialog close, product cell fit. */
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'] {
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    background-image: none !important;
-    border: 0 !important;
-    border-top: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > a,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > button,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > span,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'] > .a2,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'] > a,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'] > button,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'] > span {
-    background: #0b8ff3 !important;
-    background-color: #0b8ff3 !important;
-    background-image: none !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    border: 0 !important;
-    border-top: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > * *,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2[data-ps-second-hover='true'] > * * {
-    background: transparent !important;
-    background-color: transparent !important;
-    color: #fff !important;
-    -webkit-text-fill-color: #fff !important;
-    border: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover::before,
-html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2::before {
-    content: none !important;
-    display: none !important;
-    border: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
 }
 
 html body.pushsale-app-body .ps-dialog-body .modal-header .close,
@@ -2323,4 +1952,62 @@ html body.pushsale-app-body .ps-wh-dialog.wide .ps-wh-items-editor select {
 /* V146 — Sales ranking reuses the Pushsale marketing-ranking chrome. */
 html body.pushsale-app-body .psr-page .psr-topbar h1 {
     min-width: 220px !important;
+}
+
+
+/* V147 — Customer contact flags belong to the Họ tên / Số điện thoại cell.
+   Keep the legacy circular heart form; duplicate and upsale reuse the same compact outline contract. */
+html body.pushsale-app-body .ps-contact-phone-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-contact-phone-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 14px !important;
+    height: 18px !important;
+    min-width: 14px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #1683d8 !important;
+    font-size: 11px !important;
+    line-height: 18px !important;
+    text-decoration: none !important;
+}
+
+html body.pushsale-app-body .ps-contact-phone-icon:hover,
+html body.pushsale-app-body .ps-contact-phone-icon:focus {
+    color: #23527c !important;
+    text-decoration: none !important;
+}
+
+html body.pushsale-app-body .ps-order-flags.ps-contact-flags {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+    gap: 3px !important;
+    margin: 0 0 0 1px !important;
+    vertical-align: middle !important;
+}
+
+/* Older customer-profile CSS intentionally hid legacy phone-line heart/clone marks.
+   V147 places the canonical flags here on purpose, so explicitly restore their glyphs. */
+html body.pushsale-app-body .ps-customer-profile-table .ps-phone-line .ps-contact-flags .fa-heart,
+html body.pushsale-app-body .ps-customer-profile-table .ps-phone-line .ps-contact-flags .fa-clone,
+html body.pushsale-app-body .ps-customer-profile-table .ps-phone-line .ps-contact-flags .fa-level-up {
+    display: inline-block !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-table .ps-code-cell .ps-order-flags,
+html body.pushsale-app-body .ps-sale-operation-table .ps-code-cell .ps-order-flags {
+    margin-top: 0 !important;
 }

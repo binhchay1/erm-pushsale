@@ -1,6 +1,4 @@
-import { Copy, Heart } from 'lucide-react';
-
-import { OrderMoneyBreakdown, OrderProductsBreakdown } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { formatCurrency, formatDate, formatDateTime, formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
@@ -26,9 +24,15 @@ function CustomerCell({ row }) {
     return (
         <div className="ps-acc-customer-cell">
             <b>{row.customerName || '—'}</b><br />
-            <span>{row.customerPhone || '—'}</span>
-            {row.isReturningCustomer && <Heart className="ps-acc-mini-icon text-danger" aria-label="Khách mua lại" />}
-            {row.isDuplicatePhone && <Copy className="ps-acc-mini-icon text-danger" aria-label="Trùng số" />}
+            <div className="ps-contact-phone-row">
+                <span>{row.customerPhone || '—'}</span>
+                {row.customerPhone ? (
+                    <a className="ps-contact-phone-icon" href={`tel:${row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.customerPhone}`}>
+                        <i className="fa fa-phone" aria-hidden="true" />
+                    </a>
+                ) : null}
+                <OrderStatusFlags row={row} className="ps-contact-flags" />
+            </div>
             {row.desiredDeliveryAt && <div className="small-tip">{formatDate(row.desiredDeliveryAt)}</div>}
             {row.hasDifferentReceiver && (
                 <div className="small-tip ps-acc-receiver">NN: {row.effectiveReceiverName}{row.effectiveReceiverPhone ? ` · ${row.effectiveReceiverPhone}` : ''}</div>
