@@ -526,6 +526,7 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
                 actions={shellActions}
                 advancedFilters={advancedFilters}
                 className="psm-page"
+                data-page-code="2.1"
             >
                 <div className="psm-table-area">
                     <DashboardTable report={report} expanded={expanded} advancedUtm={Boolean(draft.advanced_utm)} onToggle={toggle} onChart={(row) => setChartState({ row })} onDaily={(row) => setDailyState({ row })} />

@@ -60,25 +60,26 @@ export default function Workspace({
                 {workspaceError && (
                     <div className="ps-alert ps-alert-danger">{workspaceError}</div>
                 )}
-                <SaleWorkspaceFilters routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} />
-                <SaleWorkspaceTabs tabs={report.statusTabs ?? []} routeUrl={routeUrl} filters={filters} />
-                <SaleWorkspaceTable
-                    rows={rows}
-                    meta={meta}
-                    filters={filters}
-                    routeUrl={routeUrl}
-                    actionBaseUrl={actionBaseUrl}
-                    operationStatusOptions={operationStatusOptions}
-                    onEdit={openOrder}
-                    onHistory={(order, context = 'sale') => setHistoryState({ order, context })}
-                    onDataViewHistory={setDataViewOrder}
-                    onMessages={setMessagesOrder}
-                    onPurchaseHistory={setPurchaseOrder}
-                    onDuplicateOrders={setDuplicateOrder}
-                    onDesiredDate={setDesiredOrder}
-                    onResult={(order, result) => setResultState({ open: true, order, result })}
-                    onBulkClose={setBulkOrderIds}
-                />
+                <SaleWorkspaceFilters routeUrl={routeUrl} filters={filters} filterOptions={filterOptions}>
+                    <SaleWorkspaceTabs tabs={report.statusTabs ?? []} routeUrl={routeUrl} filters={filters} />
+                    <SaleWorkspaceTable
+                        rows={rows}
+                        meta={meta}
+                        filters={filters}
+                        routeUrl={routeUrl}
+                        actionBaseUrl={actionBaseUrl}
+                        operationStatusOptions={operationStatusOptions}
+                        onEdit={openOrder}
+                        onHistory={(order, context = 'sale') => setHistoryState({ order, context })}
+                        onDataViewHistory={setDataViewOrder}
+                        onMessages={setMessagesOrder}
+                        onPurchaseHistory={setPurchaseOrder}
+                        onDuplicateOrders={setDuplicateOrder}
+                        onDesiredDate={setDesiredOrder}
+                        onResult={(order, result) => setResultState({ open: true, order, result })}
+                        onBulkClose={setBulkOrderIds}
+                    />
+                </SaleWorkspaceFilters>
 
                 <button type="button" className="tao-don-fixed ps-create-order-fab" onClick={() => openOrder(null, false)}>
                     <i className="fa fa-pencil-square-o" /><span className="text">Tạo đơn</span>

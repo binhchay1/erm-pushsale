@@ -355,18 +355,23 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
 
     const title = <>Danh sách nhân viên <span className="ps-title-divider">|</span> <span className="ps-orange">Số TK: {visibleAccountCount}</span></>;
     const actions = (
-        <form className="ps-header-search ps-users-header-search" onSubmit={submit}>
+        <div className="ps-header-search ps-users-header-search">
             <input
                 type="text"
                 className="form-control"
                 value={form.search}
                 onChange={(event) => setForm((old) => ({ ...old, search: event.target.value }))}
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter') submit(event);
+                }}
             />
-            <button className="btn btn-sm btn-primary" type="submit"><i className="fa fa-search" /> Tìm kiếm</button>
-        </form>
+            <button className="btn btn-sm btn-primary" type="button" onClick={submit}>
+                <i className="fa fa-search" /> Tìm kiếm
+            </button>
+        </div>
     );
-    const filtersNode = (
-        <form className="ps-filter-row" onSubmit={submit}>
+    const advancedFilters = (
+        <div className="ps-filter-row">
             <select className="form-control" value={form.role} onChange={(event) => setForm((old) => ({ ...old, role: event.target.value }))}>
                 <option value="">--Chức vụ--</option>
                 {roles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
@@ -386,30 +391,40 @@ export default function UsersIndex({ users, filters = {}, roles = [], workShifts
                 <option value="0">Đang sử dụng</option>
                 <option value="1">Đã khóa</option>
             </select>
-        </form>
+        </div>
+    );
+
+    const toolbar = (
+        <div className="ps-toolbar">
+            {canCreate && (
+                <button type="button" className="btn btn-sm btn-primary" onClick={() => setAccountDialog({ mode: 'create', user: null })}>
+                    <i className="fa fa-plus" /> Thêm tài khoản
+                </button>
+            )}
+            <button type="button" className="btn btn-sm btn-default" onClick={() => setBulkDialogOpen(true)}>
+                <i className="fa fa-gears" /> Thêm nhiều tài khoản
+            </button>
+            <button type="button" className="btn btn-sm btn-default" disabled={!canBulk} title="Bật/tắt nhận dữ liệu trực tiếp tại từng dòng hoặc trong dialog cập nhật">
+                <i className="fa fa-gears" /> Cập nhật nhận dữ liệu
+            </button>
+            <button type="button" className="btn btn-sm btn-default" onClick={exportCsv}>
+                <i className="fa fa-file-excel-o" /> Xuất Excel
+            </button>
+        </div>
     );
 
     return (
         <AppLayout>
             <Head title="Danh sách nhân viên" />
-            <PushsalePageFrame title={title} actions={actions} filters={filtersNode} className="ps-adminlte-page ps-users-page ps-standard-list-page" data-page-code="1.2.1">
-                <div className="ps-toolbar">
-                    {canCreate && (
-                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setAccountDialog({ mode: 'create', user: null })}>
-                            <i className="fa fa-plus" /> Thêm tài khoản
-                        </button>
-                    )}
-                    <button type="button" className="btn btn-sm btn-default" onClick={() => setBulkDialogOpen(true)}>
-                        <i className="fa fa-gears" /> Thêm nhiều tài khoản
-                    </button>
-                    <button type="button" className="btn btn-sm btn-default" disabled={!canBulk} title="Bật/tắt nhận dữ liệu trực tiếp tại từng dòng hoặc trong dialog cập nhật">
-                        <i className="fa fa-gears" /> Cập nhật nhận dữ liệu
-                    </button>
-                    <button type="button" className="btn btn-sm btn-default" onClick={exportCsv}>
-                        <i className="fa fa-file-excel-o" /> Xuất Excel
-                    </button>
-                </div>
-
+            <PushsalePageFrame
+                title={title}
+                actions={actions}
+                advancedFilters={advancedFilters}
+                toolbar={toolbar}
+                collapsible={false}
+                className="ps-adminlte-page ps-users-page ps-standard-list-page"
+                data-page-code="1.2.1"
+            >
                 <div className="ps-table-scroll ps-users-table-wrap">
                     <table className="table table-bordered table-striped ps-source-table ps-users-table">
                         <thead>

@@ -1,13 +1,40 @@
 <?php
 
+/**
+ * Admin Pushsale menu routes (static paths + legacy redirects).
+ *
+ * Loaded from routes/web.php inside:
+ *   Route::prefix('admin')->name('admin.')->group(...)
+ *
+ * Do NOT dump this into web.php. Keep domain routes here.
+ *
+ * Related sources of truth:
+ * - config/pushsale_navigation.php  → sidebar tree / menu codes
+ * - config/pushsale_pages.php        → page schemas for captured templates
+ * - docs/PUSHSALE_ROUTE_CONTRACT.md  → URL / naming rules
+ *
+ * Controllers: App\Http\Controllers\Admin\Pushsale\Pages\Page{menu}_Controller
+ * Legacy URLs: /admin/pages/{code}-... → 301 to canonical /admin/...
+ */
+
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| 1. Quản trị đơn vị — 1.1 Thông tin / gói dịch vụ
+|--------------------------------------------------------------------------
+*/
 Route::get('company/subscription-history', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_1_2Controller::class, 'index'])->name('company.subscription-history');
 Route::post('company/subscription-history/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_1_2Controller::class, 'store'])->name('company.subscription-history.store');
 Route::match(['put', 'patch'], 'company/subscription-history/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_1_2Controller::class, 'update'])->whereNumber('record')->name('company.subscription-history.update');
 Route::delete('company/subscription-history/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_1_2Controller::class, 'destroy'])->whereNumber('record')->name('company.subscription-history.destroy');
 Route::redirect('pages/1-1-2-lich-su-dang-ky-goi-dich-vu', '/admin/company/subscription-history', 301);
 
+/*
+|--------------------------------------------------------------------------
+| 1.2 Nhân sự / phân quyền (employees & teams → routes thật ở web.php)
+|--------------------------------------------------------------------------
+*/
 Route::redirect('hr/employees', '/admin/users', 301);
 Route::redirect('pages/1-2-1-danh-sach-nhan-vien', '/admin/users', 301);
 
@@ -39,6 +66,11 @@ Route::match(['put', 'patch'], 'hr/care-distribution-rules/records/{record}', [\
 Route::delete('hr/care-distribution-rules/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_2_6Controller::class, 'destroy'])->whereNumber('record')->name('hr.care-distribution-rules.destroy');
 Route::redirect('pages/1-2-6-danh-sach-cau-hinh-chia-so-care-don', '/admin/hr/care-distribution-rules', 301);
 
+/*
+|--------------------------------------------------------------------------
+| 1.3 Danh mục sản phẩm / combo
+|--------------------------------------------------------------------------
+*/
 Route::redirect('catalog/products', '/admin/products', 301);
 Route::redirect('catalog/products/import', '/admin/products/import', 301);
 Route::redirect('pages/1-3-1-quan-ly-san-pham', '/admin/products', 301);
@@ -53,6 +85,11 @@ Route::match(['put', 'patch'], 'catalog/combos/dialogs/{dialog}/records/{record}
 Route::delete('catalog/combos/dialogs/{dialog}/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_3_2Controller::class, 'destroyDialog'])->where(['dialog' => '[a-z0-9\-]+', 'record' => '[0-9]+'])->name('catalog.combos.dialogs.destroy');
 Route::redirect('pages/1-3-2-danh-sach-combo', '/admin/catalog/combos', 301);
 
+/*
+|--------------------------------------------------------------------------
+| 1.7 Bảo mật đăng nhập / lọc data
+|--------------------------------------------------------------------------
+*/
 Route::get('security/login-history', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_7_1Controller::class, 'index'])->name('security.login-history');
 Route::redirect('pages/1-7-1-lich-su-dang-nhap', '/admin/security/login-history', 301);
 
@@ -64,6 +101,11 @@ Route::redirect('pages/1-7-2-quan-ly-cho-phep-tai-khoan-dang-nhap', '/admin/secu
 Route::get('security/lead-filter-history', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_7_3Controller::class, 'index'])->name('security.lead-filter-history');
 Route::redirect('pages/1-7-3-lich-su-loc-data-chot-don', '/admin/security/lead-filter-history', 301);
 
+/*
+|--------------------------------------------------------------------------
+| 1.8–1.11 Cấu hình tác nghiệp / chiết khấu / import / Facebook đơn vị
+|--------------------------------------------------------------------------
+*/
 Route::get('sales/operation-categories', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_8_1Controller::class, 'index'])->name('sales.operation-categories');
 Route::post('sales/operation-categories/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_8_1Controller::class, 'store'])->name('sales.operation-categories.store');
 Route::match(['put', 'patch'], 'sales/operation-categories/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_8_1Controller::class, 'update'])->whereNumber('record')->name('sales.operation-categories.update');
@@ -92,6 +134,11 @@ Route::match(['put', 'patch'], 'integrations/facebook-pages/records/{record}', [
 Route::delete('integrations/facebook-pages/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_11Controller::class, 'destroy'])->whereNumber('record')->name('integrations.facebook-pages.destroy');
 Route::redirect('pages/1-11-cau-hinh-facebook-cua-don-vi', '/admin/integrations/facebook-pages', 301);
 
+/*
+|--------------------------------------------------------------------------
+| 1.13–1.14 Blacklist / hóa đơn điện tử đơn vị
+|--------------------------------------------------------------------------
+*/
 Route::get('security/phone-blacklist', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_13_1Controller::class, 'index'])->name('security.phone-blacklist');
 Route::post('security/phone-blacklist/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_13_1Controller::class, 'store'])->name('security.phone-blacklist.store');
 Route::match(['put', 'patch'], 'security/phone-blacklist/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_13_1Controller::class, 'update'])->whereNumber('record')->name('security.phone-blacklist.update');
@@ -105,6 +152,11 @@ Route::match(['put', 'patch'], 'unit/electronic-invoice-configs/records/{record}
 Route::delete('unit/electronic-invoice-configs/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page1_14_1Controller::class, 'destroy'])->whereNumber('record')->name('unit.electronic-invoice-configs.destroy');
 Route::redirect('pages/1-14-1-danh-sach-cau-hinh-hoa-don-dien-tu', '/admin/unit/electronic-invoice-configs', 301);
 
+/*
+|--------------------------------------------------------------------------
+| 2. Marketing — hồ sơ KH, kết nối landing/FB, import lead, seeding
+|--------------------------------------------------------------------------
+*/
 Route::get('marketing/customers', \App\Http\Controllers\Sales\CustomerProfileController::class)->name('marketing.customers');
 Route::redirect('pages/2-3-ho-so-khach-hang', '/admin/marketing/customers', 301);
 
@@ -163,6 +215,11 @@ Route::match(['put', 'patch'], 'marketing/seeding-numbers/records/{record}', [\A
 Route::delete('marketing/seeding-numbers/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page2_6_4Controller::class, 'destroy'])->whereNumber('record')->name('marketing.seeding-numbers.destroy');
 Route::redirect('pages/2-6-4-kho-so-seeding-toi-da-1000', '/admin/marketing/seeding-numbers', 301);
 
+/*
+|--------------------------------------------------------------------------
+| Customer profile bulk actions (aliases theo URL đang mở)
+|--------------------------------------------------------------------------
+*/
 Route::get('customers/export', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'export'])->name('customers.export.admin-alias');
 Route::post('customers/bulk/reallocate-now', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'reallocateNow'])->name('customers.bulk.reallocate-now.admin-alias');
 Route::post('customers/bulk/queue-reallocation', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'queueReallocation'])->name('customers.bulk.queue-reallocation.admin-alias');
@@ -179,6 +236,11 @@ foreach (['marketing/customers' => 'marketing.customers', 'sales/customers' => '
     Route::delete($customerProfilePath.'/bulk/operation-history', [\App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController::class, 'deleteOperationHistory'])->name($customerProfileName.'.bulk.operation-history.destroy');
 }
 
+/*
+|--------------------------------------------------------------------------
+| 3. Quản lý khách hàng / chiến dịch CSKH / báo cáo KH
+|--------------------------------------------------------------------------
+*/
 Route::get('customer-management', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'index'])->name('customers.page');
 Route::get('ld/customers/list-customers', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'index'])->name('legacy.customers.management');
 Route::get('customer-management/export', [\App\Http\Controllers\CustomerInteractions\Customer360ManagementController::class, 'export'])->name('customer-management.export');
@@ -199,6 +261,11 @@ Route::redirect('pages/3-3-1-thong-ke-khach-hang-da-chieu', '/admin/customers/re
 Route::get('customers/reports/spending', [\App\Http\Controllers\Admin\Pushsale\Pages\Page3_3_2Controller::class, 'index'])->name('customers.reports.spending');
 Route::redirect('pages/3-3-2-thong-ke-khach-hang-chi-tra', '/admin/customers/reports/spending', 301);
 
+/*
+|--------------------------------------------------------------------------
+| 4. Sale — hồ sơ KH / xếp hạng / báo cáo tác nghiệp
+|--------------------------------------------------------------------------
+*/
 Route::get('sales/customers', \App\Http\Controllers\Sales\CustomerProfileController::class)->name('sales.customers');
 Route::redirect('pages/4-2-ho-so-khach-hang', '/admin/sales/customers', 301);
 
@@ -220,6 +287,11 @@ Route::redirect('pages/4-6-4-bao-cao-data-sale', '/admin/sales/reports/data', 30
 Route::get('sales/reports/optimization', [\App\Http\Controllers\Admin\Pushsale\Pages\Page4_6_5Controller::class, 'index'])->name('sales.reports.optimization');
 Route::redirect('pages/4-6-5-bao-cao-toi-uu-sale', '/admin/sales/reports/optimization', 301);
 
+/*
+|--------------------------------------------------------------------------
+| 5. Kho / vận đơn / phiếu / biên bản / báo cáo kho
+|--------------------------------------------------------------------------
+*/
 Route::redirect('warehouse/shipping-operations', '/admin/warehouse/operations', 301);
 Route::redirect('pages/5-1-tac-nghiep-van-don', '/admin/warehouse/operations', 301);
 
@@ -274,6 +346,11 @@ Route::match(['put', 'patch'], 'warehouse/care-distribution/records/{record}', [
 Route::delete('warehouse/care-distribution/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page5_8_2Controller::class, 'destroy'])->whereNumber('record')->name('warehouse.care-distribution.destroy');
 Route::redirect('pages/5-8-2-phan-bo-data-care-don', '/admin/warehouse/care-distribution', 301);
 
+/*
+|--------------------------------------------------------------------------
+| 6. Kế toán — chi phí / danh mục / hóa đơn điện tử
+|--------------------------------------------------------------------------
+*/
 Route::get('accounting/expenses', [\App\Http\Controllers\Admin\Pushsale\Pages\Page6_2_1Controller::class, 'index'])->name('accounting.expenses');
 Route::post('accounting/expenses/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page6_2_1Controller::class, 'store'])->name('accounting.expenses.store');
 Route::match(['put', 'patch'], 'accounting/expenses/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page6_2_1Controller::class, 'update'])->whereNumber('record')->name('accounting.expenses.update');
@@ -310,6 +387,11 @@ Route::match(['put', 'patch'], 'accounting/electronic-invoices/records/{record}'
 Route::delete('accounting/electronic-invoices/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page6_4Controller::class, 'destroy'])->whereNumber('record')->name('accounting.electronic-invoices.destroy');
 Route::redirect('pages/6-4-danh-sach-xu-ly-xuat-hoa-don-dien-tu', '/admin/accounting/electronic-invoices', 301);
 
+/*
+|--------------------------------------------------------------------------
+| 7. CEO — kế hoạch KD / KPI / thưởng doanh số
+|--------------------------------------------------------------------------
+*/
 Route::get('ceo/business-plan/monthly', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'index'])->name('ceo.business-plan.monthly');
 Route::post('ceo/business-plan/monthly/records', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'store'])->name('ceo.business-plan.monthly.store');
 Route::match(['put', 'patch'], 'ceo/business-plan/monthly/records/{record}', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'update'])->whereNumber('record')->name('ceo.business-plan.monthly.update');
@@ -319,7 +401,7 @@ Route::post('ceo/business-plan/monthly/copy-previous', [\App\Http\Controllers\Ad
 Route::post('ceo/business-plan/monthly/lock-period', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'lockPeriod'])->name('ceo.business-plan.monthly.lock-period');
 Route::post('ceo/business-plan/monthly/bulk-save', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_1Controller::class, 'bulkSave'])->name('ceo.business-plan.monthly.bulk-save');
 Route::redirect('pages/7-1-1-ke-hoach-kinh-doanh-thang', '/admin/ceo/business-plan/monthly', 301);
-Route::redirect('ld/unit-admin/thiet-lap-kpi', '/admin/ceo/business-plan/monthly', 301);
+// ld/unit-admin/thiet-lap-kpi → named redirect in web.php (legacy.ceo.monthly-kpi)
 Route::get('ceo/business-plan/yearly', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_2Controller::class, 'index'])->name('ceo.business-plan.yearly');
 Route::post('ceo/business-plan/yearly/planned-data', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_2Controller::class, 'storePlannedData'])->name('ceo.business-plan.yearly.planned-data');
 Route::redirect('pages/7-1-2-lap-ke-hoach-kinh-doanh-nam', '/admin/ceo/business-plan/yearly', 301);
@@ -337,9 +419,13 @@ Route::delete('ceo/business-plan/revenue-bonus/records/{record}', [\App\Http\Con
 Route::post('ceo/business-plan/revenue-bonus/copy-previous', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_4Controller::class, 'copyPrevious'])->name('ceo.business-plan.revenue-bonus.copy-previous');
 Route::post('ceo/business-plan/revenue-bonus/lock-period', [\App\Http\Controllers\Admin\Pushsale\Pages\Page7_1_4Controller::class, 'setLocked'])->name('ceo.business-plan.revenue-bonus.lock-period');
 Route::redirect('pages/7-1-4-khai-bao-thuong', '/admin/ceo/business-plan/revenue-bonus', 301);
-Route::redirect('ld/unit-admin/thiet-lap-thuong-theo-doanh-so', '/admin/ceo/business-plan/revenue-bonus', 301);
-Route::redirect('ld/thong-ke/lap-ke-hoach-kinh-doanh', '/admin/ceo/business-plan/yearly', 301);
+// ld/unit-admin/thiet-lap-thuong-theo-doanh-so + ld/thong-ke/lap-ke-hoach-kinh-doanh → named redirects in web.php
 
+/*
+|--------------------------------------------------------------------------
+| 8. Báo cáo hệ thống / Power Dashboard (extra reports → web.php + config)
+|--------------------------------------------------------------------------
+*/
 Route::get('reports/trends', [\App\Http\Controllers\Admin\Pushsale\Pages\Page8_5_4Controller::class, 'index'])->name('reports.trends');
 Route::redirect('pages/8-5-4-bieu-do-xu-huong', '/admin/reports/trends', 301);
 
@@ -348,7 +434,7 @@ Route::redirect('pages/8-5-5-bang-tong-hop-ket-qua-chia-data-trong-ngay', '/admi
 
 Route::get('reports/power-dashboard', [\App\Http\Controllers\Admin\Pushsale\Pages\Page8_5_9Controller::class, 'index'])->name('reports.power-dashboard');
 Route::redirect('pages/8-5-9-power-dashboard', '/admin/reports/power-dashboard', 301);
-Route::redirect('ld/ceo/power-dashboard', '/admin/reports/power-dashboard', 301);
+// ld/ceo/power-dashboard → named redirect in web.php (legacy.ceo.power-dashboard)
 
 Route::get('reports/repurchase', [\App\Http\Controllers\Admin\Pushsale\Pages\Page8_5_10Controller::class, 'index'])->name('reports.repurchase');
 Route::redirect('pages/8-5-10-thong-ke-mua-lai', '/admin/reports/repurchase', 301);

@@ -240,8 +240,9 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function () {
     Route::redirect('error-order-list', '/admin/ecommerce/sync-errors', 301)->name('legacy.ecommerce.sync-errors');
     Route::redirect('ld/ecommerce/e-order-sync-error-list', '/admin/ecommerce/sync-errors', 301)->name('legacy.ecommerce.sync-errors.ld');
 
-    // Mỗi mã menu là một màn hình nghiệp vụ với controller và route tĩnh riêng.
-    // Các file template chỉ cung cấp content + dialog; header/sidebar do AppLayout quản lý.
+    // Pushsale admin pages: keep menu routes in routes/pushsale_pages.php (not inlined here).
+    // That file is organized by menu group 1.x–8.x + legacy 301 redirects from /admin/pages/...
+    // Header/sidebar chrome always comes from AppLayout; page body uses PushsalePageShell.
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('company/profile', [\App\Http\Controllers\Admin\CompanyProfileController::class, 'index'])
             ->name('company.profile');

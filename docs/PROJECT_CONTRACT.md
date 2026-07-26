@@ -1,23 +1,49 @@
 # ERM Pushsale Project Contract
 
+Living contract. Agent conventions: root `AGENTS.md`. Historical prompt notes: `docs/archive/handoffs/`.
+
+## 0. Sources of truth
+
+| Concern | Location |
+| --- | --- |
+| Menu tree / codes | `config/pushsale_navigation.php` |
+| Page schemas | `config/pushsale_pages.php` |
+| Admin menu routes + legacy 301 | `routes/pushsale_pages.php` (required from `web.php`) |
+| CSS load order | `resources/js/lib/pushsaleStyleRegistry.js` |
+| Page frame | `PushsalePageShell.jsx` + `pushsale-page-frame-contract.css` |
+| Sidebar + L3 | `AppSidebar.jsx` + `usePushsaleSidebarMenu.js` + `pushsale-sidebar-canonical-contract.css` |
+| Orphan CSS | `resources/css/_archive/` (not loaded) |
+
+Do **not** create new `CONTEXT_HANDOFF_V*` / versioned UI docs per prompt. Update this file or `AGENTS.md`.
+
 ## 1. Kiến trúc giao diện
 
-Tất cả trang admin phải đi qua `AppLayout`. Trang nghiệp vụ dùng một trong hai shell:
+Tất cả trang admin phải đi qua `AppLayout`. Trang nghiệp vụ dùng:
 
-- `resources/js/components/layout/PushsalePageShell.jsx`: trang có title + filter chính + filter nâng cao + body.
-- `resources/js/components/pushsale/PushsalePageHeader.jsx`: trang legacy cần header giống Pushsale HTML mẫu.
+- `resources/js/components/layout/PushsalePageShell.jsx`: title + primary filters/actions + advanced filters + toolbar + body.
+- Layout variants: `is-title-only` | `is-title-actions` | `has-primary-filters`.
+- `data-page-code` = mã menu Pushsale khi có (vd. `1.2.1`, `2.1`).
 
-Không viết mỗi trang một bộ header/filter riêng nữa. Nếu thiếu use case, mở rộng component shell, không copy layout.
+Không viết mỗi trang một bộ header/filter riêng. Thiếu use case → mở rộng shell.
 
 ## 2. CSS contract
 
 Thứ tự CSS runtime nằm ở `resources/js/lib/pushsaleStyleRegistry.js`.
 
 - Vendor legacy: `/public/vendor/adminlte2`, `/public/vendor/font-awesome`.
-- CSS base/page scoped: `resources/css/pushsale-*.css`.
-- CSS cuối cùng: `resources/css/pushsale-adminlte-canonical-contract.css`.
+- CSS page scoped: `resources/css/pushsale-*.css` **chỉ khi đã đăng ký registry**.
+- Cuối cascade (cố định):
+  1. `pushsale-unified-page-shell-contract.css`
+  2. `pushsale-adminlte-canonical-contract.css`
+  3. `pushsale-page-frame-contract.css`
+  4. `pushsale-sidebar-canonical-contract.css` (**absolute last**)
 
-Quy tắc: selector global sidebar/header chỉ được đặt ở file canonical cuối cùng. Các trang riêng chỉ được scope bằng class trang.
+Quy tắc:
+
+- Selector global sidebar/header chỉ ở `pushsale-sidebar-canonical-contract.css` (+ phần chrome liên quan trong adminlte-canonical nếu cần).
+- Page CSS scope bằng class trang; không đụng `.main-sidebar` / `.ul2` / navbar.
+- Không thêm file `pushsale-sidebar-*` mới để vá hover.
+- File không load → `resources/css/_archive/`.
 
 ## 3. Luồng Landing Connection mới
 
@@ -69,13 +95,20 @@ Menu 1.5 `/admin/leads` is a real manual allocation workflow, not a demo table:
 
 ## 7. Sidebar/menu hover contract
 
-Second-level menu leaves and second-level parents must use one visual contract:
+Source of truth (only):
+
+- `resources/js/hooks/usePushsaleSidebarMenu.js` — accordion, active key, L2 hover, L3 flyout, timers.
+- `resources/js/components/layout/AppSidebar.jsx` — markup only; **no** runtime `<style>`, `style.setProperty`, or `data-ps-second-hover` hacks.
+- `resources/css/pushsale-sidebar-canonical-contract.css` — visual contract, loaded last.
+
+Visual rules:
 
 - active: blue background, white text;
 - hover: blue background, white text;
-- no top/bottom blue border artifacts.
+- no top/bottom blue border artifacts;
+- L3 flyout uses `.pushsale-third-menu` + `.is-visible`.
 
-Because AdminLTE legacy CSS can override hover selectors, `AppSidebar.jsx` also applies a React hover class/inline fallback. Do not remove this until AdminLTE CSS is fully retired.
+Do **not** add another sidebar override CSS file. Page CSS must not override `.pushsale-main-sidebar .ul2 > li.li2:hover`.
 
 ## v126 landing approval UI contract
 
@@ -91,7 +124,7 @@ Because AdminLTE legacy CSS can override hover selectors, `AppSidebar.jsx` also 
 - Manual data distribution must always show visible feedback: pending toast, success toast, or validation/error toast.
 - Landing approval must validate selected product IDs before submit and must use a stable explicit payload to backend.
 - Taxonomy dialogs are full-window Pushsale-style popups with visible close action.
-- Sidebar second-level leaf hover is controlled in both React state and canonical CSS; no page CSS may override `.pushsale-main-sidebar .ul2 > li.li2:hover` back to white.
+- Sidebar second-level leaf hover is controlled in canonical CSS + menu hook only; no page CSS may override `.pushsale-main-sidebar .ul2 > li.li2:hover` back to white.
 
 
 ## v128 Landing webhook mapping contract
@@ -105,6 +138,7 @@ Because AdminLTE legacy CSS can override hover selectors, `AppSidebar.jsx` also 
 ## v129 Sidebar runtime guard
 
 - `AppSidebar.jsx` không được dùng biến của scope menu cấp 2 trong `ThirdLevelFlyout`.
+- Logic hover/flyout nằm ở `usePushsaleSidebarMenu`.
 - Khi sửa menu, phải kiểm tra runtime bằng thao tác mở hamburger + hover/click menu cấp 2/cấp 3 trên ít nhất một trang như `/admin/products/import`.
 
 ## v130 Landing source flags
@@ -115,17 +149,17 @@ Because AdminLTE legacy CSS can override hover selectors, `AppSidebar.jsx` also 
 - Checkbox `Nhập TC` và `Duyệt` trong bảng chỉ là thao tác bật nhanh/hiển thị trạng thái contract, không thay thế bước duyệt chính.
 
 ## v131 UI Contract Addendum
-- Page header alignment is centralized in `pushsale-adminlte-canonical-contract.css`.
-- Marketing dashboard and landing approval headers must use the canonical title-left/filter-right rhythm; no page should add another broad header override file.
-- Sidebar second-level menu hover must be handled in `AppSidebar.jsx` plus canonical CSS only. Do not add `pushsale-sidebar-*` files for future hover fixes.
+- Page header/frame rhythm: `PushsalePageShell` + `pushsale-page-frame-contract.css` (+ adminlte-canonical cho control chrome).
+- Marketing dashboard and landing approval headers must use the shared shell; no page should add another broad header override file.
+- Sidebar hover: hook + `pushsale-sidebar-canonical-contract.css` only.
 
 ## v133 UI contract update
 
-- The final visual contract for native selects, React `PushsaleSelect`, date range filters, rebuilt page headers, and sidebar second-level hover lives in `resources/css/pushsale-adminlte-canonical-contract.css`.
+- Native selects, React `PushsaleSelect`, date range filters: `pushsale-adminlte-canonical-contract.css`.
 - Date range filters must remain clickable native inputs. Do not hide them with `opacity: 0` overlays in later page CSS.
 - Native selects must keep the canonical right-side caret. Do not remove appearance/caret per page.
-- Second-level sidebar hover must use the same blue background as active menu items, including menu items that do not have a third-level submenu.
-- Rebuilt AdminLTE pages should use a left-aligned title with a small gutter, then primary filters/actions to the right.
+- Second-level sidebar hover must use the same blue background as active menu items, including items without a third-level submenu.
+- Rebuilt AdminLTE pages: title left + gutter, primary filters/actions right via `PushsalePageShell`.
 
 ## v134 operation/category and modal contract
 
@@ -153,8 +187,8 @@ Do not create another product taxonomy CSS override file.
 ## v136 Contract bổ sung
 
 ### Sidebar hover
-- Source of truth: `AppSidebar.jsx` + `pushsale-adminlte-canonical-contract.css`.
-- Không tạo file CSS mới để sửa hover menu. Menu cấp 2 hover phải dùng `data-ps-second-hover` hoặc `:hover` canonical rule.
+- Source of truth: `usePushsaleSidebarMenu` + `pushsale-sidebar-canonical-contract.css` (last in registry).
+- Không tạo file CSS mới để sửa hover menu. Không dùng `data-ps-second-hover` / inline style hacks.
 
 ### Dialog khách hàng / Pancake
 - Dialog React mới dùng `PushsaleDialog`; không nhúng lại nút close cũ trong body.

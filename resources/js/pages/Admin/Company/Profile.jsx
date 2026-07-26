@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 
+import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import AppLayout from '@/layouts/AppLayout';
 
 const provinceOptions = ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ'];
@@ -67,13 +68,12 @@ export default function CompanyProfile({ company }) {
     return (
         <AppLayout>
             <Head title="Thông tin đơn vị" />
-            <section className="ps-adminlte-page ps-unit-profile-page" data-page-code="1.1.1">
-                <div className="m-header-wrap">
-                    <div className="m-header">
-                        <div className="ps-title">Thông tin đơn vị</div>
-                    </div>
-                </div>
-
+            <PushsalePageShell
+                title="Thông tin đơn vị"
+                className="ps-unit-profile-page"
+                data-page-code="1.1.1"
+                collapsible={false}
+            >
                 <form className="ps-unit-form" onSubmit={submit}>
                     <FieldRow label="Tên đơn vị" required error={form.errors.name}>
                         <input
@@ -95,7 +95,9 @@ export default function CompanyProfile({ company }) {
                     <FieldRow label="Lĩnh vực sản phẩm" required error={form.errors.product_field}>
                         <Select value={form.data.product_field} onChange={(value) => form.setData('product_field', value)}>
                             <option value="">--Chọn lĩnh vực--</option>
-                            {optionWithCurrent(productFieldOptions, form.data.product_field).map((item) => <option key={item} value={item}>{item}</option>)}
+                            {optionWithCurrent(productFieldOptions, form.data.product_field).map((item) => (
+                                <option key={item} value={item}>{item}</option>
+                            ))}
                         </Select>
                     </FieldRow>
 
@@ -128,31 +130,37 @@ export default function CompanyProfile({ company }) {
                     <FieldRow label="Tỉnh/TP" required error={form.errors.province_name}>
                         <Select value={form.data.province_name} onChange={(value) => form.setData('province_name', value)}>
                             <option value="">--Chọn Tỉnh/TP--</option>
-                            {optionWithCurrent(provinceOptions, form.data.province_name).map((item) => <option key={item} value={item}>{item}</option>)}
+                            {optionWithCurrent(provinceOptions, form.data.province_name).map((item) => (
+                                <option key={item} value={item}>{item}</option>
+                            ))}
                         </Select>
                     </FieldRow>
 
                     <FieldRow label="Quận/Huyện" required error={form.errors.district_name}>
                         <Select value={form.data.district_name} onChange={(value) => form.setData('district_name', value)}>
                             <option value="">--Chọn Quận/Huyện--</option>
-                            {optionWithCurrent(districtOptions, form.data.district_name).map((item) => <option key={item} value={item}>{item}</option>)}
+                            {optionWithCurrent(districtOptions, form.data.district_name).map((item) => (
+                                <option key={item} value={item}>{item}</option>
+                            ))}
                         </Select>
                     </FieldRow>
 
                     <FieldRow label="Xã/Phường" error={form.errors.ward_name}>
                         <Select value={form.data.ward_name} onChange={(value) => form.setData('ward_name', value)}>
                             <option value="">--Chọn Xã/Phường--</option>
-                            {optionWithCurrent(wardOptions, form.data.ward_name).map((item) => <option key={item} value={item}>{item}</option>)}
+                            {optionWithCurrent(wardOptions, form.data.ward_name).map((item) => (
+                                <option key={item} value={item}>{item}</option>
+                            ))}
                         </Select>
                     </FieldRow>
 
                     <div className="ps-unit-actions">
                         <button type="submit" className="btn btn-sm btn-primary" disabled={form.processing}>
-                            <i className="fa fa-save" /> {form.processing ? 'Đang lưu' : 'Lưu'}
+                            <i className={`fa ${form.processing ? 'fa-spinner fa-spin' : 'fa-save'}`} /> Lưu
                         </button>
                     </div>
                 </form>
-            </section>
+            </PushsalePageShell>
         </AppLayout>
     );
 }

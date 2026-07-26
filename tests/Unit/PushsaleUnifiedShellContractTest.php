@@ -26,14 +26,15 @@ class PushsaleUnifiedShellContractTest extends TestCase
         $this->assertIsString($registry);
 
         $menuCanonical = strrpos($registry, 'pushsale-sidebar-canonical-contract.css');
+        $pageFrame = strrpos($registry, 'pushsale-page-frame-contract.css');
         $adminlteCanonical = strrpos($registry, 'pushsale-adminlte-canonical-contract.css');
         $unifiedShell = strrpos($registry, 'pushsale-unified-page-shell-contract.css');
-        $legacyMenu = strrpos($registry, 'pushsale-sidebar-menu-contract.css');
 
         $this->assertNotFalse($menuCanonical);
-        $this->assertGreaterThan($adminlteCanonical, $menuCanonical);
+        $this->assertNotFalse($pageFrame);
+        $this->assertGreaterThan($pageFrame, $menuCanonical);
+        $this->assertGreaterThan($adminlteCanonical, $pageFrame);
         $this->assertGreaterThan($unifiedShell, $menuCanonical);
-        $this->assertGreaterThan($legacyMenu, $menuCanonical);
 
         $modulesTail = substr($registry, strpos($registry, 'export const PUSHSALE_CSS_MODULES'));
         $lastCss = null;
@@ -41,6 +42,36 @@ class PushsaleUnifiedShellContractTest extends TestCase
             $lastCss = end($matches[1]);
         }
         $this->assertSame('pushsale-sidebar-canonical-contract.css', $lastCss);
+    }
+
+    public function test_page_shell_exposes_shared_frame_slots(): void
+    {
+        $shell = file_get_contents(dirname(__DIR__, 2).'/resources/js/components/layout/PushsalePageShell.jsx');
+        $this->assertIsString($shell);
+        $this->assertStringContainsString('ps-page-shell__main-row', $shell);
+        $this->assertStringContainsString('ps-page-shell__advanced-row', $shell);
+        $this->assertStringContainsString('ps-page-shell__toolbar', $shell);
+        $this->assertStringContainsString('ps-page-shell__body', $shell);
+        $this->assertStringContainsString('is-title-only', $shell);
+        $this->assertStringContainsString('is-title-actions', $shell);
+        $this->assertStringContainsString('has-primary-filters', $shell);
+    }
+
+    public function test_key_pages_use_shared_page_shell_frame(): void
+    {
+        $company = file_get_contents(dirname(__DIR__, 2).'/resources/js/pages/Admin/Company/Profile.jsx');
+        $users = file_get_contents(dirname(__DIR__, 2).'/resources/js/pages/Admin/Users/Index.jsx');
+        $marketing = file_get_contents(dirname(__DIR__, 2).'/resources/js/pages/Admin/Marketing/Dashboard.jsx');
+        $saleFilters = file_get_contents(dirname(__DIR__, 2).'/resources/js/components/operations/pushsale/SaleWorkspaceFilters.jsx');
+
+        $this->assertStringContainsString('PushsalePageShell', $company);
+        $this->assertStringContainsString('Thông tin đơn vị', $company);
+        $this->assertStringContainsString('advancedFilters', $users);
+        $this->assertStringContainsString('toolbar', $users);
+        $this->assertStringContainsString('PushsalePageShell', $marketing);
+        $this->assertStringContainsString('primaryFilters', $marketing);
+        $this->assertStringContainsString('PushsalePageShell', $saleFilters);
+        $this->assertStringContainsString('Sale tác nghiệp', $saleFilters);
     }
 
     public function test_sidebar_component_has_no_runtime_hover_hacks(): void
