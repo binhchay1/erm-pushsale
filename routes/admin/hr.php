@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 // 1.2.1 Danh sách nhân viên — mở cho nhánh quản lý có quyền HR, không chỉ admin.
 Route::post('users/bulk', [UserController::class, 'storeBulk'])->name('users.bulk.store');
+Route::post('users/bulk-receive-data', [UserController::class, 'bulkUpdateReceiveData'])->name('users.bulk-receive-data');
 Route::patch('users/{user}/quick-update', [UserController::class, 'quickUpdate'])->name('users.quick-update');
 Route::patch('users/{user}/operational-status', [UserController::class, 'updateOperationalStatus'])->name('users.operational-status');
 Route::patch('users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password');

@@ -414,6 +414,81 @@ class UserController extends Controller
         return back()->with('success', 'Đã cập nhật tài khoản.');
     }
 
+    public function bulkUpdateReceiveData(Request $request): RedirectResponse
+    {
+        $actor = $request->user();
+        if (! $actor || ! $actor->allows(PermissionArea::Hr, \App\Enums\PermissionLevel::Full)) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'accounts' => ['required', 'string'],
+            'receive_data' => ['required', 'boolean'],
+        ]);
+
+        $identifiers = collect(preg_split('/\R+/', (string) $data['accounts']) ?: [])
+            ->map(fn ($value) => trim((string) $value))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($identifiers->isEmpty()) {
+            return back()->withErrors(['accounts' => 'Chưa có tài khoản hợp lệ.']);
+        }
+
+        $updated = 0;
+        $skipped = [];
+        foreach ($identifiers as $identifier) {
+            $user = $this->resolveUserIdentifier($actor, $identifier);
+            if (! $user) {
+                $skipped[] = $identifier;
+                continue;
+            }
+
+            if (! $this->hierarchy->canManage($actor, $user)) {
+                $skipped[] = $identifier;
+                continue;
+            }
+
+            $profile = $user->operationalProfile()->firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'company_id' => $user->company_id,
+                    'employee_code' => 'NV'.str_pad((string) $user->id, 5, '0', STR_PAD_LEFT),
+                    'base_salary' => 0,
+                    'receive_data' => true,
+                    'is_locked' => false,
+                    'updated_by_user_id' => $actor->id,
+                ],
+            );
+
+            $profile->fill(['receive_data' => (bool) $data['receive_data']]);
+            $profile->updated_by_user_id = $actor->id;
+            $profile->save();
+            $updated++;
+        }
+
+        if ($updated === 0) {
+            return back()->withErrors(['accounts' => 'Không cập nhật được tài khoản nào.']);
+        }
+
+        $message = $data['receive_data']
+            ? "Đã bật nhận dữ liệu cho {$updated} tài khoản."
+            : "Đã tắt nhận dữ liệu cho {$updated} tài khoản.";
+
+        if ($skipped !== []) {
+            $message .= ' Bỏ qua: '.implode(', ', array_slice($skipped, 0, 5)).(count($skipped) > 5 ? '…' : '');
+        }
+
+        ActivityLogger::log(
+            ActivityLogger::USER_UPDATED,
+            $actor,
+            ['bulk_receive_data' => ['count' => $updated, 'receive_data' => (bool) $data['receive_data']]],
+        );
+
+        return back()->with('success', $message);
+    }
+
     public function updateOperationalStatus(Request $request, User $user): RedirectResponse
     {
         $actor = $request->user();
@@ -651,6 +726,32 @@ class UserController extends Controller
                 'updated_by_user_id' => auth()->id(),
             ],
         );
+    }
+
+    private function resolveUserIdentifier(User $actor, string $identifier): ?User
+    {
+        $query = User::query()->with('company');
+
+        if (ctype_digit($identifier)) {
+            $user = $query->find((int) $identifier);
+        } else {
+            $local = TenantEmail::normalizeLocalPart($identifier);
+            if ($local === '') {
+                return null;
+            }
+
+            $company = $actor->company;
+            $email = $company ? TenantEmail::build($local, $company) : null;
+            $user = $email
+                ? $query->where('email', $email)->first()
+                : $query->where('email', 'like', $local.'@%')->first();
+        }
+
+        if (! $user || ! $this->hierarchy->canView($actor, $user)) {
+            return null;
+        }
+
+        return $user;
     }
 
     /** @return list<array{id:int,name:string}> */
