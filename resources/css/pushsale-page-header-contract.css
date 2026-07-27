@@ -1191,7 +1191,7 @@ html body.pushsale-app-body .ps-page-shell > .ps-page-shell__toolbar {
     }
 }
 
-/* Products toolbar: cùng l? trái v?i title/filter (portal header dùng --ps-header-x). */
+/* Products toolbar: flush left with title/filters (portal header uses --ps-header-x). */
 html body.pushsale-app-body .ps-products-page {
     padding-left: var(--ps-header-x) !important;
     padding-right: var(--ps-header-x) !important;
