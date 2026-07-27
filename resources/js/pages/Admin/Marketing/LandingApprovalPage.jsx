@@ -203,9 +203,6 @@ export default function LandingApprovalPage({
                                         <td className="text-center pslc-td-marketer">
                                             {row.marketer || '—'}
                                             {row.marketer_email && <><br /><span className="small-tip">({row.marketer_email})</span></>}
-                                            {row.creator && row.creator !== row.marketer && (
-                                                <><br /><span className="small-tip text-warning">Tạo bởi: {row.creator}</span></>
-                                            )}
                                         </td>
                                         <td className="text-left pslc-td-source">{row.name}<br /><span className="small-tip">{row.source_url || row.webhook_url || '—'}</span></td>
                                         <td className="text-center pslc-type-cell"><div>Nguồn dữ liệu</div><div className="pslc-channel">({channelLabels[row.ad_channel] || row.ad_channel || '—'})</div></td>
