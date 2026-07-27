@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Building2, Copy, FileUp, Pencil, Search, UserPlus } from 'lucide-react';
+import { Building2, Copy, FileUp, Pencil, Search, Settings2, UserPlus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
@@ -177,6 +177,13 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                     icon={Building2}
                     title={t('pages.platform.title')}
                     description={t('pages.platform.desc')}
+                    actions={(
+                        <Button type="button" variant="outline" size="sm" asChild>
+                            <Link href="/platform/settings">
+                                <Settings2 className="size-4" /> {t('pages.platform.settings_title')}
+                            </Link>
+                        </Button>
+                    )}
                 />
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

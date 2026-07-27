@@ -4,10 +4,16 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpdateShippingPartnerRequest extends FormRequest
 {
-    public function authorize(): bool { return $this->user()?->isAdmin() ?? false; }
+    public function authorize(): bool
+    {
+        $user = $this->user();
+
+        return (bool) ($user?->isAdmin() || $user?->canManagePlatform());
+    }
 
     /** @return array<string, mixed> */
     public function rules(): array
@@ -41,5 +47,45 @@ class UpdateShippingPartnerRequest extends FormRequest
             'settings.extra_services' => ['nullable', 'array'],
             'settings.extra_services.*' => ['nullable', 'string', 'max:80'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $provider = (string) $this->route('provider');
+            $fields = config("shipping_partners.providers.{$provider}.fields", []);
+            if (! is_array($fields) || $fields === []) {
+                return;
+            }
+
+            $incoming = $this->input('credentials', []);
+            $incoming = is_array($incoming) ? $incoming : [];
+            $stored = [];
+
+            try {
+                $connection = \App\Models\ShippingPartnerConnection::query()
+                    ->where('provider', $provider)
+                    ->first();
+                $stored = is_array($connection?->credentials) ? $connection->credentials : [];
+            } catch (\Throwable) {
+                $stored = [];
+            }
+
+            foreach ($fields as $key => $meta) {
+                if (! is_array($meta) || ! ($meta['required'] ?? false)) {
+                    continue;
+                }
+
+                $label = (string) ($meta['label'] ?? $key);
+                $value = $incoming[$key] ?? null;
+                $hasIncoming = filled($value);
+                $isSecret = (bool) ($meta['secret'] ?? false);
+                $hasStoredSecret = $isSecret && filled($stored[$key] ?? null);
+
+                if (! $hasIncoming && ! $hasStoredSecret) {
+                    $validator->errors()->add("credentials.{$key}", "{$label} bắt buộc.");
+                }
+            }
+        });
     }
 }

@@ -64,20 +64,30 @@ html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-main-si
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar.pushsale-sidebar,
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar {
     height: 100% !important;
+    max-height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
     background: var(--ps-menu-bg) !important;
+    scrollbar-gutter: stable !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #b7c2ce transparent !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar::-webkit-scrollbar {
-    width: 6px !important;
+    width: 8px !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar::-webkit-scrollbar-thumb {
-    background: #c5ced8 !important;
-    border-radius: 3px !important;
+    background: #b7c2ce !important;
+    border-radius: 4px !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar::-webkit-scrollbar-track {
+    background: transparent !important;
 }
 
 /* ---------- Lists / reset ---------- */
@@ -216,22 +226,17 @@ html body.pushsale-app-body .pushsale-main-sidebar .a1:active {
 
 /* ---------- Level 2 accordion ---------- */
 html body.pushsale-app-body .pushsale-main-sidebar .treeview-menu.ul2 {
-    display: block !important;
-    max-height: 0 !important;
-    overflow: hidden !important;
+    display: none !important;
+    max-height: none !important;
+    overflow: visible !important;
     background: #fff !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    transition:
-        max-height var(--ps-menu-accordion),
-        opacity var(--ps-menu-accordion),
-        visibility var(--ps-menu-accordion) !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .treeview-menu.ul2.is-open,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.menu-open > .treeview-menu.ul2,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.is-open > .treeview-menu.ul2 {
-    max-height: 2400px !important;
+    display: block !important;
+    max-height: none !important;
     overflow: visible !important;
     background: #fff !important;
     opacity: 1 !important;

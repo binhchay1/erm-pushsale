@@ -77,6 +77,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-system-monitor-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-system-monitor-contract.css') },
     { file: 'pushsale-operation-columns-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-operation-columns-contract.css') },
     { file: 'pushsale-ecommerce-new-flow-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-ecommerce-new-flow-contract.css') },
+    { file: 'pushsale-shipping-partners-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-shipping-partners-contract.css') },
     { file: 'pushsale-activity-product-report-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-activity-product-report-contract.css') },
     { file: 'pushsale-power-dashboard-859.css', layer: 'final-contract', load: () => import('../../css/pushsale-power-dashboard-859.css') },
     { file: 'pushsale-hourly-statistics-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-hourly-statistics-contract.css') },

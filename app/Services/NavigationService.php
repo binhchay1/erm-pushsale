@@ -286,12 +286,12 @@ class NavigationService
                 continue;
             }
 
+            // 1.16.2 (cấu hình nền tảng) trùng mục đích với 10.1.4 — không gắn lại vào menu 1.
             $top['children'][] = [
                 'title' => '1.16 Quản trị nền tảng',
                 'children' => [
-                    ['title' => '1. Danh sách doanh nghiệp', 'url' => '/platform/companies', 'icon' => 'building'],
-                    ['title' => '2. Cấu hình nền tảng', 'url' => '/platform/settings', 'icon' => 'sliders'],
-                    ['title' => '3. Giám sát hệ thống', 'url' => '/admin/system-monitor', 'icon' => 'heartbeat'],
+                    ['title' => '1. Danh sách doanh nghiệp', 'url' => '/platform/companies', 'icon' => 'building', 'code' => '1.16.1'],
+                    ['title' => '2. Giám sát hệ thống', 'url' => '/admin/system-monitor', 'icon' => 'heartbeat', 'code' => '1.16.2'],
                 ],
             ];
             break;

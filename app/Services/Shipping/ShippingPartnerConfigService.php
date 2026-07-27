@@ -65,10 +65,12 @@ class ShippingPartnerConfigService
         $connection = ShippingPartnerConnection::forProvider($provider);
         $updates = [];
 
-        foreach (['is_enabled', 'integration_mode'] as $key) {
-            if (array_key_exists($key, $payload)) {
-                $updates[$key] = $key === 'is_enabled' ? (bool) $payload[$key] : (string) $payload[$key];
-            }
+        if (array_key_exists('is_enabled', $payload)) {
+            $updates['is_enabled'] = filter_var($payload['is_enabled'], FILTER_VALIDATE_BOOL);
+        }
+
+        if (array_key_exists('integration_mode', $payload) && filled($payload['integration_mode'])) {
+            $updates['integration_mode'] = (string) $payload['integration_mode'];
         }
 
         if (! empty($payload['webhook_secret'])) {
@@ -79,10 +81,9 @@ class ShippingPartnerConfigService
             $credentials = $connection->credentials ?? [];
             foreach ($payload['credentials'] as $key => $value) {
                 if ($value === null || $value === '') {
-                    unset($credentials[$key]);
                     continue;
                 }
-                $credentials[$key] = (string) $value;
+                $credentials[(string) $key] = (string) $value;
             }
             $updates['credentials'] = $credentials;
         }

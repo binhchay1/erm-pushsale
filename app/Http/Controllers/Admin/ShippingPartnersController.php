@@ -25,6 +25,7 @@ class ShippingPartnersController extends Controller
     {
         abort_unless(array_key_exists($provider, config('shipping_partners.providers', [])), 404);
         $service->update($provider, $request->validated());
+
         return back()->with('success', __('messages.shipping_saved'));
     }
 
