@@ -1,7 +1,7 @@
 /*
  * Admin dashboard toolbar contract.
- * Purpose: align the date filters, load button, and LIVE badge on one clean
- * Pushsale/AdminLTE baseline without relying on per-page spacing hacks.
+ * Works with shared PageHeader (.m-header-wrap > .m-header):
+ * title left · date filters + LIVE right, one baseline.
  */
 
 html body.pushsale-app-body .psfd-page {
@@ -10,67 +10,92 @@ html body.pushsale-app-body .psfd-page {
     padding: 0 !important;
 }
 
-html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 {
-    display: grid !important;
-    grid-template-columns: minmax(320px, 1fr) max-content !important;
-    align-items: end !important;
-    gap: 18px !important;
+/* Wrap chỉ là shell — không tự grid (để PageHeader row quyết định layout). */
+html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88.ps-page-header,
+html body.pushsale-app-body .m-header-wrap.psfd-toolbar.psfd-toolbar-v88 {
+    display: block !important;
     width: 100% !important;
-    min-height: 74px !important;
+    min-height: 0 !important;
     margin: 0 !important;
-    padding: 10px 14px 11px !important;
+    padding: 0 !important;
     border: 0 !important;
-    border-bottom: 1px solid #d2d6de !important;
     border-radius: 0 !important;
     background: #fff !important;
+    box-shadow: var(--ps-header-shadow, 0 2px 6px rgba(15, 42, 66, 0.14)) !important;
+}
+
+html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 > .m-header,
+html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 > .ps-page-header__row {
+    display: grid !important;
+    grid-template-columns: minmax(240px, 1fr) auto !important;
+    align-items: center !important;
+    gap: 16px !important;
+    width: 100% !important;
+    min-height: 58px !important;
+    margin: 0 !important;
+    padding: 8px 14px !important;
+    background: #fff !important;
+    border: 0 !important;
     box-shadow: none !important;
 }
 
-html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-toolbar-copy {
-    align-self: end !important;
+/* Title + subtitle xếp cột — tránh title bị flex co về 0 khi subtitle dài. */
+html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .ps-page-header__title {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 2px !important;
     min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
-html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-toolbar-copy h1 {
-    margin: 0 0 3px 0 !important;
+html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .ps-page-header__title > .text {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 !important;
     padding: 0 !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    line-height: 20px !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
     color: #111 !important;
+    font: 700 16px/20px Arial, Helvetica, sans-serif !important;
 }
 
-html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-toolbar-copy p {
+html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .ps-page-header__subtitle {
+    display: block !important;
     margin: 0 !important;
-    padding: 0 !important;
-    max-width: 560px !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 12px !important;
-    line-height: 16px !important;
+    max-width: min(560px, 48vw) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
     color: #4f5f73 !important;
+    font: 400 12px/16px Arial, Helvetica, sans-serif !important;
 }
 
-html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-toolbar-controls {
-    display: grid !important;
-    grid-template-columns: max-content max-content !important;
-    align-items: end !important;
-    justify-content: end !important;
-    gap: 28px !important;
+/* Filter + LIVE cùng cụm phải, căn đáy thẳng hàng. */
+html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .ps-page-header__actions {
+    display: inline-flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    gap: 14px !important;
     width: auto !important;
     min-width: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+    white-space: nowrap !important;
 }
 
 html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls {
-    display: grid !important;
-    grid-template-columns: 150px 150px max-content !important;
-    align-items: end !important;
-    justify-content: end !important;
-    gap: 10px !important;
+    display: inline-flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
     width: auto !important;
     min-width: 0 !important;
     margin: 0 !important;
@@ -78,29 +103,23 @@ html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls
 }
 
 html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls label {
-    display: grid !important;
-    grid-template-rows: 17px 31px !important;
-    align-items: end !important;
-    gap: 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 3px !important;
     width: 150px !important;
-    height: 52px !important;
-    min-height: 52px !important;
     margin: 0 !important;
     padding: 0 !important;
     color: #111 !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    line-height: 17px !important;
+    font: 700 12px/16px Arial, Helvetica, sans-serif !important;
 }
 
 html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls label > span {
     display: block !important;
-    height: 17px !important;
-    min-height: 17px !important;
+    height: 16px !important;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 17px !important;
+    line-height: 16px !important;
 }
 
 html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls input[type='date'],
@@ -114,23 +133,18 @@ html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls
     margin: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 12px !important;
-    line-height: 17px !important;
-    vertical-align: bottom !important;
+    font: 600 12px/17px Arial, Helvetica, sans-serif !important;
 }
 
 html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls input[type='date'] {
     width: 150px !important;
     padding: 5px 9px !important;
-    border: 1px solid #bfcdda !important;
+    border: 1px solid #c8d2df !important;
     background: #fff !important;
     color: #111 !important;
-    font-weight: 600 !important;
 }
 
 html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls button[type='submit'] {
-    align-self: end !important;
     min-width: 112px !important;
     padding: 5px 12px !important;
     border: 1px solid #197bad !important;
@@ -146,8 +160,7 @@ html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls
 }
 
 html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-live-slot {
-    display: flex !important;
-    align-self: end !important;
+    display: inline-flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
     height: 31px !important;
@@ -166,11 +179,7 @@ html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-live-slot > spa
     margin: 0 !important;
     padding: 2px 8px !important;
     border-radius: 0 !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 10px !important;
-    font-weight: 700 !important;
-    line-height: 16px !important;
-    vertical-align: middle !important;
+    font: 700 10px/16px Arial, Helvetica, sans-serif !important;
     white-space: nowrap !important;
 }
 
@@ -181,12 +190,17 @@ html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-live-slot svg {
 }
 
 @media (max-width: 980px) {
-    html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88,
-    html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-toolbar-controls,
-    html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls {
+    html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 > .m-header,
+    html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 > .ps-page-header__row {
         grid-template-columns: 1fr !important;
-        justify-content: stretch !important;
-        justify-items: stretch !important;
+        align-items: stretch !important;
+    }
+
+    html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .ps-page-header__actions,
+    html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls {
+        flex-wrap: wrap !important;
+        justify-content: flex-start !important;
+        width: 100% !important;
     }
 
     html body.pushsale-app-body .psfd-toolbar.psfd-toolbar-v88 .psfd-filter-controls label,

@@ -423,13 +423,25 @@ html body.pushsale-app-body .ps-page-header .ps-sale-search-wrap {
 }
 
 html body.pushsale-app-body .ps-page-header .ps-sale-extra-filters {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-sale-extra-row {
     display: grid !important;
-    grid-template-columns: minmax(180px, 1.1fr) repeat(8, minmax(100px, 1fr)) auto !important;
+    grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(140px, 1fr)) !important;
     gap: 8px 10px !important;
     align-items: center !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-sale-extra-row:last-child {
+    grid-template-columns: repeat(4, minmax(140px, 1fr)) auto !important;
 }
 
 html body.pushsale-app-body .ps-page-header .ps-sale-check {
@@ -440,6 +452,14 @@ html body.pushsale-app-body .ps-page-header .ps-sale-check {
     white-space: nowrap !important;
     font-size: 12px !important;
     font-weight: 400 !important;
+}
+
+/* Đổ bóng đường dưới header Sale tác nghiệp (cả khối title + advanced). */
+html body.pushsale-app-body .ps-page-header[data-page-code="4.1"],
+html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header,
+html body.pushsale-app-body .m-header-wrap.ps-page-header[data-page-code="4.1"] {
+    box-shadow: var(--ps-header-shadow) !important;
+    border-bottom: 0 !important;
 }
 
 /* Hồ sơ KH: filter nâng cao gọn hơn, 1 hàng dày (cuộn ngang nếu thiếu chỗ). */
@@ -469,8 +489,9 @@ html body.pushsale-app-body .ps-customer-profile-header .ps-filter-grid .ps-filt
 }
 
 @media (max-width: 1399px) {
-    html body.pushsale-app-body .ps-page-header .ps-sale-extra-filters {
-        grid-template-columns: repeat(5, minmax(120px, 1fr)) !important;
+    html body.pushsale-app-body .ps-page-header .ps-sale-extra-row,
+    html body.pushsale-app-body .ps-page-header .ps-sale-extra-row:last-child {
+        grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
     }
 
     html body.pushsale-app-body .ps-customer-profile-header .ps-filter-grid {
@@ -483,8 +504,9 @@ html body.pushsale-app-body .ps-customer-profile-header .ps-filter-grid .ps-filt
 
 @media (max-width: 1199px) {
     html body.pushsale-app-body .ps-page-header .ps-sale-primary-filters,
-    html body.pushsale-app-body .ps-page-header .ps-sale-extra-filters {
-        grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
+    html body.pushsale-app-body .ps-page-header .ps-sale-extra-row,
+    html body.pushsale-app-body .ps-page-header .ps-sale-extra-row:last-child {
+        grid-template-columns: repeat(2, minmax(140px, 1fr)) !important;
     }
 }
 

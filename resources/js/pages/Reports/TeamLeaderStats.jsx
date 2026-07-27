@@ -144,88 +144,93 @@ function MarketingLeaderFilter({ filters, filterOptions, routeUrl }) {
             title={t('reports.team_leaders.title')}
             pageCode="2.8.1"
             className="ps-leader-filter"
+            defaultCollapsed={false}
             actions={(
                 <button type="button" className="btn btn-sm btn-primary ps-leader-search-btn" onClick={submit}>
                     <Search className="size-3.5" /> {t('common.search')}
                 </button>
             )}
             advanced={(
-                <div className="ps-leader-advanced-row" role="search" aria-label="Bộ lọc thống kê trưởng nhóm">
-                    <Select
-                        value={form.date_type}
-                        onChange={(value) => set('date_type', value)}
-                        options={filterOptions?.dateTypes ?? []}
-                        placeholder="--Chuẩn Pushsale--"
-                    />
-                    <div className="date-range-wrap legacy-range">
-                        <input
-                            type="date"
-                            className="ps-input"
-                            value={form.date_from ?? ''}
-                            onChange={(event) => set('date_from', event.target.value)}
+                <div className="ps-leader-advanced" role="search" aria-label="Bộ lọc thống kê trưởng nhóm">
+                    <div className="ps-leader-advanced-row">
+                        <Select
+                            value={form.date_type}
+                            onChange={(value) => set('date_type', value)}
+                            options={filterOptions?.dateTypes ?? []}
+                            placeholder="--Chuẩn Pushsale--"
                         />
-                        <input
-                            type="date"
-                            className="ps-input"
-                            value={form.date_to ?? ''}
-                            onChange={(event) => set('date_to', event.target.value)}
+                        <div className="date-range-wrap legacy-range">
+                            <input
+                                type="date"
+                                className="ps-input"
+                                value={form.date_from ?? ''}
+                                onChange={(event) => set('date_from', event.target.value)}
+                            />
+                            <input
+                                type="date"
+                                className="ps-input"
+                                value={form.date_to ?? ''}
+                                onChange={(event) => set('date_to', event.target.value)}
+                            />
+                        </div>
+                        <Select
+                            value={form.delivery_status}
+                            onChange={(value) => set('delivery_status', value)}
+                            options={filterOptions?.deliveryStatuses ?? []}
+                            placeholder="-- Chọn trạng thái giao hàng --"
+                        />
+                        <Select
+                            value={form.discount_mode}
+                            onChange={(value) => set('discount_mode', value)}
+                            options={filterOptions?.discountModes ?? []}
+                            placeholder="Sau chiết khấu"
+                        />
+                        <Select
+                            value={form.marketing_team_leader_id}
+                            onChange={(value) => set('marketing_team_leader_id', value)}
+                            options={filterOptions?.marketingTeamLeaders ?? []}
+                            placeholder="--Chọn trưởng nhóm--"
+                        />
+                        <Select
+                            value={form.marketing_team_id}
+                            onChange={(value) => set('marketing_team_id', value)}
+                            options={marketingTeams}
+                            placeholder="--Chọn nhóm--"
                         />
                     </div>
-                    <Select
-                        value={form.delivery_status}
-                        onChange={(value) => set('delivery_status', value)}
-                        options={filterOptions?.deliveryStatuses ?? []}
-                        placeholder="-- Chọn trạng thái giao hàng --"
-                    />
-                    <Select
-                        value={form.discount_mode}
-                        onChange={(value) => set('discount_mode', value)}
-                        options={filterOptions?.discountModes ?? []}
-                        placeholder="Sau chiết khấu"
-                    />
-                    <Select
-                        value={form.marketing_team_leader_id}
-                        onChange={(value) => set('marketing_team_leader_id', value)}
-                        options={filterOptions?.marketingTeamLeaders ?? []}
-                        placeholder="--Chọn trưởng nhóm--"
-                    />
-                    <Select
-                        value={form.marketing_team_id}
-                        onChange={(value) => set('marketing_team_id', value)}
-                        options={marketingTeams}
-                        placeholder="--Chọn nhóm--"
-                    />
-                    <Select
-                        value={form.parent_product_id}
-                        onChange={(value) => set('parent_product_id', value)}
-                        options={filterOptions?.parentProducts ?? []}
-                        placeholder="-- Sản phẩm cha --"
-                    />
-                    <Select
-                        value={form.product_id}
-                        onChange={(value) => set('product_id', value)}
-                        options={filterOptions?.products ?? []}
-                        placeholder="-- Sản phẩm --"
-                    />
-                    <Select
-                        value={form.reconciliation_status}
-                        onChange={(value) => set('reconciliation_status', value)}
-                        options={filterOptions?.reconciliationStatuses ?? []}
-                        placeholder="-- Đối soát --"
-                    />
-                    <Select
-                        value={form.per_page ?? '20'}
-                        onChange={(value) => set('per_page', value)}
-                        options={PER_PAGE_OPTIONS.map((value) => ({ value, label: value === '999999' ? '--Hiển thị tất--' : value }))}
-                    />
-                    <label className="ps-report-check">
-                        <input
-                            type="checkbox"
-                            checked={Boolean(form.no_closing_date_limit)}
-                            onChange={(event) => set('no_closing_date_limit', event.target.checked ? 1 : 0)}
+                    <div className="ps-leader-advanced-row">
+                        <Select
+                            value={form.parent_product_id}
+                            onChange={(value) => set('parent_product_id', value)}
+                            options={filterOptions?.parentProducts ?? []}
+                            placeholder="-- Sản phẩm cha --"
                         />
-                        <span>Không giới hạn ngày chốt</span>
-                    </label>
+                        <Select
+                            value={form.product_id}
+                            onChange={(value) => set('product_id', value)}
+                            options={filterOptions?.products ?? []}
+                            placeholder="-- Sản phẩm --"
+                        />
+                        <Select
+                            value={form.reconciliation_status}
+                            onChange={(value) => set('reconciliation_status', value)}
+                            options={filterOptions?.reconciliationStatuses ?? []}
+                            placeholder="-- Đối soát --"
+                        />
+                        <Select
+                            value={form.per_page ?? '20'}
+                            onChange={(value) => set('per_page', value)}
+                            options={PER_PAGE_OPTIONS.map((value) => ({ value, label: value === '999999' ? '--Hiển thị tất--' : value }))}
+                        />
+                        <label className="ps-report-check">
+                            <input
+                                type="checkbox"
+                                checked={Boolean(form.no_closing_date_limit)}
+                                onChange={(event) => set('no_closing_date_limit', event.target.checked ? 1 : 0)}
+                            />
+                            <span>Không giới hạn ngày chốt</span>
+                        </label>
+                    </div>
                 </div>
             )}
         />

@@ -1187,6 +1187,15 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
                 return;
             }
 
+            const closeButton = event.target.closest?.('[id$="btnDong"]');
+            if (closeButton) {
+                event.preventDefault();
+                if (String(schema.code) === '5.3.1') {
+                    router.visit('/admin/warehouse/vouchers');
+                    return;
+                }
+            }
+
             const summaryToggle = event.target.closest?.('[id$="btnToggleSummary"], .btnToggleSummary, .ps-header-toggle');
             if (summaryToggle) {
                 event.preventDefault();

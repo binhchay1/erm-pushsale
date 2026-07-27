@@ -104,7 +104,7 @@ html body.pushsale-app-body .ps-product-empty {
 
 /* Landing connection modal: make it a real compact Pushsale form. */
 html body.pushsale-app-body .pslc-dialog {
-    max-width: 1180px !important;
+    max-width: min(1280px, 92vw) !important;
 }
 
 html body.pushsale-app-body .pslc-dialog-shell {

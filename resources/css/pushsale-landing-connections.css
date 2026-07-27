@@ -583,3 +583,66 @@ html body.pushsale-app-body .pslc-approval-table-card {
     html body.pushsale-app-body .pslc-approval-header .pslc-approval-filters { width: 100% !important; grid-template-columns: 1fr !important; }
     html body.pushsale-app-body .pslc-approval-header .pslc-approval-filters .btn { width: 100% !important; }
 }
+
+/* Dialog chỉnh sửa nguồn dữ liệu: rộng hơn + input phẳng (không đôi viền/đổ bóng). */
+html body.pushsale-app-body .pslc-source-dialog.ps-dialog-surface,
+html body.pushsale-app-body .pslc-dialog.pslc-source-dialog.ps-dialog-surface {
+    width: min(1280px, 92vw) !important;
+    max-width: min(1280px, 92vw) !important;
+    min-width: min(980px, calc(100vw - 24px)) !important;
+    max-height: calc(100dvh - 24px) !important;
+}
+
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form {
+    grid-template-columns: 220px minmax(0, 1fr) !important;
+    gap: 10px 16px !important;
+}
+
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .ps-select,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .ps-select--multi,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .pslc-inline-action-field {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    filter: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .form-control,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .ps-select__control,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form button.ps-select__control,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .ps-product-select-button,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form input[type='text'],
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form input[type='url'] {
+    height: 32px !important;
+    min-height: 32px !important;
+    border: 1px solid #c8d2df !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    outline: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .form-control:focus,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .ps-select__control:focus,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form button.ps-select__control:focus,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form input:focus {
+    border-color: #66afe9 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+html body.pushsale-app-body .pslc-source-dialog .pslc-dialog-body {
+    max-height: calc(100dvh - 90px) !important;
+    overflow-y: auto !important;
+}
+
+html body.pushsale-app-body .pslc-source-dialog .pslc-dialog-footer {
+    justify-content: flex-start !important;
+    padding: 8px 20px 12px 236px !important;
+    border-top: 0 !important;
+    background: #fff !important;
+}

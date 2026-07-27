@@ -1914,17 +1914,21 @@ body.pushsale-app-body .pslc-source-form-v118 .btn-icon i {
     color: #168be8 !important;
 }
 body.pushsale-app-body .pslc-source-dialog.ps-dialog-surface {
-    width: 80vw !important;
-    max-width: 80vw !important;
+    width: min(1280px, 92vw) !important;
+    max-width: min(1280px, 92vw) !important;
     min-width: min(960px, calc(100vw - 30px)) !important;
+    max-height: calc(100dvh - 28px) !important;
 }
 body.pushsale-app-body .pslc-source-dialog .ps-dialog-body,
 body.pushsale-app-body .pslc-source-dialog .pslc-dialog-shell {
     padding: 0 !important;
-    overflow: auto !important;
+    overflow: hidden !important;
 }
 body.pushsale-app-body .pslc-source-form-v118 .pslc-dialog-body {
-    padding: 14px 18px !important;
+    max-height: calc(100dvh - 96px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 12px 20px 8px !important;
 }
 body.pushsale-app-body .pslc-source-simple-form {
     display: grid !important;

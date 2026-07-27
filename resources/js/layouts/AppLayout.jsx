@@ -57,7 +57,10 @@ export default function AppLayout({ children }) {
             // until the user presses F5.
             if (!event.persisted) return;
             applyPushsaleShell();
-            setStylesReady(false);
+            // Chỉ reset spinner khi CSS thật sự mất — tránh flash khi back/forward.
+            if (document.documentElement.dataset.pushsaleStylesReady !== '1') {
+                setStylesReady(false);
+            }
             ensurePushsaleStyles().finally(() => active && setStylesReady(true));
         };
 
@@ -103,7 +106,8 @@ export default function AppLayout({ children }) {
             }
 
             clearTransitionTimer();
-            transitionTimer = window.setTimeout(() => setPageTransitioning(true), 160);
+            // Chỉ hiện overlay khi điều hướng chậm (>400ms) để tránh giật trên chuyển trang nhanh.
+            transitionTimer = window.setTimeout(() => setPageTransitioning(true), 400);
             setPendingDashboardRole(dashboardRoleFromUrl(targetUrl));
         });
         const finish = router.on('finish', () => {

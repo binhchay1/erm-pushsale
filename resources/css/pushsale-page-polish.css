@@ -312,12 +312,13 @@ body.pushsale-app-body .pslc-actions { white-space: nowrap !important; }
 body.pushsale-app-body .pslc-actions button { padding: 2px !important; font-size: 12px !important; }
 body.pushsale-app-body .pslc-money-cell { white-space: normal !important; }
 
-/* Pushsale-like landing source dialog: compact, centered, and no accidental inner
-   horizontal scroll. Business additions stay, but presentation follows old form. */
-body.pushsale-app-body .pslc-dialog.ps-dialog-surface {
-    width: min(1040px, calc(100vw - 42px)) !important;
-    max-width: calc(100vw - 42px) !important;
-    max-height: calc(100dvh - 42px) !important;
+/* Pushsale-like landing source dialog: wider so form fits without vertical scroll. */
+body.pushsale-app-body .pslc-dialog.ps-dialog-surface,
+body.pushsale-app-body .pslc-source-dialog.ps-dialog-surface {
+    width: min(1280px, 92vw) !important;
+    max-width: min(1280px, 92vw) !important;
+    min-width: min(960px, calc(100vw - 30px)) !important;
+    max-height: calc(100dvh - 28px) !important;
     border: 1px solid #4b6f88 !important;
     border-radius: 0 !important;
     overflow: hidden !important;

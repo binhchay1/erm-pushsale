@@ -39,20 +39,23 @@ function hasCompiledStyle(file) {
 }
 
 async function ensureCompiledPushsaleStyles() {
-    for (const entry of PUSHSALE_CSS_MODULES) {
-        if (!hasCompiledStyle(entry.file)) {
-            await entry.load();
-        }
-    }
+    const pending = PUSHSALE_CSS_MODULES.filter((entry) => !hasCompiledStyle(entry.file));
+    if (!pending.length) return;
+    await Promise.all(pending.map((entry) => entry.load()));
 }
 
+let stylesMoved = false;
+
 function moveApplicationStylesAfterVendor() {
+    if (stylesMoved) return;
+
     const styles = [...document.querySelectorAll('link[rel="stylesheet"]')].filter((link) => {
         const href = link.getAttribute('href') ?? '';
         return !link.dataset.pushsaleLayer?.includes('vendor') && isPushsaleRuntimeStylesheet(href);
     });
 
     styles.forEach((link) => document.head.appendChild(link));
+    stylesMoved = true;
 }
 
 export async function ensurePushsaleStyles() {

@@ -2069,16 +2069,16 @@ html body.pushsale-app-body .ps-sale-operation-table .ps-sale-name-row > b {
 html body.pushsale-app-body .ps-sale-operation-table .ps-sale-delete,
 html body.pushsale-app-body .ps-sale-operation-table .ps-sale-delete.btn-icon {
     position: static !important;
-    width: 16px !important;
-    height: 16px !important;
-    min-width: 16px !important;
-    margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    margin: 0 0 0 6px !important;
     padding: 0 !important;
     border: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
     color: #c0392b !important;
-    font-size: 12px !important;
+    font-size: 13px !important;
     line-height: 1 !important;
 }
 
@@ -2087,34 +2087,59 @@ html body.pushsale-app-body .ps-sale-operation-table .ps-sale-delete:hover {
 }
 
 /* Bỏ viền khó chịu quanh icon/nút trong bảng tác nghiệp & hồ sơ KH. */
+/* Bỏ viền/khung ngoài icon trong bảng tác nghiệp & hồ sơ KH.
+ * Icon nhạt #cae7fb trước đây nhìn như ô vuông rỗng có viền. */
 html body.pushsale-app-body .ps-sale-operation-table .btn-icon,
 html body.pushsale-app-body .ps-sale-operation-table .btn-icon.ps-cell-action,
+html body.pushsale-app-body .ps-sale-operation-table .ps-note-toolbar .btn-icon,
+html body.pushsale-app-body .ps-sale-operation-table .ps-customer-cell .btn-icon,
 html body.pushsale-app-body .ps-customer-profile-table .btn-icon,
 html body.pushsale-app-body .ps-customer-profile-table .btn-icon.aoh,
 html body.pushsale-app-body .ps-customer-profile-table .ps-row-actions .btn-icon,
 html body.pushsale-app-body .ps-sale-operation-table .ps-row-actions .btn-icon,
 html body.pushsale-app-body .ps-sale-operation-table .ps-row-actions button,
 html body.pushsale-app-body .ps-customer-profile-table .ps-row-actions button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 2px !important;
+    padding: 0 !important;
     border: 0 !important;
     outline: 0 !important;
     box-shadow: none !important;
     background: transparent !important;
     border-radius: 0 !important;
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px !important;
-    min-height: 20px !important;
-    padding: 0 !important;
+    color: #3c8dbc !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .btn-icon:hover,
+html body.pushsale-app-body .ps-sale-operation-table .ps-note-toolbar .btn-icon:hover,
+html body.pushsale-app-body .ps-customer-profile-table .btn-icon:hover {
+    color: #23527c !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table .btn-icon .fa,
 html body.pushsale-app-body .ps-customer-profile-table .btn-icon .fa,
 html body.pushsale-app-body .ps-sale-operation-table .ps-row-actions .fa,
-html body.pushsale-app-body .ps-customer-profile-table .ps-row-actions .fa {
+html body.pushsale-app-body .ps-customer-profile-table .ps-row-actions .fa,
+html body.pushsale-app-body .ps-sale-operation-table .ps-note-toolbar .fa {
     border: 0 !important;
     box-shadow: none !important;
     background: transparent !important;
+    outline: 0 !important;
     line-height: 1 !important;
+    width: auto !important;
+    height: auto !important;
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-filter-grid .form-control,

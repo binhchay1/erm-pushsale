@@ -189,7 +189,7 @@ function PageDialog({ open, title, onClose, children }) {
             open={Boolean(open)}
             onOpenChange={(nextOpen) => !nextOpen && onClose?.()}
             title={title}
-            width="80vw"
+            width="min(1280px, 92vw)"
             className="pslc-dialog pslc-source-dialog"
             bodyClassName="pslc-dialog-shell"
         >

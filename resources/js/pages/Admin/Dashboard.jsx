@@ -159,17 +159,17 @@ function AdminDashboardContent({ stats: initialStats, filters = {} }) {
                 title="ADMIN DASHBOARD"
                 subtitle="Điều hành doanh thu, dòng tiền, marketing, kho và vận hành trên cùng một nguồn dữ liệu."
                 className="psfd-toolbar psfd-toolbar-v88"
-                filters={(
-                    <form className="psfd-filter-controls" onSubmit={submitFilter}>
-                        <label><span>Từ ngày</span><input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} /></label>
-                        <label><span>Đến ngày</span><input type="date" min={dateFrom || undefined} value={dateTo} onChange={(event) => setDateTo(event.target.value)} /></label>
-                        <button type="submit"><i className="fa fa-search" /> Tải dữ liệu</button>
-                    </form>
-                )}
                 actions={(
-                    <div className="psfd-live-slot">
-                        <RealtimeBadge connected={connected} />
-                    </div>
+                    <>
+                        <form className="psfd-filter-controls" onSubmit={submitFilter}>
+                            <label><span>Từ ngày</span><input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} /></label>
+                            <label><span>Đến ngày</span><input type="date" min={dateFrom || undefined} value={dateTo} onChange={(event) => setDateTo(event.target.value)} /></label>
+                            <button type="submit"><i className="fa fa-search" /> Tải dữ liệu</button>
+                        </form>
+                        <div className="psfd-live-slot">
+                            <RealtimeBadge connected={connected} />
+                        </div>
+                    </>
                 )}
             />
 
