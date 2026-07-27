@@ -18,7 +18,8 @@ class PancakeMessageWebhookController extends Controller
 {
     public function __invoke(Request $request, string $token): JsonResponse
     {
-        if ($request->getContentLength() > (int) config('security.webhook.max_payload_kb', 512) * 1024) {
+        $contentLength = (int) ($request->header('Content-Length') ?: strlen($request->getContent()));
+        if ($contentLength > (int) config('security.webhook.max_payload_kb', 512) * 1024) {
             return response()->json([
                 'message' => __('messages.webhook.payload_too_large'),
             ], 413);

@@ -87,7 +87,9 @@ class LoginController extends Controller
         $request->session()->regenerate();
         $this->logLoginAttempt($request, ActivityLogger::AUTH_LOGIN_SUCCESS, $user, $user->email, 'success');
 
-        return redirect()->to($this->homeFor($user));
+        return redirect()
+            ->to($this->homeFor($user))
+            ->withoutCookie('erm_skip_auto_login');
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -99,7 +101,10 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        // Staging auto-login must not immediately re-auth after an explicit logout.
+        return redirect()
+            ->route('login')
+            ->withCookie(cookie('erm_skip_auto_login', '1', 60 * 12));
     }
 
     private function logLoginAttempt(Request $request, string $action, ?User $user, string $email, string $reason): void

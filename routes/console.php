@@ -35,29 +35,31 @@ Schedule::command('reports:warm-snapshots --queue')
     ->onOneServer();
 
 // Kiểm tra metadata/checksum hằng ngày, không tự sửa để tránh che lỗi vận hành.
+// Chạy trước cửa sổ mysqldump ~02:00.
 Schedule::command('reports:verify-facts --days=14 --queue')
     ->dailyAt('01:20')
     ->timezone(config('reporting.timezone'))
     ->withoutOverlapping(60)
     ->onOneServer();
 
-// Ngày 2 hàng tháng: copy tháng trước sang bảng vật lý *_YYYY_MM và verify checksum.
+// Archive theo NĂM (*_YYYY), không theo tháng — tránh nhân bảng khi data còn nhỏ.
+// Lịch 03/01 04:30: tránh đụng mysqldump 02:00 hàng ngày trên server.
 Schedule::command('reports:archive-month --queue')
-    ->monthlyOn(2, '02:00')
+    ->yearlyOn(1, 3, '04:30')
     ->timezone(config('reporting.timezone'))
-    ->withoutOverlapping(240)
+    ->withoutOverlapping(360)
     ->onOneServer();
 
-// Late updates to a month already archived mark its manifest stale; refresh in small queued batches.
-Schedule::command('reports:refresh-stale-archives --queue --limit=12')
-    ->dailyAt('02:40')
+// Late updates to an archived year mark its manifest stale; refresh after dump window.
+Schedule::command('reports:refresh-stale-archives --queue --limit=8')
+    ->dailyAt('04:50')
     ->timezone(config('reporting.timezone'))
     ->withoutOverlapping(240)
     ->onOneServer();
 
 // Durable result snapshots are bounded by retention and pruned in small batches.
 Schedule::command('reports:prune-snapshots --limit=5000 --queue')
-    ->dailyAt('03:20')
+    ->dailyAt('05:20')
     ->timezone(config('reporting.timezone'))
     ->withoutOverlapping(30)
     ->onOneServer();

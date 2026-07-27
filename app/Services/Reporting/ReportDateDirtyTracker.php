@@ -135,16 +135,18 @@ class ReportDateDirtyTracker
             return;
         }
 
-        $month = CarbonImmutable::parse($metricDate, config('reporting.timezone'))->format('Y-m');
-        $currentMonth = CarbonImmutable::now(config('reporting.timezone'))->format('Y-m');
-        if ($month >= $currentMonth) {
+        $period = app(MonthlyArchiveService::class)->periodKeyForDate($metricDate);
+        $currentPeriod = app(MonthlyArchiveService::class)->periodKeyForDate(
+            CarbonImmutable::now(config('reporting.timezone')),
+        );
+        if ($period >= $currentPeriod) {
             return;
         }
 
         DB::table('analytics_archive_manifests')
             ->where('company_id', $companyId)
             ->where('source_table', $sourceTable)
-            ->where('archive_month', $month)
+            ->where('archive_month', $period)
             ->update([
                 'status' => DB::raw("CASE WHEN source_purged = 1 THEN 'late_rows_after_purge' ELSE 'stale' END"),
                 'verified' => false,

@@ -13,7 +13,10 @@ import { useOrgLevelLabel, useRoleLabel } from '@/hooks/use-labels';
 import { useT } from '@/providers/I18nProvider';
 
 function logout() {
-    router.post('/logout');
+    router.post('/logout', {}, {
+        preserveScroll: false,
+        preserveState: false,
+    });
 }
 
 export function UserMenu({ variant = 'avatar' }) {
@@ -59,7 +62,11 @@ export function UserMenu({ variant = 'avatar' }) {
                     <DropdownMenuSeparator className="pushsale-user-dropdown-separator" />
                     <DropdownMenuItem
                         className="pushsale-user-dropdown-item"
-                        onSelect={() => logout()}
+                        onSelect={(event) => {
+                            // Keep the item mounted until Inertia starts the POST.
+                            event.preventDefault();
+                            logout();
+                        }}
                     >
                         <i className="fa fa-power-off" aria-hidden="true" />
                         <span>Thoát</span>
@@ -83,7 +90,12 @@ export function UserMenu({ variant = 'avatar' }) {
                 <DropdownMenuItem asChild><Link href="/profile">{t('common.profile')}</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/settings">{t('common.settings')}</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => logout()}>
+                <DropdownMenuItem
+                    onSelect={(event) => {
+                        event.preventDefault();
+                        logout();
+                    }}
+                >
                     {t('common.logout')}
                 </DropdownMenuItem>
             </DropdownMenuContent>

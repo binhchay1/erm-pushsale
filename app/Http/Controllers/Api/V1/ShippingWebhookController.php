@@ -17,7 +17,8 @@ class ShippingWebhookController extends Controller
 
     public function handle(Request $request, string $provider): JsonResponse
     {
-        if ($request->getContentLength() > (int) config('security.webhook.max_payload_kb', 512) * 1024) {
+        $contentLength = (int) ($request->header('Content-Length') ?: strlen($request->getContent()));
+        if ($contentLength > (int) config('security.webhook.max_payload_kb', 512) * 1024) {
             return $this->error(__('messages.webhook.payload_too_large'), 413);
         }
         if (! array_key_exists($provider, config('shipping_partners.providers', []))) {

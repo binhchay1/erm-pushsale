@@ -34,7 +34,8 @@ class WebhookController extends Controller
             return $this->error(__('messages.webhook.platform_unsupported'), 404);
         }
 
-        if ($request->getContentLength() > (int) config('security.webhook.max_payload_kb', 512) * 1024) {
+        $contentLength = (int) ($request->header('Content-Length') ?: strlen($request->getContent()));
+        if ($contentLength > (int) config('security.webhook.max_payload_kb', 512) * 1024) {
             return $this->error(__('messages.webhook.payload_too_large'), 413);
         }
 

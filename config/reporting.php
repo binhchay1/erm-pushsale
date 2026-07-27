@@ -9,12 +9,16 @@ return [
     'snapshot_live_ttl_seconds' => (int) env('REPORTING_SNAPSHOT_LIVE_TTL_SECONDS', 300),
     'snapshot_history_ttl_days' => (int) env('REPORTING_SNAPSHOT_HISTORY_TTL_DAYS', 730),
     'archive' => [
+        // Hot tables stay in place. Physical copies are yearly (*_YYYY) so we do not
+        // multiply schema/tables while data volume is still modest (NVMe + RAM OK).
         'enabled' => env('REPORTING_ARCHIVE_ENABLED', true),
-        'driver' => env('REPORTING_ARCHIVE_DRIVER', 'monthly_tables'),
-        'retention_months' => (int) env('REPORTING_HOT_RETENTION_MONTHS', 6),
+        'driver' => env('REPORTING_ARCHIVE_DRIVER', 'yearly_tables'), // yearly_tables|monthly_tables|cold_records
+        'retention_months' => (int) env('REPORTING_HOT_RETENTION_MONTHS', 24),
+        'retention_years' => (int) env('REPORTING_HOT_RETENTION_YEARS', 2),
         'allow_purge' => env('REPORTING_ARCHIVE_ALLOW_PURGE', false),
-        'copy_chunk_size' => (int) env('REPORTING_ARCHIVE_COPY_CHUNK_SIZE', 2000),
-        'checksum_chunk_size' => (int) env('REPORTING_ARCHIVE_CHECKSUM_CHUNK_SIZE', 1000),
+        // Larger chunks = fewer transactions while yearly windows stay small.
+        'copy_chunk_size' => (int) env('REPORTING_ARCHIVE_COPY_CHUNK_SIZE', 5000),
+        'checksum_chunk_size' => (int) env('REPORTING_ARCHIVE_CHECKSUM_CHUNK_SIZE', 2000),
         'sources' => [
             'lead_ingestions' => ['date_column' => 'created_at', 'mutable' => false, 'purge_safe' => true],
             'inbound_events' => ['date_column' => 'created_at', 'mutable' => false, 'purge_safe' => true],

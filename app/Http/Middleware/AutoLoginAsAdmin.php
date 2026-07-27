@@ -25,6 +25,11 @@ class AutoLoginAsAdmin
             return $next($request);
         }
 
+        // Explicit logout / manual login flow: do not silently re-authenticate.
+        if ($request->cookies->get('erm_skip_auto_login') === '1') {
+            return $next($request);
+        }
+
         if (! $request->user()) {
             $admin = $this->resolveAdminUser();
 

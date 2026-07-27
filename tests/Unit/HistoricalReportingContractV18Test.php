@@ -17,6 +17,8 @@ class HistoricalReportingContractV18Test extends TestCase
         $this->assertStringContainsString('reports:process-dirty --queue', $schedule);
         $this->assertStringContainsString('reports:aggregate-daily yesterday --close --queue', $schedule);
         $this->assertStringContainsString('reports:archive-month --queue', $schedule);
+        $this->assertStringContainsString('yearlyOn(1, 3, \'04:30\')', $schedule);
+        $this->assertStringContainsString("'driver' => env('REPORTING_ARCHIVE_DRIVER', 'yearly_tables')", file_get_contents($root.'/config/reporting.php'));
         $this->assertStringContainsString('reports:refresh-stale-archives --queue', $schedule);
         $this->assertStringContainsString('reports:prune-snapshots', $schedule);
         $this->assertStringContainsString('reports:verify-facts --days=14', $schedule);

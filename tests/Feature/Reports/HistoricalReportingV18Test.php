@@ -123,20 +123,21 @@ class HistoricalReportingV18Test extends TestCase
         $this->assertTrue($aggregator->verify($company->id, '2026-07-09')['valid']);
     }
 
-    public function test_monthly_archive_copies_and_verifies_raw_rows_without_purging_by_default(): void
+    public function test_yearly_archive_copies_and_verifies_raw_rows_without_purging_by_default(): void
     {
         Carbon::setTestNow('2026-07-10 12:00:00');
-        [$company, , $order] = $this->makeBusinessDay('2026-06-15 09:00:00');
+        [$company, , $order] = $this->makeBusinessDay('2025-06-15 09:00:00');
 
-        $result = app(MonthlyArchiveService::class)->archiveCompanyMonth($company->id, '2026-06');
+        $result = app(MonthlyArchiveService::class)->archiveCompanyMonth($company->id, '2025');
 
         $this->assertTrue($result['lead_ingestions']['verified']);
         $this->assertTrue($result['orders']['verified']);
         $this->assertFalse($result['lead_ingestions']['sourcePurged']);
+        $this->assertSame('lead_ingestions_2025', $result['lead_ingestions']['archiveTable']);
         $this->assertDatabaseHas('analytics_archive_manifests', [
             'company_id' => $company->id,
             'source_table' => 'lead_ingestions',
-            'archive_month' => '2026-06',
+            'archive_month' => '2025',
             'verified' => true,
             'source_purged' => false,
         ]);
@@ -146,7 +147,7 @@ class HistoricalReportingV18Test extends TestCase
         $this->assertDatabaseHas('analytics_archive_manifests', [
             'company_id' => $company->id,
             'source_table' => 'orders',
-            'archive_month' => '2026-06',
+            'archive_month' => '2025',
             'status' => 'stale',
             'verified' => false,
         ]);

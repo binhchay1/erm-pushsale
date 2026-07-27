@@ -41,6 +41,6 @@ class ArchiveMonthlyAnalyticsJob implements ShouldBeUnique, ShouldQueue
 
     public function tags(): array
     {
-        return ['reports', 'monthly-archive', 'company:'.$this->companyId, 'month:'.$this->month];
+        return ['reports', 'archive', 'company:'.$this->companyId, 'period:'.$this->month];
     }
 }

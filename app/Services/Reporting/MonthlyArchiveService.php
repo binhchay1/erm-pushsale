@@ -13,20 +13,22 @@ use Throwable;
 
 class MonthlyArchiveService
 {
-    /** @return array<string,mixed> */
+    /**
+     * Archive one company period.
+     *
+     * Period formats:
+     * - yearly driver (default): YYYY  → table source_YYYY, range Jan 1..Dec 31
+     * - monthly driver: YYYY-MM → table source_YYYY_MM
+     *
+     * @return array<string,mixed>
+     */
     public function archiveCompanyMonth(
         int $companyId,
-        string $month,
+        string $period,
         bool $purge = false,
         bool $dryRun = false,
     ): array {
-        $period = CarbonImmutable::createFromFormat('!Y-m', $month, config('reporting.timezone'));
-        if (! $period || $period->format('Y-m') !== $month) {
-            throw new InvalidArgumentException('Month must use YYYY-MM format.');
-        }
-
-        $from = $period->startOfMonth();
-        $to = $period->endOfMonth()->endOfDay();
+        [$normalized, $from, $to] = $this->resolvePeriod($period);
         $results = [];
 
         foreach (config('reporting.archive.sources', []) as $sourceTable => $definition) {
@@ -35,7 +37,7 @@ class MonthlyArchiveService
                 continue;
             }
 
-            $lock = Cache::lock("reporting:archive:{$companyId}:{$sourceTable}:{$month}", 7200);
+            $lock = Cache::lock("reporting:archive:{$companyId}:{$sourceTable}:{$normalized}", 7200);
             if (! $lock->get()) {
                 $results[$sourceTable] = ['status' => 'locked', 'reason' => 'archive_already_running'];
                 continue;
@@ -48,7 +50,7 @@ class MonthlyArchiveService
                     (string) $definition['date_column'],
                     $from,
                     $to,
-                    $month,
+                    $normalized,
                     $purge && (bool) ($definition['purge_safe'] ?? false),
                     $dryRun,
                 );
@@ -60,6 +62,60 @@ class MonthlyArchiveService
         return $results;
     }
 
+    /** Default period for CLI/schedule based on archive driver. */
+    public function defaultPeriod(?CarbonImmutable $now = null): string
+    {
+        $now ??= CarbonImmutable::now(config('reporting.timezone'));
+
+        return $this->isYearlyDriver()
+            ? $now->subYear()->format('Y')
+            : $now->subMonth()->format('Y-m');
+    }
+
+    public function periodKeyForDate(CarbonImmutable|string $date): string
+    {
+        $parsed = $date instanceof CarbonImmutable
+            ? $date
+            : CarbonImmutable::parse($date, config('reporting.timezone'));
+
+        return $this->isYearlyDriver()
+            ? $parsed->format('Y')
+            : $parsed->format('Y-m');
+    }
+
+    public function isYearlyDriver(): bool
+    {
+        return config('reporting.archive.driver') === 'yearly_tables';
+    }
+
+    /**
+     * @return array{0:string,1:CarbonImmutable,2:CarbonImmutable}
+     */
+    private function resolvePeriod(string $period): array
+    {
+        $period = trim($period);
+
+        if (preg_match('/^\d{4}$/', $period) === 1) {
+            $year = CarbonImmutable::createFromFormat('!Y', $period, config('reporting.timezone'));
+            if (! $year || $year->format('Y') !== $period) {
+                throw new InvalidArgumentException('Year must use YYYY format.');
+            }
+
+            return [$period, $year->startOfYear(), $year->endOfYear()->endOfDay()];
+        }
+
+        if (preg_match('/^\d{4}-\d{2}$/', $period) === 1) {
+            $month = CarbonImmutable::createFromFormat('!Y-m', $period, config('reporting.timezone'));
+            if (! $month || $month->format('Y-m') !== $period) {
+                throw new InvalidArgumentException('Month must use YYYY-MM format.');
+            }
+
+            return [$period, $month->startOfMonth(), $month->endOfMonth()->endOfDay()];
+        }
+
+        throw new InvalidArgumentException('Period must be YYYY (yearly) or YYYY-MM (monthly).');
+    }
+
     /** @return array<string,mixed> */
     private function archiveTable(
         int $companyId,
@@ -67,11 +123,11 @@ class MonthlyArchiveService
         string $dateColumn,
         CarbonImmutable $from,
         CarbonImmutable $to,
-        string $month,
+        string $period,
         bool $purge,
         bool $dryRun,
     ): array {
-        $archiveTable = $this->archiveTableName($sourceTable, $month);
+        $archiveTable = $this->archiveTableName($sourceTable, $period);
         $sourceQuery = DB::table($sourceTable)
             ->where('company_id', $companyId)
             ->whereBetween($dateColumn, [$from, $to]);
@@ -79,7 +135,7 @@ class MonthlyArchiveService
         $sourceChecksum = $this->checksum($sourceTable, $companyId, $dateColumn, $from, $to);
 
         $manifest = AnalyticsArchiveManifest::query()->updateOrCreate(
-            ['company_id' => $companyId, 'source_table' => $sourceTable, 'archive_month' => $month],
+            ['company_id' => $companyId, 'source_table' => $sourceTable, 'archive_month' => $period],
             [
                 'archive_table' => $archiveTable,
                 'status' => $dryRun ? 'dry_run' : 'copying',
@@ -99,9 +155,9 @@ class MonthlyArchiveService
         }
 
         try {
-            if ($this->supportsMonthlyTables()) {
-                $this->createMonthlyTable($sourceTable, $archiveTable);
-                $this->copyToMonthlyTable($sourceTable, $archiveTable, $companyId, $dateColumn, $from, $to);
+            if ($this->supportsPhysicalTables()) {
+                $this->createArchiveTable($sourceTable, $archiveTable);
+                $this->copyToArchiveTable($sourceTable, $archiveTable, $companyId, $dateColumn, $from, $to);
                 $archiveRows = DB::table($archiveTable)
                     ->where('company_id', $companyId)
                     ->whereBetween($dateColumn, [$from, $to])
@@ -114,13 +170,12 @@ class MonthlyArchiveService
                     $dateColumn,
                     $from,
                     $to,
-                    $month,
+                    $period,
                 );
                 $archiveTable = 'analytics_cold_records';
             }
 
             // Re-read source after copy. A row may have arrived or changed while chunks were copied.
-            // In that case this run must never be marked verified and purge is forbidden.
             $currentSourceRows = (clone $sourceQuery)->count();
             $currentSourceChecksum = $this->checksum($sourceTable, $companyId, $dateColumn, $from, $to);
             $sourceStable = $sourceRows === $currentSourceRows
@@ -195,16 +250,17 @@ class MonthlyArchiveService
         }
     }
 
-    private function supportsMonthlyTables(): bool
+    private function supportsPhysicalTables(): bool
     {
-        if (config('reporting.archive.driver') !== 'monthly_tables') {
+        $driver = (string) config('reporting.archive.driver');
+        if (! in_array($driver, ['yearly_tables', 'monthly_tables'], true)) {
             return false;
         }
 
         return in_array(DB::connection()->getDriverName(), ['mysql', 'pgsql'], true);
     }
 
-    private function createMonthlyTable(string $sourceTable, string $archiveTable): void
+    private function createArchiveTable(string $sourceTable, string $archiveTable): void
     {
         $connection = DB::connection();
         $source = $this->quoteIdentifier($connection, $sourceTable);
@@ -212,13 +268,14 @@ class MonthlyArchiveService
 
         if ($connection->getDriverName() === 'mysql') {
             $connection->statement("CREATE TABLE IF NOT EXISTS {$archive} LIKE {$source}");
+
             return;
         }
 
         $connection->statement("CREATE TABLE IF NOT EXISTS {$archive} (LIKE {$source} INCLUDING ALL)");
     }
 
-    private function copyToMonthlyTable(
+    private function copyToArchiveTable(
         string $sourceTable,
         string $archiveTable,
         int $companyId,
@@ -234,13 +291,13 @@ class MonthlyArchiveService
             ->whereBetween($dateColumn, [$from, $to])
             ->delete();
 
-        // Copy theo dải ID để không giữ một transaction/lock khổng lồ cho cả tháng.
+        // Copy theo dải ID — transaction nhỏ, không giữ lock cả năm.
         DB::table($sourceTable)
             ->select('id')
             ->where('company_id', $companyId)
             ->whereBetween($dateColumn, [$from, $to])
             ->orderBy('id')
-            ->chunkById((int) config('reporting.archive.copy_chunk_size', 2000), function ($ids) use (
+            ->chunkById((int) config('reporting.archive.copy_chunk_size', 5000), function ($ids) use (
                 $sourceTable,
                 $archiveTable,
                 $companyId,
@@ -282,12 +339,12 @@ class MonthlyArchiveService
         string $dateColumn,
         CarbonImmutable $from,
         CarbonImmutable $to,
-        string $month,
+        string $period,
     ): array {
         DB::table('analytics_cold_records')
             ->where('company_id', $companyId)
             ->where('source_table', $sourceTable)
-            ->where('archive_month', $month)
+            ->where('archive_month', $period)
             ->delete();
 
         $count = 0;
@@ -296,7 +353,7 @@ class MonthlyArchiveService
             ->where('company_id', $companyId)
             ->whereBetween($dateColumn, [$from, $to])
             ->orderBy('id')
-            ->chunkById(500, function ($rows) use ($sourceTable, $companyId, $dateColumn, $month, &$count, $hash): void {
+            ->chunkById(500, function ($rows) use ($sourceTable, $companyId, $dateColumn, $period, &$count, $hash): void {
                 $payload = [];
                 foreach ($rows as $row) {
                     $array = (array) $row;
@@ -307,7 +364,7 @@ class MonthlyArchiveService
                     $payload[] = [
                         'company_id' => $companyId,
                         'source_table' => $sourceTable,
-                        'archive_month' => $month,
+                        'archive_month' => $period,
                         'source_id' => (int) $array['id'],
                         'source_created_at' => $array[$dateColumn] ?? null,
                         'row_checksum' => $checksum,
@@ -339,7 +396,7 @@ class MonthlyArchiveService
             ->whereBetween($dateColumn, [$from, $to])
             ->select($columns)
             ->orderBy('id')
-            ->chunkById((int) config('reporting.archive.checksum_chunk_size', 1000), function ($rows) use ($hash): void {
+            ->chunkById((int) config('reporting.archive.checksum_chunk_size', 2000), function ($rows) use ($hash): void {
                 foreach ($rows as $row) {
                     $payload = (array) $row;
                     ksort($payload);
@@ -353,13 +410,14 @@ class MonthlyArchiveService
         return hash_final($hash);
     }
 
-    private function archiveTableName(string $sourceTable, string $month): string
+    private function archiveTableName(string $sourceTable, string $period): string
     {
         if (! preg_match('/^[a-z0-9_]+$/', $sourceTable)) {
             throw new InvalidArgumentException('Unsafe source table name.');
         }
 
-        return $sourceTable.'_'.str_replace('-', '_', $month);
+        // yearly: orders_2025 ; monthly: orders_2025_06
+        return $sourceTable.'_'.str_replace('-', '_', $period);
     }
 
     private function quoteIdentifier(ConnectionInterface $connection, string $identifier): string
