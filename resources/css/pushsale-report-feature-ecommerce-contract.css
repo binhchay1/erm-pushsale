@@ -67,8 +67,7 @@ html body.pushsale-app-body .ceo-report-pushsale .ps-page-shell__advanced-row {
     display: block !important;
 }
 
-html body.pushsale-app-body .ps-report-toolbar-controls,
-html body.pushsale-app-body .ps-ceo-toolbar-grid {
+html body.pushsale-app-body .ps-report-toolbar-controls {
     display: grid !important;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
     gap: 10px 18px !important;
@@ -76,8 +75,7 @@ html body.pushsale-app-body .ps-ceo-toolbar-grid {
     width: 100% !important;
 }
 
-html body.pushsale-app-body .ps-report-toolbar-actions,
-html body.pushsale-app-body .ps-ceo-toolbar-actions {
+html body.pushsale-app-body .ps-report-toolbar-actions {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
@@ -87,11 +85,7 @@ html body.pushsale-app-body .ps-ceo-toolbar-actions {
 
 html body.pushsale-app-body .ps-report-toolbar-controls .ps-control,
 html body.pushsale-app-body .ps-report-toolbar-controls .ps-select,
-html body.pushsale-app-body .ps-report-toolbar-controls .ps-input,
-html body.pushsale-app-body .ps-ceo-toolbar-grid .ps-select,
-html body.pushsale-app-body .ps-ceo-toolbar-grid .ps-input,
-html body.pushsale-app-body .ps-ceo-toolbar-grid select,
-html body.pushsale-app-body .ps-ceo-toolbar-grid input {
+html body.pushsale-app-body .ps-report-toolbar-controls .ps-input {
     height: 34px !important;
     min-width: 0 !important;
     width: 100% !important;
@@ -102,30 +96,9 @@ html body.pushsale-app-body .ps-ceo-toolbar-grid input {
     font-size: 13px !important;
 }
 
-html body.pushsale-app-body .ps-ceo-toolbar-grid .date-range-wrap {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr) !important;
-    align-items: center !important;
-    gap: 6px !important;
-}
-
 html body.pushsale-app-body .ps-date-separator {
     text-align: center !important;
     color: #777 !important;
-}
-
-html body.pushsale-app-body .ps-ceo-checkbox {
-    height: 34px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 7px !important;
-    margin: 0 !important;
-    font-weight: 600 !important;
-}
-
-html body.pushsale-app-body .ps-ceo-export-menu {
-    position: relative !important;
-    display: inline-flex !important;
 }
 
 /* CEO report table spacing. The old fixed 570px table height created a blank sea between tables. */
@@ -294,7 +267,7 @@ html body.pushsale-app-body .ps-ecommerce-logo {
     }
 
     html body.pushsale-app-body .ps-report-toolbar-actions,
-    html body.pushsale-app-body .ps-ceo-toolbar-actions {
+    html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-ceo-toolbar-actions {
         justify-content: flex-start !important;
     }
 

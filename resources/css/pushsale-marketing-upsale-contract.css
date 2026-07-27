@@ -12,29 +12,103 @@
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.12);
 }
 
-.ps-marketing-upsale-report .ps-upsale-primary,
-.ps-marketing-upsale-report .ps-upsale-advanced {
-    display: grid;
-    gap: 14px 30px;
-    align-items: center;
-}
-
+/* Primary + advanced đều portal qua PageHeader → scope theo headerClassName. */
+html body.pushsale-app-body .ps-marketing-upsale-header .ps-upsale-primary,
 .ps-marketing-upsale-report .ps-upsale-primary {
-    grid-template-columns: 170px 250px minmax(320px, 1fr);
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
 }
 
+html body.pushsale-app-body .ps-marketing-upsale-header .ps-upsale-primary > .ps-control,
+.ps-marketing-upsale-report .ps-upsale-primary > .ps-control {
+    flex: 0 1 170px !important;
+    width: 170px !important;
+    max-width: 200px !important;
+    min-width: 140px !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-marketing-upsale-header .ps-upsale-primary > select.ps-control,
+.ps-marketing-upsale-report .ps-upsale-primary > select.ps-control {
+    flex: 0 1 250px !important;
+    width: 250px !important;
+    max-width: 280px !important;
+}
+
+html body.pushsale-app-body .ps-marketing-upsale-header .ps-upsale-primary > .ps-date-range,
+html body.pushsale-app-body .ps-marketing-upsale-header .ps-upsale-primary > .ps-date-filter,
+.ps-marketing-upsale-report .ps-upsale-primary > .ps-date-range,
+.ps-marketing-upsale-report .ps-upsale-primary > .ps-date-filter {
+    flex: 0 1 320px !important;
+    width: 320px !important;
+    max-width: 360px !important;
+    min-width: 240px !important;
+    margin: 0 !important;
+}
+
+/* Filter bổ sung: cùng pattern ps-adv-filter-row (gap rõ, không đè nhau). */
+html body.pushsale-app-body .ps-page-extra-filters.ps-marketing-upsale-header .ps-upsale-advanced-wrap,
+html body.pushsale-app-body .ps-page-extra-filters .ps-upsale-advanced-wrap,
 .ps-marketing-upsale-report .ps-upsale-advanced-wrap {
-    display: grid;
-    gap: 12px;
-    width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-.ps-marketing-upsale-report .ps-upsale-advanced:first-child {
-    grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr) minmax(260px, 1fr) 260px;
+html body.pushsale-app-body .ps-page-extra-filters.ps-marketing-upsale-header .ps-upsale-advanced.ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters .ps-upsale-advanced.ps-adv-filter-row,
+.ps-marketing-upsale-report .ps-upsale-advanced {
+    display: grid !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 1fr)) !important;
+    gap: 10px 12px !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-.ps-marketing-upsale-report .ps-upsale-advanced:last-child {
-    grid-template-columns: minmax(240px, 1fr) minmax(260px, 1fr) minmax(260px, 1fr) minmax(220px, 1fr) 160px;
+html body.pushsale-app-body .ps-page-extra-filters.ps-marketing-upsale-header .ps-upsale-advanced.ps-adv-filter-row > *,
+html body.pushsale-app-body .ps-page-extra-filters .ps-upsale-advanced.ps-adv-filter-row > *,
+.ps-marketing-upsale-report .ps-upsale-advanced > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+/* Checkbox + text cuối hàng. */
+html body.pushsale-app-body .ps-page-extra-filters.ps-marketing-upsale-header .ps-upsale-check-cell,
+html body.pushsale-app-body .ps-page-extra-filters .ps-upsale-check-cell,
+.ps-marketing-upsale-report .ps-upsale-check-cell {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-marketing-upsale-header .ps-report-check,
+html body.pushsale-app-body .ps-page-extra-filters .ps-upsale-advanced .ps-report-check,
+.ps-marketing-upsale-report .ps-upsale-advanced .ps-report-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    padding: 0 4px !important;
 }
 
 .ps-marketing-upsale-report .ps-control,
@@ -281,18 +355,36 @@
 }
 
 @media (max-width: 1200px) {
-    .ps-marketing-upsale-report .ps-upsale-primary,
-    .ps-marketing-upsale-report .ps-upsale-advanced:first-child,
-    .ps-marketing-upsale-report .ps-upsale-advanced:last-child {
-        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    html body.pushsale-app-body .ps-page-extra-filters.ps-marketing-upsale-header .ps-upsale-advanced.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-upsale-advanced.ps-adv-filter-row,
+    .ps-marketing-upsale-report .ps-upsale-advanced {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    html body.pushsale-app-body .ps-marketing-upsale-header .ps-upsale-primary,
+    .ps-marketing-upsale-report .ps-upsale-primary {
+        flex-wrap: wrap !important;
     }
 }
 
 @media (max-width: 767px) {
-    .ps-marketing-upsale-report .ps-upsale-primary,
-    .ps-marketing-upsale-report .ps-upsale-advanced:first-child,
-    .ps-marketing-upsale-report .ps-upsale-advanced:last-child {
-        grid-template-columns: minmax(0, 1fr);
+    html body.pushsale-app-body .ps-page-extra-filters.ps-marketing-upsale-header .ps-upsale-advanced.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-upsale-advanced.ps-adv-filter-row,
+    .ps-marketing-upsale-report .ps-upsale-advanced {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .ps-marketing-upsale-header .ps-upsale-primary,
+    .ps-marketing-upsale-report .ps-upsale-primary {
+        flex-wrap: wrap !important;
+        width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-marketing-upsale-header .ps-upsale-primary > *,
+    .ps-marketing-upsale-report .ps-upsale-primary > * {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
     .ps-marketing-upsale-report .ps-upsale-actions {

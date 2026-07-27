@@ -17,17 +17,16 @@ use Throwable;
 
 class DailyReportAggregator
 {
-    /** @var array<string,string> */
-    private const ORDER_DATE_BASES = [
-        'data_arrival' => 'data_arrived_at',
-        'sale_received_data' => 'assigned_at',
-        'care_update' => 'updated_at',
-        'closing_date' => 'closed_at',
-        'posting_date' => 'created_at',
-        'next_operation_date' => 'next_operation_at',
-        'delivery_update_date' => 'last_delivery_event_at',
-        'desired_delivery_date' => 'desired_delivery_at',
-    ];
+    /** @return array<string,string> date_basis => orders column */
+    private function orderDateBases(): array
+    {
+        $bases = [];
+        foreach (DateType::cases() as $dateType) {
+            $bases[$dateType->value] = $dateType->orderColumn();
+        }
+
+        return $bases;
+    }
 
     public function __construct(
         private readonly ReportDateDirtyTracker $dirtyTracker,
@@ -154,7 +153,8 @@ class DailyReportAggregator
             ->selectRaw("COALESCE(o.delivery_status, '') as delivery_status")
             ->selectRaw("COALESCE(o.reconciliation_status, '') as reconciliation_status")
             ->selectRaw('COUNT(*) as packet_count')
-            ->selectRaw('SUM(CASE WHEN li.counts_as_lead = 1 THEN 1 ELSE 0 END) as lead_count')
+            // lead_count khớp LeadContactMetrics::countableQuery (loại duplicate/needs_review/failed).
+            ->selectRaw("SUM(CASE WHEN li.counts_as_lead = 1 AND li.status NOT IN ('duplicate','needs_review','failed') THEN 1 ELSE 0 END) as lead_count")
             ->selectRaw("SUM(CASE WHEN li.counts_as_lead = 1 AND li.status = 'processed' THEN 1 ELSE 0 END) as processed_count")
             ->selectRaw("SUM(CASE WHEN li.counts_as_lead = 1 AND li.status = 'failed' THEN 1 ELSE 0 END) as failed_count")
             ->selectRaw("SUM(CASE WHEN li.counts_as_lead = 1 AND li.status = 'duplicate' THEN 1 ELSE 0 END) as duplicate_count")
@@ -183,7 +183,7 @@ class DailyReportAggregator
         $net = OrderRevenue::netAmountSql('o');
         $provider = "COALESCE(NULLIF(o.shipping_provider, ''), NULLIF(o.carrier_name, ''), '')";
 
-        foreach (self::ORDER_DATE_BASES as $dateBasis => $column) {
+        foreach ($this->orderDateBases() as $dateBasis => $column) {
             $rows = DB::table('orders as o')
                 ->where('o.company_id', $companyId)
                 ->whereBetween("o.{$column}", [$day, $day->endOfDay()])
@@ -253,7 +253,7 @@ class DailyReportAggregator
         $lineGross = '(COALESCE(oi.unit_price,0) * COALESCE(oi.quantity,0))';
         $lineNet = "CASE WHEN ({$lineGross} - COALESCE(oi.discount_amount,0)) < 0 THEN 0 ELSE ({$lineGross} - COALESCE(oi.discount_amount,0)) END";
 
-        foreach (self::ORDER_DATE_BASES as $dateBasis => $column) {
+        foreach ($this->orderDateBases() as $dateBasis => $column) {
             $rows = DB::table('order_items as oi')
                 ->join('orders as o', 'o.id', '=', 'oi.order_id')
                 ->where('o.company_id', $companyId)
@@ -507,7 +507,7 @@ class DailyReportAggregator
 
     private function sourceChecksum(int $companyId, CarbonImmutable $day): string
     {
-        $orderDateColumns = collect(self::ORDER_DATE_BASES)->values()
+        $orderDateColumns = collect($this->orderDateBases())->values()
             ->map(fn (string $column) => 'o.'.$column)
             ->all();
 

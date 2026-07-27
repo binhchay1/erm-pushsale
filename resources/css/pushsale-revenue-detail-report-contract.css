@@ -74,11 +74,26 @@ html body.pushsale-app-body .ps-revenue-detail-page .ps-page-shell__advanced-row
     border-top: 0 !important;
 }
 
-html body.pushsale-app-body .ps-revenue-detail-advanced {
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-revenue-detail-advanced-wrap,
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-detail-advanced-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-revenue-detail-advanced.ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-detail-advanced.ps-adv-filter-row {
     display: grid !important;
-    grid-template-columns: repeat(6, minmax(150px, 1fr)) !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 1fr)) !important;
     align-items: center !important;
-    gap: 10px 18px !important;
+    gap: 10px 12px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-revenue-detail-advanced.ps-adv-filter-row > *,
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-detail-advanced.ps-adv-filter-row > * {
+    min-width: 0 !important;
     width: 100% !important;
 }
 
@@ -283,8 +298,9 @@ html body.pushsale-app-body .pushsale-main-sidebar .pushsale-sidebar {
         grid-template-columns: repeat(2, minmax(190px, 1fr)) !important;
     }
 
-    html body.pushsale-app-body .ps-revenue-detail-advanced {
-        grid-template-columns: repeat(4, minmax(150px, 1fr)) !important;
+    html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-revenue-detail-advanced.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-detail-advanced.ps-adv-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 
     html body.pushsale-app-body .ps-revenue-detail-formulas {

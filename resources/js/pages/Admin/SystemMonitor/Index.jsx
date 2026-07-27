@@ -53,7 +53,7 @@ function PercentBar({ value, status = 'ok' }) {
     const safe = Math.max(0, Math.min(100, Number(value ?? 0)));
     return (
         <div className="space-y-1">
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
+            <div className="ps-sm-progress h-2 overflow-hidden rounded-full bg-muted">
                 <div
                     className={cn(
                         'h-full rounded-full transition-all',
@@ -69,7 +69,7 @@ function PercentBar({ value, status = 'ok' }) {
 
 function HealthCard({ title, icon: Icon, children, status = 'ok', description }) {
     return (
-        <Card className={cn(status === 'critical' && 'border-destructive/40', status === 'warning' && 'border-amber-400/50')}>
+        <Card className={cn('ps-sm-health-card', status === 'critical' && 'border-destructive/40', status === 'warning' && 'border-amber-400/50')} data-status={status}>
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center justify-between gap-3 text-base">
                     <span className="flex items-center gap-2">
@@ -98,15 +98,15 @@ function OverviewTab({ system }) {
     if (!system) return null;
 
     return (
-        <div className="ps-feature-page ps-system-monitor-page">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <StatCard icon={Cpu} title="CPU" value={system.cpu?.usage_percent == null ? `${system.cpu?.cores ?? 0} core` : `${system.cpu.usage_percent}%`} />
-                <StatCard icon={MemoryStick} title="RAM" value={`${system.memory?.percent ?? 0}%`} />
-                <StatCard icon={HardDrive} title="Disk storage" value={`${system.disks?.[0]?.percent ?? 0}%`} />
-                <StatCard icon={Activity} title="Queue pending" value={formatNumber(system.queues?.pending_total ?? 0)} />
+        <div className="ps-sm-stack space-y-5">
+            <div className="ps-sm-stat-grid grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <StatCard className="ps-sm-stat-card" tone="info" icon={Cpu} title="CPU" value={system.cpu?.usage_percent == null ? `${system.cpu?.cores ?? 0} core` : `${system.cpu.usage_percent}%`} />
+                <StatCard className="ps-sm-stat-card" tone="success" icon={MemoryStick} title="RAM" value={`${system.memory?.percent ?? 0}%`} />
+                <StatCard className="ps-sm-stat-card" tone="warning" icon={HardDrive} title="Disk storage" value={`${system.disks?.[0]?.percent ?? 0}%`} />
+                <StatCard className="ps-sm-stat-card" tone="info" icon={Activity} title="Queue pending" value={formatNumber(system.queues?.pending_total ?? 0)} />
             </div>
 
-            <div className="grid gap-4 xl:grid-cols-3">
+            <div className="ps-sm-panel-grid grid gap-4 xl:grid-cols-3">
                 <HealthCard title="CPU / Load" icon={Cpu} status={system.cpu?.status}>
                     <div className="space-y-3">
                         <InfoRow label="CPU" value={system.cpu?.model} />
@@ -136,14 +136,14 @@ function OverviewTab({ system }) {
                 </HealthCard>
             </div>
 
-            <div className="grid gap-4 xl:grid-cols-2">
-                <Card>
+            <div className="ps-sm-panel-grid grid gap-4 xl:grid-cols-2">
+                <Card className="ps-sm-panel">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-base"><HardDrive className="size-4" /> Disk</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-base"><HardDrive className="size-4 text-primary" /> Disk</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {system.disks?.map((disk) => (
-                            <div key={disk.path} className="rounded-lg border p-3">
+                            <div key={disk.path} className="ps-sm-disk-row rounded-lg border p-3">
                                 <div className="mb-2 flex items-center justify-between gap-4 text-sm">
                                     <div>
                                         <div className="font-semibold">{disk.label}</div>
@@ -157,14 +157,14 @@ function OverviewTab({ system }) {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="ps-sm-panel">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-base"><ShieldCheck className="size-4" /> Health checks</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-base"><ShieldCheck className="size-4 text-primary" /> Health checks</CardTitle>
                         <CardDescription>Các kiểm tra runtime quan trọng, không cần SSH vào server.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-2">
                         {system.checks?.map((check) => (
-                            <div key={check.key} className="flex items-start justify-between gap-4 rounded-lg border p-3 text-sm">
+                            <div key={check.key} className="ps-sm-check-row flex items-start justify-between gap-4 rounded-lg border p-3 text-sm">
                                 <div>
                                     <div className="font-semibold">{check.label}</div>
                                     <div className="mt-1 text-xs text-muted-foreground">{check.message}</div>
@@ -176,9 +176,9 @@ function OverviewTab({ system }) {
                 </Card>
             </div>
 
-            <Card>
+            <Card className="ps-sm-panel">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base"><Terminal className="size-4" /> Services / Processes</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-base"><Terminal className="size-4 text-primary" /> Services / Processes</CardTitle>
                     <CardDescription>Nhận diện theo process đang chạy: nginx, php-fpm, mysql, redis, supervisor, queue worker, reverb, node.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -343,7 +343,7 @@ function ReportsAuditTab({ reportAudit }) {
     if (!reportAudit) return null;
 
     return (
-        <Card>
+        <Card className="ps-sm-panel">
             <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <CardTitle className="flex items-center gap-2">
@@ -351,7 +351,9 @@ function ReportsAuditTab({ reportAudit }) {
                         Đối soát báo cáo theo bản ghi gốc
                     </CardTitle>
                     <CardDescription>
-                        Kỳ kiểm tra {reportAudit.date_range?.from} → {reportAudit.date_range?.to}, generated {reportAudit.generated_at}.
+                        Kỳ kiểm tra {reportAudit.date_range?.from} → {reportAudit.date_range?.to}
+                        {reportAudit.date_range?.date_type ? ` · ${reportAudit.date_range.date_type}` : ''}, generated {reportAudit.generated_at}.
+                        So khớp KPI / chart với Order + LeadIngestion + OrderRevenue (cùng cột ngày theo date_type).
                     </CardDescription>
                 </div>
                 <StatusBadge tone={healthTone(reportAudit.status)}>{reportAudit.status?.toUpperCase()}</StatusBadge>
@@ -426,11 +428,11 @@ export default function SystemMonitorIndex({ tab, events, logs, stats, filters, 
                     )}
                 />
 
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <StatCard icon={Inbox} title={t('system_monitor.stats_received_today')} value={stats.received_today} />
-                    <StatCard icon={Activity} title={t('system_monitor.stats_processed_today')} value={stats.processed_today ?? 0} />
-                    <StatCard icon={AlertTriangle} title={t('system_monitor.stats_failed_today')} value={stats.failed_today} />
-                    <StatCard icon={Clock} title={t('system_monitor.stats_pending')} value={stats.pending} />
+                <div className="ps-sm-stat-grid grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <StatCard className="ps-sm-stat-card" tone="info" icon={Inbox} title={t('system_monitor.stats_received_today')} value={stats.received_today} />
+                    <StatCard className="ps-sm-stat-card" tone="success" icon={Activity} title={t('system_monitor.stats_processed_today')} value={stats.processed_today ?? 0} />
+                    <StatCard className="ps-sm-stat-card" tone="danger" icon={AlertTriangle} title={t('system_monitor.stats_failed_today')} value={stats.failed_today} />
+                    <StatCard className="ps-sm-stat-card" tone="warning" icon={Clock} title={t('system_monitor.stats_pending')} value={stats.pending} />
                 </div>
 
                 {stats.top_errors?.length > 0 && (
@@ -458,7 +460,7 @@ export default function SystemMonitorIndex({ tab, events, logs, stats, filters, 
                             onClick={() => setTab(id)}
                             className={cn(
                                 'rounded-md px-4 py-2 text-sm font-medium transition-colors',
-                                tab === id ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                                tab === id ? 'is-active bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
                             )}
                         >
                             {label}

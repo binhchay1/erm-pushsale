@@ -72,82 +72,70 @@ html body.pushsale-app-body .ps-report-page .ps-table-scroll::-webkit-scrollbar 
     height: 10px !important;
 }
 
-/* Revenue overview reports: product/warehouse/sale/marketing revenue share the same chip filter. */
-html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-page-shell__advanced-row .ps-revenue-overview-advanced,
-html body.pushsale-app-body .ps-report-page .ps-revenue-overview-toolbar .ps-revenue-overview-advanced {
+/*
+ * Revenue overview (summary + v2, sale/marketing/warehouse): advanced filters are a
+ * 2-row panel in the header portal. Keep chips wrapping; never crush into one row.
+ */
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced-wrap,
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced-wrap {
     display: flex !important;
-    flex-flow: row wrap !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced.ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced.ps-adv-filter-row {
+    display: grid !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 1fr)) !important;
+    gap: 10px 12px !important;
     align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 10px 14px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced-row2,
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced-row2 {
+    grid-template-columns: minmax(280px, 1.6fr) repeat(3, minmax(0, 1fr)) minmax(180px, 0.9fr) !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-group-compact {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
     width: 100% !important;
     min-width: 0 !important;
 }
 
-html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-overview-advanced > * {
-    flex: 1 1 205px !important;
-    min-width: 205px !important;
-    max-width: none !important;
-}
-
-html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-group-compact {
-    flex: 3 1 760px !important;
-    display: grid !important;
-    grid-template-columns: minmax(520px, 1fr) minmax(230px, 260px) !important;
-    align-items: center !important;
-    gap: 8px !important;
-    width: auto !important;
-    min-width: min(760px, 100%) !important;
-    max-width: 980px !important;
-}
-
-html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-group-tags {
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-group-tags {
     display: flex !important;
+    flex-wrap: wrap !important;
     align-items: center !important;
     gap: 6px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    height: var(--ps-filter-control-height, 30px) !important;
-    min-height: var(--ps-filter-control-height, 30px) !important;
-    padding: 3px 6px !important;
-    overflow: hidden !important;
-    border: 1px solid #d2d6de !important;
-    background: #fff !important;
+    height: auto !important;
+    min-height: 32px !important;
+    overflow: visible !important;
 }
 
-html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-group-tag {
-    flex: 1 1 180px !important;
-    min-width: 165px !important;
-    max-width: 260px !important;
-    height: 22px !important;
-    min-height: 22px !important;
-    padding: 0 8px !important;
-    justify-content: flex-start !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-}
-
-html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-group-tag span {
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-group-tag {
     flex: 0 0 auto !important;
+    max-width: none !important;
+    overflow: visible !important;
 }
 
-html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-group-compact select.ps-control {
-    width: 100% !important;
-    min-width: 230px !important;
-}
-
-@media (max-width: 1500px) {
-    html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-group-compact {
-        flex-basis: 100% !important;
-        grid-template-columns: minmax(0, 1fr) minmax(230px, 260px) !important;
-        max-width: none !important;
+@media (max-width: 1200px) {
+    html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced-row2,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced-row2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 }
 
-@media (max-width: 900px) {
-    html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-group-compact {
-        grid-template-columns: 1fr !important;
-        min-width: 0 !important;
+@media (max-width: 720px) {
+    html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced-row2,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced-row2 {
+        grid-template-columns: minmax(0, 1fr) !important;
     }
 }

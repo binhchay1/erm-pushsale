@@ -1,29 +1,81 @@
-/* 4.6.2 Báo cáo công việc sale — PageHeader shell + fluid table (no forced H-scroll). */
+/* 4.6.2 Báo cáo công việc sale — header filters không đè nút; toggle bổ sung cuối hàng. */
 
 html body.pushsale-app-body .ps-sale-work-page.ps-page-shell,
 html body.pushsale-app-body .ps-sale-work-page .ps-page-shell__body {
     background: #fff !important;
 }
 
+/* Hàng header: title | filter chính | actions + toggle (cuối). */
+html body.pushsale-app-body .ps-page-header.ps-sale-work-header > .m-header,
+html body.pushsale-app-body .ps-page-header.ps-sale-work-header > .m-header.ps-page-header__row {
+    grid-template-columns: max-content minmax(0, 1fr) max-content !important;
+    align-items: center !important;
+    column-gap: 12px !important;
+}
+
 html body.pushsale-app-body .ps-sale-work-header .ps-page-header__filters,
 html body.pushsale-app-body .ps-page-header.ps-sale-work-header .ps-page-header__filters {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    justify-self: start !important;
     min-width: 0 !important;
+    max-width: 100% !important;
+    width: auto !important;
+    overflow: hidden !important;
+    flex-wrap: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-sale-work-header .ps-page-header__actions,
+html body.pushsale-app-body .ps-page-header.ps-sale-work-header .ps-page-header__actions {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    justify-self: end !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    width: auto !important;
     max-width: none !important;
+    white-space: nowrap !important;
+    position: relative !important;
+    z-index: 6 !important;
+}
+
+/* Nút toggle filter bổ sung luôn cuối hàng actions. */
+html body.pushsale-app-body .ps-sale-work-header .ps-page-header__actions .ps-page-header__toggle {
+    order: 99 !important;
+    margin-left: 2px !important;
+    flex: 0 0 auto !important;
 }
 
 html body.pushsale-app-body .ps-sale-work-primary {
-    display: grid !important;
-    grid-template-columns: minmax(180px, 240px) minmax(260px, 1fr) !important;
-    gap: 10px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     align-items: center !important;
-    width: 100% !important;
+    gap: 10px !important;
+    width: auto !important;
+    max-width: 100% !important;
     min-width: 0 !important;
 }
 
-html body.pushsale-app-body .ps-sale-work-primary > *,
-html body.pushsale-app-body .ps-sale-work-advanced-row > * {
-    width: 100% !important;
-    min-width: 0 !important;
+html body.pushsale-app-body .ps-sale-work-primary > .ps-control {
+    flex: 0 1 220px !important;
+    width: 220px !important;
+    min-width: 160px !important;
+    max-width: 240px !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-work-primary > .ps-sale-work-date,
+html body.pushsale-app-body .ps-sale-work-primary > .ps-date-range,
+html body.pushsale-app-body .ps-sale-work-primary > .ps-date-filter {
+    flex: 0 1 320px !important;
+    width: 320px !important;
+    min-width: 240px !important;
+    max-width: 360px !important;
     margin: 0 !important;
 }
 
@@ -31,31 +83,57 @@ html body.pushsale-app-body .ps-sale-work-actions {
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
+    flex: 0 0 auto !important;
     flex-wrap: nowrap !important;
     white-space: nowrap !important;
+    margin: 0 !important;
 }
 
 html body.pushsale-app-body .ps-sale-work-actions .ps-btn {
     flex: 0 0 auto !important;
 }
 
-html body.pushsale-app-body .ps-page-extra-filters.ps-sale-work-header,
-html body.pushsale-app-body .ps-sale-work-advanced {
+/* Filter bổ sung: khối riêng dưới header, không đè hàng nút. */
+html body.pushsale-app-body .ps-page-extra-filters.ps-sale-work-header {
+    display: block !important;
+    clear: both !important;
     width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 10px 14px 12px !important;
+    position: relative !important;
+    z-index: 1 !important;
+    background: #fff !important;
 }
 
+html body.pushsale-app-body .ps-page-extra-filters.ps-sale-work-header .ps-sale-work-advanced,
 html body.pushsale-app-body .ps-sale-work-advanced {
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
 }
 
 html body.pushsale-app-body .ps-sale-work-advanced-row {
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(160px, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 10px !important;
     align-items: center !important;
     width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-work-advanced-row > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
 }
 
 html body.pushsale-app-body .ps-sale-work-body {
@@ -141,15 +219,33 @@ html body.pushsale-app-body .ps-sale-work-footer {
 
 @media (max-width: 1199px) {
     html body.pushsale-app-body .ps-sale-work-primary {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) !important;
+        flex-wrap: wrap !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-work-primary > .ps-control,
+    html body.pushsale-app-body .ps-sale-work-primary > .ps-sale-work-date,
+    html body.pushsale-app-body .ps-sale-work-primary > .ps-date-range,
+    html body.pushsale-app-body .ps-sale-work-primary > .ps-date-filter {
+        flex: 1 1 200px !important;
+        width: auto !important;
+        max-width: 100% !important;
     }
 
     html body.pushsale-app-body .ps-sale-work-advanced-row {
-        grid-template-columns: repeat(2, minmax(140px, 1fr)) !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 }
 
 @media (max-width: 991px) {
+    html body.pushsale-app-body .ps-page-header.ps-sale-work-header > .m-header,
+    html body.pushsale-app-body .ps-page-header.ps-sale-work-header > .m-header.ps-page-header__row {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-work-header .ps-page-header__actions {
+        justify-self: start !important;
+    }
+
     html body.pushsale-app-body .ps-sale-work-table-wrap {
         overflow-x: auto !important;
     }
@@ -157,5 +253,9 @@ html body.pushsale-app-body .ps-sale-work-footer {
     html body.pushsale-app-body .ps-sale-work-table {
         min-width: 980px !important;
         table-layout: auto !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-work-advanced-row {
+        grid-template-columns: minmax(0, 1fr) !important;
     }
 }

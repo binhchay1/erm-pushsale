@@ -144,57 +144,61 @@ export default function SaleRevenueReport({ filters, filterOptions = {}, report 
     );
 
     const advancedFilters = (
-        <div className="ps-sales-revenue-advanced">
-            <PushsaleSelect
-                value={draft.team_leader_id}
-                options={filterOptions.teamLeaders ?? []}
-                placeholder="--Trưởng nhóm--"
-                onChange={(value) => set('team_leader_id', value)}
-            />
-            <PushsaleSelect
-                value={draft.team_id}
-                options={filterOptions.salesTeams ?? filterOptions.teams ?? []}
-                placeholder="--Chọn nhóm--"
-                onChange={(value) => set('team_id', value)}
-            />
-            <PushsaleSelect
-                value={draft.parent_product_id}
-                options={filterOptions.parentProducts ?? []}
-                placeholder="-- Sản phẩm cha --"
-                onChange={(value) => set('parent_product_id', value)}
-            />
-            <PushsaleSelect
-                value={draft.product_id}
-                options={filterOptions.products ?? []}
-                placeholder="-- Sản phẩm --"
-                onChange={(value) => set('product_id', value)}
-            />
-            <PushsaleSelect
-                value={draft.delivery_status}
-                options={filterOptions.deliveryStatuses ?? []}
-                placeholder="-- Chọn trạng thái giao hàng --"
-                onChange={(value) => set('delivery_status', value)}
-            />
-            <label className="ps-sales-revenue-check">
-                <input
-                    type="checkbox"
-                    checked={Boolean(draft.no_closing_date_limit)}
-                    onChange={(event) => set('no_closing_date_limit', event.target.checked)}
+        <div className="ps-sales-revenue-advanced-wrap ps-adv-filter-panel">
+            <div className="ps-sales-revenue-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 4 }}>
+                <PushsaleSelect
+                    value={draft.team_leader_id}
+                    options={filterOptions.teamLeaders ?? []}
+                    placeholder="--Trưởng nhóm--"
+                    onChange={(value) => set('team_leader_id', value)}
                 />
-                <span>Không giới hạn ngày chốt</span>
-            </label>
-            <PushsaleSelect
-                value={draft.sale_id}
-                options={filterOptions.salesUsers ?? []}
-                placeholder="--Chọn sale--"
-                onChange={(value) => set('sale_id', value)}
-            />
-            <PushsaleSelect
-                value={draft.per_page}
-                options={[20, 50, 100].map((value) => ({ value, label: String(value) }))}
-                placeholder="20"
-                onChange={(value) => set('per_page', value)}
-            />
+                <PushsaleSelect
+                    value={draft.team_id}
+                    options={filterOptions.salesTeams ?? filterOptions.teams ?? []}
+                    placeholder="--Chọn nhóm--"
+                    onChange={(value) => set('team_id', value)}
+                />
+                <PushsaleSelect
+                    value={draft.parent_product_id}
+                    options={filterOptions.parentProducts ?? []}
+                    placeholder="-- Sản phẩm cha --"
+                    onChange={(value) => set('parent_product_id', value)}
+                />
+                <PushsaleSelect
+                    value={draft.product_id}
+                    options={filterOptions.products ?? []}
+                    placeholder="-- Sản phẩm --"
+                    onChange={(value) => set('product_id', value)}
+                />
+            </div>
+            <div className="ps-sales-revenue-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 4 }}>
+                <PushsaleSelect
+                    value={draft.delivery_status}
+                    options={filterOptions.deliveryStatuses ?? []}
+                    placeholder="-- Chọn trạng thái giao hàng --"
+                    onChange={(value) => set('delivery_status', value)}
+                />
+                <PushsaleSelect
+                    value={draft.sale_id}
+                    options={filterOptions.salesUsers ?? []}
+                    placeholder="--Chọn sale--"
+                    onChange={(value) => set('sale_id', value)}
+                />
+                <PushsaleSelect
+                    value={draft.per_page}
+                    options={[20, 50, 100].map((value) => ({ value, label: String(value) }))}
+                    placeholder="20"
+                    onChange={(value) => set('per_page', value)}
+                />
+                <label className="ps-sales-revenue-check">
+                    <input
+                        type="checkbox"
+                        checked={Boolean(draft.no_closing_date_limit)}
+                        onChange={(event) => set('no_closing_date_limit', event.target.checked)}
+                    />
+                    <span>Không giới hạn ngày chốt</span>
+                </label>
+            </div>
         </div>
     );
 

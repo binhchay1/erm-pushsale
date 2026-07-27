@@ -21,7 +21,8 @@ class ReportConsistencyAuditService
 
     /**
      * Kiểm tra báo cáo theo nguyên tắc: mọi dashboard/report phải xuất phát từ
-     * cùng source-of-truth Order/LeadIngestion, không lấy số seed hoặc cache lệch.
+     * cùng source-of-truth Order/LeadIngestion + OrderRevenue (có kỳ ngày),
+     * không lấy số seed hoặc cache lệch.
      *
      * @return array<string, mixed>
      */
@@ -41,7 +42,7 @@ class ReportConsistencyAuditService
             Request::create('/report-audit', 'GET', [
                 'date_from' => now()->subDays(30)->toDateString(),
                 'date_to' => now()->toDateString(),
-                'date_type' => 'data_arrived',
+                'date_type' => 'data_arrival',
             ]),
             $actor,
         );
@@ -106,7 +107,8 @@ class ReportConsistencyAuditService
             'duplicate_leads' => (clone $rawLeads)->where('status', LeadIngestionStatus::Duplicate->value)->count(),
             'orders' => (clone $orders)->count(),
             'closed_orders' => (clone $orders)->whereNotNull('closed_at')->count(),
-            'revenue' => OrderRevenue::aggregate(clone $orders)['net'],
+            // Khớp rawKpiSummary / OrderRevenue (có kỳ ngày cho marketing cost).
+            'revenue' => OrderRevenue::aggregate(clone $orders, $filter->dateFrom, $filter->dateTo)['net'],
         ];
 
         $rows = [];
@@ -116,7 +118,7 @@ class ReportConsistencyAuditService
                 report: 'Dashboard KPI / '.$key,
                 expected: (int) $value,
                 actual: (int) ($kpi[$key] ?? 0),
-                detail: 'So khớp KPI với source Order/LeadIngestion theo scope role.'
+                detail: 'So khớp KPI với source Order/LeadIngestion + OrderRevenue theo scope role.'
             );
         }
 
@@ -126,7 +128,7 @@ class ReportConsistencyAuditService
             report: 'Chuỗi đơn theo ngày',
             expected: $truth['orders'],
             actual: collect($ordersSeries)->sum('value'),
-            detail: 'Tổng các ngày trên chart phải bằng tổng bản ghi đơn trong kỳ.'
+            detail: 'Tổng các ngày trên chart phải bằng tổng bản ghi đơn trong kỳ (cùng cột ngày date_type).'
         );
 
         $leadSeries = $this->metrics->leadSeries($user, $filter);
@@ -138,15 +140,26 @@ class ReportConsistencyAuditService
             detail: 'Tổng các ngày trên chart phải bằng tổng lead countable trong kỳ.'
         );
 
-        $funnel = collect($this->metrics->funnel($user, $filter))->pluck('value', 'label');
+        $funnel = collect($this->metrics->funnel($user, $filter));
+        $closedFunnel = (int) ($funnel->get(3)['value'] ?? 0);
+        $deliveredFunnel = (int) ($funnel->get(4)['value'] ?? 0);
+
         $rows[] = $this->row(
             role: $user->role->value,
             report: 'Funnel - đơn đã chốt',
             expected: $truth['closed_orders'],
-            actual: (int) $funnel->last(),
-            detail: 'Điểm cuối funnel delivered/paid thường <= đơn đã chốt; nếu lớn hơn là lỗi dữ liệu.',
+            actual: $closedFunnel,
+            detail: 'Bước chốt trên funnel phải khớp closed_orders.'
+        );
+
+        $rows[] = $this->row(
+            role: $user->role->value,
+            report: 'Funnel - delivered/paid',
+            expected: $truth['closed_orders'],
+            actual: $deliveredFunnel,
+            detail: 'Đơn delivered/paid không được vượt đơn đã chốt.',
             strict: false,
-            ok: (int) $funnel->last() <= $truth['closed_orders'],
+            ok: $deliveredFunnel <= $truth['closed_orders'],
         );
 
         $this->appendRoleSpecificAudits($rows, $user, $filter, $orders);
@@ -169,9 +182,14 @@ class ReportConsistencyAuditService
             $rows[] = $this->row($user->role->value, 'Kế toán - đã thanh toán', (clone $orders)->where('delivery_status', 'paid')->count(), $buckets['paid'] ?? 0, 'Bucket kế toán phải khớp trạng thái paid.');
         }
 
-        $eligibleRevenue = OrderRevenue::aggregate((clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible()))['net'];
-        if ($eligibleRevenue > OrderRevenue::aggregate(clone $orders)['net']) {
-            $rows[] = $this->row($user->role->value, 'Doanh thu đủ điều kiện', OrderRevenue::aggregate(clone $orders)['net'], $eligibleRevenue, 'Doanh thu delivered/paid không được vượt tổng net revenue.', strict: false, ok: false);
+        $eligibleRevenue = OrderRevenue::aggregate(
+            (clone $orders)->whereIn('delivery_status', DeliveryStatus::revenueEligible()),
+            $filter->dateFrom,
+            $filter->dateTo,
+        )['net'];
+        $totalRevenue = OrderRevenue::aggregate(clone $orders, $filter->dateFrom, $filter->dateTo)['net'];
+        if ($eligibleRevenue > $totalRevenue) {
+            $rows[] = $this->row($user->role->value, 'Doanh thu đủ điều kiện', $totalRevenue, $eligibleRevenue, 'Doanh thu delivered/paid không được vượt tổng net revenue.', strict: false, ok: false);
         }
     }
 

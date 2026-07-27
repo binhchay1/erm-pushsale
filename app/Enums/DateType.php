@@ -26,4 +26,22 @@ enum DateType: string
             self::DesiredDelivery => 'Ngày muốn nhận hàng',
         };
     }
+
+    /**
+     * Cột ngày trên orders — nguồn sự thật dùng chung filter / series / fact.
+     * DeliveryUpdate = last_delivery_event_at (không dùng updated_at chung).
+     */
+    public function orderColumn(): string
+    {
+        return match ($this) {
+            self::SaleReceived => 'assigned_at',
+            self::CareUpdate => 'updated_at',
+            self::Closing => 'closed_at',
+            self::Posting => 'created_at',
+            self::NextOperation => 'next_operation_at',
+            self::DeliveryUpdate => 'last_delivery_event_at',
+            self::DesiredDelivery => 'desired_delivery_at',
+            default => 'data_arrived_at',
+        };
+    }
 }

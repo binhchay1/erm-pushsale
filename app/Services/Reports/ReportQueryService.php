@@ -3,7 +3,6 @@
 namespace App\Services\Reports;
 
 use App\Data\ReportFilterData;
-use App\Enums\DateType;
 use App\Models\LeadIngestion;
 use App\Models\Order;
 use App\Support\LeadContactMetrics;
@@ -89,15 +88,6 @@ class ReportQueryService
 
     public function dateColumn(ReportFilterData $filter): string
     {
-        return match ($filter->dateType) {
-            DateType::SaleReceived => 'assigned_at',
-            DateType::CareUpdate => 'updated_at',
-            DateType::Closing => 'closed_at',
-            DateType::Posting => 'created_at',
-            DateType::NextOperation => 'next_operation_at',
-            DateType::DeliveryUpdate => 'last_delivery_event_at',
-            DateType::DesiredDelivery => 'desired_delivery_at',
-            default => 'data_arrived_at',
-        };
+        return $filter->dateType->orderColumn();
     }
 }

@@ -111,13 +111,16 @@ function ReportField({ field, draft, set, filterOptions, t }) {
     }
 }
 
-function PushsaleReportToolbar({ title, routeUrl, filters, filterOptions, filterFields = [], className = '', primary = [], advanced = [], actionsExtra = null, exportLabel = null }) {
+function PushsaleReportToolbar({ title, routeUrl, filters, filterOptions, filterFields = [], className = '', headerClassName = '', primary = [], advanced = [], actionsExtra = null, exportLabel = null }) {
     const t = useT();
     const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
     const fields = new Set(filterFields);
     const render = (field) => (fields.has(field) ? <ReportField key={field} field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
     const visiblePrimary = primary.filter((field) => fields.has(field));
     const visibleAdvanced = advanced.filter((field) => fields.has(field));
+    const advancedMid = Math.ceil(visibleAdvanced.length / 2);
+    const advancedRow1 = visibleAdvanced.slice(0, advancedMid);
+    const advancedRow2 = visibleAdvanced.slice(advancedMid);
 
     const primaryFilters = visiblePrimary.length > 0 ? (
         <div className="ps-report-v2-primary ps-report-toolbar-controls">
@@ -126,8 +129,15 @@ function PushsaleReportToolbar({ title, routeUrl, filters, filterOptions, filter
     ) : null;
 
     const advancedFilters = visibleAdvanced.length > 0 ? (
-        <div className="ps-report-v2-advanced ps-report-toolbar-controls">
-            {visibleAdvanced.map(render)}
+        <div className="ps-report-v2-advanced-wrap ps-adv-filter-panel">
+            <div className="ps-report-v2-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': Math.max(advancedRow1.length, 1) }}>
+                {advancedRow1.map(render)}
+            </div>
+            {advancedRow2.length > 0 ? (
+                <div className="ps-report-v2-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': Math.max(advancedRow2.length, 1) }}>
+                    {advancedRow2.map(render)}
+                </div>
+            ) : null}
         </div>
     ) : null;
 
@@ -135,6 +145,7 @@ function PushsaleReportToolbar({ title, routeUrl, filters, filterOptions, filter
         <PushsalePageShell
             title={title}
             className={`ps-report-toolbar-shell ps-extra-toolbar ps-report-v2-toolbar ${className}`.trim()}
+            headerClassName={headerClassName || 'ps-report-v2-header'}
             primaryFilters={primaryFilters}
             advancedFilters={advancedFilters}
             actions={(
@@ -535,15 +546,19 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
     );
 
     const advancedFilters = (
-        <div className="ps-revenue-detail-advanced ps-report-toolbar-controls">
-            {isMarketingReport ? renderIf('marketing_team_leader_id', <ReportField field="marketing_team_leader_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />) : renderIf('team_leader_id', <ReportField field="team_leader_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
-            {isMarketingReport ? renderIf('marketing_team_id', <ReportField field="marketing_team_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />) : renderIf('team_id', <ReportField field="team_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
-            {renderIf('parent_product_id', <ReportField field="parent_product_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
-            {renderIf('product_id', <ReportField field="product_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
-            {renderIf('delivery_status', <ReportField field="delivery_status" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
-            {isMarketingReport ? renderIf('marketer_id', <ReportField field="marketer_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />) : renderIf('sale_id', <ReportField field="sale_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
-            {renderIf('no_closing_date_limit', <ReportField field="no_closing_date_limit" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
-            {renderIf('per_page', <ReportField field="per_page" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+        <div className="ps-revenue-detail-advanced-wrap ps-adv-filter-panel">
+            <div className="ps-revenue-detail-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 4 }}>
+                {isMarketingReport ? renderIf('marketing_team_leader_id', <ReportField field="marketing_team_leader_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />) : renderIf('team_leader_id', <ReportField field="team_leader_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+                {isMarketingReport ? renderIf('marketing_team_id', <ReportField field="marketing_team_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />) : renderIf('team_id', <ReportField field="team_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+                {renderIf('parent_product_id', <ReportField field="parent_product_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+                {renderIf('product_id', <ReportField field="product_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            </div>
+            <div className="ps-revenue-detail-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 4 }}>
+                {renderIf('delivery_status', <ReportField field="delivery_status" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+                {isMarketingReport ? renderIf('marketer_id', <ReportField field="marketer_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />) : renderIf('sale_id', <ReportField field="sale_id" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+                {renderIf('per_page', <ReportField field="per_page" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+                {renderIf('no_closing_date_limit', <ReportField field="no_closing_date_limit" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
+            </div>
         </div>
     );
 
@@ -1012,7 +1027,7 @@ function RevenueGroupCompactPicker({ groups, selectedKeys, onChange }) {
     return (
         <div className="ps-revenue-group-compact">
             <div className="ps-revenue-group-tags">
-                {selectedKeys.slice(0, 3).map((key) => {
+                {selectedKeys.map((key) => {
                     const group = groups.find((item) => item.key === key);
                     return group ? (
                         <button type="button" key={key} className="ps-revenue-group-tag" onClick={() => removeGroup(key)} title={group.description}>
@@ -1020,11 +1035,14 @@ function RevenueGroupCompactPicker({ groups, selectedKeys, onChange }) {
                         </button>
                     ) : null;
                 })}
-                {selectedKeys.length > 3 ? <span className="ps-revenue-group-more">+{selectedKeys.length - 3}</span> : null}
             </div>
             <select className="ps-control" value="" onChange={(event) => addGroup(event.target.value)}>
                 <option value="">-- Chọn nhóm doanh số --</option>
-                {groups.map((group) => <option key={group.key} value={group.key}>{group.number}. {group.label}</option>)}
+                {groups.map((group) => (
+                    <option key={group.key} value={group.key} disabled={selected.has(group.key)}>
+                        {group.number}. {group.label}
+                    </option>
+                ))}
             </select>
         </div>
     );
@@ -1034,10 +1052,12 @@ function RevenueOverviewToolbar({ title, routeUrl, filters, filterOptions, filte
     const t = useT();
     const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
     const fields = new Set(filterFields);
-    const render = (field) => (fields.has(field) ? <ReportField field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
+    const render = (field) => (fields.has(field) ? <ReportField key={field} field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
+    const leaderField = fields.has('marketing_team_leader_id') ? 'marketing_team_leader_id' : 'team_leader_id';
+    const teamField = fields.has('marketing_team_id') ? 'marketing_team_id' : 'team_id';
 
     const primaryFilters = (
-        <div className="ps-revenue-overview-primary ps-report-toolbar-controls">
+        <div className="ps-revenue-overview-primary">
             <RevenueDimensionField />
             {render('parent_product_id')}
             {render('product_id')}
@@ -1047,16 +1067,24 @@ function RevenueOverviewToolbar({ title, routeUrl, filters, filterOptions, filte
     );
 
     const advancedFilters = (
-        <div className="ps-revenue-overview-advanced ps-report-toolbar-controls">
-            {render('discount_mode')}
-            {render('delivery_status')}
-            {render('reconciliation_status')}
-            {render('warehouse_id')}
-            {groups.length > 0 ? <RevenueGroupCompactPicker groups={groups} selectedKeys={selectedKeys} onChange={onSelectedKeys} /> : null}
-            {render('marketing_team_leader_id') ?? render('team_leader_id')}
-            {render('marketing_team_id') ?? render('team_id')}
-            {render('per_page')}
-            {render('no_closing_date_limit')}
+        <div className="ps-revenue-overview-advanced-wrap ps-adv-filter-panel">
+            <div className="ps-revenue-overview-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 4 }}>
+                {render('discount_mode')}
+                {render('delivery_status')}
+                {render('reconciliation_status')}
+                {render('warehouse_id')}
+            </div>
+            <div className="ps-revenue-overview-advanced ps-revenue-overview-advanced-row2 ps-adv-filter-row" style={{ '--ps-adv-cols': 5 }}>
+                {groups.length > 0 ? (
+                    <RevenueGroupCompactPicker groups={groups} selectedKeys={selectedKeys} onChange={onSelectedKeys} />
+                ) : null}
+                {render(leaderField)}
+                {render(teamField)}
+                {render('per_page')}
+                <div className="ps-revenue-overview-check-cell">
+                    {render('no_closing_date_limit')}
+                </div>
+            </div>
         </div>
     );
 
@@ -1066,6 +1094,8 @@ function RevenueOverviewToolbar({ title, routeUrl, filters, filterOptions, filte
             className={`ps-report-toolbar-shell ps-extra-toolbar ps-revenue-overview-toolbar ps-revenue-overview-toolbar-${variant}`}
             headerClassName="ps-revenue-overview-header"
             bodyClassName="ps-revenue-overview-body"
+            collapsible
+            defaultFiltersCollapsed={false}
             primaryFilters={primaryFilters}
             advancedFilters={advancedFilters}
             actions={(
@@ -1438,27 +1468,32 @@ function MarketingUpsaleReport({ title, rows, totals, filters, filterOptions, fi
                 title={title}
                 className="ps-report-toolbar-shell ps-extra-toolbar ps-marketing-upsale-toolbar"
                 primaryFilters={(
-                    <div className="ps-upsale-primary ps-report-toolbar-controls">
+                    <div className="ps-upsale-primary">
                         {fields.has('search') ? <input className="ps-control text-center" value={draft.search ?? ''} placeholder="Tên nguồn dữ liệu" onChange={(event) => set('search', event.target.value)} /> : null}
                         {render('date_type')}
                         {(fields.has('date_from') || fields.has('date_to')) ? <PushsaleDateRange filters={draft} onChange={set} /> : null}
                     </div>
                 )}
                 advancedFilters={(
-                    <div className="ps-upsale-advanced-wrap">
-                        <div className="ps-upsale-advanced ps-report-toolbar-controls">
+                    <div className="ps-upsale-advanced-wrap ps-adv-filter-panel">
+                        <div className="ps-upsale-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 4 }}>
                             {render('parent_product_id')}
                             {render('product_id')}
                             {render('customer_type')}
-                            {render('no_closing_date_limit')}
+                            <div className="ps-upsale-check-cell">
+                                {render('no_closing_date_limit')}
+                            </div>
                         </div>
-                        <div className="ps-upsale-advanced ps-report-toolbar-controls">
+                        <div className="ps-upsale-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 5 }}>
                             <PushsaleSelect value={scopeType} options={sourceScopeOptions} placeholder="Nhóm sale" onChange={setScopeType} />
                             {scopeFields.map(render)}
                             {render('per_page')}
                         </div>
                     </div>
                 )}
+                headerClassName="ps-marketing-upsale-header"
+                collapsible
+                defaultFiltersCollapsed={false}
                 actions={(
                     <div className="ps-report-toolbar-actions ps-upsale-actions">
                         <PushsaleSearchButton onClick={() => apply()} />
@@ -1556,18 +1591,22 @@ function MarketingWorkToolbar({ title, routeUrl, filters, filterOptions, filterF
     );
 
     const advancedFilters = (
-        <div className="ps-marketing-work-advanced ps-report-toolbar-controls">
-            <PushsaleSelect placeholder="Sale" value="sale" options={[{ value: 'sale', label: 'Sale' }]} onChange={() => {}} />
-            {render('marketing_team_leader_id')}
-            {render('marketing_team_id')}
-            {render('team_id')}
-            {render('no_closing_date_limit')}
-            {render('marketer_id')}
-            {render('sale_id')}
-            {render('search')}
-            {render('parent_product_id')}
-            {render('product_id')}
-            {render('per_page')}
+        <div className="ps-marketing-work-advanced-wrap ps-adv-filter-panel">
+            <div className="ps-marketing-work-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 5 }}>
+                <PushsaleSelect placeholder="Sale" value="sale" options={[{ value: 'sale', label: 'Sale' }]} onChange={() => {}} />
+                {render('marketing_team_leader_id')}
+                {render('marketing_team_id')}
+                {render('team_id')}
+                {render('marketer_id')}
+            </div>
+            <div className="ps-marketing-work-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 5 }}>
+                {render('sale_id')}
+                {render('search')}
+                {render('parent_product_id')}
+                {render('product_id')}
+                {render('per_page')}
+                {render('no_closing_date_limit')}
+            </div>
         </div>
     );
 
@@ -1575,6 +1614,7 @@ function MarketingWorkToolbar({ title, routeUrl, filters, filterOptions, filterF
         <PushsalePageShell
             title={title}
             className="ps-report-toolbar-shell ps-extra-toolbar ps-marketing-work-toolbar"
+            headerClassName="ps-marketing-work-header"
             primaryFilters={primaryFilters}
             advancedFilters={advancedFilters}
             actions={(

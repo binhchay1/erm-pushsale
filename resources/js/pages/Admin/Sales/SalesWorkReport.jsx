@@ -138,8 +138,8 @@ export default function SalesWorkReport({
     );
 
     const advancedFilters = (
-        <div className="ps-sale-work-advanced">
-            <div className="ps-sale-work-advanced-row">
+        <div className="ps-sale-work-advanced ps-adv-filter-panel">
+            <div className="ps-sale-work-advanced-row ps-adv-filter-row">
                 <PushsaleSelect
                     value={draft.operation_stage}
                     options={OPERATION_STAGES.map(({ key, label }) => ({ id: key, label }))}
@@ -159,7 +159,7 @@ export default function SalesWorkReport({
                     onChange={(value) => set('sale_id', value)}
                 />
             </div>
-            <div className="ps-sale-work-advanced-row">
+            <div className="ps-sale-work-advanced-row ps-adv-filter-row">
                 <PushsaleSelect
                     value={draft.sale_leader_id}
                     options={filterOptions.saleLeaders ?? []}
@@ -198,7 +198,7 @@ export default function SalesWorkReport({
                 className="ps-sale-work-page ps-report-toolbar-shell"
                 headerClassName="ps-sale-work-header"
                 bodyClassName="ps-sale-work-body"
-                collapsible={false}
+                collapsible
                 defaultFiltersCollapsed={false}
                 primaryFilters={primaryFilters}
                 advancedFilters={advancedFilters}

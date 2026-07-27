@@ -25,12 +25,28 @@ body.pushsale-app-body .ps-marketing-leader-page .module-title {
 }
 
 body.pushsale-app-body .ps-marketing-work-primary,
-body.pushsale-app-body .ps-marketing-work-advanced,
 body.pushsale-app-body .ps-marketing-leader-page .ps-leader-filter-body .row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 10px 22px;
     align-items: center;
+}
+
+body.pushsale-app-body .ps-page-extra-filters.ps-marketing-work-header .ps-marketing-work-advanced-wrap,
+body.pushsale-app-body .ps-page-extra-filters .ps-marketing-work-advanced-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+body.pushsale-app-body .ps-page-extra-filters.ps-marketing-work-header .ps-marketing-work-advanced.ps-adv-filter-row,
+body.pushsale-app-body .ps-page-extra-filters .ps-marketing-work-advanced.ps-adv-filter-row {
+    display: grid;
+    grid-template-columns: repeat(var(--ps-adv-cols, 5), minmax(0, 1fr));
+    gap: 10px 12px;
+    align-items: center;
+    width: 100%;
 }
 
 body.pushsale-app-body .ps-marketing-work-primary .ps-control,

@@ -1812,11 +1812,7 @@ class ExtraReportService
 
     private function dateColumn(ReportFilterData $filter): string
     {
-        return match ($filter->dateType) {
-            DateType::SaleReceived => 'assigned_at',
-            DateType::Closing => 'closed_at',
-            default => 'data_arrived_at',
-        };
+        return $filter->dateType->orderColumn();
     }
 
     /** Chỉ các order đại diện cho lead/contact thật; loại đơn supplemental. */

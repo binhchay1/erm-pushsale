@@ -50,13 +50,14 @@ class ReportMetricService
 
         if ($historical) {
             $orderFacts = $this->facts->orders($user, $historical);
-            $leadFacts = $this->facts->leads($user, $historical);
+            $leadFacts = $this->facts->countableLeads($user, $historical);
+            $allLeadFacts = $this->facts->leads($user, $historical);
             $ordersCount += (int) (clone $orderFacts)->sum('order_count');
             $closedOrders += (int) (clone $orderFacts)->sum('closed_order_count');
             $leadsCount += (int) (clone $leadFacts)->sum('lead_count');
-            $processedLeads += (int) (clone $leadFacts)->sum('processed_count');
-            $failedLeads += (int) (clone $leadFacts)->sum('failed_count');
-            $duplicateLeads += (int) (clone $leadFacts)->sum('duplicate_count');
+            $processedLeads += (int) (clone $allLeadFacts)->sum('processed_count');
+            $failedLeads += (int) (clone $allLeadFacts)->sum('failed_count');
+            $duplicateLeads += (int) (clone $allLeadFacts)->sum('duplicate_count');
             $gross += (int) (clone $orderFacts)
                 ->whereIn('delivery_status', DeliveryStatus::revenueEligible())
                 ->sum('order_value');
@@ -187,7 +188,7 @@ class ReportMetricService
         $values = [];
         $historical = $this->facts->historicalFilter($filter);
         if ($historical) {
-            $values = $this->facts->leads($user, $historical)
+            $values = $this->facts->countableLeads($user, $historical)
                 ->selectRaw('metric_date, SUM(lead_count) as aggregate_value')
                 ->groupBy('metric_date')
                 ->pluck('aggregate_value', 'metric_date')
@@ -216,7 +217,7 @@ class ReportMetricService
         $totals = collect();
         $historical = $this->facts->historicalFilter($filter);
         if ($historical) {
-            $totals = $this->facts->leads($user, $historical)
+            $totals = $this->facts->countableLeads($user, $historical)
                 ->selectRaw('platform, SUM(lead_count) as aggregate_value')
                 ->groupBy('platform')
                 ->pluck('aggregate_value', 'platform')
@@ -251,7 +252,7 @@ class ReportMetricService
 
         $historical = $this->facts->historicalFilter($filter);
         if ($historical) {
-            $leadCount += (int) $this->facts->leads($user, $historical)->sum('lead_count');
+            $leadCount += (int) $this->facts->countableLeads($user, $historical)->sum('lead_count');
             $orders = $this->facts->orders($user, $historical);
             $allocated += (int) (clone $orders)->where('sale_user_id', '>', 0)->sum('order_count');
             $contacted += (int) (clone $orders)->sum('contacted_order_count');
@@ -356,7 +357,7 @@ class ReportMetricService
                     'revenue' => (int) $row->revenue_total,
                 ];
             }
-            $leadRows = $this->facts->leads($user, $historical)
+            $leadRows = $this->facts->countableLeads($user, $historical)
                 ->where('marketing_source_id', '>', 0)
                 ->selectRaw('marketing_source_id, SUM(lead_count) as leads_count')
                 ->groupBy('marketing_source_id')

@@ -4,6 +4,7 @@ namespace App\Services\Reporting;
 
 use App\Data\ReportFilterData;
 use App\Enums\DateType;
+use App\Enums\LeadIngestionStatus;
 use App\Enums\UserRole;
 use App\Models\MarketingSource;
 use App\Models\Reporting\ReportDailyClosure;
@@ -85,6 +86,16 @@ class ReportFactReader
             ->when($filter->shippingProvider, fn (Builder $q) => $q->where('shipping_provider', $filter->shippingProvider))
             ->when($filter->operationStage, fn (Builder $q) => $q->where('operation_stage', $filter->operationStage))
             ->when($filter->closingStatus, fn (Builder $q) => $q->where('closing_status', $filter->closingStatus));
+    }
+
+    /** @return Builder<ReportDailyLeadFact> — lead_count theo LeadContactMetrics (không gồm fail/dup/review). */
+    public function countableLeads(User $user, ReportFilterData $filter): Builder
+    {
+        return $this->leads($user, $filter)->whereNotIn('status', [
+            LeadIngestionStatus::Duplicate->value,
+            LeadIngestionStatus::NeedsReview->value,
+            LeadIngestionStatus::Failed->value,
+        ]);
     }
 
     /** @return Builder<ReportDailyLeadFact> */

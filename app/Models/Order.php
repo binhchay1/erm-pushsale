@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Data\ReportFilterData;
-use App\Enums\DateType;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -252,15 +251,7 @@ class Order extends Model
 
     public function scopeApplyReportFilter(Builder $query, ReportFilterData $filter): Builder
     {
-        $column = match ($filter->dateType) {
-            DateType::SaleReceived => 'assigned_at',
-            DateType::CareUpdate, DateType::DeliveryUpdate => 'updated_at',
-            DateType::Closing => 'closed_at',
-            DateType::Posting => 'created_at',
-            DateType::NextOperation => 'next_operation_at',
-            DateType::DesiredDelivery => 'desired_delivery_at',
-            default => 'data_arrived_at',
-        };
+        $column = $filter->dateType->orderColumn();
 
         if ($filter->orderId) {
             $query->whereKey($filter->orderId);

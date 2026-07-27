@@ -49,12 +49,22 @@
     align-items: center !important;
 }
 
-.ps-sales-revenue-advanced {
+.ps-page-extra-filters.ps-sales-revenue-header .ps-sales-revenue-advanced-wrap,
+.ps-page-extra-filters .ps-sales-revenue-advanced-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+.ps-page-extra-filters.ps-sales-revenue-header .ps-sales-revenue-advanced.ps-adv-filter-row,
+.ps-page-extra-filters .ps-sales-revenue-advanced.ps-adv-filter-row {
     display: grid !important;
-    grid-template-columns: repeat(6, minmax(150px, 1fr)) !important;
-    gap: 10px 18px !important;
-    padding: 0 14px 10px !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 1fr)) !important;
+    gap: 10px 12px !important;
+    padding: 0 !important;
     align-items: center !important;
+    width: 100% !important;
 }
 
 .ps-sales-revenue-page .ps-control,
@@ -216,7 +226,7 @@
     }
 
     .ps-sales-revenue-primary,
-    .ps-sales-revenue-advanced,
+    .ps-page-extra-filters .ps-sales-revenue-advanced.ps-adv-filter-row,
     .ps-sales-revenue-formulas {
         grid-template-columns: repeat(2, minmax(180px, 1fr)) !important;
     }
