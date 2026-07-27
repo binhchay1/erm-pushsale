@@ -118,26 +118,15 @@ function PushsaleReportToolbar({ title, routeUrl, filters, filterOptions, filter
     const render = (field) => (fields.has(field) ? <ReportField key={field} field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
     const visiblePrimary = primary.filter((field) => fields.has(field));
     const visibleAdvanced = advanced.filter((field) => fields.has(field));
-    const advancedMid = Math.ceil(visibleAdvanced.length / 2);
-    const advancedRow1 = visibleAdvanced.slice(0, advancedMid);
-    const advancedRow2 = visibleAdvanced.slice(advancedMid);
 
-    const primaryFilters = visiblePrimary.length > 0 ? (
-        <div className="ps-report-v2-primary ps-report-toolbar-controls">
-            {visiblePrimary.map(render)}
-        </div>
-    ) : null;
+    // Filter chính nằm sát Tìm kiếm/Xuất Excel (cột actions), không sát title.
+    const primaryFilters = null;
 
     const advancedFilters = visibleAdvanced.length > 0 ? (
         <div className="ps-report-v2-advanced-wrap ps-adv-filter-panel">
-            <div className="ps-report-v2-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': Math.max(advancedRow1.length, 1) }}>
-                {advancedRow1.map(render)}
+            <div className="ps-report-v2-advanced ps-adv-filter-row ps-report-adv-grid">
+                {visibleAdvanced.map(render)}
             </div>
-            {advancedRow2.length > 0 ? (
-                <div className="ps-report-v2-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': Math.max(advancedRow2.length, 1) }}>
-                    {advancedRow2.map(render)}
-                </div>
-            ) : null}
         </div>
     ) : null;
 
@@ -149,7 +138,12 @@ function PushsaleReportToolbar({ title, routeUrl, filters, filterOptions, filter
             primaryFilters={primaryFilters}
             advancedFilters={advancedFilters}
             actions={(
-                <div className="ps-report-toolbar-actions">
+                <div className="ps-report-toolbar-actions ps-report-toolbar-actions--with-filters">
+                    {visiblePrimary.length > 0 ? (
+                        <div className="ps-report-v2-primary ps-report-toolbar-controls">
+                            {visiblePrimary.map(render)}
+                        </div>
+                    ) : null}
                     <PushsaleSearchButton onClick={() => apply()} />
                     <PushsaleExportButton routeUrl={routeUrl} filters={cleanReportPayload(draft)} label={exportLabel} />
                     {actionsExtra}

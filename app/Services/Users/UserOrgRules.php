@@ -101,9 +101,9 @@ final class UserOrgRules
             return;
         }
 
+        // Quản lý trực tiếp là tùy chọn: nhân viên thuộc chức vụ vẫn nhận quyền
+        // theo role/team mà không bị bắt buộc gắn manager.
         if (! $managerId) {
-            $validator->errors()->add('manager_user_id', __('messages.user_org.manager_required'));
-
             return;
         }
 

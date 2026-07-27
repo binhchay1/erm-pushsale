@@ -22,6 +22,13 @@ html body.pushsale-app-body .ps-page-shell {
     font-family: var(--ps-frame-font) !important;
 }
 
+/* Đừng cộng padding ngang từ .ps-adminlte-page — title/filter/body dùng chung --ps-frame-x. */
+html body.pushsale-app-body .ps-page-shell.ps-adminlte-page,
+html body.pushsale-app-body section.ps-page-shell.ps-adminlte-page {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
 html body.pushsale-app-body .ps-page-shell__header {
     display: block !important;
     width: 100% !important;
@@ -291,6 +298,47 @@ html body.pushsale-app-body .ps-page-shell .ps-sale-check {
     font-weight: 400 !important;
 }
 
+/* Shared money input (lương / giá) */
+html body.pushsale-app-body .ps-currency-input {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-currency-input > input {
+    width: 100% !important;
+    min-width: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+html body.pushsale-app-body .ps-currency-input__suffix {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 34px !important;
+    padding: 0 8px !important;
+    border: 1px solid #d2d6de !important;
+    border-left: 0 !important;
+    background: #f4f6f9 !important;
+    color: #555 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-currency-input--bootstrap > input.form-control {
+    height: 31px !important;
+    min-height: 31px !important;
+}
+
+html body.pushsale-app-body .ps-currency-input--bootstrap .ps-currency-input__suffix {
+    height: 31px !important;
+}
+
 /* Unit profile form stays in body under a title-only header */
 html body.pushsale-app-body .ps-page-shell.ps-unit-profile-page .ps-page-shell__body,
 html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-page-shell__body {
@@ -359,67 +407,174 @@ html body.pushsale-app-body .ps-page-shell.ps-unit-profile-page .ps-unit-actions
     padding-left: calc(min(140px, 25vw) + 16px) !important;
 }
 
-html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-form,
-html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-section {
-    width: min(760px, 100%) !important;
-    max-width: 100% !important;
-    margin: 18px 0 0 !important;
-    padding: 0 !important;
+html body.pushsale-app-body .ps-page-shell.ps-unit-profile-page .ps-unit-error {
+    margin: 4px 0 0 !important;
+    color: #c0392b !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
 }
 
-html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-section-title {
-    margin: 0 0 12px !important;
+/* Personal profile — avoid legacy .ps-unit-form 180px indent / fixed 598px control width */
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-layout {
+    display: grid !important;
+    gap: 16px !important;
+    width: min(720px, 100%) !important;
+    max-width: 100% !important;
+    margin: 16px 0 8px !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-card {
+    margin: 0 !important;
+    padding: 16px 18px 18px !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-card__title {
+    margin: 0 0 14px !important;
     padding: 0 0 8px !important;
-    border-bottom: 1px solid #e5e7eb !important;
+    border-bottom: 1px solid #eef2f7 !important;
+    color: #222 !important;
     font-size: 13px !important;
     font-weight: 700 !important;
-    color: #333 !important;
+    line-height: 1.3 !important;
 }
 
-html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-avatar-row {
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-avatar-row {
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: 14px 16px !important;
 }
 
-html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-avatar {
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-avatar,
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-avatar-fallback {
     width: 72px !important;
     height: 72px !important;
     border-radius: 50% !important;
     border: 2px solid #d8dee6 !important;
+    flex: 0 0 auto !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-avatar {
     object-fit: cover !important;
     background: #f3f4f6 !important;
 }
 
-html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-avatar-fallback {
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-avatar-fallback {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 72px !important;
-    height: 72px !important;
-    border-radius: 50% !important;
-    border: 2px solid #d8dee6 !important;
     background: #eef2f7 !important;
     color: #334155 !important;
     font-size: 20px !important;
     font-weight: 700 !important;
 }
 
-html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-readonly-value {
-    margin: 0 !important;
-    padding-top: 6px !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    color: #222 !important;
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-avatar-meta {
+    min-width: 0 !important;
+    flex: 1 1 220px !important;
 }
 
-html body.pushsale-app-body .ps-page-shell.ps-unit-profile-page .ps-unit-error,
-html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-error {
-    margin: 4px 0 0 !important;
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-avatar-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin: 0 0 6px !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-info-grid {
+    display: grid !important;
+    gap: 10px 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-info-item {
+    display: grid !important;
+    grid-template-columns: minmax(120px, 160px) minmax(0, 1fr) !important;
+    align-items: baseline !important;
+    gap: 8px 16px !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-info-item dt {
+    margin: 0 !important;
+    color: #64748b !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-info-item dd {
+    margin: 0 !important;
+    color: #111 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    word-break: break-word !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-password-form {
+    display: grid !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-field {
+    display: grid !important;
+    gap: 6px !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-field > label {
+    margin: 0 !important;
+    color: #333 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-field > label span {
+    color: #e00 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-field .form-control {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 34px !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-top: 4px !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-hint {
+    margin: 12px 0 0 !important;
+    color: #777 !important;
+    font-size: 11px !important;
+    line-height: 1.45 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-error {
+    margin: 0 !important;
     color: #c0392b !important;
     font-size: 11px !important;
     line-height: 1.4 !important;
+}
+
+@media (max-width: 640px) {
+    html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-info-item {
+        grid-template-columns: 1fr !important;
+        gap: 2px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-password-form {
+        max-width: 100% !important;
+    }
 }
 
 @media (max-width: 1200px) {

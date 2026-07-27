@@ -95,6 +95,62 @@ html body.pushsale-app-body .ps-page-shell__actions {
     white-space: nowrap !important;
 }
 
+/* Primary filters sát cụm Tìm kiếm / Xuất Excel */
+html body.pushsale-app-body .ps-report-toolbar-actions--with-filters {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-report-v2-primary,
+html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-report-toolbar-controls {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-report-v2-primary > *,
+html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-report-toolbar-controls > * {
+    flex: 0 1 160px !important;
+    min-width: 120px !important;
+    max-width: 220px !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-date-range {
+    flex: 0 1 280px !important;
+    min-width: 220px !important;
+    max-width: 340px !important;
+}
+
+/* Filter bổ sung: lưới đều, không để 2 ô cách xa nhau */
+html body.pushsale-app-body .ps-page-extra-filters .ps-report-adv-grid,
+html body.pushsale-app-body .ps-report-v2-advanced.ps-report-adv-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 10px 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-report-adv-grid > *,
+html body.pushsale-app-body .ps-report-v2-advanced.ps-report-adv-grid > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+}
+
 html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__advanced-row,
 html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__advanced-row {
     display: flex !important;
@@ -191,5 +247,35 @@ html body.pushsale-app-body .ps-kpi-notes {
     html body.pushsale-app-body .ps-page-shell__actions,
     html body.pushsale-app-body .ps-topbar-actions {
         justify-content: flex-start !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters .ps-report-adv-grid,
+    html body.pushsale-app-body .ps-report-v2-advanced.ps-report-adv-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-report-toolbar-actions--with-filters {
+        justify-content: stretch !important;
+    }
+
+    html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-report-v2-primary,
+    html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-report-toolbar-controls {
+        width: 100% !important;
+        justify-content: stretch !important;
+    }
+
+    html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-report-v2-primary > *,
+    html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-report-toolbar-controls > *,
+    html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-date-range {
+        flex: 1 1 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters .ps-report-adv-grid,
+    html body.pushsale-app-body .ps-report-v2-advanced.ps-report-adv-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
     }
 }

@@ -8,23 +8,13 @@ import { useRoleLabel } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
-function FieldRow({ label, required = false, error, hint, children }) {
+function InfoItem({ label, value }) {
     return (
-        <div className="ps-unit-form-row">
-            <label className="ps-unit-label">
-                {label} {required ? <span>(*)</span> : null}
-            </label>
-            <div className="ps-unit-control-wrap">
-                {children}
-                {hint ? <p className="ps-unit-field-hint">{hint}</p> : null}
-                {error ? <div className="ps-unit-error">{error}</div> : null}
-            </div>
+        <div className="ps-profile-info-item">
+            <dt>{label}</dt>
+            <dd>{value || '—'}</dd>
         </div>
     );
-}
-
-function ReadOnlyValue({ value }) {
-    return <p className="ps-unit-readonly-value">{value || '—'}</p>;
 }
 
 export default function ProfileIndex({ profile }) {
@@ -77,18 +67,21 @@ export default function ProfileIndex({ profile }) {
 
         if (!data.password) {
             setError('password', t('common.validation.required'));
-            toast.error(t('common.validation.fix_errors'));
+            toast.error(t('common.validation.form_errors'));
             return;
         }
         if (data.password !== data.password_confirmation) {
             setError('password_confirmation', t('pages.users.password_mismatch'));
-            toast.error(t('common.validation.fix_errors'));
+            toast.error(t('common.validation.form_errors'));
             return;
         }
 
         put('/profile', {
             preserveScroll: true,
-            onSuccess: () => reset('password', 'password_confirmation'),
+            onSuccess: () => {
+                reset('password', 'password_confirmation');
+                toast.success(t('profile.password_saved'));
+            },
             onError: (errs) => toast.error(errs.password ?? t('common.request_failed')),
         });
     };
@@ -109,100 +102,104 @@ export default function ProfileIndex({ profile }) {
                 className="ps-account-profile-page"
                 collapsible={false}
             >
-                <section className="ps-unit-section">
-                    <h3 className="ps-unit-section-title">{t('profile.avatar_title')}</h3>
-                    <div className="ps-unit-avatar-row">
-                        {avatarSrc ? (
-                            <img src={avatarSrc} alt={profile.name} className="ps-unit-avatar" />
-                        ) : (
-                            <span className="ps-unit-avatar-fallback">{profile.initials}</span>
-                        )}
-                        <div className="ps-unit-control-wrap">
-                            <input
-                                ref={fileRef}
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={onPickAvatar}
-                            />
-                            <div className="ps-unit-actions" style={{ paddingLeft: 0 }}>
-                                <button type="button" className="btn btn-sm btn-default" onClick={() => fileRef.current?.click()}>
-                                    <i className="fa fa-upload" /> {t('profile.upload')}
-                                </button>
-                                {profile.avatar_url ? (
-                                    <button type="button" className="btn btn-sm btn-default" onClick={removeAvatar}>
-                                        <i className="fa fa-trash" /> {t('profile.remove')}
+                <div className="ps-profile-layout">
+                    <section className="ps-profile-card">
+                        <h3 className="ps-profile-card__title">{t('profile.avatar_title')}</h3>
+                        <div className="ps-profile-avatar-row">
+                            {avatarSrc ? (
+                                <img src={avatarSrc} alt={profile.name} className="ps-profile-avatar" />
+                            ) : (
+                                <span className="ps-profile-avatar-fallback">{profile.initials}</span>
+                            )}
+                            <div className="ps-profile-avatar-meta">
+                                <input
+                                    ref={fileRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={onPickAvatar}
+                                />
+                                <div className="ps-profile-avatar-actions">
+                                    <button type="button" className="btn btn-sm btn-default" onClick={() => fileRef.current?.click()}>
+                                        <i className="fa fa-upload" /> {t('profile.upload')}
                                     </button>
+                                    {profile.avatar_url ? (
+                                        <button type="button" className="btn btn-sm btn-default" onClick={removeAvatar}>
+                                            <i className="fa fa-trash" /> {t('profile.remove')}
+                                        </button>
+                                    ) : null}
+                                </div>
+                                <p className="ps-profile-hint">{t('profile.avatar_hint')}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="ps-profile-card">
+                        <h3 className="ps-profile-card__title">{t('profile.account_title')}</h3>
+                        <dl className="ps-profile-info-grid">
+                            <InfoItem label={t('profile.name')} value={profile.name} />
+                            <InfoItem label={t('profile.email')} value={profile.email} />
+                            <InfoItem label={t('profile.phone')} value={profile.phone} />
+                            <InfoItem label={t('profile.job_title')} value={profile.job_title} />
+                            {profile.manager_name ? (
+                                <InfoItem label={t('profile.manager')} value={profile.manager_name} />
+                            ) : null}
+                        </dl>
+                        <p className="ps-profile-hint">{t('profile.admin_contact')}</p>
+                    </section>
+
+                    <section className="ps-profile-card">
+                        <h3 className="ps-profile-card__title">{t('profile.password_title')}</h3>
+                        <form className="ps-profile-password-form" onSubmit={submitPassword}>
+                            <div className="ps-profile-field">
+                                <label htmlFor="profile-password">
+                                    {t('profile.new_password')} <span>(*)</span>
+                                </label>
+                                <input
+                                    id="profile-password"
+                                    type="password"
+                                    className="form-control"
+                                    autoComplete="new-password"
+                                    value={data.password}
+                                    onChange={(event) => {
+                                        setData('password', event.target.value);
+                                        clearErrors('password');
+                                    }}
+                                />
+                                {errors.password ? <div className="ps-profile-error">{errors.password}</div> : null}
+                            </div>
+                            <div className="ps-profile-field">
+                                <label htmlFor="profile-password-confirm">
+                                    {t('profile.confirm_password')} <span>(*)</span>
+                                </label>
+                                <input
+                                    id="profile-password-confirm"
+                                    type="password"
+                                    className="form-control"
+                                    autoComplete="new-password"
+                                    value={data.password_confirmation}
+                                    onChange={(event) => {
+                                        setData('password_confirmation', event.target.value);
+                                        clearErrors('password_confirmation');
+                                    }}
+                                />
+                                {errors.password_confirmation ? (
+                                    <div className="ps-profile-error">{errors.password_confirmation}</div>
                                 ) : null}
                             </div>
-                            <p className="ps-unit-field-hint">{t('profile.avatar_hint')}</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="ps-unit-section">
-                    <h3 className="ps-unit-section-title">{t('profile.account_title')}</h3>
-                    <div className="ps-unit-form">
-                        <FieldRow label={t('profile.name')}>
-                            <ReadOnlyValue value={profile.name} />
-                        </FieldRow>
-                        <FieldRow label={t('profile.email')}>
-                            <ReadOnlyValue value={profile.email} />
-                        </FieldRow>
-                        <FieldRow label={t('profile.phone')}>
-                            <ReadOnlyValue value={profile.phone} />
-                        </FieldRow>
-                        <FieldRow label={t('profile.job_title')}>
-                            <ReadOnlyValue value={profile.job_title} />
-                        </FieldRow>
-                        {profile.manager_name ? (
-                            <FieldRow label={t('profile.manager')}>
-                                <ReadOnlyValue value={profile.manager_name} />
-                            </FieldRow>
-                        ) : null}
-                    </div>
-                    <p className="ps-unit-field-hint">{t('profile.admin_contact')}</p>
-                </section>
-
-                <section className="ps-unit-section">
-                    <h3 className="ps-unit-section-title">{t('profile.password_title')}</h3>
-                    <form className="ps-unit-form" onSubmit={submitPassword}>
-                        <FieldRow label={t('profile.new_password')} required error={errors.password}>
-                            <input
-                                type="password"
-                                className="form-control ps-unit-control"
-                                autoComplete="new-password"
-                                value={data.password}
-                                onChange={(event) => {
-                                    setData('password', event.target.value);
-                                    clearErrors('password');
-                                }}
-                            />
-                        </FieldRow>
-                        <FieldRow label={t('profile.confirm_password')} required error={errors.password_confirmation}>
-                            <input
-                                type="password"
-                                className="form-control ps-unit-control"
-                                autoComplete="new-password"
-                                value={data.password_confirmation}
-                                onChange={(event) => {
-                                    setData('password_confirmation', event.target.value);
-                                    clearErrors('password_confirmation');
-                                }}
-                            />
-                        </FieldRow>
-                        <div className="ps-unit-actions">
-                            {recentlySuccessful ? (
-                                <span className="ps-unit-field-hint" style={{ marginRight: 8 }}>{t('profile.password_saved')}</span>
-                            ) : null}
-                            <button type="submit" className="btn btn-sm btn-primary" disabled={processing}>
-                                <i className={`fa ${processing ? 'fa-spinner fa-spin' : 'fa-save'}`} />
-                                {' '}
-                                {processing ? t('common.saving') : t('profile.save_password')}
-                            </button>
-                        </div>
-                    </form>
-                </section>
+                            <div className="ps-profile-actions">
+                                {recentlySuccessful ? (
+                                    <span className="ps-profile-hint">{t('profile.password_saved')}</span>
+                                ) : null}
+                                <button type="submit" className="btn btn-sm btn-primary" disabled={processing}>
+                                    <i className={`fa ${processing ? 'fa-spinner fa-spin' : 'fa-save'}`} />
+                                    {' '}
+                                    {processing ? t('common.saving') : t('profile.save_password')}
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
             </PushsalePageShell>
 
             <ConfirmDialogPortal />

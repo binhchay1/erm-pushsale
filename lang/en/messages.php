@@ -29,7 +29,7 @@ return [
     'user_org' => [
         'admin_no_manager' => 'Admin accounts cannot have a direct manager.',
         'admin_no_org_level' => 'Admin accounts cannot have a department level.',
-        'manager_required' => 'Staff and supervisors must select a direct manager.',
+        'manager_required' => 'Staff and supervisors may optionally select a direct manager.',
         'manager_not_self' => 'You cannot select yourself as manager.',
         'manager_invalid' => 'Direct manager must be a head, supervisor, or admin.',
         'head_manager_admin_only' => 'Department heads may only report to an admin.',

@@ -1,5 +1,6 @@
 import { router, useForm } from '@inertiajs/react';
 
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 
 export function userToForm(user = null) {
@@ -204,7 +205,7 @@ export function AccountDialog({
                     />
                 </EmployeeFormRow>
 
-                <EmployeeFormRow label="Trưởng nhóm/QL trực tiếp">
+                <EmployeeFormRow label="Trưởng nhóm/QL trực tiếp" hint="Không bắt buộc — để trống vẫn full quyền theo chức vụ">
                     <select
                         className="form-control"
                         value={form.data.manager_user_id}
@@ -231,12 +232,10 @@ export function AccountDialog({
                 </EmployeeFormRow>
 
                 <EmployeeFormRow label="Lương cứng">
-                    <input
+                    <CurrencyInput
                         className="form-control"
-                        type="number"
-                        min="0"
-                        value={form.data.base_salary}
-                        onChange={(event) => form.setData('base_salary', event.target.value)}
+                        value={form.data.base_salary === '' || form.data.base_salary == null ? '' : Number(form.data.base_salary)}
+                        onChange={(amount) => form.setData('base_salary', amount)}
                     />
                 </EmployeeFormRow>
 

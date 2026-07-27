@@ -6,8 +6,7 @@ import { RevenueAreaChart } from '@/components/charts/RevenueAreaChart';
 import { StatCard } from '@/components/charts/StatCard';
 import { ConversionFunnel } from '@/components/dashboard/ConversionFunnel';
 import { OpsAlerts } from '@/components/dashboard/OpsAlerts';
-import { RoleDashboardShell } from '@/components/dashboard/RoleDashboardShell';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { RoleDashboardFrame, RoleDashboardShell } from '@/components/dashboard/RoleDashboardShell';
 import { RealtimeBadge } from '@/components/layout/RealtimeBadge';
 import { useRealtimeDashboard } from '@/hooks/useRealtimeDashboard';
 import { formatNumber } from '@/lib/format';
@@ -18,75 +17,31 @@ function AllocatorDashboardContent({ stats: initialStats }) {
     const { stats, connected } = useRealtimeDashboard('allocator', initialStats);
 
     const kpis = [
-        {
-            title: t('dashboard.allocator.leads_today'),
-            value: formatNumber(stats.leads_today),
-            hint: t('dashboard.allocator.leads_today_hint'),
-            icon: Inbox,
-        },
-        {
-            title: t('dashboard.allocator.pending_routing'),
-            value: formatNumber(stats.pending_routing),
-            hint: t('dashboard.allocator.pending_routing_hint'),
-            icon: GitBranch,
-        },
-        {
-            title: t('dashboard.allocator.processed'),
-            value: formatNumber(stats.processed_today),
-            hint: t('dashboard.allocator.processed_hint'),
-            icon: CopyCheck,
-            accent: true,
-        },
-        {
-            title: t('dashboard.allocator.failed'),
-            value: formatNumber(stats.failed_leads),
-            hint: t('dashboard.allocator.failed_hint'),
-            icon: AlertTriangle,
-        },
-        {
-            title: t('dashboard.allocator.duplicate'),
-            value: formatNumber(stats.duplicate_leads),
-            hint: t('dashboard.allocator.duplicate_hint'),
-            icon: UsersRound,
-        },
+        { title: t('dashboard.allocator.leads_today'), value: formatNumber(stats.leads_today), hint: t('dashboard.allocator.leads_today_hint'), icon: Inbox },
+        { title: t('dashboard.allocator.pending_routing'), value: formatNumber(stats.pending_routing), hint: t('dashboard.allocator.pending_routing_hint'), icon: GitBranch },
+        { title: t('dashboard.allocator.processed'), value: formatNumber(stats.processed_today), hint: t('dashboard.allocator.processed_hint'), icon: CopyCheck, accent: true },
+        { title: t('dashboard.allocator.failed'), value: formatNumber(stats.failed_leads), hint: t('dashboard.allocator.failed_hint'), icon: AlertTriangle },
+        { title: t('dashboard.allocator.duplicate'), value: formatNumber(stats.duplicate_leads), hint: t('dashboard.allocator.duplicate_hint'), icon: UsersRound },
     ];
 
     const alerts = [
-        Number(stats.pending_routing ?? 0) > 0 && {
-            type: 'info',
-            title: t('dashboard.allocator.pending_routing'),
-            value: stats.pending_routing,
-            description: t('dashboard.allocator.pending_alert'),
-        },
-        Number(stats.failed_leads ?? 0) > 0 && {
-            type: 'danger',
-            title: t('dashboard.allocator.failed'),
-            value: stats.failed_leads,
-            description: t('dashboard.allocator.failed_alert'),
-        },
-        Number(stats.duplicate_leads ?? 0) > 0 && {
-            type: 'warning',
-            title: t('dashboard.allocator.duplicate'),
-            value: stats.duplicate_leads,
-            description: t('dashboard.allocator.duplicate_alert'),
-        },
+        Number(stats.pending_routing ?? 0) > 0 && { type: 'info', title: t('dashboard.allocator.pending_routing'), value: stats.pending_routing, description: t('dashboard.allocator.pending_alert') },
+        Number(stats.failed_leads ?? 0) > 0 && { type: 'danger', title: t('dashboard.allocator.failed'), value: stats.failed_leads, description: t('dashboard.allocator.failed_alert') },
+        Number(stats.duplicate_leads ?? 0) > 0 && { type: 'warning', title: t('dashboard.allocator.duplicate'), value: stats.duplicate_leads, description: t('dashboard.allocator.duplicate_alert') },
     ].filter(Boolean);
 
     return (
-        <div className="space-y-6">
-            <PageHeader
-                title={t('dashboard.allocator.title')}
-                description={t('dashboard.allocator.desc')}
-                actions={<RealtimeBadge connected={connected} />}
-            />
-
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-                {kpis.map((card) => (
-                    <StatCard key={card.title} {...card} className="min-h-[132px]" />
-                ))}
+        <RoleDashboardFrame
+            role="allocator"
+            title={t('dashboard.allocator.title')}
+            subtitle={t('dashboard.allocator.desc')}
+            actions={<RealtimeBadge connected={connected} />}
+        >
+            <div className="ps-role-kpi-grid is-5">
+                {kpis.map((card) => <StatCard key={card.title} {...card} className="ps-role-kpi-card" />)}
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="ps-role-chart-grid">
                 <RevenueAreaChart
                     data={stats.lead_series}
                     title={t('dashboard.allocator.leads_7d')}
@@ -97,7 +52,7 @@ function AllocatorDashboardContent({ stats: initialStats }) {
                 <LeadSourcePieChart data={stats.platform_breakdown} title={t('dashboard.allocator.platform')} />
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="ps-role-chart-grid">
                 <RevenueAreaChart
                     data={stats.processed_series}
                     title={t('dashboard.allocator.processed_7d')}
@@ -112,10 +67,9 @@ function AllocatorDashboardContent({ stats: initialStats }) {
                 />
             </div>
 
-            {stats.funnel?.length > 0 && <ConversionFunnel data={stats.funnel} />}
-
+            {stats.funnel?.length > 0 ? <ConversionFunnel data={stats.funnel} /> : null}
             <OpsAlerts alerts={alerts} />
-        </div>
+        </RoleDashboardFrame>
     );
 }
 

@@ -49,12 +49,35 @@ html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-lead-impor
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-end !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-lead-import-search--with-filters {
+    width: 100% !important;
 }
 
 html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-lead-import-search .form-control {
     width: 180px !important;
     min-width: 160px !important;
     max-width: 200px !important;
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-lead-import-search,
+    html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-lead-import-search--with-filters {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        width: 100% !important;
+        justify-content: stretch !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-lead-import-status,
+    html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-lead-import-search .form-control {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+    }
 }
 
 html body.pushsale-app-body .ps-lead-import-body {

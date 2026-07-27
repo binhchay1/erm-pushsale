@@ -114,15 +114,15 @@ body.pushsale-app-body .ps-row-actions-cell,
 body.pushsale-app-body td.ps-row-actions-cell,
 body.pushsale-app-body td:has(> .ps-row-actions),
 body.pushsale-app-body td:has(> .pushsale-row-actions) {
-    min-width: 132px !important;
-    width: 132px !important;
+    min-width: 120px !important;
+    width: 120px !important;
     padding: 4px 6px !important;
     vertical-align: middle !important;
 }
 body.pushsale-app-body .ps-action-col,
 body.pushsale-app-body th.ps-action-col,
 body.pushsale-app-body th:has(+ .ps-action-col) {
-    min-width: 132px !important;
+    min-width: 120px !important;
 }
 body.pushsale-app-body .ps-row-actions,
 body.pushsale-app-body .pushsale-row-actions {
@@ -167,8 +167,14 @@ body.pushsale-app-body .pushsale-icon-action:hover {
     background: transparent !important;
 }
 
-body.pushsale-app-body .ps-users-page .ps-title-divider { color: #333; }
-body.pushsale-app-body .ps-users-page .ps-orange { color: darkorange; font-weight: 700; }
+body.pushsale-app-body .ps-users-page .ps-title-divider { color: #333; margin: 0 4px; }
+body.pushsale-app-body .ps-users-page .ps-orange,
+body.pushsale-app-body .ps-page-header .ps-orange {
+    color: darkorange !important;
+    font-weight: 700 !important;
+    font-size: 17px !important;
+    line-height: 1.2 !important;
+}
 
 body.pushsale-app-body .ps-users-page .ps-toolbar .mr15 { margin-right: 15px; }
 
@@ -211,11 +217,25 @@ body.pushsale-app-body .ps-users-table th:nth-child(5) { width: 100px; }
 body.pushsale-app-body .ps-users-table th:nth-child(6) { width: 100px; }
 body.pushsale-app-body .ps-users-table th:nth-child(7) { width: 115px; }
 body.pushsale-app-body .ps-users-table th:nth-child(8) { width: 190px; }
-body.pushsale-app-body .ps-users-table th:nth-child(9),
-body.pushsale-app-body .ps-users-table th:nth-child(11) { width: 95px; }
-body.pushsale-app-body .ps-users-table th:nth-child(10) { width: 105px; }
+body.pushsale-app-body .ps-users-table th:nth-child(9) { width: 90px; }
+body.pushsale-app-body .ps-users-table th:nth-child(11) { width: 100px; }
+/* Nhận dữ liệu + Đang sử dụng: cùng độ rộng để icon thẳng hàng ngang. */
+body.pushsale-app-body .ps-users-table .ps-col-flag,
+body.pushsale-app-body .ps-users-table th.ps-col-flag,
+body.pushsale-app-body .ps-users-table td.ps-col-flag {
+    width: 100px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+    text-align: center !important;
+}
 body.pushsale-app-body .ps-users-table .ps-col-updated { width: 145px; }
-body.pushsale-app-body .ps-users-table .ps-action-col { width: 132px; min-width: 132px; }
+body.pushsale-app-body .ps-users-table .ps-action-col,
+body.pushsale-app-body .ps-users-table th.ps-action-col,
+body.pushsale-app-body .ps-users-table td.ps-row-actions-cell {
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+}
 body.pushsale-app-body .ps-users-table .check0 { color: transparent; }
 body.pushsale-app-body .ps-users-table .check1 { color: forestgreen; }
 body.pushsale-app-body .ps-users-table .text-green { color: #008d4c; }
@@ -237,6 +257,56 @@ body.pushsale-app-body .ps-circle-status {
 }
 body.pushsale-app-body .ps-circle-status.is-off { color: #999; }
 body.pushsale-app-body .ps-circle-button:hover { color: #006c38; }
+
+/* Thao tác: 4 icon một hàng thẳng, không wrap 2x2. */
+body.pushsale-app-body .ps-users-page .ps-row-actions,
+body.pushsale-app-body .ps-users-table .ps-row-actions {
+    display: inline-flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    min-height: 22px !important;
+}
+body.pushsale-app-body .ps-users-page .ps-row-actions .btn-icon,
+body.pushsale-app-body .ps-users-page .ps-row-actions button,
+body.pushsale-app-body .ps-users-table .ps-row-actions .btn-icon,
+body.pushsale-app-body .ps-users-table .ps-row-actions button {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    flex: 0 0 22px !important;
+}
+body.pushsale-app-body .ps-users-page .ps-row-actions .btn-icon i,
+body.pushsale-app-body .ps-users-page .ps-row-actions button i {
+    display: block !important;
+    width: 14px !important;
+    text-align: center !important;
+    font-size: 13px !important;
+    line-height: 22px !important;
+}
+
+body.pushsale-app-body .ps-employee-inline {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px 18px !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+body.pushsale-app-body .ps-employee-inline > label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+}
 
 body.pushsale-app-body .ps-pagination-bar {
     display: flex;

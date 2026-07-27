@@ -2,6 +2,118 @@
 
 /* Admin dashboard header layout lives in pushsale-dashboard-toolbar-contract.css. */
 
+/* ------------------------------------------------------------------ */
+/* Role dashboards (sales / marketing / warehouse / accounting / allocator) */
+/* ------------------------------------------------------------------ */
+html body.pushsale-app-body .ps-role-dashboard.ps-page-shell {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-role-dashboard .ps-role-dash-body {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    padding: 0 0 16px !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-role-dash-links {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin: 0 0 4px !important;
+}
+
+html body.pushsale-app-body .ps-role-dash-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-height: 32px !important;
+    padding: 0 12px !important;
+    border: 1px solid #c8d2df !important;
+    background: #f7fafc !important;
+    color: #1a4f7a !important;
+    text-decoration: none !important;
+    font: 700 12px/1 Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-role-dash-link:hover {
+    background: #eaf4fb !important;
+    border-color: #2e91c7 !important;
+    color: #0d6aa8 !important;
+}
+
+html body.pushsale-app-body .ps-role-kpi-grid {
+    display: grid !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-role-kpi-grid.is-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-role-kpi-grid.is-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-role-kpi-card,
+html body.pushsale-app-body .ps-role-dashboard .ps-role-kpi-card {
+    min-height: 108px !important;
+    border: 1px solid #d7dfe7 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-role-chart-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-role-chart-grid.is-single {
+    grid-template-columns: minmax(0, 1fr) !important;
+}
+
+html body.pushsale-app-body .ps-role-chart-grid > * {
+    min-width: 0 !important;
+}
+
+@media (max-width: 1180px) {
+    html body.pushsale-app-body .ps-role-kpi-grid.is-4,
+    html body.pushsale-app-body .ps-role-kpi-grid.is-5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-role-kpi-grid.is-4,
+    html body.pushsale-app-body .ps-role-kpi-grid.is-5,
+    html body.pushsale-app-body .ps-role-chart-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .ps-role-dash-links {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .ps-role-dash-link {
+        width: 100% !important;
+        justify-content: flex-start !important;
+    }
+
+    html body.pushsale-app-body .ps-role-kpi-card {
+        min-height: 96px !important;
+    }
+}
+
 .ps-role-dashboard .ps-page-shell,
 .ps-role-dashboard .space-y-6 {
     margin: 0 !important;

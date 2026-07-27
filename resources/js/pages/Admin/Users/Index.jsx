@@ -208,9 +208,9 @@ export default function UsersIndex({
                                 <th className="text-center no-wrap">Số điện thoại</th>
                                 <th className="text-center no-wrap">Email</th>
                                 <th className="text-center no-wrap">Trưởng nhóm</th>
-                                <th className="text-center no-wrap">Nhận dữ liệu</th>
+                                <th className="text-center no-wrap ps-col-flag">Nhận dữ liệu</th>
                                 <th className="text-center no-wrap">Ca làm việc</th>
-                                <th className="text-center no-wrap">Đang sử dụng</th>
+                                <th className="text-center no-wrap ps-col-flag">Đang sử dụng</th>
                                 <th className="text-center no-wrap ps-col-updated">Ngày cập nhật</th>
                                 <th className="text-center ps-action-col">Thao tác</th>
                             </tr>
@@ -233,7 +233,7 @@ export default function UsersIndex({
                                             ? <i className="fa fa-check check1" title={row.team_name || 'Trưởng nhóm'} />
                                             : <i className="fa fa-check check0 hidden" />}
                                     </td>
-                                    <td className="text-center">
+                                    <td className="text-center ps-col-flag">
                                         <CircleStatus
                                             active={row.receive_data}
                                             disabled={!row.can_manage}
@@ -244,7 +244,7 @@ export default function UsersIndex({
                                         />
                                     </td>
                                     <td className="text-center">{row.work_shift || optionName(workShifts, row.work_shift_id)}</td>
-                                    <td className="text-center">
+                                    <td className="text-center ps-col-flag">
                                         <CircleStatus
                                             active={!row.is_locked}
                                             disabled={!row.can_manage}

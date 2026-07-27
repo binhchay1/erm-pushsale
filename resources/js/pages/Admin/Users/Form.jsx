@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { FieldError, RequiredMark } from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -69,7 +70,7 @@ export default function UserForm({
     const usesHierarchy = hierarchyRoles.includes(data.role);
     const isAdmin = data.role === 'admin';
     const isHead = data.org_level === 'head';
-    const managerRequired = usesHierarchy && !isHead;
+    // Quản lý trực tiếp luôn tùy chọn — quyền hiển thị theo role/team.
 
     const filteredManagers = useMemo(() => {
         const pool = managerPool.length ? managerPool : managers;
@@ -129,9 +130,6 @@ export default function UserForm({
             ...(isEdit ? {} : { password: [{ required: true, label: t('pages.users.password') }] }),
         });
 
-        if (managerRequired && !data.manager_user_id) {
-            clientErrors.manager_user_id = t('pages.users.select_manager');
-        }
         if (data.password && data.password !== data.password_confirmation) {
             clientErrors.password_confirmation = t('pages.users.password_mismatch');
         }
@@ -287,12 +285,10 @@ export default function UserForm({
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="base_salary">Mức lương cơ bản</Label>
-                                    <Input
+                                    <CurrencyInput
                                         id="base_salary"
-                                        type="number"
-                                        min="0"
-                                        value={data.base_salary}
-                                        onChange={(e) => setData('base_salary', e.target.value)}
+                                        value={data.base_salary === '' || data.base_salary == null ? '' : Number(data.base_salary)}
+                                        onChange={(amount) => setData('base_salary', amount)}
                                     />
                                     <FieldError message={errors.base_salary} />
                                 </div>
@@ -358,9 +354,6 @@ export default function UserForm({
                                     <div className="space-y-2">
                                         <Label htmlFor="manager_user_id">
                                             {t('pages.users.direct_manager')}
-                                            {managerRequired && (
-                                                <span className="text-destructive"> *</span>
-                                            )}
                                         </Label>
                                         <select
                                             id="manager_user_id"
@@ -369,9 +362,7 @@ export default function UserForm({
                                             onChange={(e) => setData('manager_user_id', e.target.value || '')}
                                         >
                                             <option value="">
-                                                {managerRequired
-                                                    ? t('pages.users.select_manager')
-                                                    : t('pages.users.no_select')}
+                                                {t('pages.users.no_select') || '--Chọn quản lý--'}
                                             </option>
                                             {filteredManagers.map((m) => (
                                                 <option key={m.id} value={m.id}>

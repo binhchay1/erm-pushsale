@@ -191,6 +191,12 @@ html body.pushsale-app-body .ps-page-header__filters {
     flex-wrap: nowrap !important;
 }
 
+html body.pushsale-app-body .ps-page-header.ps-report-v2-header .ps-page-header__filters,
+html body.pushsale-app-body .m-header-wrap.ps-report-v2-header .ps-page-header__filters {
+    justify-self: end !important;
+    justify-content: flex-end !important;
+}
+
 html body.pushsale-app-body .ps-page-header__actions {
     display: inline-flex !important;
     align-items: center !important;
@@ -978,6 +984,24 @@ html body.pushsale-app-body .ps-page-shell > .ps-page-shell__toolbar {
 
 html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body {
     padding-top: 10px !important;
+    padding-left: var(--ps-header-x) !important;
+    padding-right: var(--ps-header-x) !important;
+    padding-bottom: 14px !important;
+}
+
+/* Căn lề title / filter / toolbar / body: bỏ padding ngang kép từ page class. */
+html body.pushsale-app-body .ps-page-shell.ps-adminlte-page,
+html body.pushsale-app-body .ps-page-shell.pushsale-page-frame,
+html body.pushsale-app-body .ps-page-shell.ps-standard-list-page,
+html body.pushsale-app-body .ps-adminlte-page.ps-page-shell {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell__toolbar,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__toolbar {
+    padding-left: var(--ps-header-x) !important;
+    padding-right: var(--ps-header-x) !important;
 }
 
 /* --------------------------------------------------------- 8. Responsive

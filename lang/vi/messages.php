@@ -29,7 +29,7 @@ return [
     'user_org' => [
         'admin_no_manager' => 'Quản trị viên không có quản lý trực tiếp.',
         'admin_no_org_level' => 'Quản trị viên không gán cấp bậc phòng ban.',
-        'manager_required' => 'Nhân viên / giám sát phải chọn quản lý trực tiếp.',
+        'manager_required' => 'Nhân viên / giám sát nên chọn quản lý trực tiếp khi cần phân cấp (tùy chọn).',
         'manager_not_self' => 'Không thể chọn chính mình làm quản lý.',
         'manager_invalid' => 'Quản lý trực tiếp phải là trưởng bộ phận, giám sát hoặc quản trị.',
         'head_manager_admin_only' => 'Trưởng bộ phận chỉ được báo cáo lên quản trị viên.',

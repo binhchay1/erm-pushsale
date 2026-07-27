@@ -174,19 +174,17 @@ export default function LeadImportPage({ schema = {}, routeUrl }) {
                     )}
                     pageCode={pageCode}
                     className="ps-lead-import-header"
-                    filters={(
-                        <select
-                            className="ps-lead-import-status"
-                            value={status}
-                            onChange={(event) => setStatus(event.target.value)}
-                        >
-                            {STATUS_OPTIONS.map((option) => (
-                                <option key={option.value || 'all'} value={option.value}>{option.label}</option>
-                            ))}
-                        </select>
-                    )}
                     actions={(
-                        <div className="ps-lead-import-search">
+                        <div className="ps-lead-import-search ps-lead-import-search--with-filters">
+                            <select
+                                className="ps-lead-import-status"
+                                value={status}
+                                onChange={(event) => setStatus(event.target.value)}
+                            >
+                                {STATUS_OPTIONS.map((option) => (
+                                    <option key={option.value || 'all'} value={option.value}>{option.label}</option>
+                                ))}
+                            </select>
                             <input
                                 type="text"
                                 className="form-control"

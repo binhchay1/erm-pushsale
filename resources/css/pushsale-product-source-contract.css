@@ -57,6 +57,7 @@ html body.pushsale-app-body .ps-product-guide {
     color: #f00 !important;
     font-size: 12px !important;
     line-height: 18px !important;
+    box-sizing: border-box !important;
 }
 
 html body.pushsale-app-body .ps-product-guide strong {
@@ -410,6 +411,11 @@ html body.pushsale-app-body .ps-product-guide {
     overflow: hidden !important;
 }
 
+html body.pushsale-app-body .ps-product-source-modal .ps-product-guide {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
 @media (max-width: 1280px) {
     html body.pushsale-app-body .ps-product-source-grid {
         grid-template-columns: 95px minmax(0, 1fr) 95px minmax(0, 1fr) !important;
@@ -747,6 +753,21 @@ html body.pushsale-app-body .ps-product-source-modal .ps-product-source-form {
     min-width: 1320px !important;
 }
 
+/* Modal dùng grid 4 cột (không còn cột nhãn 150px) — chỉ dẫn / checkbox / nút Lưu thẳng hàng trái. */
+html body.pushsale-app-body .ps-product-source-modal .ps-product-guide {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 14px 0 !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-source-check {
+    margin: 0 0 14px 0 !important;
+}
+
+html body.pushsale-app-body .ps-product-source-modal .ps-save-button {
+    margin: 18px 0 20px 0 !important;
+}
+
 html body.pushsale-app-body .ps-product-source-modal .ps-product-source-grid {
     display: grid !important;
     grid-template-columns: repeat(4, minmax(270px, 1fr)) !important;
@@ -786,6 +807,7 @@ html body.pushsale-app-body .ps-product-source-modal .ps-product-field > span {
 html body.pushsale-app-body .ps-product-source-modal .ps-product-field > input,
 html body.pushsale-app-body .ps-product-source-modal .ps-product-field > select,
 html body.pushsale-app-body .ps-product-source-modal .ps-product-field > .ps-search-select,
+html body.pushsale-app-body .ps-product-source-modal .ps-product-field > .ps-currency-input,
 html body.pushsale-app-body .ps-product-source-modal .ps-product-field > div:not(.ps-search-select-menu) {
     min-width: 0 !important;
     width: 100% !important;
@@ -808,7 +830,7 @@ html body.pushsale-app-body .ps-product-source-modal .ps-vat-field > div {
 }
 
 html body.pushsale-app-body .ps-product-source-modal .ps-product-attribute-builder {
-    margin: 2px 0 16px 150px !important;
+    margin: 2px 0 16px 0 !important;
     padding: 10px 12px !important;
     border: 1px solid #d9e4f3 !important;
     background: #f8fbff !important;
