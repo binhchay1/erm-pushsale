@@ -196,6 +196,28 @@ body.public-app-body .public-login-input input {
 }
 
 body.public-app-body .public-login-error { margin: 5px 0 0; color: #dc2626; font-size: 12px; }
+
+body.public-app-body .public-login-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border: 1px solid #fecaca;
+    border-radius: 9px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+body.public-app-body .public-login-alert svg {
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
 body.public-app-body .public-login-remember { display: flex; align-items: center; gap: 8px; margin: 18px 0; color: #64748b; font-size: 13px; cursor: pointer; }
 body.public-app-body .public-login-remember input { width: 15px; height: 15px; accent-color: #0b84f3; }
 

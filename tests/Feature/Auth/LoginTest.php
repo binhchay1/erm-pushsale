@@ -73,6 +73,27 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_invalid_credentials_return_inertia_validation_errors(): void
+    {
+        User::factory()->create([
+            'email' => 'sales@saleops.local',
+            'password' => 'password',
+            'role' => UserRole::Sales,
+        ]);
+
+        $response = $this->withHeaders([
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->post('/login', [
+            'email' => 'sales@saleops.local',
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['email']);
+        $this->assertGuest();
+    }
+
     public function test_logout_invalidates_auth_and_redirects_to_login(): void
     {
         $user = User::factory()->create([

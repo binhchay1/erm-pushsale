@@ -18,19 +18,19 @@ class LoginController extends Controller
 {
     public function create(): Response
     {
-        return Inertia::render('Auth/Login');
+        return Inertia::render('Auth/Login', [
+            'old' => [
+                'email' => old('email'),
+            ],
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        try {
-            $credentials = $request->validate([
-                'email' => ['required', 'email'],
-                'password' => ['required', 'string'],
-            ]);
-        } catch (ValidationException $e) {
-            throw $e->redirectTo(route('login'));
-        }
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
 
         $candidate = User::withoutTenant()
             ->with('company:id,name,status,expires_at')
