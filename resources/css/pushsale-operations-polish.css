@@ -94,7 +94,7 @@ html body.pushsale-app-body .ps-sale-workspace-page {
 html body.pushsale-app-body .ps-sale-filter-shell {
     margin: 0 !important;
     border: 0 !important;
-    border-bottom: 1px solid #d5dce3 !important;
+    border-bottom: 0 !important;
     background: #fff !important;
 }
 

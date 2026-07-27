@@ -470,8 +470,11 @@ function optionsForField(field, filterOptions) {
 }
 
 function defaultFormPayload(fields, row = {}) {
+    const now = new Date();
     return Object.fromEntries((fields ?? []).map((field) => {
-        const fallback = field.type === 'checkbox' ? Boolean(field.default ?? false) : field.type === 'multiselect' ? [] : (field.default ?? '');
+        let fallback = field.type === 'checkbox' ? Boolean(field.default ?? false) : field.type === 'multiselect' ? [] : (field.default ?? '');
+        if (field.key === 'year' && (fallback === '' || fallback == null)) fallback = now.getFullYear();
+        if (field.key === 'month' && (fallback === '' || fallback == null)) fallback = now.getMonth() + 1;
         const raw = row?._form?.[field.key] ?? row?.[field.key] ?? fallback;
         return [field.key, raw ?? fallback];
     }));
@@ -566,6 +569,7 @@ function PushsaleEditorDialog({ open, schema, row, dialogHtml = '', dialogSchema
     const title = dialogSchema?.title ?? schema.title;
     const [payload, setPayload] = useState(() => defaultFormPayload(fields, row));
     const [saving, setSaving] = useState(false);
+    const [dialogError, setDialogError] = useState('');
     const [editingDialogRecord, setEditingDialogRecord] = useState(null);
     const [capturedFieldCount, setCapturedFieldCount] = useState(0);
     const dialogRef = useRef(null);
@@ -573,6 +577,7 @@ function PushsaleEditorDialog({ open, schema, row, dialogHtml = '', dialogSchema
     useEffect(() => {
         setPayload(defaultFormPayload(fields, row));
         setEditingDialogRecord(null);
+        setDialogError('');
     }, [open, row, dialogSchema, schema.code]);
 
     useEffect(() => {
@@ -602,9 +607,12 @@ function PushsaleEditorDialog({ open, schema, row, dialogHtml = '', dialogSchema
     const submit = async () => {
         const finalPayload = collectBoundFormValues(dialogRef.current, fields, payload);
         setSaving(true);
+        setDialogError('');
         try {
             await onSaved(finalPayload, editingDialogRecord?.id ?? row?._record_id);
             onClose();
+        } catch (exception) {
+            setDialogError(exception?.message || 'Không thể lưu dữ liệu.');
         } finally {
             setSaving(false);
         }
@@ -677,12 +685,13 @@ function PushsaleEditorDialog({ open, schema, row, dialogHtml = '', dialogSchema
                 <div className="pushsale-generated-form">
                     {(dialogHtml ? missingFields : fields).map((field) => (
                         <label key={field.key} className={`pushsale-form-field pushsale-form-field-${field.type ?? 'text'}`}>
-                            <span>{field.label}{field.required ? ' (*)' : ''}</span>
+                            <span>{field.label}{field.required ? <> <b className="required">(*)</b></> : null}</span>
                             <FormField field={field} value={payload[field.key]} filterOptions={filterOptions} onChange={(value) => setPayload((current) => ({ ...current, [field.key]: value }))} />
                         </label>
                     ))}
                 </div>
             )}
+            {dialogError ? <div className="alert alert-danger" style={{ marginTop: 12 }}>{dialogError}</div> : null}
         </PushsaleDialog>
     );
 
@@ -1433,18 +1442,12 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
     const editorDialogHtml = editor.dialogCode ? (dialogTemplates[editor.dialogCode] ?? '') : '';
 
     const save = async (payload, recordId) => {
-        setError('');
         const dialogStore = editor.dialogSchema?.store_url;
         const target = dialogStore
             ? (recordId ? `${dialogStore}/${recordId}` : dialogStore)
             : (recordId ? `${routeUrl}/records/${recordId}` : `${routeUrl}/records`);
-        try {
-            await requestJson(target, recordId ? 'PUT' : 'POST', { payload });
-            router.reload({ preserveScroll: true, only: ['schema', 'rows', 'pagination', 'summary', 'filterOptions'] });
-        } catch (exception) {
-            setError(exception.message);
-            throw exception;
-        }
+        await requestJson(target, recordId ? 'PUT' : 'POST', { payload });
+        router.reload({ preserveScroll: true, only: ['schema', 'rows', 'pagination', 'summary', 'filterOptions'] });
     };
 
     const performRemove = useCallback(async (row) => {

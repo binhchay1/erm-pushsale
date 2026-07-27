@@ -406,6 +406,22 @@ html body.pushsale-app-body .ps-page-header__advanced {
     z-index: 19 !important;
 }
 
+/* Nhiều trang gắn lại border-bottom trên form/grid con — tắt hết divider dưới filter bổ sung. */
+html body.pushsale-app-body .ps-page-extra-filters > *,
+html body.pushsale-app-body .ps-page-header__advanced > *,
+html body.pushsale-app-body .ps-page-shell__advanced-row,
+html body.pushsale-app-body .ps-page-extra-filters .ps-login-filter-grid,
+html body.pushsale-app-body .ps-page-extra-filters .ps-filter-grid,
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-filters,
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-work-advanced,
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-work-secondary,
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-panel,
+html body.pushsale-app-body .ps-page-extra-filters .ps-expense-filters,
+html body.pushsale-app-body .ps-page-extra-filters .psm-filter-grid {
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+}
+
 html body.pushsale-app-body .ps-page-extra-filters[hidden],
 html body.pushsale-app-body .ps-page-header__advanced[hidden] {
     display: none !important;

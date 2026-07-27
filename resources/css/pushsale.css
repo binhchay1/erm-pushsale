@@ -941,7 +941,7 @@ body.pushsale-app-body .ps-sale-work-secondary {
     gap: 30px;
     min-height: 57px;
     padding: 13px 14px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 0;
     background: #fff;
 }
 
@@ -965,7 +965,8 @@ body.pushsale-app-body .ps-grid-count button {
 }
 
 body.pushsale-app-body .ps-sale-work-table {
-    min-width: 1900px;
+    min-width: 0;
+    width: 100%;
 }
 
 body.pushsale-app-body .ps-sale-work-table thead tr:first-child th {
@@ -978,7 +979,7 @@ body.pushsale-app-body .ps-sale-work-table thead tr:nth-child(2) th {
 
 body.pushsale-app-body .ps-sale-work-table th:nth-child(2),
 body.pushsale-app-body .ps-sale-work-table td:nth-child(2) {
-    min-width: 190px;
+    min-width: 0;
 }
 
 body.pushsale-app-body .ps-sale-work-report > .ps-pager,

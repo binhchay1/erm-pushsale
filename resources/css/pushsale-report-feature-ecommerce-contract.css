@@ -171,6 +171,12 @@ html body.pushsale-app-body .ps-sale-work-report .ps-grid-count-top {
 
 html body.pushsale-app-body .ps-sale-work-report .ps-table-scroll {
     margin-top: 8px !important;
+    overflow-x: hidden !important;
+}
+
+html body.pushsale-app-body .ps-sale-work-table {
+    min-width: 0 !important;
+    width: 100% !important;
 }
 
 html body.pushsale-app-body .ps-sale-work-table thead th {

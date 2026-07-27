@@ -102,8 +102,11 @@ html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__advanced-row {
     gap: 18px !important;
     margin: 0 !important;
     padding: 10px 15px !important;
-    border-top: 1px solid #e5e5e5 !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
     background: #fff !important;
+    box-shadow: none !important;
 }
 
 html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__advanced-row .ps-report-toolbar-controls,

@@ -1,0 +1,179 @@
+/* 6.2 Quản lý chi phí đơn vị — PageHeader + shell + dialog form */
+
+html body.pushsale-app-body .ps-expense-page .ps-page-shell__body,
+html body.pushsale-app-body .ps-expense-page .ps-expense-body {
+    padding: 10px 12px 14px !important;
+}
+
+html body.pushsale-app-body .ps-expense-header .ps-header-search,
+html body.pushsale-app-body .ps-expense-search {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-expense-search .form-control {
+    width: min(220px, 28vw) !important;
+    min-width: 140px !important;
+    height: 32px !important;
+}
+
+html body.pushsale-app-body .ps-expense-filters {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(140px, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .ps-expense-filters > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-expense-toolbar {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    margin: 0 0 10px !important;
+}
+
+html body.pushsale-app-body .ps-expense-table-scroll {
+    width: 100% !important;
+    overflow-x: auto !important;
+}
+
+html body.pushsale-app-body .ps-expense-table {
+    width: 100% !important;
+    min-width: 1100px !important;
+    margin: 0 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-expense-table > thead > tr > th {
+    background: #3c8dbc !important;
+    color: #fff !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+    font-weight: 600 !important;
+    padding: 8px 6px !important;
+}
+
+html body.pushsale-app-body .ps-expense-table > tbody > tr > td {
+    vertical-align: middle !important;
+    padding: 7px 6px !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-expense-table .ps-money-cell {
+    text-align: right !important;
+    white-space: nowrap !important;
+    padding-right: 10px !important;
+}
+
+html body.pushsale-app-body .ps-expense-table td.ps-row-actions-cell,
+html body.pushsale-app-body .ps-expense-table th.ps-action-col {
+    white-space: nowrap !important;
+    text-align: center !important;
+}
+
+html body.pushsale-app-body .ps-expense-table td.ps-row-actions-cell button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 28px !important;
+    height: 28px !important;
+    margin: 0 2px !important;
+    padding: 0 !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 2px !important;
+    background: #fff !important;
+    color: #3c8dbc !important;
+}
+
+html body.pushsale-app-body .ps-expense-table td.ps-row-actions-cell button:hover {
+    background: #f4f8fb !important;
+    border-color: #3c8dbc !important;
+}
+
+html body.pushsale-app-body .ps-expense-footer {
+    display: flex !important;
+    justify-content: flex-end !important;
+    margin-top: 10px !important;
+}
+
+html body.pushsale-app-body .ps-expense-dialog .ps-dialog-body {
+    padding: 16px !important;
+}
+
+html body.pushsale-app-body .ps-expense-form {
+    display: grid !important;
+    gap: 12px !important;
+}
+
+html body.pushsale-app-body .ps-expense-form-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px 16px !important;
+}
+
+html body.pushsale-app-body .ps-expense-form label,
+html body.pushsale-app-body .ps-expense-form-grid label {
+    display: grid !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+}
+
+html body.pushsale-app-body .ps-expense-form label.span-2,
+html body.pushsale-app-body .ps-expense-form-grid label.span-2 {
+    grid-column: 1 / -1 !important;
+}
+
+html body.pushsale-app-body .ps-expense-form label > span,
+html body.pushsale-app-body .ps-expense-form-grid label > span {
+    color: #333 !important;
+}
+
+html body.pushsale-app-body .ps-expense-form label b.required,
+html body.pushsale-app-body .ps-expense-form-grid label b.required,
+html body.pushsale-app-body .ps-expense-form label > span b,
+html body.pushsale-app-body .ps-expense-form-grid label > span b,
+html body.pushsale-app-body .pushsale-generated-form label b.required,
+html body.pushsale-app-body .pushsale-editor-dialog b.required {
+    color: #f00 !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-expense-form .form-control,
+html body.pushsale-app-body .ps-expense-form-grid .form-control {
+    height: 32px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-expense-form textarea.form-control,
+html body.pushsale-app-body .ps-expense-form-grid textarea.form-control {
+    height: auto !important;
+    min-height: 72px !important;
+}
+
+html body.pushsale-app-body .ps-expense-form .alert,
+html body.pushsale-app-body .ps-expense-dialog .alert {
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+}
+
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-expense-filters {
+        grid-template-columns: repeat(2, minmax(140px, 1fr)) !important;
+    }
+
+    html body.pushsale-app-body .ps-expense-form-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}

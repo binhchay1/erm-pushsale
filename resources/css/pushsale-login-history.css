@@ -52,7 +52,7 @@ body.pushsale-app-body .ps-login-filter-grid {
     gap: 10px 12px;
     align-items: center;
     padding: 12px 0 14px;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 0;
 }
 
 body.pushsale-app-body .ps-login-date-range {

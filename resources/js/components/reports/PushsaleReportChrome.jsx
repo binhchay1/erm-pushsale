@@ -113,7 +113,7 @@ function exportUrl(routeUrl, filters) {
             params.set(key, String(value));
         }
     });
-    params.set('export', 'xls');
+    params.set('export', '1');
     const separator = routeUrl.includes('?') ? '&' : '?';
     return `${routeUrl}${separator}${params.toString()}`;
 }

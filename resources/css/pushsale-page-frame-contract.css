@@ -113,7 +113,10 @@ html body.pushsale-app-body .ps-page-shell__toolbar {
     padding: 10px var(--ps-frame-x) !important;
     background: #fff !important;
     border: 0 !important;
-    border-bottom: 1px solid var(--ps-frame-border) !important;
+}
+
+html body.pushsale-app-body .ps-page-shell__advanced-row {
+    border-bottom: 0 !important;
 }
 
 html body.pushsale-app-body .ps-page-shell__advanced-row[hidden] {

@@ -352,7 +352,11 @@ class PushsalePageService
         $loaders = [
             'operationCategories' => fn (): array => OperationCategory::query()->orderBy('sort_order')->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (OperationCategory $item) => ['id' => $item->id, 'label' => $item->name])->all(),
             'expenseGroups' => fn (): array => ExpenseGroup::query()->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (ExpenseGroup $item) => ['id' => $item->id, 'label' => $item->name])->all(),
-            'expenseCategories' => fn (): array => ExpenseCategory::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (ExpenseCategory $item) => ['id' => $item->id, 'label' => $item->name])->all(),
+            'expenseCategories' => fn (): array => ExpenseCategory::query()->orderBy('name')->limit(1000)->get(['id', 'name', 'expense_group_id'])->map(fn (ExpenseCategory $item) => [
+                'id' => $item->id,
+                'label' => $item->name,
+                'expense_group_id' => $item->expense_group_id,
+            ])->all(),
             'expenseUnits' => fn (): array => ExpenseUnit::query()->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (ExpenseUnit $item) => ['id' => $item->id, 'label' => $item->name])->all(),
             'productCategories' => fn (): array => ProductCategory::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (ProductCategory $item) => ['id' => $item->id, 'label' => $item->name])->all(),
             'productAttributes' => fn (): array => ProductAttribute::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (ProductAttribute $item) => ['id' => $item->id, 'label' => $item->name])->all(),
@@ -1114,6 +1118,9 @@ class PushsalePageService
                 'sale' => $row['name'],
                 'total_contacts' => $row['contacts'],
                 'untouched' => $row['untouched'],
+                '_sale_id' => $row['id'],
+                '_sale_team_id' => $row['_sale_team_id'] ?? null,
+                '_sale_leader_id' => $row['_sale_leader_id'] ?? null,
             ];
             foreach ($stages as $stage) {
                 $metric = $row['stage_metrics'][$stage] ?? ['contacts' => 0, 'untouched' => 0];
@@ -2607,6 +2614,8 @@ class PushsalePageService
             'note' => $row->note,
             'updated_at' => $row->updated_at?->toIso8601String(),
             '_record_id' => $row->id,
+            '_expense_group_id' => $row->expense_group_id,
+            '_expense_category_id' => $row->expense_category_id,
             '_form' => $this->formPayload('6.2.1', $row),
         ]);
     }
@@ -2875,6 +2884,10 @@ class PushsalePageService
             'status' => 'status',
             'contract_type' => 'contract_type',
             'payment_code' => 'payment_code',
+            'year' => 'year',
+            'month' => 'month',
+            'expense_group_id' => '_expense_group_id',
+            'expense_category_id' => '_expense_category_id',
         ];
 
         foreach ($filters as $queryKey => $rowKey) {
