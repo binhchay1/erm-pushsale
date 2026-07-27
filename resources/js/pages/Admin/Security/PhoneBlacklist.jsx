@@ -1,5 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -31,6 +32,20 @@ function creationTypeLabel(value, t) {
     return value || '';
 }
 
+function flattenErrors(errors = {}) {
+    return Object.entries(errors).flatMap(([key, value]) => {
+        const messages = Array.isArray(value) ? value : [value];
+        return messages.filter(Boolean).map((message) => {
+            const field = key.replace(/^payload\./, '');
+            return field && field !== key ? `${field}: ${message}` : message;
+        });
+    });
+}
+
+function normalizePhone(value) {
+    return String(value ?? '').replace(/[^\d+]/g, '').trim();
+}
+
 export default function PhoneBlacklist({
     schema,
     rows = [],
@@ -48,6 +63,7 @@ export default function PhoneBlacklist({
     const form = useForm(emptyForm);
 
     const title = t('pages.phone_blacklist.title');
+    const fieldError = (key) => form.errors[key] ?? form.errors[`payload.${key}`] ?? '';
 
     const search = (event) => {
         event?.preventDefault?.();
@@ -65,24 +81,79 @@ export default function PhoneBlacklist({
         setEditingId(row._record_id);
         form.setData({
             ...emptyForm,
-            ...(row._form ?? {}),
             phone: row._form?.phone ?? row.phone ?? '',
             reason: row._form?.reason ?? row.reason ?? '',
+            order_id: row._form?.order_id ?? row.order_id ?? '',
+            creation_type: row._form?.creation_type ?? row.creation_type ?? 'manual',
         });
         form.clearErrors();
         setEditorOpen(true);
     };
 
+    const validateClient = () => {
+        const nextErrors = {};
+        const phone = normalizePhone(form.data.phone);
+        if (!phone) {
+            nextErrors.phone = 'Số blacklist bắt buộc.';
+        } else if (!/^\+?\d{8,15}$/.test(phone)) {
+            nextErrors.phone = 'Số điện thoại phải gồm 8–15 chữ số.';
+        }
+
+        if (!['manual', 'warehouse', 'automatic'].includes(String(form.data.creation_type))) {
+            nextErrors.creation_type = 'Kiểu tạo không hợp lệ.';
+        }
+
+        return nextErrors;
+    };
+
     const save = (event) => {
         event.preventDefault();
-        const options = { preserveScroll: true, onSuccess: () => setEditorOpen(false) };
-        if (editingId) form.transform((data) => ({ payload: data })).put(`${routeUrl}/records/${editingId}`, options);
-        else form.transform((data) => ({ payload: data })).post(`${routeUrl}/records`, options);
+        form.clearErrors();
+
+        const clientErrors = validateClient();
+        if (Object.keys(clientErrors).length) {
+            Object.entries(clientErrors).forEach(([key, message]) => form.setError(key, message));
+            toast.error('Vui lòng kiểm tra lại thông tin blacklist.');
+            return;
+        }
+
+        const payload = {
+            phone: normalizePhone(form.data.phone),
+            reason: String(form.data.reason ?? '').trim() || null,
+            order_id: form.data.order_id ? Number(form.data.order_id) : null,
+            creation_type: form.data.creation_type || 'manual',
+        };
+
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => {
+                setEditorOpen(false);
+                toast.success(editingId ? 'Đã cập nhật số blacklist.' : 'Đã thêm số blacklist.');
+            },
+            onError: (errors) => {
+                const mapped = {};
+                Object.entries(errors ?? {}).forEach(([key, value]) => {
+                    mapped[key.replace(/^payload\./, '')] = Array.isArray(value) ? value[0] : value;
+                });
+                Object.entries(mapped).forEach(([key, message]) => form.setError(key, message));
+                toast.error(flattenErrors(errors).join(' · ') || 'Không lưu được số blacklist.');
+            },
+        };
+
+        if (editingId) {
+            router.put(`${routeUrl}/records/${editingId}`, { payload }, options);
+        } else {
+            router.post(`${routeUrl}/records`, { payload }, options);
+        }
     };
 
     const destroy = (row) => {
         if (!row._record_id || !window.confirm(t('pages.phone_blacklist.delete_confirm', { phone: row.phone }))) return;
-        router.delete(`${routeUrl}/records/${row._record_id}`, { preserveScroll: true });
+        router.delete(`${routeUrl}/records/${row._record_id}`, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Đã xóa số blacklist.'),
+            onError: () => toast.error('Không xóa được số blacklist.'),
+        });
     };
 
     return (
@@ -104,6 +175,7 @@ export default function PhoneBlacklist({
                                 className="form-control"
                                 value={keyword}
                                 onChange={(event) => setKeyword(event.target.value)}
+                                placeholder={t('pages.phone_blacklist.col_phone')}
                             />
                             <PushsaleSearchButton type="submit" label={t('common.search')} />
                         </form>
@@ -116,7 +188,7 @@ export default function PhoneBlacklist({
             />
             <section className="ps-adminlte-page ps-blacklist-page" data-page-code="1.13.1">
                 <div className="box-body ps-blacklist-body">
-                    <div className="ps-table-scroll">
+                    <div className="ps-table-scroll ps-blacklist-table-wrap">
                         <table className="table table-bordered table-multi-select ps-blacklist-table">
                             <thead>
                                 <tr>
@@ -175,18 +247,23 @@ export default function PhoneBlacklist({
                 open={editorOpen}
                 onOpenChange={(open) => !open && setEditorOpen(false)}
                 title={editingId ? t('pages.phone_blacklist.update_title') : t('pages.phone_blacklist.add')}
-                width="600px"
+                width="480px"
                 className="ps-blacklist-dialog"
+                bodyClassName="ps-blacklist-dialog-body"
             >
-                <form onSubmit={save} className="ps-blacklist-form">
+                <form onSubmit={save} className="ps-blacklist-form" noValidate>
                     <label>
                         <span>{t('pages.phone_blacklist.phone_required')} <b>(*)</b></span>
-                        <input
-                            className="form-control"
-                            value={form.data.phone}
-                            onChange={(event) => form.setData('phone', event.target.value)}
-                            required
-                        />
+                        <div>
+                            <input
+                                className="form-control"
+                                value={form.data.phone}
+                                onChange={(event) => form.setData('phone', event.target.value)}
+                                inputMode="tel"
+                                autoComplete="off"
+                            />
+                            {fieldError('phone') ? <small className="ps-field-error">{fieldError('phone')}</small> : null}
+                        </div>
                     </label>
                     <label>
                         <span>{t('pages.phone_blacklist.reason')}</span>
@@ -212,25 +289,30 @@ export default function PhoneBlacklist({
                     </label>
                     <label>
                         <span>{t('pages.phone_blacklist.creation_type')}</span>
-                        <select
-                            className="form-control"
-                            value={form.data.creation_type}
-                            onChange={(event) => form.setData('creation_type', event.target.value)}
-                        >
-                            <option value="manual">{t('pages.phone_blacklist.type_manual')}</option>
-                            <option value="warehouse">{t('pages.phone_blacklist.type_warehouse')}</option>
-                            <option value="automatic">{t('pages.phone_blacklist.type_automatic')}</option>
-                        </select>
+                        <div>
+                            <select
+                                className="form-control"
+                                value={form.data.creation_type}
+                                onChange={(event) => form.setData('creation_type', event.target.value)}
+                            >
+                                <option value="manual">{t('pages.phone_blacklist.type_manual')}</option>
+                                <option value="warehouse">{t('pages.phone_blacklist.type_warehouse')}</option>
+                                <option value="automatic">{t('pages.phone_blacklist.type_automatic')}</option>
+                            </select>
+                            {fieldError('creation_type') ? <small className="ps-field-error">{fieldError('creation_type')}</small> : null}
+                        </div>
                     </label>
-                    {Object.keys(form.errors).length ? (
-                        <div className="alert alert-danger">{Object.values(form.errors).join(' · ')}</div>
+                    {flattenErrors(form.errors).length ? (
+                        <div className="alert alert-danger">{flattenErrors(form.errors).join(' · ')}</div>
                     ) : null}
                     <div className="ps-dialog-footer">
                         <button type="button" className="btn btn-default btn-sm" onClick={() => setEditorOpen(false)}>
                             {t('common.close')}
                         </button>
                         <button className="btn btn-primary btn-sm" disabled={form.processing}>
-                            <i className="fa fa-save" /> {t('pages.phone_blacklist.update')}
+                            <i className={`fa ${form.processing ? 'fa-spinner fa-spin' : 'fa-save'}`} />
+                            {' '}
+                            {editingId ? t('pages.phone_blacklist.update') : 'Lưu'}
                         </button>
                     </div>
                 </form>

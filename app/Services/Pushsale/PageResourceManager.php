@@ -95,7 +95,11 @@ class PageResourceManager
         abort_unless($definition, 404);
 
         $normalized = $this->normalizePayload($definition, $payload);
-        $validated = Validator::make($normalized, (array) ($definition['rules'] ?? []))->validate();
+        $validated = Validator::make(
+            $normalized,
+            (array) ($definition['rules'] ?? []),
+            (array) ($definition['messages'] ?? []),
+        )->validate();
 
         if (($definition['special'] ?? null) === 'combo') {
             $validated = $this->validateComboPayload($validated);
