@@ -2,13 +2,19 @@ import { Head, router } from '@inertiajs/react';
 import { Eye } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
+import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
-import { PushsalePager } from '@/components/reports/PushsaleReportChrome';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
 function cleanPayload(payload = {}) {
     return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined && value !== null && value !== '' && value !== '-1'));
+}
+
+function currentFilters() {
+    if (typeof window === 'undefined') return {};
+    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
 }
 
 function DetailTable({ rows = [], emptyText }) {
@@ -111,6 +117,7 @@ export default function ActivityLogsIndex({ logs, filters, actionOptions = [], s
         search: filters?.search ?? '',
         date_from: filters?.date_from ?? '',
         date_to: filters?.date_to ?? '',
+        per_page: filters?.per_page ?? meta.per_page ?? 25,
     }));
 
     useEffect(() => {
@@ -121,8 +128,9 @@ export default function ActivityLogsIndex({ logs, filters, actionOptions = [], s
             search: filters?.search ?? '',
             date_from: filters?.date_from ?? '',
             date_to: filters?.date_to ?? '',
+            per_page: filters?.per_page ?? meta.per_page ?? 25,
         });
-    }, [filters]);
+    }, [filters, meta.per_page]);
 
     const setField = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
 
@@ -138,65 +146,78 @@ export default function ActivityLogsIndex({ logs, filters, actionOptions = [], s
         router.get('/admin/activity-logs', {}, { preserveState: false, preserveScroll: false, replace: true });
     };
 
-    const actionFilters = useMemo(() => (
-        <form className="ps-activity-filter-grid" onSubmit={(event) => { event.preventDefault(); search({ page: 1 }); }}>
-            <label>
-                <span>{t('activity.filter_action')}</span>
-                <select className="form-control input-sm" value={draft.action} onChange={(event) => setField('action', event.target.value)}>
-                    <option value="">{t('activity.all')}</option>
-                    {actionOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                </select>
-            </label>
-            <label>
-                <span>{t('activity.filter_user')}</span>
-                <select className="form-control input-sm" value={draft.user_id} onChange={(event) => setField('user_id', event.target.value)}>
-                    <option value="">{t('activity.all')}</option>
-                    {users.map((user) => <option key={user.id} value={user.id}>{user.name}</option>)}
-                </select>
-            </label>
-            <label>
-                <span>{t('activity.filter_subject')}</span>
-                <select className="form-control input-sm" value={draft.subject_type} onChange={(event) => setField('subject_type', event.target.value)}>
-                    <option value="">{t('activity.all')}</option>
-                    {subjectTypeOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                </select>
-            </label>
-            <label>
-                <span>{t('activity.filter_search')}</span>
-                <input className="form-control input-sm" value={draft.search} onChange={(event) => setField('search', event.target.value)} placeholder="Từ khóa / nhãn / đối tượng" />
-            </label>
-            <label>
-                <span>{t('activity.filter_date_from')}</span>
-                <input className="form-control input-sm" type="date" value={draft.date_from} onChange={(event) => setField('date_from', event.target.value)} />
-            </label>
-            <label>
-                <span>{t('activity.filter_date_to')}</span>
-                <input className="form-control input-sm" type="date" value={draft.date_to} onChange={(event) => setField('date_to', event.target.value)} />
-            </label>
-        </form>
-    ), [actionOptions, draft, subjectTypeOptions, t, users]);
-
-    const actions = (
-        <div className="ps-activity-actions">
-            <button type="button" className="btn btn-sm btn-primary" onClick={() => search({ page: 1 })}>
-                <i className="fa fa-search" aria-hidden="true" /> Tìm kiếm
-            </button>
+    const filterToolbar = useMemo(() => (
+        <form
+            className="ps-activity-filter-toolbar"
+            onSubmit={(event) => {
+                event.preventDefault();
+                search({ page: 1 });
+            }}
+        >
+            <select
+                className="form-control input-sm"
+                value={draft.action}
+                onChange={(event) => setField('action', event.target.value)}
+                aria-label={t('activity.filter_action')}
+            >
+                <option value="">{t('activity.filter_action')}</option>
+                {actionOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+            </select>
+            <select
+                className="form-control input-sm"
+                value={draft.user_id}
+                onChange={(event) => setField('user_id', event.target.value)}
+                aria-label={t('activity.filter_user')}
+            >
+                <option value="">{t('activity.filter_user')}</option>
+                {users.map((user) => <option key={user.id} value={user.id}>{user.name}</option>)}
+            </select>
+            <select
+                className="form-control input-sm"
+                value={draft.subject_type}
+                onChange={(event) => setField('subject_type', event.target.value)}
+                aria-label={t('activity.filter_subject')}
+            >
+                <option value="">{t('activity.filter_subject')}</option>
+                {subjectTypeOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+            </select>
+            <input
+                className="form-control input-sm"
+                value={draft.search}
+                onChange={(event) => setField('search', event.target.value)}
+                placeholder={t('activity.filter_search')}
+                aria-label={t('activity.filter_search')}
+            />
+            <input
+                className="form-control input-sm"
+                type="date"
+                value={draft.date_from}
+                onChange={(event) => setField('date_from', event.target.value)}
+                aria-label={t('activity.filter_date_from')}
+            />
+            <input
+                className="form-control input-sm"
+                type="date"
+                value={draft.date_to}
+                onChange={(event) => setField('date_to', event.target.value)}
+                aria-label={t('activity.filter_date_to')}
+            />
+            <PushsaleSearchButton type="submit" label={t('common.search')} />
             <button type="button" className="btn btn-sm btn-default" onClick={reset} title="Xóa lọc">
                 <i className="fa fa-refresh" aria-hidden="true" />
             </button>
-        </div>
-    );
+        </form>
+    ), [actionOptions, draft, subjectTypeOptions, t, users]);
 
     return (
         <AppLayout>
             <Head title={t('activity.title')} />
             <PushsalePageShell
                 title={t('activity.title')}
-                subtitle={t('activity.desc')}
-                primaryFilters={actionFilters}
-                actions={actions}
+                actions={filterToolbar}
                 className="ps-activity-log-page pushsale-page"
                 data-page-code="activity-logs"
+                collapsible={false}
             >
                 <div className="ps-table-scroll ps-activity-table-wrap">
                     <table className="table table-bordered table-striped table-condensed ps-activity-table">
@@ -233,12 +254,13 @@ export default function ActivityLogsIndex({ logs, filters, actionOptions = [], s
                     </table>
                 </div>
 
-                <div className="ps-activity-pagination">
-                    <div className="ps-activity-record-info">
-                        {meta.total ?? 0} bản ghi · Trang {meta.current_page ?? 1}/{meta.last_page ?? 1}
-                    </div>
-                    <PushsalePager current={meta.current_page ?? 1} totalPages={meta.last_page ?? 1} onPage={(page) => search({ page })} />
-                </div>
+                <PushsalePagination
+                    meta={meta}
+                    routeUrl="/admin/activity-logs"
+                    filters={currentFilters()}
+                    itemLabel="bản ghi"
+                    perPageOptions={[25, 50, 100]}
+                />
             </PushsalePageShell>
             <ActivityDetailModal selected={selected} onClose={() => setSelected(null)} t={t} />
         </AppLayout>

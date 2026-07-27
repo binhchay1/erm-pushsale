@@ -29,7 +29,9 @@ class ActivityLogController extends Controller
             'date_to' => $request->input('date_to'),
         ];
 
-        $paginator = $this->logs->paginate($filters);
+        $perPage = max(10, min(100, $request->integer('per_page', 25)));
+
+        $paginator = $this->logs->paginate($filters, $perPage);
 
         return Inertia::render('Admin/ActivityLogs/Index', [
             'logs' => [
@@ -39,9 +41,14 @@ class ActivityLogController extends Controller
                     'last_page' => $paginator->lastPage(),
                     'per_page' => $paginator->perPage(),
                     'total' => $paginator->total(),
+                    'from' => $paginator->firstItem(),
+                    'to' => $paginator->lastItem(),
                 ],
             ],
-            'filters' => $filters,
+            'filters' => [
+                ...$filters,
+                'per_page' => $perPage,
+            ],
             'actionOptions' => $this->actionOptions(),
             'subjectTypeOptions' => $this->subjectTypeOptions(),
             'users' => User::query()->orderBy('name')->get(['id', 'name', 'email']),

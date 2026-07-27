@@ -13,11 +13,44 @@ html body.pushsale-app-body .ps-activity-log-page .ps-page-shell__header {
 
 html body.pushsale-app-body .ps-activity-log-page .ps-page-shell__main-row {
     display: grid !important;
-    grid-template-columns: 310px minmax(0, 1fr) auto !important;
+    grid-template-columns: minmax(180px, auto) minmax(0, 1fr) !important;
     gap: 12px !important;
-    align-items: end !important;
-    min-height: 82px !important;
+    align-items: center !important;
+    min-height: 52px !important;
     padding: 8px 12px !important;
+}
+
+html body.pushsale-app-body .ps-activity-log-page .ps-page-shell__subtitle {
+    display: none !important;
+}
+
+html body.pushsale-app-body .ps-activity-filter-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(130px, 1.1fr) minmax(130px, 1.1fr) minmax(130px, 1fr) minmax(160px, 1.2fr) minmax(120px, 0.9fr) minmax(120px, 0.9fr) auto auto !important;
+    gap: 8px !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-activity-filter-toolbar .form-control,
+html body.pushsale-app-body .ps-activity-filter-toolbar .btn {
+    height: 32px !important;
+    min-height: 32px !important;
+    border-radius: 0 !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-activity-filter-toolbar .ps-search-button,
+html body.pushsale-app-body .ps-activity-filter-toolbar .btn-default {
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-activity-log-page .pushsale-pagination.ps-pagination-v81 {
+    margin: 0 !important;
+    padding: 10px 12px 14px !important;
+    border-top: 1px solid #e5e7eb !important;
+    background: #fff !important;
 }
 
 html body.pushsale-app-body .ps-activity-log-page .ps-page-shell__title {
@@ -27,12 +60,20 @@ html body.pushsale-app-body .ps-activity-log-page .ps-page-shell__title {
     color: #000 !important;
 }
 
-html body.pushsale-app-body .ps-activity-log-page .ps-page-shell__subtitle {
-    max-width: 300px !important;
-    margin-top: 2px !important;
-    color: #667085 !important;
-    font-size: 12px !important;
-    line-height: 1.25 !important;
+@media (max-width: 1400px) {
+    html body.pushsale-app-body .ps-activity-filter-toolbar {
+        grid-template-columns: repeat(3, minmax(120px, 1fr)) !important;
+    }
+}
+
+@media (max-width: 900px) {
+    html body.pushsale-app-body .ps-activity-log-page .ps-page-shell__main-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.pushsale-app-body .ps-activity-filter-toolbar {
+        grid-template-columns: 1fr 1fr !important;
+    }
 }
 
 html body.pushsale-app-body .ps-activity-filter-grid {
