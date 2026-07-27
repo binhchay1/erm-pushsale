@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 
 import {
     DropdownMenu,
@@ -11,6 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useOrgLevelLabel, useRoleLabel } from '@/hooks/use-labels';
 import { useT } from '@/providers/I18nProvider';
+
+function logout() {
+    router.post('/logout');
+}
 
 export function UserMenu({ variant = 'avatar' }) {
     const { auth } = usePage().props;
@@ -53,11 +57,12 @@ export function UserMenu({ variant = 'avatar' }) {
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="pushsale-user-dropdown-separator" />
-                    <DropdownMenuItem asChild className="pushsale-user-dropdown-item">
-                        <Link href="/logout" method="post" as="button" className="w-full">
-                            <i className="fa fa-power-off" aria-hidden="true" />
-                            <span>Thoát</span>
-                        </Link>
+                    <DropdownMenuItem
+                        className="pushsale-user-dropdown-item"
+                        onSelect={() => logout()}
+                    >
+                        <i className="fa fa-power-off" aria-hidden="true" />
+                        <span>Thoát</span>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
@@ -78,8 +83,8 @@ export function UserMenu({ variant = 'avatar' }) {
                 <DropdownMenuItem asChild><Link href="/profile">{t('common.profile')}</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/settings">{t('common.settings')}</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                    <Link href="/logout" method="post" as="button" className="w-full">{t('common.logout')}</Link>
+                <DropdownMenuItem onSelect={() => logout()}>
+                    {t('common.logout')}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
