@@ -192,10 +192,12 @@ html body.pushsale-app-body .ps-page-extra-filters .ps-ceo-checkbox {
 }
 
 html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-control,
-html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-select,
+html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-select__control,
+html body.pushsale-app-body .ps-page-header.ps-ceo-report-header button.ps-select__control,
 html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-input,
 html body.pushsale-app-body .ps-page-extra-filters.ps-ceo-report-header .ps-control,
-html body.pushsale-app-body .ps-page-extra-filters.ps-ceo-report-header .ps-select,
+html body.pushsale-app-body .ps-page-extra-filters.ps-ceo-report-header .ps-select__control,
+html body.pushsale-app-body .ps-page-extra-filters.ps-ceo-report-header button.ps-select__control,
 html body.pushsale-app-body .ps-page-extra-filters.ps-ceo-report-header .ps-input {
     height: 32px !important;
     min-height: 32px !important;
@@ -205,6 +207,16 @@ html body.pushsale-app-body .ps-page-extra-filters.ps-ceo-report-header .ps-inpu
     background: #fff !important;
     box-shadow: none !important;
     font-size: 13px !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-select,
+html body.pushsale-app-body .ps-page-extra-filters.ps-ceo-report-header .ps-select {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
 }
 
 @media (max-width: 1100px) {

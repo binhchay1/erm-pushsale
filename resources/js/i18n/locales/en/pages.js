@@ -753,7 +753,7 @@ export default {
         connect: 'Connect',
         copy: 'Copy',
         toggle_manual_import: 'Toggle manual import for this landing source',
-        toggle_approval: 'Toggle approval requirement before running',
+        toggle_approval: 'Approval status (read-only — approve in Landing Approval menu)',
         edit: 'Edit',
         empty: 'No connection data.',
         item_label: 'sources',

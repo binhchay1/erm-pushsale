@@ -50,10 +50,10 @@ body.pushsale-app-body .ps-page-extra-filters .ps-marketing-work-advanced.ps-adv
 }
 
 body.pushsale-app-body .ps-marketing-work-primary .ps-control,
-body.pushsale-app-body .ps-marketing-work-primary .ps-select,
+body.pushsale-app-body .ps-marketing-work-primary .ps-select__control,
 body.pushsale-app-body .ps-marketing-work-advanced .ps-control,
-body.pushsale-app-body .ps-marketing-work-advanced .ps-select,
-body.pushsale-app-body .ps-marketing-leader-page .ps-select,
+body.pushsale-app-body .ps-marketing-work-advanced .ps-select__control,
+body.pushsale-app-body .ps-marketing-leader-page .ps-select__control,
 body.pushsale-app-body .ps-marketing-leader-page .ps-input {
     height: 32px;
     min-height: 32px;
@@ -61,6 +61,17 @@ body.pushsale-app-body .ps-marketing-leader-page .ps-input {
     border-radius: 0;
     background: #fff;
     font-size: 13px;
+}
+
+body.pushsale-app-body .ps-marketing-work-primary .ps-select,
+body.pushsale-app-body .ps-marketing-work-advanced .ps-select,
+body.pushsale-app-body .ps-marketing-leader-page .ps-select {
+    border: 0;
+    background: transparent;
+    height: auto;
+    min-height: 0;
+    padding: 0;
+    box-shadow: none;
 }
 
 body.pushsale-app-body .ps-marketing-work-toolbar .ps-page-toolbar__advanced,
@@ -335,7 +346,8 @@ html body.pushsale-app-body .ps-leader-filter .date-range-wrap {
     padding: 0 !important;
 }
 
-html body.pushsale-app-body .ps-leader-filter .ps-select,
+html body.pushsale-app-body .ps-leader-filter .ps-select__control,
+html body.pushsale-app-body .ps-leader-filter button.ps-select__control,
 html body.pushsale-app-body .ps-leader-filter .ps-input,
 html body.pushsale-app-body .ps-leader-filter select.ps-select {
     width: 100% !important;
@@ -348,6 +360,15 @@ html body.pushsale-app-body .ps-leader-filter select.ps-select {
     filter: none !important;
     border-radius: 0 !important;
     background-color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-leader-filter .ps-select:not(select) {
+    border: 0 !important;
+    background: transparent !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
 }
 
 html body.pushsale-app-body .ps-leader-filter .ps-report-check {
@@ -437,7 +458,8 @@ html body.pushsale-app-body .ps-marketing-leader-page .legacy-range {
     background: transparent !important;
 }
 
-html body.pushsale-app-body .ps-marketing-leader-page .ps-select,
+html body.pushsale-app-body .ps-marketing-leader-page .ps-select__control,
+html body.pushsale-app-body .ps-marketing-leader-page button.ps-select__control,
 html body.pushsale-app-body .ps-marketing-leader-page .ps-input,
 html body.pushsale-app-body .ps-marketing-leader-page select.ps-select {
     height: 32px !important;
@@ -449,6 +471,15 @@ html body.pushsale-app-body .ps-marketing-leader-page select.ps-select {
     filter: none !important;
     border-radius: 0 !important;
     background-color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-marketing-leader-page .ps-select:not(select) {
+    border: 0 !important;
+    background: transparent !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
 }
 
 html body.pushsale-app-body .ps-marketing-leader-page .ps-leader-search-btn {

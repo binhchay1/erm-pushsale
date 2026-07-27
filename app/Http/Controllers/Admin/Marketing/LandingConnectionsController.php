@@ -44,7 +44,7 @@ final class LandingConnectionsController extends Controller
         }
 
         $query = LandingConnection::query()
-            ->with(array_merge($this->manager->relations(), ['updatedBy:id,name,email']))
+            ->with(array_merge($this->manager->relations(), ['updatedBy:id,name,email', 'approver:id,name,email']))
             ->when($request->filled('search'), function ($query) use ($request): void {
                 $keyword = trim((string) $request->input('search'));
                 $query->where(function ($query) use ($keyword): void {
@@ -87,6 +87,8 @@ final class LandingConnectionsController extends Controller
             'products' => Product::query()->where('is_active', true)->where('available_marketing', true)->orderBy('type')->orderBy('name')->get(['id', 'name', 'sku', 'type', 'unit_price']),
             'canManage' => $this->canManage($request->user()),
             'canApprove' => $this->canApprove($request->user()),
+            'defaultMarketerUserId' => $this->defaultMarketerUserId($request->user()),
+            'lockMarketerToSelf' => $this->shouldLockMarketerToSelf($request->user()),
             'activeMenuCode' => $activeMenuCode,
         ]);
     }
@@ -391,6 +393,10 @@ final class LandingConnectionsController extends Controller
         $validated['manual_import'] = true;
         $validated['request_approval'] = true;
 
+        if ($this->shouldLockMarketerToSelf($request->user())) {
+            $validated['marketer_user_id'] = (int) $request->user()->id;
+        }
+
         return $validated;
     }
 
@@ -450,6 +456,8 @@ final class LandingConnectionsController extends Controller
             'manual_import' => $connection->manual_import,
             'is_approved' => $connection->is_approved,
             'request_approval' => (bool) (($connection->metadata['request_approval'] ?? true)),
+            'approved_by' => $connection->approver?->name ?? $connection->approver?->email,
+            'approved_at' => $connection->approved_at?->format('d/m/Y H:i'),
             'is_active' => $connection->is_active,
             'notes' => (string) ($connection->metadata['notes'] ?? ''),
             'api_base_url' => $connection->apiBaseUrl(),
@@ -516,6 +524,20 @@ final class LandingConnectionsController extends Controller
         return $user->isAdmin()
             || $user->allows(PermissionArea::Marketing, PermissionLevel::Full)
             || $user->allows(PermissionArea::Integrations, PermissionLevel::Full);
+    }
+
+    private function defaultMarketerUserId(User $user): ?int
+    {
+        if ($this->shouldLockMarketerToSelf($user)) {
+            return $user->id;
+        }
+
+        return null;
+    }
+
+    private function shouldLockMarketerToSelf(User $user): bool
+    {
+        return $user->role === UserRole::Marketing && ! $user->isAdmin();
     }
 }
 

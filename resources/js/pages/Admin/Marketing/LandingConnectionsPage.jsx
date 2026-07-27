@@ -1,4 +1,4 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
@@ -209,11 +209,19 @@ export default function LandingConnectionsPage({
     recordsUrl = '/admin/marketing/landing-connections/records',
     canManage = false,
     canApprove = false,
+    defaultMarketerUserId = null,
+    lockMarketerToSelf = false,
     activeMenuCode = '2.4.1',
 }) {
     const t = useT();
     const l = (key, params = {}) => t(`pages.landing_connections.${key}`, params);
-    const defaultMarketerId = String(marketers[0]?.id ?? '');
+    const { auth } = usePage().props;
+    const currentUserId = String(auth?.user?.id ?? '');
+    const resolvedDefaultMarketerId = String(
+        defaultMarketerUserId
+        ?? (lockMarketerToSelf ? currentUserId : marketers[0]?.id)
+        ?? '',
+    );
     const [query, setQuery] = useState({
         search: filters.search ?? '',
         marketer_user_id: filters.marketer_user_id ?? '',
@@ -233,7 +241,7 @@ export default function LandingConnectionsPage({
     const [selected, setSelected] = useState(new Set());
     const [confirmAction, setConfirmAction] = useState(null);
     const [allProducts, setAllProducts] = useState(!filters.product_id);
-    const form = useForm(blankForm(defaultMarketerId));
+    const form = useForm(blankForm(resolvedDefaultMarketerId));
     const rows = connections?.data ?? [];
 
     const marketerOptions = useMemo(() => marketers.map((user) => ({
@@ -298,7 +306,10 @@ export default function LandingConnectionsPage({
 
     const openCreate = () => {
         setEditingId(null);
-        const data = blankForm(query.marketer_user_id || defaultMarketerId);
+        const marketerId = lockMarketerToSelf
+            ? resolvedDefaultMarketerId
+            : (query.marketer_user_id || resolvedDefaultMarketerId);
+        const data = blankForm(marketerId);
         form.setData(data);
         form.clearErrors();
         setOpen(true);
@@ -308,11 +319,12 @@ export default function LandingConnectionsPage({
         const editableSources = normalizeEditableSources(row.sources ?? []);
         const mainSource = editableSources.find((source) => source.source_type === 'main') ?? blankSource('main');
         const sourceKeys = new Set(editableSources.map((source) => String(source.client_key)));
+        const marketerId = String(row.marketer_user_id ?? resolvedDefaultMarketerId);
         setEditingId(row.id);
         form.setData({
-            ...blankForm(String(row.marketer_user_id ?? defaultMarketerId)),
+            ...blankForm(marketerId),
             name: row.name ?? '',
-            marketer_user_id: String(row.marketer_user_id ?? defaultMarketerId),
+            marketer_user_id: marketerId,
             connection_type: row.connection_type ?? 'landing',
             ad_channel: row.ad_channel ?? 'facebook_ads',
             allocation_method: row.allocation_method ?? 'inherit',
@@ -400,7 +412,6 @@ export default function LandingConnectionsPage({
         if (!row?.id) return;
         const payload = {};
         if (Object.prototype.hasOwnProperty.call(flags, 'manual_import')) payload.manual_import = Boolean(flags.manual_import);
-        if (Object.prototype.hasOwnProperty.call(flags, 'request_approval')) payload.request_approval = Boolean(flags.request_approval);
         if (Object.keys(payload).length === 0) return;
         router.patch(`${recordsUrl}/${row.id}/flags`, payload, {
             preserveScroll: true,
@@ -500,7 +511,7 @@ export default function LandingConnectionsPage({
                         </>
                     )}
                     advanced={(
-                        <div className="pslc-advanced-row">
+                        <div className="pslc-advanced-row ps-adv-filter-row" style={{ '--ps-adv-cols': 7 }}>
                             <PushsaleSelect options={channelTranslatedOptions} value={query.ad_channel ?? ''} placeholder={l('channel_placeholder')} searchable onChange={(value) => setQuery((old) => ({ ...old, ad_channel: value }))} />
                             <PushsaleSelect options={creationTypeOptions} value={query.creation_type ?? ''} placeholder="-- Chọn kiểu khởi tạo --" searchable={false} onChange={(value) => setQuery((old) => ({ ...old, creation_type: value }))} />
                             <PushsaleSelect options={approvalOptions} value={query.approved ?? ''} placeholder={l('approval_placeholder')} searchable={false} onChange={(value) => setQuery((old) => ({ ...old, approved: value }))} />
@@ -536,7 +547,7 @@ export default function LandingConnectionsPage({
                                         <th className="text-center pslc-col-allocation">{l('col_allocation')}</th>
                                         <th className="text-center pslc-col-api">{l('col_api_url')}</th>
                                         <th className="text-center pslc-col-small" title={l('manual_import')}>{l('manual_import')}</th>
-                                        <th className="text-center pslc-col-small">{l('approve')}</th>
+                                        <th className="text-center pslc-col-small" title={l('toggle_approval')}>{l('approve')}</th>
                                         <th className="text-center pslc-col-updated">{l('updated')}</th>
                                         <th className="text-center pslc-col-add">
                                             {canManage ? <button type="button" className="btn-icon pslc-add-link" onClick={openCreate}><i className="fa fa-plus" /> <span>{l('add')}</span></button> : null}
@@ -569,7 +580,15 @@ export default function LandingConnectionsPage({
                                                     </div>
                                                 </td>
                                                 <td className="text-center"><input type="checkbox" checked={Boolean(row.manual_import)} onChange={(event) => updateFlags(row, { manual_import: event.target.checked })} title={l('toggle_manual_import')} /></td>
-                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.request_approval)} onChange={(event) => updateFlags(row, { request_approval: event.target.checked })} title={l('toggle_approval')} /></td>
+                                                <td className="text-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={Boolean(row.is_approved)}
+                                                        readOnly
+                                                        disabled
+                                                        title={row.is_approved ? l('approved') : l('pending_approval')}
+                                                    />
+                                                </td>
                                                 <td className="text-center">{row.updated_by ?? 'admin'}<br />{row.updated_at}</td>
                                                 <td className="text-center pslc-actions"><button type="button" className="btn-icon" onClick={() => openEdit(row)} title={l('edit')}><i className="fa fa-edit" /></button></td>
                                             </tr>
@@ -591,6 +610,19 @@ export default function LandingConnectionsPage({
                         <div className="pslc-source-simple-form">
                             <label>{l('connection_type_label')} <span className="required">(*)</span></label>
                             <PushsaleSelect options={connectionTypeTranslatedOptions} value={form.data.connection_type} onChange={(value) => form.setData('connection_type', value || 'landing')} searchable={false} />
+
+                            {!lockMarketerToSelf ? (
+                                <>
+                                    <label>{l('select_marketing')} <span className="required">(*)</span></label>
+                                    <PushsaleSelect
+                                        options={marketerOptions}
+                                        value={form.data.marketer_user_id}
+                                        placeholder={l('select_marketing')}
+                                        searchable
+                                        onChange={(value) => form.setData('marketer_user_id', value)}
+                                    />
+                                </>
+                            ) : null}
 
                             <label>{l('allocation_config')}</label>
                             <PushsaleSelect options={allocationTranslatedOptions} value={form.data.allocation_method} onChange={(value) => form.setData('allocation_method', value || 'inherit')} searchable />
@@ -640,9 +672,16 @@ export default function LandingConnectionsPage({
 
                             <div></div>
                             <div className="pslc-dialog-checks pslc-dialog-checks-two">
-                                <label><input type="checkbox" checked readOnly /> {l('manual_import')}</label>
-                                <label><input type="checkbox" checked readOnly /> {l('approve')}</label>
-                                <span className="small-tip">{l('approval_hint')}</span>
+                                <label><input type="checkbox" checked readOnly disabled /> {l('manual_import')}</label>
+                                <label>
+                                    <input type="checkbox" checked={Boolean(form.data.is_approved)} readOnly disabled />
+                                    {' '}{l('approve')}
+                                </label>
+                                <span className="small-tip">
+                                    {form.data.is_approved ? l('approved') : l('pending_approval')}
+                                    {' — '}
+                                    {l('approval_hint')}
+                                </span>
                             </div>
                         </div>
                         {Object.keys(form.errors).length > 0 && <div className="alert alert-danger pslc-errors">{Object.entries(form.errors).map(([key, message]) => <div key={key}><strong>{key}:</strong> {message}</div>)}</div>}

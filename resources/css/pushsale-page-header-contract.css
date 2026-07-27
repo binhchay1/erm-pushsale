@@ -406,7 +406,7 @@ html body.pushsale-app-body .ps-page-header__advanced {
     z-index: 19 !important;
 }
 
-/* Nhiều trang gắn lại border-bottom trên form/grid con — tắt hết divider dưới filter bổ sung. */
+/* Nhiều trang gắn lại border trên form/grid con — tắt hết khung thừa dưới filter bổ sung. */
 html body.pushsale-app-body .ps-page-extra-filters > *,
 html body.pushsale-app-body .ps-page-header__advanced > *,
 html body.pushsale-app-body .ps-page-shell__advanced-row,
@@ -418,8 +418,10 @@ html body.pushsale-app-body .ps-page-extra-filters .ps-sale-work-secondary,
 html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-panel,
 html body.pushsale-app-body .ps-page-extra-filters .ps-expense-filters,
 html body.pushsale-app-body .ps-page-extra-filters .psm-filter-grid {
+    border: 0 !important;
     border-bottom: 0 !important;
     box-shadow: none !important;
+    background: transparent !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters[hidden],
@@ -435,10 +437,10 @@ html body.pushsale-app-body .ps-page-header__advanced > .row {
     margin: 0 !important;
 }
 
-/* Control phẳng trong filter bổ sung — tránh text lệch lề / padding dị. */
+/* Control phẳng trong filter bổ sung — chỉ viền control thật,
+ * KHÔNG gắn border lên wrapper (.ps-select) kẻo tạo đôi khung. */
 html body.pushsale-app-body .ps-page-extra-filters .form-control,
 html body.pushsale-app-body .ps-page-extra-filters select,
-html body.pushsale-app-body .ps-page-extra-filters .ps-select,
 html body.pushsale-app-body .ps-page-extra-filters .ps-select__control,
 html body.pushsale-app-body .ps-page-extra-filters button.ps-select__control,
 html body.pushsale-app-body .ps-page-extra-filters .ps-input,
@@ -453,6 +455,8 @@ html body.pushsale-app-body .ps-page-extra-filters input[type='search'] {
     border: 1px solid #c8d2df !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    filter: none !important;
+    outline: 0 !important;
     background: #fff !important;
     color: #111 !important;
     font: 400 12px/20px Arial, Helvetica, sans-serif !important;
@@ -460,8 +464,30 @@ html body.pushsale-app-body .ps-page-extra-filters input[type='search'] {
     text-indent: 0 !important;
 }
 
+html body.pushsale-app-body .ps-page-extra-filters .ps-select,
+html body.pushsale-app-body .ps-page-extra-filters .ps-select--multi,
+html body.pushsale-app-body .ps-page-extra-filters .ps-search-select,
+html body.pushsale-app-body .ps-page-extra-filters .ps-product-search-select,
+html body.pushsale-app-body .ps-page-extra-filters .ps-date-filter:not(.is-boxed),
+html body.pushsale-app-body .ps-page-extra-filters .ps-date-range,
+html body.pushsale-app-body .ps-page-extra-filters .date-range-wrap,
+html body.pushsale-app-body .ps-page-extra-filters .legacy-range,
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-panel,
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters .pslc-advanced-row {
+    border: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    background: transparent !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+}
+
 html body.pushsale-app-body .ps-page-extra-filters .form-control:focus,
 html body.pushsale-app-body .ps-page-extra-filters select:focus,
+html body.pushsale-app-body .ps-page-extra-filters .ps-select__control:focus,
+html body.pushsale-app-body .ps-page-extra-filters button.ps-select__control:focus,
 html body.pushsale-app-body .ps-page-extra-filters .ps-input:focus,
 html body.pushsale-app-body .ps-page-extra-filters .ps-control:focus,
 html body.pushsale-app-body .ps-page-extra-filters input:focus {
@@ -515,7 +541,8 @@ html body.pushsale-app-body .ps-customer-profile-header .ps-customer-filter-pane
     width: 100% !important;
 }
 
-/* Kết nối dữ liệu (2.4.1): filter bổ sung gom 1 dòng gọn. */
+/* Kết nối dữ liệu (2.4.1): filter bổ sung — portal .ps-page-extra-filters.pslc-header */
+
 html body.pushsale-app-body .pslc-header .pslc-check {
     display: inline-flex !important;
     align-items: center !important;
@@ -536,28 +563,38 @@ html body.pushsale-app-body .pslc-header .pslc-filter-product {
     min-width: 140px !important;
 }
 
+html body.pushsale-app-body .ps-page-extra-filters.pslc-header .pslc-advanced-row,
 html body.pushsale-app-body .pslc-header .pslc-advanced-row {
     display: grid !important;
     grid-template-columns: repeat(6, minmax(0, 1fr)) minmax(72px, 90px) !important;
     gap: 8px !important;
     margin: 0 !important;
+    padding: 0 !important;
     align-items: center !important;
+    width: 100% !important;
 }
 
+html body.pushsale-app-body .ps-page-extra-filters.pslc-header .pslc-advanced-row > .ps-select,
 html body.pushsale-app-body .pslc-header .pslc-advanced-row > .ps-select,
 html body.pushsale-app-body .pslc-header .pslc-advanced-row > select,
 html body.pushsale-app-body .pslc-header .pslc-advanced-row > .form-control {
     width: 100% !important;
     min-width: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
 }
 
 @media (max-width: 1199px) {
+    html body.pushsale-app-body .ps-page-extra-filters.pslc-header .pslc-advanced-row,
     html body.pushsale-app-body .pslc-header .pslc-advanced-row {
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     }
 }
 
 @media (max-width: 767px) {
+    html body.pushsale-app-body .ps-page-extra-filters.pslc-header .pslc-advanced-row,
     html body.pushsale-app-body .pslc-header .pslc-advanced-row {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }

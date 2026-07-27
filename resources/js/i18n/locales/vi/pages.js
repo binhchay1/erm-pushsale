@@ -752,7 +752,7 @@ export default {
         connect: 'Kết nối',
         copy: 'Copy',
         toggle_manual_import: 'Bật/tắt nhập thủ công cho nguồn landing',
-        toggle_approval: 'Bật/tắt yêu cầu duyệt trước khi chạy',
+        toggle_approval: 'Trạng thái duyệt (chỉ đọc — duyệt tại menu Duyệt kết nối landing)',
         edit: 'Chỉnh sửa',
         empty: 'Không có dữ liệu kết nối.',
         item_label: 'nguồn',
