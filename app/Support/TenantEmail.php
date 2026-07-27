@@ -76,6 +76,11 @@ class TenantEmail
 
     public static function hostFor(Company $company): string
     {
+        $override = strtolower(ltrim(trim((string) ($company->email_login_host ?? '')), '@'));
+        if ($override !== '') {
+            return $override;
+        }
+
         $domain = self::domain();
 
         if ($company->slug === self::internalSlug()) {

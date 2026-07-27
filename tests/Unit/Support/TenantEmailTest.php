@@ -40,4 +40,18 @@ class TenantEmailTest extends TestCase
         $this->assertSame('sales', TenantEmail::localPartFromEmail('sales@acme.saleops.local', $company));
         $this->assertFalse(TenantEmail::acceptsForCompany('sales@saleops.local', $company));
     }
+
+    public function test_company_email_login_host_override(): void
+    {
+        $company = Company::query()->create([
+            'name' => 'Custom Host Co',
+            'slug' => 'custom-host',
+            'status' => Company::STATUS_ACTIVE,
+            'plan' => 'trial',
+            'email_login_host' => 'mail.custom-host.vn',
+        ]);
+
+        $this->assertSame('@mail.custom-host.vn', TenantEmail::suffixFor($company));
+        $this->assertSame('admin@mail.custom-host.vn', TenantEmail::build('admin', $company));
+    }
 }

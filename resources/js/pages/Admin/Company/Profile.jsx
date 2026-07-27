@@ -13,7 +13,7 @@ function valueOrDefault(value, fallback = '') {
     return normalized || fallback;
 }
 
-function FieldRow({ label, required = false, error, children }) {
+function FieldRow({ label, required = false, error, hint, children }) {
     return (
         <div className="ps-unit-form-row">
             <label className="ps-unit-label">
@@ -21,22 +21,24 @@ function FieldRow({ label, required = false, error, children }) {
             </label>
             <div className="ps-unit-control-wrap">
                 {children}
+                {hint ? <p className="ps-unit-field-hint">{hint}</p> : null}
                 {error ? <div className="ps-unit-error">{error}</div> : null}
             </div>
         </div>
     );
 }
 
-function Select({ value, onChange, children }) {
+function Select({ value, onChange, children, disabled = false }) {
     return (
-        <select className="form-control ps-unit-control" value={value} onChange={(event) => onChange(event.target.value)}>
+        <select className="form-control ps-unit-control" value={value} onChange={(event) => onChange(event.target.value)} disabled={disabled}>
             {children}
         </select>
     );
 }
 
-export default function CompanyProfile({ company }) {
+export default function CompanyProfile({ company, emailIdentity = {} }) {
     const inferredProvince = company?.province_name ?? (String(company?.address ?? '').toLocaleLowerCase('vi').includes('hn') ? 'Hà Nội' : '');
+    const isInternal = Boolean(company?.is_internal ?? emailIdentity?.isInternal);
 
     const form = useForm({
         name: valueOrDefault(company?.name),
@@ -49,6 +51,7 @@ export default function CompanyProfile({ company }) {
         district_name: valueOrDefault(company?.district_name),
         ward_name: valueOrDefault(company?.ward_name),
         contact_email: valueOrDefault(company?.contact_email),
+        email_login_host: valueOrDefault(company?.email_login_host ?? emailIdentity?.host),
         tax_code: valueOrDefault(company?.tax_code),
         website: valueOrDefault(company?.website),
         representative_name: valueOrDefault(company?.representative_name),
@@ -65,6 +68,10 @@ export default function CompanyProfile({ company }) {
         return normalized && !options.includes(normalized) ? [normalized, ...options] : options;
     };
 
+    const emailSuffixPreview = form.data.email_login_host
+        ? `@${String(form.data.email_login_host).replace(/^@+/, '')}`
+        : (emailIdentity?.suffix ?? '');
+
     return (
         <AppLayout>
             <Head title="Thông tin đơn vị" />
@@ -74,6 +81,15 @@ export default function CompanyProfile({ company }) {
                 data-page-code="1.1.1"
                 collapsible={false}
             >
+                {isInternal ? (
+                    <div className="alert alert-info ps-unit-internal-notice">
+                        <i className="fa fa-info-circle" aria-hidden="true" />
+                        {' '}
+                        Đây là <strong>đơn vị nội bộ ERM</strong> — dùng để vận hành và kiểm thử hệ thống, không phải hồ sơ doanh nghiệp thương mại.
+                        Email đăng nhập nhân sự dùng hậu tố <code>{emailIdentity?.suffix ?? '@saleops.local'}</code>.
+                    </div>
+                ) : null}
+
                 <form className="ps-unit-form" onSubmit={submit}>
                     <FieldRow label="Tên đơn vị" required error={form.errors.name}>
                         <input
@@ -82,6 +98,26 @@ export default function CompanyProfile({ company }) {
                             onChange={(event) => form.setData('name', event.target.value)}
                             required
                         />
+                    </FieldRow>
+
+                    <FieldRow
+                        label="Hậu tố email đăng nhập"
+                        error={form.errors.email_login_host}
+                        hint={isInternal
+                            ? 'Đơn vị nội bộ dùng domain cố định; không cấu hình slug doanh nghiệp.'
+                            : `Ví dụ: admin${emailSuffixPreview || '@ten-cong-ty.saleops.local'}`}
+                    >
+                        <div className="ps-unit-email-host">
+                            <span className="ps-unit-email-at">@</span>
+                            <input
+                                className="form-control ps-unit-control"
+                                value={form.data.email_login_host}
+                                onChange={(event) => form.setData('email_login_host', event.target.value)}
+                                placeholder={emailIdentity?.defaultHost ?? 'saleops.local'}
+                                readOnly={isInternal}
+                                disabled={isInternal}
+                            />
+                        </div>
                     </FieldRow>
 
                     <FieldRow label="Số điện thoại" error={form.errors.contact_phone}>

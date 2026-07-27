@@ -480,7 +480,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                     )}
                     advanced={filtersOpen ? (
                         <div className="ps-adv-filter-panel ps-customer-filter-panel">
-                            <div className="ps-adv-filter-row">
+                            <div className="ps-adv-filter-row ps-customer-adv-filter-row">
                                 <DateRangeFilter
                                     className="ps-date-range-control ps-adv-date-cluster"
                                     inputClassName="ps-filter-control"
@@ -497,7 +497,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                                 <FilterSelect value={form.sale_team_id} onChange={(value) => setForm((current) => ({ ...current, sale_team_id: value, sale_id: '', page: 1 }))} options={saleTeams} placeholder="--Nhóm sale--" />
                                 <FilterSelect value={form.sale_id} onChange={(value) => setField('sale_id', value)} options={sales} placeholder="--Sale--" />
                             </div>
-                            <div className="ps-adv-filter-row">
+                            <div className="ps-adv-filter-row ps-customer-adv-filter-row">
                                 <FilterSelect value={form.marketing_leader_id} onChange={(value) => setForm((current) => ({ ...current, marketing_leader_id: value, marketing_team_id: '', marketer_id: '', page: 1 }))} options={filterOptions.marketingLeaders} placeholder="--Trưởng nhóm marketing--" />
                                 <FilterSelect value={form.marketing_team_id} onChange={(value) => setForm((current) => ({ ...current, marketing_team_id: value, marketer_id: '', page: 1 }))} options={marketingTeams} placeholder="--Nhóm marketing--" />
                                 <FilterSelect value={form.marketer_id} onChange={(value) => setField('marketer_id', value)} options={marketers} placeholder="--Marketing--" />
@@ -505,9 +505,10 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                                 <FilterSelect value={form.operation_stage} onChange={(value) => setField('operation_stage', value)} options={filterOptions.operationStages} placeholder="--Tác nghiệp--" />
                                 <FilterSelect value={form.operation_result} onChange={(value) => setField('operation_result', value)} options={filterOptions.operationResults} placeholder="--Kết quả tác nghiệp--" />
                                 <FilterSelect value={form.delivery_status} onChange={(value) => setField('delivery_status', value)} options={filterOptions.deliveryStatuses} placeholder="--Trạng thái giao hàng--" />
+                                <span className="ps-adv-filter-spacer" aria-hidden="true" />
                             </div>
-                            <div className="ps-adv-filter-row">
-                                <ProductSearchSelect products={filterOptions.products ?? []} value={form.product_id} onChange={(value) => setField('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
+                            <div className="ps-adv-filter-row ps-customer-adv-filter-row">
+                                <ProductSearchSelect className="ps-filter-control" products={filterOptions.products ?? []} value={form.product_id} onChange={(value) => setField('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
                                 <FilterSelect value={form.warehouse_id} onChange={(value) => setField('warehouse_id', value)} options={filterOptions.warehouses} placeholder="--Kho--" />
                                 <FilterSelect value={form.reconciliation_status} onChange={(value) => setField('reconciliation_status', value)} options={filterOptions.reconciliationStatuses} placeholder="--Đối soát nội bộ--" />
                                 <FilterSelect value={form.duplicate_status} onChange={(value) => setField('duplicate_status', value)} options={filterOptions.duplicateStatuses} placeholder="--Trùng số--" />

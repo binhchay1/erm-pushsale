@@ -27,7 +27,7 @@ export function LoginForm() {
                     autoComplete="username"
                     value={data.email}
                     onChange={(event) => setData('email', event.target.value)}
-                    placeholder="admin@saleops.local"
+                    placeholder="email@cong-ty.cua-ban"
                     aria-invalid={!!errors.email}
                 />
             </div>

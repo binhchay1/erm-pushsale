@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\TenantEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,6 +21,8 @@ class CompanyProfileController extends Controller
         $company = $user->company;
         abort_unless($company, 404);
 
+        $isInternal = $company->slug === TenantEmail::internalSlug();
+
         return Inertia::render('Admin/Company/Profile', [
             'company' => [
                 'id' => $company->id,
@@ -28,6 +32,9 @@ class CompanyProfileController extends Controller
                 'plan' => $company->plan,
                 'max_users' => $company->max_users,
                 'contact_email' => $company->contact_email,
+                'email_login_host' => Schema::hasColumn('companies', 'email_login_host')
+                    ? ($company->email_login_host ?: TenantEmail::hostFor($company))
+                    : TenantEmail::hostFor($company),
                 'contact_phone' => $company->contact_phone,
                 'tax_code' => $company->tax_code,
                 'product_field' => Schema::hasColumn('companies', 'product_field') ? $company->product_field : null,
@@ -41,6 +48,13 @@ class CompanyProfileController extends Controller
                 'representative_name' => $company->representative_name,
                 'representative_title' => $company->representative_title,
                 'expires_at' => $company->expires_at?->toDateString(),
+                'is_internal' => $isInternal,
+            ],
+            'emailIdentity' => [
+                'suffix' => TenantEmail::suffixFor($company),
+                'host' => TenantEmail::hostFor($company),
+                'defaultHost' => TenantEmail::domain(),
+                'isInternal' => $isInternal,
             ],
             'activeMenuCode' => '1.1.1',
         ]);
@@ -54,7 +68,9 @@ class CompanyProfileController extends Controller
         $company = $user->company;
         abort_unless($company, 404);
 
-        $data = $request->validate([
+        $isInternal = $company->slug === TenantEmail::internalSlug();
+
+        $rules = [
             'name' => ['required', 'string', 'max:160'],
             'contact_email' => ['nullable', 'email', 'max:160'],
             'contact_phone' => ['nullable', 'string', 'max:40'],
@@ -69,9 +85,27 @@ class CompanyProfileController extends Controller
             'website' => ['nullable', 'url', 'max:255'],
             'representative_name' => ['nullable', 'string', 'max:160'],
             'representative_title' => ['nullable', 'string', 'max:160'],
-        ]);
+        ];
+
+        if (Schema::hasColumn('companies', 'email_login_host')) {
+            $rules['email_login_host'] = [
+                'nullable',
+                'string',
+                'max:120',
+                Rule::regex('/^(?!-)[a-z0-9-]+(\.[a-z0-9-]+)+$/i'),
+            ];
+        }
+
+        $data = $request->validate($rules);
 
         $data['use_two_level_address'] = (bool) ($data['use_two_level_address'] ?? false);
+
+        if (isset($data['email_login_host'])) {
+            $data['email_login_host'] = strtolower(ltrim(trim((string) $data['email_login_host']), '@')) ?: null;
+            if ($isInternal) {
+                $data['email_login_host'] = TenantEmail::domain();
+            }
+        }
 
         $persistable = array_filter(
             $data,
