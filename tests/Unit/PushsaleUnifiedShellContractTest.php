@@ -68,7 +68,7 @@ class PushsaleUnifiedShellContractTest extends TestCase
 
         $this->assertStringContainsString('m-header-wrap ps-page-header', $header);
         $this->assertStringContainsString('m-header ps-page-header__row', $header);
-        $this->assertStringContainsString('ps-page-header__advanced box-body', $header);
+        $this->assertStringContainsString('ps-page-extra-filters', $header);
         $this->assertStringContainsString('createPortal', $header);
 
         $this->assertStringContainsString('PageHeaderProvider', $layout);
@@ -86,6 +86,25 @@ class PushsaleUnifiedShellContractTest extends TestCase
             $css,
             'Header dùng chung không được kẻ viền dưới, chỉ dùng đổ bóng.'
         );
+    }
+
+    public function test_shared_contracts_include_phone_breakpoints_for_header_and_topbar(): void
+    {
+        $pageHeader = file_get_contents(dirname(__DIR__, 2).'/resources/css/pushsale-page-header-contract.css');
+        $shellMenu = file_get_contents(dirname(__DIR__, 2).'/resources/css/pushsale-page-shell-menu-contract.css');
+        $canonical = file_get_contents(dirname(__DIR__, 2).'/resources/css/pushsale-adminlte-canonical-contract.css');
+
+        $this->assertStringContainsString('@media (max-width: 767px)', $pageHeader);
+        $this->assertStringContainsString('ps-page-extra-filters .ps-filter-row', $pageHeader);
+        $this->assertStringContainsString('grid-template-columns: minmax(0, 1fr)', $pageHeader);
+
+        $this->assertStringContainsString('@media (max-width: 767px)', $shellMenu);
+        $this->assertStringContainsString('pushsale-header-brand', $shellMenu);
+        $this->assertStringContainsString('pushsale-header-icon', $shellMenu);
+        $this->assertStringContainsString('display: none !important', $shellMenu);
+
+        $this->assertStringContainsString('min-width: 0 !important', $canonical);
+        $this->assertStringContainsString('pushsale-header-brand', $canonical);
     }
 
     public function test_page_shell_exposes_shared_frame_slots(): void

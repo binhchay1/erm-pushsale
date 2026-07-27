@@ -594,4 +594,123 @@ html body.pushsale-app-body .ps-page-viewport .ps-login-toolbar .form-control {
         width: 100% !important;
         max-width: none !important;
     }
+
+    /* Top blue navbar: brand must not lock 252px on tablet/phone. */
+    html body.pushsale-app-body .pushsale-main-header {
+        overflow: hidden !important;
+        padding-right: 0 !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-brand,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-header-brand,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-header-brand {
+        flex: 0 1 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: min(42vw, 160px) !important;
+    }
+
+    html body.pushsale-app-body .pushsale-logo,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-logo,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-logo {
+        max-width: 100% !important;
+        padding-right: 6px !important;
+        font-size: 14px !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-spacer {
+        flex: 1 1 8px !important;
+        min-width: 4px !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-tools {
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 58vw !important;
+        padding-right: 2px !important;
+        overflow: hidden !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-tools > *,
+    html body.pushsale-app-body .pushsale-header-icon,
+    html body.pushsale-app-body .pushsale-language-trigger,
+    html body.pushsale-app-body .pushsale-header-info-trigger,
+    html body.pushsale-app-body .pushsale-notification-trigger,
+    html body.pushsale-app-body .pushsale-user-trigger {
+        flex: 0 0 auto !important;
+        min-width: 0 !important;
+        width: auto !important;
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-icon {
+        display: none !important;
+    }
+
+    html body.pushsale-app-body .pushsale-language-trigger span {
+        display: none !important;
+    }
+
+    html body.pushsale-app-body .pushsale-user-copy small {
+        display: none !important;
+    }
+
+    html body.pushsale-app-body .pushsale-user-copy strong {
+        max-width: 72px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    html body.pushsale-app-body .ps-page-shell__toolbar,
+    html body.pushsale-app-body .ps-toolbar {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        padding: 8px 12px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-shell__toolbar .btn,
+    html body.pushsale-app-body .ps-toolbar .btn {
+        margin: 0 !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body {
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-brand,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-header-brand,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-header-brand {
+        max-width: min(38vw, 132px) !important;
+    }
+
+    html body.pushsale-app-body .pushsale-user-copy {
+        display: none !important;
+    }
+
+    html body.pushsale-app-body .pushsale-user-trigger {
+        min-width: 36px !important;
+        padding: 0 8px !important;
+    }
+
+    html body.pushsale-app-body .pushsale-user-trigger::after {
+        content: '\f007' !important;
+        font-family: FontAwesome !important;
+        font-size: 14px !important;
+        color: #fff !important;
+        line-height: 1 !important;
+    }
+
+    html body.pushsale-app-body .content-wrapper,
+    html body.pushsale-app-body .pushsale-wrapper .content-wrapper {
+        left: 0 !important;
+        margin-left: 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
 }

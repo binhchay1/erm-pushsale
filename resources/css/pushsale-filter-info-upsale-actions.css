@@ -21,56 +21,15 @@ html body.pushsale-app-body .ps-adminlte-page .ps-customer-table-scroll:first-ch
 }
 
 /* -------------------------------------------------------------------------
-   Users page: right-side search and filters share one grid, never overlap.
-   Legacy V52/V74 rules used fixed 290px columns + 440px action width; the
-   final shell must let the middle area shrink and the right search own its
-   space.
+   Users page: filters live in PageHeader portal (.ps-page-extra-filters),
+   not the legacy .ps-page-shell__main-row. Keep search + advanced filters
+   phone-safe.
    ------------------------------------------------------------------------- */
-html body.pushsale-app-body .ps-users-page .ps-page-shell__main-row {
-    display: grid !important;
-    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr) minmax(380px, 455px) !important;
-    align-items: center !important;
-    gap: 18px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 10px 16px !important;
-}
-
-html body.pushsale-app-body .ps-users-page .ps-page-shell__title-col,
-html body.pushsale-app-body .ps-users-page .ps-page-shell__filters,
-html body.pushsale-app-body .ps-users-page .ps-page-shell__actions {
+html body.pushsale-app-body .ps-users-page .ps-page-header__actions,
+html body.pushsale-app-body .ps-users-page .ps-header-search,
+html body.pushsale-app-body .ps-users-page .ps-users-header-search {
     min-width: 0 !important;
     max-width: 100% !important;
-}
-
-html body.pushsale-app-body .ps-users-page .ps-page-shell__filters--primary {
-    overflow: visible !important;
-}
-
-html body.pushsale-app-body .ps-users-page .ps-filter-row {
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(135px, 1fr)) !important;
-    gap: 18px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    justify-content: stretch !important;
-    justify-items: stretch !important;
-}
-
-html body.pushsale-app-body .ps-users-page .ps-filter-row > *,
-html body.pushsale-app-body .ps-users-page .ps-filter-row select,
-html body.pushsale-app-body .ps-users-page .ps-filter-row .form-control {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-}
-
-html body.pushsale-app-body .ps-users-page .ps-page-shell__actions {
-    justify-content: flex-end !important;
-    overflow: visible !important;
 }
 
 html body.pushsale-app-body .ps-users-page .ps-header-search,
@@ -99,30 +58,44 @@ html body.pushsale-app-body .ps-users-page .ps-users-header-search .btn {
     white-space: nowrap !important;
 }
 
-@media (max-width: 1500px) {
-    html body.pushsale-app-body .ps-users-page .ps-page-shell__main-row {
-        grid-template-columns: minmax(230px, 310px) minmax(0, 1fr) minmax(335px, 400px) !important;
-        gap: 14px !important;
-    }
+html body.pushsale-app-body .ps-users-page .ps-page-extra-filters .ps-filter-row,
+html body.pushsale-app-body .ps-users-page .ps-filter-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
 
-    html body.pushsale-app-body .ps-users-page .ps-filter-row {
-        grid-template-columns: repeat(4, minmax(118px, 1fr)) !important;
-        gap: 12px !important;
-    }
+html body.pushsale-app-body .ps-users-page .ps-filter-row > *,
+html body.pushsale-app-body .ps-users-page .ps-filter-row select,
+html body.pushsale-app-body .ps-users-page .ps-filter-row .form-control {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
 }
 
 @media (max-width: 1180px) {
-    html body.pushsale-app-body .ps-users-page .ps-page-shell__main-row {
-        grid-template-columns: 1fr !important;
-        align-items: stretch !important;
-    }
-
+    html body.pushsale-app-body .ps-users-page .ps-page-extra-filters .ps-filter-row,
     html body.pushsale-app-body .ps-users-page .ps-filter-row {
-        grid-template-columns: repeat(2, minmax(180px, 1fr)) !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-users-page .ps-page-extra-filters .ps-filter-row,
+    html body.pushsale-app-body .ps-users-page .ps-filter-row {
+        grid-template-columns: minmax(0, 1fr) !important;
     }
 
-    html body.pushsale-app-body .ps-users-page .ps-page-shell__actions {
-        justify-content: flex-start !important;
+    html body.pushsale-app-body .ps-users-page .ps-page-shell__toolbar .btn,
+    html body.pushsale-app-body .ps-users-page .ps-toolbar .btn {
+        flex: 1 1 calc(50% - 8px) !important;
+        margin-right: 0 !important;
     }
 }
 

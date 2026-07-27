@@ -18,27 +18,17 @@ body.pushsale-app-body .pushsale-page-frame {
     background: #fff;
 }
 
-/* Full-bleed header border/stripe, while content inside keeps normal page padding. */
-body.pushsale-app-body .pushsale-page-titlebar,
-body.pushsale-app-body .ps-adminlte-page .m-header-wrap {
-    position: relative;
-    border-top: 3px solid #0f8eea !important;
-    border-bottom: 1px solid #d2d6de !important;
-    background: #fff !important;
-    margin-left: calc(50% - 50vw) !important;
-    margin-right: calc(50% - 50vw) !important;
-    padding-left: calc(50vw - 50% + 14px) !important;
-    padding-right: calc(50vw - 50% + 14px) !important;
-}
-
+/* Page title bar uses shared PageHeader contract — do not full-bleed
+ * with vw math (causes mobile overflow / gray right edge). */
 body.pushsale-app-body .pushsale-page-titlebar {
+    position: relative;
     min-height: 48px;
     display: grid;
-    grid-template-columns: minmax(260px, 1fr) auto minmax(260px, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     column-gap: 12px;
-    padding-top: 7px !important;
-    padding-bottom: 7px !important;
+    padding: 7px 14px !important;
+    background: #fff !important;
 }
 
 body.pushsale-app-body .pushsale-page-title {

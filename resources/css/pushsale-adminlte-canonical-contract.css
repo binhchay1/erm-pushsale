@@ -2172,3 +2172,52 @@ html body.pushsale-app-body .ps-order-products-section-label {
 html body.pushsale-app-body .ps-sale-operation-table .ps-cell-actions-right {
     display: none !important;
 }
+
+/* ----------------------------------------------------------------
+ * Mobile shell kill-switch (loads after legacy pushsale.css).
+ * Keeps topbar icons + page body usable under 991px.
+ * ---------------------------------------------------------------- */
+@media (max-width: 991px) {
+    html body.pushsale-app-body {
+        min-width: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-adminlte-page,
+    html body.pushsale-app-body .pushsale-page-frame,
+    html body.pushsale-app-body .ps-page-shell,
+    html body.pushsale-app-body .ps-page-viewport,
+    html body.pushsale-app-body .content-wrapper,
+    html body.pushsale-app-body .content-inner {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-brand,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-header-brand,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-header-brand {
+        flex: 0 1 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: min(42vw, 160px) !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-icon {
+        display: none !important;
+    }
+
+    html body.pushsale-app-body .pushsale-language-trigger {
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
+    html body.pushsale-app-body .pushsale-language-trigger span {
+        display: none !important;
+    }
+
+    html body.pushsale-app-body .pushsale-user-trigger {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+    }
+}

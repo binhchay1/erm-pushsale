@@ -775,3 +775,38 @@ html body.pushsale-app-body .psm-table-area {
         grid-template-columns: minmax(0, 1fr) !important;
     }
 }
+
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-page-extra-filters .ps-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .psm-filter-grid,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-login-filter-grid,
+    html body.pushsale-app-body .ps-filter-toolbar,
+    html body.pushsale-app-body .ps-report-toolbar {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters .ps-filter-row > *,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row > *,
+    html body.pushsale-app-body .ps-filter-toolbar > *,
+    html body.pushsale-app-body .ps-report-toolbar > * {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-page-extra-filters .ps-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .psm-filter-grid,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-login-filter-grid,
+    html body.pushsale-app-body .ps-filter-toolbar,
+    html body.pushsale-app-body .ps-report-toolbar {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
