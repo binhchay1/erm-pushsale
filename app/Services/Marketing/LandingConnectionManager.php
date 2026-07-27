@@ -131,6 +131,37 @@ class LandingConnectionManager
         });
     }
 
+    public function setApprovalFlag(LandingConnection $connection, bool $approved, User $actor): LandingConnection
+    {
+        if ($approved) {
+            return $this->approve($connection, [
+                'budget_type' => (string) ($connection->budget_type ?: 'total'),
+                'budget_amount' => max(0, (int) $connection->budget_amount),
+                'budget_start_date' => $connection->budget_start_date?->toDateString(),
+                'budget_end_date' => $connection->budget_end_date?->toDateString(),
+            ], $actor);
+        }
+
+        return DB::transaction(function () use ($connection, $actor): LandingConnection {
+            $connection->update($this->onlyExistingColumns('landing_connections', [
+                'is_approved' => false,
+                'approved_by_user_id' => null,
+                'approved_at' => null,
+                'updated_by_user_id' => $actor->id,
+            ]));
+
+            if ($connection->marketingSource) {
+                $connection->marketingSource->forceFill($this->onlyExistingMarketingSourceColumns([
+                    'is_approved' => false,
+                    'approved_by_user_id' => null,
+                    'approved_at' => null,
+                ]))->save();
+            }
+
+            return $connection->fresh($this->relations());
+        });
+    }
+
     public function delete(LandingConnection $connection): void
     {
         DB::transaction(function () use ($connection): void {

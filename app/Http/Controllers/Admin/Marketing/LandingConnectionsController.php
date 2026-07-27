@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Marketing\LandingConnectionManager;
+use App\Services\Reports\ReportScopeResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +29,10 @@ use Inertia\Response;
 
 final class LandingConnectionsController extends Controller
 {
-    public function __construct(private readonly LandingConnectionManager $manager) {}
+    public function __construct(
+        private readonly LandingConnectionManager $manager,
+        private readonly ReportScopeResolver $scope,
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -43,8 +47,12 @@ final class LandingConnectionsController extends Controller
             $request->merge(['connection_type' => 'website']);
         }
 
+        $user = $request->user();
+
         $query = LandingConnection::query()
-            ->with(array_merge($this->manager->relations(), ['updatedBy:id,name,email', 'approver:id,name,email']))
+            ->with(array_merge($this->manager->relations(), ['updatedBy:id,name,email', 'approver:id,name,email']));
+
+        $this->applyMarketingVisibilityScope($query, $user);
             ->when($request->filled('search'), function ($query) use ($request): void {
                 $keyword = trim((string) $request->input('search'));
                 $query->where(function ($query) use ($keyword): void {
@@ -81,12 +89,13 @@ final class LandingConnectionsController extends Controller
             ]),
             'routeUrl' => $routeUrl,
             'recordsUrl' => $recordsUrl,
-            'marketers' => User::query()->whereIn('role', [UserRole::Marketing, UserRole::Admin])->orderBy('name')->get(['id', 'name', 'email']),
+            'marketers' => $this->marketersForUser($user),
             'sales' => User::query()->where('role', UserRole::Sales)->orderBy('name')->get(['id', 'name', 'email', 'team_id']),
             'saleTeams' => Team::query()->where('type', 'sale')->with('users:id,name,email,team_id')->orderBy('name')->get(['id', 'name']),
             'products' => Product::query()->where('is_active', true)->where('available_marketing', true)->orderBy('type')->orderBy('name')->get(['id', 'name', 'sku', 'type', 'unit_price']),
             'canManage' => $this->canManage($request->user()),
             'canApprove' => $this->canApprove($request->user()),
+            'canToggleApproval' => $this->canToggleInlineApproval($request->user()),
             'defaultMarketerUserId' => $this->defaultMarketerUserId($request->user()),
             'lockMarketerToSelf' => $this->shouldLockMarketerToSelf($request->user()),
             'activeMenuCode' => $activeMenuCode,
@@ -99,12 +108,6 @@ final class LandingConnectionsController extends Controller
 
         try {
             $payload = $this->validated($request);
-            // Luồng mới: tạo nguồn landing trước, duyệt/gắn sản phẩm ở menu duyệt riêng.
-            // Vì vậy form tạo không được tự bật duyệt để tránh 500/validation khi chưa có sản phẩm.
-            if (! collect($payload['products'] ?? [])->contains(fn ($row): bool => is_array($row) && filled($row['product_id'] ?? null))) {
-                $payload['is_approved'] = false;
-            }
-
             $this->manager->create($payload, $request->user());
         } catch (ValidationException $exception) {
             throw $exception;
@@ -132,13 +135,11 @@ final class LandingConnectionsController extends Controller
     public function update(Request $request, LandingConnection $record): RedirectResponse
     {
         $this->authorizeManage($request->user());
+        $this->authorizeRecordAccess($request->user(), $record);
 
         try {
-            $payload = $this->validated($request);
+            $payload = $this->validated($request, $record);
             $payload['preserve_product_mappings'] = true;
-            $payload['is_approved'] = $record->products()->exists()
-                ? (bool) $record->is_approved
-                : false;
 
             $this->manager->update($record, $payload, $request->user());
         } catch (ValidationException $exception) {
@@ -169,11 +170,23 @@ final class LandingConnectionsController extends Controller
     public function updateFlags(Request $request, LandingConnection $record): RedirectResponse
     {
         $this->authorizeManage($request->user());
+        $this->authorizeRecordAccess($request->user(), $record);
 
         $validated = $request->validate([
             'manual_import' => ['nullable', 'boolean'],
             'request_approval' => ['nullable', 'boolean'],
+            'is_approved' => ['nullable', 'boolean'],
         ]);
+
+        if (array_key_exists('is_approved', $validated)) {
+            abort_unless($this->canToggleInlineApproval($request->user()), 403);
+
+            $this->manager->setApprovalFlag($record, (bool) $validated['is_approved'], $request->user());
+
+            return back()->with('success', (bool) $validated['is_approved']
+                ? 'Đã duyệt nguồn landing.'
+                : 'Đã bỏ duyệt nguồn landing.');
+        }
 
         $metadata = (array) ($record->metadata ?? []);
         $manualImport = array_key_exists('manual_import', $validated)
@@ -192,12 +205,13 @@ final class LandingConnectionsController extends Controller
             'updated_by_user_id' => $request->user()?->id,
         ])->save();
 
-        return back()->with('success', 'Đã cập nhật trạng thái nhập thủ công/yêu cầu duyệt cho nguồn landing.');
+        return back()->with('success', 'Đã cập nhật trạng thái nhập thủ công cho nguồn landing.');
     }
 
     public function destroy(Request $request, LandingConnection $record): RedirectResponse
     {
         $this->authorizeManage($request->user());
+        $this->authorizeRecordAccess($request->user(), $record);
         $this->manager->delete($record);
 
         return back()->with('success', 'Đã ngừng và xóa kết nối landing.');
@@ -214,6 +228,7 @@ final class LandingConnectionsController extends Controller
 
         $records = LandingConnection::query()->whereIn('id', $validated['ids'])->get();
         foreach ($records as $record) {
+            $this->authorizeRecordAccess($request->user(), $record);
             $this->manager->delete($record);
         }
 
@@ -221,7 +236,7 @@ final class LandingConnectionsController extends Controller
     }
 
     /** @return array<string, mixed> */
-    private function validated(Request $request): array
+    private function validated(Request $request, ?LandingConnection $existing = null): array
     {
         $companyId = $this->resolveCompanyId($request->user());
 
@@ -231,8 +246,11 @@ final class LandingConnectionsController extends Controller
             'products' => [],
             'manual_import' => true,
             'request_approval' => true,
-            'is_approved' => false,
         ]);
+
+        if (! $request->filled('is_approved')) {
+            $request->merge(['is_approved' => false]);
+        }
 
         if (! $request->filled('marketer_user_id')) {
             $fallbackMarketer = $request->user()?->role === UserRole::Marketing
@@ -389,9 +407,12 @@ final class LandingConnectionsController extends Controller
         });
 
         $validated = $validator->validate();
-        // Contract v130: form tạo/sửa nguồn landing luôn nhập thủ công và luôn vào hàng chờ duyệt.
+        // Contract v130: form tạo/sửa nguồn landing luôn nhập thủ công; mặc định chưa duyệt.
         $validated['manual_import'] = true;
         $validated['request_approval'] = true;
+        $validated['is_approved'] = $this->canToggleInlineApproval($request->user())
+            ? (bool) ($validated['is_approved'] ?? false)
+            : (bool) ($existing?->is_approved ?? false);
 
         if ($this->shouldLockMarketerToSelf($request->user())) {
             $validated['marketer_user_id'] = (int) $request->user()->id;
@@ -535,9 +556,57 @@ final class LandingConnectionsController extends Controller
         return null;
     }
 
+    private function canToggleInlineApproval(User $user): bool
+    {
+        return $user->isAdmin();
+    }
+
     private function shouldLockMarketerToSelf(User $user): bool
     {
         return $user->role === UserRole::Marketing && ! $user->isAdmin();
+    }
+
+    /** @param  \Illuminate\Database\Eloquent\Builder<LandingConnection>  $query */
+    private function applyMarketingVisibilityScope($query, User $user): void
+    {
+        if ($user->isAdmin() || $user->role !== UserRole::Marketing) {
+            return;
+        }
+
+        $allowed = $this->scope->allowedMarketerIds($user);
+        $query->where(function ($builder) use ($allowed): void {
+            $builder->whereIn('marketer_user_id', $allowed)
+                ->orWhereIn('created_by_user_id', $allowed);
+        });
+    }
+
+    private function authorizeRecordAccess(User $user, LandingConnection $record): void
+    {
+        if ($user->isAdmin() || $user->role !== UserRole::Marketing) {
+            return;
+        }
+
+        $allowed = $this->scope->allowedMarketerIds($user);
+        abort_unless(
+            in_array((int) $record->marketer_user_id, $allowed, true)
+            || in_array((int) $record->created_by_user_id, $allowed, true),
+            403,
+        );
+    }
+
+    /** @return \Illuminate\Support\Collection<int, User> */
+    private function marketersForUser(User $user)
+    {
+        $query = User::query()
+            ->whereIn('role', [UserRole::Marketing, UserRole::Admin])
+            ->orderBy('name');
+
+        if ($user->role === UserRole::Marketing && ! $user->isAdmin()) {
+            $allowed = $this->scope->allowedMarketerIds($user);
+            $query->whereIn('id', $allowed);
+        }
+
+        return $query->get(['id', 'name', 'email']);
     }
 }
 

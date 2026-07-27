@@ -1,0 +1,97 @@
+<?php
+
+namespace Tests\Feature\Marketing;
+
+use App\Enums\UserRole;
+use App\Models\LandingConnection;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class LandingConnectionApprovalFlagTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_admin_can_toggle_inline_approval_flag_and_it_persists(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $marketer = User::factory()->create([
+            'role' => UserRole::Marketing,
+            'company_id' => $admin->company_id,
+        ]);
+        $sale = User::factory()->create([
+            'role' => UserRole::Sales,
+            'company_id' => $admin->company_id,
+        ]);
+
+        $this->actingAs($admin);
+
+        $createPayload = [
+            'name' => 'Landing inline duyệt',
+            'marketer_user_id' => $marketer->id,
+            'connection_type' => 'landing',
+            'ad_channel' => 'google_ads',
+            'allocation_method' => 'inherit',
+            'manual_import' => true,
+            'is_approved' => false,
+            'is_active' => true,
+            'sources' => [[
+                'client_key' => 'main-inline',
+                'name' => 'Landing inline duyệt',
+                'source_type' => 'main',
+                'source_url' => 'https://landing.example.test/inline',
+                'redirect_url' => null,
+                'sort_order' => 0,
+                'is_active' => true,
+            ]],
+            'products' => [],
+            'sale_user_ids' => [$sale->id],
+        ];
+
+        $this->post('/admin/marketing/landing-connections/records', $createPayload)
+            ->assertRedirect('/admin/marketing/landing-connections');
+
+        $connection = LandingConnection::query()->where('name', 'Landing inline duyệt')->firstOrFail();
+        $this->assertFalse((bool) $connection->is_approved);
+
+        $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
+            'is_approved' => true,
+        ])->assertSessionHas('success');
+
+        $connection->refresh();
+        $this->assertTrue((bool) $connection->is_approved);
+        $this->assertSame($admin->id, $connection->approved_by_user_id);
+
+        $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
+            'is_approved' => false,
+        ])->assertSessionHas('success');
+
+        $connection->refresh();
+        $this->assertFalse((bool) $connection->is_approved);
+    }
+
+    public function test_marketing_user_cannot_toggle_inline_approval_flag(): void
+    {
+        $marketer = User::factory()->create(['role' => UserRole::Marketing]);
+        $connection = LandingConnection::query()->create([
+            'company_id' => $marketer->company_id,
+            'name' => 'Landing MKT không duyệt inline',
+            'marketer_user_id' => $marketer->id,
+            'connection_type' => 'landing',
+            'allocation_method' => 'inherit',
+            'manual_import' => true,
+            'is_approved' => false,
+            'is_active' => true,
+            'created_by_user_id' => $marketer->id,
+            'updated_by_user_id' => $marketer->id,
+        ]);
+
+        $this->actingAs($marketer)
+            ->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
+                'is_approved' => true,
+            ])
+            ->assertForbidden();
+
+        $this->assertFalse((bool) $connection->fresh()->is_approved);
+    }
+}

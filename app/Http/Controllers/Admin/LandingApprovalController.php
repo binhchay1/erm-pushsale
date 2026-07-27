@@ -9,6 +9,8 @@ use App\Models\LandingConnectionSource;
 use App\Models\Product;
 use App\Services\Marketing\CampaignLandingService;
 use App\Services\Marketing\LandingConnectionManager;
+use App\Services\Reports\ReportScopeResolver;
+use App\Enums\UserRole;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +21,10 @@ use Throwable;
 
 class LandingApprovalController extends Controller
 {
-    public function __construct(private readonly LandingConnectionManager $manager) {}
+    public function __construct(
+        private readonly LandingConnectionManager $manager,
+        private readonly ReportScopeResolver $scope,
+    ) {}
 
     public function index(Request $request, CampaignLandingService $landing): Response
     {
@@ -28,7 +33,17 @@ class LandingApprovalController extends Controller
 
         $connections = LandingConnection::query()
             ->with($this->manager->relations())
-            ->whereIn('connection_type', ['landing', 'website', 'facebook'])
+            ->whereIn('connection_type', ['landing', 'website', 'facebook']);
+
+        if ($user->role === UserRole::Marketing && ! $user->isAdmin()) {
+            $allowed = $this->scope->allowedMarketerIds($user);
+            $connections->where(function ($query) use ($allowed): void {
+                $query->whereIn('marketer_user_id', $allowed)
+                    ->orWhereIn('created_by_user_id', $allowed);
+            });
+        }
+
+        $connections = $connections
             ->latest('id')
             ->get()
             ->map(fn (LandingConnection $connection): array => $this->presentForApproval($connection, $landing))
@@ -44,7 +59,9 @@ class LandingApprovalController extends Controller
                 ->get(['id', 'name', 'sku', 'type', 'unit_price']),
             'highlightCampaignId' => $request->integer('campaign') ?: $request->integer('connection') ?: null,
             'fieldMapping' => $this->fieldMappingGuide(),
-            'canApprove' => true,
+            'canApprove' => $user->isAdmin()
+                || $user->allows(\App\Enums\PermissionArea::Marketing, \App\Enums\PermissionLevel::Full)
+                || $user->allows(\App\Enums\PermissionArea::Integrations, \App\Enums\PermissionLevel::Full),
             'approveBaseUrl' => '/admin/marketing/landing-approvals',
             'activeMenuCode' => '2.4.3',
         ]);
@@ -57,6 +74,7 @@ class LandingApprovalController extends Controller
         ]);
 
         abort_unless($request->user() && ($request->user()->isAdmin() || $request->user()->allows(\App\Enums\PermissionArea::Marketing, \App\Enums\PermissionLevel::Full) || $request->user()->allows(\App\Enums\PermissionArea::Integrations, \App\Enums\PermissionLevel::Full)), 403);
+        $this->authorizeConnectionAccess($request->user(), $connection);
 
         $validated = $request->validate([
             'product_ids' => ['required', 'array', 'min:1', 'max:50'],
@@ -124,6 +142,7 @@ class LandingApprovalController extends Controller
     public function reject(Request $request, LandingConnection $connection): RedirectResponse
     {
         abort_unless($request->user() && ($request->user()->isAdmin() || $request->user()->allows(\App\Enums\PermissionArea::Marketing, \App\Enums\PermissionLevel::Full) || $request->user()->allows(\App\Enums\PermissionArea::Integrations, \App\Enums\PermissionLevel::Full)), 403);
+        $this->authorizeConnectionAccess($request->user(), $connection);
 
         $validated = $request->validate([
             'reason' => ['required', 'string', 'max:1000'],
@@ -224,5 +243,19 @@ class LandingApprovalController extends Controller
             ['ladipage' => 'field chọn gói', 'system' => 'Tên field/giá trị cấu hình tại trang duyệt kết nối'],
             ['ladipage' => 'giá / sản phẩm', 'system' => 'Không nhận từ landing; hệ thống lấy theo cấu hình backend'],
         ];
+    }
+
+    private function authorizeConnectionAccess(\App\Models\User $user, LandingConnection $connection): void
+    {
+        if ($user->isAdmin() || $user->role !== UserRole::Marketing) {
+            return;
+        }
+
+        $allowed = $this->scope->allowedMarketerIds($user);
+        abort_unless(
+            in_array((int) $connection->marketer_user_id, $allowed, true)
+            || in_array((int) $connection->created_by_user_id, $allowed, true),
+            403,
+        );
     }
 }

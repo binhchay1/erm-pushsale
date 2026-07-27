@@ -60,4 +60,48 @@ class LandingConnectionMarketerAssignmentTest extends TestCase
         $this->assertSame($targetMarketer->id, $connection->marketer_user_id);
         $this->assertFalse((bool) $connection->is_approved);
     }
+
+    public function test_marketing_user_only_sees_own_landing_connections_in_index(): void
+    {
+        $marketerA = User::factory()->create(['role' => UserRole::Marketing, 'name' => 'MKT A']);
+        $marketerB = User::factory()->create([
+            'role' => UserRole::Marketing,
+            'name' => 'MKT B',
+            'company_id' => $marketerA->company_id,
+        ]);
+
+        LandingConnection::query()->create([
+            'company_id' => $marketerA->company_id,
+            'name' => 'Nguồn A',
+            'marketer_user_id' => $marketerA->id,
+            'connection_type' => 'landing',
+            'allocation_method' => 'inherit',
+            'manual_import' => true,
+            'is_approved' => false,
+            'is_active' => true,
+            'created_by_user_id' => $marketerA->id,
+            'updated_by_user_id' => $marketerA->id,
+        ]);
+        LandingConnection::query()->create([
+            'company_id' => $marketerA->company_id,
+            'name' => 'Nguồn B',
+            'marketer_user_id' => $marketerB->id,
+            'connection_type' => 'landing',
+            'allocation_method' => 'inherit',
+            'manual_import' => true,
+            'is_approved' => false,
+            'is_active' => true,
+            'created_by_user_id' => $marketerB->id,
+            'updated_by_user_id' => $marketerB->id,
+        ]);
+
+        $this->actingAs($marketerA)
+            ->get('/admin/marketing/landing-connections')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Marketing/LandingConnectionsPage')
+                ->has('connections.data', 1)
+                ->where('connections.data.0.name', 'Nguồn A')
+                ->where('lockMarketerToSelf', true));
+    }
 }

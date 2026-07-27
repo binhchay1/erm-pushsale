@@ -157,9 +157,9 @@ function mergeUpsellSources(currentSources = [], urls = []) {
     return [main, ...upsells].map((source, index) => ({ ...source, sort_order: index }));
 }
 
-function cleanPayload(data) {
+function cleanPayload(data, { canToggleApproval = false } = {}) {
     const payload = { ...data };
-    // Contract v130: nguồn landing luôn nhập thủ công và luôn phải qua menu duyệt.
+    // Contract v130: nguồn landing luôn nhập thủ công.
     payload.manual_import = true;
     payload.request_approval = true;
     const urls = splitUpsellUrls(payload.upsell_urls_text);
@@ -176,9 +176,8 @@ function cleanPayload(data) {
     // Không gửi products từ dialog này để tránh validate theo flow cũ khi nguồn có upsell.
     delete payload.products;
     payload.success_url = payload.success_url || '';
-    // Luồng mới: form tạo/sửa nguồn landing không duyệt trực tiếp.
-    // Menu duyệt riêng sẽ gắn sản phẩm/gói + ngân sách rồi mới bật duyệt.
-    payload.is_approved = false;
+    // Mặc định chưa duyệt; chỉ admin mới gửi is_approved=true để auto duyệt.
+    payload.is_approved = canToggleApproval ? Boolean(data.is_approved) : false;
     delete payload.upsell_urls_text;
     return payload;
 }
@@ -209,6 +208,7 @@ export default function LandingConnectionsPage({
     recordsUrl = '/admin/marketing/landing-connections/records',
     canManage = false,
     canApprove = false,
+    canToggleApproval = false,
     defaultMarketerUserId = null,
     lockMarketerToSelf = false,
     activeMenuCode = '2.4.1',
@@ -389,7 +389,7 @@ export default function LandingConnectionsPage({
             preserveScroll: true,
             onSuccess: () => setOpen(false),
         };
-        form.transform(cleanPayload);
+        form.transform((data) => cleanPayload(data, { canToggleApproval }));
         editingId ? form.put(`${recordsUrl}/${editingId}`, options) : form.post(recordsUrl, options);
     };
 
@@ -412,6 +412,10 @@ export default function LandingConnectionsPage({
         if (!row?.id) return;
         const payload = {};
         if (Object.prototype.hasOwnProperty.call(flags, 'manual_import')) payload.manual_import = Boolean(flags.manual_import);
+        if (Object.prototype.hasOwnProperty.call(flags, 'is_approved')) {
+            if (!canToggleApproval) return;
+            payload.is_approved = Boolean(flags.is_approved);
+        }
         if (Object.keys(payload).length === 0) return;
         router.patch(`${recordsUrl}/${row.id}/flags`, payload, {
             preserveScroll: true,
@@ -476,6 +480,7 @@ export default function LandingConnectionsPage({
                                 options={marketerOptions}
                                 value={query.marketer_user_id}
                                 placeholder={l('select_marketing')}
+                                disabled={lockMarketerToSelf}
                                 onChange={(value) => setQuery((old) => ({ ...old, marketer_user_id: value }))}
                             />
                             <PushsaleSelect
@@ -584,13 +589,15 @@ export default function LandingConnectionsPage({
                                                     <input
                                                         type="checkbox"
                                                         checked={Boolean(row.is_approved)}
-                                                        readOnly
-                                                        disabled
-                                                        title={row.is_approved ? l('approved') : l('pending_approval')}
+                                                        disabled={!canToggleApproval}
+                                                        onChange={(event) => updateFlags(row, { is_approved: event.target.checked })}
+                                                        title={canToggleApproval
+                                                            ? (row.is_approved ? l('approved') : l('pending_approval'))
+                                                            : l('approval_admin_only')}
                                                     />
                                                 </td>
                                                 <td className="text-center">{row.updated_by ?? 'admin'}<br />{row.updated_at}</td>
-                                                <td className="text-center pslc-actions"><button type="button" className="btn-icon" onClick={() => openEdit(row)} title={l('edit')}><i className="fa fa-edit" /></button></td>
+                                                <td className="text-center pslc-actions">{canManage ? <button type="button" className="btn-icon" onClick={() => openEdit(row)} title={l('edit')}><i className="fa fa-edit" /></button> : null}</td>
                                             </tr>
                                         );
                                     }) : (
@@ -674,13 +681,17 @@ export default function LandingConnectionsPage({
                             <div className="pslc-dialog-checks pslc-dialog-checks-two">
                                 <label><input type="checkbox" checked readOnly disabled /> {l('manual_import')}</label>
                                 <label>
-                                    <input type="checkbox" checked={Boolean(form.data.is_approved)} readOnly disabled />
+                                    <input
+                                        type="checkbox"
+                                        checked={Boolean(form.data.is_approved)}
+                                        disabled={!canToggleApproval}
+                                        onChange={(event) => form.setData('is_approved', event.target.checked)}
+                                    />
                                     {' '}{l('approve')}
                                 </label>
                                 <span className="small-tip">
                                     {form.data.is_approved ? l('approved') : l('pending_approval')}
-                                    {' — '}
-                                    {l('approval_hint')}
+                                    {canToggleApproval ? ` — ${l('approval_auto_hint')}` : ` — ${l('approval_admin_only')}`}
                                 </span>
                             </div>
                         </div>
