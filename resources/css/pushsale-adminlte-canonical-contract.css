@@ -788,10 +788,10 @@ html body.pushsale-app-body .ps-order-product-qty {
     text-align: center !important;
 }
 html body.pushsale-app-body .ps-order-product-price {
-    min-width: 76px !important;
-    max-width: 92px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    min-width: 110px !important;
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
     text-align: right !important;
 }
 html body.pushsale-app-body .ps-wh-table .c-products-body,
@@ -1113,11 +1113,11 @@ html body.pushsale-app-body .ps-result-cell span {
 }
 html body.pushsale-app-body .ps-order-products-cell,
 html body.pushsale-app-body td.ps-order-products-cell {
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 html body.pushsale-app-body .ps-order-products-row {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 34px minmax(64px, 84px) !important;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(110px, 120px) !important;
     column-gap: 6px !important;
     align-items: start !important;
 }
@@ -1132,7 +1132,7 @@ html body.pushsale-app-body .ps-order-upsale-icon {
     margin-right: 4px !important;
 }
 
-/* Money columns: numeric values lean closer to the right border on all operation tables. */
+/* Money columns: keep numbers right-aligned with room for currency suffix. */
 html body.pushsale-app-body .ps-order-money-cell,
 html body.pushsale-app-body .c-money-body,
 html body.pushsale-app-body .ps-col-money,
@@ -1140,7 +1140,7 @@ html body.pushsale-app-body td.text-right,
 html body.pushsale-app-body .ps-money-cell {
     text-align: right !important;
     padding-left: 3px !important;
-    padding-right: 4px !important;
+    padding-right: 8px !important;
 }
 html body.pushsale-app-body .ps-order-money-breakdown > div,
 html body.pushsale-app-body .ps-order-money-breakdown > strong,
@@ -1390,15 +1390,15 @@ html body.pushsale-app-body .ps-sale-operation-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-customer-profile-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-wh-table .ps-order-products-cell {
-    min-width: 260px !important;
-    overflow: hidden !important;
+    min-width: 340px !important;
+    overflow: visible !important;
 }
 html body.pushsale-app-body .ps-order-products-breakdown {
     width: 100% !important;
 }
 html body.pushsale-app-body .ps-order-products-row {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 34px minmax(82px, 92px) !important;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(110px, 120px) !important;
     gap: 6px !important;
     align-items: start !important;
     min-height: 22px !important;
@@ -1616,17 +1616,17 @@ html body.pushsale-app-body .ps-sale-operation-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-wh-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-wh-table .c-products-body {
-    min-width: 300px !important;
-    width: 300px !important;
+    min-width: 340px !important;
+    width: 340px !important;
     max-width: none !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 html body.pushsale-app-body .ps-order-products-breakdown {
     display: block !important;
     width: 100% !important;
     min-width: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 html body.pushsale-app-body .ps-order-products-section {
@@ -1662,7 +1662,7 @@ html body.pushsale-app-body .ps-order-products-pending-upsale {
 
 html body.pushsale-app-body .ps-order-products-row {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 34px 92px !important;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(110px, 120px) !important;
     column-gap: 7px !important;
     row-gap: 2px !important;
     align-items: start !important;
@@ -1704,7 +1704,7 @@ html body.pushsale-app-body .ps-order-product-qty {
 
 html body.pushsale-app-body .ps-order-product-price {
     display: block !important;
-    min-width: 88px !important;
+    min-width: 110px !important;
     max-width: none !important;
     overflow: visible !important;
     text-align: right !important;

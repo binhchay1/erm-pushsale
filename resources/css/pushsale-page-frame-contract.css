@@ -237,16 +237,18 @@ html body.pushsale-app-body .ps-page-shell .ps-title-divider {
     font-weight: 700 !important;
 }
 
-/* Sale workspace advanced filter grid inside shell — 2 hàng gọn. */
+/* Sale workspace advanced filter grid inside shell — 2 hàng gọn, cùng lề trái. */
 html body.pushsale-app-body .ps-page-shell .ps-sale-extra-filters {
     display: flex !important;
     flex-direction: column !important;
+    align-items: stretch !important;
     gap: 8px !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
     border: 0 !important;
+    grid-template-columns: none !important;
 }
 
 html body.pushsale-app-body .ps-page-shell .ps-sale-extra-row {
@@ -254,10 +256,12 @@ html body.pushsale-app-body .ps-page-shell .ps-sale-extra-row {
     grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(140px, 1fr)) !important;
     gap: 8px 10px !important;
     align-items: center !important;
+    justify-content: start !important;
+    width: 100% !important;
 }
 
 html body.pushsale-app-body .ps-page-shell .ps-sale-extra-row:last-child {
-    grid-template-columns: repeat(4, minmax(140px, 1fr)) auto !important;
+    grid-template-columns: repeat(5, minmax(140px, 1fr)) !important;
 }
 
 html body.pushsale-app-body .ps-page-shell .ps-sale-extra-filters .form-control,

@@ -568,6 +568,7 @@ html body.pushsale-app-body .ps-page-header .ps-sale-search-wrap {
 html body.pushsale-app-body .ps-page-header .ps-sale-extra-filters {
     display: flex !important;
     flex-direction: column !important;
+    align-items: stretch !important;
     gap: 8px !important;
     width: 100% !important;
     margin: 0 !important;
@@ -579,6 +580,8 @@ html body.pushsale-app-body .ps-page-header .ps-sale-extra-row {
     grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(140px, 1fr)) !important;
     gap: 8px 10px !important;
     align-items: center !important;
+    justify-content: start !important;
+    justify-items: stretch !important;
     width: 100% !important;
     margin: 0 !important;
 }
@@ -590,6 +593,58 @@ html body.pushsale-app-body .ps-page-header .ps-sale-extra-row:last-child {
 html body.pushsale-app-body .ps-page-header .ps-sale-check {
     display: inline-flex !important;
     align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+}
+
+/* Filter bổ sung Sale tác nghiệp (4.1) — sibling .ps-page-extra-filters.
+ * Legacy `.ps-sale-extra-filters { display:grid; nhiều cột }` đẩy hàng 2 sang phải. */
+html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-filters,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-filters,
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-filters {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    grid-template-columns: none !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-row,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row,
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(140px, 1fr)) !important;
+    grid-column: 1 / -1 !important;
+    gap: 8px 10px !important;
+    align-items: center !important;
+    justify-content: start !important;
+    justify-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-row:last-child,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row:last-child,
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row:last-child {
+    /* Cùng lề trái với hàng 1 — không để trống cột date. */
+    grid-template-columns: repeat(5, minmax(140px, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-self: start !important;
     gap: 6px !important;
     margin: 0 !important;
     white-space: nowrap !important;
@@ -767,7 +822,7 @@ html body.pushsale-app-body .psm-dashboard-header .psm-utm-check {
     white-space: nowrap !important;
 }
 
-/* Hồ sơ KH (4.2): 2 hàng đều, date = 1 cụm, có bóng header. */
+/* Hồ sơ KH (4.2): 3 hàng filter bổ sung (rộng hơn), date = 1 cụm, có bóng header. */
 html body.pushsale-app-body .ps-page-header[data-page-code="4.2"],
 html body.pushsale-app-body .ps-page-header.ps-customer-profile-header,
 html body.pushsale-app-body .m-header-wrap.ps-page-header[data-page-code="4.2"] {
@@ -775,13 +830,22 @@ html body.pushsale-app-body .m-header-wrap.ps-page-header[data-page-code="4.2"] 
     border-bottom: 0 !important;
 }
 
-html body.pushsale-app-body .ps-customer-profile-header .ps-adv-filter-row {
-    --ps-adv-cols: 11;
-    grid-template-columns: repeat(11, minmax(0, 1fr)) !important;
+html body.pushsale-app-body .ps-customer-profile-header .ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters.ps-customer-profile-header .ps-adv-filter-row {
+    --ps-adv-cols: 8;
+    grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
 }
 
-html body.pushsale-app-body .ps-customer-profile-header .ps-adv-filter-row:last-child {
-    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+html body.pushsale-app-body .ps-customer-profile-header .ps-adv-filter-row:nth-child(2),
+html body.pushsale-app-body .ps-page-extra-filters.ps-customer-profile-header .ps-adv-filter-row:nth-child(2) {
+    --ps-adv-cols: 7;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-header .ps-adv-filter-row:last-child,
+html body.pushsale-app-body .ps-page-extra-filters.ps-customer-profile-header .ps-adv-filter-row:last-child {
+    --ps-adv-cols: 8;
+    grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
 }
 
 html body.pushsale-app-body .ps-customer-profile-header .ps-adv-filter-row .ps-filter-reset {
@@ -793,7 +857,9 @@ html body.pushsale-app-body .ps-customer-profile-header .ps-adv-filter-row .ps-f
 
 @media (max-width: 1399px) {
     html body.pushsale-app-body .ps-page-header .ps-sale-extra-row,
-    html body.pushsale-app-body .ps-page-header .ps-sale-extra-row:last-child {
+    html body.pushsale-app-body .ps-page-header .ps-sale-extra-row:last-child,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row:last-child {
         grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
     }
 
@@ -808,7 +874,9 @@ html body.pushsale-app-body .ps-customer-profile-header .ps-adv-filter-row .ps-f
 @media (max-width: 1199px) {
     html body.pushsale-app-body .ps-page-header .ps-sale-primary-filters,
     html body.pushsale-app-body .ps-page-header .ps-sale-extra-row,
-    html body.pushsale-app-body .ps-page-header .ps-sale-extra-row:last-child {
+    html body.pushsale-app-body .ps-page-header .ps-sale-extra-row:last-child,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row:last-child {
         grid-template-columns: repeat(2, minmax(140px, 1fr)) !important;
     }
 }

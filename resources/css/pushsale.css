@@ -2761,11 +2761,12 @@ body.pushsale-app-body .ps-sale-search-wrap .btn i { margin-right: 5px; }
 body.pushsale-app-body .ps-sale-filter-toggle { color: #1481d4; font-size: 15px; }
 
 body.pushsale-app-body .ps-sale-extra-filters {
-    display: grid;
-    grid-template-columns: 2.05fr 1fr 1fr 1fr 1.05fr;
-    align-items: center;
-    gap: 12px 30px;
-    min-height: 91px;
+    /* Layout 2 hàng do operations-polish / page-header-contract lo; không dùng grid nhiều cột ở đây. */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    min-height: 0;
     padding: 14px 16px 10px;
 }
 
@@ -8715,7 +8716,6 @@ body.pushsale-app-body .ps-sale-title-row {
     padding: 10px 20px !important;
 }
 body.pushsale-app-body .ps-sale-extra-filters {
-    grid-template-columns: minmax(200px, 1.15fr) repeat(8, minmax(110px, 1fr)) auto !important;
     gap: 8px 10px !important;
     padding: 8px 20px 8px !important;
 }
@@ -12848,7 +12848,7 @@ body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-
 body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-sale { width: 7.5% !important; min-width: 0 !important; }
 body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-operation { width: 6.6% !important; min-width: 0 !important; }
 body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-result { width: 8.9% !important; min-width: 0 !important; }
-body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-products { width: 12.4% !important; min-width: 0 !important; }
+body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-products { width: 14.2% !important; min-width: 340px !important; }
 body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-money { width: 6.4% !important; min-width: 0 !important; }
 body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-deposit { width: 4.5% !important; min-width: 0 !important; }
 body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-shipping { width: 5.8% !important; min-width: 0 !important; }
@@ -13494,7 +13494,6 @@ body.pushsale-app-body .ps-sale-title-spacer {
 }
 
 body.pushsale-app-body .ps-sale-extra-filters {
-    grid-template-columns: minmax(200px, 1.15fr) repeat(8, minmax(110px, 1fr)) auto !important;
     gap: 8px 10px !important;
     padding: 8px 16px 8px !important;
 }
@@ -14521,15 +14520,15 @@ html body.pushsale-app-body .ps-sale-operation-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-customer-profile-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-wh-table .ps-order-products-cell {
-    min-width: 260px !important;
-    overflow: hidden !important;
+    min-width: 340px !important;
+    overflow: visible !important;
 }
 html body.pushsale-app-body .ps-order-products-breakdown {
     width: 100% !important;
 }
 html body.pushsale-app-body .ps-order-products-row {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 34px minmax(82px, 92px) !important;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(110px, 120px) !important;
     gap: 6px !important;
     align-items: start !important;
     min-height: 22px !important;
@@ -14743,17 +14742,17 @@ html body.pushsale-app-body .ps-sale-operation-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-wh-table .ps-order-products-cell,
 html body.pushsale-app-body .ps-wh-table .c-products-body {
-    min-width: 300px !important;
-    width: 300px !important;
+    min-width: 340px !important;
+    width: 340px !important;
     max-width: none !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 html body.pushsale-app-body .ps-order-products-breakdown {
     display: block !important;
     width: 100% !important;
     min-width: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 html body.pushsale-app-body .ps-order-products-section {
@@ -14793,7 +14792,7 @@ html body.pushsale-app-body .ps-order-products-pending-upsale {
 
 html body.pushsale-app-body .ps-order-products-row {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 34px 92px !important;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(110px, 120px) !important;
     column-gap: 7px !important;
     row-gap: 2px !important;
     align-items: start !important;
@@ -14835,7 +14834,7 @@ html body.pushsale-app-body .ps-order-product-qty {
 
 html body.pushsale-app-body .ps-order-product-price {
     display: block !important;
-    min-width: 88px !important;
+    min-width: 110px !important;
     max-width: none !important;
     overflow: visible !important;
     text-align: right !important;
