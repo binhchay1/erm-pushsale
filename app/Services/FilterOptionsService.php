@@ -28,6 +28,15 @@ class FilterOptionsService
     ) {}
 
     /** @return array<string, mixed> */
+    public function forInventory(?User $user = null): array
+    {
+        return [
+            'warehouses' => $this->warehouses->options(),
+            'products' => $this->products->options(),
+        ];
+    }
+
+    /** @return array<string, mixed> */
     public function forReports(?User $user = null): array
     {
         $allTeams = $this->teams->optionsWithType();

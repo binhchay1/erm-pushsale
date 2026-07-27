@@ -98,7 +98,22 @@ function WarehouseForm({ form, managers, locations, editing, onSubmit, onAppendP
                 <label><span>Mã kho</span><input className="form-control" value={form.data.code ?? ''} onChange={(event) => form.setData('code', event.target.value)} /></label>
                 <label><span>Quản kho</span><PushsaleSelect searchable options={managerOptions} value={form.data.manager_user_id ?? ''} onChange={(value) => form.setData('manager_user_id', value)} placeholder="--Quản kho--" /></label>
 
-                <label className="ps-checkbox-row"><span>Địa chỉ 2 cấp</span><span className="ps-checkbox-inline"><input type="checkbox" checked={Boolean(form.data.use_two_level_address)} onChange={(event) => { form.setData('use_two_level_address', event.target.checked); form.setData('pick_province', ''); form.setData('pick_district', ''); form.setData('pick_ward', ''); }} /> Sử dụng địa chỉ 2 cấp</span></label>
+                <label className="ps-checkbox-row">
+                    <span>Địa chỉ 2 cấp</span>
+                    <span className="ps-checkbox-inline">
+                        <input
+                            type="checkbox"
+                            checked={Boolean(form.data.use_two_level_address)}
+                            onChange={(event) => {
+                                form.setData('use_two_level_address', event.target.checked);
+                                form.setData('pick_province', '');
+                                form.setData('pick_district', '');
+                                form.setData('pick_ward', '');
+                            }}
+                        />
+                        <span>Sử dụng địa chỉ 2 cấp</span>
+                    </span>
+                </label>
                 <label><span>Số ĐT quản kho</span><input className="form-control" value={form.data.phone ?? ''} onChange={(event) => form.setData('phone', event.target.value)} /></label>
 
                 <label><span>Tỉnh/TP <b>(*)</b></span><AddressSelect type="province" mode={provinceOptionsMode} locations={locations} value={form.data.pick_province ?? ''} onChange={(value) => { form.setData('pick_province', value); form.setData('pick_district', ''); form.setData('pick_ward', ''); }} placeholder="--Chọn Tỉnh/TP" /></label>
@@ -309,12 +324,12 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                     title="Danh sách kho"
                     pageCode="5.2.1"
                     className="ps-warehouse-list-header-wrap"
-                    filters={(
-                        <form className="ps-warehouse-filters" onSubmit={submitFilters}>
+                    actions={(
+                        <form className="ps-header-search ps-warehouse-header-filters" onSubmit={submitFilters}>
                             <PushsaleSelect searchable options={filterProvinceOptions} value={province} onChange={(value) => { setProvince(value); setDistrict(''); }} placeholder="--Chọn Tỉnh/TP" />
                             <PushsaleSelect searchable options={filterDistrictOptions} value={district} onChange={setDistrict} placeholder={province === 'Địa chỉ 2 cấp 2025' ? '--Chọn Phường/Xã 2025--' : '--Quận/Huyện--'} disabled={!province && filterDistrictOptions.length === 0} />
                             <PushsaleSelect searchable options={managerOptions} value={manager} onChange={setManager} placeholder="--Quản kho--" />
-                            <input className="form-control" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Mã, tên, số điện thoại" />
+                            <input className="form-control" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Mã, tên" />
                             <button className="btn btn-sm btn-primary" type="submit"><i className="fa fa-search" /> Tìm kiếm</button>
                         </form>
                     )}

@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use App\Support\VietnamDivisions;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -81,13 +82,15 @@ class WarehouseController extends Controller
             'updated_at' => $warehouse->updated_at?->format('d/m/Y H:i'),
         ]);
 
+        $locations = $this->locationOptions();
+
         return Inertia::render('Admin/Warehouse/Index', [
             'warehouses' => $warehouses,
             'filters' => $filters,
             'managers' => $this->managerOptions(),
-            'provinces' => $this->provinceOptions(),
-            'districts' => $this->districtOptions($filters['province']),
-            'locations' => $this->locationOptions(),
+            'provinces' => $this->provinceOptions($locations),
+            'districts' => $this->districtOptions($filters['province'], $locations),
+            'locations' => $locations,
             'shippingProviders' => $this->shippingProviderOptions(),
             'activeMenuCode' => '5.2.1',
         ]);
@@ -233,11 +236,11 @@ class WarehouseController extends Controller
     }
 
     /** @return list<string> */
-    protected function provinceOptions(): array
+    protected function provinceOptions(?array $locations = null): array
     {
-        $locations = $this->locationOptions();
-        $known = array_map(fn (array $item): string => (string) $item['name'], $locations['old']['provinces']);
-        $current = array_map(fn (array $item): string => (string) $item['name'], $locations['new2025']['provinces']);
+        $locations ??= $this->locationOptions();
+        $known = array_map(fn (array $item): string => (string) $item['name'], $locations['old']['provinces'] ?? []);
+        $current = array_map(fn (array $item): string => (string) $item['name'], $locations['new2025']['provinces'] ?? []);
 
         $fromData = Warehouse::query()
             ->whereNotNull('pick_province')
@@ -253,9 +256,9 @@ class WarehouseController extends Controller
     }
 
     /** @return list<string> */
-    protected function districtOptions(string $province = ''): array
+    protected function districtOptions(string $province = '', ?array $locations = null): array
     {
-        $locations = $this->locationOptions();
+        $locations ??= $this->locationOptions();
         $fromAddressBook = $province !== ''
             ? array_map(fn (array $item): string => (string) $item['name'], $locations['old']['districts'][$province] ?? [])
             : [];
@@ -275,6 +278,14 @@ class WarehouseController extends Controller
 
     /** @return array<string,mixed> */
     protected function locationOptions(): array
+    {
+        return Cache::remember('warehouse.location-options.v2', now()->addDay(), function (): array {
+            return $this->buildLocationOptions();
+        });
+    }
+
+    /** @return array<string,mixed> */
+    protected function buildLocationOptions(): array
     {
         $oldProvinces = [];
         $oldDistricts = [];

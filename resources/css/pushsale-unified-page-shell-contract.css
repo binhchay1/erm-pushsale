@@ -1130,6 +1130,43 @@ html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters {
     margin: 0 !important;
 }
 
+/* Header actions: một hàng ngang, đẩy về cuối dòng như Users / Inventory. */
+html body.pushsale-app-body .ps-warehouse-page .ps-header-search.ps-warehouse-header-filters,
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > .ps-select {
+    flex: 0 1 170px !important;
+    width: 170px !important;
+    min-width: 140px !important;
+    max-width: 200px !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > input.form-control {
+    flex: 0 1 180px !important;
+    width: 180px !important;
+    min-width: 140px !important;
+    height: 29px !important;
+    min-height: 29px !important;
+    border: 1px solid #c7d2df !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > .btn {
+    flex: 0 0 auto !important;
+    height: 29px !important;
+    min-height: 29px !important;
+    white-space: nowrap !important;
+}
+
 html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters select,
 html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters input {
     height: 29px !important;
@@ -1324,9 +1361,14 @@ html body.pushsale-app-body .ps-warehouse-form-grid textarea {
 }
 
 html body.pushsale-app-body .ps-warehouse-form-grid .ps-checkbox-row .ps-checkbox-inline {
-    display: flex !important;
+    display: inline-flex !important;
     align-items: center !important;
+    justify-content: flex-start !important;
     gap: 8px !important;
+    width: 100% !important;
+    min-height: 28px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     font-weight: 400 !important;
 }
 
@@ -1334,6 +1376,29 @@ html body.pushsale-app-body .ps-warehouse-form-grid .ps-checkbox-row input[type=
     width: 16px !important;
     height: 16px !important;
     min-height: 16px !important;
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+}
+
+/* Dialog select: bỏ viền/đổ bóng dày, đồng bộ input text. */
+html body.pushsale-app-body .ps-warehouse-dialog .ps-select__control,
+html body.pushsale-app-body .ps-warehouse-form-grid .ps-select__control,
+html body.pushsale-app-body .ps-dialog-surface .ps-select__control,
+html body.pushsale-app-body [data-slot='dialog-content'] .ps-select__control {
+    height: 28px !important;
+    min-height: 28px !important;
+    border: 1px solid #c8d0db !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-dialog .ps-select__menu,
+html body.pushsale-app-body .ps-dialog-surface .ps-select__menu,
+html body.pushsale-app-body [data-slot='dialog-content'] .ps-select__menu {
+    border: 1px solid #c8d0db !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .12) !important;
 }
 
 html body.pushsale-app-body .ps-warehouse-region-links {
@@ -1510,6 +1575,16 @@ html body.pushsale-app-body .ps-shipping-help-box p {
     html body.pushsale-app-body .ps-shipping-provider-grid label {
         grid-template-columns: 1fr !important;
     }
+    html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters {
+        flex-wrap: wrap !important;
+        justify-content: stretch !important;
+    }
+    html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > .ps-select,
+    html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > input.form-control {
+        flex: 1 1 140px !important;
+        width: auto !important;
+        max-width: none !important;
+    }
     html body.pushsale-app-body .ps-shipping-provider-tabs {
         min-height: 0 !important;
         border-right: 0 !important;
@@ -1520,6 +1595,39 @@ html body.pushsale-app-body .ps-shipping-help-box p {
     html body.pushsale-app-body .ps-shipping-provider-actions,
     html body.pushsale-app-body .ps-warehouse-region-links {
         margin-left: 0 !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+
+    html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > .ps-select,
+    html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > input.form-control,
+    html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > .btn {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    html body.pushsale-app-body .ps-warehouse-form-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.pushsale-app-body .ps-warehouse-form-grid label,
+    html body.pushsale-app-body .ps-warehouse-form-grid label.span-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.pushsale-app-body .ps-warehouse-table-wrap,
+    html body.pushsale-app-body .ps-table-scroll.ps-warehouse-table-wrap {
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
     }
 }
 

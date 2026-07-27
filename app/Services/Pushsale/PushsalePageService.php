@@ -196,6 +196,11 @@ class PushsalePageService
     /** @return array<string, array<int, array<string, mixed>>> */
     public function filterOptions(string $pageCode): array
     {
+        // Phiếu/kho không cần full catalog users/teams/orders — tránh load vài giây khi trang trống.
+        if (preg_match('/^5\.[23]/', $pageCode) === 1) {
+            return $this->warehousePageFilterOptions();
+        }
+
         $schema = $this->schema($pageCode);
         $requestedSources = collect($schema['form_fields'] ?? [])
             ->merge(collect($schema['dialog_resources'] ?? [])->flatMap(function (string $resourceKey): array {
@@ -388,6 +393,55 @@ class PushsalePageService
         }
 
         return $options;
+    }
+
+    /** @return array<string, array<int, array<string, mixed>>> */
+    private function warehousePageFilterOptions(): array
+    {
+        $products = Product::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->limit(2000)
+            ->get(['id', 'name', 'sku', 'type', 'unit_price', 'is_active']);
+
+        return [
+            'warehouses' => Warehouse::query()
+                ->orderBy('name')
+                ->limit(500)
+                ->get(['id', 'name'])
+                ->map(fn (Warehouse $warehouse): array => [
+                    'id' => $warehouse->id,
+                    'label' => $warehouse->name,
+                    'name' => $warehouse->name,
+                ])
+                ->all(),
+            'products' => $products->map(fn (Product $product): array => [
+                'id' => $product->id,
+                'label' => trim($product->name.($product->sku ? " ({$product->sku})" : '')),
+                'name' => $product->name,
+                'type' => $product->type,
+                'unit_price' => (int) $product->unit_price,
+                'sku' => $product->sku,
+                'is_active' => (bool) $product->is_active,
+            ])->all(),
+            'warehouseVoucherTypes' => [
+                ['id' => 1, 'label' => 'Nhập kho'],
+                ['id' => 2, 'label' => 'Xuất kho'],
+                ['id' => 4, 'label' => 'Xuất kho nội bộ'],
+                ['id' => 3, 'label' => 'Xuất hủy'],
+            ],
+            'warehouseUsers' => User::query()
+                ->whereIn('role', [UserRole::Warehouse, UserRole::Admin])
+                ->orderBy('name')
+                ->limit(500)
+                ->get(['id', 'name', 'email'])
+                ->map(fn (User $user): array => [
+                    'id' => $user->id,
+                    'label' => trim($user->name.' · '.$user->email),
+                    'name' => $user->name,
+                ])
+                ->all(),
+        ];
     }
 
     private function users(): Collection

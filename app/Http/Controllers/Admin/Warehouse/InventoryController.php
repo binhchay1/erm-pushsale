@@ -36,7 +36,7 @@ class InventoryController extends Controller
         return Inertia::render('Admin/Warehouse/Inventory', [
             'report' => $snapshot['data'],
             'reportCache' => ['cachedAt' => $snapshot['cachedAt'], 'fromCache' => $snapshot['fromCache'], 'storage' => $snapshot['storage'], 'isFinal' => $snapshot['isFinal']],
-            'filterOptions' => app(FilterOptionsService::class)->forReports($request->user()),
+            'filterOptions' => app(FilterOptionsService::class)->forInventory($request->user()),
             'intakeUrl' => $base.'/intake',
             'exportUrl' => $base.'/export',
             'approverOptions' => $users->warehouseApprovers(),

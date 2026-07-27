@@ -8,6 +8,7 @@ import { CustomerPurchaseHistoryDialog } from '@/components/customers/CustomerPu
 import { OrderOperationHistoryDialog } from '@/components/customers/OrderOperationHistoryDialog';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
@@ -736,7 +737,14 @@ function inferFilterKey(node) {
     if ((source.includes('ddlsale') || source.includes('ddlsales')) && !source.includes('leader')) return 'sale_id';
     if (source.includes('sanpham') || source.includes('product')) return 'product_id';
     if (source.includes('landing') || source.includes('nguondulieu') || source.includes('source')) return 'source_id';
-    if (source.includes('kho') || source.includes('warehouse')) return 'warehouse_id';
+    if (
+        source.includes('__idkho')
+        || source.includes('_idkho')
+        || /(^|[^a-z])idkho([^a-z]|$)/.test(source)
+        || source.includes('warehouse')
+    ) {
+        return 'warehouse_id';
+    }
     if (source.includes('trangthaichotdon')) return 'closed_status';
     if (source.includes('trangthaigiaohang') || source.includes('deliverystatus')) return 'delivery_status';
     if (source.includes('ketquatacnghiep')) return 'operation_result';
@@ -831,9 +839,18 @@ function optionsForControl(id, filterOptions) {
     if (source.includes('marketinguserid') || source.includes('idmarketing') || source.includes('ddlmarketing') || source.includes('ddlmarketings')) return filterOptions?.marketers ?? [];
     if ((source.includes('ddlsale') || source.includes('ddlsales')) && !source.includes('leader')) return filterOptions?.sales ?? [];
     if (source.includes('nghiepvukho') || source.includes('loaiphieu')) return filterOptions?.warehouseVoucherTypes ?? voucherTypeOptions();
+    // Tránh match nhầm mọi control có "CapNhatPhieuXuatNhapKho" chứa chữ "kho".
+    if (source.includes('sanphamkho') || source.includes('id_san_pham_kho')) return filterOptions?.products ?? [];
     if (source.includes('sanpham') || source.includes('product')) return filterOptions?.products ?? [];
     if (source.includes('landing') || source.includes('nguon')) return filterOptions?.sources ?? [];
-    if (source.includes('kho') || source.includes('warehouse')) return filterOptions?.warehouses ?? [];
+    if (
+        source.includes('__idkho')
+        || source.includes('_idkho')
+        || /(^|[^a-z])idkho([^a-z]|$)/.test(source)
+        || source.includes('warehouse')
+    ) {
+        return filterOptions?.warehouses ?? [];
+    }
     return [];
 }
 
@@ -1124,16 +1141,16 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
                 selected.textContent = String(selectedOption.label ?? selectedOption.name ?? selectedOption.id);
                 selected.setAttribute('item-id', String(selectedOption.id));
                 selected.dataset.optionData = JSON.stringify(selectedOption);
-            } else if (selected) {
-                selected.textContent = '-- Chọn đơn vị --';
+            } else if (selected && !selected.getAttribute('item-id')) {
+                selected.textContent = selected.textContent || '-- Chọn --';
                 selected.setAttribute('item-id', '-1');
                 selected.dataset.optionData = '{}';
             }
-            dropdown.classList.toggle('ps-ddl-disabled', options.length <= 1);
+            dropdown.classList.toggle('ps-ddl-disabled', options.length === 0);
             const searchBox = dropdown.querySelector('.ps-ddl-search-box');
             if (searchBox) {
-                searchBox.disabled = options.length <= 1;
-                searchBox.classList.toggle('aspNetDisabled', options.length <= 1);
+                searchBox.disabled = options.length === 0;
+                searchBox.classList.toggle('aspNetDisabled', options.length === 0);
             }
         });
 
@@ -1232,7 +1249,70 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
                     window.location.assign(`${routeUrl}?${params.toString()}`);
                 } else if (action === 'print') window.print();
                 else if (action === 'download_template') window.location.assign(schema.template_url || '/admin/leads/import-template');
-                else if (action === 'import') onPushsaleSave?.(host);
+                else if (action === 'import') {
+                    if (String(schema.code) === '5.3.1') {
+                        let fileInput = host.querySelector('input[data-pushsale-voucher-import]');
+                        if (!fileInput) {
+                            fileInput = document.createElement('input');
+                            fileInput.type = 'file';
+                            fileInput.accept = '.csv,text/csv';
+                            fileInput.dataset.pushsaleVoucherImport = '1';
+                            fileInput.className = 'hidden';
+                            fileInput.addEventListener('change', async () => {
+                                const file = fileInput.files?.[0];
+                                if (!file) return;
+                                try {
+                                    const text = await file.text();
+                                    const rows = text.replace(/^\uFEFF/, '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+                                    if (rows.length < 2) throw new Error('File CSV trống hoặc thiếu dữ liệu.');
+                                    const headers = rows[0].split(',').map((cell) => cell.replace(/^"|"$/g, '').trim().toLowerCase());
+                                    const skuIdx = headers.findIndex((h) => ['sku', 'mã sản phẩm', 'ma san pham', 'mã sp'].includes(h));
+                                    const qtyIdx = headers.findIndex((h) => ['quantity', 'số lượng', 'so luong', 'sl'].includes(h));
+                                    const costIdx = headers.findIndex((h) => ['unit_cost', 'giá nhập', 'gia nhap', 'đơn giá', 'don gia'].includes(h));
+                                    const warehouseId = Number(host.querySelector('[id$="__IdKho"]')?.value) || null;
+                                    const typeRaw = String(host.querySelector('[id$="__IdNghiepVuKho"]')?.value ?? '1');
+                                    const type = ['1', 'inbound', 'nhap', 'nhập kho'].includes(typeRaw.toLocaleLowerCase('vi')) ? 'inbound' : 'outbound';
+                                    if (!warehouseId || warehouseId < 1) throw new Error('Vui lòng chọn kho trước khi import.');
+                                    const products = filterOptions?.products ?? [];
+                                    let imported = 0;
+                                    for (const row of rows.slice(1)) {
+                                        const cells = row.match(/("([^"]|"")*"|[^,]*)/g)?.map((cell) => cell.replace(/^"|"$/g, '').replace(/""/g, '"').trim()) ?? [];
+                                        const sku = skuIdx >= 0 ? cells[skuIdx] : cells[0];
+                                        const quantity = Number(qtyIdx >= 0 ? cells[qtyIdx] : cells[1]) || 0;
+                                        const unitCost = Number(costIdx >= 0 ? cells[costIdx] : cells[2]) || 0;
+                                        if (!sku || quantity <= 0) continue;
+                                        const product = products.find((item) => String(item.sku ?? '').toLowerCase() === sku.toLowerCase()
+                                            || String(item.label ?? '').toLowerCase().includes(sku.toLowerCase()));
+                                        if (!product) continue;
+                                        await requestJson(`${routeUrl}/records`, 'POST', {
+                                            payload: {
+                                                warehouse_id: warehouseId,
+                                                code: `${type === 'inbound' ? 'PNK' : 'PXK'}-IMP-${Date.now()}-${imported}`,
+                                                type,
+                                                document_date: new Date().toISOString().slice(0, 10),
+                                                product_id: product.id,
+                                                document_quantity: quantity,
+                                                quantity,
+                                                unit_cost: unitCost,
+                                            },
+                                        });
+                                        imported += 1;
+                                    }
+                                    if (!imported) throw new Error('Không import được dòng nào. Kiểm tra SKU và số lượng trong CSV.');
+                                    router.reload({ preserveScroll: true, only: ['rows', 'pagination', 'summary'] });
+                                } catch (exception) {
+                                    window.alert(exception.message || 'Không thể import Excel/CSV phiếu kho.');
+                                } finally {
+                                    fileInput.value = '';
+                                }
+                            });
+                            host.appendChild(fileInput);
+                        }
+                        fileInput.click();
+                        return;
+                    }
+                    onPushsaleSave?.(host);
+                }
                 else if (action === 'delete') onDeleteSelected?.();
                 else if (['create', 'add', 'new'].includes(action)) onCreate(actionNode);
                 else if (action === 'save') onPushsaleSave ? onPushsaleSave(host) : onCreate(actionNode);
@@ -1287,7 +1367,7 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             host.removeEventListener('click', click);
             host.removeEventListener('input', input);
         };
-    }, [onCreate, onDeleteSelected, onPushsaleSave, onShowImportGuide, routeUrl, runSearch, schema.code, schema.template_url]);
+    }, [filterOptions, onCreate, onDeleteSelected, onPushsaleSave, onShowImportGuide, routeUrl, runSearch, schema.code, schema.template_url]);
 
     const rowProps = { schema, rows, onEdit, onDelete, selectedRecordIds, onToggleSelect };
     return (
@@ -1642,12 +1722,44 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
         });
     }, [openCreate, routeUrl, schema.code, schema.import_url]);
 
+    const isVoucherEntryPage = String(schema.code) === '5.3.1';
+    const voucherId = summary?.voucher_id ?? summary?.id ?? rows?.[0]?.voucher_id ?? '';
+    const voucherTitle = voucherId
+        ? `${schema.title} (${voucherId})`
+        : schema.title;
+
+    useEffect(() => {
+        if (!isVoucherEntryPage || typeof document === 'undefined') return undefined;
+        const titleNode = document.querySelector('[data-page-code="5.3.1"] [id$="lblModuleTitle"]');
+        const idNode = document.querySelector('[data-page-code="5.3.1"] [id$="lblId"]');
+        if (titleNode) titleNode.textContent = schema.title;
+        if (idNode) idNode.textContent = voucherId ? String(voucherId) : 'mới';
+        return undefined;
+    }, [isVoucherEntryPage, schema.title, voucherId]);
+
     return (
         <AppLayout>
             <Head title={schema.title} />
-            <div className={`pushsale-page pushsale-kind-${schema.kind}`} data-page-code={schema.code}>
+            <div className={`pushsale-page pushsale-kind-${schema.kind}${isVoucherEntryPage ? ' ps-voucher-entry-page' : ''}`} data-page-code={schema.code}>
+                {isVoucherEntryPage ? (
+                    <PageHeader
+                        title={voucherTitle}
+                        pageCode="5.3.1"
+                        className="ps-voucher-entry-header"
+                        actions={(
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-default"
+                                onClick={() => router.visit('/admin/warehouse/vouchers')}
+                                aria-label="Đóng"
+                            >
+                                <i className="fa fa-close" /> Đóng
+                            </button>
+                        )}
+                    />
+                ) : null}
                 {(error || pageRuntimeError) && <div className="pushsale-error-banner"><i className="fa fa-exclamation-triangle" /> {error || pageRuntimeError}</div>}
-                {!['1.10', '2.6.1'].includes(String(schema.code)) && <LiveDataSummary summary={summary} />}
+                {!['1.10', '2.6.1', '5.3.1'].includes(String(schema.code)) && <LiveDataSummary summary={summary} />}
                 <TemplateHost
                     templateHtml={templateHtml}
                     schema={schema}
