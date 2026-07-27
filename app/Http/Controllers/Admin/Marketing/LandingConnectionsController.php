@@ -53,6 +53,8 @@ final class LandingConnectionsController extends Controller
             ->with(array_merge($this->manager->relations(), ['updatedBy:id,name,email', 'approver:id,name,email']));
 
         $this->applyMarketingVisibilityScope($query, $user);
+
+        $query
             ->when($request->filled('search'), function ($query) use ($request): void {
                 $keyword = trim((string) $request->input('search'));
                 $query->where(function ($query) use ($keyword): void {

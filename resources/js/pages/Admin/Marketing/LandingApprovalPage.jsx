@@ -200,7 +200,13 @@ export default function LandingApprovalPage({
                                 {rows.length ? rows.map((row, index) => (
                                     <tr key={row.id}>
                                         <td className="text-center">{index + 1} -</td>
-                                        <td className="text-center pslc-td-marketer">{row.marketer || '—'}<br />{row.marketer_email && <span className="small-tip">({row.marketer_email})</span>}</td>
+                                        <td className="text-center pslc-td-marketer">
+                                            {row.marketer || '—'}
+                                            {row.marketer_email && <><br /><span className="small-tip">({row.marketer_email})</span></>}
+                                            {row.creator && row.creator !== row.marketer && (
+                                                <><br /><span className="small-tip text-warning">Tạo bởi: {row.creator}</span></>
+                                            )}
+                                        </td>
                                         <td className="text-left pslc-td-source">{row.name}<br /><span className="small-tip">{row.source_url || row.webhook_url || '—'}</span></td>
                                         <td className="text-center pslc-type-cell"><div>Nguồn dữ liệu</div><div className="pslc-channel">({channelLabels[row.ad_channel] || row.ad_channel || '—'})</div></td>
                                         <td className="text-left">{row.products?.length ? row.products.map((item) => <div key={item.id}>{item.product_name}</div>) : <span className="text-muted">Chưa gắn sản phẩm/gói</span>}</td>
@@ -208,7 +214,7 @@ export default function LandingApprovalPage({
                                         <td className="text-center">
                                             {row.is_approved ? <span className="ps-status ps-status-ok">Đã duyệt</span> : row.rejected_at ? <span className="ps-status ps-status-danger">Từ chối</span> : <span className="ps-status ps-status-warning">Chờ duyệt</span>}
                                         </td>
-                                        <td className="text-center">{row.approved_by || row.creator || 'admin'}<br />{row.approved_at || row.created_at}</td>
+                                        <td className="text-center">{row.approved_by || row.updated_by || row.creator || '—'}<br />{row.approved_at || row.updated_at || row.created_at}</td>
                                         <td className="text-center pslc-actions">
                                             <button type="button" className="btn-icon" onClick={() => openApprove(row)} title="Cập nhật & duyệt"><i className="fa fa-edit" /></button>
                                             {!row.is_approved && <button type="button" className="btn-icon text-danger" onClick={() => reject(row)} title="Từ chối"><i className="fa fa-trash" /></button>}
