@@ -464,9 +464,10 @@ final class LandingConnectionsController extends Controller
         return [
             'id' => $connection->id,
             'name' => $connection->name,
-            'marketer_user_id' => $connection->marketer_user_id,
-            'marketer' => $connection->marketer?->name,
-            'marketer_email' => $connection->marketer?->email,
+            // Hiển thị cột Marketing theo người tạo landing để đồng nhất dữ liệu cũ/new.
+            'marketer_user_id' => $connection->created_by_user_id ?: $connection->marketer_user_id,
+            'marketer' => $connection->createdBy?->name ?: $connection->marketer?->name,
+            'marketer_email' => $connection->createdBy?->email ?: $connection->marketer?->email,
             'connection_type' => $connection->connection_type,
             'ad_channel' => $connection->ad_channel,
             'allocation_method' => $connection->allocation_method,
