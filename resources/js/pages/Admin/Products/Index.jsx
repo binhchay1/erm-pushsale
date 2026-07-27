@@ -559,13 +559,13 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                 />
 
                 <div className="box-body ps-toolbar">
-                    <button className="btn btn-sm btn-primary" type="button" onClick={openCreate}><i className="fa fa-plus" /> Thêm mới</button>
-                    <button className="btn btn-sm btn-primary" type="button" onClick={() => openTaxonomy('category')}><i className="fa fa-list-alt" /> Phân loại sản phẩm</button>
-                    <button className="btn btn-sm btn-primary" type="button" onClick={() => openTaxonomy('attribute')}><i className="fa fa-list-alt" /> Thuộc tính sản phẩm</button>
-                    <button className="btn btn-sm btn-primary" type="button" onClick={() => openTaxonomy('value')}><i className="fa fa-list-alt" /> Thuộc tính giá trị</button>
-                    <Link className="btn btn-sm btn-primary" href="/admin/products/import" target="_blank"><i className="fa fa-file-excel-o" /> Import sản phẩm</Link>
-                    <button className="btn btn-sm btn-default" type="button" onClick={exportCsv}><i className="fa fa-file-excel-o" /> Export sản phẩm</button>
-                    <button className="btn btn-sm btn-danger" type="button" disabled={!selected.size} onClick={deleteSelected}><i className="fa fa-file-excel-o" /> Xóa sản phẩm</button>
+                    <button className="btn btn-sm btn-primary" type="button" onClick={openCreate}><i className="fa fa-plus" aria-hidden="true" /><span>Thêm mới</span></button>
+                    <button className="btn btn-sm btn-primary" type="button" onClick={() => openTaxonomy('category')}><i className="fa fa-list-alt" aria-hidden="true" /><span>Phân loại sản phẩm</span></button>
+                    <button className="btn btn-sm btn-primary" type="button" onClick={() => openTaxonomy('attribute')}><i className="fa fa-list-alt" aria-hidden="true" /><span>Thuộc tính sản phẩm</span></button>
+                    <button className="btn btn-sm btn-primary" type="button" onClick={() => openTaxonomy('value')}><i className="fa fa-list-alt" aria-hidden="true" /><span>Thuộc tính giá trị</span></button>
+                    <Link className="btn btn-sm btn-primary" href="/admin/products/import" target="_blank"><i className="fa fa-file-excel-o" aria-hidden="true" /><span>Import sản phẩm</span></Link>
+                    <button className="btn btn-sm btn-default" type="button" onClick={exportCsv}><i className="fa fa-file-excel-o" aria-hidden="true" /><span>Export sản phẩm</span></button>
+                    <button className="btn btn-sm btn-danger" type="button" disabled={!selected.size} onClick={deleteSelected}><i className="fa fa-trash" aria-hidden="true" /><span>Xóa sản phẩm</span></button>
                 </div>
 
                 <div className="ps-table-scroll">

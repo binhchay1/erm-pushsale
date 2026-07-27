@@ -1157,7 +1157,7 @@ html body.pushsale-app-body .ps-confirm-body {
 }
 html body.pushsale-app-body .ps-confirm-action {
     display: flex !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     gap: 12px !important;
     color: #222 !important;
     line-height: 1.45 !important;
@@ -1174,8 +1174,9 @@ html body.pushsale-app-body .ps-confirm-icon {
     color: #d73925 !important;
 }
 html body.pushsale-app-body .ps-confirm-copy {
-    padding-top: 2px !important;
+    padding-top: 0 !important;
     font-size: 13px !important;
+    line-height: 1.45 !important;
 }
 
 @media (max-width: 1280px) {

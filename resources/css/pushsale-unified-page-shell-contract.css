@@ -751,8 +751,37 @@ html body.pushsale-app-body .ps-products-page .ps-product-filters {
 }
 
 html body.pushsale-app-body .ps-products-page .ps-toolbar {
-    padding-top: 12px !important;
-    padding-bottom: 10px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 12px 0 10px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-toolbar .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 32px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-toolbar .btn i {
+    margin: 0 !important;
+    line-height: 1 !important;
+    font-size: 13px !important;
+    position: static !important;
 }
 
 html body.pushsale-app-body .ps-products-page .ps-table-scroll {

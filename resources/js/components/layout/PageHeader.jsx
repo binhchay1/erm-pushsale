@@ -114,7 +114,11 @@ function PageHeaderBar({ title, subtitle, icon: Icon, filters, actions, advanced
             >
                 <div className="m-header ps-page-header__row">
                     <div className="ps-page-header__title form-group">
-                        {Icon ? <span className="ps-page-header__icon">{typeof Icon === 'function' ? <Icon aria-hidden="true" /> : Icon}</span> : null}
+                        {Icon ? (
+                            <span className="ps-page-header__icon">
+                                {typeof Icon === 'string' ? Icon : <Icon aria-hidden="true" />}
+                            </span>
+                        ) : null}
                         <span className="text">{title}</span>
                         {subtitle ? <span className="ps-page-header__subtitle">{subtitle}</span> : null}
                     </div>

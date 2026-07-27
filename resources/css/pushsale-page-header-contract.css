@@ -179,8 +179,8 @@ html body.pushsale-app-body .ps-page-header__subtitle {
 html body.pushsale-app-body .ps-page-header__filters {
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-start !important;
-    justify-self: start !important;
+    justify-content: flex-end !important;
+    justify-self: end !important;
     gap: 8px !important;
     min-width: 0 !important;
     margin: 0 !important;
@@ -1189,4 +1189,42 @@ html body.pushsale-app-body .ps-page-shell > .ps-page-shell__toolbar {
         min-width: 140px !important;
         justify-content: center !important;
     }
+}
+
+/* Products toolbar: cùng l? trái v?i title/filter (portal header dùng --ps-header-x). */
+html body.pushsale-app-body .ps-products-page {
+    padding-left: var(--ps-header-x) !important;
+    padding-right: var(--ps-header-x) !important;
+}
+
+html body.pushsale-app-body .ps-products-page > .box-body.ps-toolbar,
+html body.pushsale-app-body .ps-products-page .ps-toolbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 12px 0 10px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-bottom: 1px solid #d2d6de !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-toolbar .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 32px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-products-page .ps-toolbar .btn i {
+    margin: 0 !important;
+    line-height: 1 !important;
 }
