@@ -15,7 +15,7 @@ use App\Models\Shipment;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Support\TenantManager;
-use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\FullBusinessDemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -29,7 +29,7 @@ class AdminViewRoutesSmokeTest extends TestCase
 
     public function test_critical_admin_pages_do_not_return_500_with_unknown_query_values(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
         $this->loginAsDemoAdmin();
 
         $urls = [
@@ -54,7 +54,7 @@ class AdminViewRoutesSmokeTest extends TestCase
 
     public function test_safe_registered_get_routes_resolve_or_validate_without_500(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
         $this->loginAsDemoAdmin();
 
         $urls = $this->safeViewUrls();
@@ -70,7 +70,7 @@ class AdminViewRoutesSmokeTest extends TestCase
 
     public function test_product_business_status_checkbox_updates_business_flags(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
         $this->loginAsDemoAdmin();
 
         $product = Product::withoutTenant()->where('type', 'product')->where('is_active', true)->firstOrFail();
@@ -97,7 +97,7 @@ class AdminViewRoutesSmokeTest extends TestCase
 
     public function test_product_permission_assignment_persists_team_and_user_ids(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
         $this->loginAsDemoAdmin();
 
         $product = Product::withoutTenant()->where('type', 'product')->firstOrFail();
@@ -149,7 +149,7 @@ class AdminViewRoutesSmokeTest extends TestCase
 
     public function test_warehouse_shipping_account_configuration_persists(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
         $this->loginAsDemoAdmin();
 
         $warehouse = Warehouse::withoutTenant()->firstOrFail();
@@ -177,7 +177,7 @@ class AdminViewRoutesSmokeTest extends TestCase
 
     public function test_landing_connection_can_be_created_without_product_before_approval(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
         $admin = $this->loginAsDemoAdmin();
         $marketer = User::withoutTenant()
             ->where('company_id', $admin->company_id)
@@ -227,7 +227,7 @@ class AdminViewRoutesSmokeTest extends TestCase
 
     public function test_landing_connection_source_update_does_not_require_product_mapping_for_upsell_source(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
         $admin = $this->loginAsDemoAdmin();
         $marketer = User::withoutTenant()
             ->where('company_id', $admin->company_id)
@@ -290,7 +290,7 @@ class AdminViewRoutesSmokeTest extends TestCase
 
     public function test_landing_connection_flags_endpoint_forces_manual_import_and_approval_request(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
         $admin = $this->loginAsDemoAdmin();
         $connection = LandingConnection::withoutTenant()->where('company_id', $admin->company_id)->firstOrFail();
 
@@ -313,7 +313,7 @@ class AdminViewRoutesSmokeTest extends TestCase
 
     public function test_manual_data_distribution_allocates_pending_lead_to_sale(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
         $admin = $this->loginAsDemoAdmin();
         $product = Product::withoutTenant()
             ->where('company_id', $admin->company_id)

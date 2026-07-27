@@ -18,6 +18,7 @@ use App\Support\TenantManager;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\CatalogSeeder;
 use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\FullBusinessDemoSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\LandingFlowSeeder;
 use Database\Seeders\MarketingCampaignSeeder;
@@ -28,9 +29,20 @@ class FullDemoSeedTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_full_database_seed_runs_without_error(): void
+    public function test_platform_database_seed_runs_without_error(): void
     {
         $this->seed(DatabaseSeeder::class);
+
+        $superadmin = User::query()->withoutGlobalScope(TenantScope::class)
+            ->where('email', 'superadmin@saleops.local')->first();
+        $this->assertNotNull($superadmin);
+        $this->assertTrue((bool) $superadmin->is_platform_admin);
+        $this->assertSame(1, User::query()->withoutGlobalScope(TenantScope::class)->count());
+    }
+
+    public function test_full_business_demo_seed_runs_without_error(): void
+    {
+        $this->seed(FullBusinessDemoSeeder::class);
 
         $superadmin = User::query()->withoutGlobalScope(TenantScope::class)
             ->where('email', 'superadmin@saleops.local')->first();

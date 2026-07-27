@@ -6,7 +6,7 @@ use App\Models\Product;
 use App\Models\Pushsale\ProductAttribute;
 use App\Models\Pushsale\ProductAttributeValue;
 use App\Models\Pushsale\ProductCategory;
-use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\FullBusinessDemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,7 +16,7 @@ class ProductTaxonomyDemoSeederTest extends TestCase
 
     public function test_full_demo_seed_contains_product_taxonomy_data_for_dialogs(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
 
         $this->assertGreaterThanOrEqual(60, ProductCategory::query()->count(), 'Dialog phân loại sản phẩm cần đủ dữ liệu demo để kiểm tra bảng và phân trang.');
         $this->assertGreaterThanOrEqual(15, ProductAttribute::query()->count(), 'Dialog thuộc tính sản phẩm cần đủ dữ liệu demo để kiểm tra bảng và phân trang.');

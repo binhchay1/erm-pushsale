@@ -1,4 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import AppLayout from '@/layouts/AppLayout';
@@ -8,9 +9,26 @@ const districtOptions = ['Quận Ba Đình', 'Quận Hoàn Kiếm', 'Quận Đ�
 const wardOptions = ['Phường Phúc Xá', 'Phường Trúc Bạch', 'Phường Cống Vị', 'Phường Điện Biên', 'Phường Đội Cấn'];
 const productFieldOptions = ['Bán lẻ', 'Thời trang', 'Mỹ phẩm', 'Gia dụng', 'Thực phẩm', 'Dịch vụ'];
 
+const EMAIL_HOST_PATTERN = /^(?!-)[a-z0-9-]+(\.[a-z0-9-]+)+$/i;
+
 function valueOrDefault(value, fallback = '') {
     const normalized = String(value ?? '').trim();
     return normalized || fallback;
+}
+
+function normalizeEmailHost(value) {
+    return String(value ?? '').trim().replace(/^@+/, '').toLowerCase();
+}
+
+function validateEmailHost(value) {
+    const normalized = normalizeEmailHost(value);
+    if (!normalized) {
+        return 'Hậu tố email đăng nhập không được để trống.';
+    }
+    if (!EMAIL_HOST_PATTERN.test(normalized)) {
+        return 'Hậu tố không hợp lệ. Ví dụ: saleops.local hoặc ten-cong-ty.saleops.local';
+    }
+    return null;
 }
 
 function FieldRow({ label, required = false, error, hint, children }) {
@@ -39,6 +57,7 @@ function Select({ value, onChange, children, disabled = false }) {
 export default function CompanyProfile({ company, emailIdentity = {} }) {
     const inferredProvince = company?.province_name ?? (String(company?.address ?? '').toLocaleLowerCase('vi').includes('hn') ? 'Hà Nội' : '');
     const isInternal = Boolean(company?.is_internal ?? emailIdentity?.isInternal);
+    const [emailHostError, setEmailHostError] = useState(null);
 
     const form = useForm({
         name: valueOrDefault(company?.name),
@@ -60,7 +79,25 @@ export default function CompanyProfile({ company, emailIdentity = {} }) {
 
     const submit = (event) => {
         event.preventDefault();
+
+        const hostError = validateEmailHost(form.data.email_login_host);
+        setEmailHostError(hostError);
+        if (hostError) {
+            return;
+        }
+
         form.put('/admin/company/profile', { preserveScroll: true });
+    };
+
+    const onEmailHostChange = (value) => {
+        form.setData('email_login_host', value);
+        if (emailHostError) {
+            setEmailHostError(validateEmailHost(value));
+        }
+    };
+
+    const onEmailHostBlur = () => {
+        setEmailHostError(validateEmailHost(form.data.email_login_host));
     };
 
     const optionWithCurrent = (options, current) => {
@@ -69,7 +106,7 @@ export default function CompanyProfile({ company, emailIdentity = {} }) {
     };
 
     const emailSuffixPreview = form.data.email_login_host
-        ? `@${String(form.data.email_login_host).replace(/^@+/, '')}`
+        ? `@${normalizeEmailHost(form.data.email_login_host)}`
         : (emailIdentity?.suffix ?? '');
 
     return (
@@ -85,8 +122,8 @@ export default function CompanyProfile({ company, emailIdentity = {} }) {
                     <div className="alert alert-info ps-unit-internal-notice">
                         <i className="fa fa-info-circle" aria-hidden="true" />
                         {' '}
-                        Đây là <strong>đơn vị nội bộ ERM</strong> — dùng để vận hành và kiểm thử hệ thống, không phải hồ sơ doanh nghiệp thương mại.
-                        Email đăng nhập nhân sự dùng hậu tố <code>{emailIdentity?.suffix ?? '@saleops.local'}</code>.
+                        Đây là <strong>đơn vị nội bộ ERM</strong> — dùng để vận hành hệ thống, không phải hồ sơ doanh nghiệp thương mại.
+                        Email đăng nhập nhân sự dùng hậu tố <code>{emailSuffixPreview || emailIdentity?.suffix || '@saleops.local'}</code>.
                     </div>
                 ) : null}
 
@@ -102,20 +139,19 @@ export default function CompanyProfile({ company, emailIdentity = {} }) {
 
                     <FieldRow
                         label="Hậu tố email đăng nhập"
-                        error={form.errors.email_login_host}
-                        hint={isInternal
-                            ? 'Đơn vị nội bộ dùng domain cố định; không cấu hình slug doanh nghiệp.'
-                            : `Ví dụ: admin${emailSuffixPreview || '@ten-cong-ty.saleops.local'}`}
+                        required
+                        error={emailHostError || form.errors.email_login_host}
+                        hint={`Ví dụ tài khoản: admin${emailSuffixPreview || '@saleops.local'}. Chỉ dùng chữ, số, dấu gạch ngang và dấu chấm.`}
                     >
                         <div className="ps-unit-email-host">
                             <span className="ps-unit-email-at">@</span>
                             <input
                                 className="form-control ps-unit-control"
                                 value={form.data.email_login_host}
-                                onChange={(event) => form.setData('email_login_host', event.target.value)}
+                                onChange={(event) => onEmailHostChange(event.target.value)}
+                                onBlur={onEmailHostBlur}
                                 placeholder={emailIdentity?.defaultHost ?? 'saleops.local'}
-                                readOnly={isInternal}
-                                disabled={isInternal}
+                                required
                             />
                         </div>
                     </FieldRow>

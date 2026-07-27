@@ -6,7 +6,7 @@ use App\Models\Company;
 use App\Models\User;
 use App\Services\Pushsale\PushsalePageService;
 use App\Support\TenantManager;
-use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\FullBusinessDemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\TestCase;
@@ -17,7 +17,7 @@ class PushsaleMenuDemoCoverageTest extends TestCase
 
     public function test_full_demo_seed_feeds_registered_pushsale_menu_pages(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(FullBusinessDemoSeeder::class);
 
         $company = Company::query()->where('slug', 'internal')->first()
             ?? Company::query()->firstOrFail();

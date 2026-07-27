@@ -22,7 +22,7 @@ function DialogShell({ title, open, onClose, children, wide = false, hiddenHeade
             className={className}
             headerClassName={hiddenHeader ? 'sr-only' : undefined}
             bodyClassName={`ps-source-dialog-body ${bodyClassName}`}
-            showClose={showClose}
+            showClose={showClose && !isTaxonomy}
             contentProps={isTaxonomy ? { style: { position: 'fixed', inset: '4px', left: '4px', top: '4px', right: '4px', bottom: '4px', transform: 'none', maxWidth: 'calc(100vw - 8px)', width: 'calc(100vw - 8px)', height: 'calc(100dvh - 8px)', maxHeight: 'calc(100dvh - 8px)', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' } } : undefined}
         >
             {children}

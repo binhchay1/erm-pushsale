@@ -292,6 +292,11 @@ html body.pushsale-app-body .ps-page-shell .ps-sale-check {
 }
 
 /* Unit profile form stays in body under a title-only header */
+html body.pushsale-app-body .ps-page-shell.ps-unit-profile-page .ps-page-shell__body,
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-page-shell__body {
+    padding: 0 20px 24px !important;
+}
+
 html body.pushsale-app-body .ps-page-shell.ps-unit-profile-page .ps-unit-internal-notice {
     width: min(760px, 100%) !important;
     margin: 16px 0 0 !important;
@@ -352,6 +357,69 @@ html body.pushsale-app-body .ps-page-shell.ps-unit-profile-page .ps-unit-field-h
 html body.pushsale-app-body .ps-page-shell.ps-unit-profile-page .ps-unit-actions {
     margin: 4px 0 0 !important;
     padding-left: calc(min(140px, 25vw) + 16px) !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-form,
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-section {
+    width: min(760px, 100%) !important;
+    max-width: 100% !important;
+    margin: 18px 0 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-section-title {
+    margin: 0 0 12px !important;
+    padding: 0 0 8px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #333 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-avatar-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-avatar {
+    width: 72px !important;
+    height: 72px !important;
+    border-radius: 50% !important;
+    border: 2px solid #d8dee6 !important;
+    object-fit: cover !important;
+    background: #f3f4f6 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-avatar-fallback {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 72px !important;
+    height: 72px !important;
+    border-radius: 50% !important;
+    border: 2px solid #d8dee6 !important;
+    background: #eef2f7 !important;
+    color: #334155 !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-readonly-value {
+    margin: 0 !important;
+    padding-top: 6px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #222 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell.ps-unit-profile-page .ps-unit-error,
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-unit-error {
+    margin: 4px 0 0 !important;
+    color: #c0392b !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
 }
 
 @media (max-width: 1200px) {

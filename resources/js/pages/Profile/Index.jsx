@@ -1,27 +1,30 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { Camera, KeyRound, Save, Trash2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FieldError } from '@/components/ui/field-error';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useRoleLabel } from '@/hooks/use-labels';
-import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
-function ReadOnlyField({ label, value }) {
+function FieldRow({ label, required = false, error, hint, children }) {
     return (
-        <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground">{label}</p>
-            <p className="text-sm font-medium">{value || '—'}</p>
+        <div className="ps-unit-form-row">
+            <label className="ps-unit-label">
+                {label} {required ? <span>(*)</span> : null}
+            </label>
+            <div className="ps-unit-control-wrap">
+                {children}
+                {hint ? <p className="ps-unit-field-hint">{hint}</p> : null}
+                {error ? <div className="ps-unit-error">{error}</div> : null}
+            </div>
         </div>
     );
+}
+
+function ReadOnlyValue({ value }) {
+    return <p className="ps-unit-readonly-value">{value || '—'}</p>;
 }
 
 export default function ProfileIndex({ profile }) {
@@ -38,8 +41,8 @@ export default function ProfileIndex({ profile }) {
 
     const avatarSrc = preview ?? profile.avatar_url;
 
-    const onPickAvatar = (e) => {
-        const file = e.target.files?.[0];
+    const onPickAvatar = (event) => {
+        const file = event.target.files?.[0];
         if (!file) return;
         setPreview(URL.createObjectURL(file));
         router.post(
@@ -54,7 +57,7 @@ export default function ProfileIndex({ profile }) {
                     setPreview(null);
                     if (fileRef.current) fileRef.current.value = '';
                 },
-            }
+            },
         );
     };
 
@@ -69,8 +72,8 @@ export default function ProfileIndex({ profile }) {
         router.delete('/profile/avatar', { preserveScroll: true });
     };
 
-    const submitPassword = (e) => {
-        e.preventDefault();
+    const submitPassword = (event) => {
+        event.preventDefault();
 
         if (!data.password) {
             setError('password', t('common.validation.required'));
@@ -90,24 +93,31 @@ export default function ProfileIndex({ profile }) {
         });
     };
 
+    const accountSubtitle = [
+        roleLabel,
+        profile.team_name,
+        profile.org_level_label,
+    ].filter(Boolean).join(' · ');
+
     return (
         <AppLayout>
             <Head title={t('profile.title')} />
 
-            <div className="mx-auto max-w-3xl space-y-6 animate-in fade-in-0 duration-300">
-                <PageHeader title={t('profile.title')} description={t('profile.desc')} />
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('profile.avatar_title')}</CardTitle>
-                        <CardDescription>{t('profile.avatar_desc')}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-wrap items-center gap-4">
-                        <Avatar className="size-20 border-2 border-border/80 shadow-sm transition-transform duration-200 hover:scale-[1.02]">
-                            {avatarSrc ? <AvatarImage src={avatarSrc} alt={profile.name} /> : null}
-                            <AvatarFallback className="text-lg">{profile.initials}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-wrap gap-2">
+            <PushsalePageShell
+                title={t('profile.title')}
+                subtitle={accountSubtitle || t('profile.desc')}
+                className="ps-account-profile-page"
+                collapsible={false}
+            >
+                <section className="ps-unit-section">
+                    <h3 className="ps-unit-section-title">{t('profile.avatar_title')}</h3>
+                    <div className="ps-unit-avatar-row">
+                        {avatarSrc ? (
+                            <img src={avatarSrc} alt={profile.name} className="ps-unit-avatar" />
+                        ) : (
+                            <span className="ps-unit-avatar-fallback">{profile.initials}</span>
+                        )}
+                        <div className="ps-unit-control-wrap">
                             <input
                                 ref={fileRef}
                                 type="file"
@@ -115,105 +125,85 @@ export default function ProfileIndex({ profile }) {
                                 className="hidden"
                                 onChange={onPickAvatar}
                             />
-                            <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-                                <Upload className="size-4" />
-                                {t('profile.upload')}
-                            </Button>
-                            {profile.avatar_url && (
-                                <Button type="button" variant="ghost" size="sm" onClick={removeAvatar}>
-                                    <Trash2 className="size-4" />
-                                    {t('profile.remove')}
-                                </Button>
-                            )}
-                        </div>
-                        <p className="flex w-full items-center gap-1 text-xs text-muted-foreground">
-                            <Camera className="size-3" />
-                            {t('profile.avatar_hint')}
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('profile.account_title')}</CardTitle>
-                        <CardDescription>
-                            {roleLabel}
-                            {profile.team_name ? ` · ${profile.team_name}` : ''}
-                            {profile.org_level_label ? ` · ${profile.org_level_label}` : ''}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid gap-4 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2">
-                            <ReadOnlyField label={t('profile.name')} value={profile.name} />
-                            <ReadOnlyField label={t('profile.email')} value={profile.email} />
-                            <ReadOnlyField label={t('profile.phone')} value={profile.phone} />
-                            <ReadOnlyField label={t('profile.job_title')} value={profile.job_title} />
-                            {profile.manager_name && (
-                                <ReadOnlyField label={t('profile.manager')} value={profile.manager_name} />
-                            )}
-                        </div>
-                        <p className="mt-3 text-xs text-muted-foreground">{t('profile.admin_contact')}</p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <KeyRound className="size-4" />
-                            {t('profile.password_title')}
-                        </CardTitle>
-                        <CardDescription>{t('profile.password_desc')}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={submitPassword} className="space-y-4">
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label htmlFor="password">{t('profile.new_password')}</Label>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        autoComplete="new-password"
-                                        value={data.password}
-                                        aria-invalid={!!errors.password}
-                                        onChange={(e) => {
-                                            setData('password', e.target.value);
-                                            clearErrors('password');
-                                        }}
-                                    />
-                                    <FieldError message={errors.password} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="password_confirmation">{t('profile.confirm_password')}</Label>
-                                    <Input
-                                        id="password_confirmation"
-                                        type="password"
-                                        autoComplete="new-password"
-                                        value={data.password_confirmation}
-                                        aria-invalid={!!errors.password_confirmation}
-                                        onChange={(e) => {
-                                            setData('password_confirmation', e.target.value);
-                                            clearErrors('password_confirmation');
-                                        }}
-                                    />
-                                    <FieldError message={errors.password_confirmation} />
-                                </div>
+                            <div className="ps-unit-actions" style={{ paddingLeft: 0 }}>
+                                <button type="button" className="btn btn-sm btn-default" onClick={() => fileRef.current?.click()}>
+                                    <i className="fa fa-upload" /> {t('profile.upload')}
+                                </button>
+                                {profile.avatar_url ? (
+                                    <button type="button" className="btn btn-sm btn-default" onClick={removeAvatar}>
+                                        <i className="fa fa-trash" /> {t('profile.remove')}
+                                    </button>
+                                ) : null}
                             </div>
+                            <p className="ps-unit-field-hint">{t('profile.avatar_hint')}</p>
+                        </div>
+                    </div>
+                </section>
 
-                            <div className="flex items-center justify-end gap-2">
-                                {recentlySuccessful && (
-                                    <span className="text-xs text-emerald-600 animate-in fade-in-0">
-                                        {t('profile.password_saved')}
-                                    </span>
-                                )}
-                                <Button type="submit" disabled={processing}>
-                                    <Save className="size-4" />
-                                    {processing ? t('common.saving') : t('profile.save_password')}
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
-            </div>
+                <section className="ps-unit-section">
+                    <h3 className="ps-unit-section-title">{t('profile.account_title')}</h3>
+                    <div className="ps-unit-form">
+                        <FieldRow label={t('profile.name')}>
+                            <ReadOnlyValue value={profile.name} />
+                        </FieldRow>
+                        <FieldRow label={t('profile.email')}>
+                            <ReadOnlyValue value={profile.email} />
+                        </FieldRow>
+                        <FieldRow label={t('profile.phone')}>
+                            <ReadOnlyValue value={profile.phone} />
+                        </FieldRow>
+                        <FieldRow label={t('profile.job_title')}>
+                            <ReadOnlyValue value={profile.job_title} />
+                        </FieldRow>
+                        {profile.manager_name ? (
+                            <FieldRow label={t('profile.manager')}>
+                                <ReadOnlyValue value={profile.manager_name} />
+                            </FieldRow>
+                        ) : null}
+                    </div>
+                    <p className="ps-unit-field-hint">{t('profile.admin_contact')}</p>
+                </section>
+
+                <section className="ps-unit-section">
+                    <h3 className="ps-unit-section-title">{t('profile.password_title')}</h3>
+                    <form className="ps-unit-form" onSubmit={submitPassword}>
+                        <FieldRow label={t('profile.new_password')} required error={errors.password}>
+                            <input
+                                type="password"
+                                className="form-control ps-unit-control"
+                                autoComplete="new-password"
+                                value={data.password}
+                                onChange={(event) => {
+                                    setData('password', event.target.value);
+                                    clearErrors('password');
+                                }}
+                            />
+                        </FieldRow>
+                        <FieldRow label={t('profile.confirm_password')} required error={errors.password_confirmation}>
+                            <input
+                                type="password"
+                                className="form-control ps-unit-control"
+                                autoComplete="new-password"
+                                value={data.password_confirmation}
+                                onChange={(event) => {
+                                    setData('password_confirmation', event.target.value);
+                                    clearErrors('password_confirmation');
+                                }}
+                            />
+                        </FieldRow>
+                        <div className="ps-unit-actions">
+                            {recentlySuccessful ? (
+                                <span className="ps-unit-field-hint" style={{ marginRight: 8 }}>{t('profile.password_saved')}</span>
+                            ) : null}
+                            <button type="submit" className="btn btn-sm btn-primary" disabled={processing}>
+                                <i className={`fa ${processing ? 'fa-spinner fa-spin' : 'fa-save'}`} />
+                                {' '}
+                                {processing ? t('common.saving') : t('profile.save_password')}
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            </PushsalePageShell>
 
             <ConfirmDialogPortal />
         </AppLayout>

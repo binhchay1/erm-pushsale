@@ -27,12 +27,6 @@ pnpm run build
 echo "=== MIGRATE ==="
 php artisan migrate --force
 
-echo "=== DATA AUDIT (fix dữ liệu cũ không khớp business logic) ==="
-php artisan data:audit-business --fix
-
-echo "=== REPAIR LANDING MARKETERS (sync marketer_user_id) ==="
-php artisan landing-connections:repair-marketers
-
 echo "=== CACHE ==="
 php artisan optimize:clear
 php artisan config:cache

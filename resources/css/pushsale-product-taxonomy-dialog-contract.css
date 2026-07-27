@@ -552,13 +552,7 @@ html body.pushsale-app-body .ps-taxonomy-source-modal .ps-dialog-header {
     padding: 0 !important;
 }
 html body.pushsale-app-body .ps-taxonomy-source-modal .pushsale-dialog-close {
-    top: 11px !important;
-    right: 13px !important;
-    z-index: 5 !important;
-    color: #555 !important;
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
+    display: none !important;
 }
 html body.pushsale-app-body .ps-taxonomy-close-cell {
     margin-left: auto !important;

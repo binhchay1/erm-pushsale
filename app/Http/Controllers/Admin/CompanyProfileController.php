@@ -89,7 +89,7 @@ class CompanyProfileController extends Controller
 
         if (Schema::hasColumn('companies', 'email_login_host')) {
             $rules['email_login_host'] = [
-                'nullable',
+                'required',
                 'string',
                 'max:120',
                 Rule::regex('/^(?!-)[a-z0-9-]+(\.[a-z0-9-]+)+$/i'),
@@ -102,9 +102,6 @@ class CompanyProfileController extends Controller
 
         if (isset($data['email_login_host'])) {
             $data['email_login_host'] = strtolower(ltrim(trim((string) $data['email_login_host']), '@')) ?: null;
-            if ($isInternal) {
-                $data['email_login_host'] = TenantEmail::domain();
-            }
         }
 
         $persistable = array_filter(
