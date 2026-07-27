@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const emptyForm = {
     account: '',
@@ -84,6 +85,7 @@ export default function ElectronicInvoiceConfigs({
     pagination,
     routeUrl = '/admin/unit/electronic-invoice-configs',
 }) {
+    const { ask } = useConfirm();
     const params = new URLSearchParams(window.location.search);
     const [keyword, setKeyword] = useState(params.get('search') ?? '');
     const [open, setOpen] = useState(false);
@@ -191,8 +193,14 @@ export default function ElectronicInvoiceConfigs({
         }
     };
 
-    const destroy = (row) => {
-        if (!row._record_id || !window.confirm(`Xóa cấu hình hóa đơn ${row.account}?`)) return;
+    const destroy = async (row) => {
+        if (!row._record_id) return;
+        const ok = await ask({
+            description: `Xóa cấu hình hóa đơn ${row.account}?`,
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
+        if (!ok) return;
         router.delete(`${routeUrl}/records/${row._record_id}`, {
             preserveScroll: true,
             onSuccess: () => toast.success('Đã xóa cấu hình hóa đơn.'),

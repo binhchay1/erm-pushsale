@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const ACTIVE_MENU_STORAGE_KEY = 'pushsale-active-menu-code';
-const FLYOUT_CLOSE_DELAY_MS = 160;
+const FLYOUT_CLOSE_DELAY_MS = 120;
 const HEADER_OFFSET = 50;
 const ROW_HEIGHT = 40;
 

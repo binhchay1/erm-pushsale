@@ -7,6 +7,7 @@ import { CustomerSupplementPacketsDialog } from '@/components/customers/Customer
 import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { formatCurrency } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
+import { useConfirm } from '@/hooks/use-confirm';
 import { PushsalePagination } from './PushsalePagination';
 
 const money = (value) => formatCurrency(Number(value ?? 0));
@@ -224,6 +225,7 @@ export function SaleWorkspaceTable({
     onResult,
     onBulkClose,
 }) {
+    const { ask } = useConfirm();
     const [selected, setSelected] = useState([]);
     const checkAllRef = useRef(null);
     const rowIds = useMemo(() => rows.map((row) => String(row.id)), [rows]);
@@ -240,8 +242,13 @@ export function SaleWorkspaceTable({
 
     const toggleAll = () => setSelected(allSelected ? [] : rowIds);
     const toggle = (id) => setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
-    const deleteData = (order) => {
-        if (!window.confirm(`Bạn chắc chắn muốn xóa data của ${order.customerName || order.customerPhone || `#${order.id}`}?`)) return;
+    const deleteData = async (order) => {
+        const ok = await ask({
+            description: `Bạn chắc chắn muốn xóa data của ${order.customerName || order.customerPhone || `#${order.id}`}?`,
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
+        if (!ok) return;
         router.delete(`${actionBaseUrl}/orders/${order.id}`, {
             preserveScroll: true,
             onSuccess: () => toast.success('Đã xóa data.'),

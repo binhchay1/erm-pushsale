@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsalePageFrame } from '@/components/pushsale/PushsalePageFrame';
+import { useConfirm } from '@/hooks/use-confirm';
 
 function currentFilters() {
     if (typeof window === 'undefined') return {};
@@ -126,6 +127,7 @@ function TeamDialog({ open, mode, team, types, parents, leaders, onClose }) {
 }
 
 export default function TeamsIndex({ teams, filters = {}, types = [], leaders = [], parents = [] }) {
+    const { ask } = useConfirm();
     const [form, setForm] = useState({
         type: filters.type ?? '',
         leader_id: filters.leader_id ?? '',
@@ -216,7 +218,15 @@ export default function TeamsIndex({ teams, filters = {}, types = [], leaders = 
                                     <td className="text-center ps-row-actions-cell">
                                         <span className="ps-row-actions">
                                             <button type="button" title="Cập nhật" onClick={() => openEditDialog(rowsById.get(team.id) ?? team)}><i className="fa fa-pencil-square-o" /></button>
-                                            <button type="button" title="Xóa" onClick={() => window.confirm(`Xóa nhóm ${team.name}?`) && router.delete(`/admin/teams/${team.id}`, { preserveScroll: true })}><i className="fa fa-trash" /></button>
+                                            <button
+                                                type="button"
+                                                title="Xóa"
+                                                onClick={async () => {
+                                                    const ok = await ask({ description: `Xóa nhóm ${team.name}?`, confirmLabel: 'Xóa', variant: 'destructive' });
+                                                    if (!ok) return;
+                                                    router.delete(`/admin/teams/${team.id}`, { preserveScroll: true });
+                                                }}
+                                            ><i className="fa fa-trash" /></button>
                                         </span>
                                     </td>
                                 </tr>

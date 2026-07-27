@@ -3,21 +3,24 @@ import { useState } from 'react';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import AppLayout from '@/layouts/AppLayout';
+import { useConfirm } from '@/hooks/use-confirm';
 import { optionNodes, PushsaleToast, SimplePagination, useDraft, useLocalToast, useRows } from './ecommerceUtils';
 
 export default function ConnectProducts({ filters = {}, platforms = [], warehouses = [], shops = [], products = [], rows = {}, routeUrl = '/admin/ecommerce/connect-products' }) {
+    const { ask } = useConfirm();
     const { draft, set } = useDraft(filters);
     const dataRows = useRows(rows);
     const { toast, setToast } = useLocalToast();
     const [editing, setEditing] = useState(null);
 
     const search = () => router.get(routeUrl, draft, { preserveScroll: true, preserveState: true, replace: true });
-    const sync = () => {
+    const sync = async () => {
         if (!draft.shop_id) {
             setToast({ type: 'warning', message: 'Hãy chọn shop.' });
             return;
         }
-        if (confirm('Bạn muốn lấy danh sách sản phẩm từ sàn TMĐT?')) {
+        const ok = await ask({ description: 'Bạn muốn lấy danh sách sản phẩm từ sàn TMĐT?' });
+        if (ok) {
             router.post('/admin/ecommerce/connect-products/sync', draft, { preserveScroll: true });
         }
     };

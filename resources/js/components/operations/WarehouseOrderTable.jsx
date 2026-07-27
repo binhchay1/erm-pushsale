@@ -9,6 +9,7 @@ import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@
 import { apiPost, apiRequest, getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const statusTone = {
     waiting_waybill: 'ttgh1',
@@ -84,6 +85,7 @@ function ActionMenuButton({ title, icon, tone = 'success', onClick, disabled = f
 }
 
 function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpenSingle, onClear, onPrint, onReload }) {
+    const { ask } = useConfirm();
     const [open, setOpen] = useState(false);
     const selectedCount = selectedRows.length;
     const selectedIds = selectedRows.map((row) => row.id);
@@ -113,7 +115,8 @@ function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpen
 
     const cancelShipments = async () => {
         requireSelected(async () => {
-            if (!confirm('Bạn chắc chắn muốn hủy vận đơn các đơn đã chọn?')) return;
+            const ok = await ask({ description: 'Bạn chắc chắn muốn hủy vận đơn các đơn đã chọn?', confirmLabel: 'Xóa', variant: 'destructive' });
+            if (!ok) return;
             try {
                 for (const row of selectedRows) await apiRequest(`${apiBase}/${row.id}/cancel-shipment`, { method: 'POST', body: {} });
                 toast.success(`Đã gửi yêu cầu hủy vận đơn cho ${selectedCount} đơn.`);

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
+import { useConfirm } from '@/hooks/use-confirm';
 
 function numberValue(value) {
     const number = Number(String(value ?? '').replace(/[^0-9.-]/g, ''));
@@ -55,6 +56,7 @@ function normalizeRows(rows) {
 }
 
 export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUrl = '/admin/ceo/business-plan/revenue-bonus', activeMenuCode = '7.1.4' }) {
+    const { ask } = useConfirm();
     const query = currentQuery();
     const [draftFilters, setDraftFilters] = useState({
         year: Number(filters.year || query.year || new Date().getFullYear()),
@@ -121,8 +123,9 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
         });
     };
 
-    const destroyRow = (row, index) => {
-        if (!window.confirm('Bạn chắc chắn muốn xóa dòng thưởng này?')) return;
+    const destroyRow = async (row, index) => {
+        const ok = await ask({ description: 'Bạn chắc chắn muốn xóa dòng thưởng này?', confirmLabel: 'Xóa', variant: 'destructive' });
+        if (!ok) return;
         if (!row.id) {
             setDraftRows((current) => current.filter((_, idx) => idx !== index));
             return;
@@ -134,8 +137,9 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
         });
     };
 
-    const copyPrevious = () => {
-        if (!window.confirm('Bạn chắc chắn muốn copy dữ liệu tháng trước?')) return;
+    const copyPrevious = async () => {
+        const ok = await ask({ description: 'Bạn chắc chắn muốn copy dữ liệu tháng trước?' });
+        if (!ok) return;
         setProcessing(true);
         router.post(`${routeUrl}/copy-previous`, draftFilters, {
             preserveScroll: true,
@@ -145,9 +149,10 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
         });
     };
 
-    const setLocked = (locked) => {
+    const setLocked = async (locked) => {
         const message = locked ? 'Bạn chắc chắn muốn chốt dữ liệu tháng này?' : 'Bạn chắc chắn muốn hủy chốt dữ liệu tháng này?';
-        if (!window.confirm(message)) return;
+        const ok = await ask({ description: message });
+        if (!ok) return;
         setProcessing(true);
         router.post(`${routeUrl}/lock-period`, { ...draftFilters, locked }, {
             preserveScroll: true,

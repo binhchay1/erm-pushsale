@@ -5,6 +5,7 @@ import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const number = new Intl.NumberFormat('vi-VN');
 
@@ -23,6 +24,7 @@ function DialogShell({ open, onClose, children }) {
 }
 
 export default function Inventory({ report, filterOptions = {}, intakeUrl, exportUrl, approverOptions = [] }) {
+    const { ask } = useConfirm();
     const f = report?.filters ?? {};
     const rows = report?.rows?.data ?? [];
     const routeUrl = typeof window !== 'undefined' ? window.location.pathname : '/admin/warehouse/inventory';
@@ -173,7 +175,15 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
                                     <td className="text-center ps-row-actions">
                                         <button
                                             type="button"
-                                            onClick={() => window.confirm(`Xóa dòng tồn kho ${row.productName}?`) && router.delete(`/admin/warehouse-inventories/${row.id}`, { preserveScroll: true })}
+                                            onClick={async () => {
+                                                const ok = await ask({
+                                                    description: `Xóa dòng tồn kho ${row.productName}?`,
+                                                    confirmLabel: 'Xóa',
+                                                    variant: 'destructive',
+                                                });
+                                                if (!ok) return;
+                                                router.delete(`/admin/warehouse-inventories/${row.id}`, { preserveScroll: true });
+                                            }}
                                         >
                                             <i className="fa fa-trash" />
                                         </button>

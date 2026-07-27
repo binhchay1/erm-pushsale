@@ -152,53 +152,55 @@ export function AppSidebar({ collapsed = true, onNavigate }) {
 
                                     {hasChildren && (
                                         <ul className={cn('treeview-menu ul2', rootOpen && 'is-open')}>
-                                            {root.children.map((child, childIndex) => {
-                                                const key = `${rootKey}.${childIndex}`;
-                                                const hasGrandchildren = (child.children?.length ?? 0) > 0;
-                                                const childActive = keyContains(activeKey, key);
-                                                const flyoutOpen = flyout?.key === key;
+                                            <div className="pushsale-menu-l2-inner">
+                                                {root.children.map((child, childIndex) => {
+                                                    const key = `${rootKey}.${childIndex}`;
+                                                    const hasGrandchildren = (child.children?.length ?? 0) > 0;
+                                                    const childActive = keyContains(activeKey, key);
+                                                    const flyoutOpen = flyout?.key === key;
 
-                                                return (
-                                                    <li
-                                                        key={key}
-                                                        className={cn(
-                                                            'li2',
-                                                            childActive && 'active',
-                                                            flyoutOpen && 'flyout-open',
-                                                            hoverSecondKey === key && !childActive && 'ui-hover',
-                                                        )}
-                                                        onMouseEnter={() => onSecondEnter(key, hasGrandchildren)}
-                                                        onMouseLeave={() => onSecondLeave(key)}
-                                                    >
-                                                        {hasGrandchildren ? (
-                                                            <button
-                                                                type="button"
-                                                                className="a2 pushsale-menu-link pushsale-second-parent-link"
-                                                                data-pushsale-second-parent="true"
-                                                                onClick={(event) => toggleFlyout(event.currentTarget, child, key)}
-                                                                onMouseEnter={(event) => openFlyoutFor(event.currentTarget, child, key)}
-                                                                aria-expanded={flyoutOpen}
-                                                                aria-label={child.title}
-                                                            >
-                                                                <span>{child.title}</span>
-                                                                <i className="fa fa-angle-right pull-right" aria-hidden="true" />
-                                                            </button>
-                                                        ) : (
-                                                            <LeafLink
-                                                                item={child}
-                                                                className="a2 pushsale-menu-link"
-                                                                onNavigate={() => {
-                                                                    rememberSelection(child);
-                                                                    closeFlyout();
-                                                                    onNavigate?.();
-                                                                }}
-                                                            >
-                                                                <span>{child.title}</span>
-                                                            </LeafLink>
-                                                        )}
-                                                    </li>
-                                                );
-                                            })}
+                                                    return (
+                                                        <li
+                                                            key={key}
+                                                            className={cn(
+                                                                'li2',
+                                                                childActive && 'active',
+                                                                flyoutOpen && 'flyout-open',
+                                                                hoverSecondKey === key && !childActive && 'ui-hover',
+                                                            )}
+                                                            onMouseEnter={() => onSecondEnter(key, hasGrandchildren)}
+                                                            onMouseLeave={() => onSecondLeave(key)}
+                                                        >
+                                                            {hasGrandchildren ? (
+                                                                <button
+                                                                    type="button"
+                                                                    className="a2 pushsale-menu-link pushsale-second-parent-link"
+                                                                    data-pushsale-second-parent="true"
+                                                                    onClick={(event) => toggleFlyout(event.currentTarget, child, key)}
+                                                                    onMouseEnter={(event) => openFlyoutFor(event.currentTarget, child, key)}
+                                                                    aria-expanded={flyoutOpen}
+                                                                    aria-label={child.title}
+                                                                >
+                                                                    <span>{child.title}</span>
+                                                                    <i className="fa fa-angle-right pull-right" aria-hidden="true" />
+                                                                </button>
+                                                            ) : (
+                                                                <LeafLink
+                                                                    item={child}
+                                                                    className="a2 pushsale-menu-link"
+                                                                    onNavigate={() => {
+                                                                        rememberSelection(child);
+                                                                        closeFlyout();
+                                                                        onNavigate?.();
+                                                                    }}
+                                                                >
+                                                                    <span>{child.title}</span>
+                                                                </LeafLink>
+                                                            )}
+                                                        </li>
+                                                    );
+                                                })}
+                                            </div>
                                         </ul>
                                     )}
                                 </li>

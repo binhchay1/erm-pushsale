@@ -7,6 +7,7 @@ import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { PushsaleSelect } from '@/components/pushsale/PushsaleSelect';
 import { AddressSelect, oldDistrictOptions, oldProvinceOptions, oldWardOptions, newProvinceOptions, newWardOptions, combinedProvinceOptions } from '@/components/pushsale/PushsaleAddressSelect';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const emptyWarehouse = {
     name: '',
@@ -214,6 +215,7 @@ function ShippingAccountDialog({ open, warehouse, providers, form, selectedProvi
 }
 
 export default function WarehouseIndex({ warehouses, filters = {}, managers = [], provinces = [], districts = [], locations = {}, shippingProviders = [] }) {
+    const { ask } = useConfirm();
     const [search, setSearch] = useState(filters.search ?? '');
     const [manager, setManager] = useState(filters.manager_user_id ?? '');
     const [province, setProvince] = useState(filters.province ?? '');
@@ -358,7 +360,21 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                                 <div className="ps-row-actions ps-action-icon-row ps-warehouse-actions">
                                     <button type="button" className="ps-action-icon" title="Chỉnh sửa" aria-label="Chỉnh sửa" onClick={() => openEdit(row)}><i className="fa fa-edit" /></button>
                                     <button type="button" className="ps-action-icon" title="Cấu hình tài khoản giao hàng" aria-label="Cấu hình tài khoản giao hàng" onClick={() => openShippingConfig(row)}><i className="fa fa-bank" /></button>
-                                    <button type="button" className="ps-action-icon" title="Xóa" aria-label="Xóa" onClick={() => window.confirm(`Khi xóa kho các đơn liên quan đến kho sẽ được cập nhật thành không sử dụng kho, lịch sử liên quan đến kho này sẽ bị xóa, sản phẩm kho cũng sẽ bị xóa theo. Bạn có chắc chắn bạn muốn xóa?`) && router.delete(`/admin/warehouses/${row.id}`, { preserveScroll: true })}><i className="fa fa-trash" /></button>
+                                    <button
+                                        type="button"
+                                        className="ps-action-icon"
+                                        title="Xóa"
+                                        aria-label="Xóa"
+                                        onClick={async () => {
+                                            const ok = await ask({
+                                                description: 'Khi xóa kho các đơn liên quan đến kho sẽ được cập nhật thành không sử dụng kho, lịch sử liên quan đến kho này sẽ bị xóa, sản phẩm kho cũng sẽ bị xóa theo. Bạn có chắc chắn bạn muốn xóa?',
+                                                confirmLabel: 'Xóa',
+                                                variant: 'destructive',
+                                            });
+                                            if (!ok) return;
+                                            router.delete(`/admin/warehouses/${row.id}`, { preserveScroll: true });
+                                        }}
+                                    ><i className="fa fa-trash" /></button>
                                 </div>
                             </td>
                         </tr>) : <tr><td colSpan="12" className="ps-empty">Chưa có kho phù hợp.</td></tr>}</tbody>

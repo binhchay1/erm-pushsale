@@ -5,6 +5,7 @@ import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import AppLayout from '@/layouts/AppLayout';
+import { useConfirm } from '@/hooks/use-confirm';
 
 import { RequiredMark, currentFilters, formErrorText, formatDateTime } from './expenseShared';
 
@@ -16,6 +17,7 @@ export default function ExpenseUnits({
     pagination,
     routeUrl = '/admin/accounting/expense-units',
 }) {
+    const { ask } = useConfirm();
     const title = schema?.title ?? 'Danh mục đơn vị tính';
     const [open, setOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -44,8 +46,10 @@ export default function ExpenseUnits({
         else request.post(`${routeUrl}/records`, options);
     };
 
-    const destroy = (row) => {
-        if (!row._record_id || !window.confirm(`Xóa đơn vị tính "${row.name}"?`)) return;
+    const destroy = async (row) => {
+        if (!row._record_id) return;
+        const ok = await ask({ description: `Xóa đơn vị tính "${row.name}"?`, confirmLabel: 'Xóa', variant: 'destructive' });
+        if (!ok) return;
         router.delete(`${routeUrl}/records/${row._record_id}`, { preserveScroll: true });
     };
 

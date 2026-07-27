@@ -7,6 +7,7 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 import { LocaleSync } from '@/components/layout/LocaleSync';
 import { PageHeaderOutlet, PageHeaderProvider } from '@/components/layout/PageHeader';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { ConfirmProvider } from '@/hooks/use-confirm';
 import { useFlashToast } from '@/hooks/useFlashToast';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 import { ensurePushsaleStyles } from '@/lib/uiShellStyles';
@@ -169,33 +170,35 @@ export default function AppLayout({ children }) {
         >
             <LocaleSync />
             <TooltipProvider>
-                <AppHeader onToggleSidebar={toggleSidebar} />
-                <AppSidebar collapsed={!sidebarOpen} onNavigate={closeSidebar} />
+                <ConfirmProvider>
+                    <AppHeader onToggleSidebar={toggleSidebar} />
+                    <AppSidebar collapsed={!sidebarOpen} onNavigate={closeSidebar} />
 
-                <PageHeaderProvider>
-                    <main className="content-wrapper">
-                        <div className="content-inner">
-                            <div className="ps-page-viewport">
-                                <PageHeaderOutlet />
-                                {pageTransitioning && !pendingDashboardRole && (
-                                    <div className="pushsale-route-loading" aria-live="polite"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>
-                                )}
-                                {pendingDashboardRole ? (
-                                    <DashboardSkeleton role={pendingDashboardRole} />
-                                ) : (
-                                    children
-                                )}
+                    <PageHeaderProvider>
+                        <main className="content-wrapper">
+                            <div className="content-inner">
+                                <div className="ps-page-viewport">
+                                    <PageHeaderOutlet />
+                                    {pageTransitioning && !pendingDashboardRole && (
+                                        <div className="pushsale-route-loading" aria-live="polite"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>
+                                    )}
+                                    {pendingDashboardRole ? (
+                                        <DashboardSkeleton role={pendingDashboardRole} />
+                                    ) : (
+                                        children
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    </main>
-                </PageHeaderProvider>
+                        </main>
+                    </PageHeaderProvider>
 
-                <button
-                    type="button"
-                    className="sidebar-mobile-backdrop"
-                    aria-label="Đóng menu"
-                    onClick={closeSidebar}
-                />
+                    <button
+                        type="button"
+                        className="sidebar-mobile-backdrop"
+                        aria-label="Đóng menu"
+                        onClick={closeSidebar}
+                    />
+                </ConfirmProvider>
             </TooltipProvider>
         </div>
     );

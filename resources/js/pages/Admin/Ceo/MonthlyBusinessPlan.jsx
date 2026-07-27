@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
+import { useConfirm } from '@/hooks/use-confirm';
 
 function currentQuery() {
     if (typeof window === 'undefined') return {};
@@ -42,6 +43,7 @@ function buildQuery(filters) {
 }
 
 export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, routeUrl = '/admin/ceo/business-plan/monthly', pageRuntimeError = null }) {
+    const { ask } = useConfirm();
     const query = currentQuery();
     const now = new Date();
     const [filters, setFilters] = useState({
@@ -75,8 +77,11 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
         setDraftRows((current) => current.map((row, idx) => idx === index ? { ...row, [key]: value, _dirty: true } : row));
     };
 
-    const action = (url, payload = {}, confirmText = null) => {
-        if (confirmText && !window.confirm(confirmText)) return;
+    const action = async (url, payload = {}, confirmText = null) => {
+        if (confirmText) {
+            const ok = await ask({ description: confirmText });
+            if (!ok) return;
+        }
         setMessage('');
         setProcessing(true);
         router.post(url, payload, {

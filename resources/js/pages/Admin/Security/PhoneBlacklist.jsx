@@ -8,6 +8,7 @@ import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import AppLayout from '@/layouts/AppLayout';
 import { useI18n, useT } from '@/providers/I18nProvider';
+import { useConfirm } from '@/hooks/use-confirm';
 import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
 
 const emptyForm = { phone: '', reason: '', order_id: '', creation_type: 'manual' };
@@ -52,6 +53,7 @@ export default function PhoneBlacklist({
 }) {
     const t = useT();
     const { locale } = useI18n();
+    const { ask } = useConfirm();
     const params = new URLSearchParams(window.location.search);
     const [keyword, setKeyword] = useState(params.get('search') ?? '');
     const [editorOpen, setEditorOpen] = useState(false);
@@ -142,8 +144,14 @@ export default function PhoneBlacklist({
         }
     };
 
-    const destroy = (row) => {
-        if (!row._record_id || !window.confirm(t('pages.phone_blacklist.delete_confirm', { phone: row.phone }))) return;
+    const destroy = async (row) => {
+        if (!row._record_id) return;
+        const ok = await ask({
+            description: t('pages.phone_blacklist.delete_confirm', { phone: row.phone }),
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
+        if (!ok) return;
         router.delete(`${routeUrl}/records/${row._record_id}`, {
             preserveScroll: true,
             onSuccess: () => toast.success('Đã xóa số blacklist.'),

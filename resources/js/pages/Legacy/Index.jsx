@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
 const currencyFormatter = new Intl.NumberFormat('vi-VN', {
@@ -553,6 +554,7 @@ function requestJson(url, method, payload) {
 }
 
 export default function LegacyIndex({ schema, rows = [], pagination, routeUrl, templateUrl, dialogUrls = [], filterOptions = {} }) {
+    const { ask } = useConfirm();
     const [editor, setEditor] = useState({ open: false, row: null });
     const [error, setError] = useState('');
 
@@ -577,7 +579,9 @@ export default function LegacyIndex({ schema, rows = [], pagination, routeUrl, t
     };
 
     const remove = async (row) => {
-        if (!row._record_id || !window.confirm('Xóa bản ghi này?')) return;
+        if (!row._record_id) return;
+        const ok = await ask({ description: 'Xóa bản ghi này?', confirmLabel: 'Xóa', variant: 'destructive' });
+        if (!ok) return;
         setError('');
         try {
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';

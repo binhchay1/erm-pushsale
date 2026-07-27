@@ -18,6 +18,7 @@ import {
 } from '@/components/customers/pushsale/PushsaleCustomerDialogs';
 import { getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const EMPTY_DIALOG = { type: null, order: null };
 
@@ -291,6 +292,7 @@ function ActionBubble({ tone = 'primary', label, onClick, children }) {
 }
 
 function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
+    const { ask } = useConfirm();
     const [open, setOpen] = useState(false);
     const hasSelection = selectedIds.length > 0;
 
@@ -345,7 +347,10 @@ function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
             toast.warning('Vui lòng tích chọn ít nhất một hồ sơ.');
             return;
         }
-        if (confirmMessage && !window.confirm(confirmMessage)) return;
+        if (confirmMessage) {
+            const ok = await ask({ description: confirmMessage, confirmLabel: 'Đồng ý', variant: 'destructive' });
+            if (!ok) return;
+        }
 
         try {
             const response = await fetch(url, {

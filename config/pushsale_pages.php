@@ -728,31 +728,32 @@ return array (
     array (
       0 => 
       array (
-        'key' => 'user_id',
-        'label' => 'Tài khoản',
-        'type' => 'select',
-        'option_source' => 'users',
-        'required' => true,
-      ),
-      1 => 
-      array (
-        'key' => 'team_ids',
-        'label' => 'Nhóm được xem báo cáo',
-        'type' => 'multiselect',
-        'option_source' => 'teams',
-      ),
-      2 => 
-      array (
         'key' => 'team_type',
         'label' => 'Kiểu nhóm',
         'type' => 'select',
+        'required' => true,
         'options' => 
         array (
-          'sale' => 'Sales',
-          'marketing' => 'Marketing',
-          'warehouse' => 'Kho',
-          'all' => 'Tất cả',
+          'sale' => 'Nhóm sale',
+          'care' => 'Nhóm CSKH',
+          'marketing' => 'Nhóm Marketing',
         ),
+      ),
+      1 => 
+      array (
+        'key' => 'user_id',
+        'label' => 'Trưởng nhóm',
+        'type' => 'select',
+        'option_source' => 'teamLeaders',
+        'required' => true,
+      ),
+      2 => 
+      array (
+        'key' => 'team_ids',
+        'label' => 'Danh sách nhóm xem báo cáo',
+        'type' => 'multiselect',
+        'option_source' => 'teams',
+        'required' => true,
       ),
       3 => 
       array (

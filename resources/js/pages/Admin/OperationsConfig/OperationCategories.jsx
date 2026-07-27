@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { PushsalePageFrame } from '@/components/pushsale/PushsalePageFrame';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
 
@@ -269,6 +270,7 @@ function OperationResultsTable({ results, setResults, onSave, savingValue }) {
 }
 
 function OperationWorkflowTable({ rows, setRows, categories, results, routeUrl, savingId, setSavingId, setFlash }) {
+    const { ask } = useConfirm();
     const workflowsUrl = routeUrl.replace('/operation-categories', '/operation-workflows');
     const updateRow = (index, patch) => {
         setRows((current) => current.map((row, rowIndex) => (rowIndex === index ? { ...row, ...patch } : row)));
@@ -298,7 +300,8 @@ function OperationWorkflowTable({ rows, setRows, categories, results, routeUrl, 
             setRows((current) => current.filter((item) => item !== row));
             return;
         }
-        if (!window.confirm('Xóa cấu hình chuyển bước này?')) return;
+        const ok = await ask({ description: 'Xóa cấu hình chuyển bước này?', confirmLabel: 'Xóa', variant: 'destructive' });
+        if (!ok) return;
         setSavingId(row._record_id ?? row.id);
         try {
             await requestJson(`${workflowsUrl}/records/${row._record_id ?? row.id}`, 'DELETE');
@@ -379,6 +382,7 @@ function OperationWorkflowTable({ rows, setRows, categories, results, routeUrl, 
 }
 
 export default function OperationCategoriesPage({ schema, rows = [], filterOptions = {}, routeUrl, pageRuntimeError = null }) {
+    const { ask } = useConfirm();
     const [categories, setCategories] = useState(() => rows.map(normalizeCategory));
     const [workflows, setWorkflows] = useState(() => (filterOptions.operationWorkflowsFull ?? []).map(normalizeWorkflow));
     const [askBeforeDelete, setAskBeforeDelete] = useState(true);
@@ -429,7 +433,10 @@ export default function OperationCategoriesPage({ schema, rows = [], filterOptio
             return;
         }
         const id = row._record_id ?? row.id;
-        if (confirmBeforeDelete && !window.confirm(`Xóa tác nghiệp “${row.name}”?`)) return;
+        if (confirmBeforeDelete) {
+            const ok = await ask({ description: `Xóa tác nghiệp “${row.name}”?`, confirmLabel: 'Xóa', variant: 'destructive' });
+            if (!ok) return;
+        }
 
         setSavingId(id);
         try {

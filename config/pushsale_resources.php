@@ -70,12 +70,12 @@ return [
     '1.2.5' => [
         'model' => ReportAccessRule::class,
         'fields' => [
-            ['key' => 'user_id', 'label' => 'Tài khoản', 'type' => 'select', 'option_source' => 'users', 'required' => true],
-            ['key' => 'team_ids', 'label' => 'Nhóm được xem báo cáo', 'type' => 'multiselect', 'option_source' => 'teams'],
-            ['key' => 'team_type', 'label' => 'Kiểu nhóm', 'type' => 'select', 'options' => ['sale' => 'Sales', 'marketing' => 'Marketing', 'warehouse' => 'Kho', 'all' => 'Tất cả']],
+            ['key' => 'user_id', 'label' => 'Trưởng nhóm', 'type' => 'select', 'option_source' => 'teamLeaders', 'required' => true],
+            ['key' => 'team_ids', 'label' => 'Danh sách nhóm xem báo cáo', 'type' => 'multiselect', 'option_source' => 'teams', 'required' => true],
+            ['key' => 'team_type', 'label' => 'Kiểu nhóm', 'type' => 'select', 'options' => ['sale' => 'Nhóm sale', 'care' => 'Nhóm CSKH', 'marketing' => 'Nhóm Marketing'], 'required' => true],
             ['key' => 'is_active', 'label' => 'Đang áp dụng', 'type' => 'checkbox', 'default' => true],
         ],
-        'rules' => ['user_id' => ['required','integer','exists:users,id'], 'team_ids' => ['nullable','array'], 'team_ids.*' => ['integer','exists:teams,id'], 'team_type' => ['nullable','string','max:50'], 'is_active' => ['boolean']],
+        'rules' => ['user_id' => ['required','integer','exists:users,id'], 'team_ids' => ['required','array','min:1'], 'team_ids.*' => ['integer','exists:teams,id'], 'team_type' => ['required','string','max:50'], 'is_active' => ['boolean']],
     ],
     '1.2.6' => [
         'model' => CareDistributionRule::class,
@@ -86,7 +86,7 @@ return [
             ['key' => 'sale_team_ids', 'label' => 'Nhóm Sales', 'type' => 'multiselect', 'option_source' => 'saleTeams'],
             ['key' => 'warehouse_team_id', 'label' => 'Nhóm vận đơn', 'type' => 'select', 'option_source' => 'warehouseTeams'],
         ],
-        'rules' => ['care_user_id' => ['required','integer','exists:users,id'], 'quota' => ['required','integer','min:0'], 'receive_data' => ['boolean'], 'sale_team_ids' => ['nullable','array'], 'sale_team_ids.*' => ['integer','exists:teams,id'], 'warehouse_team_id' => ['nullable','integer','exists:teams,id']],
+        'rules' => ['care_user_id' => ['required','integer','exists:users,id'], 'quota' => ['required','integer','min:0'], 'receive_data' => ['boolean'], 'sale_team_ids' => ['required','array','min:1'], 'sale_team_ids.*' => ['integer','exists:teams,id'], 'warehouse_team_id' => ['nullable','integer','exists:teams,id'],],
     ],
     '1.8.1' => [
         'model' => OperationCategory::class,

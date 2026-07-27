@@ -12,6 +12,7 @@ import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { vietnamesePhoneError, normalizeVietnamesePhone } from '@/lib/vietnamesePhone';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
 const currencyFormatter = new Intl.NumberFormat('vi-VN', {
@@ -1036,6 +1037,7 @@ function SalesRankingCards({ rows = [] }) {
 }
 
 function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, filterOptions, onCreate, onEdit, onDelete, onDeleteSelected, onPushsaleSave, onShowImportGuide, selectedRecordIds, onToggleSelect }) {
+    const { alert } = useConfirm();
     const gridEnabled = schema.grid_enabled !== false;
     const [rowAnchor, setRowAnchor] = useState(null);
     const [paginationAnchor, setPaginationAnchor] = useState(null);
@@ -1335,7 +1337,7 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
                                     if (!imported) throw new Error('Không import được dòng nào. Kiểm tra SKU và số lượng trong CSV.');
                                     router.reload({ preserveScroll: true, only: ['rows', 'pagination', 'summary'] });
                                 } catch (exception) {
-                                    window.alert(exception.message || 'Không thể import Excel/CSV phiếu kho.');
+                                    await alert(exception.message || 'Không thể import Excel/CSV phiếu kho.');
                                 } finally {
                                     fileInput.value = '';
                                 }

@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const currencyFormatter = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -63,6 +64,7 @@ function normalizePayload(form) {
 }
 
 function RuleTable({ title, type, rows, routeUrl, onSaved }) {
+    const { ask } = useConfirm();
     const [form, setForm] = useState(emptyForm(type));
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -107,7 +109,9 @@ function RuleTable({ title, type, rows, routeUrl, onSaved }) {
 
     const destroy = async (row) => {
         const id = row._record_id ?? row.id;
-        if (!id || !window.confirm('Xóa cấu hình này?')) return;
+        if (!id) return;
+        const ok = await ask({ description: 'Xóa cấu hình này?', confirmLabel: 'Xóa', variant: 'destructive' });
+        if (!ok) return;
         setSaving(true);
         setError('');
         try {

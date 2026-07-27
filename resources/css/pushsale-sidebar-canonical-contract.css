@@ -22,9 +22,9 @@ html body.pushsale-app-body {
     --ps-menu-l1-height: 42px;
     --ps-menu-l2-height: 40px;
     --ps-menu-l3-height: 40px;
-    --ps-menu-slide: .28s ease;
-    --ps-menu-accordion: .5s ease;
-    --ps-menu-flyout: .16s ease;
+    --ps-menu-slide: .26s cubic-bezier(.22, .61, .36, 1);
+    --ps-menu-accordion: .34s cubic-bezier(.22, .61, .36, 1);
+    --ps-menu-flyout: .16s cubic-bezier(.22, .61, .36, 1);
 }
 
 /* ---------- Shell: off-canvas sidebar ---------- */
@@ -151,13 +151,13 @@ html body.pushsale-app-body .pushsale-main-sidebar span.a1 {
     box-shadow: none !important;
     font-family: var(--ps-menu-font) !important;
     font-size: 13px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     line-height: var(--ps-menu-l1-height) !important;
     text-align: left !important;
     text-decoration: none !important;
     white-space: nowrap !important;
     cursor: pointer !important;
-    transition: background-color .15s ease, color .15s ease, border-color .15s ease !important;
+    transition: background-color .18s ease, color .18s ease, border-color .18s ease !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .a1 > span {
@@ -226,21 +226,40 @@ html body.pushsale-app-body .pushsale-main-sidebar .a1:active {
 
 /* ---------- Level 2 accordion ---------- */
 html body.pushsale-app-body .pushsale-main-sidebar .treeview-menu.ul2 {
-    display: none !important;
+    display: grid !important;
+    grid-template-rows: 0fr !important;
     max-height: none !important;
-    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
     background: #fff !important;
+    list-style: none !important;
+    transition: grid-template-rows var(--ps-menu-accordion) !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .treeview-menu.ul2 > .pushsale-menu-l2-inner {
+    display: block !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .treeview-menu.ul2.is-open,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.menu-open > .treeview-menu.ul2,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.is-open > .treeview-menu.ul2 {
-    display: block !important;
-    max-height: none !important;
-    overflow: visible !important;
+    display: grid !important;
+    grid-template-rows: 1fr !important;
+    overflow: hidden !important;
     background: #fff !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .treeview-menu.ul2:not(.is-open) {
+    pointer-events: none !important;
+}
+
+html body.pushsale-app-body .pushsale-main-sidebar .li1.menu-open > .treeview-menu.ul2,
+html body.pushsale-app-body .pushsale-main-sidebar .li1.is-open > .treeview-menu.ul2,
+html body.pushsale-app-body .pushsale-main-sidebar .treeview-menu.ul2.is-open {
+    pointer-events: auto !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .a2,
@@ -270,7 +289,7 @@ html body.pushsale-app-body .pushsale-main-sidebar span.a2 {
     text-decoration: none !important;
     white-space: nowrap !important;
     cursor: pointer !important;
-    transition: background-color .12s ease, color .12s ease !important;
+    transition: background-color .18s ease, color .18s ease !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .a2 > span {
@@ -296,26 +315,26 @@ html body.pushsale-app-body .pushsale-main-sidebar .li2.ui-hover > .a2,
 html body.pushsale-app-body .pushsale-main-sidebar .li2.flyout-open > .a2,
 html body.pushsale-app-body .pushsale-main-sidebar .li2.active > .a2,
 html body.pushsale-app-body .pushsale-main-sidebar .li2 > .a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.flyout-open,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.active,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > a.a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > button.a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > span.a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.ui-hover > .a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.flyout-open > .a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2.active > .a2,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > a.a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > button.a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > span.a2:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:hover > .a2.pushsale-menu-link,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > .a2.pushsale-menu-link:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2 > button.a2.pushsale-menu-link:hover,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.active > .a2.pushsale-menu-link,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.flyout-open > .a2.pushsale-menu-link {
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2.ui-hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2.flyout-open,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2.active,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2:hover > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2:hover > a.a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2:hover > button.a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2:hover > span.a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2.ui-hover > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2.flyout-open > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2.active > .a2,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2 > .a2:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2 > a.a2:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2 > button.a2:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2 > span.a2:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open .pushsale-menu-l2-inner > li.li2:hover > .a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open .pushsale-menu-l2-inner > li.li2 > .a2.pushsale-menu-link:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open .pushsale-menu-l2-inner > li.li2 > button.a2.pushsale-menu-link:hover,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open .pushsale-menu-l2-inner > li.li2.active > .a2.pushsale-menu-link,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open .pushsale-menu-l2-inner > li.li2.flyout-open > .a2.pushsale-menu-link {
     color: #fff !important;
     -webkit-text-fill-color: #fff !important;
     background: var(--ps-menu-blue) !important;
@@ -332,13 +351,13 @@ html body.pushsale-app-body .pushsale-main-sidebar .li2.ui-hover > .a2 *,
 html body.pushsale-app-body .pushsale-main-sidebar .li2.flyout-open > .a2 *,
 html body.pushsale-app-body .pushsale-main-sidebar .li2.active > .a2 *,
 html body.pushsale-app-body .pushsale-main-sidebar .li2 > .a2:hover *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > .a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > a.a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > button.a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > span.a2 *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2 > .a2:hover *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2:hover > .a2.pushsale-menu-link *,
-html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open > li.li2.active > .a2.pushsale-menu-link * {
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2:hover > .a2 *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2:hover > a.a2 *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2:hover > button.a2 *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2:hover > span.a2 *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 .pushsale-menu-l2-inner > li.li2 > .a2:hover *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open .pushsale-menu-l2-inner > li.li2:hover > .a2.pushsale-menu-link *,
+html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2.is-open .pushsale-menu-l2-inner > li.li2.active > .a2.pushsale-menu-link * {
     color: #fff !important;
     -webkit-text-fill-color: #fff !important;
 }
@@ -383,6 +402,7 @@ html body.pushsale-app-body div.pushsale-third-menu[role="menu"] {
     transform: translateX(-6px) !important;
     pointer-events: none !important;
     transition: opacity var(--ps-menu-flyout), transform var(--ps-menu-flyout) !important;
+    will-change: opacity, transform !important;
 }
 
 html body.pushsale-app-body .pushsale-third-menu.is-visible,

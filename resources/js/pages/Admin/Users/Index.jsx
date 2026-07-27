@@ -12,6 +12,7 @@ import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { formatCurrency } from '@/lib/format';
 import { PushsalePageFrame } from '@/components/pushsale/PushsalePageFrame';
+import { useConfirm } from '@/hooks/use-confirm';
 
 function currentFilters() {
     if (typeof window === 'undefined') return {};
@@ -59,6 +60,7 @@ export default function UsersIndex({
     accountCount = 0,
     canCreate = true,
 }) {
+    const { ask } = useConfirm();
     const [passwordUser, setPasswordUser] = useState(null);
     const [googleUser, setGoogleUser] = useState(null);
     const [accountDialog, setAccountDialog] = useState({ mode: null, user: null });
@@ -271,8 +273,15 @@ export default function UsersIndex({
                                                     type="button"
                                                     className="btn-icon aoh"
                                                     title="Xóa tài khoản"
-                                                    onClick={() => window.confirm(`Bạn chắc chắn muốn xóa tài khoản ${row.name}?`)
-                                                        && router.delete(`/admin/users/${row.id}`, { preserveScroll: true })}
+                                                    onClick={async () => {
+                                                        const ok = await ask({
+                                                            description: `Bạn chắc chắn muốn xóa tài khoản ${row.name}?`,
+                                                            confirmLabel: 'Xóa',
+                                                            variant: 'destructive',
+                                                        });
+                                                        if (!ok) return;
+                                                        router.delete(`/admin/users/${row.id}`, { preserveScroll: true });
+                                                    }}
                                                 >
                                                     <i className="fa fa-trash" />
                                                 </button>

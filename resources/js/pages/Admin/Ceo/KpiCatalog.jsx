@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
+import { useConfirm } from '@/hooks/use-confirm';
 
 function currentQuery() {
     if (typeof window === 'undefined') return {};
@@ -65,6 +66,7 @@ function normalizedRows(rows) {
 }
 
 export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/ceo/business-plan/kpi-catalog', pageRuntimeError = null }) {
+    const { ask } = useConfirm();
     const query = currentQuery();
     const [filters, setFilters] = useState({ position_key: query.position_key || query.role || 'marketing' });
     const [draftRows, setDraftRows] = useState(() => normalizedRows(rows));
@@ -107,8 +109,9 @@ export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/c
 
     const addRow = () => setDraftRows((current) => [...current, emptyRow(filters.position_key, current.length + 1)]);
 
-    const initializeDefaults = () => {
-        if (!window.confirm('Bạn chắc chắn muốn khởi tạo?')) return;
+    const initializeDefaults = async () => {
+        const ok = await ask({ description: 'Bạn chắc chắn muốn khởi tạo?' });
+        if (!ok) return;
         setProcessing(true);
         setMessage('');
         router.post(`${routeUrl}/initialize-defaults`, filters, {
@@ -159,8 +162,9 @@ export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/c
         });
     };
 
-    const destroyRow = (row, index) => {
-        if (!window.confirm('Bạn chắc chắn muốn xóa KPI này?')) return;
+    const destroyRow = async (row, index) => {
+        const ok = await ask({ description: 'Bạn chắc chắn muốn xóa KPI này?', confirmLabel: 'Xóa', variant: 'destructive' });
+        if (!ok) return;
         if (!row._record_id && !row.id) {
             setDraftRows((current) => current.filter((_, idx) => idx !== index));
             return;

@@ -1,64 +1,103 @@
-import { useCallback, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useT } from '@/providers/I18nProvider';
 
-export function useConfirm() {
-    const t = useT();
-    const [state, setState] = useState({
+const ConfirmContext = createContext(null);
+
+function createIdleState() {
+    return {
         open: false,
+        mode: 'confirm',
         title: '',
         description: '',
         confirmLabel: '',
         cancelLabel: '',
         variant: 'default',
         resolve: null,
-    });
+    };
+}
+
+export function ConfirmProvider({ children }) {
+    const t = useT();
+    const [state, setState] = useState(createIdleState);
 
     const close = useCallback((result) => {
         setState((current) => {
             current.resolve?.(result);
-            return {
-                open: false,
-                title: '',
-                description: '',
-                confirmLabel: '',
-                cancelLabel: '',
-                variant: 'default',
-                resolve: null,
-            };
+            return createIdleState();
         });
     }, []);
 
     const ask = useCallback(
-        (options = {}) => {
-            return new Promise((resolve) => {
-                setState({
-                    open: true,
-                    title: options.title ?? t('confirm_dialog.title'),
-                    description: options.description ?? '',
-                    confirmLabel: options.confirmLabel ?? t('common.confirm'),
-                    cancelLabel: options.cancelLabel ?? t('confirm_dialog.cancel_label'),
-                    variant: options.variant ?? 'default',
-                    resolve,
-                });
+        (options = {}) => new Promise((resolve) => {
+            setState({
+                open: true,
+                mode: 'confirm',
+                title: options.title ?? t('confirm_dialog.title'),
+                description: options.description ?? '',
+                confirmLabel: options.confirmLabel ?? t('common.confirm'),
+                cancelLabel: options.cancelLabel ?? t('confirm_dialog.cancel_label'),
+                variant: options.variant ?? 'default',
+                resolve,
             });
-        },
+        }),
         [t],
     );
 
-    const ConfirmDialogPortal = () => (
-        <ConfirmDialog
-            open={state.open}
-            onOpenChange={(open) => !open && close(false)}
-            title={state.title}
-            description={state.description}
-            confirmLabel={state.confirmLabel}
-            cancelLabel={state.cancelLabel}
-            variant={state.variant}
-            onConfirm={() => close(true)}
-        />
+    const alert = useCallback(
+        (options = {}) => new Promise((resolve) => {
+            const description = typeof options === 'string' ? options : (options.description ?? '');
+            const title = typeof options === 'string'
+                ? t('confirm_dialog.title')
+                : (options.title ?? t('confirm_dialog.title'));
+            const confirmLabel = typeof options === 'string'
+                ? t('common.confirm')
+                : (options.confirmLabel ?? t('common.confirm'));
+
+            setState({
+                open: true,
+                mode: 'alert',
+                title,
+                description,
+                confirmLabel,
+                cancelLabel: '',
+                variant: typeof options === 'string' ? 'default' : (options.variant ?? 'default'),
+                resolve,
+            });
+        }),
+        [t],
     );
 
-    return { ask, ConfirmDialogPortal };
+    const value = useMemo(() => ({
+        ask,
+        alert,
+        // Kept for pages that still render <ConfirmDialogPortal />; provider owns the dialog.
+        ConfirmDialogPortal: () => null,
+    }), [ask, alert]);
+
+    return (
+        <ConfirmContext.Provider value={value}>
+            {children}
+            <ConfirmDialog
+                open={state.open}
+                mode={state.mode}
+                onOpenChange={(open) => !open && close(false)}
+                title={state.title}
+                description={state.description}
+                confirmLabel={state.confirmLabel}
+                cancelLabel={state.cancelLabel}
+                variant={state.variant}
+                onConfirm={() => close(true)}
+            />
+        </ConfirmContext.Provider>
+    );
+}
+
+export function useConfirm() {
+    const context = useContext(ConfirmContext);
+    if (!context) {
+        throw new Error('useConfirm must be used within ConfirmProvider');
+    }
+    return context;
 }

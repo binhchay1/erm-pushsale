@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
 const currencyFormatter = new Intl.NumberFormat('vi-VN', {
@@ -333,6 +334,7 @@ function ComboDialog({ open, mode, combo, products = [], onClose, onSaved, route
 }
 
 export default function Page({ schema = {}, rows = [], pagination = {}, routeUrl = '/admin/catalog/combos', filterOptions = {}, pageRuntimeError = null }) {
+    const { ask } = useConfirm();
     const safeRows = Array.isArray(rows) ? rows : [];
     const safePagination = pagination && typeof pagination === 'object' ? pagination : {};
     const safeRouteUrl = routeUrl || '/admin/catalog/combos';
@@ -379,7 +381,9 @@ export default function Page({ schema = {}, rows = [], pagination = {}, routeUrl
     };
 
     const destroy = async (row) => {
-        if (!row?._record_id || !window.confirm(`Xóa combo "${row.name}"?`)) return;
+        if (!row?._record_id) return;
+        const ok = await ask({ description: `Xóa combo "${row.name}"?`, confirmLabel: 'Xóa', variant: 'destructive' });
+        if (!ok) return;
         setError('');
         try {
             await requestJson(`${safeRouteUrl}/records/${row._record_id}`, 'DELETE');

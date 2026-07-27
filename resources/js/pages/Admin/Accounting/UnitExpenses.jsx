@@ -7,6 +7,7 @@ import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import AppLayout from '@/layouts/AppLayout';
 import { formatCurrency } from '@/lib/format';
+import { useConfirm } from '@/hooks/use-confirm';
 
 import {
     RequiredMark,
@@ -48,6 +49,7 @@ export default function UnitExpenses({
     filterOptions = {},
     routeUrl = '/admin/accounting/expenses',
 }) {
+    const { ask } = useConfirm();
     const title = schema?.title ?? 'Quản lý chi phí đơn vị';
     const [keyword, setKeyword] = useState(valueFromSearch('search'));
     const [filters, setFilters] = useState(() => ({
@@ -152,8 +154,10 @@ export default function UnitExpenses({
         else request.post(`${routeUrl}/records`, options);
     };
 
-    const destroy = (row) => {
-        if (!row._record_id || !window.confirm(`Xóa chi phí "${row.name}"?`)) return;
+    const destroy = async (row) => {
+        if (!row._record_id) return;
+        const ok = await ask({ description: `Xóa chi phí "${row.name}"?`, confirmLabel: 'Xóa', variant: 'destructive' });
+        if (!ok) return;
         router.delete(`${routeUrl}/records/${row._record_id}`, { preserveScroll: true });
     };
 

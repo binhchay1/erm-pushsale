@@ -1,0 +1,325 @@
+/* HR distribution pages 1.2.4–1.2.6 + table-header Add buttons. */
+
+html body.pushsale-app-body .ps-hr-config-page {
+    min-height: calc(100vh - var(--ps-header-height, 50px));
+    padding: 0 0 20px;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-hr-config-page .ps-page-shell__body {
+    padding-top: 10px !important;
+}
+
+html body.pushsale-app-body .ps-hr-config-filters {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-hr-config-filters .form-control {
+    width: 180px !important;
+    min-width: 140px !important;
+    max-width: 220px !important;
+}
+
+html body.pushsale-app-body .ps-hr-config-search {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-hr-config-search .form-control {
+    width: min(280px, 36vw) !important;
+}
+
+html body.pushsale-app-body .ps-hr-config-toolbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 0 12px !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-hr-config-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+html body.pushsale-app-body .ps-hr-config-table {
+    width: 100%;
+    margin: 0;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-hr-config-table > thead > tr > th {
+    background: #3c8dbc !important;
+    color: #fff !important;
+    border-color: #367fa9 !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+    vertical-align: middle !important;
+    padding: 6px 8px !important;
+}
+
+html body.pushsale-app-body .ps-hr-config-table > tbody > tr > td {
+    vertical-align: middle !important;
+    padding: 6px 8px !important;
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-hr-config-table > tbody > tr:nth-child(odd) > td {
+    background: #f7f9fb;
+}
+
+/* Thêm in table header: white text on blue th. */
+html body.pushsale-app-body .ps-hr-config-table th.ps-col-add,
+html body.pushsale-app-body .ps-hr-config-table th.ps-col-add .btn-icon,
+html body.pushsale-app-body .ps-hr-config-table th.ps-col-add .btn-icon *,
+html body.pushsale-app-body table.table thead th.ps-col-add,
+html body.pushsale-app-body table.table thead th.ps-col-add .btn-icon,
+html body.pushsale-app-body table.table thead th.ps-col-add .btn-icon *,
+html body.pushsale-app-body table.table thead th .btn-icon.ps-th-add,
+html body.pushsale-app-body table.table thead th .btn-icon.ps-th-add * {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    opacity: 1 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body table.table thead th .btn-icon.ps-th-add {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    padding: 0 4px !important;
+    line-height: 1.2 !important;
+}
+
+html body.pushsale-app-body .ps-hr-config-empty {
+    padding: 24px 8px;
+    color: #777;
+}
+
+html body.pushsale-app-body .ps-hr-config-actions {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+html body.pushsale-app-body .ps-hr-config-actions .btn-icon {
+    width: 26px !important;
+    height: 26px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #0d8bf2 !important;
+}
+
+/* Report-access dialog — Pushsale iframe popup: blue title bar + label/control grid. */
+html body.pushsale-app-body .ps-report-access-dialog.ps-dialog-surface,
+html body.pushsale-app-body .ps-report-access-dialog[data-slot='dialog-content'] {
+    padding: 0 !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 0 !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .45) !important;
+}
+
+html body.pushsale-app-body .ps-report-access-dialog .ps-dialog-header,
+html body.pushsale-app-body .ps-report-access-dialog [data-slot='dialog-header'] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-bottom: 0 !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body .ps-report-access-dialog .ps-dialog-title,
+html body.pushsale-app-body .ps-report-access-dialog [data-slot='dialog-title'] {
+    margin: 0 !important;
+    padding: 10px 44px 10px 16px !important;
+    background: #3c8dbc !important;
+    color: #fff !important;
+    font: 700 14px/1.3 Arial, Helvetica, sans-serif !important;
+    text-transform: uppercase !important;
+    letter-spacing: .02em !important;
+}
+
+html body.pushsale-app-body .ps-report-access-dialog .ps-dialog-description,
+html body.pushsale-app-body .ps-report-access-dialog [data-slot='dialog-description'] {
+    margin: 0 !important;
+    padding: 12px 44px 8px 16px !important;
+    color: #111 !important;
+    font: 700 14px/1.4 Arial, Helvetica, sans-serif !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-report-access-dialog .pushsale-dialog-close {
+    top: 48px !important;
+    right: 10px !important;
+    color: #666 !important;
+}
+
+html body.pushsale-app-body .ps-report-access-dialog .pushsale-dialog-close:hover {
+    color: #111 !important;
+    background: rgba(0, 0, 0, .06) !important;
+}
+
+html body.pushsale-app-body .ps-report-access-dialog .ps-dialog-body {
+    padding: 8px 16px 16px !important;
+}
+
+html body.pushsale-app-body .ps-report-access-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 560px;
+}
+
+html body.pushsale-app-body .ps-report-access-row {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+}
+
+html body.pushsale-app-body .ps-report-access-row > label {
+    margin: 0;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #222;
+}
+
+html body.pushsale-app-body .ps-report-access-row .required {
+    color: #dd4b39;
+}
+
+html body.pushsale-app-body .ps-report-access-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 4px;
+}
+
+html body.pushsale-app-body .ps-report-access-actions .btn-primary {
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-report-access-error {
+    color: #a94442;
+    font-size: 12px;
+}
+
+/* Care distribution dual pane */
+html body.pushsale-app-body .ps-care-dist-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+html body.pushsale-app-body .ps-care-dist-filters {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-care-dist-filters .form-control {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+html body.pushsale-app-body .ps-care-dist-bulk {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+html body.pushsale-app-body .ps-care-create-panel {
+    border: 1px solid #d2d6de;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-care-create-panel table {
+    margin: 0;
+}
+
+html body.pushsale-app-body .ps-care-create-panel td {
+    vertical-align: top !important;
+    padding: 8px !important;
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-care-create-panel td:first-child {
+    width: 130px;
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-care-create-panel .text-red {
+    color: #dd4b39;
+}
+
+html body.pushsale-app-body .ps-care-create-panel textarea.form-control {
+    min-height: 140px;
+    resize: vertical;
+}
+
+html body.pushsale-app-body .ps-care-create-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+html body.pushsale-app-body .ps-care-create-links a,
+html body.pushsale-app-body .ps-care-create-links button.linkish {
+    color: #0d8bf2;
+    background: none;
+    border: 0;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-care-quota-input {
+    width: 88px !important;
+    text-align: center;
+    margin: 0 auto;
+    display: block;
+}
+
+@media (max-width: 1100px) {
+    html body.pushsale-app-body .ps-care-dist-layout {
+        grid-template-columns: 1fr;
+    }
+
+    html body.pushsale-app-body .ps-care-dist-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    html body.pushsale-app-body .ps-report-access-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+}

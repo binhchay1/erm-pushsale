@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
+import { useConfirm } from '@/hooks/use-confirm';
 
 function currentFilters() {
     if (typeof window === 'undefined') return {};
@@ -147,6 +148,7 @@ function StatusBadge({ value }) {
 }
 
 export default function WarehouseDeliveryHandoverPage({ schema, rows = [], pagination = {}, filterOptions = {}, routeUrl, pageRuntimeError = null }) {
+    const { ask } = useConfirm();
     const [filters, setFilters] = useState(() => ({
         handover_status: valueFromSearch('handover_status', '-1'),
         shipping_method: valueFromSearch('shipping_method', '-1'),
@@ -219,9 +221,11 @@ export default function WarehouseDeliveryHandoverPage({ schema, rows = [], pagin
         router.post(`${routeUrl}/records`, payload, options);
     };
 
-    const destroyRow = (row) => {
+    const destroyRow = async (row) => {
         const id = row._record_id ?? row.id;
-        if (!id || !window.confirm('Chắc chắn bạn muốn xóa biên bản này?')) return;
+        if (!id) return;
+        const ok = await ask({ description: 'Chắc chắn bạn muốn xóa biên bản này?', confirmLabel: 'Xóa', variant: 'destructive' });
+        if (!ok) return;
         router.delete(`${routeUrl}/records/${id}`, { preserveScroll: true });
     };
 

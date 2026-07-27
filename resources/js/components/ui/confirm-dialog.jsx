@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { useT } from '@/providers/I18nProvider';
 
-/** Confirm dialog — use directly or via useConfirm(). */
+/** Confirm / alert dialog — use via useConfirm(). */
 export function ConfirmDialog({
     open,
     onOpenChange,
@@ -18,9 +18,11 @@ export function ConfirmDialog({
     confirmLabel,
     cancelLabel,
     variant = 'default',
+    mode = 'confirm',
     onConfirm,
 }) {
     const t = useT();
+    const isAlert = mode === 'alert';
 
     const handleConfirm = () => {
         onConfirm?.();
@@ -29,21 +31,23 @@ export function ConfirmDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md" showClose={false}>
+            <DialogContent className="sm:max-w-md ps-confirm-dialog-surface" showClose={false}>
                 <DialogHeader>
                     <DialogTitle>{title ?? t('confirm_dialog.title')}</DialogTitle>
-                    {description && <DialogDescription>{description}</DialogDescription>}
+                    {description ? <DialogDescription>{description}</DialogDescription> : null}
                 </DialogHeader>
                 <DialogFooter className="gap-2 sm:gap-0">
-                    <Button type="button" variant="outline" onClick={() => onOpenChange?.(false)}>
-                        {cancelLabel ?? t('confirm_dialog.cancel_label')}
-                    </Button>
+                    {!isAlert ? (
+                        <Button type="button" variant="outline" onClick={() => onOpenChange?.(false)}>
+                            {cancelLabel ?? t('confirm_dialog.cancel_label')}
+                        </Button>
+                    ) : null}
                     <Button
                         type="button"
                         variant={variant === 'destructive' ? 'destructive' : 'default'}
                         onClick={handleConfirm}
                     >
-                        {confirmLabel ?? t('common.confirm')}
+                        {confirmLabel ?? (isAlert ? t('common.confirm') : t('common.confirm'))}
                     </Button>
                 </DialogFooter>
             </DialogContent>

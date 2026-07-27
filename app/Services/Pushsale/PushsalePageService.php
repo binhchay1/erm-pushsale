@@ -218,7 +218,12 @@ class PushsalePageService
             'id' => $user->id,
             'label' => trim($user->name.' · '.$user->email),
         ])->all();
-        $mapTeams = static fn ($items) => $items->map(fn (Team $team) => ['id' => $team->id, 'label' => $team->name])->all();
+        $mapTeams = static fn ($items) => $items->map(fn (Team $team) => [
+            'id' => $team->id,
+            'label' => $team->name,
+            'leader_user_id' => $team->leader_user_id,
+            'type' => $team->type?->value ?? $team->type,
+        ])->all();
         $userOptionQuery = User::query()->with('company:id,name');
         if (auth()->user()?->isPlatformAdmin()) {
             // Super Admin phải nhìn thấy danh sách tài khoản đăng nhập thật trên toàn hệ thống,
@@ -2435,7 +2440,12 @@ class PushsalePageService
             'index' => $index + 1,
             'account' => $row->user?->name."\n".$row->user?->email,
             'visible_teams' => collect($row->team_ids)->map(fn ($id) => $teams[$id] ?? null)->filter()->implode(', '),
-            'team_type' => $row->team_type,
+            'team_type' => match ((string) $row->team_type) {
+                'care', 'warehouse' => 'care',
+                'marketing' => 'marketing',
+                'all' => 'all',
+                default => 'sale',
+            },
             'updated_at' => $row->updated_at?->toIso8601String(),
             'actions' => 'Cập nhật',
             '_record_id' => $row->id,
