@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\VietnameseMobilePhone;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -33,7 +34,7 @@ class UpdateShippingPartnerRequest extends FormRequest
             'settings.auto_create_waybill' => ['nullable', 'boolean'],
             'settings.auto_restock_return' => ['nullable', 'boolean'],
             'settings.use_carrier_cod' => ['nullable', 'boolean'],
-            'settings.fixed_receiver_phone' => ['nullable', 'string', 'max:30'],
+            'settings.fixed_receiver_phone' => ['nullable', 'string', 'max:30', new VietnameseMobilePhone],
             'settings.sender_profile_id' => ['nullable', 'string', 'max:100'],
             'settings.callback_url_enabled' => ['nullable', 'boolean'],
             'settings.allow_insurance_order' => ['nullable', 'boolean'],

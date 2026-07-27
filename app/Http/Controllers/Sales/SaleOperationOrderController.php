@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Sales;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Rules\VietnameseMobilePhone;
 use App\Services\Operations\SaleOrderEditService;
 use App\Support\ShippingProviders;
 use Illuminate\Http\RedirectResponse;
@@ -30,7 +31,7 @@ class SaleOperationOrderController extends Controller
             'shipping_service' => ['nullable', 'string', 'max:30'],
             'carrier_name' => ['nullable', 'string', 'max:100'],
             'customer_name' => ['nullable', 'string', 'max:255'],
-            'customer_phone' => ['nullable', 'string', 'max:30'],
+            'customer_phone' => ['nullable', 'string', 'max:30', new VietnameseMobilePhone],
             'shipping_address' => ['nullable', 'string', 'max:500'],
             'address_mode' => ['nullable', Rule::in(['old', 'new'])],
             'address_detail' => ['nullable', 'string', 'max:200'],
@@ -39,7 +40,7 @@ class SaleOperationOrderController extends Controller
             'ward_code' => ['nullable', 'string', 'max:20'],
             'receiver_is_customer' => ['nullable', 'boolean'],
             'receiver_name' => ['nullable', 'string', 'max:255'],
-            'receiver_phone' => ['nullable', 'string', 'max:30'],
+            'receiver_phone' => ['nullable', 'string', 'max:30', new VietnameseMobilePhone],
             'customer_note' => ['nullable', 'string', 'max:1000'],
             'warehouse_id' => ['nullable', 'integer', 'exists:warehouses,id'],
             'shipping_fee_collected' => ['nullable', 'integer', 'min:0'],

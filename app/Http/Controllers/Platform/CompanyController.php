@@ -9,6 +9,7 @@ use App\Models\Scopes\TenantScope;
 use App\Models\User;
 use App\Services\Tenant\CompanyProvisioningService;
 use App\Support\TenantEmail;
+use App\Rules\VietnameseMobilePhone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -76,7 +77,7 @@ class CompanyController extends Controller
             'owner_email' => ['nullable', 'email', 'max:160', 'unique:users,email'],
             'owner_password' => ['nullable', 'string', 'min:8'],
             'contact_email' => ['nullable', 'email', 'max:160'],
-            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'contact_phone' => ['nullable', 'string', 'max:30', new VietnameseMobilePhone],
             'plan' => ['nullable', 'string', 'max:40'],
             'expires_at' => ['nullable', 'date'],
         ]);

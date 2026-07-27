@@ -57,7 +57,7 @@ class ManualLeadController extends Controller
             'ward_code' => ['nullable', 'string', 'max:20'],
             'receiver_is_customer' => ['nullable', 'boolean'],
             'receiver_name' => ['nullable', 'string', 'max:150'],
-            'receiver_phone' => ['nullable', 'string', 'max:30'],
+            'receiver_phone' => ['nullable', 'string', 'max:30', new VietnameseMobilePhone],
             'vat' => ['nullable', 'integer', 'min:0'],
             'close_order' => ['nullable', 'boolean'],
             'confirm_insufficient_stock' => ['nullable', 'boolean'],

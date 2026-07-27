@@ -1,0 +1,68 @@
+/* Work shifts (1.2.3) — compact hour inputs, not full-bleed filters. */
+
+html body.pushsale-app-body .ps-work-shifts-page .ps-page-shell__body {
+    max-width: 520px;
+}
+
+html body.pushsale-app-body .ps-work-shifts-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 4px 0 12px;
+}
+
+html body.pushsale-app-body .ps-work-shifts-row {
+    display: grid;
+    grid-template-columns: 88px 88px 88px;
+    align-items: center;
+    gap: 10px;
+}
+
+html body.pushsale-app-body .ps-work-shifts-label {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #222;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-work-shifts-row .form-control {
+    width: 88px !important;
+    max-width: 88px !important;
+    min-width: 0 !important;
+    text-align: center;
+}
+
+html body.pushsale-app-body .ps-work-shifts-actions {
+    margin-top: 4px;
+}
+
+html body.pushsale-app-body .ps-work-shifts-error {
+    margin: 0 0 12px;
+}
+
+html body.pushsale-app-body .ps-work-shifts-help {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e9ef;
+    color: #444;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+html body.pushsale-app-body .ps-work-shifts-help ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+@media (max-width: 575px) {
+    html body.pushsale-app-body .ps-work-shifts-row {
+        grid-template-columns: 72px minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    html body.pushsale-app-body .ps-work-shifts-row .form-control {
+        width: 100% !important;
+        max-width: none !important;
+    }
+}

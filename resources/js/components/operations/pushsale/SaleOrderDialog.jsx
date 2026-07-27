@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiGet } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
+import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
 
 const EMPTY = {
     marketing_source_id: '',
@@ -177,12 +178,12 @@ export function SaleOrderDialog({
     const payload = () => ({
         marketing_source_id: form.marketing_source_id ? Number(form.marketing_source_id) : null,
         name: form.name.trim(),
-        phone: form.phone.trim(),
+        phone: normalizeVietnamesePhone(form.phone) ?? form.phone.trim(),
         message: form.message.trim(),
         address: form.address_detail.trim(),
         shipping_address: form.address_detail.trim(),
         customer_name: form.name.trim(),
-        customer_phone: form.phone.trim(),
+        customer_phone: normalizeVietnamesePhone(form.phone) ?? form.phone.trim(),
         customer_note: form.message.trim(),
         warehouse_id: form.warehouse_id ? Number(form.warehouse_id) : null,
         shipping_provider: form.shipping_provider || null,
@@ -196,7 +197,9 @@ export function SaleOrderDialog({
         ward_code: form.ward_code || null,
         receiver_is_customer: Boolean(form.receiver_is_customer),
         receiver_name: form.receiver_is_customer ? null : form.receiver_name.trim(),
-        receiver_phone: form.receiver_is_customer ? null : form.receiver_phone.trim(),
+        receiver_phone: form.receiver_is_customer
+            ? null
+            : (normalizeVietnamesePhone(form.receiver_phone) ?? form.receiver_phone.trim()),
         discount: numberValue(form.discount),
         vat: numberValue(form.vat),
         shipping_fee_collected: numberValue(form.shipping_fee_collected),
@@ -214,7 +217,12 @@ export function SaleOrderDialog({
     const validate = () => {
         if (!form.marketing_source_id && !order) return 'Vui lòng chọn nguồn dữ liệu.';
         if (!form.name.trim()) return 'Vui lòng nhập họ tên khách hàng.';
-        if (!form.phone.trim()) return 'Vui lòng nhập số điện thoại.';
+        const phoneError = vietnamesePhoneError(form.phone, { required: true });
+        if (phoneError) return phoneError;
+        if (!form.receiver_is_customer) {
+            const receiverError = vietnamesePhoneError(form.receiver_phone, { required: true });
+            if (receiverError) return receiverError;
+        }
         if (!form.items.some((item) => item.product_id)) return 'Vui lòng chọn ít nhất một sản phẩm hoặc combo.';
         return null;
     };

@@ -1,7 +1,9 @@
 import { router, useForm } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
 
 export function userToForm(user = null) {
     return {
@@ -116,11 +118,26 @@ export function AccountDialog({
 
     const submit = (event) => {
         event.preventDefault();
+        const phoneError = vietnamesePhoneError(form.data.phone);
+        if (phoneError) {
+            form.setError('phone', phoneError);
+            toast.error(phoneError);
+            return;
+        }
+        const normalizedPhone = normalizeVietnamesePhone(form.data.phone);
+        if (String(form.data.phone ?? '').trim() && normalizedPhone) {
+            form.setData('phone', normalizedPhone);
+        }
         const options = {
             preserveScroll: true,
             onSuccess: () => {
                 form.reset();
                 onClose();
+                toast.success(isUpdate ? 'Đã cập nhật tài khoản.' : 'Đã thêm tài khoản.');
+            },
+            onError: (errors) => {
+                const message = errors.phone || Object.values(errors)[0] || 'Không thể lưu tài khoản.';
+                toast.error(String(message));
             },
         };
         if (isUpdate) form.patch(`/admin/users/${user.id}/quick-update`, options);
@@ -192,9 +209,13 @@ export function AccountDialog({
                 <EmployeeFormRow label="Số ĐT">
                     <input
                         className="form-control"
+                        type="tel"
+                        inputMode="tel"
+                        placeholder="0912345678"
                         value={form.data.phone}
                         onChange={(event) => form.setData('phone', event.target.value)}
                     />
+                    {form.errors.phone ? <div className="ps-employee-field-error">{form.errors.phone}</div> : null}
                 </EmployeeFormRow>
 
                 <EmployeeFormRow label="Mã nhân viên">

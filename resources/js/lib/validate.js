@@ -1,27 +1,7 @@
 import { translate as t } from '@/i18n/translate';
+import { isValidVnPhone } from '@/lib/vietnamesePhone';
 
-/**
- * SĐT di động VN hợp lệ — khớp logic backend (App\Support\VietnamesePhone):
- * chấp nhận 9 số (không 0 đầu), 10 số (0 đầu), hoặc tiền tố 84/+84/0084.
- */
-export function isValidVnPhone(value) {
-    if (value === null || value === undefined) {
-        return false;
-    }
-    let digits = String(value).replace(/\D+/g, '');
-    if (digits === '') {
-        return false;
-    }
-    if (digits.startsWith('0084')) {
-        digits = digits.slice(4);
-    } else if (digits.startsWith('84')) {
-        digits = digits.slice(2);
-    }
-    if (digits.length === 9 && /^[35789]/.test(digits)) {
-        digits = '0' + digits;
-    }
-    return /^0[35789]\d{8}$/.test(digits);
-}
+export { isValidVnPhone, normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
 
 export function isValidEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value ?? '').trim());

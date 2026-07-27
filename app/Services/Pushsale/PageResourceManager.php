@@ -10,7 +10,9 @@ use App\Models\Pushsale\ProductComboItem;
 use App\Models\Pushsale\WarehouseVoucher;
 use App\Models\Pushsale\WarehouseVoucherLine;
 use App\Models\User;
+use App\Rules\VietnameseMobilePhone;
 use App\Services\Inventory\InventoryIntakeService;
+use App\Support\VietnamesePhone;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -97,7 +99,7 @@ class PageResourceManager
         $normalized = $this->normalizePayload($definition, $payload);
         $validated = Validator::make(
             $normalized,
-            (array) ($definition['rules'] ?? []),
+            $this->validationRules($definition),
             (array) ($definition['messages'] ?? []),
         )->validate();
 
@@ -215,6 +217,9 @@ class PageResourceManager
             } elseif ($type === 'json' && is_string($payload[$key] ?? null)) {
                 $decoded = json_decode((string) $payload[$key], true);
                 $payload[$key] = json_last_error() === JSON_ERROR_NONE ? $decoded : ['expression' => $payload[$key]];
+            } elseif ($this->isPhoneField($key, $type)) {
+                $raw = trim((string) ($payload[$key] ?? ''));
+                $payload[$key] = $raw === '' ? null : (VietnamesePhone::normalize($raw) ?? $raw);
             }
         }
 
@@ -227,6 +232,44 @@ class PageResourceManager
         }
 
         return $payload;
+    }
+
+    /** @param array<string, mixed> $definition @return array<string, mixed> */
+    private function validationRules(array $definition): array
+    {
+        $rules = (array) ($definition['rules'] ?? []);
+
+        foreach ((array) ($definition['fields'] ?? []) as $field) {
+            $key = (string) ($field['key'] ?? '');
+            $type = (string) ($field['type'] ?? 'text');
+            if ($key === '' || ! $this->isPhoneField($key, $type)) {
+                continue;
+            }
+
+            $existing = Arr::wrap($rules[$key] ?? ['nullable', 'string', 'max:32']);
+            $existing = array_values(array_filter(
+                $existing,
+                static fn ($rule) => ! is_string($rule) || ! str_starts_with($rule, 'regex:'),
+            ));
+            $hasPhoneRule = collect($existing)->contains(
+                static fn ($rule) => $rule instanceof VietnameseMobilePhone,
+            );
+            if (! $hasPhoneRule) {
+                $existing[] = new VietnameseMobilePhone;
+            }
+            $rules[$key] = $existing;
+        }
+
+        return $rules;
+    }
+
+    private function isPhoneField(string $key, string $type): bool
+    {
+        if ($type === 'tel') {
+            return true;
+        }
+
+        return (bool) preg_match('/(^|_)(phone|sdt|mobile)(_|$)/i', $key);
     }
 
     /** @param array<string, mixed> $definition @param array<string, mixed> $validated @return array<string, mixed> */

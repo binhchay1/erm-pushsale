@@ -57,9 +57,9 @@ return [
         'model' => LeadDistributionRule::class,
         'fields' => [
             ['key' => 'name', 'label' => 'Tên cấu hình', 'type' => 'text', 'required' => true],
-            ['key' => 'number_type', 'label' => 'Kiểu số', 'type' => 'select', 'options' => ['new' => 'Số mới', 'old' => 'Khách cũ', 'care' => 'CSKH']],
-            ['key' => 'recipient_type', 'label' => 'Người nhận', 'type' => 'select', 'options' => ['sales' => 'Sales', 'care' => 'CSKH', 'both' => 'Sales + CSKH']],
-            ['key' => 'allocation_method', 'label' => 'Cách chia', 'type' => 'select', 'options' => ['round_robin' => 'Luân phiên', 'quota' => 'Theo định mức', 'manual' => 'Thủ công']],
+            ['key' => 'number_type', 'label' => 'Kiểu số', 'type' => 'select', 'options' => ['new' => 'Số mới', 'old' => 'Khách cũ', 'care' => 'CSKH'], 'required' => true],
+            ['key' => 'recipient_type', 'label' => 'Người nhận', 'type' => 'select', 'options' => ['sales' => 'Sales', 'care' => 'CSKH', 'both' => 'Sales + CSKH'], 'required' => true],
+            ['key' => 'allocation_method', 'label' => 'Cách chia', 'type' => 'select', 'options' => ['round_robin' => 'Luân phiên', 'quota' => 'Theo định mức', 'manual' => 'Thủ công'], 'required' => true],
             ['key' => 'product_ids', 'label' => 'Sản phẩm', 'type' => 'multiselect', 'option_source' => 'products'],
             ['key' => 'sale_user_ids', 'label' => 'Sales', 'type' => 'multiselect', 'option_source' => 'sales'],
             ['key' => 'care_user_ids', 'label' => 'CSKH', 'type' => 'multiselect', 'option_source' => 'careUsers'],
@@ -134,14 +134,13 @@ return [
             ['key' => 'creation_type', 'label' => 'Kiểu tạo', 'type' => 'select', 'options' => ['manual' => 'Thủ công', 'warehouse' => 'Kho cảnh báo', 'automatic' => 'Tự động']],
         ],
         'rules' => [
-            'phone' => ['required', 'string', 'max:32', 'regex:/^\+?\d{8,15}$/'],
+            'phone' => ['required', 'string', 'max:32'],
             'reason' => ['nullable', 'string', 'max:2000'],
             'order_id' => ['nullable', 'integer', 'exists:orders,id'],
             'creation_type' => ['required', 'in:manual,warehouse,automatic'],
         ],
         'messages' => [
             'phone.required' => 'Số blacklist bắt buộc.',
-            'phone.regex' => 'Số điện thoại phải gồm 8–15 chữ số.',
             'creation_type.in' => 'Kiểu tạo không hợp lệ.',
             'order_id.exists' => 'Đơn hàng không tồn tại.',
         ],

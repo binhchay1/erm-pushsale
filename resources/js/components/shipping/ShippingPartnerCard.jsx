@@ -2,6 +2,8 @@ import { useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { vietnamesePhoneError, normalizeVietnamesePhone } from '@/lib/vietnamesePhone';
+
 const providerNames = {
     vnpost: 'VN Post',
     viettel_post: 'Viettel Post',
@@ -238,6 +240,12 @@ export function ShippingPartnerCard({ provider }) {
             next['settings.sender_profile_id'] = 'Thông tin người gửi bắt buộc.';
         }
 
+        const fixedPhone = String(form.data.settings.fixed_receiver_phone ?? '').trim();
+        if (fixedPhone) {
+            const phoneError = vietnamesePhoneError(fixedPhone);
+            if (phoneError) next['settings.fixed_receiver_phone'] = phoneError;
+        }
+
         return next;
     };
 
@@ -254,8 +262,13 @@ export function ShippingPartnerCard({ provider }) {
         const credentials = Object.fromEntries(
             Object.entries(form.data.credentials).filter(([key, value]) => !(secretSet.has(key) && value === '')),
         );
+        const fixedPhone = String(form.data.settings.fixed_receiver_phone ?? '').trim();
+        const settings = {
+            ...form.data.settings,
+            fixed_receiver_phone: fixedPhone ? (normalizeVietnamesePhone(fixedPhone) ?? fixedPhone) : '',
+        };
 
-        form.transform((data) => ({ ...data, credentials })).put(`/admin/shipping-partners/${provider.provider}`, {
+        form.transform((data) => ({ ...data, credentials, settings })).put(`/admin/shipping-partners/${provider.provider}`, {
             preserveScroll: true,
             onSuccess: () => toast.success(`Đã lưu cấu hình ${providerNames[provider.provider] ?? provider.label}.`),
             onError: (errors) => toast.error(firstError(errors)),

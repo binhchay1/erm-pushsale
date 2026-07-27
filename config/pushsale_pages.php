@@ -565,6 +565,7 @@ return array (
         'key' => 'number_type',
         'label' => 'Kiểu số',
         'type' => 'select',
+        'required' => true,
         'options' => 
         array (
           'new' => 'Số mới',
@@ -577,6 +578,7 @@ return array (
         'key' => 'recipient_type',
         'label' => 'Người nhận',
         'type' => 'select',
+        'required' => true,
         'options' => 
         array (
           'sales' => 'Sales',
@@ -589,6 +591,7 @@ return array (
         'key' => 'allocation_method',
         'label' => 'Cách chia',
         'type' => 'select',
+        'required' => true,
         'options' => 
         array (
           'round_robin' => 'Luân phiên',

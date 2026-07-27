@@ -8,6 +8,7 @@ import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import AppLayout from '@/layouts/AppLayout';
 import { useI18n, useT } from '@/providers/I18nProvider';
+import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
 
 const emptyForm = { phone: '', reason: '', order_id: '', creation_type: 'manual' };
 const currentFilters = () => Object.fromEntries(new URLSearchParams(window.location.search).entries());
@@ -40,10 +41,6 @@ function flattenErrors(errors = {}) {
             return field && field !== key ? `${field}: ${message}` : message;
         });
     });
-}
-
-function normalizePhone(value) {
-    return String(value ?? '').replace(/[^\d+]/g, '').trim();
 }
 
 export default function PhoneBlacklist({
@@ -92,11 +89,9 @@ export default function PhoneBlacklist({
 
     const validateClient = () => {
         const nextErrors = {};
-        const phone = normalizePhone(form.data.phone);
-        if (!phone) {
-            nextErrors.phone = 'Số blacklist bắt buộc.';
-        } else if (!/^\+?\d{8,15}$/.test(phone)) {
-            nextErrors.phone = 'Số điện thoại phải gồm 8–15 chữ số.';
+        const phoneError = vietnamesePhoneError(form.data.phone, { required: true });
+        if (phoneError) {
+            nextErrors.phone = phoneError;
         }
 
         if (!['manual', 'warehouse', 'automatic'].includes(String(form.data.creation_type))) {
@@ -118,7 +113,7 @@ export default function PhoneBlacklist({
         }
 
         const payload = {
-            phone: normalizePhone(form.data.phone),
+            phone: normalizeVietnamesePhone(form.data.phone) ?? String(form.data.phone ?? '').trim(),
             reason: String(form.data.reason ?? '').trim() || null,
             order_id: form.data.order_id ? Number(form.data.order_id) : null,
             creation_type: form.data.creation_type || 'manual',

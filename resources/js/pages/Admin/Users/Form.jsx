@@ -127,6 +127,7 @@ export default function UserForm({
             name: [{ required: true, label: t('pages.users.name') }],
             email_local: [{ required: true, label: t('pages.users.email_local') }],
             role: [{ required: true, label: t('pages.users.role') }],
+            phone: [{ phone: true, label: t('pages.users.phone') }],
             ...(isEdit ? {} : { password: [{ required: true, label: t('pages.users.password') }] }),
         });
 

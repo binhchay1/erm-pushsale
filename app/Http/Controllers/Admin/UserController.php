@@ -12,12 +12,14 @@ use App\Models\Pushsale\UserOperationalProfile;
 use App\Models\Pushsale\WorkShift;
 use App\Repositories\TeamRepository;
 use App\Repositories\UserRepository;
+use App\Rules\VietnameseMobilePhone;
 use App\Support\PermissionCatalog;
 use App\Services\OrgStructureService;
 use App\Services\Users\UserHierarchyService;
 use App\Services\Users\UserOrgRules;
 use App\Support\ActivityLogger;
 use App\Support\TenantEmail;
+use App\Support\VietnamesePhone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -351,6 +353,8 @@ class UserController extends Controller
             'receive_data' => $request->boolean('receive_data', true),
             'is_locked' => $request->boolean('is_locked', false),
             'is_team_leader' => $request->boolean('is_team_leader', false),
+            'phone' => VietnamesePhone::normalize($request->input('phone'))
+                ?? (trim((string) $request->input('phone', '')) === '' ? null : $request->input('phone')),
         ]);
 
         $data = $request->validate([
@@ -361,7 +365,7 @@ class UserController extends Controller
             'team_id' => ['nullable', 'exists:teams,id'],
             'manager_user_id' => ['nullable', 'exists:users,id', Rule::notIn([$user->id])],
             'is_team_leader' => ['sometimes', 'boolean'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30', new VietnameseMobilePhone],
             'employee_code' => ['nullable', 'string', 'max:60', Rule::unique('user_operational_profiles', 'employee_code')->ignore($user->operationalProfile?->id)],
             'base_salary' => ['nullable', 'integer', 'min:0'],
             'receive_data' => ['sometimes', 'boolean'],

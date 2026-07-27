@@ -1228,3 +1228,54 @@ html body.pushsale-app-body .ps-products-page .ps-toolbar .btn i {
     margin: 0 !important;
     line-height: 1 !important;
 }
+
+/* List pages: toolbar + table flush with page header gutter. */
+html body.pushsale-app-body .ps-page-shell__toolbar .ps-toolbar,
+html body.pushsale-app-body .ps-standard-list-page .ps-toolbar,
+html body.pushsale-app-body .ps-users-page .ps-toolbar {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .ps-table-scroll,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .table-responsive,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > table {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/*
+ * Business/template pages: universal contract added margin on body while header
+ * kept Bootstrap column padding only — buttons/tables looked more indented.
+ */
+html body.pushsale-app-body .pushsale-page .pushsale-template-host > :not(.content-header):not(.m-header-wrap):not(style):not(script),
+html body.pushsale-app-body .pushsale-page .pushsale-template-host > form > :not(.content-header):not(.m-header-wrap):not(style):not(script) {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page .pushsale-template-host .box-body {
+    padding-left: var(--ps-header-x) !important;
+    padding-right: var(--ps-header-x) !important;
+    padding-top: 10px !important;
+    padding-bottom: 14px !important;
+}
+
+html body.pushsale-app-body .pushsale-page .pushsale-template-host .box-body > .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page .pushsale-template-host .box-body > .row > [class*='col-'] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page .pushsale-template-host .box-body > .row > [class*='col-'].form-group,
+html body.pushsale-app-body .pushsale-page .pushsale-template-host .box-body .form-group {
+    margin-bottom: 12px !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code='1.2.4'] .box-body > .row > .col-sm-2.form-group {
+    margin-bottom: 12px !important;
+}

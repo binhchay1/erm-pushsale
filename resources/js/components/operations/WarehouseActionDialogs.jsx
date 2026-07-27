@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiRequest } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
+import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
 
 const deliveryStatuses = [
     ['waiting_waybill', 'Chờ vận đơn'], ['posted', 'Đã đăng vận đơn'], ['picking_up', 'Đang lấy hàng'],
@@ -54,11 +55,40 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
 
     const endpoint = useMemo(() => row ? `${actionApiBase}/${row.id}` : '', [actionApiBase, row]);
     const submit = async () => {
+        if (type === 'blacklist') {
+            const phoneError = vietnamesePhoneError(form.phone, { required: true });
+            if (phoneError) {
+                toast.error(phoneError);
+                return;
+            }
+        }
+        if (type === 'edit') {
+            for (const [key, required] of [['customer_phone', true], ['receiver_phone', false]]) {
+                const phoneError = vietnamesePhoneError(form[key], { required });
+                if (phoneError) {
+                    toast.error(phoneError);
+                    return;
+                }
+            }
+        }
+
         setLoading(true);
         try {
             let path = endpoint;
             let method = 'PATCH';
-            let payload = form;
+            let payload = { ...form };
+            if (type === 'blacklist') {
+                payload = { ...payload, phone: normalizeVietnamesePhone(form.phone) ?? form.phone };
+            }
+            if (type === 'edit') {
+                payload = {
+                    ...payload,
+                    customer_phone: normalizeVietnamesePhone(form.customer_phone) ?? form.customer_phone,
+                    receiver_phone: String(form.receiver_phone ?? '').trim()
+                        ? (normalizeVietnamesePhone(form.receiver_phone) ?? form.receiver_phone)
+                        : form.receiver_phone,
+                };
+            }
             if (type === 'date') path += '/desired-delivery';
             if (type === 'blacklist') { path += '/blacklist'; method = 'POST'; }
             if (type === 'care') path += '/care';

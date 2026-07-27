@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\VietnameseMobilePhone;
 use Illuminate\Foundation\Http\FormRequest;
 
 class WarehouseRequest extends FormRequest
@@ -16,7 +17,7 @@ class WarehouseRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'phone' => ['nullable', 'string', 'max:20', new VietnameseMobilePhone],
             'address' => ['nullable', 'string', 'max:255'],
             'pick_province' => ['nullable', 'string', 'max:120'],
             'pick_district' => ['nullable', 'string', 'max:120'],

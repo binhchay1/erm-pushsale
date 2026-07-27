@@ -8,9 +8,11 @@ use App\Enums\PermissionLevel;
 use App\Enums\UserRole;
 use App\Models\Company;
 use App\Models\User;
+use App\Rules\VietnameseMobilePhone;
 use App\Services\Users\UserHierarchyService;
 use App\Services\Users\UserOrgRules;
 use App\Support\TenantEmail;
+use App\Support\VietnamesePhone;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -43,6 +45,7 @@ class UserRequest extends FormRequest
             'work_shift_id' => $this->input('work_shift_id') ?: null,
             'receive_data' => $this->boolean('receive_data', true),
             'is_locked' => $this->boolean('is_locked', false),
+            'phone' => VietnamesePhone::normalize($this->input('phone')) ?? (trim((string) $this->input('phone', '')) === '' ? null : $this->input('phone')),
         ]);
 
         $company = $this->user()?->company;
@@ -69,7 +72,7 @@ class UserRequest extends FormRequest
             'manager_user_id' => ['nullable', 'exists:users,id', Rule::notIn([$userId])],
             'is_team_leader' => ['sometimes', 'boolean'],
             'org_level' => ['nullable', Rule::enum(OrgLevel::class)],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30', new VietnameseMobilePhone],
             'job_title' => ['nullable', 'string', 'max:120'],
             'employee_code' => ['nullable', 'string', 'max:60', Rule::unique('user_operational_profiles', 'employee_code')->ignore($this->route('user')?->operationalProfile?->id)],
             'base_salary' => ['nullable', 'integer', 'min:0'],

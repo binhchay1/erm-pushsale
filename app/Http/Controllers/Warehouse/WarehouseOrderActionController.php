@@ -9,6 +9,7 @@ use App\Models\Pushsale\ElectronicInvoiceJob;
 use App\Models\Pushsale\ElectronicInvoiceConfig;
 use App\Services\Warehouse\WarehouseOrderActionService;
 use App\Support\ShippingProviders;
+use App\Rules\VietnameseMobilePhone;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -125,7 +126,7 @@ class WarehouseOrderActionController extends Controller
     public function blacklist(Request $request, Order $order): JsonResponse
     {
         $data = $request->validate([
-            'phone' => ['required', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', new VietnameseMobilePhone],
             'reason' => ['required', 'string', 'max:500'],
         ]);
         $this->service->updateBlacklist($order, $data['phone'], $data['reason'], $request->user());
@@ -155,9 +156,9 @@ class WarehouseOrderActionController extends Controller
     {
         $data = $request->validate([
             'customer_name' => ['nullable', 'string', 'max:255'],
-            'customer_phone' => ['nullable', 'string', 'max:30'],
+            'customer_phone' => ['nullable', 'string', 'max:30', new VietnameseMobilePhone],
             'receiver_name' => ['nullable', 'string', 'max:255'],
-            'receiver_phone' => ['nullable', 'string', 'max:30'],
+            'receiver_phone' => ['nullable', 'string', 'max:30', new VietnameseMobilePhone],
             'shipping_address' => ['nullable', 'string', 'max:500'],
             'shipping_address_2' => ['nullable', 'string', 'max:500'],
             'shipping_notes' => ['nullable', 'string', 'max:2000'],

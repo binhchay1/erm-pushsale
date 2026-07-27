@@ -266,7 +266,7 @@ abstract class BasePushsalePageController extends Controller
     private function savedResponse(Request $request, array $record, int $status, string $message): RedirectResponse|JsonResponse
     {
         return $request->expectsJson()
-            ? response()->json(['ok' => true, 'record' => $record], $status)
+            ? response()->json(['ok' => true, 'message' => $message, 'record' => $record], $status)
             : back()->with('success', $message);
     }
 

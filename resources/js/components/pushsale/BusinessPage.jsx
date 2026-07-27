@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 import { CustomerMessagesDialog } from '@/components/customers/CustomerMessagesDialog';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
@@ -10,6 +11,7 @@ import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
+import { vietnamesePhoneError, normalizeVietnamesePhone } from '@/lib/vietnamesePhone';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
 const currencyFormatter = new Intl.NumberFormat('vi-VN', {
@@ -607,13 +609,45 @@ function PushsaleEditorDialog({ open, schema, row, dialogHtml = '', dialogSchema
 
     const submit = async () => {
         const finalPayload = collectBoundFormValues(dialogRef.current, fields, payload);
+        const missing = [];
+        for (const field of fields) {
+            if (!field.required) continue;
+            const value = finalPayload[field.key];
+            const blank = value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0);
+            if (blank) missing.push(field.label || field.key);
+        }
+        if (missing.length) {
+            const message = `Vui lòng nhập: ${missing.join(', ')}.`;
+            setDialogError(message);
+            toast.error(message);
+            return;
+        }
+        for (const field of fields) {
+            const key = String(field.key ?? '');
+            const type = String(field.type ?? '');
+            const isPhone = type === 'tel' || /(^|_)(phone|sdt|mobile)(_|$)/i.test(key);
+            if (!isPhone) continue;
+            const phoneError = vietnamesePhoneError(finalPayload[key], { required: Boolean(field.required) });
+            if (phoneError) {
+                setDialogError(phoneError);
+                toast.error(phoneError);
+                return;
+            }
+            if (String(finalPayload[key] ?? '').trim()) {
+                finalPayload[key] = normalizeVietnamesePhone(finalPayload[key]) ?? finalPayload[key];
+            }
+        }
+
         setSaving(true);
         setDialogError('');
         try {
             await onSaved(finalPayload, editingDialogRecord?.id ?? row?._record_id);
+            toast.success(row || editingDialogRecord ? 'Đã cập nhật dữ liệu.' : 'Đã thêm dữ liệu.');
             onClose();
         } catch (exception) {
-            setDialogError(exception?.message || 'Không thể lưu dữ liệu.');
+            const message = exception?.message || 'Không thể lưu dữ liệu.';
+            setDialogError(message);
+            toast.error(message);
         } finally {
             setSaving(false);
         }
@@ -1455,11 +1489,12 @@ function requestJson(url, method, payload) {
         },
         body: payload ? JSON.stringify(payload) : undefined,
     }).then(async (response) => {
+        const body = await response.json().catch(() => ({}));
         if (!response.ok) {
-            const body = await response.json().catch(() => ({}));
-            throw new Error(body.message || 'Không thể lưu dữ liệu.');
+            const fromErrors = Object.values(body.errors ?? {}).flat().filter(Boolean).join(' ');
+            throw new Error(fromErrors || body.message || 'Không thể lưu dữ liệu.');
         }
-        return response.json().catch(() => ({}));
+        return body;
     });
 }
 
@@ -1704,11 +1739,12 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
         let product = null;
         try { product = JSON.parse(productNode?.dataset.optionData || 'null'); } catch { product = null; }
         const phone = findValue('_KhachHangPhone');
-        if (!phone) { setError('Vui lòng nhập số điện thoại khách hàng.'); return; }
+        const phoneError = vietnamesePhoneError(phone, { required: true });
+        if (phoneError) { setError(phoneError); toast.error(phoneError); return; }
         setError('');
         router.post('/admin/leads/manual', {
             name: findValue('_KhachHangName'),
-            phone,
+            phone: normalizeVietnamesePhone(phone) ?? phone,
             message: findValue('_KhachHangMessage'),
             marketing_source_id: sourceId,
             items: product?.id ? [{ product_id: Number(product.id), item_type: product.type === 'combo' ? 'combo' : 'product', quantity: 1, unit_price: Number(product.unit_price || 0), discount_amount: 0 }] : [],

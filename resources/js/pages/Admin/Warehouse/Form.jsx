@@ -28,6 +28,7 @@ export default function WarehouseForm({ warehouse, managers }) {
 
         const clientErrors = validate(data, {
             name: [{ required: true, label: t('pages.warehouse.name') }],
+            phone: [{ phone: true, label: t('pages.warehouse.phone') }],
         });
 
         if (Object.keys(clientErrors).length > 0) {

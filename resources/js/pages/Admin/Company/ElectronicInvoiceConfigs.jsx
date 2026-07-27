@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
+import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
 
 const emptyForm = {
     account: '',
@@ -129,8 +130,11 @@ export default function ElectronicInvoiceConfigs({
         }
 
         const phone = String(form.data.phone ?? '').trim();
-        if (phone && !/^[0-9+\-\s()]{8,20}$/.test(phone)) {
-            nextErrors.phone = 'Số điện thoại không hợp lệ.';
+        if (phone) {
+            const phoneError = vietnamesePhoneError(phone, { required: true });
+            if (phoneError) nextErrors.phone = phoneError;
+        } else {
+            nextErrors.phone = 'Điện thoại bắt buộc.';
         }
 
         const tax = String(form.data.tax_code ?? '').trim();
@@ -157,7 +161,7 @@ export default function ElectronicInvoiceConfigs({
             account: String(form.data.account).trim(),
             tax_code: String(form.data.tax_code).trim(),
             email: String(form.data.email ?? '').trim() || null,
-            phone: String(form.data.phone ?? '').trim() || null,
+            phone: normalizeVietnamesePhone(form.data.phone) || String(form.data.phone ?? '').trim() || null,
             fax: String(form.data.fax ?? '').trim() || null,
             bank_account: String(form.data.bank_account ?? '').trim() || null,
             password: String(form.data.password ?? '').trim() || null,
