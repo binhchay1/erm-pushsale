@@ -2,6 +2,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
@@ -173,7 +174,7 @@ export default function DataDistributionIndex({ filters = {}, products = [], sal
                             />
                         </>
                     )}
-                    actions={<button type="button" className="psdd-search" onClick={applyFilters}><i className="fa fa-search" /> Tìm kiếm</button>}
+                    actions={<PushsaleSearchButton onClick={applyFilters} label="Tìm kiếm" />}
                 />
 
                 <div className="psdd-notice">

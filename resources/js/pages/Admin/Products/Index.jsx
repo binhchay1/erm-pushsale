@@ -543,15 +543,17 @@ export default function ProductsIndex({ products, filters = {}, categories = [],
                         </form>
                     )}
                     advanced={(
-                        <form className="ps-filter-row ps-product-filters" onSubmit={submitFilters}>
-                            <select className="form-control" value={query.sort} onChange={(event) => setQuery((old) => ({ ...old, sort: event.target.value }))}>
-                                <option value="newest">Sắp xếp theo ngày tạo</option><option value="oldest">Cũ nhất</option><option value="name">Theo tên</option><option value="price_asc">Giá tăng dần</option><option value="price_desc">Giá giảm dần</option>
-                            </select>
-                            <select className="form-control" value={query.active} onChange={(event) => setQuery((old) => ({ ...old, active: event.target.value }))}><option value="">--Trạng thái kinh doanh--</option><option value="1">Đang kinh doanh</option><option value="0">Ngừng kinh doanh</option></select>
-                            <select className="form-control" value={query.category_id} onChange={(event) => setQuery((old) => ({ ...old, category_id: event.target.value }))}><option value="">--Chọn phân loại--</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
-                            <select className="form-control" value={query.marketing} onChange={(event) => setQuery((old) => ({ ...old, marketing: event.target.value }))}><option value="">--Chọn marketing--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
-                            <select className="form-control" value={query.sale} onChange={(event) => setQuery((old) => ({ ...old, sale: event.target.value }))}><option value="">--Chọn sale--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
-                            <select className="form-control" value={query.care} onChange={(event) => setQuery((old) => ({ ...old, care: event.target.value }))}><option value="">--Chọn CSKH--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
+                        <form className="ps-adv-filter-panel ps-product-filters" onSubmit={submitFilters}>
+                            <div className="ps-adv-filter-row" style={{ '--ps-adv-cols': 6 }}>
+                                <select className="form-control" value={query.sort} onChange={(event) => setQuery((old) => ({ ...old, sort: event.target.value }))}>
+                                    <option value="newest">Sắp xếp theo ngày tạo</option><option value="oldest">Cũ nhất</option><option value="name">Theo tên</option><option value="price_asc">Giá tăng dần</option><option value="price_desc">Giá giảm dần</option>
+                                </select>
+                                <select className="form-control" value={query.active} onChange={(event) => setQuery((old) => ({ ...old, active: event.target.value }))}><option value="">--Trạng thái kinh doanh--</option><option value="1">Đang kinh doanh</option><option value="0">Ngừng kinh doanh</option></select>
+                                <select className="form-control" value={query.category_id} onChange={(event) => setQuery((old) => ({ ...old, category_id: event.target.value }))}><option value="">--Chọn phân loại--</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
+                                <select className="form-control" value={query.marketing} onChange={(event) => setQuery((old) => ({ ...old, marketing: event.target.value }))}><option value="">--Chọn marketing--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
+                                <select className="form-control" value={query.sale} onChange={(event) => setQuery((old) => ({ ...old, sale: event.target.value }))}><option value="">--Chọn sale--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
+                                <select className="form-control" value={query.care} onChange={(event) => setQuery((old) => ({ ...old, care: event.target.value }))}><option value="">--Chọn CSKH--</option><option value="1">Được sử dụng</option><option value="0">Không sử dụng</option></select>
+                            </div>
                         </form>
                     )}
                 />

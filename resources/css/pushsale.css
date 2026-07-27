@@ -7019,18 +7019,12 @@ body.pushsale-app-body .psdd-chipbox select {
     box-shadow: none !important;
     outline: none !important;
 }
-body.pushsale-app-body .psdd-topbar select { min-width: 190px; padding: 4px 9px !important; }
+body.pushsale-app-body .psdd-topbar select { min-width: 150px; max-width: 180px; padding: 4px 9px !important; }
 body.pushsale-app-body .psdd-date-range {
-    min-width: 260px;
-}
-body.pushsale-app-body .psdd-search {
-    height: 30px !important;
-    border: 1px solid #1a76ad !important;
-    border-radius: 2px !important;
-    background: #3c8dbc !important;
-    color: #fff !important;
-    font-weight: 700 !important;
-    cursor: pointer;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: 340px !important;
+    min-width: 0 !important;
 }
 body.pushsale-app-body .psdd-notice {
     margin: 14px 15px 0;
@@ -10620,7 +10614,8 @@ body.pushsale-app-body .m-header-wrap {
     border-top: 0 !important;
     background: #fff !important;
 }
-body.pushsale-app-body .m-header-wrap > .m-header:first-child {
+/* Chỉ áp lưới nhiều cột cho header template cũ — không đụng .ps-page-header. */
+body.pushsale-app-body .m-header-wrap:not(.ps-page-header) > .m-header:first-child {
     grid-template-columns: minmax(210px, 300px) repeat(4, minmax(180px, 1fr)) auto !important;
 }
 body.pushsale-app-body .m-header-wrap > .m-header:not(:first-child) {

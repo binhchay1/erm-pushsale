@@ -1,5 +1,3 @@
-import PushsaleBusinessPage from '@/components/pushsale/BusinessPage';
+import LeadImportPage from '@/pages/Admin/Integrations/LeadImportPage';
 
-export default function Page(props) {
-    return <PushsaleBusinessPage {...props} />;
-}
+export default LeadImportPage;

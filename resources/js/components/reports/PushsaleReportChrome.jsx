@@ -1,7 +1,10 @@
 import { router } from '@inertiajs/react';
 import { useT } from '@/providers/I18nProvider';
 import { useEffect, useState } from 'react';
+import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
+
+export { PushsaleSearchButton };
 
 function pad(value) {
     return String(value).padStart(2, '0');
@@ -100,18 +103,6 @@ export function PushsaleDateRange({ filters, onChange, className = '' }) {
                 onChange?.('date_to', date_to);
             }}
         />
-    );
-}
-
-export function PushsaleSearchButton({ onClick, label }) {
-    const t = useT();
-    const text = label ?? t('reports.pushsale.search');
-
-    return (
-        <button type="button" className="ps-btn ps-btn-primary" onClick={onClick}>
-            <i className="fa fa-search" aria-hidden="true" />
-            <span>{text}</span>
-        </button>
     );
 }
 

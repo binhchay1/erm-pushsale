@@ -736,18 +736,7 @@ html body.pushsale-app-body .psm-filter-panel {
     padding-bottom: 14px !important;
 }
 
-html body.pushsale-app-body .psm-filter-grid.is-second {
-    grid-template-columns:
-        minmax(250px, 1.1fr)
-        minmax(330px, 1.45fr)
-        minmax(175px, .8fr)
-        minmax(230px, 1fr)
-        minmax(170px, .75fr)
-        minmax(190px, .85fr)
-        minmax(140px, .65fr)
-        minmax(170px, .75fr) !important;
-    align-items: center !important;
-}
+/* is-second dùng chung mẫu .ps-adv-filter-row (7 cột + cụm UTM/history) — không ép 8 cột cũ. */
 
 html body.pushsale-app-body .psm-page .ps-product-search-select-v82 .ps-product-search-menu {
     min-width: max(360px, 100%) !important;
@@ -759,8 +748,7 @@ html body.pushsale-app-body .psm-table-area {
 }
 
 @media (max-width: 1440px) {
-    html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-overview-advanced,
-    html body.pushsale-app-body .psm-filter-grid.is-second {
+    html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-overview-advanced {
         grid-template-columns: repeat(4, minmax(220px, 1fr)) !important;
     }
 

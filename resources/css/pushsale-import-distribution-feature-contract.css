@@ -1,7 +1,193 @@
 /* Pushsale import/contact + data distribution + feature information contract.
    Keep scoped: no version suffix, no global override outside Pushsale app body. */
 
-/* Import contact page: header must start from the left like the source template. */
+/* ------------------------------------------------------------------ */
+/* Import contact (React PageHeader) — compact header + upload panel */
+/* ------------------------------------------------------------------ */
+html body.pushsale-app-body .ps-lead-import-page {
+    background: #fff !important;
+    color: #111 !important;
+    font: 12px/1.4 Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-page-header__title .text {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-guide-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #008b8b !important;
+    font: italic 11px/16px Arial, Helvetica, sans-serif !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-lead-import-status {
+    flex: 0 0 auto !important;
+    width: 170px !important;
+    min-width: 150px !important;
+    max-width: 180px !important;
+    height: var(--ps-header-control-h, 32px) !important;
+    min-height: var(--ps-header-control-h, 32px) !important;
+    padding: 4px 8px !important;
+    border: 1px solid #c8d2df !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-lead-import-search {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-lead-import-header .ps-lead-import-search .form-control {
+    width: 180px !important;
+    min-width: 160px !important;
+    max-width: 200px !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-body {
+    padding: 14px 14px 28px !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-upload {
+    width: min(520px, 100%) !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-upload-title {
+    margin: 0 0 8px !important;
+    color: #999 !important;
+    font: italic 12px/16px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-table td {
+    padding: 7px 9px !important;
+    border: 1px solid #d7dce2 !important;
+    vertical-align: middle !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-step {
+    width: 118px !important;
+    color: #333 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    color: #337ab7 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-link:hover {
+    text-decoration: underline !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-file {
+    display: flex !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 320px !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-file-name {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    margin: 0 !important;
+    padding: 0 8px !important;
+    border: 1px solid #cfd9e2 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #555 !important;
+    font: 12px/26px Arial, Helvetica, sans-serif !important;
+    text-align: left !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-file-btn {
+    flex: 0 0 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid #cfd9e2 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #1684f8 !important;
+    font-size: 13px !important;
+    line-height: 26px !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-upload-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    font-weight: 400 !important;
+    color: #111 !important;
+    cursor: pointer !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-check input {
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-history {
+    text-align: right !important;
+}
+
+html body.pushsale-app-body .ps-lead-import-history-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    color: #337ab7 !important;
+    font-size: 12px !important;
+}
+
+/* Legacy template import pages (fallback if template still loads). */
 html body.pushsale-app-body .pushsale-template-page-1-10 .m-header-wrap,
 html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header-wrap {
     margin: 0 !important;
@@ -13,11 +199,11 @@ html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header-wrap {
 html body.pushsale-app-body .pushsale-template-page-1-10 .m-header,
 html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header {
     display: grid !important;
-    grid-template-columns: minmax(260px, 420px) minmax(160px, 220px) minmax(320px, 1fr) auto !important;
-    gap: 16px !important;
+    grid-template-columns: max-content 170px minmax(220px, 280px) auto !important;
+    gap: 10px !important;
     align-items: center !important;
     justify-content: start !important;
-    min-height: 56px !important;
+    min-height: 50px !important;
     width: 100% !important;
     padding: 0 !important;
 }
@@ -39,7 +225,7 @@ html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header .text {
     align-items: center !important;
     margin: 0 4px 0 0 !important;
     color: #111 !important;
-    font-size: 16px !important;
+    font-size: 15px !important;
     font-weight: 700 !important;
     line-height: 30px !important;
 }
@@ -56,12 +242,19 @@ html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header span[style*=
 }
 
 html body.pushsale-app-body .pushsale-template-page-1-10 .m-header select,
-html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header select,
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header select {
+    height: 30px !important;
+    min-height: 30px !important;
+    width: 170px !important;
+    max-width: 170px !important;
+}
+
 html body.pushsale-app-body .pushsale-template-page-1-10 .m-header input,
 html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header input {
     height: 30px !important;
     min-height: 30px !important;
     width: 100% !important;
+    max-width: 200px !important;
 }
 
 html body.pushsale-app-body .pushsale-template-page-1-10 .box-body,
@@ -70,10 +263,24 @@ html body.pushsale-app-body .pushsale-template-page-2-6-1 .box-body {
     padding-right: 15px !important;
 }
 
+html body.pushsale-app-body .pushsale-template-page-1-10 .app-file-upload,
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .app-file-upload {
+    max-width: 320px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-page-1-10 label.app-file-upload-chooser.form-control,
+html body.pushsale-app-body .pushsale-template-page-2-6-1 label.app-file-upload-chooser.form-control,
+html body.pushsale-app-body .pushsale-template-page-1-10 .app-file-upload .app-btn-upload-file,
+html body.pushsale-app-body .pushsale-template-page-2-6-1 .app-file-upload .app-btn-upload-file {
+    height: 28px !important;
+    min-height: 28px !important;
+    line-height: 26px !important;
+}
+
 @media (max-width: 1180px) {
     html body.pushsale-app-body .pushsale-template-page-1-10 .m-header,
     html body.pushsale-app-body .pushsale-template-page-2-6-1 .m-header {
-        grid-template-columns: 1fr 220px 1fr auto !important;
+        grid-template-columns: max-content 160px minmax(180px, 1fr) auto !important;
     }
 }
 
@@ -153,6 +360,25 @@ html body.pushsale-app-body .ps-import-guide-grid h4 {
 html body.pushsale-app-body .ps-import-guide-actions {
     margin-top: 14px !important;
     text-align: right !important;
+}
+
+/* Phân bổ data: header filters sát title, date boxed gọn. */
+html body.pushsale-app-body .ps-page-header.psdd-topbar .ps-page-header__filters {
+    justify-content: flex-start !important;
+    justify-self: start !important;
+}
+
+html body.pushsale-app-body .ps-page-header.psdd-topbar .ps-page-header__filters > select {
+    flex: 0 0 auto !important;
+    width: 160px !important;
+    min-width: 150px !important;
+    max-width: 180px !important;
+}
+
+html body.pushsale-app-body .ps-page-header.psdd-topbar .psdd-date-range.ps-date-filter.is-boxed {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: 340px !important;
 }
 
 /* Phân bổ data: option checkboxes should breathe and line up from the left. */

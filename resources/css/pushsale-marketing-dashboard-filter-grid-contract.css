@@ -154,38 +154,46 @@ html body.pushsale-app-body .psm-history-link {
 }
 
 
-/* v123: canonical compact two-line Marketing Dashboard filter layout. */
+/* v123+: layout filter marketing dashboard dùng mẫu .ps-adv-filter-*
+ * trong pushsale-page-header-contract.css. Không tắt bóng header. */
 html body.pushsale-app-body .psm-page .ps-page-shell__header,
 html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row,
 html body.pushsale-app-body .psm-page .ps-filter-panel,
 html body.pushsale-app-body .psm-page .psm-filter-panel {
     border-bottom: 0 !important;
-    box-shadow: none !important;
 }
-html body.pushsale-app-body .psm-page .ps-page-shell__header::after,
-html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row::after {
-    display: none !important;
-    content: none !important;
-}
-html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row {
-    padding: 8px 30px 10px 30px !important;
-}
-html body.pushsale-app-body .psm-page .psm-filter-panel {
+
+html body.pushsale-app-body .ps-page-header.psm-dashboard-header .ps-adv-filter-panel,
+html body.pushsale-app-body .ps-page-header[data-page-code="2.1"] .ps-adv-filter-panel {
+    display: flex !important;
+    flex-direction: column !important;
     gap: 8px !important;
+    grid-template-rows: none !important;
 }
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-first,
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
+
+html body.pushsale-app-body .ps-page-header.psm-dashboard-header .ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-header[data-page-code="2.1"] .ps-adv-filter-row {
     display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 8px 14px !important;
     align-items: center !important;
-    gap: 10px 18px !important;
     width: 100% !important;
 }
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-first {
-    grid-template-columns: repeat(7, minmax(135px, 1fr)) !important;
+
+html body.pushsale-app-body .ps-page-header.psm-dashboard-header .ps-adv-filter-row > *,
+html body.pushsale-app-body .ps-page-header[data-page-code="2.1"] .ps-adv-filter-row > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 31px !important;
 }
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
-    grid-template-columns: repeat(8, minmax(120px, 1fr)) !important;
+
+html body.pushsale-app-body .ps-page-header.psm-dashboard-header .ps-adv-inline-cluster,
+html body.pushsale-app-body .ps-page-header[data-page-code="2.1"] .ps-adv-inline-cluster {
+    width: auto !important;
+    min-height: 31px !important;
 }
+
 html body.pushsale-app-body .psm-page .ps-control,
 html body.pushsale-app-body .psm-page .ps-select,
 html body.pushsale-app-body .psm-page .ps-date-range,
@@ -195,6 +203,7 @@ html body.pushsale-app-body .psm-page input[type='text'] {
     min-height: 31px !important;
     font-size: 12px !important;
 }
+
 html body.pushsale-app-body .psm-page .ps-product-search-select-v82,
 html body.pushsale-app-body .psm-page .ps-product-search-select-v82 .ps-product-search-control,
 html body.pushsale-app-body .psm-page .ps-product-search-select-v82 button,
@@ -202,40 +211,10 @@ html body.pushsale-app-body .psm-page .ps-date-range {
     min-width: 0 !important;
     width: 100% !important;
 }
+
 @media (max-width: 1500px) {
-    html body.pushsale-app-body .psm-page .psm-filter-grid.is-first,
-    html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
+    html body.pushsale-app-body .ps-page-header.psm-dashboard-header .ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-header[data-page-code="2.1"] .ps-adv-filter-row {
         grid-template-columns: repeat(4, minmax(160px, 1fr)) !important;
     }
-}
-
-/* v125: strict two-row dashboard filter, no underline/bottom border below advanced filters. */
-html body.pushsale-app-body .psm-page .ps-page-shell__header,
-html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row,
-html body.pushsale-app-body .psm-page .ps-page-shell__body {
-    border-bottom: 0 !important;
-}
-html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row {
-    padding: 8px 30px 8px 30px !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-}
-html body.pushsale-app-body .psm-page .psm-filter-panel {
-    display: grid !important;
-    grid-template-rows: 31px 31px !important;
-    gap: 8px !important;
-}
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-first {
-    grid-template-columns: 1fr 1fr .95fr .95fr .95fr .95fr .95fr !important;
-}
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
-    grid-template-columns: 1fr 1fr .95fr .95fr .95fr .95fr .82fr .9fr !important;
-}
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-first,
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
-    gap: 8px 14px !important;
-}
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-first > *,
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-second > * {
-    height: 31px !important;
 }

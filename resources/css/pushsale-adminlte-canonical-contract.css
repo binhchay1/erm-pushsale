@@ -147,24 +147,22 @@ html body.pushsale-app-body .psm-page .ps-page-shell__advanced-row {
     border-bottom: 0 !important;
     box-shadow: none !important;
 }
-html body.pushsale-app-body .psm-page .psm-filter-panel {
-    display: grid !important;
-    grid-template-rows: 31px 31px !important;
+html body.pushsale-app-body .psm-page .psm-filter-panel,
+html body.pushsale-app-body .ps-page-header .psm-filter-panel.ps-adv-filter-panel {
+    display: flex !important;
+    flex-direction: column !important;
     gap: 8px !important;
     width: 100% !important;
+    grid-template-rows: none !important;
 }
 html body.pushsale-app-body .psm-page .psm-filter-grid.is-first,
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
+html body.pushsale-app-body .psm-page .psm-filter-grid.is-second,
+html body.pushsale-app-body .ps-page-header .psm-filter-grid.ps-adv-filter-row {
     display: grid !important;
     align-items: center !important;
     gap: 8px 12px !important;
     width: 100% !important;
-}
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-first {
-    grid-template-columns: repeat(7, minmax(120px, 1fr)) !important;
-}
-html body.pushsale-app-body .psm-page .psm-filter-grid.is-second {
-    grid-template-columns: repeat(8, minmax(112px, 1fr)) !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
 }
 html body.pushsale-app-body .psm-page .psm-filter-grid.is-first > *,
 html body.pushsale-app-body .psm-page .psm-filter-grid.is-second > * {

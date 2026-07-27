@@ -494,8 +494,8 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
     );
 
     const advancedFilters = (
-        <div className="psm-filter-panel">
-            <div className="psm-filter-grid is-first">
+        <div className="ps-adv-filter-panel psm-filter-panel">
+            <div className="ps-adv-filter-row psm-filter-grid is-first">
                 <PushsaleSelect value={draft.date_type ?? ''} onChange={(value) => set('date_type', value)} options={filterOptions.dateTypes ?? []} placeholder="--Chuẩn Pushsale--" />
                 <PushsaleDateRange filters={draft} onChange={set} />
                 <PushsaleSelect value={draft.operation_scope ?? ''} onChange={(value) => set('operation_scope', value)} options={filterOptions.operationScopes ?? []} placeholder="Tác nghiệp cần" />
@@ -504,15 +504,17 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
                 <PushsaleSelect value={draft.source_type ?? ''} onChange={(value) => set('source_type', value)} options={filterOptions.sourceTypes ?? []} placeholder="--Nguồn dữ liệu--" />
                 <PushsaleSelect value={draft.ad_channel ?? ''} onChange={(value) => set('ad_channel', value)} options={filterOptions.adChannels ?? []} placeholder="--Kênh quảng cáo--" />
             </div>
-            <div className="psm-filter-grid is-second">
+            <div className="ps-adv-filter-row psm-filter-grid is-second">
                 <PushsaleSelect value={draft.parent_product_id ?? ''} onChange={(value) => { set('parent_product_id', value); set('product_id', ''); }} options={filterOptions.parentProducts ?? []} placeholder="--Sản phẩm cha--" />
                 <ProductSearchSelect products={products} value={draft.product_id ?? ''} onChange={(value) => set('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
                 <input className="ps-control" value={draft.utm_keyword ?? ''} onChange={(event) => set('utm_keyword', event.target.value)} placeholder="Mã Utm" />
                 <input className="ps-control" value={draft.source_keyword ?? ''} onChange={(event) => set('source_keyword', event.target.value)} placeholder="Tên nguồn dữ liệu" />
                 <PushsaleSelect value={draft.sort_by ?? ''} onChange={(value) => set('sort_by', value)} options={filterOptions.sortOptions ?? []} placeholder="Số contact" />
                 <PushsaleSelect value={draft.revenue_mode ?? ''} onChange={(value) => set('revenue_mode', value)} options={filterOptions.revenueModes ?? []} placeholder="1.Doanh số tổng" />
-                <label className="psm-utm-check"><input type="checkbox" checked={Boolean(draft.advanced_utm)} onChange={(event) => set('advanced_utm', event.target.checked ? 1 : 0)} /> UTM Nâng cao</label>
-                <Link className="psm-history-link" href={endpoints.activityHistory ?? '/notifications'}><i className="fa fa-history" /> Lịch sử hoạt động</Link>
+                <div className="ps-adv-inline-cluster">
+                    <label className="psm-utm-check"><input type="checkbox" checked={Boolean(draft.advanced_utm)} onChange={(event) => set('advanced_utm', event.target.checked ? 1 : 0)} /> UTM Nâng cao</label>
+                    <Link className="psm-history-link" href={endpoints.activityHistory ?? '/notifications'}><i className="fa fa-history" /> Lịch sử hoạt động</Link>
+                </div>
             </div>
         </div>
     );
@@ -522,11 +524,12 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
             <Head title="Marketing dashboard" />
             <PushsalePageShell
                 title="Marketing dashboard"
+                pageCode="2.1"
+                headerClassName="psm-dashboard-header"
                 primaryFilters={primaryFilters}
                 actions={shellActions}
                 advancedFilters={advancedFilters}
                 className="psm-page"
-                data-page-code="2.1"
             >
                 <div className="psm-table-area">
                     <DashboardTable report={report} expanded={expanded} advancedUtm={Boolean(draft.advanced_utm)} onToggle={toggle} onChart={(row) => setChartState({ row })} onDaily={(row) => setDailyState({ row })} />

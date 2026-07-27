@@ -10,6 +10,12 @@ html body.pushsale-app-body .ps-date-filter {
     min-height: 34px;
 }
 
+/* Trong hàng filter chính của PageHeader: không kéo full width. */
+html body.pushsale-app-body .ps-page-header__filters .ps-date-filter {
+    width: auto;
+    max-width: 340px;
+}
+
 html body.pushsale-app-body .ps-date-filter .ps-date-filter-input,
 html body.pushsale-app-body .ps-date-filter input[type='date'] {
     width: 100% !important;

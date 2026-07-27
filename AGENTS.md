@@ -14,6 +14,7 @@
 | Extra reports | `config/pushsale_report_routes.php` + `routes/admin/reports.php` |
 | CSS cascade runtime | `resources/js/lib/pushsaleStyleRegistry.js` |
 | Header trang (dùng chung) | `components/layout/PageHeader.jsx` + `pushsale-page-header-contract.css` |
+| Filter bổ sung (toggle) | Sibling `.ps-page-extra-filters` của header (prop `advanced` / `advancedFilters`) — **không** nằm trong `.m-header-wrap` |
 | Shell trang | `PushsalePageShell.jsx` + `pushsale-page-frame-contract.css` |
 | Sidebar / L3 flyout | `AppSidebar.jsx` + `usePushsaleSidebarMenu.js` + `pushsale-sidebar-canonical-contract.css` (load **cuối**) |
 | Contract nghiệp vụ dài | `docs/PROJECT_CONTRACT.md` |
@@ -52,15 +53,17 @@ Menu Pushsale dùng mã dạng `1.2.1`, `4.6.2`, `8.5.9`.
 
 Mọi trang admin: `AppLayout` → header qua `PageHeader`, body qua `PushsalePageShell` (hoặc wrapper đã dùng shell).
 
-`PageHeader` đẩy nội dung lên `PageHeaderOutlet` trong `AppLayout` nên **mỗi trang chỉ có đúng một header**, không thể double khi component lồng nhau. DOM xuất ra đúng mẫu Pushsale:
+`PageHeader` đẩy nội dung lên `PageHeaderOutlet` trong `AppLayout` nên **mỗi trang chỉ có đúng một header**, không thể double khi component lồng nhau. DOM xuất ra:
 
 ```
 .m-header-wrap.ps-page-header
-  > .m-header.ps-page-header__row   (title | filters | actions)
-  > .ps-page-header__advanced.box-body   (filter nâng cao, NGOÀI .m-header)
+  > .m-header.ps-page-header__row   (title | filters | actions + toggle)
+.ps-page-extra-filters              (filter bổ sung — CÙNG CẤP header, giữa header và body)
 ```
 
 Props: `title`, `subtitle`, `icon`, `filters` (= `primaryFilters`), `actions`, `advanced` (= `advancedFilters`), `pageCode`, `className`, `collapsible`, `defaultCollapsed`.
+
+Filter bổ sung qua prop `advanced` → sibling `.ps-page-extra-filters` (không nằm trong `.m-header-wrap`). Layout dùng `.ps-adv-filter-panel` / `.ps-adv-filter-row`.
 
 Lưu ý: nội dung `actions`/`filters` được portal ra khỏi cây DOM của trang. Nút submit nằm trong đó phải dùng `form="<id của form>"`, không dựa vào việc nằm trong `<form>`.
 
@@ -97,6 +100,7 @@ Thiếu use case → mở rộng `PageHeader`/shell, không copy header từng t
 - [ ] Không thêm CSS ngoài registry (trừ khi đã đăng ký có chủ đích).
 - [ ] Không override sidebar/header từ page CSS.
 - [ ] Trang mới dùng `PageHeader` + `PushsalePageShell`, không tự dựng `.m-header-wrap`.
+- [ ] Filter bổ sung (nếu có) qua prop `advanced` → render sibling `.ps-page-extra-filters`, không nhét vào trong header.
 - [ ] Route nằm đúng `routes/admin/{domain}.php` hoặc `routes/roles/{role}.php` (CRUD core trong `web.php`).
 - [ ] Controller/JSX không đặt tên theo mã menu.
 - [ ] Không tạo doc handoff version mới.

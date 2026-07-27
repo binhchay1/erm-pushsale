@@ -289,6 +289,19 @@ class PushsalePageService
                 ['id' => 'ip', 'label' => 'Sắp xếp theo IP'],
                 ['id' => 'user', 'label' => 'Sắp xếp theo tài khoản'],
             ],
+            'contractTypes' => [
+                ['value' => 'PushSale Advance', 'label' => 'PushSale Advance'],
+                ['value' => 'Pushsale Basic', 'label' => 'Pushsale Basic'],
+                ['value' => 'Tổng đài PushCall', 'label' => 'Tổng đài PushCall'],
+                ['value' => 'Tổng đài OmiCall', 'label' => 'Tổng đài OmiCall'],
+                ['value' => 'Tổng đài EZ Call', 'label' => 'Tổng đài EZ Call'],
+                ['value' => 'SMS', 'label' => 'SMS'],
+                ['value' => 'Zalo ZNS', 'label' => 'Zalo ZNS'],
+                ['value' => 'Khác', 'label' => 'Khác'],
+                ['value' => 'Mới', 'label' => 'Mới'],
+                ['value' => 'Gia hạn', 'label' => 'Gia hạn'],
+                ['value' => 'Nâng cấp', 'label' => 'Nâng cấp'],
+            ],
             'sales' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Sales)->values()),
             'saleLeaders' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Sales && (bool) $user->is_team_leader)->values()),
             'marketers' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Marketing)->values()),
@@ -2297,6 +2310,7 @@ class PushsalePageService
                 ->map(fn (CompanySubscriptionHistory $row, int $index) => [
                     'id' => $index + 1,
                     'unit_payment' => trim(($row->company?->name ?? '—')."\n".($row->payment_code ?: '—')),
+                    'payment_code' => $row->payment_code,
                     'contract_type' => $row->contract_type,
                     'description' => $row->description,
                     'amount' => $row->amount,
@@ -2304,6 +2318,7 @@ class PushsalePageService
                     'duration_months' => $row->duration_months,
                     'expires_at' => $row->expires_at?->toIso8601String(),
                     'updated_at' => $row->updated_at?->toIso8601String(),
+                    '_paid_at' => $row->paid_at?->toIso8601String(),
                     '_record_id' => $row->id,
                     '_form' => $this->formPayload('1.1.2', $row),
                 ]);
@@ -2858,6 +2873,8 @@ class PushsalePageService
             'available_sale' => '_available_sale',
             'available_care' => '_available_care',
             'status' => 'status',
+            'contract_type' => 'contract_type',
+            'payment_code' => 'payment_code',
         ];
 
         foreach ($filters as $queryKey => $rowKey) {
@@ -2918,15 +2935,17 @@ class PushsalePageService
                 'NgayChoXuat' => '_next_operation_at',
                 'NgayCapNhatTrangThaiGiaoHang' => '_delivery_updated_at',
                 'NgayGiaoHang' => '_desired_delivery_at',
+                'NgayThanhToan', 'paid_at' => '_paid_at',
                 default => '_data_arrived_at',
             };
             $rows = $rows->filter(function (array $row) use ($from, $to, $dateKey): bool {
                 $candidate = data_get($row, $dateKey)
+                    ?? data_get($row, '_paid_at')
+                    ?? data_get($row, 'paid_at')
                     ?? data_get($row, '_data_arrived_at')
                     ?? data_get($row, 'updated_at')
                     ?? data_get($row, 'created_at')
-                    ?? data_get($row, 'performed_at')
-                    ?? data_get($row, 'paid_at');
+                    ?? data_get($row, 'performed_at');
                 if (! $candidate) {
                     return true;
                 }

@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { ReportPagination } from '@/components/reports/ReportPagination';
 import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
+import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -458,7 +459,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                                 onChange={(event) => setField('search', event.target.value)}
                                 onKeyDown={(event) => event.key === 'Enter' && search()}
                             />
-                            <button type="button" className="btn btn-sm btn-primary" onClick={search}><i className="fa fa-search" /> Tìm kiếm</button>
+                            <PushsaleSearchButton onClick={search} label="Tìm kiếm" />
                             <a
                                 role="button"
                                 tabIndex={0}
@@ -478,40 +479,40 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                         </div>
                     )}
                     advanced={filtersOpen ? (
-                        <div className="ps-customer-filter-panel">
-                            <div className="ps-filter-grid">
-                            <DateRangeFilter
-                                className="ps-date-range-control"
-                                inputClassName="ps-filter-control"
-                                from={form.date_from}
-                                to={form.date_to}
-                                onChange={({ date_from, date_to }) => setForm((current) => ({ ...current, date_from, date_to, page: 1 }))}
-                            />
-                            <FilterSelect value={form.date_type} onChange={(value) => setField('date_type', value)} options={filterOptions.dateTypes} placeholder="--Kiểu ngày--" />
-                            <FilterSelect value={form.care_status} onChange={(value) => setField('care_status', value)} options={filterOptions.careStatuses} placeholder="--Care đơn--" />
-                            <FilterSelect value={form.closing_status} onChange={(value) => setField('closing_status', value)} options={filterOptions.closingStatuses} placeholder="--Trạng thái chốt đơn--" />
-                            <FilterSelect value={form.source_id} onChange={(value) => setField('source_id', value)} options={filterOptions.sources} placeholder="--Nguồn dữ liệu--" />
-
-                            <FilterSelect value={form.sale_leader_id} onChange={(value) => setForm((current) => ({ ...current, sale_leader_id: value, sale_team_id: '', sale_id: '', page: 1 }))} options={filterOptions.saleLeaders} placeholder="--Trưởng nhóm sale--" />
-                            <FilterSelect value={form.sale_team_id} onChange={(value) => setForm((current) => ({ ...current, sale_team_id: value, sale_id: '', page: 1 }))} options={saleTeams} placeholder="--Nhóm sale--" />
-                            <FilterSelect value={form.sale_id} onChange={(value) => setField('sale_id', value)} options={sales} placeholder="--Sale--" />
-                            <FilterSelect value={form.marketing_leader_id} onChange={(value) => setForm((current) => ({ ...current, marketing_leader_id: value, marketing_team_id: '', marketer_id: '', page: 1 }))} options={filterOptions.marketingLeaders} placeholder="--Trưởng nhóm marketing--" />
-                            <FilterSelect value={form.marketing_team_id} onChange={(value) => setForm((current) => ({ ...current, marketing_team_id: value, marketer_id: '', page: 1 }))} options={marketingTeams} placeholder="--Nhóm marketing--" />
-                            <FilterSelect value={form.marketer_id} onChange={(value) => setField('marketer_id', value)} options={marketers} placeholder="--Marketing--" />
-
-                            <FilterSelect value={form.operation_stage} onChange={(value) => setField('operation_stage', value)} options={filterOptions.operationStages} placeholder="--Trạng thái tác nghiệp--" />
-                            <FilterSelect value={form.operation_stage} onChange={(value) => setField('operation_stage', value)} options={filterOptions.operationStages} placeholder="--Tác nghiệp--" />
-                            <FilterSelect value={form.operation_result} onChange={(value) => setField('operation_result', value)} options={filterOptions.operationResults} placeholder="--Kết quả tác nghiệp--" />
-                            <FilterSelect value={form.delivery_status} onChange={(value) => setField('delivery_status', value)} options={filterOptions.deliveryStatuses} placeholder="--Trạng thái giao hàng--" />
-                            <ProductSearchSelect products={filterOptions.products ?? []} value={form.product_id} onChange={(value) => setField('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
-                            <FilterSelect value={form.warehouse_id} onChange={(value) => setField('warehouse_id', value)} options={filterOptions.warehouses} placeholder="--Kho--" />
-
-                            <FilterSelect value={form.reconciliation_status} onChange={(value) => setField('reconciliation_status', value)} options={filterOptions.reconciliationStatuses} placeholder="--Đối soát nội bộ--" />
-                            <FilterSelect value={form.duplicate_status} onChange={(value) => setField('duplicate_status', value)} options={filterOptions.duplicateStatuses} placeholder="--Trùng số--" />
-                            <FilterSelect value={form.customer_type} onChange={(value) => setField('customer_type', value)} options={filterOptions.customerTypes} placeholder="--Khách cũ / Khách mới--" />
-                            <FilterSelect value={form.allocation_status} onChange={(value) => setField('allocation_status', value)} options={filterOptions.allocationStatuses} placeholder="--Phân bổ--" />
-                            <FilterSelect value={form.shipping_method} onChange={(value) => setField('shipping_method', value)} options={filterOptions.shippingMethods} placeholder="--PTGH--" />
-                            <button type="button" className="btn btn-default ps-filter-reset" onClick={reset}><i className="fa fa-refresh" /> Đặt lại</button>
+                        <div className="ps-adv-filter-panel ps-customer-filter-panel">
+                            <div className="ps-adv-filter-row">
+                                <DateRangeFilter
+                                    className="ps-date-range-control ps-adv-date-cluster"
+                                    inputClassName="ps-filter-control"
+                                    from={form.date_from}
+                                    to={form.date_to}
+                                    withTimeLabel={false}
+                                    onChange={({ date_from, date_to }) => setForm((current) => ({ ...current, date_from, date_to, page: 1 }))}
+                                />
+                                <FilterSelect value={form.date_type} onChange={(value) => setField('date_type', value)} options={filterOptions.dateTypes} placeholder="--Kiểu ngày--" />
+                                <FilterSelect value={form.care_status} onChange={(value) => setField('care_status', value)} options={filterOptions.careStatuses} placeholder="--Care đơn--" />
+                                <FilterSelect value={form.closing_status} onChange={(value) => setField('closing_status', value)} options={filterOptions.closingStatuses} placeholder="--Trạng thái chốt đơn--" />
+                                <FilterSelect value={form.source_id} onChange={(value) => setField('source_id', value)} options={filterOptions.sources} placeholder="--Nguồn dữ liệu--" />
+                                <FilterSelect value={form.sale_leader_id} onChange={(value) => setForm((current) => ({ ...current, sale_leader_id: value, sale_team_id: '', sale_id: '', page: 1 }))} options={filterOptions.saleLeaders} placeholder="--Trưởng nhóm sale--" />
+                                <FilterSelect value={form.sale_team_id} onChange={(value) => setForm((current) => ({ ...current, sale_team_id: value, sale_id: '', page: 1 }))} options={saleTeams} placeholder="--Nhóm sale--" />
+                                <FilterSelect value={form.sale_id} onChange={(value) => setField('sale_id', value)} options={sales} placeholder="--Sale--" />
+                                <FilterSelect value={form.marketing_leader_id} onChange={(value) => setForm((current) => ({ ...current, marketing_leader_id: value, marketing_team_id: '', marketer_id: '', page: 1 }))} options={filterOptions.marketingLeaders} placeholder="--Trưởng nhóm marketing--" />
+                                <FilterSelect value={form.marketing_team_id} onChange={(value) => setForm((current) => ({ ...current, marketing_team_id: value, marketer_id: '', page: 1 }))} options={marketingTeams} placeholder="--Nhóm marketing--" />
+                                <FilterSelect value={form.marketer_id} onChange={(value) => setField('marketer_id', value)} options={marketers} placeholder="--Marketing--" />
+                            </div>
+                            <div className="ps-adv-filter-row">
+                                <FilterSelect value={form.operation_stage} onChange={(value) => setField('operation_stage', value)} options={filterOptions.operationStages} placeholder="--Trạng thái tác nghiệp--" />
+                                <FilterSelect value={form.operation_stage} onChange={(value) => setField('operation_stage', value)} options={filterOptions.operationStages} placeholder="--Tác nghiệp--" />
+                                <FilterSelect value={form.operation_result} onChange={(value) => setField('operation_result', value)} options={filterOptions.operationResults} placeholder="--Kết quả tác nghiệp--" />
+                                <FilterSelect value={form.delivery_status} onChange={(value) => setField('delivery_status', value)} options={filterOptions.deliveryStatuses} placeholder="--Trạng thái giao hàng--" />
+                                <ProductSearchSelect products={filterOptions.products ?? []} value={form.product_id} onChange={(value) => setField('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
+                                <FilterSelect value={form.warehouse_id} onChange={(value) => setField('warehouse_id', value)} options={filterOptions.warehouses} placeholder="--Kho--" />
+                                <FilterSelect value={form.reconciliation_status} onChange={(value) => setField('reconciliation_status', value)} options={filterOptions.reconciliationStatuses} placeholder="--Đối soát nội bộ--" />
+                                <FilterSelect value={form.duplicate_status} onChange={(value) => setField('duplicate_status', value)} options={filterOptions.duplicateStatuses} placeholder="--Trùng số--" />
+                                <FilterSelect value={form.customer_type} onChange={(value) => setField('customer_type', value)} options={filterOptions.customerTypes} placeholder="--Khách cũ / Khách mới--" />
+                                <FilterSelect value={form.allocation_status} onChange={(value) => setField('allocation_status', value)} options={filterOptions.allocationStatuses} placeholder="--Phân bổ--" />
+                                <FilterSelect value={form.shipping_method} onChange={(value) => setField('shipping_method', value)} options={filterOptions.shippingMethods} placeholder="--PTGH--" />
+                                <button type="button" className="btn btn-default ps-filter-reset" onClick={reset}><i className="fa fa-refresh" /> Đặt lại</button>
                             </div>
                         </div>
                     ) : null}

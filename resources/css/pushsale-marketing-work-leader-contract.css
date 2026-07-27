@@ -265,6 +265,8 @@ html body.pushsale-app-body .ps-leader-filter .ps-leader-search-btn {
     box-shadow: none !important;
 }
 
+html body.pushsale-app-body .ps-leader-filter.ps-page-extra-filters .ps-page-header__advanced,
+html body.pushsale-app-body .ps-leader-filter.ps-page-extra-filters,
 html body.pushsale-app-body .ps-leader-filter .ps-page-header__advanced {
     display: flex !important;
     flex-direction: column !important;
@@ -274,6 +276,7 @@ html body.pushsale-app-body .ps-leader-filter .ps-page-header__advanced {
     padding: 0 14px 10px !important;
     border: 0 !important;
     background: #fff !important;
+    box-shadow: none !important;
 }
 
 html body.pushsale-app-body .ps-leader-filter .ps-leader-advanced {
