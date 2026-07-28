@@ -106,7 +106,7 @@ class FilterOptionsService
                 fn (array $meta, string $provider) => ['value' => $provider, 'label' => $meta['label'] ?? $provider]
             )->values(),
             'warehouseCareStatuses' => [
-                ['value' => 'waiting', 'label' => 'Chờ care'],
+                ['value' => 'waiting', 'label' => 'Chờ care đơn'],
                 ['value' => 'calling', 'label' => 'Đang liên hệ'],
                 ['value' => 'confirmed', 'label' => 'Đã xác nhận'],
                 ['value' => 'reschedule', 'label' => 'Hẹn giao lại'],

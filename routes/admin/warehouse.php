@@ -74,6 +74,7 @@ Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     Route::patch('warehouse/orders/{order}/order-code', [WarehouseOrderActionController::class, 'changeOrderCode'])->name('warehouse.orders.order-code');
     Route::post('warehouse/orders/{order}/blacklist', [WarehouseOrderActionController::class, 'blacklist'])->name('warehouse.orders.blacklist');
     Route::patch('warehouse/orders/{order}/care', [WarehouseOrderActionController::class, 'care'])->name('warehouse.orders.care');
+    Route::post('warehouse/orders/{order}/internal-message', [WarehouseOrderActionController::class, 'internalMessage'])->name('warehouse.orders.internal-message');
     Route::patch('warehouse/orders/{order}/delivery-status', [WarehouseOrderActionController::class, 'deliveryStatus'])->name('warehouse.orders.delivery-status');
     Route::put('warehouse/orders/{order}', [WarehouseOrderActionController::class, 'updateOrder'])->name('warehouse.orders.update');
     Route::post('warehouse/orders/{order}/split', [WarehouseOrderActionController::class, 'split'])->name('warehouse.orders.split');

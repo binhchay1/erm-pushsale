@@ -3,11 +3,13 @@
 namespace App\Services\Warehouse;
 
 use App\Enums\DeliveryStatus;
+use App\Models\CustomerInternalMessage;
 use App\Models\Order;
 use App\Models\Pushsale\PhoneBlacklist;
 use App\Models\User;
 use App\Enums\UserRole;
 use App\Services\Settings\FeatureSettingsService;
+use App\Services\CustomerInteractions\CustomerIdentity;
 use App\Services\CustomerInteractions\OrderOperationHistoryService;
 use App\Services\Inventory\InventoryReturnService;
 use App\Services\Leads\LeadOrderFactory;
@@ -68,15 +70,64 @@ class WarehouseOrderActionService
         $this->log($order, $actor, 'warehouse_phone_blacklisted', ['phone' => $phone, 'reason' => $reason]);
     }
 
-    public function updateCare(Order $order, ?string $status, ?string $note, ?User $actor): Order
+    public function updateCare(Order $order, ?string $status, ?string $note, ?User $actor, bool $requestRedelivery = false): Order
     {
-        $order->update([
-            'warehouse_care_status' => $status ?: null,
-            'warehouse_care_note' => $note ?: null,
-            'warehouse_care_user_id' => $actor?->id,
-        ]);
-        $this->log($order, $actor, 'warehouse_care_updated', compact('status', 'note'));
+        return DB::transaction(function () use ($order, $status, $note, $actor, $requestRedelivery): Order {
+            $careStatus = $requestRedelivery ? 'reschedule' : ($status ?: null);
+            $noteText = filled($note) ? trim((string) $note) : null;
+
+            $order->update([
+                'warehouse_care_status' => $careStatus,
+                'warehouse_care_note' => $noteText,
+                'warehouse_care_user_id' => $actor?->id,
+                'warehouse_care_updated_at' => now(),
+            ]);
+
+            if ($requestRedelivery) {
+                $order->update([
+                    'delivery_status' => DeliveryStatus::Redelivery->value,
+                    'last_delivery_event_at' => now(),
+                ]);
+            }
+
+            $this->log($order, $actor, 'warehouse_care_updated', [
+                'status' => $careStatus,
+                'note' => $noteText,
+                'request_redelivery' => $requestRedelivery,
+            ]);
+
+            return $order->fresh();
+        });
+    }
+
+    public function postInternalMessage(Order $order, string $message, ?User $actor): Order
+    {
+        $text = trim($message);
+        if ($text === '') {
+            throw ValidationException::withMessages(['message' => 'Nhập nội dung tin nhắn nội bộ.']);
+        }
+
+        $this->createInternalMessage($order, $text, $actor);
+        $this->log($order, $actor, 'warehouse_internal_message', ['message' => $text]);
+
         return $order->fresh();
+    }
+
+    private function createInternalMessage(Order $order, string $message, ?User $actor): void
+    {
+        if (! $actor) {
+            return;
+        }
+
+        CustomerInternalMessage::query()->create([
+            'company_id' => $order->company_id ?? $actor->company_id,
+            'order_id' => $order->id,
+            'author_user_id' => $actor->id,
+            'author_name' => $actor->name,
+            'author_role' => $actor->role?->value,
+            'customer_phone' => CustomerIdentity::phoneKey($order),
+            'message' => $message,
+        ]);
     }
 
     public function updateDeliveryStatus(Order $order, string $status, ?string $note, ?int $collectedAmount, ?User $actor): Order

@@ -10,7 +10,6 @@ use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Shipping\ShipmentActionResolver;
 use App\Support\OrderRevenue;
 use App\Support\PhoneCarrier;
-use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 /** Màn Thủ kho tác nghiệp — nguồn dữ liệu thống nhất cho xuất kho, giao vận, hoàn hàng và COD. */
@@ -67,6 +66,7 @@ class WarehouseOperationService
         $paginator = $pageQuery->with([
             'items.product', 'warehouse', 'saleUser', 'marketerUser', 'warehouseCareUser',
             'supplementalOriginPacket.relatedOrder',
+            'internalMessages' => fn ($query) => $query->latest('id')->limit(1),
             'shipments' => fn ($query) => $query->with(['statusEvents' => fn ($events) => $events->latest('occurred_at')])->latest('id'),
             'returnReceipt.lines',
             'shippingStatusEvents' => fn ($query) => $query->latest('occurred_at')->limit(10),
@@ -169,10 +169,15 @@ class WarehouseOperationService
         ])->values();
         $carrierCost = $order->shippingCost();
         $netCash = (int) $order->settled_cod_amount + (int) $order->deposit - $carrierCost;
-        $warehouseCareUpdatedAt = $order->getAttribute('warehouse_care_updated_at');
-        $warehouseCareUpdatedAt = $warehouseCareUpdatedAt instanceof CarbonInterface
-            ? $warehouseCareUpdatedAt->toIso8601String()
-            : $warehouseCareUpdatedAt;
+        $warehouseCareUpdatedAt = $order->warehouse_care_updated_at?->toIso8601String();
+        $lastInternal = $order->relationLoaded('internalMessages')
+            ? $order->internalMessages->first()
+            : $order->internalMessages()->latest('id')->first();
+        $lastInternalPreview = null;
+        if ($lastInternal) {
+            $author = $lastInternal->author_name ?: 'Hệ thống';
+            $lastInternalPreview = trim($author.': '.$lastInternal->message);
+        }
 
         return [
             'id' => (string) $order->id,
@@ -182,6 +187,7 @@ class WarehouseOperationService
             'desiredDeliveryAt' => $order->desired_delivery_at?->toIso8601String(),
             'lastDeliveryEventAt' => $order->last_delivery_event_at?->toIso8601String(),
             'printedAt' => $order->printed_at?->toIso8601String(),
+            'shipmentPostedAt' => $shipment?->created_at?->toIso8601String(),
             'saleName' => $order->saleUser?->name,
             'saleUsername' => $order->saleUser?->email ? strstr($order->saleUser->email, '@', true) : null,
             'marketerName' => $order->marketerUser?->name,
@@ -190,7 +196,8 @@ class WarehouseOperationService
             'warehouseCareStatusLabel' => $this->warehouseCareLabel($order->warehouse_care_status),
             'warehouseCareNote' => $order->warehouse_care_note,
             'warehouseCareUpdatedAt' => $warehouseCareUpdatedAt,
-            'lastInternalMessage' => null,
+            'lastInternalMessage' => $lastInternalPreview,
+            'accountingNotes' => $order->accounting_notes,
             'customerName' => $order->customer_name,
             'customerPhone' => $order->customer_phone,
             'receiverName' => $order->receiver_name,

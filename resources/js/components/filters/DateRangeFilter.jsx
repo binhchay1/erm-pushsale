@@ -106,25 +106,26 @@ function presetRanges(now = new Date()) {
     const today = startOfDay(now);
     const yesterday = startOfDay(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1));
     const last7From = startOfDay(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6));
-    const thisWeekFrom = startOfWeekMonday(today);
-    const thisWeekTo = endOfWeekSunday(today);
-    const lastWeekTo = startOfDay(new Date(thisWeekFrom.getFullYear(), thisWeekFrom.getMonth(), thisWeekFrom.getDate() - 1));
-    const lastWeekFrom = startOfWeekMonday(lastWeekTo);
-    const thisMonthFrom = new Date(today.getFullYear(), today.getMonth(), 1);
-    const thisMonthTo = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    const lastMonthFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const lastMonthTo = new Date(today.getFullYear(), today.getMonth(), 0);
 
     return [
         { key: 'last7', label: '7 ngày vừa qua', from: last7From, to: today },
-        { key: 'today', label: 'Hôm nay', from: today, to: today },
         { key: 'yesterday', label: 'Hôm qua', from: yesterday, to: yesterday },
-        { key: 'thisWeek', label: 'Tuần này', from: thisWeekFrom, to: thisWeekTo },
-        { key: 'lastWeek', label: 'Tuần trước', from: lastWeekFrom, to: lastWeekTo },
-        { key: 'thisMonth', label: 'Tháng này', from: thisMonthFrom, to: thisMonthTo },
-        { key: 'lastMonth', label: 'Tháng trước', from: lastMonthFrom, to: lastMonthTo },
+        { key: 'today', label: 'Hôm nay', from: today, to: today },
         { key: 'custom', label: 'Tùy chỉnh', from: null, to: null },
     ];
+}
+
+function matchPresetKey(from, to, presets) {
+    const fromIso = normalizeDate(from);
+    const toIso = normalizeDate(to);
+    if (!fromIso || !toIso) return 'custom';
+    const found = presets.find((preset) => (
+        preset.from
+        && preset.to
+        && toIsoDate(preset.from) === fromIso
+        && toIsoDate(preset.to) === toIso
+    ));
+    return found?.key ?? 'custom';
 }
 
 const WEEKDAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
@@ -203,6 +204,7 @@ export function DateRangeFilter({
     const [hoverDay, setHoverDay] = useState('');
     const [pickingEnd, setPickingEnd] = useState(Boolean(normalizeDate(from) && normalizeDate(to)));
     const [activePreset, setActivePreset] = useState('custom');
+    const [showCalendar, setShowCalendar] = useState(false);
     const [leftMonth, setLeftMonth] = useState(() => parseLocalDate(from) || startOfDay(new Date()));
     const presets = useMemo(() => presetRanges(), [open]);
 
@@ -212,8 +214,13 @@ export function DateRangeFilter({
             setDraftTo(normalizeDate(to));
             setFromTime(extractTime(from, '00:00'));
             setToTime(extractTime(to, '23:59'));
+            return;
         }
-    }, [from, to, open]);
+        const matched = matchPresetKey(from, to, presets);
+        setActivePreset(matched);
+        setShowCalendar(matched === 'custom');
+        setLeftMonth(parseLocalDate(from) || startOfDay(new Date()));
+    }, [from, to, open, presets]);
 
     useEffect(() => {
         if (!open) return undefined;
@@ -236,13 +243,26 @@ export function DateRangeFilter({
 
     const applyPreset = (preset) => {
         setActivePreset(preset.key);
-        if (preset.key === 'custom' || !preset.from || !preset.to) return;
-        setDraftFrom(toIsoDate(preset.from));
-        setDraftTo(toIsoDate(preset.to));
+        if (preset.key === 'custom' || !preset.from || !preset.to) {
+            setShowCalendar(true);
+            return;
+        }
+        const nextFrom = toIsoDate(preset.from);
+        const nextTo = toIsoDate(preset.to);
+        setDraftFrom(nextFrom);
+        setDraftTo(nextTo);
         setFromTime('00:00');
         setToTime('23:59');
         setPickingEnd(true);
+        setShowCalendar(false);
         setLeftMonth(new Date(preset.from.getFullYear(), preset.from.getMonth(), 1));
+        onChange?.({
+            date_from: nextFrom,
+            date_to: nextTo,
+            time_from: '00:00',
+            time_to: '23:59',
+        });
+        setOpen(false);
     };
 
     const pickDay = (iso, { hoverOnly = false } = {}) => {
@@ -285,12 +305,12 @@ export function DateRangeFilter({
     };
 
     const popover = open && typeof document !== 'undefined' ? createPortal(
-        <div className="ps-drp-popover" style={(() => {
+        <div className={`ps-drp-popover ${showCalendar ? '' : 'is-presets-only'}`.trim()} style={(() => {
             const rect = rootRef.current?.getBoundingClientRect();
             if (!rect) return { top: 80, left: 24 };
-            const width = 720;
+            const width = showCalendar ? 720 : 180;
             const left = Math.min(Math.max(8, rect.left), window.innerWidth - width - 8);
-            const top = Math.min(rect.bottom + 4, window.innerHeight - 420);
+            const top = Math.min(rect.bottom + 4, window.innerHeight - (showCalendar ? 420 : 200));
             return { top, left, width };
         })()}
         >
@@ -309,55 +329,57 @@ export function DateRangeFilter({
                     ))}
                 </ul>
             </div>
-            <div className="ps-drp-calendars">
-                <CalendarMonth
-                    monthDate={leftMonth}
-                    from={draftFrom}
-                    to={draftTo}
-                    hover={hoverDay}
-                    onPick={pickDay}
-                    onPrev={() => setLeftMonth((current) => addMonths(current, -1))}
-                    onNext={() => setLeftMonth((current) => addMonths(current, 1))}
-                    showPrev
-                    showNext={false}
-                />
-                <CalendarMonth
-                    monthDate={rightMonth}
-                    from={draftFrom}
-                    to={draftTo}
-                    hover={hoverDay}
-                    onPick={pickDay}
-                    onPrev={() => setLeftMonth((current) => addMonths(current, -1))}
-                    onNext={() => setLeftMonth((current) => addMonths(current, 1))}
-                    showPrev={false}
-                    showNext
-                />
-                <div className="ps-drp-times">
-                    <div className="ps-drp-time-group">
-                        <select value={fromTime.slice(0, 2)} onChange={(event) => setFromTime(`${event.target.value}:${fromTime.slice(3)}`)}>
-                            {HOURS.map((hour) => <option key={`fh-${hour}`} value={hour}>{Number(hour)}</option>)}
-                        </select>
-                        <span>:</span>
-                        <select value={fromTime.slice(3)} onChange={(event) => setFromTime(`${fromTime.slice(0, 2)}:${event.target.value}`)}>
-                            {MINUTES.map((minute) => <option key={`fm-${minute}`} value={minute}>{minute}</option>)}
-                        </select>
+            {showCalendar ? (
+                <div className="ps-drp-calendars">
+                    <CalendarMonth
+                        monthDate={leftMonth}
+                        from={draftFrom}
+                        to={draftTo}
+                        hover={hoverDay}
+                        onPick={pickDay}
+                        onPrev={() => setLeftMonth((current) => addMonths(current, -1))}
+                        onNext={() => setLeftMonth((current) => addMonths(current, 1))}
+                        showPrev
+                        showNext={false}
+                    />
+                    <CalendarMonth
+                        monthDate={rightMonth}
+                        from={draftFrom}
+                        to={draftTo}
+                        hover={hoverDay}
+                        onPick={pickDay}
+                        onPrev={() => setLeftMonth((current) => addMonths(current, -1))}
+                        onNext={() => setLeftMonth((current) => addMonths(current, 1))}
+                        showPrev={false}
+                        showNext
+                    />
+                    <div className="ps-drp-times">
+                        <div className="ps-drp-time-group">
+                            <select value={fromTime.slice(0, 2)} onChange={(event) => setFromTime(`${event.target.value}:${fromTime.slice(3)}`)}>
+                                {HOURS.map((hour) => <option key={`fh-${hour}`} value={hour}>{Number(hour)}</option>)}
+                            </select>
+                            <span>:</span>
+                            <select value={fromTime.slice(3)} onChange={(event) => setFromTime(`${fromTime.slice(0, 2)}:${event.target.value}`)}>
+                                {MINUTES.map((minute) => <option key={`fm-${minute}`} value={minute}>{minute}</option>)}
+                            </select>
+                        </div>
+                        <div className="ps-drp-time-group">
+                            <select value={toTime.slice(0, 2)} onChange={(event) => setToTime(`${event.target.value}:${toTime.slice(3)}`)}>
+                                {HOURS.map((hour) => <option key={`th-${hour}`} value={hour}>{Number(hour)}</option>)}
+                            </select>
+                            <span>:</span>
+                            <select value={toTime.slice(3)} onChange={(event) => setToTime(`${toTime.slice(0, 2)}:${event.target.value}`)}>
+                                {MINUTES.map((minute) => <option key={`tm-${minute}`} value={minute}>{minute}</option>)}
+                            </select>
+                        </div>
                     </div>
-                    <div className="ps-drp-time-group">
-                        <select value={toTime.slice(0, 2)} onChange={(event) => setToTime(`${event.target.value}:${toTime.slice(3)}`)}>
-                            {HOURS.map((hour) => <option key={`th-${hour}`} value={hour}>{Number(hour)}</option>)}
-                        </select>
-                        <span>:</span>
-                        <select value={toTime.slice(3)} onChange={(event) => setToTime(`${toTime.slice(0, 2)}:${event.target.value}`)}>
-                            {MINUTES.map((minute) => <option key={`tm-${minute}`} value={minute}>{minute}</option>)}
-                        </select>
+                    <div className="ps-drp-buttons">
+                        <span className="ps-drp-selected">{draftTitle || 'Chọn khoảng ngày'}</span>
+                        <button type="button" className="btn btn-sm btn-default" onClick={cancel}>Hủy</button>
+                        <button type="button" className="btn btn-sm btn-primary" onClick={commit} disabled={!draftFrom || !draftTo || invalid}>Đồng ý</button>
                     </div>
                 </div>
-                <div className="ps-drp-buttons">
-                    <span className="ps-drp-selected">{draftTitle || 'Chọn khoảng ngày'}</span>
-                    <button type="button" className="btn btn-sm btn-default" onClick={cancel}>Hủy</button>
-                    <button type="button" className="btn btn-sm btn-primary" onClick={commit} disabled={!draftFrom || !draftTo || invalid}>Đồng ý</button>
-                </div>
-            </div>
+            ) : null}
         </div>,
         document.body,
     ) : null;

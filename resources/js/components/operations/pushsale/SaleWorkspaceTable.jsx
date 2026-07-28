@@ -46,11 +46,9 @@ function TimeRemaining({ order }) {
 
 function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     const t = useT();
-    const [value, setValue] = useState(order.saleOperationNote ?? '');
+    const [value, setValue] = useState('');
     const [saving, setSaving] = useState(false);
     const textareaRef = useRef(null);
-
-    useEffect(() => setValue(order.saleOperationNote ?? ''), [order.saleOperationNote]);
 
     useEffect(() => {
         const node = textareaRef.current;
@@ -63,7 +61,10 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
         setSaving(true);
         router.patch(`${actionBaseUrl}/orders/${order.id}/operation-note`, { note: value }, {
             preserveScroll: true,
-            onSuccess: () => toast.success(t('operations.sale_workspace.note_saved')),
+            onSuccess: () => {
+                toast.success(t('operations.sale_workspace.note_saved'));
+                setValue('');
+            },
             onError: (errors) => toast.error(errors.note ?? errors.order ?? t('operations.sale_workspace.note_save_failed')),
             onFinish: () => setSaving(false),
         });
@@ -72,15 +73,24 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     return (
         <div className="ps-operation-note-editor area2">
             <span className="fb span-col ttgh7 ps-operation-stage-label">{order.currentOperation || t('operations.sale_workspace.default_stage')}</span>
-            <div className="ps-note-toolbar text-right">
-                <button type="button" className="btn-icon aoh ps-note-msg" onClick={() => onMessages(order)} title={t('operations.sale_workspace.internal_message')}>
+            <div className="mof-container ps-note-mof">
+                <button
+                    type="button"
+                    className="btn-icon aoh ps-note-ear ps-note-ear-left"
+                    onClick={() => onMessages(order)}
+                    title={t('operations.sale_workspace.internal_message')}
+                >
                     <i className="fa fa-commenting-o" />
                 </button>
-                <button type="button" className="btn-icon aoh ps-note-save" onClick={save} disabled={saving} title={t('operations.sale_workspace.save_note')}>
+                <button
+                    type="button"
+                    className="btn-icon aoh ps-note-ear ps-note-ear-right"
+                    onClick={save}
+                    disabled={saving}
+                    title={t('operations.sale_workspace.save_note')}
+                >
                     <i className="fa fa-save" />
                 </button>
-            </div>
-            <div className="mof-container">
                 <textarea
                     ref={textareaRef}
                     className="form-control txt-mof txt-dotted ps-note-inline-textarea"
@@ -93,6 +103,7 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
                     }}
                     aria-label={t('operations.sale_workspace.note_aria', { name: order.customerName ?? order.customerPhone })}
                     title={t('operations.sale_workspace.note_helper')}
+                    placeholder=""
                 />
             </div>
         </div>
@@ -262,8 +273,9 @@ export function SaleWorkspaceTable({
                                                     <option value="">--Chọn--</option>
                                                     {operationStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                                                 </select>
-                                            ) : <b>{order.operationResult || order.closingStatusLabel}</b>}
-                                            {order.operationResult && <div className="small-tip ps-result-current">{order.operationResult}</div>}
+                                            ) : (
+                                                <b className="ps-result-label">{order.operationResult || order.closingStatusLabel || ''}</b>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="text-center ps-next-cell">

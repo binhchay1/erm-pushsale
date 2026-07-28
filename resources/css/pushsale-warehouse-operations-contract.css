@@ -177,7 +177,7 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row {
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-main {
-    grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(140px, 1fr)) !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-six {
@@ -279,33 +279,164 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-six {
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-code-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
     position: relative;
     text-align: center;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-code-action-row {
+    display: flex;
+    justify-content: flex-end;
+    min-height: 18px;
+    width: 100%;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-code-action {
-    position: absolute !important;
-    right: 0;
-    top: 0;
+    position: static !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-order-code {
-    color: #337ab7 !important;
+    color: #007bff !important;
     display: block !important;
     font-weight: 700 !important;
-    margin: 2px 0 !important;
+    margin: 0 !important;
+    text-align: center !important;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-code-stack .small-tip {
+    text-align: center;
+    width: 100%;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-delivery-stack {
+    align-items: center;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px;
+    justify-content: center;
     text-align: center;
+    width: 100%;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-delivery-actions {
     align-items: center;
-    display: inline-flex;
+    display: flex !important;
+    flex-wrap: nowrap;
     gap: 4px;
     justify-content: center;
-    margin: 4px 0;
+    margin: 0;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-delivery-status {
+    display: block !important;
+    text-align: center;
+    width: 100%;
+}
+
+/* Care note textarea: ears + hover like Sale TN cần */
+html body.pushsale-app-body .ps-wh-page .ps-care-note-mof,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-mof {
+    clear: both;
+    margin: 4px 14px 0 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    position: relative !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-care-note-ear,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-ear {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #3c8dbc !important;
+    cursor: pointer;
+    height: 16px !important;
+    line-height: 16px !important;
+    opacity: 0.2 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    top: 2px !important;
+    transition: opacity .18s ease;
+    width: 16px !important;
+    z-index: 2;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-care-note-ear-left,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-ear-left {
+    left: -14px !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-care-note-ear-right,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-ear-right {
+    right: -14px !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-care-note-mof:hover .ps-care-note-ear,
+html body.pushsale-app-body .ps-wh-page .ps-care-note-mof:focus-within .ps-care-note-ear,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-mof:hover .ps-care-note-ear,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-mof:focus-within .ps-care-note-ear {
+    opacity: 0.85 !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-care-note-ear:hover,
+html body.pushsale-app-body .ps-wh-page .ps-care-note-ear:focus,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-ear:hover,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-ear:focus {
+    opacity: 1 !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .c-care-body,
+html body.pushsale-app-body .ps-wh-legacy-table .c-care-body {
+    overflow: visible !important;
+}
+
+/* Care dialog — table field layout like Pushsale */
+html body.pushsale-app-body .ps-wh-care-dialog .ps-wh-care-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-wh-care-dialog .ps-wh-care-table th,
+html body.pushsale-app-body .ps-wh-care-dialog .ps-wh-care-table td {
+    border: 1px solid #c8d2dc;
+    font-size: 12px;
+    padding: 8px 10px;
+    vertical-align: middle;
+}
+
+html body.pushsale-app-body .ps-wh-care-dialog .ps-wh-care-table th {
+    background: #eef5fb;
+    color: #333;
+    font-weight: 600;
+    text-align: left;
+    white-space: nowrap;
+    width: 38%;
+}
+
+html body.pushsale-app-body .ps-wh-care-dialog .ps-wh-care-table td {
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-wh-care-dialog .ps-wh-care-table a {
+    color: #337ab7;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-wh-care-dialog .ps-wh-care-table select,
+html body.pushsale-app-body .ps-wh-care-dialog .ps-wh-care-table textarea {
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-wh-care-dialog .ps-wh-care-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
 }
 
 /* FAB: show all child buttons when menu is open (no per-row reveal / fade) */

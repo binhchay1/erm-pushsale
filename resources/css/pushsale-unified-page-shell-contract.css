@@ -1030,12 +1030,27 @@ html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-date-range input {
     margin: 0 !important;
 }
 
-html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-date-range {
+html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-date-range:not(.ps-date-range-control) {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) !important;
     align-items: center !important;
     gap: 6px !important;
     width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-date-range.ps-date-range-control {
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-date-range.ps-date-range-control::after {
+    content: none !important;
+    display: none !important;
 }
 
 html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-status-row.ttgh-acc,

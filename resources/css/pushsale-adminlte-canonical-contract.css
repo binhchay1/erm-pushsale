@@ -275,16 +275,16 @@ html body.pushsale-app-body .ps-select__control > span {
     white-space: nowrap !important;
 }
 
-/* Unified date/range controls: restore visible, clickable native date inputs. */
-html body.pushsale-app-body .ps-date-filter,
-html body.pushsale-app-body .ps-date-range,
-html body.pushsale-app-body .ps-date-range-control,
+/* Unified date/range controls: restore visible, clickable native date inputs.
+ * Single-button DateRangeFilter (.ps-date-range-control) stays block/full-width — not dual-grid. */
+html body.pushsale-app-body .ps-date-filter:not(.ps-date-range-control),
+html body.pushsale-app-body .ps-date-range:not(.ps-date-range-control),
 html body.pushsale-app-body .date-range-wrap,
 html body.pushsale-app-body .legacy-range,
 html body.pushsale-app-body .ps-login-date-range,
 html body.pushsale-app-body .ps-revenue-detail-date-range,
 html body.pushsale-app-body .ps-sales-revenue-date-range,
-html body.pushsale-app-body .ps-wh-date-range {
+html body.pushsale-app-body .ps-wh-date-range:not(.ps-date-range-control) {
     position: relative !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
@@ -299,8 +299,25 @@ html body.pushsale-app-body .ps-wh-date-range {
     border: 0 !important;
     background: transparent !important;
 }
-html body.pushsale-app-body .ps-date-range::after,
-html body.pushsale-app-body .ps-date-filter::after,
+
+html body.pushsale-app-body .ps-date-filter.ps-date-range-control,
+html body.pushsale-app-body .ps-date-range-control,
+html body.pushsale-app-body .ps-wh-date-range.ps-date-range-control {
+    position: relative !important;
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+html body.pushsale-app-body .ps-date-range:not(.ps-date-range-control)::after,
+html body.pushsale-app-body .ps-date-filter:not(.ps-date-range-control)::after,
 html body.pushsale-app-body .date-range-wrap::after,
 html body.pushsale-app-body .legacy-range::after {
     content: '-' !important;
@@ -313,6 +330,13 @@ html body.pushsale-app-body .legacy-range::after {
     color: #777 !important;
     font-size: 12px !important;
     pointer-events: none !important;
+}
+
+html body.pushsale-app-body .ps-date-filter.ps-date-range-control::after,
+html body.pushsale-app-body .ps-date-range-control::after,
+html body.pushsale-app-body .ps-wh-date-range.ps-date-range-control::after {
+    content: none !important;
+    display: none !important;
 }
 html body.pushsale-app-body .ps-date-filter .ps-date-filter-separator,
 html body.pushsale-app-body .ps-date-range > span:not(.ps-date-range-label),

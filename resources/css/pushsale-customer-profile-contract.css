@@ -3,6 +3,17 @@
  * Scoped to .ps-customer-profile-page / .ps-customer-dialog / .ps-purchase-history-dialog.
  */
 
+/* Table headers: keep Pushsale-normal size (override global 12px/700 bump) */
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table th {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 14px !important;
+    height: auto !important;
+    min-height: 48px !important;
+    padding: 4px 5px !important;
+}
+
 /* —— Advanced filters: 4 rows like Pushsale screenshot —— */
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-panel {
     padding: 8px 15px 10px !important;
@@ -16,7 +27,7 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-ro
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-5 {
-    grid-template-columns: minmax(220px, 1.5fr) repeat(4, minmax(140px, 1fr)) !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-6 {

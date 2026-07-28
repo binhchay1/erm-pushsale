@@ -186,8 +186,35 @@ class WarehouseOrderActionController extends Controller
         $data = $request->validate([
             'status' => ['nullable', Rule::in(['waiting', 'calling', 'confirmed', 'reschedule', 'complaint', 'completed'])],
             'note' => ['nullable', 'string', 'max:2000'],
+            'request_redelivery' => ['sometimes', 'boolean'],
         ]);
-        return response()->json(['order' => $this->service->updateCare($order, $data['status'] ?? null, $data['note'] ?? null, $request->user())]);
+
+        $order = $this->service->updateCare(
+            $order,
+            $data['status'] ?? null,
+            $data['note'] ?? null,
+            $request->user(),
+            (bool) ($data['request_redelivery'] ?? false),
+        );
+
+        return response()->json([
+            'message' => ($data['request_redelivery'] ?? false) ? 'Đã yêu cầu giao lại.' : 'Đã cập nhật trạng thái care đơn.',
+            'order' => $order,
+        ]);
+    }
+
+    public function internalMessage(Request $request, Order $order): JsonResponse
+    {
+        $data = $request->validate([
+            'message' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $order = $this->service->postInternalMessage($order, $data['message'], $request->user());
+
+        return response()->json([
+            'message' => 'Đã lưu tin nhắn nội bộ.',
+            'order' => $order,
+        ]);
     }
 
     public function deliveryStatus(Request $request, Order $order): JsonResponse

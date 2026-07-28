@@ -30,6 +30,7 @@ Route::middleware('role:'.User::ROLE_ACCOUNTING)->prefix('accounting')->name('ac
     Route::patch('orders/{order}/order-code', [WarehouseOrderActionController::class, 'changeOrderCode'])->name('orders.order-code');
     Route::post('orders/{order}/blacklist', [WarehouseOrderActionController::class, 'blacklist'])->name('orders.blacklist');
     Route::patch('orders/{order}/care', [WarehouseOrderActionController::class, 'care'])->name('orders.care');
+    Route::post('orders/{order}/internal-message', [WarehouseOrderActionController::class, 'internalMessage'])->name('orders.internal-message');
     Route::patch('orders/{order}/delivery-status', [WarehouseOrderActionController::class, 'deliveryStatus'])->name('orders.delivery-status');
     Route::put('orders/{order}', [WarehouseOrderActionController::class, 'updateOrder'])->name('orders.update');
     Route::post('orders/{order}/split', [WarehouseOrderActionController::class, 'split'])->name('orders.split');

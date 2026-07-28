@@ -252,13 +252,20 @@ html body.pushsale-app-body .ps-operation-history-modal .ps-history-table > tbod
 
 /* —— Pushsale date-range popover ——
  * Single-button control: do NOT use the dual-input grid/`::after` hyphen from
- * pushsale-adminlte-canonical-contract.css (.ps-date-filter 1fr auto 1fr). */
+ * pushsale-adminlte-canonical-contract.css (.ps-date-filter 1fr auto 1fr).
+ * Higher specificity beats .ps-wh-legacy-page .ps-wh-date-range / filter-toolbar grids. */
 html body.pushsale-app-body .ps-date-filter.ps-date-range-control,
-html body.pushsale-app-body .ps-date-range-control:not(.is-boxed) {
+html body.pushsale-app-body .ps-date-range-control:not(.is-boxed),
+html body.pushsale-app-body .ps-wh-page .ps-wh-date-range.ps-date-range-control,
+html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-date-range.ps-date-range-control,
+html body.pushsale-app-body .ps-wh-filter .ps-wh-date-range.ps-date-filter,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-date-range.ps-date-range-control,
+html body.pushsale-app-body .ps-customer-profile-page .ps-date-range-control.ps-date-filter {
     display: block !important;
     grid-template-columns: none !important;
     gap: 0 !important;
     width: 100% !important;
+    max-width: none !important;
     min-width: 0 !important;
     height: auto !important;
     min-height: 0 !important;
@@ -268,10 +275,28 @@ html body.pushsale-app-body .ps-date-range-control:not(.is-boxed) {
 }
 
 html body.pushsale-app-body .ps-date-filter.ps-date-range-control::after,
-html body.pushsale-app-body .ps-date-range-control:not(.is-boxed)::after {
+html body.pushsale-app-body .ps-date-range-control:not(.is-boxed)::after,
+html body.pushsale-app-body .ps-wh-page .ps-wh-date-range.ps-date-range-control::after,
+html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-date-range.ps-date-range-control::after,
+html body.pushsale-app-body .ps-wh-filter .ps-wh-date-range.ps-date-filter::after {
     content: none !important;
     display: none !important;
     width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-drp-popover.is-presets-only {
+    width: 180px !important;
+    min-width: 180px !important;
+}
+
+html body.pushsale-app-body .ps-drp-popover.is-presets-only .ps-drp-ranges {
+    border-right: 0;
+    min-width: 180px;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-drp-popover.is-presets-only .ps-drp-calendars {
+    display: none !important;
 }
 
 html body.pushsale-app-body .ps-date-range-input {

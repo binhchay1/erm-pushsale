@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import { router } from '@inertiajs/react';
 
@@ -37,7 +37,7 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
         setFormError('');
         if (type === 'date') setForm({ desired_delivery_at: row.desiredDeliveryAt?.slice(0, 16) ?? '' });
         if (type === 'blacklist') setForm({ phone: row.customerPhone ?? '', reason: 'Chờ vận đơn' });
-        if (type === 'care') setForm({ status: row.warehouseCareStatus ?? 'waiting', note: row.warehouseCareNote ?? '' });
+        if (type === 'care') setForm({ status: row.warehouseCareStatus ?? '', note: '' });
         if (type === 'message') setForm({ message: '' });
         if (type === 'changeCode') setForm({ order_code: row.orderCode ?? '' });
         if (type === 'delivery') setForm({ delivery_status: row.deliveryStatusValue ?? 'waiting_waybill', note: row.shippingNotes ?? '', collected_amount: row.settledCodAmount ?? 0 });
@@ -110,11 +110,9 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
             if (type === 'blacklist') { path += '/blacklist'; method = 'POST'; }
             if (type === 'care') path += '/care';
             if (type === 'message') {
-                path += '/care';
-                payload = {
-                    status: row.warehouseCareStatus ?? 'waiting',
-                    note: [row.warehouseCareNote, `[Nội bộ] ${String(form.message).trim()}`].filter(Boolean).join('\n'),
-                };
+                path += '/internal-message';
+                method = 'POST';
+                payload = { message: String(form.message ?? '').trim() };
             }
             if (type === 'delivery') path += '/delivery-status';
             if (type === 'edit') method = 'PUT';
@@ -126,6 +124,28 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
             router.reload({ only: ['report', 'filters', 'filterOptions'] });
         } catch (error) {
             setFormError(error.message || 'Không thể cập nhật đơn hàng.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const submitRedelivery = async () => {
+        setFormError('');
+        setLoading(true);
+        try {
+            const result = await apiRequest(`${endpoint}/care`, {
+                method: 'PATCH',
+                body: {
+                    status: 'reschedule',
+                    note: form.note ?? '',
+                    request_redelivery: true,
+                },
+            });
+            toast.success(result.message ?? 'Đã yêu cầu giao lại.');
+            onClose();
+            router.reload({ only: ['report', 'filters', 'filterOptions'] });
+        } catch (error) {
+            setFormError(error.message || 'Không thể yêu cầu giao lại.');
         } finally {
             setLoading(false);
         }
@@ -147,18 +167,73 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
 
     return (
         <Dialog open={Boolean(action)} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className={`ps-wh-dialog ${type === 'edit' || type === 'split' || type === 'return' ? 'wide' : ''}`}>
+            <DialogContent className={`ps-wh-dialog ${type === 'care' ? 'ps-wh-care-dialog' : ''} ${type === 'edit' || type === 'split' || type === 'return' ? 'wide' : ''}`.trim()}>
                 <DialogHeader><DialogTitle>{titles[type]}</DialogTitle></DialogHeader>
                 <div className="ps-wh-dialog-body">
                     {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
-                    <div className="ps-wh-dialog-order-summary">
-                        <span><b>Mã đơn:</b> {row.orderCode}</span><span><b>Khách:</b> {row.customerName}</span><span><b>SĐT:</b> {row.customerPhone}</span><span><b>Trạng thái:</b> {row.deliveryStatus}</span>
-                    </div>
+                    {type !== 'care' ? (
+                        <div className="ps-wh-dialog-order-summary">
+                            <span><b>Mã đơn:</b> {row.orderCode}</span><span><b>Khách:</b> {row.customerName}</span><span><b>SĐT:</b> {row.customerPhone}</span><span><b>Trạng thái:</b> {row.deliveryStatus}</span>
+                        </div>
+                    ) : null}
 
                     {type === 'date' && <Field label="Ngày giao hàng mong muốn" required><input type="datetime-local" value={form.desired_delivery_at ?? ''} onChange={(e) => setForm({ ...form, desired_delivery_at: e.target.value })} /></Field>}
                     {type === 'changeCode' && <Field label="Mã đơn mới" required><input value={form.order_code ?? ''} onChange={(e) => setForm({ ...form, order_code: e.target.value })} maxLength={80} /></Field>}
                     {type === 'blacklist' && <><Field label="Số blacklist" required><input value={form.phone ?? ''} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field><Field label="Lý do" required><input value={form.reason ?? ''} onChange={(e) => setForm({ ...form, reason: e.target.value })} /></Field></>}
-                    {type === 'care' && <><Field label="Chuyển sang trạng thái"><select value={form.status ?? ''} onChange={(e) => setForm({ ...form, status: e.target.value })}>{(filterOptions.warehouseCareStatuses ?? []).map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></Field><Field label="Ghi chú"><textarea value={form.note ?? ''} onChange={(e) => setForm({ ...form, note: e.target.value })} /></Field></>}
+                    {type === 'care' && (
+                        <div>
+                            <table className="ps-wh-care-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <td><a href={`/admin/warehouse/orders/${row.id}`} onClick={(e) => e.preventDefault()}>{row.orderCode}</a></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Họ tên khách hàng</th>
+                                        <td>{row.effectiveReceiverName || row.customerName || ''}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Số điện thoại</th>
+                                        <td>{row.effectiveReceiverPhone || row.customerPhone || ''}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Đơn vị giao vận</th>
+                                        <td>{row.shippingProviderLabel || row.shippingMethod || ''}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Mã giao vận</th>
+                                        <td>{row.trackingNumber || ''}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Trạng thái care đơn hiện tại</th>
+                                        <td>{row.warehouseCareStatusLabel || row.warehouseCareStatus || ''}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Chuyển sang trạng thái care đơn</th>
+                                        <td>
+                                            <select value={form.status ?? ''} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                                                <option value="">--Care đơn--</option>
+                                                {(filterOptions.warehouseCareStatuses ?? []).map((item) => (
+                                                    <option key={item.value} value={item.value}>{item.label}</option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Ghi chú</th>
+                                        <td>
+                                            <textarea
+                                                rows={4}
+                                                value={form.note ?? ''}
+                                                onChange={(e) => setForm({ ...form, note: e.target.value })}
+                                                placeholder=""
+                                            />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                     {type === 'message' && <Field label="Nội dung tin nhắn nội bộ" required><textarea value={form.message ?? ''} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} /></Field>}
                     {type === 'delivery' && <><Field label="Chuyển sang trạng thái"><select value={form.delivery_status ?? ''} onChange={(e) => setForm({ ...form, delivery_status: e.target.value })}>{deliveryStatuses.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field><Field label="Ghi chú"><textarea value={form.note ?? ''} onChange={(e) => setForm({ ...form, note: e.target.value })} /></Field><Field label="Tiền đã thu (giao một phần/COD)"><MoneyInput value={form.collected_amount} onChange={(value) => setForm({ ...form, collected_amount: value })} /></Field></>}
 
@@ -191,7 +266,25 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
 
                     {type === 'timeline' && <div className="ps-wh-timeline">{(row.statusEvents ?? []).length ? row.statusEvents.map((event) => <div key={event.id}><time>{formatDateTime(event.occurredAt, { withSeconds: false })}</time><strong>{event.rawStatus || event.mappedStatus}</strong><span>{event.location || ''} {event.note || ''}</span>{event.financials && <small>COD: {formatCurrency(event.financials.cod_remitted || event.financials.cod_collected || event.financials.cod_amount)} · Phí: {formatCurrency((event.financials.shipping_fee || 0)+(event.financials.return_fee || 0)+(event.financials.cod_fee || 0)+(event.financials.other_fee || 0))}</small>}</div>) : <p>Chưa có sự kiện từ đơn vị vận chuyển.</p>}</div>}
                 </div>
-                {type !== 'timeline' && <DialogFooter className="ps-wh-dialog-footer"><Button variant="outline" onClick={onClose} disabled={loading}>Đóng</Button><Button onClick={submit} disabled={loading}>{loading ? <Loader2 className="animate-spin" size={15} /> : <Save size={15} />} Cập nhật</Button></DialogFooter>}
+                {type !== 'timeline' && (
+                    <DialogFooter className="ps-wh-dialog-footer">
+                        {type === 'care' ? (
+                            <div className="ps-wh-care-actions">
+                                <Button onClick={submit} disabled={loading}>
+                                    {loading ? <Loader2 className="animate-spin" size={15} /> : <Save size={15} />} Cập nhật
+                                </Button>
+                                <Button variant="default" onClick={submitRedelivery} disabled={loading}>
+                                    {loading ? <Loader2 className="animate-spin" size={15} /> : <Truck size={15} />} Yêu cầu giao lại
+                                </Button>
+                            </div>
+                        ) : (
+                            <>
+                                <Button variant="outline" onClick={onClose} disabled={loading}>Đóng</Button>
+                                <Button onClick={submit} disabled={loading}>{loading ? <Loader2 className="animate-spin" size={15} /> : <Save size={15} />} Cập nhật</Button>
+                            </>
+                        )}
+                    </DialogFooter>
+                )}
             </DialogContent>
         </Dialog>
     );
