@@ -245,12 +245,28 @@ final class WorkspaceUiDemoService
                 'note' => 'Đã chốt, chờ kho tạo vận đơn.',
             ],
             [
+                'name' => 'Ngô Văn UX Demo Giao ngay',
+                'stage' => OperationStage::Call2,
+                'result' => OperationResult::ReceivedOrder,
+                'closing' => ClosingStatus::Closed,
+                'delivery' => DeliveryStatus::DeliverNow,
+                'note' => 'Chốt giao ngay — kho ưu tiên.',
+            ],
+            [
                 'name' => 'Hoàng Minh UX Demo Đang giao',
                 'stage' => OperationStage::Call2,
                 'result' => OperationResult::ReceivedOrder,
                 'closing' => ClosingStatus::Closed,
                 'delivery' => DeliveryStatus::Delivering,
                 'note' => 'Đã xuất kho, đang giao.',
+            ],
+            [
+                'name' => 'Lý Văn UX Demo Đã thanh toán',
+                'stage' => OperationStage::Care1,
+                'result' => OperationResult::GoodEffect,
+                'closing' => ClosingStatus::Closed,
+                'delivery' => DeliveryStatus::Paid,
+                'note' => 'Đã giao và thanh toán COD.',
             ],
             [
                 'name' => 'Vũ Thị UX Demo Giao xong',
@@ -273,7 +289,7 @@ final class WorkspaceUiDemoService
                 'stage' => OperationStage::Call2,
                 'result' => OperationResult::WrongNumber,
                 'closing' => ClosingStatus::Cancelled,
-                'delivery' => null,
+                'delivery' => DeliveryStatus::CancelClosing,
                 'note' => 'Sai số — hủy đơn.',
             ],
         ];
@@ -294,11 +310,18 @@ final class WorkspaceUiDemoService
         $subtotal = $unitPrice * $qty;
         $shipFee = 30_000;
         $total = $subtotal + $shipFee;
-        $arrivedAt = now()->subDays(8 - min(7, $index))->subHours($index);
+        $arrivedAt = now()->subDays(($index - 1) % 5)->setTime(9 + ($index % 8), 15 + $index);
         $assignedAt = $arrivedAt->copy()->addMinutes(30);
-        $closed = $scenario['closing'] === ClosingStatus::Closed;
+        $isClosedLike = in_array($scenario['closing'], [ClosingStatus::Closed, ClosingStatus::Cancelled], true);
         $delivery = $scenario['delivery'];
-        $hasWaybill = $delivery instanceof DeliveryStatus;
+        $deliveryStatus = $delivery instanceof DeliveryStatus
+            ? $delivery->value
+            : DeliveryStatus::WaitingWaybill->value;
+        $closedAt = $isClosedLike
+            ? $assignedAt->copy()->addHours(2 + ($index % 4))
+            : null;
+        $needsWaybill = $scenario['closing'] === ClosingStatus::Closed
+            || ($delivery instanceof DeliveryStatus && $delivery !== DeliveryStatus::WaitingWaybill);
 
         $order = Order::query()->create([
             'order_code' => self::ORDER_PREFIX.str_pad((string) $index, 4, '0', STR_PAD_LEFT),
@@ -313,16 +336,20 @@ final class WorkspaceUiDemoService
             'customer_note' => self::NOTE_TAG.' '.$scenario['note'],
             'sale_operation_note' => self::NOTE_TAG.' '.$scenario['note'],
             'shipping_address' => 'Số '.$index.' đường UX Demo, Hà Nội',
+            'shipping_method' => 'viettel_post',
+            'shipping_provider' => 'viettel_post',
             'data_arrived_at' => $arrivedAt,
             'assigned_at' => $assignedAt,
-            'closed_at' => $closed ? $assignedAt->copy()->addHours(3) : null,
-            'next_operation_at' => $closed ? null : now()->addHours($index),
+            'closed_at' => $closedAt,
+            'next_operation_at' => $closedAt ? null : now()->addHours($index),
             'operation_stage' => $scenario['stage']->value,
             'operation_result' => $scenario['result']->value,
             'closing_status' => $scenario['closing']->value,
-            'delivery_status' => $hasWaybill ? $delivery->value : DeliveryStatus::WaitingWaybill->value,
-            'carrier_name' => $hasWaybill ? 'Viettel Post(COD)' : null,
-            'tracking_number' => $hasWaybill ? 'UXVT'.str_pad((string) (1000 + $index), 6, '0', STR_PAD_LEFT) : null,
+            'delivery_status' => $deliveryStatus,
+            'carrier_name' => $needsWaybill || $scenario['closing'] === ClosingStatus::Closed ? 'Viettel Post(COD)' : null,
+            'tracking_number' => ($needsWaybill || $scenario['closing'] === ClosingStatus::Closed)
+                ? 'UXVT'.str_pad((string) (1000 + $index), 6, '0', STR_PAD_LEFT)
+                : null,
             'is_returning_customer' => $index % 4 === 0,
             'subtotal' => $subtotal,
             'discount' => 0,
