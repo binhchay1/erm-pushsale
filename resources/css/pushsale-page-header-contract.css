@@ -1008,10 +1008,35 @@ html body.pushsale-app-body .ps-page-shell > .ps-page-shell__toolbar {
 }
 
 html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body {
-    padding-top: 10px !important;
+    /* Tables flush with shell edges; toolbar/header keep --ps-header-x gutters. */
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Form-only shells still need side gutters. */
+html body.pushsale-app-body .ps-page-shell.ps-unit-profile-page > .ps-page-shell__body,
+html body.pushsale-app-body .ps-page-shell.ps-account-profile-page > .ps-page-shell__body {
+    padding: 0 20px 24px !important;
+}
+
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .ps-table-scroll,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .table-responsive,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .ps-users-table-wrap,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .ps-hr-config-table-wrap,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > table {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .pushsale-pagination,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .ps-pagination,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .pagination-wrapper {
     padding-left: var(--ps-header-x) !important;
     padding-right: var(--ps-header-x) !important;
-    padding-bottom: 14px !important;
 }
 
 /* Căn lề title / filter / toolbar / body: bỏ padding ngang kép từ page class. */
@@ -1155,8 +1180,8 @@ html body.pushsale-app-body .ps-page-shell > .ps-page-shell__toolbar {
     }
 
     html body.pushsale-app-body .ps-page-shell__body {
-        padding-left: var(--ps-header-x) !important;
-        padding-right: var(--ps-header-x) !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
         min-width: 0 !important;
     }
 

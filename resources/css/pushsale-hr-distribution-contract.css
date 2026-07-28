@@ -2,12 +2,12 @@
 
 html body.pushsale-app-body .ps-hr-config-page {
     min-height: calc(100vh - var(--ps-header-height, 50px));
-    padding: 0 0 20px;
+    padding: 0 !important;
     background: #fff;
 }
 
 html body.pushsale-app-body .ps-hr-config-page .ps-page-shell__body {
-    padding-top: 10px !important;
+    padding: 0 !important;
 }
 
 html body.pushsale-app-body .ps-hr-config-filters {

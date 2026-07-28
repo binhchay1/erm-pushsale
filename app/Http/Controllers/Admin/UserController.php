@@ -505,6 +505,13 @@ class UserController extends Controller
             'is_locked' => ['sometimes', 'boolean'],
         ]);
 
+        if ($request->exists('receive_data')) {
+            $data['receive_data'] = $request->boolean('receive_data');
+        }
+        if ($request->exists('is_locked')) {
+            $data['is_locked'] = $request->boolean('is_locked');
+        }
+
         if ($data === []) {
             return back()->with('error', 'Không có trạng thái nào được cập nhật.');
         }

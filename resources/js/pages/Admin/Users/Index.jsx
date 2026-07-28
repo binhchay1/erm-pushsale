@@ -20,24 +20,39 @@ function currentFilters() {
 }
 
 function CircleStatus({ active, title, onClick, disabled = false }) {
-    const icon = active
-        ? <i className="fa fa-check-circle-o text-green" />
-        : <i className="fa fa-circle-o" />;
+    const checked = Boolean(active);
 
     if (!onClick) {
-        return <span className={`ps-circle-status ${active ? 'is-on' : 'is-off'}`} title={title}>{icon}</span>;
+        return (
+            <span
+                className={`ps-round-tick ${checked ? 'is-on' : 'is-off'}`}
+                title={title}
+                aria-hidden="true"
+            >
+                <i className={`fa ${checked ? 'fa-check' : ''}`} />
+            </span>
+        );
     }
 
     return (
-        <button
-            type="button"
-            className={`ps-circle-status ps-circle-button ${active ? 'is-on' : 'is-off'}`}
+        <label
+            className={`ps-round-tick-wrap ${disabled ? 'is-disabled' : ''}`}
             title={title}
-            disabled={disabled}
-            onClick={onClick}
         >
-            {icon}
-        </button>
+            <input
+                type="checkbox"
+                className="ps-round-tick-input"
+                checked={checked}
+                disabled={disabled}
+                onChange={() => {
+                    if (!disabled) onClick();
+                }}
+                aria-label={title}
+            />
+            <span className={`ps-round-tick ${checked ? 'is-on' : 'is-off'}`} aria-hidden="true">
+                {checked ? <i className="fa fa-check" /> : null}
+            </span>
+        </label>
     );
 }
 
@@ -241,7 +256,9 @@ export default function UsersIndex({
                                             disabled={!row.can_manage}
                                             title={row.receive_data ? 'Tắt nhận dữ liệu' : 'Bật nhận dữ liệu'}
                                             onClick={row.can_manage
-                                                ? () => router.patch(`/admin/users/${row.id}/operational-status`, { receive_data: !row.receive_data }, { preserveScroll: true })
+                                                ? () => router.patch(`/admin/users/${row.id}/operational-status`, {
+                                                    receive_data: row.receive_data ? 0 : 1,
+                                                }, { preserveScroll: true })
                                                 : undefined}
                                         />
                                     </td>
@@ -252,7 +269,9 @@ export default function UsersIndex({
                                             disabled={!row.can_manage}
                                             title={row.is_locked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
                                             onClick={row.can_manage
-                                                ? () => router.patch(`/admin/users/${row.id}/operational-status`, { is_locked: !row.is_locked }, { preserveScroll: true })
+                                                ? () => router.patch(`/admin/users/${row.id}/operational-status`, {
+                                                    is_locked: row.is_locked ? 0 : 1,
+                                                }, { preserveScroll: true })
                                                 : undefined}
                                         />
                                     </td>
