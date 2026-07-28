@@ -27,6 +27,7 @@ export default function LeadsIndex({
     statuses,
     packetTypes = [],
     campaigns = [],
+    manualSources = null,
     salesUsers = [],
     allocateUrl = '/admin/leads/allocate',
     deleteUrlPrefix = '/admin/leads',
@@ -209,7 +210,7 @@ export default function LeadsIndex({
                     importUrl={importUrl}
                     templateUrl={templateUrl}
                     productOptions={products}
-                    sources={campaigns}
+                    sources={manualSources ?? campaigns}
                     importFields={importFields}
                     canManageTemplate={canManageTemplate}
                     companyTemplate={companyTemplate}

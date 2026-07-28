@@ -153,9 +153,11 @@ Do **not** add another sidebar override CSS file. Page CSS must not override `.p
 ## v130 Landing source flags
 
 - Trang 2.4.1 không được validate/gắn sản phẩm ở form tạo/sửa nguồn dữ liệu.
-- `manual_import` luôn bật cho nguồn landing.
+- `manual_import` (Nhập TC) **không** mặc định bật: tick trong dialog/list mới cho phép nhập data tay vào nguồn đó.
+- Form tạo nguồn: checkbox Nhập TC editable, mặc định tắt (giống Pushsale).
+- Dropdown nguồn ở nhập data thủ công (`2.6.2`, dialog leads) chỉ liệt kê nguồn eligible: có landing connection + `manual_import=true`, hoặc nguồn legacy không gắn landing.
 - `metadata.request_approval` luôn bật; muốn chạy live phải duyệt ở menu duyệt kết nối.
-- Checkbox `Nhập TC` và `Duyệt` trong bảng chỉ là thao tác bật nhanh/hiển thị trạng thái contract, không thay thế bước duyệt chính.
+- Checkbox `Duyệt` trong bảng (Admin) = duyệt/hủy duyệt nhanh; không thay thế menu duyệt khi cần gắn sản phẩm/ngân sách.
 
 ## v131 UI Contract Addendum
 - Page header/frame rhythm: `PushsalePageShell` + `pushsale-page-frame-contract.css` (+ adminlte-canonical cho control chrome). *(Phần header đã chuyển sang `PageHeader` — xem mục “Route, naming và header dùng chung” ở cuối file.)*

@@ -754,6 +754,8 @@ export default {
         connect: 'Kết nối',
         copy: 'Copy',
         toggle_manual_import: 'Bật/tắt nhập thủ công cho nguồn landing',
+        manual_import_hint_on: 'Đã bật — nguồn hiện trong form nhập data thủ công',
+        manual_import_hint_off: 'Tắt — không cho nhập data tay vào nguồn này',
         toggle_approval: 'Tích để auto duyệt nguồn (chỉ Admin)',
         approval_admin_only: 'Chỉ Admin mới được duyệt tại đây. Marketing tạo nguồn mặc định chưa duyệt.',
         approval_auto_hint: 'Tích = auto duyệt ngay. Bỏ tích = chưa duyệt.',

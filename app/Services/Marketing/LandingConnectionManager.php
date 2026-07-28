@@ -451,8 +451,8 @@ class LandingConnectionManager
             'budget_start_date' => filled($data['budget_start_date'] ?? null) ? $data['budget_start_date'] : null,
             'budget_end_date' => filled($data['budget_end_date'] ?? null) ? $data['budget_end_date'] : null,
             'success_url' => filled($data['success_url'] ?? null) ? trim((string) $data['success_url']) : null,
-            // Contract v130: landing source is always manually accepted and must pass approval before live use.
-            'manual_import' => true,
+            // Tick Nhập TC = cho phép nhập data tay; mặc định tắt giống Pushsale.
+            'manual_import' => (bool) ($data['manual_import'] ?? false),
             'is_approved' => $approved,
             'is_active' => (bool) ($data['is_active'] ?? true),
             'approved_by_user_id' => $approved ? ($existing?->approved_by_user_id ?: $actor->id) : null,

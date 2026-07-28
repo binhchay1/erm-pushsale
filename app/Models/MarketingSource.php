@@ -88,6 +88,20 @@ class MarketingSource extends Model
         return $this->hasOne(LandingConnection::class);
     }
 
+    /**
+     * Nguồn được phép chọn khi nhập data thủ công:
+     * - có landing connection và đã bật Nhập TC, hoặc
+     * - nguồn legacy không gắn landing connection.
+     */
+    public function scopeEligibleForManualEntry($query)
+    {
+        return $query->where(function ($builder): void {
+            $builder->whereHas('landingConnection', static function ($landing): void {
+                $landing->where('manual_import', true);
+            })->orWhereDoesntHave('landingConnection');
+        });
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);

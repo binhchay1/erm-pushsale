@@ -53,6 +53,7 @@ class LandingConnectionApprovalFlagTest extends TestCase
 
         $connection = LandingConnection::query()->where('name', 'Landing inline duyệt')->firstOrFail();
         $this->assertFalse((bool) $connection->is_approved);
+        $this->assertTrue((bool) $connection->manual_import);
 
         $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
             'is_approved' => 1,
@@ -107,5 +108,63 @@ class LandingConnectionApprovalFlagTest extends TestCase
             ->assertForbidden();
 
         $this->assertFalse((bool) $connection->fresh()->is_approved);
+    }
+
+    public function test_create_defaults_manual_import_off_and_respects_dialog_tick(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $marketer = User::factory()->create([
+            'role' => UserRole::Marketing,
+            'company_id' => $admin->company_id,
+        ]);
+
+        $this->actingAs($admin);
+
+        $base = [
+            'name' => 'Landing không nhập TC',
+            'marketer_user_id' => $marketer->id,
+            'connection_type' => 'landing',
+            'ad_channel' => 'facebook_ads',
+            'allocation_method' => 'inherit',
+            'is_approved' => false,
+            'is_active' => true,
+            'sources' => [[
+                'client_key' => 'main-no-manual',
+                'name' => 'Landing không nhập TC',
+                'source_type' => 'main',
+                'source_url' => 'https://landing.example.test/no-manual',
+                'redirect_url' => null,
+                'sort_order' => 0,
+                'is_active' => true,
+            ]],
+            'products' => [],
+            'sale_user_ids' => [],
+        ];
+
+        $this->post('/admin/marketing/landing-connections/records', [
+            ...$base,
+            'manual_import' => 0,
+        ])->assertRedirect('/admin/marketing/landing-connections');
+
+        $off = LandingConnection::query()->where('name', 'Landing không nhập TC')->firstOrFail();
+        $this->assertFalse((bool) $off->manual_import);
+
+        $this->post('/admin/marketing/landing-connections/records', [
+            ...$base,
+            'name' => 'Landing có nhập TC',
+            'manual_import' => 1,
+            'sources' => [[
+                'client_key' => 'main-yes-manual',
+                'name' => 'Landing có nhập TC',
+                'source_type' => 'main',
+                'source_url' => 'https://landing.example.test/yes-manual',
+                'redirect_url' => null,
+                'sort_order' => 0,
+                'is_active' => true,
+            ]],
+        ])->assertRedirect('/admin/marketing/landing-connections');
+
+        $on = LandingConnection::query()->where('name', 'Landing có nhập TC')->firstOrFail();
+        $this->assertTrue((bool) $on->manual_import);
     }
 }

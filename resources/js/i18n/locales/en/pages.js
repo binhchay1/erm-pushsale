@@ -755,6 +755,8 @@ export default {
         connect: 'Connect',
         copy: 'Copy',
         toggle_manual_import: 'Toggle manual import for this landing source',
+        manual_import_hint_on: 'On — source appears in manual lead entry forms',
+        manual_import_hint_off: 'Off — manual data entry into this source is blocked',
         toggle_approval: 'Check to auto-approve source (Admin only)',
         approval_admin_only: 'Only Admin can approve here. Marketing sources default to not approved.',
         approval_auto_hint: 'Checked = auto-approved. Unchecked = pending approval.',

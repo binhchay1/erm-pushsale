@@ -350,7 +350,13 @@ class PushsalePageService
             'shippingProviders' => collect(config('shipping_partners.providers', []))->map(
                 fn (array $provider, string $key): array => ['id' => $key, 'label' => (string) ($provider['label'] ?? strtoupper($key))]
             )->values()->all(),
-            'sources' => MarketingSource::query()->orderBy('name')->limit(1000)->get(['id', 'name'])->map(fn (MarketingSource $source) => ['id' => $source->id, 'label' => $source->name])->all(),
+            'sources' => MarketingSource::query()
+                ->eligibleForManualEntry()
+                ->orderBy('name')
+                ->limit(1000)
+                ->get(['id', 'name'])
+                ->map(fn (MarketingSource $source) => ['id' => $source->id, 'label' => $source->name])
+                ->all(),
             'orders' => Order::query()->latest('id')->limit(1000)->get(['id', 'order_code', 'customer_name', 'customer_phone'])->map(fn (Order $order) => [
                 'id' => $order->id,
                 'label' => trim($order->order_code.' · '.$order->customer_name.' · '.$order->customer_phone),
@@ -799,7 +805,7 @@ class PushsalePageService
     private function marketingSources(): Collection
     {
         return MarketingSource::query()
-            ->with(['marketer:id,name', 'product:id,name'])
+            ->with(['marketer:id,name', 'product:id,name', 'landingConnection:id,marketing_source_id,manual_import'])
             ->latest('id')
             ->limit(2000)
             ->get()
@@ -817,7 +823,7 @@ class PushsalePageService
                     'sale_priority' => $allocation,
                     'allocation' => $allocation,
                     'webhook_url' => url('/api/v1/webhooks/landing/'.$webhookToken),
-                    'manual_import' => true,
+                    'manual_import' => (bool) ($source->landingConnection?->manual_import ?? false),
                     'approved' => (bool) $source->is_approved,
                     'updated_at' => $source->updated_at?->toIso8601String(),
                     'actions' => 'Cập nhật',

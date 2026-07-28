@@ -288,24 +288,24 @@ class AdminViewRoutesSmokeTest extends TestCase
         $this->assertTrue((bool) ($connection->metadata['request_approval'] ?? false));
     }
 
-    public function test_landing_connection_flags_endpoint_forces_manual_import_and_approval_request(): void
+    public function test_landing_connection_flags_endpoint_respects_manual_import_toggle(): void
     {
         $this->seed(FullBusinessDemoSeeder::class);
         $admin = $this->loginAsDemoAdmin();
         $connection = LandingConnection::withoutTenant()->where('company_id', $admin->company_id)->firstOrFail();
 
         $connection->forceFill([
-            'manual_import' => false,
-            'metadata' => ['request_approval' => false],
+            'manual_import' => true,
+            'metadata' => ['request_approval' => true, 'pending_approval_flow' => true],
         ])->save();
 
         $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
-            'manual_import' => false,
+            'manual_import' => 0,
             'request_approval' => false,
         ])->assertSessionHas('success');
 
         $connection->refresh();
-        $this->assertTrue((bool) $connection->manual_import);
+        $this->assertFalse((bool) $connection->manual_import);
         $this->assertTrue((bool) ($connection->metadata['request_approval'] ?? false));
         $this->assertTrue((bool) ($connection->metadata['pending_approval_flow'] ?? false));
     }

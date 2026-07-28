@@ -267,13 +267,16 @@ final class LandingConnectionsController extends Controller
     {
         $companyId = $this->resolveCompanyId($request->user());
 
-        // Contract v130: form 2.4.1/2.4.2 chỉ tạo nguồn dữ liệu.
+        // Contract: form 2.4.1 chỉ tạo nguồn dữ liệu.
         // Product/package và ngân sách chỉ được xử lý ở menu duyệt, nên bỏ mọi product payload cũ gửi kèm.
         $request->merge([
             'products' => [],
-            'manual_import' => true,
             'request_approval' => true,
         ]);
+
+        if (! $request->exists('manual_import')) {
+            $request->merge(['manual_import' => false]);
+        }
 
         if (! $request->filled('is_approved')) {
             $request->merge(['is_approved' => false]);
@@ -430,8 +433,8 @@ final class LandingConnectionsController extends Controller
         });
 
         $validated = $validator->validate();
-        // Contract v130: form tạo/sửa nguồn landing luôn nhập thủ công; mặc định chưa duyệt.
-        $validated['manual_import'] = true;
+        // Nhập TC theo tick form/list; muốn chạy live vẫn phải duyệt ở menu duyệt.
+        $validated['manual_import'] = (bool) ($validated['manual_import'] ?? false);
         $validated['request_approval'] = true;
         $validated['is_approved'] = $this->canToggleInlineApproval($request->user())
             ? (bool) ($validated['is_approved'] ?? false)

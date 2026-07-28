@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\MarketingSource;
 use App\Models\User;
 use App\Rules\VietnameseMobilePhone;
 use App\Services\Leads\ManualLeadImportService;
@@ -31,7 +32,25 @@ class ManualLeadController extends Controller
             'name' => ['nullable', 'string', 'max:150'],
             'phone' => ['required', 'string', 'max:30', new VietnameseMobilePhone],
             'address' => ['nullable', 'string', 'max:255'],
-            'marketing_source_id' => ['nullable', 'integer', 'exists:marketing_sources,id'],
+            'marketing_source_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('marketing_sources', 'id'),
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($value === null || $value === '') {
+                        return;
+                    }
+
+                    $allowed = MarketingSource::query()
+                        ->eligibleForManualEntry()
+                        ->whereKey((int) $value)
+                        ->exists();
+
+                    if (! $allowed) {
+                        $fail('Nguồn dữ liệu này chưa bật Nhập TC (nhập thủ công).');
+                    }
+                },
+            ],
             'product_ids' => ['nullable', 'array', 'max:20'],
             'product_ids.*' => ['integer', 'exists:products,id'],
             'items' => ['nullable', 'array', 'max:50'],

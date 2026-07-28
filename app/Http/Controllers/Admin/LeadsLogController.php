@@ -126,6 +126,13 @@ class LeadsLogController extends Controller
                 ->get(['id', 'name'])
                 ->map(fn (MarketingSource $c) => ['id' => (string) $c->id, 'name' => $c->name])
                 ->all(),
+            'manualSources' => MarketingSource::query()
+                ->eligibleForManualEntry()
+                ->whereNull('parent_id')
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (MarketingSource $c) => ['id' => (string) $c->id, 'name' => $c->name])
+                ->all(),
             'salesUsers' => collect($users->nameOptionsByRoles([UserRole::Sales]))
                 ->map(fn (array $u) => ['id' => (string) $u['id'], 'name' => $u['name']])
                 ->all(),

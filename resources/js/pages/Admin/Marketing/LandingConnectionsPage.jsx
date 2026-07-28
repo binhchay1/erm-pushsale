@@ -121,7 +121,7 @@ const blankForm = (marketerId = '') => {
         budget_start_date: budgetDates.start,
         budget_end_date: budgetDates.end,
         success_url: '',
-        manual_import: true,
+        manual_import: false,
         request_approval: true,
         is_approved: false,
         is_active: true,
@@ -178,8 +178,8 @@ function mergeUpsellSources(currentSources = [], urls = []) {
 
 function cleanPayload(data, { canToggleApproval = false } = {}) {
     const payload = { ...data };
-    // Contract v130: nguồn landing luôn nhập thủ công.
-    payload.manual_import = true;
+    // 0/1 để Inertia không drop false; tick = cho phép nhập data tay vào nguồn này.
+    payload.manual_import = data.manual_import ? 1 : 0;
     payload.request_approval = true;
     const urls = splitUpsellUrls(payload.upsell_urls_text);
     const sources = mergeUpsellSources(payload.sources, urls);
@@ -357,7 +357,7 @@ export default function LandingConnectionsPage({
             budget_start_date: row.budget_start_date ?? defaultBudgetDates().start,
             budget_end_date: row.budget_end_date ?? defaultBudgetDates().end,
             success_url: row.success_url ?? '',
-            manual_import: true,
+            manual_import: Boolean(row.manual_import),
             request_approval: true,
             is_approved: Boolean(row.is_approved),
             is_active: Boolean(row.is_active),
@@ -731,7 +731,15 @@ export default function LandingConnectionsPage({
 
                             <div></div>
                             <div className="pslc-dialog-checks pslc-dialog-checks-two">
-                                <label><input type="checkbox" checked readOnly disabled /> {l('manual_import')}</label>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={Boolean(form.data.manual_import)}
+                                        disabled={!canManage}
+                                        onChange={(event) => form.setData('manual_import', event.target.checked)}
+                                    />
+                                    {' '}{l('manual_import')}
+                                </label>
                                 <label>
                                     <input
                                         type="checkbox"
@@ -742,6 +750,8 @@ export default function LandingConnectionsPage({
                                     {' '}{l('approve')}
                                 </label>
                                 <span className="small-tip">
+                                    {form.data.manual_import ? l('manual_import_hint_on') : l('manual_import_hint_off')}
+                                    {' · '}
                                     {form.data.is_approved ? l('approved') : l('pending_approval')}
                                     {canToggleApproval ? ` — ${l('approval_auto_hint')}` : ` — ${l('approval_admin_only')}`}
                                 </span>
