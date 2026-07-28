@@ -385,22 +385,46 @@ html body.pushsale-app-body .pslc-page .pslc-col-small { width: 70px !important;
 html body.pushsale-app-body .pslc-page .pslc-table th.pslc-col-small,
 html body.pushsale-app-body .pslc-page .pslc-table td.pslc-col-small,
 html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell {
-    width: 70px !important;
-    max-width: 70px !important;
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
     text-align: center !important;
     vertical-align: middle !important;
-    padding-left: 2px !important;
-    padding-right: 2px !important;
+    padding: 6px 4px !important;
+}
+
+html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell {
+    /* Center the tick as a block in the cell — avoid form-controls label margin shifting it. */
+    text-align: center !important;
 }
 
 html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell .ps-round-tick-wrap {
     position: relative !important;
+    display: block !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    line-height: 0 !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell .ps-round-tick {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 100% !important;
-    min-height: 22px !important;
-    margin: 0 auto !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell .ps-round-tick-wrap.is-disabled {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    opacity: .55 !important;
 }
 
 /* One round tick only — hide native blue checkbox inside Nhập TC / Duyệt. */
@@ -514,6 +538,16 @@ html body.pushsale-app-body .pslc-dialog-checks-two label {
     gap: 6px !important;
     margin: 0 !important;
     font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .pslc-dialog-checks-two label.is-disabled {
+    opacity: .55 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+html body.pushsale-app-body .pslc-dialog-checks-two label.is-disabled input {
+    cursor: not-allowed !important;
 }
 
 html body.pushsale-app-body .pslc-approval-page {

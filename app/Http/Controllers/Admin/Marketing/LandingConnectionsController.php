@@ -590,7 +590,8 @@ final class LandingConnectionsController extends Controller
 
     private function canToggleInlineApproval(User $user): bool
     {
-        return $user->isAdmin();
+        // Admin công ty hoặc Super Admin nền tảng mới được tick Duyệt (bảng + dialog).
+        return $user->isAdmin() || $user->isPlatformAdmin();
     }
 
     private function shouldLockMarketerToSelf(User $user): bool

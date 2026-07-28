@@ -58,18 +58,41 @@ final class WorkspaceUiDemoService
         return app(TenantManager::class)->forCompany($companyId, function () use ($companyId): array {
             $this->purge();
 
-            $sale = User::query()->where('role', UserRole::Sales)->orderBy('id')->first()
-                ?? User::query()->where('role', UserRole::Admin)->orderBy('id')->first();
-            $warehouseUser = User::query()->where('role', UserRole::Warehouse)->orderBy('id')->first()
-                ?? User::query()->where('role', UserRole::Admin)->orderBy('id')->first();
-            $admin = User::query()->where('role', UserRole::Admin)->orderBy('id')->first() ?? $sale;
-            $product = Product::query()->where('is_active', true)->where('type', 'product')->orderBy('id')->first()
-                ?? Product::query()->orderBy('id')->first();
-            $warehouse = Warehouse::query()->orderBy('id')->first();
+            $users = User::query()->withoutGlobalScopes()->where(function ($q) use ($companyId): void {
+                $q->where('company_id', $companyId)->orWhereNull('company_id');
+            })->orderBy('id')->get();
 
-            if (! $sale || ! $product || ! $warehouse) {
-                throw new \RuntimeException('Thiếu user sale/sản phẩm/kho — chạy seed tài khoản & catalog trước.');
+            if ($users->isEmpty()) {
+                $users = User::query()->withoutGlobalScopes()->orderBy('id')->limit(20)->get();
             }
+
+            $sale = $users->first(fn (User $u) => $u->role === UserRole::Sales)
+                ?? $users->first(fn (User $u) => $u->role === UserRole::Admin)
+                ?? $users->first();
+            $warehouseUser = $users->first(fn (User $u) => $u->role === UserRole::Warehouse)
+                ?? $users->first(fn (User $u) => $u->role === UserRole::Admin)
+                ?? $sale;
+            $admin = $users->first(fn (User $u) => $u->role === UserRole::Admin)
+                ?? $users->first(fn (User $u) => (bool) $u->is_platform_admin)
+                ?? $sale;
+
+            if (! $sale) {
+                throw new \RuntimeException('Thiếu user — cần ít nhất 1 tài khoản trong DB.');
+            }
+
+            // Gắn company cho user demo nếu đang null để order/history thuộc đúng tenant UI.
+            foreach ([$sale, $warehouseUser, $admin] as $actor) {
+                if ($actor && ! $actor->company_id) {
+                    $actor->forceFill(['company_id' => $companyId])->save();
+                }
+            }
+
+            $product = Product::query()->where('is_active', true)->where('type', 'product')->orderBy('id')->first()
+                ?? Product::query()->orderBy('id')->first()
+                ?? $this->ensureDemoProduct($companyId, $admin ?? $sale);
+
+            $warehouse = Warehouse::query()->orderBy('id')->first()
+                ?? $this->ensureDemoWarehouse($companyId);
 
             $scenarios = $this->saleScenarios();
             $orders = [];
@@ -175,6 +198,10 @@ final class WorkspaceUiDemoService
 
                 WarehouseIncidentReport::query()->where('name', 'like', self::HANDOVER_PREFIX.'%')->delete();
                 WarehouseInventoryMovement::query()->where('note', 'like', self::NOTE_TAG.'%')->delete();
+
+                // Chỉ xóa SP/kho bootstrap nếu đúng mã UXDEMO (không đụng catalog thật).
+                Product::query()->where('sku', 'UXDEMO-SP-01')->delete();
+                Warehouse::query()->where('code', 'UXDEMO-KHO')->delete();
 
                 return $counts;
             });
@@ -293,7 +320,7 @@ final class WorkspaceUiDemoService
             'operation_stage' => $scenario['stage']->value,
             'operation_result' => $scenario['result']->value,
             'closing_status' => $scenario['closing']->value,
-            'delivery_status' => $hasWaybill ? $delivery->value : null,
+            'delivery_status' => $hasWaybill ? $delivery->value : DeliveryStatus::WaitingWaybill->value,
             'carrier_name' => $hasWaybill ? 'Viettel Post(COD)' : null,
             'tracking_number' => $hasWaybill ? 'UXVT'.str_pad((string) (1000 + $index), 6, '0', STR_PAD_LEFT) : null,
             'is_returning_customer' => $index % 4 === 0,
@@ -556,6 +583,31 @@ final class WorkspaceUiDemoService
         }
 
         return $count;
+    }
+
+    private function ensureDemoProduct(int $companyId, User $actor): Product
+    {
+        return Product::query()->create([
+            'company_id' => $companyId,
+            'name' => 'UXDEMO Sản phẩm thử UI',
+            'sku' => 'UXDEMO-SP-01',
+            'type' => 'product',
+            'unit' => 'chai',
+            'unit_price' => 199_000,
+            'cost_price' => 80_000,
+            'is_active' => true,
+            'available_marketing' => true,
+            'available_sale' => true,
+        ]);
+    }
+
+    private function ensureDemoWarehouse(int $companyId): Warehouse
+    {
+        return Warehouse::query()->create([
+            'company_id' => $companyId,
+            'name' => 'Kho UXDEMO',
+            'code' => 'UXDEMO-KHO',
+        ]);
     }
 
     /** @return array{orders:int, leads:int, histories:int, messages:int, vouchers:int, handovers:int, movements:int} */

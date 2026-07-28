@@ -459,6 +459,7 @@ class LandingConnectionManager
     private function connectionPayload(array $data, User $actor, ?LandingConnection $existing = null): array
     {
         $canApprove = $actor->isAdmin()
+            || $actor->isPlatformAdmin()
             || $actor->allows(PermissionArea::Marketing, PermissionLevel::Full)
             || $actor->allows(PermissionArea::Integrations, PermissionLevel::Full);
         $approved = $canApprove

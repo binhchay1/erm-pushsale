@@ -133,9 +133,9 @@ html body.pushsale-app-body .ps-report-page th label {
     font-weight: 700 !important;
 }
 
-html body.pushsale-app-body .pushsale-template-fragment label:has(> input[type='checkbox']),
-html body.pushsale-app-body .ps-adminlte-page label:has(> input[type='checkbox']),
-html body.pushsale-app-body .ps-report-page label:has(> input[type='checkbox']),
+html body.pushsale-app-body .pushsale-template-fragment label:has(> input[type='checkbox']):not(.ps-round-tick-wrap),
+html body.pushsale-app-body .ps-adminlte-page label:has(> input[type='checkbox']):not(.ps-round-tick-wrap),
+html body.pushsale-app-body .ps-report-page label:has(> input[type='checkbox']):not(.ps-round-tick-wrap),
 html body.pushsale-app-body .pushsale-template-fragment label:has(> input[type='radio']),
 html body.pushsale-app-body .ps-adminlte-page label:has(> input[type='radio']),
 html body.pushsale-app-body .ps-report-page label:has(> input[type='radio']) {

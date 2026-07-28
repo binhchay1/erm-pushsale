@@ -11,13 +11,27 @@ import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
 import { useT } from '@/providers/I18nProvider';
 
 function RoundFlagTick({ checked, disabled = false, title, onChange }) {
+    if (disabled) {
+        return (
+            <span
+                className="ps-round-tick-wrap is-disabled"
+                title={title}
+                aria-label={title}
+                role="img"
+            >
+                <span className={`ps-round-tick ${checked ? 'is-on' : 'is-off'}`} aria-hidden="true">
+                    {checked ? <i className="fa fa-check" /> : null}
+                </span>
+            </span>
+        );
+    }
+
     return (
-        <label className={`ps-round-tick-wrap ${disabled ? 'is-disabled' : ''}`} title={title}>
+        <label className="ps-round-tick-wrap" title={title}>
             <input
                 type="checkbox"
                 className="ps-round-tick-input"
                 checked={Boolean(checked)}
-                disabled={disabled}
                 onChange={(event) => onChange?.(event.target.checked)}
                 aria-label={title}
             />
@@ -731,21 +745,29 @@ export default function LandingConnectionsPage({
 
                             <div></div>
                             <div className="pslc-dialog-checks pslc-dialog-checks-two">
-                                <label>
+                                <label className={!canManage ? 'is-disabled' : undefined}>
                                     <input
                                         type="checkbox"
                                         checked={Boolean(form.data.manual_import)}
                                         disabled={!canManage}
-                                        onChange={(event) => form.setData('manual_import', event.target.checked)}
+                                        readOnly={!canManage}
+                                        onChange={(event) => {
+                                            if (!canManage) return;
+                                            form.setData('manual_import', event.target.checked);
+                                        }}
                                     />
                                     {' '}{l('manual_import')}
                                 </label>
-                                <label>
+                                <label className={!canToggleApproval ? 'is-disabled' : undefined}>
                                     <input
                                         type="checkbox"
                                         checked={Boolean(form.data.is_approved)}
                                         disabled={!canToggleApproval}
-                                        onChange={(event) => form.setData('is_approved', event.target.checked)}
+                                        readOnly={!canToggleApproval}
+                                        onChange={(event) => {
+                                            if (!canToggleApproval) return;
+                                            form.setData('is_approved', event.target.checked);
+                                        }}
                                     />
                                     {' '}{l('approve')}
                                 </label>
