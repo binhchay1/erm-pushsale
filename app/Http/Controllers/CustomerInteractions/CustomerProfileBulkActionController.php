@@ -10,6 +10,7 @@ use App\Models\OrderOperationHistory;
 use App\Services\CustomerInteractions\OrderOperationHistoryService;
 use App\Services\Customers\CustomerPhoneAssignmentService;
 use App\Services\Leads\LeadRoutingService;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -166,9 +167,15 @@ class CustomerProfileBulkActionController extends Controller
         return $this->success($request, 'Đã xóa '.$deleted.' bản ghi lịch sử tác nghiệp.');
     }
 
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request): StreamedResponse|JsonResponse
     {
-        abort_unless($request->user()?->allows(PermissionArea::Customers, PermissionLevel::View), 403);
+        if (! $request->user()?->allows(PermissionArea::Customers, PermissionLevel::View)) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['message' => 'Bạn không có quyền xuất hồ sơ khách hàng.'], 403);
+            }
+
+            abort(403);
+        }
 
         $ids = collect($request->input('ids', []))->filter()->map(fn ($id) => (int) $id)->values();
         $variant = min(4, max(1, $request->integer('variant', 1)));
@@ -223,7 +230,17 @@ class CustomerProfileBulkActionController extends Controller
 
     private function authorizeFull(Request $request): void
     {
-        abort_unless($request->user()?->allows(PermissionArea::Customers, PermissionLevel::Full), 403);
+        if ($request->user()?->allows(PermissionArea::Customers, PermissionLevel::Full)) {
+            return;
+        }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            throw new HttpResponseException(response()->json([
+                'message' => 'Bạn không có quyền thực hiện thao tác này.',
+            ], 403));
+        }
+
+        abort(403);
     }
 
     /** @return \Illuminate\Database\Eloquent\Collection<int, Order> */

@@ -67,6 +67,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-warehouse-operations-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-warehouse-operations-contract.css') },
     { file: 'pushsale-sale-operations-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-sale-operations-contract.css') },
     { file: 'pushsale-customer-profile-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-customer-profile-contract.css') },
+    { file: 'pushsale-ops-shared-controls-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-ops-shared-controls-contract.css') },
     { file: 'pushsale-facebook-unit-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-facebook-unit-contract.css') },
     { file: 'pushsale-manual-lead-page.css', layer: 'final-contract', load: () => import('../../css/pushsale-manual-lead-page.css') },
     { file: 'pushsale-monthly-kpi-plan.css', layer: 'final-contract', load: () => import('../../css/pushsale-monthly-kpi-plan.css') },

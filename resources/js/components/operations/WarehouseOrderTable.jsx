@@ -54,9 +54,15 @@ async function postDownload(url, body = {}, fallbackName = 'warehouse-export.csv
         credentials: 'same-origin',
         body: JSON.stringify(body),
     });
+    const contentType = response.headers.get('content-type') ?? '';
     if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.message || 'Không thể xuất dữ liệu.');
+        const data = contentType.includes('application/json')
+            ? await response.json().catch(() => ({}))
+            : {};
+        throw new Error(data.message || `Không thể xuất dữ liệu (${response.status}).`);
+    }
+    if (contentType.includes('text/html')) {
+        throw new Error('Máy chủ trả về trang lỗi thay vì file xuất.');
     }
     const blob = await response.blob();
     const filename = filenameFromDisposition(response.headers.get('Content-Disposition'), fallbackName);
@@ -397,7 +403,7 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                     <div className="small-tip sline">{row.shipment?.statusText || ''}</div>
                                     {row.shipmentError && <div className="ps-wh-error text-left">{row.shipmentError}</div>}
                                 </td>
-                                <td className="text-center c-customer-body" title={`${row.id} | ${row.sourceType || ''}`}>
+                                <td className="text-center c-customer-body ps-contact-name-phone" title={`${row.id} | ${row.sourceType || ''}`}>
                                     <div className="text-right">
                                         <InlineIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={() => setAction({ type: 'date', row })} />
                                         <InlineIconButton title="Tách đơn" icon="clipboard" onClick={() => setAction({ type: 'split', row })} disabled={!row.canSplit} />
@@ -405,16 +411,18 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                     </div>
                                     <div className="sline text-left ps-wh-customer-name">
                                         <span>{row.effectiveReceiverName || row.customerName}</span>
-                                        <OrderStatusFlags row={row} className="ps-contact-flags" />
                                     </div>
                                     {row.carrierLabel ? <span className="nha-mang text-left">{row.carrierLabel}</span> : null}
                                     <div className="no-wrap ps-contact-phone-row">
-                                        <a className="text-left" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a>
-                                        {(row.effectiveReceiverPhone || row.customerPhone) ? (
-                                            <a className="ps-contact-phone-icon" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.effectiveReceiverPhone || row.customerPhone}`}>
-                                                <i className="fa fa-phone" aria-hidden="true" />
-                                            </a>
-                                        ) : null}
+                                        <div className="ps-phone-main">
+                                            <a className="text-left" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a>
+                                            {(row.effectiveReceiverPhone || row.customerPhone) ? (
+                                                <a className="ps-contact-phone-icon" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.effectiveReceiverPhone || row.customerPhone}`}>
+                                                    <i className="fa fa-phone" aria-hidden="true" />
+                                                </a>
+                                            ) : null}
+                                        </div>
+                                        <OrderStatusFlags row={row} className="ps-contact-flags" />
                                     </div>
                                     <div className="text-left khkn sline">{row.customerNote || ''}</div>
                                     <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>

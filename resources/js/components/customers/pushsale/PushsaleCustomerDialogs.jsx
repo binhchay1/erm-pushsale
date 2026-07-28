@@ -223,6 +223,7 @@ export function PushsaleOperationHistoryDialog({ order, open, onOpenChange }) {
             open={open}
             onOpenChange={onOpenChange}
             width="1728px"
+            className="ps-operation-history-dialog"
             title={`Lịch sử tác nghiệp: ${data.customer?.name ?? order?.customerName ?? '-'}`}
             footer={<button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>Đóng</button>}
         >

@@ -177,7 +177,7 @@ export function SaleOperationHistoryDialog({ order, context = 'sale', open, onOp
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-dialog ps-sale-modal ps-operation-history-modal ps-operation-history-dialog" aria-describedby={undefined}>
+            <DialogContent className="ps-sale-dialog ps-sale-modal ps-operation-history-modal ps-operation-history-dialog ps-dialog-surface" aria-describedby={undefined} style={{ '--ps-dialog-width': '1600px' }}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{dialogTitle}: <span className="ps-history-title-code">{order.orderCode || `#${order.id}`}</span></DialogTitle></DialogHeader>
                 <div className="ps-history-customer-line">
                     <b>{data.customer?.name ?? order.customerName}</b> · {data.customer?.phone ?? order.customerPhone} · {order.orderCode || `Đơn chưa chốt #${order.id}`}

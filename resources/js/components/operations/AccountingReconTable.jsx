@@ -22,15 +22,17 @@ function ReconIcon({ value }) {
 
 function CustomerCell({ row }) {
     return (
-        <div className="ps-acc-customer-cell">
+        <div className="ps-acc-customer-cell ps-contact-name-phone">
             <b>{row.customerName || '—'}</b><br />
             <div className="ps-contact-phone-row">
-                <span>{row.customerPhone || '—'}</span>
-                {row.customerPhone ? (
-                    <a className="ps-contact-phone-icon" href={`tel:${row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.customerPhone}`}>
-                        <i className="fa fa-phone" aria-hidden="true" />
-                    </a>
-                ) : null}
+                <div className="ps-phone-main">
+                    <span>{row.customerPhone || '—'}</span>
+                    {row.customerPhone ? (
+                        <a className="ps-contact-phone-icon" href={`tel:${row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.customerPhone}`}>
+                            <i className="fa fa-phone" aria-hidden="true" />
+                        </a>
+                    ) : null}
+                </div>
                 <OrderStatusFlags row={row} className="ps-contact-flags" />
             </div>
             {row.desiredDeliveryAt && <div className="small-tip">{formatDate(row.desiredDeliveryAt)}</div>}

@@ -1,0 +1,251 @@
+/**
+ * Shared filter controls + customer name/phone cell parity.
+ * Loaded for all ops pages; does not touch sidebar/header chrome.
+ */
+
+/* —— Native-like selects (match Pushsale filter screenshot) —— */
+html body.pushsale-app-body .ps-customer-profile-page select.form-control,
+html body.pushsale-app-body .ps-customer-profile-page select.ps-filter-control,
+html body.pushsale-app-body .ps-sale-workspace-page select.form-control,
+html body.pushsale-app-body .ps-sale-workspace-page select.ps-sale-select,
+html body.pushsale-app-body .ps-wh-page select.form-control,
+html body.pushsale-app-body .ps-wh-page select.chosen,
+html body.pushsale-app-body .ps-page-extra-filters select.form-control,
+html body.pushsale-app-body .ps-page-extra-filters select.ps-filter-control,
+html body.pushsale-app-body .ps-page-extra-filters select.ps-sale-select,
+html body.pushsale-app-body .ps-sale-extra-filters select.form-control,
+html body.pushsale-app-body .ps-sale-extra-filters select.ps-sale-select,
+html body.pushsale-app-body .ps-wh-filter-body select.form-control,
+html body.pushsale-app-body .ps-wh-filter-body select.chosen,
+html body.pushsale-app-body .ps-acc-filters select.form-control {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-color: #fff !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23666' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E") !important;
+    background-position: right 10px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 10px 6px !important;
+    border: 1px solid #c8d2dc !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #333 !important;
+    font: 400 12px/30px Arial, Helvetica, sans-serif !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 28px 0 10px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-product-search-select-v82 .ps-product-select-button {
+    appearance: none !important;
+    background-color: #fff !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23666' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E") !important;
+    background-position: right 10px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 10px 6px !important;
+    border: 1px solid #c8d2dc !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 28px 0 10px !important;
+    font: 400 12px/30px Arial, Helvetica, sans-serif !important;
+}
+
+html body.pushsale-app-body .ps-product-search-select-v82 .ps-product-select-arrow {
+    display: none !important;
+}
+
+html body.pushsale-app-body .ps-product-search-select-v82 .ps-product-clear {
+    right: 26px !important;
+    height: 28px !important;
+    background: transparent !important;
+}
+
+/* —— Carrier: plain magenta text, NO pill background —— */
+html body.pushsale-app-body .nha-mang,
+html body.pushsale-app-body .ps-carrier,
+html body.pushsale-app-body .ps-carrier-viettel,
+html body.pushsale-app-body .ps-carrier-vinaphone,
+html body.pushsale-app-body .ps-carrier-mobifone,
+html body.pushsale-app-body span.ps-carrier,
+html body.pushsale-app-body .ps-carrier-badge {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: magenta !important;
+    display: block !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    line-height: 12px !important;
+    margin: 1px 0 2px !important;
+    padding: 0 !important;
+}
+
+/* —— Name / phone cell: name top; phone + flags space-between —— */
+html body.pushsale-app-body .ps-contact-name-phone {
+    text-align: left;
+    vertical-align: top !important;
+}
+
+html body.pushsale-app-body .ps-contact-name-phone .ps-customer-name-link,
+html body.pushsale-app-body .ps-contact-name-phone .ps-customer-name-text {
+    color: #337ab7;
+    font-weight: 400;
+}
+
+html body.pushsale-app-body .ps-contact-phone-row {
+    align-items: center !important;
+    display: flex !important;
+    gap: 6px !important;
+    justify-content: space-between !important;
+    margin-top: 2px !important;
+    min-height: 18px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-contact-phone-row .ps-phone-main {
+    align-items: center;
+    display: inline-flex;
+    gap: 6px;
+    min-width: 0;
+}
+
+html body.pushsale-app-body .ps-contact-phone-row .ps-order-flags.ps-contact-flags {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    gap: 4px !important;
+    margin-left: auto !important;
+}
+
+/* Pushsale-plain icons (no circular badges) in name/phone column */
+html body.pushsale-app-body .ps-contact-phone-row .ps-order-flag {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    height: auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+}
+
+html body.pushsale-app-body .ps-contact-phone-row .ps-order-flag-inner {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    display: inline !important;
+    height: auto !important;
+    padding: 0 !important;
+    width: auto !important;
+}
+
+html body.pushsale-app-body .ps-contact-phone-row .ps-order-flag.is-returning .fa-heart {
+    color: #ff0000 !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-contact-phone-row .ps-order-flag.is-duplicate .fa-clone,
+html body.pushsale-app-body .ps-contact-phone-row .ps-order-flag.is-duplicate .fa-copy {
+    color: #ff0000 !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-contact-phone-row .ps-order-flag.is-upsale .fa-level-up {
+    color: #ff8300 !important;
+    font-size: 12px !important;
+}
+
+/* —— Operation history dialog —— */
+html body.pushsale-app-body .ps-operation-history-dialog.ps-customer-dialog.ps-dialog-surface,
+html body.pushsale-app-body .ps-customer-dialog.ps-operation-history-dialog,
+html body.pushsale-app-body .ps-operation-history-dialog.ps-dialog-surface,
+html body.pushsale-app-body .ps-sale-history-dialog.ps-dialog-surface {
+    width: min(1600px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+}
+
+html body.pushsale-app-body .ps-operation-history-dialog .ps-dialog-body,
+html body.pushsale-app-body .ps-sale-history-dialog .ps-dialog-body {
+    padding: 10px 12px !important;
+}
+
+html body.pushsale-app-body .ps-operation-history-dialog .ps-history-table-wrap,
+html body.pushsale-app-body .ps-sale-history-dialog .ps-history-table-wrap {
+    max-height: min(68vh, 620px) !important;
+    margin: 0 !important;
+    overflow: auto !important;
+    border: 1px solid #d2d6de !important;
+}
+
+html body.pushsale-app-body .ps-operation-history-dialog .ps-history-table,
+html body.pushsale-app-body .ps-sale-history-dialog .ps-history-table {
+    margin: 0 !important;
+    min-width: 1180px !important;
+    table-layout: fixed !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-operation-history-dialog .ps-history-table > thead > tr > th,
+html body.pushsale-app-body .ps-sale-history-dialog .ps-history-table > thead > tr > th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    background: #3782dc !important;
+    border: 1px solid #2f72c4 !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    padding: 7px 8px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .ps-operation-history-dialog .ps-history-table > tbody > tr > td,
+html body.pushsale-app-body .ps-sale-history-dialog .ps-history-table > tbody > tr > td {
+    border: 1px solid #e5e7eb !important;
+    padding: 8px !important;
+    vertical-align: top !important;
+    color: #222 !important;
+}
+
+html body.pushsale-app-body .ps-operation-history-dialog .ps-history-table .small-tip,
+html body.pushsale-app-body .ps-sale-history-dialog .ps-history-table .small-tip {
+    color: #777 !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table > tbody > tr > td {
+    border: 1px solid #e5e7eb !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table > thead > tr > th {
+    border: 1px solid #2f72c4 !important;
+}
+
+/* Sale workspace history modal (same thin borders) */
+html body.pushsale-app-body .ps-operation-history-modal.ps-operation-history-dialog,
+html body.pushsale-app-body .ps-operation-history-modal[data-slot='dialog-content'] {
+    width: min(1600px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+}
+
+html body.pushsale-app-body .ps-operation-history-modal .ps-history-table {
+    border-collapse: collapse !important;
+}
+
+html body.pushsale-app-body .ps-operation-history-modal .ps-history-table > thead > tr > th {
+    border: 1px solid #2f72c4 !important;
+    background: #3782dc !important;
+    color: #fff !important;
+    padding: 7px 8px !important;
+}
+
+html body.pushsale-app-body .ps-operation-history-modal .ps-history-table > tbody > tr > td {
+    border: 1px solid #e5e7eb !important;
+    padding: 8px !important;
+    vertical-align: top !important;
+}

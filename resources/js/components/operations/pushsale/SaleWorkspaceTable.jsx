@@ -324,7 +324,7 @@ export function SaleWorkspaceTable({
                                         </div>
                                         <div className="small-tip">({dateTime(order.assignedAt)})</div>
                                     </td>
-                                    <td className="ps-customer-cell area1" title={`${order.id} | ${order.sourceType || ''}`}>
+                                    <td className="ps-customer-cell area1 ps-contact-name-phone" title={`${order.id} | ${order.sourceType || ''}`}>
                                         <div className="text-right ps-customer-edit-wrap">
                                             <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onEdit(order, false)} title="Cập nhật đơn"><i className="fa fa-edit" /></button>
                                         </div>
@@ -335,8 +335,10 @@ export function SaleWorkspaceTable({
                                             </span>
                                         ) : null}
                                         <div className="no-wrap ps-contact-phone-row">
-                                            <button type="button" className="ps-phone-link" onClick={() => onDuplicateOrders(order)} title="Danh sách trùng số">{order.customerPhone}</button>
-                                            <CallButton order={order} actionBaseUrl={actionBaseUrl} />
+                                            <div className="ps-phone-main">
+                                                <button type="button" className="ps-phone-link" onClick={() => onDuplicateOrders(order)} title="Danh sách trùng số">{order.customerPhone}</button>
+                                                <CallButton order={order} actionBaseUrl={actionBaseUrl} />
+                                            </div>
                                             <OrderStatusFlags row={order} onDuplicate={onDuplicateOrders ? () => onDuplicateOrders(order) : null} className="ps-contact-flags" />
                                         </div>
                                         <div className="text-left khkn sline">{order.customerExtraNote || ''}</div>

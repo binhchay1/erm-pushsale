@@ -150,14 +150,13 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                     <br />
                                     <span className="small-tip">{dateLabel(row.dataArrivedAt)}</span>
                                 </td>
-                                <td className="text-left ps-customer-name-cell">
+                                <td className="text-left ps-customer-name-cell ps-contact-name-phone">
                                     <div className="ps-customer-name-row">
                                         {saleWorkspaceUrl ? (
                                             <a className="ps-customer-name-link" href={appendQuery(saleWorkspaceUrl, { order_id: row.id })}>{safeText(row.customerName)}</a>
                                         ) : (
                                             <span className="ps-customer-name-link">{safeText(row.customerName)}</span>
                                         )}
-                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell />
                                     </div>
                                     {(row.carrierLabel || row.phoneCarrier) ? (
                                         <span className={`nha-mang ps-carrier ps-carrier-${row.phoneCarrierKey ?? 'other'}`}>
@@ -165,12 +164,15 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                         </span>
                                     ) : null}
                                     <div className="no-wrap ps-phone-line ps-contact-phone-row">
-                                        <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('purchase', row)}>{safeText(row.customerPhone)}</button>
-                                        {row.customerPhone ? (
-                                            <a className="ps-contact-phone-icon" href={`tel:${row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.customerPhone}`}>
-                                                <i className="fa fa-phone" aria-hidden="true" />
-                                            </a>
-                                        ) : null}
+                                        <div className="ps-phone-main">
+                                            <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('purchase', row)}>{safeText(row.customerPhone)}</button>
+                                            {row.customerPhone ? (
+                                                <a className="ps-contact-phone-icon" href={`tel:${row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.customerPhone}`}>
+                                                    <i className="fa fa-phone" aria-hidden="true" />
+                                                </a>
+                                            ) : null}
+                                        </div>
+                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell />
                                     </div>
                                 </td>
                                 <td className="text-left ps-message-cell">
@@ -295,10 +297,21 @@ function ActionBubble({ tone = 'primary', label, onClick, children }) {
     );
 }
 
-function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
+function safeActionErrorMessage(raw, fallback = 'Không thực hiện được thao tác.') {
+    const text = String(raw ?? '').trim();
+    if (!text) return fallback;
+    if (/^\s*</.test(text) || /<!DOCTYPE|<html|<body/i.test(text)) {
+        return fallback;
+    }
+    return text.length > 220 ? `${text.slice(0, 220)}…` : text;
+}
+
+function FloatingActions({ selectedIds, permissions }) {
     const { ask } = useConfirm();
     const [open, setOpen] = useState(false);
     const hasSelection = selectedIds.length > 0;
+    // Shared CRUD lives under /customers (web.php), not role page prefixes like /sales/customers.
+    const actionBase = '/customers';
 
     const downloadBlob = (blob, filename) => {
         const url = window.URL.createObjectURL(blob);
@@ -320,20 +333,24 @@ function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
         try {
             const query = new URLSearchParams({ variant: String(variant) });
             selectedIds.forEach((id) => query.append('ids[]', id));
-            const response = await fetch(`${apiBase}/export?${query.toString()}`, {
+            const response = await fetch(`${actionBase}/export?${query.toString()}`, {
                 method: 'GET',
                 credentials: 'same-origin',
                 headers: {
-                    Accept: 'text/csv,application/json,text/plain,*/*',
+                    Accept: 'text/csv,application/json',
                     'X-Requested-With': 'XMLHttpRequest',
                 },
             });
             const contentType = response.headers.get('content-type') ?? '';
             if (!response.ok) {
-                const message = contentType.includes('application/json')
-                    ? (await response.json().catch(() => ({}))).message
-                    : await response.text().catch(() => '');
-                throw new Error(message || `Không xuất được file (${response.status}).`);
+                let message = '';
+                if (contentType.includes('application/json')) {
+                    message = (await response.json().catch(() => ({}))).message ?? '';
+                }
+                throw new Error(safeActionErrorMessage(message, `Không xuất được file (${response.status}).`));
+            }
+            if (contentType.includes('text/html')) {
+                throw new Error('Máy chủ trả về trang lỗi thay vì file CSV.');
             }
             const blob = await response.blob();
             const disposition = response.headers.get('content-disposition') ?? '';
@@ -342,7 +359,7 @@ function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
             downloadBlob(blob, filename);
             toast.success('Đã xuất file.');
         } catch (error) {
-            toast.error(error.message ?? 'Không xuất được file.');
+            toast.error(safeActionErrorMessage(error.message, 'Không xuất được file.'));
         }
     };
 
@@ -369,11 +386,13 @@ function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
                 body: JSON.stringify({ ids: selectedIds }),
             });
             const data = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(data.message ?? `Không thực hiện được thao tác (${response.status}).`);
+            if (!response.ok) {
+                throw new Error(safeActionErrorMessage(data.message, `Không thực hiện được thao tác (${response.status}).`));
+            }
             toast.success(data.message ?? 'Đã thực hiện thao tác.');
             router.reload({ preserveScroll: true });
         } catch (error) {
-            toast.error(error.message ?? 'Không thực hiện được thao tác.');
+            toast.error(safeActionErrorMessage(error.message, 'Không thực hiện được thao tác.'));
         }
     };
 
@@ -388,21 +407,23 @@ function FloatingActions({ selectedIds, permissions, apiBase = '/customers' }) {
                 </div>
                 {permissions?.canBulkManage ? (
                     <div className="icon-row">
-                        <ActionBubble tone="warning" label="Phân bổ lại ngay" onClick={() => submit(`${apiBase}/bulk/reallocate-now`, 'POST', 'Bạn chắc chắn muốn phân bổ lại hồ sơ khách hàng?')}><i className="fa fa-retweet" /></ActionBubble>
-                        <ActionBubble tone="warning" label="Chuyển phân bổ lại sau" onClick={() => submit(`${apiBase}/bulk/queue-reallocation`, 'POST', 'Bạn chắc chắn muốn chuyển hồ sơ về danh sách phân bổ lại?')}><i className="fa fa-send" /></ActionBubble>
-                        <ActionBubble tone="danger" label="Thu hồi số" onClick={() => submit(`${apiBase}/bulk/recall`, 'POST', 'Bạn chắc chắn muốn thu hồi các hồ sơ đã chọn?')}><i className="fa fa-chain-broken" /></ActionBubble>
+                        <ActionBubble tone="warning" label="Phân bổ lại ngay" onClick={() => submit(`${actionBase}/bulk/reallocate-now`, 'POST', 'Bạn chắc chắn muốn phân bổ lại hồ sơ khách hàng?')}><i className="fa fa-retweet" /></ActionBubble>
+                        <ActionBubble tone="warning" label="Chuyển phân bổ lại sau" onClick={() => submit(`${actionBase}/bulk/queue-reallocation`, 'POST', 'Bạn chắc chắn muốn chuyển hồ sơ về danh sách phân bổ lại?')}><i className="fa fa-send" /></ActionBubble>
+                        <ActionBubble tone="danger" label="Thu hồi số" onClick={() => submit(`${actionBase}/bulk/recall`, 'POST', 'Bạn chắc chắn muốn thu hồi các hồ sơ đã chọn?')}><i className="fa fa-chain-broken" /></ActionBubble>
                     </div>
                 ) : null}
                 {permissions?.canDeleteHistory ? (
                     <div className="icon-row">
-                        <ActionBubble tone="danger" label="Xóa lịch sử tác nghiệp" onClick={() => submit(`${apiBase}/bulk/operation-history`, 'DELETE', 'Bạn chắc chắn muốn xóa lịch sử tác nghiệp?')}><i className="fa fa-trash" /></ActionBubble>
+                        <ActionBubble tone="danger" label="Xóa lịch sử tác nghiệp" onClick={() => submit(`${actionBase}/bulk/operation-history`, 'DELETE', 'Bạn chắc chắn muốn xóa lịch sử tác nghiệp?')}><i className="fa fa-trash" /></ActionBubble>
                     </div>
                 ) : null}
             </div>
-            <button type="button" className="main-action ps-v87-round-action" onClick={() => setOpen((current) => !current)} title="Thao tác" style={actionMainStyle}>
+            <button type="button" className="main-action ps-v87-round-action" onClick={() => setOpen((current) => !current)} title="Thao tác hàng loạt" style={actionMainStyle}>
                 <i className="fa fa-bars" />
             </button>
-            {hasSelection ? <span className="ps-action-count">{selectedIds.length}</span> : null}
+            {hasSelection ? (
+                <span className="ps-action-count" title={`Đã chọn ${selectedIds.length} hồ sơ`}>{selectedIds.length}</span>
+            ) : null}
         </nav>
     );
 }
@@ -447,7 +468,6 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
     };
     const openDialog = (type, order) => setDialog({ type, order });
     const closeDialog = () => setDialog(EMPTY_DIALOG);
-    const customerActionBase = String(routeUrl || '/customers').split('?')[0].replace(/\/$/, '');
 
     return (
         <AppLayout>
@@ -518,16 +538,14 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                                 <FilterSelect value={form.delivery_status} onChange={(value) => setField('delivery_status', value)} options={filterOptions.deliveryStatuses} placeholder="--Chọn trạng thái giao hàng--" />
                                 <ProductSearchSelect className="ps-filter-control" products={filterOptions.products ?? []} value={form.product_id} onChange={(value) => setField('product_id', value)} placeholder="--Chọn sản phẩm--" showPrice={false} />
                             </div>
-                            <div className="ps-adv-filter-row ps-customer-adv-filter-row is-6">
+                            <div className="ps-adv-filter-row ps-customer-adv-filter-row is-6-with-reset">
                                 <FilterSelect value={form.reconciliation_status} onChange={(value) => setField('reconciliation_status', value)} options={filterOptions.reconciliationStatuses} placeholder="--Chọn đối soát nội bộ--" />
                                 <FilterSelect value={form.duplicate_status} onChange={(value) => setField('duplicate_status', value)} options={filterOptions.duplicateStatuses} placeholder="--Chọn trùng số--" />
                                 <FilterSelect value={form.customer_type} onChange={(value) => setField('customer_type', value)} options={filterOptions.customerTypes} placeholder="--Chọn khách cũ--" />
                                 <FilterSelect value={form.allocation_status} onChange={(value) => setField('allocation_status', value)} options={filterOptions.allocationStatuses} placeholder="--Chọn phân bổ--" />
                                 <FilterSelect value={form.shipping_method} onChange={(value) => setField('shipping_method', value)} options={filterOptions.shippingMethods} placeholder="--Chọn PTGH--" />
-                                <div className="ps-customer-filter-reset-wrap">
-                                    <FilterSelect value={form.warehouse_id} onChange={(value) => setField('warehouse_id', value)} options={filterOptions.warehouses} placeholder="--Chọn kho--" />
-                                    <button type="button" className="btn btn-default btn-sm ps-filter-reset" onClick={reset} title="Đặt lại"><i className="fa fa-refresh" /></button>
-                                </div>
+                                <FilterSelect value={form.warehouse_id} onChange={(value) => setField('warehouse_id', value)} options={filterOptions.warehouses} placeholder="--Chọn kho--" />
+                                <button type="button" className="btn btn-default btn-sm ps-filter-reset" onClick={reset} title="Đặt lại bộ lọc"><i className="fa fa-refresh" /></button>
                             </div>
                         </div>
                     ) : null}
@@ -537,7 +555,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
 
                 <ReportPagination routeUrl={routeUrl} filters={form} meta={pagination} scrollTargetId="customer-profile-table" />
 
-                <FloatingActions selectedIds={[...selected]} permissions={filterOptions.permissions} apiBase={customerActionBase} />
+                <FloatingActions selectedIds={[...selected]} permissions={filterOptions.permissions} />
             </section>
 
             <PushsaleCustomerMessagesDialog order={dialog.order} open={dialog.type === 'messages'} onOpenChange={(open) => !open && closeDialog()} />

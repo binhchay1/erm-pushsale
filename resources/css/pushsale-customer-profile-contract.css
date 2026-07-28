@@ -27,11 +27,22 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-ro
     grid-template-columns: repeat(5, minmax(140px, 1fr)) !important;
 }
 
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-6-with-reset {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) 34px !important;
+}
+
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row .form-control,
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row .ps-filter-control {
     height: 30px !important;
     min-height: 30px !important;
     width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row .ps-filter-reset {
+    height: 30px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+    width: 34px !important;
 }
 
 /* —— Shared name / products cells —— */
@@ -40,18 +51,17 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-customer-name-cell {
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-name-row {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+    display: block;
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-name-cell .nha-mang {
+    background: transparent !important;
     color: magenta !important;
     display: block !important;
     font-size: 9px !important;
     font-weight: 700 !important;
     line-height: 12px !important;
+    padding: 0 !important;
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-order-products-cell {
@@ -212,22 +222,14 @@ html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-product-qty
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-reset-wrap {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 34px !important;
-    gap: 6px !important;
-    align-items: center !important;
-}
-
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-reset-wrap .ps-filter-reset {
-    height: 30px !important;
-    min-width: 34px !important;
-    padding: 0 !important;
+    display: none !important;
 }
 
 @media (max-width: 992px) {
     html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-5,
     html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-6,
-    html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-5-equal {
+    html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-5-equal,
+    html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-6-with-reset {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 
