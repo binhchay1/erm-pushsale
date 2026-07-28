@@ -85,6 +85,82 @@ class LandingConnectionApprovalFlagTest extends TestCase
         $this->assertTrue((bool) $connection->fresh()->manual_import);
     }
 
+    public function test_unapprove_clears_rejection_so_row_returns_to_pending_approval(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $marketer = User::factory()->create([
+            'role' => UserRole::Marketing,
+            'company_id' => $admin->company_id,
+        ]);
+
+        $this->actingAs($admin);
+
+        $this->post('/admin/marketing/landing-connections/records', [
+            'name' => 'Landing unapprove pending',
+            'marketer_user_id' => $marketer->id,
+            'connection_type' => 'landing',
+            'ad_channel' => 'facebook_ads',
+            'allocation_method' => 'inherit',
+            'manual_import' => 1,
+            'is_approved' => 0,
+            'is_active' => true,
+            'sources' => [[
+                'client_key' => 'main-unapprove',
+                'name' => 'Landing unapprove pending',
+                'source_type' => 'main',
+                'source_url' => 'https://landing.example.test/unapprove',
+                'redirect_url' => null,
+                'sort_order' => 0,
+                'is_active' => true,
+            ]],
+            'products' => [],
+            'sale_user_ids' => [],
+        ])->assertRedirect('/admin/marketing/landing-connections');
+
+        $connection = LandingConnection::query()->where('name', 'Landing unapprove pending')->firstOrFail();
+
+        $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
+            'is_approved' => 1,
+        ])->assertSessionHas('success');
+
+        $connection->refresh();
+        $this->assertTrue((bool) $connection->is_approved);
+
+        $connection->forceFill([
+            'metadata' => array_merge((array) $connection->metadata, [
+                'rejected_at' => now()->toISOString(),
+                'rejection_reason' => 'stale reject',
+            ]),
+        ])->save();
+        $connection->marketingSource?->forceFill([
+            'rejected_at' => now(),
+            'rejection_reason' => 'stale reject',
+        ])->save();
+
+        $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
+            'is_approved' => 0,
+        ])->assertSessionHas('success');
+
+        $connection->refresh();
+        $this->assertFalse((bool) $connection->is_approved);
+        $this->assertNull(data_get($connection->metadata, 'rejected_at'));
+        $this->assertNull($connection->marketingSource?->fresh()?->rejected_at);
+
+        $this->get('/admin/marketing/landing-approvals')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Marketing/LandingApprovalPage')
+                ->has('campaigns')
+                ->where('campaigns', function ($campaigns) {
+                    $row = collect($campaigns)->firstWhere('name', 'Landing unapprove pending');
+
+                    return $row
+                        && ! ($row['is_approved'] ?? true)
+                        && empty($row['rejected_at']);
+                })
+            );
+    }
+
     public function test_marketing_user_cannot_toggle_inline_approval_flag(): void
     {
         $marketer = User::factory()->create(['role' => UserRole::Marketing]);

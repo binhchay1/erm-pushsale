@@ -68,6 +68,9 @@ class LandingConnectionManager
                     'is_approved' => false,
                     'approved_by_user_id' => null,
                     'approved_at' => null,
+                    'rejected_by_user_id' => null,
+                    'rejected_at' => null,
+                    'rejection_reason' => null,
                 ]))->save();
             }
 
@@ -159,11 +162,21 @@ class LandingConnectionManager
         }
 
         return DB::transaction(function () use ($connection, $actor): LandingConnection {
+            $metadata = (array) ($connection->metadata ?? []);
+            unset(
+                $metadata['rejected_at'],
+                $metadata['rejected_by_user_id'],
+                $metadata['rejection_reason'],
+            );
+            $metadata['pending_approval_flow'] = true;
+            $metadata['request_approval'] = true;
+
             $connection->update($this->onlyExistingColumns('landing_connections', [
                 'is_approved' => false,
                 'approved_by_user_id' => null,
                 'approved_at' => null,
                 'updated_by_user_id' => $actor->id,
+                'metadata' => $metadata,
             ]));
 
             if ($connection->marketingSource) {
@@ -171,6 +184,9 @@ class LandingConnectionManager
                     'is_approved' => false,
                     'approved_by_user_id' => null,
                     'approved_at' => null,
+                    'rejected_by_user_id' => null,
+                    'rejected_at' => null,
+                    'rejection_reason' => null,
                 ]))->save();
             }
 
@@ -185,7 +201,17 @@ class LandingConnectionManager
 
             $connection->sources()->update(['is_active' => false]);
             $connection->forceFill(['is_active' => false])->save();
-            $source?->update(['is_active' => false]);
+
+            if ($source) {
+                $source->forceFill($this->onlyExistingMarketingSourceColumns([
+                    'is_active' => false,
+                    'is_approved' => false,
+                    'name' => str_starts_with((string) $source->name, '[Đã xóa] ')
+                        ? $source->name
+                        : '[Đã xóa] '.$source->name,
+                ]))->save();
+            }
+
             $connection->delete();
         });
     }

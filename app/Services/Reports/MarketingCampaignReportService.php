@@ -127,6 +127,7 @@ class MarketingCampaignReportService
     private function campaigns(User $viewer, ReportFilterData $filter): Collection
     {
         $query = MarketingSource::query()
+            ->visibleInReports()
             ->with([
                 'marketer:id,name,email',
                 'creator:id,name',

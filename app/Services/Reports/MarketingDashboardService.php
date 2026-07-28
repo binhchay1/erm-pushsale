@@ -24,6 +24,7 @@ class MarketingDashboardService
         $leadCountsBySource = LeadContactMetrics::effectiveCountsBySource($filter, $orderCollection);
 
         $sources = MarketingSource::query()
+            ->visibleInReports()
             ->with(['product:id,name', 'children.product:id,name'])
             ->whereNull('parent_id')
             ->orderBy('name')

@@ -382,6 +382,27 @@ html body.pushsale-app-body .pslc-page .pslc-col-allocation { width: 150px !impo
 html body.pushsale-app-body .pslc-page .pslc-col-api { width: 205px !important; }
 html body.pushsale-app-body .pslc-page .pslc-col-small { width: 70px !important; }
 
+html body.pushsale-app-body .pslc-page .pslc-table th.pslc-col-small,
+html body.pushsale-app-body .pslc-page .pslc-table td.pslc-col-small,
+html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell {
+    width: 70px !important;
+    max-width: 70px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+}
+
+html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell .ps-round-tick-wrap {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 22px !important;
+    margin: 0 auto !important;
+}
+
 /* One round tick only — hide native blue checkbox inside Nhập TC / Duyệt. */
 html body.pushsale-app-body .pslc-page .ps-round-tick-input {
     position: absolute !important;

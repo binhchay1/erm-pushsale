@@ -186,8 +186,8 @@ class PushsaleMarketingDashboardService
             ]))->values(),
             'parentProducts' => $products->whereNull('parent_id')->map(fn (Product $item) => ['id' => $item->id, 'name' => $item->name])->values(),
             'products' => $products->map(fn (Product $item) => ['id' => $item->id, 'name' => $item->name, 'parent_id' => $item->parent_id])->values(),
-            'sources' => MarketingSource::query()->orderBy('name')->get(['id', 'name'])->map(fn (MarketingSource $item) => ['id' => $item->id, 'name' => $item->name])->values(),
-            'adChannels' => MarketingSource::query()->whereNotNull('ad_channel')->where('ad_channel', '<>', '')
+            'sources' => MarketingSource::query()->visibleInReports()->orderBy('name')->get(['id', 'name'])->map(fn (MarketingSource $item) => ['id' => $item->id, 'name' => $item->name])->values(),
+            'adChannels' => MarketingSource::query()->visibleInReports()->whereNotNull('ad_channel')->where('ad_channel', '<>', '')
                 ->distinct()->orderBy('ad_channel')->pluck('ad_channel')->map(fn (string $value) => ['value' => $value, 'label' => $value])->values(),
             'dateTypes' => [
                 ['value' => DateType::DataArrival->value, 'label' => '--Chuẩn Pushsale--'],
@@ -438,6 +438,7 @@ class PushsaleMarketingDashboardService
     private function sourceQuery(MarketingDashboardFilterData $filter): Builder
     {
         return MarketingSource::query()
+            ->visibleInReports()
             ->whereNull('parent_id')
             ->when($filter->marketerId, fn (Builder $q, int $id) => $q->where('marketer_user_id', $id))
             ->when($filter->teamId, fn (Builder $q, int $id) => $q->whereHas('marketer', fn (Builder $u) => $u->where('team_id', $id)))

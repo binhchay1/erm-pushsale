@@ -157,7 +157,13 @@ Do **not** add another sidebar override CSS file. Page CSS must not override `.p
 - Form tạo nguồn: checkbox Nhập TC editable, mặc định tắt (giống Pushsale).
 - Dropdown nguồn ở nhập data thủ công (`2.6.2`, dialog leads) chỉ liệt kê nguồn eligible: có landing connection + `manual_import=true`, hoặc nguồn legacy không gắn landing.
 - `metadata.request_approval` luôn bật; muốn chạy live phải duyệt ở menu duyệt kết nối.
-- Checkbox `Duyệt` trong bảng (Admin) = duyệt/hủy duyệt nhanh; không thay thế menu duyệt khi cần gắn sản phẩm/ngân sách.
+- Checkbox `Duyệt` trong bảng (Admin) = duyệt/hủy duyệt nhanh; bỏ tích phải xóa `rejected_at` để nguồn về lại **Chờ duyệt** trên trang duyệt.
+- Xóa kết nối landing: soft-delete LC + tắt `marketing_sources.is_active` (đổi tên `[Đã xóa] …`). Dashboard/báo cáo chỉ lấy `MarketingSource::visibleInReports()`.
+
+### Demo UI workspace
+
+- `php artisan demo:workspace-ui` — seed dữ liệu gắn nhãn `UXDEMO` cho sale / thủ kho / hồ sơ KH.
+- `php artisan demo:workspace-ui delete --force` — chỉ xóa bản ghi UXDEMO, không đụng dữ liệu khác.
 
 ## v131 UI Contract Addendum
 - Page header/frame rhythm: `PushsalePageShell` + `pushsale-page-frame-contract.css` (+ adminlte-canonical cho control chrome). *(Phần header đã chuyển sang `PageHeader` — xem mục “Route, naming và header dùng chung” ở cuối file.)*

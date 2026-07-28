@@ -630,7 +630,7 @@ export default function LandingConnectionsPage({
                                                         <button type="button" className="btn-icon" onClick={() => copy(mainSource?.submit_url ?? row.api_base_url)}><i className="fa fa-copy" /> {l('copy')}</button>
                                                     </div>
                                                 </td>
-                                                <td className="text-center">
+                                                <td className="text-center pslc-col-small pslc-flag-cell">
                                                     <RoundFlagTick
                                                         checked={Boolean(row.manual_import)}
                                                         disabled={!canManage}
@@ -638,7 +638,7 @@ export default function LandingConnectionsPage({
                                                         onChange={(next) => updateFlags(row, { manual_import: next })}
                                                     />
                                                 </td>
-                                                <td className="text-center">
+                                                <td className="text-center pslc-col-small pslc-flag-cell">
                                                     <RoundFlagTick
                                                         checked={Boolean(row.is_approved)}
                                                         disabled={!canToggleApproval}

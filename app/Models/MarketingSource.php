@@ -102,6 +102,23 @@ class MarketingSource extends Model
         });
     }
 
+    /**
+     * Nguồn còn sống để hiện trên dashboard/báo cáo marketing.
+     * Ẩn nguồn inactive và nguồn chỉ gắn landing connection đã soft-delete.
+     */
+    public function scopeVisibleInReports($query)
+    {
+        return $query
+            ->where('is_active', true)
+            ->where(function ($builder): void {
+                $builder
+                    ->whereDoesntHave('landingConnection', static function ($landing): void {
+                        $landing->withTrashed();
+                    })
+                    ->orWhereHas('landingConnection');
+            });
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
