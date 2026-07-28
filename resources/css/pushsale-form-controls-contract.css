@@ -148,9 +148,9 @@ html body.pushsale-app-body .ps-report-page label:has(> input[type='radio']) {
     white-space: nowrap !important;
 }
 
-html body.pushsale-app-body .pushsale-template-fragment input[type='checkbox'],
-html body.pushsale-app-body .ps-adminlte-page input[type='checkbox'],
-html body.pushsale-app-body .ps-report-page input[type='checkbox'],
+html body.pushsale-app-body .pushsale-template-fragment input[type='checkbox']:not(.ps-round-tick-input),
+html body.pushsale-app-body .ps-adminlte-page input[type='checkbox']:not(.ps-round-tick-input),
+html body.pushsale-app-body .ps-report-page input[type='checkbox']:not(.ps-round-tick-input),
 html body.pushsale-app-body .pushsale-template-fragment input[type='radio'],
 html body.pushsale-app-body .ps-adminlte-page input[type='radio'],
 html body.pushsale-app-body .ps-report-page input[type='radio'] {
