@@ -5,36 +5,20 @@
     color: #111;
 }
 
-.ps-facebook-unit-titlebar {
-    min-height: 76px;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    border-bottom: 1px solid #d6dde5;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.16);
-}
-
-.ps-facebook-unit-titlebar h1 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 1.2;
-}
-
 .ps-facebook-unit-panel {
-    margin: 0 14px;
+    margin: 0 14px 14px;
     border: 1px solid #d7d7d7;
-    border-top: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
     min-height: 460px;
+    background: #fff;
 }
 
 .ps-facebook-unit-search {
     display: grid;
-    grid-template-columns: minmax(260px, 440px) 100px;
-    gap: 30px;
+    grid-template-columns: minmax(260px, 440px) auto;
+    gap: 12px;
     align-items: center;
-    padding: 30px 16px 16px;
+    padding: 16px;
 }
 
 .ps-facebook-unit-search .form-control,
@@ -44,18 +28,22 @@
     border-radius: 0;
     box-shadow: none;
     font-size: 12px;
+    background: #fff;
+    pointer-events: auto;
 }
 
-.ps-facebook-unit-search .btn {
+.ps-facebook-unit-search .btn,
+.ps-facebook-editor-actions .btn {
     height: 30px;
-    width: 94px;
+    min-height: 30px;
     border-radius: 3px;
     font-size: 12px;
     font-weight: 700;
-}
-
-.ps-facebook-unit-search .btn i {
-    margin-right: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    pointer-events: auto;
 }
 
 .ps-facebook-unit-divider {
@@ -123,25 +111,10 @@
     color: #666;
 }
 
-.ps-facebook-row-actions button,
-.ps-facebook-editor-actions button {
-    border: 0;
-    background: transparent;
-    color: #1784e8;
+.ps-facebook-row-actions .btn {
+    min-width: 28px;
+    height: 26px;
     padding: 0 8px;
-    font-size: 12px;
-    line-height: 24px;
-}
-
-.ps-facebook-row-actions button:hover,
-.ps-facebook-editor-actions button:hover {
-    color: #005baf;
-    text-decoration: underline;
-}
-
-.ps-facebook-row-actions i,
-.ps-facebook-editor-actions i {
-    margin-right: 4px;
 }
 
 .ps-facebook-pagination-wrap {
@@ -162,28 +135,31 @@
     font-weight: 400;
 }
 
-.ps-facebook-editor-table .txt-dotted[disabled] {
-    background: #f2f2f2;
-    border: 0;
-    border-bottom: 1px dotted #bdbdbd;
-    color: #333;
-}
-
 .ps-facebook-editor-actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
+    min-height: 44px;
+    padding: 6px 0;
 }
 
-.ps-facebook-editor-actions button[disabled] {
-    opacity: .55;
-    pointer-events: none;
+.ps-facebook-editor-actions .btn[disabled] {
+    opacity: .65;
 }
 
-.ps-facebook-editor-message {
-    color: #d9534f;
-    font-style: italic;
+.ps-facebook-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.ps-facebook-check input {
+    margin: 0;
+    pointer-events: auto;
 }
 
 .ps-facebook-business-note {
@@ -203,6 +179,5 @@
 
     .ps-facebook-unit-search {
         grid-template-columns: minmax(240px, 1fr) auto;
-        gap: 12px;
     }
 }

@@ -355,8 +355,14 @@ return [
             'page_id' => ['required','string','max:255'],
             'page_name' => ['required','string','max:255'],
             'creator_name' => ['nullable','string','max:255'],
-            'marketer_user_id' => ['nullable','integer','exists:users,id'],
+            'marketer_user_id' => ['required','integer','exists:users,id'],
             'is_active' => ['boolean'],
+        ],
+        'messages' => [
+            'page_id.required' => 'PageID bắt buộc.',
+            'page_name.required' => 'Tên Fanpage bắt buộc.',
+            'marketer_user_id.required' => 'Chọn tài khoản Marketing phụ trách Fanpage.',
+            'marketer_user_id.exists' => 'Tài khoản Marketing không tồn tại.',
         ],
     ],
     '2.4.1' => [

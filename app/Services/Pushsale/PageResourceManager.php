@@ -3,12 +3,14 @@
 namespace App\Services\Pushsale;
 
 use App\Models\Product;
+use App\Models\Pushsale\FacebookPageMapping;
 use App\Models\Pushsale\OperationCategory;
 use App\Models\Pushsale\OperationWorkflow;
 use App\Models\Pushsale\Expense;
 use App\Models\Pushsale\ProductComboItem;
 use App\Models\Pushsale\WarehouseVoucher;
 use App\Models\Pushsale\WarehouseVoucherLine;
+use App\Models\MarketingSource;
 use App\Models\User;
 use App\Rules\VietnameseMobilePhone;
 use App\Services\Inventory\InventoryIntakeService;
@@ -333,6 +335,19 @@ class PageResourceManager
                     'unit_price' => max(0, (int) ($item['unit_price'] ?? Product::query()->whereKey($id)->value('unit_price'))),
                 ]);
             }
+        }
+
+        if ($resourceKey === '1.11' && $model instanceof FacebookPageMapping) {
+            MarketingSource::query()->updateOrCreate(
+                ['utm_source' => 'facebook', 'utm_campaign' => (string) $model->page_id],
+                [
+                    'name' => 'Facebook — '.$model->page_name,
+                    'marketer_user_id' => $model->marketer_user_id,
+                    'ad_channel' => 'Facebook',
+                    'is_active' => (bool) $model->is_active,
+                    'is_approved' => true,
+                ],
+            );
         }
     }
 
