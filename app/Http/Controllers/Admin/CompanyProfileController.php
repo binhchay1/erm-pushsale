@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Rules\VietnameseMobilePhone;
 use App\Support\TenantEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -73,7 +74,7 @@ class CompanyProfileController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:160'],
             'contact_email' => ['nullable', 'email', 'max:160'],
-            'contact_phone' => ['nullable', 'string', 'max:40'],
+            'contact_phone' => ['nullable', 'string', 'max:40', new VietnameseMobilePhone],
             'tax_code' => ['nullable', 'string', 'max:40'],
             'product_field' => ['nullable', 'string', 'max:120'],
             'address' => ['nullable', 'string', 'max:500'],
@@ -99,6 +100,12 @@ class CompanyProfileController extends Controller
         $data = $request->validate($rules);
 
         $data['use_two_level_address'] = (bool) ($data['use_two_level_address'] ?? false);
+
+        foreach (['contact_phone', 'product_field', 'address', 'address_2', 'province_name', 'district_name', 'ward_name', 'contact_email', 'tax_code', 'website', 'representative_name', 'representative_title'] as $optional) {
+            if (array_key_exists($optional, $data) && (is_string($data[$optional]) ? trim($data[$optional]) === '' : $data[$optional] === null)) {
+                $data[$optional] = null;
+            }
+        }
 
         if (isset($data['email_login_host'])) {
             $data['email_login_host'] = strtolower(ltrim(trim((string) $data['email_login_host']), '@')) ?: null;

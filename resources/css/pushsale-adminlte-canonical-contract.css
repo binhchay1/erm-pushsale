@@ -1152,12 +1152,17 @@ html body.pushsale-app-body .c-money-body > strong {
 }
 
 /* Shared delete/confirm dialog. */
+html body.pushsale-app-body .ps-confirm-dialog-surface,
+html body.pushsale-app-body .ps-confirm-dialog {
+    min-height: 180px !important;
+}
 html body.pushsale-app-body .ps-confirm-body {
-    padding: 14px 16px !important;
+    padding: 18px 16px !important;
+    min-height: 72px !important;
 }
 html body.pushsale-app-body .ps-confirm-action {
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     gap: 12px !important;
     color: #222 !important;
     line-height: 1.45 !important;
@@ -1174,9 +1179,11 @@ html body.pushsale-app-body .ps-confirm-icon {
     color: #d73925 !important;
 }
 html body.pushsale-app-body .ps-confirm-copy {
-    padding-top: 0 !important;
+    padding-top: 6px !important;
     font-size: 13px !important;
-    line-height: 1.45 !important;
+    line-height: 1.5 !important;
+    color: #222 !important;
+    white-space: pre-wrap !important;
 }
 
 @media (max-width: 1280px) {

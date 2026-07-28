@@ -203,7 +203,6 @@ export default function SettingsIndex({ definition = [], values = {}, activityUr
         event.preventDefault();
         put('/settings', {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã cập nhật cấu hình chức năng'),
             onError: (errors) => toast.error(Object.values(errors)[0] ?? 'Không thể lưu cấu hình'),
         });
     };

@@ -86,7 +86,6 @@ function ShippingDefaultPanel({ providers = [], defaultConfig = {} }) {
         event.preventDefault();
         form.put('/admin/shipping-default', {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã lưu đơn vị giao hàng mặc định.'),
             onError: (errors) => toast.error(Object.values(errors)[0] ?? 'Không thể lưu cấu hình mặc định.'),
         });
     };

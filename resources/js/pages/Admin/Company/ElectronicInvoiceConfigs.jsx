@@ -174,7 +174,6 @@ export default function ElectronicInvoiceConfigs({
             preserveScroll: true,
             onSuccess: () => {
                 setOpen(false);
-                toast.success(editingId ? 'Đã cập nhật cấu hình hóa đơn.' : 'Đã thêm cấu hình hóa đơn.');
             },
             onError: (errors) => {
                 const mapped = {};
@@ -196,14 +195,14 @@ export default function ElectronicInvoiceConfigs({
     const destroy = async (row) => {
         if (!row._record_id) return;
         const ok = await ask({
-            description: `Xóa cấu hình hóa đơn ${row.account}?`,
+            title: 'Xóa cấu hình hóa đơn',
+            description: `Bạn chắc chắn muốn xóa cấu hình hóa đơn "${row.account || 'không tên'}"? Hành động này không thể hoàn tác.`,
             confirmLabel: 'Xóa',
             variant: 'destructive',
         });
         if (!ok) return;
         router.delete(`${routeUrl}/records/${row._record_id}`, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã xóa cấu hình hóa đơn.'),
             onError: () => toast.error('Không xóa được cấu hình hóa đơn.'),
         });
     };

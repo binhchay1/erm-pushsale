@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -44,7 +44,6 @@ export default function Page({
     routeUrl,
     pageRuntimeError = null,
 }) {
-    const flash = usePage().props.flash ?? {};
     const [keyword, setKeyword] = useState(() => currentQuery().search ?? '');
     const [selectedId, setSelectedId] = useState(null);
     const [form, setForm] = useState(blankForm);
@@ -55,11 +54,6 @@ export default function Page({
         () => rows.find((row) => String(row._record_id) === String(selectedId)) ?? null,
         [rows, selectedId],
     );
-
-    useEffect(() => {
-        if (flash.success) toast.success(flash.success);
-        if (flash.error) toast.error(flash.error);
-    }, [flash.success, flash.error]);
 
     useEffect(() => {
         if (pageRuntimeError) toast.error(pageRuntimeError);
@@ -107,7 +101,6 @@ export default function Page({
         const options = {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success(selectedId ? 'Đã cập nhật cấu hình Fanpage.' : 'Đã thêm cấu hình Fanpage.');
                 if (!selectedId) clearForm();
             },
             onError: (errors) => {

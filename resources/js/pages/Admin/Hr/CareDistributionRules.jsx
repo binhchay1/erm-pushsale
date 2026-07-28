@@ -151,7 +151,6 @@ export default function CareDistributionRules({
             onFinish: () => setCreating(false),
             onSuccess: () => {
                 createForm.setData(emptyCreate);
-                toast.success('Đã thêm cấu hình chia số care đơn.');
             },
             onError: (errors) => toast.error(flattenErrors(errors).join(' · ') || 'Không thêm được cấu hình.'),
         });
@@ -187,7 +186,6 @@ export default function CareDistributionRules({
             onFinish: () => setUpdating(false),
             onSuccess: () => {
                 setEditingRow(null);
-                toast.success('Đã cập nhật cấu hình.');
             },
             onError: (errors) => toast.error(flattenErrors(errors).join(' · ') || 'Không cập nhật được.'),
         });
@@ -280,7 +278,12 @@ export default function CareDistributionRules({
             toast.error('Vui lòng chọn ít nhất một dòng.');
             return;
         }
-        const ok = await ask({ description: `Bạn chắc chắn muốn xóa ${ids.length} cấu hình?`, confirmLabel: 'Xóa', variant: 'destructive' });
+        const ok = await ask({
+            title: 'Xóa cấu hình care đơn',
+            description: `Bạn chắc chắn muốn xóa ${ids.length} cấu hình đã chọn? Hành động này không thể hoàn tác.`,
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
         if (!ok) return;
         try {
             await Promise.all(ids.map((id) => fetch(`${routeUrl}/records/${id}`, {
@@ -304,11 +307,15 @@ export default function CareDistributionRules({
 
     const destroyOne = async (row) => {
         if (!row._record_id) return;
-        const ok = await ask({ description: 'Xóa cấu hình này?', confirmLabel: 'Xóa', variant: 'destructive' });
+        const ok = await ask({
+            title: 'Xóa cấu hình care đơn',
+            description: 'Bạn chắc chắn muốn xóa cấu hình này? Hành động này không thể hoàn tác.',
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
         if (!ok) return;
         router.delete(`${routeUrl}/records/${row._record_id}`, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã xóa cấu hình.'),
             onError: () => toast.error('Không xóa được cấu hình.'),
         });
     };

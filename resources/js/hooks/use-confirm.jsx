@@ -31,14 +31,22 @@ export function ConfirmProvider({ children }) {
 
     const ask = useCallback(
         (options = {}) => new Promise((resolve) => {
+            const variant = options.variant ?? 'default';
+            const description = String(
+                options.description
+                ?? options.message
+                ?? (variant === 'destructive' ? t('confirm_dialog.delete_desc') : ''),
+            ).trim();
+
             setState({
                 open: true,
                 mode: 'confirm',
-                title: options.title ?? t('confirm_dialog.title'),
-                description: options.description ?? '',
-                confirmLabel: options.confirmLabel ?? t('common.confirm'),
+                title: options.title ?? (variant === 'destructive' ? t('confirm_dialog.delete_title') : t('confirm_dialog.title')),
+                description,
+                confirmLabel: options.confirmLabel
+                    ?? (variant === 'destructive' ? t('confirm_dialog.confirm_delete') : t('common.confirm')),
                 cancelLabel: options.cancelLabel ?? t('confirm_dialog.cancel_label'),
-                variant: options.variant ?? 'default',
+                variant,
                 resolve,
             });
         }),
@@ -47,7 +55,9 @@ export function ConfirmProvider({ children }) {
 
     const alert = useCallback(
         (options = {}) => new Promise((resolve) => {
-            const description = typeof options === 'string' ? options : (options.description ?? '');
+            const description = typeof options === 'string'
+                ? options
+                : String(options.description ?? options.message ?? '').trim();
             const title = typeof options === 'string'
                 ? t('confirm_dialog.title')
                 : (options.title ?? t('confirm_dialog.title'));
@@ -59,7 +69,7 @@ export function ConfirmProvider({ children }) {
                 open: true,
                 mode: 'alert',
                 title,
-                description,
+                description: description || t('confirm_dialog.delete_related_desc'),
                 confirmLabel,
                 cancelLabel: '',
                 variant: typeof options === 'string' ? 'default' : (options.variant ?? 'default'),

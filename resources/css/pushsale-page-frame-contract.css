@@ -172,7 +172,11 @@ html body.pushsale-app-body .ps-page-shell .ps-search-button {
 html body.pushsale-app-body .ps-page-shell__toggle,
 html body.pushsale-app-body .ps-page-shell .psm-square-button,
 html body.pushsale-app-body .ps-page-shell .psm-help-button,
-html body.pushsale-app-body .ps-page-shell .btn-icon {
+html body.pushsale-app-body .ps-page-shell .m-header .btn-icon,
+html body.pushsale-app-body .ps-page-shell .ps-page-header .btn-icon,
+html body.pushsale-app-body .ps-page-shell .ps-page-shell__toolbar .btn-icon,
+html body.pushsale-app-body .ps-page-shell .ps-header-search .btn-icon,
+html body.pushsale-app-body .ps-page-shell .ps-users-header-search .btn-icon {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -185,6 +189,40 @@ html body.pushsale-app-body .ps-page-shell .btn-icon {
     border: 1px solid #9aa7b7 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+}
+
+/* Table / row action icons: never boxed — override any header btn-icon chrome. */
+html body.pushsale-app-body .ps-page-shell table td .btn-icon,
+html body.pushsale-app-body .ps-page-shell table th .btn-icon,
+html body.pushsale-app-body .ps-page-shell .ps-hr-config-actions .btn-icon,
+html body.pushsale-app-body .ps-page-shell .ps-row-actions .btn-icon,
+html body.pushsale-app-body .ps-page-shell .ps-row-actions button,
+html body.pushsale-app-body .ps-page-shell table td button.btn-icon,
+html body.pushsale-app-body .ps-page-shell table th button.btn-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 2px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #0d84df !important;
+    line-height: 1 !important;
+}
+
+html body.pushsale-app-body .ps-page-shell table td .btn-icon:hover,
+html body.pushsale-app-body .ps-page-shell .ps-hr-config-actions .btn-icon:hover,
+html body.pushsale-app-body .ps-page-shell .ps-row-actions .btn-icon:hover {
+    background: transparent !important;
+    border: 0 !important;
+    color: #005fae !important;
 }
 
 html body.pushsale-app-body .ps-page-shell .ps-header-search,

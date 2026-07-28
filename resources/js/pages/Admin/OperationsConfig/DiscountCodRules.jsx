@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -84,7 +84,6 @@ function RuleTable({ title, type, rows, routeUrl, onSaved }) {
         const options = {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success(form.id ? 'Đã cập nhật cấu hình.' : 'Đã thêm cấu hình.');
                 reset();
                 onSaved?.();
             },
@@ -110,7 +109,7 @@ function RuleTable({ title, type, rows, routeUrl, onSaved }) {
         if (!id) return;
         const ok = await ask({
             title: 'Xóa cấu hình',
-            description: 'Xóa cấu hình này?',
+            description: 'Bạn chắc chắn muốn xóa cấu hình này? Hành động này không thể hoàn tác.',
             confirmLabel: 'Xóa',
             variant: 'destructive',
         });
@@ -121,7 +120,6 @@ function RuleTable({ title, type, rows, routeUrl, onSaved }) {
         router.delete(`${routeUrl}/records/${id}`, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Đã xóa cấu hình.');
                 if (String(form.id) === String(id)) reset();
                 onSaved?.();
             },
@@ -248,19 +246,16 @@ function RuleTable({ title, type, rows, routeUrl, onSaved }) {
 }
 
 export default function Page({ schema, rows = [], routeUrl, pageRuntimeError = null }) {
-    const flash = usePage().props.flash ?? {};
     const [error, setError] = useState(pageRuntimeError || '');
     const discountRows = useMemo(() => rows.filter((row) => (row.rule_type ?? 'discount') === 'discount'), [rows]);
     const codRows = useMemo(() => rows.filter((row) => row.rule_type === 'cod'), [rows]);
 
     useEffect(() => {
-        if (flash.success) toast.success(flash.success);
-        if (flash.error) toast.error(flash.error);
         if (pageRuntimeError) {
             setError(pageRuntimeError);
             toast.error(pageRuntimeError);
         }
-    }, [flash.success, flash.error, pageRuntimeError]);
+    }, [pageRuntimeError]);
 
     const reload = () => {
         setError('');

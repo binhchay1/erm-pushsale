@@ -125,7 +125,6 @@ export default function PhoneBlacklist({
             preserveScroll: true,
             onSuccess: () => {
                 setEditorOpen(false);
-                toast.success(editingId ? 'Đã cập nhật số blacklist.' : 'Đã thêm số blacklist.');
             },
             onError: (errors) => {
                 const mapped = {};
@@ -147,6 +146,7 @@ export default function PhoneBlacklist({
     const destroy = async (row) => {
         if (!row._record_id) return;
         const ok = await ask({
+            title: 'Xóa số blacklist',
             description: t('pages.phone_blacklist.delete_confirm', { phone: row.phone }),
             confirmLabel: 'Xóa',
             variant: 'destructive',
@@ -154,7 +154,6 @@ export default function PhoneBlacklist({
         if (!ok) return;
         router.delete(`${routeUrl}/records/${row._record_id}`, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã xóa số blacklist.'),
             onError: () => toast.error('Không xóa được số blacklist.'),
         });
     };

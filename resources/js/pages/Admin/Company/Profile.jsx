@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import AppLayout from '@/layouts/AppLayout';
+import { vietnamesePhoneError } from '@/lib/vietnamesePhone';
 
 const provinceOptions = ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ'];
 const districtOptions = ['Quận Ba Đình', 'Quận Hoàn Kiếm', 'Quận Đống Đa', 'Quận Hà Đông', 'Quận Cầu Giấy'];
@@ -29,6 +30,10 @@ function validateEmailHost(value) {
         return 'Hậu tố không hợp lệ. Ví dụ: saleops.local hoặc ten-cong-ty.saleops.local';
     }
     return null;
+}
+
+function validateOptionalPhone(value) {
+    return vietnamesePhoneError(value, { required: false }) || null;
 }
 
 function FieldRow({ label, required = false, error, hint, children }) {
@@ -58,6 +63,7 @@ export default function CompanyProfile({ company, emailIdentity = {} }) {
     const inferredProvince = company?.province_name ?? (String(company?.address ?? '').toLocaleLowerCase('vi').includes('hn') ? 'Hà Nội' : '');
     const isInternal = Boolean(company?.is_internal ?? emailIdentity?.isInternal);
     const [emailHostError, setEmailHostError] = useState(null);
+    const [phoneError, setPhoneError] = useState(null);
 
     const form = useForm({
         name: valueOrDefault(company?.name),
@@ -81,8 +87,10 @@ export default function CompanyProfile({ company, emailIdentity = {} }) {
         event.preventDefault();
 
         const hostError = validateEmailHost(form.data.email_login_host);
+        const nextPhoneError = validateOptionalPhone(form.data.contact_phone);
         setEmailHostError(hostError);
-        if (hostError) {
+        setPhoneError(nextPhoneError);
+        if (hostError || nextPhoneError) {
             return;
         }
 
@@ -156,15 +164,22 @@ export default function CompanyProfile({ company, emailIdentity = {} }) {
                         </div>
                     </FieldRow>
 
-                    <FieldRow label="Số điện thoại" error={form.errors.contact_phone}>
+                    <FieldRow label="Số điện thoại" error={phoneError || form.errors.contact_phone}>
                         <input
                             className="form-control ps-unit-control"
                             value={form.data.contact_phone}
-                            onChange={(event) => form.setData('contact_phone', event.target.value)}
+                            onChange={(event) => {
+                                form.setData('contact_phone', event.target.value);
+                                if (phoneError) {
+                                    setPhoneError(validateOptionalPhone(event.target.value));
+                                }
+                            }}
+                            onBlur={() => setPhoneError(validateOptionalPhone(form.data.contact_phone))}
+                            placeholder="Ví dụ: 0912345678"
                         />
                     </FieldRow>
 
-                    <FieldRow label="Lĩnh vực sản phẩm" required error={form.errors.product_field}>
+                    <FieldRow label="Lĩnh vực sản phẩm" error={form.errors.product_field}>
                         <Select value={form.data.product_field} onChange={(value) => form.setData('product_field', value)}>
                             <option value="">--Chọn lĩnh vực--</option>
                             {optionWithCurrent(productFieldOptions, form.data.product_field).map((item) => (
@@ -173,7 +188,7 @@ export default function CompanyProfile({ company, emailIdentity = {} }) {
                         </Select>
                     </FieldRow>
 
-                    <FieldRow label="Địa chỉ" required error={form.errors.address}>
+                    <FieldRow label="Địa chỉ" error={form.errors.address}>
                         <input
                             className="form-control ps-unit-control"
                             value={form.data.address}
@@ -199,7 +214,7 @@ export default function CompanyProfile({ company, emailIdentity = {} }) {
                         ) : null}
                     </FieldRow>
 
-                    <FieldRow label="Tỉnh/TP" required error={form.errors.province_name}>
+                    <FieldRow label="Tỉnh/TP" error={form.errors.province_name}>
                         <Select value={form.data.province_name} onChange={(value) => form.setData('province_name', value)}>
                             <option value="">--Chọn Tỉnh/TP--</option>
                             {optionWithCurrent(provinceOptions, form.data.province_name).map((item) => (
@@ -208,7 +223,7 @@ export default function CompanyProfile({ company, emailIdentity = {} }) {
                         </Select>
                     </FieldRow>
 
-                    <FieldRow label="Quận/Huyện" required error={form.errors.district_name}>
+                    <FieldRow label="Quận/Huyện" error={form.errors.district_name}>
                         <Select value={form.data.district_name} onChange={(value) => form.setData('district_name', value)}>
                             <option value="">--Chọn Quận/Huyện--</option>
                             {optionWithCurrent(districtOptions, form.data.district_name).map((item) => (

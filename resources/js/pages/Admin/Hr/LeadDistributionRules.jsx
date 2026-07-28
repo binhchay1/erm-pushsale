@@ -154,7 +154,6 @@ export default function LeadDistributionRules({
             preserveScroll: true,
             onSuccess: () => {
                 setEditorOpen(false);
-                toast.success(editingId ? 'Đã cập nhật cấu hình chia số.' : 'Đã thêm cấu hình chia số.');
             },
             onError: (errors) => {
                 Object.entries(errors ?? {}).forEach(([key, value]) => {
@@ -170,11 +169,15 @@ export default function LeadDistributionRules({
 
     const destroy = async (row) => {
         if (!row._record_id) return;
-        const ok = await ask({ description: `Xóa cấu hình "${row.name}"?`, confirmLabel: 'Xóa', variant: 'destructive' });
+        const ok = await ask({
+            title: 'Xóa cấu hình chia số',
+            description: `Bạn chắc chắn muốn xóa cấu hình "${row.name || 'không tên'}"? Hành động này không thể hoàn tác.`,
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
         if (!ok) return;
         router.delete(`${routeUrl}/records/${row._record_id}`, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã xóa cấu hình.'),
             onError: () => toast.error('Không xóa được cấu hình.'),
         });
     };
