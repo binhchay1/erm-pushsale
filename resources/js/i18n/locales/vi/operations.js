@@ -87,6 +87,12 @@ export default {
     sale_workspace: {
         note_helper: 'Lưu vào lịch sử tác nghiệp và hồ sơ khách hàng',
         note_empty_hint: 'Chưa có TN cần. Nhập tại cột TN cần để lưu vào lịch sử tác nghiệp.',
+        note_saved: 'Đã lưu tác nghiệp cần.',
+        note_save_failed: 'Không thể lưu tác nghiệp cần.',
+        default_stage: 'Gọi lần 1',
+        internal_message: 'Tin nhắn nội bộ',
+        save_note: 'Lưu ghi chú',
+        note_aria: 'Tác nghiệp cần của :name',
     },
     customer_interactions: {
         history_title: 'Lịch sử tác nghiệp',

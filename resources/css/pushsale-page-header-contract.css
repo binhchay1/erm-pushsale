@@ -636,7 +636,8 @@ html body.pushsale-app-body .ps-page-header .ps-sale-extra-filters {
 
 html body.pushsale-app-body .ps-page-header .ps-sale-extra-row {
     display: grid !important;
-    grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(140px, 1fr)) !important;
+    /* Pushsale: col-sm-4 date + 3× col-sm-2 + checkbox */
+    grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(120px, 1fr)) auto !important;
     gap: 8px 10px !important;
     align-items: center !important;
     justify-content: start !important;
@@ -646,7 +647,7 @@ html body.pushsale-app-body .ps-page-header .ps-sale-extra-row {
 }
 
 html body.pushsale-app-body .ps-page-header .ps-sale-extra-row:last-child {
-    grid-template-columns: repeat(4, minmax(140px, 1fr)) auto !important;
+    grid-template-columns: repeat(5, minmax(120px, 1fr)) !important;
 }
 
 html body.pushsale-app-body .ps-page-header .ps-sale-check {
@@ -681,7 +682,7 @@ html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-
 html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row,
 html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row {
     display: grid !important;
-    grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(140px, 1fr)) !important;
+    grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(120px, 1fr)) auto !important;
     grid-column: 1 / -1 !important;
     gap: 8px 10px !important;
     align-items: center !important;
@@ -696,8 +697,16 @@ html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row {
 html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-row:last-child,
 html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row:last-child,
 html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row:last-child {
-    /* Cùng lề trái với hàng 1 — không để trống cột date. */
-    grid-template-columns: repeat(5, minmax(140px, 1fr)) !important;
+    /* Same left edge as row 1 — five equal fields */
+    grid-template-columns: repeat(5, minmax(120px, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row > .ps-date-filter,
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row > .ps-sale-date-range,
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row > .ps-date-range-control {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters .ps-sale-check {

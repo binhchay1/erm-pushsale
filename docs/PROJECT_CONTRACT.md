@@ -40,7 +40,9 @@ Thứ tự CSS runtime nằm ở `resources/js/lib/pushsaleStyleRegistry.js`.
 - Thủ kho tác nghiệp (5.1): `pushsale-warehouse-operations-contract.css` (level flags, `nha-mang`, `txt-mof`, `ttgh*`, FAB `fam-*`). HTML gốc tham chiếu: `docs/reference/pushsale-warehouse-operations.html`.
 - Sale tác nghiệp (4.1): `pushsale-sale-operations-contract.css` (ô vuông `level-*` Gọi lần/Chăm sóc, cột Tin nhắn plain `Địa chỉ=…`, TN cần `txt-mof`, trash góc cột Sale). HTML: `docs/reference/pushsale-sale-operations.html`.
   - **Tin nhắn** = `customer_note` từ landing (thường dạng `Địa chỉ=… | …`) — chỉ hiển thị, không textarea.
-  - **TN cần** = `sale_operation_note` — ô nhập tay `textarea.txt-mof` + nhãn đỏ giai đoạn (Gọi lần 1…).
+  - **TN cần** = `sale_operation_note` — ô nhập tay `textarea.txt-mof` auto-grow + nhãn đỏ giai đoạn; icon chat/save mờ mặc định, đậm khi hover ô.
+  - Date range dùng `DateRangeFilter` single-button (class `ps-date-range-control`) — **không** dùng dual-grid/`::after` hyphen của `.ps-date-filter` cũ.
+- **i18n**: Mọi chuỗi UI mới/sửa (toast, title, label, aria, dialog) phải thêm key ở `resources/js/i18n/locales/{vi,en}/…` và gọi qua `useT()` / `__()` — không hardcode tiếng Việt trong React/PHP khi user-facing.
 - Hồ sơ khách hàng (4.2 / route role khác nhau, cùng trang): `pushsale-customer-profile-contract.css` — filter 4 hàng theo Pushsale; cột họ tên/SP dùng `OrderStatusFlags` + `OrderProductsBreakdown`; dialog lịch sử mua hàng table-layout cố định.
 - Cuối cascade (cố định):
   1. `pushsale-unified-page-shell-contract.css`

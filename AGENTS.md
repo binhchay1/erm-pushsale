@@ -87,6 +87,7 @@ Thiếu use case → mở rộng `PageHeader`/shell, không copy header từng t
 - **D**: Service inject repo/query; Model không chứa validation nghiệp vụ phức tạp.
 - Transaction / phân bổ lead / duyệt landing → service layer (`app/Services/...`).
 - Không sửa schema “repair runtime” nếu phá dữ liệu.
+- **i18n / trans**: Chuỗi UI mới hoặc sửa (toast, label, title, dialog, aria) → thêm key `resources/js/i18n/locales/{vi,en}/…` + `useT()`, hoặc `__()` / Laravel lang phía PHP. Không hardcode tiếng Việt trong JSX cho user-facing text.
 
 ## 7. Docs — đừng spam
 

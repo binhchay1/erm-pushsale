@@ -381,14 +381,18 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                         <div className="small-tip sline">{formatDateTime(row.closedAt, { withSeconds: false })}</div>
                                     </div>
                                 </td>
-                                <td className="text-center no-wrap">
+                                    <td className="text-center no-wrap ps-wh-shipper-cell">
                                     <div className="text-right">
                                         {row.canCreateShipment && <InlineIconButton title="Đăng vận đơn" icon="calendar-check-o" onClick={() => createShipment(row)} className="orange" />}
                                         {row.canPrintLabel && <InlineIconButton title="In đơn" icon="print" onClick={() => printLabel(row)} />}
                                     </div>
-                                    {row.warehouseName || 'Chưa chọn kho'}<br />
-                                    <span className="ps-wh-green">{row.shippingProviderLabel || row.shippingMethod || 'Thủ công'}</span>
-                                    <button type="button" className="item-mdgv" onClick={() => setDetailOrderId(row.id)}>{row.trackingNumber || ''}</button>
+                                    <div className="ps-wh-shipper-stack">
+                                        <div className="ps-wh-shipper-line">{row.warehouseName || ''}</div>
+                                        <div className="ps-wh-shipper-line ps-wh-green">{row.shippingProviderLabel || row.shippingMethod || ''}</div>
+                                        <div className="ps-wh-shipper-line">
+                                            <button type="button" className="item-mdgv" onClick={() => setDetailOrderId(row.id)}>{row.trackingNumber || ''}</button>
+                                        </div>
+                                    </div>
                                 </td>
                                 <CareNoteCell
                                     row={row}
@@ -433,14 +437,22 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                     <div className="text-left khkn sline">{row.customerNote || ''}</div>
                                     <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>
                                 </td>
-                                <td className="c-address-body"><span>{row.shippingAddress || 'Chưa có địa chỉ giao'}</span>{row.shippingNotes && <><br /><span className="small-tip ps-wh-magenta">{row.shippingNotes}</span></>}</td>
+                                <td className="c-address-body"><span>{row.shippingAddress || ''}</span>{row.shippingNotes && <><br /><span className="small-tip ps-wh-magenta">{row.shippingNotes}</span></>}</td>
                                 <td className="text-left c-products-body"><OrderProductsBreakdown items={row.products || [...(row.mainProducts || []), ...(row.upsellProducts || [])]} order={row} /></td>
                                 <td className="no-wrap area3 text-right c-money-body"><OrderMoneyBreakdown row={row} /></td>
                                 <td className="text-right">{formatCurrency(row.deposit)}</td>
                                 <td className="text-right">{formatCurrency(row.codAmount || row.total)}</td>
                                 <td className="text-right">{formatCurrency(row.carrierServiceFee)}</td>
                                 <td className="text-right">{formatCurrency(row.carrierReturnFee || row.carrierOtherFee || row.codFee)}</td>
-                                <td className="text-center"><span>{row.reconciliationStatus || ''}</span><br /><span className="small-tip">{row.reconciliationUpdatedAt || ''}</span></td>
+                                <td className="text-center">
+                                    {row.reconciliationStatus && !['pending', 'none', 'null'].includes(String(row.reconciliationStatus).toLowerCase()) ? (
+                                        <>
+                                            <span>{row.reconciliationStatusLabel || row.reconciliationStatus}</span>
+                                            <br />
+                                            <span className="small-tip">{row.reconciliationUpdatedAt || ''}</span>
+                                        </>
+                                    ) : null}
+                                </td>
                             </tr>
                         )) : <tr><td colSpan="15" className="ps-wh-empty">Không có đơn phù hợp bộ lọc.</td></tr>}
                     </tbody>

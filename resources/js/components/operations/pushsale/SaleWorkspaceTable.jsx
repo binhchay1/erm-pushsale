@@ -48,36 +48,50 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     const t = useT();
     const [value, setValue] = useState(order.saleOperationNote ?? '');
     const [saving, setSaving] = useState(false);
+    const textareaRef = useRef(null);
 
     useEffect(() => setValue(order.saleOperationNote ?? ''), [order.saleOperationNote]);
+
+    useEffect(() => {
+        const node = textareaRef.current;
+        if (!node) return;
+        node.style.height = '48px';
+        node.style.height = `${Math.min(160, Math.max(48, node.scrollHeight))}px`;
+    }, [value]);
 
     const save = () => {
         setSaving(true);
         router.patch(`${actionBaseUrl}/orders/${order.id}/operation-note`, { note: value }, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã lưu tác nghiệp cần.'),
-            onError: (errors) => toast.error(errors.note ?? errors.order ?? 'Không thể lưu tác nghiệp cần.'),
+            onSuccess: () => toast.success(t('operations.sale_workspace.note_saved')),
+            onError: (errors) => toast.error(errors.note ?? errors.order ?? t('operations.sale_workspace.note_save_failed')),
             onFinish: () => setSaving(false),
         });
     };
 
     return (
         <div className="ps-operation-note-editor area2">
-            <span className="fb span-col ttgh7 ps-operation-stage-label">{order.currentOperation || 'Gọi lần 1'}</span>
-            <div className="ps-note-toolbar">
-                <button type="button" className="btn-icon aoh" onClick={() => onMessages(order)} title="Tin nhắn nội bộ"><i className="fa fa-commenting-o" /></button>
-                <button type="button" className="btn-icon aoh" onClick={save} disabled={saving} title="Lưu ghi chú"><i className="fa fa-save" /></button>
+            <span className="fb span-col ttgh7 ps-operation-stage-label">{order.currentOperation || t('operations.sale_workspace.default_stage')}</span>
+            <div className="ps-note-toolbar text-right">
+                <button type="button" className="btn-icon aoh ps-note-msg" onClick={() => onMessages(order)} title={t('operations.sale_workspace.internal_message')}>
+                    <i className="fa fa-commenting-o" />
+                </button>
+                <button type="button" className="btn-icon aoh ps-note-save" onClick={save} disabled={saving} title={t('operations.sale_workspace.save_note')}>
+                    <i className="fa fa-save" />
+                </button>
             </div>
             <div className="mof-container">
                 <textarea
+                    ref={textareaRef}
                     className="form-control txt-mof txt-dotted ps-note-inline-textarea"
                     maxLength={500}
+                    rows={2}
                     value={value}
                     onChange={(event) => setValue(event.target.value)}
                     onKeyDown={(event) => {
                         if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
                     }}
-                    aria-label={`Tác nghiệp cần của ${order.customerName ?? order.customerPhone}`}
+                    aria-label={t('operations.sale_workspace.note_aria', { name: order.customerName ?? order.customerPhone })}
                     title={t('operations.sale_workspace.note_helper')}
                 />
             </div>

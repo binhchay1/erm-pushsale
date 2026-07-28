@@ -199,7 +199,8 @@ html body.pushsale-app-body .action-container.ps-wh-floating-actions .hidden-act
     flex-direction: column !important;
     gap: 10px !important;
     left: 0 !important;
-    opacity: 0 !important;
+    opacity: 1 !important;
+    filter: none !important;
     pointer-events: none !important;
     position: absolute !important;
     transform: none !important;
@@ -210,6 +211,7 @@ html body.pushsale-app-body .action-container.ps-wh-floating-actions.open .hidde
     display: flex !important;
     margin-left: 5px !important;
     opacity: 1 !important;
+    filter: none !important;
     pointer-events: auto !important;
 }
 
@@ -306,13 +308,11 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-delivery-actions {
     margin: 4px 0;
 }
 
-/* FAB: show only lead button per row until that row is hovered */
-html body.pushsale-app-body .action-container.ps-wh-floating-actions .icon-row > .n-button:not(:first-child) {
-    display: none !important;
-}
-
-html body.pushsale-app-body .action-container.ps-wh-floating-actions .icon-row:hover > .n-button {
+/* FAB: show all child buttons when menu is open (no per-row reveal / fade) */
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .icon-row > .n-button {
     display: inline-flex !important;
+    opacity: 1 !important;
+    filter: none !important;
 }
 
 html body.pushsale-app-body .ps-dialog-form-error {
@@ -322,6 +322,32 @@ html body.pushsale-app-body .ps-dialog-form-error {
     font-size: 12px !important;
     margin: 0 0 10px !important;
     padding: 8px 10px !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-shipper-stack {
+    text-align: center !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-shipper-line {
+    display: block !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-shipper-line .item-mdgv {
+    color: darkorange !important;
+    display: inline-block !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .c-care-body .btn-icon.aoh {
+    opacity: 0.28 !important;
+    transition: opacity .15s ease;
+}
+
+html body.pushsale-app-body .ps-wh-page .c-care-body:hover .btn-icon.aoh,
+html body.pushsale-app-body .ps-wh-page .c-care-body:focus-within .btn-icon.aoh,
+html body.pushsale-app-body .ps-wh-page .c-care-body .btn-icon.aoh:hover {
+    opacity: 1 !important;
 }
 
 @media (max-width: 992px) {

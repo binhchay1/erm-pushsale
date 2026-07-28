@@ -125,6 +125,42 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .f
     margin-top: 2px;
 }
 
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-toolbar {
+    display: block !important;
+    margin: 2px 0 0 !important;
+    min-height: 18px;
+    overflow: hidden;
+    text-align: right;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-toolbar .btn-icon {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #3c8dbc !important;
+    height: 18px;
+    line-height: 18px;
+    opacity: 0.28 !important;
+    padding: 0 !important;
+    transition: opacity .15s ease;
+    width: 18px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-toolbar .btn-icon.ps-note-msg {
+    float: left !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-toolbar .btn-icon.ps-note-save {
+    float: right !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor:hover .ps-note-toolbar .btn-icon,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor:focus-within .ps-note-toolbar .btn-icon,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-toolbar .btn-icon:hover {
+    opacity: 1 !important;
+}
+
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .mof-container {
     clear: both;
     padding-top: 2px;
@@ -135,18 +171,42 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor te
     border: 1px dotted #ddd !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    display: block !important;
     font-size: 12px !important;
-    height: 48px !important;
+    height: auto !important;
     line-height: 15px !important;
+    max-height: 160px !important;
     min-height: 48px !important;
+    overflow-y: hidden !important;
     padding: 5px !important;
-    resize: vertical !important;
+    resize: none !important;
     width: 100% !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof:hover,
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof:focus {
     background: #fff !important;
+    overflow-y: auto !important;
+}
+
+/* Status tabs: align left edge with advanced filters (no Bootstrap .row gutter) */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-stage-tabs,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-stage-tabs.row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-content: flex-start !important;
+    gap: 4px 10px !important;
+    margin: 0 !important;
+    padding: 10px 14px 8px !important;
+    border-bottom: 1px solid #ddd !important;
+    background: #fff !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-stage-tabs::before,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-stage-tabs::after {
+    display: none !important;
+    content: none !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page a.tao-don-fixed,
@@ -213,19 +273,6 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-money { width: 120px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-deposit { width: 72px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-delivery { width: 120px; }
-
-html body.pushsale-app-body .ps-sale-workspace-page .ps-note-toolbar {
-    align-items: center;
-    display: flex !important;
-    justify-content: space-between !important;
-    margin: 2px 0 2px !important;
-    min-height: 18px;
-    width: 100%;
-}
-
-html body.pushsale-app-body .ps-sale-workspace-page .ps-note-toolbar .btn-icon {
-    float: none !important;
-}
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-cell-inner {
     position: relative;

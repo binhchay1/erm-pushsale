@@ -87,6 +87,12 @@ export default {
     sale_workspace: {
         note_helper: 'Saved to operation history and customer profile',
         note_empty_hint: 'No needed action note yet. Fill the TN cần column to save it to operation history.',
+        note_saved: 'Operation note saved.',
+        note_save_failed: 'Could not save the operation note.',
+        default_stage: 'Call 1',
+        internal_message: 'Internal message',
+        save_note: 'Save note',
+        note_aria: 'Operation note for :name',
     },
     customer_interactions: {
         history_title: 'Operation history',
