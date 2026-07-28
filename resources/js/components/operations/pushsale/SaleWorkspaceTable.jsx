@@ -148,7 +148,7 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
                 <strong>{order.currentOperation || 'Gọi lần 1'}</strong>
                 <div className="ps-note-floating-actions">
                     <button type="button" className="btn-icon" onClick={() => onMessages(order)} title="Tin nhắn"><i className="fa fa-commenting-o" /></button>
-                    <button type="button" className="btn-icon" onClick={save} disabled={saving} title="Lưu tác nghiệp cần"><i className="fa fa-floppy-o" /></button>
+                    <button type="button" className="btn-icon" onClick={save} disabled={saving} title="Lưu tác nghiệp cần"><i className="fa fa-save" /></button>
                     <button type="button" className="btn-icon" onClick={forceCloseFloating} title="Thu gọn"><i className="fa fa-compress" /></button>
                 </div>
             </div>
@@ -172,28 +172,31 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     return (
         <div
             ref={editorRef}
-            className={`ps-operation-note-editor ${pinned ? 'is-pinned' : ''} ${hoverOpen ? 'is-hover-open' : ''}`}
+            className={`ps-operation-note-editor area2 ${pinned ? 'is-pinned' : ''} ${hoverOpen ? 'is-hover-open' : ''}`}
             onMouseEnter={() => openFloating({ pin: false })}
             onMouseLeave={scheduleCloseFloating}
         >
-            <div className="ps-operation-stage-label">{order.currentOperation || 'Gọi lần 1'}</div>
-            <div className="ps-note-toolbar">
-                <button type="button" className="btn-icon" onClick={() => onMessages(order)} title="Tin nhắn"><i className="fa fa-commenting-o" /></button>
-                <button type="button" className="btn-icon" onClick={save} disabled={saving} title="Lưu tác nghiệp cần"><i className="fa fa-floppy-o" /></button>
+            <span className="fb span-col ttgh7 ps-operation-stage-label">{order.currentOperation || 'Gọi lần 1'}</span>
+            <div className="text-right ps-note-toolbar">
+                <button type="button" className="btn-icon aoh" style={{ float: 'left' }} onClick={() => onMessages(order)} title="Tin nhắn nội bộ"><i className="fa fa-commenting-o" /></button>
+                <button type="button" className="btn-icon aoh" onClick={save} disabled={saving} title="Lưu ghi chú"><i className="fa fa-save" /></button>
             </div>
-            <textarea
-                className="form-control txt-mof txt-dotted ps-note-inline-textarea"
-                maxLength={500}
-                value={value}
-                onChange={(event) => setValue(event.target.value)}
-                onClick={() => openFloating({ pin: true })}
-                onFocus={() => openFloating({ pin: true })}
-                onKeyDown={(event) => {
-                    if (event.key === 'Escape') forceCloseFloating();
-                    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
-                }}
-                aria-label={`Tác nghiệp cần của ${order.customerName ?? order.customerPhone}`}
-            />
+            <div className="mof-container">
+                <textarea
+                    className="form-control txt-mof txt-dotted ps-note-inline-textarea"
+                    maxLength={500}
+                    value={value}
+                    onChange={(event) => setValue(event.target.value)}
+                    onClick={() => openFloating({ pin: true })}
+                    onFocus={() => openFloating({ pin: true })}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape') forceCloseFloating();
+                        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
+                    }}
+                    aria-label={`Tác nghiệp cần của ${order.customerName ?? order.customerPhone}`}
+                />
+            </div>
+            <div style={{ clear: 'both' }} />
             {floatingPanel}
         </div>
     );
@@ -307,32 +310,43 @@ export function SaleWorkspaceTable({
                                         )}<br />
                                         <span className="small-tip">({dateTime(order.dataArrivedAt)})</span>
                                     </td>
-                                    <td className="text-center ps-sale-cell">
-                                        <div className="ps-sale-name-row">
-                                            <b>{order.saleName}</b>
+                                    <td className="text-center ps-sale-cell area5">
+                                        <div className="text-right ps-sale-delete-wrap">
                                             {order.canDeleteData ? (
-                                                <button type="button" className="btn-icon ps-sale-delete" onClick={() => deleteData(order)} title="Xóa data" aria-label="Xóa data">
+                                                <button type="button" className="btn-icon aoh ps-sale-delete" onClick={() => deleteData(order)} title="Xóa data" aria-label="Xóa data">
                                                     <i className="fa fa-trash" />
                                                 </button>
                                             ) : null}
                                         </div>
-                                        <span className="small-tip">({dateTime(order.assignedAt)})</span>
+                                        <div className="ps-sale-name-block">
+                                            <b>{order.saleName}</b>
+                                            {order.saleUsername ? <span className="small-tip">({order.saleUsername})</span> : null}
+                                        </div>
+                                        <div className="small-tip">({dateTime(order.assignedAt)})</div>
                                     </td>
-                                    <td className="ps-customer-cell">
-                                        <button type="button" className="btn-icon ps-cell-action" onClick={() => onEdit(order, false)} title="Cập nhật đơn"><i className="fa fa-pencil-square-o" /></button>
-                                        <button type="button" className="ps-customer-name-link" onClick={() => onPurchaseHistory(order)}>{order.customerName || '—'}</button><br />
-                                        {order.phoneCarrier && <><span className={`ps-carrier ps-carrier-${order.phoneCarrierKey}`}>[{order.phoneCarrier}]</span><br /></>}
-                                        <div className="ps-contact-phone-row">
+                                    <td className="ps-customer-cell area1" title={`${order.id} | ${order.sourceType || ''}`}>
+                                        <div className="text-right ps-customer-edit-wrap">
+                                            <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onEdit(order, false)} title="Cập nhật đơn"><i className="fa fa-edit" /></button>
+                                        </div>
+                                        <button type="button" className="ps-customer-name-link" onClick={() => onPurchaseHistory(order)}>{order.customerName || '—'}</button>
+                                        {(order.phoneCarrier || order.carrierLabel) ? (
+                                            <span className={`nha-mang ps-carrier ps-carrier-${order.phoneCarrierKey || ''}`}>
+                                                {order.carrierLabel || `[${order.phoneCarrier}]`}
+                                            </span>
+                                        ) : null}
+                                        <div className="no-wrap ps-contact-phone-row">
                                             <button type="button" className="ps-phone-link" onClick={() => onDuplicateOrders(order)} title="Danh sách trùng số">{order.customerPhone}</button>
                                             <CallButton order={order} actionBaseUrl={actionBaseUrl} />
                                             <OrderStatusFlags row={order} onDuplicate={onDuplicateOrders ? () => onDuplicateOrders(order) : null} className="ps-contact-flags" />
                                         </div>
+                                        <div className="text-left khkn sline">{order.customerExtraNote || ''}</div>
                                         {order.desiredDeliveryAt && <span className="small-tip">{dateTime(order.desiredDeliveryAt)}</span>}
                                         {order.pendingSupplementCount > 0 && <CustomerSupplementPacketsDialog order={order} count={order.pendingSupplementCount} />}
                                     </td>
-                                    <td className="ps-message-cell">
-                                        <button type="button" className="btn-icon ps-cell-action" onClick={() => onMessages(order)} title="Tin nhắn"><i className="fa fa-commenting-o" /></button>
-                                        <span className="td-message">{order.customerNote || '—'}</span>
+                                    <td className="ps-message-cell area1">
+                                        <span className="td-message" title={order.customerNote || ''} onClick={() => onMessages(order)}>
+                                            {order.customerNote || '—'}
+                                        </span>
                                     </td>
                                     <td><OperationNoteEditor order={order} actionBaseUrl={actionBaseUrl} onMessages={onMessages} /></td>
                                     <td className="ps-result-cell">

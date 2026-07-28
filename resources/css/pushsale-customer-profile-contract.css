@@ -1,0 +1,237 @@
+/**
+ * Customer profile + purchase-history dialog contract.
+ * Scoped to .ps-customer-profile-page / .ps-customer-dialog / .ps-purchase-history-dialog.
+ */
+
+/* —— Advanced filters: 4 rows like Pushsale screenshot —— */
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-panel {
+    padding: 8px 15px 10px !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row {
+    display: grid !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-5 {
+    grid-template-columns: minmax(220px, 1.5fr) repeat(4, minmax(140px, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-6 {
+    grid-template-columns: repeat(6, minmax(130px, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-5-equal {
+    grid-template-columns: repeat(5, minmax(140px, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row .form-control,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row .ps-filter-control {
+    height: 30px !important;
+    min-height: 30px !important;
+    width: 100% !important;
+}
+
+/* —— Shared name / products cells —— */
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-name-cell {
+    vertical-align: top !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-name-row {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-name-cell .nha-mang {
+    color: magenta !important;
+    display: block !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    line-height: 12px !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-order-products-cell {
+    vertical-align: top !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-order-products-breakdown {
+    min-width: 180px;
+}
+
+/* —— Purchase history dialog —— */
+html body.pushsale-app-body .ps-purchase-history-dialog.ps-customer-dialog.ps-dialog-surface,
+html body.pushsale-app-body .ps-customer-dialog.ps-purchase-history-dialog {
+    width: min(1480px, calc(100vw - 36px)) !important;
+    max-width: calc(100vw - 36px) !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-dialog-body {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 12px 14px 10px !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-summary {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    margin: 0 !important;
+    border: 1px solid #d2d6de !important;
+    background: #fafbfc !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-summary > div {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    min-height: 40px !important;
+    padding: 8px 12px !important;
+    border-right: 1px solid #d2d6de !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-summary > div:last-child {
+    border-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-summary span {
+    color: #777 !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-summary strong {
+    color: #337ab7 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    text-align: right !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table-wrap {
+    max-height: min(62vh, 560px) !important;
+    margin: 0 !important;
+    overflow: auto !important;
+    padding: 0 !important;
+    border: 1px solid #d2d6de !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table {
+    margin: 0 !important;
+    min-width: 1280px !important;
+    table-layout: fixed !important;
+    width: 100% !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table > thead > tr > th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    height: 36px !important;
+    padding: 6px 8px !important;
+    border-color: #2f72c4 !important;
+    background: #3782dc !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table > tbody > tr > td {
+    padding: 8px !important;
+    vertical-align: middle !important;
+    border-color: #d2d6de !important;
+    line-height: 1.35 !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table > tbody > tr.info > td,
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table > tbody > tr.is-selected > td {
+    background: #eef6ff !important;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-idx { width: 44px; }
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-code { width: 120px; }
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-date { width: 140px; }
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-sale { width: 120px; }
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-ops { width: 140px; }
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-products { width: 220px; }
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-total { width: 110px; }
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-wh { width: 140px; }
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-status { width: 120px; }
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-stack-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-start;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-stack-cell.is-center {
+    align-items: center;
+    text-align: center;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-stack-primary {
+    color: #111;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-stack-secondary {
+    color: #777;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-product-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-product-line + .ps-purchase-product-line {
+    border-top: 1px dotted #d4d4d4;
+    margin-top: 3px;
+    padding-top: 3px;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-product-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-product-qty {
+    color: #555;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-reset-wrap {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 34px !important;
+    gap: 6px !important;
+    align-items: center !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-reset-wrap .ps-filter-reset {
+    height: 30px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+}
+
+@media (max-width: 992px) {
+    html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-5,
+    html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-6,
+    html body.pushsale-app-body .ps-customer-profile-page .ps-customer-adv-filter-row.is-5-equal {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}

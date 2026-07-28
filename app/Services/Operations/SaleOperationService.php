@@ -103,7 +103,7 @@ class SaleOperationService
             'count' => $total,
             'total' => $total,
             'durationMinutes' => 0,
-            'level' => 3,
+            'level' => '',
             'color' => '#c1e2f4',
         ];
 

@@ -20,6 +20,7 @@ export function ProductSearchSelect({
     placeholder = '--Sản phẩm / gói sản phẩm--',
     disabled = false,
     name,
+    form,
     className = '',
     showPrice = true,
     allowClear = true,
@@ -66,7 +67,7 @@ export function ProductSearchSelect({
 
     return (
         <div className={`ps-product-search-select ps-product-search-select-v82 ${disabled ? 'is-disabled' : ''} ${open ? 'is-open' : ''} ${className}`.trim()}>
-            {name ? <input type="hidden" name={name} value={value ?? ''} readOnly /> : null}
+            {name ? <input type="hidden" name={name} form={form} value={value ?? ''} readOnly /> : null}
             <button
                 type="button"
                 className="ps-product-select-button"

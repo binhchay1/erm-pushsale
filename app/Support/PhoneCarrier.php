@@ -56,4 +56,36 @@ class PhoneCarrier
     {
         return self::resolve($phone)['key'] ?? null;
     }
+
+    /** Pushsale-style short label: [VIETTEL], [VINA], [MOBI]. */
+    public static function bracket(?string $phone, ?string $stored = null): ?string
+    {
+        $map = [
+            'viettel' => 'VIETTEL',
+            'vinaphone' => 'VINA',
+            'mobifone' => 'MOBI',
+            'vietnamobile' => 'VIETNAMOBILE',
+            'gmobile' => 'GMOBILE',
+            'itel' => 'ITEL',
+        ];
+        $key = self::key($phone);
+        if ($key && isset($map[$key])) {
+            return '['.$map[$key].']';
+        }
+
+        $stored = trim((string) $stored);
+        if ($stored !== '') {
+            $normalized = strtoupper(preg_replace('/\s+/', '', $stored) ?? $stored);
+            if (str_contains($normalized, 'VINA')) {
+                return '[VINA]';
+            }
+            if (str_contains($normalized, 'MOBI')) {
+                return '[MOBI]';
+            }
+
+            return '['.$normalized.']';
+        }
+
+        return null;
+    }
 }

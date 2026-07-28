@@ -28,7 +28,9 @@ Route::middleware('role:'.User::ROLE_WAREHOUSE)->prefix('warehouse')->name('ware
     Route::post('orders/bulk/export', [WarehouseOrderActionController::class, 'bulkExport'])->name('orders.bulk.export');
     Route::post('orders/bulk/invoices', [WarehouseOrderActionController::class, 'bulkInvoices'])->name('orders.bulk.invoices');
     Route::post('orders/bulk/update-by-code', [WarehouseOrderActionController::class, 'bulkUpdateByCode'])->name('orders.bulk.update-by-code');
+    Route::delete('orders/{order}', [WarehouseOrderActionController::class, 'destroy'])->name('orders.destroy');
     Route::patch('orders/{order}/desired-delivery', [WarehouseOrderActionController::class, 'desiredDelivery'])->name('orders.desired-delivery');
+    Route::patch('orders/{order}/order-code', [WarehouseOrderActionController::class, 'changeOrderCode'])->name('orders.order-code');
     Route::post('orders/{order}/blacklist', [WarehouseOrderActionController::class, 'blacklist'])->name('orders.blacklist');
     Route::patch('orders/{order}/care', [WarehouseOrderActionController::class, 'care'])->name('orders.care');
     Route::patch('orders/{order}/delivery-status', [WarehouseOrderActionController::class, 'deliveryStatus'])->name('orders.delivery-status');

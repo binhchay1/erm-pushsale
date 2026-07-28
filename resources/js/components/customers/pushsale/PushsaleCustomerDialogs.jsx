@@ -14,7 +14,7 @@ function EmptyRow({ colSpan, text = 'Không có dữ liệu' }) {
     return <tr><td colSpan={colSpan} className="text-center ps-empty-cell">{text}</td></tr>;
 }
 
-function CustomerDialogShell({ open, onOpenChange, width = '800px', title, description, children, footer }) {
+function CustomerDialogShell({ open, onOpenChange, width = '800px', title, description, children, footer, className = '' }) {
     return (
         <PushsaleDialog
             open={open}
@@ -22,7 +22,7 @@ function CustomerDialogShell({ open, onOpenChange, width = '800px', title, descr
             width={width}
             title={title}
             description={description}
-            className="ps-customer-dialog"
+            className={`ps-customer-dialog ${className}`.trim()}
             footer={footer}
         >
             {children}
@@ -293,9 +293,10 @@ export function PushsalePurchaseHistoryDialog({ order, open, onOpenChange }) {
         <CustomerDialogShell
             open={open}
             onOpenChange={onOpenChange}
-            width="1500px"
+            width="1480px"
             title={`Lịch sử mua hàng: ${data.customer?.name ?? order?.customerName ?? '-'}`}
             description={`${data.customer?.phone ?? order?.customerPhone ?? '—'} · ${data.customer?.address ?? order?.effectiveShippingAddress ?? ''}`}
+            className="ps-purchase-history-dialog"
             footer={<button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>Đóng</button>}
         >
             {loading ? <LoadingBlock /> : (
@@ -307,25 +308,63 @@ export function PushsalePurchaseHistoryDialog({ order, open, onOpenChange }) {
                         <div><span>Tổng giá trị</span><strong>{formatCurrency(summary.totalValue ?? 0)}</strong></div>
                     </div>
                     <div className="table-responsive ps-history-table-wrap">
-                        <table className="table table-bordered table-striped ps-history-table">
+                        <table className="table table-bordered table-striped ps-history-table ps-purchase-history-table">
+                            <colgroup>
+                                <col className="c-idx" /><col className="c-code" /><col className="c-date" /><col className="c-sale" />
+                                <col className="c-ops" /><col className="c-products" /><col className="c-total" /><col className="c-wh" /><col className="c-status" />
+                            </colgroup>
                             <thead>
                                 <tr>
-                                    <th>#</th><th>Mã đơn</th><th>Ngày data về</th><th>Sale</th><th>Tác nghiệp / Kết quả</th>
-                                    <th>Sản phẩm</th><th>Tổng tiền</th><th>Kho / Giao vận</th><th>Trạng thái</th>
+                                    <th>#</th>
+                                    <th>Mã đơn</th>
+                                    <th>Ngày data về</th>
+                                    <th>Sale</th>
+                                    <th>Tác nghiệp / Kết quả</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Kho / Giao vận</th>
+                                    <th>Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {data.orders?.length ? data.orders.map((item, index) => (
-                                    <tr key={item.id} className={item.isSelected ? 'info' : ''}>
+                                    <tr key={item.id} className={item.isSelected ? 'info is-selected' : ''}>
                                         <td className="text-center">{index + 1}</td>
-                                        <td><strong>{item.orderCode}</strong></td>
-                                        <td>{formatDateTime(item.dataArrivedAt)}</td>
-                                        <td>{item.saleName || '—'}<br /><span className="small-tip">{item.teamName || ''}</span></td>
-                                        <td>{item.operationStage || '—'}<br /><span className="small-tip">{item.operationResult || ''}</span></td>
-                                        <td>{item.products?.map((product) => `${product.name} x${product.quantity}`).join(' | ') || '—'}</td>
+                                        <td className="text-center"><strong>{item.orderCode || '—'}</strong></td>
+                                        <td className="text-center">{formatDateTime(item.dataArrivedAt) || '—'}</td>
+                                        <td>
+                                            <div className="ps-stack-cell">
+                                                <span className="ps-stack-primary">{item.saleName || '—'}</span>
+                                                {item.teamName ? <span className="ps-stack-secondary">{item.teamName}</span> : null}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="ps-stack-cell">
+                                                <span className="ps-stack-primary">{item.operationStage || '—'}</span>
+                                                <span className="ps-stack-secondary">{item.operationResult || ''}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {item.products?.length ? item.products.map((product, productIndex) => (
+                                                <div className="ps-purchase-product-line" key={`${item.id}-${productIndex}`}>
+                                                    <span className="ps-purchase-product-name" title={product.name}>{product.name || '—'}</span>
+                                                    <span className="ps-purchase-product-qty">x{product.quantity ?? 0}</span>
+                                                </div>
+                                            )) : '—'}
+                                        </td>
                                         <td className="text-right"><strong>{formatCurrency(item.total)}</strong></td>
-                                        <td>{item.warehouseName || '—'}<br /><span className="small-tip">{item.trackingNumber || item.shippingMethod || ''}</span></td>
-                                        <td>{item.closingStatusLabel || '—'}<br /><span className="small-tip">{item.deliveryStatus || ''}</span></td>
+                                        <td>
+                                            <div className="ps-stack-cell">
+                                                <span className="ps-stack-primary">{item.warehouseName || '—'}</span>
+                                                <span className="ps-stack-secondary">{item.trackingNumber || item.shippingMethod || ''}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="ps-stack-cell">
+                                                <span className="ps-stack-primary">{item.closingStatusLabel || '—'}</span>
+                                                <span className="ps-stack-secondary">{item.deliveryStatus || ''}</span>
+                                            </div>
+                                        </td>
                                     </tr>
                                 )) : <EmptyRow colSpan={9} />}
                             </tbody>

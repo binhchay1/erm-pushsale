@@ -15,6 +15,7 @@ const statusTone = {
     waiting_waybill: 'ttgh1',
     posted: 'ttgh20',
     picking_up: 'ttgh23',
+    picked_up: 'ttgh21',
     cannot_pickup: 'ttgh22',
     delivering: 'ttgh30',
     cannot_deliver: 'ttgh33',
@@ -28,6 +29,7 @@ const statusTone = {
     returned: 'ttgh41',
     cancel_waybill: 'ttgh4',
     cancel_closing: 'ttgh5',
+    compensation: 'ttgh50',
 };
 
 
@@ -213,11 +215,53 @@ function LegacyStatus({ row }) {
     return <span className={`no-wrap ${className}`}>{row.deliveryStatus || 'Chưa cập nhật'}</span>;
 }
 
-export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterOptions = {} }) {
+function CareNoteCell({ row, actionApiBase, onCare, onMessage }) {
+    const noteRef = useRef(null);
+
+    const saveNote = async () => {
+        const note = noteRef.current?.value ?? '';
+        try {
+            await apiRequest(`${actionApiBase}/${row.id}/care`, {
+                method: 'PATCH',
+                body: { status: row.warehouseCareStatus ?? 'waiting', note },
+            });
+            toast.success('Đã lưu ghi chú care.');
+            router.reload({ only: ['report', 'filters', 'filterOptions'] });
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    return (
+        <td className="text-left c-care-body">
+            <div className="small-tip text-center">{formatDateTime(row.warehouseCareUpdatedAt, { withSeconds: false })}</div>
+            <span className="span-col icon-col"><InlineIconButton title="Tác nghiệp care đơn" icon="refresh" onClick={onCare} /></span>
+            <span className="span-col care-text"><span className="ps-wh-magenta">{row.warehouseCareStatusLabel || row.warehouseCareStatus || ''}</span><div><span title="Người đang xử lý" className="small-tip">({row.warehouseCareName || ''})</span></div></span>
+            <span className="span-col save-col">
+                <InlineIconButton title="Lưu ghi chú" icon="save" onClick={saveNote} />
+                <InlineIconButton title="Tin nhắn nội bộ" icon="commenting-o" onClick={onMessage} />
+            </span>
+            <div className="mof-container text-left">
+                <textarea
+                    ref={noteRef}
+                    className="txt-mof form-control txt-dotted"
+                    defaultValue={row.warehouseCareNote || ''}
+                    maxLength="200"
+                    onFocus={(event) => event.currentTarget.select()}
+                />
+            </div>
+            <div style={{ clear: 'both' }} />
+            <span className="item-noidung-other">{row.lastInternalMessage || ''}</span>
+        </td>
+    );
+}
+
+export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterOptions = {}, canDeleteOrder = false }) {
     const [action, setAction] = useState(null);
     const [detailOrderId, setDetailOrderId] = useState(null);
     const [selected, setSelected] = useState([]);
     const checkAllRef = useRef(null);
+    const { ask } = useConfirm();
     const rowIds = useMemo(() => rows.map((row) => String(row.id)), [rows]);
     const selectedRows = useMemo(() => rows.filter((row) => selected.includes(String(row.id))), [rows, selected]);
     const allSelected = rowIds.length > 0 && rowIds.every((id) => selected.includes(id));
@@ -265,6 +309,22 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
         } catch (error) { toast.error(error.message); }
     };
 
+    const deleteOrder = async (row) => {
+        const ok = await ask({
+            description: `Bạn chắc chắn muốn xóa data của ${row.customerName || row.customerPhone || row.orderCode || `#${row.id}`}?`,
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
+        if (!ok) return;
+        try {
+            await apiRequest(`${actionApiBase}/${row.id}`, { method: 'DELETE' });
+            toast.success('Đã xóa data.');
+            reload();
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
     return (
         <>
             <div className="ps-wh-table-shell dragscroll1 tableFixHead">
@@ -293,31 +353,39 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                         {rows.length ? rows.map((row, index) => (
                             <tr className={`contact-row item${row.id} ${row.isReturnFlow ? 'return-row' : ''}`} key={row.id}>
                                 <td className="text-center no-wrap"><span className="chk-item"><input type="checkbox" checked={selected.includes(String(row.id))} onChange={() => toggle(row.id)} /><label>{index + 1}</label></span></td>
-                                <td className="text-center"><span className="ps-wh-sale-name">{row.saleName || '—'}</span><br /><span className="small-tip">{row.saleUsername ? `(${row.saleUsername})` : ''}</span></td>
+                                <td className="text-center ps-wh-sale-cell">
+                                    <div className="text-right ps-wh-delete-wrap">
+                                        {(canDeleteOrder && row.canDeleteOrder) ? (
+                                            <button type="button" className="btn-icon aoh ps-wh-delete" onClick={() => deleteOrder(row)} title="Xóa data" aria-label="Xóa data">
+                                                <i className="fa fa-trash" />
+                                            </button>
+                                        ) : null}
+                                    </div>
+                                    <span className="ps-wh-sale-name">{row.saleName || '—'}</span>
+                                    <br />
+                                    <span className="small-tip">{row.saleUsername ? `(${row.saleUsername})` : ''}</span>
+                                </td>
                                 <td className="text-center no-wrap">
-                                    <div className="text-right"><InlineIconButton title="Thay đổi mã đơn" icon="repeat" onClick={() => setAction({ type: 'edit', row })} className="orange" /></div>
+                                    <div className="text-right"><InlineIconButton title="Thay đổi mã đơn" icon="repeat" onClick={() => setAction({ type: 'changeCode', row })} className="orange" /></div>
                                     <div className="small-tip sline">{formatDateTime(row.dataArrivedAt, { withSeconds: false })}</div>
                                     <button type="button" className="item-md ps-wh-order-code" onClick={() => setDetailOrderId(row.id)}>{row.orderCode}</button>
                                     <div className="small-tip sline">{formatDateTime(row.closedAt, { withSeconds: false })}</div>
                                 </td>
                                 <td className="text-center no-wrap">
-                                    <div className="text-right">{row.canCreateShipment && <InlineIconButton title="Đăng vận đơn" icon="calendar-check-o" onClick={() => createShipment(row)} className="orange" />}</div>
+                                    <div className="text-right">
+                                        {row.canCreateShipment && <InlineIconButton title="Đăng vận đơn" icon="calendar-check-o" onClick={() => createShipment(row)} className="orange" />}
+                                        {row.canPrintLabel && <InlineIconButton title="In đơn" icon="print" onClick={() => printLabel(row)} />}
+                                    </div>
                                     {row.warehouseName || 'Chưa chọn kho'}<br />
                                     <span className="ps-wh-green">{row.shippingProviderLabel || row.shippingMethod || 'Thủ công'}</span>
-                                    <a className="item-mdgv" onClick={() => setDetailOrderId(row.id)}>{row.trackingNumber || ''}</a>
+                                    <button type="button" className="item-mdgv" onClick={() => setDetailOrderId(row.id)}>{row.trackingNumber || ''}</button>
                                 </td>
-                                <td className="text-left c-care-body">
-                                    <div className="small-tip text-center">{formatDateTime(row.warehouseCareUpdatedAt, { withSeconds: false })}</div>
-                                    <span className="span-col icon-col"><InlineIconButton title="Tác nghiệp care đơn" icon="refresh" onClick={() => setAction({ type: 'care', row })} /></span>
-                                    <span className="span-col care-text"><span className="ps-wh-magenta">{row.warehouseCareStatusLabel || row.warehouseCareStatus || ''}</span><div><span title="Người đang xử lý" className="small-tip">({row.warehouseCareName || ''})</span></div></span>
-                                    <span className="span-col save-col">
-                                        <InlineIconButton title="Lưu ghi chú" icon="save" onClick={() => setAction({ type: 'care', row })} />
-                                        <InlineIconButton title="Tin nhắn nội bộ" icon="commenting-o" onClick={() => setAction({ type: 'care', row })} />
-                                    </span>
-                                    <div className="mof-container text-left"><textarea className="txt-mof form-control txt-dotted" defaultValue={row.warehouseCareNote || ''} maxLength="200" onFocus={(event) => event.currentTarget.select()} /></div>
-                                    <div style={{ clear: 'both' }} />
-                                    <span className="item-noidung-other">{row.lastInternalMessage || ''}</span>
-                                </td>
+                                <CareNoteCell
+                                    row={row}
+                                    actionApiBase={actionApiBase}
+                                    onCare={() => setAction({ type: 'care', row })}
+                                    onMessage={() => setAction({ type: 'message', row })}
+                                />
                                 <td className="text-center area4">
                                     <div className="small-tip">{formatDateTime(row.lastDeliveryEventAt, { withSeconds: false })}</div>
                                     <div className="text-right no-wrap">
@@ -335,8 +403,11 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                         <InlineIconButton title="Tách đơn" icon="clipboard" onClick={() => setAction({ type: 'split', row })} disabled={!row.canSplit} />
                                         <InlineIconButton title="Cập nhật đơn vị giao vận" icon="truck" onClick={() => setAction({ type: 'edit', row })} />
                                     </div>
-                                    <div className="sline text-left">{row.effectiveReceiverName || row.customerName}</div>
-                                    <span className="nha-mang text-left">{row.carrierLabel || ''}</span>
+                                    <div className="sline text-left ps-wh-customer-name">
+                                        <span>{row.effectiveReceiverName || row.customerName}</span>
+                                        <OrderStatusFlags row={row} className="ps-contact-flags" />
+                                    </div>
+                                    {row.carrierLabel ? <span className="nha-mang text-left">{row.carrierLabel}</span> : null}
                                     <div className="no-wrap ps-contact-phone-row">
                                         <a className="text-left" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a>
                                         {(row.effectiveReceiverPhone || row.customerPhone) ? (
@@ -344,7 +415,6 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                                 <i className="fa fa-phone" aria-hidden="true" />
                                             </a>
                                         ) : null}
-                                        <OrderStatusFlags row={row} className="ps-contact-flags" />
                                     </div>
                                     <div className="text-left khkn sline">{row.customerNote || ''}</div>
                                     <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>

@@ -17,7 +17,7 @@ export default function WarehouseOperations({
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title={pageTitle} />
             <section className="ps-wh-page ps-wh-legacy-page">
-                <WarehouseFilterPanel title={pageTitle} routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} />
+                <WarehouseFilterPanel title={pageTitle} routeUrl={routeUrl} filters={filters} filterOptions={filterOptions} pageCode={activeMenuCode} />
                 <div className="row ttgh-acc ps-wh-status-row">
                     <div className="col-sm-12">
                         {(report.statusTabs ?? []).map((tab) => (

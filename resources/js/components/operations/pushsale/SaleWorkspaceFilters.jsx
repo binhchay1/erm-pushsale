@@ -88,6 +88,16 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {}, ch
                     <option value="complaint_done">Hoàn tất xử lý khiếu nại</option>
                 </select>
                 <Select value={form.marketing_source_id} onChange={(value) => update('marketing_source_id', value)} placeholder="--Chọn nguồn dữ liệu--" options={filterOptions.marketingSources} />
+                <label className="ps-sale-check">
+                    <input
+                        type="checkbox"
+                        checked={Boolean(form.hide_zero_status)}
+                        onChange={(event) => update('hide_zero_status', event.target.checked ? 1 : '')}
+                    />
+                    Ẩn tác nghiệp không số
+                </label>
+            </div>
+            <div className="ps-sale-extra-row">
                 <ProductSearchSelect
                     products={filterOptions.products ?? []}
                     value={form.product_id}
@@ -95,8 +105,6 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {}, ch
                     placeholder="--Chọn sản phẩm / gói sản phẩm--"
                     showPrice={false}
                 />
-            </div>
-            <div className="ps-sale-extra-row">
                 <Select
                     value={form.operation_activity_status}
                     onChange={(value) => update('operation_activity_status', value)}
@@ -106,14 +114,6 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {}, ch
                 <Select value={form.operation_result} onChange={(value) => update('operation_result', value)} placeholder="--Chọn kết quả tác nghiệp--" options={filterOptions.operationResults} />
                 <Select value={form.closing_status} onChange={(value) => update('closing_status', value)} placeholder="--Trạng thái chốt đơn--" options={filterOptions.closingStatuses} />
                 <Select value={form.delivery_status} onChange={(value) => update('delivery_status', value)} placeholder="--Chọn trạng thái giao hàng--" options={filterOptions.deliveryStatuses} />
-                <label className="ps-sale-check">
-                    <input
-                        type="checkbox"
-                        checked={Boolean(form.hide_zero_status)}
-                        onChange={(event) => update('hide_zero_status', event.target.checked ? 1 : '')}
-                    />
-                    Ẩn tác nghiệp không số
-                </label>
             </div>
         </div>
     );

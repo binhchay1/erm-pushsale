@@ -7,12 +7,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Pushsale\ElectronicInvoiceJob;
 use App\Models\Pushsale\ElectronicInvoiceConfig;
+use App\Services\DataDeletion\OrderDeletionService;
 use App\Services\Warehouse\WarehouseOrderActionService;
+use App\Support\ActivityLogger;
 use App\Support\ShippingProviders;
 use App\Rules\VietnameseMobilePhone;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WarehouseOrderActionController extends Controller
@@ -20,6 +24,38 @@ class WarehouseOrderActionController extends Controller
     public function __construct(private readonly WarehouseOrderActionService $service) {}
 
 
+
+    public function destroy(Request $request, Order $order): JsonResponse|RedirectResponse
+    {
+        $actor = $request->user();
+
+        if (filled($order->tracking_number) || $order->shipments()->exists() || $order->inventory_deducted_at) {
+            throw ValidationException::withMessages([
+                'order' => 'Không thể xóa data đã phát sinh giao vận hoặc đã xuất kho.',
+            ]);
+        }
+
+        $label = $order->order_code ?: '#'.$order->id;
+        ActivityLogger::log(
+            'warehouse_order_deleted',
+            $order,
+            [
+                'customer_name' => $order->customer_name,
+                'customer_phone' => $order->customer_phone,
+                'sale_user_id' => $order->sale_user_id,
+            ],
+            $label,
+            $actor,
+        );
+
+        app(OrderDeletionService::class)->delete($order);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Đã xóa data '.$label.'.']);
+        }
+
+        return back()->with('success', 'Đã xóa data '.$label.'.');
+    }
 
     public function bulkExport(Request $request): StreamedResponse
     {
@@ -115,6 +151,18 @@ class WarehouseOrderActionController extends Controller
         }
 
         return response()->json(['message' => 'Đã ghi nhận cập nhật theo mã Pushsale cho '.$orders->count().' đơn.', 'count' => $orders->count()]);
+    }
+
+    public function changeOrderCode(Request $request, Order $order): JsonResponse
+    {
+        $data = $request->validate([
+            'order_code' => ['required', 'string', 'min:3', 'max:80', 'regex:/^[A-Za-z0-9._\\-]+$/'],
+        ]);
+
+        return response()->json([
+            'message' => 'Đã đổi mã đơn.',
+            'order' => $this->service->changeOrderCode($order, $data['order_code'], $request->user()),
+        ]);
     }
 
     public function desiredDelivery(Request $request, Order $order): JsonResponse

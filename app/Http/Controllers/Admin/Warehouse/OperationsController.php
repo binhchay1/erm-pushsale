@@ -33,7 +33,9 @@ class OperationsController extends Controller
             'routeUrl' => $isWarehouseRole ? '/warehouse/workspace' : '/admin/warehouse/operations',
             'shippingApiBase' => $isWarehouseRole ? '/warehouse/shipping/orders' : '/admin/shipping/orders',
             'actionApiBase' => $isWarehouseRole ? '/warehouse/orders' : '/admin/warehouse/orders',
-            'canDeleteOrder' => ! $isWarehouseRole,
+            // Admin: cho xóa data chưa giao vận (icon trash góc cột Sale, giống Sale tác nghiệp).
+            // Role kho: vẫn truyền true để UI hiện khi đơn đủ điều kiện; backend chặn nếu đã chốt/có vận đơn.
+            'canDeleteOrder' => true,
             'filterFields' => app(FilterOptionsService::class)->warehouseOperationFilterFields(),
         ]));
     }

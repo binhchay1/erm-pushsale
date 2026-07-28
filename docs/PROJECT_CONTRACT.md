@@ -37,6 +37,11 @@ Thứ tự CSS runtime nằm ở `resources/js/lib/pushsaleStyleRegistry.js`.
 
 - Vendor legacy: `/public/vendor/adminlte2`, `/public/vendor/font-awesome`.
 - CSS page scoped: `resources/css/pushsale-*.css` **chỉ khi đã đăng ký registry**.
+- Thủ kho tác nghiệp (5.1): `pushsale-warehouse-operations-contract.css` (level flags, `nha-mang`, `txt-mof`, `ttgh*`, FAB `fam-*`). HTML gốc tham chiếu: `docs/reference/pushsale-warehouse-operations.html`.
+- Sale tác nghiệp (4.1): `pushsale-sale-operations-contract.css` (ô vuông `level-*` Gọi lần/Chăm sóc, cột Tin nhắn plain `Địa chỉ=…`, TN cần `txt-mof`, trash góc cột Sale). HTML: `docs/reference/pushsale-sale-operations.html`.
+  - **Tin nhắn** = `customer_note` từ landing (thường dạng `Địa chỉ=… | …`) — chỉ hiển thị, không textarea.
+  - **TN cần** = `sale_operation_note` — ô nhập tay `textarea.txt-mof` + nhãn đỏ giai đoạn (Gọi lần 1…).
+- Hồ sơ khách hàng (4.2 / route role khác nhau, cùng trang): `pushsale-customer-profile-contract.css` — filter 4 hàng theo Pushsale; cột họ tên/SP dùng `OrderStatusFlags` + `OrderProductsBreakdown`; dialog lịch sử mua hàng table-layout cố định.
 - Cuối cascade (cố định):
   1. `pushsale-unified-page-shell-contract.css`
   2. `pushsale-adminlte-canonical-contract.css`

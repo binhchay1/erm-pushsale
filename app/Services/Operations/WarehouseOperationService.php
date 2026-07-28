@@ -9,6 +9,7 @@ use App\Models\Shipment;
 use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Shipping\ShipmentActionResolver;
 use App\Support\OrderRevenue;
+use App\Support\PhoneCarrier;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -65,10 +66,11 @@ class WarehouseOperationService
 
         $paginator = $pageQuery->with([
             'items.product', 'warehouse', 'saleUser', 'marketerUser', 'warehouseCareUser',
+            'supplementalOriginPacket.relatedOrder',
             'shipments' => fn ($query) => $query->with(['statusEvents' => fn ($events) => $events->latest('occurred_at')])->latest('id'),
             'returnReceipt.lines',
             'shippingStatusEvents' => fn ($query) => $query->latest('occurred_at')->limit(10),
-        ])->orderByDesc('closed_at')->paginate(
+        ])->withCount('pendingSupplementPackets')->orderByDesc('closed_at')->paginate(
             perPage: $filter->perPage,
             columns: ['*'],
             pageName: 'page',
@@ -111,11 +113,11 @@ class WarehouseOperationService
             'delivering' => ['label' => 'Đang giao hàng', 'code' => '30', 'level' => 1],
             'cannot_deliver' => ['label' => 'Không giao được', 'code' => '33', 'level' => 1],
             'redelivery' => ['label' => 'Yêu cầu giao lại', 'code' => '34', 'level' => 1],
-            'delivered' => ['label' => 'Đã giao hàng', 'code' => '31', 'level' => 1],
-            'partial_delivery' => ['label' => 'Giao hàng một phần', 'code' => '35', 'level' => 1],
+            'delivered' => ['label' => 'Đã giao hàng', 'code' => '31', 'level' => 4],
+            'partial_delivery' => ['label' => 'Giao hàng một phần', 'code' => '35', 'level' => 3],
             'paid' => ['label' => 'Đã thanh toán', 'code' => '32', 'level' => 1],
-            'returning' => ['label' => 'Đang hoàn', 'code' => '40', 'level' => 1],
-            'returned' => ['label' => 'Đã hoàn', 'code' => '41', 'level' => 1],
+            'returning' => ['label' => 'Đang hoàn', 'code' => '40', 'level' => 4],
+            'returned' => ['label' => 'Đã hoàn', 'code' => '41', 'level' => 4],
             'compensation' => ['label' => 'Bồi hoàn', 'code' => '50', 'level' => 1],
         ];
         $tabs = [];
@@ -262,6 +264,23 @@ class WarehouseOperationService
             ] : null,
             'canReceiveReturn' => $isReturnFlow && ! $order->return_restocked_at,
             'canSplit' => ! $order->inventory_deducted_at && ! filled($shipment?->tracking_number),
+            'carrierLabel' => PhoneCarrier::bracket($order->effectiveReceiverPhone() ?: $order->customer_phone, $order->phone_carrier),
+            'phoneCarrier' => PhoneCarrier::label($order->effectiveReceiverPhone() ?: $order->customer_phone) ?? $order->phone_carrier,
+            'phoneCarrierKey' => PhoneCarrier::key($order->effectiveReceiverPhone() ?: $order->customer_phone),
+            'isReturningCustomer' => (bool) $order->is_returning_customer,
+            'isDuplicatePhone' => (bool) $order->is_duplicate_phone,
+            'awaitingLandingUpsell' => $order->isAwaitingLandingUpsell(),
+            'landingUpsellHoldUntil' => $order->landing_upsell_hold_until?->toIso8601String(),
+            'pendingSupplementCount' => (int) ($order->pending_supplement_packets_count ?? 0),
+            'isSupplementalOrder' => $order->supplementalOriginPacket !== null,
+            'supplementalOriginalOrderCode' => $order->supplementalOriginPacket?->relatedOrder?->order_code,
+            'sourceType' => $order->closing_status,
+            'canDeleteOrder' => blank($order->tracking_number) && $shipment === null && ! $order->inventory_deducted_at,
         ];
+    }
+
+    private function carrierBracket(?string $phone, ?string $stored = null): ?string
+    {
+        return PhoneCarrier::bracket($phone, $stored);
     }
 }

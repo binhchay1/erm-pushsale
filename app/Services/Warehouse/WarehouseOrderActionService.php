@@ -31,6 +31,28 @@ class WarehouseOrderActionService
         return $order->fresh();
     }
 
+    public function changeOrderCode(Order $order, string $orderCode, ?User $actor): Order
+    {
+        $code = trim($orderCode);
+        if ($code === '') {
+            throw ValidationException::withMessages(['order_code' => 'Mã đơn không được để trống.']);
+        }
+
+        $exists = Order::query()
+            ->where('order_code', $code)
+            ->whereKeyNot($order->id)
+            ->exists();
+        if ($exists) {
+            throw ValidationException::withMessages(['order_code' => 'Mã đơn đã tồn tại.']);
+        }
+
+        $before = $order->order_code;
+        $order->update(['order_code' => $code]);
+        $this->log($order, $actor, 'warehouse_order_code_changed', ['from' => $before, 'to' => $code]);
+
+        return $order->fresh();
+    }
+
     public function updateBlacklist(Order $order, string $phone, string $reason, ?User $actor): void
     {
         PhoneBlacklist::query()->updateOrCreate(

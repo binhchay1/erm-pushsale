@@ -128,17 +128,17 @@ final class SaleOperationConfigurationService
         }
 
         $defaults = [
-            OperationStage::NewCustomer->value => ['label' => 'Gọi lần 1', 'durationMinutes' => 0, 'level' => 4, 'color' => '#ff3b12'],
-            OperationStage::Call2->value => ['label' => 'Gọi lần 2', 'durationMinutes' => 0, 'level' => 4, 'color' => '#ff3b12'],
-            OperationStage::Call3->value => ['label' => 'Gọi lần 3', 'durationMinutes' => 0, 'level' => 4, 'color' => '#ff3b12'],
-            OperationStage::Call4->value => ['label' => 'Gọi lần 4', 'durationMinutes' => 0, 'level' => 3, 'color' => '#ffc0cb'],
-            OperationStage::Call5->value => ['label' => 'Gọi lần 5', 'durationMinutes' => 0, 'level' => 1, 'color' => '#a6ffa8'],
-            OperationStage::Call6->value => ['label' => 'Gọi lần 6', 'durationMinutes' => 0, 'level' => 4, 'color' => '#ff3b12'],
+            OperationStage::NewCustomer->value => ['label' => 'Gọi lần 1', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
+            OperationStage::Call2->value => ['label' => 'Gọi lần 2', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
+            OperationStage::Call3->value => ['label' => 'Gọi lần 3', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
+            OperationStage::Call4->value => ['label' => 'Gọi lần 4', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
+            OperationStage::Call5->value => ['label' => 'Gọi lần 5', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
+            OperationStage::Call6->value => ['label' => 'Gọi lần 6', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
             OperationStage::Care1->value => ['label' => 'Chăm sóc lần 1', 'durationMinutes' => 0, 'level' => 1, 'color' => '#a6ffa8'],
             OperationStage::Care2->value => ['label' => 'Chăm sóc lần 2', 'durationMinutes' => 0, 'level' => 1, 'color' => '#a6ffa8'],
             OperationStage::Care3->value => ['label' => 'Chăm sóc lần 3', 'durationMinutes' => 0, 'level' => 1, 'color' => '#a6ffa8'],
             OperationStage::Skipped->value => ['label' => 'Bỏ qua', 'durationMinutes' => 0, 'level' => 1, 'color' => '#a6ffa8'],
-            OperationStage::NoOperation->value => ['label' => 'Chưa có TN', 'durationMinutes' => 0, 'level' => 2, 'color' => '#c1e2f4'],
+            OperationStage::NoOperation->value => ['label' => 'Chưa có TN', 'durationMinutes' => 0, 'level' => '', 'color' => '#c1e2f4'],
         ];
 
         try {

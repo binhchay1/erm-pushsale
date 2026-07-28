@@ -36,6 +36,8 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
         if (type === 'date') setForm({ desired_delivery_at: row.desiredDeliveryAt?.slice(0, 16) ?? '' });
         if (type === 'blacklist') setForm({ phone: row.customerPhone ?? '', reason: 'Chờ vận đơn' });
         if (type === 'care') setForm({ status: row.warehouseCareStatus ?? 'waiting', note: row.warehouseCareNote ?? '' });
+        if (type === 'message') setForm({ message: '' });
+        if (type === 'changeCode') setForm({ order_code: row.orderCode ?? '' });
         if (type === 'delivery') setForm({ delivery_status: row.deliveryStatusValue ?? 'waiting_waybill', note: row.shippingNotes ?? '', collected_amount: row.settledCodAmount ?? 0 });
         if (type === 'edit') setForm({
             customer_name: row.customerName ?? '', customer_phone: row.customerPhone ?? '',
@@ -71,6 +73,14 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
                 }
             }
         }
+        if (type === 'changeCode' && !String(form.order_code ?? '').trim()) {
+            toast.error('Nhập mã đơn mới.');
+            return;
+        }
+        if (type === 'message' && !String(form.message ?? '').trim()) {
+            toast.error('Nhập nội dung tin nhắn nội bộ.');
+            return;
+        }
 
         setLoading(true);
         try {
@@ -90,8 +100,19 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
                 };
             }
             if (type === 'date') path += '/desired-delivery';
+            if (type === 'changeCode') {
+                path += '/order-code';
+                payload = { order_code: String(form.order_code ?? '').trim() };
+            }
             if (type === 'blacklist') { path += '/blacklist'; method = 'POST'; }
             if (type === 'care') path += '/care';
+            if (type === 'message') {
+                path += '/care';
+                payload = {
+                    status: row.warehouseCareStatus ?? 'waiting',
+                    note: [row.warehouseCareNote, `[Nội bộ] ${String(form.message).trim()}`].filter(Boolean).join('\n'),
+                };
+            }
             if (type === 'delivery') path += '/delivery-status';
             if (type === 'edit') method = 'PUT';
             if (type === 'split') { path += '/split'; method = 'POST'; payload = { items: form.items.filter((item) => Number(item.quantity) > 0).map(({ order_item_id, quantity }) => ({ order_item_id, quantity: Number(quantity) })) }; }
@@ -108,7 +129,18 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
     };
 
     if (! row) return null;
-    const titles = { date: 'Cập nhật ngày giao hàng theo đơn', blacklist: 'Cập nhật số blacklist', care: 'Cập nhật trạng thái care đơn', delivery: 'Cập nhật trạng thái giao hàng', edit: `Cập nhật đơn: ${row.orderCode}`, split: `Tách đơn: ${row.orderCode}`, return: `Nhập hàng hoàn: ${row.orderCode}` };
+    const titles = {
+        date: 'Cập nhật ngày giao hàng theo đơn',
+        blacklist: 'Cập nhật số blacklist',
+        care: 'Cập nhật trạng thái care đơn',
+        message: 'Tin nhắn nội bộ',
+        changeCode: `Đổi mã đơn: ${row.orderCode}`,
+        delivery: 'Cập nhật trạng thái giao hàng',
+        edit: `Cập nhật đơn: ${row.orderCode}`,
+        split: `Tách đơn: ${row.orderCode}`,
+        return: `Nhập hàng hoàn: ${row.orderCode}`,
+        timeline: 'Lịch sử tác nghiệp',
+    };
 
     return (
         <Dialog open={Boolean(action)} onOpenChange={(open) => !open && onClose()}>
@@ -120,8 +152,10 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
                     </div>
 
                     {type === 'date' && <Field label="Ngày giao hàng mong muốn" required><input type="datetime-local" value={form.desired_delivery_at ?? ''} onChange={(e) => setForm({ ...form, desired_delivery_at: e.target.value })} /></Field>}
+                    {type === 'changeCode' && <Field label="Mã đơn mới" required><input value={form.order_code ?? ''} onChange={(e) => setForm({ ...form, order_code: e.target.value })} maxLength={80} /></Field>}
                     {type === 'blacklist' && <><Field label="Số blacklist" required><input value={form.phone ?? ''} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field><Field label="Lý do" required><input value={form.reason ?? ''} onChange={(e) => setForm({ ...form, reason: e.target.value })} /></Field></>}
                     {type === 'care' && <><Field label="Chuyển sang trạng thái"><select value={form.status ?? ''} onChange={(e) => setForm({ ...form, status: e.target.value })}>{(filterOptions.warehouseCareStatuses ?? []).map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></Field><Field label="Ghi chú"><textarea value={form.note ?? ''} onChange={(e) => setForm({ ...form, note: e.target.value })} /></Field></>}
+                    {type === 'message' && <Field label="Nội dung tin nhắn nội bộ" required><textarea value={form.message ?? ''} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} /></Field>}
                     {type === 'delivery' && <><Field label="Chuyển sang trạng thái"><select value={form.delivery_status ?? ''} onChange={(e) => setForm({ ...form, delivery_status: e.target.value })}>{deliveryStatuses.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field><Field label="Ghi chú"><textarea value={form.note ?? ''} onChange={(e) => setForm({ ...form, note: e.target.value })} /></Field><Field label="Tiền đã thu (giao một phần/COD)"><MoneyInput value={form.collected_amount} onChange={(value) => setForm({ ...form, collected_amount: value })} /></Field></>}
 
                     {type === 'edit' && (

@@ -119,7 +119,12 @@ export function OrderProductsBreakdown({ items = [], order = null, empty = '—'
     return (
         <div className="ps-order-products-breakdown" role="list" aria-label="Sản phẩm trong đơn">
             <ProductSection label="" type="main" items={mainItems} />
-            <ProductSection label="" type="upsale" items={upsellItems} forceUpsell={forceWholeOrderUpsell} />
+            <ProductSection
+                label={upsellItems.length && mainItems.length ? 'Upsale' : ''}
+                type="upsale"
+                items={upsellItems}
+                forceUpsell={forceWholeOrderUpsell}
+            />
         </div>
     );
 }

@@ -150,14 +150,20 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                     <br />
                                     <span className="small-tip">{dateLabel(row.dataArrivedAt)}</span>
                                 </td>
-                                <td className="text-left">
-                                    <div className="span-col ps-customer-name">
+                                <td className="text-left ps-customer-name-cell">
+                                    <div className="ps-customer-name-row">
                                         {saleWorkspaceUrl ? (
-                                            <a href={appendQuery(saleWorkspaceUrl, { order_id: row.id })}>{safeText(row.customerName)}</a>
+                                            <a className="ps-customer-name-link" href={appendQuery(saleWorkspaceUrl, { order_id: row.id })}>{safeText(row.customerName)}</a>
                                         ) : (
-                                            <span>{safeText(row.customerName)}</span>
+                                            <span className="ps-customer-name-link">{safeText(row.customerName)}</span>
                                         )}
+                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell />
                                     </div>
+                                    {(row.carrierLabel || row.phoneCarrier) ? (
+                                        <span className={`nha-mang ps-carrier ps-carrier-${row.phoneCarrierKey ?? 'other'}`}>
+                                            {row.carrierLabel || `[${row.phoneCarrier}]`}
+                                        </span>
+                                    ) : null}
                                     <div className="no-wrap ps-phone-line ps-contact-phone-row">
                                         <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('purchase', row)}>{safeText(row.customerPhone)}</button>
                                         {row.customerPhone ? (
@@ -165,9 +171,7 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                                 <i className="fa fa-phone" aria-hidden="true" />
                                             </a>
                                         ) : null}
-                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell />
                                     </div>
-                                    {row.phoneCarrier ? <span className={`ps-carrier ps-carrier-${row.phoneCarrierKey ?? 'other'}`}>{row.phoneCarrier}</span> : null}
                                 </td>
                                 <td className="text-left ps-message-cell">
                                     <span>{message || '—'}</span>
@@ -485,7 +489,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                     )}
                     advanced={filtersOpen ? (
                         <div className="ps-adv-filter-panel ps-customer-filter-panel">
-                            <div className="ps-adv-filter-row ps-customer-adv-filter-row">
+                            <div className="ps-adv-filter-row ps-customer-adv-filter-row is-5">
                                 <DateRangeFilter
                                     className="ps-date-range-control ps-adv-date-cluster"
                                     inputClassName="ps-filter-control"
@@ -497,30 +501,33 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                                 <FilterSelect value={form.date_type} onChange={(value) => setField('date_type', value)} options={filterOptions.dateTypes} placeholder="--Kiểu ngày--" />
                                 <FilterSelect value={form.care_status} onChange={(value) => setField('care_status', value)} options={filterOptions.careStatuses} placeholder="--Care đơn--" />
                                 <FilterSelect value={form.closing_status} onChange={(value) => setField('closing_status', value)} options={filterOptions.closingStatuses} placeholder="--Trạng thái chốt đơn--" />
-                                <FilterSelect value={form.source_id} onChange={(value) => setField('source_id', value)} options={filterOptions.sources} placeholder="--Nguồn dữ liệu--" />
-                                <FilterSelect value={form.sale_leader_id} onChange={(value) => setForm((current) => ({ ...current, sale_leader_id: value, sale_team_id: '', sale_id: '', page: 1 }))} options={filterOptions.saleLeaders} placeholder="--Trưởng nhóm sale--" />
-                                <FilterSelect value={form.sale_team_id} onChange={(value) => setForm((current) => ({ ...current, sale_team_id: value, sale_id: '', page: 1 }))} options={saleTeams} placeholder="--Nhóm sale--" />
-                                <FilterSelect value={form.sale_id} onChange={(value) => setField('sale_id', value)} options={sales} placeholder="--Sale--" />
+                                <FilterSelect value={form.source_id} onChange={(value) => setField('source_id', value)} options={filterOptions.sources} placeholder="--Chọn nguồn dữ liệu--" />
                             </div>
-                            <div className="ps-adv-filter-row ps-customer-adv-filter-row">
-                                <FilterSelect value={form.marketing_leader_id} onChange={(value) => setForm((current) => ({ ...current, marketing_leader_id: value, marketing_team_id: '', marketer_id: '', page: 1 }))} options={filterOptions.marketingLeaders} placeholder="--Trưởng nhóm marketing--" />
-                                <FilterSelect value={form.marketing_team_id} onChange={(value) => setForm((current) => ({ ...current, marketing_team_id: value, marketer_id: '', page: 1 }))} options={marketingTeams} placeholder="--Nhóm marketing--" />
-                                <FilterSelect value={form.marketer_id} onChange={(value) => setField('marketer_id', value)} options={marketers} placeholder="--Marketing--" />
-                                <FilterSelect value={form.operation_stage} onChange={(value) => setField('operation_stage', value)} options={filterOptions.operationStages} placeholder="--Trạng thái tác nghiệp--" />
-                                <FilterSelect value={form.operation_stage} onChange={(value) => setField('operation_stage', value)} options={filterOptions.operationStages} placeholder="--Tác nghiệp--" />
-                                <FilterSelect value={form.operation_result} onChange={(value) => setField('operation_result', value)} options={filterOptions.operationResults} placeholder="--Kết quả tác nghiệp--" />
-                                <FilterSelect value={form.delivery_status} onChange={(value) => setField('delivery_status', value)} options={filterOptions.deliveryStatuses} placeholder="--Trạng thái giao hàng--" />
-                                <span className="ps-adv-filter-spacer" aria-hidden="true" />
+                            <div className="ps-adv-filter-row ps-customer-adv-filter-row is-6">
+                                <FilterSelect value={form.sale_leader_id} onChange={(value) => setForm((current) => ({ ...current, sale_leader_id: value, sale_team_id: '', sale_id: '', page: 1 }))} options={filterOptions.saleLeaders} placeholder="--Chọn trưởng nhóm sale--" />
+                                <FilterSelect value={form.sale_team_id} onChange={(value) => setForm((current) => ({ ...current, sale_team_id: value, sale_id: '', page: 1 }))} options={saleTeams} placeholder="--Chọn nhóm sale--" />
+                                <FilterSelect value={form.sale_id} onChange={(value) => setField('sale_id', value)} options={sales} placeholder="--Chọn sale--" />
+                                <FilterSelect value={form.marketing_leader_id} onChange={(value) => setForm((current) => ({ ...current, marketing_leader_id: value, marketing_team_id: '', marketer_id: '', page: 1 }))} options={filterOptions.marketingLeaders} placeholder="--Chọn trưởng nhóm marketing--" />
+                                <FilterSelect value={form.marketing_team_id} onChange={(value) => setForm((current) => ({ ...current, marketing_team_id: value, marketer_id: '', page: 1 }))} options={marketingTeams} placeholder="--Chọn nhóm marketing--" />
+                                <FilterSelect value={form.marketer_id} onChange={(value) => setField('marketer_id', value)} options={marketers} placeholder="--Chọn marketing--" />
                             </div>
-                            <div className="ps-adv-filter-row ps-customer-adv-filter-row">
-                                <ProductSearchSelect className="ps-filter-control" products={filterOptions.products ?? []} value={form.product_id} onChange={(value) => setField('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
-                                <FilterSelect value={form.warehouse_id} onChange={(value) => setField('warehouse_id', value)} options={filterOptions.warehouses} placeholder="--Kho--" />
-                                <FilterSelect value={form.reconciliation_status} onChange={(value) => setField('reconciliation_status', value)} options={filterOptions.reconciliationStatuses} placeholder="--Đối soát nội bộ--" />
-                                <FilterSelect value={form.duplicate_status} onChange={(value) => setField('duplicate_status', value)} options={filterOptions.duplicateStatuses} placeholder="--Trùng số--" />
-                                <FilterSelect value={form.customer_type} onChange={(value) => setField('customer_type', value)} options={filterOptions.customerTypes} placeholder="--Khách cũ / Khách mới--" />
-                                <FilterSelect value={form.allocation_status} onChange={(value) => setField('allocation_status', value)} options={filterOptions.allocationStatuses} placeholder="--Phân bổ--" />
-                                <FilterSelect value={form.shipping_method} onChange={(value) => setField('shipping_method', value)} options={filterOptions.shippingMethods} placeholder="--PTGH--" />
-                                <button type="button" className="btn btn-default ps-filter-reset" onClick={reset}><i className="fa fa-refresh" /> Đặt lại</button>
+                            <div className="ps-adv-filter-row ps-customer-adv-filter-row is-5-equal">
+                                <FilterSelect value={form.operation_activity_status} onChange={(value) => setField('operation_activity_status', value)} options={filterOptions.operationActivityStatuses ?? [{ value: 'not_operated', label: 'Chưa tác nghiệp' }, { value: 'operated', label: 'Đã tác nghiệp' }]} placeholder="--Chọn trạng thái tác nghiệp--" />
+                                <FilterSelect value={form.operation_stage} onChange={(value) => setField('operation_stage', value)} options={filterOptions.operationStages} placeholder="--Chọn tác nghiệp--" />
+                                <FilterSelect value={form.operation_result} onChange={(value) => setField('operation_result', value)} options={filterOptions.operationResults} placeholder="--Chọn kết quả tác nghiệp--" />
+                                <FilterSelect value={form.delivery_status} onChange={(value) => setField('delivery_status', value)} options={filterOptions.deliveryStatuses} placeholder="--Chọn trạng thái giao hàng--" />
+                                <ProductSearchSelect className="ps-filter-control" products={filterOptions.products ?? []} value={form.product_id} onChange={(value) => setField('product_id', value)} placeholder="--Chọn sản phẩm--" showPrice={false} />
+                            </div>
+                            <div className="ps-adv-filter-row ps-customer-adv-filter-row is-6">
+                                <FilterSelect value={form.reconciliation_status} onChange={(value) => setField('reconciliation_status', value)} options={filterOptions.reconciliationStatuses} placeholder="--Chọn đối soát nội bộ--" />
+                                <FilterSelect value={form.duplicate_status} onChange={(value) => setField('duplicate_status', value)} options={filterOptions.duplicateStatuses} placeholder="--Chọn trùng số--" />
+                                <FilterSelect value={form.customer_type} onChange={(value) => setField('customer_type', value)} options={filterOptions.customerTypes} placeholder="--Chọn khách cũ--" />
+                                <FilterSelect value={form.allocation_status} onChange={(value) => setField('allocation_status', value)} options={filterOptions.allocationStatuses} placeholder="--Chọn phân bổ--" />
+                                <FilterSelect value={form.shipping_method} onChange={(value) => setField('shipping_method', value)} options={filterOptions.shippingMethods} placeholder="--Chọn PTGH--" />
+                                <div className="ps-customer-filter-reset-wrap">
+                                    <FilterSelect value={form.warehouse_id} onChange={(value) => setField('warehouse_id', value)} options={filterOptions.warehouses} placeholder="--Chọn kho--" />
+                                    <button type="button" className="btn btn-default btn-sm ps-filter-reset" onClick={reset} title="Đặt lại"><i className="fa fa-refresh" /></button>
+                                </div>
                             </div>
                         </div>
                     ) : null}

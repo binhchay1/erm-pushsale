@@ -82,7 +82,7 @@ export default function Workspace({
                 </SaleWorkspaceFilters>
 
                 <button type="button" className="tao-don-fixed ps-create-order-fab" onClick={() => openOrder(null, false)}>
-                    <i className="fa fa-pencil-square-o" /><span className="text">Tạo đơn</span>
+                    <i className="fa fa-edit" /><span className="text">Tạo đơn</span>
                 </button>
             </section>
 

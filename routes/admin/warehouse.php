@@ -66,10 +66,12 @@ Route::delete('warehouse/care-distribution/records/{record}', [CareDistributionC
 Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     // 5.1 Tác nghiệp vận đơn
     Route::get('warehouse/operations', WarehouseOperationsController::class)->name('warehouse.operations');
+    Route::delete('warehouse/orders/{order}', [WarehouseOrderActionController::class, 'destroy'])->name('warehouse.orders.destroy');
     Route::post('warehouse/orders/bulk/export', [WarehouseOrderActionController::class, 'bulkExport'])->name('warehouse.orders.bulk.export');
     Route::post('warehouse/orders/bulk/invoices', [WarehouseOrderActionController::class, 'bulkInvoices'])->name('warehouse.orders.bulk.invoices');
     Route::post('warehouse/orders/bulk/update-by-code', [WarehouseOrderActionController::class, 'bulkUpdateByCode'])->name('warehouse.orders.bulk.update-by-code');
     Route::patch('warehouse/orders/{order}/desired-delivery', [WarehouseOrderActionController::class, 'desiredDelivery'])->name('warehouse.orders.desired-delivery');
+    Route::patch('warehouse/orders/{order}/order-code', [WarehouseOrderActionController::class, 'changeOrderCode'])->name('warehouse.orders.order-code');
     Route::post('warehouse/orders/{order}/blacklist', [WarehouseOrderActionController::class, 'blacklist'])->name('warehouse.orders.blacklist');
     Route::patch('warehouse/orders/{order}/care', [WarehouseOrderActionController::class, 'care'])->name('warehouse.orders.care');
     Route::patch('warehouse/orders/{order}/delivery-status', [WarehouseOrderActionController::class, 'deliveryStatus'])->name('warehouse.orders.delivery-status');

@@ -1,0 +1,183 @@
+/**
+ * Sale tác nghiệp — Pushsale parity (tabs level-*, message, TN cần, trash).
+ * Scoped to .ps-sale-workspace-page. Does not touch sidebar/header chrome.
+ */
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep {
+    align-items: center;
+    background: #fff;
+    border: 1px solid transparent;
+    color: #333;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 11px;
+    min-width: 180px;
+    padding: 6px 15px 6px 6px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep:hover,
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep.selected {
+    box-shadow: inset 0 0 4px orange !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep .flag {
+    background-color: #c1e2f4 !important;
+    display: inline-block !important;
+    flex: 0 0 20px !important;
+    height: 14px !important;
+    margin-right: 10px !important;
+    min-width: 20px !important;
+    width: 20px !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep .flag.level-1 {
+    background-color: #a6ffa8 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep .flag.level-2 {
+    background-color: #8ad6ff !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep .flag.level-3 {
+    background-color: #ffc0cb !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep .flag.level-4 {
+    background-color: orangered !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep .text {
+    line-height: 16px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep .count {
+    color: orange !important;
+    font-weight: 700 !important;
+    margin-left: 6px !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep .live-stream {
+    display: none;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep .fa-angle-double-right {
+    color: #8a8a8a;
+    font-size: 11px;
+    margin-left: 8px;
+}
+
+/* Sale column: trash top-right like Pushsale */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-cell,
+html body.pushsale-app-body .ps-wh-page .ps-wh-sale-cell {
+    position: relative;
+    vertical-align: top !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-cell .ps-sale-delete-wrap,
+html body.pushsale-app-body .ps-wh-page .ps-wh-sale-cell .ps-wh-delete-wrap {
+    text-align: right;
+    min-height: 18px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-cell .btn-icon.aoh.ps-sale-delete,
+html body.pushsale-app-body .ps-wh-page .ps-wh-sale-cell .btn-icon.aoh.ps-wh-delete {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #e11d48 !important;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 !important;
+    width: 18px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-customer-cell .ps-customer-edit-wrap {
+    text-align: right;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-customer-cell .nha-mang {
+    color: magenta !important;
+    display: block !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+}
+
+/* Tin nhắn: plain landing note (Địa chỉ=…), not editable */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .td-message {
+    cursor: pointer;
+    display: inline-block;
+    max-width: 250px;
+    min-width: 150px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* TN cần: red stage + dotted textarea (the editable form cell) */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-operation-stage-label,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .fb.ttgh7 {
+    color: #ff0000 !important;
+    cursor: pointer;
+    display: block !important;
+    font-weight: 700 !important;
+    margin-top: 2px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .mof-container {
+    clear: both;
+    padding-top: 2px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof {
+    background: transparent !important;
+    border: 1px dotted #ddd !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+    height: 48px !important;
+    line-height: 15px !important;
+    min-height: 48px !important;
+    padding: 5px !important;
+    resize: vertical !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof:hover,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof:focus {
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page a.tao-don-fixed,
+html body.pushsale-app-body .ps-sale-workspace-page button.tao-don-fixed {
+    align-items: center;
+    background: #0080ff !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    color: #fff !important;
+    display: flex !important;
+    flex-direction: column;
+    font-size: 11px;
+    height: 55px !important;
+    justify-content: center;
+    left: 24px;
+    position: fixed !important;
+    text-decoration: none !important;
+    width: 55px !important;
+    z-index: 1060;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page button.tao-don-fixed .fa {
+    color: #fff !important;
+    font-size: 18px !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page button.tao-don-fixed .text {
+    display: block;
+    font-size: 10px;
+    line-height: 1.1;
+    margin-top: 2px;
+}

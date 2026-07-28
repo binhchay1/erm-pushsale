@@ -15,19 +15,28 @@ export function SaleWorkspaceTabs({ tabs = [], routeUrl, filters }) {
     };
 
     return (
-        <div className="ps-sale-stage-tabs">
-            {tabs.map((tab) => (
-                <button
-                    type="button"
-                    key={tab.status}
-                    className={`dm-tac-nghiep ${selected === tab.status || (selected === 'all' && tab.status === 'all') ? 'selected' : ''}`}
-                    onClick={() => select(tab.status)}
-                >
-                    <span className="flag" style={{ backgroundColor: tab.color }} />
-                    <span className="text">{tab.label}</span>
-                    <span className="count">{tab.count ? `(${tab.count}/${tab.total})` : ''}</span>
-                </button>
-            ))}
+        <div className="ps-sale-stage-tabs row ttgh-acc">
+            {tabs.map((tab) => {
+                const level = tab.level === 0 || tab.level === '0' ? '' : (tab.level ?? '');
+                const flagClass = level === '' || level === null || level === undefined
+                    ? 'flag level-'
+                    : `flag level-${level}`;
+
+                return (
+                    <button
+                        type="button"
+                        key={tab.status}
+                        className={`dm-tac-nghiep dm-tac-nghiep${tab.status} ${selected === tab.status || (selected === 'all' && tab.status === 'all') ? 'selected' : ''}`}
+                        onClick={() => select(tab.status)}
+                    >
+                        <span className={flagClass} />
+                        <span className="text">{tab.label}</span>
+                        <span className="count">{tab.count ? `(${Number(tab.count).toLocaleString('vi-VN')}/${Number(tab.total || tab.count).toLocaleString('vi-VN')})` : ''}</span>
+                        <span className="live-stream" />
+                        <i className="fa fa-angle-double-right" />
+                    </button>
+                );
+            })}
         </div>
     );
 }
