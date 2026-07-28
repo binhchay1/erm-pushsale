@@ -36,10 +36,14 @@ html body.pushsale-app-body aside.left-side.pushsale-main-sidebar {
     bottom: 0 !important;
     left: 0 !important;
     z-index: 1055 !important;
+    display: flex !important;
+    flex-direction: column !important;
     width: var(--ps-menu-width) !important;
     min-width: var(--ps-menu-width) !important;
     max-width: var(--ps-menu-width) !important;
+    height: auto !important;
     min-height: 0 !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
@@ -63,14 +67,18 @@ html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-main-si
 
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar.pushsale-sidebar,
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar {
-    height: 100% !important;
-    max-height: 100% !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0 0 12px !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
     background: var(--ps-menu-bg) !important;
     scrollbar-gutter: stable !important;
     scrollbar-width: thin !important;
@@ -243,12 +251,20 @@ html body.pushsale-app-body .pushsale-main-sidebar .treeview-menu.ul2 > .pushsal
     overflow: hidden !important;
 }
 
+html body.pushsale-app-body .pushsale-main-sidebar .treeview-menu.ul2.is-open > .pushsale-menu-l2-inner,
+html body.pushsale-app-body .pushsale-main-sidebar .li1.menu-open > .treeview-menu.ul2 > .pushsale-menu-l2-inner,
+html body.pushsale-app-body .pushsale-main-sidebar .li1.is-open > .treeview-menu.ul2 > .pushsale-menu-l2-inner {
+    /* Open accordion must expand to content height so the sidebar scroller can grow. */
+    min-height: min-content !important;
+    overflow: visible !important;
+}
+
 html body.pushsale-app-body .pushsale-main-sidebar .treeview-menu.ul2.is-open,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.menu-open > .treeview-menu.ul2,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.is-open > .treeview-menu.ul2 {
     display: grid !important;
     grid-template-rows: 1fr !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     background: #fff !important;
 }
 

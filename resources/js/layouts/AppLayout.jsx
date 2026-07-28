@@ -7,7 +7,6 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 import { LocaleSync } from '@/components/layout/LocaleSync';
 import { PageHeaderOutlet, PageHeaderProvider } from '@/components/layout/PageHeader';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { ConfirmProvider } from '@/hooks/use-confirm';
 import { useFlashToast } from '@/hooks/useFlashToast';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 import { ensurePushsaleStyles } from '@/lib/uiShellStyles';
@@ -56,13 +55,13 @@ export default function AppLayout({ children }) {
             // Chrome/Safari can restore an Inertia page from BFCache with body classes or
             // runtime CSS links detached. Re-apply the shell instead of leaving a blank page
             // until the user presses F5.
-            if (!event.persisted) return;
             applyPushsaleShell();
-            // Chỉ reset spinner khi CSS thật sự mất — tránh flash khi back/forward.
-            if (document.documentElement.dataset.pushsaleStylesReady !== '1') {
-                setStylesReady(false);
+            const stylesMissing = document.documentElement.dataset.pushsaleStylesReady !== '1'
+                || !document.getElementById('pushsale-adminlte');
+            if (stylesMissing || event.persisted) {
+                if (stylesMissing) setStylesReady(false);
+                ensurePushsaleStyles().finally(() => active && setStylesReady(true));
             }
-            ensurePushsaleStyles().finally(() => active && setStylesReady(true));
         };
 
         window.addEventListener('pageshow', restoreFromBrowserBack);
@@ -70,7 +69,8 @@ export default function AppLayout({ children }) {
         return () => {
             active = false;
             window.removeEventListener('pageshow', restoreFromBrowserBack);
-            document.body.classList.remove('pushsale-app-body', 'hold-transition', 'skin-blue-light', 'sidebar-mini', 'fixed');
+            // Do not strip pushsale body classes on unmount — each page remounts AppLayout
+            // and stripping causes a white/unstyled flash (especially on history back).
         };
     }, []);
 
@@ -170,35 +170,33 @@ export default function AppLayout({ children }) {
         >
             <LocaleSync />
             <TooltipProvider>
-                <ConfirmProvider>
-                    <AppHeader onToggleSidebar={toggleSidebar} />
-                    <AppSidebar collapsed={!sidebarOpen} onNavigate={closeSidebar} />
+                <AppHeader onToggleSidebar={toggleSidebar} />
+                <AppSidebar collapsed={!sidebarOpen} onNavigate={closeSidebar} />
 
-                    <PageHeaderProvider>
-                        <main className="content-wrapper">
-                            <div className="content-inner">
-                                <div className="ps-page-viewport">
-                                    <PageHeaderOutlet />
-                                    {pageTransitioning && !pendingDashboardRole && (
-                                        <div className="pushsale-route-loading" aria-live="polite"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>
-                                    )}
-                                    {pendingDashboardRole ? (
-                                        <DashboardSkeleton role={pendingDashboardRole} />
-                                    ) : (
-                                        children
-                                    )}
-                                </div>
+                <PageHeaderProvider>
+                    <main className="content-wrapper">
+                        <div className="content-inner">
+                            <div className="ps-page-viewport">
+                                <PageHeaderOutlet />
+                                {pageTransitioning && !pendingDashboardRole && (
+                                    <div className="pushsale-route-loading" aria-live="polite"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>
+                                )}
+                                {pendingDashboardRole ? (
+                                    <DashboardSkeleton role={pendingDashboardRole} />
+                                ) : (
+                                    children
+                                )}
                             </div>
-                        </main>
-                    </PageHeaderProvider>
+                        </div>
+                    </main>
+                </PageHeaderProvider>
 
-                    <button
-                        type="button"
-                        className="sidebar-mobile-backdrop"
-                        aria-label="Đóng menu"
-                        onClick={closeSidebar}
-                    />
-                </ConfirmProvider>
+                <button
+                    type="button"
+                    className="sidebar-mobile-backdrop"
+                    aria-label="Đóng menu"
+                    onClick={closeSidebar}
+                />
             </TooltipProvider>
         </div>
     );

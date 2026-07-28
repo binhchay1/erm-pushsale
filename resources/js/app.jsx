@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Toaster } from 'sonner';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ConfirmProvider } from '@/hooks/use-confirm';
 import { I18nProvider } from '@/providers/I18nProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 
@@ -46,8 +47,10 @@ createInertiaApp({
                         preferences={pageProps.preferences}
                         themes={pageProps.themes}
                     >
-                        <App {...props} />
-                        <Toaster richColors position="top-right" closeButton visibleToasts={3} offset={18} toastOptions={{ className: 'pushsale-toast', duration: 5500 }} />
+                        <ConfirmProvider>
+                            <App {...props} />
+                            <Toaster richColors position="top-right" closeButton visibleToasts={3} offset={18} toastOptions={{ className: 'pushsale-toast', duration: 5500 }} />
+                        </ConfirmProvider>
                     </ThemeProvider>
                 </ErrorBoundary>
             </I18nProvider>

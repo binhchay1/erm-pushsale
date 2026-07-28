@@ -1,11 +1,12 @@
 import { Component } from 'react';
+import { router } from '@inertiajs/react';
 import { RefreshCw } from 'lucide-react';
 
 import { ErrorShell } from '@/components/errors/ErrorShell';
 import { Button } from '@/components/ui/button';
 import { useT } from '@/providers/I18nProvider';
 
-function ClientErrorActions() {
+function ClientErrorActions({ onRecover }) {
     const t = useT();
 
     return (
@@ -14,7 +15,18 @@ function ClientErrorActions() {
                 <RefreshCw className="size-4" />
                 {t('common.refresh')}
             </Button>
-            <Button type="button" variant="outline" onClick={() => window.history.back()}>
+            <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                    onRecover?.();
+                    if (window.history.length > 1) {
+                        window.history.back();
+                        return;
+                    }
+                    window.location.assign('/admin/dashboard');
+                }}
+            >
                 {t('common.back')}
             </Button>
         </>
@@ -31,9 +43,27 @@ export class ErrorBoundary extends Component {
         return { error };
     }
 
+    componentDidMount() {
+        this.removeNavigateListener = router.on('navigate', () => {
+            if (this.state.error) this.setState({ error: null });
+        });
+        this.removeFinishListener = router.on('finish', () => {
+            if (this.state.error) this.setState({ error: null });
+        });
+    }
+
+    componentWillUnmount() {
+        this.removeNavigateListener?.();
+        this.removeFinishListener?.();
+    }
+
     componentDidCatch(error, info) {
         console.error('[SaleOps] React error:', error, info);
     }
+
+    recover = () => {
+        this.setState({ error: null });
+    };
 
     render() {
         if (this.state.error) {
@@ -45,7 +75,7 @@ export class ErrorBoundary extends Component {
                     status="client"
                     detail={import.meta.env.DEV ? `${message}${stack ? `\n\n${stack}` : ''}` : message}
                 >
-                    <ClientErrorActions />
+                    <ClientErrorActions onRecover={this.recover} />
                 </ErrorShell>
             );
         }
