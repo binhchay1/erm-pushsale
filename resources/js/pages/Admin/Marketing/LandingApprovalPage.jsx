@@ -119,13 +119,6 @@ export default function LandingApprovalPage({
             ? form.data.product_ids.map((id) => Number(id)).filter((id, index, source) => id > 0 && source.indexOf(id) === index)
             : [];
 
-        if (productIds.length === 0) {
-            const message = 'Cần chọn ít nhất 1 sản phẩm hoặc gói sản phẩm trước khi duyệt.';
-            setApprovalErrors({ product_ids: message });
-            toast.error(message);
-            return;
-        }
-
         setApprovalErrors({});
         setApprovalProcessing(true);
         router.post(`${approveBaseUrl}/${selected.id}/approve`, {
@@ -138,7 +131,6 @@ export default function LandingApprovalPage({
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {
-                toast.success('Đã cập nhật và duyệt kết nối dữ liệu.');
                 setSelected(null);
             },
             onError: (errors) => {
@@ -168,7 +160,6 @@ export default function LandingApprovalPage({
         router.post(`${approveBaseUrl}/${rejectTarget.id}/reject`, { reason }, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Đã từ chối kết nối dữ liệu.');
                 setRejectTarget(null);
                 setRejectReason('');
             },
@@ -263,7 +254,7 @@ export default function LandingApprovalPage({
                             <label>Url nguồn dữ liệu</label>
                             <input className="form-control" readOnly value={selected?.source_url || ''} />
 
-                            <label>Sản phẩm / gói sản phẩm <span className="required">(*)</span></label>
+                            <label>Sản phẩm / gói sản phẩm <span className="text-muted">(tuỳ chọn)</span></label>
                             <PushsaleMultiSelect
                                 label="Sản phẩm"
                                 options={productOptions}
@@ -272,8 +263,8 @@ export default function LandingApprovalPage({
                                 onEnabledChange={() => {}}
                                 onChange={(ids) => form.setData('product_ids', ids)}
                                 allLabel="Chọn sản phẩm / gói sản phẩm"
-                                placeholder="--Chọn sản phẩm / gói sản phẩm--"
-                                emptyLabel="Chưa chọn sản phẩm"
+                                placeholder="--Chọn sản phẩm / gói (không bắt buộc)--"
+                                emptyLabel="Chưa chọn sản phẩm — vẫn duyệt được"
                             />
 
                             <label>Loại ngân sách</label>

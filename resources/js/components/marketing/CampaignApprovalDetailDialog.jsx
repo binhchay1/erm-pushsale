@@ -87,10 +87,10 @@ export function CampaignApprovalDetailDialog({
 
                     <div className="space-y-5">
                         {missingProduct && (
-                            <div className="space-y-2 rounded-lg border border-rose-200/80 bg-rose-50/60 p-3 text-xs text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
+                            <div className="space-y-2 rounded-lg border border-amber-200/80 bg-amber-50/60 p-3 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
                                 <div className="flex items-start gap-2">
                                     <XCircle className="mt-0.5 size-4 shrink-0" />
-                                    <span>{t('pages.landing.incomplete_hint')}</span>
+                                    <span>Chưa gắn sản phẩm/gói — vẫn duyệt được. Có thể chọn sau hoặc chọn ngay bên dưới.</span>
                                 </div>
                                 <div className="space-y-1">
                                     <label className="font-medium text-foreground">{t('pages.landing.pick_product_label')}</label>
@@ -251,9 +251,8 @@ export function CampaignApprovalDetailDialog({
                                 </Button>
                                 <Button
                                     type="button"
-                                    disabled={approving || (missingProduct && !pickedProductId)}
-                                    title={missingProduct && !pickedProductId ? t('pages.landing.incomplete_hint') : undefined}
-                                    onClick={() => onApprove(campaign, missingProduct ? Number(pickedProductId) : null)}
+                                    disabled={approving}
+                                    onClick={() => onApprove(campaign, pickedProductId ? Number(pickedProductId) : null)}
                                 >
                                     <CheckCircle2 className="size-4" />
                                     {t('pages.landing.approve')}

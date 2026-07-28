@@ -573,7 +573,19 @@ export default function LandingConnectionsPage({
                                                 <td className="text-center pslc-td-marketer">{row.marketer ?? '—'}<br />{row.marketer_email && <span className="small-tip">({row.marketer_email})</span>}</td>
                                                 <td className="text-left pslc-td-source">{row.name}<br /><span className="small-tip">{mainSource?.source_url ?? '—'}</span></td>
                                                 <td className="text-center pslc-type-cell"><div>{l('source_data')}</div><div className="pslc-channel">({channelOptions.find((item) => item.value === row.ad_channel)?.label ?? row.ad_channel ?? 'Facebook ads'})</div></td>
-                                                <td className="text-left pslc-products-cell">{row.products?.length ? row.products.map((mapping) => <div key={mapping.id}>{mapping.product_name}</div>) : <span className="text-muted">{l('waiting_product_approval')}</span>}</td>
+                                                <td className="text-left pslc-products-cell">
+                                                    {row.products?.length
+                                                        ? row.products.map((mapping) => <div key={mapping.id}>{mapping.product_name}</div>)
+                                                        : (
+                                                            <span className={row.rejected_at && !row.is_approved ? 'text-danger' : 'text-muted'}>
+                                                                {row.is_approved
+                                                                    ? l('no_product_attached')
+                                                                    : row.rejected_at
+                                                                        ? l('rejected_status')
+                                                                        : l('pending_approval')}
+                                                            </span>
+                                                        )}
+                                                </td>
                                                 <td className="text-left">{row.sale_names?.length ? row.sale_names.map((name, saleIndex) => <div key={`${name}-${saleIndex}`}>{saleIndex + 1}. {name}</div>) : ''}</td>
                                                 <td className="text-left">{l(`allocation_label.${row.allocation_method}`)}</td>
                                                 <td className="text-center pslc-api-cell">

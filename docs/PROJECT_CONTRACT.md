@@ -121,15 +121,17 @@ Do **not** add another sidebar override CSS file. Page CSS must not override `.p
 
 - Menu 2.4.1 only creates/edits landing source information. Product/package and budget are not part of this form.
 - `request_approval` is a UI/business flag for the source table `Duyệt` checkbox. It does not replace final approval.
-- Menu 2.4.3 is the only place that approves landing source, attaches product/package, and syncs legacy `marketing_sources`.
+- Menu 2.4.3 approves landing source, optionally attaches product/package + budget, and syncs legacy `marketing_sources`.
+- **Product/package is optional at approval** — missing product must not block approve or cause 500. Webhook still accepts leads (mapping review if unmapped).
 - Money inputs in approval UI must display VNĐ format and submit sanitized integer values to Laravel.
 - Pushsale table URL fields should be borderless by default; focus/double-click may show border/shadow for copy.
+- Product column on 2.4.1 must reflect connection status (`Chờ duyệt` / `Đã từ chối` / `Chưa gắn sản phẩm` / product names) — never keep showing “Chờ duyệt gắn sản phẩm” after reject/approve.
 
 
 ## v127 interaction contract
 
 - Manual data distribution must always show visible feedback: pending toast, success toast, or validation/error toast.
-- Landing approval must validate selected product IDs before submit and must use a stable explicit payload to backend.
+- Landing approval may include product IDs (optional). Do not require product before approve; use a stable explicit payload to backend.
 - Taxonomy dialogs are full-window Pushsale-style popups with visible close action.
 - Sidebar second-level leaf hover is controlled in canonical CSS + menu hook only; no page CSS may override `.pushsale-main-sidebar .ul2 > li.li2:hover` back to white.
 

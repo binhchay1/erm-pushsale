@@ -82,6 +82,13 @@ class LandingConnectionManager
     public function approve(LandingConnection $connection, array $options, User $actor): LandingConnection
     {
         return DB::transaction(function () use ($connection, $options, $actor): LandingConnection {
+            $metadata = (array) ($connection->metadata ?? []);
+            unset(
+                $metadata['rejected_at'],
+                $metadata['rejected_by_user_id'],
+                $metadata['rejection_reason'],
+            );
+
             $connection->update($this->onlyExistingColumns('landing_connections', [
                 'budget_type' => (string) ($options['budget_type'] ?? $connection->budget_type ?: 'total'),
                 'budget_amount' => max(0, (int) ($options['budget_amount'] ?? $connection->budget_amount ?? 0)),
@@ -92,6 +99,7 @@ class LandingConnectionManager
                 'approved_by_user_id' => $actor->id,
                 'approved_at' => now(),
                 'updated_by_user_id' => $actor->id,
+                'metadata' => $metadata,
             ]));
 
             $campaign = $this->syncMarketingSource($connection->fresh($this->relations()), $actor);
@@ -99,6 +107,9 @@ class LandingConnectionManager
                 'is_approved' => true,
                 'approved_by_user_id' => $actor->id,
                 'approved_at' => now(),
+                'rejected_by_user_id' => null,
+                'rejected_at' => null,
+                'rejection_reason' => null,
                 'is_active' => true,
             ])->save();
 
@@ -113,15 +124,20 @@ class LandingConnectionManager
             $metadata['rejected_at'] = now()->toISOString();
             $metadata['rejected_by_user_id'] = $actor->id;
             $metadata['rejection_reason'] = $reason;
+            unset($metadata['approved_at'], $metadata['approved_by_user_id']);
 
             $connection->update($this->onlyExistingColumns('landing_connections', [
                 'is_approved' => false,
+                'approved_by_user_id' => null,
+                'approved_at' => null,
                 'metadata' => $metadata,
                 'updated_by_user_id' => $actor->id,
             ]));
 
             $connection->marketingSource?->update([
                 'is_approved' => false,
+                'approved_by_user_id' => null,
+                'approved_at' => null,
                 'rejected_by_user_id' => $actor->id,
                 'rejected_at' => now(),
                 'rejection_reason' => $reason,
@@ -180,6 +196,7 @@ class LandingConnectionManager
         return [
             'marketer:id,name,email',
             'marketingSource:id,name,webhook_token,contacts,budget,is_active,is_approved,approved_by_user_id,approved_at,rejected_by_user_id,rejected_at,rejection_reason,product_id',
+            'marketingSource.rejector:id,name,email',
             'sources',
             'products.product:id,name,sku,unit_price,type',
             'products.source:id,name',
@@ -205,12 +222,8 @@ class LandingConnectionManager
     /** @param array<string, mixed> $data */
     private function shouldPublishMarketingSource(array $data, LandingConnection $connection): bool
     {
-        $hasProduct = collect($data['products'] ?? [])->contains(fn ($row): bool => is_array($row) && filled($row['product_id'] ?? null));
-        if (! $hasProduct && ! empty($data['preserve_product_mappings'])) {
-            $hasProduct = $connection->products()->exists();
-        }
-
-        return (bool) ($data['is_approved'] ?? false) && $hasProduct && $connection->products()->exists();
+        // Duyệt được dù chưa gắn sản phẩm — webhook/lead vẫn nhận payload (v128/v130).
+        return (bool) ($data['is_approved'] ?? false) || (bool) $connection->is_approved;
     }
 
     /** @param array<string, mixed> $data */
@@ -312,15 +325,11 @@ class LandingConnectionManager
     private function syncMarketingSource(LandingConnection $connection, User $actor): MarketingSource
     {
         $connection->loadMissing(['products.product', 'marketingSource']);
-        $firstProductId = $connection->products->pluck('product_id')->filter()->map(fn ($id) => (int) $id)->first();
-
-        if (! $firstProductId) {
-            throw new \RuntimeException('Không thể duyệt kết nối landing khi chưa có sản phẩm/gói sản phẩm.');
-        }
+        $firstProductId = $connection->products->pluck('product_id')->filter()->map(fn ($id) => (int) $id)->first() ?: null;
 
         $campaign = $connection->marketingSource;
         $budgetTotal = $this->budgetTotal($connection);
-        $payload = array_filter([
+        $payload = [
             'company_id' => $connection->company_id,
             'name' => $connection->name,
             'product_id' => $firstProductId,
@@ -336,8 +345,9 @@ class LandingConnectionManager
             'js_tracking_enabled' => false,
             'approved_by_user_id' => $connection->is_approved ? ($connection->approved_by_user_id ?: $actor->id) : null,
             'approved_at' => $connection->is_approved ? ($connection->approved_at ?: now()) : null,
-        ], fn ($value) => $value !== null);
+        ];
 
+        // Keep explicit null product_id so re-approve without products clears legacy mapping.
         $payload = $this->onlyExistingMarketingSourceColumns($payload);
 
         if ($campaign) {

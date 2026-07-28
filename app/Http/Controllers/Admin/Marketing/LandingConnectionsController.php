@@ -131,7 +131,7 @@ final class LandingConnectionsController extends Controller
                 ->with('error', 'Không lưu được kết nối landing.');
         }
 
-        return redirect('/admin/marketing/landing-connections')->with('success', 'Đã tạo kết nối landing. Chờ duyệt ở menu duyệt kết nối để gắn sản phẩm/gói và ngân sách.');
+        return redirect('/admin/marketing/landing-connections')->with('success', 'Đã tạo kết nối landing. Chờ duyệt ở menu duyệt kết nối dữ liệu.');
     }
 
     public function update(Request $request, LandingConnection $record): RedirectResponse
@@ -377,11 +377,7 @@ final class LandingConnectionsController extends Controller
             }
 
             // Luồng mới: Marketing tạo kết nối landing trước, chưa cần gắn sản phẩm.
-            // Bước duyệt riêng sẽ gắn sản phẩm/gói sản phẩm + ngân sách trước khi bật nhận data thật.
-            if ($request->boolean('is_approved') && $products->isEmpty()) {
-                $validator->errors()->add('products', 'Kết nối chỉ được duyệt sau khi đã gắn ít nhất 1 sản phẩm hoặc gói sản phẩm.');
-            }
-
+            // Duyệt không bắt buộc sản phẩm — mapping có thể gắn sau, webhook vẫn nhận data.
             if ($products->isNotEmpty()) {
                 foreach ($sources->whereIn('source_type', ['main', 'upsell']) as $sourceIndex => $source) {
                     $key = (string) ($source['client_key'] ?? '');
@@ -482,6 +478,11 @@ final class LandingConnectionsController extends Controller
             'request_approval' => (bool) (($connection->metadata['request_approval'] ?? true)),
             'approved_by' => $connection->approver?->name ?? $connection->approver?->email,
             'approved_at' => $connection->approved_at?->format('d/m/Y H:i'),
+            'rejected_at' => data_get($connection->metadata, 'rejected_at')
+                ?: $connection->marketingSource?->rejected_at?->toISOString(),
+            'rejected_by' => $connection->marketingSource?->rejector?->name,
+            'rejection_reason' => data_get($connection->metadata, 'rejection_reason')
+                ?: $connection->marketingSource?->rejection_reason,
             'is_active' => $connection->is_active,
             'notes' => (string) ($connection->metadata['notes'] ?? ''),
             'api_base_url' => $connection->apiBaseUrl(),

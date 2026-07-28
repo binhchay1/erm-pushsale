@@ -71,8 +71,8 @@ class LandingApprovalController extends Controller
         $this->authorizeConnectionAccess($request->user(), $connection);
 
         $validated = $request->validate([
-            'product_ids' => ['required', 'array', 'min:1', 'max:50'],
-            'product_ids.*' => ['required', 'integer', 'distinct', Rule::exists('products', 'id')->where(fn ($query) => $query
+            'product_ids' => ['nullable', 'array', 'max:50'],
+            'product_ids.*' => ['integer', 'distinct', Rule::exists('products', 'id')->where(fn ($query) => $query
                 ->where('company_id', (int) $connection->company_id)
                 ->where('is_active', true)
                 ->where('available_marketing', true))],
@@ -89,13 +89,11 @@ class LandingApprovalController extends Controller
                 ->unique()
                 ->values();
 
-            if ($productIds->isEmpty()) {
-                return back()->withErrors(['product_ids' => 'Cần chọn ít nhất 1 sản phẩm hoặc gói sản phẩm trước khi duyệt.']);
-            }
-
-            $products = Product::query()
-                ->whereIn('id', $productIds->all())
-                ->get(['id', 'type']);
+            $products = $productIds->isEmpty()
+                ? collect()
+                : Product::query()
+                    ->whereIn('id', $productIds->all())
+                    ->get(['id', 'type']);
 
             $connection->loadMissing(['sources']);
             $mainSource = $connection->sources->firstWhere('source_type', LandingConnectionSource::TYPE_MAIN)
@@ -178,6 +176,12 @@ class LandingApprovalController extends Controller
         $budgetType = $connection->budget_type ?: 'total';
         $budgetAmount = (int) ($connection->budget_amount ?? $campaign?->budget ?? 0);
         $metadata = (array) ($connection->metadata ?? []);
+        $rejectedAt = $metadata['rejected_at'] ?? $campaign?->rejected_at?->toISOString();
+        $rejectedById = $metadata['rejected_by_user_id'] ?? $campaign?->rejected_by_user_id;
+        $rejectedByName = $campaign?->rejector?->name;
+        if (! $rejectedByName && filled($rejectedById)) {
+            $rejectedByName = \App\Models\User::query()->whereKey((int) $rejectedById)->value('name');
+        }
 
         return [
             'id' => $connection->id,
@@ -193,7 +197,7 @@ class LandingApprovalController extends Controller
                 'product_sku' => $mapping->product?->sku,
                 'item_type' => $mapping->item_type,
             ])->values(),
-            'can_be_approved' => $connectionProducts->isNotEmpty(),
+            'can_be_approved' => true,
             'missing_product' => $connectionProducts->isEmpty(),
             'product_sku' => $campaign?->product?->sku,
             'product_unit_price' => (int) ($campaign?->product?->unit_price ?? 0),
@@ -221,8 +225,8 @@ class LandingApprovalController extends Controller
             'created_at' => $connection->created_at?->format('d/m/Y H:i'),
             'approved_at' => $connection->approved_at?->format('d/m/Y H:i'),
             'approved_by' => $connection->approver?->name ?: $campaign?->approver?->name,
-            'rejected_at' => $metadata['rejected_at'] ?? $campaign?->rejected_at?->format('d/m/Y H:i'),
-            'rejected_by' => $metadata['rejected_by_user_id'] ?? $campaign?->rejector?->name,
+            'rejected_at' => $rejectedAt,
+            'rejected_by' => $rejectedByName,
             'rejection_reason' => $metadata['rejection_reason'] ?? $campaign?->rejection_reason,
         ];
     }

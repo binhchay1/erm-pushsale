@@ -197,7 +197,7 @@ export default function LandingApprovals({
                                                         <Button
                                                             type="button"
                                                             size="sm"
-                                                            onClick={() => (row.missing_product ? openDetail(row) : approve(row))}
+                                                            onClick={() => approve(row)}
                                                         >
                                                             <CheckCircle2 className="size-3.5" />
                                                             {t('pages.landing.approve')}
