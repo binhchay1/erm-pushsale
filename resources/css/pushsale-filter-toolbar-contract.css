@@ -144,11 +144,40 @@ html body.pushsale-app-body .ps-report-page .ps-kpi-toolbar-controls {
     padding: 0 !important;
 }
 
-/* Generic reports such as system-business: date range + 2–3 selects. */
+/* Generic reports such as system-business: date range + 2–3 selects — portal header. */
 html body.pushsale-app-body .ps-system-business-toolbar .ps-report-v2-primary,
-html body.pushsale-app-body .ps-system-business-toolbar .ps-page-shell__filters--primary > .ps-report-toolbar-controls {
-    grid-template-columns: minmax(360px, 2fr) minmax(150px, .7fr) minmax(150px, .7fr) minmax(150px, .7fr) !important;
-    grid-auto-flow: row !important;
+html body.pushsale-app-body .ps-system-business-toolbar .ps-page-shell__filters--primary > .ps-report-toolbar-controls,
+html body.pushsale-app-body .ps-page-header.ps-system-business-toolbar .ps-report-v2-primary,
+html body.pushsale-app-body .m-header-wrap.ps-system-business-toolbar .ps-report-v2-primary,
+html body.pushsale-app-body .ps-page-header.ps-report-v2-header .ps-report-v2-primary {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: none !important;
+    grid-auto-flow: unset !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-system-business-toolbar .ps-report-v2-primary > *,
+html body.pushsale-app-body .m-header-wrap.ps-system-business-toolbar .ps-report-v2-primary > *,
+html body.pushsale-app-body .ps-page-header.ps-report-v2-header .ps-report-v2-primary > * {
+    flex: 0 1 150px !important;
+    width: auto !important;
+    min-width: 120px !important;
+    max-width: 190px !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-system-business-toolbar .ps-date-range,
+html body.pushsale-app-body .m-header-wrap.ps-system-business-toolbar .ps-date-range,
+html body.pushsale-app-body .ps-page-header.ps-report-v2-header .ps-date-range {
+    flex: 0 0 250px !important;
+    width: 250px !important;
+    min-width: 220px !important;
+    max-width: 280px !important;
 }
 
 /* Closing summary has only date, sale/name and per-page. */
@@ -193,23 +222,27 @@ html body.pushsale-app-body .ps-report-page .ps-page-shell__advanced-row .ps-rep
     padding: 0 !important;
 }
 
-html body.pushsale-app-body .ps-page-extra-filters.ps-report-v2-header .ps-report-v2-advanced-wrap,
-html body.pushsale-app-body .ps-page-extra-filters .ps-report-v2-advanced-wrap {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 10px !important;
-    width: 100% !important;
-}
-
 html body.pushsale-app-body .ps-page-extra-filters.ps-report-v2-header .ps-report-v2-advanced.ps-adv-filter-row,
-html body.pushsale-app-body .ps-page-extra-filters .ps-report-v2-advanced.ps-adv-filter-row {
+html body.pushsale-app-body .ps-page-extra-filters .ps-report-v2-advanced.ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters.ps-system-business-toolbar .ps-report-v2-advanced.ps-adv-filter-row {
     display: grid !important;
-    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 1fr)) !important;
-    gap: 10px 12px !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 220px)) !important;
+    justify-content: start !important;
+    gap: 8px 10px !important;
     align-items: center !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-report-v2-header .ps-report-v2-advanced-wrap,
+html body.pushsale-app-body .ps-page-extra-filters .ps-report-v2-advanced-wrap,
+html body.pushsale-app-body .ps-page-extra-filters.ps-system-business-toolbar .ps-report-v2-advanced-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 980px !important;
 }
 
 /* Revenue overview advanced: 2-row panel (portal + legacy). Do not force a single 9-col row. */
@@ -235,7 +268,43 @@ html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-overview-ad
 
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced-row2,
 html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-overview-advanced-row2 {
-    grid-template-columns: minmax(280px, 1.6fr) repeat(3, minmax(0, 1fr)) minmax(180px, 0.9fr) !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-groups-row,
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-groups-row {
+    width: 100% !important;
+    max-width: 980px !important;
+    min-width: 0 !important;
+}
+
+/* Nhóm doanh số: tags + select nằm 1 hàng ngang gọn. */
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-group-compact.is-inline,
+html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-group-compact.is-inline,
+html body.pushsale-app-body .ps-report-page .ps-revenue-group-compact.is-inline {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 260px) !important;
+    gap: 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-group-compact.is-inline .ps-revenue-group-tags,
+html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-group-compact.is-inline .ps-revenue-group-tags,
+html body.pushsale-app-body .ps-report-page .ps-revenue-group-compact.is-inline .ps-revenue-group-tags {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: var(--ps-filter-control-height, 30px) !important;
+    min-height: var(--ps-filter-control-height, 30px) !important;
+    max-height: var(--ps-filter-control-height, 30px) !important;
+    padding: 0 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
 }
 
 html body.pushsale-app-body .ps-report-page .ps-control,
@@ -767,12 +836,17 @@ html body.pushsale-app-body .psm-table-area {
 @media (max-width: 1440px) {
     html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced.ps-adv-filter-row,
     html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-overview-advanced.ps-adv-filter-row {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(4, minmax(0, 200px)) !important;
     }
 
     html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced-row2,
     html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-overview-advanced-row2 {
-        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-columns: repeat(4, minmax(0, 200px)) !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-group-compact.is-inline,
+    html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-revenue-group-compact.is-inline {
+        grid-template-columns: minmax(0, 1fr) minmax(180px, 220px) !important;
     }
 }
 

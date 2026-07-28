@@ -78,16 +78,18 @@ html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-
 html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-detail-advanced-wrap {
     display: flex !important;
     flex-direction: column !important;
-    gap: 10px !important;
+    gap: 8px !important;
     width: 100% !important;
+    max-width: 980px !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-revenue-detail-advanced.ps-adv-filter-row,
 html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-detail-advanced.ps-adv-filter-row {
     display: grid !important;
-    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 220px)) !important;
+    justify-content: start !important;
     align-items: center !important;
-    gap: 10px 12px !important;
+    gap: 8px 10px !important;
     width: 100% !important;
 }
 
@@ -95,6 +97,7 @@ html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-
 html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-detail-advanced.ps-adv-filter-row > * {
     min-width: 0 !important;
     width: 100% !important;
+    max-width: 220px !important;
 }
 
 html body.pushsale-app-body .ps-revenue-detail-page .ps-control,

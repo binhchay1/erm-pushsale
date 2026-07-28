@@ -760,6 +760,31 @@ html body.pushsale-app-body .ps-page-header__advanced .ps-adv-filter-panel {
     padding: 0 !important;
 }
 
+/* Filter bổ sung báo cáo: ô gọn, căn trái, không kéo full-width. */
+html body.pushsale-app-body .ps-page-extra-filters.ps-report-v2-header .ps-adv-filter-panel,
+html body.pushsale-app-body .ps-page-extra-filters.ps-system-business-toolbar .ps-adv-filter-panel,
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-adv-filter-panel,
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-adv-filter-panel,
+html body.pushsale-app-body .ps-page-extra-filters.ps-marketing-upsale-header .ps-adv-filter-panel {
+    max-width: 980px !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-report-v2-header .ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters.ps-system-business-toolbar .ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-adv-filter-row {
+    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 220px)) !important;
+    justify-content: start !important;
+    gap: 8px 10px !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-report-v2-header .ps-adv-filter-row > *,
+html body.pushsale-app-body .ps-page-extra-filters.ps-system-business-toolbar .ps-adv-filter-row > *,
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-adv-filter-row > *,
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-adv-filter-row > * {
+    max-width: 220px !important;
+}
+
 html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row,
 html body.pushsale-app-body .ps-page-header .ps-adv-filter-row,
 html body.pushsale-app-body .ps-page-header__advanced .ps-adv-filter-row {

@@ -57,13 +57,14 @@ html body.pushsale-app-body .ps-revenue-overview-primary {
     min-width: 0 !important;
 }
 
-/* Filter bổ sung: 2 hàng, gap rõ — scope theo header portal. */
+/* Filter bổ sung: hàng đều, ô gọn — scope theo header portal. */
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced-wrap,
 html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced-wrap {
     display: flex !important;
     flex-direction: column !important;
-    gap: 10px !important;
+    gap: 8px !important;
     width: 100% !important;
+    max-width: 980px !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -71,8 +72,9 @@ html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced.ps-adv-filter-row,
 html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced.ps-adv-filter-row {
     display: grid !important;
-    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 1fr)) !important;
-    gap: 10px 12px !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 220px)) !important;
+    justify-content: start !important;
+    gap: 8px 10px !important;
     align-items: center !important;
     width: 100% !important;
     margin: 0 !important;
@@ -82,14 +84,19 @@ html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .p
 html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced.ps-adv-filter-row > * {
     width: 100% !important;
     min-width: 0 !important;
-    max-width: 100% !important;
+    max-width: 220px !important;
     margin: 0 !important;
 }
 
-/* Hàng 2: nhóm doanh số rộng hơn (cột đầu). */
+html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-groups-row,
+html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-groups-row {
+    width: 100% !important;
+    max-width: 980px !important;
+}
+
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced-row2,
 html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced-row2 {
-    grid-template-columns: minmax(280px, 1.6fr) repeat(3, minmax(0, 1fr)) minmax(180px, 0.9fr) !important;
+    grid-template-columns: repeat(4, minmax(0, 220px)) !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-check-cell,
@@ -98,6 +105,7 @@ html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-check-ce
     align-items: center !important;
     justify-content: flex-start !important;
     min-width: 0 !important;
+    max-width: none !important;
 }
 
 html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-page-shell__advanced-row {
@@ -179,25 +187,27 @@ html body.pushsale-app-body .ps-report-gear {
 }
 
 html body.pushsale-app-body .ps-revenue-group-compact {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
-    align-items: stretch !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 260px) !important;
+    gap: 10px !important;
+    align-items: center !important;
     width: 100% !important;
-    min-width: 220px !important;
+    min-width: 0 !important;
 }
 
 html body.pushsale-app-body .ps-revenue-group-tags {
-    min-height: 32px !important;
-    height: auto !important;
+    min-height: 30px !important;
+    height: 30px !important;
+    max-height: 30px !important;
     display: flex !important;
-    flex-wrap: wrap !important;
+    flex-wrap: nowrap !important;
     align-items: center !important;
     gap: 6px !important;
-    padding: 4px 8px !important;
+    padding: 0 8px !important;
     border: 1px solid #bfcdda !important;
     background: #fff !important;
-    overflow: visible !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
 }
 
 html body.pushsale-app-body .ps-revenue-group-tag {
@@ -355,11 +365,11 @@ html body.pushsale-app-body .ps-sales-revenue-v2-table .ps-total-row td.ps-rv2-r
     }
     html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced.ps-adv-filter-row,
     html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced.ps-adv-filter-row {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(4, minmax(0, 200px)) !important;
     }
     html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced-row2,
     html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced-row2 {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+        grid-template-columns: repeat(4, minmax(0, 200px)) !important;
     }
 }
 
@@ -367,7 +377,9 @@ html body.pushsale-app-body .ps-sales-revenue-v2-table .ps-total-row td.ps-rv2-r
     html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced.ps-adv-filter-row,
     html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced.ps-adv-filter-row,
     html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-revenue-overview-advanced-row2,
-    html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced-row2 {
+    html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-overview-advanced-row2,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-group-compact,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-revenue-group-compact.is-inline {
         grid-template-columns: minmax(0, 1fr) !important;
     }
 }

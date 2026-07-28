@@ -57,9 +57,9 @@ html body.pushsale-app-body .ps-page-extra-filters .ps-upsale-advanced-wrap,
 .ps-marketing-upsale-report .ps-upsale-advanced-wrap {
     display: flex !important;
     flex-direction: column !important;
-    gap: 10px !important;
+    gap: 8px !important;
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: 980px !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -68,8 +68,9 @@ html body.pushsale-app-body .ps-page-extra-filters.ps-marketing-upsale-header .p
 html body.pushsale-app-body .ps-page-extra-filters .ps-upsale-advanced.ps-adv-filter-row,
 .ps-marketing-upsale-report .ps-upsale-advanced {
     display: grid !important;
-    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 1fr)) !important;
-    gap: 10px 12px !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 220px)) !important;
+    justify-content: start !important;
+    gap: 8px 10px !important;
     align-items: center !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -82,7 +83,7 @@ html body.pushsale-app-body .ps-page-extra-filters .ps-upsale-advanced.ps-adv-fi
 .ps-marketing-upsale-report .ps-upsale-advanced > * {
     width: 100% !important;
     min-width: 0 !important;
-    max-width: 100% !important;
+    max-width: 220px !important;
     margin: 0 !important;
 }
 

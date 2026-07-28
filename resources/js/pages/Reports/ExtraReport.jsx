@@ -111,22 +111,41 @@ function ReportField({ field, draft, set, filterOptions, t }) {
     }
 }
 
+function chunkFields(items, size = 4) {
+    const rows = [];
+    for (let index = 0; index < items.length; index += size) {
+        rows.push(items.slice(index, index + size));
+    }
+    return rows;
+}
+
 function PushsaleReportToolbar({ title, routeUrl, filters, filterOptions, filterFields = [], className = '', headerClassName = '', primary = [], advanced = [], actionsExtra = null, exportLabel = null }) {
     const t = useT();
     const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
     const fields = new Set(filterFields);
     const render = (field) => (fields.has(field) ? <ReportField key={field} field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
-    const visiblePrimary = primary.filter((field) => fields.has(field));
+    const visiblePrimary = primary.filter((field) => fields.has(field) && field !== 'date_to');
     const visibleAdvanced = advanced.filter((field) => fields.has(field));
+    const advancedRows = chunkFields(visibleAdvanced, 4);
 
-    // Filter chính nằm sát Tìm kiếm/Xuất Excel (cột actions), không sát title.
-    const primaryFilters = null;
+    // Filter chính ở cột filters (1 hàng ngang); nút ở cột actions.
+    const primaryFilters = visiblePrimary.length > 0 ? (
+        <div className="ps-report-v2-primary ps-report-toolbar-controls">
+            {visiblePrimary.map(render)}
+        </div>
+    ) : null;
 
-    const advancedFilters = visibleAdvanced.length > 0 ? (
+    const advancedFilters = advancedRows.length > 0 ? (
         <div className="ps-report-v2-advanced-wrap ps-adv-filter-panel">
-            <div className="ps-report-v2-advanced ps-adv-filter-row ps-report-adv-grid">
-                {visibleAdvanced.map(render)}
-            </div>
+            {advancedRows.map((row, rowIndex) => (
+                <div
+                    key={`adv-row-${rowIndex}`}
+                    className="ps-report-v2-advanced ps-adv-filter-row ps-report-adv-grid"
+                    style={{ '--ps-adv-cols': Math.max(row.length, 4) }}
+                >
+                    {row.map(render)}
+                </div>
+            ))}
         </div>
     ) : null;
 
@@ -134,16 +153,11 @@ function PushsaleReportToolbar({ title, routeUrl, filters, filterOptions, filter
         <PushsalePageShell
             title={title}
             className={`ps-report-toolbar-shell ps-extra-toolbar ps-report-v2-toolbar ${className}`.trim()}
-            headerClassName={headerClassName || 'ps-report-v2-header'}
+            headerClassName={headerClassName || `ps-report-v2-header ${className}`.trim()}
             primaryFilters={primaryFilters}
             advancedFilters={advancedFilters}
             actions={(
-                <div className="ps-report-toolbar-actions ps-report-toolbar-actions--with-filters">
-                    {visiblePrimary.length > 0 ? (
-                        <div className="ps-report-v2-primary ps-report-toolbar-controls">
-                            {visiblePrimary.map(render)}
-                        </div>
-                    ) : null}
+                <div className="ps-report-toolbar-actions">
                     <PushsaleSearchButton onClick={() => apply()} />
                     <PushsaleExportButton routeUrl={routeUrl} filters={cleanReportPayload(draft)} label={exportLabel} />
                     {actionsExtra}
@@ -1019,7 +1033,7 @@ function RevenueGroupCompactPicker({ groups, selectedKeys, onChange }) {
     };
 
     return (
-        <div className="ps-revenue-group-compact">
+        <div className="ps-revenue-group-compact is-inline">
             <div className="ps-revenue-group-tags">
                 {selectedKeys.map((key) => {
                     const group = groups.find((item) => item.key === key);
@@ -1068,10 +1082,12 @@ function RevenueOverviewToolbar({ title, routeUrl, filters, filterOptions, filte
                 {render('reconciliation_status')}
                 {render('warehouse_id')}
             </div>
-            <div className="ps-revenue-overview-advanced ps-revenue-overview-advanced-row2 ps-adv-filter-row" style={{ '--ps-adv-cols': 5 }}>
-                {groups.length > 0 ? (
+            {groups.length > 0 ? (
+                <div className="ps-revenue-overview-groups-row">
                     <RevenueGroupCompactPicker groups={groups} selectedKeys={selectedKeys} onChange={onSelectedKeys} />
-                ) : null}
+                </div>
+            ) : null}
+            <div className="ps-revenue-overview-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 4 }}>
                 {render(leaderField)}
                 {render(teamField)}
                 {render('per_page')}
