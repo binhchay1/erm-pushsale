@@ -104,7 +104,8 @@ html body.pushsale-app-body .ps-product-empty {
 
 /* Landing connection modal: make it a real compact Pushsale form. */
 html body.pushsale-app-body .pslc-dialog {
-    max-width: min(1280px, 92vw) !important;
+    max-width: min(1280px, 96vw) !important;
+    max-height: calc(100dvh - 8px) !important;
 }
 
 html body.pushsale-app-body .pslc-dialog-shell {
@@ -115,12 +116,13 @@ html body.pushsale-app-body .pslc-dialog-shell {
 html body.pushsale-app-body .pslc-form {
     display: flex !important;
     flex-direction: column !important;
-    max-height: calc(100vh - 72px) !important;
+    max-height: calc(100dvh - 8px) !important;
     overflow: hidden !important;
 }
 
 html body.pushsale-app-body .pslc-dialog-body {
     flex: 1 1 auto !important;
+    max-height: calc(100dvh - 52px) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     padding: 10px 14px 0 !important;

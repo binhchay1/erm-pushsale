@@ -188,9 +188,14 @@ function PageDialog({ open, title, onClose, children }) {
             open={Boolean(open)}
             onOpenChange={(nextOpen) => !nextOpen && onClose?.()}
             title={title}
-            width="min(1280px, 92vw)"
+            width="min(1280px, 96vw)"
             className="pslc-dialog pslc-source-dialog"
             bodyClassName="pslc-dialog-shell"
+            contentProps={{
+                style: {
+                    maxHeight: 'calc(100dvh - 8px)',
+                },
+            }}
         >
             {children}
         </PushsaleDialog>

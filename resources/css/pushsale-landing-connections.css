@@ -584,18 +584,28 @@ html body.pushsale-app-body .pslc-approval-table-card {
     html body.pushsale-app-body .pslc-approval-header .pslc-approval-filters .btn { width: 100% !important; }
 }
 
-/* Dialog chỉnh sửa nguồn dữ liệu: rộng hơn + input phẳng (không đôi viền/đổ bóng). */
+/* Dialog thêm/sửa nguồn dữ liệu: gần full viewport để hết phải scroll form. */
 html body.pushsale-app-body .pslc-source-dialog.ps-dialog-surface,
-html body.pushsale-app-body .pslc-dialog.pslc-source-dialog.ps-dialog-surface {
-    width: min(1280px, 92vw) !important;
-    max-width: min(1280px, 92vw) !important;
-    min-width: min(980px, calc(100vw - 24px)) !important;
-    max-height: calc(100dvh - 24px) !important;
+html body.pushsale-app-body .pslc-dialog.pslc-source-dialog.ps-dialog-surface,
+html body.pushsale-app-body [data-slot='dialog-content'].pslc-source-dialog.ps-dialog-surface {
+    width: min(1280px, 96vw) !important;
+    max-width: min(1280px, 96vw) !important;
+    min-width: min(980px, calc(100vw - 16px)) !important;
+    height: auto !important;
+    max-height: calc(100dvh - 8px) !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .pslc-source-dialog .pslc-form,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-form-v118,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-form-v119 {
+    max-height: calc(100dvh - 8px) !important;
+    overflow: hidden !important;
 }
 
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form {
     grid-template-columns: 220px minmax(0, 1fr) !important;
-    gap: 10px 16px !important;
+    gap: 8px 16px !important;
 }
 
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .ps-select,
@@ -616,8 +626,8 @@ html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form button.
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .ps-product-select-button,
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form input[type='text'],
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form input[type='url'] {
-    height: 32px !important;
-    min-height: 32px !important;
+    height: 30px !important;
+    min-height: 30px !important;
     border: 1px solid #c8d2df !important;
     border-radius: 0 !important;
     box-shadow: none !important;
@@ -635,14 +645,24 @@ html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form input:f
     outline: 0 !important;
 }
 
-html body.pushsale-app-body .pslc-source-dialog .pslc-dialog-body {
-    max-height: calc(100dvh - 90px) !important;
+html body.pushsale-app-body .pslc-source-dialog .ps-dialog-body,
+html body.pushsale-app-body .pslc-source-dialog .pslc-dialog-shell {
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .pslc-source-dialog .pslc-dialog-body,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-form-v118 .pslc-dialog-body,
+html body.pushsale-app-body .pslc-source-dialog .pslc-source-form-v119 .pslc-dialog-body {
+    max-height: calc(100dvh - 52px) !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 10px 20px 6px !important;
 }
 
 html body.pushsale-app-body .pslc-source-dialog .pslc-dialog-footer {
     justify-content: flex-start !important;
-    padding: 8px 20px 12px 236px !important;
+    padding: 6px 20px 10px 236px !important;
     border-top: 0 !important;
     background: #fff !important;
 }

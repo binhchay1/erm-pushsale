@@ -312,13 +312,13 @@ body.pushsale-app-body .pslc-actions { white-space: nowrap !important; }
 body.pushsale-app-body .pslc-actions button { padding: 2px !important; font-size: 12px !important; }
 body.pushsale-app-body .pslc-money-cell { white-space: normal !important; }
 
-/* Pushsale-like landing source dialog: wider so form fits without vertical scroll. */
+/* Pushsale-like landing source dialog: taller so form fits without vertical scroll. */
 body.pushsale-app-body .pslc-dialog.ps-dialog-surface,
 body.pushsale-app-body .pslc-source-dialog.ps-dialog-surface {
-    width: min(1280px, 92vw) !important;
-    max-width: min(1280px, 92vw) !important;
-    min-width: min(960px, calc(100vw - 30px)) !important;
-    max-height: calc(100dvh - 28px) !important;
+    width: min(1280px, 96vw) !important;
+    max-width: min(1280px, 96vw) !important;
+    min-width: min(960px, calc(100vw - 16px)) !important;
+    max-height: calc(100dvh - 8px) !important;
     border: 1px solid #4b6f88 !important;
     border-radius: 0 !important;
     overflow: hidden !important;
@@ -337,9 +337,9 @@ body.pushsale-app-body .pslc-dialog-shell {
     padding: 0 !important;
     overflow: hidden !important;
 }
-body.pushsale-app-body .pslc-form { display: flex !important; min-height: 0 !important; flex-direction: column !important; }
+body.pushsale-app-body .pslc-form { display: flex !important; min-height: 0 !important; flex-direction: column !important; max-height: calc(100dvh - 8px) !important; }
 body.pushsale-app-body .pslc-dialog-body {
-    max-height: calc(100dvh - 134px) !important;
+    max-height: calc(100dvh - 52px) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     padding: 0 12px 10px !important;

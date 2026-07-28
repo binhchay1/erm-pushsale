@@ -2051,10 +2051,10 @@ body.pushsale-app-body .pslc-source-form-v118 .btn-icon i {
     color: #168be8 !important;
 }
 body.pushsale-app-body .pslc-source-dialog.ps-dialog-surface {
-    width: min(1280px, 92vw) !important;
-    max-width: min(1280px, 92vw) !important;
-    min-width: min(960px, calc(100vw - 30px)) !important;
-    max-height: calc(100dvh - 28px) !important;
+    width: min(1280px, 96vw) !important;
+    max-width: min(1280px, 96vw) !important;
+    min-width: min(960px, calc(100vw - 16px)) !important;
+    max-height: calc(100dvh - 8px) !important;
 }
 body.pushsale-app-body .pslc-source-dialog .ps-dialog-body,
 body.pushsale-app-body .pslc-source-dialog .pslc-dialog-shell {
@@ -2062,10 +2062,10 @@ body.pushsale-app-body .pslc-source-dialog .pslc-dialog-shell {
     overflow: hidden !important;
 }
 body.pushsale-app-body .pslc-source-form-v118 .pslc-dialog-body {
-    max-height: calc(100dvh - 96px) !important;
+    max-height: calc(100dvh - 52px) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding: 12px 20px 8px !important;
+    padding: 10px 20px 6px !important;
 }
 body.pushsale-app-body .pslc-source-simple-form {
     display: grid !important;
