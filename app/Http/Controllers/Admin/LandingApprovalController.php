@@ -35,13 +35,7 @@ class LandingApprovalController extends Controller
             ->with($this->manager->relations())
             ->whereIn('connection_type', ['landing', 'website', 'facebook']);
 
-        if ($user->role === UserRole::Marketing && ! $user->isAdmin()) {
-            $allowed = $this->scope->allowedMarketerIds($user);
-            $connections->where(function ($query) use ($allowed): void {
-                $query->whereIn('marketer_user_id', $allowed)
-                    ->orWhereIn('created_by_user_id', $allowed);
-            });
-        }
+        $this->applyApprovalVisibilityScope($connections, $user);
 
         $connections = $connections
             ->latest('id')
@@ -248,9 +242,36 @@ class LandingApprovalController extends Controller
         ];
     }
 
+    private function applyApprovalVisibilityScope($query, \App\Models\User $user): void
+    {
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        // Marketer không thuộc team → chỉ admin thấy trên màn duyệt.
+        $query->whereHas('marketer', fn ($marketer) => $marketer->whereNotNull('team_id'));
+
+        if ($user->role !== UserRole::Marketing) {
+            return;
+        }
+
+        $allowed = $this->scope->allowedMarketerIds($user);
+        $query->where(function ($builder) use ($allowed): void {
+            $builder->whereIn('marketer_user_id', $allowed)
+                ->orWhereIn('created_by_user_id', $allowed);
+        });
+    }
+
     private function authorizeConnectionAccess(\App\Models\User $user, LandingConnection $connection): void
     {
-        if ($user->isAdmin() || $user->role !== UserRole::Marketing) {
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        $connection->loadMissing('marketer');
+        abort_unless($connection->marketer?->team_id, 403);
+
+        if ($user->role !== UserRole::Marketing) {
             return;
         }
 

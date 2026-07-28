@@ -592,6 +592,7 @@ html body.pushsale-app-body [data-slot='dialog-content'].pslc-source-dialog.ps-d
     max-width: min(1280px, 96vw) !important;
     min-width: min(980px, calc(100vw - 16px)) !important;
     height: auto !important;
+    min-height: min(920px, calc(100dvh - 16px)) !important;
     max-height: calc(100dvh - 8px) !important;
     overflow: hidden !important;
 }

@@ -13676,11 +13676,19 @@ html body.pushsale-app-body .ps-create-order-fab i {
 
 body.pushsale-app-body .ps-sale-order-modal[data-slot='dialog-content'] {
     width: min(1480px, calc(100vw - 28px)) !important;
-    max-height: calc(100dvh - 18px) !important;
+    max-width: min(1660px, calc(100vw - 18px)) !important;
+    max-height: calc(100dvh - 8px) !important;
+    min-height: min(920px, calc(100dvh - 16px)) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
 }
 body.pushsale-app-body .ps-sale-order-body {
     grid-template-columns: minmax(430px, 39%) minmax(0, 61%) !important;
-    max-height: calc(100dvh - 76px) !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: auto !important;
 }
 body.pushsale-app-body .ps-sale-order-modal .ps-order-product-table {
     min-width: 820px !important;

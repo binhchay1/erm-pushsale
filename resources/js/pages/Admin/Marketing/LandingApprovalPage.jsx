@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleSelect, PushsaleMultiSelect } from '@/components/pushsale/PushsaleSelect';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 const channelLabels = {
     facebook_ads: 'Facebook ads',
@@ -59,8 +61,12 @@ export default function LandingApprovalPage({
     products = [],
     approveBaseUrl = '/admin/marketing/landing-approvals',
     activeMenuCode = '2.4.3',
+    canApprove = false,
 }) {
     const [selected, setSelected] = useState(null);
+    const [rejectTarget, setRejectTarget] = useState(null);
+    const [rejectReason, setRejectReason] = useState('');
+    const [rejectProcessing, setRejectProcessing] = useState(false);
     const [status, setStatus] = useState('pending');
     const [searchDraft, setSearchDraft] = useState('');
     const [search, setSearch] = useState('');
@@ -150,9 +156,25 @@ export default function LandingApprovalPage({
     };
 
     const reject = (row) => {
-        const reason = window.prompt('Lý do từ chối kết nối dữ liệu này?');
-        if (!reason) return;
-        router.post(`${approveBaseUrl}/${row.id}/reject`, { reason }, { preserveScroll: true });
+        setRejectTarget(row);
+        setRejectReason('');
+    };
+
+    const submitReject = () => {
+        const reason = rejectReason.trim();
+        if (!rejectTarget || !reason || rejectProcessing) return;
+
+        setRejectProcessing(true);
+        router.post(`${approveBaseUrl}/${rejectTarget.id}/reject`, { reason }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Đã từ chối kết nối dữ liệu.');
+                setRejectTarget(null);
+                setRejectReason('');
+            },
+            onError: (errors) => toast.error(Object.values(errors || {})[0] || 'Không từ chối được kết nối dữ liệu.'),
+            onFinish: () => setRejectProcessing(false),
+        });
     };
 
     return (
@@ -213,8 +235,14 @@ export default function LandingApprovalPage({
                                         </td>
                                         <td className="text-center">{row.approved_by || row.updated_by || row.creator || '—'}<br />{row.approved_at || row.updated_at || row.created_at}</td>
                                         <td className="text-center pslc-actions">
-                                            <button type="button" className="btn-icon" onClick={() => openApprove(row)} title="Cập nhật & duyệt"><i className="fa fa-edit" /></button>
-                                            {!row.is_approved && <button type="button" className="btn-icon text-danger" onClick={() => reject(row)} title="Từ chối"><i className="fa fa-trash" /></button>}
+                                            {canApprove ? (
+                                                <>
+                                                    <button type="button" className="btn-icon" onClick={() => openApprove(row)} title="Cập nhật & duyệt"><i className="fa fa-edit" /></button>
+                                                    {!row.is_approved && <button type="button" className="btn-icon text-danger" onClick={() => reject(row)} title="Từ chối"><i className="fa fa-trash" /></button>}
+                                                </>
+                                            ) : (
+                                                <span className="text-muted small-tip">—</span>
+                                            )}
                                         </td>
                                     </tr>
                                 )) : <tr><td colSpan="9" className="text-center text-muted">Không có kết nối dữ liệu cần duyệt.</td></tr>}
@@ -225,6 +253,7 @@ export default function LandingApprovalPage({
             </section>
 
             <ApprovalDialog open={Boolean(selected)} onClose={() => setSelected(null)}>
+                {canApprove ? (
                 <form className="pslc-form pslc-approval-form" onSubmit={approve}>
                     <div className="pslc-dialog-body">
                         <div className="pslc-source-simple-form pslc-approval-simple-form">
@@ -263,7 +292,30 @@ export default function LandingApprovalPage({
                     </div>
                     <footer className="pslc-dialog-footer"><button type="submit" className="btn btn-primary" disabled={form.processing || approvalProcessing}><i className="fa fa-save" /> {approvalProcessing ? 'Đang duyệt…' : 'Cập nhật & duyệt'}</button></footer>
                 </form>
+                ) : null}
             </ApprovalDialog>
+
+            <Dialog open={Boolean(rejectTarget)} onOpenChange={(open) => !open && setRejectTarget(null)}>
+                <DialogContent className="pslc-dialog pslc-reject-dialog" aria-describedby={undefined}>
+                    <DialogHeader>
+                        <DialogTitle>Từ chối kết nối dữ liệu</DialogTitle>
+                    </DialogHeader>
+                    <p className="text-sm text-muted-foreground">Nhập lý do từ chối kết nối &quot;{rejectTarget?.name || ''}&quot;.</p>
+                    <textarea
+                        className="form-control min-h-24"
+                        value={rejectReason}
+                        onChange={(event) => setRejectReason(event.target.value)}
+                        placeholder="VD: Thiếu sản phẩm, URL webhook chưa đúng…"
+                        rows={4}
+                    />
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setRejectTarget(null)}>Huỷ</Button>
+                        <Button type="button" variant="destructive" disabled={!rejectReason.trim() || rejectProcessing} onClick={submitReject}>
+                            {rejectProcessing ? 'Đang xử lý…' : 'Từ chối'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

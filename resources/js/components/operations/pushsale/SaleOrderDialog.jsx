@@ -102,12 +102,20 @@ export function SaleOrderDialog({
     const auth = usePage().props.auth;
     const [form, setForm] = useState(EMPTY);
     const [processing, setProcessing] = useState(false);
+    const [manualDiscount, setManualDiscount] = useState(false);
+    const [manualShippingFee, setManualShippingFee] = useState(false);
+    const [recipientPaysCarrier, setRecipientPaysCarrier] = useState(false);
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
 
     useEffect(() => {
-        if (open) setForm(mapOrder(order));
+        if (open) {
+            setForm(mapOrder(order));
+            setManualDiscount(numberValue(mapOrder(order).discount) > 0);
+            setManualShippingFee(numberValue(mapOrder(order).shipping_fee_collected) > 0);
+            setRecipientPaysCarrier(false);
+        }
     }, [open, order]);
 
     useEffect(() => {
@@ -275,12 +283,42 @@ export function SaleOrderDialog({
         });
     };
 
+    const calcOrderDiscount = () => {
+        if (manualDiscount) {
+            toast.info('Đang bật tự nhập chiết khấu đơn.');
+            return;
+        }
+        update('discount', lineDiscount);
+        toast.success('Đã tính chiết khấu theo sản phẩm.');
+    };
+
+    const calcShippingFee = () => {
+        if (!order?.id) {
+            toast.error('Vui lòng lưu đơn trước khi tính phí vận chuyển.');
+            return;
+        }
+        if (!form.warehouse_id || !form.province_code) {
+            toast.error('Chọn kho và địa chỉ giao hàng trước khi tính phí VC.');
+            return;
+        }
+        toast.info('Phí VC tạm tính: nhập thủ công hoặc chốt đơn qua kho để tính theo đơn vị vận chuyển.');
+    };
+
+    const refreshProducts = () => {
+        setForm((current) => ({ ...current, items: [] }));
+        toast.success('Đã làm mới danh sách sản phẩm.');
+    };
+
     const selectedWarehouse = warehouseOptions.find((item) => String(item.id) === String(form.warehouse_id));
     const services = shippingServiceOptions?.[form.shipping_provider] ?? [];
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-dialog ps-sale-modal ps-sale-order-modal ps-sale-order-dialog" aria-describedby={undefined}>
+            <DialogContent
+                className="ps-sale-dialog ps-sale-modal ps-sale-order-modal ps-sale-order-dialog"
+                aria-describedby={undefined}
+                style={{ minHeight: 'min(920px, calc(100dvh - 16px))', maxHeight: 'calc(100dvh - 8px)' }}
+            >
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{order ? `${closeIntent ? 'Chốt đơn' : 'Cập nhật đơn'}: ${order.orderCode || 'Đơn chưa chốt'}` : 'Nhập đơn mới: --'}</DialogTitle></DialogHeader>
                 <div className="ps-sale-order-body">
                     <section className="ps-order-left-panel">
@@ -299,7 +337,7 @@ export function SaleOrderDialog({
                         <label className="ps-order-checkbox ps-full"><input type="checkbox" checked={form.receiver_is_customer} onChange={(event) => update('receiver_is_customer', event.target.checked)} /> Khách đặt hàng là người nhận hàng</label>
                         {!form.receiver_is_customer && <><div className="ps-order-field"><FieldLabel>Người nhận</FieldLabel><input className="form-control" value={form.receiver_name} onChange={(event) => update('receiver_name', event.target.value)} /></div><div className="ps-order-field"><FieldLabel>SĐT người nhận</FieldLabel><input className="form-control" value={form.receiver_phone} onChange={(event) => update('receiver_phone', event.target.value)} /></div></>}
                         <label className="ps-order-checkbox"><input type="checkbox" checked={form.address_mode === 'new'} onChange={(event) => update('address_mode', event.target.checked ? 'new' : 'old')} /> Sử dụng địa chỉ 2 cấp</label>
-                        <label className="ps-order-checkbox"><input type="checkbox" /> Gợi ý chuyển địa chỉ</label>
+                        <label className="ps-order-checkbox"><input type="checkbox" checked={form.address_mode === 'new'} readOnly disabled title="Bật địa chỉ 2 cấp để dùng gợi ý chuyển đổi" /> Gợi ý chuyển địa chỉ</label>
                     </section>
 
                     <section className="ps-order-right-panel">
@@ -332,18 +370,18 @@ export function SaleOrderDialog({
                                 <tfoot>
                                     <tr><th colSpan={2} className="text-right">Tổng cộng:</th><th>{form.items.reduce((sum, item) => sum + numberValue(item.quantity), 0)}</th><th className="text-right">{money(subtotal + lineDiscount)}</th><th /><th className="text-right">{money(lineDiscount)}</th><th /><th /></tr>
                                     <tr><td colSpan={3} className="text-right">Chiết khấu sản phẩm (v):</td><td className="text-right">{money(lineDiscount)}</td><td colSpan={4} /></tr>
-                                    <tr><td><label><input type="checkbox" /> Tự nhập CK</label></td><td colSpan={2} className="text-right">Chiết khấu theo đơn (v):</td><td><input className="form-control text-right" type="number" value={form.discount} onChange={(event) => update('discount', event.target.value)} /></td><td colSpan={4} /></tr>
-                                    <tr><td><label><input type="checkbox" /> Người nhận trả phí VC trực tiếp cho đơn vị VC</label></td><td colSpan={2} className="text-right">Phí VC thu của khách (v):</td><td><input className="form-control text-right" type="number" value={form.shipping_fee_collected} onChange={(event) => update('shipping_fee_collected', event.target.value)} /></td><td colSpan={2}>Phí VC tạm tính:<br /><span className="text-muted">0</span></td><td colSpan={2} /></tr>
-                                    <tr><td><label><input type="checkbox" /> Tự nhập phí VC thu của khách</label></td><td colSpan={2} className="text-right">Khách đã đặt cọc:</td><td><input className="form-control text-right" type="number" value={form.deposit} onChange={(event) => update('deposit', event.target.value)} /></td><td colSpan={4} /></tr>
+                                    <tr><td><label><input type="checkbox" checked={manualDiscount} onChange={(event) => setManualDiscount(event.target.checked)} /> Tự nhập CK</label></td><td colSpan={2} className="text-right">Chiết khấu theo đơn (v):</td><td><input className="form-control text-right" type="number" value={form.discount} readOnly={!manualDiscount} onChange={(event) => update('discount', event.target.value)} /></td><td colSpan={4} /></tr>
+                                    <tr><td><label><input type="checkbox" checked={recipientPaysCarrier} onChange={(event) => setRecipientPaysCarrier(event.target.checked)} /> Người nhận trả phí VC trực tiếp cho đơn vị VC</label></td><td colSpan={2} className="text-right">Phí VC thu của khách (v):</td><td><input className="form-control text-right" type="number" value={form.shipping_fee_collected} readOnly={!manualShippingFee && !recipientPaysCarrier} onChange={(event) => update('shipping_fee_collected', event.target.value)} /></td><td colSpan={2}>Phí VC tạm tính:<br /><span className="text-muted">{recipientPaysCarrier ? money(form.shipping_fee_collected) : '0'}</span></td><td colSpan={2} /></tr>
+                                    <tr><td><label><input type="checkbox" checked={manualShippingFee} onChange={(event) => setManualShippingFee(event.target.checked)} /> Tự nhập phí VC thu của khách</label></td><td colSpan={2} className="text-right">Khách đã đặt cọc:</td><td><input className="form-control text-right" type="number" value={form.deposit} onChange={(event) => update('deposit', event.target.value)} /></td><td colSpan={4} /></tr>
                                     <tr><th colSpan={3} className="text-right">Tổng tiền đơn:</th><th className="text-right">{money(total)}</th><th colSpan={2}>Phải thu của khách:<br /><span className="text-success">{money(collect)}</span></th><th colSpan={2} /></tr>
                                 </tfoot>
                             </table>
                         </div>
                         <div className="ps-order-actions">
-                            <button type="button" className="btn btn-default"><i className="fa fa-calculator" /> Tính phí VC</button>
-                            <button type="button" className="btn btn-default"><i className="fa fa-calendar-minus-o" /> Tính CK</button>
+                            <button type="button" className="btn btn-default" onClick={calcShippingFee}><i className="fa fa-calculator" /> Tính phí VC</button>
+                            <button type="button" className="btn btn-default" onClick={calcOrderDiscount}><i className="fa fa-calendar-minus-o" /> Tính CK</button>
                             <button type="button" className="btn btn-default" disabled={processing} onClick={() => submit(false)}><i className="fa fa-floppy-o" /> Lưu đơn</button>
-                            <button type="button" className="btn btn-default" onClick={() => setForm((current) => ({ ...current, items: [] }))}><i className="fa fa-cube" /> Làm mới SP</button>
+                            <button type="button" className="btn btn-default" onClick={refreshProducts}><i className="fa fa-cube" /> Làm mới SP</button>
                             <button type="button" className="btn btn-primary" disabled={processing || Boolean(order?.closedAt)} onClick={() => submit(true)}><i className="fa fa-calendar-check-o" /> Chốt đơn</button>
                         </div>
                     </section>

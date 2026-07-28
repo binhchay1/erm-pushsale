@@ -1297,12 +1297,20 @@ html body.pushsale-app-body .ps-sale-modal > button[data-slot='dialog-close'] {
 html body.pushsale-app-body .ps-sale-order-dialog[data-slot='dialog-content'],
 html body.pushsale-app-body .ps-sale-order-modal[data-slot='dialog-content'] {
     width: min(1660px, calc(100vw - 18px)) !important;
+    max-width: min(1660px, calc(100vw - 18px)) !important;
+    max-height: calc(100dvh - 8px) !important;
+    min-height: min(920px, calc(100dvh - 16px)) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
 }
 
 html body.pushsale-app-body .ps-sale-order-body {
     display: grid !important;
     grid-template-columns: minmax(520px, 39%) minmax(760px, 61%) !important;
-    max-height: calc(100dvh - 62px) !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     overflow: auto !important;
     background: #fff !important;
 }
