@@ -196,7 +196,6 @@ class LandingConnectionManager
         return [
             'marketer:id,name,email',
             'marketingSource:id,name,webhook_token,contacts,budget,is_active,is_approved,approved_by_user_id,approved_at,rejected_by_user_id,rejected_at,rejection_reason,product_id',
-            'marketingSource.rejector:id,name,email',
             'sources',
             'products.product:id,name,sku,unit_price,type',
             'products.source:id,name',
@@ -332,7 +331,6 @@ class LandingConnectionManager
         $payload = [
             'company_id' => $connection->company_id,
             'name' => $connection->name,
-            'product_id' => $firstProductId,
             'marketer_user_id' => $connection->marketer_user_id,
             'created_by_user_id' => $campaign?->created_by_user_id ?: ($connection->created_by_user_id ?: $actor->id),
             'ad_channel' => $connection->ad_channel ?: 'landing',
@@ -345,9 +343,16 @@ class LandingConnectionManager
             'js_tracking_enabled' => false,
             'approved_by_user_id' => $connection->is_approved ? ($connection->approved_by_user_id ?: $actor->id) : null,
             'approved_at' => $connection->is_approved ? ($connection->approved_at ?: now()) : null,
+            'rejected_by_user_id' => null,
+            'rejected_at' => null,
+            'rejection_reason' => null,
         ];
 
-        // Keep explicit null product_id so re-approve without products clears legacy mapping.
+        // Only touch product_id when mapped — avoids NOT NULL failures on older schemas.
+        if ($firstProductId) {
+            $payload['product_id'] = $firstProductId;
+        }
+
         $payload = $this->onlyExistingMarketingSourceColumns($payload);
 
         if ($campaign) {

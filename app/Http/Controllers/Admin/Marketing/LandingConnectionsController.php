@@ -174,40 +174,65 @@ final class LandingConnectionsController extends Controller
         $this->authorizeManage($request->user());
         $this->authorizeRecordAccess($request->user(), $record);
 
-        $validated = $request->validate([
-            'manual_import' => ['nullable', 'boolean'],
-            'request_approval' => ['nullable', 'boolean'],
-            'is_approved' => ['nullable', 'boolean'],
-        ]);
-
-        if (array_key_exists('is_approved', $validated)) {
+        if ($request->exists('is_approved')) {
             abort_unless($this->canToggleInlineApproval($request->user()), 403);
 
-            $this->manager->setApprovalFlag($record, (bool) $validated['is_approved'], $request->user());
+            try {
+                $approved = $request->boolean('is_approved');
+                $this->manager->setApprovalFlag($record, $approved, $request->user());
 
-            return back()->with('success', (bool) $validated['is_approved']
-                ? 'Đã duyệt nguồn landing.'
-                : 'Đã bỏ duyệt nguồn landing.');
+                return back()->with('success', $approved
+                    ? 'Đã duyệt nguồn landing.'
+                    : 'Đã bỏ duyệt nguồn landing.');
+            } catch (Throwable $exception) {
+                Log::error('landing_connections.flags_approve_failed', [
+                    'connection_id' => $record->id,
+                    'user_id' => $request->user()?->id,
+                    'message' => $exception->getMessage(),
+                    'exception' => $exception,
+                ]);
+
+                return back()->with('error', app()->isProduction()
+                    ? 'Không cập nhật được trạng thái duyệt nguồn landing.'
+                    : get_class($exception).': '.$exception->getMessage());
+            }
         }
 
-        $metadata = (array) ($record->metadata ?? []);
-        $manualImport = array_key_exists('manual_import', $validated)
-            ? (bool) $validated['manual_import']
-            : (bool) $record->manual_import;
-        $requestApproval = array_key_exists('request_approval', $validated)
-            ? (bool) $validated['request_approval']
-            : (bool) ($metadata['request_approval'] ?? true);
+        if ($request->exists('manual_import') || $request->exists('request_approval')) {
+            try {
+                $metadata = (array) ($record->metadata ?? []);
+                $manualImport = $request->exists('manual_import')
+                    ? $request->boolean('manual_import')
+                    : (bool) $record->manual_import;
+                $requestApproval = $request->exists('request_approval')
+                    ? $request->boolean('request_approval')
+                    : (bool) ($metadata['request_approval'] ?? true);
 
-        $metadata['request_approval'] = $requestApproval;
-        $metadata['pending_approval_flow'] = $requestApproval;
+                $metadata['request_approval'] = $requestApproval;
+                $metadata['pending_approval_flow'] = $requestApproval;
 
-        $record->forceFill([
-            'manual_import' => $manualImport,
-            'metadata' => $metadata,
-            'updated_by_user_id' => $request->user()?->id,
-        ])->save();
+                $record->forceFill([
+                    'manual_import' => $manualImport,
+                    'metadata' => $metadata,
+                    'updated_by_user_id' => $request->user()?->id,
+                ])->save();
 
-        return back()->with('success', 'Đã cập nhật trạng thái nhập thủ công cho nguồn landing.');
+                return back()->with('success', 'Đã cập nhật trạng thái nhập thủ công cho nguồn landing.');
+            } catch (Throwable $exception) {
+                Log::error('landing_connections.flags_manual_failed', [
+                    'connection_id' => $record->id,
+                    'user_id' => $request->user()?->id,
+                    'message' => $exception->getMessage(),
+                    'exception' => $exception,
+                ]);
+
+                return back()->with('error', app()->isProduction()
+                    ? 'Không cập nhật được trạng thái nhập thủ công.'
+                    : get_class($exception).': '.$exception->getMessage());
+            }
+        }
+
+        return back()->with('error', 'Không có trạng thái nào được cập nhật.');
     }
 
     public function destroy(Request $request, LandingConnection $record): RedirectResponse
@@ -480,7 +505,7 @@ final class LandingConnectionsController extends Controller
             'approved_at' => $connection->approved_at?->format('d/m/Y H:i'),
             'rejected_at' => data_get($connection->metadata, 'rejected_at')
                 ?: $connection->marketingSource?->rejected_at?->toISOString(),
-            'rejected_by' => $connection->marketingSource?->rejector?->name,
+            'rejected_by' => null,
             'rejection_reason' => data_get($connection->metadata, 'rejection_reason')
                 ?: $connection->marketingSource?->rejection_reason,
             'is_active' => $connection->is_active,

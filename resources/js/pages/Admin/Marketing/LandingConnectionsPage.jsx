@@ -1,5 +1,6 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
 import PageHeader from '@/components/layout/PageHeader';
@@ -8,6 +9,24 @@ import { PushsaleSelect, PushsaleMultiSelect } from '@/components/pushsale/Pushs
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
 import { useT } from '@/providers/I18nProvider';
+
+function RoundFlagTick({ checked, disabled = false, title, onChange }) {
+    return (
+        <label className={`ps-round-tick-wrap ${disabled ? 'is-disabled' : ''}`} title={title}>
+            <input
+                type="checkbox"
+                className="ps-round-tick-input"
+                checked={Boolean(checked)}
+                disabled={disabled}
+                onChange={(event) => onChange?.(event.target.checked)}
+                aria-label={title}
+            />
+            <span className={`ps-round-tick ${checked ? 'is-on' : 'is-off'}`} aria-hidden="true">
+                {checked ? <i className="fa fa-check" /> : null}
+            </span>
+        </label>
+    );
+}
 
 const connectionTabs = [
     ['facebook', 'tab_facebook'],
@@ -416,16 +435,26 @@ export default function LandingConnectionsPage({
     const updateFlags = (row, flags) => {
         if (!row?.id) return;
         const payload = {};
-        if (Object.prototype.hasOwnProperty.call(flags, 'manual_import')) payload.manual_import = Boolean(flags.manual_import);
+        if (Object.prototype.hasOwnProperty.call(flags, 'manual_import')) {
+            payload.manual_import = flags.manual_import ? 1 : 0;
+        }
         if (Object.prototype.hasOwnProperty.call(flags, 'is_approved')) {
-            if (!canToggleApproval) return;
-            payload.is_approved = Boolean(flags.is_approved);
+            if (!canToggleApproval) {
+                toast.error(l('approval_admin_only'));
+                return;
+            }
+            payload.is_approved = flags.is_approved ? 1 : 0;
         }
         if (Object.keys(payload).length === 0) return;
+
         router.patch(`${recordsUrl}/${row.id}/flags`, payload, {
             preserveScroll: true,
             preserveState: true,
             only: ['connections', 'flash'],
+            onError: (errors) => {
+                const first = Object.values(errors || {})[0];
+                toast.error(first || 'Không cập nhật được trạng thái.');
+            },
         });
     };
 
@@ -601,16 +630,22 @@ export default function LandingConnectionsPage({
                                                         <button type="button" className="btn-icon" onClick={() => copy(mainSource?.submit_url ?? row.api_base_url)}><i className="fa fa-copy" /> {l('copy')}</button>
                                                     </div>
                                                 </td>
-                                                <td className="text-center"><input type="checkbox" checked={Boolean(row.manual_import)} onChange={(event) => updateFlags(row, { manual_import: event.target.checked })} title={l('toggle_manual_import')} /></td>
                                                 <td className="text-center">
-                                                    <input
-                                                        type="checkbox"
+                                                    <RoundFlagTick
+                                                        checked={Boolean(row.manual_import)}
+                                                        disabled={!canManage}
+                                                        title={l('toggle_manual_import')}
+                                                        onChange={(next) => updateFlags(row, { manual_import: next })}
+                                                    />
+                                                </td>
+                                                <td className="text-center">
+                                                    <RoundFlagTick
                                                         checked={Boolean(row.is_approved)}
                                                         disabled={!canToggleApproval}
-                                                        onChange={(event) => updateFlags(row, { is_approved: event.target.checked })}
                                                         title={canToggleApproval
                                                             ? (row.is_approved ? l('approved') : l('pending_approval'))
                                                             : l('approval_admin_only')}
+                                                        onChange={(next) => updateFlags(row, { is_approved: next })}
                                                     />
                                                 </td>
                                                 <td className="text-center">{row.updated_by ?? 'admin'}<br />{row.updated_at}</td>

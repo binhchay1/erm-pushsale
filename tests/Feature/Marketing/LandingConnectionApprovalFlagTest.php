@@ -55,19 +55,33 @@ class LandingConnectionApprovalFlagTest extends TestCase
         $this->assertFalse((bool) $connection->is_approved);
 
         $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
-            'is_approved' => true,
+            'is_approved' => 1,
         ])->assertSessionHas('success');
 
         $connection->refresh();
         $this->assertTrue((bool) $connection->is_approved);
         $this->assertSame($admin->id, $connection->approved_by_user_id);
+        $this->assertNotNull($connection->marketing_source_id);
 
         $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
-            'is_approved' => false,
+            'is_approved' => 0,
         ])->assertSessionHas('success');
 
         $connection->refresh();
         $this->assertFalse((bool) $connection->is_approved);
+
+        $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
+            'manual_import' => 0,
+        ])->assertSessionHas('success');
+
+        $connection->refresh();
+        $this->assertFalse((bool) $connection->manual_import);
+
+        $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
+            'manual_import' => 1,
+        ])->assertSessionHas('success');
+
+        $this->assertTrue((bool) $connection->fresh()->manual_import);
     }
 
     public function test_marketing_user_cannot_toggle_inline_approval_flag(): void
