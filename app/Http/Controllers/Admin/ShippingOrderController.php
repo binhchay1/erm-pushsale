@@ -77,7 +77,12 @@ class ShippingOrderController extends Controller
 
     public function createShipment(Request $request, Order $order, CreateShipmentService $service): JsonResponse
     {
-        abort_unless($order->closed_at, 422, __('messages.shipping_actions.order_not_closed'));
+        if (! $order->closed_at) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.shipping_actions.order_not_closed'),
+            ], 422);
+        }
 
         if ($blocked = $this->assertShipmentPermission($request, 'create')) {
             return $blocked;
@@ -90,8 +95,17 @@ class ShippingOrderController extends Controller
             ], 422);
         }
 
-        $provider = $request->string('provider')->toString() ?: null;
-        $service->createForOrder($order->fresh(['items', 'warehouse']), $provider);
+        try {
+            $provider = $request->string('provider')->toString() ?: null;
+            $service->createForOrder($order->fresh(['items', 'warehouse']), $provider);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage() ?: 'Không tạo được vận đơn.',
+            ], 422);
+        }
 
         return response()->json(array_merge(
             ['success' => true, 'message' => __('messages.shipping_actions.waybill_created')],

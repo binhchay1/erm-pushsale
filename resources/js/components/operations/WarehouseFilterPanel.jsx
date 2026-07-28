@@ -55,22 +55,20 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="care_status" value={filters.care_status ?? ''} placeholder="--Chọn care đơn--" options={filterOptions.careUsers} /></div>
             </div>
 
-            <div className="ps-wh-filter-row ps-wh-filter-row-six ps-adv-filter-row hidden-xs">
-                <div className="ps-wh-filter-cell"><ProductSearchSelect form={FORM_ID} name="product_id" products={filterOptions.products ?? []} value={productId} placeholder="--Chọn sản phẩm / gói sản phẩm--" showPrice={false} onChange={setProductId} /></div>
+            <div className="ps-wh-filter-row ps-wh-filter-row-five ps-adv-filter-row hidden-xs">
+                <div className="ps-wh-filter-cell"><ProductSearchSelect form={FORM_ID} name="product_id" products={filterOptions.products ?? []} value={productId} placeholder="--Chọn sản phẩm--" showPrice={false} onChange={setProductId} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="reconciliation_status" value={filters.reconciliation_status ?? ''} placeholder="--Chọn đối soát nội bộ--" options={filterOptions.reconciliationStatuses} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="shipping_provider" value={filters.shipping_provider ?? ''} placeholder="--Chọn PTGH--" options={filterOptions.shippingProviders} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="warehouse_id" value={filters.warehouse_id ?? ''} placeholder="--Chọn kho--" options={filterOptions.warehouses} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="deposit_status" value={filters.deposit_status ?? ''} placeholder="--Đặt cọc--" options={filterOptions.depositStatuses} /></div>
-                <div className="ps-wh-filter-cell ps-wh-empty-cell" />
             </div>
 
-            <div className="ps-wh-filter-row ps-wh-filter-row-six ps-adv-filter-row">
+            <div className="ps-wh-filter-row ps-wh-filter-row-five ps-adv-filter-row">
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="team_leader_id" value={filters.team_leader_id ?? ''} placeholder="--Chọn trưởng nhóm sale--" options={filterOptions.teamLeaders} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="team_id" value={filters.team_id ?? ''} placeholder="--Chọn nhóm sale--" options={filterOptions.salesTeams} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="sale_id" value={filters.sale_id ?? ''} placeholder="--Chọn sale--" options={filterOptions.salesUsers} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="marketing_team_leader_id" value={filters.marketing_team_leader_id ?? ''} placeholder="--Chọn trưởng nhóm marketing--" options={filterOptions.marketingTeamLeaders} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="marketing_team_id" value={filters.marketing_team_id ?? ''} placeholder="--Chọn nhóm marketing--" options={filterOptions.marketingTeams} /></div>
-                <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="marketer_id" value={filters.marketer_id ?? ''} placeholder="--Chọn marketing--" options={filterOptions.marketingUsers} /></div>
             </div>
 
             <div className="ps-wh-filter-row ps-wh-filter-row-six ps-adv-filter-row hidden-xs">
@@ -78,8 +76,8 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
                 <div className="ps-wh-filter-cell"><select form={FORM_ID} className="form-control chosen" name="min_product_quantity" defaultValue={filters.min_product_quantity ?? ''}><option value="">--Toàn bộ số lượng--</option>{[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100].map((value) => <option key={value} value={value}>Tổng số lượng sản phẩm từ {value}</option>)}</select></div>
                 <div className="ps-wh-filter-cell"><select form={FORM_ID} className="form-control chosen" name="max_product_quantity" defaultValue={filters.max_product_quantity ?? ''}><option value="">--Toàn bộ số lượng--</option>{[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100].map((value) => <option key={value} value={value}>Tổng số lượng sản phẩm đến {value}</option>)}<option value="999999">Tổng số lượng sản phẩm không giới hạn</option></select></div>
                 <div className="ps-wh-filter-cell"><select form={FORM_ID} className="form-control chosen chosen-x" name="invoice_status" defaultValue={filters.invoice_status ?? ''}><option value="">--Xuất HĐĐT--</option><option value="issued">Đã xuất HĐĐT</option><option value="not_issued">Chưa xuất HĐĐT</option></select></div>
-                <div className="ps-wh-filter-cell ps-wh-empty-cell" />
-                <div className="ps-wh-filter-cell ps-wh-reset-cell"><button type="button" className="btn btn-sm btn-default ps-wh-btn" onClick={reset}><i className="fa fa-refresh" /> Đặt lại</button></div>
+                <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="marketer_id" value={filters.marketer_id ?? ''} placeholder="--Chọn marketing--" options={filterOptions.marketingUsers} /></div>
+                <div className="ps-wh-filter-cell ps-wh-reset-cell"><button type="button" className="btn btn-sm btn-default ps-wh-btn ps-filter-reset" onClick={reset} title="Đặt lại"><i className="fa fa-refresh" /></button></div>
             </div>
         </div>
     );

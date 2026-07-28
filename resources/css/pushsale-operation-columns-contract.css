@@ -16,23 +16,24 @@ html body.pushsale-app-body .table-responsive:has(.ps-customer-profile-table) {
     -webkit-overflow-scrolling: touch !important;
 }
 
-/* Sale operation table: give the money/result/next-operation columns enough room.
-   The previous 82px / 130px overrides clipped the currency suffix and caused the
-   inline history/refresh icons to sit on top of selects/text. */
+/* Sale operation table: fit viewport; avoid forced horizontal scroll.
+   Column widths stay readable via colgroup + page contracts. */
 html body.pushsale-app-body .ps-sale-operation-table {
-    min-width: 2070px !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+    width: 100% !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table col.c-result {
-    width: 202px !important;
+    width: 140px !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table col.c-next {
-    width: 112px !important;
+    width: 90px !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table col.c-money {
-    width: 178px !important;
+    width: 130px !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table .ps-result-cell,
@@ -87,39 +88,57 @@ html body.pushsale-app-body .ps-acc-operation-table .ps-col-money,
 html body.pushsale-app-body .ps-customer-profile-table .ps-col-money,
 html body.pushsale-app-body .ps-customer-profile-table td.area3,
 html body.pushsale-app-body .ps-customer-profile-table td.ps-col-money {
-    min-width: 172px !important;
-    width: 172px !important;
+    min-width: 0 !important;
+    width: auto !important;
     max-width: none !important;
     overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-order-products-cell,
+html body.pushsale-app-body .ps-wh-legacy-table .c-products-body,
+html body.pushsale-app-body .ps-wh-table .c-products-body,
+html body.pushsale-app-body .ps-wh-legacy-table .c-address-body {
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table col.c-products {
+    width: 170px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table .ps-result-cell .ps-result-select {
+    min-width: 0 !important;
 }
 
 html body.pushsale-app-body .ps-wh-legacy-table .c-money,
 html body.pushsale-app-body .ps-wh-legacy-table th.c-money,
 html body.pushsale-app-body .ps-wh-legacy-table td.c-money {
-    width: 186px !important;
-    min-width: 186px !important;
+    width: auto !important;
+    min-width: 0 !important;
 }
 
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-money,
 html body.pushsale-app-body .ps-acc-operation-table th.ps-col-money,
 html body.pushsale-app-body .ps-acc-operation-table td.ps-col-money {
-    width: 186px !important;
-    min-width: 186px !important;
+    width: auto !important;
+    min-width: 0 !important;
 }
 
 html body.pushsale-app-body .ps-customer-profile-table col.c-money,
 html body.pushsale-app-body .ps-customer-profile-table .area3.ps-col-money,
 html body.pushsale-app-body .ps-customer-profile-table .area3 {
-    width: 190px !important;
-    min-width: 190px !important;
+    width: auto !important;
+    min-width: 0 !important;
 }
 
 html body.pushsale-app-body .ps-order-money-breakdown {
-    min-width: 146px !important;
+    min-width: 0 !important;
     width: 100% !important;
-    padding-right: 6px !important;
+    padding-right: 4px !important;
     box-sizing: border-box !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     font-variant-numeric: tabular-nums !important;
 }
 

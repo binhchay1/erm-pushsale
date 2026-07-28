@@ -4,25 +4,11 @@
     min-height: calc(100vh - 50px) !important;
 }
 
-.ps-handover-page .ps-handover-header {
-    height: 52px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 16px !important;
-    border-bottom: 1px solid #d6dde5 !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
-    margin: 0 -2px 12px !important;
-    padding: 0 6px 0 0 !important;
-    background: #fff !important;
-}
-
-.ps-handover-title {
-    color: #000 !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    line-height: 32px !important;
-    white-space: nowrap !important;
+.ps-handover-page .m-header-wrap.ps-handover-header,
+html body.pushsale-app-body .m-header-wrap.ps-handover-header {
+    /* Keep shared PageHeader shadow from pushsale-page-header-contract.css */
+    border-bottom: 0 !important;
+    margin: 0 !important;
 }
 
 .ps-handover-search {
@@ -30,7 +16,7 @@
     align-items: center !important;
     justify-content: flex-end !important;
     gap: 12px !important;
-    min-width: 320px !important;
+    min-width: 260px !important;
 }
 
 .ps-handover-search input,

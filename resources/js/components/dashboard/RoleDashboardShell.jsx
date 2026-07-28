@@ -21,7 +21,7 @@ const ROLE_QUICK_LINKS = {
         { href: '/warehouse/incidents', label: 'Sự cố', icon: 'fa-exclamation-triangle' },
     ],
     accounting: [
-        { href: '/accounting/operations', label: 'Kế toán tác nghiệp', icon: 'fa-calculator' },
+        { href: '/accounting/workspace', label: 'Kế toán tác nghiệp', icon: 'fa-calculator' },
         { href: '/accounting/reconciliation', label: 'Đối soát', icon: 'fa-exchange' },
         { href: '/accounting/expenses', label: 'Chi phí', icon: 'fa-credit-card' },
     ],

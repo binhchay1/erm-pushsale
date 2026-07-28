@@ -103,7 +103,9 @@ export function AccountingReconTable({ rows = [], totals, enableDeleteOrder = fa
                             <td className="ps-col-customer"><CustomerCell row={row} /></td>
                             <td className="ps-col-address">
                                 <div>{row.effectiveShippingAddress || row.shippingAddress || '—'}</div>
-                                {row.customerNote && <div className="small-tip text-fuchsia">{row.customerNote}</div>}
+                                {(row.shippingNotes || row.customerNote) && (
+                                    <div className="small-tip text-fuchsia">{row.shippingNotes || row.customerNote}</div>
+                                )}
                             </td>
                             {enableDeleteOrder && (
                                 <td className="text-center ps-col-action">

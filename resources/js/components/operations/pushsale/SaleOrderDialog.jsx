@@ -21,7 +21,7 @@ const EMPTY = {
     shipping_provider: '',
     shipping_service: '',
     shipping_method: 'Thủ công',
-    shipping_notes: 'Cho xem hàng, không được thử, không bóc seal. Ko giao được liên hệ sale.',
+    shipping_notes: 'Cho xem hàng, không được thử, không bóc seal. Ko giao được liên hệ Shop. Khách hoàn đơn thu 30K ship, Ko tự ý hoàn, Ko GỌI SHOP SẼ BỒI HOÀN',
     receiver_is_customer: true,
     receiver_name: '',
     receiver_phone: '',
@@ -101,6 +101,7 @@ export function SaleOrderDialog({
 }) {
     const auth = usePage().props.auth;
     const [form, setForm] = useState(EMPTY);
+    const [formError, setFormError] = useState('');
     const [processing, setProcessing] = useState(false);
     const [manualDiscount, setManualDiscount] = useState(false);
     const [manualShippingFee, setManualShippingFee] = useState(false);
@@ -112,6 +113,7 @@ export function SaleOrderDialog({
     useEffect(() => {
         if (open) {
             setForm(mapOrder(order));
+            setFormError('');
             setManualDiscount(numberValue(mapOrder(order).discount) > 0);
             setManualShippingFee(numberValue(mapOrder(order).shipping_fee_collected) > 0);
             setRecipientPaysCarrier(false);
@@ -235,9 +237,19 @@ export function SaleOrderDialog({
         return null;
     };
 
+    const firstError = (errors) => {
+        const value = Object.values(errors ?? {})[0];
+        if (Array.isArray(value)) return value[0];
+        return value || 'Không thể lưu đơn.';
+    };
+
     const submit = (shouldClose) => {
         const error = validate();
-        if (error) return toast.error(error);
+        if (error) {
+            setFormError(error);
+            return;
+        }
+        setFormError('');
         const data = payload();
         setProcessing(true);
 
@@ -250,7 +262,7 @@ export function SaleOrderDialog({
             router.post(manualUrl, data, {
                 preserveScroll: true,
                 onSuccess: () => { toast.success(shouldClose ? 'Đã tạo và chốt đơn.' : 'Đã lưu đơn mới.'); onOpenChange(false); },
-                onError: (errors) => toast.error(Object.values(errors)[0] ?? 'Không thể lưu đơn.'),
+                onError: (errors) => setFormError(firstError(errors)),
                 onFinish: () => setProcessing(false),
             });
             return;
@@ -275,11 +287,11 @@ export function SaleOrderDialog({
                 }, {
                     preserveScroll: true,
                     onSuccess: () => { toast.success('Đã chốt đơn và sinh mã đơn.'); onOpenChange(false); },
-                    onError: (errors) => toast.error(Object.values(errors)[0] ?? 'Không thể chốt đơn.'),
+                    onError: (errors) => setFormError(firstError(errors)),
                     onFinish: () => setProcessing(false),
                 });
             },
-            onError: (errors) => { toast.error(Object.values(errors)[0] ?? 'Không thể cập nhật đơn.'); setProcessing(false); },
+            onError: (errors) => { setFormError(firstError(errors)); setProcessing(false); },
         });
     };
 
@@ -321,6 +333,7 @@ export function SaleOrderDialog({
             >
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{order ? `${closeIntent ? 'Chốt đơn' : 'Cập nhật đơn'}: ${order.orderCode || 'Đơn chưa chốt'}` : 'Nhập đơn mới: --'}</DialogTitle></DialogHeader>
                 <div className="ps-sale-order-body">
+                    {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
                     <section className="ps-order-left-panel">
                         <div className="ps-order-field ps-full"><FieldLabel required>Nguồn dữ liệu</FieldLabel><Select value={form.marketing_source_id} onChange={(value) => update('marketing_source_id', value)}><option value="">--Chọn nguồn dữ liệu--</option>{sourceOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
                         <div className="ps-order-field"><FieldLabel required>Họ tên khách hàng</FieldLabel><input className="form-control" value={form.name} onChange={(event) => update('name', event.target.value)} /></div>

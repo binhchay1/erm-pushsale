@@ -29,10 +29,12 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
     const row = action?.row;
     const type = action?.type;
     const [loading, setLoading] = useState(false);
+    const [formError, setFormError] = useState('');
     const [form, setForm] = useState({});
 
     useEffect(() => {
         if (! row || ! type) return;
+        setFormError('');
         if (type === 'date') setForm({ desired_delivery_at: row.desiredDeliveryAt?.slice(0, 16) ?? '' });
         if (type === 'blacklist') setForm({ phone: row.customerPhone ?? '', reason: 'Chờ vận đơn' });
         if (type === 'care') setForm({ status: row.warehouseCareStatus ?? 'waiting', note: row.warehouseCareNote ?? '' });
@@ -60,7 +62,7 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
         if (type === 'blacklist') {
             const phoneError = vietnamesePhoneError(form.phone, { required: true });
             if (phoneError) {
-                toast.error(phoneError);
+                setFormError(phoneError);
                 return;
             }
         }
@@ -68,20 +70,21 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
             for (const [key, required] of [['customer_phone', true], ['receiver_phone', false]]) {
                 const phoneError = vietnamesePhoneError(form[key], { required });
                 if (phoneError) {
-                    toast.error(phoneError);
+                    setFormError(phoneError);
                     return;
                 }
             }
         }
         if (type === 'changeCode' && !String(form.order_code ?? '').trim()) {
-            toast.error('Nhập mã đơn mới.');
+            setFormError('Nhập mã đơn mới.');
             return;
         }
         if (type === 'message' && !String(form.message ?? '').trim()) {
-            toast.error('Nhập nội dung tin nhắn nội bộ.');
+            setFormError('Nhập nội dung tin nhắn nội bộ.');
             return;
         }
 
+        setFormError('');
         setLoading(true);
         try {
             let path = endpoint;
@@ -122,7 +125,7 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
             onClose();
             router.reload({ only: ['report', 'filters', 'filterOptions'] });
         } catch (error) {
-            toast.error(error.message);
+            setFormError(error.message || 'Không thể cập nhật đơn hàng.');
         } finally {
             setLoading(false);
         }
@@ -147,6 +150,7 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
             <DialogContent className={`ps-wh-dialog ${type === 'edit' || type === 'split' || type === 'return' ? 'wide' : ''}`}>
                 <DialogHeader><DialogTitle>{titles[type]}</DialogTitle></DialogHeader>
                 <div className="ps-wh-dialog-body">
+                    {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
                     <div className="ps-wh-dialog-order-summary">
                         <span><b>Mã đơn:</b> {row.orderCode}</span><span><b>Khách:</b> {row.customerName}</span><span><b>SĐT:</b> {row.customerPhone}</span><span><b>Trạng thái:</b> {row.deliveryStatus}</span>
                     </div>

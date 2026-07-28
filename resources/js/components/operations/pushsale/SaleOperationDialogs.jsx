@@ -51,13 +51,22 @@ function HistoryNote({ history }) {
 
 export function DesiredDeliveryDialog({ order, open, onOpenChange, actionBaseUrl }) {
     const [date, setDate] = useState('');
+    const [formError, setFormError] = useState('');
     const [processing, setProcessing] = useState(false);
 
-    useEffect(() => setDate(toDateTimeLocal(order?.desiredDeliveryAt)), [order?.desiredDeliveryAt, open]);
+    useEffect(() => {
+        setDate(toDateTimeLocal(order?.desiredDeliveryAt));
+        setFormError('');
+    }, [order?.desiredDeliveryAt, open]);
     if (!order) return null;
 
     const submit = (event) => {
         event.preventDefault();
+        if (!date) {
+            setFormError('Vui lòng chọn ngày muốn nhận hàng.');
+            return;
+        }
+        setFormError('');
         setProcessing(true);
         router.patch(`${actionBaseUrl}/orders/${order.id}/desired-delivery-date`, { desired_delivery_at: date }, {
             preserveScroll: true,
@@ -65,7 +74,7 @@ export function DesiredDeliveryDialog({ order, open, onOpenChange, actionBaseUrl
                 toast.success('Đã cập nhật ngày muốn nhận hàng.');
                 onOpenChange(false);
             },
-            onError: (errors) => toast.error(errors.desired_delivery_at ?? errors.order ?? 'Không thể cập nhật.'),
+            onError: (errors) => setFormError(errors.desired_delivery_at ?? errors.order ?? 'Không thể cập nhật.'),
             onFinish: () => setProcessing(false),
         });
     };
@@ -75,6 +84,7 @@ export function DesiredDeliveryDialog({ order, open, onOpenChange, actionBaseUrl
             <DialogContent className="ps-sale-dialog ps-sale-modal ps-desired-date-modal ps-desired-date-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Cập nhật ngày muốn giao hàng</DialogTitle></DialogHeader>
                 <form onSubmit={submit} className="ps-desired-date-body">
+                    {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
                     <table className="table table-bordered table-striped">
                         <tbody>
                             <tr><td>Mã đơn</td><td className="ps-order-code">{order.orderCode || 'Đơn chưa chốt'}</td></tr>
@@ -97,14 +107,17 @@ export function DesiredDeliveryDialog({ order, open, onOpenChange, actionBaseUrl
 }
 
 export function OperationResultDialog({ order, result, open, onOpenChange, actionBaseUrl, onCloseOrder }) {
+    const t = useT();
     const [nextAt, setNextAt] = useState('');
     const [note, setNote] = useState('');
+    const [formError, setFormError] = useState('');
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         if (open) {
             setNextAt(toDateTimeLocal(order?.nextOperationAt));
             setNote('');
+            setFormError('');
         }
     }, [open, order?.nextOperationAt]);
 
@@ -118,6 +131,11 @@ export function OperationResultDialog({ order, result, open, onOpenChange, actio
             onCloseOrder(order);
             return;
         }
+        if (needsDate && !nextAt) {
+            setFormError('Vui lòng chọn thời gian tác nghiệp tiếp.');
+            return;
+        }
+        setFormError('');
         setProcessing(true);
         router.post(`${actionBaseUrl}/orders/${order.id}/operation-status`, {
             operation_result: result.value,
@@ -129,7 +147,7 @@ export function OperationResultDialog({ order, result, open, onOpenChange, actio
                 toast.success('Đã cập nhật kết quả tác nghiệp.');
                 onOpenChange(false);
             },
-            onError: (errors) => toast.error(errors.next_operation_at ?? errors.operation_result ?? errors.order ?? 'Không thể cập nhật tác nghiệp.'),
+            onError: (errors) => setFormError(errors.next_operation_at ?? errors.operation_result ?? errors.order ?? 'Không thể cập nhật tác nghiệp.'),
             onFinish: () => setProcessing(false),
         });
     };
@@ -139,6 +157,7 @@ export function OperationResultDialog({ order, result, open, onOpenChange, actio
             <DialogContent className="ps-sale-dialog ps-sale-modal ps-operation-result-modal ps-operation-result-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Cập nhật tác nghiệp</DialogTitle></DialogHeader>
                 <form onSubmit={submit} className="ps-operation-result-body">
+                    {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
                     <div className="form-group"><label>Khách hàng</label><div className="ps-static-value">{order.customerName} - {order.customerPhone}</div></div>
                     <div className="form-group"><label>Tác nghiệp cần</label><div className="ps-static-value ps-operation-needed-static"><b>{order.currentOperation || 'Gọi lần 1'}</b>{order.saleOperationNote ? <span>{order.saleOperationNote}</span> : <small>{t('operations.sale_workspace.note_empty_hint')}</small>}</div></div>
                     <div className="form-group"><label>Kết quả tác nghiệp</label><div className="ps-static-value"><b>{result.label}</b></div></div>
@@ -298,11 +317,22 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange }) {
 export function BulkCloseDialog({ orderIds = [], rows = [], actionBaseUrl, open, onOpenChange }) {
     const [processing, setProcessing] = useState(false);
     const [confirmStock, setConfirmStock] = useState(false);
+    const [formError, setFormError] = useState('');
     const selectedRows = useMemo(() => rows.filter((row) => orderIds.includes(String(row.id))), [rows, orderIds]);
 
-    useEffect(() => { if (!open) setConfirmStock(false); }, [open]);
+    useEffect(() => {
+        if (!open) {
+            setConfirmStock(false);
+            setFormError('');
+        }
+    }, [open]);
 
     const submit = () => {
+        if (!orderIds.length) {
+            setFormError('Chưa chọn đơn nào để chốt.');
+            return;
+        }
+        setFormError('');
         setProcessing(true);
         router.post(`${actionBaseUrl}/orders/bulk-close`, {
             order_ids: orderIds,
@@ -313,7 +343,7 @@ export function BulkCloseDialog({ orderIds = [], rows = [], actionBaseUrl, open,
                 toast.success('Đã xử lý chốt các đơn được chọn.');
                 onOpenChange(false);
             },
-            onError: (errors) => toast.error(errors.order_ids ?? errors.order ?? 'Không thể chốt đơn hàng loạt.'),
+            onError: (errors) => setFormError(errors.order_ids ?? errors.order ?? 'Không thể chốt đơn hàng loạt.'),
             onFinish: () => setProcessing(false),
         });
     };
@@ -323,6 +353,7 @@ export function BulkCloseDialog({ orderIds = [], rows = [], actionBaseUrl, open,
             <DialogContent className="ps-sale-dialog ps-sale-modal ps-bulk-close-modal ps-bulk-close-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Chốt đơn nhiều</DialogTitle></DialogHeader>
                 <div className="ps-bulk-close-body">
+                    {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
                     <div className="alert alert-info">Đã chọn <b>{orderIds.length}</b> đơn. Mã đơn sẽ chỉ được sinh cho các đơn chốt thành công.</div>
                     <div className="table-responsive"><table className="table table-bordered table-striped"><thead><tr><th>#</th><th>Khách hàng</th><th>Điện thoại</th><th>Sản phẩm</th><th>Tổng tiền</th><th>Trạng thái</th></tr></thead><tbody>
                         {selectedRows.map((order, index) => <tr key={order.id}><td>{index + 1}</td><td>{order.customerName || '—'}</td><td>{order.customerPhone || '—'}</td><td>{order.products?.map((item) => `${item.productName} x${item.quantity}`).join(' | ') || '—'}</td><td className="text-right">{money(order.total)}</td><td>{order.closedAt ? 'Đã chốt' : 'Chưa chốt'}</td></tr>)}

@@ -232,29 +232,46 @@ export default function WarehouseDeliveryHandoverPage({ schema, rows = [], pagin
     return (
         <AppLayout activeMenuCode="5.4">
             <Head title={schema?.title ?? 'Danh sách biên bản'} />
-            <PushsalePageShell className="ps-handover-page ps-template-page" activeMenuCode="5.4">
-                <form className="ps-handover-header" onSubmit={submitFilters}>
-                    <div className="ps-handover-title">Danh sách biên bản</div>
+            <form id="ps-handover-search-form" className="ps-handover-filter-form" onSubmit={submitFilters} hidden aria-hidden="true" />
+            <PushsalePageShell
+                className="ps-handover-page ps-template-page"
+                pageCode="5.4"
+                title={schema?.title ?? 'Danh sách biên bản'}
+                headerClassName="ps-handover-header"
+                defaultFiltersCollapsed={false}
+                filters={(
                     <div className="ps-handover-search">
-                        <input value={filters.search} onChange={(event) => setFilter('search', event.target.value)} placeholder="" />
-                        <button type="submit" className="btn btn-primary btn-sm"><i className="fa fa-search" /> Tìm kiếm</button>
+                        <input
+                            className="form-control"
+                            form="ps-handover-search-form"
+                            name="search"
+                            value={filters.search}
+                            onChange={(event) => setFilter('search', event.target.value)}
+                            placeholder=""
+                        />
                     </div>
-                </form>
-
-                <div className="ps-handover-filter-row">
-                    <select value={filters.handover_status} onChange={(event) => setFilter('handover_status', event.target.value)}>
-                        {statuses.map((status) => <option key={status.id} value={status.id}>{status.label}</option>)}
-                    </select>
-                    <select value={filters.shipping_method} onChange={(event) => setFilter('shipping_method', event.target.value)}>
-                        <option value="-1">--Chọn đơn vị giao hàng--</option>
-                        {providers.map((provider) => <option key={provider.id} value={provider.id}>{optionLabel(provider)}</option>)}
-                    </select>
-                    <div className="ps-handover-filter-spacer" />
-                    <button type="button" className="btn btn-primary btn-sm" onClick={openCreate}>
-                        <i className="fa fa-plus" /> Thêm mới
+                )}
+                actions={(
+                    <button type="submit" form="ps-handover-search-form" className="btn btn-primary btn-sm">
+                        <i className="fa fa-search" /> Tìm kiếm
                     </button>
-                </div>
-
+                )}
+                advancedFilters={(
+                    <div className="ps-handover-filter-row ps-adv-filter-panel">
+                        <select form="ps-handover-search-form" name="handover_status" value={filters.handover_status} onChange={(event) => setFilter('handover_status', event.target.value)}>
+                            {statuses.map((status) => <option key={status.id} value={status.id}>{status.label}</option>)}
+                        </select>
+                        <select form="ps-handover-search-form" name="shipping_method" value={filters.shipping_method} onChange={(event) => setFilter('shipping_method', event.target.value)}>
+                            <option value="-1">--Chọn đơn vị giao hàng--</option>
+                            {providers.map((provider) => <option key={provider.id} value={provider.id}>{optionLabel(provider)}</option>)}
+                        </select>
+                        <div className="ps-handover-filter-spacer" />
+                        <button type="button" className="btn btn-primary btn-sm" onClick={openCreate}>
+                            <i className="fa fa-plus" /> Thêm mới
+                        </button>
+                    </div>
+                )}
+            >
                 {pageRuntimeError ? <div className="alert alert-warning">{pageRuntimeError}</div> : null}
 
                 <div className="ps-handover-table-wrap">

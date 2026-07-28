@@ -242,8 +242,91 @@ html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-actio
     background: #0056b3 !important;
 }
 
+/* Compact warehouse table + aligned stacks */
+html body.pushsale-app-body .ps-wh-page .ps-wh-table-wrap,
+html body.pushsale-app-body .ps-wh-page .table-responsive {
+    overflow-x: auto !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table .c-address,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table .c-address-body,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table .c-products,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table .c-products-body {
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+}
+
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table > thead > tr > th,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table > tbody > tr > td {
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-five {
+    display: grid !important;
+    gap: 8px !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-six {
+    display: grid !important;
+    gap: 8px !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) 40px !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-code-stack {
+    position: relative;
+    text-align: center;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-code-action {
+    position: absolute !important;
+    right: 0;
+    top: 0;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-order-code {
+    color: #337ab7 !important;
+    display: block !important;
+    font-weight: 700 !important;
+    margin: 2px 0 !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-delivery-stack {
+    text-align: center;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-delivery-actions {
+    align-items: center;
+    display: inline-flex;
+    gap: 4px;
+    justify-content: center;
+    margin: 4px 0;
+}
+
+/* FAB: show only lead button per row until that row is hovered */
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .icon-row > .n-button:not(:first-child) {
+    display: none !important;
+}
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .icon-row:hover > .n-button {
+    display: inline-flex !important;
+}
+
+html body.pushsale-app-body .ps-dialog-form-error {
+    background: #fdecea !important;
+    border: 1px solid #f5c2c0 !important;
+    color: #b42318 !important;
+    font-size: 12px !important;
+    margin: 0 0 10px !important;
+    padding: 8px 10px !important;
+}
+
 @media (max-width: 992px) {
     html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-main,
+    html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-five,
     html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-six {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }

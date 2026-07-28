@@ -2,9 +2,11 @@
 
 namespace App\Services\Operations;
 
+use App\Models\CustomerInternalMessage;
 use App\Models\Order;
 use App\Models\OrderOperationHistory;
 use App\Models\User;
+use App\Services\CustomerInteractions\CustomerIdentity;
 use App\Services\CustomerInteractions\OrderOperationHistoryService;
 use App\Services\Leads\LandingUpsellService;
 use App\Support\ActivityLogger;
@@ -30,6 +32,19 @@ final class SaleOperationNoteService
 
             $order->update(['sale_operation_note' => filled($note) ? trim((string) $note) : null]);
             $fresh = $order->fresh();
+
+            $noteText = trim((string) ($fresh->sale_operation_note ?? ''));
+            if ($noteText !== '') {
+                CustomerInternalMessage::query()->create([
+                    'company_id' => $fresh->company_id ?? $actor->company_id,
+                    'order_id' => $fresh->id,
+                    'author_user_id' => $actor->id,
+                    'author_name' => $actor->name,
+                    'author_role' => $actor->role?->value,
+                    'customer_phone' => CustomerIdentity::phoneKey($fresh),
+                    'message' => $noteText,
+                ]);
+            }
 
             ActivityLogger::log(
                 ActivityLogger::ORDER_UPDATED,

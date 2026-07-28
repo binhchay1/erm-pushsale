@@ -515,7 +515,6 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                                     inputClassName="ps-filter-control"
                                     from={form.date_from}
                                     to={form.date_to}
-                                    withTimeLabel={false}
                                     onChange={({ date_from, date_to }) => setForm((current) => ({ ...current, date_from, date_to, page: 1 }))}
                                 />
                                 <FilterSelect value={form.date_type} onChange={(value) => setField('date_type', value)} options={filterOptions.dateTypes} placeholder="--Kiểu ngày--" />

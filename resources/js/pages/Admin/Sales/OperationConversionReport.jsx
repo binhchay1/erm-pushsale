@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { Fragment, useMemo, useState } from 'react';
 
+import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
@@ -263,33 +264,40 @@ export default function Page({ schema, rows = [], pagination = {}, filterOptions
     };
 
     return (
-        <AppLayout>
+        <AppLayout activeMenuCode="4.6.1">
             <Head title={schema?.title ?? 'Báo cáo tỉ lệ chốt đơn theo tác nghiệp'} />
             <div className="pushsale-page ps-operation-conversion-report" data-page-code="4.6.1">
                 {pageRuntimeError && <div className="pushsale-error-banner"><i className="fa fa-exclamation-triangle" /> {pageRuntimeError}</div>}
 
-                <div className="ps-operation-conversion-header">
-                    <div className="ps-operation-conversion-title">{schema?.title ?? 'Báo cáo tỉ lệ chốt đơn theo tác nghiệp'}</div>
-                    <SelectFilter value={filters.date_type} onChange={(value) => set('date_type', value)} placeholder="Ngày sale tác nghiệp tiếp" options={DATE_TYPE_OPTIONS} />
-                    <input className="form-control ps-operation-conversion-date" value={dateRange} onChange={(event) => setDateRange(event.target.value)} />
-                    <label className="ps-operation-conversion-check">
-                        <input type="checkbox" checked={Boolean(filters.no_closing_date_limit)} onChange={(event) => set('no_closing_date_limit', event.target.checked)} />
-                        <span>Không giới hạn ngày chốt</span>
-                    </label>
-                    <div className="ps-operation-conversion-actions">
-                        <button type="button" className="btn-icon" title="Ẩn/hiện bộ lọc"><i className="fa fa-angle-double-up" /></button>
-                        <button type="button" className="btn btn-sm btn-primary" onClick={search}><i className="fa fa-search" /> Tìm kiếm</button>
-                        <button type="button" className="btn btn-sm btn-primary" onClick={exportExcel}><i className="fa fa-file-excel-o" /> Xuất Excel</button>
-                    </div>
-                </div>
-
-                <div className="ps-operation-conversion-filter-row">
-                    <SelectFilter value={filters.sale_leader_id} onChange={(value) => set('sale_leader_id', value)} placeholder="--Trưởng nhóm--" options={filterOptions.saleLeaders ?? []} />
-                    <SelectFilter value={filters.sale_team_id} onChange={(value) => set('sale_team_id', value)} placeholder="--Chọn nhóm--" options={filterOptions.saleTeams ?? filterOptions.teams ?? []} />
-                    <SelectFilter value={filters.operation_stage} onChange={(value) => set('operation_stage', value)} placeholder="--Tác nghiệp--" options={OPERATION_STAGES.map(({ key, label }) => ({ id: key, label }))} />
-                    <SelectFilter value={filters.sort_metric} onChange={(value) => set('sort_metric', value)} placeholder="1.Doanh số tổng" options={METRIC_OPTIONS} />
-                    <SelectFilter value={filters.per_page} onChange={(value) => set('per_page', value)} placeholder="20" options={PER_PAGE_OPTIONS.map((value) => ({ id: value, label: value }))} />
-                </div>
+                <PageHeader
+                    title={schema?.title ?? 'Báo cáo tỉ lệ chốt đơn theo tác nghiệp'}
+                    pageCode="4.6.1"
+                    className="ps-operation-conversion-header"
+                    defaultCollapsed={false}
+                    filters={(
+                        <label className="ps-operation-conversion-check">
+                            <input type="checkbox" checked={Boolean(filters.no_closing_date_limit)} onChange={(event) => set('no_closing_date_limit', event.target.checked)} />
+                            <span>Không giới hạn ngày chốt</span>
+                        </label>
+                    )}
+                    actions={(
+                        <>
+                            <button type="button" className="btn btn-sm btn-primary" onClick={search}><i className="fa fa-search" /> Tìm kiếm</button>
+                            <button type="button" className="btn btn-sm btn-primary" onClick={exportExcel}><i className="fa fa-file-excel-o" /> Xuất Excel</button>
+                        </>
+                    )}
+                    advanced={(
+                        <div className="ps-operation-conversion-filter-row ps-adv-filter-panel">
+                            <SelectFilter value={filters.date_type} onChange={(value) => set('date_type', value)} placeholder="Ngày sale tác nghiệp tiếp" options={DATE_TYPE_OPTIONS} />
+                            <input className="form-control ps-operation-conversion-date" value={dateRange} onChange={(event) => setDateRange(event.target.value)} />
+                            <SelectFilter value={filters.sale_leader_id} onChange={(value) => set('sale_leader_id', value)} placeholder="--Trưởng nhóm--" options={filterOptions.saleLeaders ?? []} />
+                            <SelectFilter value={filters.sale_team_id} onChange={(value) => set('sale_team_id', value)} placeholder="--Chọn nhóm--" options={filterOptions.saleTeams ?? filterOptions.teams ?? []} />
+                            <SelectFilter value={filters.operation_stage} onChange={(value) => set('operation_stage', value)} placeholder="--Tác nghiệp--" options={OPERATION_STAGES.map(({ key, label }) => ({ id: key, label }))} />
+                            <SelectFilter value={filters.sort_metric} onChange={(value) => set('sort_metric', value)} placeholder="1.Doanh số tổng" options={METRIC_OPTIONS} />
+                            <SelectFilter value={filters.per_page} onChange={(value) => set('per_page', value)} placeholder="20" options={PER_PAGE_OPTIONS.map((value) => ({ id: value, label: value }))} />
+                        </div>
+                    )}
+                />
 
                 <div className="ps-operation-conversion-pager-row">
                     <Pager meta={pagination} routeUrl={routeUrl} filters={cleanFilters} />

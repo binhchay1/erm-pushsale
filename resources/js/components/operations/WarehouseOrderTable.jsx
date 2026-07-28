@@ -251,7 +251,7 @@ function CareNoteCell({ row, actionApiBase, onCare, onMessage }) {
                 <textarea
                     ref={noteRef}
                     className="txt-mof form-control txt-dotted"
-                    defaultValue={row.warehouseCareNote || ''}
+                    defaultValue={row.warehouseCareNote || row.accountingNotes || ''}
                     maxLength="200"
                     onFocus={(event) => event.currentTarget.select()}
                 />
@@ -371,11 +371,15 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                     <br />
                                     <span className="small-tip">{row.saleUsername ? `(${row.saleUsername})` : ''}</span>
                                 </td>
-                                <td className="text-center no-wrap">
-                                    <div className="text-right"><InlineIconButton title="Thay đổi mã đơn" icon="repeat" onClick={() => setAction({ type: 'changeCode', row })} className="orange" /></div>
-                                    <div className="small-tip sline">{formatDateTime(row.dataArrivedAt, { withSeconds: false })}</div>
-                                    <button type="button" className="item-md ps-wh-order-code" onClick={() => setDetailOrderId(row.id)}>{row.orderCode}</button>
-                                    <div className="small-tip sline">{formatDateTime(row.closedAt, { withSeconds: false })}</div>
+                                <td className="text-center no-wrap ps-wh-code-cell">
+                                    <div className="ps-wh-code-stack">
+                                        <button type="button" className="btn-icon aoh orange ps-wh-code-action" title="Thay đổi mã đơn" onClick={() => setAction({ type: 'changeCode', row })}>
+                                            <i className="fa fa-repeat" />
+                                        </button>
+                                        <div className="small-tip sline">{formatDateTime(row.dataArrivedAt, { withSeconds: false })}</div>
+                                        <button type="button" className="item-md ps-wh-order-code" onClick={() => setDetailOrderId(row.id)}>{row.orderCode}</button>
+                                        <div className="small-tip sline">{formatDateTime(row.closedAt, { withSeconds: false })}</div>
+                                    </div>
                                 </td>
                                 <td className="text-center no-wrap">
                                     <div className="text-right">
@@ -392,16 +396,18 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                     onCare={() => setAction({ type: 'care', row })}
                                     onMessage={() => setAction({ type: 'message', row })}
                                 />
-                                <td className="text-center area4">
-                                    <div className="small-tip">{formatDateTime(row.lastDeliveryEventAt, { withSeconds: false })}</div>
-                                    <div className="text-right no-wrap">
-                                        <InlineIconButton title="Đưa vào danh sách cảnh báo bom hàng" icon="bomb" onClick={() => setAction({ type: 'blacklist', row })} />
-                                        <InlineIconButton title="Cập nhật trạng thái giao hàng" icon="refresh" onClick={() => setAction({ type: 'delivery', row })} />
-                                        <InlineIconButton title="Lịch sử tác nghiệp" icon="history" onClick={() => setAction({ type: 'timeline', row })} />
+                                <td className="text-center area4 ps-wh-delivery-cell">
+                                    <div className="ps-wh-delivery-stack">
+                                        <div className="small-tip">{formatDateTime(row.lastDeliveryEventAt, { withSeconds: false })}</div>
+                                        <div className="ps-wh-delivery-actions">
+                                            <InlineIconButton title="Đưa vào danh sách cảnh báo bom hàng" icon="bomb" onClick={() => setAction({ type: 'blacklist', row })} />
+                                            <InlineIconButton title="Cập nhật trạng thái giao hàng" icon="refresh" onClick={() => setAction({ type: 'delivery', row })} />
+                                            <InlineIconButton title="Lịch sử tác nghiệp" icon="history" onClick={() => setAction({ type: 'timeline', row })} />
+                                        </div>
+                                        <LegacyStatus row={row} />
+                                        <div className="small-tip sline">{row.shipment?.statusText || ''}</div>
+                                        {row.shipmentError && <div className="ps-wh-error text-left">{row.shipmentError}</div>}
                                     </div>
-                                    <LegacyStatus row={row} />
-                                    <div className="small-tip sline">{row.shipment?.statusText || ''}</div>
-                                    {row.shipmentError && <div className="ps-wh-error text-left">{row.shipmentError}</div>}
                                 </td>
                                 <td className="text-center c-customer-body ps-contact-name-phone" title={`${row.id} | ${row.sourceType || ''}`}>
                                     <div className="text-right">

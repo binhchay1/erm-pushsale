@@ -73,7 +73,6 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {}, ch
                     className="ps-sale-date-range"
                     from={form.date_from}
                     to={form.date_to}
-                    displayLabel
                     onChange={({ date_from, date_to }) => setForm((current) => ({ ...current, date_from, date_to, page: 1 }))}
                 />
                 <Select value={form.date_type} onChange={(value) => update('date_type', value)} placeholder="--Kiểu ngày--" options={filterOptions.dateTypes} />
@@ -102,7 +101,7 @@ export function SaleWorkspaceFilters({ routeUrl, filters, filterOptions = {}, ch
                     products={filterOptions.products ?? []}
                     value={form.product_id}
                     onChange={(value) => update('product_id', value)}
-                    placeholder="--Chọn sản phẩm / gói sản phẩm--"
+                    placeholder="--Chọn sản phẩm--"
                     showPrice={false}
                 />
                 <Select

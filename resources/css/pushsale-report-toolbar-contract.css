@@ -13,11 +13,13 @@ html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__header {
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
-    border-bottom: 1px solid #d2d6de !important;
+    border-bottom: 0 !important;
     border-radius: 0 !important;
     background: #fff !important;
     box-shadow: none !important;
 }
+
+/* Header thật nằm ở outlet (PageHeader) — không đè shadow/border từ shell. */
 
 html body.pushsale-app-body .ps-report-toolbar-shell .ps-page-shell__main-row,
 html body.pushsale-app-body .ps-extra-toolbar .ps-page-shell__main-row {

@@ -1,6 +1,5 @@
 import { router } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
@@ -48,137 +47,25 @@ function TimeRemaining({ order }) {
 function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     const t = useT();
     const [value, setValue] = useState(order.saleOperationNote ?? '');
-    const [pinned, setPinned] = useState(false);
-    const [hoverOpen, setHoverOpen] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [floatingRect, setFloatingRect] = useState(null);
-    const editorRef = useRef(null);
-    const floatingRef = useRef(null);
-    const closeTimerRef = useRef(null);
 
     useEffect(() => setValue(order.saleOperationNote ?? ''), [order.saleOperationNote]);
-
-    const calculateFloatingRect = () => {
-        if (typeof window === 'undefined' || !editorRef.current) return null;
-        const rect = editorRef.current.getBoundingClientRect();
-        const width = Math.min(380, window.innerWidth - 16);
-        const height = 170;
-        const left = Math.min(Math.max(rect.left - 16, 8), window.innerWidth - width - 8);
-        const top = Math.min(Math.max(rect.top - 8, 56), window.innerHeight - height - 8);
-        return { left, top, width };
-    };
-
-    const clearCloseTimer = () => {
-        if (closeTimerRef.current) {
-            window.clearTimeout(closeTimerRef.current);
-            closeTimerRef.current = null;
-        }
-    };
-
-    const openFloating = ({ pin = false } = {}) => {
-        clearCloseTimer();
-        const nextRect = calculateFloatingRect();
-        if (!nextRect) return;
-        setFloatingRect(nextRect);
-        setHoverOpen(true);
-        if (pin) setPinned(true);
-    };
-
-    const scheduleCloseFloating = () => {
-        clearCloseTimer();
-        closeTimerRef.current = window.setTimeout(() => {
-            if (!pinned) {
-                setHoverOpen(false);
-                setFloatingRect(null);
-            }
-            closeTimerRef.current = null;
-        }, 180);
-    };
-
-    const forceCloseFloating = () => {
-        clearCloseTimer();
-        setPinned(false);
-        setHoverOpen(false);
-        setFloatingRect(null);
-    };
-
-    useEffect(() => {
-        if (!pinned && !hoverOpen) return undefined;
-        const reposition = () => {
-            const nextRect = calculateFloatingRect();
-            if (nextRect) setFloatingRect(nextRect);
-        };
-        const closeOnOutside = (event) => {
-            if (editorRef.current?.contains(event.target) || floatingRef.current?.contains(event.target)) return;
-            forceCloseFloating();
-        };
-        window.addEventListener('scroll', reposition, true);
-        window.addEventListener('resize', reposition);
-        document.addEventListener('mousedown', closeOnOutside);
-        return () => {
-            window.removeEventListener('scroll', reposition, true);
-            window.removeEventListener('resize', reposition);
-            document.removeEventListener('mousedown', closeOnOutside);
-            clearCloseTimer();
-        };
-    }, [pinned, hoverOpen]);
 
     const save = () => {
         setSaving(true);
         router.patch(`${actionBaseUrl}/orders/${order.id}/operation-note`, { note: value }, {
             preserveScroll: true,
-            onSuccess: () => {
-                toast.success('Đã lưu tác nghiệp cần.');
-                forceCloseFloating();
-            },
+            onSuccess: () => toast.success('Đã lưu tác nghiệp cần.'),
             onError: (errors) => toast.error(errors.note ?? errors.order ?? 'Không thể lưu tác nghiệp cần.'),
             onFinish: () => setSaving(false),
         });
     };
 
-    const floatingPanel = (pinned || hoverOpen) && floatingRect && typeof document !== 'undefined' ? createPortal(
-        <div
-            ref={floatingRef}
-            className={`ps-note-floating-panel ${pinned ? 'is-pinned' : 'is-hovering'}`}
-            style={{ left: floatingRect.left, top: floatingRect.top, width: floatingRect.width }}
-            onMouseEnter={clearCloseTimer}
-            onMouseLeave={scheduleCloseFloating}
-        >
-            <div className="ps-note-floating-head">
-                <strong>{order.currentOperation || 'Gọi lần 1'}</strong>
-                <div className="ps-note-floating-actions">
-                    <button type="button" className="btn-icon" onClick={() => onMessages(order)} title="Tin nhắn"><i className="fa fa-commenting-o" /></button>
-                    <button type="button" className="btn-icon" onClick={save} disabled={saving} title="Lưu tác nghiệp cần"><i className="fa fa-save" /></button>
-                    <button type="button" className="btn-icon" onClick={forceCloseFloating} title="Thu gọn"><i className="fa fa-compress" /></button>
-                </div>
-            </div>
-            <textarea
-                className="form-control txt-mof txt-dotted ps-note-floating-textarea"
-                maxLength={500}
-                value={value}
-                autoFocus={pinned}
-                onChange={(event) => setValue(event.target.value)}
-                onKeyDown={(event) => {
-                    if (event.key === 'Escape') forceCloseFloating();
-                    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
-                }}
-                aria-label={`Tác nghiệp cần của ${order.customerName ?? order.customerPhone}`}
-            />
-            <div className="ps-note-floating-counter">{value.length}/500 · {t('operations.sale_workspace.note_helper')} · Ctrl+Enter để lưu</div>
-        </div>,
-        document.body,
-    ) : null;
-
     return (
-        <div
-            ref={editorRef}
-            className={`ps-operation-note-editor area2 ${pinned ? 'is-pinned' : ''} ${hoverOpen ? 'is-hover-open' : ''}`}
-            onMouseEnter={() => openFloating({ pin: false })}
-            onMouseLeave={scheduleCloseFloating}
-        >
+        <div className="ps-operation-note-editor area2">
             <span className="fb span-col ttgh7 ps-operation-stage-label">{order.currentOperation || 'Gọi lần 1'}</span>
-            <div className="text-right ps-note-toolbar">
-                <button type="button" className="btn-icon aoh" style={{ float: 'left' }} onClick={() => onMessages(order)} title="Tin nhắn nội bộ"><i className="fa fa-commenting-o" /></button>
+            <div className="ps-note-toolbar">
+                <button type="button" className="btn-icon aoh" onClick={() => onMessages(order)} title="Tin nhắn nội bộ"><i className="fa fa-commenting-o" /></button>
                 <button type="button" className="btn-icon aoh" onClick={save} disabled={saving} title="Lưu ghi chú"><i className="fa fa-save" /></button>
             </div>
             <div className="mof-container">
@@ -187,17 +74,13 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
                     maxLength={500}
                     value={value}
                     onChange={(event) => setValue(event.target.value)}
-                    onClick={() => openFloating({ pin: true })}
-                    onFocus={() => openFloating({ pin: true })}
                     onKeyDown={(event) => {
-                        if (event.key === 'Escape') forceCloseFloating();
                         if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
                     }}
                     aria-label={`Tác nghiệp cần của ${order.customerName ?? order.customerPhone}`}
+                    title={t('operations.sale_workspace.note_helper')}
                 />
             </div>
-            <div style={{ clear: 'both' }} />
-            {floatingPanel}
         </div>
     );
 }
@@ -311,18 +194,18 @@ export function SaleWorkspaceTable({
                                         <span className="small-tip">({dateTime(order.dataArrivedAt)})</span>
                                     </td>
                                     <td className="text-center ps-sale-cell area5">
-                                        <div className="text-right ps-sale-delete-wrap">
+                                        <div className="ps-sale-cell-inner">
                                             {order.canDeleteData ? (
                                                 <button type="button" className="btn-icon aoh ps-sale-delete" onClick={() => deleteData(order)} title="Xóa data" aria-label="Xóa data">
                                                     <i className="fa fa-trash" />
                                                 </button>
                                             ) : null}
+                                            <div className="ps-sale-name-block">
+                                                <b>{order.saleName}</b>
+                                                {order.saleUsername ? <span className="small-tip">({order.saleUsername})</span> : null}
+                                            </div>
+                                            <div className="small-tip">({dateTime(order.assignedAt)})</div>
                                         </div>
-                                        <div className="ps-sale-name-block">
-                                            <b>{order.saleName}</b>
-                                            {order.saleUsername ? <span className="small-tip">({order.saleUsername})</span> : null}
-                                        </div>
-                                        <div className="small-tip">({dateTime(order.assignedAt)})</div>
                                     </td>
                                     <td className="ps-customer-cell area1 ps-contact-name-phone" title={`${order.id} | ${order.sourceType || ''}`}>
                                         <div className="text-right ps-customer-edit-wrap">
@@ -352,18 +235,22 @@ export function SaleWorkspaceTable({
                                     </td>
                                     <td><OperationNoteEditor order={order} actionBaseUrl={actionBaseUrl} onMessages={onMessages} /></td>
                                     <td className="ps-result-cell">
-                                        <button type="button" className="btn-icon ps-cell-action" onClick={() => onHistory(order)} title="Lịch sử tác nghiệp"><i className="fa fa-history" /></button>
-                                        {order.canChangeStatus ? (
-                                            <select className="form-control ps-result-select" value="" onChange={(event) => {
-                                                const option = operationStatusOptions.find((item) => item.value === event.target.value);
-                                                if (option) onResult(order, option);
-                                                event.target.value = '';
-                                            }}>
-                                                <option value="">--Chọn--</option>
-                                                {operationStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                                            </select>
-                                        ) : <b>{order.operationResult || order.closingStatusLabel}</b>}
-                                        {order.operationResult && <div className="small-tip ps-result-current">{order.operationResult}</div>}
+                                        <div className="ps-result-cell-inner">
+                                            <div className="ps-result-icon-row">
+                                                <button type="button" className="btn-icon ps-cell-action" onClick={() => onHistory(order)} title="Lịch sử tác nghiệp"><i className="fa fa-history" /></button>
+                                            </div>
+                                            {order.canChangeStatus ? (
+                                                <select className="form-control ps-result-select" value="" onChange={(event) => {
+                                                    const option = operationStatusOptions.find((item) => item.value === event.target.value);
+                                                    if (option) onResult(order, option);
+                                                    event.target.value = '';
+                                                }}>
+                                                    <option value="">--Chọn--</option>
+                                                    {operationStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                                                </select>
+                                            ) : <b>{order.operationResult || order.closingStatusLabel}</b>}
+                                            {order.operationResult && <div className="small-tip ps-result-current">{order.operationResult}</div>}
+                                        </div>
                                     </td>
                                     <td className="text-center ps-next-cell">
                                         <button type="button" className="btn-icon ps-cell-action" onClick={() => onDesiredDate(order)} title="Cập nhật tác nghiệp tiếp"><i className="fa fa-undo" /></button>

@@ -181,3 +181,92 @@ html body.pushsale-app-body .ps-sale-workspace-page button.tao-don-fixed .text {
     line-height: 1.1;
     margin-top: 2px;
 }
+
+/* Compact table: fit viewport, center cells */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-table-wrap {
+    overflow-x: auto !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table {
+    min-width: 0 !important;
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > thead > tr > th,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > tbody > tr > td {
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-check { width: 36px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-code { width: 88px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-source { width: 110px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-sale { width: 120px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-customer { width: 140px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-message { width: 160px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-needed { width: 150px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-result { width: 140px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-next { width: 90px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-time { width: 72px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-products { width: 170px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-money { width: 120px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-deposit { width: 72px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-delivery { width: 120px; }
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-note-toolbar {
+    align-items: center;
+    display: flex !important;
+    justify-content: space-between !important;
+    margin: 2px 0 2px !important;
+    min-height: 18px;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-note-toolbar .btn-icon {
+    float: none !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-cell-inner {
+    position: relative;
+    padding-top: 2px;
+    text-align: center;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-cell-inner .ps-sale-delete {
+    position: absolute !important;
+    right: 0;
+    top: 0;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-result-cell-inner {
+    text-align: center;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-result-icon-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 4px;
+    min-height: 18px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-result-select {
+    height: 30px !important;
+    margin: 0 auto;
+    max-width: 100%;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-status-tabs,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-tabs,
+html body.pushsale-app-body .ps-sale-workspace-page .box-body.ps-sale-tabs-wrap {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page button.tao-don-fixed,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-create-order-fab {
+    border-radius: 50% !important;
+    height: 64px !important;
+    width: 64px !important;
+}
