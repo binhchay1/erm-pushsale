@@ -35,8 +35,37 @@ class LandingProductLabelTest extends TestCase
         ]);
 
         $this->assertSame([], $normalized['items']);
-        $this->assertStringContainsString('URL landing', (string) $normalized['product_interest']);
-        $this->assertStringNotContainsString('https://', (string) $normalized['product_interest']);
+        $this->assertNull($normalized['product_interest']);
+    }
+
+    public function test_driver_parses_form_item_array_as_upsell_text(): void
+    {
+        $normalized = (new LandingFormDriver)->normalize([
+            'name' => 'Nguyenanhhuy',
+            'phone' => '0944767989',
+            'utm_source' => '2107_NH_8443_2',
+            'link' => 'https://www.shophalinh.click/decalhoasen?utm_source=2107_NH_8443_2',
+            'form_item[2]' => ['Mua 1 Tấm 169K + 30K Ship'],
+        ]);
+
+        $this->assertSame('Nguyenanhhuy', $normalized['customer_name']);
+        $this->assertCount(1, $normalized['items']);
+        $this->assertSame('Mua 1 Tấm 169K + 30K Ship', $normalized['items'][0]['product_name']);
+        $this->assertSame('combo', $normalized['items'][0]['item_type']);
+        $this->assertSame(169000, $normalized['items'][0]['unit_price']);
+    }
+
+    public function test_driver_does_not_scrape_bare_digits_as_price(): void
+    {
+        $normalized = (new LandingFormDriver)->normalize([
+            'name' => 'Huynh Van Thanh',
+            'phone' => '0918253158',
+            'products' => 'Goi dac biet ma 1785354232768',
+        ]);
+
+        $this->assertCount(1, $normalized['items']);
+        $this->assertSame(0, $normalized['items'][0]['unit_price']);
+        $this->assertTrue($normalized['items'][0]['meta']['text_only']);
     }
 
     public function test_driver_still_parses_real_product_labels(): void

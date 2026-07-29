@@ -146,7 +146,7 @@ export default function SalesDataReport({
                     )}
                     advanced={(
                         <div className="ps-sales-leader-advanced ps-adv-filter-panel">
-                            <div className="ps-adv-filter-row">
+                            <div className="ps-adv-filter-row" style={{ '--ps-adv-cols': 6 }}>
                                 <PushsaleSelect value={draft.sale_leader_id} options={filterOptions.saleLeaders ?? []} placeholder="--Trưởng nhóm--" onChange={(value) => set('sale_leader_id', value)} />
                                 <PushsaleSelect value={draft.sale_team_id} options={filterOptions.saleTeams ?? filterOptions.teams ?? []} placeholder="--Chọn nhóm--" onChange={(value) => set('sale_team_id', value)} />
                                 <PushsaleSelect value={draft.sale_id} options={filterOptions.sales ?? filterOptions.salesUsers ?? []} placeholder="-- Chọn sale --" onChange={(value) => set('sale_id', value)} />

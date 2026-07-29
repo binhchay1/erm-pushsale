@@ -682,7 +682,8 @@ html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-
 html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row,
 html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row {
     display: grid !important;
-    grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(120px, 1fr)) auto !important;
+    /* Cùng 5 cột đều nhau — hàng 1 và hàng 2 thẳng hàng */
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
     grid-column: 1 / -1 !important;
     gap: 8px 10px !important;
     align-items: center !important;
@@ -697,8 +698,13 @@ html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row {
 html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-row:last-child,
 html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row:last-child,
 html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row:last-child {
-    /* Same left edge as row 1 — five equal fields */
-    grid-template-columns: repeat(5, minmax(120px, 1fr)) !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row > * {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row > .ps-date-filter,

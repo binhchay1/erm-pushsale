@@ -10,14 +10,14 @@
         .meta { font-size: 9pt; color: #475569; margin-bottom: 16px; line-height: 1.6; }
         table { border-collapse: collapse; width: 100%; }
         th {
-            background: #f1f5f9;
-            color: #334155;
+            background: #3c8dbc;
+            color: #fff;
             font-weight: bold;
             font-size: 9pt;
-            text-transform: uppercase;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #2e6f99;
             padding: 8px 10px;
-            text-align: left;
+            text-align: center;
+            vertical-align: middle;
         }
         th.num { text-align: right; }
         td {
@@ -26,8 +26,9 @@
             font-size: 10pt;
         }
         td.num { text-align: right; }
+        td.center { text-align: center; }
         tr:nth-child(even) td { background: #f8fafc; }
-        tr.total td { background: #e2e8f0; font-weight: bold; }
+        tr.total td { background: #fff8e8; font-weight: bold; }
         .pct-good { background: #d1fae5; color: #047857; }
         .pct-warn { background: #fef3c7; color: #b45309; }
         .pct-bad { background: #ffe4e6; color: #be123c; }
@@ -50,11 +51,27 @@
     </div>
     <table>
         <thead>
-            <tr>
-                @foreach($columns as $col)
-                    <th class="{{ ($col['format'] ?? 'text') !== 'text' ? 'num' : '' }}">{{ $col['label'] }}</th>
+            @php
+                $headerRows = $meta['header_rows'] ?? null;
+            @endphp
+            @if(is_array($headerRows) && count($headerRows) > 0)
+                @foreach($headerRows as $headerRow)
+                    <tr>
+                        @foreach($headerRow as $cell)
+                            <th
+                                @if(!empty($cell['colspan'])) colspan="{{ (int) $cell['colspan'] }}" @endif
+                                @if(!empty($cell['rowspan'])) rowspan="{{ (int) $cell['rowspan'] }}" @endif
+                            >{{ $cell['label'] ?? '' }}</th>
+                        @endforeach
+                    </tr>
                 @endforeach
-            </tr>
+            @else
+                <tr>
+                    @foreach($columns as $col)
+                        <th class="{{ ($col['format'] ?? 'text') !== 'text' ? 'num' : '' }}">{{ $col['label'] }}</th>
+                    @endforeach
+                </tr>
+            @endif
         </thead>
         <tbody>
             @foreach($rows as $row)
@@ -63,7 +80,7 @@
                         @php
                             $val = $row[$col['key']] ?? '';
                             $fmt = $col['format'] ?? 'text';
-                            $cls = ($fmt !== 'text') ? 'num' : '';
+                            $cls = ($fmt !== 'text') ? 'num' : 'center';
                             if ($fmt === 'currency') $cls .= ' currency';
                             if ($fmt === 'percent' && is_numeric($val)) {
                                 $v = (float) $val;

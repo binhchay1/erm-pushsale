@@ -301,6 +301,52 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-deposit { width: 64px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-delivery { width: 118px; }
 
+/* Icon rail: cùng một hàng ngang phía trên dữ liệu (mẫu Pushsale text-right). */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-icon-rail {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+    min-height: 22px !important;
+    margin: 0 0 4px !important;
+    padding: 0 !important;
+    width: 100% !important;
+    position: relative !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-icon-rail .btn-icon,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-icon-rail .ps-cell-action,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-icon-rail .ps-sale-delete {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    float: none !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-icon-rail-spacer {
+    display: inline-block !important;
+    width: 18px !important;
+    height: 18px !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-note-toolbar.ps-icon-rail {
+    justify-content: space-between !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-note-tool-left {
+    margin-right: auto !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-order-products-upsell-rule {
+    color: #98abc0 !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+    line-height: 1 !important;
+    margin: 4px 0 2px !important;
+    text-align: center !important;
+}
+
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-name-block {
     white-space: nowrap !important;
 }

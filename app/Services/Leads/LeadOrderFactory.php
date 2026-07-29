@@ -96,25 +96,12 @@ class LeadOrderFactory
             'contact_count' => 1,
         ]);
 
-        // Có combo/gói khách chọn trên landing → dùng đúng những dòng đó (tránh nhân đôi với SP mặc định).
+        // Chỉ tạo dòng hàng từ payload (form_item / combo / mapping).
+        // Không gắn SP mặc định chiến dịch khi landing không gửi sản phẩm — tránh giá catalog ảo.
         if ($comboItems !== []) {
             foreach ($comboItems as $row) {
                 $order->items()->create($row);
             }
-        } elseif ($source->product_id) {
-            $product = Product::query()->find($source->product_id);
-            $qty = max(1, (int) ($normalized['quantity'] ?? 1));
-            $interest = LandingProductLabel::sanitizeName((string) ($normalized['product_interest'] ?? ''))
-                ?? 'Sản phẩm';
-            $order->items()->create([
-                'product_id' => $product?->id,
-                'product_name' => $product?->name ?? $interest,
-                'item_type' => 'product',
-                'origin' => $normalized['item_origin'] ?? 'landing',
-                'quantity' => $qty,
-                'unit_price' => $product?->unit_price ?? 0,
-                'cost_price' => $this->productCost($product),
-            ]);
         }
 
         return $this->syncTotals($order->fresh(['items']));

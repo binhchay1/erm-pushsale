@@ -223,7 +223,160 @@ class LeadIngestionService
             ? $packetExternalId
             : (string) ($normalized['external_id'] ?? '');
 
+        // Cùng SĐT + utm_source:
+        // - Đang trong cửa sổ chờ upsale + URL khác trang chính → gộp upsale
+        // - Cùng URL landing chính → trùng số, đóng cửa sổ 15p
+        // - Hết cửa sổ → trùng số
+        if ($existing = $this->findOrderByPhoneAndUtm($phone, $normalized['utm_source'] ?? null, $campaign)) {
+            if ($this->landingUpsell->canMerge($existing)) {
+                if ($this->isSamePrimaryLandingUrl($existing, $rawPayload, $normalized)) {
+                    $this->landingUpsell->releaseHold($existing, saleLocked: true);
+                    $existing->forceFill(['is_duplicate_phone' => true])->save();
+                } else {
+                    $normalized['items'] = $this->forceUpsellItems($normalized['items'] ?? []);
+                    if ($merged = $this->mergePacketIntoOrder(
+                        $driver,
+                        $existing,
+                        $campaign,
+                        $normalized,
+                        $rawPayload,
+                        $packetExternalId,
+                        LeadPacketType::Upsell,
+                        $session,
+                    )) {
+                        return $merged;
+                    }
+                }
+            }
+        }
+
         return $this->ingestNormalized($driver, $rawPayload, $normalized, $campaign, $session);
+    }
+
+    /**
+     * So khớp URL/landing source của gói tin với nguồn chính đã tạo đơn.
+     * Cùng URL trang chính trong cửa sổ chờ → trùng số (không gộp upsale).
+     *
+     * @param  array<string, mixed>  $rawPayload
+     * @param  array<string, mixed>  $normalized
+     */
+    protected function isSamePrimaryLandingUrl(Order $order, array $rawPayload, array $normalized): bool
+    {
+        $orderSourceId = $order->landing_connection_source_id
+            ? (int) $order->landing_connection_source_id
+            : null;
+        $incomingSourceId = filled($normalized['landing_connection_source_id'] ?? null)
+            ? (int) $normalized['landing_connection_source_id']
+            : (filled($rawPayload['landing_connection_source_id'] ?? null)
+                ? (int) $rawPayload['landing_connection_source_id']
+                : null);
+
+        if ($orderSourceId && $incomingSourceId && $orderSourceId === $incomingSourceId) {
+            return true;
+        }
+
+        $primaryUrl = $this->normalizeLandingUrl(
+            $order->landingConnectionSource?->source_url
+                ?? $order->landingConnection?->sources
+                    ?->firstWhere('source_type', 'main')
+                    ?->source_url
+        );
+
+        $incomingUrl = $this->normalizeLandingUrl(
+            $rawPayload['url_page']
+                ?? $rawPayload['link']
+                ?? $rawPayload['landing_url']
+                ?? $rawPayload['page_url']
+                ?? null
+        );
+
+        if ($primaryUrl && $incomingUrl && hash_equals($primaryUrl, $incomingUrl)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function normalizeLandingUrl(mixed $url): ?string
+    {
+        if (! is_scalar($url)) {
+            return null;
+        }
+
+        $raw = trim((string) $url);
+        if ($raw === '') {
+            return null;
+        }
+
+        $parts = parse_url($raw);
+        if (! is_array($parts) || blank($parts['host'] ?? null)) {
+            $hostPath = preg_replace('#^https?://#i', '', $raw) ?? $raw;
+            $hostPath = explode('?', $hostPath, 2)[0];
+
+            return strtolower(rtrim($hostPath, '/'));
+        }
+
+        $host = strtolower((string) $parts['host']);
+        $path = rtrim((string) ($parts['path'] ?? ''), '/');
+
+        return $host.($path !== '' ? $path : '');
+    }
+
+    /**
+     * @param  mixed  $items
+     * @return list<array<string, mixed>>
+     */
+    protected function forceUpsellItems(mixed $items): array
+    {
+        if (! is_array($items)) {
+            return [];
+        }
+
+        $forced = [];
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $item['item_type'] = 'upsell';
+            $item['type'] = 'upsell';
+            $item['origin'] = $item['origin'] ?? 'upsell';
+            $forced[] = $item;
+        }
+
+        return $forced;
+    }
+
+    /**
+     * Đơn gần đây cùng SĐT + cùng utm_source (đúng ý: một khách / một mã ads).
+     */
+    protected function findOrderByPhoneAndUtm(?string $phone, ?string $utmSource, MarketingSource $campaign): ?Order
+    {
+        if (! $phone || ! filled($utmSource)) {
+            return null;
+        }
+
+        $windowDays = (int) config('saleops.lead_routing.duplicate_window_days', 30);
+
+        $orderId = LeadIngestion::query()
+            ->where('customer_phone', $phone)
+            ->where('utm_source', $utmSource)
+            ->where('marketing_source_id', $campaign->id)
+            ->whereNotNull('order_id')
+            ->where('created_at', '>=', now()->subDays($windowDays))
+            ->latest('id')
+            ->value('order_id');
+
+        if (! $orderId) {
+            $orderId = Order::query()
+                ->where('customer_phone', $phone)
+                ->where('marketing_source_id', $campaign->id)
+                ->where('created_at', '>=', now()->subDays($windowDays))
+                ->whereHas('leadPackets', fn ($q) => $q->where('utm_source', $utmSource))
+                ->latest('id')
+                ->value('id');
+        }
+
+        return $orderId ? Order::query()->find($orderId) : null;
     }
 
     /**
@@ -556,7 +709,17 @@ class LeadIngestionService
             }
 
             if ($items !== [] || $extraDiscount > 0) {
-                $this->orderFactory->appendItems($order, $items, $extraDiscount, 'upsell');
+                $upsellItems = array_map(static function ($item) {
+                    if (! is_array($item)) {
+                        return $item;
+                    }
+                    $item['item_type'] = 'upsell';
+                    $item['type'] = 'upsell';
+                    $item['origin'] = $item['origin'] ?? 'upsell';
+
+                    return $item;
+                }, $items);
+                $this->orderFactory->appendItems($order, $upsellItems, $extraDiscount, 'upsell');
             }
 
             $parent = $this->findPrimaryIngestionForOrder($order);
@@ -818,8 +981,16 @@ class LeadIngestionService
         );
 
         if ($packet->wasRecentlyCreated) {
-            FinalizeLandingSupplementPacketJob::dispatch($packet->id, $campaign->company_id)
-                ->delay(now()->addSeconds(5));
+            try {
+                $pending = FinalizeLandingSupplementPacketJob::dispatch($packet->id, $campaign->company_id)
+                    ->delay(now()->addSeconds(5));
+                unset($pending);
+            } catch (\Throwable $e) {
+                Log::warning('FinalizeLandingSupplementPacketJob dispatch failed (lead intake continues)', [
+                    'packet_id' => $packet->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         return $packet;
@@ -1164,7 +1335,7 @@ class LeadIngestionService
             ->latest('id')
             ->first();
 
-        $holdOpen = $this->landingUpsell->startHold($order, $baseLead->created_at);
+        $holdOpen = $this->landingUpsell->startHold($order, $order->created_at ?? now());
         $order->refresh();
         $driver = IntegrationDriverFactory::make('landing');
         $margin = 15;
@@ -1233,8 +1404,17 @@ class LeadIngestionService
         }
 
         if ($holdOpen && $order->landing_upsell_hold_until) {
-            FinalizeLandingLeadJob::dispatch($baseLead->id, $campaign->company_id)
-                ->delay($order->landing_upsell_hold_until);
+            try {
+                $pending = FinalizeLandingLeadJob::dispatch($baseLead->id, $campaign->company_id)
+                    ->delay($order->landing_upsell_hold_until);
+                // Ép push ngay trong try — tránh __destruct ném Redis error ra ngoài luồng ingest.
+                unset($pending);
+            } catch (\Throwable $e) {
+                Log::warning('FinalizeLandingLeadJob dispatch failed (lead intake continues)', [
+                    'lead_id' => $baseLead->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 
@@ -1517,11 +1697,6 @@ class LeadIngestionService
         // hết 90 giây; tuyệt đối không trì hoãn tạo đơn hay phân sale.
         $hold = $campaign !== null && ! $duplicateOrder;
 
-        $willAutoAssign = ! $forcePending
-            && $hold
-            && ($campaign === null || $campaign->is_approved)
-            && $this->allocationResolver->shouldAutoAssign($campaign);
-
         $status = $duplicateOrder
             ? LeadIngestionStatus::Duplicate
             : LeadIngestionStatus::Pending;
@@ -1626,28 +1801,24 @@ class LeadIngestionService
             return $ingestion;
         }
 
-        // Chia số ngay (auto) hoặc vào pool (manual); job chỉ kết thúc cửa sổ upsale trên đơn.
+        // Chia số ngay (auto) hoặc tạo đơn chưa gán (manual/pool). Không nuốt packet.
         if ($hold) {
             if ($session) {
                 $session->forceFill(['lead_ingestion_id' => $ingestion->id, 'last_activity_at' => now()])->save();
             }
 
-            if ($willAutoAssign || $forceSale !== null) {
-                $ingestion = $this->allocateFromNormalized($ingestion, $normalized, $campaign, $session, $forceSale);
+            $ingestion = $this->allocateFromNormalized($ingestion, $normalized, $campaign, $session, $forceSale);
 
-                if ($ingestion->order_id) {
-                    $order = Order::query()->find($ingestion->order_id);
-                    if ($order) {
-                        $this->reconcileLandingOrder(
-                            $ingestion->fresh(),
-                            $order,
-                            $campaign,
-                            $session,
-                        );
-                    }
+            if ($ingestion->order_id) {
+                $order = Order::query()->find($ingestion->order_id);
+                if ($order) {
+                    $this->reconcileLandingOrder(
+                        $ingestion->fresh(),
+                        $order,
+                        $campaign,
+                        $session,
+                    );
                 }
-            } else {
-                $this->broadcastSafe(new LeadIngested($ingestion), new LeadPoolChanged);
             }
 
             $this->pingMarketingDashboard($campaign);
@@ -1700,9 +1871,9 @@ class LeadIngestionService
             $companyId,
         );
 
-        if ($saleUser && $requestedSale && (int) $requestedSale->id !== (int) $saleUser->id) {
+        if ($saleUser && $candidateSale && (int) $candidateSale->id !== (int) $saleUser->id) {
             $payload = is_array($ingestion->payload) ? $ingestion->payload : [];
-            $payload['phone_lock_requested_sale_user_id'] = $requestedSale->id;
+            $payload['phone_lock_requested_sale_user_id'] = $candidateSale->id;
             $payload['phone_lock_owner_user_id'] = $saleUser->id;
             $ingestion->forceFill([
                 'payload' => $payload,
@@ -1712,13 +1883,33 @@ class LeadIngestionService
         }
 
         if (! $saleUser) {
-            if ($ingestion->status !== LeadIngestionStatus::Pending) {
-                $ingestion->update(['status' => LeadIngestionStatus::Pending]);
-            }
-            $this->broadcastSafe(new LeadIngested($ingestion), new LeadPoolChanged);
-            $this->pingMarketingDashboard($campaign);
+            // Landing/webhook vẫn phải tạo đơn để sale/admin thấy trên tác nghiệp.
+            // Không có sale khả dụng → đơn chưa gán (pool), không nuốt packet.
+            return DB::transaction(function () use ($ingestion, $normalized, $campaign, $session) {
+                $order = $this->orderFactory->createFromLead($ingestion, $normalized, null);
 
-            return $ingestion;
+                $ingestion->update([
+                    'status' => LeadIngestionStatus::Processed,
+                    'order_id' => $order->id,
+                    'processed_at' => now(),
+                ]);
+
+                if ($session) {
+                    $session->forceFill([
+                        'order_id' => $order->id,
+                        'lead_ingestion_id' => $ingestion->id,
+                        'last_activity_at' => now(),
+                    ])->save();
+                }
+
+                $this->broadcastSafe(
+                    new LeadIngested($ingestion, $order),
+                    new LeadPoolChanged,
+                );
+                $this->pingMarketingDashboard($campaign);
+
+                return $ingestion;
+            });
         }
 
         return DB::transaction(function () use ($ingestion, $normalized, $saleUser, $campaign, $session) {

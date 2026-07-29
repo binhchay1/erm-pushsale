@@ -298,7 +298,7 @@ class LandingConnectionFlowTest extends TestCase
         $this->assertSame(1, Order::query()->where('customer_phone', '0909000911')->count());
     }
 
-    public function test_unmapped_landing_payload_is_kept_for_review_with_full_field_mapping_report(): void
+    public function test_unmapped_landing_payload_still_creates_order_with_soft_product_text(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
         $marketer = User::factory()->create(['role' => UserRole::Marketing]);
@@ -324,23 +324,24 @@ class LandingConnectionFlowTest extends TestCase
             'submission_id' => 'unmapped-main-001',
             'name' => 'Khách chưa map',
             'phone' => '0909000999',
+            'utm_source' => 'ADS_UNMAPPED_01',
+            'form_item[2]' => ['Mua 1 Tấm 169K + 30K Ship'],
             'fields' => [
-                ['name' => 'chon_combo', 'value' => 'Combo lạ chưa cấu hình 299k'],
                 ['name' => 'dia_chi', 'value' => 'Hà Nội'],
             ],
-        ])->assertAccepted()
-            ->assertJsonPath('ok', true)
-            ->assertJsonPath('mapping_review', true)
-            ->assertJsonPath('requires_review', true);
+        ])->assertCreated()
+            ->assertJsonPath('ok', true);
 
         $lead = LeadIngestion::query()->where('customer_phone', '0909000999')->firstOrFail();
-        $payload = $lead->payload;
-        $this->assertSame(LeadIngestionStatus::NeedsReview, $lead->status);
-        $this->assertTrue($lead->requires_review);
+        $this->assertSame('Khách chưa map', $lead->customer_name);
+        $this->assertNotNull($lead->order_id);
         $this->assertSame($connection->id, (int) $lead->landing_connection_id);
-        $this->assertSame('Combo lạ chưa cấu hình 299k', $payload['_landing_webhook_mapping']['product_candidates'][0]['value'] ?? null);
-        $this->assertNotEmpty($payload['_landing_webhook_mapping']['unmapped_product_fields'] ?? []);
-        $this->assertDatabaseCount('orders', 0);
+
+        $order = Order::query()->with('items')->findOrFail($lead->order_id);
+        $this->assertSame('Khách chưa map', $order->customer_name);
+        $this->assertCount(1, $order->items);
+        $this->assertSame('Mua 1 Tấm 169K + 30K Ship', $order->items->first()->product_name);
+        $this->assertSame(169_000, (int) $order->items->first()->unit_price);
     }
 
     public function test_thank_you_source_is_registry_only_and_cannot_receive_form_data(): void

@@ -44,6 +44,11 @@ final class LandingProductLabel
             return null;
         }
 
+        // Monitor hints / discarded URL placeholders must never become order lines.
+        if (preg_match('/^URL landing\b/iu', $label) === 1) {
+            return null;
+        }
+
         // Extremely long labels are almost always tracking dumps, not product names.
         if (mb_strlen($label) > 180) {
             return null;

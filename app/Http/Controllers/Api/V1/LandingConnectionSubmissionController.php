@@ -83,33 +83,37 @@ class LandingConnectionSubmissionController extends Controller
                 $rawNormalized = $driver->normalize($request->all());
                 $phone = $this->normalizePhone($rawNormalized['customer_phone'] ?? null);
                 $flowToken = $this->resolveFlowToken($request, $connection, $source, $phone);
-                $payload = $this->mapper->map($connection, $source, $request->all(), $flowToken);
+
+                // Trang cảm ơn / upsell thường chỉ gửi ps_flow — lấy SĐT (và tên nếu thiếu) từ session.
+                $input = $request->all();
+                $flowSession = LandingSession::query()->where('session_key', $flowToken)->first();
+                if ($phone === null && $flowSession?->customer_phone) {
+                    $phone = $this->normalizePhone($flowSession->customer_phone);
+                }
+                if ($phone !== null) {
+                    $input['phone'] = $input['phone'] ?? $phone;
+                    $input['customer_phone'] = $input['customer_phone'] ?? $phone;
+                }
+                if (blank($input['name'] ?? null) && blank($input['customer_name'] ?? null) && $flowSession?->order_id) {
+                    $sessionOrderName = Order::query()->whereKey($flowSession->order_id)->value('customer_name');
+                    if (filled($sessionOrderName)) {
+                        $input['name'] = $sessionOrderName;
+                    }
+                }
+
+                $payload = $this->mapper->map($connection, $source, $input, $flowToken);
                 $normalized = $driver->normalize($payload);
 
                 if ($this->normalizePhone($normalized['customer_phone'] ?? null) === null) {
                     throw new HttpException(422, 'Vui lòng gửi số điện thoại hợp lệ của khách hàng.');
                 }
 
-                if (! $connection->marketingSource || empty($normalized['items']) || ! is_array($normalized['items'])) {
-                    $lead = $this->recordMappingReviewPacket(
-                        $driver->platform(),
-                        $connection,
-                        $source,
-                        $payload,
-                        $normalized,
-                        $flowToken,
-                    );
-
-                    return [
-                        'flow_token' => $flowToken,
-                        'lead_id' => $lead->id,
-                        'order_id' => $lead->order_id ?: $lead->related_order_id,
-                        'status' => $lead->status instanceof LeadIngestionStatus ? $lead->status->value : (string) $lead->status,
-                        'requires_review' => true,
-                        'mapping_review' => true,
-                    ];
+                if (! $connection->marketingSource) {
+                    throw new HttpException(422, 'Landing connection chưa gắn chiến dịch marketing.');
                 }
 
+                // Cho phép đơn không có SP catalog / chỉ có form_item text / trống cột SP.
+                // Không chặn mapping_review chỉ vì thiếu configured items.
                 $lead = $source->isSupplemental()
                     ? $this->ingestion->ingestUpsellForCampaign($driver, $connection->marketingSource, $payload)
                     : $this->ingestion->ingestForCampaign($driver, $connection->marketingSource, $payload);

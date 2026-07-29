@@ -79,14 +79,14 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
         });
     };
 
-    // Original Pushsale markup: icon row ABOVE textarea (not side ears).
+    // Pushsale: nhãn TN cần → hàng icon (chat trái / save phải) → textarea.
     return (
         <div className={`ps-operation-note-editor area2${focused ? ' is-focused' : ''}`}>
             <span className="fb span-col ttgh7 ps-operation-stage-label">{order.currentOperation || t('operations.sale_workspace.default_stage')}</span>
-            <div className="ps-note-toolbar">
+            <div className="ps-icon-rail ps-note-toolbar">
                 <button
                     type="button"
-                    className="btn-icon aoh ps-note-tool"
+                    className="btn-icon aoh ps-note-tool ps-note-tool-left"
                     onClick={() => onMessages(order)}
                     title={t('operations.sale_workspace.internal_message')}
                 >
@@ -215,12 +215,12 @@ export function SaleWorkspaceTable({
                                         <div className="ps-row-number">{Number(meta?.from ?? 1) + index}</div>
                                     </td>
                                     <td className="text-center ps-code-cell">
-                                        <div className="ps-order-code-stack">
-                                            {order.orderCode ? (
-                                                <button type="button" className="ps-order-code-link" onClick={() => onDataViewHistory(order)}>{order.orderCode}</button>
-                                            ) : <span className="ps-order-code-empty" title="Mã đơn chỉ sinh sau khi chốt đơn">&nbsp;</span>}
-                                            <button type="button" className="btn-icon ps-cell-action" onClick={() => onDataViewHistory(order)} title="Lịch sử xem thông tin số"><i className="fa fa-history" /></button>
+                                        <div className="ps-icon-rail">
+                                            <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onDataViewHistory(order)} title="Lịch sử xem thông tin số"><i className="fa fa-history" /></button>
                                         </div>
+                                        {order.orderCode ? (
+                                            <button type="button" className="ps-order-code-link" onClick={() => onDataViewHistory(order)}>{order.orderCode}</button>
+                                        ) : <span className="ps-order-code-empty" title="Mã đơn chỉ sinh sau khi chốt đơn">&nbsp;</span>}
                                     </td>
                                     <td className="text-center">
                                         {externalHref(order.sourceUrl) ? (
@@ -233,21 +233,21 @@ export function SaleWorkspaceTable({
                                         <span className="small-tip">({dateTime(order.dataArrivedAt)})</span>
                                     </td>
                                     <td className="text-center ps-sale-cell area5">
-                                        <div className="ps-sale-cell-inner">
+                                        <div className="ps-icon-rail">
                                             {order.canDeleteData ? (
-                                                <button type="button" className="btn-icon aoh ps-sale-delete" onClick={() => deleteData(order)} title="Xóa data" aria-label="Xóa data">
+                                                <button type="button" className="btn-icon aoh ps-cell-action ps-sale-delete" onClick={() => deleteData(order)} title="Xóa data" aria-label="Xóa data">
                                                     <i className="fa fa-trash" />
                                                 </button>
-                                            ) : null}
-                                            <div className="ps-sale-name-block">
-                                                <b>{order.saleName}</b>
-                                                {order.saleUsername ? <span className="small-tip">({order.saleUsername})</span> : null}
-                                            </div>
-                                            <div className="small-tip">({dateTime(order.assignedAt)})</div>
+                                            ) : <span className="ps-icon-rail-spacer" aria-hidden="true" />}
                                         </div>
+                                        <div className="ps-sale-name-block">
+                                            <b>{order.saleName}</b>
+                                            {order.saleUsername ? <span className="small-tip">({order.saleUsername})</span> : null}
+                                        </div>
+                                        <div className="small-tip">({dateTime(order.assignedAt)})</div>
                                     </td>
                                     <td className="ps-customer-cell area1 ps-contact-name-phone" title={`${order.id} | ${order.sourceType || ''}`}>
-                                        <div className="text-right ps-customer-edit-wrap">
+                                        <div className="ps-icon-rail">
                                             <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onEdit(order, false)} title="Cập nhật đơn"><i className="fa fa-edit" /></button>
                                         </div>
                                         <button type="button" className="ps-customer-name-link" onClick={() => onPurchaseHistory(order)}>{order.customerName || '—'}</button>
@@ -275,8 +275,8 @@ export function SaleWorkspaceTable({
                                     <td><OperationNoteEditor order={order} actionBaseUrl={actionBaseUrl} onMessages={onMessages} /></td>
                                     <td className="ps-result-cell">
                                         <div className="ps-result-cell-inner">
-                                            <div className="ps-result-icon-row">
-                                                <button type="button" className="btn-icon ps-cell-action" onClick={() => onHistory(order)} title="Lịch sử tác nghiệp"><i className="fa fa-history" /></button>
+                                            <div className="ps-icon-rail">
+                                                <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onHistory(order)} title="Lịch sử tác nghiệp"><i className="fa fa-history" /></button>
                                             </div>
                                             {order.canChangeStatus ? (
                                                 <select className="form-control ps-result-select" value="" onChange={(event) => {
@@ -293,21 +293,23 @@ export function SaleWorkspaceTable({
                                         </div>
                                     </td>
                                     <td className="text-center ps-next-cell">
-                                        <button type="button" className="btn-icon ps-cell-action" onClick={() => onDesiredDate(order)} title="Cập nhật tác nghiệp tiếp"><i className="fa fa-undo" /></button>
+                                        <div className="ps-icon-rail">
+                                            <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onDesiredDate(order)} title="Cập nhật tác nghiệp tiếp"><i className="fa fa-undo" /></button>
+                                        </div>
                                         {order.nextOperationAt ? <span className="small-tip">{dateTime(order.nextOperationAt)}</span> : '—'}
                                     </td>
                                     <td className="text-center"><TimeRemaining order={order} /></td>
                                     <td className="ps-order-products-cell">
                                         <OrderProductsBreakdown items={order.products ?? []} order={order} />
                                     </td>
-                                    <td className="text-right ps-money-cell">
-                                        <OrderMoneyBreakdown row={order} />
+                                    <td className="text-right ps-money-cell ps-order-money-cell">
+                                        <OrderMoneyBreakdown row={order} items={order.products ?? []} />
                                     </td>
                                     <td className="text-right">{money(order.deposit)}</td>
                                     <td className={`text-center ttgh ttgh-${order.deliveryStatusValue || 'none'}`}>
-                                        <div className="ps-delivery-actions">
-                                            {order.closedAt ? <button type="button" className="btn-icon" onClick={() => onHistory(order, 'accounting')} title="Lịch sử kế toán"><i className="fa fa-history" /></button> : null}
-                                            <button type="button" className="btn-icon" onClick={() => onDesiredDate(order)} title="Cập nhật ngày muốn nhận hàng"><i className="fa fa-calendar" /></button>
+                                        <div className="ps-icon-rail">
+                                            {order.closedAt ? <button type="button" className="btn-icon aoh" onClick={() => onHistory(order, 'accounting')} title="Lịch sử kế toán"><i className="fa fa-history" /></button> : null}
+                                            <button type="button" className="btn-icon aoh" onClick={() => onDesiredDate(order)} title="Cập nhật ngày muốn nhận hàng"><i className="fa fa-calendar" /></button>
                                         </div>
                                         <b>{order.deliveryStatus || '—'}</b><br />
                                         {order.trackingNumber && <span>{order.trackingNumber}</span>}

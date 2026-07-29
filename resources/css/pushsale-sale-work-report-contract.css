@@ -121,7 +121,8 @@ html body.pushsale-app-body .ps-sale-work-advanced {
 
 html body.pushsale-app-body .ps-sale-work-advanced-row {
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 6), minmax(140px, 200px)) !important;
+    justify-content: start !important;
     gap: 10px !important;
     align-items: center !important;
     width: 100% !important;
@@ -132,7 +133,7 @@ html body.pushsale-app-body .ps-sale-work-advanced-row {
 html body.pushsale-app-body .ps-sale-work-advanced-row > * {
     width: 100% !important;
     min-width: 0 !important;
-    max-width: 100% !important;
+    max-width: 200px !important;
     margin: 0 !important;
 }
 
@@ -170,6 +171,18 @@ html body.pushsale-app-body .ps-sale-work-table > thead > tr > th {
     white-space: normal !important;
     word-break: break-word !important;
     border-color: #2e6f99 !important;
+    position: sticky;
+    z-index: 3;
+}
+
+html body.pushsale-app-body .ps-sale-work-table > thead > tr:first-child > th {
+    top: 0;
+    z-index: 5;
+}
+
+html body.pushsale-app-body .ps-sale-work-table > thead > tr:nth-child(2) > th {
+    top: 36px;
+    z-index: 4;
 }
 
 html body.pushsale-app-body .ps-sale-work-table > tbody > tr > td {

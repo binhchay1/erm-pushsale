@@ -53,6 +53,9 @@ class LandingConnectionPayloadMapper
         $payload['submission_id'] = 'lc_'.substr(hash('sha256', $connection->id.'|'.$source->id.'|'.$rawSubmission), 0, 40);
 
         $items = $this->configuredItems($connection, $source, $input);
+        if ($items === []) {
+            $items = $this->softFormItemLines($input, $source);
+        }
         if ($items !== []) {
             $payload['items'] = $items;
             $payload['products'] = collect($items)->pluck('product_name')->implode(', ');
@@ -61,7 +64,11 @@ class LandingConnectionPayloadMapper
 
         $mappingReport = $this->mappingReport($connection, $source, $input, $items, $flowToken);
         $payload['_landing_webhook_mapping'] = $mappingReport;
-        if (blank($payload['product_interest'] ?? null) && $mappingReport['product_candidate_text'] !== '') {
+        // Chỉ gắn product_interest text thật — không dùng URL monitor hint (tránh thành dòng hàng).
+        if (blank($payload['product_interest'] ?? null)
+            && $mappingReport['product_candidate_text'] !== ''
+            && ! str_starts_with((string) $mappingReport['product_candidate_text'], 'URL landing')
+        ) {
             $payload['product_interest'] = $mappingReport['product_candidate_text'];
         }
 
@@ -160,12 +167,10 @@ class LandingConnectionPayloadMapper
             ->unique()
             ->implode(', ');
 
-        if ($candidateText === '' && $discardedUrlFields !== []) {
-            $candidateText = 'URL landing (chưa map SP): '.LandingProductLabel::urlMonitorHint((string) ($discardedUrlFields[0]['value'] ?? ''));
-        }
+        // Không gắn URL monitor hint vào product_candidate_text — chỉ audit discarded_url_fields.
 
         return [
-            'version' => 'v129',
+            'version' => 'v130',
             'connection_id' => $connection->id,
             'source_id' => $source->id,
             'source_type' => $source->source_type,
@@ -192,7 +197,18 @@ class LandingConnectionPayloadMapper
     private function flattenSubmittedFields(array $input): array
     {
         $fields = [];
-        $put = function (string $key, mixed $value, string $path) use (&$fields): void {
+        $put = function (string $key, mixed $value, string $path) use (&$fields, &$put): void {
+            if (is_array($value)) {
+                foreach ($value as $index => $entry) {
+                    if (is_scalar($entry) && trim((string) $entry) !== '') {
+                        $put($key, $entry, $path.'.'.$index);
+
+                        return;
+                    }
+                }
+
+                return;
+            }
             if (! is_scalar($value)) {
                 return;
             }
@@ -272,7 +288,7 @@ class LandingConnectionPayloadMapper
         if (preg_match('/(^|_)(message|note|ghi_chu|tin_nhan)($|_)/', $normalizedKey)) {
             return 'customer_note';
         }
-        if (preg_match('/(combo|package|goi|san_pham|product|mua_them|muathem|upsell|addon|add_on|sku|(^|_)sp($|_))/', $normalizedKey)) {
+        if (preg_match('/(combo|package|goi|san_pham|product|mua_them|muathem|upsell|addon|add_on|sku|form_item|(^|_)sp($|_))/', $normalizedKey)) {
             return 'product_candidate';
         }
         if (preg_match('/(combo|goi|mua them|upsell|san pham|\d+\s*k|\d+\s*vn)/i', $normalizedValue)) {
@@ -329,6 +345,68 @@ class LandingConnectionPayloadMapper
                 ],
             ];
         })->values()->all();
+    }
+
+    /**
+     * LadiPage hay gửi gói/upsell dạng form_item / form_item[2] / form_item12 (string hoặc array text).
+     * Không có giá catalog → dòng text-only (unit_price = 0), sale sửa tay sau.
+     *
+     * @param  array<string, mixed>  $input
+     * @return list<array<string, mixed>>
+     */
+    private function softFormItemLines(array $input, LandingConnectionSource $source): array
+    {
+        $lines = [];
+        $seen = [];
+
+        $push = function (string $label, string $fieldKey) use (&$lines, &$seen, $source): void {
+            $safe = LandingProductLabel::sanitizeName($label);
+            if ($safe === null || isset($seen[mb_strtolower($safe)])) {
+                return;
+            }
+            $seen[mb_strtolower($safe)] = true;
+
+            $price = 0;
+            if (preg_match('/([0-9][0-9.,]*)\s*(k|nghìn|nghin|ngàn|ngan|đ|vnđ|vnd|tr|triệu|trieu)\b/iu', $safe, $m)) {
+                $aroundOffset = mb_stripos($safe, $m[0]);
+                $around = $aroundOffset === false ? '' : mb_substr($safe, max(0, $aroundOffset - 8), mb_strlen($m[0]) + 16);
+                if (preg_match('/(ship|phí\s*vc|phi\s*vc|vận\s*chuyển|van\s*chuyen)/iu', $around) !== 1) {
+                    $price = \App\Support\MoneyParser::parse($m[1].$m[2]);
+                }
+            }
+
+            $lines[] = [
+                'product_id' => null,
+                'name' => $safe,
+                'product_name' => $safe,
+                'unit_price' => $price,
+                'price' => $price,
+                'quantity' => 1,
+                'item_type' => $source->isSupplemental() ? 'upsell' : 'combo',
+                'type' => $source->isSupplemental() ? 'upsell' : 'combo',
+                'origin' => 'landing_form_item',
+                'meta' => [
+                    'external_field' => $fieldKey,
+                    'external_value' => $safe,
+                    'raw_label' => $label,
+                    'text_only' => $price <= 0,
+                ],
+            ];
+        };
+
+        foreach ($input as $key => $value) {
+            if (! is_string($key) || preg_match('/^form_item/i', $key) !== 1) {
+                continue;
+            }
+            $values = is_array($value) ? $value : [$value];
+            foreach ($values as $entry) {
+                if (is_scalar($entry) && trim((string) $entry) !== '') {
+                    $push((string) $entry, $key);
+                }
+            }
+        }
+
+        return $lines;
     }
 
     /** @param array<string, mixed> $input */

@@ -203,37 +203,39 @@ export default function OperationConversionReport({
                         </>
                     )}
                     advanced={(
-                        <div className="ps-operation-conversion-filter-row ps-adv-filter-panel">
-                            <PushsaleSelect
-                                value={draft.sale_leader_id}
-                                options={filterOptions.saleLeaders ?? []}
-                                placeholder="--Trưởng nhóm--"
-                                onChange={(value) => set('sale_leader_id', value)}
-                            />
-                            <PushsaleSelect
-                                value={draft.sale_team_id}
-                                options={filterOptions.saleTeams ?? filterOptions.teams ?? []}
-                                placeholder="--Chọn nhóm--"
-                                onChange={(value) => set('sale_team_id', value)}
-                            />
-                            <PushsaleSelect
-                                value={draft.operation_stage}
-                                options={ALL_STAGES.map(({ key, label }) => ({ id: key, label }))}
-                                placeholder="--Tác nghiệp--"
-                                onChange={(value) => set('operation_stage', value)}
-                            />
-                            <PushsaleSelect
-                                value={draft.sort_metric}
-                                options={METRIC_OPTIONS}
-                                placeholder="1.Doanh số tổng"
-                                onChange={(value) => set('sort_metric', value)}
-                            />
-                            <PushsaleSelect
-                                value={draft.per_page}
-                                options={PER_PAGE_OPTIONS}
-                                placeholder="20"
-                                onChange={(value) => set('per_page', value)}
-                            />
+                        <div className="ps-operation-conversion-advanced ps-adv-filter-panel">
+                            <div className="ps-operation-conversion-filter-row ps-adv-filter-row" style={{ '--ps-adv-cols': 5 }}>
+                                <PushsaleSelect
+                                    value={draft.sale_leader_id}
+                                    options={filterOptions.saleLeaders ?? []}
+                                    placeholder="--Trưởng nhóm--"
+                                    onChange={(value) => set('sale_leader_id', value)}
+                                />
+                                <PushsaleSelect
+                                    value={draft.sale_team_id}
+                                    options={filterOptions.saleTeams ?? filterOptions.teams ?? []}
+                                    placeholder="--Chọn nhóm--"
+                                    onChange={(value) => set('sale_team_id', value)}
+                                />
+                                <PushsaleSelect
+                                    value={draft.operation_stage}
+                                    options={ALL_STAGES.map(({ key, label }) => ({ id: key, label }))}
+                                    placeholder="--Tác nghiệp--"
+                                    onChange={(value) => set('operation_stage', value)}
+                                />
+                                <PushsaleSelect
+                                    value={draft.sort_metric}
+                                    options={METRIC_OPTIONS}
+                                    placeholder="1.Doanh số tổng"
+                                    onChange={(value) => set('sort_metric', value)}
+                                />
+                                <PushsaleSelect
+                                    value={draft.per_page}
+                                    options={PER_PAGE_OPTIONS}
+                                    placeholder="20"
+                                    onChange={(value) => set('per_page', value)}
+                                />
+                            </div>
                         </div>
                     )}
                 />

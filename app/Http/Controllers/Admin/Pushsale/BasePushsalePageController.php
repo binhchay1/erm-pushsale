@@ -29,7 +29,7 @@ abstract class BasePushsalePageController extends Controller
         protected readonly NavigationService $navigation,
     ) {}
 
-    public function index(Request $request): Response|StreamedResponse
+    public function index(Request $request): Response|StreamedResponse|\Symfony\Component\HttpFoundation\Response
     {
         $this->authorizePage($request);
         $schema = $this->pages->schema($this->pageCode);
@@ -49,8 +49,8 @@ abstract class BasePushsalePageController extends Controller
         try {
             $result = $this->pages->rows($this->pageCode, $request);
 
-            if ($request->boolean('export')) {
-                return $this->export($schema, $result['data']);
+            if ($request->boolean('export') || in_array((string) $request->query('export'), ['1', 'xls', 'excel', 'csv'], true)) {
+                return $this->export($schema, $result, $request);
             }
 
             $this->recordFilterHistoryIfNeeded($request, $schema, $result);
@@ -66,6 +66,12 @@ abstract class BasePushsalePageController extends Controller
                 ];
             }
         } catch (Throwable $exception) {
+            $isExport = $request->boolean('export')
+                || in_array((string) $request->query('export'), ['1', 'xls', 'excel', 'csv'], true);
+            if ($isExport) {
+                throw $exception;
+            }
+
             report($exception);
             $pageRuntimeError = (bool) config('app.debug')
                 ? $exception->getMessage()
@@ -450,20 +456,224 @@ abstract class BasePushsalePageController extends Controller
         return $value;
     }
 
-    /** @param array<string, mixed> $schema @param array<int, array<string, mixed>> $rows */
-    private function export(array $schema, array $rows): StreamedResponse
+    /**
+     * @param  array<string, mixed>  $schema
+     * @param  array{data?: list<array<string, mixed>>, summary?: array<string, mixed>}  $result
+     */
+    private function export(array $schema, array $result, Request $request): StreamedResponse|\Symfony\Component\HttpFoundation\Response
     {
-        $columns = $schema['columns'] ?? [];
-        $filename = 'pushsale-'.str_replace('.', '-', (string) $schema['code']).'-'.now()->format('Ymd-His').'.csv';
-
-        return response()->streamDownload(function () use ($columns, $rows): void {
-            $out = fopen('php://output', 'wb');
-            fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, array_column($columns, 'label'));
-            foreach ($rows as $row) {
-                fputcsv($out, array_map(fn (array $column) => data_get($row, $column['key']), $columns));
+        $summary = is_array($result['summary'] ?? null) ? $result['summary'] : [];
+        $rows = array_values($result['data'] ?? []);
+        $totals = is_array($summary['totals'] ?? null) ? $summary['totals'] : null;
+        if ($totals) {
+            $totals['_is_total'] = true;
+            if (! isset($totals['index'])) {
+                $totals['index'] = '';
             }
-            fclose($out);
-        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+            if (! isset($totals['sale']) && ! isset($totals['sale_name'])) {
+                $totals['sale'] = 'Tổng';
+            }
+            array_unshift($rows, $totals);
+        }
+
+        $columns = $this->resolveExportColumns($schema, $summary);
+        $pageCode = (string) ($schema['code'] ?? $this->pageCode);
+        $layout = str_starts_with($pageCode, '4.6.')
+            ? \App\Support\SalesLeaderReportExcelLayout::forPage($pageCode, $columns, $summary)
+            : ['columns' => $columns, 'header_rows' => null];
+        $columns = $layout['columns'];
+        $rows = $this->formatExportRows($rows, $columns);
+
+        $basename = 'pushsale-'.str_replace('.', '-', $pageCode).'-'.now()->format('Ymd-His');
+        $export = strtolower((string) $request->query('export', 'excel'));
+
+        if ($export === 'csv') {
+            return \App\Support\ReportCsvExporter::download($basename.'.csv', $rows, $columns);
+        }
+
+        // export=1 / excel / xls → Excel HTML khớp layout bảng trên UI.
+        return \App\Support\ReportExcelExporter::download($basename, $rows, $columns, [
+            'brand' => config('saleops.brand.name', 'ERM Pushsale'),
+            'title' => (string) ($schema['title'] ?? $this->pageCode),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+            'generated_at' => now()->format('Y-m-d H:i'),
+            'period_label' => 'Kỳ báo cáo',
+            'generated_label' => 'Xuất lúc',
+            'header_rows' => $layout['header_rows'] ?? null,
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $schema
+     * @param  array<string, mixed>  $summary
+     * @return list<array{key: string, label: string, format?: string}>
+     */
+    private function resolveExportColumns(array $schema, array $summary): array
+    {
+        $display = array_values(array_filter(
+            (array) ($schema['display_columns'] ?? []),
+            fn ($column) => is_array($column) && filled($column['key'] ?? null),
+        ));
+        $legacy = array_values(array_filter(
+            (array) ($schema['columns'] ?? []),
+            fn ($column) => is_array($column) && filled($column['key'] ?? null),
+        ));
+
+        $source = $display !== [] ? $display : $legacy;
+        $stageLabels = [];
+        foreach ((array) ($summary['stages'] ?? []) as $stage) {
+            if (is_array($stage) && filled($stage['key'] ?? null)) {
+                $stageLabels[(string) $stage['key']] = (string) ($stage['label'] ?? $stage['key']);
+            }
+        }
+
+        $columns = [];
+        foreach ($source as $column) {
+            $key = (string) $column['key'];
+            // Bỏ cột nhóm (call_1) — chỉ xuất cột lá khớp UI (call_1_contacts…).
+            if ($display === [] && isset($stageLabels[$key])) {
+                continue;
+            }
+
+            $columns[] = [
+                'key' => $key,
+                'label' => filled($column['label'] ?? null)
+                    ? (string) $column['label']
+                    : $this->exportColumnLabel($key, $stageLabels),
+                'format' => (string) ($column['format'] ?? 'text'),
+            ];
+        }
+
+        return $columns !== [] ? $columns : [
+            ['key' => 'index', 'label' => 'STT', 'format' => 'text'],
+            ['key' => 'sale', 'label' => 'SALE', 'format' => 'text'],
+        ];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @param  list<array{key: string, label: string, format?: string}>  $columns
+     * @return list<array<string, mixed>>
+     */
+    private function formatExportRows(array $rows, array $columns): array
+    {
+        return array_map(function (array $row) use ($columns): array {
+            foreach ($columns as $column) {
+                $key = (string) $column['key'];
+                $value = $row[$key] ?? null;
+                if (is_array($value) || is_object($value)) {
+                    $row[$key] = '';
+                    continue;
+                }
+
+                $format = (string) ($column['format'] ?? 'text');
+                if ($value === null || $value === '') {
+                    continue;
+                }
+
+                if ($format === 'percent' && is_numeric($value)) {
+                    $numeric = (float) $value;
+                    $row[$key] = (fmod($numeric, 1.0) === 0.0 ? (string) (int) $numeric : number_format($numeric, 2, '.', '')).' %';
+                    continue;
+                }
+
+                if (in_array($format, ['number', 'currency'], true) && is_numeric($value)) {
+                    $row[$key] = number_format((float) $value, 0, ',', '.');
+                    continue;
+                }
+
+                if ($key === 'receive_data') {
+                    $row[$key] = ((string) $value === '1' || $value === true || $value === 'Có') ? 'Có' : 'Không';
+                }
+            }
+
+            if (($row['sale'] ?? '') === '' && ($row['sale_name'] ?? '') !== '') {
+                $row['sale'] = $row['sale_name'];
+            }
+
+            return $row;
+        }, $rows);
+    }
+
+    /** @param  array<string, string>  $stageLabels */
+    private function exportColumnLabel(string $key, array $stageLabels): string
+    {
+        static $base = [
+            'index' => 'STT',
+            'sale' => 'SALE',
+            'sale_account' => 'Tài khoản',
+            'total_contacts' => 'Tổng contact',
+            'total_closed' => 'Tổng chốt đơn',
+            'total_rate' => 'Tổng tỷ lệ',
+            'total_revenue' => 'Tổng doanh số',
+            'revenue' => 'Tổng doanh số',
+            'untouched' => 'Tổng contact chưa TN',
+            'total_untouched' => 'Tổng contact chưa TN',
+            'received' => 'Contact nhận',
+            'duplicate' => 'Contact trùng',
+            'unique' => 'Contact không trùng',
+            'receive_data' => 'Nhận dữ liệu',
+            'new_contacts' => 'KH mới - Contact',
+            'new_closed' => 'KH mới - Chốt đơn',
+            'new_rate' => 'KH mới - Tỷ lệ chốt',
+            'new_products' => 'KH mới - Số sản phẩm',
+            'new_revenue' => 'KH mới - Doanh số tạm tính',
+            'old_contacts' => 'KH cũ - Contact',
+            'old_closed' => 'KH cũ - Chốt đơn',
+            'old_rate' => 'KH cũ - Tỷ lệ chốt',
+            'old_products' => 'KH cũ - Số sản phẩm',
+            'old_revenue' => 'KH cũ - Doanh số tạm tính',
+            'provisional_revenue' => 'Doanh số tạm tính',
+            'cod_fee' => 'Phí COD',
+            'cod_support' => 'Hỗ trợ COD',
+            'discount' => 'CK',
+            'deposit' => 'Đặt cọc',
+            'after_discount_revenue' => 'Doanh số tạm tính sau chiết khấu',
+            'kpi_revenue' => 'KPI doanh số',
+            'kpi_rate' => 'Tỷ lệ KPI',
+            'yesterday_rate' => 'Hôm qua - % chốt đơn',
+            'yesterday_revenue' => 'Hôm qua - Doanh số',
+            'last_month_rate' => 'Tháng trước - % chốt đơn',
+            'last_month_revenue' => 'Tháng trước - Doanh số',
+            'this_month_rate' => 'Tháng này - % chốt đơn',
+            'this_month_revenue' => 'Tháng này - Doanh số',
+            'success_revenue' => 'Doanh số thành công',
+            'contacts' => 'Contact tổng',
+            'allocated_total' => 'Contact được chia - Tổng',
+            'allocated_duplicate' => 'Contact được chia - Trùng',
+            'allocated_unique' => 'Contact được chia - Không trùng',
+            'closed_contacts' => 'Contact chốt đơn',
+            'close_rate' => 'Tỷ lệ chốt đơn',
+            'avg_order_value' => 'Giá trị TB đơn',
+            'products_per_order' => 'Số sản phẩm/Đơn',
+            'revenue_per_contact' => 'Doanh số tạm tính/Contact được chia',
+            'cancelled_revenue' => 'Doanh số hủy',
+            'returned_revenue' => 'Doanh số hoàn',
+        ];
+
+        if (isset($base[$key])) {
+            return $base[$key];
+        }
+
+        foreach ($stageLabels as $stageKey => $stageLabel) {
+            if ($key === $stageKey.'_contacts') {
+                return $stageLabel.' - Số contact';
+            }
+            if ($key === $stageKey.'_closed') {
+                return $stageLabel.' - Chốt đơn';
+            }
+            if ($key === $stageKey.'_rate') {
+                return $stageLabel.' - Tỷ lệ chốt';
+            }
+            if ($key === $stageKey.'_revenue') {
+                return $stageLabel.' - Doanh số';
+            }
+            if ($key === $stageKey.'_untouched') {
+                return $stageLabel.' - Chưa TN';
+            }
+        }
+
+        return Str::of($key)->replace('_', ' ')->title()->toString();
     }
 }

@@ -141,7 +141,7 @@ export default function SalesWorkReport({
                 )}
                 advancedFilters={(
                     <div className="ps-sale-work-advanced ps-adv-filter-panel">
-                        <div className="ps-sale-work-advanced-row ps-adv-filter-row">
+                        <div className="ps-sale-work-advanced-row ps-adv-filter-row" style={{ '--ps-adv-cols': 6 }}>
                             <PushsaleSelect
                                 value={draft.operation_stage}
                                 options={ALL_STAGES.map(({ key, label }) => ({ id: key, label }))}
@@ -160,8 +160,6 @@ export default function SalesWorkReport({
                                 placeholder="-- Chọn sale --"
                                 onChange={(value) => set('sale_id', value)}
                             />
-                        </div>
-                        <div className="ps-sale-work-advanced-row ps-adv-filter-row">
                             <PushsaleSelect
                                 value={draft.sale_leader_id}
                                 options={filterOptions.saleLeaders ?? []}

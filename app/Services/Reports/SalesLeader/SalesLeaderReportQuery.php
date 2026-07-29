@@ -232,9 +232,24 @@ final class SalesLeaderReportQuery
 
     public function paginateRows(Collection $rows, Request $request): array
     {
+        $total = $rows->count();
+        $export = strtolower((string) $request->query('export', ''));
+        if ($request->boolean('export') || in_array($export, ['1', 'xls', 'excel', 'csv'], true)) {
+            return [
+                'data' => $rows->values()->all(),
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'per_page' => max(1, $total),
+                    'total' => $total,
+                    'from' => $total === 0 ? 0 : 1,
+                    'to' => $total,
+                ],
+            ];
+        }
+
         $perPage = max(1, min(1000, (int) ($request->input('per_page') ?: 50)));
         $page = max(1, (int) ($request->input('page') ?: 1));
-        $total = $rows->count();
         $lastPage = max(1, (int) ceil($total / $perPage));
         $page = min($page, $lastPage);
         $slice = $rows->slice(($page - 1) * $perPage, $perPage)->values();

@@ -6,19 +6,40 @@ html body.pushsale-app-body .ps-sales-leader-report {
 
 html body.pushsale-app-body .ps-sales-leader-primary,
 html body.pushsale-app-body .ps-operation-conversion-primary {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+}
+
+html body.pushsale-app-body .ps-sales-leader-primary > *,
+html body.pushsale-app-body .ps-operation-conversion-primary > * {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
 }
 
 html body.pushsale-app-body .ps-sales-leader-advanced .ps-adv-filter-row,
 html body.pushsale-app-body .ps-operation-conversion-filter-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
+    display: grid !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 6), minmax(140px, 200px)) !important;
+    justify-content: start !important;
+    gap: 8px 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+    flex-wrap: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-sales-leader-advanced .ps-adv-filter-row > *,
+html body.pushsale-app-body .ps-page-extra-filters .ps-operation-conversion-filter-row > * {
+    max-width: 200px !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-sales-leader-advanced .ps-adv-filter-row > .ps-sales-data-unassigned {
+    max-width: none !important;
+    white-space: nowrap !important;
+    align-self: center !important;
 }
 
 html body.pushsale-app-body .ps-sales-leader-table-wrap,
@@ -28,13 +49,33 @@ html body.pushsale-app-body .ps-operation-conversion-table-wrap {
     margin-top: 8px;
 }
 
-html body.pushsale-app-body .ps-sales-leader-table-wrap table thead th,
-html body.pushsale-app-body .ps-sales-leader-table-wrap table thead td {
+html body.pushsale-app-body .ps-sales-leader-table-wrap table thead tr:first-child th,
+html body.pushsale-app-body .ps-sales-leader-table-wrap table thead tr:first-child td {
     position: sticky;
     top: 0;
-    z-index: 2;
-    background: #f7f7f7;
+    z-index: 5;
+    background: #3c8dbc;
+    color: #fff;
     white-space: nowrap;
+    vertical-align: middle;
+}
+
+html body.pushsale-app-body .ps-sales-leader-table-wrap table thead tr:nth-child(2) th {
+    position: sticky;
+    top: 40px;
+    z-index: 4;
+    background: #3c8dbc;
+    color: #fff;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+html body.pushsale-app-body .ps-sales-leader-table-wrap table thead tr.rowsum td,
+html body.pushsale-app-body .ps-sales-leader-table-wrap table thead tr.rowsum th {
+    position: static;
+    top: auto;
+    background: #fff8e8;
+    color: #111;
 }
 
 html body.pushsale-app-body .ps-sales-leader-table-wrap tr.rowsum td,
@@ -79,14 +120,21 @@ html body.pushsale-app-body .ps-sales-team-card__value {
     font-weight: 700;
 }
 
+html body.pushsale-app-body .tdProgress {
+    vertical-align: middle !important;
+}
+
 html body.pushsale-app-body .tdProgress .box-progress {
     position: relative;
     min-height: 22px;
+    display: flex;
+    align-items: center;
 }
 
 html body.pushsale-app-body .tdProgress .progress {
     height: 18px;
     margin: 0;
+    width: 100%;
     background: #eee;
     border-radius: 0;
     box-shadow: none;

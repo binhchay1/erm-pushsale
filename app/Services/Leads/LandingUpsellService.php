@@ -9,8 +9,9 @@ use Illuminate\Support\Carbon;
  * Cửa sổ mở để gộp upsell trang cảm ơn vào đơn Landing vừa tạo.
  *
  * Đây KHÔNG phải delay tạo/chia đơn: đơn được tạo và chia sale ngay. Trong cửa
- * sổ này, gói upsell có cùng session/client-ref/SĐT được phép cộng vào đúng đơn.
- * Hết hạn hoặc sale đã tác nghiệp thì đơn bị khóa và gói đến sau không được gộp.
+ * sổ này (mặc định 15 phút), gói cùng SĐT + utm_source nhưng khác URL landing
+ * chính được phép cộng vào đúng đơn như upsale. Hết hạn, sale đã tác nghiệp,
+ * hoặc gói trùng đúng URL trang chính thì đơn bị khóa / tính trùng số.
  */
 final class LandingUpsellService
 {

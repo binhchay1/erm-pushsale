@@ -65,8 +65,8 @@ return [
         // Fallback khi trang upsale không gửi ps_flow nhưng có phone/landing_phone từ URL.
         // Vẫn không gộp mù: đơn chỉ auto-append nếu hold còn mở; ngoài cửa sổ sẽ đưa vào review.
         'phone_merge_window_minutes' => (int) env('LEAD_PHONE_MERGE_WINDOW_MINUTES', 60),
-        'hold_seconds' => (int) env('LEAD_HOLD_SECONDS', 90),
-        'max_hold_seconds' => (int) env('LEAD_MAX_HOLD_SECONDS', 90),
+        'hold_seconds' => (int) env('LEAD_HOLD_SECONDS', 900),
+        'max_hold_seconds' => (int) env('LEAD_MAX_HOLD_SECONDS', 900),
     ],
 
     /*
