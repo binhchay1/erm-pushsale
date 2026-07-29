@@ -359,7 +359,7 @@ final class WorkspaceUiDemoService
                 'untouched' => false,
                 'discount' => $i * 5_000,
                 'cod_fee' => 15_000,
-                'cod_support' => $i % 3 === 0 ? -10_000 : 0,
+                'cod_support' => $i % 3 === 0 ? 10_000 : 0,
                 'deposit' => $i === 0 ? 50_000 : 0,
             ];
         }
