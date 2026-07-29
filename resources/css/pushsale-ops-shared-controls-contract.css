@@ -517,6 +517,98 @@ html body.pushsale-app-body .ps-dialog-form-error {
     padding: 8px 10px !important;
 }
 
+/* Shared product/money stacks — div layout, never nested table borders */
+html body.pushsale-app-body .tb-in-sp.ps-order-products-breakdown,
+html body.pushsale-app-body .tb-in-sp.ps-order-money-breakdown,
+html body.pushsale-app-body .tb-in-sp .row-sp,
+html body.pushsale-app-body .tb-in-sp .ps-order-money-line,
+html body.pushsale-app-body .tb-in-sp .ten-sp,
+html body.pushsale-app-body .tb-in-sp .ps-order-product-qty,
+html body.pushsale-app-body .tb-in-sp .ps-order-product-price {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+html body.pushsale-app-body .tb-in-sp.ps-order-products-breakdown {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    width: 100% !important;
+    font-size: 11px !important;
+}
+
+html body.pushsale-app-body .tb-in-sp.ps-order-products-breakdown > .row-sp {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 28px 64px !important;
+    align-items: center !important;
+    gap: 4px !important;
+    line-height: 1.25 !important;
+    min-height: 18px !important;
+    padding: 1px 0 !important;
+}
+
+html body.pushsale-app-body .tb-in-sp.ps-order-products-breakdown > .row-sp + .row-sp {
+    border-top: 1px dashed #edf0f3 !important;
+    padding-top: 3px !important;
+}
+
+html body.pushsale-app-body .tb-in-sp .ten-sp {
+    display: block !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .tb-in-sp .ps-order-product-qty {
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .tb-in-sp .ps-order-product-price {
+    text-align: right !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .tb-in-sp.ps-order-money-breakdown {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 1px !important;
+    margin-left: auto !important;
+    min-width: 72px !important;
+    width: auto !important;
+    font-size: 11px !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+html body.pushsale-app-body .tb-in-sp .ps-order-money-line {
+    display: block !important;
+    line-height: 1.25 !important;
+    min-height: 18px !important;
+    padding: 1px 2px 1px 0 !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .tb-in-sp .ps-order-money-line.is-total {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-order-products-upsell-rule {
+    color: #98abc0 !important;
+    display: block !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+    text-align: center !important;
+    width: 100% !important;
+}
+
 /* Final FAB round contract — wins over stacked pushsale.css variants */
 html body.pushsale-app-body button.tao-don-fixed,
 html body.pushsale-app-body .tao-don-fixed,

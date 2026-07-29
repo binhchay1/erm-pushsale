@@ -97,25 +97,25 @@ function ProductLine({ item, index, forceUpsell = false, showUpsellDivider = fal
         || (!item.productId && !item.product_id && unitPrice <= 0);
 
     return (
-        <tr
-            key={item.itemId ?? item.id ?? `${name}-${index}`}
+        <div
             className={`row-sp ${isUpsell ? 'is-upsale-line' : 'is-main-line'} ${showUpsellDivider ? 'has-upsale-divider' : ''}`.trim()}
+            role="listitem"
         >
-            <td>
-                <span className="ten-sp ps-order-product-name" title={looksLikeUrl ? String(rawName) : name} style={{ textOverflow: 'ellipsis' }}>
-                    {showUpsellDivider ? (
-                        <span className="ps-order-upsale-icon" title="Upsale" aria-label="Upsale">
-                            <i className="fa fa-level-up" aria-hidden="true" />
-                        </span>
-                    ) : null}
-                    <span>{name}</span>
-                </span>
-            </td>
-            <td className="text-center no-wrap">
-                {textOnly && quantity <= 1 ? '' : `\u00a0 x${quantity} \u00a0`}
-            </td>
-            <td className="text-right">{unitPrice > 0 ? formatCurrency(unitPrice) : ''}</td>
-        </tr>
+            <span className="ten-sp ps-order-product-name" title={looksLikeUrl ? String(rawName) : name}>
+                {showUpsellDivider ? (
+                    <span className="ps-order-upsale-icon" title="Upsale" aria-label="Upsale">
+                        <i className="fa fa-level-up" aria-hidden="true" />
+                    </span>
+                ) : null}
+                <span>{name}</span>
+            </span>
+            <span className="ps-order-product-qty no-wrap">
+                {textOnly && quantity <= 1 ? '' : `x${quantity}`}
+            </span>
+            <span className="ps-order-product-price no-wrap">
+                {unitPrice > 0 ? formatCurrency(unitPrice) : ''}
+            </span>
+        </div>
     );
 }
 
@@ -131,27 +131,25 @@ export function OrderProductsBreakdown({ items = [], order = null, empty = '—'
     const showDashBeforeUpsell = mainItems.length > 0 && upsellItems.length > 0;
 
     return (
-        <table className="tb-in-sp ps-order-products-breakdown" aria-label="Sản phẩm trong đơn">
-            <tbody>
-                {mainItems.map((item, index) => (
-                    <ProductLine key={item.itemId ?? item.id ?? `main-${index}`} item={item} index={index} />
-                ))}
-                {showDashBeforeUpsell ? (
-                    <tr className="row-sp ps-order-products-upsell-rule-row" aria-hidden="true">
-                        <td colSpan={3} className="ps-order-products-upsell-rule">—</td>
-                    </tr>
-                ) : null}
-                {upsellItems.map((item, index) => (
-                    <ProductLine
-                        key={item.itemId ?? item.id ?? `upsell-${index}`}
-                        item={item}
-                        index={index}
-                        forceUpsell
-                        showUpsellDivider={index === 0 && !showDashBeforeUpsell}
-                    />
-                ))}
-            </tbody>
-        </table>
+        <div className="tb-in-sp ps-order-products-breakdown" aria-label="Sản phẩm trong đơn" role="list">
+            {mainItems.map((item, index) => (
+                <ProductLine key={item.itemId ?? item.id ?? `main-${index}`} item={item} index={index} />
+            ))}
+            {showDashBeforeUpsell ? (
+                <div className="row-sp ps-order-products-upsell-rule-row" aria-hidden="true">
+                    <span className="ps-order-products-upsell-rule">—</span>
+                </div>
+            ) : null}
+            {upsellItems.map((item, index) => (
+                <ProductLine
+                    key={item.itemId ?? item.id ?? `upsell-${index}`}
+                    item={item}
+                    index={index}
+                    forceUpsell
+                    showUpsellDivider={index === 0 && !showDashBeforeUpsell}
+                />
+            ))}
+        </div>
     );
 }
 
@@ -168,31 +166,45 @@ export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount =
         ? storedTotal
         : Math.max(0, subtotal - discount + shippingFee);
 
-    const moneyOrBlank = (value, { prefix = '', always = false } = {}) => {
+    const moneyOrBlank = (value, { always = false } = {}) => {
         if (!always && (!value || Number(value) === 0)) {
             return '';
         }
 
-        return `${prefix}${formatCurrency(value)}`;
+        return formatCurrency(value);
     };
 
+    const lines = [];
+    if (subtotal > 0) {
+        lines.push({ key: 'subtotal', title: 'Thành tiền', text: moneyOrBlank(subtotal) });
+    }
+    if (discount > 0 || showZeroDiscount) {
+        lines.push({
+            key: 'discount',
+            title: 'Chiết khấu',
+            text: discount > 0 ? `-${formatCurrency(discount)}` : formatCurrency(0),
+        });
+    }
+    if (vat > 0) {
+        lines.push({ key: 'vat', title: 'VAT', text: moneyOrBlank(vat) });
+    }
+    if (shippingFee > 0) {
+        lines.push({ key: 'shipping', title: 'Phí vận chuyển', text: moneyOrBlank(shippingFee) });
+    }
+    lines.push({
+        key: 'total',
+        title: 'Tổng tiền đơn hàng',
+        text: moneyOrBlank(total) || (subtotal > 0 ? formatCurrency(total) : ''),
+        strong: true,
+    });
+
     return (
-        <table className="tb-in-sp ps-order-money-breakdown" aria-label="Thành tiền đơn hàng">
-            <tbody>
-                {subtotal > 0 ? <tr><td><span title="Thành tiền">{moneyOrBlank(subtotal)}</span></td></tr> : null}
-                {discount > 0 || showZeroDiscount ? (
-                    <tr><td><span title="Chiết khấu">{discount > 0 ? `-${formatCurrency(discount)}` : formatCurrency(0)}</span></td></tr>
-                ) : null}
-                {vat > 0 ? <tr><td><span title="VAT">{moneyOrBlank(vat)}</span></td></tr> : null}
-                {shippingFee > 0 ? <tr><td><span title="Phí vận chuyển">{moneyOrBlank(shippingFee)}</span></td></tr> : null}
-                <tr>
-                    <td>
-                        <span title="Tổng tiền đơn hàng" style={{ fontWeight: 'bold', fontSize: 13 }}>
-                            {moneyOrBlank(total) || (subtotal > 0 ? formatCurrency(total) : '')}
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div className="tb-in-sp ps-order-money-breakdown" aria-label="Thành tiền đơn hàng">
+            {lines.filter((line) => line.text).map((line) => (
+                <div key={line.key} className={`ps-order-money-line${line.strong ? ' is-total' : ''}`} title={line.title}>
+                    {line.text}
+                </div>
+            ))}
+        </div>
     );
 }

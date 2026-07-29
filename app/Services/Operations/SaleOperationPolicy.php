@@ -71,15 +71,13 @@ final class SaleOperationPolicy
     }
 
     /**
-     * Data chỉ được xóa khi chưa chốt và chưa phát sinh giao vận. Backend tiếp tục
-     * kiểm tra quyền sở hữu của sale và shipment để không dựa riêng vào UI.
+     * Sale workspace luôn hiện nút xóa data trên mọi dòng.
+     * Backend vẫn kiểm tra quyền sở hữu (sale chỉ xóa data của mình).
      */
     public static function canDeleteData(Order $order): bool
     {
-        $provider = trim(strtolower((string) $order->shipping_provider));
+        unset($order);
 
-        return self::isOpen($order)
-            && blank($order->tracking_number)
-            && ($provider === '' || in_array($provider, ['manual', 'thu_cong', 'thu-cong', 'thủ công'], true));
+        return true;
     }
 }

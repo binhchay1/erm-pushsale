@@ -159,7 +159,7 @@ html body.pushsale-app-body .ps-order-money-breakdown {
 
 html body.pushsale-app-body .ps-order-money-breakdown > div,
 html body.pushsale-app-body .ps-order-money-breakdown > strong,
-html body.pushsale-app-body .ps-order-money-breakdown.tb-in-sp td {
+html body.pushsale-app-body .ps-order-money-breakdown .ps-order-money-line {
     justify-content: flex-end !important;
     padding-right: 4px !important;
     overflow: visible !important;

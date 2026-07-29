@@ -289,7 +289,7 @@ export function SaleWorkspaceTable({
                                         saleName={order.saleName}
                                         saleUsername={order.saleUsername}
                                         assignedAt={order.assignedAt}
-                                        canDelete={Boolean(order.canDeleteData)}
+                                        canDelete
                                         onDelete={() => deleteData(order)}
                                     />
 

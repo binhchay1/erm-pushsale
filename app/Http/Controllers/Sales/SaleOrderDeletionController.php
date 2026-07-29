@@ -22,12 +22,6 @@ class SaleOrderDeletionController extends Controller
             ]);
         }
 
-        if ($order->closed_at || filled($order->tracking_number) || $order->shipments()->exists()) {
-            throw ValidationException::withMessages([
-                'order' => 'Không thể xóa data đã chốt đơn hoặc đã phát sinh giao vận.',
-            ]);
-        }
-
         $label = $order->order_code ?: '#'.$order->id;
 
         ActivityLogger::log(

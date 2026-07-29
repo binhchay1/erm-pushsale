@@ -423,13 +423,16 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-green:empty {
     display: none !important;
 }
 
-/* Nested product/money tables: no frame borders */
+/* Nested product/money stacks: no frame borders (div layout, not nested tables) */
 html body.pushsale-app-body .ps-wh-page .tb-in-sp,
-html body.pushsale-app-body .ps-wh-page .tb-in-sp tbody,
-html body.pushsale-app-body .ps-wh-page .tb-in-sp tr,
-html body.pushsale-app-body .ps-wh-page .tb-in-sp td,
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .row-sp,
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-money-line,
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .ten-sp,
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-product-qty,
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-product-price,
 html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp,
-html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp td {
+html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp .row-sp,
+html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp .ps-order-money-line {
     background: transparent !important;
     border: 0 !important;
     border-width: 0 !important;
@@ -437,52 +440,79 @@ html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp td {
     outline: 0 !important;
 }
 
-html body.pushsale-app-body .ps-wh-page .tb-in-sp,
-html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp {
-    border-collapse: collapse !important;
-    border-spacing: 0 !important;
+html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-products-breakdown,
+html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp.ps-order-products-breakdown {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
     margin: 0 !important;
-    table-layout: auto !important;
     width: 100% !important;
+    font-size: 11px !important;
 }
 
-html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-products-breakdown td,
-html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp.ps-order-products-breakdown td {
+html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-products-breakdown > .row-sp,
+html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp.ps-order-products-breakdown > .row-sp {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 28px 64px !important;
+    align-items: center !important;
+    gap: 4px !important;
+    line-height: 1.25 !important;
+    min-height: 18px !important;
     padding: 1px 2px !important;
-    vertical-align: middle !important;
 }
 
-html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-products-breakdown td:nth-child(1) {
-    max-width: 110px !important;
+html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-products-breakdown > .row-sp + .row-sp,
+html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp.ps-order-products-breakdown > .row-sp + .row-sp {
+    border-top: 1px dashed #edf0f3 !important;
+    padding-top: 3px !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .ten-sp,
+html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp .ten-sp {
+    display: block !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    white-space: nowrap !important;
 }
 
-html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-products-breakdown td:nth-child(2) {
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-product-qty {
     text-align: center !important;
     white-space: nowrap !important;
-    width: 28px !important;
 }
 
-html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-products-breakdown td:nth-child(3) {
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-product-price {
     text-align: right !important;
     white-space: nowrap !important;
-    width: 64px !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-money-breakdown,
 html body.pushsale-app-body .ps-wh-page .c-money-body .tb-in-sp {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 1px !important;
     margin-left: auto !important;
     width: auto !important;
     min-width: 72px !important;
+    font-variant-numeric: tabular-nums !important;
 }
 
-html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-money-breakdown td,
-html body.pushsale-app-body .ps-wh-page .c-money-body .tb-in-sp td {
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-money-line,
+html body.pushsale-app-body .ps-wh-page .c-money-body .tb-in-sp .ps-order-money-line {
+    display: block !important;
+    line-height: 1.25 !important;
+    min-height: 18px !important;
     padding: 1px 4px 1px 2px !important;
     text-align: right !important;
-    vertical-align: middle !important;
     white-space: nowrap !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-money-line.is-total {
+    font-size: 13px !important;
+    font-weight: 700 !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .c-money-body {

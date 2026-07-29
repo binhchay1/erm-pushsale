@@ -12,7 +12,7 @@ trait InteractsWithReportSnapshots
      * @template T
      *
      * @param  callable(): T  $compute
-     * @return array{data: T, cachedAt: ?string, fromCache: bool}
+     * @return array{data: T, cachedAt: ?string, fromCache: bool, storage: string, isFinal: bool}
      */
     protected function maybeCachedReport(
         Request $request,
@@ -22,7 +22,13 @@ trait InteractsWithReportSnapshots
         bool $useCache = true,
     ): array {
         if (! $useCache) {
-            return ['data' => $compute(), 'cachedAt' => null, 'fromCache' => false];
+            return [
+                'data' => $compute(),
+                'cachedAt' => null,
+                'fromCache' => false,
+                'storage' => 'live',
+                'isFinal' => true,
+            ];
         }
 
         return app(ReportSnapshotCache::class)->remember(
