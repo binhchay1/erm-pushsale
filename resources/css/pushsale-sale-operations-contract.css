@@ -274,150 +274,269 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-table-wrap {
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table {
     min-width: 1560px !important;
-    table-layout: fixed !important;
+    table-layout: auto !important;
     width: max(100%, 1560px) !important;
+    font-size: 12px !important;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > thead > tr > th,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > thead > tr > th {
+    background: #3c8dbc !important;
+    border-color: #2e6f99 !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+    padding: 6px 4px !important;
+}
+
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > tbody > tr > td {
     overflow: visible !important;
     vertical-align: top !important;
     word-break: break-word !important;
+    padding: 6px 4px !important;
+    background: #fff;
 }
 
-/* Widths from docs/reference/pushsale-sale-operations.html (span-col / th hints) */
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-check { width: 36px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-code { width: 78px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-source { width: 88px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-sale { width: 128px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-customer { width: 130px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-message { width: 140px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-needed { width: 150px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-result { width: 150px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-next { width: 80px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-time { width: 64px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-products { width: 200px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-money { width: 132px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-deposit { width: 64px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-delivery { width: 118px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > tbody > tr:nth-child(odd) > td {
+    background: #f9f9f9;
+}
 
-/* Icon rail: cùng một hàng ngang phía trên dữ liệu (mẫu Pushsale text-right). */
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-icon-rail {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    gap: 4px !important;
-    min-height: 22px !important;
-    margin: 0 0 4px !important;
-    padding: 0 !important;
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > tbody > tr.row-selected > td,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > tbody > tr:hover > td {
+    background: #dfeffd !important;
+}
+
+/* Pushsale area hide animation hooks */
+html body.pushsale-app-body .ps-sale-workspace-page .area1,
+html body.pushsale-app-body .ps-sale-workspace-page .area2,
+html body.pushsale-app-body .ps-sale-workspace-page .area3,
+html body.pushsale-app-body .ps-sale-workspace-page .area4,
+html body.pushsale-app-body .ps-sale-workspace-page .area5 {
+    transition: ease 0.5s all;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .span-col {
+    display: inline-block;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .span-col-width {
+    width: calc(100% - 50px);
+    text-overflow: ellipsis;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .cancel-col {
     width: 100% !important;
-    position: relative !important;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-icon-rail .btn-icon,
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-icon-rail .ps-cell-action,
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-icon-rail .ps-sale-delete {
-    position: static !important;
-    top: auto !important;
-    right: auto !important;
-    float: none !important;
-    margin: 0 !important;
+html body.pushsale-app-body .ps-sale-workspace-page .small-tip {
+    color: #777;
+    font-size: 11px;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-icon-rail-spacer {
-    display: inline-block !important;
-    width: 18px !important;
-    height: 18px !important;
+html body.pushsale-app-body .ps-sale-workspace-page .nha-mang {
+    color: magenta !important;
+    display: block !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-note-toolbar.ps-icon-rail {
-    justify-content: space-between !important;
+html body.pushsale-app-body .ps-sale-workspace-page .khkn {
+    color: darkorange;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-note-tool-left {
-    margin-right: auto !important;
+html body.pushsale-app-body .ps-sale-workspace-page .sline {
+    padding-top: 3px;
+    padding-bottom: 3px;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-order-products-upsell-rule {
+html body.pushsale-app-body .ps-sale-workspace-page .fb.ttgh7,
+html body.pushsale-app-body .ps-sale-workspace-page .ttgh6,
+html body.pushsale-app-body .ps-sale-workspace-page .ttgh7 {
+    color: #ff0000 !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .lnk-md,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-order-code-link {
+    background: none !important;
+    border: 0 !important;
+    color: #007bff !important;
+    cursor: pointer;
+    font-weight: 700 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-customer-name-link,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-phone-link {
+    background: none !important;
+    border: 0 !important;
+    color: #337ab7 !important;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 0 !important;
+    text-align: left;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .btn-icon.aoh {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #3c8dbc !important;
+    cursor: pointer;
+    display: inline-block;
+    height: 18px;
+    line-height: 18px;
+    opacity: 0.35;
+    padding: 0 !important;
+    width: 18px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page tr.contact-row:hover .btn-icon.aoh,
+html body.pushsale-app-body .ps-sale-workspace-page .btn-icon.aoh:hover,
+html body.pushsale-app-body .ps-sale-workspace-page .btn-icon.aoh:focus {
+    opacity: 1 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .btn-icon.invisible {
+    opacity: 0 !important;
+    pointer-events: none;
+    width: 18px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .chk-item label,
+html body.pushsale-app-body .ps-sale-workspace-page .chk-all label {
+    font-weight: 400;
+    margin: 0 0 0 4px;
+}
+
+/* Nested product/money tables — Pushsale .tb-in-sp */
+html body.pushsale-app-body .ps-sale-workspace-page .tb-in-sp,
+html body.pushsale-app-body .ps-wh-page .tb-in-sp {
+    border: none !important;
+    width: 100%;
+    font-size: 11px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .tb-in-sp td,
+html body.pushsale-app-body .ps-wh-page .tb-in-sp td {
+    border: none !important;
+    background-color: transparent !important;
+    padding: 3px 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .row-sp,
+html body.pushsale-app-body .ps-wh-page .row-sp {
+    border-bottom: 1px dashed #ccc;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ten-sp,
+html body.pushsale-app-body .ps-wh-page .ten-sp {
+    display: inline-block;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-order-products-upsell-rule,
+html body.pushsale-app-body .ps-wh-page .ps-order-products-upsell-rule {
     color: #98abc0 !important;
     font-weight: 700 !important;
     letter-spacing: 2px !important;
     line-height: 1 !important;
-    margin: 4px 0 2px !important;
+    margin: 0 !important;
     text-align: center !important;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-name-block {
-    white-space: nowrap !important;
+html body.pushsale-app-body .ps-sale-workspace-page .ps-order-upsale-icon {
+    color: #f39c12;
+    margin-right: 4px;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-name-block b,
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-name-block .small-tip {
-    display: inline !important;
-    white-space: nowrap !important;
+/* Message */
+html body.pushsale-app-body .ps-sale-workspace-page .td-message {
+    cursor: pointer;
+    display: inline-block;
+    max-width: 250px;
+    min-width: 150px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-money-cell,
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td.ps-money-cell {
-    padding-left: 6px !important;
-    padding-right: 10px !important;
+html body.pushsale-app-body .ps-sale-workspace-page .td-793 {
+    width: 150px !important;
+    max-width: 150px !important;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-money-cell .ps-order-money-breakdown,
-html body.pushsale-app-body .ps-sale-workspace-page .ps-money-cell .ps-money-stack {
-    box-sizing: border-box !important;
-    padding-right: 4px !important;
+/* TN cần — Pushsale mof textarea */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor,
+html body.pushsale-app-body .ps-sale-workspace-page td.ps-operation-note-editor {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 1;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor.is-focused {
+    z-index: 60 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .mof-container,
+html body.pushsale-app-body .ps-sale-workspace-page .txt-mof {
+    background-color: transparent;
+    height: 45px;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page textarea.txt-mof {
+    background: transparent !important;
+    border: 1px dotted #ddd !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: block !important;
+    font-size: 12px !important;
+    height: 48px !important;
+    line-height: 15px !important;
+    max-height: 160px !important;
+    min-height: 48px !important;
+    overflow-y: hidden !important;
+    padding: 5px !important;
+    resize: none !important;
+    transition: min-height .12s ease, background .12s ease, box-shadow .12s ease !important;
     width: 100% !important;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-order-product-name,
-html body.pushsale-app-body .ps-sale-workspace-page .ps-order-product-name > span {
-    display: -webkit-box !important;
-    -webkit-box-orient: vertical !important;
-    -webkit-line-clamp: 3 !important;
-    overflow: hidden !important;
-    word-break: break-word !important;
-}
-
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-cell-inner {
-    position: relative;
-    padding-top: 2px;
-    text-align: center;
-}
-
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-cell-inner .ps-sale-delete {
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor.is-focused textarea.txt-mof,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof:focus {
+    background: #fff !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .18) !important;
+    height: 128px !important;
+    left: 0 !important;
+    min-height: 128px !important;
+    overflow-y: auto !important;
     position: absolute !important;
-    right: 0;
-    top: 0;
+    right: auto !important;
+    top: 0 !important;
+    width: 280px !important;
+    z-index: 70 !important;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-result-cell {
-    vertical-align: middle !important;
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof:hover:not(:focus) {
+    background: #fff !important;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-result-cell-inner {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    justify-content: center;
-    min-height: 52px;
-    text-align: center;
-    width: 100%;
-}
-
-html body.pushsale-app-body .ps-sale-workspace-page .ps-result-icon-row {
-    display: flex;
-    justify-content: flex-end;
-    margin: 0;
-    min-height: 18px;
-    width: 100%;
+html body.pushsale-app-body .ps-sale-workspace-page .txt-dotted {
+    border-bottom: none !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-result-select {
+    background: transparent !important;
     height: 30px !important;
-    margin: 0 auto !important;
-    max-width: 100%;
+    max-width: 180px;
     width: 100% !important;
 }
 
@@ -426,15 +545,31 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-result-label {
     font-weight: 700;
     line-height: 30px;
     min-height: 30px;
-    text-align: center;
-    width: 100%;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-status-tabs,
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-tabs,
-html body.pushsale-app-body .ps-sale-workspace-page .box-body.ps-sale-tabs-wrap {
-    margin-left: 0 !important;
-    padding-left: 0 !important;
+html body.pushsale-app-body .ps-sale-workspace-page .ps-time-overdue {
+    color: #dd4b39;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-time-active {
+    color: #00a65a;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-contact-flags {
+    display: inline-flex;
+    gap: 2px;
+    margin-left: 2px;
+    vertical-align: middle;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-delete {
+    color: #e11d48 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-empty {
+    color: #777;
+    height: 64px;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page button.tao-don-fixed,

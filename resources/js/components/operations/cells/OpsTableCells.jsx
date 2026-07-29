@@ -1,0 +1,318 @@
+import { useEffect, useState } from 'react';
+import { formatCurrency } from '@/lib/format';
+
+/** Shared Pushsale ops table cells — icon layout matches legacy `text-right` / float pattern. */
+
+export function OpsIconButton({ title, icon, onClick, disabled = false, className = '', style = undefined, hidden = false }) {
+    if (hidden) return null;
+
+    return (
+        <button
+            type="button"
+            className={`btn-icon aoh ${className}`.trim()}
+            title={title}
+            onClick={onClick}
+            disabled={disabled}
+            style={style}
+            aria-label={title}
+        >
+            <i className={`fa fa-${icon}`} aria-hidden="true" />
+        </button>
+    );
+}
+
+export function OpsTopRightIcons({ children, className = '' }) {
+    if (!children) return null;
+
+    return <div className={`text-right ${className}`.trim()}>{children}</div>;
+}
+
+export function formatOpsDateTime(value, { withSeconds = false } = {}) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    const pad = (n) => String(n).padStart(2, '0');
+    const base = `${pad(date.getDate())} / ${pad(date.getMonth() + 1)} / ${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    return withSeconds ? `${base}:${pad(date.getSeconds())}` : base;
+}
+
+export function externalHref(url) {
+    const value = String(url ?? '').trim();
+    if (!value) return null;
+    if (/^(https?:)?\/\//i.test(value)) return value.startsWith('//') ? `https:${value}` : value;
+    return `https://${value}`;
+}
+
+export function OrderCodeCell({ orderCode, onHistory, emptyTitle = 'Mã đơn chỉ sinh sau khi chốt đơn' }) {
+    return (
+        <td className="text-center">
+            {orderCode ? (
+                <button type="button" className="lnk-md ps-order-code-link" onClick={onHistory}>{orderCode}</button>
+            ) : (
+                <span className="lnk-md ps-order-code-empty" title={emptyTitle}>&nbsp;</span>
+            )}
+            <OpsIconButton title="Xem lịch sử xem thông tin số" icon="history" onClick={onHistory} style={{ fontSize: 14 }} />
+        </td>
+    );
+}
+
+export function SourceDataCell({ sourceName, sourceUrl, dataArrivedAt, className = 'text-center area5 hidden-xs' }) {
+    const href = externalHref(sourceUrl);
+
+    return (
+        <td className={className}>
+            <span className="span-col span-col-width cancel-col" style={{ minWidth: 110, maxWidth: 160, display: 'inline-block' }}>
+                {href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer" title={sourceUrl}>{sourceName || '—'}</a>
+                ) : (
+                    <span>{sourceName || '—'}</span>
+                )}
+            </span>
+            <br />
+            <span className="small-tip">({formatOpsDateTime(dataArrivedAt)})</span>
+        </td>
+    );
+}
+
+export function SaleAssigneeCell({
+    saleName,
+    saleUsername,
+    assignedAt,
+    canDelete = false,
+    onDelete,
+    className = 'text-center area5 hidden-xs',
+}) {
+    return (
+        <td className={className}>
+            <OpsTopRightIcons>
+                {canDelete ? (
+                    <OpsIconButton title="Xóa data" icon="trash" onClick={onDelete} className="ps-sale-delete" />
+                ) : (
+                    <a className="btn-icon invisible" aria-hidden="true">&nbsp;</a>
+                )}
+            </OpsTopRightIcons>
+            <div style={{ minWidth: 100, maxWidth: 150, display: 'inline-block' }}>
+                {saleName || '—'}
+                {saleUsername ? <span className="small-tip">({saleUsername})</span> : null}
+            </div>
+            <div className="small-tip">
+                ({formatOpsDateTime(assignedAt, { withSeconds: true })})
+                <a className="btn-icon invisible" aria-hidden="true">&nbsp;</a>
+            </div>
+        </td>
+    );
+}
+
+export function CustomerContactCell({
+    order,
+    onEdit,
+    onPurchaseHistory,
+    onDuplicateOrders,
+    phoneActions = null,
+    flags = null,
+    supplement = null,
+    className = 'area1',
+}) {
+    const name = order.customerName || order.effectiveReceiverName || '—';
+    const phone = order.customerPhone || order.effectiveReceiverPhone || '';
+    const carrier = order.carrierLabel || (order.phoneCarrier ? `[${order.phoneCarrier}]` : '');
+
+    return (
+        <td className={className} title={`${order.id} | ${order.sourceType || ''}`}>
+            <OpsTopRightIcons>
+                {onEdit ? <OpsIconButton title="Cập nhật đơn" icon="edit" onClick={onEdit} /> : null}
+            </OpsTopRightIcons>
+            <div style={{ maxWidth: 170, textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {onPurchaseHistory ? (
+                    <button type="button" className="ps-customer-name-link" onClick={onPurchaseHistory}>{name}</button>
+                ) : (
+                    <span>{name}</span>
+                )}
+            </div>
+            {carrier ? <span className="nha-mang">{carrier}</span> : null}
+            <div className="no-wrap text-right">
+                {onDuplicateOrders ? (
+                    <button
+                        type="button"
+                        className="span-col hidden-xs text-left ps-phone-link"
+                        style={{ display: 'inline-block', width: 90, marginTop: 4 }}
+                        onClick={onDuplicateOrders}
+                        title="Danh sách trùng số"
+                    >
+                        {phone || '—'}
+                    </button>
+                ) : (
+                    <span className="span-col hidden-xs text-left" style={{ display: 'inline-block', width: 90, marginTop: 4 }}>
+                        {phone || '—'}
+                    </span>
+                )}
+                <span className="span-col text-right no-wrap" style={{ width: 80 }}>
+                    {phoneActions}
+                    {flags}
+                </span>
+                <div style={{ clear: 'both' }} />
+            </div>
+            <div className="text-left khkn sline">{order.customerExtraNote || ''}</div>
+            {order.desiredDeliveryAt ? (
+                <div className="small-tip">({formatOpsDateTime(order.desiredDeliveryAt)})</div>
+            ) : (
+                <div className="small-tip" />
+            )}
+            {supplement}
+        </td>
+    );
+}
+
+export function MessageCell({ note, onClick, className = 'area1 hidden-xs td-5715' }) {
+    return (
+        <td className={className}>
+            <span
+                className="td-message"
+                style={{ cursor: 'pointer', maxWidth: 250, display: 'inline-block' }}
+                title={note || ''}
+                onClick={onClick}
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') onClick?.(event);
+                }}
+                role={onClick ? 'button' : undefined}
+                tabIndex={onClick ? 0 : undefined}
+            >
+                {note || '—'}
+            </span>
+        </td>
+    );
+}
+
+export function OperationResultCell({
+    canChangeStatus,
+    options = [],
+    currentLabel = '',
+    onHistory,
+    onChange,
+    className = 'area2 no-wrap fix_brower_continue_let_off',
+}) {
+    return (
+        <td className={className}>
+            <OpsTopRightIcons>
+                {onHistory ? <OpsIconButton title="Lịch sử tác nghiệp" icon="history" onClick={onHistory} /> : null}
+            </OpsTopRightIcons>
+            <div style={{ maxWidth: 180 }}>
+                {canChangeStatus ? (
+                    <select
+                        className="form-control txt-dotted ddlpb dis_val ps-result-select"
+                        defaultValue=""
+                        onChange={(event) => {
+                            const option = options.find((item) => item.value === event.target.value);
+                            if (option) onChange?.(option);
+                            event.target.value = '';
+                        }}
+                    >
+                        <option value="">--Chọn--</option>
+                        {options.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
+                ) : (
+                    <b className="ps-result-label">{currentLabel}</b>
+                )}
+            </div>
+            <div className="small-tip text-left">
+                <a className="btn-icon invisible" aria-hidden="true">&nbsp;</a>
+            </div>
+        </td>
+    );
+}
+
+export function NextOperationCell({ nextOperationAt, onEdit, className = 'area2 hidden-xs' }) {
+    return (
+        <td className={className}>
+            <OpsTopRightIcons>
+                {onEdit ? <OpsIconButton title="Cập nhật tác nghiệp tiếp" icon="undo" onClick={onEdit} /> : null}
+            </OpsTopRightIcons>
+            {nextOperationAt ? <span className="small-tip">{formatOpsDateTime(nextOperationAt)}</span> : null}
+        </td>
+    );
+}
+
+export function TimeRemainingCell({ nextOperationAt, className = 'text-center no-wrap area2 hidden-xs' }) {
+    const [, tick] = useState(0);
+    useEffect(() => {
+        const timer = window.setInterval(() => tick((value) => value + 1), 60000);
+        return () => window.clearInterval(timer);
+    }, []);
+
+    if (!nextOperationAt) {
+        return (
+            <td className={className}>
+                <OpsTopRightIcons>
+                    <a className="btn-icon invisible" aria-hidden="true">&nbsp;</a>
+                </OpsTopRightIcons>
+                <br />
+                <span className="span-col small-tip" style={{ width: 'calc(100% - 20px)' }}>—</span>
+            </td>
+        );
+    }
+
+    const milliseconds = new Date(nextOperationAt).getTime() - Date.now();
+    const absoluteMinutes = Math.floor(Math.abs(milliseconds) / 60000);
+    const hours = Math.floor(absoluteMinutes / 60);
+    const minutes = absoluteMinutes % 60;
+    const label = `${milliseconds < 0 ? 'Quá ' : 'Còn '}${hours ? `${hours}h ` : ''}${minutes}p`;
+
+    return (
+        <td className={className}>
+            <OpsTopRightIcons>
+                <a className="btn-icon invisible" aria-hidden="true">&nbsp;</a>
+            </OpsTopRightIcons>
+            <br />
+            <span className={`span-col small-tip sau-bao-lau-con-lai ${milliseconds < 0 ? 'ps-time-overdue' : 'ps-time-active'}`} style={{ width: 'calc(100% - 20px)' }}>
+                {label}
+            </span>
+        </td>
+    );
+}
+
+export function DeliveryStatusCell({
+    deliveryStatus,
+    deliveryStatusValue,
+    trackingNumber,
+    desiredDeliveryAt,
+    onCalendar,
+    onHistory,
+    showAccountingHistory = false,
+    className = 'text-center area4',
+}) {
+    return (
+        <td className={`${className} ttgh ttgh-${deliveryStatusValue || 'none'}`.trim()}>
+            <span className="span-col no-wrap">
+                <span className="span-col" style={{ width: 20 }}>
+                    {showAccountingHistory && onHistory ? (
+                        <OpsIconButton title="Lịch sử kế toán" icon="history" onClick={onHistory} />
+                    ) : null}
+                </span>
+                <span className="span-col no-wrap" style={{ width: 'calc(100% - 50px)' }}>
+                    <span className={`ttgh${deliveryStatusValue || 0}`}>{deliveryStatus || ''}</span>
+                </span>
+                <span className="span-col" style={{ width: 20 }} />
+                <div className="small-tip">
+                    ()
+                    <a className="btn-icon invisible" aria-hidden="true">&nbsp;</a>
+                </div>
+            </span>
+            {trackingNumber ? (
+                <a className="lnk-mdgv" href="javascript:void(0)" style={{ color: 'darkorange' }}>{trackingNumber}</a>
+            ) : null}
+            <br />
+            {onCalendar ? <OpsIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={onCalendar} /> : null}
+            {desiredDeliveryAt ? (
+                <div style={{ color: 'green' }}>{formatOpsDateTime(desiredDeliveryAt)}</div>
+            ) : null}
+        </td>
+    );
+}
+
+export function moneyDisplay(value) {
+    const amount = Number(value ?? 0);
+    if (!amount) return '';
+    return formatCurrency(amount);
+}

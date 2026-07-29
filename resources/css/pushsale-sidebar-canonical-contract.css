@@ -8,23 +8,25 @@
 html body.pushsale-app-body {
     --ps-menu-header: 50px;
     --ps-menu-width: 252px;
-    --ps-menu-blue: #0b8ff3;
-    --ps-menu-blue-dark: #0560ad;
-    --ps-menu-blue-soft: #0a7ee7;
-    --ps-menu-bg: #f9fafc;
-    --ps-menu-bg-hover: #f4f6f8;
-    --ps-menu-text: #435365;
-    --ps-menu-text-muted: #52606d;
-    --ps-menu-icon: #6e7e8c;
-    --ps-menu-plus: #007fff;
+    /* Pushsale skin-blue-light exact tokens */
+    --ps-menu-blue: #007BFF;
+    --ps-menu-blue-dark: #0057B4;
+    --ps-menu-blue-soft: #007BFF;
+    --ps-menu-bg: #F8F8FA;
+    --ps-menu-bg-hover: #F8F8FA;
+    --ps-menu-text: #6C7D8B;
+    --ps-menu-text-muted: #6C7D8B;
+    --ps-menu-icon: #6C7D8B;
+    --ps-menu-plus: #007BFF;
     --ps-menu-border: #d2d6de;
     --ps-menu-font: Arial, Helvetica, sans-serif;
-    --ps-menu-l1-height: 42px;
-    --ps-menu-l2-height: 40px;
-    --ps-menu-l3-height: 40px;
-    --ps-menu-slide: .26s cubic-bezier(.22, .61, .36, 1);
-    --ps-menu-accordion: .34s cubic-bezier(.22, .61, .36, 1);
-    --ps-menu-flyout: .16s cubic-bezier(.22, .61, .36, 1);
+    --ps-menu-l1-height: auto;
+    --ps-menu-l2-height: auto;
+    --ps-menu-l3-height: auto;
+    /* AdminLTE panel .3s + accordion 500ms + L3 ease 0.5s */
+    --ps-menu-slide: .3s ease-in-out;
+    --ps-menu-accordion: .5s ease;
+    --ps-menu-flyout: .5s ease;
 }
 
 /* ---------- Shell: off-canvas sidebar ---------- */
@@ -49,11 +51,12 @@ html body.pushsale-app-body aside.left-side.pushsale-main-sidebar {
     overflow: hidden !important;
     background: var(--ps-menu-bg) !important;
     border: 0 !important;
-    border-right: 1px solid var(--ps-menu-border) !important;
-    box-shadow: 3px 0 9px rgba(0, 0, 0, .12) !important;
+    border-right: 0 !important;
+    box-shadow: 0 0 5px #666 !important;
     font-family: var(--ps-menu-font) !important;
-    transform: translateX(-100%) !important;
-    transition: transform var(--ps-menu-slide) !important;
+    font-size: 12px !important;
+    transform: translateX(-270px) !important;
+    transition: transform var(--ps-menu-slide), width var(--ps-menu-slide) !important;
     -webkit-tap-highlight-color: transparent !important;
 }
 
@@ -62,7 +65,7 @@ html body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-main-sideba
 }
 
 html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-main-sidebar {
-    transform: translateX(-100%) !important;
+    transform: translateX(-270px) !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar.pushsale-sidebar,
@@ -144,28 +147,29 @@ html body.pushsale-app-body .pushsale-main-sidebar button.a1,
 html body.pushsale-app-body .pushsale-main-sidebar span.a1 {
     display: flex !important;
     align-items: center !important;
+    position: relative !important;
     box-sizing: border-box !important;
     width: 100% !important;
-    height: var(--ps-menu-l1-height) !important;
-    min-height: var(--ps-menu-l1-height) !important;
+    min-height: 42px !important;
+    height: auto !important;
     margin: 0 !important;
-    padding: 0 40px 0 14px !important;
+    padding: 12px 28px 12px 15px !important;
     color: var(--ps-menu-text) !important;
-    background: var(--ps-menu-bg) !important;
+    background: transparent !important;
     border: 0 !important;
-    border-left: 3px solid transparent !important;
+    border-left: 0 !important;
     border-radius: 0 !important;
     outline: 0 !important;
     box-shadow: none !important;
     font-family: var(--ps-menu-font) !important;
     font-size: 13px !important;
-    font-weight: 600 !important;
-    line-height: var(--ps-menu-l1-height) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
     text-align: left !important;
     text-decoration: none !important;
     white-space: nowrap !important;
     cursor: pointer !important;
-    transition: background-color .18s ease, color .18s ease, border-color .18s ease !important;
+    transition: color .15s ease !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .a1 > span {
@@ -196,14 +200,15 @@ html body.pushsale-app-body .pushsale-main-sidebar .a1 > .pull-right,
 html body.pushsale-app-body .pushsale-main-sidebar .a1 > .fa-plus,
 html body.pushsale-app-body .pushsale-main-sidebar .a1 > .fa-minus {
     position: absolute !important;
-    top: 0 !important;
+    top: 50% !important;
     right: 12px !important;
     width: auto !important;
     margin: 0 !important;
     color: var(--ps-menu-plus) !important;
-    font-size: 12px !important;
+    font-size: 10px !important;
     font-weight: 400 !important;
-    line-height: var(--ps-menu-l1-height) !important;
+    line-height: 1 !important;
+    transform: translateY(-50%) !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .li1 {
@@ -214,15 +219,15 @@ html body.pushsale-app-body .pushsale-main-sidebar .li1 > .a1:hover,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.menu-open > .a1,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.is-open > .a1,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.active > .a1 {
-    color: var(--ps-menu-blue-soft) !important;
-    background: var(--ps-menu-bg-hover) !important;
-    border-left-color: var(--ps-menu-blue) !important;
+    color: #007BFF !important;
+    background: transparent !important;
+    border-left-color: transparent !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .li1 > .a1:hover > i:first-child,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.menu-open > .a1 > i:first-child,
 html body.pushsale-app-body .pushsale-main-sidebar .li1.active > .a1 > i:first-child {
-    color: var(--ps-menu-blue-soft) !important;
+    color: #007BFF !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .a1:focus,
@@ -287,10 +292,10 @@ html body.pushsale-app-body .pushsale-main-sidebar span.a2 {
     justify-content: space-between !important;
     box-sizing: border-box !important;
     width: 100% !important;
-    height: var(--ps-menu-l2-height) !important;
-    min-height: var(--ps-menu-l2-height) !important;
+    min-height: 40px !important;
+    height: auto !important;
     margin: 0 !important;
-    padding: 0 14px 0 38px !important;
+    padding: 12px 10px 12px 40px !important;
     color: var(--ps-menu-text-muted) !important;
     background: #fff !important;
     border: 0 !important;
@@ -300,12 +305,12 @@ html body.pushsale-app-body .pushsale-main-sidebar span.a2 {
     font-family: var(--ps-menu-font) !important;
     font-size: 13px !important;
     font-weight: 400 !important;
-    line-height: var(--ps-menu-l2-height) !important;
+    line-height: 1.25 !important;
     text-align: left !important;
     text-decoration: none !important;
     white-space: nowrap !important;
     cursor: pointer !important;
-    transition: background-color .18s ease, color .18s ease !important;
+    transition: background-color .15s ease, color .15s ease !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .a2 > span {
@@ -359,7 +364,7 @@ html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-m
     border: 0 !important;
     outline: 0 !important;
     box-shadow: none !important;
-    font-weight: 700 !important;
+    font-weight: 400 !important;
 }
 
 html body.pushsale-app-body .pushsale-main-sidebar .li2:hover > .a2 *,
@@ -403,21 +408,22 @@ html body.pushsale-app-body div.pushsale-third-menu[role="menu"] {
     min-width: var(--ps-menu-width) !important;
     max-width: min(360px, calc(100vw - var(--ps-menu-width) - 12px)) !important;
     margin: 0 !important;
-    padding: 6px 8px !important;
+    padding: 5px 10px !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     color: #fff !important;
-    background: var(--ps-menu-blue) !important;
+    background: #007BFF !important;
     background-image: none !important;
     border: 0 !important;
-    border-radius: 0 2px 2px 0 !important;
+    border-radius: 0 !important;
     outline: 0 !important;
-    box-shadow: 3px 4px 12px rgba(0, 0, 0, .22) !important;
+    box-shadow: 0 0 5px #666 !important;
     font-family: var(--ps-menu-font) !important;
+    font-size: 12px !important;
     opacity: 0 !important;
-    transform: translateX(-6px) !important;
+    transform: translateX(-12px) !important;
     pointer-events: none !important;
-    transition: opacity var(--ps-menu-flyout), transform var(--ps-menu-flyout) !important;
+    transition: opacity var(--ps-menu-flyout), transform var(--ps-menu-flyout), box-shadow var(--ps-menu-flyout) !important;
     will-change: opacity, transform !important;
 }
 
@@ -457,25 +463,25 @@ html body.pushsale-app-body .pushsale-third-menu a.pushsale-third-link {
     justify-content: space-between !important;
     box-sizing: border-box !important;
     width: 100% !important;
-    height: var(--ps-menu-l3-height) !important;
-    min-height: var(--ps-menu-l3-height) !important;
+    min-height: 36px !important;
+    height: auto !important;
     margin: 0 !important;
-    padding: 0 16px !important;
+    padding: 12px 10px 12px 20px !important;
     gap: 8px !important;
     color: #fff !important;
     background: transparent !important;
     border: 0 !important;
-    border-radius: 3px !important;
+    border-radius: 5px !important;
     outline: 0 !important;
     box-shadow: none !important;
     font-family: var(--ps-menu-font) !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     font-weight: 400 !important;
-    line-height: var(--ps-menu-l3-height) !important;
+    line-height: 1.25 !important;
     text-decoration: none !important;
     white-space: nowrap !important;
     cursor: pointer !important;
-    transition: background-color .12s ease !important;
+    transition: background-color .15s ease !important;
 }
 
 html body.pushsale-app-body .pushsale-third-menu .a3 > span,
@@ -495,8 +501,8 @@ html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link:hover,
 html body.pushsale-app-body .pushsale-third-menu .a3:focus,
 html body.pushsale-app-body .pushsale-third-menu .pushsale-third-link:focus {
     color: #fff !important;
-    background: var(--ps-menu-blue-dark) !important;
-    font-weight: 700 !important;
+    background: #0057B4 !important;
+    font-weight: 400 !important;
     text-decoration: none !important;
 }
 

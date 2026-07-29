@@ -1,6 +1,6 @@
 # ERM Pushsale Project Contract
 
-Living contract. Agent conventions: root `AGENTS.md`. Historical prompt notes: `docs/archive/handoffs/`.
+Living contract. Agent conventions: root `AGENTS.md`. Docs index: `docs/README.md`.
 
 ## 0. Sources of truth
 
@@ -11,13 +11,21 @@ Living contract. Agent conventions: root `AGENTS.md`. Historical prompt notes: `
 | Admin menu routes | `routes/admin/{domain}.php` (required from `web.php`) |
 | Role workspace routes | `routes/roles/{role}.php` |
 | Legacy 301 | `routes/legacy.php` |
+| Extra reports | `config/pushsale_report_routes.php` + `routes/admin/reports.php` |
 | CSS load order | `resources/js/lib/pushsaleStyleRegistry.js` |
 | Page header | `components/layout/PageHeader.jsx` + `pushsale-page-header-contract.css` |
 | Page frame | `PushsalePageShell.jsx` + `pushsale-page-frame-contract.css` |
 | Sidebar + L3 | `AppSidebar.jsx` + `usePushsaleSidebarMenu.js` + `pushsale-sidebar-canonical-contract.css` |
+| Ops table cells | `components/operations/cells/OpsTableCells.jsx` + `OrderLineBreakdown.jsx` |
 | Orphan CSS | `resources/css/_archive/` (not loaded) |
 
-Do **not** create new `CONTEXT_HANDOFF_V*` / versioned UI docs per prompt. Update this file or `AGENTS.md`.
+Do **not** create `CONTEXT_HANDOFF_V*` / versioned UI docs / HTML templates under `docs/`. Update this file, `AGENTS.md`, or the slim set in `docs/README.md`.
+
+## 0b. Route & menu naming
+
+- URL / route name / controller / React page: business English (`/admin/hr/work-shifts`), never menu number or prompt version.
+- Menu code is **data only**: `protected $pageCode = '1.2.3'`, `activeMenuCode`, `data-page-code`.
+- Legacy `/ld/...` → 301 in `routes/legacy.php` only.
 
 ## 1. Kiến trúc giao diện
 
@@ -37,14 +45,16 @@ Thứ tự CSS runtime nằm ở `resources/js/lib/pushsaleStyleRegistry.js`.
 
 - Vendor legacy: `/public/vendor/adminlte2`, `/public/vendor/font-awesome`.
 - CSS page scoped: `resources/css/pushsale-*.css` **chỉ khi đã đăng ký registry**.
-- Thủ kho tác nghiệp (5.1): `pushsale-warehouse-operations-contract.css` (level flags, `nha-mang`, `txt-mof`, `ttgh*`, FAB `fam-*`). HTML gốc tham chiếu: `docs/reference/pushsale-warehouse-operations.html`.
-- Sale tác nghiệp (4.1): `pushsale-sale-operations-contract.css` (ô vuông `level-*` Gọi lần/Chăm sóc, cột Tin nhắn plain `Địa chỉ=…`, TN cần `txt-mof`, trash góc cột Sale). HTML: `docs/reference/pushsale-sale-operations.html`.
-  - **Tin nhắn** = `customer_note` từ landing (thường dạng `Địa chỉ=… | …`) — chỉ hiển thị, không textarea.
-  - **TN cần** = `sale_operation_note` — ô nhập tay `textarea.txt-mof`; icon chat/save nằm **hàng trên** textarea; focus phóng overlay (~280×128) đè ô bên cạnh như Pushsale gốc.
-  - Webhook landing: **không** lưu URL trang/tracking vào `order_items.product_name`. Field LadiPage map sai → packet `needs_review` + `_landing_webhook_mapping` (full fields) trên giám sát hệ thống / lead log.
-  - Date range dùng `DateRangeFilter` single-button (class `ps-date-range-control`) — **không** dùng dual-grid/`::after` hyphen của `.ps-date-filter` cũ.
-- **i18n**: Mọi chuỗi UI mới/sửa (toast, title, label, aria, dialog) phải thêm key ở `resources/js/i18n/locales/{vi,en}/…` và gọi qua `useT()` / `__()` — không hardcode tiếng Việt trong React/PHP khi user-facing.
-- Hồ sơ khách hàng (4.2 / route role khác nhau, cùng trang): `pushsale-customer-profile-contract.css` — filter 4 hàng theo Pushsale; cột họ tên/SP dùng `OrderStatusFlags` + `OrderProductsBreakdown`; dialog lịch sử mua hàng table-layout cố định.
+- Thủ kho tác nghiệp (5.1): `pushsale-warehouse-operations-contract.css` + `WarehouseOrderTable` (`variant=warehouse`).
+- Kế toán tác nghiệp (6.1): cùng bảng với `variant="accounting"` (icon retweet, không clipboard tách đơn).
+- Sale tác nghiệp (4.1): `pushsale-sale-operations-contract.css` + `SaleWorkspaceTable` + shared `OpsTableCells`.
+  - **Tin nhắn** = `customer_note` từ landing — chỉ hiển thị.
+  - **TN cần** = `sale_operation_note` — `textarea.txt-mof`; chat float trái + save phải phía trên textarea; focus overlay như Pushsale.
+  - Sidebar tokens: Arial, `#6C7D8B` / `#007BFF` / L3 `#0057B4`; slide `.3s ease-in-out`, accordion `.5s`, flyout `.5s`.
+  - Webhook landing: **không** lưu URL trang/tracking vào `order_items.product_name`.
+  - Date range: `DateRangeFilter` single-button (`ps-date-range-control`).
+- **i18n**: chuỗi UI qua `useT()` / `__()` + locale files.
+- Hồ sơ khách hàng: `pushsale-customer-profile-contract.css` + shared product/money/flag cells.
 - Cuối cascade (cố định):
   1. `pushsale-unified-page-shell-contract.css`
   2. `pushsale-adminlte-canonical-contract.css`

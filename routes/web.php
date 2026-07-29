@@ -8,7 +8,7 @@
  * - routes/roles/*.php   → không gian làm việc theo vai trò (/sales, /marketing, …)
  * - routes/legacy.php    → 301 từ URL đời Pushsale cũ
  *
- * Quy ước đặt tên: docs/PUSHSALE_ROUTE_CONTRACT.md.
+ * Quy ước đặt tên: AGENTS.md + docs/PROJECT_CONTRACT.md (§0b).
  */
 
 use App\Http\Controllers\Auth\LoginController;

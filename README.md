@@ -1,14 +1,28 @@
 # ERM Pushsale
 
-Laravel/Inertia ERM Pushsale project.
+Laravel + Inertia/React ERM. Deploy target: `salesloop.vn`.
 
-## Project contracts
+## Living docs
 
-Read these files before changing UI/business flow:
+Đọc trước khi sửa UI / route / nghiệp vụ:
 
-- `docs/PROJECT_CONTRACT.md`
-- `docs/LANDING_CONNECTION_BACKEND_RESET_V122.md`
-- `docs/context-history/README_v125_manual_distribution_landing_fix.md`
+- [`AGENTS.md`](./AGENTS.md) — conventions agent
+- [`docs/README.md`](./docs/README.md) — index
+- [`docs/PROJECT_CONTRACT.md`](./docs/PROJECT_CONTRACT.md) — UI/CSS/shell/menu
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) · [`docs/OPERATIONS.md`](./docs/OPERATIONS.md) · [`docs/INTEGRATIONS.md`](./docs/INTEGRATIONS.md) · [`docs/DEPLOY.md`](./docs/DEPLOY.md)
+
+Không tạo `CONTEXT_HANDOFF_V*` / HTML template trong `docs/`.
+
+## Quick start
+
+```bash
+composer install && pnpm install
+cp .env.example .env && php artisan key:generate
+php artisan migrate --seed
+composer run dev
+```
+
+Demo password: `password`. Email theo `{role}@saleops.local` — xem `database/seeders/AccountSeeder.php`.
 
 ## Deploy checklist
 
@@ -20,7 +34,7 @@ pnpm build
 php artisan erm:test-all --route-smoke --smoke-limit=30 --json
 ```
 
-Do not delete legacy runtime vendor assets unless all references are migrated:
+Giữ vendor runtime legacy nếu còn reference:
 
 - `public/vendor/font-awesome`
 - `public/vendor/adminlte2`

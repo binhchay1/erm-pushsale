@@ -97,22 +97,25 @@ function ProductLine({ item, index, forceUpsell = false, showUpsellDivider = fal
         || (!item.productId && !item.product_id && unitPrice <= 0);
 
     return (
-        <div
+        <tr
             key={item.itemId ?? item.id ?? `${name}-${index}`}
-            className={`ps-order-products-row ${isUpsell ? 'is-upsale-line' : 'is-main-line'} ${showUpsellDivider ? 'has-upsale-divider' : ''}`.trim()}
-            role="listitem"
+            className={`row-sp ${isUpsell ? 'is-upsale-line' : 'is-main-line'} ${showUpsellDivider ? 'has-upsale-divider' : ''}`.trim()}
         >
-            <span className="ps-order-product-name" title={looksLikeUrl ? String(rawName) : name}>
-                {showUpsellDivider ? (
-                    <span className="ps-order-upsale-icon" title="Upsale" aria-label="Upsale">
-                        <i className="fa fa-level-up" aria-hidden="true" />
-                    </span>
-                ) : null}
-                <span>{name}</span>
-            </span>
-            <span className="ps-order-product-qty">{textOnly && quantity <= 1 ? '' : `x${quantity}`}</span>
-            <span className="ps-order-product-price">{unitPrice > 0 ? formatCurrency(unitPrice) : ''}</span>
-        </div>
+            <td>
+                <span className="ten-sp ps-order-product-name" title={looksLikeUrl ? String(rawName) : name} style={{ textOverflow: 'ellipsis' }}>
+                    {showUpsellDivider ? (
+                        <span className="ps-order-upsale-icon" title="Upsale" aria-label="Upsale">
+                            <i className="fa fa-level-up" aria-hidden="true" />
+                        </span>
+                    ) : null}
+                    <span>{name}</span>
+                </span>
+            </td>
+            <td className="text-center no-wrap">
+                {textOnly && quantity <= 1 ? '' : `\u00a0 x${quantity} \u00a0`}
+            </td>
+            <td className="text-right">{unitPrice > 0 ? formatCurrency(unitPrice) : ''}</td>
+        </tr>
     );
 }
 
@@ -128,21 +131,27 @@ export function OrderProductsBreakdown({ items = [], order = null, empty = '—'
     const showDashBeforeUpsell = mainItems.length > 0 && upsellItems.length > 0;
 
     return (
-        <div className="ps-order-products-breakdown" role="list" aria-label="Sản phẩm trong đơn">
-            {mainItems.map((item, index) => (
-                <ProductLine key={item.itemId ?? item.id ?? `main-${index}`} item={item} index={index} />
-            ))}
-            {showDashBeforeUpsell ? <div className="ps-order-products-upsell-rule" aria-hidden="true">—</div> : null}
-            {upsellItems.map((item, index) => (
-                <ProductLine
-                    key={item.itemId ?? item.id ?? `upsell-${index}`}
-                    item={item}
-                    index={index}
-                    forceUpsell
-                    showUpsellDivider={index === 0 && !showDashBeforeUpsell}
-                />
-            ))}
-        </div>
+        <table className="tb-in-sp ps-order-products-breakdown" aria-label="Sản phẩm trong đơn">
+            <tbody>
+                {mainItems.map((item, index) => (
+                    <ProductLine key={item.itemId ?? item.id ?? `main-${index}`} item={item} index={index} />
+                ))}
+                {showDashBeforeUpsell ? (
+                    <tr className="row-sp ps-order-products-upsell-rule-row" aria-hidden="true">
+                        <td colSpan={3} className="ps-order-products-upsell-rule">—</td>
+                    </tr>
+                ) : null}
+                {upsellItems.map((item, index) => (
+                    <ProductLine
+                        key={item.itemId ?? item.id ?? `upsell-${index}`}
+                        item={item}
+                        index={index}
+                        forceUpsell
+                        showUpsellDivider={index === 0 && !showDashBeforeUpsell}
+                    />
+                ))}
+            </tbody>
+        </table>
     );
 }
 
@@ -168,12 +177,21 @@ export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount =
     };
 
     return (
-        <div className="ps-order-money-breakdown" aria-label="Thành tiền đơn hàng">
-            <div title="Thành tiền">{moneyOrBlank(subtotal)}</div>
-            <div title="Chiết khấu">{discount > 0 ? `-${formatCurrency(discount)}` : (showZeroDiscount ? formatCurrency(0) : '')}</div>
-            <div title="VAT">{moneyOrBlank(vat, { always: true })}</div>
-            <div title="Phí vận chuyển">{moneyOrBlank(shippingFee)}</div>
-            <strong title="Tổng tiền đơn hàng">{moneyOrBlank(total) || (subtotal > 0 ? formatCurrency(total) : '')}</strong>
-        </div>
+        <table className="tb-in-sp ps-order-money-breakdown" aria-label="Thành tiền đơn hàng">
+            <tbody>
+                <tr><td><span title="Thành tiền">{moneyOrBlank(subtotal)}</span></td></tr>
+                <tr><td><span title="Chiết khấu">{discount > 0 ? `-${formatCurrency(discount)}` : (showZeroDiscount ? formatCurrency(0) : '')}</span></td></tr>
+                <tr><td><span title="VAT">{moneyOrBlank(vat, { always: true })}</span></td></tr>
+                <tr><td><span title="Phí vận chuyển">{moneyOrBlank(shippingFee)}</span></td></tr>
+                <tr>
+                    <td>
+                        <span title="Tổng tiền đơn hàng" style={{ fontWeight: 'bold', fontSize: 13 }}>
+                            {moneyOrBlank(total) || (subtotal > 0 ? formatCurrency(total) : '')}
+                        </span>
+                        &nbsp;
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     );
 }

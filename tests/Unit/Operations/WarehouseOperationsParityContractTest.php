@@ -43,7 +43,5 @@ class WarehouseOperationsParityContractTest extends TestCase
         $this->assertStringContainsString('orangered', $css);
         $this->assertStringContainsString('.td-message', $css);
         $this->assertStringContainsString('textarea.txt-mof', $css);
-        $this->assertFileExists(dirname(__DIR__, 3).'/docs/reference/pushsale-sale-operations.html');
-        $this->assertFileExists(dirname(__DIR__, 3).'/docs/reference/pushsale-warehouse-operations.html');
     }
 }

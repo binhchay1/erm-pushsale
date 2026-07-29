@@ -48,6 +48,7 @@ export default function AccountingOperations({
                     actionApiBase={actionApiBase}
                     filterOptions={filterOptions}
                     canDeleteOrder={canDeleteOrder}
+                    variant="accounting"
                 />
                 <PushsalePagination meta={report.rows?.meta} routeUrl={routeUrl} filters={filters} itemLabel="đơn" />
             </section>

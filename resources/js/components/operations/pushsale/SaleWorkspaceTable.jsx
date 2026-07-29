@@ -4,66 +4,56 @@ import { toast } from 'sonner';
 
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
+import {
+    CustomerContactCell,
+    DeliveryStatusCell,
+    MessageCell,
+    NextOperationCell,
+    OperationResultCell,
+    OpsIconButton,
+    OrderCodeCell,
+    SaleAssigneeCell,
+    SourceDataCell,
+    TimeRemainingCell,
+    moneyDisplay,
+} from '@/components/operations/cells/OpsTableCells';
 import { formatCurrency } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
 import { useConfirm } from '@/hooks/use-confirm';
 import { PushsalePagination } from './PushsalePagination';
 
-const money = (value) => formatCurrency(Number(value ?? 0));
-const externalHref = (url) => {
-    const value = String(url ?? '').trim();
-    if (!value) return null;
-    if (/^(https?:)?\/\//i.test(value)) return value.startsWith('//') ? `https:${value}` : value;
-    return `https://${value}`;
-};
-const dateTime = (value) => {
-    if (!value) return '';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
-    return new Intl.DateTimeFormat('vi-VN', {
-        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
-    }).format(date);
-};
+function CallButton({ order, actionBaseUrl }) {
+    const call = () => router.post(`${actionBaseUrl}/orders/${order.id}/call`, {}, {
+        preserveScroll: true,
+        onSuccess: () => toast.success('Đã ghi nhận cuộc gọi.'),
+        onError: (errors) => toast.error(errors.order ?? 'Không thể ghi nhận cuộc gọi.'),
+    });
 
-function TimeRemaining({ order }) {
-    const [, tick] = useState(0);
-    useEffect(() => {
-        const timer = window.setInterval(() => tick((value) => value + 1), 60000);
-        return () => window.clearInterval(timer);
-    }, []);
-
-    if (!order.nextOperationAt) return <span className="ps-time-empty">—</span>;
-    const milliseconds = new Date(order.nextOperationAt).getTime() - Date.now();
-    const absoluteMinutes = Math.floor(Math.abs(milliseconds) / 60000);
-    const hours = Math.floor(absoluteMinutes / 60);
-    const minutes = absoluteMinutes % 60;
     return (
-        <span className={milliseconds < 0 ? 'ps-time-overdue' : 'ps-time-active'}>
-            {milliseconds < 0 ? 'Quá ' : 'Còn '}{hours ? `${hours}h ` : ''}{minutes}p
-        </span>
+        <OpsIconButton
+            title="Ghi nhận cuộc gọi"
+            icon="phone"
+            onClick={call}
+            disabled={!order.canCall}
+        />
     );
 }
 
-function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
+function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
     const t = useT();
     const [value, setValue] = useState('');
     const [saving, setSaving] = useState(false);
     const [focused, setFocused] = useState(false);
     const textareaRef = useRef(null);
 
-    const syncHeight = (expanded) => {
+    useEffect(() => {
         const node = textareaRef.current;
         if (!node) return;
-        if (expanded) {
+        if (focused || value.length > 0) {
             node.style.height = '128px';
             return;
         }
         node.style.height = '48px';
-        node.style.height = `${Math.min(48, Math.max(48, node.scrollHeight))}px`;
-    };
-
-    useEffect(() => {
-        syncHeight(focused || value.length > 0);
     }, [value, focused]);
 
     const save = () => {
@@ -79,33 +69,32 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
         });
     };
 
-    // Pushsale: nhãn TN cần → hàng icon (chat trái / save phải) → textarea.
+    // Pushsale: label → float-left comment + right save → textarea (.mof-container)
     return (
-        <div className={`ps-operation-note-editor area2${focused ? ' is-focused' : ''}`}>
-            <span className="fb span-col ttgh7 ps-operation-stage-label">{order.currentOperation || t('operations.sale_workspace.default_stage')}</span>
-            <div className="ps-icon-rail ps-note-toolbar">
-                <button
-                    type="button"
-                    className="btn-icon aoh ps-note-tool ps-note-tool-left"
-                    onClick={() => onMessages(order)}
+        <td className={`area2 hidden-xs ps-operation-note-editor${focused ? ' is-focused' : ''}`}>
+            <span className="fb span-col ttgh7" style={{ cursor: 'pointer', display: 'block', marginTop: 2 }}>
+                {order.currentOperation || t('operations.sale_workspace.default_stage')}
+            </span>
+            <div className="text-right">
+                <OpsIconButton
                     title={t('operations.sale_workspace.internal_message')}
-                >
-                    <i className="fa fa-commenting-o" />
-                </button>
-                <button
-                    type="button"
-                    className="btn-icon aoh ps-note-tool"
-                    onClick={save}
-                    disabled={saving}
-                    title={t('operations.sale_workspace.save_note')}
-                >
-                    <i className="fa fa-save" />
-                </button>
+                    icon="commenting-o"
+                    onClick={() => onMessages(order)}
+                    style={{ float: 'left' }}
+                />
+                <div className="text-right">
+                    <OpsIconButton
+                        title={t('operations.sale_workspace.save_note')}
+                        icon="save"
+                        onClick={save}
+                        disabled={saving}
+                    />
+                </div>
             </div>
-            <div className="mof-container ps-note-mof">
+            <div className="mof-container">
                 <textarea
                     ref={textareaRef}
-                    className="form-control txt-mof txt-dotted ps-note-inline-textarea"
+                    className="form-control txt-mof txt-dotted"
                     maxLength={500}
                     rows={2}
                     value={value}
@@ -120,17 +109,10 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
                     placeholder=""
                 />
             </div>
-        </div>
+            <div style={{ clear: 'both' }} />
+            <span className="lnk-noidung-other" style={{ marginTop: 4, display: 'inline-block' }} />
+        </td>
     );
-}
-
-function CallButton({ order, actionBaseUrl }) {
-    const call = () => router.post(`${actionBaseUrl}/orders/${order.id}/call`, {}, {
-        preserveScroll: true,
-        onSuccess: () => toast.success('Đã ghi nhận cuộc gọi.'),
-        onError: (errors) => toast.error(errors.order ?? 'Không thể ghi nhận cuộc gọi.'),
-    });
-    return <button type="button" className="btn-icon" onClick={call} disabled={!order.canCall} title="Ghi nhận cuộc gọi"><i className="fa fa-phone" /></button>;
 }
 
 export function SaleWorkspaceTable({
@@ -166,7 +148,10 @@ export function SaleWorkspaceTable({
     }, [someSelected]);
 
     const toggleAll = () => setSelected(allSelected ? [] : rowIds);
-    const toggle = (id) => setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+    const toggle = (id) => setSelected((current) => (
+        current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
+    ));
+
     const deleteData = async (order) => {
         const ok = await ask({
             description: `Bạn chắc chắn muốn xóa data của ${order.customerName || order.customerPhone || `#${order.id}`}?`,
@@ -184,149 +169,205 @@ export function SaleWorkspaceTable({
     return (
         <>
             <div className="table-responsive ps-sale-table-wrap">
-                <table className="table table-bordered table-striped table-sale ps-sale-operation-table">
-                    <colgroup>
-                        <col className="c-check" /><col className="c-code" /><col className="c-source" /><col className="c-sale" /><col className="c-customer" /><col className="c-message" /><col className="c-needed" /><col className="c-result" /><col className="c-next" /><col className="c-time" /><col className="c-products" /><col className="c-money" /><col className="c-deposit" /><col className="c-delivery" />
-                    </colgroup>
-                    <thead><tr>
-                        <th><input ref={checkAllRef} type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="Chọn tất cả" /></th>
-                        <th>Mã đơn</th>
-                        <th>Nguồn dữ liệu<br />Ngày data về</th>
-                        <th>Sale<br />Ngày nhận data</th>
-                        <th>Họ tên<br />Số điện thoại<br />Ngày muốn nhận hàng</th>
-                        <th>Tin nhắn</th>
-                        <th>TN cần</th>
-                        <th>Kết quả</th>
-                        <th>TN tiếp</th>
-                        <th>Sau<br />Còn lại</th>
-                        <th>Sản phẩm - Số lượng - Đơn giá</th>
-                        <th>Thành tiền<br />CK / VAT SP<br />Phí VC / Tổng tiền</th>
-                        <th>Đặt cọc</th>
-                        <th>Trạng thái giao hàng<br />Ngày muốn nhận hàng</th>
-                    </tr></thead>
+                <table className="table table-bordered table-multi-select table-sale ps-sale-operation-table">
+                    <thead>
+                        <tr className="drags-area">
+                            <th>
+                                <span className="chk-all">
+                                    <input ref={checkAllRef} type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="Chọn tất cả" />
+                                </span>
+                            </th>
+                            <th>Mã đơn</th>
+                            <th className="text-center no-wrap area5 hidden-xs">
+                                <span className="span-col" style={{ width: 80 }}>Nguồn dữ liệu</span>
+                                <br />
+                                Ngày data về
+                            </th>
+                            <th className="text-center no-wrap area5 hidden-xs">
+                                <span className="span-col" style={{ minWidth: 120, width: 120 }}>
+                                    Sale
+                                    <br />
+                                    Ngày nhận data
+                                </span>
+                            </th>
+                            <th className="text-center no-wrap area1">
+                                <span className="span-col text-center">
+                                    Họ tên
+                                    <br />
+                                    <span className="span-col" style={{ display: 'inline-block', minWidth: 130 }}>Số điện thoại</span>
+                                    <br />
+                                    Ngày muốn nhận hàng
+                                </span>
+                            </th>
+                            <th className="text-center no-wrap area1 hidden-xs">
+                                <span className="span-col td-message td-793">Tin nhắn</span>
+                            </th>
+                            <th className="text-center no-wrap area2 hidden-xs">
+                                <span className="span-col" style={{ display: 'inline-block', minWidth: 150 }}>TN cần</span>
+                            </th>
+                            <th className="text-center no-wrap area2">
+                                <span className="span-col" style={{ width: 150 }}>Kết quả</span>
+                            </th>
+                            <th className="text-center no-wrap area2 hidden-xs">
+                                <span className="span-col" style={{ minWidth: 80 }}>TN tiếp</span>
+                            </th>
+                            <th className="text-center no-wrap area2 hidden-xs">
+                                <span className="span-col">Sau</span>
+                                <br />
+                                Còn lại
+                            </th>
+                            <th className="text-center no-wrap area3 hidden-xs">
+                                <span className="span-col" style={{ display: 'inline-block', minWidth: 200 }}>Sản phẩm - Số lượng - Đơn giá</span>
+                            </th>
+                            <th className="text-center no-wrap area3 hidden-xs">
+                                <span className="span-col">
+                                    Thành tiền
+                                    <br />
+                                    CK / VAT SP
+                                    <br />
+                                    Phí VC / Tổng tiền
+                                </span>
+                            </th>
+                            <th className="text-center no-wrap area3 hidden-xs">
+                                <span className="span-col">Đặt cọc</span>
+                            </th>
+                            <th className="text-center no-wrap area4">
+                                <span className="span-col">
+                                    Trạng thái giao hàng
+                                    <br />
+                                    Ngày muốn nhận hàng
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
                     <tbody>
                         {rows.map((order, index) => {
                             const id = String(order.id);
                             const isSelected = selected.includes(id);
+
                             return (
-                                <tr key={order.id} className={`contact-row item${order.id} ${order.closedAt ? 'is-closed' : ''} ${isSelected ? 'row-selected' : ''}`}>
+                                <tr
+                                    key={order.id}
+                                    data-id={order.id}
+                                    className={`contact-row item${order.id} ${order.closedAt ? 'is-closed' : ''} ${isSelected ? 'row-selected' : ''}`}
+                                >
                                     <td className="text-center">
-                                        <input type="checkbox" checked={isSelected} onChange={() => toggle(id)} aria-label={`Chọn ${order.customerName ?? order.customerPhone}`} />
-                                        <div className="ps-row-number">{Number(meta?.from ?? 1) + index}</div>
-                                    </td>
-                                    <td className="text-center ps-code-cell">
-                                        <div className="ps-icon-rail">
-                                            <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onDataViewHistory(order)} title="Lịch sử xem thông tin số"><i className="fa fa-history" /></button>
-                                        </div>
-                                        {order.orderCode ? (
-                                            <button type="button" className="ps-order-code-link" onClick={() => onDataViewHistory(order)}>{order.orderCode}</button>
-                                        ) : <span className="ps-order-code-empty" title="Mã đơn chỉ sinh sau khi chốt đơn">&nbsp;</span>}
-                                    </td>
-                                    <td className="text-center">
-                                        {externalHref(order.sourceUrl) ? (
-                                            <a href={externalHref(order.sourceUrl)} target="_blank" rel="noopener noreferrer" title={order.sourceUrl}>
-                                                {order.sourceName}
-                                            </a>
-                                        ) : (
-                                            <span>{order.sourceName}</span>
-                                        )}<br />
-                                        <span className="small-tip">({dateTime(order.dataArrivedAt)})</span>
-                                    </td>
-                                    <td className="text-center ps-sale-cell area5">
-                                        <div className="ps-icon-rail">
-                                            {order.canDeleteData ? (
-                                                <button type="button" className="btn-icon aoh ps-cell-action ps-sale-delete" onClick={() => deleteData(order)} title="Xóa data" aria-label="Xóa data">
-                                                    <i className="fa fa-trash" />
-                                                </button>
-                                            ) : <span className="ps-icon-rail-spacer" aria-hidden="true" />}
-                                        </div>
-                                        <div className="ps-sale-name-block">
-                                            <b>{order.saleName}</b>
-                                            {order.saleUsername ? <span className="small-tip">({order.saleUsername})</span> : null}
-                                        </div>
-                                        <div className="small-tip">({dateTime(order.assignedAt)})</div>
-                                    </td>
-                                    <td className="ps-customer-cell area1 ps-contact-name-phone" title={`${order.id} | ${order.sourceType || ''}`}>
-                                        <div className="ps-icon-rail">
-                                            <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onEdit(order, false)} title="Cập nhật đơn"><i className="fa fa-edit" /></button>
-                                        </div>
-                                        <button type="button" className="ps-customer-name-link" onClick={() => onPurchaseHistory(order)}>{order.customerName || '—'}</button>
-                                        {(order.phoneCarrier || order.carrierLabel) ? (
-                                            <span className={`nha-mang ps-carrier ps-carrier-${order.phoneCarrierKey || ''}`}>
-                                                {order.carrierLabel || `[${order.phoneCarrier}]`}
-                                            </span>
-                                        ) : null}
-                                        <div className="no-wrap ps-contact-phone-row">
-                                            <div className="ps-phone-main">
-                                                <button type="button" className="ps-phone-link" onClick={() => onDuplicateOrders(order)} title="Danh sách trùng số">{order.customerPhone}</button>
-                                                <CallButton order={order} actionBaseUrl={actionBaseUrl} />
-                                            </div>
-                                            <OrderStatusFlags row={order} onDuplicate={onDuplicateOrders ? () => onDuplicateOrders(order) : null} className="ps-contact-flags" />
-                                        </div>
-                                        <div className="text-left khkn sline">{order.customerExtraNote || ''}</div>
-                                        {order.desiredDeliveryAt && <span className="small-tip">{dateTime(order.desiredDeliveryAt)}</span>}
-                                        {order.pendingSupplementCount > 0 && <CustomerSupplementPacketsDialog order={order} count={order.pendingSupplementCount} />}
-                                    </td>
-                                    <td className="ps-message-cell area1">
-                                        <span className="td-message" title={order.customerNote || ''} onClick={() => onMessages(order)}>
-                                            {order.customerNote || '—'}
+                                        <span className="chk-item">
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => toggle(id)}
+                                                aria-label={`Chọn ${order.customerName ?? order.customerPhone}`}
+                                                id={`sale-chk-${order.id}`}
+                                            />
+                                            <label htmlFor={`sale-chk-${order.id}`}>{Number(meta?.from ?? 1) + index}</label>
                                         </span>
                                     </td>
-                                    <td><OperationNoteEditor order={order} actionBaseUrl={actionBaseUrl} onMessages={onMessages} /></td>
-                                    <td className="ps-result-cell">
-                                        <div className="ps-result-cell-inner">
-                                            <div className="ps-icon-rail">
-                                                <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onHistory(order)} title="Lịch sử tác nghiệp"><i className="fa fa-history" /></button>
-                                            </div>
-                                            {order.canChangeStatus ? (
-                                                <select className="form-control ps-result-select" value="" onChange={(event) => {
-                                                    const option = operationStatusOptions.find((item) => item.value === event.target.value);
-                                                    if (option) onResult(order, option);
-                                                    event.target.value = '';
-                                                }}>
-                                                    <option value="">--Chọn--</option>
-                                                    {operationStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                                                </select>
-                                            ) : (
-                                                <b className="ps-result-label">{order.operationResult || order.closingStatusLabel || ''}</b>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="text-center ps-next-cell">
-                                        <div className="ps-icon-rail">
-                                            <button type="button" className="btn-icon aoh ps-cell-action" onClick={() => onDesiredDate(order)} title="Cập nhật tác nghiệp tiếp"><i className="fa fa-undo" /></button>
-                                        </div>
-                                        {order.nextOperationAt ? <span className="small-tip">{dateTime(order.nextOperationAt)}</span> : '—'}
-                                    </td>
-                                    <td className="text-center"><TimeRemaining order={order} /></td>
-                                    <td className="ps-order-products-cell">
+
+                                    <OrderCodeCell
+                                        orderCode={order.orderCode}
+                                        onHistory={() => onDataViewHistory(order)}
+                                    />
+
+                                    <SourceDataCell
+                                        sourceName={order.sourceName}
+                                        sourceUrl={order.sourceUrl}
+                                        dataArrivedAt={order.dataArrivedAt}
+                                    />
+
+                                    <SaleAssigneeCell
+                                        saleName={order.saleName}
+                                        saleUsername={order.saleUsername}
+                                        assignedAt={order.assignedAt}
+                                        canDelete={Boolean(order.canDeleteData)}
+                                        onDelete={() => deleteData(order)}
+                                    />
+
+                                    <CustomerContactCell
+                                        order={order}
+                                        onEdit={() => onEdit(order, false)}
+                                        onPurchaseHistory={() => onPurchaseHistory(order)}
+                                        onDuplicateOrders={() => onDuplicateOrders(order)}
+                                        phoneActions={<CallButton order={order} actionBaseUrl={actionBaseUrl} />}
+                                        flags={(
+                                            <OrderStatusFlags
+                                                row={order}
+                                                onDuplicate={onDuplicateOrders ? () => onDuplicateOrders(order) : null}
+                                                className="ps-contact-flags"
+                                            />
+                                        )}
+                                        supplement={order.pendingSupplementCount > 0 ? (
+                                            <CustomerSupplementPacketsDialog order={order} count={order.pendingSupplementCount} />
+                                        ) : null}
+                                    />
+
+                                    <MessageCell
+                                        note={order.customerNote}
+                                        onClick={() => onMessages(order)}
+                                    />
+
+                                    <OperationNeededCell
+                                        order={order}
+                                        actionBaseUrl={actionBaseUrl}
+                                        onMessages={onMessages}
+                                    />
+
+                                    <OperationResultCell
+                                        canChangeStatus={Boolean(order.canChangeStatus)}
+                                        options={operationStatusOptions}
+                                        currentLabel={order.operationResult || order.closingStatusLabel || ''}
+                                        onHistory={() => onHistory(order)}
+                                        onChange={(option) => onResult(order, option)}
+                                    />
+
+                                    <NextOperationCell
+                                        nextOperationAt={order.nextOperationAt}
+                                        onEdit={() => onDesiredDate(order)}
+                                    />
+
+                                    <TimeRemainingCell nextOperationAt={order.nextOperationAt} />
+
+                                    <td className="text-left area3 hidden-xs">
                                         <OrderProductsBreakdown items={order.products ?? []} order={order} />
                                     </td>
-                                    <td className="text-right ps-money-cell ps-order-money-cell">
+
+                                    <td className="no-wrap area3 text-right hidden-xs">
                                         <OrderMoneyBreakdown row={order} items={order.products ?? []} />
                                     </td>
-                                    <td className="text-right">{money(order.deposit)}</td>
-                                    <td className={`text-center ttgh ttgh-${order.deliveryStatusValue || 'none'}`}>
-                                        <div className="ps-icon-rail">
-                                            {order.closedAt ? <button type="button" className="btn-icon aoh" onClick={() => onHistory(order, 'accounting')} title="Lịch sử kế toán"><i className="fa fa-history" /></button> : null}
-                                            <button type="button" className="btn-icon aoh" onClick={() => onDesiredDate(order)} title="Cập nhật ngày muốn nhận hàng"><i className="fa fa-calendar" /></button>
-                                        </div>
-                                        <b>{order.deliveryStatus || '—'}</b><br />
-                                        {order.trackingNumber && <span>{order.trackingNumber}</span>}
-                                        {order.desiredDeliveryAt && <div className="small-tip">({dateTime(order.desiredDeliveryAt)})</div>}
+
+                                    <td className="no-wrap area3 text-right hidden-xs">
+                                        {moneyDisplay(order.deposit) || (Number(order.deposit) === 0 ? formatCurrency(0) : '')}
                                     </td>
+
+                                    <DeliveryStatusCell
+                                        deliveryStatus={order.deliveryStatus}
+                                        deliveryStatusValue={order.deliveryStatusValue}
+                                        trackingNumber={order.trackingNumber}
+                                        desiredDeliveryAt={order.desiredDeliveryAt}
+                                        onCalendar={() => onDesiredDate(order)}
+                                        onHistory={() => onHistory(order, 'accounting')}
+                                        showAccountingHistory={Boolean(order.closedAt)}
+                                    />
                                 </tr>
                             );
                         })}
-                        {!rows.length && <tr><td colSpan={14} className="ps-sale-empty">Không có dữ liệu phù hợp.</td></tr>}
+                        {!rows.length && (
+                            <tr>
+                                <td colSpan={14} className="ps-sale-empty text-center">Không có dữ liệu phù hợp.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
+
             <PushsalePagination meta={meta} routeUrl={routeUrl} filters={filters} />
+
             {selected.length > 0 && (
                 <div className="ps-sale-selection-bar">
                     <strong>Đã chọn {selected.length} dòng</strong>
-                    <button type="button" className="btn btn-primary btn-sm" onClick={() => onBulkClose(selected)}><i className="fa fa-check-square-o" /> Chốt đơn nhiều</button>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={() => onBulkClose(selected)}>
+                        <i className="fa fa-check-square-o" /> Chốt đơn nhiều
+                    </button>
                     <button type="button" className="btn btn-default btn-sm" onClick={() => setSelected([])}>Bỏ chọn</button>
                 </div>
             )}

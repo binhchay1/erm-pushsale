@@ -257,19 +257,23 @@ function CareNoteCell({ row, actionApiBase, onCare, onMessage }) {
 
     return (
         <td className="text-left c-care-body">
-            <div className="small-tip text-center">{formatDateTime(row.warehouseCareUpdatedAt, { withSeconds: false })}</div>
-            <span className="span-col icon-col"><InlineIconButton title="Tác nghiệp care đơn" icon="refresh" onClick={onCare} /></span>
-            <span className="span-col care-text">
-                <span className="ps-wh-magenta">{row.warehouseCareStatusLabel || row.warehouseCareStatus || ''}</span>
-                <div><span title="Người đang xử lý" className="small-tip">({row.warehouseCareName || ''})</span></div>
+            <div style={{ paddingBottom: 4 }} className="small-tip text-center">
+                {formatDateTime(row.warehouseCareUpdatedAt, { withSeconds: false })}
+            </div>
+            <span className="span-col" style={{ width: 20 }}>
+                <InlineIconButton title="Tác nghiệp care đơn" icon="refresh" onClick={onCare} />
             </span>
-            <div className="mof-container text-left ps-care-note-mof">
-                <button type="button" className="btn-icon aoh ps-care-note-ear ps-care-note-ear-left" title="Tin nhắn nội bộ" onClick={onMessage}>
-                    <i className="fa fa-commenting-o" />
-                </button>
-                <button type="button" className="btn-icon aoh ps-care-note-ear ps-care-note-ear-right" title="Lưu tin nhắn nội bộ" onClick={saveNote} disabled={saving}>
-                    <i className="fa fa-save" />
-                </button>
+            <span className="span-col" style={{ width: 'calc(100% - 90px)', textOverflow: 'ellipsis', maxWidth: 150 }}>
+                <span className="ps-wh-magenta">{row.warehouseCareStatusLabel || row.warehouseCareStatus || ''}</span>
+                <div>
+                    <span title="Người đang xử lý" className="small-tip">({row.warehouseCareName || ''})</span>
+                </div>
+            </span>
+            <span className="span-col" style={{ width: 60 }}>
+                <InlineIconButton title="Lưu ghi chú" icon="save" onClick={saveNote} disabled={saving} />
+                <InlineIconButton title="Tin nhắn nội bộ" icon="commenting-o" onClick={onMessage} />
+            </span>
+            <div className="mof-container text-left">
                 <textarea
                     ref={textareaRef}
                     className="txt-mof form-control txt-dotted"
@@ -284,12 +288,20 @@ function CareNoteCell({ row, actionApiBase, onCare, onMessage }) {
                 />
             </div>
             <div style={{ clear: 'both' }} />
-            <span className="item-noidung-other">{row.lastInternalMessage || ''}</span>
+            <span className="item-noidung-other" style={{ display: 'inline-block', marginTop: 4 }}>{row.lastInternalMessage || ''}</span>
         </td>
     );
 }
 
-export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterOptions = {}, canDeleteOrder = false }) {
+export function WarehouseOrderTable({
+    rows = [],
+    apiBase,
+    actionApiBase,
+    filterOptions = {},
+    canDeleteOrder = false,
+    variant = 'warehouse',
+}) {
+    const isAccounting = variant === 'accounting';
     const [action, setAction] = useState(null);
     const [detailOrderId, setDetailOrderId] = useState(null);
     const [selected, setSelected] = useState([]);
@@ -399,21 +411,27 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                     <span className="small-tip">{row.saleUsername ? `(${row.saleUsername})` : ''}</span>
                                 </td>
                                 <td className="text-center no-wrap ps-wh-code-cell">
-                                    <div className="ps-wh-code-stack">
-                                        <div className="ps-wh-code-action-row">
-                                            <button type="button" className="btn-icon aoh orange ps-wh-code-action" title="Thay đổi mã đơn" onClick={() => setAction({ type: 'changeCode', row })}>
-                                                <i className="fa fa-repeat" />
-                                            </button>
-                                        </div>
-                                        <div className="small-tip sline">{formatDateTime(row.dataArrivedAt, { withSeconds: false })}</div>
-                                        <button type="button" className="item-md ps-wh-order-code" onClick={() => setDetailOrderId(row.id)}>{row.orderCode}</button>
-                                        <div className="small-tip sline">{formatDateTime(row.closedAt, { withSeconds: false })}</div>
+                                    <div className="text-right">
+                                        <button
+                                            type="button"
+                                            className="btn-icon aoh orange ps-wh-code-action"
+                                            title="Thay đổi mã đơn"
+                                            style={{ color: 'darkorange' }}
+                                            onClick={() => setAction({ type: 'changeCode', row })}
+                                        >
+                                            <i className="fa fa-repeat" />
+                                        </button>
                                     </div>
+                                    <div className="small-tip sline">{formatDateTime(row.dataArrivedAt, { withSeconds: true })}</div>
+                                    <div>
+                                        <button type="button" className="item-md ps-wh-order-code" onClick={() => setDetailOrderId(row.id)}>{row.orderCode}</button>
+                                    </div>
+                                    <div className="small-tip sline">{formatDateTime(row.closedAt, { withSeconds: true })}</div>
                                 </td>
                                     <td className="text-center no-wrap ps-wh-shipper-cell">
                                     <div className="text-right">
-                                        {row.canCreateShipment && <InlineIconButton title="Đăng vận đơn" icon="calendar-check-o" onClick={() => createShipment(row)} className="orange" />}
-                                        {row.canPrintLabel && <InlineIconButton title="In đơn" icon="print" onClick={() => printLabel(row)} />}
+                                        {!isAccounting && row.canCreateShipment && <InlineIconButton title="Đăng vận đơn" icon="calendar-check-o" onClick={() => createShipment(row)} className="orange" />}
+                                        {!isAccounting && row.canPrintLabel && <InlineIconButton title="In đơn" icon="print" onClick={() => printLabel(row)} />}
                                     </div>
                                     <div className="ps-wh-shipper-stack">
                                         <div className="ps-wh-shipper-line">{row.warehouseName || ''}</div>
@@ -430,22 +448,26 @@ export function WarehouseOrderTable({ rows = [], apiBase, actionApiBase, filterO
                                     onMessage={() => setAction({ type: 'message', row })}
                                 />
                                 <td className="text-center area4 ps-wh-delivery-cell">
-                                    <div className="ps-wh-delivery-stack">
-                                        <div className="small-tip">{formatDateTime(row.lastDeliveryEventAt, { withSeconds: false }) || '—'}</div>
-                                        <div className="ps-wh-delivery-actions">
+                                    <div className="small-tip">{formatDateTime(row.lastDeliveryEventAt, { withSeconds: true }) || '—'}</div>
+                                    <div className="text-right no-wrap">
+                                        {isAccounting ? (
+                                            <InlineIconButton title="Đồng bộ trạng thái giao hàng" icon="retweet" onClick={() => setAction({ type: 'delivery', row })} />
+                                        ) : (
                                             <InlineIconButton title="Đưa vào danh sách cảnh báo bom hàng" icon="bomb" onClick={() => setAction({ type: 'blacklist', row })} />
-                                            <InlineIconButton title="Cập nhật trạng thái giao hàng" icon="refresh" onClick={() => setAction({ type: 'delivery', row })} />
-                                            <InlineIconButton title="Lịch sử tác nghiệp" icon="history" onClick={() => setAction({ type: 'timeline', row })} />
-                                        </div>
-                                        <LegacyStatus row={row} />
-                                        <div className="small-tip sline">{formatDateTime(row.shipmentPostedAt || row.printedAt, { withSeconds: false }) || row.shipment?.statusText || ''}</div>
-                                        {row.shipmentError && <div className="ps-wh-error text-left">{row.shipmentError}</div>}
+                                        )}
+                                        <InlineIconButton title="Cập nhật trạng thái giao hàng" icon="refresh" onClick={() => setAction({ type: 'delivery', row })} />
+                                        <InlineIconButton title="Lịch sử tác nghiệp" icon="history" onClick={() => setAction({ type: 'timeline', row })} />
                                     </div>
+                                    <LegacyStatus row={row} />
+                                    <div className="small-tip sline">{formatDateTime(row.shipmentPostedAt || row.printedAt, { withSeconds: false }) || row.shipment?.statusText || ''}</div>
+                                    {row.shipmentError && <div className="ps-wh-error text-left">{row.shipmentError}</div>}
                                 </td>
                                 <td className="text-center c-customer-body ps-contact-name-phone" title={`${row.id} | ${row.sourceType || ''}`}>
                                     <div className="text-right">
                                         <InlineIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={() => setAction({ type: 'date', row })} />
-                                        <InlineIconButton title="Tách đơn" icon="clipboard" onClick={() => setAction({ type: 'split', row })} disabled={!row.canSplit} />
+                                        {!isAccounting && (
+                                            <InlineIconButton title="Tách đơn" icon="clipboard" onClick={() => setAction({ type: 'split', row })} disabled={!row.canSplit} />
+                                        )}
                                         <InlineIconButton title="Cập nhật đơn vị giao vận" icon="truck" onClick={() => setAction({ type: 'edit', row })} />
                                     </div>
                                     <div className="sline text-left ps-wh-customer-name">

@@ -18,8 +18,11 @@
 | Shell trang | `PushsalePageShell.jsx` + `pushsale-page-frame-contract.css` |
 | Sidebar / L3 flyout | `AppSidebar.jsx` + `usePushsaleSidebarMenu.js` + `pushsale-sidebar-canonical-contract.css` (load **cuối**) |
 | Contract nghiệp vụ dài | `docs/PROJECT_CONTRACT.md` |
-| Route/menu naming | `docs/PUSHSALE_ROUTE_CONTRACT.md` |
-| Handoff lịch sử | `docs/archive/handoffs/` (chỉ đọc khi cần context cũ) |
+| Kiến trúc / API overview | `docs/ARCHITECTURE.md` |
+| Luồng nghiệp vụ | `docs/OPERATIONS.md` |
+| Tích hợp (landing, Pancake, queue) | `docs/INTEGRATIONS.md` |
+| Deploy | `docs/DEPLOY.md` |
+| Index docs | `docs/README.md` |
 | CSS orphan | `resources/css/_archive/` (không import lại) |
 
 ## 2. Đặt tên theo menu
@@ -91,10 +94,9 @@ Thiếu use case → mở rộng `PageHeader`/shell, không copy header từng t
 
 ## 7. Docs — đừng spam
 
-- Cập nhật `PROJECT_CONTRACT.md` / `AGENTS.md` / rule Cursor khi thay đổi contract sống.
-- Không tạo `CONTEXT_HANDOFF_V{n}.md`, `RELEASE_VALIDATION_V{n}.md` cho mỗi prompt.
+- Cập nhật `PROJECT_CONTRACT.md` / `AGENTS.md` / `docs/README.md` khi thay đổi contract sống.
+- Không tạo `CONTEXT_HANDOFF_V{n}.md`, `RELEASE_VALIDATION_V{n}.md`, HTML mẫu trong `docs/reference*`.
 - Changelog ngắn → `docs/CHANGELOG.md` nếu cần.
-- Archive cũ nằm `docs/archive/handoffs/`.
 
 ## 8. Checklist trước khi xong task UI
 
