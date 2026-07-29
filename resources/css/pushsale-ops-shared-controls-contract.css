@@ -284,6 +284,12 @@ html body.pushsale-app-body .ps-wh-filter .ps-wh-date-range.ps-date-filter::afte
     width: 0 !important;
 }
 
+html body.pushsale-app-body .ps-date-range-control > .ps-date-filter-label,
+html body.pushsale-app-body .ps-date-range-control > .ps-date-filter-separator,
+html body.pushsale-app-body .ps-date-range-control > .ps-date-filter-title {
+    display: none !important;
+}
+
 html body.pushsale-app-body .ps-drp-popover.is-presets-only {
     width: 180px !important;
     min-width: 180px !important;
@@ -509,4 +515,20 @@ html body.pushsale-app-body .ps-dialog-form-error {
     font-size: 12px !important;
     margin: 0 0 10px !important;
     padding: 8px 10px !important;
+}
+
+/* Final FAB round contract — wins over stacked pushsale.css variants */
+html body.pushsale-app-body button.tao-don-fixed,
+html body.pushsale-app-body .tao-don-fixed,
+html body.pushsale-app-body .pushsale-create-order-fab,
+html body.pushsale-app-body button.pushsale-create-order-fab,
+html body.pushsale-app-body .ps-create-order-fab,
+html body.pushsale-app-body button.ps-create-order-fab {
+    border-radius: 50% !important;
+    clip-path: circle(50%) !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    min-width: 56px !important;
+    overflow: hidden !important;
+    width: 56px !important;
 }

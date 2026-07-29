@@ -173,12 +173,12 @@ export function CreateSaleOrderDialog({
         <>
             <button
                 type="button"
-                className="pushsale-create-order-fab"
+                className="tao-don-fixed pushsale-create-order-fab ps-create-order-fab"
                 onClick={() => setOpen(true)}
                 title="Tạo đơn"
             >
                 <span><i className="fa fa-pencil-square-o" aria-hidden="true" /></span>
-                <strong>Tạo đơn</strong>
+                <strong className="text">Tạo đơn</strong>
             </button>
 
             <Dialog open={open} onOpenChange={setOpen}>

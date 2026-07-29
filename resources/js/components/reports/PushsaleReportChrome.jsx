@@ -92,12 +92,13 @@ export function PushsaleDateRange({ filters, onChange, className = '' }) {
     const from = filters?.date_from ?? '';
     const to = filters?.date_to ?? '';
 
+    // Single-button control only — do not add legacy `.ps-date-range` dual-grid
+    // or `displayLabel` span (those reintroduce the stray "-" separator).
     return (
         <DateRangeFilter
-            className={`ps-date-range ${className}`.trim()}
+            className={className}
             from={from}
             to={to}
-            displayLabel
             onChange={({ date_from, date_to }) => {
                 onChange?.('date_from', date_from);
                 onChange?.('date_to', date_to);

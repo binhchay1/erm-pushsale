@@ -221,17 +221,25 @@ class NavigationService
     {
         $path = strtok($url, '?') ?: $url;
 
+        // Admin menu URLs must match ExtraReport config only. A broad
+        // `/admin/sales/reports/{key}` regex wrongly hides custom pages
+        // (e.g. 4.6.1–4.6.5 Leader reports) that are not ExtraReports.
         foreach ((array) config('pushsale_report_routes', []) as $key => $route) {
             if (($route['admin_path'] ?? null) === $path) {
                 return ExtraReportService::normalizeKey((string) $key);
             }
         }
 
-        if (preg_match('#/(?:admin/reports/extra|sales/reports|marketing/reports|warehouse/reports|accounting/reports)/([a-z0-9-]+)$#', $path, $matches) !== 1) {
-            return null;
+        if (preg_match('#/admin/reports/extra/([a-z0-9-]+)$#', $path, $matches) === 1) {
+            return ExtraReportService::normalizeKey($matches[1]);
         }
 
-        return ExtraReportService::normalizeKey($matches[1]);
+        // Role workspace aliases only (not /admin/…).
+        if (preg_match('#^/(sales|marketing|warehouse|accounting)/reports/([a-z0-9-]+)$#', $path, $matches) === 1) {
+            return ExtraReportService::normalizeKey($matches[2]);
+        }
+
+        return null;
     }
 
 

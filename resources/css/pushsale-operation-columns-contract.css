@@ -16,24 +16,39 @@ html body.pushsale-app-body .table-responsive:has(.ps-customer-profile-table) {
     -webkit-overflow-scrolling: touch !important;
 }
 
-/* Sale operation table: fit viewport; avoid forced horizontal scroll.
-   Column widths stay readable via colgroup + page contracts. */
+/* Sale operation table: HTML-faithful min widths; scroll instead of clipping. */
 html body.pushsale-app-body .ps-sale-operation-table {
-    min-width: 0 !important;
+    min-width: 1560px !important;
     table-layout: fixed !important;
-    width: 100% !important;
+    width: max(100%, 1560px) !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table col.c-result {
-    width: 140px !important;
+    width: 150px !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table col.c-next {
-    width: 90px !important;
+    width: 80px !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table col.c-money {
+    width: 118px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table col.c-products {
+    width: 200px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table col.c-needed {
+    width: 150px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table col.c-customer {
     width: 130px !important;
+}
+
+html body.pushsale-app-body .ps-sale-operation-table col.c-source {
+    width: 88px !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table .ps-result-cell,

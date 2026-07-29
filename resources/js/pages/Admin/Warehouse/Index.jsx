@@ -9,6 +9,36 @@ import { PushsaleSelect } from '@/components/pushsale/PushsaleSelect';
 import { AddressSelect, oldDistrictOptions, oldProvinceOptions, oldWardOptions, newProvinceOptions, newWardOptions, combinedProvinceOptions } from '@/components/pushsale/PushsaleAddressSelect';
 import { useConfirm } from '@/hooks/use-confirm';
 
+const emptyLocations = {
+    old: { provinces: [], districts: {}, wards: {} },
+    new2025: { provinces: [], wards: {} },
+};
+
+let locationsCache = null;
+let locationsPromise = null;
+
+async function loadWarehouseLocations() {
+    if (locationsCache) return locationsCache;
+    if (!locationsPromise) {
+        locationsPromise = fetch('/admin/warehouses/locations', {
+            headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin',
+        })
+            .then((response) => {
+                if (!response.ok) throw new Error('Không tải được sổ địa chỉ.');
+                return response.json();
+            })
+            .then((data) => {
+                locationsCache = data;
+                return data;
+            })
+            .finally(() => {
+                locationsPromise = null;
+            });
+    }
+    return locationsPromise;
+}
+
 const emptyWarehouse = {
     name: '',
     code: '',
@@ -214,7 +244,7 @@ function ShippingAccountDialog({ open, warehouse, providers, form, selectedProvi
     );
 }
 
-export default function WarehouseIndex({ warehouses, filters = {}, managers = [], provinces = [], districts = [], locations = {}, shippingProviders = [] }) {
+export default function WarehouseIndex({ warehouses, filters = {}, managers = [], provinces = [], districts = [], locations: initialLocations = emptyLocations, shippingProviders = [] }) {
     const { ask } = useConfirm();
     const [search, setSearch] = useState(filters.search ?? '');
     const [manager, setManager] = useState(filters.manager_user_id ?? '');
@@ -225,19 +255,39 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
     const [shippingOpen, setShippingOpen] = useState(false);
     const [shippingWarehouse, setShippingWarehouse] = useState(null);
     const [selectedProvider, setSelectedProvider] = useState(shippingProviders[0]?.key ?? 'manual');
+    const [locations, setLocations] = useState(initialLocations);
+    const [locationsLoading, setLocationsLoading] = useState(false);
     const form = useForm(emptyWarehouse);
     const shippingForm = useForm({ default_shipping_provider: '', default_shipping_service: '', shipping_account_settings: {} });
     const rows = warehouses?.data ?? [];
 
     const providerOptions = shippingProviders.length ? shippingProviders : [{ key: 'manual', label: 'Thủ công', services: [{ code: 'manual', label: 'Giao hàng thủ công' }] }];
-    const filterProvinceOptions = useMemo(() => combinedProvinceOptions(locations, province), [locations, province]);
+    const filterProvinceOptions = useMemo(() => {
+        const fromProps = toChoiceOptions(provinces, province);
+        if (fromProps.length) return fromProps;
+        return combinedProvinceOptions(locations, province);
+    }, [locations, province, provinces]);
     const filterDistrictOptions = useMemo(() => {
         if (!province || province === 'Địa chỉ 2 cấp 2025') return toChoiceOptions(districts, district);
         const oldOptions = oldDistrictOptions(locations, province, district);
         const newOptions = newWardOptions(locations, province, district);
-        return oldOptions.length ? oldOptions : newOptions;
+        if (oldOptions.length || newOptions.length) return oldOptions.length ? oldOptions : newOptions;
+        return toChoiceOptions(districts, district);
     }, [district, districts, locations, province]);
     const managerOptions = useMemo(() => toChoiceOptions(managers, manager), [managers, manager]);
+
+    const ensureLocations = async () => {
+        const hasBook = (locations?.old?.provinces?.length ?? 0) > 0 || (locations?.new2025?.provinces?.length ?? 0) > 0;
+        if (hasBook) return locations;
+        setLocationsLoading(true);
+        try {
+            const book = await loadWarehouseLocations();
+            setLocations(book);
+            return book;
+        } finally {
+            setLocationsLoading(false);
+        }
+    };
 
     const submitFilters = (event) => {
         event.preventDefault();
@@ -249,14 +299,15 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
         }, { preserveState: true, replace: true });
     };
 
-    const openCreate = () => {
+    const openCreate = async () => {
         setEditing(null);
         form.setData(emptyWarehouse);
         form.clearErrors();
         setOpen(true);
+        await ensureLocations();
     };
 
-    const openEdit = (row) => {
+    const openEdit = async (row) => {
         setEditing(row.id);
         form.setData({
             name: row.name ?? '',
@@ -277,6 +328,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
         });
         form.clearErrors();
         setOpen(true);
+        await ensureLocations();
     };
 
     const save = (event) => {
@@ -384,6 +436,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
             </section>
 
             <DialogShell open={open} onClose={() => setOpen(false)} title={editing ? 'Cập nhật kho' : 'Thêm mới kho'}>
+                {locationsLoading ? <div className="ps-empty">Đang tải sổ địa chỉ…</div> : null}
                 <WarehouseForm form={form} managers={managers} locations={locations} editing={Boolean(editing)} onSubmit={save} onAppendProvinces={appendProvinces} />
             </DialogShell>
 

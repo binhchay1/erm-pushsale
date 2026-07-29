@@ -87,6 +87,7 @@ Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     Route::post('warehouse/inventory/export', [InventoryMovementController::class, 'export'])->name('warehouse.inventory.export');
     Route::get('warehouse/movements', MovementHistoryController::class)->name('warehouse.movements');
     Route::get('warehouses', [WarehouseController::class, 'index'])->name('warehouses.index');
+    Route::get('warehouses/locations', [WarehouseController::class, 'locationBook'])->name('warehouses.locations');
     Route::get('warehouses/create', [WarehouseController::class, 'create'])->name('warehouses.create');
     Route::post('warehouses', [WarehouseController::class, 'store'])->name('warehouses.store');
     Route::get('warehouses/{warehouse}', [WarehouseController::class, 'show'])->name('warehouses.show');

@@ -48,14 +48,21 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     const t = useT();
     const [value, setValue] = useState('');
     const [saving, setSaving] = useState(false);
+    const [focused, setFocused] = useState(false);
     const textareaRef = useRef(null);
 
-    useEffect(() => {
+    const syncHeight = (expanded) => {
         const node = textareaRef.current;
         if (!node) return;
-        node.style.height = '48px';
-        node.style.height = `${Math.min(160, Math.max(48, node.scrollHeight))}px`;
-    }, [value]);
+        const min = expanded ? 96 : 48;
+        const max = expanded ? 160 : 48;
+        node.style.height = `${min}px`;
+        node.style.height = `${Math.min(max, Math.max(min, node.scrollHeight))}px`;
+    };
+
+    useEffect(() => {
+        syncHeight(focused || value.length > 0);
+    }, [value, focused]);
 
     const save = () => {
         setSaving(true);
@@ -70,13 +77,14 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
         });
     };
 
+    // Original Pushsale markup: icon row ABOVE textarea (not side ears).
     return (
-        <div className="ps-operation-note-editor area2">
+        <div className={`ps-operation-note-editor area2${focused ? ' is-focused' : ''}`}>
             <span className="fb span-col ttgh7 ps-operation-stage-label">{order.currentOperation || t('operations.sale_workspace.default_stage')}</span>
-            <div className="mof-container ps-note-mof">
+            <div className="ps-note-toolbar">
                 <button
                     type="button"
-                    className="btn-icon aoh ps-note-ear ps-note-ear-left"
+                    className="btn-icon aoh ps-note-tool"
                     onClick={() => onMessages(order)}
                     title={t('operations.sale_workspace.internal_message')}
                 >
@@ -84,13 +92,15 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
                 </button>
                 <button
                     type="button"
-                    className="btn-icon aoh ps-note-ear ps-note-ear-right"
+                    className="btn-icon aoh ps-note-tool"
                     onClick={save}
                     disabled={saving}
                     title={t('operations.sale_workspace.save_note')}
                 >
                     <i className="fa fa-save" />
                 </button>
+            </div>
+            <div className="mof-container ps-note-mof">
                 <textarea
                     ref={textareaRef}
                     className="form-control txt-mof txt-dotted ps-note-inline-textarea"
@@ -98,6 +108,8 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
                     rows={2}
                     value={value}
                     onChange={(event) => setValue(event.target.value)}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
                     onKeyDown={(event) => {
                         if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
                     }}

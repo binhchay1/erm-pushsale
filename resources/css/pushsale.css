@@ -10880,8 +10880,9 @@ body.pushsale-app-body .ps-action-fab {
     height: 56px !important;
     min-width: 56px !important;
     min-height: 56px !important;
-    border-radius: 4px !important;
-    clip-path: none !important;
+    border-radius: 50% !important;
+    clip-path: circle(50%) !important;
+    overflow: hidden !important;
     background: #007ad3 !important;
     color: #fff !important;
     box-shadow: 0 3px 10px rgba(0,0,0,.32) !important;
@@ -13609,31 +13610,35 @@ body.pushsale-app-body .ps-sale-operation-table .ps-money-stack > strong {
 }
 
 body.pushsale-app-body .ps-operation-note-editor {
-    height: 82px !important;
-    min-height: 82px !important;
+    height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
 }
 body.pushsale-app-body .ps-operation-note-editor textarea.txt-mof {
     height: 48px !important;
     min-height: 48px !important;
-    transition: background .12s ease, box-shadow .12s ease !important;
+    transition: background .12s ease, box-shadow .12s ease, min-height .12s ease !important;
 }
 body.pushsale-app-body .ps-operation-note-editor:hover textarea.txt-mof,
-body.pushsale-app-body .ps-operation-note-editor.is-pinned textarea.txt-mof {
-    position: absolute !important;
-    top: 18px !important;
-    right: -2px !important;
-    width: 330px !important;
-    height: 128px !important;
-    min-height: 128px !important;
-    z-index: 80 !important;
+body.pushsale-app-body .ps-operation-note-editor.is-focused textarea.txt-mof,
+body.pushsale-app-body .ps-operation-note-editor.is-pinned textarea.txt-mof,
+body.pushsale-app-body .ps-operation-note-editor textarea.txt-mof:focus {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 96px !important;
+    z-index: 2 !important;
 }
 
 html body.pushsale-app-body .tao-don-fixed,
 html body.pushsale-app-body a.tao-don-fixed,
 html body.pushsale-app-body button.tao-don-fixed,
 html body.pushsale-app-body .ps-create-order-fab,
-html body.pushsale-app-body button.ps-create-order-fab {
+html body.pushsale-app-body button.ps-create-order-fab,
+html body.pushsale-app-body .pushsale-create-order-fab,
+html body.pushsale-app-body button.pushsale-create-order-fab {
     position: fixed !important;
     left: 18px !important;
     bottom: 18px !important;
@@ -13650,6 +13655,8 @@ html body.pushsale-app-body button.ps-create-order-fab {
     padding: 0 !important;
     border: 0 !important;
     border-radius: 999px !important;
+    clip-path: circle(50%) !important;
+    overflow: hidden !important;
     background: #0080ff !important;
     color: #fff !important;
     box-shadow: 0 3px 10px rgba(0,0,0,.32) !important;
@@ -13657,7 +13664,9 @@ html body.pushsale-app-body button.ps-create-order-fab {
 }
 html body.pushsale-app-body .tao-don-fixed .text,
 html body.pushsale-app-body button.tao-don-fixed .text,
-html body.pushsale-app-body .ps-create-order-fab .text {
+html body.pushsale-app-body .ps-create-order-fab .text,
+html body.pushsale-app-body .pushsale-create-order-fab .text,
+html body.pushsale-app-body .pushsale-create-order-fab strong {
     display: block !important;
     margin-top: 1px !important;
     font-size: 10px !important;
@@ -13667,7 +13676,8 @@ html body.pushsale-app-body .ps-create-order-fab .text {
 }
 html body.pushsale-app-body .tao-don-fixed i,
 html body.pushsale-app-body button.tao-don-fixed i,
-html body.pushsale-app-body .ps-create-order-fab i {
+html body.pushsale-app-body .ps-create-order-fab i,
+html body.pushsale-app-body .pushsale-create-order-fab i {
     margin: 0 !important;
     font-size: 20px !important;
     line-height: 20px !important;

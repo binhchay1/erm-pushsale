@@ -36,7 +36,7 @@ class WarehouseController extends Controller
             'district' => (string) $request->query('district', ''),
         ];
 
-        $query = Warehouse::query()->with('manager:id,name')->withCount('inventories');
+        $query = Warehouse::query()->with('manager:id,name');
         if ($filters['search'] !== '') {
             $term = $filters['search'];
             $query->where(fn ($builder) => $builder->where('name', 'like', "%{$term}%")->orWhere('phone', 'like', "%{$term}%")->orWhere('address', 'like', "%{$term}%"));
@@ -57,6 +57,7 @@ class WarehouseController extends Controller
                 ->orWhere('pick_ward', 'like', "%{$district}%"));
         }
 
+        // Slim list payload: omit full VN address book + shipping tokens (loaded on demand).
         $warehouses = $query->orderBy('name')->paginate(20)->withQueryString()->through(fn (Warehouse $warehouse): array => [
             'id' => $warehouse->id,
             'name' => $warehouse->name,
@@ -78,22 +79,27 @@ class WarehouseController extends Controller
             'default_shipping_provider' => $warehouse->default_shipping_provider,
             'default_shipping_service' => $warehouse->default_shipping_service,
             'shipping_account_settings' => $warehouse->shipping_account_settings ?? [],
-            'products_count' => (int) $warehouse->inventories_count,
             'updated_at' => $warehouse->updated_at?->format('d/m/Y H:i'),
         ]);
-
-        $locations = $this->locationOptions();
 
         return Inertia::render('Admin/Warehouse/Index', [
             'warehouses' => $warehouses,
             'filters' => $filters,
             'managers' => $this->managerOptions(),
-            'provinces' => $this->provinceOptions($locations),
-            'districts' => $this->districtOptions($filters['province'], $locations),
-            'locations' => $locations,
+            'provinces' => $this->provinceOptions(),
+            'districts' => $this->districtOptions($filters['province']),
+            'locations' => [
+                'old' => ['provinces' => [], 'districts' => [], 'wards' => []],
+                'new2025' => ['provinces' => [], 'wards' => []],
+            ],
             'shippingProviders' => $this->shippingProviderOptions(),
             'activeMenuCode' => '5.2.1',
         ]);
+    }
+
+    public function locationBook(): \Illuminate\Http\JsonResponse
+    {
+        return response()->json($this->locationOptions());
     }
 
     public function create(): Response
