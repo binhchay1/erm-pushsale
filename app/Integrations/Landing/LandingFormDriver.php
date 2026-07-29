@@ -5,6 +5,7 @@ namespace App\Integrations\Landing;
 use App\Contracts\Integrations\LeadPayloadNormalizer;
 use App\Enums\IntegrationPlatform;
 use App\Models\IntegrationConnection;
+use App\Support\LandingProductLabel;
 use App\Support\MoneyParser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -213,9 +214,16 @@ class LandingFormDriver implements LeadPayloadNormalizer
         ];
 
         foreach ($candidates as $candidate) {
-            if (is_scalar($candidate) && filled($candidate)) {
-                return (string) $candidate;
+            if (! is_scalar($candidate) || ! filled($candidate)) {
+                continue;
             }
+
+            $text = trim((string) $candidate);
+            if (LandingProductLabel::looksLikeUrl($text)) {
+                return 'URL landing (chưa map SP): '.LandingProductLabel::urlMonitorHint($text);
+            }
+
+            return $text;
         }
 
         return null;
@@ -406,16 +414,20 @@ class LandingFormDriver implements LeadPayloadNormalizer
                     continue;
                 }
                 $name = trim((string) ($row['name'] ?? $row['product_name'] ?? ''));
-                if ($name === '') {
+                $safeName = LandingProductLabel::sanitizeName($name);
+                if ($safeName === null) {
                     continue;
                 }
                 // Giữ nguyên meta gốc (vd detected_qty) khi payload đã có sẵn items
                 // đã chuẩn hoá — xảy ra khi chốt lead "đang gom" (dựng lại từ payload).
                 $existingMeta = is_array($row['meta'] ?? null) ? $row['meta'] : [];
+                if (LandingProductLabel::looksLikeUrl($name)) {
+                    $existingMeta['rejected_url_hint'] = LandingProductLabel::urlMonitorHint($name);
+                }
 
                 $items[] = [
                     'product_id' => $row['product_id'] ?? null,
-                    'product_name' => $name,
+                    'product_name' => $safeName,
                     'unit_price' => MoneyParser::parse($row['price'] ?? $row['unit_price'] ?? 0),
                     'quantity' => max(1, (int) ($row['quantity'] ?? $defaultQty)),
                     'discount_amount' => MoneyParser::parse($row['discount'] ?? $row['discount_amount'] ?? 0),
@@ -466,11 +478,14 @@ class LandingFormDriver implements LeadPayloadNormalizer
                 continue;
             }
 
-            $items[] = $this->itemFromLabel(
+            $item = $this->itemFromLabel(
                 (string) $value,
                 $isUpsell ? 'upsell' : 'combo',
                 is_string($variant) ? $variant : null,
             );
+            if ($item !== null) {
+                $items[] = $item;
+            }
         }
 
         // 3) Cặp combo + combo_price rời (không nhúng giá trong nhãn).
@@ -478,8 +493,10 @@ class LandingFormDriver implements LeadPayloadNormalizer
         $comboPrice = Arr::get($scan, 'combo_price') ?? Arr::get($scan, 'gia_combo');
         if ($items === [] && is_scalar($comboLabel) && filled($comboLabel) && $comboPrice !== null) {
             $item = $this->itemFromLabel((string) $comboLabel, 'combo', is_string($variant) ? $variant : null);
-            $item['unit_price'] = MoneyParser::parse($comboPrice);
-            $items[] = $item;
+            if ($item !== null) {
+                $item['unit_price'] = MoneyParser::parse($comboPrice);
+                $items[] = $item;
+            }
         }
 
         // Một số form LadiPage đặt tên field chung là product/san_pham thay vì
@@ -495,7 +512,10 @@ class LandingFormDriver implements LeadPayloadNormalizer
             $type = $requestedType === 'upsell' || $isUpsellPacket ? 'upsell' : 'product';
 
             if (is_scalar($generic) && filled($generic)) {
-                $items[] = $this->itemFromLabel((string) $generic, $type, is_string($variant) ? $variant : null);
+                $item = $this->itemFromLabel((string) $generic, $type, is_string($variant) ? $variant : null);
+                if ($item !== null) {
+                    $items[] = $item;
+                }
             }
         }
 
@@ -504,20 +524,25 @@ class LandingFormDriver implements LeadPayloadNormalizer
 
     /**
      * Tách 1 nhãn combo landing thành dòng hàng: giá + số lượng nhúng trong text.
+     * Trả null nếu nhãn là URL / noise — không tạo order line từ tracking link.
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed>|null
      */
-    protected function itemFromLabel(string $label, string $type, ?string $variant): array
+    protected function itemFromLabel(string $label, string $type, ?string $variant): ?array
     {
-        $label = trim(preg_replace('/\s+/u', ' ', $label) ?? $label);
+        $raw = trim(preg_replace('/\s+/u', ' ', $label) ?? $label);
+        $safeName = LandingProductLabel::sanitizeName($raw);
+        if ($safeName === null) {
+            return null;
+        }
 
         // Giá trong nhãn — ưu tiên token có đơn vị tiền ("289k", "99.000đ", "1tr2").
         $price = 0;
-        if (preg_match('/([0-9][0-9.,]*)\s*(k|nghìn|nghin|ngàn|ngan|đ|vnđ|vnd|tr|triệu|trieu)\b/iu', $label, $m)) {
+        if (preg_match('/([0-9][0-9.,]*)\s*(k|nghìn|nghin|ngàn|ngan|đ|vnđ|vnd|tr|triệu|trieu)\b/iu', $safeName, $m)) {
             $price = MoneyParser::parse($m[1].$m[2]);
         } else {
             // Không có đơn vị → chọn cụm số nhiều chữ số nhất (bỏ "2" trong "Mua 2 Thỏi").
-            preg_match_all('/[0-9][0-9.,]*/', $label, $all);
+            preg_match_all('/[0-9][0-9.,]*/', $safeName, $all);
             foreach (($all[0] ?? []) as $token) {
                 if (strlen(preg_replace('/\D/', '', $token) ?? '') >= 4) {
                     $candidate = MoneyParser::parse($token);
@@ -530,15 +555,15 @@ class LandingFormDriver implements LeadPayloadNormalizer
 
         // Số lượng: "Mua 2 Thỏi", "x2", "2 hộp".
         $qty = 1;
-        if (preg_match('/(?:mua|x|sl|số lượng)\s*([0-9]+)/iu', $label, $mq)) {
+        if (preg_match('/(?:mua|x|sl|số lượng)\s*([0-9]+)/iu', $safeName, $mq)) {
             $qty = max(1, (int) $mq[1]);
-        } elseif (preg_match('/\b([0-9]+)\s*(thỏi|cây|gói|hộp|chiếc|cái|lọ|chai)/iu', $label, $mq2)) {
+        } elseif (preg_match('/\b([0-9]+)\s*(thỏi|cây|gói|hộp|chiếc|cái|lọ|chai)/iu', $safeName, $mq2)) {
             $qty = max(1, (int) $mq2[1]);
         }
 
         // Giá nhúng thường là giá cả gói → unit_price = giá/gói, quantity = 1 để tránh nhân đôi.
         return [
-            'product_name' => $label,
+            'product_name' => $safeName,
             'unit_price' => $price,
             'quantity' => $price > 0 ? 1 : $qty,
             'discount_amount' => 0,
@@ -547,7 +572,7 @@ class LandingFormDriver implements LeadPayloadNormalizer
             'meta' => array_filter([
                 'variant' => $variant,
                 'detected_qty' => $qty,
-                'raw_label' => $label,
+                'raw_label' => $raw,
             ]),
         ];
     }

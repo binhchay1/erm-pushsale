@@ -74,7 +74,9 @@ export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, c
 
 function ProductLine({ item, index, forceUpsell = false }) {
     const isUpsell = forceUpsell || isUpsellOrderItem(item);
-    const name = item.productName ?? item.product_name ?? item.name ?? '—';
+    const rawName = item.productName ?? item.product_name ?? item.name ?? '—';
+    const looksLikeUrl = /^https?:\/\//i.test(String(rawName)) || /^www\./i.test(String(rawName));
+    const name = looksLikeUrl ? 'Sản phẩm (chưa map)' : rawName;
     const quantity = Number(item.quantity ?? item.qty ?? 0);
     const unitPrice = Number(item.unitPrice ?? item.unit_price ?? item.price ?? 0);
 
@@ -84,11 +86,11 @@ function ProductLine({ item, index, forceUpsell = false }) {
             className={`ps-order-products-row ${isUpsell ? 'is-upsale-line' : 'is-main-line'}`.trim()}
             role="listitem"
         >
-            <span className="ps-order-product-name" title={name}>
+            <span className="ps-order-product-name" title={looksLikeUrl ? String(rawName) : name}>
                 <span>{name}</span>
             </span>
             <span className="ps-order-product-qty">x{quantity}</span>
-            <span className="ps-order-product-price">{formatCurrency(unitPrice)}</span>
+            <span className="ps-order-product-price">{formatCurrency(looksLikeUrl ? 0 : unitPrice)}</span>
         </div>
     );
 }

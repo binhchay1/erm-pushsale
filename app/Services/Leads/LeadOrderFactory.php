@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Orders\DiscountCodRuleResolver;
+use App\Support\LandingProductLabel;
 use Illuminate\Support\Facades\DB;
 
 class LeadOrderFactory
@@ -103,9 +104,11 @@ class LeadOrderFactory
         } elseif ($source->product_id) {
             $product = Product::query()->find($source->product_id);
             $qty = max(1, (int) ($normalized['quantity'] ?? 1));
+            $interest = LandingProductLabel::sanitizeName((string) ($normalized['product_interest'] ?? ''))
+                ?? 'Sản phẩm';
             $order->items()->create([
                 'product_id' => $product?->id,
-                'product_name' => $product?->name ?? ($normalized['product_interest'] ?? 'Sản phẩm'),
+                'product_name' => $product?->name ?? $interest,
                 'item_type' => 'product',
                 'origin' => $normalized['item_origin'] ?? 'landing',
                 'quantity' => $qty,
@@ -139,8 +142,9 @@ class LeadOrderFactory
         $rows = [];
 
         foreach ($items as $item) {
-            $name = trim((string) ($item['product_name'] ?? $item['name'] ?? ''));
-            if ($name === '') {
+            $rawName = trim((string) ($item['product_name'] ?? $item['name'] ?? ''));
+            $name = LandingProductLabel::sanitizeName($rawName);
+            if ($name === null) {
                 continue;
             }
 
@@ -149,6 +153,11 @@ class LeadOrderFactory
             $costPrice = $product
                 ? max(0, (int) ($product->cost_price ?: ($comboCosts[$productId] ?? 0)))
                 : 0;
+
+            $meta = is_array($item['meta'] ?? null) ? $item['meta'] : [];
+            if ($rawName !== $name) {
+                $meta['raw_label'] = $rawName;
+            }
 
             $rows[] = [
                 'product_id' => $productId,
@@ -163,7 +172,7 @@ class LeadOrderFactory
                 'unit_price' => max(0, (int) ($item['unit_price'] ?? 0)),
                 'cost_price' => $costPrice,
                 'discount_amount' => max(0, (int) ($item['discount_amount'] ?? 0)),
-                'meta' => $item['meta'] ?? null,
+                'meta' => $meta !== [] ? $meta : ($item['meta'] ?? null),
             ];
         }
 

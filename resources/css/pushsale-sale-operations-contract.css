@@ -129,6 +129,12 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor {
     height: auto !important;
     min-height: 0 !important;
     overflow: visible !important;
+    position: relative !important;
+    z-index: 1;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor.is-focused {
+    z-index: 60 !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-toolbar {
@@ -182,16 +188,28 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor te
     overflow-y: hidden !important;
     padding: 5px !important;
     resize: none !important;
-    transition: min-height .12s ease, background .12s ease !important;
+    transition: min-height .12s ease, background .12s ease, box-shadow .12s ease !important;
     width: 100% !important;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof:hover,
-html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof:focus,
-html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor.is-focused textarea.txt-mof {
+/* Focus expand: overlay like original Pushsale (covers adjacent cells) */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor.is-focused textarea.txt-mof,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof:focus {
     background: #fff !important;
-    min-height: 96px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .18) !important;
+    height: 128px !important;
+    left: 0 !important;
+    min-height: 128px !important;
     overflow-y: auto !important;
+    position: absolute !important;
+    right: auto !important;
+    top: 0 !important;
+    width: 280px !important;
+    z-index: 70 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof:hover:not(:focus) {
+    background: #fff !important;
 }
 
 /* Status tabs: align left edge with advanced filters (no Bootstrap .row gutter) */
@@ -249,8 +267,9 @@ html body.pushsale-app-body .ps-sale-workspace-page button.tao-don-fixed .text {
 
 /* Compact table: HTML-faithful widths, scroll instead of clipping */
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-table-wrap {
+    margin: 0 14px !important;
     overflow-x: auto !important;
-    width: 100% !important;
+    width: calc(100% - 28px) !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table {
@@ -270,7 +289,7 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > t
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-check { width: 36px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-code { width: 78px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-source { width: 88px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-sale { width: 120px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-sale { width: 128px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-customer { width: 130px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-message { width: 140px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-needed { width: 150px; }
@@ -278,9 +297,41 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-next { width: 80px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-time { width: 64px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-products { width: 200px; }
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-money { width: 118px; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-money { width: 132px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-deposit { width: 64px; }
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .c-delivery { width: 118px; }
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-name-block {
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-name-block b,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-name-block .small-tip {
+    display: inline !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-money-cell,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td.ps-money-cell {
+    padding-left: 6px !important;
+    padding-right: 10px !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-money-cell .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-money-cell .ps-money-stack {
+    box-sizing: border-box !important;
+    padding-right: 4px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-order-product-name,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-order-product-name > span {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 3 !important;
+    overflow: hidden !important;
+    word-break: break-word !important;
+}
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-cell-inner {
     position: relative;

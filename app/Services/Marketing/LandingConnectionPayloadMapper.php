@@ -5,6 +5,7 @@ namespace App\Services\Marketing;
 use App\Models\LandingConnection;
 use App\Models\LandingConnectionProduct;
 use App\Models\LandingConnectionSource;
+use App\Support\LandingProductLabel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -106,6 +107,7 @@ class LandingConnectionPayloadMapper
         $received = [];
         $productCandidates = [];
         $unmappedProductFields = [];
+        $discardedUrlFields = [];
         $flowFields = [];
         $customerFields = [];
 
@@ -115,6 +117,13 @@ class LandingConnectionPayloadMapper
             $role = $this->fieldRole($normalizedKey, $normalizedValue);
             $field['role'] = $role;
             $field['mapped'] = false;
+
+            if ($role === 'discarded_url') {
+                $field['mapped'] = false;
+                $discardedUrlFields[] = $field;
+                $received[] = $field;
+                continue;
+            }
 
             if ($role === 'flow_key') {
                 $flowFields[] = $field;
@@ -147,12 +156,16 @@ class LandingConnectionPayloadMapper
 
         $candidateText = collect($productCandidates)
             ->pluck('value')
-            ->filter(fn ($value): bool => is_string($value) && trim($value) !== '')
+            ->filter(fn ($value): bool => is_string($value) && trim($value) !== '' && ! LandingProductLabel::looksLikeUrl($value))
             ->unique()
             ->implode(', ');
 
+        if ($candidateText === '' && $discardedUrlFields !== []) {
+            $candidateText = 'URL landing (chưa map SP): '.LandingProductLabel::urlMonitorHint((string) ($discardedUrlFields[0]['value'] ?? ''));
+        }
+
         return [
-            'version' => 'v128',
+            'version' => 'v129',
             'connection_id' => $connection->id,
             'source_id' => $source->id,
             'source_type' => $source->source_type,
@@ -164,10 +177,11 @@ class LandingConnectionPayloadMapper
             'received_fields' => $received,
             'product_candidate_text' => $candidateText,
             'product_candidates' => $productCandidates,
+            'discarded_url_fields' => $discardedUrlFields,
             'mapped_items' => $mappedItemSummary,
             'unmapped_product_fields' => $unmappedProductFields,
-            'has_product_mapping_gap' => $mappedItemSummary === [] && $productCandidates !== [],
-            'has_no_product_signal' => $mappedItemSummary === [] && $productCandidates === [],
+            'has_product_mapping_gap' => $mappedItemSummary === [] && ($productCandidates !== [] || $discardedUrlFields !== []),
+            'has_no_product_signal' => $mappedItemSummary === [] && $productCandidates === [] && $discardedUrlFields === [],
         ];
     }
 
@@ -237,6 +251,12 @@ class LandingConnectionPayloadMapper
 
     private function fieldRole(string $normalizedKey, string $normalizedValue): string
     {
+        // Page/tracking URLs must never count as product candidates (LadiPage often
+        // posts the landing URL into a field named products / san_pham).
+        if (LandingProductLabel::looksLikeUrl($normalizedValue)) {
+            return 'discarded_url';
+        }
+
         if (preg_match('/(^|_)(ps_flow|saleops_session|session_id|session_key|saleops_client_ref|flow_token|client_ref|parent_ref|parent_submission_id)($|_)/', $normalizedKey)) {
             return 'flow_key';
         }
@@ -252,10 +272,10 @@ class LandingConnectionPayloadMapper
         if (preg_match('/(^|_)(message|note|ghi_chu|tin_nhan)($|_)/', $normalizedKey)) {
             return 'customer_note';
         }
-        if (preg_match('/(combo|package|goi|san_pham|product|mua_them|muathem|upsell|addon|add_on|sku|sp)/', $normalizedKey)) {
+        if (preg_match('/(combo|package|goi|san_pham|product|mua_them|muathem|upsell|addon|add_on|sku|(^|_)sp($|_))/', $normalizedKey)) {
             return 'product_candidate';
         }
-        if (preg_match('/(combo|goi|mua them|upsell|san pham|product|\d+\s*k|\d+\s*vn)/i', $normalizedValue)) {
+        if (preg_match('/(combo|goi|mua them|upsell|san pham|\d+\s*k|\d+\s*vn)/i', $normalizedValue)) {
             return 'product_candidate';
         }
 

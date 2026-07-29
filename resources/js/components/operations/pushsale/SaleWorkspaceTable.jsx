@@ -54,10 +54,12 @@ function OperationNoteEditor({ order, actionBaseUrl, onMessages }) {
     const syncHeight = (expanded) => {
         const node = textareaRef.current;
         if (!node) return;
-        const min = expanded ? 96 : 48;
-        const max = expanded ? 160 : 48;
-        node.style.height = `${min}px`;
-        node.style.height = `${Math.min(max, Math.max(min, node.scrollHeight))}px`;
+        if (expanded) {
+            node.style.height = '128px';
+            return;
+        }
+        node.style.height = '48px';
+        node.style.height = `${Math.min(48, Math.max(48, node.scrollHeight))}px`;
     };
 
     useEffect(() => {
