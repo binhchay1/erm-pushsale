@@ -47,7 +47,7 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
 
     const advancedFilters = (
         <div className="box-body ps-wh-filter-body ps-adv-filter-panel">
-            <div className="ps-wh-filter-row ps-wh-filter-row-main ps-adv-filter-row">
+            <div className="ps-wh-filter-row ps-wh-filter-row-main ps-adv-filter-row" style={{ '--ps-adv-cols': 5 }}>
                 <div className="ps-wh-filter-cell ps-wh-cell-wide"><DateRangeFilter className="ps-wh-date-range" from={dateFrom} to={dateTo} onChange={({ date_from, date_to }) => setDateRange(date_from, date_to)} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="date_type" value={filters.date_type ?? 'data_arrival'} placeholder="--Kiểu ngày--" options={filterOptions.dateTypes} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="printed_status" value={filters.printed_status ?? ''} placeholder="--In đơn--" options={filterOptions.printedStatuses} /></div>
@@ -55,7 +55,7 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="care_status" value={filters.care_status ?? ''} placeholder="--Chọn care đơn--" options={filterOptions.careUsers} /></div>
             </div>
 
-            <div className="ps-wh-filter-row ps-wh-filter-row-five ps-adv-filter-row hidden-xs">
+            <div className="ps-wh-filter-row ps-wh-filter-row-five ps-adv-filter-row hidden-xs" style={{ '--ps-adv-cols': 5 }}>
                 <div className="ps-wh-filter-cell"><ProductSearchSelect form={FORM_ID} name="product_id" products={filterOptions.products ?? []} value={productId} placeholder="--Chọn sản phẩm--" showPrice={false} onChange={setProductId} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="reconciliation_status" value={filters.reconciliation_status ?? ''} placeholder="--Chọn đối soát nội bộ--" options={filterOptions.reconciliationStatuses} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="shipping_provider" value={filters.shipping_provider ?? ''} placeholder="--Chọn PTGH--" options={filterOptions.shippingProviders} /></div>
@@ -63,7 +63,7 @@ export function WarehouseFilterPanel({ routeUrl, filters = {}, filterOptions = {
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="deposit_status" value={filters.deposit_status ?? ''} placeholder="--Đặt cọc--" options={filterOptions.depositStatuses} /></div>
             </div>
 
-            <div className="ps-wh-filter-row ps-wh-filter-row-five ps-adv-filter-row">
+            <div className="ps-wh-filter-row ps-wh-filter-row-five ps-adv-filter-row" style={{ '--ps-adv-cols': 5 }}>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="team_leader_id" value={filters.team_leader_id ?? ''} placeholder="--Chọn trưởng nhóm sale--" options={filterOptions.teamLeaders} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="team_id" value={filters.team_id ?? ''} placeholder="--Chọn nhóm sale--" options={filterOptions.salesTeams} /></div>
                 <div className="ps-wh-filter-cell"><SelectField form={FORM_ID} name="sale_id" value={filters.sale_id ?? ''} placeholder="--Chọn sale--" options={filterOptions.salesUsers} /></div>

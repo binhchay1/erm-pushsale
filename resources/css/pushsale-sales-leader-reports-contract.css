@@ -4,6 +4,9 @@ html body.pushsale-app-body .ps-sales-leader-report {
     background: #fff;
 }
 
+/* Header primary filters: equal flex, no horizontal scrollbar / cut text */
+html body.pushsale-app-body .ps-page-header .ps-sales-leader-primary,
+html body.pushsale-app-body .ps-page-header .ps-operation-conversion-primary,
 html body.pushsale-app-body .ps-sales-leader-primary,
 html body.pushsale-app-body .ps-operation-conversion-primary {
     display: flex !important;
@@ -11,29 +14,63 @@ html body.pushsale-app-body .ps-operation-conversion-primary {
     align-items: center !important;
     gap: 8px !important;
     min-width: 0 !important;
-    overflow-x: auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
 }
 
+html body.pushsale-app-body .ps-page-header .ps-sales-leader-primary > *,
+html body.pushsale-app-body .ps-page-header .ps-operation-conversion-primary > *,
 html body.pushsale-app-body .ps-sales-leader-primary > *,
 html body.pushsale-app-body .ps-operation-conversion-primary > * {
-    flex: 0 0 auto !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-sales-leader-primary .ps-date-range-control,
+html body.pushsale-app-body .ps-page-header .ps-operation-conversion-primary .ps-date-range-control,
+html body.pushsale-app-body .ps-sales-leader-primary .ps-date-range-control,
+html body.pushsale-app-body .ps-operation-conversion-primary .ps-date-range-control {
+    flex: 1.6 1 0 !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-sales-leader-primary .ps-date-range-input,
+html body.pushsale-app-body .ps-page-header .ps-operation-conversion-primary .ps-date-range-input,
+html body.pushsale-app-body .ps-sales-leader-primary .ps-date-range-input,
+html body.pushsale-app-body .ps-operation-conversion-primary .ps-date-range-input {
+    width: 100% !important;
+    max-width: 100% !important;
     min-width: 0 !important;
 }
 
+html body.pushsale-app-body .ps-page-header .ps-sales-leader-primary .ps-sales-data-check,
+html body.pushsale-app-body .ps-page-header .ps-operation-conversion-primary .ps-operation-conversion-check {
+    flex: 0 0 auto !important;
+    width: auto !important;
+}
+
+/* Advanced filters: equal columns, full row (not space-between / fixed 200px) */
 html body.pushsale-app-body .ps-sales-leader-advanced .ps-adv-filter-row,
-html body.pushsale-app-body .ps-operation-conversion-filter-row {
+html body.pushsale-app-body .ps-operation-conversion-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters .ps-sales-leader-advanced .ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters .ps-operation-conversion-filter-row.ps-adv-filter-row {
     display: grid !important;
-    grid-template-columns: repeat(var(--ps-adv-cols, 6), minmax(140px, 200px)) !important;
-    justify-content: start !important;
-    gap: 8px 10px !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 6), minmax(0, 1fr)) !important;
+    justify-content: stretch !important;
+    gap: 8px !important;
     align-items: center !important;
     width: 100% !important;
-    flex-wrap: nowrap !important;
+    max-width: none !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters .ps-sales-leader-advanced .ps-adv-filter-row > *,
 html body.pushsale-app-body .ps-page-extra-filters .ps-operation-conversion-filter-row > * {
-    max-width: 200px !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters .ps-sales-leader-advanced .ps-adv-filter-row > .ps-sales-data-unassigned {
@@ -42,11 +79,39 @@ html body.pushsale-app-body .ps-page-extra-filters .ps-sales-leader-advanced .ps
     align-self: center !important;
 }
 
+/* Align table / cards / toolbar with header title gutters */
+html body.pushsale-app-body .ps-sales-leader-table-wrap,
+html body.pushsale-app-body .ps-operation-conversion-table-wrap,
+html body.pushsale-app-body .ps-sales-team-cards,
+html body.pushsale-app-body .ps-sales-opt-toolbar,
+html body.pushsale-app-body .ps-sales-leader-report .pushsale-pagination,
+html body.pushsale-app-body .ps-operation-conversion-report .pushsale-pagination,
+html body.pushsale-app-body .ps-operation-conversion-bottom-pager,
+html body.pushsale-app-body .ps-operation-conversion-pager-row {
+    margin-left: var(--ps-header-x, 14px) !important;
+    margin-right: var(--ps-header-x, 14px) !important;
+    width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
+    max-width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
+    box-sizing: border-box !important;
+}
+
 html body.pushsale-app-body .ps-sales-leader-table-wrap,
 html body.pushsale-app-body .ps-operation-conversion-table-wrap {
     overflow: auto;
     max-height: calc(100vh - 260px);
     margin-top: 8px;
+}
+
+/* Compact multi-row thead (4.6) */
+html body.pushsale-app-body .ps-sales-leader-table-wrap table thead th,
+html body.pushsale-app-body .ps-operation-conversion-report table thead th {
+    padding: 4px 6px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    vertical-align: middle !important;
 }
 
 html body.pushsale-app-body .ps-sales-leader-table-wrap table thead tr:first-child th,
@@ -62,7 +127,7 @@ html body.pushsale-app-body .ps-sales-leader-table-wrap table thead tr:first-chi
 
 html body.pushsale-app-body .ps-sales-leader-table-wrap table thead tr:nth-child(2) th {
     position: sticky;
-    top: 40px;
+    top: 28px;
     z-index: 4;
     background: #3c8dbc;
     color: #fff;
@@ -89,7 +154,8 @@ html body.pushsale-app-body .ps-sales-team-cards {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 10px;
-    margin: 12px 0 8px;
+    margin-top: 12px;
+    margin-bottom: 8px;
 }
 
 html body.pushsale-app-body .ps-sales-team-card {
@@ -178,7 +244,8 @@ html body.pushsale-app-body .ps-sales-opt-toolbar {
     justify-content: space-between;
     gap: 12px;
     align-items: center;
-    margin: 10px 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 html body.pushsale-app-body .ps-sales-opt-toolbar__actions {
@@ -198,6 +265,7 @@ html body.pushsale-app-body .ps-sales-opt-legend__item {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    font-size: 12px;
 }
 
 html body.pushsale-app-body .ps-sales-opt-swatch {

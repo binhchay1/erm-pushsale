@@ -44,17 +44,15 @@ function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
     const [value, setValue] = useState('');
     const [saving, setSaving] = useState(false);
     const [focused, setFocused] = useState(false);
+    const [hovered, setHovered] = useState(false);
     const textareaRef = useRef(null);
+    const expanded = focused || hovered;
 
     useEffect(() => {
         const node = textareaRef.current;
         if (!node) return;
-        if (focused || value.length > 0) {
-            node.style.height = '128px';
-            return;
-        }
-        node.style.height = '48px';
-    }, [value, focused]);
+        node.style.height = expanded ? '128px' : '48px';
+    }, [expanded]);
 
     const save = () => {
         setSaving(true);
@@ -69,9 +67,9 @@ function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
         });
     };
 
-    // Pushsale: label → float-left comment + right save → textarea (.mof-container)
+    // Hover phóng / leave thu; click(focus) giữ phóng; blur thu lại.
     return (
-        <td className={`area2 hidden-xs ps-operation-note-editor${focused ? ' is-focused' : ''}`}>
+        <td className={`area2 hidden-xs ps-operation-note-editor${expanded ? ' is-expanded' : ''}${focused ? ' is-focused' : ''}`}>
             <span className="fb span-col ttgh7" style={{ cursor: 'pointer', display: 'block', marginTop: 2 }}>
                 {order.currentOperation || t('operations.sale_workspace.default_stage')}
             </span>
@@ -91,7 +89,13 @@ function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
                     />
                 </div>
             </div>
-            <div className="mof-container">
+            <div
+                className="mof-container ps-note-mof"
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => {
+                    if (!focused) setHovered(false);
+                }}
+            >
                 <textarea
                     ref={textareaRef}
                     className="form-control txt-mof txt-dotted"
@@ -99,8 +103,14 @@ function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
                     rows={2}
                     value={value}
                     onChange={(event) => setValue(event.target.value)}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
+                    onFocus={() => {
+                        setFocused(true);
+                        setHovered(true);
+                    }}
+                    onBlur={() => {
+                        setFocused(false);
+                        setHovered(false);
+                    }}
                     onKeyDown={(event) => {
                         if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') save();
                     }}
@@ -178,8 +188,8 @@ export function SaleWorkspaceTable({
                                 </span>
                             </th>
                             <th>Mã đơn</th>
-                            <th className="text-center no-wrap area5 hidden-xs">
-                                <span className="span-col" style={{ width: 80 }}>Nguồn dữ liệu</span>
+                            <th className="text-center no-wrap area5 hidden-xs ps-col-source">
+                                <span className="span-col" style={{ width: 100 }}>Nguồn dữ liệu</span>
                                 <br />
                                 Ngày data về
                             </th>
@@ -327,11 +337,11 @@ export function SaleWorkspaceTable({
 
                                     <TimeRemainingCell nextOperationAt={order.nextOperationAt} />
 
-                                    <td className="text-left area3 hidden-xs">
+                                    <td className="text-left area3 hidden-xs ps-col-products">
                                         <OrderProductsBreakdown items={order.products ?? []} order={order} />
                                     </td>
 
-                                    <td className="no-wrap area3 text-right hidden-xs">
+                                    <td className="area3 text-right hidden-xs ps-col-money">
                                         <OrderMoneyBreakdown row={order} items={order.products ?? []} />
                                     </td>
 

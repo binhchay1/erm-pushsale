@@ -213,7 +213,7 @@ final class WorkspaceUiDemoService
                 WarehouseIncidentReport::query()->where('name', 'like', self::HANDOVER_PREFIX.'%')->delete();
                 WarehouseInventoryMovement::query()->where('note', 'like', self::NOTE_TAG.'%')->delete();
 
-                MonthlyKpiPlan::query()->where('kpi_name', 'like', 'UXDEMO%')->delete();
+                MonthlyKpiPlan::query()->where('kpi_name', 'like', 'UXDEMO%')->forceDelete();
 
                 $demoSaleIds = User::query()->withoutGlobalScopes()
                     ->where('email', 'like', self::SALE_EMAIL_PREFIX.'%@%')
@@ -234,6 +234,10 @@ final class WorkspaceUiDemoService
                 if ($demoSaleIds->isNotEmpty()) {
                     UserOperationalProfile::query()->whereIn('user_id', $demoSaleIds)->delete();
                 }
+                UserOperationalProfile::query()
+                    ->where('employee_code', 'like', 'UXDEMO-%')
+                    ->orWhere('employee_code', 'like', 'UX0%')
+                    ->delete();
 
                 User::query()->withoutGlobalScopes()
                     ->where('email', 'like', self::SALE_EMAIL_PREFIX.'%@%')
@@ -455,14 +459,15 @@ final class WorkspaceUiDemoService
     {
         $now = now();
         foreach ($sales as $index => $sale) {
-            MonthlyKpiPlan::query()->updateOrCreate(
+            MonthlyKpiPlan::query()->withTrashed()->updateOrCreate(
                 [
+                    'company_id' => $companyId,
                     'user_id' => $sale->id,
                     'year' => $now->year,
                     'month' => $now->month,
-                    'kpi_name' => 'UXDEMO KPI',
                 ],
                 [
+                    'kpi_name' => 'UXDEMO KPI',
                     'revenue_target' => 50_000_000 + ($index * 10_000_000),
                     'contacts_target' => 100,
                     'new_contacts_target' => 70,
@@ -472,6 +477,7 @@ final class WorkspaceUiDemoService
                     'working_days' => 26,
                     'actual_days' => 20,
                     'locked' => false,
+                    'deleted_at' => null,
                 ],
             );
 
@@ -480,7 +486,7 @@ final class WorkspaceUiDemoService
                 [
                     'company_id' => $companyId,
                     'receive_data' => $index !== 2,
-                    'employee_code' => 'UX'.str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT),
+                    'employee_code' => 'UXDEMO-U'.$sale->id,
                 ],
             );
 

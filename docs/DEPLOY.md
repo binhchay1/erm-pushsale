@@ -11,6 +11,17 @@ Production: **salesloop.vn**. Local → `git push origin main` + `git push ssd m
 
 Hook on `ssd`: `pnpm build`, `artisan migrate --force`, optimize, reload PHP-FPM, restart Horizon/Reverb.
 
+## Scripts giữ lại (`deploy/`)
+
+| Script | Việc |
+| --- | --- |
+| `ssd-deploy.sh` / `prod-deploy.sh` | Deploy build path |
+| `fix-build-permissions.sh` | Owner `public/build` trước Vite |
+| `install-scheduler-cron.sh` | Cron scheduler |
+| `harden-prod-env.sh` | Hardening env prod |
+| `post-deploy-check.sh` / `prod-smoke-test.sh` | Smoke sau deploy |
+| `supervisor/*` | Horizon / worker conf |
+
 ## Permissions (`public/build`)
 
 Vite wipes `public/build`. Wrong owner → `EACCES unlink`.

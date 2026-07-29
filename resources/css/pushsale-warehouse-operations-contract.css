@@ -163,11 +163,53 @@ html body.pushsale-app-body .ps-wh-page .ps-order-products-section.is-upsale-sec
     padding-top: 4px !important;
 }
 
-/* Advanced filter grid under PageHeader sibling */
+/* Advanced filter grid under PageHeader sibling — full width, đúng số cột */
 html body.pushsale-app-body .ps-wh-page .ps-page-extra-filters .ps-wh-filter-body,
-html body.pushsale-app-body .ps-wh-page .ps-wh-filter-body {
+html body.pushsale-app-body .ps-wh-page .ps-wh-filter-body,
+html body.pushsale-app-body .ps-acc-page .ps-page-extra-filters .ps-wh-filter-body {
     background: #fff !important;
-    padding: 8px 15px 12px !important;
+    padding: 8px 0 12px !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-page-extra-filters .ps-wh-filter-row.ps-adv-filter-row,
+html body.pushsale-app-body .ps-acc-page .ps-page-extra-filters .ps-wh-filter-row.ps-adv-filter-row {
+    display: grid !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-page-extra-filters .ps-wh-filter-row-main.ps-adv-filter-row,
+html body.pushsale-app-body .ps-wh-page .ps-page-extra-filters .ps-wh-filter-row-five.ps-adv-filter-row,
+html body.pushsale-app-body .ps-acc-page .ps-page-extra-filters .ps-wh-filter-row-main.ps-adv-filter-row,
+html body.pushsale-app-body .ps-acc-page .ps-page-extra-filters .ps-wh-filter-row-five.ps-adv-filter-row {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-page-extra-filters .ps-wh-filter-row-six.ps-adv-filter-row,
+html body.pushsale-app-body .ps-acc-page .ps-page-extra-filters .ps-wh-filter-row-six.ps-adv-filter-row {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) 40px !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-page-extra-filters .ps-wh-filter-cell,
+html body.pushsale-app-body .ps-acc-page .ps-page-extra-filters .ps-wh-filter-cell {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-page-extra-filters .ps-wh-cell-wide,
+html body.pushsale-app-body .ps-acc-page .ps-page-extra-filters .ps-wh-cell-wide,
+html body.pushsale-app-body .ps-wh-page .ps-page-extra-filters .ps-wh-cell-wide .ps-date-range-control,
+html body.pushsale-app-body .ps-acc-page .ps-page-extra-filters .ps-wh-cell-wide .ps-date-range-control,
+html body.pushsale-app-body .ps-wh-page .ps-page-extra-filters .ps-wh-cell-wide .ps-date-range-input,
+html body.pushsale-app-body .ps-acc-page .ps-page-extra-filters .ps-wh-cell-wide .ps-date-range-input {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row {
@@ -181,7 +223,7 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-main {
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-six {
-    grid-template-columns: repeat(6, minmax(140px, 1fr)) !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) 40px !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-filter-cell select,

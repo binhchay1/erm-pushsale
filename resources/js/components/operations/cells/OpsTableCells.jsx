@@ -56,12 +56,12 @@ export function OrderCodeCell({ orderCode, onHistory, emptyTitle = 'Mã đơn ch
     );
 }
 
-export function SourceDataCell({ sourceName, sourceUrl, dataArrivedAt, className = 'text-center area5 hidden-xs' }) {
+export function SourceDataCell({ sourceName, sourceUrl, dataArrivedAt, className = 'text-center area5 hidden-xs ps-source-cell' }) {
     const href = externalHref(sourceUrl);
 
     return (
         <td className={className}>
-            <span className="span-col span-col-width cancel-col" style={{ minWidth: 110, maxWidth: 160, display: 'inline-block' }}>
+            <span className="span-col span-col-width cancel-col ps-source-name" style={{ minWidth: 130, maxWidth: 190, display: 'inline-block' }}>
                 {href ? (
                     <a href={href} target="_blank" rel="noopener noreferrer" title={sourceUrl}>{sourceName || '—'}</a>
                 ) : (
@@ -111,7 +111,7 @@ export function CustomerContactCell({
     phoneActions = null,
     flags = null,
     supplement = null,
-    className = 'area1',
+    className = 'area1 ps-customer-cell',
 }) {
     const name = order.customerName || order.effectiveReceiverName || '—';
     const phone = order.customerPhone || order.effectiveReceiverPhone || '';
@@ -119,38 +119,37 @@ export function CustomerContactCell({
 
     return (
         <td className={className} title={`${order.id} | ${order.sourceType || ''}`}>
-            <OpsTopRightIcons>
-                {onEdit ? <OpsIconButton title="Cập nhật đơn" icon="edit" onClick={onEdit} /> : null}
-            </OpsTopRightIcons>
-            <div style={{ maxWidth: 170, textOverflow: 'ellipsis', overflow: 'hidden' }}>
+            {/* Họ tên: edit float phải như cũ — không dùng OpsTopRightIcons (1 dòng icon) */}
+            {onEdit ? (
+                <div className="text-right ps-customer-edit-wrap">
+                    <OpsIconButton title="Cập nhật đơn" icon="edit" onClick={onEdit} className="ps-cell-action" />
+                </div>
+            ) : null}
+            <div className="ps-customer-name-wrap" style={{ maxWidth: 170, textOverflow: 'ellipsis', overflow: 'hidden' }}>
                 {onPurchaseHistory ? (
                     <button type="button" className="ps-customer-name-link" onClick={onPurchaseHistory}>{name}</button>
                 ) : (
                     <span>{name}</span>
                 )}
             </div>
-            {carrier ? <span className="nha-mang">{carrier}</span> : null}
-            <div className="no-wrap text-right">
-                {onDuplicateOrders ? (
-                    <button
-                        type="button"
-                        className="span-col hidden-xs text-left ps-phone-link"
-                        style={{ display: 'inline-block', width: 90, marginTop: 4 }}
-                        onClick={onDuplicateOrders}
-                        title="Danh sách trùng số"
-                    >
-                        {phone || '—'}
-                    </button>
-                ) : (
-                    <span className="span-col hidden-xs text-left" style={{ display: 'inline-block', width: 90, marginTop: 4 }}>
-                        {phone || '—'}
-                    </span>
-                )}
-                <span className="span-col text-right no-wrap" style={{ width: 80 }}>
+            <div className="no-wrap ps-contact-phone-row">
+                <div className="ps-phone-main">
+                    {carrier ? <span className="nha-mang">{carrier}</span> : null}
+                    {onDuplicateOrders ? (
+                        <button
+                            type="button"
+                            className="ps-phone-link"
+                            onClick={onDuplicateOrders}
+                            title="Danh sách trùng số"
+                        >
+                            {phone || '—'}
+                        </button>
+                    ) : (
+                        <span className="ps-phone-text">{phone || '—'}</span>
+                    )}
                     {phoneActions}
                     {flags}
-                </span>
-                <div style={{ clear: 'both' }} />
+                </div>
             </div>
             <div className="text-left khkn sline">{order.customerExtraNote || ''}</div>
             {order.desiredDeliveryAt ? (

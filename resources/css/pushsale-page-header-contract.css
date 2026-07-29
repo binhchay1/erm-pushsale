@@ -820,14 +820,14 @@ html body.pushsale-app-body .ps-page-header__advanced .ps-adv-filter-row > * {
 }
 
 html body.pushsale-app-body .ps-page-extra-filters .ps-adv-date-cluster,
-html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .ps-date-filter,
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .ps-date-filter:not(.ps-date-range-control),
 html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .date-range-wrap,
-html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .ps-date-range,
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .ps-date-range:not(.ps-date-range-control),
 html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .legacy-range,
 html body.pushsale-app-body .ps-page-header .ps-adv-date-cluster,
-html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .ps-date-filter,
+html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .ps-date-filter:not(.ps-date-range-control),
 html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .date-range-wrap,
-html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .ps-date-range,
+html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .ps-date-range:not(.ps-date-range-control),
 html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .legacy-range {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
@@ -839,6 +839,38 @@ html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .legacy-range {
     background: transparent !important;
     box-shadow: none !important;
     padding: 0 !important;
+}
+
+/* Single-button DateRangeFilter: full cell width (không dual-grid) */
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .ps-date-range-control,
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .ps-date-filter.ps-date-range-control,
+html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .ps-date-range-control,
+html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .ps-date-filter.ps-date-range-control {
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .ps-date-range-control::after,
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .ps-date-filter.ps-date-range-control::after,
+html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .ps-date-range-control::after,
+html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .ps-date-filter.ps-date-range-control::after {
+    content: none !important;
+    display: none !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .ps-date-range-control .ps-date-range-input,
+html body.pushsale-app-body .ps-page-header .ps-adv-filter-row .ps-date-range-control .ps-date-range-input {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row .date-range-wrap,
@@ -1010,7 +1042,38 @@ html body.pushsale-app-body .ps-page-extra-filters.ps-customer-profile-header .p
     }
 }
 
-/* --------------------------------------------- 7. Khoảng cách xuống body */
+/* Căn lề title / filter bổ sung / body chung --ps-header-x (= 14px, khớp title). */
+html body.pushsale-app-body {
+    --ps-header-x: 14px;
+    --ps-frame-x: 14px;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-panel,
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row {
+    grid-template-columns: repeat(var(--ps-adv-cols, 6), minmax(0, 1fr)) !important;
+    justify-content: stretch !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row > * {
+    max-width: none !important;
+}
+
+/* Các page root phổ biến: không cộng padding ngang lệch title */
+html body.pushsale-app-body .ps-sale-workspace-page,
+html body.pushsale-app-body .ps-wh-page,
+html body.pushsale-app-body .ps-acc-page,
+html body.pushsale-app-body .ps-customer-profile-page,
+html body.pushsale-app-body .ps-sales-leader-report,
+html body.pushsale-app-body .ps-operation-conversion-report,
+html body.pushsale-app-body .pushsale-page[data-page-code^="4.6"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
 html body.pushsale-app-body .ps-page-header + *,
 html body.pushsale-app-body .ps-page-header-outlet + * {
     margin-top: 0 !important;
@@ -1343,4 +1406,16 @@ html body.pushsale-app-body .pushsale-page .pushsale-template-host .box-body .fo
 
 html body.pushsale-app-body .pushsale-page[data-page-code='1.2.4'] .box-body > .row > .col-sm-2.form-group {
     margin-bottom: 12px !important;
+}
+
+/* H? so KH + b?ng ops: th compact (d� pushsale.css font-weight/line-height) */
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table thead th {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 5px 6px !important;
+    vertical-align: middle !important;
 }

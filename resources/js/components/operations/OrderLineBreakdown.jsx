@@ -179,16 +179,17 @@ export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount =
     return (
         <table className="tb-in-sp ps-order-money-breakdown" aria-label="Thành tiền đơn hàng">
             <tbody>
-                <tr><td><span title="Thành tiền">{moneyOrBlank(subtotal)}</span></td></tr>
-                <tr><td><span title="Chiết khấu">{discount > 0 ? `-${formatCurrency(discount)}` : (showZeroDiscount ? formatCurrency(0) : '')}</span></td></tr>
-                <tr><td><span title="VAT">{moneyOrBlank(vat, { always: true })}</span></td></tr>
-                <tr><td><span title="Phí vận chuyển">{moneyOrBlank(shippingFee)}</span></td></tr>
+                {subtotal > 0 ? <tr><td><span title="Thành tiền">{moneyOrBlank(subtotal)}</span></td></tr> : null}
+                {discount > 0 || showZeroDiscount ? (
+                    <tr><td><span title="Chiết khấu">{discount > 0 ? `-${formatCurrency(discount)}` : formatCurrency(0)}</span></td></tr>
+                ) : null}
+                {vat > 0 ? <tr><td><span title="VAT">{moneyOrBlank(vat)}</span></td></tr> : null}
+                {shippingFee > 0 ? <tr><td><span title="Phí vận chuyển">{moneyOrBlank(shippingFee)}</span></td></tr> : null}
                 <tr>
                     <td>
                         <span title="Tổng tiền đơn hàng" style={{ fontWeight: 'bold', fontSize: 13 }}>
                             {moneyOrBlank(total) || (subtotal > 0 ? formatCurrency(total) : '')}
                         </span>
-                        &nbsp;
                     </td>
                 </tr>
             </tbody>
