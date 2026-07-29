@@ -1408,7 +1408,8 @@ html body.pushsale-app-body .pushsale-page[data-page-code='1.2.4'] .box-body > .
     margin-bottom: 12px !important;
 }
 
-/* H? so KH + b?ng ops: th compact (dè pushsale.css font-weight/line-height) */
+
+/* Customer profile table th: compact size */
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th,
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table thead th {
     font-size: 11px !important;
