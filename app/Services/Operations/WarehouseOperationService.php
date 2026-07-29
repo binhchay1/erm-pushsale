@@ -45,8 +45,9 @@ class WarehouseOperationService
     /** @return array<string, mixed> */
     public function build(ReportFilterData $filter): array
     {
+        // Luồng mới: đơn webhook/sale có thể đã ở trạng thái kho (waiting_waybill, deliver_now, ...)
+        // trước khi / mà không gắn closed_at. Không khóa danh sách bằng closed_at — tab TTGH lọc nghiệp vụ.
         $baseQuery = Order::query()
-            ->whereNotNull('closed_at')
             ->applyReportFilter($filter->withoutDeliveryStatus());
 
         $statusTabs = $this->statusTabs($baseQuery, $filter->hideZeroStatus);
@@ -70,12 +71,15 @@ class WarehouseOperationService
             'shipments' => fn ($query) => $query->with(['statusEvents' => fn ($events) => $events->latest('occurred_at')])->latest('id'),
             'returnReceipt.lines',
             'shippingStatusEvents' => fn ($query) => $query->latest('occurred_at')->limit(10),
-        ])->withCount('pendingSupplementPackets')->orderByDesc('closed_at')->paginate(
-            perPage: $filter->perPage,
-            columns: ['*'],
-            pageName: 'page',
-            page: $filter->page,
-        )->withQueryString();
+        ])->withCount('pendingSupplementPackets')
+            ->orderByDesc('data_arrived_at')
+            ->orderByDesc('id')
+            ->paginate(
+                perPage: $filter->perPage,
+                columns: ['*'],
+                pageName: 'page',
+                page: $filter->page,
+            )->withQueryString();
 
         return [
             'summary' => $summary,

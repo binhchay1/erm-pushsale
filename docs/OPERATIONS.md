@@ -29,13 +29,15 @@ Landing / ads → Lead ingest → Sale tác nghiệp (4.1)
 ## Kho tác nghiệp (5.1)
 
 - UI: `WarehouseOrderTable` (`variant=warehouse`); CSS `pushsale-warehouse-operations-contract.css`.
+- Nguồn list: cùng pool đơn với filter báo cáo + tab TTGH — **không** khóa `closed_at` (luồng mới: webhook/sale có thể đã ở `deliver_now` / `waiting_waybill` trước khi chốt).
+- Chốt đơn vẫn gắn `closed_at` + `waiting_waybill` và cấp mã đơn; action đăng vận đơn/in đơn vẫn theo policy shipment.
 - Icon: `fa-repeat` trên mã đơn; care 3 `span-col`; TTGH bomb/refresh/history; khách calendar/clipboard/truck.
 - Tab TTGH + FAB hàng loạt (đăng vận đơn, in, sync…).
 
 ## Kế toán tác nghiệp (6.1)
 
-- Cùng bảng kho với `variant="accounting"`: `retweet` thay bomb; không clipboard tách đơn.
-- Focus đối soát / tiền / trạng thái giao hàng.
+- Cùng `WarehouseOperationService` + bảng kho với `variant="accounting"`: `retweet` thay bomb; không clipboard tách đơn.
+- Cùng rule hiển thị list với kho (không khóa `closed_at`); focus đối soát / tiền / trạng thái giao hàng.
 
 ## Báo cáo trưởng sale (4.6.x)
 
