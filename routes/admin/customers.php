@@ -23,6 +23,7 @@ Route::get('customer-management/export', [Customer360ManagementController::class
 Route::post('customer-management/campaigns', [Customer360ManagementController::class, 'createCampaign'])->name('customer-management.campaigns.store');
 Route::post('customer-management/campaigns/attach', [Customer360ManagementController::class, 'attachCampaign'])->name('customer-management.campaigns.attach');
 Route::put('customer-management/segments', [Customer360ManagementController::class, 'saveSegments'])->name('customer-management.segments.update');
+Route::post('customer-management/segments/recalculate', [Customer360ManagementController::class, 'recalculateSegments'])->name('customer-management.segments.recalculate');
 
 // 3.2 Quản lý chiến dịch chăm sóc
 Route::get('customers/care-campaigns', [CareCampaignController::class, 'index'])->name('customers.care-campaigns');

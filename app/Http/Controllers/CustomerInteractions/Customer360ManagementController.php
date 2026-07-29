@@ -6,17 +6,18 @@ use App\Data\Customers\CustomerProfileFilterData;
 use App\Enums\PermissionArea;
 use App\Enums\PermissionLevel;
 use App\Http\Controllers\Controller;
-use App\Models\AppSetting;
+use App\Jobs\RecalculateCustomerSegmentsJob;
 use App\Models\Order;
 use App\Models\Pushsale\CustomerCareCampaign;
+use App\Services\Customers\CareCampaignService;
 use App\Services\Customers\CustomerProfileOptionsService;
 use App\Services\Customers\CustomerProfileService;
+use App\Services\Customers\CustomerSegmentService;
 use App\Support\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,6 +30,8 @@ final class Customer360ManagementController extends Controller
         Request $request,
         CustomerProfileService $profileService,
         CustomerProfileOptionsService $options,
+        CareCampaignService $campaigns,
+        CustomerSegmentService $segments,
     ): Response {
         abort_unless($request->user()?->allows(PermissionArea::Customers, PermissionLevel::View), 403);
 
@@ -39,8 +42,8 @@ final class Customer360ManagementController extends Controller
         return Inertia::render('Customers/Management', [
             'filters' => $filter->toArray(),
             'filterOptions' => array_merge($options->build($request->user()), [
-                'campaigns' => $this->campaignOptions(),
-                'segments' => $this->segmentOptions(),
+                'campaigns' => $campaigns->options(),
+                'segments' => $segments->definitions(),
                 'customer360Permissions' => [
                     'canManageCampaigns' => (bool) $request->user()?->allows(PermissionArea::Customers, PermissionLevel::Full),
                     'canEditCustomers' => (bool) $request->user()?->allows(PermissionArea::Customers, PermissionLevel::Full),
@@ -54,32 +57,29 @@ final class Customer360ManagementController extends Controller
         ]);
     }
 
-    public function createCampaign(Request $request): JsonResponse|RedirectResponse
+    public function createCampaign(Request $request, CareCampaignService $campaigns): JsonResponse|RedirectResponse
     {
         abort_unless($request->user()?->allows(PermissionArea::Customers, PermissionLevel::Full), 403);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:180'],
+            'repeat_days' => ['nullable', 'integer', 'min:0'],
+            'starts_at' => ['nullable', 'date'],
+            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'status' => ['nullable', 'in:draft,active,paused,completed'],
             'filters' => ['nullable', 'array'],
+            'customer_condition' => ['nullable', 'array'],
             'customer_ids' => ['nullable', 'array', 'max:2000'],
             'customer_ids.*' => ['integer'],
         ]);
 
         try {
-            $campaign = CustomerCareCampaign::query()->create([
-                'name' => $validated['name'],
+            $campaign = $campaigns->create(array_merge($validated, [
                 'customer_condition' => [
                     'source' => 'customer360_filter',
-                    'filters' => Arr::only((array) ($validated['filters'] ?? []), [
-                        'date_from', 'date_to', 'date_type', 'search', 'sale_id', 'marketer_id', 'product_id',
-                        'customer_type', 'duplicate_status', 'delivery_status', 'operation_stage', 'operation_result',
-                    ]),
-                    'order_ids' => collect($validated['customer_ids'] ?? [])->map(fn ($id) => (int) $id)->unique()->values()->all(),
+                    'filters' => $validated['filters'] ?? $validated['customer_condition']['filters'] ?? [],
                 ],
-                'status' => 'draft',
-                'created_by_user_id' => $request->user()?->id,
-                'updated_by_user_id' => $request->user()?->id,
-            ]);
+            ]), $request->user());
 
             ActivityLogger::log('customer360.campaign_created', $campaign, [
                 'campaign_id' => $campaign->id,
@@ -89,11 +89,12 @@ final class Customer360ManagementController extends Controller
             return $this->saved($request, 'Đã tạo chiến dịch chăm sóc khách hàng.', ['campaign' => $campaign]);
         } catch (Throwable $exception) {
             report($exception);
+
             return response()->json(['message' => 'Không tạo được chiến dịch. Vui lòng kiểm tra dữ liệu và thử lại.'], 422);
         }
     }
 
-    public function attachCampaign(Request $request): JsonResponse|RedirectResponse
+    public function attachCampaign(Request $request, CareCampaignService $campaigns): JsonResponse|RedirectResponse
     {
         abort_unless($request->user()?->allows(PermissionArea::Customers, PermissionLevel::Full), 403);
 
@@ -105,22 +106,7 @@ final class Customer360ManagementController extends Controller
 
         try {
             $campaign = CustomerCareCampaign::query()->findOrFail((int) $validated['campaign_id']);
-            $existing = (array) ($campaign->customer_condition ?? []);
-            $orderIds = collect($existing['order_ids'] ?? [])
-                ->merge($validated['customer_ids'])
-                ->map(fn ($id) => (int) $id)
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
-
-            $campaign->forceFill([
-                'customer_condition' => array_merge($existing, [
-                    'source' => $existing['source'] ?? 'manual_customer360_selection',
-                    'order_ids' => $orderIds,
-                ]),
-                'updated_by_user_id' => $request->user()?->id,
-            ])->save();
+            $campaign = $campaigns->attachOrders($campaign, $validated['customer_ids'], $request->user());
 
             ActivityLogger::log('customer360.campaign_customers_attached', $campaign, [
                 'campaign_id' => $campaign->id,
@@ -130,11 +116,12 @@ final class Customer360ManagementController extends Controller
             return $this->saved($request, 'Đã thêm khách hàng vào chiến dịch.', ['campaign' => $campaign]);
         } catch (Throwable $exception) {
             report($exception);
+
             return response()->json(['message' => 'Không thêm được khách hàng vào chiến dịch.'], 422);
         }
     }
 
-    public function saveSegments(Request $request): JsonResponse|RedirectResponse
+    public function saveSegments(Request $request, CustomerSegmentService $segments): JsonResponse|RedirectResponse
     {
         abort_unless($request->user()?->allows(PermissionArea::Customers, PermissionLevel::Full), 403);
 
@@ -142,21 +129,35 @@ final class Customer360ManagementController extends Controller
             'segments' => ['required', 'array', 'max:50'],
             'segments.*.name' => ['required', 'string', 'max:120'],
             'segments.*.color' => ['nullable', 'string', 'max:20'],
+            'segments.*.min_successful_order_value' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        $segments = collect($validated['segments'])->map(fn (array $segment, int $index): array => [
-            'id' => $index + 1,
-            'name' => trim($segment['name']),
-            'color' => $segment['color'] ?: '#337ab7',
-        ])->values()->all();
-
-        AppSetting::set('customer360.segments', json_encode($segments, JSON_UNESCAPED_UNICODE));
+        $saved = $segments->saveDefinitions($validated['segments']);
 
         ActivityLogger::log('customer360.segments_updated', null, [
-            'segments_count' => count($segments),
+            'segments_count' => count($saved),
         ], 'Cập nhật phân loại khách hàng 360', $request->user());
 
-        return $this->saved($request, 'Đã cập nhật phân loại khách hàng.', ['segments' => $segments]);
+        return $this->saved($request, 'Đã cập nhật phân loại khách hàng.', ['segments' => $saved]);
+    }
+
+    public function recalculateSegments(Request $request, CustomerSegmentService $segments): JsonResponse|RedirectResponse
+    {
+        abort_unless($request->user()?->allows(PermissionArea::Customers, PermissionLevel::Full), 403);
+
+        $companyId = $request->user()?->company_id ? (int) $request->user()->company_id : null;
+        $sync = $request->boolean('sync', true);
+
+        if ($sync) {
+            $result = $segments->recalculate($companyId);
+        } else {
+            RecalculateCustomerSegmentsJob::dispatch($companyId);
+            $result = ['queued' => true];
+        }
+
+        ActivityLogger::log('customer360.segments_recalculated', null, $result, 'Tính toán phân loại khách hàng 360', $request->user());
+
+        return $this->saved($request, 'Hệ thống đã ghi nhận và tính toán phân loại khách hàng.', $result);
     }
 
     public function export(Request $request, CustomerProfileService $profileService): StreamedResponse
@@ -275,36 +276,6 @@ final class Customer360ManagementController extends Controller
                 'updatedAt' => $order->updated_at?->format('d/m/Y H:i'),
                 'latestOrderCode' => $order->order_code,
             ]);
-    }
-
-    /** @return array<int, array<string, string>> */
-    private function campaignOptions(): array
-    {
-        return CustomerCareCampaign::query()
-            ->orderBy('name')
-            ->limit(500)
-            ->get(['id', 'name'])
-            ->map(fn (CustomerCareCampaign $campaign): array => [
-                'value' => (string) $campaign->id,
-                'label' => $campaign->name,
-            ])->all();
-    }
-
-    /** @return array<int, array<string, mixed>> */
-    private function segmentOptions(): array
-    {
-        $json = AppSetting::get('customer360.segments');
-        $segments = is_string($json) ? json_decode($json, true) : null;
-
-        if (! is_array($segments) || $segments === []) {
-            return [
-                ['id' => 1, 'name' => 'Khách mới', 'color' => '#337ab7'],
-                ['id' => 2, 'name' => 'Khách cũ', 'color' => '#00a65a'],
-                ['id' => 3, 'name' => 'Khách VIP', 'color' => '#f39c12'],
-            ];
-        }
-
-        return $segments;
     }
 
     private function saved(Request $request, string $message, array $payload = []): JsonResponse|RedirectResponse

@@ -2,29 +2,14 @@ import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import { PageHeader } from '@/components/layout/PageHeader';
-import AppLayout from '@/layouts/AppLayout';
+import { CareCampaignFormDialog, SelectBox } from '@/components/customers/CareCampaignDialogs';
+import { CustomerSegmentDialog } from '@/components/customers/CustomerSegmentDialog';
+import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { ReportPagination } from '@/components/reports/ReportPagination';
+import AppLayout from '@/layouts/AppLayout';
 import { apiRequest } from '@/lib/api';
 import { useT } from '@/providers/I18nProvider';
-
-function optionValue(option) {
-    return String(option?.value ?? option?.id ?? '');
-}
-
-function optionLabel(option) {
-    return option?.label ?? option?.name ?? '—';
-}
-
-function SelectBox({ value, onChange, options = [], placeholder }) {
-    return (
-        <select className="form-control ps-filter-control" value={value ?? ''} onChange={(event) => onChange(event.target.value)}>
-            <option value="">{placeholder}</option>
-            {options.map((option) => <option key={optionValue(option)} value={optionValue(option)}>{optionLabel(option)}</option>)}
-        </select>
-    );
-}
 
 function toDateRangeLabel(filters) {
     const from = filters?.date_from ? String(filters.date_from).split('-').reverse().join('/') : '';
@@ -42,22 +27,7 @@ function parseDateRange(value) {
     };
 }
 
-function DialogShell({ title, open, onClose, children, footer }) {
-    return (
-        <PushsaleDialog
-            open={open}
-            onOpenChange={(nextOpen) => !nextOpen && onClose()}
-            title={title}
-            width="980px"
-            bodyClassName="ps-dialog-body"
-            footer={footer}
-        >
-            {children}
-        </PushsaleDialog>
-    );
-}
-
-function Customer360Table({ rows, pagination, selected, setSelected, onAdd }) {
+function Customer360Table({ rows, selected, setSelected, onAdd, onAttachOne }) {
     const t = useT();
     const c = (key, params = {}) => t(`pages.customer360.${key}`, params);
     const allSelected = rows.length > 0 && rows.every((row) => selected.has(String(row.id)));
@@ -65,7 +35,7 @@ function Customer360Table({ rows, pagination, selected, setSelected, onAdd }) {
     const toggleAll = (checked) => {
         setSelected((current) => {
             const next = new Set(current);
-            rows.forEach((row) => checked ? next.add(String(row.id)) : next.delete(String(row.id)));
+            rows.forEach((row) => (checked ? next.add(String(row.id)) : next.delete(String(row.id))));
             return next;
         });
     };
@@ -129,15 +99,15 @@ function Customer360Table({ rows, pagination, selected, setSelected, onAdd }) {
                                 <td className="text-center no-wrap">{row.updatedAt ?? ''}</td>
                                 <td className="text-center ps-customer360-row-actions">
                                     <a href={`/admin/customers?search=${encodeURIComponent(row.customerPhone ?? '')}`} title={c('open_customer_profile')}><i className="fa fa-external-link" /></a>
-                                    <button type="button" title={c('add_to_campaign')} onClick={() => toggleOne(row.id, true)}><i className="fa fa-user-plus" /></button>
+                                    <button type="button" title={c('add_to_campaign')} onClick={() => onAttachOne(row.id)}>
+                                        <i className="fa fa-user-plus" />
+                                    </button>
                                 </td>
                             </tr>
                         );
                     }) : (
                         <tr>
-                            <td colSpan={12} className="text-left">
-                                <span className="tbl-chk"><input id="customer360-confirm-delete" type="checkbox" defaultChecked /><label htmlFor="customer360-confirm-delete">{c('ask_before_delete')}</label></span>
-                            </td>
+                            <td colSpan={12} className="text-center">Không có khách hàng trong bộ lọc</td>
                         </tr>
                     )}
                 </tbody>
@@ -146,7 +116,13 @@ function Customer360Table({ rows, pagination, selected, setSelected, onAdd }) {
     );
 }
 
-export default function Customer360Management({ filters = {}, filterOptions = {}, report, routeUrl = '/admin/customer-management', pageTitle = 'Khách hàng 360' }) {
+export default function Customer360Management({
+    filters = {},
+    filterOptions = {},
+    report,
+    routeUrl = '/admin/customer-management',
+    pageTitle = 'Khách hàng 360',
+}) {
     const t = useT();
     const c = (key, params = {}) => t(`pages.customer360.${key}`, params);
     const resolvedPageTitle = c('title') || pageTitle;
@@ -154,14 +130,15 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
     const pagination = report?.rows?.meta ?? { current_page: 1, last_page: 1, per_page: 20, total: 0, from: 0, to: 0 };
     const [form, setForm] = useState({ ...filters, keyword: filters.search ?? '' });
     const [dateRange, setDateRange] = useState(toDateRangeLabel(filters));
-    const [filtersOpen, setFiltersOpen] = useState(false);
     const [selected, setSelected] = useState(new Set());
     const [dialog, setDialog] = useState(null);
-    const [campaignName, setCampaignName] = useState('');
     const [campaignId, setCampaignId] = useState('');
     const [segments, setSegments] = useState(filterOptions.segments ?? []);
+    const [processing, setProcessing] = useState(false);
+    const [recalcStatus, setRecalcStatus] = useState(null);
 
     useEffect(() => setSelected(new Set()), [rows.map((row) => row.id).join(',')]);
+    useEffect(() => setSegments(filterOptions.segments ?? []), [filterOptions.segments]);
 
     const selectedIds = useMemo(() => [...selected].map((id) => Number(id)).filter(Boolean), [selected]);
     const setField = (name, value) => setForm((current) => ({ ...current, [name]: value, page: 1 }));
@@ -183,24 +160,35 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
         window.location.assign(`${routeUrl}/export?${query.toString()}`);
     };
 
-    const postJson = async (url, body, successMessage) => {
+    const postJson = async (url, body, successMessage, method = 'POST') => {
+        setProcessing(true);
         try {
-            const data = await apiRequest(url, { method: url.endsWith('/segments') ? 'PUT' : 'POST', body });
+            const data = await apiRequest(url, { method, body });
             toast.success(data.message ?? successMessage);
             setDialog(null);
             router.reload({ preserveScroll: true });
+            return data;
         } catch (error) {
             toast.error(error.message ?? c('action_failed'));
+            return null;
+        } finally {
+            setProcessing(false);
         }
     };
 
-    const createCampaign = () => {
-        const name = campaignName.trim();
-        if (!name) {
+    const createCampaign = (payload) => {
+        if (!String(payload.name ?? '').trim()) {
             toast.warning(c('enter_campaign_name'));
             return;
         }
-        postJson(`${routeUrl}/campaigns`, { name, filters: normalizedForm(), customer_ids: selectedIds }, c('created_campaign'));
+        postJson(`${routeUrl}/campaigns`, {
+            name: payload.name.trim(),
+            starts_at: payload.starts_at || null,
+            ends_at: payload.ends_at || null,
+            status: payload.status || 'active',
+            filters: { ...normalizedForm(), ...(payload.filters ?? {}) },
+            customer_ids: selectedIds,
+        }, c('created_campaign'));
     };
 
     const attachCampaign = () => {
@@ -215,124 +203,145 @@ export default function Customer360Management({ filters = {}, filterOptions = {}
         postJson(`${routeUrl}/campaigns/attach`, { campaign_id: Number(campaignId), customer_ids: selectedIds }, c('attached_customers'));
     };
 
-    const saveSegments = () => {
-        const clean = segments.map((segment) => ({ name: String(segment.name ?? '').trim(), color: segment.color ?? '#337ab7' })).filter((segment) => segment.name);
+    const saveSegments = (nextSegments) => {
+        const clean = nextSegments
+            .map((segment) => ({
+                name: String(segment.name ?? '').trim(),
+                color: segment.color ?? '#337ab7',
+                min_successful_order_value: Number(segment.min_successful_order_value ?? 0),
+            }))
+            .filter((segment) => segment.name);
         if (!clean.length) {
             toast.warning(c('segment_required'));
             return;
         }
-        postJson(`${routeUrl}/segments`, { segments: clean }, c('saved_segments'));
+        postJson(`${routeUrl}/segments`, { segments: clean }, c('saved_segments'), 'PUT');
+    };
+
+    const recalculateSegments = async () => {
+        const data = await postJson(`${routeUrl}/segments/recalculate`, { sync: true }, 'Đã tính toán phân loại khách hàng');
+        if (data) {
+            setRecalcStatus(`Đã phân loại ${data.assigned ?? 0}/${data.phones ?? 0} khách`);
+        }
     };
 
     return (
         <AppLayout>
             <Head title={resolvedPageTitle} />
-            <section className="ps-customer360-page">
-                <PageHeader
-                    title={resolvedPageTitle}
-                    className="ps-customer360-header"
-                    filters={(
-                        <>
-                            <input className="form-control date-range" value={dateRange} onChange={(event) => setDateRange(event.target.value)} onBlur={() => setForm((current) => ({ ...current, ...(parseDateRange(dateRange) ?? {}) }))} />
-                            <SelectBox value={form.campaign_id} onChange={(value) => setField('campaign_id', value)} options={filterOptions.campaigns} placeholder={c('select_campaign')} />
-                            <input className="form-control" value={form.keyword ?? ''} placeholder={c('keyword_placeholder')} onChange={(event) => setField('keyword', event.target.value)} onKeyDown={(event) => event.key === 'Enter' && search()} />
-                        </>
-                    )}
-                    actions={(
-                        <>
-                            <button type="button" className="btn-icon ps-filter-toggle" onClick={() => setFiltersOpen((current) => !current)} title={c('advanced_filter')}><i className={`fa ${filtersOpen ? 'fa-angle-double-up' : 'fa-angle-double-down'}`} /></button>
-                            <button type="button" className="btn btn-sm btn-primary" onClick={search}><i className="fa fa-search" /> {c('search')}</button>
-                            <button type="button" className="btn btn-sm btn-primary" onClick={exportCsv}><i className="fa fa-file-excel-o" /> {c('export_excel')}</button>
-                        </>
-                    )}
-                    advanced={filtersOpen ? (
-                        <div className="ps-customer360-filter-grid">
+            <PushsalePageShell
+                title={resolvedPageTitle}
+                pageCode="3.1"
+                className="ps-customer360-page"
+                filters={(
+                    <>
+                        <input
+                            className="form-control date-range"
+                            value={dateRange}
+                            onChange={(event) => setDateRange(event.target.value)}
+                            onBlur={() => setForm((current) => ({ ...current, ...(parseDateRange(dateRange) ?? {}) }))}
+                        />
+                        <SelectBox value={form.campaign_id} onChange={(value) => setField('campaign_id', value)} options={filterOptions.campaigns} placeholder={c('select_campaign')} />
+                        <input
+                            className="form-control"
+                            value={form.keyword ?? ''}
+                            placeholder={c('keyword_placeholder')}
+                            onChange={(event) => setField('keyword', event.target.value)}
+                            onKeyDown={(event) => event.key === 'Enter' && search()}
+                        />
+                    </>
+                )}
+                actions={(
+                    <>
+                        <button type="button" className="btn btn-sm btn-primary" onClick={search}><i className="fa fa-search" /> {c('search')}</button>
+                        <button type="button" className="btn btn-sm btn-primary" onClick={exportCsv}><i className="fa fa-file-excel-o" /> {c('export_excel')}</button>
+                    </>
+                )}
+                advancedFilters={(
+                    <div className="ps-adv-filter-panel">
+                        <div className="ps-adv-filter-row ps-customer360-filter-grid" style={{ '--ps-adv-cols': 5 }}>
                             <SelectBox value={form.sale_id} onChange={(value) => setField('sale_id', value)} options={filterOptions.sales} placeholder={c('select_sale')} />
                             <SelectBox value={form.marketer_id} onChange={(value) => setField('marketer_id', value)} options={filterOptions.marketers} placeholder={c('select_marketing')} />
                             <SelectBox value={form.customer_type} onChange={(value) => setField('customer_type', value)} options={filterOptions.customerTypes} placeholder={c('purchase_times')} />
                             <SelectBox value={form.segment_id} onChange={(value) => setField('segment_id', value)} options={segments.map((segment) => ({ value: segment.id, label: segment.name }))} placeholder={c('customer_segment')} />
-                            <input className="form-control" placeholder={c('age_from')} value={form.age_from ?? ''} onChange={(event) => setField('age_from', event.target.value)} />
-                            <input className="form-control" placeholder={c('age_to')} value={form.age_to ?? ''} onChange={(event) => setField('age_to', event.target.value)} />
-                            <SelectBox value={form.province} onChange={(value) => setField('province', value)} options={[]} placeholder={c('province_placeholder')} />
-                            <SelectBox value={form.district} onChange={(value) => setField('district', value)} options={[]} placeholder={c('district_placeholder')} />
-                            <SelectBox value={form.ward} onChange={(value) => setField('ward', value)} options={[]} placeholder={c('ward_placeholder')} />
                             <SelectBox value={form.gender} onChange={(value) => setField('gender', value)} options={[{ value: 'male', label: c('male') }, { value: 'female', label: c('female') }]} placeholder={c('gender_placeholder')} />
-                            <SelectBox value={form.birth_month} onChange={(value) => setField('birth_month', value)} options={Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `${c('month')} ${i + 1}` }))} placeholder={c('birth_month')} />
-                            <SelectBox value={form.job} onChange={(value) => setField('job', value)} options={[]} placeholder={c('job_placeholder')} />
-                            <SelectBox value={form.religion} onChange={(value) => setField('religion', value)} options={[]} placeholder={c('religion_placeholder')} />
-                            <SelectBox value={form.income_from} onChange={(value) => setField('income_from', value)} options={[]} placeholder={c('income_from')} />
-                            <SelectBox value={form.income_to} onChange={(value) => setField('income_to', value)} options={[]} placeholder={c('income_to')} />
-                            <SelectBox value={form.spending_from} onChange={(value) => setField('spending_from', value)} options={[]} placeholder={c('spending_from')} />
-                            <SelectBox value={form.spending_to} onChange={(value) => setField('spending_to', value)} options={[]} placeholder={c('spending_from')} />
-                            <SelectBox value={form.customer_status} onChange={(value) => setField('customer_status', value)} options={[]} placeholder={c('customer_status')} />
-                            <SelectBox value={form.usage_effectiveness} onChange={(value) => setField('usage_effectiveness', value)} options={[]} placeholder={c('usage_effectiveness')} />
-                            <SelectBox value={form.usage_status} onChange={(value) => setField('usage_status', value)} options={[]} placeholder={c('usage_status')} />
-                            <SelectBox value={form.data_quality} onChange={(value) => setField('data_quality', value)} options={[]} placeholder={c('data_quality')} />
-                            <SelectBox value={form.reject_reason} onChange={(value) => setField('reject_reason', value)} options={[]} placeholder={c('reject_reason')} />
-                            <SelectBox value={form.per_page} onChange={(value) => setField('per_page', value)} options={[20, 50, 100, 200, 500, 1000, 3000].map((value) => ({ value, label: value }))} placeholder="20" />
+                            <SelectBox value={form.per_page} onChange={(value) => setField('per_page', value)} options={[20, 50, 100].map((value) => ({ value, label: value }))} placeholder="20" />
                         </div>
-                    ) : null}
-                    collapsible={false}
+                    </div>
+                )}
+                toolbar={(
+                    <div className="ps-customer360-actions">
+                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('createCampaign')}><i className="fa fa-plus" /> {c('create_campaign_from_filter')}</button>
+                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('attachCampaign')}><i className="fa fa-user-plus" /> {c('attach_customers_to_campaign')}</button>
+                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('segments')}><i className="fa fa-diamond" /> {c('manage_segments')}</button>
+                    </div>
+                )}
+            >
+                <Customer360Table
+                    rows={rows}
+                    selected={selected}
+                    setSelected={setSelected}
+                    onAdd={() => setDialog('createCustomer')}
+                    onAttachOne={(id) => {
+                        setSelected(new Set([String(id)]));
+                        setDialog('attachCampaign');
+                    }}
                 />
-
-                <div className="box-body ps-customer360-actions">
-                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('createCampaign')}><i className="fa fa-plus" /> {c('create_campaign_from_filter')}</button>
-                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('attachCampaign')}><i className="fa fa-user-plus" /> {c('attach_customers_to_campaign')}</button>
-                    <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('segments')}><i className="fa fa-diamond" /> {c('manage_segments')}</button>
-                </div>
-
-                <Customer360Table rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onAdd={() => setDialog('createCustomer')} />
                 <ReportPagination routeUrl={routeUrl} filters={normalizedForm()} meta={pagination} scrollTargetId="customer360-table" />
-            </section>
+            </PushsalePageShell>
 
-            <DialogShell
-                title={c('create_campaign_dialog_title')}
+            <CareCampaignFormDialog
                 open={dialog === 'createCampaign'}
                 onClose={() => setDialog(null)}
-                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>{c('close')}</button><button type="button" className="btn btn-primary" onClick={createCampaign}><i className="fa fa-save" /> {c('save')}</button></>}
-            >
-                <label>{c('campaign_name')}</label>
-                <input className="form-control" value={campaignName} onChange={(event) => setCampaignName(event.target.value)} placeholder={c('campaign_name_placeholder')} />
-                <p className="small-tip mt-2">{c('campaign_filter_hint')}</p>
-            </DialogShell>
+                onSave={createCampaign}
+                filterOptions={{
+                    ...filterOptions,
+                    segments,
+                    customerTypes: filterOptions.customerTypes ?? [
+                        { value: 'new', label: 'Khách mới' },
+                        { value: 'returning', label: 'Khách mua lại' },
+                    ],
+                }}
+                processing={processing}
+            />
 
-            <DialogShell
-                title={c('attach_campaign_dialog_title')}
+            <PushsaleDialog
                 open={dialog === 'attachCampaign'}
-                onClose={() => setDialog(null)}
-                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>{c('close')}</button><button type="button" className="btn btn-primary" onClick={attachCampaign}><i className="fa fa-save" /> {c('save')}</button></>}
+                onOpenChange={(next) => !next && setDialog(null)}
+                title={c('attach_campaign_dialog_title')}
+                width="560px"
+                bodyClassName="ps-dialog-body"
+                footer={(
+                    <>
+                        <button type="button" className="btn btn-default" onClick={() => setDialog(null)}>{c('close')}</button>
+                        <button type="button" className="btn btn-primary" disabled={processing} onClick={attachCampaign}><i className="fa fa-save" /> {c('save')}</button>
+                    </>
+                )}
             >
                 <label>{c('campaign')}</label>
                 <SelectBox value={campaignId} onChange={setCampaignId} options={filterOptions.campaigns} placeholder={c('select_campaign_short')} />
                 <p className="small-tip mt-2">{c('selected_customers', { count: selectedIds.length })}</p>
-            </DialogShell>
+            </PushsaleDialog>
 
-            <DialogShell
-                title={c('segments_dialog_title')}
+            <CustomerSegmentDialog
                 open={dialog === 'segments'}
                 onClose={() => setDialog(null)}
-                footer={<><button type="button" className="btn btn-default" onClick={() => setDialog(null)}>{c('close')}</button><button type="button" className="btn btn-primary" onClick={saveSegments}><i className="fa fa-save" /> {c('save')}</button></>}
-            >
-                <div className="ps-segment-editor">
-                    {segments.map((segment, index) => (
-                        <div className="ps-segment-row" key={segment.id ?? index}>
-                            <input className="form-control" value={segment.name ?? ''} onChange={(event) => setSegments((current) => current.map((item, i) => i === index ? { ...item, name: event.target.value } : item))} />
-                            <input type="color" value={segment.color ?? '#337ab7'} onChange={(event) => setSegments((current) => current.map((item, i) => i === index ? { ...item, color: event.target.value } : item))} />
-                            <button type="button" className="btn-icon" onClick={() => setSegments((current) => current.filter((_, i) => i !== index))}><i className="fa fa-trash" /></button>
-                        </div>
-                    ))}
-                    <button type="button" className="btn btn-default btn-sm" onClick={() => setSegments((current) => [...current, { id: Date.now(), name: c('new_segment_name'), color: '#337ab7' }])}><i className="fa fa-plus" /> {c('add_segment')}</button>
-                </div>
-            </DialogShell>
+                segments={segments}
+                onSave={saveSegments}
+                onRecalculate={recalculateSegments}
+                processing={processing}
+                recalcStatus={recalcStatus}
+            />
 
-            <DialogShell
-                title={c('add_customer')}
+            <PushsaleDialog
                 open={dialog === 'createCustomer'}
-                onClose={() => setDialog(null)}
+                onOpenChange={(next) => !next && setDialog(null)}
+                title={c('add_customer')}
+                width="520px"
+                bodyClassName="ps-dialog-body"
                 footer={<button type="button" className="btn btn-default" onClick={() => setDialog(null)}>{c('close')}</button>}
             >
                 <p>{c('create_customer_hint')}</p>
-            </DialogShell>
+            </PushsaleDialog>
         </AppLayout>
     );
 }

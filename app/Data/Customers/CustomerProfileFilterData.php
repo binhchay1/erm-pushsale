@@ -32,6 +32,9 @@ readonly class CustomerProfileFilterData
         public ?string $allocationStatus,
         public ?string $shippingMethod,
         public ?string $search,
+        public ?int $campaignId,
+        public ?int $segmentId,
+        public ?string $gender,
         public int $page,
         public int $perPage,
     ) {}
@@ -84,6 +87,9 @@ readonly class CustomerProfileFilterData
             allocationStatus: self::nullableString($request->input('allocation_status')),
             shippingMethod: self::nullableString($request->input('shipping_method')),
             search: self::nullableString($request->input('search')),
+            campaignId: $request->integer('campaign_id') ?: null,
+            segmentId: $request->integer('segment_id') ?: null,
+            gender: self::nullableString($request->input('gender')),
             page: max(1, $request->integer('page', 1)),
             perPage: min(100, max(10, $request->integer('per_page', 20))),
         );
@@ -116,6 +122,9 @@ readonly class CustomerProfileFilterData
             'allocation_status' => $this->allocationStatus,
             'shipping_method' => $this->shippingMethod,
             'search' => $this->search,
+            'campaign_id' => $this->campaignId,
+            'segment_id' => $this->segmentId,
+            'gender' => $this->gender,
             'page' => $this->page,
             'per_page' => $this->perPage,
         ];

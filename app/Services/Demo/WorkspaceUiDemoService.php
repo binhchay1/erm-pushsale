@@ -121,6 +121,7 @@ final class WorkspaceUiDemoService
 
             $this->seedCustomerProfiles($orders, $sale, $warehouseUser ?? $admin, $admin);
             $this->seedReportConfig($companyId, $sales);
+            $this->seedCustomer360($companyId, $orders, $admin);
             $voucherCount = $this->seedWarehouse($warehouse, $product, $warehouseUser ?? $admin, $orders);
             $handoverCount = $this->seedHandovers($warehouseUser ?? $admin, $orders);
             $movementCount = $this->seedInventoryMovements($warehouse, $product, $warehouseUser ?? $admin, $orders);
@@ -135,6 +136,7 @@ final class WorkspaceUiDemoService
                 'movements' => $movementCount,
                 'sales' => count($sales),
                 'kpi_plans' => MonthlyKpiPlan::query()->where('kpi_name', 'like', 'UXDEMO%')->count(),
+                'care_campaigns' => \App\Models\Pushsale\CustomerCareCampaign::query()->where('name', 'like', 'UXDEMO%')->count(),
             ];
         });
     }
@@ -214,6 +216,8 @@ final class WorkspaceUiDemoService
                 WarehouseInventoryMovement::query()->where('note', 'like', self::NOTE_TAG.'%')->delete();
 
                 MonthlyKpiPlan::query()->where('kpi_name', 'like', 'UXDEMO%')->forceDelete();
+                \App\Models\Pushsale\CustomerCareCampaign::query()->where('name', 'like', 'UXDEMO%')->forceDelete();
+                \App\Models\CustomerSegmentAssignment::query()->where('phone_key', 'like', self::PHONE_PREFIX.'%')->delete();
 
                 $demoSaleIds = User::query()->withoutGlobalScopes()
                     ->where('email', 'like', self::SALE_EMAIL_PREFIX.'%@%')
@@ -530,6 +534,38 @@ final class WorkspaceUiDemoService
                 );
             }
         }
+    }
+
+    /** @param  array<int, Order>  $orders */
+    private function seedCustomer360(int $companyId, array $orders, User $admin): void
+    {
+        $segments = app(\App\Services\Customers\CustomerSegmentService::class);
+        $segments->saveDefinitions([
+            ['name' => 'UXDEMO Mới', 'color' => '#337ab7', 'min_successful_order_value' => 0],
+            ['name' => 'UXDEMO Thân thiết', 'color' => '#00a65a', 'min_successful_order_value' => 200000],
+            ['name' => 'UXDEMO VIP', 'color' => '#f39c12', 'min_successful_order_value' => 2000000],
+        ]);
+        $segments->recalculate($companyId);
+
+        $orderIds = collect($orders)->take(5)->pluck('id')->map(fn ($id) => (int) $id)->all();
+        \App\Models\Pushsale\CustomerCareCampaign::query()->updateOrCreate(
+            ['company_id' => $companyId, 'name' => 'UXDEMO Chăm sóc 7 ngày'],
+            [
+                'customer_condition' => [
+                    'source' => 'uxdemo',
+                    'filters' => ['customer_type' => 'returning', 'status' => 'active'],
+                    'order_ids' => $orderIds,
+                    'phone_keys' => [],
+                ],
+                'repeat_days' => 7,
+                'starts_at' => now()->subDays(3)->toDateString(),
+                'ends_at' => now()->addDays(27)->toDateString(),
+                'status' => 'active',
+                'created_by_user_id' => $admin->id,
+                'updated_by_user_id' => $admin->id,
+                'deleted_at' => null,
+            ],
+        );
     }
 
     /** @param array<string, mixed> $scenario */

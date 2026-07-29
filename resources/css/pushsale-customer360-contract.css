@@ -1,0 +1,132 @@
+/* Menu 3.x Customer 360 / care campaigns / customer reports */
+
+html body.pushsale-app-body .ps-customer360-page,
+html body.pushsale-app-body .ps-care-campaigns-page,
+html body.pushsale-app-body .ps-customer-multi-report-page,
+html body.pushsale-app-body .ps-customer-spending-report-page {
+    --ps-header-x: 14px;
+}
+
+html body.pushsale-app-body .ps-customer360-page .ps-page-shell__toolbar,
+html body.pushsale-app-body .ps-care-campaigns-page .ps-page-shell__toolbar,
+html body.pushsale-app-body .ps-customer360-page .ps-page-shell__body,
+html body.pushsale-app-body .ps-care-campaigns-page .ps-page-shell__body,
+html body.pushsale-app-body .ps-customer-multi-report-page .ps-page-shell__body,
+html body.pushsale-app-body .ps-customer-spending-report-page .ps-page-shell__body {
+    padding-left: var(--ps-header-x);
+    padding-right: var(--ps-header-x);
+}
+
+html body.pushsale-app-body .ps-customer360-filter-grid,
+html body.pushsale-app-body .ps-care-condition-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--ps-adv-cols, 5), minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-customer360-filter-grid > *,
+html body.pushsale-app-body .ps-care-condition-grid > * {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-customer360-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+html body.pushsale-app-body .ps-customer360-table-wrap,
+html body.pushsale-app-body .ps-care-campaigns-table-wrap,
+html body.pushsale-app-body .ps-customer-report-table-wrap {
+    width: 100%;
+    overflow: auto;
+}
+
+html body.pushsale-app-body .ps-customer360-table > thead > tr > th,
+html body.pushsale-app-body .ps-care-campaigns-table > thead > tr > th,
+html body.pushsale-app-body .ps-customer-report-table > thead > tr > th,
+html body.pushsale-app-body .ps-segment-table > thead > tr > th {
+    background: #3c8dbc !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+    padding: 6px 8px !important;
+    vertical-align: middle !important;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-customer360-add,
+html body.pushsale-app-body .ps-customer360-add .text,
+html body.pushsale-app-body .ps-customer360-add i,
+html body.pushsale-app-body .ps-segment-add-th,
+html body.pushsale-app-body .ps-segment-add-th .text,
+html body.pushsale-app-body .ps-segment-add-th i {
+    color: #fff !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-customer360-row-actions {
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-customer360-row-actions a,
+html body.pushsale-app-body .ps-customer360-row-actions button {
+    color: #3c8dbc;
+    margin: 0 3px;
+    background: transparent;
+    border: 0;
+}
+
+html body.pushsale-app-body .ps-care-campaign-dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 10px 0 14px;
+}
+
+html body.pushsale-app-body .ps-care-condition-title {
+    margin: 8px 0 10px;
+    color: #f39c12;
+    font-size: 13px;
+    font-weight: 700;
+    border-bottom: 1px solid #f39c12;
+    padding-bottom: 4px;
+}
+
+html body.pushsale-app-body .ps-segment-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+html body.pushsale-app-body .ps-segment-status {
+    color: #777;
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-segment-table-wrap {
+    overflow: auto;
+}
+
+@media (max-width: 1100px) {
+    html body.pushsale-app-body .ps-customer360-filter-grid,
+    html body.pushsale-app-body .ps-care-condition-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    html body.pushsale-app-body .ps-customer360-filter-grid,
+    html body.pushsale-app-body .ps-care-condition-grid,
+    html body.pushsale-app-body .ps-care-campaign-dates {
+        grid-template-columns: 1fr;
+    }
+}

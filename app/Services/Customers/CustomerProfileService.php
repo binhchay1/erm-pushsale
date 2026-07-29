@@ -231,6 +231,59 @@ final class CustomerProfileService
             $query->where('orders.shipping_method', $filter->shippingMethod);
         }
 
+        if ($filter->campaignId) {
+            $campaign = \App\Models\Pushsale\CustomerCareCampaign::query()->find($filter->campaignId);
+            $condition = (array) ($campaign?->customer_condition ?? []);
+            $orderIds = collect($condition['order_ids'] ?? [])->map(fn ($id) => (int) $id)->filter()->values();
+            $phoneKeys = collect($condition['phone_keys'] ?? [])->filter()->values();
+
+            $query->where(function (Builder $scope) use ($orderIds, $phoneKeys): void {
+                if ($orderIds->isNotEmpty()) {
+                    $scope->whereIn('orders.id', $orderIds->all());
+                }
+                if ($phoneKeys->isNotEmpty()) {
+                    $method = $orderIds->isNotEmpty() ? 'orWhereIn' : 'whereIn';
+                    // Match by raw digits containment — phones stored variously.
+                    $scope->{$method === 'orWhereIn' ? 'orWhere' : 'where'}(function (Builder $phones) use ($phoneKeys): void {
+                        foreach ($phoneKeys as $index => $phone) {
+                            $digits = preg_replace('/\D+/', '', (string) $phone) ?: '';
+                            if ($digits === '') {
+                                continue;
+                            }
+                            $clause = $index === 0 ? 'where' : 'orWhere';
+                            $phones->{$clause}('orders.customer_phone', 'like', '%'.$digits.'%');
+                        }
+                    });
+                }
+                if ($orderIds->isEmpty() && $phoneKeys->isEmpty()) {
+                    $scope->whereRaw('1 = 0');
+                }
+            });
+        }
+
+        if ($filter->segmentId) {
+            $phoneKeys = \App\Models\CustomerSegmentAssignment::query()
+                ->where('segment_id', $filter->segmentId)
+                ->pluck('phone_key')
+                ->filter()
+                ->values();
+
+            if ($phoneKeys->isEmpty()) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $query->where(function (Builder $scope) use ($phoneKeys): void {
+                    foreach ($phoneKeys as $index => $phone) {
+                        $digits = preg_replace('/\D+/', '', (string) $phone) ?: (string) $phone;
+                        if ($digits === '') {
+                            continue;
+                        }
+                        $clause = $index === 0 ? 'where' : 'orWhere';
+                        $scope->{$clause}('orders.customer_phone', 'like', '%'.$digits.'%');
+                    }
+                });
+            }
+        }
+
         if ($filter->search) {
             $term = '%'.$filter->search.'%';
             $query->where(function (Builder $scope) use ($term): void {
