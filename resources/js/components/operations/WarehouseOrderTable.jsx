@@ -448,46 +448,45 @@ export function WarehouseOrderTable({
                                     onMessage={() => setAction({ type: 'message', row })}
                                 />
                                 <td className="text-center area4 ps-wh-delivery-cell">
-                                    <div className="small-tip">{formatDateTime(row.lastDeliveryEventAt, { withSeconds: true }) || '—'}</div>
-                                    <div className="text-right no-wrap">
-                                        {isAccounting ? (
-                                            <InlineIconButton title="Đồng bộ trạng thái giao hàng" icon="retweet" onClick={() => setAction({ type: 'delivery', row })} />
-                                        ) : (
-                                            <InlineIconButton title="Đưa vào danh sách cảnh báo bom hàng" icon="bomb" onClick={() => setAction({ type: 'blacklist', row })} />
-                                        )}
-                                        <InlineIconButton title="Cập nhật trạng thái giao hàng" icon="refresh" onClick={() => setAction({ type: 'delivery', row })} />
-                                        <InlineIconButton title="Lịch sử tác nghiệp" icon="history" onClick={() => setAction({ type: 'timeline', row })} />
-                                    </div>
-                                    <LegacyStatus row={row} />
-                                    <div className="small-tip sline">{formatDateTime(row.shipmentPostedAt || row.printedAt, { withSeconds: false }) || row.shipment?.statusText || ''}</div>
-                                    {row.shipmentError && <div className="ps-wh-error text-left">{row.shipmentError}</div>}
-                                </td>
-                                <td className="text-center c-customer-body ps-contact-name-phone" title={`${row.id} | ${row.sourceType || ''}`}>
-                                    <div className="text-right">
-                                        <InlineIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={() => setAction({ type: 'date', row })} />
-                                        {!isAccounting && (
-                                            <InlineIconButton title="Tách đơn" icon="clipboard" onClick={() => setAction({ type: 'split', row })} disabled={!row.canSplit} />
-                                        )}
-                                        <InlineIconButton title="Cập nhật đơn vị giao vận" icon="truck" onClick={() => setAction({ type: 'edit', row })} />
-                                    </div>
-                                    <div className="sline text-left ps-wh-customer-name">
-                                        <span>{row.effectiveReceiverName || row.customerName}</span>
-                                    </div>
-                                    {row.carrierLabel ? <span className="nha-mang text-left">{row.carrierLabel}</span> : null}
-                                    <div className="no-wrap ps-contact-phone-row">
-                                        <div className="ps-phone-main">
-                                            <a className="text-left" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a>
-                                            {(row.effectiveReceiverPhone || row.customerPhone) ? (
-                                                <a className="ps-contact-phone-icon" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.effectiveReceiverPhone || row.customerPhone}`}>
-                                                    <i className="fa fa-phone" aria-hidden="true" />
-                                                </a>
-                                            ) : null}
-                                        </div>
-                                        <OrderStatusFlags row={row} className="ps-contact-flags" />
-                                    </div>
-                                    <div className="text-left khkn sline">{row.customerNote || ''}</div>
-                                    <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>
-                                </td>
+                    <div className="ps-wh-delivery-stack">
+                        <div className="small-tip ps-wh-delivery-date">{formatDateTime(row.lastDeliveryEventAt, { withSeconds: true }) || '—'}</div>
+                        <div className="ps-wh-delivery-actions no-wrap">
+                            {isAccounting ? (
+                                <InlineIconButton title="Đồng bộ trạng thái giao hàng" icon="retweet" onClick={() => setAction({ type: 'delivery', row })} />
+                            ) : (
+                                <InlineIconButton title="Đưa vào danh sách cảnh báo bom hàng" icon="bomb" onClick={() => setAction({ type: 'blacklist', row })} />
+                            )}
+                            <InlineIconButton title="Cập nhật trạng thái giao hàng" icon="refresh" onClick={() => setAction({ type: 'delivery', row })} />
+                            <InlineIconButton title="Lịch sử tác nghiệp" icon="history" onClick={() => setAction({ type: 'timeline', row })} />
+                        </div>
+                        <LegacyStatus row={row} />
+                        <div className="small-tip sline ps-wh-delivery-date">{formatDateTime(row.shipmentPostedAt || row.printedAt, { withSeconds: false }) || row.shipment?.statusText || '—'}</div>
+                        {row.shipmentError ? <div className="ps-wh-error text-left">{row.shipmentError}</div> : null}
+                    </div>
+                </td>
+                <td className="text-center c-customer-body ps-contact-name-phone" title={`${row.id} | ${row.sourceType || ''}`}>
+                    <div className="text-right">
+                        <InlineIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={() => setAction({ type: 'date', row })} />
+                        {!isAccounting && (
+                            <InlineIconButton title="Tách đơn" icon="clipboard" onClick={() => setAction({ type: 'split', row })} disabled={!row.canSplit} />
+                        )}
+                        <InlineIconButton title="Cập nhật đơn vị giao vận" icon="truck" onClick={() => setAction({ type: 'edit', row })} />
+                    </div>
+                    <div className="sline text-left ps-wh-customer-name">
+                        <span>{row.effectiveReceiverName || row.customerName}</span>
+                    </div>
+                    {row.carrierLabel ? <span className="nha-mang text-left">{row.carrierLabel}</span> : null}
+                    <div className="no-wrap ps-contact-phone-row">
+                        <div className="ps-phone-main">
+                            <a className="text-left ps-phone-link" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a>
+                        </div>
+                        <OrderStatusFlags row={row} className="ps-contact-flags" />
+                    </div>
+                    {row.customerNote ? <div className="text-left khkn sline">{row.customerNote}</div> : null}
+                    {row.desiredDeliveryAt ? (
+                        <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>
+                    ) : null}
+                </td>
                                 <td className="c-address-body"><span>{row.shippingAddress || ''}</span>{row.shippingNotes && <><br /><span className="small-tip ps-wh-magenta">{row.shippingNotes}</span></>}</td>
                                 <td className="text-left c-products-body"><OrderProductsBreakdown items={row.products || [...(row.mainProducts || []), ...(row.upsellProducts || [])]} order={row} /></td>
                                 <td className="no-wrap area3 text-right c-money-body"><OrderMoneyBreakdown row={row} /></td>

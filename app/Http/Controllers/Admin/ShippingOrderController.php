@@ -68,11 +68,22 @@ class ShippingOrderController extends Controller
         ]));
     }
 
-    public function detail(Order $order, ShippingOrderService $service): JsonResponse
+    public function detail(int $order, ShippingOrderService $service): JsonResponse
     {
-        abort_unless($order->closed_at, 404);
+        $model = Order::query()->find($order);
+        if (! $model) {
+            return response()->json([
+                'message' => 'Không tìm thấy đơn hàng (có thể đã bị xóa hoặc cache danh sách cũ). Tải lại trang rồi thử lại.',
+            ], 404);
+        }
 
-        return response()->json($service->detail($order));
+        if (! $model->closed_at) {
+            return response()->json([
+                'message' => 'Đơn chưa chốt nên chưa có chi tiết vận chuyển.',
+            ], 404);
+        }
+
+        return response()->json($service->detail($model));
     }
 
     public function createShipment(Request $request, Order $order, CreateShipmentService $service): JsonResponse

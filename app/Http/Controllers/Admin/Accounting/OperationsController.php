@@ -24,6 +24,7 @@ class OperationsController extends Controller
             'accounting-operations',
             $filter,
             fn () => $service->build($filter),
+            useCache: false,
         );
         $isAccountingRole = $request->routeIs('accounting.*');
 

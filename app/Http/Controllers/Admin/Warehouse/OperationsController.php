@@ -24,6 +24,7 @@ class OperationsController extends Controller
             'warehouse-operations',
             $filter,
             fn () => $service->build($filter),
+            useCache: false,
         );
         $isWarehouseRole = $request->routeIs('warehouse.*');
 

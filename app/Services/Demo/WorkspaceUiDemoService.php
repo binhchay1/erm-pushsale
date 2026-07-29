@@ -28,6 +28,7 @@ use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
 use App\Models\WarehouseInventoryMovement;
 use App\Services\CustomerInteractions\CustomerIdentity;
+use App\Services\Reports\ReportSnapshotCache;
 use App\Services\Tenant\CompanyProvisioningService;
 use App\Support\TenantManager;
 use Illuminate\Support\Facades\DB;
@@ -126,6 +127,8 @@ final class WorkspaceUiDemoService
             $handoverCount = $this->seedHandovers($warehouseUser ?? $admin, $orders);
             $movementCount = $this->seedInventoryMovements($warehouse, $product, $warehouseUser ?? $admin, $orders);
 
+            app(ReportSnapshotCache::class)->forgetAllForCompany($companyId);
+
             return [
                 'orders' => count($orders),
                 'leads' => LeadIngestion::query()->where('external_id', 'like', self::LEAD_PREFIX.'%')->count(),
@@ -218,6 +221,8 @@ final class WorkspaceUiDemoService
                 MonthlyKpiPlan::query()->where('kpi_name', 'like', 'UXDEMO%')->forceDelete();
                 \App\Models\Pushsale\CustomerCareCampaign::query()->where('name', 'like', 'UXDEMO%')->forceDelete();
                 \App\Models\CustomerSegmentAssignment::query()->where('phone_key', 'like', self::PHONE_PREFIX.'%')->delete();
+
+                app(ReportSnapshotCache::class)->forgetAllForCompany((int) (CompanyProvisioningService::internalCompany()?->id ?? 0));
 
                 $demoSaleIds = User::query()->withoutGlobalScopes()
                     ->where('email', 'like', self::SALE_EMAIL_PREFIX.'%@%')
