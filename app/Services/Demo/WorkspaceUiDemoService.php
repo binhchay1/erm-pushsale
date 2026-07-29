@@ -15,9 +15,14 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderOperationHistory;
 use App\Models\Product;
+use App\Models\Pushsale\MonthlyKpiPlan;
+use App\Models\Pushsale\UserOperationalProfile;
 use App\Models\Pushsale\WarehouseIncidentReport;
 use App\Models\Pushsale\WarehouseVoucher;
 use App\Models\Pushsale\WarehouseVoucherLine;
+use App\Models\SaleOptimizationAlertThreshold;
+use App\Models\SaleOptimizationLevel;
+use App\Models\SaleOptimizationTarget;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
@@ -26,6 +31,9 @@ use App\Services\CustomerInteractions\CustomerIdentity;
 use App\Services\Tenant\CompanyProvisioningService;
 use App\Support\TenantManager;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 /**
  * Seed / purge dữ liệu demo có gắn nhãn cho UI sale, thủ kho, hồ sơ khách hàng.
@@ -47,7 +55,9 @@ final class WorkspaceUiDemoService
 
     public const LEAD_PREFIX = 'uxdemo-';
 
-    /** @return array{orders:int, leads:int, histories:int, messages:int, vouchers:int, handovers:int, movements:int} */
+    public const SALE_EMAIL_PREFIX = 'uxdemo.sale';
+
+    /** @return array{orders:int, leads:int, histories:int, messages:int, vouchers:int, handovers:int, movements:int, sales:int, kpi_plans:int} */
     public function seed(?int $companyId = null): array
     {
         $companyId = $companyId ?: (int) (CompanyProvisioningService::internalCompany()?->id ?? 0);
@@ -80,13 +90,13 @@ final class WorkspaceUiDemoService
                 throw new \RuntimeException('Thiếu user — cần ít nhất 1 tài khoản trong DB.');
             }
 
-            // Gắn company cho user demo nếu đang null để order/history thuộc đúng tenant UI.
             foreach ([$sale, $warehouseUser, $admin] as $actor) {
                 if ($actor && ! $actor->company_id) {
                     $actor->forceFill(['company_id' => $companyId])->save();
                 }
             }
 
+            $sales = $this->ensureDemoSales($companyId, $sale);
             $product = Product::query()->where('is_active', true)->where('type', 'product')->orderBy('id')->first()
                 ?? Product::query()->orderBy('id')->first()
                 ?? $this->ensureDemoProduct($companyId, $admin ?? $sale);
@@ -94,13 +104,14 @@ final class WorkspaceUiDemoService
             $warehouse = Warehouse::query()->orderBy('id')->first()
                 ?? $this->ensureDemoWarehouse($companyId);
 
-            $scenarios = $this->saleScenarios();
+            $scenarios = array_merge($this->saleScenarios(), $this->reportScenarios());
             $orders = [];
 
             foreach ($scenarios as $index => $scenario) {
+                $saleUser = $sales[$index % count($sales)];
                 $orders[] = $this->createSaleOrder(
                     companyId: $companyId,
-                    sale: $sale,
+                    sale: $saleUser,
                     product: $product,
                     warehouse: $warehouse,
                     index: $index + 1,
@@ -109,6 +120,7 @@ final class WorkspaceUiDemoService
             }
 
             $this->seedCustomerProfiles($orders, $sale, $warehouseUser ?? $admin, $admin);
+            $this->seedReportConfig($companyId, $sales);
             $voucherCount = $this->seedWarehouse($warehouse, $product, $warehouseUser ?? $admin, $orders);
             $handoverCount = $this->seedHandovers($warehouseUser ?? $admin, $orders);
             $movementCount = $this->seedInventoryMovements($warehouse, $product, $warehouseUser ?? $admin, $orders);
@@ -121,6 +133,8 @@ final class WorkspaceUiDemoService
                 'vouchers' => $voucherCount,
                 'handovers' => $handoverCount,
                 'movements' => $movementCount,
+                'sales' => count($sales),
+                'kpi_plans' => MonthlyKpiPlan::query()->where('kpi_name', 'like', 'UXDEMO%')->count(),
             ];
         });
     }
@@ -198,6 +212,32 @@ final class WorkspaceUiDemoService
 
                 WarehouseIncidentReport::query()->where('name', 'like', self::HANDOVER_PREFIX.'%')->delete();
                 WarehouseInventoryMovement::query()->where('note', 'like', self::NOTE_TAG.'%')->delete();
+
+                MonthlyKpiPlan::query()->where('kpi_name', 'like', 'UXDEMO%')->delete();
+
+                $demoSaleIds = User::query()->withoutGlobalScopes()
+                    ->where('email', 'like', self::SALE_EMAIL_PREFIX.'%@%')
+                    ->pluck('id');
+
+                if (Schema::hasTable('sale_optimization_targets') && $demoSaleIds->isNotEmpty()) {
+                    SaleOptimizationTarget::query()->whereIn('sale_user_id', $demoSaleIds)->delete();
+                }
+                if (Schema::hasTable('sale_optimization_levels')) {
+                    SaleOptimizationLevel::query()->where('label', 'like', 'UXDEMO%')->delete();
+                }
+                if (Schema::hasTable('sale_optimization_alert_thresholds')) {
+                    SaleOptimizationAlertThreshold::query()
+                        ->where('metric_key', 'uxdemo_close_rate')
+                        ->delete();
+                }
+
+                if ($demoSaleIds->isNotEmpty()) {
+                    UserOperationalProfile::query()->whereIn('user_id', $demoSaleIds)->delete();
+                }
+
+                User::query()->withoutGlobalScopes()
+                    ->where('email', 'like', self::SALE_EMAIL_PREFIX.'%@%')
+                    ->delete();
 
                 // Chỉ xóa SP/kho bootstrap nếu đúng mã UXDEMO (không đụng catalog thật).
                 Product::query()->where('sku', 'UXDEMO-SP-01')->delete();
@@ -295,6 +335,197 @@ final class WorkspaceUiDemoService
         ];
     }
 
+    /**
+     * Scenario bổ sung để bảng báo cáo 4.6.x có đủ stage, kỳ ngày, trùng SĐT, chưa TN.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function reportScenarios(): array
+    {
+        $stages = ['call_1', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6', 'care_1', 'care_2', 'care_3', 'skipped'];
+        $rows = [];
+
+        foreach ($stages as $i => $stage) {
+            $rows[] = [
+                'name' => 'UX Report Stage '.Str::upper($stage),
+                'stage' => $stage,
+                'result' => $i % 2 === 0 ? OperationResult::ReceivedOrder : OperationResult::Considering,
+                'closing' => $i % 2 === 0 ? ClosingStatus::Closed : ClosingStatus::Open,
+                'delivery' => $i % 2 === 0 ? DeliveryStatus::Delivered : DeliveryStatus::WaitingWaybill,
+                'note' => 'Seed báo cáo stage '.$stage,
+                'day_offset' => $i % 3,
+                'duplicate' => $i === 1,
+                'returning' => $i >= 7,
+                'untouched' => false,
+                'discount' => $i * 5_000,
+                'cod_fee' => 15_000,
+                'cod_support' => $i % 3 === 0 ? -10_000 : 0,
+                'deposit' => $i === 0 ? 50_000 : 0,
+            ];
+        }
+
+        foreach ([0, 1, 2] as $i) {
+            $rows[] = [
+                'name' => 'UX Report Chưa TN #'.($i + 1),
+                'stage' => null,
+                'result' => null,
+                'closing' => ClosingStatus::Open,
+                'delivery' => DeliveryStatus::WaitingWaybill,
+                'note' => 'Contact chưa tác nghiệp',
+                'day_offset' => 0,
+                'untouched' => true,
+                'duplicate' => false,
+                'returning' => false,
+            ];
+        }
+
+        $rows[] = [
+            'name' => 'UX Report Hôm qua chốt',
+            'stage' => 'call_1',
+            'result' => OperationResult::ReceivedOrder,
+            'closing' => ClosingStatus::Closed,
+            'delivery' => DeliveryStatus::Paid,
+            'note' => 'Đơn chốt hôm qua',
+            'anchor' => 'yesterday',
+            'duplicate' => false,
+            'returning' => false,
+        ];
+        $rows[] = [
+            'name' => 'UX Report Tháng trước',
+            'stage' => 'call_2',
+            'result' => OperationResult::ReceivedOrder,
+            'closing' => ClosingStatus::Closed,
+            'delivery' => DeliveryStatus::Delivered,
+            'note' => 'Đơn chốt tháng trước',
+            'anchor' => 'last_month',
+            'duplicate' => true,
+            'returning' => true,
+        ];
+        $rows[] = [
+            'name' => 'UX Report Hủy VĐ',
+            'stage' => 'call_3',
+            'result' => OperationResult::NotReceivedOrder,
+            'closing' => ClosingStatus::Cancelled,
+            'delivery' => DeliveryStatus::CancelWaybill,
+            'note' => 'Hủy vận đơn — card 4.6.3',
+            'day_offset' => 0,
+        ];
+
+        return $rows;
+    }
+
+    /** @return list<User> */
+    private function ensureDemoSales(int $companyId, User $template): array
+    {
+        $sales = [];
+        for ($i = 1; $i <= 3; $i++) {
+            $email = self::SALE_EMAIL_PREFIX."{$i}@salesloop.local";
+            $user = User::query()->withoutGlobalScopes()->where('email', $email)->first();
+            if (! $user) {
+                $user = User::query()->create([
+                    'company_id' => $companyId,
+                    'name' => "UXDEMO Sale {$i}",
+                    'email' => $email,
+                    'password' => Hash::make('password'),
+                    'role' => UserRole::Sales,
+                    'team_id' => $template->team_id,
+                    'is_active' => true,
+                    'permissions' => ['receive_data' => $i !== 3],
+                ]);
+            } else {
+                $user->forceFill([
+                    'company_id' => $companyId,
+                    'team_id' => $template->team_id,
+                    'role' => UserRole::Sales,
+                    'is_active' => true,
+                ])->save();
+            }
+            $sales[] = $user;
+        }
+
+        if (! collect($sales)->contains(fn (User $u) => $u->id === $template->id)) {
+            array_unshift($sales, $template);
+        }
+
+        return array_values($sales);
+    }
+
+    /** @param list<User> $sales */
+    private function seedReportConfig(int $companyId, array $sales): void
+    {
+        $now = now();
+        foreach ($sales as $index => $sale) {
+            MonthlyKpiPlan::query()->updateOrCreate(
+                [
+                    'user_id' => $sale->id,
+                    'year' => $now->year,
+                    'month' => $now->month,
+                    'kpi_name' => 'UXDEMO KPI',
+                ],
+                [
+                    'revenue_target' => 50_000_000 + ($index * 10_000_000),
+                    'contacts_target' => 100,
+                    'new_contacts_target' => 70,
+                    'old_contacts_target' => 30,
+                    'new_closed_target' => 40,
+                    'old_closed_target' => 15,
+                    'working_days' => 26,
+                    'actual_days' => 20,
+                    'locked' => false,
+                ],
+            );
+
+            UserOperationalProfile::query()->updateOrCreate(
+                ['user_id' => $sale->id],
+                [
+                    'company_id' => $companyId,
+                    'receive_data' => $index !== 2,
+                    'employee_code' => 'UX'.str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT),
+                ],
+            );
+
+            if (Schema::hasTable('sale_optimization_targets')) {
+                SaleOptimizationTarget::query()->updateOrCreate(
+                    [
+                        'company_id' => $companyId,
+                        'sale_user_id' => $sale->id,
+                        'metric_key' => 'close_rate',
+                    ],
+                    ['target_value' => 60 + ($index * 10)],
+                );
+            }
+        }
+
+        if (Schema::hasTable('sale_optimization_alert_thresholds')) {
+            SaleOptimizationAlertThreshold::query()->updateOrCreate(
+                ['company_id' => $companyId, 'metric_key' => 'close_rate'],
+                ['low_ratio' => 80, 'high_ratio' => 100],
+            );
+        }
+
+        if (Schema::hasTable('sale_optimization_levels')) {
+            foreach ([
+                ['label' => 'UXDEMO Chưa tốt', 'tone' => 'bad', 'min_ratio' => 0, 'max_ratio' => 80, 'sort_order' => 1],
+                ['label' => 'UXDEMO Trung bình', 'tone' => 'average', 'min_ratio' => 80, 'max_ratio' => 100, 'sort_order' => 2],
+                ['label' => 'UXDEMO Tốt', 'tone' => 'good', 'min_ratio' => 100, 'max_ratio' => null, 'sort_order' => 3],
+            ] as $level) {
+                SaleOptimizationLevel::query()->updateOrCreate(
+                    [
+                        'company_id' => $companyId,
+                        'metric_key' => 'close_rate',
+                        'label' => $level['label'],
+                    ],
+                    [
+                        'tone' => $level['tone'],
+                        'min_ratio' => $level['min_ratio'],
+                        'max_ratio' => $level['max_ratio'],
+                        'sort_order' => $level['sort_order'],
+                    ],
+                );
+            }
+        }
+    }
+
     /** @param array<string, mixed> $scenario */
     private function createSaleOrder(
         int $companyId,
@@ -305,23 +536,49 @@ final class WorkspaceUiDemoService
         array $scenario,
     ): Order {
         $phone = self::PHONE_PREFIX.str_pad((string) $index, 4, '0', STR_PAD_LEFT);
+        if (! empty($scenario['duplicate']) && $index > 1) {
+            $phone = self::PHONE_PREFIX.str_pad((string) max(1, $index - 1), 4, '0', STR_PAD_LEFT);
+        }
+
         $qty = 1 + ($index % 2);
         $unitPrice = max(50_000, (int) $product->unit_price);
         $subtotal = $unitPrice * $qty;
+        $discount = (int) ($scenario['discount'] ?? 0);
         $shipFee = 30_000;
-        $total = $subtotal + $shipFee;
-        $arrivedAt = now()->subDays(($index - 1) % 5)->setTime(9 + ($index % 8), 15 + $index);
+        $codFee = (int) ($scenario['cod_fee'] ?? 0);
+        $codSupport = (int) ($scenario['cod_support'] ?? 0);
+        $deposit = (int) ($scenario['deposit'] ?? 0);
+        $total = max(0, $subtotal - $discount + $shipFee);
+
+        $arrivedAt = match ($scenario['anchor'] ?? null) {
+            'yesterday' => now()->subDay()->setTime(10, 30),
+            'last_month' => now()->subMonthNoOverflow()->setDay(min(28, now()->day))->setTime(11, 0),
+            default => now()->subDays((int) ($scenario['day_offset'] ?? (($index - 1) % 5)))->setTime(9 + ($index % 8), 15 + ($index % 40)),
+        };
         $assignedAt = $arrivedAt->copy()->addMinutes(30);
-        $isClosedLike = in_array($scenario['closing'], [ClosingStatus::Closed, ClosingStatus::Cancelled], true);
-        $delivery = $scenario['delivery'];
+
+        $closing = $scenario['closing'] instanceof ClosingStatus ? $scenario['closing'] : ClosingStatus::Open;
+        $delivery = $scenario['delivery'] ?? null;
         $deliveryStatus = $delivery instanceof DeliveryStatus
             ? $delivery->value
             : DeliveryStatus::WaitingWaybill->value;
-        $closedAt = $isClosedLike
-            ? $assignedAt->copy()->addHours(2 + ($index % 4))
-            : null;
-        $needsWaybill = $scenario['closing'] === ClosingStatus::Closed
+        $isClosedLike = in_array($closing, [ClosingStatus::Closed, ClosingStatus::Cancelled], true);
+        $closedAt = $isClosedLike ? $assignedAt->copy()->addHours(2 + ($index % 4)) : null;
+        $needsWaybill = $closing === ClosingStatus::Closed
             || ($delivery instanceof DeliveryStatus && $delivery !== DeliveryStatus::WaitingWaybill);
+
+        $stageValue = OperationStage::NoOperation->value;
+        $resultValue = null;
+        if (empty($scenario['untouched'])) {
+            $stage = $scenario['stage'] ?? OperationStage::NewCustomer;
+            $stageValue = $stage instanceof OperationStage ? $stage->value : (is_string($stage) ? $stage : OperationStage::NewCustomer->value);
+            $result = $scenario['result'] ?? OperationResult::NoContact;
+            $resultValue = $result instanceof OperationResult ? $result->value : (is_string($result) ? $result : null);
+        } else {
+            // DB NOT NULL operation_stage — dùng no_operation + result rỗng để báo cáo tính "chưa TN".
+            $stageValue = OperationStage::NoOperation->value;
+            $resultValue = '';
+        }
 
         $order = Order::query()->create([
             'order_code' => self::ORDER_PREFIX.str_pad((string) $index, 4, '0', STR_PAD_LEFT),
@@ -333,8 +590,8 @@ final class WorkspaceUiDemoService
             'customer_name' => $scenario['name'],
             'customer_phone' => $phone,
             'phone_carrier' => ['VIETTEL', 'VINAPHONE', 'MOBIFONE'][$index % 3],
-            'customer_note' => self::NOTE_TAG.' '.$scenario['note'],
-            'sale_operation_note' => self::NOTE_TAG.' '.$scenario['note'],
+            'customer_note' => self::NOTE_TAG.' '.($scenario['note'] ?? ''),
+            'sale_operation_note' => self::NOTE_TAG.' '.($scenario['note'] ?? ''),
             'shipping_address' => 'Số '.$index.' đường UX Demo, Hà Nội',
             'shipping_method' => 'viettel_post',
             'shipping_provider' => 'viettel_post',
@@ -342,22 +599,25 @@ final class WorkspaceUiDemoService
             'assigned_at' => $assignedAt,
             'closed_at' => $closedAt,
             'next_operation_at' => $closedAt ? null : now()->addHours($index),
-            'operation_stage' => $scenario['stage']->value,
-            'operation_result' => $scenario['result']->value,
-            'closing_status' => $scenario['closing']->value,
+            'operation_stage' => $stageValue,
+            'operation_result' => $resultValue,
+            'closing_status' => $closing->value,
             'delivery_status' => $deliveryStatus,
-            'carrier_name' => $needsWaybill || $scenario['closing'] === ClosingStatus::Closed ? 'Viettel Post(COD)' : null,
-            'tracking_number' => ($needsWaybill || $scenario['closing'] === ClosingStatus::Closed)
+            'carrier_name' => $needsWaybill || $closing === ClosingStatus::Closed ? 'Viettel Post(COD)' : null,
+            'tracking_number' => ($needsWaybill || $closing === ClosingStatus::Closed)
                 ? 'UXVT'.str_pad((string) (1000 + $index), 6, '0', STR_PAD_LEFT)
                 : null,
-            'is_returning_customer' => $index % 4 === 0,
+            'is_returning_customer' => (bool) ($scenario['returning'] ?? ($index % 4 === 0)),
+            'is_duplicate_phone' => (bool) ($scenario['duplicate'] ?? false),
             'subtotal' => $subtotal,
-            'discount' => 0,
+            'discount' => $discount,
             'vat' => 0,
             'shipping_fee_collected' => $shipFee,
+            'cod_fee' => $codFee,
+            'cod_support' => $codSupport,
             'total' => $total,
-            'deposit' => 0,
-            'amount_to_collect' => $total,
+            'deposit' => $deposit,
+            'amount_to_collect' => max(0, $total - $deposit),
             'contact_count' => max(1, $index % 4),
         ]);
 

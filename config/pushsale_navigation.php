@@ -681,12 +681,14 @@ return array (
           array (
             'title' => '4. Báo cáo data sale',
             'url' => '/admin/sales/reports/data',
+            'area' => 'reports',
             'code' => '4.6.4',
           ),
           4 => 
           array (
             'title' => '5. Tối ưu sale',
             'url' => '/admin/sales/reports/optimization',
+            'area' => 'reports',
             'code' => '4.6.5',
           ),
         ),

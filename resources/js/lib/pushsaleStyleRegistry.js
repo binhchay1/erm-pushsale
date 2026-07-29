@@ -52,6 +52,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-page-spacing-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-page-spacing-contract.css') },
     { file: 'pushsale-operation-conversion-report.css', layer: 'final-contract', load: () => import('../../css/pushsale-operation-conversion-report.css') },
     { file: 'pushsale-sale-work-report-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-sale-work-report-contract.css') },
+    { file: 'pushsale-sales-leader-reports-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-sales-leader-reports-contract.css') },
     { file: 'pushsale-report-toolbar-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-report-toolbar-contract.css') },
     { file: 'pushsale-filter-toolbar-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-filter-toolbar-contract.css') },
     { file: 'pushsale-dashboard-toolbar-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-dashboard-toolbar-contract.css') },

@@ -11,7 +11,7 @@ import {
 } from '@/components/reports/PushsaleReportChrome';
 import AppLayout from '@/layouts/AppLayout';
 
-const OPERATION_STAGES = [
+const ALL_STAGES = [
     { key: 'call_1', label: 'Gọi lần 1' },
     { key: 'call_2', label: 'Gọi lần 2' },
     { key: 'call_3', label: 'Gọi lần 3' },
@@ -25,8 +25,8 @@ const OPERATION_STAGES = [
 ];
 
 const DATE_TYPE_OPTIONS = [
-    { id: 'data_arrival', label: 'Ngày data về hệ thống' },
     { id: 'sale_received_data', label: 'Ngày sale nhận data' },
+    { id: 'data_arrival', label: 'Ngày data về hệ thống' },
     { id: 'care_update', label: 'Ngày sale tác nghiệp' },
     { id: 'closing_date', label: 'Ngày sale chốt đơn' },
     { id: 'posting_date', label: 'Ngày đăng đơn' },
@@ -34,7 +34,6 @@ const DATE_TYPE_OPTIONS = [
 ];
 
 const PER_PAGE_OPTIONS = [20, 50, 100, 200, 500, 1000].map((value) => ({ id: String(value), label: String(value) }));
-
 const numberFormatter = new Intl.NumberFormat('vi-VN');
 
 function currentQuery() {
@@ -62,7 +61,7 @@ function cleanPayload(values) {
 function buildInitialFilters() {
     const params = currentQuery();
     return {
-        date_type: params.get('date_type') || 'data_arrival',
+        date_type: params.get('date_type') || 'sale_received_data',
         date_from: params.get('date_from') || daysAgoIso(6),
         date_to: params.get('date_to') || todayIso(),
         operation_stage: params.get('operation_stage') || '',
@@ -78,41 +77,38 @@ function formatNumber(value) {
     return numberFormatter.format(Number(value) || 0);
 }
 
-function totalsFor(rows) {
-    return rows.reduce((acc, row) => {
-        acc.total_contacts += Number(row.total_contacts) || 0;
-        acc.untouched += Number(row.untouched) || 0;
-        OPERATION_STAGES.forEach(({ key }) => {
-            acc[`${key}_contacts`] += Number(row[`${key}_contacts`]) || 0;
-            acc[`${key}_untouched`] += Number(row[`${key}_untouched`]) || 0;
-        });
-        return acc;
-    }, {
-        sale: 'Tổng',
-        total_contacts: 0,
-        untouched: 0,
-        ...Object.fromEntries(OPERATION_STAGES.flatMap(({ key }) => [
-            [`${key}_contacts`, 0],
-            [`${key}_untouched`, 0],
-        ])),
-    });
+function SaleName({ row }) {
+    const sale = String(row.sale ?? '').trim() || 'Chưa phân sale';
+    const account = String(row.sale_account ?? '').trim();
+    return (
+        <span className="ps-sale-name">
+            {sale}
+            {account ? <small> ({account})</small> : null}
+        </span>
+    );
 }
 
 export default function SalesWorkReport({
     schema,
     rows = [],
     pagination = {},
+    summary = {},
     filterOptions = {},
     routeUrl = '/admin/sales/reports/work',
     pageRuntimeError = null,
 }) {
     const title = schema?.title ?? 'Báo cáo công việc sale';
     const [draft, setDraft] = useState(buildInitialFilters);
-    const totals = useMemo(() => totalsFor(rows), [rows]);
+    const stages = useMemo(() => {
+        const fromSummary = Array.isArray(summary?.stages) ? summary.stages : [];
+        if (fromSummary.length) {
+            return fromSummary.map((stage) => ({ key: stage.key, label: stage.label }));
+        }
+        return ALL_STAGES;
+    }, [summary]);
+    const totals = summary?.totals || null;
     const queryFilters = useMemo(() => cleanPayload(draft), [draft]);
-
     const set = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
-
     const search = () => {
         router.get(routeUrl, { ...cleanPayload(draft), page: 1 }, {
             preserveScroll: true,
@@ -121,76 +117,8 @@ export default function SalesWorkReport({
         });
     };
 
-    const primaryFilters = (
-        <div className="ps-sale-work-primary">
-            <PushsaleSelect
-                value={draft.date_type}
-                options={DATE_TYPE_OPTIONS}
-                placeholder="-- Kiểu ngày --"
-                onChange={(value) => set('date_type', value)}
-            />
-            <PushsaleDateRange
-                filters={draft}
-                onChange={(key, value) => set(key, value)}
-                className="ps-sale-work-date"
-            />
-        </div>
-    );
-
-    const advancedFilters = (
-        <div className="ps-sale-work-advanced ps-adv-filter-panel">
-            <div className="ps-sale-work-advanced-row ps-adv-filter-row">
-                <PushsaleSelect
-                    value={draft.operation_stage}
-                    options={OPERATION_STAGES.map(({ key, label }) => ({ id: key, label }))}
-                    placeholder="-- Chọn tác nghiệp --"
-                    onChange={(value) => set('operation_stage', value)}
-                />
-                <PushsaleSelect
-                    value={draft.product_id}
-                    options={filterOptions.products ?? filterOptions.productGroups ?? []}
-                    placeholder="-- Chọn sản phẩm --"
-                    onChange={(value) => set('product_id', value)}
-                />
-                <PushsaleSelect
-                    value={draft.sale_id}
-                    options={filterOptions.sales ?? filterOptions.salesUsers ?? []}
-                    placeholder="-- Chọn sale --"
-                    onChange={(value) => set('sale_id', value)}
-                />
-            </div>
-            <div className="ps-sale-work-advanced-row ps-adv-filter-row">
-                <PushsaleSelect
-                    value={draft.sale_leader_id}
-                    options={filterOptions.saleLeaders ?? []}
-                    placeholder="-- Trưởng nhóm sale --"
-                    onChange={(value) => set('sale_leader_id', value)}
-                />
-                <PushsaleSelect
-                    value={draft.sale_team_id}
-                    options={filterOptions.saleTeams ?? filterOptions.teams ?? []}
-                    placeholder="-- Chọn nhóm sale --"
-                    onChange={(value) => set('sale_team_id', value)}
-                />
-                <PushsaleSelect
-                    value={draft.per_page}
-                    options={PER_PAGE_OPTIONS}
-                    placeholder="50"
-                    onChange={(value) => set('per_page', value)}
-                />
-            </div>
-        </div>
-    );
-
-    const actions = (
-        <div className="ps-sale-work-actions">
-            <PushsaleSearchButton onClick={search} label="Tìm kiếm" />
-            <PushsaleExportButton routeUrl={routeUrl} filters={queryFilters} label="Xuất Excel" />
-        </div>
-    );
-
     return (
-        <AppLayout>
+        <AppLayout activeMenuCode="4.6.2">
             <Head title={title} />
             <PushsalePageShell
                 title={title}
@@ -200,9 +128,67 @@ export default function SalesWorkReport({
                 bodyClassName="ps-sale-work-body"
                 collapsible
                 defaultFiltersCollapsed={false}
-                primaryFilters={primaryFilters}
-                advancedFilters={advancedFilters}
-                actions={actions}
+                primaryFilters={(
+                    <div className="ps-sale-work-primary">
+                        <PushsaleSelect
+                            value={draft.date_type}
+                            options={DATE_TYPE_OPTIONS}
+                            placeholder="-- Kiểu ngày --"
+                            onChange={(value) => set('date_type', value)}
+                        />
+                        <PushsaleDateRange filters={draft} onChange={set} className="ps-sale-work-date" />
+                    </div>
+                )}
+                advancedFilters={(
+                    <div className="ps-sale-work-advanced ps-adv-filter-panel">
+                        <div className="ps-sale-work-advanced-row ps-adv-filter-row">
+                            <PushsaleSelect
+                                value={draft.operation_stage}
+                                options={ALL_STAGES.map(({ key, label }) => ({ id: key, label }))}
+                                placeholder="-- Chọn tác nghiệp --"
+                                onChange={(value) => set('operation_stage', value)}
+                            />
+                            <PushsaleSelect
+                                value={draft.product_id}
+                                options={filterOptions.products ?? filterOptions.productGroups ?? []}
+                                placeholder="-- Chọn sản phẩm --"
+                                onChange={(value) => set('product_id', value)}
+                            />
+                            <PushsaleSelect
+                                value={draft.sale_id}
+                                options={filterOptions.sales ?? filterOptions.salesUsers ?? []}
+                                placeholder="-- Chọn sale --"
+                                onChange={(value) => set('sale_id', value)}
+                            />
+                        </div>
+                        <div className="ps-sale-work-advanced-row ps-adv-filter-row">
+                            <PushsaleSelect
+                                value={draft.sale_leader_id}
+                                options={filterOptions.saleLeaders ?? []}
+                                placeholder="-- Trưởng nhóm sale --"
+                                onChange={(value) => set('sale_leader_id', value)}
+                            />
+                            <PushsaleSelect
+                                value={draft.sale_team_id}
+                                options={filterOptions.saleTeams ?? filterOptions.teams ?? []}
+                                placeholder="-- Chọn nhóm sale --"
+                                onChange={(value) => set('sale_team_id', value)}
+                            />
+                            <PushsaleSelect
+                                value={draft.per_page}
+                                options={PER_PAGE_OPTIONS}
+                                placeholder="50"
+                                onChange={(value) => set('per_page', value)}
+                            />
+                        </div>
+                    </div>
+                )}
+                actions={(
+                    <div className="ps-sale-work-actions">
+                        <PushsaleSearchButton onClick={search} label="Tìm kiếm" />
+                        <PushsaleExportButton routeUrl={routeUrl} filters={queryFilters} label="Xuất Excel" />
+                    </div>
+                )}
                 notice={pageRuntimeError ? (
                     <div className="pushsale-error-banner">
                         <i className="fa fa-exclamation-triangle" /> {pageRuntimeError}
@@ -217,12 +203,12 @@ export default function SalesWorkReport({
                                 <th rowSpan="2" className="ps-col-sale">SALE</th>
                                 <th rowSpan="2" className="ps-col-metric">Tổng<br />contact</th>
                                 <th rowSpan="2" className="ps-col-metric">Tổng contact<br />chưa TN</th>
-                                {OPERATION_STAGES.map(({ key, label }) => (
+                                {stages.map(({ key, label }) => (
                                     <th key={key} colSpan="2">{label}</th>
                                 ))}
                             </tr>
                             <tr>
-                                {OPERATION_STAGES.map(({ key }) => (
+                                {stages.map(({ key }) => (
                                     <Fragment key={key}>
                                         <th className="ps-col-metric">Số<br />contact</th>
                                         <th className="ps-col-metric">Chưa<br />TN</th>
@@ -233,25 +219,27 @@ export default function SalesWorkReport({
                         <tbody>
                             {rows.length ? (
                                 <>
-                                    <tr className="ps-sale-work-total">
-                                        <td className="text-center" />
-                                        <td className="ps-sale-name">{totals.sale}</td>
-                                        <td className="text-center">{formatNumber(totals.total_contacts)}</td>
-                                        <td className="text-center">{formatNumber(totals.untouched)}</td>
-                                        {OPERATION_STAGES.map(({ key }) => (
-                                            <Fragment key={key}>
-                                                <td className="text-center">{formatNumber(totals[`${key}_contacts`])}</td>
-                                                <td className="text-center">{formatNumber(totals[`${key}_untouched`])}</td>
-                                            </Fragment>
-                                        ))}
-                                    </tr>
+                                    {totals && (
+                                        <tr className="ps-sale-work-total">
+                                            <td className="text-center" />
+                                            <td className="ps-sale-name">Tổng:</td>
+                                            <td className="text-center">{formatNumber(totals.total_contacts)}</td>
+                                            <td className="text-center">{formatNumber(totals.untouched)}</td>
+                                            {stages.map(({ key }) => (
+                                                <Fragment key={key}>
+                                                    <td className="text-center">{formatNumber(totals[`${key}_contacts`])}</td>
+                                                    <td className="text-center">{formatNumber(totals[`${key}_untouched`])}</td>
+                                                </Fragment>
+                                            ))}
+                                        </tr>
+                                    )}
                                     {rows.map((row, index) => (
-                                        <tr key={`${row.sale}-${row._sale_id ?? index}`}>
+                                        <tr key={`${row.sale_id ?? row.sale}-${index}`}>
                                             <td className="text-center">{index + (pagination?.from ?? 1)}</td>
-                                            <td className="ps-sale-name" title={row.sale}>{row.sale}</td>
+                                            <td><SaleName row={row} /></td>
                                             <td className="text-center">{formatNumber(row.total_contacts)}</td>
                                             <td className="text-center">{formatNumber(row.untouched)}</td>
-                                            {OPERATION_STAGES.map(({ key }) => (
+                                            {stages.map(({ key }) => (
                                                 <Fragment key={key}>
                                                     <td className="text-center">{formatNumber(row[`${key}_contacts`])}</td>
                                                     <td className="text-center">{formatNumber(row[`${key}_untouched`])}</td>
@@ -262,7 +250,7 @@ export default function SalesWorkReport({
                                 </>
                             ) : (
                                 <tr>
-                                    <td colSpan={24} className="text-center">Chưa có dữ liệu phù hợp với bộ lọc.</td>
+                                    <td colSpan={4 + stages.length * 2} className="text-center">Chưa có dữ liệu phù hợp với bộ lọc.</td>
                                 </tr>
                             )}
                         </tbody>

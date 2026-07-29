@@ -4296,54 +4296,26 @@ return array (
     'title' => 'Báo cáo nhóm sale',
     'columns' => 
     array (
-      0 => 
-      array (
-        'key' => 'index',
-        'label' => 'STT',
-        'format' => 'text',
-      ),
-      1 => 
-      array (
-        'key' => 'team',
-        'label' => 'Nhóm sale',
-        'format' => 'text',
-      ),
-      2 => 
-      array (
-        'key' => 'total_contacts',
-        'label' => 'Tổng contact',
-        'format' => 'number',
-      ),
-      3 => 
-      array (
-        'key' => 'closed',
-        'label' => 'Chốt đơn',
-        'format' => 'number',
-      ),
-      4 => 
-      array (
-        'key' => 'rate',
-        'label' => 'Tỷ lệ chốt',
-        'format' => 'percent',
-      ),
-      5 => 
-      array (
-        'key' => 'revenue',
-        'label' => 'Doanh số',
-        'format' => 'currency',
-      ),
-      6 => 
-      array (
-        'key' => 'delivered',
-        'label' => 'Đã giao',
-        'format' => 'number',
-      ),
-      7 => 
-      array (
-        'key' => 'delivered_revenue',
-        'label' => 'Doanh số đã giao',
-        'format' => 'currency',
-      ),
+      array ('key' => 'index', 'label' => 'STT', 'format' => 'text'),
+      array ('key' => 'sale', 'label' => 'SALE', 'format' => 'text'),
+      array ('key' => 'new_contacts', 'label' => 'KH mới - Contact', 'format' => 'number'),
+      array ('key' => 'new_closed', 'label' => 'KH mới - Chốt đơn', 'format' => 'number'),
+      array ('key' => 'new_rate', 'label' => 'KH mới - Tỷ lệ chốt', 'format' => 'percent'),
+      array ('key' => 'new_products', 'label' => 'KH mới - Số SP', 'format' => 'number'),
+      array ('key' => 'new_revenue', 'label' => 'KH mới - DS tạm', 'format' => 'currency'),
+      array ('key' => 'old_contacts', 'label' => 'KH cũ - Contact', 'format' => 'number'),
+      array ('key' => 'old_closed', 'label' => 'KH cũ - Chốt đơn', 'format' => 'number'),
+      array ('key' => 'old_rate', 'label' => 'KH cũ - Tỷ lệ chốt', 'format' => 'percent'),
+      array ('key' => 'old_products', 'label' => 'KH cũ - Số SP', 'format' => 'number'),
+      array ('key' => 'old_revenue', 'label' => 'KH cũ - DS tạm', 'format' => 'currency'),
+      array ('key' => 'provisional_revenue', 'label' => 'DS tạm tính', 'format' => 'currency'),
+      array ('key' => 'cod_fee', 'label' => 'Phí COD', 'format' => 'currency'),
+      array ('key' => 'cod_support', 'label' => 'Hỗ trợ COD', 'format' => 'currency'),
+      array ('key' => 'discount', 'label' => 'CK', 'format' => 'currency'),
+      array ('key' => 'deposit', 'label' => 'Đặt cọc', 'format' => 'currency'),
+      array ('key' => 'after_discount_revenue', 'label' => 'DS sau CK', 'format' => 'currency'),
+      array ('key' => 'kpi_revenue', 'label' => 'KPI DS', 'format' => 'currency'),
+      array ('key' => 'kpi_rate', 'label' => 'Tỷ lệ KPI', 'format' => 'percent'),
     ),
     'source' => 'sale_team',
     'kind' => 'report',
@@ -4351,115 +4323,26 @@ return array (
     'component' => 'Admin/Sales/SalesTeamReport',
     'display_columns' => 
     array (
-      0 => 
-      array (
-        'key' => 'index',
-        'format' => 'text',
-      ),
-      1 => 
-      array (
-        'key' => 'sale',
-        'format' => 'text',
-      ),
-      2 => 
-      array (
-        'key' => 'current_contacts',
-        'format' => 'number',
-      ),
-      3 => 
-      array (
-        'key' => 'current_closed',
-        'format' => 'number',
-      ),
-      4 => 
-      array (
-        'key' => 'current_rate',
-        'format' => 'percent',
-      ),
-      5 => 
-      array (
-        'key' => 'current_products',
-        'format' => 'number',
-      ),
-      6 => 
-      array (
-        'key' => 'current_revenue',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      7 => 
-      array (
-        'key' => 'previous_contacts',
-        'format' => 'number',
-      ),
-      8 => 
-      array (
-        'key' => 'previous_closed',
-        'format' => 'number',
-      ),
-      9 => 
-      array (
-        'key' => 'previous_rate',
-        'format' => 'percent',
-      ),
-      10 => 
-      array (
-        'key' => 'previous_products',
-        'format' => 'number',
-      ),
-      11 => 
-      array (
-        'key' => 'previous_revenue',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      12 => 
-      array (
-        'key' => 'provisional_revenue',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      13 => 
-      array (
-        'key' => 'cod_fee',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      14 => 
-      array (
-        'key' => 'cod_support',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      15 => 
-      array (
-        'key' => 'discount',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      16 => 
-      array (
-        'key' => 'deposit',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      17 => 
-      array (
-        'key' => 'after_discount_revenue',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      18 => 
-      array (
-        'key' => 'kpi_revenue',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      19 => 
-      array (
-        'key' => 'kpi_rate',
-        'format' => 'percent',
-      ),
+      array ('key' => 'index', 'format' => 'text'),
+      array ('key' => 'sale', 'format' => 'text'),
+      array ('key' => 'new_contacts', 'format' => 'number'),
+      array ('key' => 'new_closed', 'format' => 'number'),
+      array ('key' => 'new_rate', 'format' => 'percent'),
+      array ('key' => 'new_products', 'format' => 'number'),
+      array ('key' => 'new_revenue', 'format' => 'currency'),
+      array ('key' => 'old_contacts', 'format' => 'number'),
+      array ('key' => 'old_closed', 'format' => 'number'),
+      array ('key' => 'old_rate', 'format' => 'percent'),
+      array ('key' => 'old_products', 'format' => 'number'),
+      array ('key' => 'old_revenue', 'format' => 'currency'),
+      array ('key' => 'provisional_revenue', 'format' => 'currency'),
+      array ('key' => 'cod_fee', 'format' => 'currency'),
+      array ('key' => 'cod_support', 'format' => 'currency'),
+      array ('key' => 'discount', 'format' => 'currency'),
+      array ('key' => 'deposit', 'format' => 'currency'),
+      array ('key' => 'after_discount_revenue', 'format' => 'currency'),
+      array ('key' => 'kpi_revenue', 'format' => 'currency'),
+      array ('key' => 'kpi_rate', 'format' => 'percent'),
     ),
   ),
   '4.6.4' => 
@@ -4467,60 +4350,18 @@ return array (
     'title' => 'Báo cáo data sale',
     'columns' => 
     array (
-      0 => 
-      array (
-        'key' => 'index',
-        'label' => 'STT',
-        'format' => 'text',
-      ),
-      1 => 
-      array (
-        'key' => 'sale',
-        'label' => 'Sale',
-        'format' => 'text',
-      ),
-      2 => 
-      array (
-        'key' => 'new_contacts',
-        'label' => 'Contact mới',
-        'format' => 'number',
-      ),
-      3 => 
-      array (
-        'key' => 'old_contacts',
-        'label' => 'Contact cũ',
-        'format' => 'number',
-      ),
-      4 => 
-      array (
-        'key' => 'operated',
-        'label' => 'Đã tác nghiệp',
-        'format' => 'number',
-      ),
-      5 => 
-      array (
-        'key' => 'untouched',
-        'label' => 'Chưa tác nghiệp',
-        'format' => 'number',
-      ),
-      6 => 
-      array (
-        'key' => 'closed',
-        'label' => 'Chốt đơn',
-        'format' => 'number',
-      ),
-      7 => 
-      array (
-        'key' => 'rate',
-        'label' => 'Tỷ lệ',
-        'format' => 'percent',
-      ),
-      8 => 
-      array (
-        'key' => 'revenue',
-        'label' => 'Doanh số',
-        'format' => 'currency',
-      ),
+      array ('key' => 'index', 'label' => 'STT', 'format' => 'text'),
+      array ('key' => 'sale', 'label' => 'Sale', 'format' => 'text'),
+      array ('key' => 'received', 'label' => 'Contact nhận', 'format' => 'number'),
+      array ('key' => 'duplicate', 'label' => 'Contact trùng', 'format' => 'number'),
+      array ('key' => 'unique', 'label' => 'Contact không trùng', 'format' => 'number'),
+      array ('key' => 'yesterday_rate', 'label' => 'Hôm qua % chốt', 'format' => 'percent'),
+      array ('key' => 'yesterday_revenue', 'label' => 'Hôm qua DS', 'format' => 'currency'),
+      array ('key' => 'last_month_rate', 'label' => 'Tháng trước % chốt', 'format' => 'percent'),
+      array ('key' => 'last_month_revenue', 'label' => 'Tháng trước DS', 'format' => 'currency'),
+      array ('key' => 'this_month_rate', 'label' => 'Tháng này % chốt', 'format' => 'percent'),
+      array ('key' => 'this_month_revenue', 'label' => 'Tháng này DS', 'format' => 'currency'),
+      array ('key' => 'receive_data', 'label' => 'Nhận dữ liệu', 'format' => 'text'),
     ),
     'source' => 'sale_data',
     'kind' => 'report',
@@ -4528,69 +4369,18 @@ return array (
     'component' => 'Admin/Sales/SalesDataReport',
     'display_columns' => 
     array (
-      0 => 
-      array (
-        'key' => 'index',
-        'format' => 'text',
-      ),
-      1 => 
-      array (
-        'key' => 'sale',
-        'format' => 'text',
-      ),
-      2 => 
-      array (
-        'key' => 'received',
-        'format' => 'number',
-      ),
-      3 => 
-      array (
-        'key' => 'duplicate',
-        'format' => 'number',
-      ),
-      4 => 
-      array (
-        'key' => 'unique',
-        'format' => 'number',
-      ),
-      5 => 
-      array (
-        'key' => 'new_rate',
-        'format' => 'percent',
-      ),
-      6 => 
-      array (
-        'key' => 'new_revenue',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      7 => 
-      array (
-        'key' => 'old_rate',
-        'format' => 'percent',
-      ),
-      8 => 
-      array (
-        'key' => 'old_revenue',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      9 => 
-      array (
-        'key' => 'care_rate',
-        'format' => 'percent',
-      ),
-      10 => 
-      array (
-        'key' => 'care_revenue',
-        'format' => 'currency',
-        'align' => 'right',
-      ),
-      11 => 
-      array (
-        'key' => 'receive_data',
-        'format' => 'boolean',
-      ),
+      array ('key' => 'index', 'format' => 'text'),
+      array ('key' => 'sale', 'format' => 'text'),
+      array ('key' => 'received', 'format' => 'number'),
+      array ('key' => 'duplicate', 'format' => 'number'),
+      array ('key' => 'unique', 'format' => 'number'),
+      array ('key' => 'yesterday_rate', 'format' => 'percent'),
+      array ('key' => 'yesterday_revenue', 'format' => 'currency'),
+      array ('key' => 'last_month_rate', 'format' => 'percent'),
+      array ('key' => 'last_month_revenue', 'format' => 'currency'),
+      array ('key' => 'this_month_rate', 'format' => 'percent'),
+      array ('key' => 'this_month_revenue', 'format' => 'currency'),
+      array ('key' => 'receive_data', 'format' => 'text'),
     ),
   ),
   '4.6.5' => 
@@ -4598,48 +4388,23 @@ return array (
     'title' => 'Báo cáo tối ưu Sale',
     'columns' => 
     array (
-      0 => 
-      array (
-        'key' => 'index',
-        'label' => 'STT',
-        'format' => 'text',
-      ),
-      1 => 
-      array (
-        'key' => 'sale',
-        'label' => 'Sale',
-        'format' => 'text',
-      ),
-      2 => 
-      array (
-        'key' => 'contacts',
-        'label' => 'Contact nhận',
-        'format' => 'number',
-      ),
-      3 => 
-      array (
-        'key' => 'operation_rate',
-        'label' => 'Tỷ lệ tác nghiệp',
-        'format' => 'percent',
-      ),
-      4 => 
-      array (
-        'key' => 'closing_rate',
-        'label' => 'Tỷ lệ chốt',
-        'format' => 'percent',
-      ),
-      5 => 
-      array (
-        'key' => 'revenue',
-        'label' => 'Doanh số',
-        'format' => 'currency',
-      ),
-      6 => 
-      array (
-        'key' => 'score',
-        'label' => 'Điểm tối ưu',
-        'format' => 'number',
-      ),
+      array ('key' => 'index', 'label' => 'STT', 'format' => 'text'),
+      array ('key' => 'sale', 'label' => 'Sale', 'format' => 'text'),
+      array ('key' => 'receive_data', 'label' => 'Nhận dữ liệu', 'format' => 'text'),
+      array ('key' => 'provisional_revenue', 'label' => 'DS tạm tính', 'format' => 'currency'),
+      array ('key' => 'success_revenue', 'label' => 'DS thành công', 'format' => 'currency'),
+      array ('key' => 'contacts', 'label' => 'Contact tổng', 'format' => 'number'),
+      array ('key' => 'allocated_total', 'label' => 'Contact chia tổng', 'format' => 'number'),
+      array ('key' => 'allocated_duplicate', 'label' => 'Contact chia trùng', 'format' => 'number'),
+      array ('key' => 'allocated_unique', 'label' => 'Contact chia không trùng', 'format' => 'number'),
+      array ('key' => 'closed_contacts', 'label' => 'Contact chốt', 'format' => 'number'),
+      array ('key' => 'close_rate', 'label' => 'Tỷ lệ chốt', 'format' => 'percent'),
+      array ('key' => 'avg_order_value', 'label' => 'Giá trị TB đơn', 'format' => 'currency'),
+      array ('key' => 'products_per_order', 'label' => 'SP/Đơn', 'format' => 'number'),
+      array ('key' => 'untouched', 'label' => 'Chưa TN', 'format' => 'number'),
+      array ('key' => 'revenue_per_contact', 'label' => 'DS/Contact', 'format' => 'currency'),
+      array ('key' => 'cancelled_revenue', 'label' => 'DS hủy', 'format' => 'currency'),
+      array ('key' => 'returned_revenue', 'label' => 'DS hoàn', 'format' => 'currency'),
     ),
     'source' => 'sale_optimization',
     'kind' => 'report',
@@ -4647,141 +4412,23 @@ return array (
     'component' => 'Admin/Sales/SalesOptimizationReport',
     'display_columns' => 
     array (
-      0 => 
-      array (
-        'key' => 'index',
-        'format' => 'text',
-      ),
-      1 => 
-      array (
-        'key' => 'sale',
-        'format' => 'text',
-      ),
-      2 => 
-      array (
-        'key' => 'receive_data',
-        'format' => 'boolean',
-      ),
-      3 => 
-      array (
-        'key' => 'provisional_revenue',
-        'format' => 'currency',
-      ),
-      4 => 
-      array (
-        'key' => 'success_revenue',
-        'format' => 'currency',
-      ),
-      5 => 
-      array (
-        'key' => 'contacts',
-        'format' => 'number',
-      ),
-      6 => 
-      array (
-        'key' => 'allocated_total',
-        'format' => 'number',
-      ),
-      7 => 
-      array (
-        'key' => 'allocated_duplicate',
-        'format' => 'number',
-      ),
-      8 => 
-      array (
-        'key' => 'allocated_unique',
-        'format' => 'number',
-      ),
-      9 => 
-      array (
-        'key' => 'pool_total',
-        'format' => 'number',
-      ),
-      10 => 
-      array (
-        'key' => 'pool_duplicate',
-        'format' => 'number',
-      ),
-      11 => 
-      array (
-        'key' => 'pool_unique',
-        'format' => 'number',
-      ),
-      12 => 
-      array (
-        'key' => 'pool_closed',
-        'format' => 'number',
-      ),
-      13 => 
-      array (
-        'key' => 'pool_revenue',
-        'format' => 'currency',
-      ),
-      14 => 
-      array (
-        'key' => 'answered_call_ratio',
-        'format' => 'percent',
-      ),
-      15 => 
-      array (
-        'key' => 'call_duration',
-        'format' => 'number',
-      ),
-      16 => 
-      array (
-        'key' => 'avg_call_duration',
-        'format' => 'number',
-      ),
-      17 => 
-      array (
-        'key' => 'close_per_answered',
-        'format' => 'percent',
-      ),
-      18 => 
-      array (
-        'key' => 'closed',
-        'format' => 'number',
-      ),
-      19 => 
-      array (
-        'key' => 'closing_rate',
-        'format' => 'percent',
-      ),
-      20 => 
-      array (
-        'key' => 'avg_order_value',
-        'format' => 'currency',
-      ),
-      21 => 
-      array (
-        'key' => 'products_per_order',
-        'format' => 'number',
-      ),
-      22 => 
-      array (
-        'key' => 'untouched',
-        'format' => 'number',
-      ),
-      23 => 
-      array (
-        'key' => 'revenue_per_contact',
-        'format' => 'currency',
-      ),
-      24 => 
-      array (
-        'key' => 'cancelled_revenue',
-        'format' => 'currency',
-      ),
-      25 => 
-      array (
-        'key' => 'returned_revenue',
-        'format' => 'currency',
-      ),
-      26 => 
-      array (
-        'key' => 'overdue_orders',
-        'format' => 'number',
-      ),
+      array ('key' => 'index', 'format' => 'text'),
+      array ('key' => 'sale', 'format' => 'text'),
+      array ('key' => 'receive_data', 'format' => 'text'),
+      array ('key' => 'provisional_revenue', 'format' => 'currency'),
+      array ('key' => 'success_revenue', 'format' => 'currency'),
+      array ('key' => 'contacts', 'format' => 'number'),
+      array ('key' => 'allocated_total', 'format' => 'number'),
+      array ('key' => 'allocated_duplicate', 'format' => 'number'),
+      array ('key' => 'allocated_unique', 'format' => 'number'),
+      array ('key' => 'closed_contacts', 'format' => 'number'),
+      array ('key' => 'close_rate', 'format' => 'percent'),
+      array ('key' => 'avg_order_value', 'format' => 'currency'),
+      array ('key' => 'products_per_order', 'format' => 'number'),
+      array ('key' => 'untouched', 'format' => 'number'),
+      array ('key' => 'revenue_per_contact', 'format' => 'currency'),
+      array ('key' => 'cancelled_revenue', 'format' => 'currency'),
+      array ('key' => 'returned_revenue', 'format' => 'currency'),
     ),
   ),
   '5.1' => 

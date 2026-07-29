@@ -44,7 +44,11 @@ Route::get('sales/reports/operation-conversion', [OperationConversionReportContr
 Route::get('sales/reports/work', [SalesWorkReportController::class, 'index'])->name('sales.reports.work');
 Route::get('sales/reports/teams', [SalesTeamReportController::class, 'index'])->name('sales.reports.teams');
 Route::get('sales/reports/data', [SalesDataReportController::class, 'index'])->name('sales.reports.data');
+Route::post('sales/reports/data/receive-data', [SalesDataReportController::class, 'updateReceiveData'])->name('sales.reports.data.receive-data');
 Route::get('sales/reports/optimization', [SalesOptimizationReportController::class, 'index'])->name('sales.reports.optimization');
+Route::post('sales/reports/optimization/alerts', [SalesOptimizationReportController::class, 'saveAlerts'])->name('sales.reports.optimization.alerts');
+Route::post('sales/reports/optimization/targets', [SalesOptimizationReportController::class, 'saveTargets'])->name('sales.reports.optimization.targets');
+Route::post('sales/reports/optimization/receive-data', [SalesOptimizationReportController::class, 'updateReceiveData'])->name('sales.reports.optimization.receive-data');
 
 Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     Route::get('sales/revenue', SaleRevenueReportController::class)->name('sales.revenue');

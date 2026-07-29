@@ -360,10 +360,39 @@ html body.pushsale-app-body .pslc-source-form-v119 .pslc-api-preview {
 }
 
 /* v126 — landing table parity + approval polish */
-html body.pushsale-app-body .pslc-page .pslc-table-card {
+
+/* Align table/tabs with header filters (kill nested 14px double gutters) */
+html body.pushsale-app-body .pslc-page .pslc-tabs-shell,
+html body.pushsale-app-body .pslc-page .pslc-tabs-shell.box-body,
+html body.pushsale-app-body .pslc-page.pslc-page-v119 .pslc-tabs-shell {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .pslc-page .pslc-tabs {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+html body.pushsale-app-body .pslc-page .pslc-table-card,
+html body.pushsale-app-body .pslc-page .pslc-table-card.box-body,
+html body.pushsale-app-body .pslc-page.pslc-page-v119 .pslc-table-card {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     padding: 0 !important;
     border: 0 !important;
     background: #fff !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .pslc-page .pslc-table-scroll {
+    width: 100% !important;
+    margin: 0 !important;
 }
 
 html body.pushsale-app-body .pslc-page .pslc-table {
@@ -372,7 +401,26 @@ html body.pushsale-app-body .pslc-page .pslc-table {
     table-layout: fixed !important;
 }
 
-html body.pushsale-app-body .pslc-page .pslc-col-stt { width: 48px !important; }
+html body.pushsale-app-body .pslc-page .pslc-col-stt,
+html body.pushsale-app-body .pslc-page .pslc-table th.pslc-col-stt,
+html body.pushsale-app-body .pslc-page .pslc-table td.pslc-td-stt {
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 56px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 6px 4px !important;
+}
+
+html body.pushsale-app-body .pslc-page .pslc-table th.pslc-col-stt .chk-all,
+html body.pushsale-app-body .pslc-page .pslc-table td.pslc-td-stt .chk-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+    min-width: 28px !important;
+}
+
 html body.pushsale-app-body .pslc-page .pslc-col-marketer { width: 150px !important; }
 html body.pushsale-app-body .pslc-page .pslc-col-source { width: 235px !important; }
 html body.pushsale-app-body .pslc-page .pslc-col-type { width: 155px !important; }
@@ -393,20 +441,33 @@ html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell {
     padding: 6px 4px !important;
 }
 
+/* Nhập TC / Duyệt — tick dead-center in cell */
 html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell {
-    /* Center the tick as a block in the cell — avoid form-controls label margin shifting it. */
     text-align: center !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell .pslc-flag-center {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 22px !important;
 }
 
 html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell .ps-round-tick-wrap {
     position: relative !important;
-    display: block !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     width: 18px !important;
     height: 18px !important;
+    min-width: 18px !important;
     min-height: 18px !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
     padding: 0 !important;
     gap: 0 !important;
+    float: none !important;
     line-height: 0 !important;
     vertical-align: middle !important;
 }
@@ -418,6 +479,7 @@ html body.pushsale-app-body .pslc-page .pslc-table td.pslc-flag-cell .ps-round-t
     width: 18px !important;
     height: 18px !important;
     margin: 0 !important;
+    float: none !important;
     vertical-align: middle !important;
 }
 

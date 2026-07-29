@@ -1083,8 +1083,8 @@ html body.pushsale-app-body .pslc-page .pslc-check {
 html body.pushsale-app-body .pslc-page .pslc-tabs-shell,
 html body.pushsale-app-body .pslc-page .pslc-tabs,
 html body.pushsale-app-body .pslc-page .pslc-table-wrap {
-    margin-left: var(--ps-v141-gutter-x) !important;
-    margin-right: var(--ps-v141-gutter-x) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
 /* Carry-forward: Customer 360 single-line header. */
@@ -1803,12 +1803,19 @@ html body.pushsale-app-body .pslc-page .ps-page-advanced-filters {
 }
 html body.pushsale-app-body .pslc-page .pslc-tabs-shell,
 html body.pushsale-app-body .pslc-page .pslc-table-card {
-    margin-left: 14px !important;
-    margin-right: 14px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 html body.pushsale-app-body .pslc-page .pslc-table-card {
     padding-left: 0 !important;
     padding-right: 0 !important;
+    width: 100% !important;
+}
+html body.pushsale-app-body .pslc-page .pslc-tabs {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
 }
 
 /* Customer 360: one canonical desktop line like the product/header pages. */

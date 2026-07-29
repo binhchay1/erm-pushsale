@@ -42,7 +42,11 @@ $legacyRedirects = [
     // 4. Sale
     'ld/sale/sale-kpi' => '/admin/sales/reports/sale-kpi',
     'ld/sale/bang-tong-hop-ban-hang' => '/admin/sales/reports/closing-summary',
+    'ld/thong-ke/ty-le-chot-don-theo-tac-nghiep' => '/admin/sales/reports/operation-conversion',
     'ld/sale/bao-cao/bao-cao-cong-viec-sale' => '/admin/sales/reports/work',
+    'ld/sale/thong-ke-truong-nhom-sale' => '/admin/sales/reports/teams',
+    'ld/sale/bao-cao-data-sale' => '/admin/sales/reports/data',
+    'ld/sale/toi-uu-sale' => '/admin/sales/reports/optimization',
     'ld/sale/bao-cao-doanh-so-chi-tiet' => '/admin/sales/reports/revenue-detail',
     'ld/sale/bao-cao/bao-cao-doanh-so' => '/admin/sales/reports/revenue',
     'ld/sale/bao-cao/bao-cao-doanh-so-v2' => '/admin/sales/reports/revenue-v2',

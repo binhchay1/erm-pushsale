@@ -14923,8 +14923,8 @@ html body.pushsale-app-body .pslc-page .ps-page-advanced-filters {
 }
 html body.pushsale-app-body .pslc-page .pslc-tabs-shell,
 html body.pushsale-app-body .pslc-page .pslc-table-card {
-    margin-left: 14px !important;
-    margin-right: 14px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 html body.pushsale-app-body .pslc-page .pslc-table-card {
     padding-left: 0 !important;

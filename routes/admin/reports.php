@@ -73,11 +73,20 @@ Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
             continue;
         }
 
+        $relativePath = substr($adminPath, strlen('/admin/'));
         if (Route::getRoutes()->getByName('admin.'.$routeName) !== null) {
             continue;
         }
 
-        Route::get(substr($adminPath, strlen('/admin/')), function (Request $request, ExtraReportController $controller) use ($reportKey) {
+        // Tránh đè URI đã có controller riêng (vd. 4.6.2 SalesWorkReportController).
+        $uriTaken = collect(Route::getRoutes())->contains(
+            fn ($route): bool => in_array('GET', $route->methods(), true) && $route->uri() === 'admin/'.$relativePath
+        );
+        if ($uriTaken) {
+            continue;
+        }
+
+        Route::get($relativePath, function (Request $request, ExtraReportController $controller) use ($reportKey) {
             return $controller($request, (string) $reportKey);
         })->name($routeName);
     }

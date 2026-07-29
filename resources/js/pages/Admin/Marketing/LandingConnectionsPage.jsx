@@ -591,7 +591,12 @@ export default function LandingConnectionsPage({
                             <table className="table table-bordered table-multi-select pslc-table">
                                 <thead>
                                     <tr>
-                                        <th className="text-center pslc-col-stt"><input type="checkbox" checked={rows.length > 0 && rows.every((row) => selected.has(row.id))} onChange={toggleAll} /><br />STT</th>
+                                        <th className="text-center pslc-col-stt">
+                                            <span className="chk-all">
+                                                <input type="checkbox" checked={rows.length > 0 && rows.every((row) => selected.has(row.id))} onChange={toggleAll} />
+                                                <label>&nbsp;</label>
+                                            </span>
+                                        </th>
                                         <th className="text-center pslc-col-marketer">Marketing</th>
                                         <th className="text-center pslc-col-source">{l('col_source')}<br /><span>{l('col_source_url')}</span></th>
                                         <th className="text-center no-wrap pslc-col-type">{l('col_type')}<br /><span>{l('col_channel')}</span></th>
@@ -612,7 +617,12 @@ export default function LandingConnectionsPage({
                                         const mainSource = row.sources?.find((source) => source.source_type === 'main') ?? row.sources?.[0];
                                         return (
                                             <tr key={row.id}>
-                                                <td className="text-center"><input type="checkbox" checked={selected.has(row.id)} onChange={() => toggleSelected(row.id)} /><br />{(connections.from ?? 1) + index} -</td>
+                                                <td className="text-center no-wrap pslc-td-stt">
+                                                    <span className="chk-item">
+                                                        <input type="checkbox" checked={selected.has(row.id)} onChange={() => toggleSelected(row.id)} />
+                                                        <label>{(connections.from ?? 1) + index}</label>
+                                                    </span>
+                                                </td>
                                                 <td className="text-center pslc-td-marketer">{row.marketer ?? '—'}<br />{row.marketer_email && <span className="small-tip">({row.marketer_email})</span>}</td>
                                                 <td className="text-left pslc-td-source">{row.name}<br /><span className="small-tip">{mainSource?.source_url ?? '—'}</span></td>
                                                 <td className="text-center pslc-type-cell"><div>{l('source_data')}</div><div className="pslc-channel">({channelOptions.find((item) => item.value === row.ad_channel)?.label ?? row.ad_channel ?? 'Facebook ads'})</div></td>
@@ -645,22 +655,26 @@ export default function LandingConnectionsPage({
                                                     </div>
                                                 </td>
                                                 <td className="text-center pslc-col-small pslc-flag-cell">
-                                                    <RoundFlagTick
-                                                        checked={Boolean(row.manual_import)}
-                                                        disabled={!canManage}
-                                                        title={l('toggle_manual_import')}
-                                                        onChange={(next) => updateFlags(row, { manual_import: next })}
-                                                    />
+                                                    <div className="pslc-flag-center">
+                                                        <RoundFlagTick
+                                                            checked={Boolean(row.manual_import)}
+                                                            disabled={!canManage}
+                                                            title={l('toggle_manual_import')}
+                                                            onChange={(next) => updateFlags(row, { manual_import: next })}
+                                                        />
+                                                    </div>
                                                 </td>
                                                 <td className="text-center pslc-col-small pslc-flag-cell">
-                                                    <RoundFlagTick
-                                                        checked={Boolean(row.is_approved)}
-                                                        disabled={!canToggleApproval}
-                                                        title={canToggleApproval
-                                                            ? (row.is_approved ? l('approved') : l('pending_approval'))
-                                                            : l('approval_admin_only')}
-                                                        onChange={(next) => updateFlags(row, { is_approved: next })}
-                                                    />
+                                                    <div className="pslc-flag-center">
+                                                        <RoundFlagTick
+                                                            checked={Boolean(row.is_approved)}
+                                                            disabled={!canToggleApproval}
+                                                            title={canToggleApproval
+                                                                ? (row.is_approved ? l('approved') : l('pending_approval'))
+                                                                : l('approval_admin_only')}
+                                                            onChange={(next) => updateFlags(row, { is_approved: next })}
+                                                        />
+                                                    </div>
                                                 </td>
                                                 <td className="text-center">{row.updated_by ?? 'admin'}<br />{row.updated_at}</td>
                                                 <td className="text-center pslc-actions">{canManage ? <button type="button" className="btn-icon" onClick={() => openEdit(row)} title={l('edit')}><i className="fa fa-edit" /></button> : null}</td>

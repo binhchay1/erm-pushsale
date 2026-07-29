@@ -50,6 +50,11 @@ use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
 use App\Models\WarehouseInventoryMovement;
 use App\Services\Finance\PayrollCostService;
+use App\Services\Reports\SalesLeader\OperationConversionReportService;
+use App\Services\Reports\SalesLeader\SalesDataReportService;
+use App\Services\Reports\SalesLeader\SalesOptimizationReportService;
+use App\Services\Reports\SalesLeader\SalesTeamReportService;
+use App\Services\Reports\SalesLeader\SalesWorkReportService;
 use App\Support\ActivityLogger;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -105,6 +110,18 @@ class PushsalePageService
             return $live;
         }
 
+        $salesLeader = match ($source) {
+            'sale_operation_rate' => app(OperationConversionReportService::class)->build($request),
+            'sale_work' => app(SalesWorkReportService::class)->build($request),
+            'sale_team' => app(SalesTeamReportService::class)->build($request),
+            'sale_data' => app(SalesDataReportService::class)->build($request),
+            'sale_optimization' => app(SalesOptimizationReportService::class)->build($request),
+            default => null,
+        };
+        if (is_array($salesLeader)) {
+            return $salesLeader;
+        }
+
         $rows = match ($source) {
             'users' => $this->users(),
             'teams' => $this->teams(),
@@ -123,11 +140,6 @@ class PushsalePageService
             'customer_spending' => $this->customerSpending(),
             'customer_orders' => $this->customerOrders(),
             'sales_ranking' => $this->salesRanking(),
-            'sale_operation_rate' => $this->saleOperationRate(),
-            'sale_work' => $this->saleWork(),
-            'sale_team' => $this->saleTeam(),
-            'sale_data' => $this->saleData(),
-            'sale_optimization' => $this->saleOptimization(),
             'warehouse_orders' => $this->warehouseOrders(),
             'warehouses' => $this->warehouses(),
             'inventory' => $this->inventory(),

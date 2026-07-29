@@ -60,12 +60,13 @@ class WorkspaceUiDemoCommand extends Command
             return self::FAILURE;
         }
 
-        $this->info('Đã tạo demo UXDEMO cho sale / thủ kho / hồ sơ khách hàng.');
+        $this->info('Đã tạo demo UXDEMO cho sale / thủ kho / hồ sơ KH / báo cáo Leader.');
         $this->table(array_keys($counts), [array_values($counts)]);
         $this->line('Gợi ý UI:');
         $this->line('  - Sale workspace / tác nghiệp: đơn UXDEMO-0001…');
         $this->line('  - Hồ sơ KH: SĐT 0988700001… + tin nhắn [UXDEMO]');
         $this->line('  - Thủ kho: phiếu UXDEMO-PN-* , biên bản UXDEMO BB *');
+        $this->line('  - Báo cáo 4.6.x / doanh số: đơn UXDEMO theo nhiều sale + stage + kỳ ngày');
         $this->line('Xóa: php artisan demo:workspace-ui delete --force');
 
         return self::SUCCESS;

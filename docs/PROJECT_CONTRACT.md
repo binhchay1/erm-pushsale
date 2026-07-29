@@ -169,7 +169,7 @@ Do **not** add another sidebar override CSS file. Page CSS must not override `.p
 
 ### Demo UI workspace
 
-- `php artisan demo:workspace-ui` — seed dữ liệu gắn nhãn `UXDEMO` cho sale / thủ kho / hồ sơ KH.
+- `php artisan demo:workspace-ui` — seed dữ liệu gắn nhãn `UXDEMO` cho sale / thủ kho / hồ sơ KH / báo cáo Leader (4.6.x).
 - `php artisan demo:workspace-ui delete --force` — chỉ xóa bản ghi UXDEMO, không đụng dữ liệu khác.
 
 ## v131 UI Contract Addendum
