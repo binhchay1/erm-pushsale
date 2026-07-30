@@ -1,17 +1,15 @@
-import { Head, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { Head } from '@inertiajs/react';
+import { useMemo } from 'react';
 
+import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { ReportExportControl } from '@/components/reports/ReportExportControl';
+import { PushsaleSearchButton } from '@/components/reports/PushsaleReportChrome';
 import { TableEmptyRow } from '@/components/reports/TableEmpty';
+import { readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 });
 const currencyFormatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
-
-function q() {
-    if (typeof window === 'undefined') return {};
-    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
-}
 
 function today() {
     return new Date().toISOString().slice(0, 10);
@@ -22,6 +20,14 @@ function toDate(value) {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return String(value).slice(0, 10);
     return date.toISOString().slice(0, 10);
+}
+
+function buildInitialFilters(serverFilters = {}) {
+    return readQueryFilters({
+        date_from: toDate(serverFilters.date_from),
+        date_to: toDate(serverFilters.date_to),
+        search: '',
+    });
 }
 
 function format(value, fmt = 'text') {
@@ -38,30 +44,65 @@ function ErrorBanner({ message }) {
     return <div className="ps85-error"><i className="fa fa-exclamation-triangle" /> {message}</div>;
 }
 
-function SearchHeader({ title, routeUrl, showExport = false, filters = {}, pageRuntimeError }) {
-    const query = q();
-    const [draft, setDraft] = useState({
-        date_from: toDate(query.date_from || filters.date_from),
-        date_to: toDate(query.date_to || filters.date_to),
-        search: query.search || '',
+function SystemReport85Shell({
+    title,
+    routeUrl,
+    showExport = false,
+    filters: serverFilters = {},
+    pageRuntimeError,
+    activeMenuCode,
+    className = 'ps85-page',
+    children,
+}) {
+    const { draft, set, apply } = useInertiaFilters(routeUrl, buildInitialFilters(serverFilters), {
+        sync: false,
+        preserveScroll: true,
+        replace: false,
     });
-    const update = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
-    const submit = () => router.get(routeUrl, draft, { preserveScroll: true });
+
+    const primaryFilters = (
+        <div className="ps85-filter-row">
+            <input
+                className="form-control"
+                type="date"
+                value={draft.date_from}
+                onChange={(event) => set('date_from', event.target.value)}
+            />
+            <input
+                className="form-control"
+                type="date"
+                value={draft.date_to}
+                onChange={(event) => set('date_to', event.target.value)}
+            />
+            <input
+                className="form-control"
+                placeholder="Tìm theo tên / mã"
+                value={draft.search}
+                onChange={(event) => set('search', event.target.value)}
+            />
+        </div>
+    );
+
+    const actions = (
+        <>
+            <PushsaleSearchButton onClick={() => apply()} label="Tìm kiếm" />
+            {showExport ? (
+                <ReportExportControl mode="visit" routeUrl={routeUrl} filters={draft} label="Xuất Excel" />
+            ) : null}
+        </>
+    );
 
     return (
-        <div className="ps85-header-block">
-            <div className="ps85-title">{title}</div>
-            <div className="ps85-filter-row">
-                <input className="form-control" type="date" value={draft.date_from} onChange={(event) => update('date_from', event.target.value)} />
-                <input className="form-control" type="date" value={draft.date_to} onChange={(event) => update('date_to', event.target.value)} />
-                <input className="form-control" placeholder="Tìm theo tên / mã" value={draft.search} onChange={(event) => update('search', event.target.value)} />
-                <button type="button" className="btn btn-primary btn-sm" onClick={submit}><i className="fa fa-search" /> Tìm kiếm</button>
-                {showExport ? (
-                    <ReportExportControl mode="visit" routeUrl={routeUrl} filters={draft} label="Xuất Excel" />
-                ) : null}
-            </div>
-            <ErrorBanner message={pageRuntimeError} />
-        </div>
+        <PushsalePageShell
+            title={title}
+            pageCode={activeMenuCode}
+            className={className}
+            primaryFilters={primaryFilters}
+            actions={actions}
+            notice={pageRuntimeError ? <ErrorBanner message={pageRuntimeError} /> : null}
+        >
+            {children}
+        </PushsalePageShell>
     );
 }
 
@@ -109,11 +150,16 @@ function SimpleReport({ schema = {}, rows = [], summary = {}, routeUrl, activeMe
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title={schema.title ?? 'Báo cáo'} />
-            <div className="ps85-page">
-                <SearchHeader title={schema.title ?? 'Báo cáo'} routeUrl={routeUrl} filters={summary.filters ?? {}} pageRuntimeError={pageRuntimeError} />
+            <SystemReport85Shell
+                title={schema.title ?? 'Báo cáo'}
+                routeUrl={routeUrl}
+                filters={summary.filters ?? {}}
+                pageRuntimeError={pageRuntimeError}
+                activeMenuCode={activeMenuCode}
+            >
                 <SummaryCards summary={summary} />
                 <DataTable columns={columns} rows={rows} />
-            </div>
+            </SystemReport85Shell>
         </AppLayout>
     );
 }
@@ -151,13 +197,19 @@ export function TrendReport({ schema = {}, rows = [], summary = {}, routeUrl, ac
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title={schema.title ?? 'Biểu đồ xu hướng'} />
-            <div className="ps85-page ps85-trend-page">
-                <SearchHeader title={schema.title ?? 'Biểu đồ xu hướng'} routeUrl={routeUrl} filters={summary.filters ?? {}} pageRuntimeError={pageRuntimeError} />
+            <SystemReport85Shell
+                title={schema.title ?? 'Biểu đồ xu hướng'}
+                routeUrl={routeUrl}
+                filters={summary.filters ?? {}}
+                pageRuntimeError={pageRuntimeError}
+                activeMenuCode={activeMenuCode}
+                className="ps85-page ps85-trend-page"
+            >
                 <div className="ps85-chart-grid">
                     {rows.map((row) => <TrendChart key={row.period} row={row} />)}
                 </div>
                 <DataTable columns={tableColumns} rows={rows} compact />
-            </div>
+            </SystemReport85Shell>
         </AppLayout>
     );
 }
@@ -175,8 +227,15 @@ export function RepurchaseReport({ schema = {}, rows = [], summary = {}, routeUr
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title={schema.title ?? 'Thống kê mua lại'} />
-            <div className="ps85-page ps85-repurchase-page">
-                <SearchHeader title={schema.title ?? 'Thống kê mua lại'} routeUrl={routeUrl} filters={summary.filters ?? {}} showExport pageRuntimeError={pageRuntimeError} />
+            <SystemReport85Shell
+                title={schema.title ?? 'Thống kê mua lại'}
+                routeUrl={routeUrl}
+                filters={summary.filters ?? {}}
+                showExport
+                pageRuntimeError={pageRuntimeError}
+                activeMenuCode={activeMenuCode}
+                className="ps85-page ps85-repurchase-page"
+            >
                 <div className="ps85-repurchase-layout">
                     <DataTable columns={columns} rows={rows} />
                     <div className="ps85-side-card">
@@ -188,7 +247,7 @@ export function RepurchaseReport({ schema = {}, rows = [], summary = {}, routeUr
                         </table>
                     </div>
                 </div>
-            </div>
+            </SystemReport85Shell>
         </AppLayout>
     );
 }
@@ -202,10 +261,17 @@ export function RepurchaseProductsReport({ schema = {}, rows = [], summary = {},
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title={schema.title ?? 'Thống kê KH mua lại theo số sản phẩm'} />
-            <div className="ps85-page ps85-repurchase-products-page">
-                <SearchHeader title={schema.title ?? 'Thống kê KH mua lại theo số sản phẩm'} routeUrl={routeUrl} filters={summary.filters ?? {}} showExport pageRuntimeError={pageRuntimeError} />
+            <SystemReport85Shell
+                title={schema.title ?? 'Thống kê KH mua lại theo số sản phẩm'}
+                routeUrl={routeUrl}
+                filters={summary.filters ?? {}}
+                showExport
+                pageRuntimeError={pageRuntimeError}
+                activeMenuCode={activeMenuCode}
+                className="ps85-page ps85-repurchase-products-page"
+            >
                 <DataTable columns={columns} rows={rows} compact />
-            </div>
+            </SystemReport85Shell>
         </AppLayout>
     );
 }

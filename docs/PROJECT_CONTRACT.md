@@ -255,6 +255,11 @@ Do not create another product taxonomy CSS override file.
 ### Header dùng chung
 - Component: `resources/js/components/layout/PageHeader.jsx` + `PageHeaderProvider`/`PageHeaderOutlet` trong `AppLayout.jsx`. Header được portal lên outlet nên mỗi trang chỉ có một header.
 - CSS: `resources/css/pushsale-page-header-contract.css`, load sau `page-frame` và trước `sidebar-canonical`. Có `box-shadow`, không `border-bottom`, sticky khi scroll.
-- Filter nâng cao thuộc `.ps-page-header__advanced.box-body`, không nằm trong `.m-header` — đúng mẫu Pushsale.
+- Filter nâng cao thuộc sibling `.ps-page-extra-filters` (prop `advanced` / `advancedFilters`), không nằm trong `.m-header-wrap`.
 - Trang mẫu đã áp: `Sales/CustomerProfile.jsx` (4.2 — kèm tách `Đơn chính`/`Upsale` và cờ upsale ở ô mã đơn) và `Admin/Marketing/LandingConnectionsPage.jsx` (2.4.1 — 6 select hàng 2 + chọn số dòng, tabs kết nối).
 - Filter ngày dùng `components/filters/DateRangeFilter.jsx`; biến thể `boxed` gói `[ngày][00:00] – [ngày][23:59]` trong một control có viền.
+
+### Filter stack báo cáo (DRY #15)
+- **Primary (admin Pushsale reports):** `PageHeader` / `PushsalePageShell` + `ReportFilterToolbar` + `ReportFilterField` + `useInertiaFilters` + catalog `config/reportFilters.js`. Extra reports dùng wrapper `components/reports/extra/ExtraReportToolbars.jsx`.
+- **Secondary (giữ nguyên):** `ReportFilterBar` (shadcn Label/Input/Button + Tailwind) trên các trang Marketing Campaign/Revenue, Sales Performance, Shipping Orders, Allocator Reports — **không** ép sang shell Pushsale trong đợt này để tránh gãy CSS/Tailwind hiện có.
+- Báo cáo admin mới: luôn primary stack. Không tạo toolbar filter song song thứ 3.

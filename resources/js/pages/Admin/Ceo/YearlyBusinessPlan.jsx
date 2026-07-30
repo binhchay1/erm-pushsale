@@ -1,11 +1,10 @@
 import { Head, router } from '@inertiajs/react';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 
-import { PageHeader } from '@/components/layout/PageHeader';
-import { ReportExportControl } from '@/components/reports/ReportExportControl';
+import { CeoPlanToolbar, ceoMonthOptions, ceoNumberValue } from '@/components/ceo/CeoPlanToolbar';
 import AppLayout from '@/layouts/AppLayout';
 
-const monthOptions = Array.from({ length: 12 }, (_, index) => index + 1);
+const monthOptions = ceoMonthOptions();
 
 function nf(value, digits = 0) {
     const number = Number(value ?? 0);
@@ -22,11 +21,6 @@ function formatMetric(value, format) {
 function percent(value) {
     if (value === null || value === undefined || Number.isNaN(Number(value))) return '';
     return `${nf(value, 2)} %`;
-}
-
-function numberValue(value) {
-    const number = Number(String(value ?? '').replace(/[^0-9.-]/g, ''));
-    return Number.isFinite(number) ? number : 0;
 }
 
 function queryFilters(defaultFilters) {
@@ -186,22 +180,22 @@ function PlannedDataDialog({ open, filters, onClose, routeUrl }) {
                             Nhập các chỉ số gốc, hệ thống tự tính theo công thức của màn hình: số đơn, doanh số, ngân sách, chi phí và lợi nhuận cho từng tháng được chọn.
                         </div>
                         <div className="ps-year-plan-form-grid">
-                            <label><span>Năm</span><input className="form-control" value={payload.year} onChange={(e) => setField('year', numberValue(e.target.value))} /></label>
+                            <label><span>Năm</span><input className="form-control" value={payload.year} onChange={(e) => setField('year', ceoNumberValue(e.target.value))} /></label>
                             <div className="ps-year-plan-month-picker">
                                 <span>Tháng áp dụng</span>
                                 <div>{monthOptions.map((month) => <label key={month}><input type="checkbox" checked={(payload.months ?? []).includes(month)} onChange={() => toggleMonth(month)} /> Tháng {month}</label>)}</div>
                             </div>
-                            <label><span>Số contact (3)</span><input className="form-control" value={payload.contacts} onChange={(e) => setField('contacts', numberValue(e.target.value))} /></label>
-                            <label><span>Tỉ lệ chốt (4)</span><input className="form-control" value={payload.close_rate} onChange={(e) => setField('close_rate', numberValue(e.target.value))} /></label>
-                            <label><span>Số sản phẩm/đơn (6)</span><input className="form-control" value={payload.products_per_order} onChange={(e) => setField('products_per_order', numberValue(e.target.value))} /></label>
-                            <label><span>Đơn giá TB/SP (7)</span><input className="form-control" value={payload.unit_price} onChange={(e) => setField('unit_price', numberValue(e.target.value))} /></label>
-                            <label><span>Giá contact (11)</span><input className="form-control" value={payload.contact_price} onChange={(e) => setField('contact_price', numberValue(e.target.value))} /></label>
-                            <label><span>Lương marketing (12)</span><input className="form-control" value={payload.marketing_salary} onChange={(e) => setField('marketing_salary', numberValue(e.target.value))} /></label>
-                            <label><span>Thưởng marketing (13)</span><input className="form-control" value={payload.marketing_bonus} onChange={(e) => setField('marketing_bonus', numberValue(e.target.value))} /></label>
-                            <label><span>Lương sale (14)</span><input className="form-control" value={payload.sale_salary} onChange={(e) => setField('sale_salary', numberValue(e.target.value))} /></label>
-                            <label><span>Thưởng sale (15)</span><input className="form-control" value={payload.sale_bonus} onChange={(e) => setField('sale_bonus', numberValue(e.target.value))} /></label>
-                            <label><span>Chi phí khác (16)</span><input className="form-control" value={payload.other_cost} onChange={(e) => setField('other_cost', numberValue(e.target.value))} /></label>
-                            <label><span>Giá vốn hàng hóa % (17)</span><input className="form-control" value={payload.cost_of_goods_percent} onChange={(e) => setField('cost_of_goods_percent', numberValue(e.target.value))} /></label>
+                            <label><span>Số contact (3)</span><input className="form-control" value={payload.contacts} onChange={(e) => setField('contacts', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>Tỉ lệ chốt (4)</span><input className="form-control" value={payload.close_rate} onChange={(e) => setField('close_rate', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>Số sản phẩm/đơn (6)</span><input className="form-control" value={payload.products_per_order} onChange={(e) => setField('products_per_order', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>Đơn giá TB/SP (7)</span><input className="form-control" value={payload.unit_price} onChange={(e) => setField('unit_price', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>Giá contact (11)</span><input className="form-control" value={payload.contact_price} onChange={(e) => setField('contact_price', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>Lương marketing (12)</span><input className="form-control" value={payload.marketing_salary} onChange={(e) => setField('marketing_salary', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>Thưởng marketing (13)</span><input className="form-control" value={payload.marketing_bonus} onChange={(e) => setField('marketing_bonus', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>Lương sale (14)</span><input className="form-control" value={payload.sale_salary} onChange={(e) => setField('sale_salary', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>Thưởng sale (15)</span><input className="form-control" value={payload.sale_bonus} onChange={(e) => setField('sale_bonus', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>Chi phí khác (16)</span><input className="form-control" value={payload.other_cost} onChange={(e) => setField('other_cost', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>Giá vốn hàng hóa % (17)</span><input className="form-control" value={payload.cost_of_goods_percent} onChange={(e) => setField('cost_of_goods_percent', ceoNumberValue(e.target.value))} /></label>
                         </div>
                     </div>
                     <div className="modal-footer">
@@ -253,10 +247,10 @@ export default function YearlyBusinessPlanPage({ schema, rows = [], chart = {}, 
                         <span>{summary.toast}</span>
                     </div>
                 )}
-                <PageHeader
+                <CeoPlanToolbar
                     title={schema?.title ?? 'Lập kế hoạch kinh doanh'}
                     className="ps-year-plan-toolbar"
-                    filters={(
+                    filtersSlot={(
                         <>
                             <select className="form-control" value={filters.year} onChange={(event) => setFilters((current) => ({ ...current, year: event.target.value }))}>
                                 {years.map((year) => <option key={year} value={year}>Năm {year}</option>)}
@@ -273,10 +267,11 @@ export default function YearlyBusinessPlanPage({ schema, rows = [], chart = {}, 
                             </select>
                         </>
                     )}
-                    actions={(
+                    onSearch={runSearch}
+                    routeUrl={routeUrl}
+                    exportFilters={buildQuery(filters)}
+                    actionsExtra={(
                         <div className="ps-year-plan-actions">
-                            <button type="button" className="btn btn-primary btn-sm" onClick={runSearch}><i className="fa fa-search" /> Tìm kiếm</button>
-                            <ReportExportControl mode="visit" routeUrl={routeUrl} filters={buildQuery(filters)} label="Xuất Excel" />
                             <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowData(true)}><i className="fa fa-plus" /> Thêm dữ liệu</button>
                             <button type="button" className="ps-year-plan-note-button" title="Chú thích" onClick={() => setShowNote(true)}><i className="fa fa-question-circle" /></button>
                         </div>

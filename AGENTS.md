@@ -16,6 +16,9 @@
 | Header trang (dùng chung) | `components/layout/PageHeader.jsx` + `pushsale-page-header-contract.css` |
 | Filter bổ sung (toggle) | Sibling `.ps-page-extra-filters` của header (prop `advanced` / `advancedFilters`) — **không** nằm trong `.m-header-wrap` |
 | Shell trang | `PushsalePageShell.jsx` + `pushsale-page-frame-contract.css` |
+| Filter báo cáo admin (primary) | `ReportFilterToolbar` + `ReportFilterField` + `config/reportFilters.js` + `useInertiaFilters` |
+| Filter shadcn (secondary) | `ReportFilterBar` — chỉ trang Marketing/Sales/Shipping/Allocator đã dùng Tailwind; **không** thêm trang admin Pushsale mới vào stack này |
+| Extra-report toolbars | `components/reports/extra/ExtraReportToolbars.jsx` |
 | Sidebar / L3 flyout | `AppSidebar.jsx` + `usePushsaleSidebarMenu.js` + `pushsale-sidebar-canonical-contract.css` (load **cuối**) |
 | Contract nghiệp vụ dài | `docs/PROJECT_CONTRACT.md` |
 | Kiến trúc / API overview | `docs/ARCHITECTURE.md` |

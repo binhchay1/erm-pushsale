@@ -1,38 +1,17 @@
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { PageHeader } from '@/components/layout/PageHeader';
-import { ReportExportControl } from '@/components/reports/ReportExportControl';
+import {
+    CeoPlanToolbar,
+    CEO_POSITIONS,
+    ceoCurrentQuery,
+    ceoMoney,
+    ceoMonthOptions,
+    ceoNumberValue,
+    ceoYearOptions,
+} from '@/components/ceo/CeoPlanToolbar';
 import AppLayout from '@/layouts/AppLayout';
 import { useConfirm } from '@/hooks/use-confirm';
-
-function numberValue(value) {
-    const number = Number(String(value ?? '').replace(/[^0-9.-]/g, ''));
-    return Number.isFinite(number) ? number : 0;
-}
-
-function money(value) {
-    return numberValue(value).toLocaleString('vi-VN');
-}
-
-function currentQuery() {
-    if (typeof window === 'undefined') return {};
-    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
-}
-
-const POSITIONS = [
-    ['marketing', 'Marketing'],
-    ['sales', 'Sale'],
-];
-
-function monthOptions() {
-    return [['0', '--Chọn Tháng--'], ...Array.from({ length: 12 }, (_, index) => [String(index + 1), String(index + 1)])];
-}
-
-function yearOptions() {
-    const year = new Date().getFullYear();
-    return Array.from({ length: 8 }, (_, index) => year + 1 - index);
-}
 
 function emptyRow(filters, index = 0) {
     return {
@@ -58,7 +37,7 @@ function normalizeRows(rows) {
 
 export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUrl = '/admin/ceo/business-plan/revenue-bonus', activeMenuCode = '7.1.4' }) {
     const { ask } = useConfirm();
-    const query = currentQuery();
+    const query = ceoCurrentQuery();
     const [draftFilters, setDraftFilters] = useState({
         year: Number(filters.year || query.year || new Date().getFullYear()),
         month: Number(filters.month ?? query.month ?? new Date().getMonth() + 1),
@@ -73,9 +52,9 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
     }, [rows]);
 
     const total = useMemo(() => draftRows.reduce((acc, row) => {
-        acc.revenue_from += numberValue(row.revenue_from);
-        acc.revenue_to += numberValue(row.revenue_to);
-        acc.bonus_amount += numberValue(row.bonus_amount);
+        acc.revenue_from += ceoNumberValue(row.revenue_from);
+        acc.revenue_to += ceoNumberValue(row.revenue_to);
+        acc.bonus_amount += ceoNumberValue(row.bonus_amount);
         return acc;
     }, { revenue_from: 0, revenue_to: 0, bonus_amount: 0 }), [draftRows]);
 
@@ -92,14 +71,14 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
         .map((row, index) => ({
             id: row.id || null,
             position_key: row.position_key || draftFilters.position_key,
-            year: numberValue(row.year || draftFilters.year),
-            month: numberValue(row.month || draftFilters.month || new Date().getMonth() + 1),
-            revenue_from: numberValue(row.revenue_from),
-            revenue_to: numberValue(row.revenue_to),
-            bonus_percent: numberValue(row.bonus_percent),
-            bonus_amount: numberValue(row.bonus_amount),
+            year: ceoNumberValue(row.year || draftFilters.year),
+            month: ceoNumberValue(row.month || draftFilters.month || new Date().getMonth() + 1),
+            revenue_from: ceoNumberValue(row.revenue_from),
+            revenue_to: ceoNumberValue(row.revenue_to),
+            bonus_percent: ceoNumberValue(row.bonus_percent),
+            bonus_amount: ceoNumberValue(row.bonus_amount),
             locked: Boolean(row.locked),
-            sort_order: numberValue(row.sort_order || index + 1),
+            sort_order: ceoNumberValue(row.sort_order || index + 1),
         }));
 
     const saveAll = () => {
@@ -150,8 +129,8 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
     };
 
     const setLocked = async (locked) => {
-        const message = locked ? 'Bạn chắc chắn muốn chốt dữ liệu tháng này?' : 'Bạn chắc chắn muốn hủy chốt dữ liệu tháng này?';
-        const ok = await ask({ description: message });
+        const lockMessage = locked ? 'Bạn chắc chắn muốn chốt dữ liệu tháng này?' : 'Bạn chắc chắn muốn hủy chốt dữ liệu tháng này?';
+        const ok = await ask({ description: lockMessage });
         if (!ok) return;
         setProcessing(true);
         router.post(`${routeUrl}/lock-period`, { ...draftFilters, locked }, {
@@ -166,29 +145,28 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title="(UnitAdmin) Thiết lập tiền thưởng theo doanh số" />
             <div className="ps-revenue-bonus-page">
-                <PageHeader
+                <CeoPlanToolbar
                     title="(UnitAdmin) Thiết lập tiền thưởng theo doanh số"
                     pageCode={activeMenuCode}
                     className="ps-revenue-bonus-header"
-                    filters={(
+                    filtersSlot={(
                         <>
                             <select className="form-control" value={String(draftFilters.month)} onChange={(event) => setFilter('month', Number(event.target.value))}>
-                                {monthOptions().map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                                <option value="0">--Chọn Tháng--</option>
+                                {ceoMonthOptions().map((month) => <option key={month} value={month}>{month}</option>)}
                             </select>
                             <select className="form-control" value={String(draftFilters.year)} onChange={(event) => setFilter('year', Number(event.target.value))}>
-                                {yearOptions().map((year) => <option key={year} value={year}>Năm {year}</option>)}
+                                {ceoYearOptions().map((year) => <option key={year} value={year}>Năm {year}</option>)}
                             </select>
                             <select className="form-control" value={draftFilters.position_key} onChange={(event) => setFilter('position_key', event.target.value)}>
-                                {POSITIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                                {CEO_POSITIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                             </select>
                         </>
                     )}
-                    actions={(
-                        <>
-                            <button type="button" className="btn btn-sm btn-primary" onClick={runSearch} disabled={processing}><i className="fa fa-search" /> Tìm kiếm</button>
-                            <ReportExportControl mode="visit" routeUrl={routeUrl} filters={draftFilters} label="Xuất Excel" />
-                        </>
-                    )}
+                    onSearch={runSearch}
+                    routeUrl={routeUrl}
+                    exportFilters={draftFilters}
+                    searchDisabled={processing}
                 />
 
                 {message && <div className="ps-revenue-bonus-message">{message}</div>}
@@ -211,10 +189,10 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
                         <tbody>
                             <tr className="rowsum">
                                 <td colSpan="2" className="text-center font-weight-bold">Tổng:</td>
-                                <td className="text-right font-weight-bold">{money(total.revenue_from)}</td>
-                                <td className="text-right font-weight-bold">{money(total.revenue_to)}</td>
+                                <td className="text-right font-weight-bold">{ceoMoney(total.revenue_from)}</td>
+                                <td className="text-right font-weight-bold">{ceoMoney(total.revenue_to)}</td>
                                 <td />
-                                <td className="text-right font-weight-bold">{money(total.bonus_amount)}</td>
+                                <td className="text-right font-weight-bold">{ceoMoney(total.bonus_amount)}</td>
                                 <td colSpan="3" />
                             </tr>
                             {draftRows.length ? draftRows.map((row, index) => (
@@ -222,13 +200,13 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
                                     <td className="text-center">{index + 1}</td>
                                     <td>
                                         <select className="form-control" value={row.position_key || draftFilters.position_key} onChange={(event) => setRow(index, 'position_key', event.target.value)} disabled={Boolean(row.locked)}>
-                                            {POSITIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                                            {CEO_POSITIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                                         </select>
                                     </td>
-                                    <td><input className="form-control text-right" value={row.revenue_from ?? 0} onChange={(event) => setRow(index, 'revenue_from', numberValue(event.target.value))} disabled={Boolean(row.locked)} /></td>
-                                    <td><input className="form-control text-right" value={row.revenue_to ?? 0} onChange={(event) => setRow(index, 'revenue_to', numberValue(event.target.value))} disabled={Boolean(row.locked)} /></td>
-                                    <td><input className="form-control text-right" value={row.bonus_percent ?? 0} onChange={(event) => setRow(index, 'bonus_percent', numberValue(event.target.value))} disabled={Boolean(row.locked)} /></td>
-                                    <td><input className="form-control text-right" value={row.bonus_amount ?? 0} onChange={(event) => setRow(index, 'bonus_amount', numberValue(event.target.value))} disabled={Boolean(row.locked)} /></td>
+                                    <td><input className="form-control text-right" value={row.revenue_from ?? 0} onChange={(event) => setRow(index, 'revenue_from', ceoNumberValue(event.target.value))} disabled={Boolean(row.locked)} /></td>
+                                    <td><input className="form-control text-right" value={row.revenue_to ?? 0} onChange={(event) => setRow(index, 'revenue_to', ceoNumberValue(event.target.value))} disabled={Boolean(row.locked)} /></td>
+                                    <td><input className="form-control text-right" value={row.bonus_percent ?? 0} onChange={(event) => setRow(index, 'bonus_percent', ceoNumberValue(event.target.value))} disabled={Boolean(row.locked)} /></td>
+                                    <td><input className="form-control text-right" value={row.bonus_amount ?? 0} onChange={(event) => setRow(index, 'bonus_amount', ceoNumberValue(event.target.value))} disabled={Boolean(row.locked)} /></td>
                                     <td className="text-center">{row.locked ? <span className="ps-revenue-bonus-locked">Đã chốt</span> : <span className="ps-revenue-bonus-open">Chưa chốt</span>}</td>
                                     <td className="text-center no-wrap">{row.updated_by ? <><strong>{row.updated_by}</strong><br /></> : null}{row.updated_at ?? ''}</td>
                                     <td className="text-center no-wrap"><button type="button" className="ps-revenue-bonus-icon" onClick={() => destroyRow(row, index)} disabled={Boolean(row.locked)} title="Xóa"><i className="fa fa-trash" /></button></td>

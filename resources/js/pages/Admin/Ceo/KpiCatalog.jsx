@@ -1,38 +1,16 @@
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { PageHeader } from '@/components/layout/PageHeader';
-import { ReportExportControl } from '@/components/reports/ReportExportControl';
+import {
+    CeoPlanToolbar,
+    CEO_POSITIONS,
+    ceoCurrentQuery,
+    ceoFormatDateTime,
+    ceoMoney,
+    ceoNumberValue,
+} from '@/components/ceo/CeoPlanToolbar';
 import AppLayout from '@/layouts/AppLayout';
 import { useConfirm } from '@/hooks/use-confirm';
-
-function currentQuery() {
-    if (typeof window === 'undefined') return {};
-    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
-}
-
-function numberValue(value) {
-    const number = Number(String(value ?? '').replace(/[^0-9.-]/g, ''));
-    return Number.isFinite(number) ? number : 0;
-}
-
-function money(value) {
-    return numberValue(value).toLocaleString('vi-VN');
-}
-
-function formatDateTime(value) {
-    if (!value) return '';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return String(value);
-    return new Intl.DateTimeFormat('vi-VN', {
-        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
-    }).format(date);
-}
-
-const POSITIONS = [
-    ['marketing', 'Marketing'],
-    ['sales', 'Sale'],
-];
 
 function emptyRow(position, index = 0) {
     return {
@@ -68,7 +46,7 @@ function normalizedRows(rows) {
 
 export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/ceo/business-plan/kpi-catalog', pageRuntimeError = null }) {
     const { ask } = useConfirm();
-    const query = currentQuery();
+    const query = ceoCurrentQuery();
     const [filters, setFilters] = useState({ position_key: query.position_key || query.role || 'marketing' });
     const [draftRows, setDraftRows] = useState(() => normalizedRows(rows));
     const [message, setMessage] = useState('');
@@ -80,14 +58,14 @@ export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/c
 
     const isSales = filters.position_key === 'sales';
     const totals = useMemo(() => draftRows.reduce((acc, row) => {
-        acc.daily_budget += numberValue(row.daily_budget);
-        acc.daily_clicks += numberValue(row.daily_clicks);
-        acc.daily_contacts += numberValue(row.daily_contacts);
-        acc.daily_revenue += numberValue(row.daily_revenue);
-        acc.daily_new_contacts += numberValue(row.daily_new_contacts);
-        acc.daily_new_closed += numberValue(row.daily_new_closed);
-        acc.daily_old_contacts += numberValue(row.daily_old_contacts);
-        acc.daily_old_closed += numberValue(row.daily_old_closed);
+        acc.daily_budget += ceoNumberValue(row.daily_budget);
+        acc.daily_clicks += ceoNumberValue(row.daily_clicks);
+        acc.daily_contacts += ceoNumberValue(row.daily_contacts);
+        acc.daily_revenue += ceoNumberValue(row.daily_revenue);
+        acc.daily_new_contacts += ceoNumberValue(row.daily_new_contacts);
+        acc.daily_new_closed += ceoNumberValue(row.daily_new_closed);
+        acc.daily_old_contacts += ceoNumberValue(row.daily_old_contacts);
+        acc.daily_old_closed += ceoNumberValue(row.daily_old_closed);
         return acc;
     }, {
         daily_budget: 0,
@@ -129,16 +107,16 @@ export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/c
                 id: row._record_id || row.id || null,
                 position_key: filters.position_key,
                 kpi_name: row.kpi_name,
-                daily_budget: numberValue(row.daily_budget),
-                daily_clicks: numberValue(row.daily_clicks),
-                daily_contacts: numberValue(row.daily_contacts),
-                daily_revenue: numberValue(row.daily_revenue),
-                daily_new_contacts: numberValue(row.daily_new_contacts),
-                daily_new_closed: numberValue(row.daily_new_closed),
-                daily_old_contacts: numberValue(row.daily_old_contacts),
-                daily_old_closed: numberValue(row.daily_old_closed),
+                daily_budget: ceoNumberValue(row.daily_budget),
+                daily_clicks: ceoNumberValue(row.daily_clicks),
+                daily_contacts: ceoNumberValue(row.daily_contacts),
+                daily_revenue: ceoNumberValue(row.daily_revenue),
+                daily_new_contacts: ceoNumberValue(row.daily_new_contacts),
+                daily_new_closed: ceoNumberValue(row.daily_new_closed),
+                daily_old_contacts: ceoNumberValue(row.daily_old_contacts),
+                daily_old_closed: ceoNumberValue(row.daily_old_closed),
                 is_active: Boolean(row.is_active),
-                sort_order: numberValue(row.sort_order || index + 1),
+                sort_order: ceoNumberValue(row.sort_order || index + 1),
             }));
 
         if (!records.length) {
@@ -182,22 +160,18 @@ export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/c
             <div className="ps-kpi-catalog-page">
                 {pageRuntimeError && <div className="alert alert-warning">{pageRuntimeError}</div>}
 
-                <PageHeader
+                <CeoPlanToolbar
                     title="(Unit admin) Danh mục KPI"
                     className="ps-kpi-catalog-header"
-                    filters={(
+                    filtersSlot={(
                         <select className="form-control" value={filters.position_key} onChange={(event) => setFilter('position_key', event.target.value)}>
-                            {POSITIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                            {CEO_POSITIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                         </select>
                     )}
-                    actions={(
-                        <>
-                            <button type="button" className="btn btn-primary btn-sm" onClick={runSearch} disabled={processing}>
-                                <i className="fa fa-search" /> Tìm kiếm
-                            </button>
-                            <ReportExportControl mode="visit" routeUrl={routeUrl} filters={filters} label="Xuất Excel" />
-                        </>
-                    )}
+                    onSearch={runSearch}
+                    routeUrl={routeUrl}
+                    exportFilters={filters}
+                    searchDisabled={processing}
                 />
 
                 {message && <div className="ps-kpi-catalog-message">{message}</div>}
@@ -228,14 +202,14 @@ export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/c
                         <tbody>
                             <tr className="rowsum">
                                 <td colSpan={3} className="text-center font-weight-bold">Tổng:</td>
-                                {!isSales && <td className="text-right font-weight-bold">{money(totals.daily_budget)}</td>}
-                                {!isSales && <td className="text-right font-weight-bold">{money(totals.daily_clicks)}</td>}
-                                {!isSales && <td className="text-right font-weight-bold">{money(totals.daily_contacts)}</td>}
-                                {isSales && <td className="text-right font-weight-bold">{money(totals.daily_new_contacts)}</td>}
-                                {isSales && <td className="text-right font-weight-bold">{money(totals.daily_new_closed)}</td>}
-                                {isSales && <td className="text-right font-weight-bold">{money(totals.daily_old_contacts)}</td>}
-                                {isSales && <td className="text-right font-weight-bold">{money(totals.daily_old_closed)}</td>}
-                                <td className="text-right font-weight-bold">{money(totals.daily_revenue)}</td>
+                                {!isSales && <td className="text-right font-weight-bold">{ceoMoney(totals.daily_budget)}</td>}
+                                {!isSales && <td className="text-right font-weight-bold">{ceoMoney(totals.daily_clicks)}</td>}
+                                {!isSales && <td className="text-right font-weight-bold">{ceoMoney(totals.daily_contacts)}</td>}
+                                {isSales && <td className="text-right font-weight-bold">{ceoMoney(totals.daily_new_contacts)}</td>}
+                                {isSales && <td className="text-right font-weight-bold">{ceoMoney(totals.daily_new_closed)}</td>}
+                                {isSales && <td className="text-right font-weight-bold">{ceoMoney(totals.daily_old_contacts)}</td>}
+                                {isSales && <td className="text-right font-weight-bold">{ceoMoney(totals.daily_old_closed)}</td>}
+                                <td className="text-right font-weight-bold">{ceoMoney(totals.daily_revenue)}</td>
                                 <td colSpan={2} />
                             </tr>
                             {draftRows.length ? draftRows.map((row, index) => (
@@ -243,15 +217,15 @@ export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/c
                                     <td className="text-center">{row.id || ''}</td>
                                     <td><input className="form-control" value={row.kpi_name ?? ''} onChange={(event) => setRow(index, 'kpi_name', event.target.value)} /></td>
                                     <td className="text-center no-wrap">{row.position_label || (filters.position_key === 'sales' ? 'Sale' : 'Marketing')}</td>
-                                    {!isSales && <td><input className="form-control text-right" value={row.daily_budget ?? 0} onChange={(event) => setRow(index, 'daily_budget', numberValue(event.target.value))} /></td>}
-                                    {!isSales && <td><input className="form-control text-right" value={row.daily_clicks ?? 0} onChange={(event) => setRow(index, 'daily_clicks', numberValue(event.target.value))} /></td>}
-                                    {!isSales && <td><input className="form-control text-right" value={row.daily_contacts ?? 0} onChange={(event) => setRow(index, 'daily_contacts', numberValue(event.target.value))} /></td>}
-                                    {isSales && <td><input className="form-control text-right" value={row.daily_new_contacts ?? 0} onChange={(event) => setRow(index, 'daily_new_contacts', numberValue(event.target.value))} /></td>}
-                                    {isSales && <td><input className="form-control text-right" value={row.daily_new_closed ?? 0} onChange={(event) => setRow(index, 'daily_new_closed', numberValue(event.target.value))} /></td>}
-                                    {isSales && <td><input className="form-control text-right" value={row.daily_old_contacts ?? 0} onChange={(event) => setRow(index, 'daily_old_contacts', numberValue(event.target.value))} /></td>}
-                                    {isSales && <td><input className="form-control text-right" value={row.daily_old_closed ?? 0} onChange={(event) => setRow(index, 'daily_old_closed', numberValue(event.target.value))} /></td>}
-                                    <td><input className="form-control text-right" value={row.daily_revenue ?? 0} onChange={(event) => setRow(index, 'daily_revenue', numberValue(event.target.value))} /></td>
-                                    <td className="text-center no-wrap">{formatDateTime(row.updated_at)}</td>
+                                    {!isSales && <td><input className="form-control text-right" value={row.daily_budget ?? 0} onChange={(event) => setRow(index, 'daily_budget', ceoNumberValue(event.target.value))} /></td>}
+                                    {!isSales && <td><input className="form-control text-right" value={row.daily_clicks ?? 0} onChange={(event) => setRow(index, 'daily_clicks', ceoNumberValue(event.target.value))} /></td>}
+                                    {!isSales && <td><input className="form-control text-right" value={row.daily_contacts ?? 0} onChange={(event) => setRow(index, 'daily_contacts', ceoNumberValue(event.target.value))} /></td>}
+                                    {isSales && <td><input className="form-control text-right" value={row.daily_new_contacts ?? 0} onChange={(event) => setRow(index, 'daily_new_contacts', ceoNumberValue(event.target.value))} /></td>}
+                                    {isSales && <td><input className="form-control text-right" value={row.daily_new_closed ?? 0} onChange={(event) => setRow(index, 'daily_new_closed', ceoNumberValue(event.target.value))} /></td>}
+                                    {isSales && <td><input className="form-control text-right" value={row.daily_old_contacts ?? 0} onChange={(event) => setRow(index, 'daily_old_contacts', ceoNumberValue(event.target.value))} /></td>}
+                                    {isSales && <td><input className="form-control text-right" value={row.daily_old_closed ?? 0} onChange={(event) => setRow(index, 'daily_old_closed', ceoNumberValue(event.target.value))} /></td>}
+                                    <td><input className="form-control text-right" value={row.daily_revenue ?? 0} onChange={(event) => setRow(index, 'daily_revenue', ceoNumberValue(event.target.value))} /></td>
+                                    <td className="text-center no-wrap">{ceoFormatDateTime(row.updated_at)}</td>
                                     <td className="text-center no-wrap">
                                         <button type="button" className="ps-kpi-catalog-icon" title="Xóa" onClick={() => destroyRow(row, index)}>
                                             <i className="fa fa-trash" />

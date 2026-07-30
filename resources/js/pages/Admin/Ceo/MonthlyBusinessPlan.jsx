@@ -1,34 +1,15 @@
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { PageHeader } from '@/components/layout/PageHeader';
-import { ReportExportControl } from '@/components/reports/ReportExportControl';
+import {
+    CeoPlanToolbar,
+    ceoCurrentQuery,
+    ceoFormatDateTime,
+    ceoMoney,
+    ceoNumberValue,
+} from '@/components/ceo/CeoPlanToolbar';
 import AppLayout from '@/layouts/AppLayout';
 import { useConfirm } from '@/hooks/use-confirm';
-
-function currentQuery() {
-    if (typeof window === 'undefined') return {};
-    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
-}
-
-function money(value) {
-    const number = Number(value ?? 0);
-    return Number.isFinite(number) ? number.toLocaleString('vi-VN') : '0';
-}
-
-function formatDateTime(value) {
-    if (!value) return '';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return String(value);
-    return new Intl.DateTimeFormat('vi-VN', {
-        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
-    }).format(date);
-}
-
-function numberValue(value) {
-    const number = Number(String(value ?? '').replace(/[^0-9.-]/g, ''));
-    return Number.isFinite(number) ? number : 0;
-}
 
 const DEPARTMENTS = [
     ['marketing', 'Marketing'],
@@ -45,7 +26,7 @@ function buildQuery(filters) {
 
 export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, routeUrl = '/admin/ceo/business-plan/monthly', pageRuntimeError = null }) {
     const { ask } = useConfirm();
-    const query = currentQuery();
+    const query = ceoCurrentQuery();
     const now = new Date();
     const [filters, setFilters] = useState({
         month: query.month || String(now.getMonth() + 1),
@@ -61,12 +42,12 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
     const [processing, setProcessing] = useState(false);
 
     const totals = useMemo(() => draftRows.reduce((acc, row) => {
-        acc.budget += numberValue(row.budget);
-        acc.clicks += numberValue(row.clicks);
-        acc.contacts += numberValue(row.contacts);
-        acc.revenue_target += numberValue(row.revenue_target);
-        acc.base_salary += numberValue(row.base_salary);
-        acc.income += numberValue(row.income || (numberValue(row.base_salary) + numberValue(row.revenue_target) * numberValue(row.bonus_percent) / 100));
+        acc.budget += ceoNumberValue(row.budget);
+        acc.clicks += ceoNumberValue(row.clicks);
+        acc.contacts += ceoNumberValue(row.contacts);
+        acc.revenue_target += ceoNumberValue(row.revenue_target);
+        acc.base_salary += ceoNumberValue(row.base_salary);
+        acc.income += ceoNumberValue(row.income || (ceoNumberValue(row.base_salary) + ceoNumberValue(row.revenue_target) * ceoNumberValue(row.bonus_percent) / 100));
         return acc;
     }, { budget: 0, clicks: 0, contacts: 0, revenue_target: 0, base_salary: 0, income: 0 }), [draftRows]);
 
@@ -99,14 +80,14 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
                 year: Number(filters.year),
                 month: Number(filters.month),
                 kpi_name: row.kpi,
-                budget: numberValue(row.budget),
-                clicks_target: numberValue(row.clicks),
-                contacts_target: numberValue(row.contacts),
-                revenue_target: numberValue(row.revenue_target),
-                bonus_percent: numberValue(row.bonus_percent),
-                base_salary: numberValue(row.base_salary),
-                working_days: numberValue(row.working_days),
-                actual_days: numberValue(row.actual_days),
+                budget: ceoNumberValue(row.budget),
+                clicks_target: ceoNumberValue(row.clicks),
+                contacts_target: ceoNumberValue(row.contacts),
+                revenue_target: ceoNumberValue(row.revenue_target),
+                bonus_percent: ceoNumberValue(row.bonus_percent),
+                base_salary: ceoNumberValue(row.base_salary),
+                working_days: ceoNumberValue(row.working_days),
+                actual_days: ceoNumberValue(row.actual_days),
                 locked: Boolean(row.locked),
             },
         };
@@ -130,14 +111,14 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
             records: changed.map((row) => ({
                 id: row._record_id,
                 kpi_name: row.kpi,
-                budget: numberValue(row.budget),
-                clicks_target: numberValue(row.clicks),
-                contacts_target: numberValue(row.contacts),
-                revenue_target: numberValue(row.revenue_target),
-                bonus_percent: numberValue(row.bonus_percent),
-                base_salary: numberValue(row.base_salary),
-                working_days: numberValue(row.working_days),
-                actual_days: numberValue(row.actual_days),
+                budget: ceoNumberValue(row.budget),
+                clicks_target: ceoNumberValue(row.clicks),
+                contacts_target: ceoNumberValue(row.contacts),
+                revenue_target: ceoNumberValue(row.revenue_target),
+                bonus_percent: ceoNumberValue(row.bonus_percent),
+                base_salary: ceoNumberValue(row.base_salary),
+                working_days: ceoNumberValue(row.working_days),
+                actual_days: ceoNumberValue(row.actual_days),
                 locked: Boolean(row.locked),
             })),
         });
@@ -149,10 +130,10 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
             <div className="ps-monthly-kpi-page">
                 {pageRuntimeError && <div className="alert alert-warning">{pageRuntimeError}</div>}
 
-                <PageHeader
+                <CeoPlanToolbar
                     title="Thiết lập KPI theo tháng"
                     className="ps-monthly-kpi-header"
-                    filters={(
+                    filtersSlot={(
                         <>
                             <select className="form-control" value={filters.month} onChange={(event) => setFilter('month', event.target.value)}>
                                 <option value="">--Chọn Tháng--</option>
@@ -166,14 +147,10 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
                             </select>
                         </>
                     )}
-                    actions={(
-                        <>
-                            <button type="button" className="btn btn-primary btn-sm" onClick={runSearch} disabled={processing}>
-                                <i className="fa fa-search" /> Tìm kiếm
-                            </button>
-                            <ReportExportControl mode="visit" routeUrl={routeUrl} filters={buildQuery(filters)} label="Xuất Excel" />
-                        </>
-                    )}
+                    onSearch={runSearch}
+                    routeUrl={routeUrl}
+                    exportFilters={buildQuery(filters)}
+                    searchDisabled={processing}
                 />
 
                 {message && <div className="ps-monthly-kpi-message">{message}</div>}
@@ -210,13 +187,13 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
                         <tbody>
                             <tr className="rowsum">
                                 <td colSpan={4} className="text-center font-weight-bold">Tổng:</td>
-                                <td className="text-center font-weight-bold">{money(totals.budget)}</td>
-                                <td className="text-center font-weight-bold">{money(totals.clicks)}</td>
-                                <td className="text-center font-weight-bold">{money(totals.contacts)}</td>
-                                <td className="text-center font-weight-bold">{money(totals.revenue_target)}</td>
+                                <td className="text-center font-weight-bold">{ceoMoney(totals.budget)}</td>
+                                <td className="text-center font-weight-bold">{ceoMoney(totals.clicks)}</td>
+                                <td className="text-center font-weight-bold">{ceoMoney(totals.contacts)}</td>
+                                <td className="text-center font-weight-bold">{ceoMoney(totals.revenue_target)}</td>
                                 <td />
-                                <td className="text-center font-weight-bold">{money(totals.base_salary)}</td>
-                                <td className="text-center font-weight-bold">{money(totals.income)}</td>
+                                <td className="text-center font-weight-bold">{ceoMoney(totals.base_salary)}</td>
+                                <td className="text-center font-weight-bold">{ceoMoney(totals.income)}</td>
                                 <td colSpan={4} />
                             </tr>
                             {draftRows.length ? draftRows.map((row, index) => (
@@ -225,16 +202,16 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
                                     <td className="ps-monthly-kpi-account">{row.account || '—'}</td>
                                     <td className="text-center">{row.role || '—'}</td>
                                     <td><input className="form-control" value={row.kpi ?? ''} onChange={(event) => setRow(index, 'kpi', event.target.value)} /></td>
-                                    <td><input className="form-control text-right" value={row.budget ?? 0} onChange={(event) => setRow(index, 'budget', numberValue(event.target.value))} /></td>
-                                    <td><input className="form-control text-right" value={row.clicks ?? 0} onChange={(event) => setRow(index, 'clicks', numberValue(event.target.value))} /></td>
-                                    <td><input className="form-control text-right" value={row.contacts ?? 0} onChange={(event) => setRow(index, 'contacts', numberValue(event.target.value))} /></td>
-                                    <td><input className="form-control text-right" value={row.revenue_target ?? 0} onChange={(event) => setRow(index, 'revenue_target', numberValue(event.target.value))} /></td>
-                                    <td><input className="form-control text-right" value={row.bonus_percent ?? 0} onChange={(event) => setRow(index, 'bonus_percent', numberValue(event.target.value))} /></td>
-                                    <td><input className="form-control text-right" value={row.base_salary ?? 0} onChange={(event) => setRow(index, 'base_salary', numberValue(event.target.value))} /></td>
-                                    <td className="text-right no-wrap">{money(numberValue(row.income || (numberValue(row.base_salary) + numberValue(row.revenue_target) * numberValue(row.bonus_percent) / 100)))} đ</td>
+                                    <td><input className="form-control text-right" value={row.budget ?? 0} onChange={(event) => setRow(index, 'budget', ceoNumberValue(event.target.value))} /></td>
+                                    <td><input className="form-control text-right" value={row.clicks ?? 0} onChange={(event) => setRow(index, 'clicks', ceoNumberValue(event.target.value))} /></td>
+                                    <td><input className="form-control text-right" value={row.contacts ?? 0} onChange={(event) => setRow(index, 'contacts', ceoNumberValue(event.target.value))} /></td>
+                                    <td><input className="form-control text-right" value={row.revenue_target ?? 0} onChange={(event) => setRow(index, 'revenue_target', ceoNumberValue(event.target.value))} /></td>
+                                    <td><input className="form-control text-right" value={row.bonus_percent ?? 0} onChange={(event) => setRow(index, 'bonus_percent', ceoNumberValue(event.target.value))} /></td>
+                                    <td><input className="form-control text-right" value={row.base_salary ?? 0} onChange={(event) => setRow(index, 'base_salary', ceoNumberValue(event.target.value))} /></td>
+                                    <td className="text-right no-wrap">{ceoMoney(ceoNumberValue(row.income || (ceoNumberValue(row.base_salary) + ceoNumberValue(row.revenue_target) * ceoNumberValue(row.bonus_percent) / 100)))} đ</td>
                                     <td className="text-center"><input type="checkbox" checked={Boolean(row.locked)} onChange={(event) => setRow(index, 'locked', event.target.checked)} /></td>
                                     <td className="text-center no-wrap"><button type="button" className="ps-monthly-kpi-link" onClick={() => saveRow(row, index)}><i className="fa fa-save" /> Lưu dòng</button></td>
-                                    <td className="text-center no-wrap">{formatDateTime(row.updated_at)}</td>
+                                    <td className="text-center no-wrap">{ceoFormatDateTime(row.updated_at)}</td>
                                     <td />
                                 </tr>
                             )) : (

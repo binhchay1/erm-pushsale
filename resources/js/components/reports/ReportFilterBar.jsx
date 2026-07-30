@@ -16,6 +16,11 @@ const PRIMARY_FIELDS = ['date_from', 'date_to', 'product_id', 'search'];
 
 const PRESET_KEYS = ['today', 'last_7_days', 'last_30_days', 'this_month'];
 
+/**
+ * Secondary filter bar for shadcn/Tailwind report pages (DRY #15).
+ * Admin Pushsale reports should use `ReportFilterToolbar` + `ReportFilterField` instead.
+ * Keep this chrome intact so existing Marketing/Sales/Shipping/Allocator Tailwind layouts do not break.
+ */
 export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields, extra = null }) {
     const t = useT();
     const localizedOptions = useLocalizedFilterOptions(filterOptions);

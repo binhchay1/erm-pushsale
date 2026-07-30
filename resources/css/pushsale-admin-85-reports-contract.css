@@ -6,6 +6,18 @@ html body.pushsale-app-body .ps85-page {
     font-size: 13px;
 }
 
+/* PageHeader portaled — shell body/notice keep ps85 horizontal inset */
+html body.pushsale-app-body .ps85-page.ps-page-shell .ps-page-shell__body,
+html body.pushsale-app-body .ps85-page.ps-page-shell .ps-page-shell__notice {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Filters live in PageHeader actions slot; row is date + date + search only */
+html body.pushsale-app-body .m-header-wrap .ps85-filter-row {
+    grid-template-columns: 170px 170px minmax(260px, 1fr);
+}
+
 html body.pushsale-app-body .ps85-header-block {
     background: #fff;
     border-bottom: 1px solid #d5dce5;
