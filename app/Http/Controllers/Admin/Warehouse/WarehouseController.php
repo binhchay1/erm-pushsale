@@ -86,8 +86,10 @@ class WarehouseController extends Controller
             'warehouses' => $warehouses,
             'filters' => $filters,
             'managers' => $this->managerOptions(),
-            'provinces' => $this->provinceOptions(),
-            'districts' => $this->districtOptions($filters['province']),
+            // Không load full sổ địa chỉ VN khi mở list — chỉ lấy tỉnh/huyện đã dùng trên kho.
+            // Sổ đầy đủ lazy-load qua /admin/warehouses/locations khi mở dialog thêm/sửa.
+            'provinces' => $this->provinceOptionsFromWarehouses(),
+            'districts' => $this->districtOptionsFromWarehouses($filters['province']),
             'locations' => [
                 'old' => ['provinces' => [], 'districts' => [], 'wards' => []],
                 'new2025' => ['provinces' => [], 'wards' => []],
@@ -239,6 +241,33 @@ class WarehouseController extends Controller
     protected function managerOptions(): array
     {
         return $this->users->nameOptionsByRoles([UserRole::Admin, UserRole::Warehouse]);
+    }
+
+    /** @return list<string> */
+    protected function provinceOptionsFromWarehouses(): array
+    {
+        $fromData = Warehouse::query()
+            ->whereNotNull('pick_province')
+            ->where('pick_province', '!=', '')
+            ->distinct()
+            ->orderBy('pick_province')
+            ->pluck('pick_province')
+            ->all();
+
+        return array_values(array_unique(array_filter(array_merge([
+            'Địa chỉ 2 cấp 2025',
+        ], $fromData))));
+    }
+
+    /** @return list<string> */
+    protected function districtOptionsFromWarehouses(string $province = ''): array
+    {
+        $query = Warehouse::query()->whereNotNull('pick_district')->where('pick_district', '!=', '');
+        if ($province !== '' && $province !== 'Địa chỉ 2 cấp 2025') {
+            $query->where('pick_province', $province);
+        }
+
+        return $query->distinct()->orderBy('pick_district')->pluck('pick_district')->values()->all();
     }
 
     /** @return list<string> */

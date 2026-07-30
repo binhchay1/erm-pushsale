@@ -7,6 +7,8 @@ use App\Http\Controllers\Concerns\InteractsWithReportSnapshots;
 use App\Http\Controllers\Controller;
 use App\Services\FilterOptionsService;
 use App\Services\Operations\WarehouseOperationService;
+use App\Services\Warehouse\ShippingLabelPrintService;
+use App\Services\Warehouse\WarehouseOrderExcelExportService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -35,6 +37,8 @@ class OperationsController extends Controller
             'routeUrl' => $isAccountingRole ? '/accounting/workspace' : '/admin/accounting',
             'shippingApiBase' => $isAccountingRole ? '/accounting/shipping/orders' : '/admin/shipping/orders',
             'actionApiBase' => $isAccountingRole ? '/accounting/orders' : '/admin/warehouse/orders',
+            'printButtons' => app(ShippingLabelPrintService::class)->fabButtons(),
+            'exportButtons' => app(WarehouseOrderExcelExportService::class)->fabButtons(),
             'canDeleteOrder' => true,
             'activeMenuCode' => '6.1',
             'filterFields' => app(FilterOptionsService::class)->warehouseOperationFilterFields(),

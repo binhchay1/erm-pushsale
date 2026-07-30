@@ -8,7 +8,7 @@ import { WarehouseOrderTable } from '@/components/operations/WarehouseOrderTable
 export default function WarehouseOperations({
     filters = {}, filterOptions = {}, report = { rows: { data: [], meta: null }, statusTabs: [], summary: {} },
     pageTitle = 'Thủ kho tác nghiệp', routeUrl = '/admin/warehouse/operations', shippingApiBase = '/admin/shipping/orders',
-    actionApiBase = '/admin/warehouse/orders', canDeleteOrder = false, activeMenuCode = '5.1',
+    actionApiBase = '/admin/warehouse/orders', canDeleteOrder = false, printButtons = [], exportButtons = [], activeMenuCode = '5.1',
 }) {
     const setTab = (value) => router.get(routeUrl, { ...filters, delivery_status: value === 'all' ? undefined : value, page: 1 }, { preserveState: true, preserveScroll: true, replace: true });
     const active = filters.delivery_status ?? 'all';
@@ -36,7 +36,7 @@ export default function WarehouseOperations({
                         ))}
                     </div>
                 </div>
-                <WarehouseOrderTable rows={report.rows?.data ?? []} apiBase={shippingApiBase} actionApiBase={actionApiBase} filterOptions={filterOptions} canDeleteOrder={canDeleteOrder} />
+                <WarehouseOrderTable rows={report.rows?.data ?? []} apiBase={shippingApiBase} actionApiBase={actionApiBase} filterOptions={filterOptions} filters={filters} canDeleteOrder={canDeleteOrder} printButtons={printButtons} exportButtons={exportButtons} />
                 <PushsalePagination meta={report.rows?.meta} routeUrl={routeUrl} filters={filters} itemLabel="đơn" />
             </section>
         </AppLayout>

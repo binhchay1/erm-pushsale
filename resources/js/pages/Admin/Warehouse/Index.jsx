@@ -378,15 +378,56 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                     title="Danh sách kho"
                     pageCode="5.2.1"
                     className="ps-warehouse-list-header-wrap"
-                    actions={(
-                        <form className="ps-header-search ps-warehouse-header-filters" onSubmit={submitFilters}>
-                            <PushsaleSelect searchable options={filterProvinceOptions} value={province} onChange={(value) => { setProvince(value); setDistrict(''); }} placeholder="--Chọn Tỉnh/TP" />
-                            <PushsaleSelect searchable options={filterDistrictOptions} value={district} onChange={setDistrict} placeholder={province === 'Địa chỉ 2 cấp 2025' ? '--Chọn Phường/Xã 2025--' : '--Quận/Huyện--'} disabled={!province && filterDistrictOptions.length === 0} />
-                            <PushsaleSelect searchable options={managerOptions} value={manager} onChange={setManager} placeholder="--Quản kho--" />
-                            <input className="form-control" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Mã, tên" />
-                            <button className="btn btn-sm btn-primary" type="submit"><i className="fa fa-search" /> Tìm kiếm</button>
+                    filters={(
+                        <form id="ps-warehouse-list-filters" className="ps-warehouse-header-filters" onSubmit={submitFilters}>
+                            <PushsaleSelect
+                                searchable
+                                className="ps-wh-filter-province"
+                                options={filterProvinceOptions}
+                                value={province}
+                                onChange={(value) => { setProvince(value); setDistrict(''); }}
+                                placeholder="--Chọn Tỉnh/TP--"
+                            />
+                            <PushsaleSelect
+                                searchable
+                                className="ps-wh-filter-district"
+                                options={filterDistrictOptions}
+                                value={district}
+                                onChange={setDistrict}
+                                placeholder={province === 'Địa chỉ 2 cấp 2025' ? '--Chọn Phường/Xã 2025--' : '--Quận/Huyện--'}
+                                disabled={!province && filterDistrictOptions.length === 0}
+                            />
+                            <PushsaleSelect
+                                searchable
+                                className="ps-wh-filter-manager"
+                                options={managerOptions}
+                                value={manager}
+                                onChange={setManager}
+                                placeholder="--Quản kho--"
+                            />
                         </form>
                     )}
+                    actions={(
+                        <div className="ps-header-search ps-warehouse-header-search">
+                            <input
+                                className="form-control"
+                                form="ps-warehouse-list-filters"
+                                value={search}
+                                onChange={(event) => setSearch(event.target.value)}
+                                placeholder="Mã, tên"
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault();
+                                        submitFilters(event);
+                                    }
+                                }}
+                            />
+                            <button className="btn btn-sm btn-primary" type="submit" form="ps-warehouse-list-filters">
+                                <i className="fa fa-search" /> Tìm kiếm
+                            </button>
+                        </div>
+                    )}
+                    collapsible={false}
                 />
 
                 <div className="box-body ps-toolbar ps-warehouse-toolbar">

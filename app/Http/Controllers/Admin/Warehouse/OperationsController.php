@@ -7,6 +7,8 @@ use App\Http\Controllers\Concerns\InteractsWithReportSnapshots;
 use App\Http\Controllers\Controller;
 use App\Services\FilterOptionsService;
 use App\Services\Operations\WarehouseOperationService;
+use App\Services\Warehouse\ShippingLabelPrintService;
+use App\Services\Warehouse\WarehouseOrderExcelExportService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -34,6 +36,8 @@ class OperationsController extends Controller
             'routeUrl' => $isWarehouseRole ? '/warehouse/workspace' : '/admin/warehouse/operations',
             'shippingApiBase' => $isWarehouseRole ? '/warehouse/shipping/orders' : '/admin/shipping/orders',
             'actionApiBase' => $isWarehouseRole ? '/warehouse/orders' : '/admin/warehouse/orders',
+            'printButtons' => app(ShippingLabelPrintService::class)->fabButtons(),
+            'exportButtons' => app(WarehouseOrderExcelExportService::class)->fabButtons(),
             // Admin: cho xóa data chưa giao vận (icon trash góc cột Sale, giống Sale tác nghiệp).
             // Role kho: vẫn truyền true để UI hiện khi đơn đủ điều kiện; backend chặn nếu đã chốt/có vận đơn.
             'canDeleteOrder' => true,

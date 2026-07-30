@@ -9,7 +9,7 @@ import { apiRequest } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
 
-const deliveryStatuses = [
+const FALLBACK_DELIVERY_STATUSES = [
     ['waiting_waybill', 'Chờ vận đơn'], ['posted', 'Đã đăng vận đơn'], ['picking_up', 'Đang lấy hàng'],
     ['delivering', 'Đang giao'], ['redelivery', 'Giao lại'], ['partial_delivery', 'Giao một phần'],
     ['delivered', 'Đã giao'], ['delivery_complete', 'Hoàn tất giao'], ['paid', 'Đã đối soát COD'],
@@ -31,6 +31,12 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
     const [loading, setLoading] = useState(false);
     const [formError, setFormError] = useState('');
     const [form, setForm] = useState({});
+    const deliveryStatuses = useMemo(() => {
+        const fromOptions = (filterOptions.deliveryStatuses ?? [])
+            .map((item) => [String(item.value ?? ''), item.label ?? String(item.value ?? '')])
+            .filter(([value]) => value);
+        return fromOptions.length ? fromOptions : FALLBACK_DELIVERY_STATUSES;
+    }, [filterOptions.deliveryStatuses]);
 
     useEffect(() => {
         if (! row || ! type) return;

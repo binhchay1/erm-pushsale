@@ -14,6 +14,8 @@ export default function AccountingOperations({
     shippingApiBase = '/admin/shipping/orders',
     actionApiBase = '/admin/warehouse/orders',
     canDeleteOrder = false,
+    printButtons = [],
+    exportButtons = [],
     activeMenuCode = '6.1',
 }) {
     const setTab = (value) => router.get(routeUrl, { ...filters, delivery_status: value === 'all' ? undefined : value, page: 1 }, { preserveState: true, preserveScroll: true, replace: true });
@@ -47,7 +49,10 @@ export default function AccountingOperations({
                     apiBase={shippingApiBase}
                     actionApiBase={actionApiBase}
                     filterOptions={filterOptions}
+                    filters={filters}
                     canDeleteOrder={canDeleteOrder}
+                    printButtons={printButtons}
+                    exportButtons={exportButtons}
                     variant="accounting"
                 />
                 <PushsalePagination meta={report.rows?.meta} routeUrl={routeUrl} filters={filters} itemLabel="đơn" />

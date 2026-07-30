@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Warehouse;
 
+use App\Data\ReportFilterData;
 use App\Enums\DeliveryStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -9,6 +10,7 @@ use App\Models\Pushsale\ElectronicInvoiceJob;
 use App\Models\Pushsale\ElectronicInvoiceConfig;
 use App\Services\DataDeletion\OrderDeletionService;
 use App\Services\Warehouse\WarehouseOrderActionService;
+use App\Services\Warehouse\WarehouseOrderExcelExportService;
 use App\Support\ActivityLogger;
 use App\Support\ShippingProviders;
 use App\Rules\VietnameseMobilePhone;
@@ -17,6 +19,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WarehouseOrderActionController extends Controller
@@ -57,47 +60,63 @@ class WarehouseOrderActionController extends Controller
         return back()->with('success', 'Đã xóa data '.$label.'.');
     }
 
-    public function bulkExport(Request $request): StreamedResponse
+    public function bulkExport(Request $request, WarehouseOrderExcelExportService $exporter): Response
     {
         $data = $request->validate([
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:orders,id'],
+            'ids' => ['nullable', 'array', 'max:5000'],
+            'ids.*' => ['integer'],
             'type' => ['nullable', Rule::in(['standard', 'shipping', 'accounting', 'delivery-status'])],
+            'filters' => ['nullable', 'array'],
         ]);
 
         $type = $data['type'] ?? 'standard';
+        if ($type === 'delivery-status') {
+            return $this->legacyDeliveryStatusExport($request, $data['ids'] ?? []);
+        }
+
+        if (is_array($data['filters'] ?? null)) {
+            $request->merge($data['filters']);
+        }
+
+        return $exporter->export(
+            $type,
+            $data['ids'] ?? [],
+            ReportFilterData::fromRequest($request, $request->user()),
+            $request->user(),
+        );
+    }
+
+    /**
+     * @param  list<int>  $ids
+     */
+    private function legacyDeliveryStatusExport(Request $request, array $ids): StreamedResponse
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if ($ids === []) {
+            throw ValidationException::withMessages(['ids' => 'Chọn ít nhất 1 đơn để xuất mẫu TTGH.']);
+        }
+
         $orders = Order::query()
-            ->with(['items', 'warehouse', 'saleUser', 'marketerUser', 'shipments' => fn ($query) => $query->latest('id')])
-            ->whereIn('id', $data['ids'])
+            ->with(['shipments' => fn ($query) => $query->latest('id')])
+            ->whereIn('id', $ids)
             ->orderBy('id')
             ->get();
 
-        $headersByType = [
-            'standard' => ['Mã đơn', 'Khách hàng', 'Số điện thoại', 'Địa chỉ', 'Sản phẩm', 'Tổng tiền', 'Đặt cọc', 'COD', 'Sale'],
-            'shipping' => ['Mã đơn', 'Kho', 'PTGH', 'Mã giao vận', 'Người nhận', 'SĐT nhận', 'Địa chỉ giao', 'Phí VC', 'COD'],
-            'accounting' => ['Mã đơn', 'Thành tiền', 'Chiết khấu', 'VAT', 'Phí VC', 'Tổng tiền', 'Đã thu', 'Đối soát'],
-            'delivery-status' => ['Mã đơn', 'Mã giao vận', 'Trạng thái hiện tại', 'Trạng thái cập nhật', 'Ghi chú'],
-        ];
+        $filename = 'warehouse-delivery-status-'.now()->format('YmdHis').'.csv';
 
-        $filename = 'warehouse-'.$type.'-'.now()->format('YmdHis').'.csv';
-
-        return response()->streamDownload(function () use ($orders, $headersByType, $type): void {
+        return response()->streamDownload(function () use ($orders): void {
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, $headersByType[$type]);
+            fputcsv($out, ['Mã đơn', 'Mã giao vận', 'Trạng thái hiện tại', 'Trạng thái cập nhật', 'Ghi chú']);
             foreach ($orders as $order) {
                 $shipment = $order->shipments->first();
-                $products = $order->items->map(fn ($item) => $item->product_name.' x'.$item->quantity.' @'.$item->unit_price)->implode(' | ');
-                $receiverName = trim((string) ($order->receiver_name ?: $order->customer_name));
-                $receiverPhone = trim((string) ($order->receiver_phone ?: $order->customer_phone));
-                $address = trim((string) ($order->shipping_address_2 ?: $order->shipping_address));
-                $row = match ($type) {
-                    'shipping' => [$order->order_code, $order->warehouse?->name, $order->shipping_provider ?: $order->shipping_method, $shipment?->tracking_number ?: $order->tracking_number, $receiverName, $receiverPhone, $address, (int) $order->shipping_fee_collected, (int) ($order->amount_to_collect ?: max(0, (int) $order->total - (int) $order->deposit))],
-                    'accounting' => [$order->order_code, (int) $order->subtotal, (int) $order->discount, (int) $order->vat, (int) $order->shipping_fee_collected, (int) $order->total, (int) $order->settled_cod_amount, $order->reconciliation_status],
-                    'delivery-status' => [$order->order_code, $shipment?->tracking_number ?: $order->tracking_number, $order->delivery_status, '', ''],
-                    default => [$order->order_code, $order->customer_name, $order->customer_phone, $address, $products, (int) $order->total, (int) $order->deposit, (int) ($order->amount_to_collect ?: max(0, (int) $order->total - (int) $order->deposit)), $order->saleUser?->name],
-                };
-                fputcsv($out, $row);
+                fputcsv($out, [
+                    $order->order_code,
+                    $shipment?->tracking_number ?: $order->tracking_number,
+                    $order->delivery_status,
+                    '',
+                    '',
+                ]);
             }
             fclose($out);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);

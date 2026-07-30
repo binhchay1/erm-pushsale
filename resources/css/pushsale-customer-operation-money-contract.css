@@ -194,27 +194,41 @@ html body.pushsale-app-body .ps-order-upsale-icon .fa {
 }
 
 html body.pushsale-app-body .ps-order-money-breakdown {
-    display: grid !important;
-    grid-template-rows: repeat(5, minmax(24px, auto)) !important;
-    gap: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 1px !important;
+    grid-template-rows: none !important;
     text-align: right !important;
+    width: auto !important;
+    min-width: 72px !important;
+    margin-left: auto !important;
+    font-variant-numeric: tabular-nums !important;
 }
 
 html body.pushsale-app-body .ps-order-money-breakdown > div,
-html body.pushsale-app-body .ps-order-money-breakdown > strong {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    min-height: 24px !important;
-    padding: 2px 0 !important;
-    border-bottom: 1px dashed #d7dce2 !important;
+html body.pushsale-app-body .ps-order-money-breakdown > strong,
+html body.pushsale-app-body .ps-order-money-breakdown .ps-order-money-line {
+    display: block !important;
+    position: static !important;
+    float: none !important;
+    align-items: unset !important;
+    justify-content: unset !important;
+    min-height: 18px !important;
+    line-height: 1.25 !important;
+    padding: 1px 2px 1px 0 !important;
+    border-bottom: 0 !important;
     white-space: nowrap !important;
+    text-align: right !important;
+    width: 100% !important;
     font-weight: 400 !important;
     color: #000 !important;
 }
 
-html body.pushsale-app-body .ps-order-money-breakdown > strong {
+html body.pushsale-app-body .ps-order-money-breakdown > strong,
+html body.pushsale-app-body .ps-order-money-breakdown .ps-order-money-line.is-total {
     border-bottom: 0 !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
 }
 

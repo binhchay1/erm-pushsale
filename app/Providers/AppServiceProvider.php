@@ -135,5 +135,12 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(120)->by($userId.'|'.$request->ip());
         });
+
+        RateLimiter::for('warehouse-excel-export', function (Request $request) {
+            $userId = $request->user()?->id ?: 'guest';
+            $perMinute = max(1, (int) config('warehouse_excel_export.throttle_per_minute', 3));
+
+            return Limit::perMinute($perMinute)->by($userId.'|'.$request->ip());
+        });
     }
 }

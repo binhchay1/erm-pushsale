@@ -95,6 +95,14 @@ class WarehouseOperationService
         ];
     }
 
+    public function filteredOrdersQuery(ReportFilterData $filter): Builder
+    {
+        $query = Order::query()->applyReportFilter($filter->withoutDeliveryStatus());
+        $this->applyStatusTab($query, $filter->deliveryStatus);
+
+        return $query;
+    }
+
     private function applyStatusTab(Builder $query, ?string $value): void
     {
         if (! $value || $value === 'all') return;

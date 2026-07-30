@@ -175,7 +175,8 @@ export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount =
     };
 
     const lines = [];
-    if (subtotal > 0) {
+    const hasBreakdown = discount > 0 || showZeroDiscount || vat > 0 || shippingFee > 0;
+    if (subtotal > 0 && (hasBreakdown || Math.abs(subtotal - total) > 0.5)) {
         lines.push({ key: 'subtotal', title: 'Thành tiền', text: moneyOrBlank(subtotal) });
     }
     if (discount > 0 || showZeroDiscount) {

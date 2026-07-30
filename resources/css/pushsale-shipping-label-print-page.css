@@ -1,0 +1,234 @@
+html body.pushsale-app-body .ps-print-page {
+    background: #fff;
+    min-height: 70vh;
+    padding: 10px 14px 24px;
+}
+
+html body.pushsale-app-body .ps-print-page-bar {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+html body.pushsale-app-body .ps-print-page-bar h2 {
+    font-size: 18px;
+    margin: 0;
+}
+
+html body.pushsale-app-body .ps-print-internal {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+html body.pushsale-app-body .ps-print-preview {
+    display: grid;
+    gap: 12px;
+}
+
+html body.pushsale-app-body .ps-print-label-card {
+    border: 1px solid #222;
+    page-break-inside: avoid;
+    padding: 10px 12px;
+    position: relative;
+}
+
+html body.pushsale-app-body .ps-print-label-head {
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 1.2fr 1fr 0.8fr;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+}
+
+html body.pushsale-app-body .ps-print-title {
+    font-weight: 700;
+    text-align: center;
+}
+
+html body.pushsale-app-body .ps-print-province {
+    font-size: 20px;
+    font-weight: 700;
+    text-align: right;
+}
+
+html body.pushsale-app-body .ps-print-barcode {
+    font-family: "Courier New", monospace;
+    letter-spacing: 1px;
+}
+
+html body.pushsale-app-body .ps-print-products {
+    margin: 8px 0;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-print-products td {
+    border-top: 1px dotted #ccc;
+    padding: 2px 0;
+}
+
+html body.pushsale-app-body .ps-print-cod {
+    font-size: 1.25em;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-print-qr {
+    align-items: center;
+    border: 1px dashed #999;
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+html body.pushsale-app-body .ps-print-sidebar {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    padding: 10px;
+}
+
+html body.pushsale-app-body .ps-print-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-print-tabs button {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    padding: 4px 8px;
+}
+
+html body.pushsale-app-body .ps-print-tabs button.active {
+    background: #0b82e8;
+    border-color: #0b82e8;
+    color: #fff;
+}
+
+html body.pushsale-app-body .ps-print-qty-badge {
+    background: #0b82e8;
+    border-radius: 999px;
+    color: #fff;
+    margin-bottom: 12px;
+    padding: 14px;
+    text-align: center;
+}
+
+html body.pushsale-app-body .ps-print-qty-badge strong {
+    display: block;
+    font-size: 28px;
+}
+
+html body.pushsale-app-body .ps-print-font-grid,
+html body.pushsale-app-body .ps-print-toggles {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-print-toggles label {
+    font-weight: 400;
+}
+
+html body.pushsale-app-body .ps-print-sidebar-actions {
+    display: grid;
+    gap: 8px;
+}
+
+html body.pushsale-app-body .ps-print-platform-top,
+html body.pushsale-app-body .ps-print-platform-controls {
+    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+html body.pushsale-app-body .ps-print-platform-controls label {
+    display: grid;
+    gap: 4px;
+    min-width: 140px;
+}
+
+html body.pushsale-app-body .ps-print-carrier {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 260px minmax(0, 1fr);
+}
+
+html body.pushsale-app-body .ps-print-carrier-group header {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+html body.pushsale-app-body .ps-print-carrier-group h3 {
+    font-size: 16px;
+    margin: 0;
+}
+
+html body.pushsale-app-body .ps-print-pretty {
+    background: #eee;
+    display: block;
+    margin-bottom: 8px;
+    padding: 6px 8px;
+}
+
+html body.pushsale-app-body .ps-print-carrier-body {
+    border: 1px solid #ddd;
+    min-height: 120px;
+    padding: 10px;
+}
+
+html body.pushsale-app-body .ps-print-carrier-body.is-pretty {
+    font-family: Consolas, monospace;
+    white-space: pre-wrap;
+}
+
+html body.pushsale-app-body .ps-print-merge {
+    padding: 12px 0;
+}
+
+html body.pushsale-app-body .ps-print-merge-list {
+    margin-top: 14px;
+}
+
+html body.pushsale-app-body .ps-print-alert {
+    background: #fff3cd;
+    border: 1px solid #ffe08a;
+    color: #856404;
+    margin: 10px 0;
+    padding: 8px 10px;
+}
+
+@media print {
+    html body.pushsale-app-body .no-print,
+    html body.pushsale-app-body .main-sidebar,
+    html body.pushsale-app-body .main-header,
+    html body.pushsale-app-body .ps-print-page-bar {
+        display: none !important;
+    }
+
+    html body.pushsale-app-body .ps-print-internal {
+        display: block !important;
+    }
+
+    html body.pushsale-app-body .ps-print-label-card {
+        break-inside: avoid;
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 992px) {
+    html body.pushsale-app-body .ps-print-internal,
+    html body.pushsale-app-body .ps-print-carrier {
+        grid-template-columns: 1fr;
+    }
+}

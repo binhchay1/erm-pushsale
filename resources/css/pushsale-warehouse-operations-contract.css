@@ -725,10 +725,92 @@ html body.pushsale-app-body .ps-wh-page .c-care-body .btn-icon.aoh:hover {
     opacity: 1 !important;
 }
 
+/* TTGH by-code / Excel dialogs (FAB truck) */
+html body.pushsale-app-body .ps-ttgh-by-code-dialog .ps-ttgh-form,
+html body.pushsale-app-body .ps-ttgh-excel-dialog .ps-ttgh-excel-layout {
+    display: block;
+}
+
+html body.pushsale-app-body .ps-ttgh-field {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-ttgh-field > span {
+    font-weight: 600;
+}
+
+html body.pushsale-app-body .ps-ttgh-check {
+    display: block;
+    font-weight: 400;
+    margin: 0 0 12px;
+}
+
+html body.pushsale-app-body .ps-ttgh-inspect {
+    background: #f7fbff;
+    border: 1px solid #d7e8f7;
+    margin-top: 8px;
+    padding: 8px 10px;
+}
+
+html body.pushsale-app-body .ps-ttgh-inspect ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-dialog.wide {
+    max-width: min(1100px, 96vw);
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-notice {
+    background: #fffbe6;
+    border: 1px solid #f0e6a8;
+    margin-bottom: 12px;
+    padding: 8px 10px;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-layout {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 260px minmax(0, 1fr);
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-side .ps-ttgh-excel-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-stats td:last-child {
+    text-align: right;
+    font-weight: 600;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-filters {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+    margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
 @media (max-width: 992px) {
     html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-main,
     html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-five,
     html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-six {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    html body.pushsale-app-body .ps-ttgh-excel-layout,
+    html body.pushsale-app-body .ps-ttgh-excel-filters {
+        grid-template-columns: 1fr;
     }
 }

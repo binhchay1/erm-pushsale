@@ -438,7 +438,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
 
     useEffect(() => {
         setSelected(new Set());
-    }, [rows.map((row) => row.id).join(',')]);
+    }, [pagination.current_page, pagination.total, routeUrl]);
 
     const saleTeams = useMemo(() => {
         const leaderId = String(form.sale_leader_id ?? '');

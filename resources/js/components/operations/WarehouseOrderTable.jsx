@@ -5,6 +5,9 @@ import { toast } from 'sonner';
 
 import { ShippingOrderDetailDialog } from '@/components/shipping/ShippingOrderDetailDialog';
 import { WarehouseActionDialogs } from '@/components/operations/WarehouseActionDialogs';
+import { RegisterShipmentDialog } from '@/components/operations/RegisterShipmentDialog';
+import { UpdateDeliveryStatusByCodeDialog } from '@/components/operations/UpdateDeliveryStatusByCodeDialog';
+import { UpdateDeliveryStatusExcelDialog } from '@/components/operations/UpdateDeliveryStatusExcelDialog';
 import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { apiPost, apiRequest, getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
@@ -59,9 +62,15 @@ async function postDownload(url, body = {}, fallbackName = 'warehouse-export.csv
         const data = contentType.includes('application/json')
             ? await response.json().catch(() => ({}))
             : {};
-        throw new Error(data.message || `Không thể xuất dữ liệu (${response.status}).`);
+        const validationMessage = data.message
+            || data.errors?.export?.[0]
+            || data.errors?.ids?.[0]
+            || data.errors?.type?.[0]
+            || (data.errors ? Object.values(data.errors).flat()[0] : null);
+        throw new Error(validationMessage || `Không thể xuất dữ liệu (${response.status}).`);
     }
-    if (contentType.includes('text/html')) {
+    // HTML Excel (.xls) is valid export output from ReportExcelExporter.
+    if (contentType.includes('text/html') && !contentType.includes('excel') && !contentType.includes('spreadsheet')) {
         throw new Error('Máy chủ trả về trang lỗi thay vì file xuất.');
     }
     const blob = await response.blob();
@@ -92,12 +101,47 @@ function ActionMenuButton({ title, icon, tone = 'success', onClick, disabled = f
     );
 }
 
-function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpenSingle, onClear, onPrint, onReload }) {
+function FloatingWarehouseActions({
+    selectedRows,
+    eligibleShipmentRows,
+    pageRows = [],
+    filters = {},
+    apiBase,
+    actionApiBase,
+    deliveryStatuses = [],
+    printButtons = [],
+    exportButtons = [],
+    onOpenSingle,
+    onClear,
+    onReload,
+}) {
     const { ask } = useConfirm();
     const [open, setOpen] = useState(false);
+    const [registerOpen, setRegisterOpen] = useState(false);
+    const [ttghCodeOpen, setTtghCodeOpen] = useState(false);
+    const [ttghExcelOpen, setTtghExcelOpen] = useState(false);
+    const [exportBusy, setExportBusy] = useState(false);
     const selectedCount = selectedRows.length;
     const selectedIds = selectedRows.map((row) => row.id);
     const selectedValidForShipment = selectedRows.filter((row) => row.canCreateShipment && !row.hasInsufficientStock);
+    const selectedCodesText = selectedRows.map((row) => row.orderCode).filter(Boolean).join('\n');
+    const printFabButtons = printButtons.length
+        ? printButtons
+        : [
+            { key: 'internal', title: 'In đơn', tone: 'success', icon: 'print' },
+            { key: 'shopee', title: 'In đơn mẫu Shopee', tone: 'warning', icon: 'print' },
+            { key: 'tiktok', title: 'In đơn mẫu TikTok', tone: 'warning', icon: 'print' },
+            { key: 'ghtk', title: 'In đơn mẫu GHTK', tone: 'success', icon: 'print' },
+            { key: 'jnt', title: 'In đơn mẫu J&T', tone: 'success', icon: 'print' },
+            { key: 'spx', title: 'In đơn mẫu SPX', tone: 'success', icon: 'print' },
+        ];
+    const excelFabButtons = exportButtons.length
+        ? exportButtons
+        : [
+            { key: 'standard', title: 'Xuất Excel kiểu 1', tone: 'primary', icon: 'file-excel-o' },
+            { key: 'shipping', title: 'Xuất Excel kiểu 2', tone: 'success', icon: 'file-excel-o' },
+            { key: 'accounting', title: 'Xuất Excel kiểu 3', tone: 'warning', icon: 'file-excel-o' },
+        ];
     const requireSelected = (callback, message = 'Chọn ít nhất 1 đơn ở cột đầu tiên trước khi thao tác.') => {
         if (!selectedCount) {
             toast.error(message);
@@ -106,13 +150,36 @@ function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpen
         callback();
     };
 
-    const bulkJson = async (endpoint, payload = {}) => postJson(`${actionApiBase}/bulk/${endpoint}`, { ids: selectedIds, ...payload });
+    const resolveActionIds = () => {
+        if (selectedIds.length) return selectedIds;
+        return pageRows.map((row) => row.id).filter(Boolean);
+    };
 
-    const createShipments = async () => {
-        if (!selectedValidForShipment.length) {
-            toast.error('Không có đơn đủ điều kiện tạo vận đơn.');
+    const bulkUpdatePageUrl = `${actionApiBase}/update-by-code`;
+
+    const openPrintProfile = (profileKey) => {
+        const ids = resolveActionIds();
+        if (!ids.length) {
+            toast.error('Không có đơn để in. Chọn đơn hoặc đảm bảo trang hiện tại có dữ liệu theo bộ lọc.');
             return;
         }
+        router.visit(`${actionApiBase}/print/${profileKey}?ids=${encodeURIComponent(ids.join(','))}`);
+    };
+
+    const createShipments = async () => {
+        if (!selectedCount) {
+            setRegisterOpen(true);
+            return;
+        }
+        if (!selectedValidForShipment.length) {
+            toast.error('Không có đơn đủ điều kiện tạo vận đơn trong các dòng đã chọn.');
+            return;
+        }
+        const ok = await ask({
+            description: 'Bạn chắc chắn muốn đăng đơn?',
+            confirmLabel: 'Đăng đơn',
+        });
+        if (!ok) return;
         try {
             for (const row of selectedValidForShipment) await apiPost(`${apiBase}/${row.id}/create-shipment`);
             toast.success(`Đã đăng vận đơn cho ${selectedValidForShipment.length} đơn.`);
@@ -123,7 +190,11 @@ function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpen
 
     const cancelShipments = async () => {
         requireSelected(async () => {
-            const ok = await ask({ description: 'Bạn chắc chắn muốn hủy vận đơn các đơn đã chọn?', confirmLabel: 'Xóa', variant: 'destructive' });
+            const ok = await ask({
+                description: 'Bạn chắc chắn muốn hủy đơn?',
+                confirmLabel: 'Hủy đăng đơn',
+                variant: 'destructive',
+            });
             if (!ok) return;
             try {
                 for (const row of selectedRows) await apiRequest(`${apiBase}/${row.id}/cancel-shipment`, { method: 'POST', body: {} });
@@ -134,85 +205,121 @@ function FloatingWarehouseActions({ selectedRows, apiBase, actionApiBase, onOpen
         });
     };
 
-    const syncStatuses = async () => {
-        requireSelected(async () => {
-            try {
-                for (const row of selectedRows) await apiRequest(`${apiBase}/${row.id}/sync-status`, { method: 'POST', body: {} });
-                toast.success(`Đã cập nhật trạng thái giao hàng cho ${selectedCount} đơn.`);
-                onReload();
-            } catch (error) { toast.error(error.message); }
-        });
+    const exportExcel = async (kind, type = 'standard') => {
+        if (exportBusy) {
+            toast.warning('Đang xuất Excel, vui lòng đợi xong trước khi bấm tiếp.');
+            return;
+        }
+        setExportBusy(true);
+        try {
+            const payload = {
+                type,
+                ids: selectedIds,
+                filters,
+            };
+            await postDownload(`${actionApiBase}/bulk/export`, payload, `warehouse-${type}.xls`);
+            toast.success(selectedIds.length
+                ? `${kind}: đã xuất ${selectedIds.length} đơn đã chọn.`
+                : `${kind}: đã xuất theo bộ lọc hiện tại.`);
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setExportBusy(false);
+        }
     };
 
-    const markPrinted = async (printer = 'In đơn') => {
-        requireSelected(async () => {
+    const issueInvoices = () => {
+        const ids = resolveActionIds();
+        if (!ids.length) {
+            toast.error('Không có đơn để xuất HĐĐT. Chọn đơn hoặc lọc có dữ liệu trên trang.');
+            return;
+        }
+        (async () => {
             try {
-                for (const row of selectedRows) await apiRequest(`${actionApiBase}/${row.id}/printed`, { method: 'POST', body: {} });
-                toast.success(`${printer}: đã đánh dấu in ${selectedCount} đơn.`);
+                const data = await postJson(`${actionApiBase}/bulk/invoices`, { ids, source: 'warehouse-actions' });
+                toast.success(data.message || `Đã tạo yêu cầu xuất HĐĐT cho ${ids.length} đơn.`);
                 onReload();
             } catch (error) { toast.error(error.message); }
-        });
+        })();
     };
 
-    const exportSelected = (kind, type = 'standard') => requireSelected(async () => {
-        try {
-            await postDownload(`${actionApiBase}/bulk/export`, { ids: selectedIds, type }, `warehouse-${type}.csv`);
-            toast.success(`${kind}: đã xuất ${selectedCount} đơn.`);
-        } catch (error) { toast.error(error.message); }
-    });
-
-    const issueInvoices = () => requireSelected(async () => {
-        try {
-            const data = await bulkJson('invoices', { source: 'warehouse-actions' });
-            toast.success(data.message || `Đã tạo yêu cầu xuất HĐĐT cho ${selectedCount} đơn.`);
-            onReload();
-        } catch (error) { toast.error(error.message); }
-    });
-
-    const updateByOrderCode = () => requireSelected(async () => {
-        try {
-            const data = await bulkJson('update-by-code', { note: 'Cập nhật nhiều đơn theo mã Pushsale từ màn thủ kho.' });
-            toast.success(data.message || `Đã ghi nhận ${selectedCount} đơn cần cập nhật.`);
-            onReload();
-        } catch (error) { toast.error(error.message); }
-    });
+    const openBulkUpdatePage = () => {
+        const codes = selectedRows.map((row) => row.orderCode).filter(Boolean).join('\n');
+        const url = codes
+            ? `${bulkUpdatePageUrl}?codes=${encodeURIComponent(codes)}`
+            : bulkUpdatePageUrl;
+        router.visit(url);
+    };
 
     return (
-        <nav className={`action-container ps-wh-floating-actions ${open ? 'open' : ''}`} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-            <div className="hidden-actions" aria-hidden={!open}>
-                <div className="icon-row">
-                    <ActionMenuButton title="Đăng đơn" icon="calendar-check-o" tone="primary" onClick={createShipments} disabled={!selectedValidForShipment.length} />
-                    <ActionMenuButton title="Hủy đăng đơn" icon="calendar-times-o" tone="warning" onClick={cancelShipments} disabled={!selectedCount} />
+        <>
+            <nav className={`action-container ps-wh-floating-actions ${open ? 'open' : ''}`} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+                <div className="hidden-actions" aria-hidden={!open}>
+                    <div className="icon-row">
+                        <ActionMenuButton title="Đăng đơn" icon="calendar-check-o" tone="primary" onClick={createShipments} />
+                        <ActionMenuButton title="Hủy đăng đơn" icon="calendar-times-o" tone="warning" onClick={cancelShipments} />
+                    </div>
+                    <div className="icon-row">
+                        <ActionMenuButton title="Cập nhật trạng thái giao hàng" icon="truck" tone="success" onClick={() => setTtghCodeOpen(true)} />
+                        <ActionMenuButton title="Cập nhật trạng thái giao hàng Excel" icon="truck" tone="warning" onClick={() => setTtghExcelOpen(true)} />
+                    </div>
+                    <div className="icon-row">
+                        {printFabButtons.map((button) => (
+                            <ActionMenuButton
+                                key={button.key}
+                                title={button.title}
+                                icon={button.icon || 'print'}
+                                tone={button.tone || 'success'}
+                                onClick={() => openPrintProfile(button.key)}
+                            />
+                        ))}
+                    </div>
+                    <div className="icon-row">
+                        {excelFabButtons.map((button) => (
+                            <ActionMenuButton
+                                key={button.key}
+                                title={button.title}
+                                icon={button.icon || 'file-excel-o'}
+                                tone={button.tone || 'primary'}
+                                onClick={() => exportExcel(button.title, button.key)}
+                                disabled={exportBusy}
+                            />
+                        ))}
+                    </div>
+                    <div className="icon-row">
+                        <ActionMenuButton title="Thêm đơn vào biên bản" icon="file-text-o" tone="success" onClick={() => onOpenSingle('return')} />
+                        <ActionMenuButton title="Xuất hóa đơn điện tử theo mã đơn" icon="barcode" tone="success" onClick={issueInvoices} />
+                    </div>
+                    <div className="icon-row">
+                        <ActionMenuButton title="Cập nhật nhiều đơn theo mã Pushsale" icon="gears" tone="success" onClick={openBulkUpdatePage} />
+                    </div>
                 </div>
-                <div className="icon-row">
-                    <ActionMenuButton title="Cập nhật trạng thái giao hàng" icon="truck" tone="success" onClick={syncStatuses} disabled={!selectedCount} />
-                    <ActionMenuButton title="Cập nhật trạng thái giao hàng Excel" icon="truck" tone="warning" onClick={() => exportSelected('Cập nhật giao hàng Excel', 'delivery-status')} disabled={!selectedCount} />
-                </div>
-                <div className="icon-row">
-                    <ActionMenuButton title="In đơn" icon="print" tone="success" onClick={() => markPrinted('In đơn')} disabled={!selectedCount} />
-                    <ActionMenuButton title="In đơn mẫu Shopee" icon="print" tone="warning" onClick={() => markPrinted('In Shopee')} disabled={!selectedCount} />
-                    <ActionMenuButton title="In đơn mẫu TikTok" icon="print" tone="warning" onClick={() => markPrinted('In TikTok')} disabled={!selectedCount} />
-                    <ActionMenuButton title="In đơn mẫu GHTK" icon="print" tone="success" onClick={() => markPrinted('In GHTK')} disabled={!selectedCount} />
-                    <ActionMenuButton title="In đơn mẫu J&T" icon="print" tone="success" onClick={() => markPrinted('In J&T')} disabled={!selectedCount} />
-                    <ActionMenuButton title="In đơn mẫu SPX" icon="print" tone="success" onClick={() => markPrinted('In SPX')} disabled={!selectedCount} />
-                </div>
-                <div className="icon-row">
-                    <ActionMenuButton title="Xuất Excel kiểu 1" icon="file-excel-o" tone="primary" onClick={() => exportSelected('Xuất Excel kiểu 1', 'standard')} disabled={!selectedCount} />
-                    <ActionMenuButton title="Xuất Excel kiểu 2" icon="file-excel-o" tone="success" onClick={() => exportSelected('Xuất Excel kiểu 2', 'shipping')} disabled={!selectedCount} />
-                    <ActionMenuButton title="Xuất Excel kiểu 3" icon="file-excel-o" tone="warning" onClick={() => exportSelected('Xuất Excel kiểu 3', 'accounting')} disabled={!selectedCount} />
-                </div>
-                <div className="icon-row">
-                    <ActionMenuButton title="Thêm đơn vào biên bản" icon="file-text-o" tone="success" onClick={() => onOpenSingle('return')} disabled={selectedCount !== 1} />
-                    <ActionMenuButton title="Xuất hóa đơn điện tử theo mã đơn" icon="barcode" tone="success" onClick={issueInvoices} disabled={!selectedCount} />
-                </div>
-                <div className="icon-row">
-                    <ActionMenuButton title="Cập nhật nhiều đơn theo mã Pushsale" icon="gears" tone="success" onClick={updateByOrderCode} disabled={!selectedCount} />
-                </div>
-            </div>
-            <button type="button" className="main-action ps-wh-main-action" id="warehouseMenuToggle" title={open ? 'Đóng chức năng' : 'Mở chức năng'} onClick={() => setOpen((value) => !value)}>
-                <i className="fa fa-bars" />
-            </button>
-        </nav>
+                <button type="button" className="main-action ps-wh-main-action" id="warehouseMenuToggle" title={open ? 'Đóng chức năng' : 'Mở chức năng'} onClick={() => setOpen((value) => !value)}>
+                    <i className="fa fa-bars" />
+                </button>
+            </nav>
+            <RegisterShipmentDialog
+                open={registerOpen}
+                onOpenChange={setRegisterOpen}
+                eligibleRows={eligibleShipmentRows}
+                apiBase={apiBase}
+                onDone={() => { onClear(); onReload(); }}
+            />
+            <UpdateDeliveryStatusByCodeDialog
+                open={ttghCodeOpen}
+                onOpenChange={setTtghCodeOpen}
+                actionApiBase={actionApiBase}
+                initialCodes={selectedCodesText}
+                deliveryStatuses={deliveryStatuses}
+                onDone={() => { onClear(); onReload(); }}
+            />
+            <UpdateDeliveryStatusExcelDialog
+                open={ttghExcelOpen}
+                onOpenChange={setTtghExcelOpen}
+                actionApiBase={actionApiBase}
+                onDone={() => { onClear(); onReload(); }}
+            />
+        </>
     );
 }
 
@@ -298,7 +405,10 @@ export function WarehouseOrderTable({
     apiBase,
     actionApiBase,
     filterOptions = {},
+    filters = {},
     canDeleteOrder = false,
+    printButtons = [],
+    exportButtons = [],
     variant = 'warehouse',
 }) {
     const isAccounting = variant === 'accounting';
@@ -309,6 +419,10 @@ export function WarehouseOrderTable({
     const { ask } = useConfirm();
     const rowIds = useMemo(() => rows.map((row) => String(row.id)), [rows]);
     const selectedRows = useMemo(() => rows.filter((row) => selected.includes(String(row.id))), [rows, selected]);
+    const eligibleShipmentRows = useMemo(
+        () => rows.filter((row) => row.canCreateShipment && !row.hasInsufficientStock),
+        [rows],
+    );
     const allSelected = rowIds.length > 0 && rowIds.every((id) => selected.includes(id));
     const someSelected = selected.length > 0 && !allSelected;
 
@@ -339,11 +453,6 @@ export function WarehouseOrderTable({
             else window.print();
             if (reloadAfter) reload();
         } catch (error) { toast.error(error.message); }
-    };
-
-    const printSelected = async () => {
-        for (const row of selectedRows) await printLabel(row, false);
-        reload();
     };
 
     const createShipment = async (row) => {
@@ -511,11 +620,16 @@ export function WarehouseOrderTable({
 
             <FloatingWarehouseActions
                 selectedRows={selectedRows}
+                eligibleShipmentRows={eligibleShipmentRows}
+                pageRows={rows}
+                filters={filters}
                 apiBase={apiBase}
                 actionApiBase={actionApiBase}
+                deliveryStatuses={filterOptions.deliveryStatuses ?? []}
+                printButtons={printButtons}
+                exportButtons={exportButtons}
                 onOpenSingle={openSingleSelected}
                 onClear={() => setSelected([])}
-                onPrint={printSelected}
                 onReload={reload}
             />
             {selectedRows.length > 0 && <div className="ps-wh-selected-hint">Đã chọn {selectedRows.length} đơn. Mở nút chức năng màu xanh bên trái để xử lý hàng loạt.</div>}

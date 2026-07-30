@@ -1,0 +1,49 @@
+/**
+ * Trang cập nhật nhiều đơn theo mã Pushsale (FAB gears → /orders/update-by-code).
+ * Scoped to .ps-wh-bulk-page only.
+ */
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-body {
+    background: #fff;
+    padding: 12px 16px 24px;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .h-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-check {
+    display: block;
+    font-weight: 400;
+    margin: 0 0 12px;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-notice {
+    background: #fffbe6;
+    border: 1px solid #f0e6a8;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-notice .text-danger {
+    color: #c00;
+    font-size: 14px;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page textarea.form-control {
+    line-height: 20px;
+    min-height: 220px;
+    resize: vertical;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-results {
+    margin-top: 18px;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-results table td,
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-results table th {
+    font-size: 13px;
+    vertical-align: top;
+}

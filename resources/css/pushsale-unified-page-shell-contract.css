@@ -1174,41 +1174,46 @@ html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters {
     margin: 0 !important;
 }
 
-/* Header actions: một hàng ngang, đẩy về cuối dòng như Users / Inventory. */
-html body.pushsale-app-body .ps-warehouse-page .ps-header-search.ps-warehouse-header-filters,
+/* Header filters on warehouse list: never stack/overlap (global .ps-select is width:100%) */
+html body.pushsale-app-body .ps-warehouse-page .ps-page-header__filters .ps-warehouse-header-filters,
 html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: flex-end !important;
-    gap: 10px !important;
-    width: 100% !important;
+    gap: 8px !important;
+    width: auto !important;
+    max-width: 100% !important;
     margin: 0 !important;
 }
 
+html body.pushsale-app-body .ps-warehouse-page .ps-page-header .ps-warehouse-header-filters > .ps-select,
 html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > .ps-select {
-    flex: 0 1 170px !important;
-    width: 170px !important;
+    position: relative !important;
+    flex: 0 0 160px !important;
+    width: 160px !important;
     min-width: 140px !important;
-    max-width: 200px !important;
+    max-width: 180px !important;
 }
 
-html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > input.form-control {
-    flex: 0 1 180px !important;
-    width: 180px !important;
-    min-width: 140px !important;
-    height: 29px !important;
-    min-height: 29px !important;
-    border: 1px solid #c7d2df !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-search {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: auto !important;
+    margin: 0 !important;
 }
 
-html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > .btn {
-    flex: 0 0 auto !important;
-    height: 29px !important;
-    min-height: 29px !important;
-    white-space: nowrap !important;
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-search > input.form-control {
+    flex: 0 0 160px !important;
+    width: 160px !important;
+    min-width: 120px !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-page .ps-page-header__filters {
+    justify-content: flex-end !important;
+    min-width: 0 !important;
+    overflow: visible !important;
 }
 
 html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters select,
