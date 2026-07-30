@@ -251,29 +251,33 @@ export default function UsersIndex({
                                             : <i className="fa fa-check check0 hidden" />}
                                     </td>
                                     <td className="text-center ps-col-flag">
-                                        <CircleStatus
-                                            active={row.receive_data}
-                                            disabled={!row.can_manage}
-                                            title={row.receive_data ? 'Tắt nhận dữ liệu' : 'Bật nhận dữ liệu'}
-                                            onClick={row.can_manage
-                                                ? () => router.patch(`/admin/users/${row.id}/operational-status`, {
-                                                    receive_data: row.receive_data ? 0 : 1,
-                                                }, { preserveScroll: true })
-                                                : undefined}
-                                        />
+                                        {row.is_super_admin ? null : (
+                                            <CircleStatus
+                                                active={row.receive_data}
+                                                disabled={!row.can_manage}
+                                                title={row.receive_data ? 'Tắt nhận dữ liệu' : 'Bật nhận dữ liệu'}
+                                                onClick={row.can_manage
+                                                    ? () => router.patch(`/admin/users/${row.id}/operational-status`, {
+                                                        receive_data: row.receive_data ? 0 : 1,
+                                                    }, { preserveScroll: true })
+                                                    : undefined}
+                                            />
+                                        )}
                                     </td>
                                     <td className="text-center">{row.work_shift || optionName(workShifts, row.work_shift_id)}</td>
                                     <td className="text-center ps-col-flag">
-                                        <CircleStatus
-                                            active={!row.is_locked}
-                                            disabled={!row.can_manage}
-                                            title={row.is_locked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
-                                            onClick={row.can_manage
-                                                ? () => router.patch(`/admin/users/${row.id}/operational-status`, {
-                                                    is_locked: row.is_locked ? 0 : 1,
-                                                }, { preserveScroll: true })
-                                                : undefined}
-                                        />
+                                        {row.is_super_admin ? null : (
+                                            <CircleStatus
+                                                active={!row.is_locked}
+                                                disabled={!row.can_manage}
+                                                title={row.is_locked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
+                                                onClick={row.can_manage
+                                                    ? () => router.patch(`/admin/users/${row.id}/operational-status`, {
+                                                        is_locked: row.is_locked ? 0 : 1,
+                                                    }, { preserveScroll: true })
+                                                    : undefined}
+                                            />
+                                        )}
                                     </td>
                                     <td className="text-center ps-update-cell no-wrap">
                                         {row.updated_by && <strong>{row.updated_by}</strong>}

@@ -127,6 +127,7 @@ class UserController extends Controller
                 'updated_by' => $profile?->updatedBy?->name ?: $user->creator?->name,
                 'updated_at' => $user->updated_at?->format('d/m/Y H:i'),
                 'can_manage' => $actor ? $this->hierarchy->canManage($actor, $user) : false,
+                'is_super_admin' => $user->isSuperAdmin(),
             ];
         });
 

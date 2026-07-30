@@ -162,8 +162,6 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                     ) : null}
                                     <div className="ps-contact-phone-row">
                                         <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('purchase', row)}>{safeText(row.customerPhone)}</button>
-                                    </div>
-                                    <div className="ps-contact-flags-row">
                                         <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell />
                                     </div>
                                 </td>

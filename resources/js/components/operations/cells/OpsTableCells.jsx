@@ -139,8 +139,8 @@ export function CustomerContactCell({
                 ) : (
                     <span className="ps-phone-text">{phone || '—'}</span>
                 )}
+                {flags}
             </div>
-            {flags ? <div className="ps-contact-flags-row">{flags}</div> : null}
             <div className="text-left khkn sline">{order.customerExtraNote || ''}</div>
             {order.desiredDeliveryAt ? (
                 <div className="small-tip">({formatOpsDateTime(order.desiredDeliveryAt)})</div>

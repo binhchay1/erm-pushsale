@@ -110,15 +110,30 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-contact-carrier-line {
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-contact-phone-row {
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
     margin-top: 2px !important;
+    width: 100% !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-contact-phone-row .ps-phone-link,
 html body.pushsale-app-body .ps-sale-workspace-page .ps-contact-phone-row .ps-phone-text {
     display: inline !important;
+    flex: 0 1 auto !important;
     margin: 0 !important;
+    min-width: 0 !important;
     width: auto !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-contact-phone-row .ps-order-flags,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-contact-phone-row .ps-contact-flags {
+    display: inline-flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    gap: 3px !important;
+    margin-left: auto !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-contact-phone-icon,
@@ -174,9 +189,12 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .p
     flex-wrap: nowrap !important;
     gap: 8px !important;
     justify-content: flex-start !important;
-    margin: 2px 0 4px !important;
+    margin: 0 0 8px !important;
     min-height: 18px !important;
+    padding-bottom: 2px !important;
     width: 100% !important;
+    position: relative !important;
+    z-index: 5 !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-operation-stage-label,
@@ -205,13 +223,19 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor.is
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-toolbar {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    z-index: auto !important;
     align-items: center;
     display: inline-flex !important;
     flex: 0 0 auto !important;
     gap: 6px;
     justify-content: flex-start;
-    margin: 0 !important;
+    margin: 0 0 2px !important;
     min-height: 18px;
+    float: none !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-tool {
@@ -732,40 +756,112 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-create-order-fab {
     width: 56px !important;
 }
 
-/* Duplicate-phone dialog: wide enough for sale-like columns, no forced horizontal scroll */
+/* Duplicate-phone dialog */
 html body.pushsale-app-body .ps-duplicate-phone-modal[data-slot='dialog-content'],
 html body.pushsale-app-body .ps-duplicate-phone-dialog[data-slot='dialog-content'] {
+    display: flex !important;
+    flex-direction: column !important;
     width: min(1680px, calc(100vw - 24px)) !important;
     max-width: calc(100vw - 24px) !important;
     max-height: calc(100dvh - 24px) !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-duplicate-phone-header {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 18px !important;
+    margin: 0 !important;
+    padding: 10px 40px 10px 14px !important;
+    background: #3782dc !important;
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-duplicate-phone-header [data-slot='dialog-title'],
+html body.pushsale-app-body .ps-duplicate-phone-header .ps-duplicate-closed-filter,
+html body.pushsale-app-body .ps-duplicate-phone-header .ps-duplicate-closed-filter span {
+    color: #fff !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-duplicate-phone-header .ps-duplicate-closed-filter {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+}
+
+html body.pushsale-app-body .ps-duplicate-phone-header .ps-duplicate-closed-filter input {
+    margin: 0 !important;
+    accent-color: #fff !important;
 }
 
 html body.pushsale-app-body .ps-duplicate-phone-body {
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
+    gap: 0 !important;
     min-height: 0 !important;
-    overflow: auto !important;
-    padding: 10px 12px 12px !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+    padding: 0 !important;
 }
 
 html body.pushsale-app-body .ps-duplicate-summary {
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 16px !important;
+    margin: 0 !important;
+    padding: 8px 14px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    background: #f8fafc !important;
     font-size: 12px !important;
+    color: #111 !important;
 }
 
 html body.pushsale-app-body .ps-duplicate-table-wrap {
-    overflow-x: auto !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: auto !important;
     width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 html body.pushsale-app-body .ps-duplicate-table {
-    margin-bottom: 0 !important;
+    margin: 0 !important;
     min-width: 1480px !important;
     table-layout: auto !important;
     width: 100% !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-duplicate-table > thead > tr > th {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: 32px !important;
+    padding: 4px 6px !important;
+    line-height: 1.15 !important;
+    vertical-align: top !important;
+    white-space: nowrap !important;
+    background: #3782dc !important;
+    color: #fff !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+
+html body.pushsale-app-body .ps-duplicate-table > tbody > tr > td {
+    padding: 4px 6px !important;
+    font-size: 12px !important;
+    vertical-align: top !important;
 }
 
 html body.pushsale-app-body .ps-duplicate-message {

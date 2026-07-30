@@ -244,93 +244,74 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange }) {
         if (!open || !order?.id) return;
         let active = true;
         setLoading(true);
-        apiGet(`/customers/orders/${order.id}/purchase-history`)
+        const query = closedOnly ? '?closed_only=1' : '';
+        apiGet(`/customers/orders/${order.id}/purchase-history${query}`)
             .then((payload) => active && setData(payload))
             .catch((error) => active && toast.error(error.message ?? 'Không tải được danh sách cùng số điện thoại.'))
             .finally(() => active && setLoading(false));
         return () => { active = false; };
-    }, [open, order?.id]);
+    }, [open, order?.id, closedOnly]);
 
     if (!order) return null;
 
-    const orders = (data.orders ?? []).filter((item) => !closedOnly || item.closedAt || item.closingStatus === 'closed');
+    const orders = data.orders ?? [];
     const summary = data.summary ?? {};
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-dialog ps-sale-modal ps-duplicate-phone-modal ps-duplicate-phone-dialog" aria-describedby={undefined}>
+            <DialogContent
+                showClose
+                className="ps-sale-dialog ps-sale-modal ps-duplicate-phone-modal ps-duplicate-phone-dialog"
+                aria-describedby={undefined}
+            >
                 <DialogHeader className="ps-sale-dialog-header ps-duplicate-phone-header">
                     <DialogTitle>Danh sách đơn cùng số điện thoại</DialogTitle>
                     <label className="ps-duplicate-closed-filter">
                         <input type="checkbox" checked={closedOnly} onChange={(event) => setClosedOnly(event.target.checked)} />
-                        {' '}
-                        Đã chốt đơn
+                        <span>Đã chốt đơn</span>
                     </label>
                 </DialogHeader>
                 <div className="ps-duplicate-phone-body">
-                    {(summary.orderCount != null || summary.totalValue != null) ? (
-                        <div className="ps-duplicate-summary">
+                    <div className="ps-duplicate-summary">
+                        <span>
+                            Tổng đơn:
+                            {' '}
+                            <b>{summary.orderCount ?? orders.length}</b>
+                        </span>
+                        <span>
+                            Đã chốt:
+                            {' '}
+                            <b>{summary.closedOrderCount ?? 0}</b>
+                        </span>
+                        <span>
+                            Doanh số:
+                            {' '}
+                            <b>{money(summary.totalValue ?? 0)}</b>
+                        </span>
+                        {data.customer?.phone ? (
                             <span>
-                                Tổng đơn:
+                                SĐT:
                                 {' '}
-                                <b>{summary.orderCount ?? orders.length}</b>
+                                <b>{data.customer.phone}</b>
                             </span>
-                            {summary.closedOrderCount != null ? (
-                                <span>
-                                    Đã chốt:
-                                    {' '}
-                                    <b>{summary.closedOrderCount}</b>
-                                </span>
-                            ) : null}
-                            {summary.totalValue != null ? (
-                                <span>
-                                    Doanh số:
-                                    {' '}
-                                    <b>{money(summary.totalValue)}</b>
-                                </span>
-                            ) : null}
-                        </div>
-                    ) : null}
+                        ) : null}
+                    </div>
                     <div className="ps-duplicate-table-wrap">
-                        <table className="table table-bordered table-striped ps-duplicate-table ps-sale-operation-table">
+                        <table className="table table-bordered table-striped ps-duplicate-table">
                             <thead>
                                 <tr>
                                     <th className="text-center">#</th>
                                     <th className="text-center">Mã đơn</th>
-                                    <th className="text-center">
-                                        Nguồn dữ liệu
-                                        <br />
-                                        Ngày data về
-                                    </th>
-                                    <th className="text-center">
-                                        Sale
-                                        <br />
-                                        Ngày nhận data
-                                    </th>
-                                    <th className="text-center">
-                                        Họ tên
-                                        <br />
-                                        Số điện thoại
-                                    </th>
+                                    <th className="text-center">Nguồn dữ liệu / Ngày data về</th>
+                                    <th className="text-center">Sale / Ngày nhận data</th>
+                                    <th className="text-center">Họ tên / Số điện thoại</th>
                                     <th className="text-center">Tin nhắn</th>
-                                    <th className="text-center">
-                                        Tác nghiệp
-                                        <br />
-                                        Ngày chốt
-                                    </th>
+                                    <th className="text-center">Tác nghiệp / Ngày chốt</th>
                                     <th className="text-center">Kết quả</th>
                                     <th className="text-center">Sản phẩm - SL - Đơn giá</th>
-                                    <th className="text-center">
-                                        Thành tiền
-                                        <br />
-                                        CK / Tổng
-                                    </th>
+                                    <th className="text-center">Thành tiền / CK / Tổng</th>
                                     <th className="text-center">Đặt cọc</th>
-                                    <th className="text-center">
-                                        Trạng thái giao hàng
-                                        <br />
-                                        Ngày muốn nhận
-                                    </th>
+                                    <th className="text-center">Trạng thái GH / Ngày muốn nhận</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -396,13 +377,6 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange }) {
                                 {!loading && !orders.length ? <tr><td colSpan={12} className="text-center">Không có đơn cùng số điện thoại.</td></tr> : null}
                             </tbody>
                         </table>
-                    </div>
-                    <div className="ps-sale-dialog-footer">
-                        <button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>
-                            <i className="fa fa-times" />
-                            {' '}
-                            Đóng
-                        </button>
                     </div>
                 </div>
             </DialogContent>

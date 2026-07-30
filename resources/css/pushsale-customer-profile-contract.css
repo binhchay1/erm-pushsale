@@ -20,16 +20,33 @@ html body.pushsale-app-body .ps-customer-profile-page table.ps-customer-profile-
     box-sizing: border-box !important;
     font-size: 11px !important;
     font-weight: 600 !important;
-    line-height: 1.15 !important;
+    line-height: 1.1 !important;
     height: auto !important;
     min-height: 0 !important;
-    max-height: none !important;
-    padding: 4px 4px !important;
-    vertical-align: middle !important;
-    white-space: normal !important;
+    max-height: 34px !important;
+    padding: 2px 4px !important;
+    vertical-align: top !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
     background: #3782dc !important;
     color: #fff !important;
     border-color: #2b70bd !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row .ps-contact-flags,
+html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row .ps-order-flags {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    margin-left: auto !important;
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th br {
