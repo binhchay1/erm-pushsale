@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
+import { ReportExportControl } from '@/components/reports/ReportExportControl';
 import AppLayout from '@/layouts/AppLayout';
 import { useConfirm } from '@/hooks/use-confirm';
 
@@ -100,7 +101,6 @@ export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/c
     }), [draftRows]);
 
     const runSearch = () => router.get(routeUrl, filters, { preserveScroll: true });
-    const exportExcel = () => router.get(routeUrl, { ...filters, export: 1 }, { preserveScroll: true });
 
     const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value }));
     const setRow = (index, key, value) => {
@@ -195,9 +195,7 @@ export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/c
                             <button type="button" className="btn btn-primary btn-sm" onClick={runSearch} disabled={processing}>
                                 <i className="fa fa-search" /> Tìm kiếm
                             </button>
-                            <button type="button" className="btn btn-primary btn-sm" onClick={exportExcel}>
-                                <i className="fa fa-file-excel-o" /> Xuất Excel
-                            </button>
+                            <ReportExportControl mode="visit" routeUrl={routeUrl} filters={filters} label="Xuất Excel" />
                         </>
                     )}
                 />

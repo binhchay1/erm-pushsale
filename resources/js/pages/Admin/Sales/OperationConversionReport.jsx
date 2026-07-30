@@ -4,7 +4,14 @@ import { Fragment, useMemo } from 'react';
 import { OperationStageSelect } from '@/components/filters/OperationStageSelect';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
+import {
+    MoneyCell,
+    NumberCell,
+    PercentCell,
+} from '@/components/reports/FormatCells';
 import { ReportFilterField } from '@/components/reports/ReportFilterField';
+import { SaleNameCell } from '@/components/reports/SaleNameCell';
+import { TableEmptyRow } from '@/components/reports/TableEmpty';
 import {
     PushsaleDateRange,
     PushsaleExportButton,
@@ -14,13 +21,6 @@ import {
 import { reportPerPageOptions, resolveFilterOptions } from '@/config/reportFilters';
 import { cleanInertiaFilters, readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
-
-const numberFormatter = new Intl.NumberFormat('vi-VN');
-const currencyFormatter = new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-});
 
 const METRIC_OPTIONS = [
     { id: 'total_revenue', label: '1.Doanh số tổng' },
@@ -48,38 +48,13 @@ function buildInitialFilters() {
     });
 }
 
-function number(value) {
-    return numberFormatter.format(Number(value) || 0);
-}
-
-function percent(value) {
-    const numeric = Number(value) || 0;
-    return `${Number.isInteger(numeric) ? numeric : numeric.toFixed(2)} %`;
-}
-
-function money(value) {
-    return currencyFormatter.format(Number(value) || 0).replace(/\s?₫$/, '').trim();
-}
-
-function SaleCell({ row }) {
-    const sale = String(row.sale ?? '').trim();
-    const account = String(row.sale_account ?? '').trim();
-    if (!sale && !account) return <span>Tổng</span>;
-    return (
-        <span className="ps-operation-conversion-sale">
-            <span>{sale || 'Chưa phân sale'}</span>
-            {account ? <small> ({account})</small> : null}
-        </span>
-    );
-}
-
 function MetricCells({ row, stage }) {
     return (
         <>
-            <td className="text-center nowrap">{number(row[`${stage}_contacts`])}</td>
-            <td className="text-center nowrap">{number(row[`${stage}_closed`])}</td>
-            <td className="text-center nowrap">{percent(row[`${stage}_rate`])}</td>
-            <td className="text-center nowrap">{money(row[`${stage}_revenue`])}</td>
+            <NumberCell value={row[`${stage}_contacts`]} />
+            <NumberCell value={row[`${stage}_closed`]} />
+            <PercentCell value={row[`${stage}_rate`]} empty="0 %" />
+            <MoneyCell value={row[`${stage}_revenue`]} stripCurrencySymbol empty="0" />
         </>
     );
 }
@@ -88,11 +63,17 @@ function ReportRow({ row, stages, className = '', isTotal = false }) {
     return (
         <tr className={className}>
             <td className="text-center">{isTotal ? '' : row.index}</td>
-            <td className="text-left"><SaleCell row={isTotal ? { sale: 'Tổng' } : row} /></td>
-            <td className="text-center nowrap">{number(row.total_contacts)}</td>
-            <td className="text-center nowrap">{number(row.total_closed)}</td>
-            <td className="text-center nowrap">{percent(row.total_rate)}</td>
-            <td className="text-center nowrap">{money(row.total_revenue ?? row.revenue)}</td>
+            <td className="text-left">
+                <SaleNameCell
+                    row={row}
+                    isTotal={isTotal}
+                    className={isTotal ? undefined : 'ps-operation-conversion-sale'}
+                />
+            </td>
+            <NumberCell value={row.total_contacts} />
+            <NumberCell value={row.total_closed} />
+            <PercentCell value={row.total_rate} empty="0 %" />
+            <MoneyCell value={row.total_revenue ?? row.revenue} stripCurrencySymbol empty="0" />
             {stages.map(({ key }) => <MetricCells key={key} row={row} stage={key} />)}
         </tr>
     );
@@ -218,11 +199,10 @@ export default function OperationConversionReport({
                                 />
                             ))}
                             {!rows.length && (
-                                <tr>
-                                    <td colSpan={6 + stages.length * 4} className="text-center ps-operation-conversion-empty">
-                                        Chưa có dữ liệu phù hợp với bộ lọc.
-                                    </td>
-                                </tr>
+                                <TableEmptyRow
+                                    colSpan={6 + stages.length * 4}
+                                    className="text-center ps-operation-conversion-empty"
+                                />
                             )}
                         </tbody>
                     </table>

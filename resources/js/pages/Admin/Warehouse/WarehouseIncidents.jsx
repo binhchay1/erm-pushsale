@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
+import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout';
 import { useConfirm } from '@/hooks/use-confirm';
 
@@ -142,9 +143,13 @@ function HandoverModal({ open, mode, form, providers, onChange, onClose, onSubmi
     );
 }
 
-function StatusBadge({ value }) {
+function HandoverStatusBadge({ value }) {
     const closed = String(value ?? '').toLowerCase().includes('chốt') || String(value ?? '').toLowerCase() === 'closed';
-    return <span className={`ps-handover-status ${closed ? 'is-closed' : 'is-updating'}`}>{value || 'Đang cập nhật'}</span>;
+    return (
+        <StatusBadge bare className={`ps-handover-status ${closed ? 'is-closed' : 'is-updating'}`}>
+            {value || 'Đang cập nhật'}
+        </StatusBadge>
+    );
 }
 
 export default function WarehouseDeliveryHandoverPage({ schema, rows = [], pagination = {}, filterOptions = {}, routeUrl, pageRuntimeError = null }) {
@@ -301,7 +306,7 @@ export default function WarehouseDeliveryHandoverPage({ schema, rows = [], pagin
                                     <td>{row.carrier || '—'}</td>
                                     <td className="text-center">{row.order_count ?? 0}</td>
                                     <td className="text-center">{row.product_count ?? 0}</td>
-                                    <td className="text-center"><StatusBadge value={row.status} /></td>
+                                    <td className="text-center"><HandoverStatusBadge value={row.status} /></td>
                                     <td className="text-center">{formatDateTime(row.updated_at)}</td>
                                     <td className="text-center ps-handover-actions">
                                         <button type="button" className="btn-icon" aria-label="Chi tiết" onClick={() => openEdit(row)}><i className="fa fa-edit" /></button>

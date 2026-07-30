@@ -3,10 +3,14 @@ import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { PushsaleStatusSummary } from '@/components/reports/ceo/PushsaleStatusSummary';
+import { ReportProgressCell } from '@/components/reports/ReportProgressCell';
+import {
+    formatReportNumber,
+    formatReportPercent,
+} from '@/components/reports/reportFormat';
 import { useInertiaFilters } from '@/hooks/useInertiaFilters';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
-import { formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
 
 const PER_PAGE_OPTIONS = ['20', '50', '100', '200', '500', '1000', '999999'];
@@ -53,44 +57,27 @@ function Select({ value, onChange, options = [], placeholder, className = 'ps-se
 }
 
 function displayMetric(value, key) {
-    if (value == null || value === '') {
-        return PERCENT_KEYS.has(key) ? '0 %' : '0';
-    }
-
     if (PERCENT_KEYS.has(key)) {
-        return `${Number(value) || 0} %`;
+        return formatReportPercent(value, { empty: '0 %' });
     }
 
-    if (MONEY_KEYS.has(key) || typeof value === 'number') {
-        return formatNumber(Number(value) || 0);
+    if (MONEY_KEYS.has(key) || typeof value === 'number' || value == null || value === '') {
+        return formatReportNumber(value, { empty: '0' });
     }
 
     return String(value);
 }
 
 function ProgressTd({ row, metric, max, className = '' }) {
-    const value = Number(row?.[metric]) || 0;
-    const denominator = Number(max?.[metric]) || 0;
-    const width = PERCENT_KEYS.has(metric)
-        ? Math.min(100, Math.max(0, value))
-        : denominator > 0
-          ? Math.min(100, Math.max(0, (value / denominator) * 100))
-          : 0;
-
     return (
-        <td className={`tdProgress ${className}`.trim()}>
-            <div className="box-progress">
-                <div className="progress">
-                    <div className="progress-bar" style={{ width: `${width}%` }} />
-                </div>
-                <span className="progress-text">{displayMetric(row?.[metric], metric)}</span>
-            </div>
-        </td>
+        <ReportProgressCell
+            value={row?.[metric]}
+            max={max?.[metric]}
+            format={PERCENT_KEYS.has(metric) ? 'percent' : 'number'}
+            display="raw"
+            className={className}
+        />
     );
-}
-
-function sumRows(rows, key) {
-    return rows.reduce((acc, row) => acc + (Number(row?.[key]) || 0), 0);
 }
 
 function maxRows(rows, totals) {

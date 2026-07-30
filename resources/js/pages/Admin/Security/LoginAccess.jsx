@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
+import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout';
 
 function formatDateTime(value) {
@@ -34,15 +35,16 @@ function optionLabel(option) {
     return option?.label ?? option?.name ?? option?.email ?? option?.id ?? '';
 }
 
-function StatusBadge({ value }) {
+function LoginAccessStatusBadge({ value }) {
     const normalized = String(value ?? '').toLocaleLowerCase('vi');
     const approved = normalized.includes('đã phê duyệt');
     const pending = normalized.includes('chưa phê duyệt');
+    const tone = approved ? 'success' : pending ? 'warning' : 'default';
 
     return (
-        <span className={`ps-login-status ${approved ? 'ps-login-status-success' : pending ? 'ps-login-status-warning' : 'ps-login-status-default'}`}>
+        <StatusBadge bare className={`ps-login-status ps-login-status-${tone}`}>
             {value || '—'}
-        </span>
+        </StatusBadge>
     );
 }
 
@@ -203,7 +205,7 @@ export default function LoginAccessPage({ schema, rows = [], pagination = {}, fi
                                         <td>{row.account || '—'}</td>
                                         <td className="ps-login-access-code">{row.access_code || '—'}</td>
                                         <td>{formatDateTime(row.login_at)}</td>
-                                        <td className="text-center"><StatusBadge value={row.status} /></td>
+                                        <td className="text-center"><LoginAccessStatusBadge value={row.status} /></td>
                                         <td className="text-center">
                                             <div className="ps-login-access-actions">
                                                 {row._edit_url ? (

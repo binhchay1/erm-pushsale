@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
+import { ReportExportControl } from '@/components/reports/ReportExportControl';
 import AppLayout from '@/layouts/AppLayout';
 import { useConfirm } from '@/hooks/use-confirm';
 
@@ -71,7 +72,6 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
 
     const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value }));
     const runSearch = () => router.get(routeUrl, buildQuery(filters), { preserveScroll: true });
-    const exportExcel = () => router.get(routeUrl, { ...buildQuery(filters), export: 1 }, { preserveScroll: true });
 
     const setRow = (index, key, value) => {
         setDraftRows((current) => current.map((row, idx) => idx === index ? { ...row, [key]: value, _dirty: true } : row));
@@ -171,9 +171,7 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
                             <button type="button" className="btn btn-primary btn-sm" onClick={runSearch} disabled={processing}>
                                 <i className="fa fa-search" /> Tìm kiếm
                             </button>
-                            <button type="button" className="btn btn-primary btn-sm" onClick={exportExcel}>
-                                <i className="fa fa-file-excel-o" /> Xuất Excel
-                            </button>
+                            <ReportExportControl mode="visit" routeUrl={routeUrl} filters={buildQuery(filters)} label="Xuất Excel" />
                         </>
                     )}
                 />

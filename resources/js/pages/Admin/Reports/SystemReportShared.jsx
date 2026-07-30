@@ -1,6 +1,8 @@
 import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
+import { ReportExportControl } from '@/components/reports/ReportExportControl';
+import { TableEmptyRow } from '@/components/reports/TableEmpty';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 });
@@ -45,7 +47,6 @@ function SearchHeader({ title, routeUrl, showExport = false, filters = {}, pageR
     });
     const update = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
     const submit = () => router.get(routeUrl, draft, { preserveScroll: true });
-    const exportExcel = () => router.get(routeUrl, { ...draft, export: 1 }, { preserveScroll: true });
 
     return (
         <div className="ps85-header-block">
@@ -55,7 +56,9 @@ function SearchHeader({ title, routeUrl, showExport = false, filters = {}, pageR
                 <input className="form-control" type="date" value={draft.date_to} onChange={(event) => update('date_to', event.target.value)} />
                 <input className="form-control" placeholder="Tìm theo tên / mã" value={draft.search} onChange={(event) => update('search', event.target.value)} />
                 <button type="button" className="btn btn-primary btn-sm" onClick={submit}><i className="fa fa-search" /> Tìm kiếm</button>
-                {showExport ? <button type="button" className="btn btn-primary btn-sm" onClick={exportExcel}><i className="fa fa-file-excel-o" /> Xuất Excel</button> : null}
+                {showExport ? (
+                    <ReportExportControl mode="visit" routeUrl={routeUrl} filters={draft} label="Xuất Excel" />
+                ) : null}
             </div>
             <ErrorBanner message={pageRuntimeError} />
         </div>
@@ -93,7 +96,7 @@ export function DataTable({ columns = [], rows = [], compact = false }) {
                             {safeColumns.map((column) => <td key={column.key}>{format(row[column.key], column.format)}</td>)}
                         </tr>
                     )) : (
-                        <tr><td colSpan={safeColumns.length || 1} className="ps85-empty">Không có dữ liệu.</td></tr>
+                        <TableEmptyRow colSpan={safeColumns.length || 1} message="Không có dữ liệu." className="ps85-empty" />
                     )}
                 </tbody>
             </table>

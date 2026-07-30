@@ -69,10 +69,11 @@ export function parseMoneyInput(value) {
     return parseInt(digits, 10);
 }
 
-export function formatPercent(value) {
-    if (value == null) return '—';
-
-    return `${value}%`;
+export function formatPercent(value, { empty = '—', suffix = '%', spaceBeforeSuffix = false } = {}) {
+    if (value == null || value === '') return empty;
+    const numeric = Number(value);
+    if (Number.isNaN(numeric)) return empty;
+    return `${numeric}${spaceBeforeSuffix ? ' ' : ''}${suffix}`;
 }
 
 export function formatDateTime(value, { withTime = true, withSeconds = true, locale } = {}) {

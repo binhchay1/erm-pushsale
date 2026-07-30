@@ -4,6 +4,13 @@ import { useMemo } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { ReportFilterField } from '@/components/reports/ReportFilterField';
+import { ReportProgressCell } from '@/components/reports/ReportProgressCell';
+import { SaleNameCell } from '@/components/reports/SaleNameCell';
+import { TableEmptyRow } from '@/components/reports/TableEmpty';
+import {
+    formatReportNumber,
+    formatReportPercent,
+} from '@/components/reports/reportFormat';
 import {
     PushsaleDateRange,
     PushsaleExportButton,
@@ -11,8 +18,6 @@ import {
 } from '@/components/reports/PushsaleReportChrome';
 import { cleanInertiaFilters, readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
-
-const numberFormatter = new Intl.NumberFormat('vi-VN');
 
 function todayIso() {
     const date = new Date();
@@ -33,42 +38,6 @@ function buildInitialFilters() {
         reconciliation_status: '',
         per_page: '20',
     });
-}
-
-function num(value) {
-    return numberFormatter.format(Number(value) || 0);
-}
-
-function pct(value) {
-    if (value === null || value === undefined || Number.isNaN(Number(value))) return '∞ %';
-    const numeric = Number(value);
-    return `${Number.isInteger(numeric) ? numeric : numeric.toFixed(2)} %`;
-}
-
-function ProgressCell({ value, format = 'number' }) {
-    const display = format === 'percent' ? pct(value) : num(value);
-    const width = format === 'percent' ? Math.min(100, Math.max(0, Number(value) || 0)) : 100;
-    return (
-        <td className="tdProgress">
-            <div className="box-progress">
-                <div className="progress">
-                    <div className="progress-bar" style={{ width: `${width}%` }} />
-                </div>
-                <span className="progress-text">{display}</span>
-            </div>
-        </td>
-    );
-}
-
-function SaleName({ row }) {
-    const sale = String(row.sale ?? '').trim() || 'Chưa phân sale';
-    const account = String(row.sale_account ?? '').trim();
-    return (
-        <span>
-            {sale}
-            {account ? <small> ({account})</small> : null}
-        </span>
-    );
 }
 
 export default function SalesTeamReport({
@@ -175,24 +144,24 @@ export default function SalesTeamReport({
                             {totals && (
                                 <tr className="rowsum">
                                     <td colSpan="2" className="text-center font-weight-bold">Tổng:</td>
-                                    <td className="text-center font-weight-bold">{num(totals.new_contacts)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.new_closed)}</td>
-                                    <td className="text-center font-weight-bold">{pct(totals.new_rate)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.new_products)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.new_revenue)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.old_contacts)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.old_closed)}</td>
-                                    <td className="text-center font-weight-bold">{pct(totals.old_rate)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.old_products)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.old_revenue)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.provisional_revenue)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.cod_fee)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.cod_support)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.discount)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.deposit)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.after_discount_revenue)}</td>
-                                    <td className="text-center font-weight-bold">{num(totals.kpi_revenue)}</td>
-                                    <td className="text-center font-weight-bold">{pct(totals.kpi_rate)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.new_contacts)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.new_closed)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportPercent(totals.new_rate)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.new_products)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.new_revenue)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.old_contacts)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.old_closed)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportPercent(totals.old_rate)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.old_products)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.old_revenue)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.provisional_revenue)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.cod_fee)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.cod_support)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.discount)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.deposit)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.after_discount_revenue)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportNumber(totals.kpi_revenue)}</td>
+                                    <td className="text-center font-weight-bold">{formatReportPercent(totals.kpi_rate)}</td>
                                 </tr>
                             )}
                         </thead>
@@ -200,30 +169,28 @@ export default function SalesTeamReport({
                             {rows.map((row, index) => (
                                 <tr key={`${row.sale_id}-${index}`}>
                                     <td className="text-center">{(pagination.from || 1) + index}</td>
-                                    <td><SaleName row={row} /></td>
-                                    <ProgressCell value={row.new_contacts} />
-                                    <ProgressCell value={row.new_closed} />
-                                    <ProgressCell value={row.new_rate} format="percent" />
-                                    <ProgressCell value={row.new_products} />
-                                    <ProgressCell value={row.new_revenue} />
-                                    <ProgressCell value={row.old_contacts} />
-                                    <ProgressCell value={row.old_closed} />
-                                    <ProgressCell value={row.old_rate} format="percent" />
-                                    <ProgressCell value={row.old_products} />
-                                    <ProgressCell value={row.old_revenue} />
-                                    <ProgressCell value={row.provisional_revenue} />
-                                    <ProgressCell value={row.cod_fee} />
-                                    <ProgressCell value={row.cod_support} />
-                                    <ProgressCell value={row.discount} />
-                                    <ProgressCell value={row.deposit} />
-                                    <ProgressCell value={row.after_discount_revenue} />
-                                    <ProgressCell value={row.kpi_revenue} />
-                                    <ProgressCell value={row.kpi_rate} format="percent" />
+                                    <td><SaleNameCell row={row} /></td>
+                                    <ReportProgressCell value={row.new_contacts} fillWhenNoMax />
+                                    <ReportProgressCell value={row.new_closed} fillWhenNoMax />
+                                    <ReportProgressCell value={row.new_rate} format="percent" />
+                                    <ReportProgressCell value={row.new_products} fillWhenNoMax />
+                                    <ReportProgressCell value={row.new_revenue} fillWhenNoMax />
+                                    <ReportProgressCell value={row.old_contacts} fillWhenNoMax />
+                                    <ReportProgressCell value={row.old_closed} fillWhenNoMax />
+                                    <ReportProgressCell value={row.old_rate} format="percent" />
+                                    <ReportProgressCell value={row.old_products} fillWhenNoMax />
+                                    <ReportProgressCell value={row.old_revenue} fillWhenNoMax />
+                                    <ReportProgressCell value={row.provisional_revenue} fillWhenNoMax />
+                                    <ReportProgressCell value={row.cod_fee} fillWhenNoMax />
+                                    <ReportProgressCell value={row.cod_support} fillWhenNoMax />
+                                    <ReportProgressCell value={row.discount} fillWhenNoMax />
+                                    <ReportProgressCell value={row.deposit} fillWhenNoMax />
+                                    <ReportProgressCell value={row.after_discount_revenue} fillWhenNoMax />
+                                    <ReportProgressCell value={row.kpi_revenue} fillWhenNoMax />
+                                    <ReportProgressCell value={row.kpi_rate} format="percent" />
                                 </tr>
                             ))}
-                            {!rows.length && (
-                                <tr><td colSpan={20} className="text-center">Chưa có dữ liệu phù hợp với bộ lọc.</td></tr>
-                            )}
+                            {!rows.length && <TableEmptyRow colSpan={20} />}
                         </tbody>
                     </table>
                 </div>

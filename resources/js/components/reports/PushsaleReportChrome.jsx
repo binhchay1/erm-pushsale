@@ -3,9 +3,12 @@ import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton'
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { useInertiaFilters } from '@/hooks/useInertiaFilters';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
+import { buildReportExportUrl, ReportExportControl } from '@/components/reports/ReportExportControl';
+import { useState } from 'react';
 
 export { PushsaleSearchButton };
 export { useInertiaFilters };
+export { buildReportExportUrl, ReportExportControl };
 
 function pad(value) {
     return String(value).padStart(2, '0');
@@ -81,26 +84,19 @@ export function PushsaleDateRange({ filters, onChange, className = '' }) {
 }
 
 function exportUrl(routeUrl, filters) {
-    const params = new URLSearchParams();
-    Object.entries(filters ?? {}).forEach(([key, value]) => {
-        if (value !== '' && value !== null && value !== undefined && value !== false) {
-            params.set(key, String(value));
-        }
-    });
-    params.set('export', '1');
-    const separator = routeUrl.includes('?') ? '&' : '?';
-    return `${routeUrl}${separator}${params.toString()}`;
+    return buildReportExportUrl(routeUrl, filters, '1');
 }
 
-export function PushsaleExportButton({ routeUrl, filters, label }) {
-    const t = useT();
-    const text = label ?? t('reports.pushsale.export_excel');
-
+/** Thin alias → ReportExportControl link mode (DRY #5). */
+export function PushsaleExportButton({ routeUrl, filters, label, className = '' }) {
     return (
-        <a className="ps-btn ps-btn-primary" href={exportUrl(routeUrl, filters)}>
-            <i className="fa fa-file-excel-o" aria-hidden="true" />
-            <span>{text}</span>
-        </a>
+        <ReportExportControl
+            mode="link"
+            routeUrl={routeUrl}
+            filters={filters}
+            label={label}
+            className={className}
+        />
     );
 }
 

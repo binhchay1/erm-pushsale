@@ -1,4 +1,5 @@
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
+import { TableEmptyRow } from '@/components/reports/TableEmpty';
 import { useT } from '@/providers/I18nProvider';
 
 const pairColumns = [
@@ -84,11 +85,11 @@ export function RevenueMetricsTable({ rows = [], nameKey = 'saleName', nameLabel
                 </thead>
                 <tbody>
                     {rows.length === 0 ? (
-                        <tr>
-                            <td className="text-center ps-empty-row" colSpan={2 + pairColumns.length * 2 + singleColumns.length}>
-                                Không có dữ liệu theo điều kiện lọc.
-                            </td>
-                        </tr>
+                        <TableEmptyRow
+                            colSpan={2 + pairColumns.length * 2 + singleColumns.length}
+                            message="Không có dữ liệu theo điều kiện lọc."
+                            className="text-center ps-empty-row"
+                        />
                     ) : rows.map((row) => (
                         <tr key={`${row.stt}-${row[nameKey] ?? row.id ?? 'row'}`} className={row.isTotalRow ? 'ps-sales-revenue-total-row' : ''}>
                             <td className="text-center">{row.stt}</td>

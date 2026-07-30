@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
+import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout';
 
 function formatDateTime(value) {
@@ -40,7 +41,7 @@ function optionLabel(option) {
     return option?.label ?? option?.name ?? option?.email ?? option?.id ?? '';
 }
 
-function StatusBadge({ value }) {
+function LoginStatusBadge({ value }) {
     const normalized = String(value ?? '').toLocaleLowerCase('vi');
     const tone = normalized.includes('thành công') && !normalized.includes('không')
         ? 'success'
@@ -48,7 +49,11 @@ function StatusBadge({ value }) {
             ? 'default'
             : 'danger';
 
-    return <span className={`ps-login-status ps-login-status-${tone}`}>{value || '—'}</span>;
+    return (
+        <StatusBadge bare className={`ps-login-status ps-login-status-${tone}`}>
+            {value || '—'}
+        </StatusBadge>
+    );
 }
 
 function currentFilters() {
@@ -209,7 +214,7 @@ export default function LoginHistoryPage({ schema, rows = [], pagination = {}, f
                                     <td className="ps-login-access-code">{row.access_code || '—'}</td>
                                     <td className="ps-login-browser" title={row.browser || ''}>{row.browser || '—'}</td>
                                     <td>{formatDateTime(row.created_at)}</td>
-                                    <td><StatusBadge value={row.status} /></td>
+                                    <td><LoginStatusBadge value={row.status} /></td>
                                 </tr>
                             )) : (
                                 <tr>

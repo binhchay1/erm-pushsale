@@ -6,10 +6,11 @@ import {
     ReportFilterToolbar,
     cleanReportFilterPayload,
 } from '@/components/reports/ReportFilterToolbar';
+import { SaleNameCell } from '@/components/reports/SaleNameCell';
+import { TableEmptyRow } from '@/components/reports/TableEmpty';
+import { formatReportNumber } from '@/components/reports/reportFormat';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
-
-const numberFormatter = new Intl.NumberFormat('vi-VN');
 
 function currentQuery() {
     if (typeof window === 'undefined') return new URLSearchParams();
@@ -40,21 +41,6 @@ function buildInitialFilters() {
         sale_team_id: params.get('sale_team_id') || '',
         per_page: params.get('per_page') || '50',
     };
-}
-
-function formatNumber(value) {
-    return numberFormatter.format(Number(value) || 0);
-}
-
-function SaleName({ row }) {
-    const sale = String(row.sale ?? '').trim() || 'Chưa phân sale';
-    const account = String(row.sale_account ?? '').trim();
-    return (
-        <span className="ps-sale-name">
-            {sale}
-            {account ? <small> ({account})</small> : null}
-        </span>
-    );
 }
 
 export default function SalesWorkReport({
@@ -149,12 +135,12 @@ export default function SalesWorkReport({
                                         <tr className="ps-sale-work-total">
                                             <td className="text-center" />
                                             <td className="ps-sale-name">Tổng:</td>
-                                            <td className="text-center">{formatNumber(totals.total_contacts)}</td>
-                                            <td className="text-center">{formatNumber(totals.untouched)}</td>
+                                            <td className="text-center">{formatReportNumber(totals.total_contacts)}</td>
+                                            <td className="text-center">{formatReportNumber(totals.untouched)}</td>
                                             {stages.map(({ key }) => (
                                                 <Fragment key={key}>
-                                                    <td className="text-center">{formatNumber(totals[`${key}_contacts`])}</td>
-                                                    <td className="text-center">{formatNumber(totals[`${key}_untouched`])}</td>
+                                                    <td className="text-center">{formatReportNumber(totals[`${key}_contacts`])}</td>
+                                                    <td className="text-center">{formatReportNumber(totals[`${key}_untouched`])}</td>
                                                 </Fragment>
                                             ))}
                                         </tr>
@@ -162,22 +148,20 @@ export default function SalesWorkReport({
                                     {rows.map((row, index) => (
                                         <tr key={`${row.sale_id ?? row.sale}-${index}`}>
                                             <td className="text-center">{index + (pagination?.from ?? 1)}</td>
-                                            <td><SaleName row={row} /></td>
-                                            <td className="text-center">{formatNumber(row.total_contacts)}</td>
-                                            <td className="text-center">{formatNumber(row.untouched)}</td>
+                                            <td><SaleNameCell row={row} className="ps-sale-name" /></td>
+                                            <td className="text-center">{formatReportNumber(row.total_contacts)}</td>
+                                            <td className="text-center">{formatReportNumber(row.untouched)}</td>
                                             {stages.map(({ key }) => (
                                                 <Fragment key={key}>
-                                                    <td className="text-center">{formatNumber(row[`${key}_contacts`])}</td>
-                                                    <td className="text-center">{formatNumber(row[`${key}_untouched`])}</td>
+                                                    <td className="text-center">{formatReportNumber(row[`${key}_contacts`])}</td>
+                                                    <td className="text-center">{formatReportNumber(row[`${key}_untouched`])}</td>
                                                 </Fragment>
                                             ))}
                                         </tr>
                                     ))}
                                 </>
                             ) : (
-                                <tr>
-                                    <td colSpan={4 + stages.length * 2} className="text-center">Chưa có dữ liệu phù hợp với bộ lọc.</td>
-                                </tr>
+                                <TableEmptyRow colSpan={4 + stages.length * 2} />
                             )}
                         </tbody>
                     </table>

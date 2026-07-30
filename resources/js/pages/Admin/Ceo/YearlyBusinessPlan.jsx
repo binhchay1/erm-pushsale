@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
+import { ReportExportControl } from '@/components/reports/ReportExportControl';
 import AppLayout from '@/layouts/AppLayout';
 
 const monthOptions = Array.from({ length: 12 }, (_, index) => index + 1);
@@ -235,7 +236,6 @@ export default function YearlyBusinessPlanPage({ schema, rows = [], chart = {}, 
 
     const years = useMemo(() => [now.getFullYear() + 1, now.getFullYear(), now.getFullYear() - 1, now.getFullYear() - 2, now.getFullYear() - 3, now.getFullYear() - 4, now.getFullYear() - 5], [now]);
     const runSearch = () => router.get(routeUrl, buildQuery(filters), { preserveScroll: false });
-    const exportExcel = () => router.get(routeUrl, { ...buildQuery(filters), export: 1 }, { preserveScroll: true });
     const toggleMonth = (month) => setFilters((current) => {
         const set = new Set(current.months ?? []);
         if (set.has(month)) set.delete(month); else set.add(month);
@@ -276,7 +276,7 @@ export default function YearlyBusinessPlanPage({ schema, rows = [], chart = {}, 
                     actions={(
                         <div className="ps-year-plan-actions">
                             <button type="button" className="btn btn-primary btn-sm" onClick={runSearch}><i className="fa fa-search" /> Tìm kiếm</button>
-                            <button type="button" className="btn btn-primary btn-sm" onClick={exportExcel}><i className="fa fa-file-excel-o" /> Xuất Excel</button>
+                            <ReportExportControl mode="visit" routeUrl={routeUrl} filters={buildQuery(filters)} label="Xuất Excel" />
                             <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowData(true)}><i className="fa fa-plus" /> Thêm dữ liệu</button>
                             <button type="button" className="ps-year-plan-note-button" title="Chú thích" onClick={() => setShowNote(true)}><i className="fa fa-question-circle" /></button>
                         </div>

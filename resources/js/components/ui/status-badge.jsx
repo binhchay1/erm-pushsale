@@ -25,12 +25,16 @@ const TONES = {
     muted: 'border border-border bg-muted/60 text-muted-foreground',
 };
 
-export function StatusBadge({ tone = 'muted', icon: Icon, children, className, label }) {
+/**
+ * Shared status chip (DRY #10).
+ * @param {boolean} [bare] Skip default tone styles — use for Pushsale CSS class chrome.
+ */
+export function StatusBadge({ tone = 'muted', icon: Icon, children, className, label, bare = false }) {
     return (
         <span
             className={cn(
-                'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold leading-tight',
-                TONES[tone] ?? TONES.muted,
+                !bare && 'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold leading-tight',
+                !bare && (TONES[tone] ?? TONES.muted),
                 className,
             )}
         >

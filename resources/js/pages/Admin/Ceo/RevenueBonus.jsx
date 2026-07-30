@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
+import { ReportExportControl } from '@/components/reports/ReportExportControl';
 import AppLayout from '@/layouts/AppLayout';
 import { useConfirm } from '@/hooks/use-confirm';
 
@@ -80,7 +81,6 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
 
     const setFilter = (key, value) => setDraftFilters((current) => ({ ...current, [key]: value }));
     const runSearch = () => router.get(routeUrl, draftFilters, { preserveScroll: true });
-    const exportExcel = () => router.get(routeUrl, { ...draftFilters, export: 1 }, { preserveScroll: true });
 
     const addRow = () => setDraftRows((current) => [...current, emptyRow(draftFilters, current.length + 1)]);
     const setRow = (index, key, value) => {
@@ -186,7 +186,7 @@ export default function RevenueBonusSetupPage({ rows = [], filters = {}, routeUr
                     actions={(
                         <>
                             <button type="button" className="btn btn-sm btn-primary" onClick={runSearch} disabled={processing}><i className="fa fa-search" /> Tìm kiếm</button>
-                            <button type="button" className="btn btn-sm btn-primary" onClick={exportExcel}><i className="fa fa-file-excel-o" /> Xuất Excel</button>
+                            <ReportExportControl mode="visit" routeUrl={routeUrl} filters={draftFilters} label="Xuất Excel" />
                         </>
                     )}
                 />

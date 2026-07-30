@@ -4,6 +4,12 @@ import { useMemo, useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { ReportFilterField } from '@/components/reports/ReportFilterField';
+import { SaleNameCell } from '@/components/reports/SaleNameCell';
+import { TableEmptyRow } from '@/components/reports/TableEmpty';
+import {
+    formatReportNumber,
+    formatReportPercent,
+} from '@/components/reports/reportFormat';
 import {
     PushsaleDateRange,
     PushsaleExportButton,
@@ -11,8 +17,6 @@ import {
 } from '@/components/reports/PushsaleReportChrome';
 import { cleanInertiaFilters, readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
-
-const numberFormatter = new Intl.NumberFormat('vi-VN');
 
 function todayIso() {
     const date = new Date();
@@ -35,20 +39,11 @@ function buildInitialFilters() {
 }
 
 function num(value) {
-    if (value === null || value === undefined || value === '') return '';
-    return numberFormatter.format(Number(value) || 0);
+    return formatReportNumber(value, { empty: '' });
 }
 
 function pct(value) {
-    if (value === null || value === undefined || value === '') return '';
-    const numeric = Number(value) || 0;
-    return `${Number.isInteger(numeric) ? numeric : numeric.toFixed(2)}%`;
-}
-
-function SaleName({ row }) {
-    const sale = String(row.sale ?? '').trim() || 'Chưa phân sale';
-    const account = String(row.sale_account ?? '').trim();
-    return <span>{sale}{account ? <small> ({account})</small> : null}</span>;
+    return formatReportPercent(value, { empty: '', spaceBeforeSuffix: false });
 }
 
 function MetricCell({ actual, target = null, ratio = null, tone = 'average' }) {
@@ -230,7 +225,7 @@ export default function SalesOptimizationReport({
                                             <span>{(pagination.from || 1) + index}</span>
                                         </label>
                                     </td>
-                                    <td><SaleName row={row} /></td>
+                                    <td><SaleNameCell row={row} /></td>
                                     <td className="text-center">{row.receive_data ? 'Có' : 'Không'}</td>
                                     <td className="text-center">{num(row.provisional_revenue)}</td>
                                     <td className="text-center">{num(row.success_revenue)}</td>
@@ -257,9 +252,7 @@ export default function SalesOptimizationReport({
                                     <td className="text-center">{num(row.returned_revenue)}</td>
                                 </tr>
                             ))}
-                            {!rows.length && (
-                                <tr><td colSpan={21} className="text-center">Chưa có dữ liệu phù hợp với bộ lọc.</td></tr>
-                            )}
+                            {!rows.length && <TableEmptyRow colSpan={21} />}
                         </tbody>
                     </table>
                 </div>
