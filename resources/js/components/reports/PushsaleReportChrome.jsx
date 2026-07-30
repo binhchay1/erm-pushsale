@@ -94,9 +94,10 @@ export function PushsaleDateRange({ filters, onChange, className = '' }) {
 
     // Single-button control only — do not add legacy `.ps-date-range` dual-grid
     // or `displayLabel` span (those reintroduce the stray "-" separator).
+    // Keep `ps-date-range` class so report toolbar width contracts apply project-wide.
     return (
         <DateRangeFilter
-            className={className}
+            className={`ps-date-range ${className}`.trim()}
             from={from}
             to={to}
             onChange={({ date_from, date_to }) => {

@@ -81,9 +81,12 @@ html body.pushsale-app-body .ps-closing-summary-filters > * {
 }
 
 html body.pushsale-app-body .ps-report-toolbar-controls .ps-date-range,
-html body.pushsale-app-body .ps-closing-summary-filters .ps-date-range {
+html body.pushsale-app-body .ps-closing-summary-filters .ps-date-range,
+html body.pushsale-app-body .ps-report-toolbar-controls .ps-date-range-control,
+html body.pushsale-app-body .ps-closing-summary-filters .ps-date-range-control {
     flex-basis: 360px !important;
-    max-width: 560px !important;
+    min-width: 340px !important;
+    max-width: 420px !important;
 }
 
 html body.pushsale-app-body .ps-report-toolbar-actions,
@@ -128,10 +131,13 @@ html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-report-
     max-width: 200px !important;
 }
 
-html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-date-range {
-    flex: 0 0 260px !important;
-    min-width: 220px !important;
-    max-width: 280px !important;
+html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-date-range,
+html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-date-range-control,
+html body.pushsale-app-body .ps-report-toolbar-actions--with-filters .ps-date-filter {
+    flex: 0 0 360px !important;
+    min-width: 340px !important;
+    max-width: 420px !important;
+    width: 360px !important;
 }
 
 /* Header portal: filter chính 1 hàng ngang (PageHeader outlet). */
@@ -177,11 +183,19 @@ html body.pushsale-app-body .m-header-wrap.ps-report-v2-header .ps-report-toolba
 html body.pushsale-app-body .ps-page-header.ps-report-v2-header .ps-date-range,
 html body.pushsale-app-body .m-header-wrap.ps-report-v2-header .ps-date-range,
 html body.pushsale-app-body .ps-page-header.ps-system-business-toolbar .ps-date-range,
-html body.pushsale-app-body .m-header-wrap.ps-system-business-toolbar .ps-date-range {
-    flex: 0 0 250px !important;
-    min-width: 220px !important;
-    max-width: 280px !important;
-    width: 250px !important;
+html body.pushsale-app-body .m-header-wrap.ps-system-business-toolbar .ps-date-range,
+html body.pushsale-app-body .ps-page-header.ps-report-v2-header .ps-date-range-control,
+html body.pushsale-app-body .m-header-wrap.ps-report-v2-header .ps-date-range-control,
+html body.pushsale-app-body .ps-page-header.ps-system-business-toolbar .ps-date-range-control,
+html body.pushsale-app-body .m-header-wrap.ps-system-business-toolbar .ps-date-range-control,
+html body.pushsale-app-body .ps-page-header .ps-report-toolbar-controls .ps-date-range,
+html body.pushsale-app-body .m-header-wrap .ps-report-toolbar-controls .ps-date-range,
+html body.pushsale-app-body .ps-page-header .ps-report-toolbar-controls .ps-date-range-control,
+html body.pushsale-app-body .m-header-wrap .ps-report-toolbar-controls .ps-date-range-control {
+    flex: 0 0 360px !important;
+    min-width: 340px !important;
+    max-width: 420px !important;
+    width: 360px !important;
 }
 
 html body.pushsale-app-body .ps-page-header.ps-report-v2-header .ps-page-header__actions,
@@ -346,4 +360,23 @@ html body.pushsale-app-body .ps-kpi-notes {
     html body.pushsale-app-body .ps-report-v2-advanced.ps-report-adv-grid {
         grid-template-columns: minmax(0, 1fr) !important;
     }
+}
+
+/* Shared: report tables grow with content — no forced empty band under grids. */
+html body.pushsale-app-body .ps-report-page .ps-table-scroll,
+html body.pushsale-app-body .ps-report-page .ps-revenue-detail-scroll,
+html body.pushsale-app-body .ps-report-page .ps-sales-revenue-scroll,
+html body.pushsale-app-body .ps-report-toolbar-shell .ps-table-scroll {
+    min-height: 0 !important;
+}
+
+html body.pushsale-app-body .ps-report-page,
+html body.pushsale-app-body .ps-report-toolbar-shell.ps-report-page {
+    min-height: 0 !important;
+}
+
+html body.pushsale-app-body .content-wrapper:has(.ps-report-page),
+html body.pushsale-app-body .content-inner:has(.ps-report-page),
+html body.pushsale-app-body .ps-page-viewport:has(.ps-report-page) {
+    min-height: 0 !important;
 }

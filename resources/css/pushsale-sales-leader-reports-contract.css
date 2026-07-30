@@ -33,8 +33,9 @@ html body.pushsale-app-body .ps-page-header .ps-sales-leader-primary .ps-date-ra
 html body.pushsale-app-body .ps-page-header .ps-operation-conversion-primary .ps-date-range-control,
 html body.pushsale-app-body .ps-sales-leader-primary .ps-date-range-control,
 html body.pushsale-app-body .ps-operation-conversion-primary .ps-date-range-control {
-    flex: 1.6 1 0 !important;
-    overflow: hidden !important;
+    flex: 1.6 1 360px !important;
+    min-width: 360px !important;
+    overflow: visible !important;
 }
 
 html body.pushsale-app-body .ps-page-header .ps-sales-leader-primary .ps-date-range-input,

@@ -71,11 +71,12 @@ html body.pushsale-app-body .ps-sale-work-primary > .ps-control {
 
 html body.pushsale-app-body .ps-sale-work-primary > .ps-sale-work-date,
 html body.pushsale-app-body .ps-sale-work-primary > .ps-date-range,
-html body.pushsale-app-body .ps-sale-work-primary > .ps-date-filter {
-    flex: 0 1 320px !important;
-    width: 320px !important;
-    min-width: 240px !important;
-    max-width: 360px !important;
+html body.pushsale-app-body .ps-sale-work-primary > .ps-date-filter,
+html body.pushsale-app-body .ps-sale-work-primary > .ps-date-range-control {
+    flex: 0 1 360px !important;
+    width: 360px !important;
+    min-width: 340px !important;
+    max-width: 420px !important;
     margin: 0 !important;
 }
 

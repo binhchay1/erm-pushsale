@@ -50,11 +50,19 @@ html body.pushsale-app-body .ps-revenue-overview-toolbar .ps-page-shell__body {
 
 html body.pushsale-app-body .ps-revenue-overview-primary {
     display: grid !important;
-    grid-template-columns: 130px minmax(150px, .8fr) minmax(150px, .8fr) minmax(210px, 1fr) minmax(300px, 1.45fr) !important;
+    grid-template-columns: 130px minmax(150px, .8fr) minmax(150px, .8fr) minmax(180px, 1fr) minmax(360px, 1.6fr) !important;
     gap: 12px !important;
     align-items: center !important;
     width: 100% !important;
     min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-revenue-overview-primary .ps-date-range,
+html body.pushsale-app-body .ps-revenue-overview-primary .ps-date-range-control,
+html body.pushsale-app-body .ps-revenue-overview-primary .ps-date-filter {
+    width: 100% !important;
+    min-width: 360px !important;
+    max-width: none !important;
 }
 
 /* Filter bổ sung: hàng đều, ô gọn — scope theo header portal. */
@@ -256,7 +264,7 @@ html body.pushsale-app-body .ps-revenue-summary-legend .is-avg { color: #f000a8 
 
 html body.pushsale-app-body .ps-sales-revenue-scroll {
     width: 100% !important;
-    min-height: 420px !important;
+    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: auto !important;

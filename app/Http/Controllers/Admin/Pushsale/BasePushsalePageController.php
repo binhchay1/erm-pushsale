@@ -484,7 +484,10 @@ abstract class BasePushsalePageController extends Controller
         $columns = $layout['columns'];
         $rows = $this->formatExportRows($rows, $columns);
 
-        $basename = 'pushsale-'.str_replace('.', '-', $pageCode).'-'.now()->format('Ymd-His');
+        $basename = \App\Support\ReportExportIdentity::basename(
+            str_replace('.', '-', $pageCode),
+            now()->format('Ymd-His'),
+        );
         $export = strtolower((string) $request->query('export', 'excel'));
 
         if ($export === 'csv') {
@@ -493,7 +496,7 @@ abstract class BasePushsalePageController extends Controller
 
         // export=1 / excel / xls → Excel HTML khớp layout bảng trên UI.
         return \App\Support\ReportExcelExporter::download($basename, $rows, $columns, [
-            'brand' => config('saleops.brand.name', 'ERM Pushsale'),
+            'brand' => \App\Support\ReportExportIdentity::brand(),
             'title' => (string) ($schema['title'] ?? $this->pageCode),
             'date_from' => $request->query('date_from'),
             'date_to' => $request->query('date_to'),

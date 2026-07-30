@@ -62,7 +62,7 @@ html body.pushsale-app-body .ps-revenue-detail-page .ps-page-shell__actions {
 
 html body.pushsale-app-body .ps-revenue-detail-primary {
     display: grid !important;
-    grid-template-columns: minmax(180px, 1fr) minmax(260px, 1.25fr) minmax(180px, 1fr) minmax(180px, 1fr) !important;
+    grid-template-columns: minmax(160px, 200px) minmax(360px, 1.6fr) minmax(140px, 1fr) minmax(140px, 1fr) !important;
     align-items: center !important;
     gap: 14px !important;
     width: 100% !important;
@@ -116,34 +116,21 @@ html body.pushsale-app-body .ps-revenue-detail-page input[type='date'] {
     line-height: 20px !important;
 }
 
-html body.pushsale-app-body .ps-revenue-detail-date-range {
-    position: relative !important;
+html body.pushsale-app-body .ps-revenue-detail-primary .ps-date-range,
+html body.pushsale-app-body .ps-revenue-detail-primary .ps-date-range-control,
+html body.pushsale-app-body .ps-revenue-detail-primary .ps-date-filter {
     width: 100% !important;
-    height: 32px !important;
+    min-width: 360px !important;
+    max-width: none !important;
 }
 
-html body.pushsale-app-body .ps-revenue-detail-date-label {
-    position: relative !important;
-    z-index: 1 !important;
-    padding: 5px 10px !important;
-    pointer-events: none !important;
-    background: #fff !important;
-    color: #111 !important;
-}
-
-html body.pushsale-app-body .ps-revenue-detail-date-native {
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 2 !important;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    opacity: .01 !important;
-}
-
-html body.pushsale-app-body .ps-revenue-detail-date-native input {
+html body.pushsale-app-body .ps-revenue-detail-scroll {
     width: 100% !important;
-    height: 32px !important;
-    cursor: pointer !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: auto !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
 }
 
 html body.pushsale-app-body .ps-revenue-detail-actions,
@@ -219,15 +206,6 @@ html body.pushsale-app-body .ps-revenue-detail-formula {
 html body.pushsale-app-body .ps-revenue-detail-formula span {
     color: #f00 !important;
     font-weight: 700 !important;
-}
-
-html body.pushsale-app-body .ps-revenue-detail-scroll {
-    width: 100% !important;
-    margin: 54px 0 0 !important;
-    padding: 0 !important;
-    overflow: auto !important;
-    max-width: 100% !important;
-    min-height: 330px !important;
 }
 
 html body.pushsale-app-body .ps-revenue-detail-table {

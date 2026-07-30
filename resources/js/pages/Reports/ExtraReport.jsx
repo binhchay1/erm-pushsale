@@ -481,37 +481,6 @@ const REVENUE_DETAIL_FORMULAS = [
     ['Upsale = ', 'Tách riêng SL/DS upsale trong cùng đơn chốt, nhưng không nhân đôi contact/đơn gốc'],
 ];
 
-function formatReportDateLabel(value) {
-    if (!value) return '';
-    const [year, month, day] = String(value).split('-');
-    if (!year || !month || !day) return String(value);
-    return `${day}/${month}/${year}`;
-}
-
-function RevenueDetailDateRange({ draft, set }) {
-    const label = `${formatReportDateLabel(draft.date_from) || '...'} 00:00 - ${formatReportDateLabel(draft.date_to) || '...'} 23:59`;
-
-    return (
-        <div className="ps-revenue-detail-date-range" title="Bấm nửa trái để chọn từ ngày, nửa phải để chọn đến ngày">
-            <input className="ps-control ps-revenue-detail-date-label" value={label} readOnly />
-            <div className="ps-revenue-detail-date-native" aria-hidden="false">
-                <input
-                    type="date"
-                    value={draft.date_from ?? ''}
-                    onChange={(event) => set('date_from', event.target.value)}
-                    aria-label="Từ ngày"
-                />
-                <input
-                    type="date"
-                    value={draft.date_to ?? ''}
-                    onChange={(event) => set('date_to', event.target.value)}
-                    aria-label="Đến ngày"
-                />
-            </div>
-        </div>
-    );
-}
-
 function RevenueDetailFormulaLegend() {
     return (
         <div className="ps-revenue-detail-formulas">
@@ -547,7 +516,7 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
     const primaryFilters = (
         <div className="ps-revenue-detail-primary ps-report-toolbar-controls">
             {renderIf('date_type', <ReportField field="date_type" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
-            {(fields.has('date_from') || fields.has('date_to')) ? <RevenueDetailDateRange draft={draft} set={set} /> : null}
+            {(fields.has('date_from') || fields.has('date_to')) ? <PushsaleDateRange filters={draft} onChange={set} /> : null}
             {renderIf('discount_mode', <ReportField field="discount_mode" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
             {renderIf('reconciliation_status', <ReportField field="reconciliation_status" draft={draft} set={set} filterOptions={filterOptions} t={t} />)}
         </div>
@@ -1070,7 +1039,7 @@ function RevenueOverviewToolbar({ title, routeUrl, filters, filterOptions, filte
             {render('parent_product_id')}
             {render('product_id')}
             {render('date_type')}
-            {(fields.has('date_from') || fields.has('date_to')) ? <RevenueDetailDateRange draft={draft} set={set} /> : null}
+            {(fields.has('date_from') || fields.has('date_to')) ? <PushsaleDateRange filters={draft} onChange={set} /> : null}
         </div>
     );
 

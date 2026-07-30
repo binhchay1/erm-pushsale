@@ -14,13 +14,20 @@ class ReportExcelExporter
      */
     public static function download(string $filename, array $rows, array $columns, array $meta = []): Response
     {
+        $brand = trim((string) ($meta['brand'] ?? ''));
+        if ($brand === '' || str_contains(mb_strtolower($brand), 'pushsale')) {
+            $meta['brand'] = ReportExportIdentity::brand();
+        }
+
+        $meta['generated_at'] = $meta['generated_at'] ?? now()->format('Y-m-d H:i');
+
         $html = View::make('exports.report-excel', [
             'meta' => $meta,
             'rows' => $rows,
             'columns' => $columns,
         ])->render();
 
-        $safeName = preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $filename) ?: 'report';
+        $safeName = ReportExportIdentity::sanitizeFilename($filename);
 
         return response($html, 200, [
             'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',

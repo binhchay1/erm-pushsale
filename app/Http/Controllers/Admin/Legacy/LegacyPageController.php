@@ -86,7 +86,10 @@ class LegacyPageController extends Controller
     private function export(array $schema, array $rows): StreamedResponse
     {
         $columns = $schema['columns'] ?? [];
-        $filename = 'pushsale-'.str_replace('.', '-', (string) $schema['code']).'-'.now()->format('Ymd-His').'.csv';
+        $filename = \App\Support\ReportExportIdentity::basename(
+            str_replace('.', '-', (string) $schema['code']),
+            now()->format('Ymd-His'),
+        ).'.csv';
 
         return response()->streamDownload(function () use ($columns, $rows): void {
             $out = fopen('php://output', 'wb');

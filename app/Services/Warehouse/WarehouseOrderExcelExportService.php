@@ -13,7 +13,6 @@ use App\Support\ReportExcelExporter;
 use App\Support\ShippingProviders;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -64,11 +63,7 @@ class WarehouseOrderExcelExportService
             $rows = array_slice($rows, 0, $maxRows);
         }
 
-        $appSlug = Str::slug((string) config('app.name'), '_');
-        if ($appSlug === '') {
-            $appSlug = 'export';
-        }
-
+        $appSlug = \App\Support\ReportExportIdentity::slug();
         $filename = sprintf(
             '%s.%s.%s',
             $profile['filename_prefix'] ?? $appSlug,
@@ -93,7 +88,7 @@ class WarehouseOrderExcelExportService
         return ReportExcelExporter::download($filename, $assocRows, $excelColumns, [
             'title' => $profile['title'],
             'generated_at' => now()->format('d/m/Y H:i:s'),
-            'brand' => (string) config('app.name'),
+            'brand' => \App\Support\ReportExportIdentity::brand(),
         ]);
     }
 
