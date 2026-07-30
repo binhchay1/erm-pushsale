@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
 import { ReportPagination } from '@/components/reports/ReportPagination';
-import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyCell, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
@@ -105,7 +105,7 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                         <th className="text-center no-wrap ps-col-operation"><span>Tác nghiệp</span><br />Ngày chốt đơn</th>
                         <th className="text-center no-wrap ps-col-result"><span>Kết quả</span><br />Ngày sale tác nghiệp</th>
                         <th className="text-center no-wrap ps-col-products"><span>Sản phẩm - Số lượng - Đơn giá</span></th>
-                        <th className="text-center no-wrap area3 ps-col-money"><span>Thành tiền<br />CK/VAT<br />Phí VC/Tổng tiền</span></th>
+                        <th className="text-center no-wrap area3 ps-col-money"><span>Thành tiền / CK / VAT / Tổng</span></th>
                         <th className="text-center no-wrap ps-col-deposit">Khách đặt cọc</th>
                         <th className="text-center no-wrap ps-col-shipping"><span>Kho</span><br /><span title="Phương thức giao hàng">PTGH</span><br />Mã giao vận</th>
                         <th className="text-center ps-col-delivery">Trạng thái giao hàng<br /><span>Ngày muốn nhận hàng</span></th>
@@ -152,26 +152,17 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                 </td>
                                 <td className="text-left ps-customer-name-cell ps-contact-name-phone">
                                     <div className="ps-customer-name-row">
-                                        {saleWorkspaceUrl ? (
-                                            <a className="ps-customer-name-link" href={appendQuery(saleWorkspaceUrl, { order_id: row.id })}>{safeText(row.customerName)}</a>
-                                        ) : (
-                                            <span className="ps-customer-name-link">{safeText(row.customerName)}</span>
-                                        )}
+                                        <span className="ps-customer-name-text">{safeText(row.customerName)}</span>
                                     </div>
                                     {(row.carrierLabel || row.phoneCarrier) ? (
-                                        <span className={`nha-mang ps-carrier ps-carrier-${row.phoneCarrierKey ?? 'other'}`}>
+                                        <div className={`nha-mang ps-carrier ps-carrier-${row.phoneCarrierKey ?? 'other'} ps-contact-carrier-line`}>
                                             {row.carrierLabel || `[${row.phoneCarrier}]`}
-                                        </span>
-                                    ) : null}
-                                    <div className="no-wrap ps-phone-line ps-contact-phone-row">
-                                        <div className="ps-phone-main">
-                                            <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('purchase', row)}>{safeText(row.customerPhone)}</button>
-                                            {row.customerPhone ? (
-                                                <a className="ps-contact-phone-icon" href={`tel:${row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.customerPhone}`}>
-                                                    <i className="fa fa-phone" aria-hidden="true" />
-                                                </a>
-                                            ) : null}
                                         </div>
+                                    ) : null}
+                                    <div className="ps-contact-phone-row">
+                                        <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('purchase', row)}>{safeText(row.customerPhone)}</button>
+                                    </div>
+                                    <div className="ps-contact-flags-row">
                                         <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell />
                                     </div>
                                 </td>
@@ -206,9 +197,7 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                 <td className="text-left ps-order-products-cell">
                                     <OrderProductsBreakdown items={row.products ?? []} order={row} />
                                 </td>
-                                <td className="no-wrap area3 text-right ps-order-money-cell">
-                                    <OrderMoneyBreakdown row={row} />
-                                </td>
+                                <OrderMoneyCell className="no-wrap area3 ps-order-money-cell" row={row} />
                                 <td className="text-right">{row.deposit ? formatCurrency(row.deposit) : ''}</td>
                                 <td className="text-center area4">
                                     <span className="ps-warehouse-name">{safeText(row.warehouseName, '')}</span>

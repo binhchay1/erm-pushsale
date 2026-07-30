@@ -3,7 +3,7 @@
  * Scoped to .ps-customer-profile-page / .ps-customer-dialog / .ps-purchase-history-dialog.
  */
 
-/* Table headers: compact Pushsale size (override sticky 58px / tall padding) */
+/* Table headers: compact like other ops tables (no tall empty blue band) */
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th,
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table th {
     position: sticky !important;
@@ -11,11 +11,11 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table
     z-index: 8 !important;
     font-size: 11px !important;
     font-weight: 600 !important;
-    line-height: 1.2 !important;
-    height: 36px !important;
-    min-height: 36px !important;
-    max-height: 44px !important;
-    padding: 4px 5px !important;
+    line-height: 1.25 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 6px 5px !important;
     vertical-align: middle !important;
     white-space: normal !important;
     background: #3782dc !important;

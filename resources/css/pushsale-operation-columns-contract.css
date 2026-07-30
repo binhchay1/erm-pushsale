@@ -153,25 +153,71 @@ html body.pushsale-app-body .ps-order-money-breakdown {
     width: 100% !important;
     padding-right: 4px !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     font-variant-numeric: tabular-nums !important;
 }
 
-html body.pushsale-app-body .ps-order-money-breakdown > div,
-html body.pushsale-app-body .ps-order-money-breakdown > strong,
+/* One shared Thành tiền cell for Sale / WH / KT / Customer tables */
+html body.pushsale-app-body .ps-ops-money-cell,
+html body.pushsale-app-body td.ps-ops-money-cell,
+html body.pushsale-app-body .ps-sale-operation-table td.ps-ops-money-cell,
+html body.pushsale-app-body .ps-wh-legacy-table td.ps-ops-money-cell,
+html body.pushsale-app-body .ps-acc-operation-table td.ps-ops-money-cell,
+html body.pushsale-app-body .ps-customer-profile-table td.ps-ops-money-cell {
+    min-width: 132px !important;
+    width: 140px !important;
+    max-width: 160px !important;
+    overflow: visible !important;
+    vertical-align: middle !important;
+    text-align: right !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body .ps-ops-money-cell .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-sale-operation-table .ps-ops-money-cell .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-wh-table .ps-ops-money-cell .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-acc-operation-table .ps-ops-money-cell .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-customer-profile-table .ps-ops-money-cell .ps-order-money-breakdown {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 1px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-ops-money-cell .ps-order-money-line,
 html body.pushsale-app-body .ps-order-money-breakdown .ps-order-money-line {
-    justify-content: flex-end !important;
-    padding-right: 4px !important;
+    display: block !important;
+    position: static !important;
+    float: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+    min-height: 18px !important;
+    line-height: 1.25 !important;
+    padding: 1px 2px !important;
+    margin: 0 !important;
     overflow: visible !important;
     white-space: nowrap !important;
     text-align: right !important;
+    font-weight: 400 !important;
+    color: #000 !important;
+}
+
+html body.pushsale-app-body .ps-ops-money-cell .ps-order-money-line.is-total,
+html body.pushsale-app-body .ps-order-money-breakdown .ps-order-money-line.is-total {
+    font-size: 13px !important;
+    font-weight: 700 !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table .ps-order-money-breakdown,
 html body.pushsale-app-body .ps-wh-table .ps-order-money-breakdown,
 html body.pushsale-app-body .ps-acc-operation-table .ps-order-money-breakdown,
 html body.pushsale-app-body .ps-customer-profile-table .ps-order-money-breakdown {
-    min-width: 146px !important;
+    min-width: 0 !important;
 }
 
 /* Tailwind based operation table fallback. These pages do not use colgroups, so

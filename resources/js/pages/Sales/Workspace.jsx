@@ -7,7 +7,6 @@ import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import {
     PushsaleCustomerMessagesDialog,
     PushsaleDataViewHistoryDialog,
-    PushsalePurchaseHistoryDialog,
 } from '@/components/customers/pushsale/PushsaleCustomerDialogs';
 import {
     BulkCloseDialog,
@@ -42,7 +41,6 @@ export default function Workspace({
     const [historyState, setHistoryState] = useState({ order: null, context: 'sale' });
     const [dataViewOrder, setDataViewOrder] = useState(null);
     const [messagesOrder, setMessagesOrder] = useState(null);
-    const [purchaseOrder, setPurchaseOrder] = useState(null);
     const [duplicateOrder, setDuplicateOrder] = useState(null);
     const [desiredOrder, setDesiredOrder] = useState(null);
     const [resultState, setResultState] = useState({ open: false, order: null, result: null });
@@ -73,7 +71,6 @@ export default function Workspace({
                         onHistory={(order, context = 'sale') => setHistoryState({ order, context })}
                         onDataViewHistory={setDataViewOrder}
                         onMessages={setMessagesOrder}
-                        onPurchaseHistory={setPurchaseOrder}
                         onDuplicateOrders={setDuplicateOrder}
                         onDesiredDate={setDesiredOrder}
                         onResult={(order, result) => setResultState({ open: true, order, result })}
@@ -102,7 +99,6 @@ export default function Workspace({
             <SaleOperationHistoryDialog order={historyState.order} context={historyState.context} open={Boolean(historyState.order)} onOpenChange={(open) => !open && setHistoryState({ order: null, context: 'sale' })} />
             <PushsaleDataViewHistoryDialog order={dataViewOrder} open={Boolean(dataViewOrder)} onOpenChange={(open) => !open && setDataViewOrder(null)} />
             <PushsaleCustomerMessagesDialog order={messagesOrder} open={Boolean(messagesOrder)} onOpenChange={(open) => !open && setMessagesOrder(null)} />
-            <PushsalePurchaseHistoryDialog order={purchaseOrder} open={Boolean(purchaseOrder)} onOpenChange={(open) => !open && setPurchaseOrder(null)} />
             <DuplicatePhoneOrdersDialog order={duplicateOrder} open={Boolean(duplicateOrder)} onOpenChange={(open) => !open && setDuplicateOrder(null)} />
             <DesiredDeliveryDialog order={desiredOrder} open={Boolean(desiredOrder)} onOpenChange={(open) => !open && setDesiredOrder(null)} actionBaseUrl={actionBaseUrl} />
             <OperationResultDialog

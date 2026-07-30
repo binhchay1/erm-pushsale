@@ -106,9 +106,7 @@ export function SaleAssigneeCell({
 export function CustomerContactCell({
     order,
     onEdit,
-    onPurchaseHistory,
     onDuplicateOrders,
-    phoneActions = null,
     flags = null,
     supplement = null,
     className = 'area1 ps-customer-cell',
@@ -119,39 +117,30 @@ export function CustomerContactCell({
 
     return (
         <td className={className} title={`${order.id} | ${order.sourceType || ''}`}>
-            {/* Họ tên: edit float phải như cũ — không dùng OpsTopRightIcons (1 dòng icon) */}
             {onEdit ? (
                 <div className="text-right ps-customer-edit-wrap">
                     <OpsIconButton title="Cập nhật đơn" icon="edit" onClick={onEdit} className="ps-cell-action" />
                 </div>
             ) : null}
             <div className="ps-customer-name-wrap" style={{ maxWidth: 170, textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                {onPurchaseHistory ? (
-                    <button type="button" className="ps-customer-name-link" onClick={onPurchaseHistory}>{name}</button>
-                ) : (
-                    <span>{name}</span>
-                )}
+                <span className="ps-customer-name-text">{name}</span>
             </div>
             {carrier ? <div className="nha-mang text-left ps-contact-carrier-line">{carrier}</div> : null}
-            <div className="no-wrap ps-contact-phone-row">
-                <div className="ps-phone-main">
-                    {onDuplicateOrders ? (
-                        <button
-                            type="button"
-                            className="ps-phone-link"
-                            onClick={onDuplicateOrders}
-                            title="Danh sách trùng số"
-                        >
-                            {phone || '—'}
-                        </button>
-                    ) : (
-                        <span className="ps-phone-text">{phone || '—'}</span>
-                    )}
-                    {flags}
-                </div>
+            <div className="ps-contact-phone-row">
+                {onDuplicateOrders ? (
+                    <button
+                        type="button"
+                        className="ps-phone-link"
+                        onClick={onDuplicateOrders}
+                        title="Danh sách trùng số"
+                    >
+                        {phone || '—'}
+                    </button>
+                ) : (
+                    <span className="ps-phone-text">{phone || '—'}</span>
+                )}
             </div>
-            {/* phoneActions (call icon) intentionally omitted from contact stack — name / carrier / phone only */}
-            {phoneActions ? <div className="ps-contact-phone-actions">{phoneActions}</div> : null}
+            {flags ? <div className="ps-contact-flags-row">{flags}</div> : null}
             <div className="text-left khkn sline">{order.customerExtraNote || ''}</div>
             {order.desiredDeliveryAt ? (
                 <div className="small-tip">({formatOpsDateTime(order.desiredDeliveryAt)})</div>
@@ -283,27 +272,22 @@ export function DeliveryStatusCell({
     className = 'text-center area4',
 }) {
     return (
-        <td className={`${className} ttgh ttgh-${deliveryStatusValue || 'none'}`.trim()}>
-            <span className="span-col no-wrap">
-                <span className="span-col" style={{ width: 20 }}>
-                    {showAccountingHistory && onHistory ? (
-                        <OpsIconButton title="Lịch sử kế toán" icon="history" onClick={onHistory} />
-                    ) : null}
-                </span>
-                <span className="span-col no-wrap" style={{ width: 'calc(100% - 50px)' }}>
-                    <span className={`ttgh${deliveryStatusValue || 0}`}>{deliveryStatus || ''}</span>
-                </span>
-                <span className="span-col" style={{ width: 20 }} />
-                <div className="small-tip">
-                    ()
-                    <a className="btn-icon invisible" aria-hidden="true">&nbsp;</a>
-                </div>
-            </span>
+        <td className={`${className} ttgh ttgh-${deliveryStatusValue || 'none'} ps-delivery-status-cell`.trim()}>
+            <div className="ps-delivery-status-row">
+                {showAccountingHistory && onHistory ? (
+                    <OpsIconButton title="Lịch sử kế toán" icon="history" onClick={onHistory} />
+                ) : null}
+                <span className={`ps-delivery-status-label ttgh${deliveryStatusValue || 0}`}>{deliveryStatus || ''}</span>
+            </div>
+            <div className="small-tip ps-delivery-carrier-hint">()</div>
             {trackingNumber ? (
                 <a className="lnk-mdgv" href="javascript:void(0)" style={{ color: 'darkorange' }}>{trackingNumber}</a>
             ) : null}
-            <br />
-            {onCalendar ? <OpsIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={onCalendar} /> : null}
+            {onCalendar ? (
+                <div className="ps-delivery-calendar-wrap">
+                    <OpsIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={onCalendar} />
+                </div>
+            ) : null}
             {desiredDeliveryAt ? (
                 <div style={{ color: 'green' }}>{formatOpsDateTime(desiredDeliveryAt)}</div>
             ) : null}

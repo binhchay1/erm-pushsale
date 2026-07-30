@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
-import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyCell, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import {
     CustomerContactCell,
     DeliveryStatusCell,
@@ -28,14 +28,7 @@ function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
     const [saving, setSaving] = useState(false);
     const [focused, setFocused] = useState(false);
     const [hovered, setHovered] = useState(false);
-    const textareaRef = useRef(null);
     const expanded = focused || hovered;
-
-    useEffect(() => {
-        const node = textareaRef.current;
-        if (!node) return;
-        node.style.height = expanded ? '128px' : '48px';
-    }, [expanded]);
 
     const save = () => {
         setSaving(true);
@@ -50,27 +43,26 @@ function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
         });
     };
 
-    // Hover phóng / leave thu; click(focus) giữ phóng; blur thu lại.
+    // Slot stays 48px; textarea is always absolute so shrink never reflows the row.
     return (
         <td className={`area2 hidden-xs ps-operation-note-editor${expanded ? ' is-expanded' : ''}${focused ? ' is-focused' : ''}`}>
             <span className="fb span-col ttgh7" style={{ cursor: 'pointer', display: 'block', marginTop: 2 }}>
                 {order.currentOperation || t('operations.sale_workspace.default_stage')}
             </span>
-            <div className="text-right">
+            <div className="ps-note-toolbar">
                 <OpsIconButton
                     title={t('operations.sale_workspace.internal_message')}
                     icon="commenting-o"
                     onClick={() => onMessages(order)}
-                    style={{ float: 'left' }}
+                    className="ps-note-tool"
                 />
-                <div className="text-right">
-                    <OpsIconButton
-                        title={t('operations.sale_workspace.save_note')}
-                        icon="save"
-                        onClick={save}
-                        disabled={saving}
-                    />
-                </div>
+                <OpsIconButton
+                    title={t('operations.sale_workspace.save_note')}
+                    icon="save"
+                    onClick={save}
+                    disabled={saving}
+                    className="ps-note-tool"
+                />
             </div>
             <div
                 className="mof-container ps-note-mof"
@@ -79,8 +71,8 @@ function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
                     if (!focused) setHovered(false);
                 }}
             >
+                <div className="ps-note-slot" aria-hidden="true" />
                 <textarea
-                    ref={textareaRef}
                     className="form-control txt-mof txt-dotted"
                     maxLength={500}
                     rows={2}
@@ -119,7 +111,6 @@ export function SaleWorkspaceTable({
     onHistory,
     onDataViewHistory,
     onMessages,
-    onPurchaseHistory,
     onDuplicateOrders,
     onDesiredDate,
     onResult,
@@ -279,7 +270,6 @@ export function SaleWorkspaceTable({
                                     <CustomerContactCell
                                         order={order}
                                         onEdit={() => onEdit(order, false)}
-                                        onPurchaseHistory={() => onPurchaseHistory(order)}
                                         onDuplicateOrders={() => onDuplicateOrders(order)}
                                         flags={(
                                             <OrderStatusFlags
@@ -323,9 +313,11 @@ export function SaleWorkspaceTable({
                                         <OrderProductsBreakdown items={order.products ?? []} order={order} />
                                     </td>
 
-                                    <td className="area3 text-right hidden-xs ps-col-money">
-                                        <OrderMoneyBreakdown row={order} items={order.products ?? []} />
-                                    </td>
+                                    <OrderMoneyCell
+                                        className="area3 hidden-xs ps-col-money"
+                                        row={order}
+                                        items={order.products ?? []}
+                                    />
 
                                     <td className="no-wrap area3 text-right hidden-xs">
                                         {moneyDisplay(order.deposit) || (Number(order.deposit) === 0 ? formatCurrency(0) : '')}

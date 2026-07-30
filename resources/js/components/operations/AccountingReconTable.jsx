@@ -1,4 +1,4 @@
-import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyCell, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { DeleteRowButton } from '@/components/ui/delete-row-button';
 import { formatCurrency, formatDate, formatDateTime, formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
@@ -23,16 +23,14 @@ function ReconIcon({ value }) {
 function CustomerCell({ row }) {
     return (
         <div className="ps-acc-customer-cell ps-contact-name-phone">
-            <b>{row.customerName || '—'}</b><br />
+            <b className="ps-customer-name-text">{row.customerName || '—'}</b>
+            {row.carrierLabel || row.phoneCarrier ? (
+                <div className="nha-mang ps-contact-carrier-line">{row.carrierLabel || `[${row.phoneCarrier}]`}</div>
+            ) : null}
             <div className="ps-contact-phone-row">
-                <div className="ps-phone-main">
-                    <span>{row.customerPhone || '—'}</span>
-                    {row.customerPhone ? (
-                        <a className="ps-contact-phone-icon" href={`tel:${row.customerPhone}`} title="Gọi khách hàng" aria-label={`Gọi ${row.customerPhone}`}>
-                            <i className="fa fa-phone" aria-hidden="true" />
-                        </a>
-                    ) : null}
-                </div>
+                <span className="ps-phone-text">{row.customerPhone || '—'}</span>
+            </div>
+            <div className="ps-contact-flags-row">
                 <OrderStatusFlags row={row} className="ps-contact-flags" />
             </div>
             {row.desiredDeliveryAt && <div className="small-tip">{formatDate(row.desiredDeliveryAt)}</div>}
@@ -95,7 +93,7 @@ export function AccountingReconTable({ rows = [], totals, enableDeleteOrder = fa
                             </td>
                             <td className="text-center ps-col-recon"><ReconIcon value={row.internalReconNote} /></td>
                             <td className="ps-col-products"><OrderProductsBreakdown items={row.products ?? []} order={row} /></td>
-                            <td className="text-right ps-col-money"><OrderMoneyBreakdown row={row} /></td>
+                            <OrderMoneyCell className="ps-col-money" row={row} />
                             <td className="text-right ps-col-deposit">{money(row.deposit)}</td>
                             <td className="text-right ps-col-collect"><strong className="text-success">{money(row.amountToCollect)}</strong></td>
                             <td className="text-right ps-col-vc">{money(row.carrierServiceFee)}</td>
@@ -126,7 +124,7 @@ export function AccountingReconTable({ rows = [], totals, enableDeleteOrder = fa
                         <tr className="ps-acc-total-row">
                             <td colSpan={7} className="text-right"><b>Tổng:</b></td>
                             <td className="text-center"><b>{formatNumber(totals.quantity ?? 0)}</b></td>
-                            <td className="text-right"><OrderMoneyBreakdown row={totals} /></td>
+                            <OrderMoneyCell className="" row={totals} />
                             <td className="text-right"><b>{money(totals.deposit)}</b></td>
                             <td className="text-right"><b className="text-success">{money(totals.amountToCollect)}</b></td>
                             <td className="text-right"><b>{money(totals.carrierServiceFee)}</b></td>

@@ -9,7 +9,7 @@ import { RegisterShipmentDialog } from '@/components/operations/RegisterShipment
 import { AddToHandoverDialog } from '@/components/operations/AddToHandoverDialog';
 import { UpdateDeliveryStatusByCodeDialog } from '@/components/operations/UpdateDeliveryStatusByCodeDialog';
 import { UpdateDeliveryStatusExcelDialog } from '@/components/operations/UpdateDeliveryStatusExcelDialog';
-import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
+import { OrderMoneyCell, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { apiPost, apiRequest, getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
@@ -614,7 +614,7 @@ export function WarehouseOrderTable({
                 </td>
                                 <td className="c-address-body"><span>{row.shippingAddress || ''}</span>{row.shippingNotes && <><br /><span className="small-tip ps-wh-magenta">{row.shippingNotes}</span></>}</td>
                                 <td className="text-left c-products-body"><OrderProductsBreakdown items={row.products || [...(row.mainProducts || []), ...(row.upsellProducts || [])]} order={row} /></td>
-                                <td className="no-wrap area3 text-right c-money-body"><OrderMoneyBreakdown row={row} /></td>
+                                <OrderMoneyCell className="no-wrap area3 c-money-body" row={row} />
                                 <td className="text-right">{formatCurrency(row.deposit)}</td>
                                 <td className="text-right">{formatCurrency(row.codAmount || row.total)}</td>
                                 <td className="text-right">{formatCurrency(row.carrierServiceFee)}</td>

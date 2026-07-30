@@ -254,60 +254,156 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange }) {
     if (!order) return null;
 
     const orders = (data.orders ?? []).filter((item) => !closedOnly || item.closedAt || item.closingStatus === 'closed');
-    const copyAddress = async (value) => {
-        try {
-            await navigator.clipboard.writeText(value || '');
-            toast.success('Đã copy địa chỉ.');
-        } catch (error) {
-            toast.error('Không copy được địa chỉ.');
-        }
-    };
+    const summary = data.summary ?? {};
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-sale-dialog ps-sale-modal ps-duplicate-phone-modal ps-duplicate-phone-dialog ps-duplicate-phone-dialog-legacy" aria-describedby={undefined}>
+            <DialogContent className="ps-sale-dialog ps-sale-modal ps-duplicate-phone-modal ps-duplicate-phone-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header ps-duplicate-phone-header">
                     <DialogTitle>Danh sách đơn cùng số điện thoại</DialogTitle>
-                    <label className="ps-duplicate-closed-filter"><input type="checkbox" checked={closedOnly} onChange={(event) => setClosedOnly(event.target.checked)} /> Đã chốt đơn</label>
+                    <label className="ps-duplicate-closed-filter">
+                        <input type="checkbox" checked={closedOnly} onChange={(event) => setClosedOnly(event.target.checked)} />
+                        {' '}
+                        Đã chốt đơn
+                    </label>
                 </DialogHeader>
                 <div className="ps-duplicate-phone-body">
-                    <div className="table-responsive ps-duplicate-table-wrap">
-                        <table className="table table-bordered table-striped ps-duplicate-table ps-duplicate-table-legacy">
-                            <thead><tr>
-                                <th>#</th>
-                                <th>Nguồn dữ liệu<br />Ngày data về</th>
-                                <th>Họ tên<br />Số điện thoại</th>
-                                <th>Tin nhắn</th>
-                                <th>Sale</th>
-                                <th>Tác nghiệp</th>
-                                <th>Kết quả</th>
-                                <th>Ngày chốt đơn<br />Mã đơn</th>
-                                <th>TTGH<br />Mã giao vận</th>
-                                <th>Địa chỉ</th>
-                                <th />
-                            </tr></thead>
+                    {(summary.orderCount != null || summary.totalValue != null) ? (
+                        <div className="ps-duplicate-summary">
+                            <span>
+                                Tổng đơn:
+                                {' '}
+                                <b>{summary.orderCount ?? orders.length}</b>
+                            </span>
+                            {summary.closedOrderCount != null ? (
+                                <span>
+                                    Đã chốt:
+                                    {' '}
+                                    <b>{summary.closedOrderCount}</b>
+                                </span>
+                            ) : null}
+                            {summary.totalValue != null ? (
+                                <span>
+                                    Doanh số:
+                                    {' '}
+                                    <b>{money(summary.totalValue)}</b>
+                                </span>
+                            ) : null}
+                        </div>
+                    ) : null}
+                    <div className="ps-duplicate-table-wrap">
+                        <table className="table table-bordered table-striped ps-duplicate-table ps-sale-operation-table">
+                            <thead>
+                                <tr>
+                                    <th className="text-center">#</th>
+                                    <th className="text-center">Mã đơn</th>
+                                    <th className="text-center">
+                                        Nguồn dữ liệu
+                                        <br />
+                                        Ngày data về
+                                    </th>
+                                    <th className="text-center">
+                                        Sale
+                                        <br />
+                                        Ngày nhận data
+                                    </th>
+                                    <th className="text-center">
+                                        Họ tên
+                                        <br />
+                                        Số điện thoại
+                                    </th>
+                                    <th className="text-center">Tin nhắn</th>
+                                    <th className="text-center">
+                                        Tác nghiệp
+                                        <br />
+                                        Ngày chốt
+                                    </th>
+                                    <th className="text-center">Kết quả</th>
+                                    <th className="text-center">Sản phẩm - SL - Đơn giá</th>
+                                    <th className="text-center">
+                                        Thành tiền
+                                        <br />
+                                        CK / Tổng
+                                    </th>
+                                    <th className="text-center">Đặt cọc</th>
+                                    <th className="text-center">
+                                        Trạng thái giao hàng
+                                        <br />
+                                        Ngày muốn nhận
+                                    </th>
+                                </tr>
+                            </thead>
                             <tbody>
-                                {loading ? <tr><td colSpan={11} className="text-center">Đang tải...</td></tr> : null}
-                                {!loading && orders.map((item) => (
+                                {loading ? <tr><td colSpan={12} className="text-center">Đang tải...</td></tr> : null}
+                                {!loading && orders.map((item, index) => (
                                     <tr key={item.id} className={item.isSelected ? 'info' : ''}>
-                                        <td className="text-center text-danger">{item.id}</td>
-                                        <td className="text-center"><b>{item.sourceName || '—'}</b><br /><span className="small-tip">{formatDateTime(item.dataArrivedAt)}</span></td>
-                                        <td><b>{item.customerName || '—'}</b><br /><button type="button" className="ps-phone-link">{item.customerPhone || '—'}</button></td>
+                                        <td className="text-center">{index + 1}</td>
+                                        <td className="text-center"><b>{item.orderCode || '—'}</b></td>
+                                        <td className="text-center">
+                                            <b>{item.sourceName || '—'}</b>
+                                            <br />
+                                            <span className="small-tip">{formatDateTime(item.dataArrivedAt)}</span>
+                                        </td>
+                                        <td className="text-center">
+                                            <b>{item.saleName || '—'}</b>
+                                            {item.teamName ? <><br /><span className="small-tip">({item.teamName})</span></> : null}
+                                            <br />
+                                            <span className="small-tip">{formatDateTime(item.assignedAt)}</span>
+                                        </td>
+                                        <td>
+                                            <span className="ps-customer-name-text">{item.customerName || '—'}</span>
+                                            <br />
+                                            <span className="ps-phone-text">{item.customerPhone || '—'}</span>
+                                        </td>
                                         <td className="ps-duplicate-message">{item.customerNote || item.shippingNotes || '—'}</td>
-                                        <td className="text-center"><b>{item.saleName || '—'}</b>{item.teamName ? <><br /><span className="small-tip">({item.teamName})</span></> : null}</td>
-                                        <td className="text-center">{item.operationStage || '—'}</td>
-                                        <td className="text-center">{item.operationResult || '—'}</td>
-                                        <td className="text-center">{item.closedAt ? formatDateTime(item.closedAt) : '—'}<br /><b>{item.orderCode || '—'}</b></td>
-                                        <td className="text-center">{item.deliveryStatus || '—'}<br /><span className="item-mdgv">{item.trackingNumber || '—'}</span></td>
-                                        <td className="ps-duplicate-address">{item.address || '—'}{item.address ? <><br /><button type="button" className="btn btn-link btn-xs" onClick={() => copyAddress(item.address)}><i className="fa fa-copy" /> Copy</button></> : null}</td>
-                                        <td className="text-center"><i className="fa fa-circle-o-notch text-info" /></td>
+                                        <td className="text-center">
+                                            {item.operationStage || '—'}
+                                            <br />
+                                            <span className="small-tip">{item.closedAt ? formatDateTime(item.closedAt) : '—'}</span>
+                                        </td>
+                                        <td className="text-center">{item.operationResult || item.closingStatusLabel || '—'}</td>
+                                        <td className="text-left">
+                                            {(item.products ?? []).length
+                                                ? (item.products ?? []).map((product) => (
+                                                    <div key={product.id || `${product.name}-${product.quantity}`}>
+                                                        {product.name}
+                                                        {' '}
+                                                        x
+                                                        {product.quantity}
+                                                        {' · '}
+                                                        {money(product.unitPrice)}
+                                                    </div>
+                                                ))
+                                                : '—'}
+                                        </td>
+                                        <td className="text-right ps-ops-money-cell">
+                                            <div className="ps-order-money-breakdown">
+                                                {item.subtotal ? <div className="ps-order-money-line">{money(item.subtotal)}</div> : null}
+                                                {item.discount ? <div className="ps-order-money-line">-{money(item.discount)}</div> : null}
+                                                <div className="ps-order-money-line is-total">{money(item.total)}</div>
+                                            </div>
+                                        </td>
+                                        <td className="text-right">{money(item.deposit)}</td>
+                                        <td className="text-center">
+                                            {item.deliveryStatus || '—'}
+                                            <br />
+                                            <span className="item-mdgv">{item.trackingNumber || '—'}</span>
+                                            <br />
+                                            <span className="small-tip">{item.desiredDeliveryAt ? formatDateTime(item.desiredDeliveryAt) : ''}</span>
+                                        </td>
                                     </tr>
                                 ))}
-                                {!loading && !orders.length ? <tr><td colSpan={11} className="text-center">Không có đơn cùng số điện thoại.</td></tr> : null}
+                                {!loading && !orders.length ? <tr><td colSpan={12} className="text-center">Không có đơn cùng số điện thoại.</td></tr> : null}
                             </tbody>
                         </table>
                     </div>
-                    <div className="ps-sale-dialog-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}><i className="fa fa-times" /> Đóng</button></div>
+                    <div className="ps-sale-dialog-footer">
+                        <button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>
+                            <i className="fa fa-times" />
+                            {' '}
+                            Đóng
+                        </button>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>

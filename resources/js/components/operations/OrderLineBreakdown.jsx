@@ -199,13 +199,30 @@ export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount =
         strong: true,
     });
 
+    // Do NOT use legacy .tb-in-sp here — that class is table-oriented and causes
+    // amount/"đ" overlap when reused for money stacks across Sale/WH/KT.
     return (
-        <div className="tb-in-sp ps-order-money-breakdown" aria-label="Thành tiền đơn hàng">
+        <div className="ps-order-money-breakdown" aria-label="Thành tiền đơn hàng">
             {lines.filter((line) => line.text).map((line) => (
                 <div key={line.key} className={`ps-order-money-line${line.strong ? ' is-total' : ''}`} title={line.title}>
                     {line.text}
                 </div>
             ))}
         </div>
+    );
+}
+
+/** Shared Thành tiền <td> for Sale / Warehouse / Accounting / Customer tables. */
+export function OrderMoneyCell({
+    row = {},
+    items = null,
+    showZeroDiscount = false,
+    className = '',
+    ...tdProps
+}) {
+    return (
+        <td className={`ps-ops-money-cell text-right ${className}`.trim()} {...tdProps}>
+            <OrderMoneyBreakdown row={row} items={items} showZeroDiscount={showZeroDiscount} />
+        </td>
     );
 }

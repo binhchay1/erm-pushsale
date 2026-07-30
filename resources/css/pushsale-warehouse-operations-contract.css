@@ -547,25 +547,12 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td.c-products-body {
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-money,
-html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td.c-money-body {
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td.c-money-body,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td.ps-ops-money-cell {
     max-width: 160px !important;
-    min-width: 120px !important;
+    min-width: 132px !important;
     width: 140px !important;
     overflow: visible !important;
-}
-
-html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-money-breakdown,
-html body.pushsale-app-body .ps-wh-page .c-money-body .tb-in-sp {
-    min-width: 110px !important;
-    max-width: 100% !important;
-    overflow: visible !important;
-}
-
-html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-money-line,
-html body.pushsale-app-body .ps-wh-page .c-money-body .tb-in-sp .ps-order-money-line {
-    position: static !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
 }
 
 /* Care note: fixed collapsed slot + absolute expand overlay */
