@@ -929,7 +929,7 @@ function SystemBusinessReport({ rows, totals, filters, filterOptions, filterFiel
     ));
 
     return (
-        <section className="ps-report-page ps-system-business-report">
+        <section className="ps-report-page ps-system-business-report ps-warehouse-report-page">
             <PushsaleReportToolbar
                 title="Báo cáo kinh doanh hệ thống"
                 routeUrl={routeUrl}
@@ -1177,7 +1177,7 @@ function WarehouseSalesSummaryReport({ title = 'Báo cáo doanh số theo kho', 
     };
 
     return (
-        <section className="ps-report-page ps-sales-revenue-summary ps-warehouse-sales-summary">
+        <section className="ps-report-page ps-sales-revenue-summary ps-warehouse-sales-summary ps-warehouse-report-page">
             <RevenueOverviewToolbar
                 title={title}
                 routeUrl={routeUrl}
@@ -1251,7 +1251,7 @@ function WarehouseSalesV2Report({ title = 'Báo cáo doanh số V2', rows, total
     );
 
     return (
-        <section className="ps-report-page ps-sales-revenue-v2 ps-warehouse-sales-v2">
+        <section className="ps-report-page ps-sales-revenue-v2 ps-warehouse-sales-v2 ps-warehouse-report-page">
             <RevenueOverviewToolbar
                 title={title}
                 routeUrl={routeUrl}

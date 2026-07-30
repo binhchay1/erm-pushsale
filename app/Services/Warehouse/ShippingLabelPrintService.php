@@ -87,6 +87,7 @@ class ShippingLabelPrintService
                 'watermark_logo' => $this->featureSettings->bool('SettingInDonAnhChim', false),
                 'fixed_receiver_phone' => $this->featureSettings->string('SettingDangDonNguoiNhanSDT', ''),
                 'default_sender' => $this->featureSettings->string('SettingDangDonNguoiGui', ''),
+                'app_name' => (string) config('app.name'),
             ],
             'labels' => $matched->map(fn (Order $order) => $this->presentLabel($order, $profile))->values()->all(),
             'unmatched' => $unmatched->map(fn (Order $order) => [

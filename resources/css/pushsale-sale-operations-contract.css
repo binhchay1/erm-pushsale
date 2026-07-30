@@ -376,13 +376,13 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > t
     background: #dfeffd !important;
 }
 
-/* Pushsale area hide animation hooks */
+/* Pushsale area hide animation hooks — avoid transition:all (reflows columns) */
 html body.pushsale-app-body .ps-sale-workspace-page .area1,
 html body.pushsale-app-body .ps-sale-workspace-page .area2,
 html body.pushsale-app-body .ps-sale-workspace-page .area3,
 html body.pushsale-app-body .ps-sale-workspace-page .area4,
 html body.pushsale-app-body .ps-sale-workspace-page .area5 {
-    transition: ease 0.5s all;
+    transition: opacity .2s ease, background-color .2s ease !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .span-col {

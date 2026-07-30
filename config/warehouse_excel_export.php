@@ -34,21 +34,19 @@ return [
             'key' => 'standard',
             'title' => 'Xuất Excel kiểu 1',
             'tone' => 'primary',
-            'filename_prefix' => 'admin_kho',
+            // filename_prefix omitted → WarehouseOrderExcelExportService uses config('app.name') slug
             'extension' => 'xls',
         ],
         'shipping' => [
             'key' => 'shipping',
             'title' => 'Xuất Excel kiểu 2',
             'tone' => 'success',
-            'filename_prefix' => 'admin_kho',
             'extension' => 'xls',
         ],
         'accounting' => [
             'key' => 'accounting',
             'title' => 'Xuất Excel kiểu 3',
             'tone' => 'warning',
-            'filename_prefix' => 'admin_kho',
             'extension' => 'xlsx',
         ],
     ],

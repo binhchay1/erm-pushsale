@@ -250,7 +250,24 @@ html body.pushsale-app-body .ps-sale-operation-table .ps-order-money-breakdown,
 html body.pushsale-app-body .ps-wh-table .ps-order-money-breakdown,
 html body.pushsale-app-body .ps-acc-operation-table .ps-order-money-breakdown,
 html body.pushsale-app-body .ps-customer-profile-table .ps-order-money-breakdown {
-    min-width: 110px !important;
+    min-width: 120px !important;
+    max-width: none !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-acc-operation-table td.ps-col-money,
+html body.pushsale-app-body .ps-acc-operation-table th.ps-col-money,
+html body.pushsale-app-body .ps-sale-operation-table td.c-money-body,
+html body.pushsale-app-body .ps-sale-operation-table th.c-money {
+    min-width: 120px !important;
+    width: 140px !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-order-money-breakdown .ps-order-money-line {
+    position: static !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
 }
 
 

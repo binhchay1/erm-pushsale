@@ -77,7 +77,7 @@ function emptyForm(defaultSender = '') {
 function HandoverModal({ open, mode, form, providers, onChange, onClose, onSubmit, processing }) {
     if (!open) return null;
 
-    const title = mode === 'edit' ? 'Cập nhật biên bản' : 'Cập nhật biên bản';
+    const title = mode === 'edit' ? 'Cập nhật biên bản' : 'Biên bản bàn giao vận đơn';
 
     return (
         <div className="ps-handover-modal-backdrop" role="dialog" aria-modal="true">
@@ -240,24 +240,7 @@ export default function WarehouseDeliveryHandoverPage({ schema, rows = [], pagin
                 headerClassName="ps-handover-header"
                 defaultFiltersCollapsed={false}
                 filters={(
-                    <div className="ps-handover-search">
-                        <input
-                            className="form-control"
-                            form="ps-handover-search-form"
-                            name="search"
-                            value={filters.search}
-                            onChange={(event) => setFilter('search', event.target.value)}
-                            placeholder=""
-                        />
-                    </div>
-                )}
-                actions={(
-                    <button type="submit" form="ps-handover-search-form" className="btn btn-primary btn-sm">
-                        <i className="fa fa-search" /> Tìm kiếm
-                    </button>
-                )}
-                advancedFilters={(
-                    <div className="ps-handover-filter-row ps-adv-filter-panel">
+                    <div className="ps-handover-filters">
                         <select form="ps-handover-search-form" name="handover_status" value={filters.handover_status} onChange={(event) => setFilter('handover_status', event.target.value)}>
                             {statuses.map((status) => <option key={status.id} value={status.id}>{status.label}</option>)}
                         </select>
@@ -265,7 +248,21 @@ export default function WarehouseDeliveryHandoverPage({ schema, rows = [], pagin
                             <option value="-1">--Chọn đơn vị giao hàng--</option>
                             {providers.map((provider) => <option key={provider.id} value={provider.id}>{optionLabel(provider)}</option>)}
                         </select>
-                        <div className="ps-handover-filter-spacer" />
+                        <input
+                            className="form-control"
+                            form="ps-handover-search-form"
+                            name="search"
+                            value={filters.search}
+                            onChange={(event) => setFilter('search', event.target.value)}
+                            placeholder="Tìm kiếm"
+                        />
+                    </div>
+                )}
+                actions={(
+                    <div className="ps-handover-actions-row">
+                        <button type="submit" form="ps-handover-search-form" className="btn btn-primary btn-sm">
+                            <i className="fa fa-search" /> Tìm kiếm
+                        </button>
                         <button type="button" className="btn btn-primary btn-sm" onClick={openCreate}>
                             <i className="fa fa-plus" /> Thêm mới
                         </button>

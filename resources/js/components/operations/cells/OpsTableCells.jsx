@@ -132,9 +132,9 @@ export function CustomerContactCell({
                     <span>{name}</span>
                 )}
             </div>
+            {carrier ? <div className="nha-mang text-left ps-contact-carrier-line">{carrier}</div> : null}
             <div className="no-wrap ps-contact-phone-row">
                 <div className="ps-phone-main">
-                    {carrier ? <span className="nha-mang">{carrier}</span> : null}
                     {onDuplicateOrders ? (
                         <button
                             type="button"
@@ -147,10 +147,11 @@ export function CustomerContactCell({
                     ) : (
                         <span className="ps-phone-text">{phone || '—'}</span>
                     )}
-                    {phoneActions}
                     {flags}
                 </div>
             </div>
+            {/* phoneActions (call icon) intentionally omitted from contact stack — name / carrier / phone only */}
+            {phoneActions ? <div className="ps-contact-phone-actions">{phoneActions}</div> : null}
             <div className="text-left khkn sline">{order.customerExtraNote || ''}</div>
             {order.desiredDeliveryAt ? (
                 <div className="small-tip">({formatOpsDateTime(order.desiredDeliveryAt)})</div>

@@ -11,16 +11,16 @@ html body.pushsale-app-body .m-header-wrap.ps-handover-header {
     margin: 0 !important;
 }
 
-.ps-handover-search {
+.ps-handover-filters {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
-    gap: 12px !important;
-    min-width: 260px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
 }
 
-.ps-handover-search input,
-.ps-handover-filter-row select,
+.ps-handover-filters input,
+.ps-handover-filters select,
 .ps-handover-form input,
 .ps-handover-form select {
     height: 31px !important;
@@ -34,8 +34,20 @@ html body.pushsale-app-body .m-header-wrap.ps-handover-header {
     color: #000 !important;
 }
 
-.ps-handover-search input {
-    width: 260px !important;
+.ps-handover-filters input[name="search"] {
+    width: 180px !important;
+}
+
+.ps-handover-filters select {
+    width: 160px !important;
+    max-width: 180px !important;
+}
+
+.ps-handover-actions-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
 }
 
 .ps-handover-page .btn.btn-primary,
@@ -51,23 +63,12 @@ html body.pushsale-app-body .m-header-wrap.ps-handover-header {
     font-size: 13px !important;
 }
 
-.ps-handover-filter-row {
-    display: grid !important;
-    grid-template-columns: minmax(240px, 300px) minmax(260px, 320px) 1fr auto !important;
-    gap: 26px !important;
-    align-items: center !important;
-    margin-bottom: 10px !important;
-}
-
-.ps-handover-filter-row select {
-    width: 100% !important;
-}
-
 .ps-handover-table-wrap {
     width: 100% !important;
     overflow-x: auto !important;
     overflow-y: visible !important;
     margin-top: 6px !important;
+    padding: 0 !important;
 }
 
 .ps-handover-table {
@@ -170,7 +171,8 @@ html body.pushsale-app-body .m-header-wrap.ps-handover-header {
 .ps-handover-modal {
     width: 600px !important;
     max-width: calc(100vw - 22px) !important;
-    height: min(930px, calc(100vh - 12px)) !important;
+    height: auto !important;
+    max-height: calc(100vh - 24px) !important;
     background: #fff !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.32) !important;
     overflow-y: auto !important;
@@ -233,12 +235,9 @@ html body.pushsale-app-body .m-header-wrap.ps-handover-header {
 }
 
 @media (max-width: 900px) {
-    .ps-handover-filter-row {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px !important;
-    }
-
-    .ps-handover-filter-spacer {
-        display: none !important;
+    .ps-handover-filters input[name="search"],
+    .ps-handover-filters select {
+        width: 140px !important;
+        max-width: 160px !important;
     }
 }

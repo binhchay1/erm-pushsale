@@ -22,23 +22,6 @@ import { useT } from '@/providers/I18nProvider';
 import { useConfirm } from '@/hooks/use-confirm';
 import { PushsalePagination } from './PushsalePagination';
 
-function CallButton({ order, actionBaseUrl }) {
-    const call = () => router.post(`${actionBaseUrl}/orders/${order.id}/call`, {}, {
-        preserveScroll: true,
-        onSuccess: () => toast.success('Đã ghi nhận cuộc gọi.'),
-        onError: (errors) => toast.error(errors.order ?? 'Không thể ghi nhận cuộc gọi.'),
-    });
-
-    return (
-        <OpsIconButton
-            title="Ghi nhận cuộc gọi"
-            icon="phone"
-            onClick={call}
-            disabled={!order.canCall}
-        />
-    );
-}
-
 function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
     const t = useT();
     const [value, setValue] = useState('');
@@ -298,7 +281,6 @@ export function SaleWorkspaceTable({
                                         onEdit={() => onEdit(order, false)}
                                         onPurchaseHistory={() => onPurchaseHistory(order)}
                                         onDuplicateOrders={() => onDuplicateOrders(order)}
-                                        phoneActions={<CallButton order={order} actionBaseUrl={actionBaseUrl} />}
                                         flags={(
                                             <OrderStatusFlags
                                                 row={order}

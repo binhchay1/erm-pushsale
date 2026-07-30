@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
+import { Code128Barcode } from '@/components/shipping/Code128Barcode';
 import { apiRequest } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
@@ -24,29 +25,56 @@ function sortLabels(labels, sortBy) {
     return list;
 }
 
-function InternalLabelCard({ label, settings }) {
-    const t = settings.toggles || {};
-    const products = (label.products || []).filter((item) => {
-        if (t.print_combo === false && item.item_type === 'combo') return false;
-        return true;
+function expandProducts(products, toggles = {}) {
+    const list = [];
+    (products || []).forEach((item) => {
+        if (toggles.print_combo === false && item.item_type === 'combo') return;
+        list.push(item);
+        if (toggles.print_combo_detail && Array.isArray(item.children) && item.children.length) {
+            item.children.forEach((child) => {
+                list.push({
+                    ...child,
+                    name: `↳ ${child.name || child.product_name || ''}`,
+                    quantity: child.quantity,
+                });
+            });
+        }
     });
+    return list;
+}
+
+function InternalLabelCard({ label, settings, featureFlags = {}, mode = 'label' }) {
+    const t = settings.toggles || {};
+    const products = expandProducts(label.products || [], t);
     const phone = maskPhone(label.receiver_phone, t.mask_customer_phone);
     const tracking = t.use_pushsale_as_tracking ? label.order_code : (label.tracking_number || label.order_code);
-    const sender = settings.sender_text || label.sender_print_note || label.sender_name || '';
+    const sender = t.sender_by_warehouse
+        ? (settings.sender_text || label.warehouse_name || label.sender_print_note || label.sender_name || featureFlags.default_sender || '')
+        : (settings.sender_text || label.sender_print_note || label.sender_name || featureFlags.default_sender || '');
     const note = settings.note_text || label.shipping_notes || label.customer_note || '';
+    const showLogo = Boolean(featureFlags.watermark_logo);
+    const title = mode === 'invoice' ? 'HÓA ĐƠN BÁN HÀNG' : 'PHIẾU GỬI HÀNG';
 
     return (
-        <article className="ps-print-label-card" style={{ fontSize: `${settings.font_product || 12}px` }}>
+        <article
+            className={`ps-print-label-card${mode === 'invoice' ? ' is-invoice' : ''}${t.multi_per_page ? ' is-multi' : ''}`}
+            style={{ fontSize: `${settings.font_product || 12}px`, minHeight: settings.height ? `${settings.height}px` : undefined }}
+        >
+            {showLogo ? (
+                <div className="ps-print-logo-watermark" aria-hidden="true">
+                    {featureFlags.app_name || 'Logo'}
+                </div>
+            ) : null}
             <header className="ps-print-label-head">
-                <div className="ps-print-barcode" style={{ fontSize: `${settings.font_barcode || 11}px` }}>*{tracking}*</div>
-                <div className="ps-print-title">PHIẾU GỬI HÀNG</div>
-                <div className="ps-print-province">{label.province || '—'}</div>
+                <Code128Barcode value={tracking} height={Math.max(28, Number(settings.font_barcode || 11) * 3)} />
+                <div className="ps-print-title">{title}</div>
+                {mode === 'label' ? <div className="ps-print-province">{label.province || '—'}</div> : null}
             </header>
             <div className="ps-print-meta">
                 <div>
-                    <b>Mã vận đơn:</b>
+                    <b>{mode === 'invoice' ? 'Số HĐ:' : 'Mã vận đơn:'}</b>
                     {' '}
-                    {label.tracking_number || '—'}
+                    {label.tracking_number || label.order_code || '—'}
                 </div>
                 <div style={{ fontSize: `${settings.font_order_code || 11}px` }}>
                     <b>Mã đơn:</b>
@@ -57,7 +85,7 @@ function InternalLabelCard({ label, settings }) {
             <div className="ps-print-block">
                 <b>Người gửi:</b>
                 {' '}
-                {sender || '—'}
+                {t.sender_is_ctv ? (label.sale_name || sender || '—') : (sender || '—')}
                 {t.show_sale_phone && label.sale_phone ? ` · Sale: ${label.sale_phone}` : ''}
                 {t.show_print_date ? ` · ${new Date().toLocaleDateString('vi-VN')}` : ''}
             </div>
@@ -70,7 +98,7 @@ function InternalLabelCard({ label, settings }) {
                 <div>
                     <b>SĐT:</b>
                     {' '}
-                    <strong>{phone}</strong>
+                    <strong>{featureFlags.fixed_receiver_phone || phone}</strong>
                 </div>
                 <div>
                     <b>ĐC:</b>
@@ -111,7 +139,7 @@ function InternalLabelCard({ label, settings }) {
                     </div>
                 ) : null}
                 <div className="ps-print-cod">
-                    Tiền thu hộ:
+                    {mode === 'invoice' ? 'Tổng thanh toán:' : 'Tiền thu hộ:'}
                     {' '}
                     {formatCurrency(label.cod)}
                 </div>
@@ -122,7 +150,7 @@ function InternalLabelCard({ label, settings }) {
             {settings.footer_text ? (
                 <div className="ps-print-footer" style={{ fontSize: `${settings.font_footer || 12}px` }}>{settings.footer_text}</div>
             ) : null}
-            {!t.hide_qr ? (
+            {!t.hide_qr && mode === 'label' ? (
                 <div className="ps-print-qr" style={{ width: settings.qr_size || 70, height: settings.qr_size || 70 }}>
                     QR
                 </div>
@@ -162,7 +190,7 @@ export default function ShippingLabelPrint({
     }));
     const [busy, setBusy] = useState(false);
     const [carrierErrors, setCarrierErrors] = useState([]);
-    const [activeTab, setActiveTab] = useState(defaults.tab || profile.tabs?.[0]?.value || 'print');
+    const [activeTab, setActiveTab] = useState(defaults.tab || profile.tabs?.[0]?.value || 'label');
 
     useEffect(() => {
         const key = `ps-print-settings:${profile.key}`;
@@ -180,6 +208,28 @@ export default function ShippingLabelPrint({
             // ignore
         }
     }, [profile.key, labels.length]);
+
+    useEffect(() => {
+        // Seed toggle defaults from profile when missing.
+        setSettings((old) => {
+            const next = { ...(old.toggles || {}) };
+            let changed = false;
+            (profile.toggles || []).forEach((toggle) => {
+                if (next[toggle.key] === undefined && toggle.default !== undefined) {
+                    next[toggle.key] = Boolean(toggle.default);
+                    changed = true;
+                }
+            });
+            if (!changed) return old;
+            const merged = { ...old, toggles: next };
+            try {
+                localStorage.setItem(`ps-print-settings:${profile.key}`, JSON.stringify(merged));
+            } catch {
+                // ignore
+            }
+            return merged;
+        });
+    }, [profile.key, profile.toggles]);
 
     const persistSettings = (next) => {
         setSettings(next);
@@ -543,10 +593,49 @@ export default function ShippingLabelPrint({
                 {profile.ui === 'internal' ? (
                     <div className="ps-print-internal">
                         <div className="ps-print-preview">
-                            {visibleLabels.map((label) => (
-                                <InternalLabelCard key={label.id} label={label} settings={settings} />
-                            ))}
-                            {!visibleLabels.length ? <div className="ps-print-empty">Không có đơn để in.</div> : null}
+                            {activeTab === 'settings' ? (
+                                <div className="ps-print-settings-panel no-print">
+                                    <h3>Thiết lập chung</h3>
+                                    <p className="text-muted">Chỉnh mẫu in, cỡ chữ và các tùy chọn bên phải. Bản xem trước cập nhật ngay trên tab Phiếu gửi hàng / Hóa đơn.</p>
+                                    <ul className="ps-print-settings-summary">
+                                        {(profile.toggles || []).map((toggle) => (
+                                            <li key={toggle.key}>
+                                                <strong>{toggle.label}:</strong>
+                                                {' '}
+                                                {settings.toggles?.[toggle.key] ? 'Bật' : 'Tắt'}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    {featureFlags.watermark_logo ? (
+                                        <div className="ps-print-logo-preview">
+                                            Logo chìm:
+                                            {' '}
+                                            <strong>{featureFlags.app_name || 'Bật'}</strong>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ) : null}
+                            {activeTab === 'label' || activeTab === 'print' ? visibleLabels.map((label) => (
+                                <InternalLabelCard
+                                    key={`label-${label.id}`}
+                                    label={label}
+                                    settings={settings}
+                                    featureFlags={featureFlags}
+                                    mode="label"
+                                />
+                            )) : null}
+                            {activeTab === 'invoice' ? visibleLabels.map((label) => (
+                                <InternalLabelCard
+                                    key={`invoice-${label.id}`}
+                                    label={label}
+                                    settings={settings}
+                                    featureFlags={featureFlags}
+                                    mode="invoice"
+                                />
+                            )) : null}
+                            {(activeTab === 'label' || activeTab === 'print' || activeTab === 'invoice') && !visibleLabels.length ? (
+                                <div className="ps-print-empty">Không có đơn để in.</div>
+                            ) : null}
                         </div>
                         <div className="no-print">{renderInternalSidebar()}</div>
                     </div>

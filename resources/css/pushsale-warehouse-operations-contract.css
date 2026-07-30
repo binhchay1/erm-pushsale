@@ -548,9 +548,64 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td.c-products-body {
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-money,
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td.c-money-body {
-    max-width: 92px !important;
-    min-width: 78px !important;
-    width: 86px !important;
+    max-width: 160px !important;
+    min-width: 120px !important;
+    width: 140px !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-money-breakdown,
+html body.pushsale-app-body .ps-wh-page .c-money-body .tb-in-sp {
+    min-width: 110px !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-money-line,
+html body.pushsale-app-body .ps-wh-page .c-money-body .tb-in-sp .ps-order-money-line {
+    position: static !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+}
+
+/* Care note: fixed collapsed slot + absolute expand overlay */
+html body.pushsale-app-body .ps-wh-page .ps-care-note-editor .ps-care-note-mof,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-editor .ps-care-note-mof {
+    position: relative !important;
+    min-height: 48px !important;
+    height: 48px !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-care-note-editor textarea.txt-mof,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-editor textarea.txt-mof {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    resize: none !important;
+    transition: background .12s ease, box-shadow .12s ease !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-care-note-editor.is-expanded,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-editor.is-expanded {
+    z-index: 60 !important;
+    position: relative !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-care-note-editor.is-expanded textarea.txt-mof,
+html body.pushsale-app-body .ps-wh-page .ps-care-note-editor .ps-care-note-mof:focus-within textarea.txt-mof,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-editor.is-expanded textarea.txt-mof,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-editor .ps-care-note-mof:focus-within textarea.txt-mof {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 260px !important;
+    height: 120px !important;
+    min-height: 120px !important;
+    max-height: 160px !important;
+    z-index: 70 !important;
+    background: #fff !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .18) !important;
+    overflow-y: auto !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-deposit,

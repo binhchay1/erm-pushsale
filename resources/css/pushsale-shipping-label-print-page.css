@@ -60,6 +60,59 @@ html body.pushsale-app-body .ps-print-barcode {
     letter-spacing: 1px;
 }
 
+html body.pushsale-app-body .ps-print-barcode-wrap {
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+html body.pushsale-app-body .ps-print-barcode-svg {
+    line-height: 0;
+    margin: 0 auto;
+    max-width: 100%;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-print-barcode-caption {
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+html body.pushsale-app-body .ps-print-logo-watermark {
+    color: rgba(0, 0, 0, 0.08);
+    font-size: 42px;
+    font-weight: 700;
+    left: 50%;
+    letter-spacing: 2px;
+    pointer-events: none;
+    position: absolute;
+    top: 40%;
+    transform: translate(-50%, -50%) rotate(-24deg);
+    white-space: nowrap;
+    z-index: 0;
+}
+
+html body.pushsale-app-body .ps-print-label-card {
+    position: relative;
+}
+
+html body.pushsale-app-body .ps-print-label-card.is-invoice .ps-print-title {
+    color: #0b5;
+}
+
+html body.pushsale-app-body .ps-print-settings-panel {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    padding: 16px;
+}
+
+html body.pushsale-app-body .ps-print-settings-summary {
+    columns: 2;
+    margin: 12px 0 0;
+    padding-left: 18px;
+}
+
 html body.pushsale-app-body .ps-print-products {
     margin: 8px 0;
     width: 100%;

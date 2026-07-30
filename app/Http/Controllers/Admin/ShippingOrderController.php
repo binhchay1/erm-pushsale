@@ -148,8 +148,17 @@ class ShippingOrderController extends Controller
             return $blocked;
         }
 
-        $provider = $request->string('provider')->toString() ?: null;
-        $service->cancel($order, $provider);
+        try {
+            $provider = $request->string('provider')->toString() ?: null;
+            $service->cancel($order, $provider);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage() ?: 'Không hủy được vận đơn.',
+            ], 422);
+        }
 
         return response()->json(array_merge(
             ['success' => true, 'message' => __('messages.shipping_actions.waybill_cancelled')],

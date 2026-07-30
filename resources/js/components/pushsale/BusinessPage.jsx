@@ -1761,6 +1761,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
     }, [openCreate, routeUrl, schema.code, schema.import_url]);
 
     const isVoucherEntryPage = String(schema.code) === '5.3.1';
+    const isWarehouseReportPage = /^5\.5\./.test(String(schema.code ?? ''));
     const voucherId = summary?.voucher_id ?? summary?.id ?? rows?.[0]?.voucher_id ?? '';
     const voucherTitle = voucherId
         ? `${schema.title} (${voucherId})`
@@ -1778,7 +1779,10 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
     return (
         <AppLayout>
             <Head title={schema.title} />
-            <div className={`pushsale-page pushsale-kind-${schema.kind}${isVoucherEntryPage ? ' ps-voucher-entry-page' : ''}`} data-page-code={schema.code}>
+            <div
+                className={`pushsale-page pushsale-kind-${schema.kind}${isVoucherEntryPage ? ' ps-voucher-entry-page' : ''}${isWarehouseReportPage ? ' ps-warehouse-report-page' : ''}`}
+                data-page-code={schema.code}
+            >
                 {isVoucherEntryPage ? (
                     <PageHeader
                         title={voucherTitle}
@@ -1794,6 +1798,13 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
                                 <i className="fa fa-close" /> Đóng
                             </button>
                         )}
+                    />
+                ) : null}
+                {isWarehouseReportPage ? (
+                    <PageHeader
+                        title={schema.title}
+                        pageCode={String(schema.code)}
+                        className="ps-warehouse-report-header"
                     />
                 ) : null}
                 {(error || pageRuntimeError) && <div className="pushsale-error-banner"><i className="fa fa-exclamation-triangle" /> {error || pageRuntimeError}</div>}

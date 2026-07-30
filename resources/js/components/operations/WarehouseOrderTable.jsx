@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { ShippingOrderDetailDialog } from '@/components/shipping/ShippingOrderDetailDialog';
 import { WarehouseActionDialogs } from '@/components/operations/WarehouseActionDialogs';
 import { RegisterShipmentDialog } from '@/components/operations/RegisterShipmentDialog';
+import { AddToHandoverDialog } from '@/components/operations/AddToHandoverDialog';
 import { UpdateDeliveryStatusByCodeDialog } from '@/components/operations/UpdateDeliveryStatusByCodeDialog';
 import { UpdateDeliveryStatusExcelDialog } from '@/components/operations/UpdateDeliveryStatusExcelDialog';
 import { OrderMoneyBreakdown, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
@@ -111,20 +112,27 @@ function FloatingWarehouseActions({
     deliveryStatuses = [],
     printButtons = [],
     exportButtons = [],
-    onOpenSingle,
+    shippingProviders = [],
     onClear,
     onReload,
 }) {
     const { ask } = useConfirm();
     const [open, setOpen] = useState(false);
     const [registerOpen, setRegisterOpen] = useState(false);
+    const [handoverOpen, setHandoverOpen] = useState(false);
     const [ttghCodeOpen, setTtghCodeOpen] = useState(false);
     const [ttghExcelOpen, setTtghExcelOpen] = useState(false);
     const [exportBusy, setExportBusy] = useState(false);
-    const selectedCount = selectedRows.length;
     const selectedIds = selectedRows.map((row) => row.id);
     const selectedValidForShipment = selectedRows.filter((row) => row.canCreateShipment && !row.hasInsufficientStock);
-    const selectedCodesText = selectedRows.map((row) => row.orderCode).filter(Boolean).join('\n');
+
+    const resolveActionRows = () => (selectedRows.length ? selectedRows : pageRows);
+    const resolveActionIds = () => {
+        const rows = resolveActionRows();
+        return rows.map((row) => row.id).filter(Boolean);
+    };
+    const resolveActionCodesText = () => resolveActionRows().map((row) => row.orderCode).filter(Boolean).join('\n');
+
     const printFabButtons = printButtons.length
         ? printButtons
         : [
@@ -142,18 +150,6 @@ function FloatingWarehouseActions({
             { key: 'shipping', title: 'Xuất Excel kiểu 2', tone: 'success', icon: 'file-excel-o' },
             { key: 'accounting', title: 'Xuất Excel kiểu 3', tone: 'warning', icon: 'file-excel-o' },
         ];
-    const requireSelected = (callback, message = 'Chọn ít nhất 1 đơn ở cột đầu tiên trước khi thao tác.') => {
-        if (!selectedCount) {
-            toast.error(message);
-            return;
-        }
-        callback();
-    };
-
-    const resolveActionIds = () => {
-        if (selectedIds.length) return selectedIds;
-        return pageRows.map((row) => row.id).filter(Boolean);
-    };
 
     const bulkUpdatePageUrl = `${actionApiBase}/update-by-code`;
 
@@ -167,42 +163,53 @@ function FloatingWarehouseActions({
     };
 
     const createShipments = async () => {
-        if (!selectedCount) {
+        const targetRows = selectedRows.length
+            ? selectedValidForShipment
+            : pageRows.filter((row) => row.canCreateShipment && !row.hasInsufficientStock);
+
+        if (!selectedRows.length && !targetRows.length) {
             setRegisterOpen(true);
             return;
         }
-        if (!selectedValidForShipment.length) {
-            toast.error('Không có đơn đủ điều kiện tạo vận đơn trong các dòng đã chọn.');
+        if (!targetRows.length) {
+            toast.error('Không có đơn đủ điều kiện tạo vận đơn trên trang / lựa chọn hiện tại.');
             return;
         }
         const ok = await ask({
-            description: 'Bạn chắc chắn muốn đăng đơn?',
+            title: 'Đăng đơn',
+            description: `Bạn chắc chắn muốn đăng đơn cho ${targetRows.length} đơn?`,
             confirmLabel: 'Đăng đơn',
         });
         if (!ok) return;
         try {
-            for (const row of selectedValidForShipment) await apiPost(`${apiBase}/${row.id}/create-shipment`);
-            toast.success(`Đã đăng vận đơn cho ${selectedValidForShipment.length} đơn.`);
+            for (const row of targetRows) await apiPost(`${apiBase}/${row.id}/create-shipment`);
+            toast.success(`Đã đăng vận đơn cho ${targetRows.length} đơn.`);
             onClear();
             onReload();
         } catch (error) { toast.error(error.message); }
     };
 
     const cancelShipments = async () => {
-        requireSelected(async () => {
-            const ok = await ask({
-                description: 'Bạn chắc chắn muốn hủy đơn?',
-                confirmLabel: 'Hủy đăng đơn',
-                variant: 'destructive',
-            });
-            if (!ok) return;
-            try {
-                for (const row of selectedRows) await apiRequest(`${apiBase}/${row.id}/cancel-shipment`, { method: 'POST', body: {} });
-                toast.success(`Đã gửi yêu cầu hủy vận đơn cho ${selectedCount} đơn.`);
-                onClear();
-                onReload();
-            } catch (error) { toast.error(error.message); }
+        const rows = resolveActionRows();
+        if (!rows.length) {
+            toast.error('Không có đơn để hủy. Chọn đơn hoặc đảm bảo trang hiện tại có dữ liệu.');
+            return;
+        }
+        const ok = await ask({
+            title: 'Hủy đăng đơn',
+            description: `Bạn chắc chắn muốn hủy đăng đơn cho ${rows.length} đơn đang hiển thị / đã chọn?`,
+            confirmLabel: 'Hủy đăng đơn',
+            variant: 'destructive',
         });
+        if (!ok) return;
+        try {
+            for (const row of rows) {
+                await apiRequest(`${apiBase}/${row.id}/cancel-shipment`, { method: 'POST', body: {} });
+            }
+            toast.success(`Đã gửi yêu cầu hủy vận đơn cho ${rows.length} đơn.`);
+            onClear();
+            onReload();
+        } catch (error) { toast.error(error.message); }
     };
 
     const exportExcel = async (kind, type = 'standard') => {
@@ -210,17 +217,19 @@ function FloatingWarehouseActions({
             toast.warning('Đang xuất Excel, vui lòng đợi xong trước khi bấm tiếp.');
             return;
         }
+        const ids = resolveActionIds();
+        if (!ids.length) {
+            toast.error('Không có đơn để xuất. Chọn đơn hoặc đảm bảo trang hiện tại có dữ liệu.');
+            return;
+        }
         setExportBusy(true);
         try {
-            const payload = {
+            await postDownload(`${actionApiBase}/bulk/export`, {
                 type,
-                ids: selectedIds,
+                ids,
                 filters,
-            };
-            await postDownload(`${actionApiBase}/bulk/export`, payload, `warehouse-${type}.xls`);
-            toast.success(selectedIds.length
-                ? `${kind}: đã xuất ${selectedIds.length} đơn đã chọn.`
-                : `${kind}: đã xuất theo bộ lọc hiện tại.`);
+            }, `warehouse-${type}.xls`);
+            toast.success(`${kind}: đã xuất ${ids.length} đơn.`);
         } catch (error) {
             toast.error(error.message);
         } finally {
@@ -244,11 +253,20 @@ function FloatingWarehouseActions({
     };
 
     const openBulkUpdatePage = () => {
-        const codes = selectedRows.map((row) => row.orderCode).filter(Boolean).join('\n');
+        const codes = resolveActionCodesText();
         const url = codes
             ? `${bulkUpdatePageUrl}?codes=${encodeURIComponent(codes)}`
             : bulkUpdatePageUrl;
         router.visit(url);
+    };
+
+    const openHandoverDialog = () => {
+        const rows = resolveActionRows();
+        if (!rows.length) {
+            toast.error('Không có đơn để thêm vào biên bản.');
+            return;
+        }
+        setHandoverOpen(true);
     };
 
     return (
@@ -287,7 +305,7 @@ function FloatingWarehouseActions({
                         ))}
                     </div>
                     <div className="icon-row">
-                        <ActionMenuButton title="Thêm đơn vào biên bản" icon="file-text-o" tone="success" onClick={() => onOpenSingle('return')} />
+                        <ActionMenuButton title="Thêm đơn vào biên bản" icon="file-text-o" tone="success" onClick={openHandoverDialog} />
                         <ActionMenuButton title="Xuất hóa đơn điện tử theo mã đơn" icon="barcode" tone="success" onClick={issueInvoices} />
                     </div>
                     <div className="icon-row">
@@ -305,11 +323,18 @@ function FloatingWarehouseActions({
                 apiBase={apiBase}
                 onDone={() => { onClear(); onReload(); }}
             />
+            <AddToHandoverDialog
+                open={handoverOpen}
+                onOpenChange={setHandoverOpen}
+                targetRows={resolveActionRows()}
+                providers={shippingProviders}
+                onDone={() => { onClear(); onReload(); }}
+            />
             <UpdateDeliveryStatusByCodeDialog
                 open={ttghCodeOpen}
                 onOpenChange={setTtghCodeOpen}
                 actionApiBase={actionApiBase}
-                initialCodes={selectedCodesText}
+                initialCodes={resolveActionCodesText()}
                 deliveryStatuses={deliveryStatuses}
                 onDone={() => { onClear(); onReload(); }}
             />
@@ -331,14 +356,7 @@ function LegacyStatus({ row }) {
 function CareNoteCell({ row, actionApiBase, onCare, onMessage }) {
     const [value, setValue] = useState('');
     const [saving, setSaving] = useState(false);
-    const textareaRef = useRef(null);
-
-    useEffect(() => {
-        const node = textareaRef.current;
-        if (!node) return;
-        node.style.height = '48px';
-        node.style.height = `${Math.min(120, Math.max(48, node.scrollHeight))}px`;
-    }, [value]);
+    const [expanded, setExpanded] = useState(false);
 
     const saveNote = async () => {
         const note = value.trim();
@@ -363,7 +381,7 @@ function CareNoteCell({ row, actionApiBase, onCare, onMessage }) {
     };
 
     return (
-        <td className="text-left c-care-body">
+        <td className={`text-left c-care-body ps-care-note-editor${expanded ? ' is-expanded' : ''}`}>
             <div style={{ paddingBottom: 4 }} className="small-tip text-center">
                 {formatDateTime(row.warehouseCareUpdatedAt, { withSeconds: false })}
             </div>
@@ -380,15 +398,20 @@ function CareNoteCell({ row, actionApiBase, onCare, onMessage }) {
                 <InlineIconButton title="Lưu ghi chú" icon="save" onClick={saveNote} disabled={saving} />
                 <InlineIconButton title="Tin nhắn nội bộ" icon="commenting-o" onClick={onMessage} />
             </span>
-            <div className="mof-container text-left">
+            <div
+                className="mof-container text-left ps-care-note-mof"
+                onMouseEnter={() => setExpanded(true)}
+                onMouseLeave={() => setExpanded(false)}
+            >
                 <textarea
-                    ref={textareaRef}
                     className="txt-mof form-control txt-dotted"
                     value={value}
                     maxLength={200}
                     rows={2}
                     placeholder=""
                     onChange={(event) => setValue(event.target.value)}
+                    onFocus={() => setExpanded(true)}
+                    onBlur={() => setExpanded(false)}
                     onKeyDown={(event) => {
                         if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') saveNote();
                     }}
@@ -438,13 +461,6 @@ export function WarehouseOrderTable({
     const toggle = (id) => setSelected((current) => current.includes(String(id)) ? current.filter((item) => item !== String(id)) : [...current, String(id)]);
 
     const reload = () => router.reload({ only: ['report'] });
-    const openSingleSelected = (type) => {
-        if (selectedRows.length !== 1) {
-            toast.error('Chọn đúng 1 đơn để thao tác.');
-            return;
-        }
-        setAction({ type, row: selectedRows[0] });
-    };
 
     const printLabel = async (row, reloadAfter = true) => {
         try {
@@ -628,7 +644,7 @@ export function WarehouseOrderTable({
                 deliveryStatuses={filterOptions.deliveryStatuses ?? []}
                 printButtons={printButtons}
                 exportButtons={exportButtons}
-                onOpenSingle={openSingleSelected}
+                shippingProviders={filterOptions.shippingProviders ?? []}
                 onClear={() => setSelected([])}
                 onReload={reload}
             />

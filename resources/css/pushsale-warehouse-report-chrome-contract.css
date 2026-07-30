@@ -1,0 +1,118 @@
+/* Shared chrome for warehouse menu 5.5 reports (BusinessPage + ExtraReport).
+   Aligns title / filters / table gutters with PageHeader ops pages. */
+
+html body.pushsale-app-body .ps-warehouse-report-page,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page {
+    padding: 0 14px 14px !important;
+    margin: 0 !important;
+    background: #fff !important;
+}
+
+/* Hide native template primary header when React PageHeader is present. */
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page [data-pushsale-chrome-role='primary-header'] {
+    display: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-template-empty-spacer,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-native-empty-spacer,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .content-header {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Compact filter rows that remain in the HTML template body. */
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-composite-filter-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 8px 0 10px !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row > [class*='col-'],
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-composite-filter-row > [class*='col-'] {
+    width: auto !important;
+    float: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-empty-column {
+    display: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row select,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row input:not([type='hidden']):not([type='checkbox']):not([type='radio']),
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-composite-filter-row select,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-composite-filter-row input:not([type='hidden']):not([type='checkbox']):not([type='radio']) {
+    height: 31px !important;
+    min-height: 31px !important;
+    max-width: 200px !important;
+    width: auto !important;
+    min-width: 120px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row .btn,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-composite-filter-row .btn {
+    height: 31px !important;
+    padding: 5px 12px !important;
+    line-height: 18px !important;
+    white-space: nowrap !important;
+}
+
+/* Table gutters match PageHeader padding (14px on page root). */
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box-body,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .table-responsive {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-report-page .ps-report-table-shell,
+html body.pushsale-app-body .ps-warehouse-report-page .ps-table-scroll,
+html body.pushsale-app-body .ps-warehouse-report-page .ps-system-business-shell,
+html body.pushsale-app-body .ps-warehouse-report-page .ps-sales-revenue-scroll {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* ExtraReport toolbars under 5.5: denser controls + same page padding. */
+html body.pushsale-app-body .ps-warehouse-report-page.ps-report-page {
+    padding: 0 14px 14px !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-report-page .ps-report-toolbar-controls,
+html body.pushsale-app-body .ps-warehouse-report-page .ps-report-v2-primary {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-report-page .ps-report-toolbar-controls .ps-control,
+html body.pushsale-app-body .ps-warehouse-report-page .ps-report-v2-primary .ps-control,
+html body.pushsale-app-body .ps-warehouse-report-page .ps-report-toolbar-controls select,
+html body.pushsale-app-body .ps-warehouse-report-page .ps-report-v2-primary select {
+    height: 31px !important;
+    min-height: 31px !important;
+    max-width: 180px !important;
+}
+
+html body.pushsale-app-body .ps-warehouse-report-page .ps-report-toolbar-actions .btn,
+html body.pushsale-app-body .ps-warehouse-report-page .ps-report-toolbar-actions button {
+    height: 31px !important;
+    padding: 5px 12px !important;
+    white-space: nowrap !important;
+}
