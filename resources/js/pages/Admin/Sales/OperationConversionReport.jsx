@@ -1,5 +1,5 @@
-import { Head, router } from '@inertiajs/react';
-import { Fragment, useMemo, useState } from 'react';
+import { Head } from '@inertiajs/react';
+import { Fragment, useMemo } from 'react';
 
 import { OperationStageSelect } from '@/components/filters/OperationStageSelect';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -12,6 +12,7 @@ import {
     PushsaleSelect,
 } from '@/components/reports/PushsaleReportChrome';
 import { reportPerPageOptions, resolveFilterOptions } from '@/config/reportFilters';
+import { cleanInertiaFilters, readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
@@ -28,35 +29,23 @@ const METRIC_OPTIONS = [
     { id: 'total_rate', label: '4.Tỷ lệ chốt' },
 ];
 
-function currentQuery() {
-    if (typeof window === 'undefined') return new URLSearchParams();
-    return new URLSearchParams(window.location.search);
-}
-
 function todayIso() {
     const date = new Date();
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-function cleanPayload(values) {
-    return Object.fromEntries(
-        Object.entries(values).filter(([, value]) => value !== '' && value !== null && value !== undefined && value !== false),
-    );
-}
-
 function buildInitialFilters() {
-    const params = currentQuery();
-    return {
-        date_type: params.get('date_type') || '',
-        date_from: params.get('date_from') || todayIso(),
-        date_to: params.get('date_to') || todayIso(),
-        no_closing_date_limit: params.get('no_closing_date_limit') === '1',
-        sale_leader_id: params.get('sale_leader_id') || '',
-        sale_team_id: params.get('sale_team_id') || '',
-        operation_stage: params.get('operation_stage') || '',
-        sort_metric: params.get('sort_metric') || 'total_revenue',
-        per_page: params.get('per_page') || '20',
-    };
+    return readQueryFilters({
+        date_type: '',
+        date_from: todayIso(),
+        date_to: todayIso(),
+        no_closing_date_limit: false,
+        sale_leader_id: '',
+        sale_team_id: '',
+        operation_stage: '',
+        sort_metric: 'total_revenue',
+        per_page: '20',
+    });
 }
 
 function number(value) {
@@ -118,7 +107,7 @@ export default function OperationConversionReport({
     routeUrl = '/admin/sales/reports/operation-conversion',
     pageRuntimeError = null,
 }) {
-    const [draft, setDraft] = useState(buildInitialFilters);
+    const { draft, set, visit } = useInertiaFilters(routeUrl, buildInitialFilters(), { sync: false });
     const stages = useMemo(() => {
         const fromSummary = Array.isArray(summary?.stages) ? summary.stages : [];
         if (fromSummary.length) {
@@ -130,18 +119,12 @@ export default function OperationConversionReport({
         }));
     }, [summary, filterOptions.operationStages]);
     const totals = summary?.totals || null;
-    const queryFilters = useMemo(() => {
-        const payload = {
-            ...draft,
-            no_closing_date_limit: draft.no_closing_date_limit ? '1' : '',
-        };
-        return cleanPayload(payload);
-    }, [draft]);
+    const queryFilters = useMemo(() => cleanInertiaFilters({
+        ...draft,
+        no_closing_date_limit: draft.no_closing_date_limit ? '1' : '',
+    }), [draft]);
 
-    const set = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
-    const search = () => {
-        router.get(routeUrl, { ...queryFilters, page: 1 }, { preserveScroll: true, preserveState: false, replace: true });
-    };
+    const search = () => visit({ ...queryFilters, page: 1 });
 
     const perPageOptions = resolveFilterOptions(filterOptions, 'perPageOptions');
     const resolvedPerPage = perPageOptions.length ? perPageOptions : reportPerPageOptions();

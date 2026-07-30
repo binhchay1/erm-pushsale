@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { useLocalizedFilterOptions } from '@/hooks/use-localized-filter-options';
-import { useReportSearch } from '@/hooks/useReportSearch';
+import { useInertiaFilters } from '@/hooks/useInertiaFilters';
 import { useT } from '@/providers/I18nProvider';
 
 const PER_PAGE_OPTIONS = [
@@ -26,7 +26,7 @@ export function CeoReportFilterBar({
     onToggleSummary,
 }) {
     const t = useT();
-    const { search } = useReportSearch(routeUrl, filters);
+    const { search } = useInertiaFilters(routeUrl, filters, { sync: false });
     const options = useLocalizedFilterOptions(filterOptions);
     const [menuOpen, setMenuOpen] = useState(false);
     const [local, setLocal] = useState(() => ({ ...filters }));

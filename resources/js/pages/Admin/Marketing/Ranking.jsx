@@ -6,7 +6,7 @@ import {
     PushsalePager,
     PushsaleSearchButton,
     PushsaleSelect,
-    usePushsaleFilters,
+    useInertiaFilters,
 } from '@/components/reports/PushsaleReportChrome';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
@@ -142,7 +142,7 @@ function RankingTable({ report = {} }) {
 }
 
 export default function MarketingRanking({ report = {}, filters = {}, filterOptions = {}, filterRouteUrl = '/admin/rankings', activeMenuCode = '2.2', pageTitle = 'Bảng xếp hạng' }) {
-    const { draft, set, apply } = usePushsaleFilters(filterRouteUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(filterRouteUrl, filters);
     const [collapsed, setCollapsed] = useState(false);
     const [gearOpen, setGearOpen] = useState(false);
     const gearRef = useRef(null);

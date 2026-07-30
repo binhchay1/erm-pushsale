@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils';
-import { useReportSearch } from '@/hooks/useReportSearch';
+import { useInertiaFilters } from '@/hooks/useInertiaFilters';
 
 export function StatusTabs({ routeUrl, filters, tabs, filterKey = 'operation_stage' }) {
-    const { search } = useReportSearch(routeUrl, filters);
+    const { search } = useInertiaFilters(routeUrl, filters, { sync: false });
     const active = filters[filterKey] ?? 'all';
 
     return (

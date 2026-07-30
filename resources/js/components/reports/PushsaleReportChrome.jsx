@@ -1,10 +1,11 @@
-import { router } from '@inertiajs/react';
 import { useT } from '@/providers/I18nProvider';
-import { useEffect, useState } from 'react';
 import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
+import { useInertiaFilters } from '@/hooks/useInertiaFilters';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 
 export { PushsaleSearchButton };
+export { useInertiaFilters };
 
 function pad(value) {
     return String(value).padStart(2, '0');
@@ -28,38 +29,9 @@ export function displayDateRange(filters = {}) {
     return `${format(from || to)} - ${format(to || from, true)}`;
 }
 
+/** @deprecated Prefer useInertiaFilters — alias kept for existing report pages. */
 export function usePushsaleFilters(routeUrl, filters = {}) {
-    const [draft, setDraft] = useState(filters);
-
-    useEffect(() => {
-        setDraft(filters);
-    }, [filters]);
-
-    const set = (key, value) => {
-        setDraft((current) => ({ ...current, [key]: value }));
-    };
-
-    const apply = (extra = {}) => {
-        const payload = { ...draft, ...extra };
-        if (!Object.prototype.hasOwnProperty.call(extra, 'page')) {
-            payload.page = 1;
-        }
-        const [path, query = ''] = String(routeUrl).split('?');
-        const routeParams = new URLSearchParams(query);
-        routeParams.forEach((value, key) => {
-            if (!Object.prototype.hasOwnProperty.call(payload, key)) {
-                payload[key] = value;
-            }
-        });
-
-        router.get(
-            path,
-            payload,
-            { preserveState: true, preserveScroll: true, replace: true },
-        );
-    };
-
-    return { draft, set, apply };
+    return useInertiaFilters(routeUrl, filters);
 }
 
 export function optionValue(option) {
@@ -171,32 +143,15 @@ export function PushsaleActionMenu({ routeUrl, filters, onNote, exportLabel, not
     );
 }
 
+/** Thin alias → unified PushsalePagination (variant=pager). */
 export function PushsalePager({ current = 1, totalPages = 1, onPage, max = 7 }) {
-    const t = useT();
-    const safeTotal = Math.max(1, Number(totalPages) || 1);
-    const safeCurrent = Math.min(safeTotal, Math.max(1, Number(current) || 1));
-    const windowSize = Math.max(3, Math.min(safeTotal, max));
-    let start = Math.max(1, safeCurrent - Math.floor(windowSize / 2));
-    let end = Math.min(safeTotal, start + windowSize - 1);
-    start = Math.max(1, end - windowSize + 1);
-    const pages = Array.from({ length: end - start + 1 }, (_, index) => start + index);
-
     return (
-        <div className="ps-pager ps-pagination-v81 pushsale-pagination" aria-label={t('reports.pushsale.pagination')}>
-            <button type="button" disabled={safeCurrent <= 1} onClick={() => onPage?.(1)} title={t('reports.pushsale.first_page')}>«</button>
-            <button type="button" disabled={safeCurrent <= 1} onClick={() => onPage?.(safeCurrent - 1)} title={t('reports.pushsale.prev_page')}>‹</button>
-            {pages.map((page) => (
-                <button
-                    type="button"
-                    key={page}
-                    className={page === safeCurrent ? 'is-active' : ''}
-                    onClick={() => onPage?.(page)}
-                >
-                    {page}
-                </button>
-            ))}
-            <button type="button" disabled={safeCurrent >= safeTotal} onClick={() => onPage?.(safeCurrent + 1)} title={t('reports.pushsale.next_page')}>›</button>
-            <button type="button" disabled={safeCurrent >= safeTotal} onClick={() => onPage?.(safeTotal)} title={t('reports.pushsale.last_page')}>»</button>
-        </div>
+        <PushsalePagination
+            variant="pager"
+            current={current}
+            totalPages={totalPages}
+            onPage={onPage}
+            max={max}
+        />
     );
 }

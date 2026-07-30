@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 import { CareCampaignFormDialog, SelectBox } from '@/components/customers/CareCampaignDialogs';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
-import { ReportPagination } from '@/components/reports/ReportPagination';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
 import AppLayout from '@/layouts/AppLayout';
 import { apiRequest } from '@/lib/api';
@@ -221,7 +221,7 @@ export default function CareCampaigns({
                         </tbody>
                     </table>
                 </div>
-                <ReportPagination routeUrl={routeUrl} filters={queryFilters} meta={pagination} />
+                <PushsalePagination routeUrl={routeUrl} filters={queryFilters} meta={pagination} />
             </PushsalePageShell>
 
             <CareCampaignFormDialog

@@ -5,8 +5,8 @@ import { ReportFilterField } from '@/components/reports/ReportFilterField';
 import {
     PushsaleExportButton,
     PushsaleSearchButton,
-    usePushsaleFilters,
 } from '@/components/reports/PushsaleReportChrome';
+import { cleanInertiaFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 
 function chunkFields(items, size = 4) {
     const rows = [];
@@ -17,11 +17,7 @@ function chunkFields(items, size = 4) {
 }
 
 export function cleanReportFilterPayload(values = {}) {
-    return Object.fromEntries(
-        Object.entries(values).filter(([, value]) => (
-            value !== '' && value !== null && value !== undefined && value !== false
-        )),
-    );
+    return cleanInertiaFilters(values);
 }
 
 function ReportFilterToolbarShell({
@@ -128,7 +124,7 @@ function ReportFilterToolbarShell({
 
 /**
  * Config-driven report filter toolbar (DRY #2).
- * Owns draft state via usePushsaleFilters unless `draft` + `onChange` are provided.
+ * Owns draft state via useInertiaFilters unless `draft` + `onChange` are provided.
  */
 export function ReportFilterToolbar({
     title,
@@ -160,9 +156,10 @@ export function ReportFilterToolbar({
     onSearch: controlledOnSearch,
 }) {
     const isControlled = controlledDraft !== undefined && typeof controlledOnChange === 'function';
-    const { draft: internalDraft, set: internalSet, apply } = usePushsaleFilters(
+    const { draft: internalDraft, set: internalSet, apply } = useInertiaFilters(
         routeUrl,
         isControlled ? {} : filters,
+        { sync: !isControlled },
     );
 
     const draft = isControlled ? controlledDraft : internalDraft;

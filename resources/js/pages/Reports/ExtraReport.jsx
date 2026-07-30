@@ -9,7 +9,7 @@ import {
     PushsalePager,
     PushsaleSearchButton,
     PushsaleSelect,
-    usePushsaleFilters,
+    useInertiaFilters,
 } from '@/components/reports/PushsaleReportChrome';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
@@ -131,7 +131,7 @@ function chunkFields(items, size = 4) {
 
 function PushsaleReportToolbar({ title, routeUrl, filters, filterOptions, filterFields = [], className = '', headerClassName = '', primary = [], advanced = [], actionsExtra = null, exportLabel = null }) {
     const t = useT();
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const fields = new Set(filterFields);
     const render = (field) => (fields.has(field) ? <ReportField key={field} field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
     const visiblePrimary = primary.filter((field) => fields.has(field) && field !== 'date_to');
@@ -203,7 +203,7 @@ function resolveOperationStages(filterOptions = {}) {
 
 function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const t = useT();
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const fields = new Set(filterFields);
     const [pageSize, setPageSize] = useState('50');
     const [page, setPage] = useState(1);
@@ -375,7 +375,7 @@ function dateProgress(filters) {
 
 function SaleKpiReport({ rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const t = useT();
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const fields = new Set(filterFields);
     const achieved = filters.sale_id ? (rows[0] ?? totals ?? {}) : (totals ?? rows[0] ?? {});
     const time = dateProgress(draft);
@@ -514,7 +514,7 @@ const REVENUE_GROUPS = [
 
 function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const t = useT();
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const fields = new Set(filterFields);
     const isMarketingReport = fields.has('marketer_id') || fields.has('marketing_team_id') || fields.has('marketing_team_leader_id') || title.toLowerCase().includes('marketing');
     const personLabel = isMarketingReport ? psText(t, 'marketing_name', 'TÊN MARKETING') : psText(t, 'sale_name', 'TÊN SALE');
@@ -631,7 +631,7 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
 
 function WarehousePendingReport({ rows, filters, filterOptions, routeUrl }) {
     const t = useT();
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const [movementOnly, setMovementOnly] = useState('changed');
     const [page, setPage] = useState(1);
     const perPage = 50;
@@ -730,7 +730,7 @@ function ShortRecordPager({ current, totalPages, from, to, total, onPage }) {
 
 function SaleClosingSummaryReport({ rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const t = useT();
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const fields = [
         ['new_contacts', 'number'], ['new_closed', 'number'], ['new_rate', 'percent'], ['new_gross', 'currency'], ['new_discount', 'currency'], ['new_net', 'currency'],
         ['old_closed', 'number'], ['old_gross', 'currency'], ['old_discount', 'currency'], ['old_net', 'currency'],
@@ -1034,7 +1034,7 @@ function RevenueGroupCompactPicker({ groups, selectedKeys, onChange }) {
 
 function RevenueOverviewToolbar({ title, routeUrl, filters, filterOptions, filterFields, groups = [], selectedKeys = [], onSelectedKeys, variant = 'summary' }) {
     const t = useT();
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const fields = new Set(filterFields);
     const render = (field) => (fields.has(field) ? <ReportField key={field} field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
     const leaderField = fields.has('marketing_team_leader_id') ? 'marketing_team_leader_id' : 'team_leader_id';
@@ -1269,7 +1269,7 @@ function WarehouseSalesV2Report({ title = 'Báo cáo doanh số V2', rows, total
 
 function AppointmentCardsReport({ rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const t = useT();
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const fields = new Set(filterFields);
     return (
         <section className="ps-report-page ps-appointment-report">
@@ -1391,7 +1391,7 @@ function ProductConversionMatrixReport({ rows, totals, extra, filters, filterOpt
 
 function MarketingUpsaleReport({ title, rows, totals, filters, filterOptions, filterFields, routeUrl, extra = {} }) {
     const t = useT();
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const [showNote, setShowNote] = useState(false);
     const fields = new Set(filterFields);
     const perPage = Math.max(1, Number(draft?.per_page ?? 20) || 20);
@@ -1571,7 +1571,7 @@ function rateToneClass(value) {
 
 function MarketingWorkToolbar({ title, routeUrl, filters, filterOptions, filterFields = [] }) {
     const t = useT();
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const fields = new Set(filterFields);
     const render = (field) => (fields.has(field) ? <ReportField key={field} field={field} draft={draft} set={set} filterOptions={filterOptions} t={t} /> : null);
 

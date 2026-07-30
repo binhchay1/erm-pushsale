@@ -1,5 +1,5 @@
-import { Head, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { Head } from '@inertiajs/react';
+import { useMemo } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
@@ -9,41 +9,30 @@ import {
     PushsaleExportButton,
     PushsaleSearchButton,
 } from '@/components/reports/PushsaleReportChrome';
+import { cleanInertiaFilters, readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
-
-function currentQuery() {
-    if (typeof window === 'undefined') return new URLSearchParams();
-    return new URLSearchParams(window.location.search);
-}
 
 function todayIso() {
     const date = new Date();
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-function cleanPayload(values) {
-    return Object.fromEntries(
-        Object.entries(values).filter(([, value]) => value !== '' && value !== null && value !== undefined && value !== false),
-    );
-}
-
 function buildInitialFilters() {
-    const params = currentQuery();
-    return {
-        date_type: params.get('date_type') || 'sale_received_data',
-        date_from: params.get('date_from') || todayIso(),
-        date_to: params.get('date_to') || todayIso(),
-        discount_mode: params.get('discount_mode') || 'after_discount',
-        delivery_status: params.get('delivery_status') || '',
-        sale_leader_id: params.get('sale_leader_id') || '',
-        sale_team_id: params.get('sale_team_id') || '',
-        parent_product_id: params.get('parent_product_id') || '',
-        product_id: params.get('product_id') || '',
-        reconciliation_status: params.get('reconciliation_status') || '',
-        per_page: params.get('per_page') || '20',
-    };
+    return readQueryFilters({
+        date_type: 'sale_received_data',
+        date_from: todayIso(),
+        date_to: todayIso(),
+        discount_mode: 'after_discount',
+        delivery_status: '',
+        sale_leader_id: '',
+        sale_team_id: '',
+        parent_product_id: '',
+        product_id: '',
+        reconciliation_status: '',
+        per_page: '20',
+    });
 }
 
 function num(value) {
@@ -92,14 +81,13 @@ export default function SalesTeamReport({
     pageRuntimeError = null,
 }) {
     const title = schema?.title ?? 'Báo cáo nhóm sale';
-    const [draft, setDraft] = useState(buildInitialFilters);
-    const queryFilters = useMemo(() => cleanPayload(draft), [draft]);
+    const { draft, set, apply: search } = useInertiaFilters(routeUrl, buildInitialFilters(), {
+        sync: false,
+        clean: true,
+    });
+    const queryFilters = useMemo(() => cleanInertiaFilters(draft), [draft]);
     const totals = summary?.totals || null;
     const cards = Array.isArray(summary?.delivery_cards) ? summary.delivery_cards : [];
-    const set = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
-    const search = () => {
-        router.get(routeUrl, { ...cleanPayload(draft), page: 1 }, { preserveScroll: true, preserveState: false, replace: true });
-    };
 
     return (
         <AppLayout activeMenuCode="4.6.3">

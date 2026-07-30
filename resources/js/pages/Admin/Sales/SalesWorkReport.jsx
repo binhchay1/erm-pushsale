@@ -1,11 +1,12 @@
-import { Head, router } from '@inertiajs/react';
-import { Fragment, useMemo, useState } from 'react';
+import { Head } from '@inertiajs/react';
+import { Fragment, useMemo } from 'react';
 
-import { PushsalePagination } from '@/components/pagination/PushsalePagination';
+import { useInertiaFilters } from '@/hooks/useInertiaFilters';
 import {
     ReportFilterToolbar,
     cleanReportFilterPayload,
 } from '@/components/reports/ReportFilterToolbar';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
@@ -66,7 +67,10 @@ export default function SalesWorkReport({
     pageRuntimeError = null,
 }) {
     const title = schema?.title ?? 'Báo cáo công việc sale';
-    const [draft, setDraft] = useState(buildInitialFilters);
+    const { draft, set, apply: search } = useInertiaFilters(routeUrl, buildInitialFilters(), {
+        sync: false,
+        clean: true,
+    });
     const stages = useMemo(() => {
         const fromSummary = Array.isArray(summary?.stages) ? summary.stages : [];
         if (fromSummary.length) {
@@ -80,14 +84,6 @@ export default function SalesWorkReport({
     }, [summary, filterOptions.operationStages]);
     const totals = summary?.totals || null;
     const queryFilters = useMemo(() => cleanReportFilterPayload(draft), [draft]);
-    const set = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
-    const search = () => {
-        router.get(routeUrl, { ...cleanReportFilterPayload(draft), page: 1 }, {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-        });
-    };
 
     return (
         <AppLayout activeMenuCode="4.6.2">

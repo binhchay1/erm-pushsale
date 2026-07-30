@@ -4,7 +4,7 @@ import {
     PushsaleDateRange,
     PushsaleSearchButton,
     PushsaleSelect,
-    usePushsaleFilters,
+    useInertiaFilters,
 } from '@/components/reports/PushsaleReportChrome';
 import AppLayout from '@/layouts/AppLayout';
 import { formatNumber } from '@/lib/format';
@@ -155,7 +155,7 @@ export default function HourlyStats({
 }) {
     const t = useT();
     const title = psText(t, 'reports.hourly.title', 'Biểu đồ thống kê theo khung giờ');
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const chartRows = normalizeChartRows(rows);
 
     return (

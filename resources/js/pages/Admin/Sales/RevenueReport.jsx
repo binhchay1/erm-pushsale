@@ -1,10 +1,11 @@
-import { Head, router } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { Head } from '@inertiajs/react';
+import { useMemo } from 'react';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { ReportFilterField } from '@/components/reports/ReportFilterField';
 import { PushsaleDateRange, PushsaleExportButton, PushsaleSearchButton } from '@/components/reports/PushsaleReportChrome';
 import { RevenueMetricsTable } from '@/components/reports/RevenueMetricsTable';
+import { cleanInertiaFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
@@ -51,12 +52,6 @@ function normalizeDraft(filters = {}) {
     };
 }
 
-function cleanPayload(values) {
-    return Object.fromEntries(
-        Object.entries(values).filter(([, value]) => value !== '' && value !== null && value !== undefined && value !== false),
-    );
-}
-
 function FormulaLegend() {
     return (
         <div className="ps-sales-revenue-formulas">
@@ -71,18 +66,9 @@ function FormulaLegend() {
 
 export default function SaleRevenueReport({ filters, filterOptions = {}, report }) {
     const t = useT();
-    const [draft, setDraft] = useState(() => normalizeDraft(filters));
-
-    useEffect(() => {
-        setDraft(normalizeDraft(filters));
-    }, [filters]);
-
-    const set = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
-    const search = () => router.get(routeUrl, { ...cleanPayload(draft), page: 1 }, {
-        preserveScroll: true,
-        preserveState: true,
-        replace: true,
-    });
+    const normalized = useMemo(() => normalizeDraft(filters), [filters]);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, normalized, { clean: true });
+    const search = () => apply();
 
     const primaryFilters = (
         <div className="ps-sales-revenue-primary">
@@ -113,7 +99,7 @@ export default function SaleRevenueReport({ filters, filterOptions = {}, report 
     const actions = (
         <>
             <PushsaleSearchButton onClick={search} label="Tìm kiếm" />
-            <PushsaleExportButton routeUrl={routeUrl} filters={cleanPayload(draft)} label="Xuất Excel" />
+            <PushsaleExportButton routeUrl={routeUrl} filters={cleanInertiaFilters(draft)} label="Xuất Excel" />
         </>
     );
 

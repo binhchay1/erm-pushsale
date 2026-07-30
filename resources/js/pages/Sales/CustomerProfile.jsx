@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
-import { ReportPagination } from '@/components/reports/ReportPagination';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { OrderMoneyCell, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
@@ -549,7 +549,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
 
                 <CustomerProfileTable rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onOpenDialog={openDialog} saleWorkspaceUrl={saleWorkspaceUrl} warehouseOperationsUrl={warehouseOperationsUrl} />
 
-                <ReportPagination routeUrl={routeUrl} filters={form} meta={pagination} scrollTargetId="customer-profile-table" />
+                <PushsalePagination routeUrl={routeUrl} filters={form} meta={pagination} scrollTargetId="customer-profile-table" />
 
                 <FloatingActions selectedIds={[...selected]} permissions={filterOptions.permissions} />
             </section>

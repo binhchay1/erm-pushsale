@@ -5,7 +5,7 @@ import {
     PushsaleDateRange,
     PushsaleSearchButton,
     PushsaleSelect,
-    usePushsaleFilters,
+    useInertiaFilters,
 } from '@/components/reports/PushsaleReportChrome';
 import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
@@ -433,7 +433,7 @@ function DashboardTable({ report, expanded, onToggle, onChart, onDaily, advanced
 
 export default function Dashboard({ filters = {}, filterOptions = {}, report = {}, filterRouteUrl, endpoints = {}, activeMenuCode = '2.1' }) {
     const routeUrl = filterRouteUrl ?? '/admin/marketing/dashboard';
-    const { draft, set, apply } = usePushsaleFilters(routeUrl, filters);
+    const { draft, set, apply } = useInertiaFilters(routeUrl, filters);
     const [gearOpen, setGearOpen] = useState(false);
     const [expanded, setExpanded] = useState(new Set());
     const [chartState, setChartState] = useState(null);

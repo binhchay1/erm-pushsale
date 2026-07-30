@@ -3,7 +3,7 @@ import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { PushsaleStatusSummary } from '@/components/reports/ceo/PushsaleStatusSummary';
-import { useReportSearch } from '@/hooks/useReportSearch';
+import { useInertiaFilters } from '@/hooks/useInertiaFilters';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { formatNumber } from '@/lib/format';
@@ -123,7 +123,7 @@ function maxRows(rows, totals) {
 
 function MarketingLeaderFilter({ filters, filterOptions, routeUrl }) {
     const t = useT();
-    const { search } = useReportSearch(routeUrl, filters);
+    const { search } = useInertiaFilters(routeUrl, filters, { sync: false });
     const [form, setForm] = useState({ ...filters });
 
     useEffect(() => {

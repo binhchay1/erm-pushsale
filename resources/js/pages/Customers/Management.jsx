@@ -6,7 +6,7 @@ import { CareCampaignFormDialog, SelectBox } from '@/components/customers/CareCa
 import { CustomerSegmentDialog } from '@/components/customers/CustomerSegmentDialog';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
-import { ReportPagination } from '@/components/reports/ReportPagination';
+import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
 import { apiRequest } from '@/lib/api';
 import { useT } from '@/providers/I18nProvider';
@@ -286,7 +286,7 @@ export default function Customer360Management({
                         setDialog('attachCampaign');
                     }}
                 />
-                <ReportPagination routeUrl={routeUrl} filters={normalizedForm()} meta={pagination} scrollTargetId="customer360-table" />
+                <PushsalePagination routeUrl={routeUrl} filters={normalizedForm()} meta={pagination} scrollTargetId="customer360-table" />
             </PushsalePageShell>
 
             <CareCampaignFormDialog

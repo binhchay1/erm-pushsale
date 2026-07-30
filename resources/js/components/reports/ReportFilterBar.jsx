@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useLocalizedFilterOptions } from '@/hooks/use-localized-filter-options';
-import { useReportSearch } from '@/hooks/useReportSearch';
+import { useInertiaFilters } from '@/hooks/useInertiaFilters';
 import { useT } from '@/providers/I18nProvider';
 
 const PRIMARY_FIELDS = ['date_from', 'date_to', 'product_id', 'search'];
@@ -19,7 +19,7 @@ const PRESET_KEYS = ['today', 'last_7_days', 'last_30_days', 'this_month'];
 export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields, extra = null }) {
     const t = useT();
     const localizedOptions = useLocalizedFilterOptions(filterOptions);
-    const { search } = useReportSearch(routeUrl, filters);
+    const { search } = useInertiaFilters(routeUrl, filters, { sync: false });
     const fields = useMemo(
         () => new Set(filterFields ?? PRIMARY_FIELDS),
         [filterFields],

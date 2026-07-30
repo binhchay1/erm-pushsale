@@ -1,4 +1,4 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -9,38 +9,27 @@ import {
     PushsaleExportButton,
     PushsaleSearchButton,
 } from '@/components/reports/PushsaleReportChrome';
+import { cleanInertiaFilters, readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
-
-function currentQuery() {
-    if (typeof window === 'undefined') return new URLSearchParams();
-    return new URLSearchParams(window.location.search);
-}
 
 function todayIso() {
     const date = new Date();
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-function cleanPayload(values) {
-    return Object.fromEntries(
-        Object.entries(values).filter(([, value]) => value !== '' && value !== null && value !== undefined && value !== false),
-    );
-}
-
 function buildInitialFilters() {
-    const params = currentQuery();
-    return {
-        date_type: params.get('date_type') || 'sale_received_data',
-        date_from: params.get('date_from') || todayIso(),
-        date_to: params.get('date_to') || todayIso(),
-        sale_leader_id: params.get('sale_leader_id') || '',
-        sale_team_id: params.get('sale_team_id') || '',
-        sale_id: params.get('sale_id') || '',
-        product_id: params.get('product_id') || '',
-        per_page: params.get('per_page') || '50',
-    };
+    return readQueryFilters({
+        date_type: 'sale_received_data',
+        date_from: todayIso(),
+        date_to: todayIso(),
+        sale_leader_id: '',
+        sale_team_id: '',
+        sale_id: '',
+        product_id: '',
+        per_page: '50',
+    });
 }
 
 function num(value) {
@@ -83,16 +72,15 @@ export default function SalesDataReport({
     pageRuntimeError = null,
 }) {
     const title = schema?.title ?? 'Báo cáo data sale';
-    const [draft, setDraft] = useState(buildInitialFilters);
+    const { draft, set, apply: search } = useInertiaFilters(routeUrl, buildInitialFilters(), {
+        sync: false,
+        clean: true,
+    });
     const [selected, setSelected] = useState([]);
     const [dialogOpen, setDialogOpen] = useState(false);
-    const queryFilters = useMemo(() => cleanPayload(draft), [draft]);
+    const queryFilters = useMemo(() => cleanInertiaFilters(draft), [draft]);
     const totals = summary?.totals || null;
     const form = useForm({ sale_ids: [], receive_data: true });
-    const set = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
-    const search = () => {
-        router.get(routeUrl, { ...cleanPayload(draft), page: 1 }, { preserveScroll: true, preserveState: false, replace: true });
-    };
     const toggleRow = (saleId) => {
         setSelected((current) => (
             current.includes(saleId) ? current.filter((id) => id !== saleId) : [...current, saleId]

@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLocalizedFilterOptions } from '@/hooks/use-localized-filter-options';
-import { useReportSearch } from '@/hooks/useReportSearch';
+import { useInertiaFilters } from '@/hooks/useInertiaFilters';
 import { useT } from '@/providers/I18nProvider';
 
 export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) {
     const t = useT();
     const localizedOptions = useLocalizedFilterOptions(filterOptions);
-    const { search } = useReportSearch(routeUrl, filters);
+    const { search } = useInertiaFilters(routeUrl, filters, { sync: false });
 
     const set = (key, val) => search({ [key]: val });
 

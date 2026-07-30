@@ -1,6 +1,8 @@
 import { router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 
+import { useInertiaFilters } from '@/hooks/useInertiaFilters';
+
 export function optionNodes(options = [], placeholder = null) {
     return (
         <>
@@ -10,11 +12,9 @@ export function optionNodes(options = [], placeholder = null) {
     );
 }
 
+/** @deprecated Prefer useInertiaFilters — draft-only alias for ecommerce pages. */
 export function useDraft(filters) {
-    const [draft, setDraft] = useState(filters ?? {});
-    useEffect(() => setDraft(filters ?? {}), [filters]);
-    const set = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
-
+    const { draft, set, setDraft } = useInertiaFilters('', filters ?? {}, { sync: true });
     return { draft, set, setDraft };
 }
 
