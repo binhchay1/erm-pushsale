@@ -520,6 +520,28 @@ html body.pushsale-app-body .ps-wh-page .c-money-body {
     vertical-align: middle !important;
 }
 
+html body.pushsale-app-body .ps-wh-page .c-money-body .ps-order-money-breakdown,
+html body.pushsale-app-body .ps-wh-page .ps-ops-money-cell .ps-order-money-breakdown {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 2px !important;
+    margin-left: auto !important;
+    width: auto !important;
+    min-width: 72px !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .c-money-body .ps-order-money-line,
+html body.pushsale-app-body .ps-wh-page .ps-ops-money-cell .ps-order-money-line {
+    display: block !important;
+    float: none !important;
+    position: static !important;
+    line-height: 1.35 !important;
+    white-space: nowrap !important;
+    text-align: right !important;
+    width: auto !important;
+}
+
 /* Compact columns to reduce horizontal scroll */
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table {
     table-layout: auto !important;

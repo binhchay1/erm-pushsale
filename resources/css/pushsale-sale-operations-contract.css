@@ -167,14 +167,28 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .td-message
     word-break: break-word;
 }
 
-/* TN cần: red stage + toolbar icons ABOVE textarea (Pushsale HTML parity) */
+/* TN cần: stage label + icons on ONE row, above textarea */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-stage-row {
+    align-items: center !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    justify-content: flex-start !important;
+    margin: 2px 0 4px !important;
+    min-height: 18px !important;
+    width: 100% !important;
+}
+
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-operation-stage-label,
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .fb.ttgh7 {
     color: #ff0000 !important;
     cursor: pointer;
-    display: block !important;
+    display: inline !important;
+    flex: 0 1 auto !important;
     font-weight: 700 !important;
-    margin: 2px 0 4px !important;
+    line-height: 18px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor {
@@ -192,10 +206,11 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor.is
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-toolbar {
     align-items: center;
-    display: flex !important;
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
     gap: 6px;
     justify-content: flex-start;
-    margin: 0 0 2px !important;
+    margin: 0 !important;
     min-height: 18px;
 }
 
@@ -757,4 +772,49 @@ html body.pushsale-app-body .ps-duplicate-message {
     max-width: 220px !important;
     white-space: normal !important;
     word-break: break-word !important;
+}
+
+/* Pagination footer: keep "Hiển thị…" + "Số dòng" + select on one baseline */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-pagination-wrap {
+    align-items: center !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    min-height: 48px !important;
+    padding: 8px 14px !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-pagination-info {
+    align-items: center !important;
+    color: #666 !important;
+    display: inline-flex !important;
+    flex-wrap: nowrap !important;
+    gap: 12px !important;
+    line-height: 28px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-page-size {
+    align-items: center !important;
+    display: inline-flex !important;
+    flex-wrap: nowrap !important;
+    font-weight: 400 !important;
+    gap: 6px !important;
+    margin: 0 0 0 4px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-page-size > span {
+    display: inline-block !important;
+    line-height: 28px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-page-size .form-control {
+    display: inline-block !important;
+    height: 28px !important;
+    line-height: 18px !important;
+    margin: 0 !important;
+    padding: 3px 6px !important;
+    vertical-align: middle !important;
+    width: 66px !important;
 }

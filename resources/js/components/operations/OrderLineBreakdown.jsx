@@ -1,4 +1,9 @@
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatNumber } from '@/lib/format';
+
+function formatOpsMoney(value) {
+    if (value == null || Number.isNaN(Number(value))) return '';
+    return `${formatNumber(value)} đ`;
+}
 
 function normalizedText(value) {
     return String(value ?? '').toLowerCase();
@@ -171,19 +176,20 @@ export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount =
             return '';
         }
 
-        return formatCurrency(value);
+        return formatOpsMoney(value);
     };
 
     const lines = [];
-    const hasBreakdown = discount > 0 || showZeroDiscount || vat > 0 || shippingFee > 0;
-    if (subtotal > 0 && (hasBreakdown || Math.abs(subtotal - total) > 0.5)) {
+    // Only show Thành tiền line when it differs from Tổng — identical values stacked
+    // and looked like a ghosted "169.000" / "169.000 đ" overlap on WH/KT pages.
+    if (subtotal > 0 && Math.abs(subtotal - total) > 0.5) {
         lines.push({ key: 'subtotal', title: 'Thành tiền', text: moneyOrBlank(subtotal) });
     }
     if (discount > 0 || showZeroDiscount) {
         lines.push({
             key: 'discount',
             title: 'Chiết khấu',
-            text: discount > 0 ? `-${formatCurrency(discount)}` : formatCurrency(0),
+            text: discount > 0 ? `-${formatOpsMoney(discount)}` : formatOpsMoney(0),
         });
     }
     if (vat > 0) {
@@ -195,12 +201,11 @@ export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount =
     lines.push({
         key: 'total',
         title: 'Tổng tiền đơn hàng',
-        text: moneyOrBlank(total) || (subtotal > 0 ? formatCurrency(total) : ''),
+        text: moneyOrBlank(total) || (subtotal > 0 ? formatOpsMoney(total) : ''),
         strong: true,
     });
 
-    // Do NOT use legacy .tb-in-sp here — that class is table-oriented and causes
-    // amount/"đ" overlap when reused for money stacks across Sale/WH/KT.
+    // Prefer plain "169.000 đ" (not Intl ₫) — avoids amount/symbol ghosting in ops tables.
     return (
         <div className="ps-order-money-breakdown" aria-label="Thành tiền đơn hàng">
             {lines.filter((line) => line.text).map((line) => (

@@ -46,23 +46,25 @@ function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
     // Slot stays 48px; textarea is always absolute so shrink never reflows the row.
     return (
         <td className={`area2 hidden-xs ps-operation-note-editor${expanded ? ' is-expanded' : ''}${focused ? ' is-focused' : ''}`}>
-            <span className="fb span-col ttgh7" style={{ cursor: 'pointer', display: 'block', marginTop: 2 }}>
-                {order.currentOperation || t('operations.sale_workspace.default_stage')}
-            </span>
-            <div className="ps-note-toolbar">
-                <OpsIconButton
-                    title={t('operations.sale_workspace.internal_message')}
-                    icon="commenting-o"
-                    onClick={() => onMessages(order)}
-                    className="ps-note-tool"
-                />
-                <OpsIconButton
-                    title={t('operations.sale_workspace.save_note')}
-                    icon="save"
-                    onClick={save}
-                    disabled={saving}
-                    className="ps-note-tool"
-                />
+            <div className="ps-note-stage-row">
+                <span className="fb span-col ttgh7 ps-operation-stage-label">
+                    {order.currentOperation || t('operations.sale_workspace.default_stage')}
+                </span>
+                <div className="ps-note-toolbar">
+                    <OpsIconButton
+                        title={t('operations.sale_workspace.internal_message')}
+                        icon="commenting-o"
+                        onClick={() => onMessages(order)}
+                        className="ps-note-tool"
+                    />
+                    <OpsIconButton
+                        title={t('operations.sale_workspace.save_note')}
+                        icon="save"
+                        onClick={save}
+                        disabled={saving}
+                        className="ps-note-tool"
+                    />
+                </div>
             </div>
             <div
                 className="mof-container ps-note-mof"

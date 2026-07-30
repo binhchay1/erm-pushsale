@@ -194,10 +194,11 @@ html body.pushsale-app-body .ps-order-money-breakdown .ps-order-money-line {
     display: block !important;
     position: static !important;
     float: none !important;
+    clear: both !important;
     width: auto !important;
     max-width: 100% !important;
     min-height: 18px !important;
-    line-height: 1.25 !important;
+    line-height: 1.35 !important;
     padding: 1px 2px !important;
     margin: 0 !important;
     overflow: visible !important;
@@ -205,6 +206,13 @@ html body.pushsale-app-body .ps-order-money-breakdown .ps-order-money-line {
     text-align: right !important;
     font-weight: 400 !important;
     color: #000 !important;
+    letter-spacing: normal !important;
+    text-indent: 0 !important;
+}
+
+html body.pushsale-app-body .ps-ops-money-cell .ps-order-money-line + .ps-order-money-line,
+html body.pushsale-app-body .ps-order-money-breakdown .ps-order-money-line + .ps-order-money-line {
+    margin-top: 2px !important;
 }
 
 html body.pushsale-app-body .ps-ops-money-cell .ps-order-money-line.is-total,
