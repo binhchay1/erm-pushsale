@@ -33,12 +33,6 @@ class HourlyStatsController extends Controller
         );
         $data = $snapshot['data'];
 
-        $filterFields = ['date_from', 'date_to', 'product_id'];
-        if ($user->role === UserRole::Admin) {
-            $filterFields[] = 'sale_id';
-            $filterFields[] = 'marketer_id';
-        }
-
         $path = '/'.ltrim($request->path(), '/');
         $base = $path === '/ld/thong-ke' ? '/ld/thong-ke' : match ($user->role) {
             UserRole::Admin => '/admin/reports/hourly',
@@ -46,6 +40,16 @@ class HourlyStatsController extends Controller
             UserRole::Sales => '/sales/reports/hourly',
             default => '/reports/hourly',
         };
+
+        // 8.1.1 / marketing hourly → marketer; sales hourly → sale.
+        $filterFields = ['date_from', 'date_to', 'product_id'];
+        $isSalesHourly = $user->role === UserRole::Sales
+            || str_contains($path, '/sales/reports/hourly');
+        if ($isSalesHourly) {
+            $filterFields[] = 'sale_id';
+        } else {
+            $filterFields[] = 'marketer_id';
+        }
 
         return Inertia::render('Reports/HourlyStats', array_merge(
             $this->reportPageProps($request, ['filterFields' => $filterFields]),

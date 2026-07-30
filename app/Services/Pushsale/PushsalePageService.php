@@ -362,6 +362,27 @@ class PushsalePageService
             'shippingProviders' => collect(config('shipping_partners.providers', []))->map(
                 fn (array $provider, string $key): array => ['id' => $key, 'label' => (string) ($provider['label'] ?? strtoupper($key))]
             )->values()->all(),
+            // Enum / setup filters — shared with report toolbars (DRY #3 / mục A).
+            'dateTypes' => collect(\App\Enums\DateType::cases())->map(fn (\App\Enums\DateType $e) => [
+                'value' => $e->value,
+                'id' => $e->value,
+                'label' => $e->label(),
+            ])->values()->all(),
+            'discountModes' => collect(\App\Enums\DiscountMode::cases())->map(fn (\App\Enums\DiscountMode $e) => [
+                'value' => $e->value,
+                'id' => $e->value,
+                'label' => $e->label(),
+            ])->values()->all(),
+            'deliveryStatuses' => collect(DeliveryStatus::cases())->map(fn (DeliveryStatus $e) => [
+                'value' => $e->value,
+                'id' => $e->value,
+                'label' => $e->label(),
+            ])->values()->all(),
+            'operationStages' => app(\App\Services\Operations\SaleOperationConfigurationService::class)
+                ->filterOptions(includeNoOperation: false),
+            'perPageOptions' => collect([20, 50, 100, 200, 500, 1000])->map(
+                fn (int $value) => ['value' => (string) $value, 'id' => (string) $value, 'label' => (string) $value]
+            )->values()->all(),
             'sources' => MarketingSource::query()
                 ->eligibleForManualEntry()
                 ->orderBy('name')
@@ -1146,7 +1167,12 @@ class PushsalePageService
 
     private function saleOperationRate(): Collection
     {
-        $stages = ['call_1', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6', 'care_1', 'care_2', 'care_3', 'skipped'];
+        $stages = app(\App\Services\Operations\SaleOperationConfigurationService::class)
+            ->reportStageKeys(includeNoOperation: false);
+        if ($stages === []) {
+            $stages = ['new_customer', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6', 'care_1', 'care_2', 'care_3', 'skipped'];
+        }
+
         $sortMetric = trim((string) $this->currentRequest?->query('sort_metric', 'total_revenue'));
 
         return $this->ordersGroupedBySale()
@@ -1187,7 +1213,11 @@ class PushsalePageService
 
     private function saleWork(): Collection
     {
-        $stages = ['call_1', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6', 'care_1', 'care_2', 'care_3', 'skipped'];
+        $stages = app(\App\Services\Operations\SaleOperationConfigurationService::class)
+            ->reportStageKeys(includeNoOperation: false);
+        if ($stages === []) {
+            $stages = ['new_customer', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6', 'care_1', 'care_2', 'care_3', 'skipped'];
+        }
 
         return $this->ordersGroupedBySale()->values()->map(function (array $row, int $index) use ($stages): array {
             $result = [
@@ -2815,7 +2845,11 @@ class PushsalePageService
 
     private function ordersGroupedBySale(): Collection
     {
-        $stages = ['call_1', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6', 'care_1', 'care_2', 'care_3', 'skipped'];
+        $stages = app(\App\Services\Operations\SaleOperationConfigurationService::class)
+            ->reportStageKeys(includeNoOperation: false);
+        if ($stages === []) {
+            $stages = ['new_customer', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6', 'care_1', 'care_2', 'care_3', 'skipped'];
+        }
 
         return $this->recentOrders()->groupBy(fn (Order $order) => $order->sale_user_id ?: 0)->map(function (Collection $orders, int|string $saleId) use ($stages): array {
             /** @var Order $first */
@@ -2893,7 +2927,7 @@ class PushsalePageService
     private function normalizedOperationStage(string $stage): ?string
     {
         return match (Str::lower(trim($stage))) {
-            '102133', 'call_1', 'call1', 'gọi lần 1' => 'call_1',
+            '102133', 'call_1', 'call1', 'gọi lần 1', 'new_customer', 'khách mới' => 'new_customer',
             '102134', 'call_2', 'call2', 'gọi lần 2' => 'call_2',
             '102135', 'call_3', 'call3', 'gọi lần 3' => 'call_3',
             '102136', 'call_4', 'call4', 'gọi lần 4' => 'call_4',
@@ -2911,7 +2945,7 @@ class PushsalePageService
     private function operationStageAliases(string $stage): array
     {
         return match ($stage) {
-            'call_1' => ['call_1', 'call1', 'Gọi lần 1', 'gọi lần 1'],
+            'new_customer' => ['new_customer', 'call_1', 'call1', 'Gọi lần 1', 'gọi lần 1', 'Khách mới'],
             'call_2' => ['call_2', 'call2', 'Gọi lần 2', 'gọi lần 2'],
             'call_3' => ['call_3', 'call3', 'Gọi lần 3', 'gọi lần 3'],
             'call_4' => ['call_4', 'call4', 'Gọi lần 4', 'gọi lần 4'],

@@ -63,7 +63,7 @@ final class OperationConversionReportService
             'summary' => [
                 'totals' => $totals,
                 'stages' => array_map(
-                    fn (string $stage) => ['key' => $stage, 'label' => SalesLeaderReportQuery::STAGE_LABELS[$stage] ?? $stage],
+                    fn (string $stage) => ['key' => $stage, 'label' => $this->query->stageLabel($stage)],
                     $stages,
                 ),
             ],

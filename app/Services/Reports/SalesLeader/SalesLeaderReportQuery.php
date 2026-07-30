@@ -12,23 +12,31 @@ use Illuminate\Support\Str;
 
 final class SalesLeaderReportQuery
 {
+    /**
+     * Canonical report stage keys (= OperationStage values, không gồm no_operation).
+     * Prefer {@see self::stages()} so labels/keys stay synced with menu 1.8.1.
+     */
     public const STAGES = [
-        'call_1', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6',
+        'new_customer', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6',
         'care_1', 'care_2', 'care_3', 'skipped',
     ];
 
-    public const STAGE_LABELS = [
-        'call_1' => 'Gọi lần 1',
-        'call_2' => 'Gọi lần 2',
-        'call_3' => 'Gọi lần 3',
-        'call_4' => 'Gọi lần 4',
-        'call_5' => 'Gọi lần 5',
-        'call_6' => 'Gọi lần 6',
-        'care_1' => 'Chăm sóc lần 1',
-        'care_2' => 'Chăm sóc lần 2',
-        'care_3' => 'Chăm sóc lần 3',
-        'skipped' => 'Bỏ qua',
-    ];
+    public function __construct(
+        private readonly \App\Services\Operations\SaleOperationConfigurationService $saleOperations,
+    ) {}
+
+    /** @return list<string> */
+    public function stages(): array
+    {
+        $keys = $this->saleOperations->reportStageKeys(includeNoOperation: false);
+
+        return $keys !== [] ? $keys : self::STAGES;
+    }
+
+    public function stageLabel(string $stage): string
+    {
+        return $this->saleOperations->label($stage);
+    }
 
     public function ordersQuery(Request $request, ?User $actor = null): Builder
     {
@@ -100,13 +108,13 @@ final class SalesLeaderReportQuery
     {
         $requested = $this->requestedStages($request);
 
-        return $requested !== [] ? $requested : self::STAGES;
+        return $requested !== [] ? $requested : $this->stages();
     }
 
     public function normalizeStage(string $stage): ?string
     {
         return match (Str::lower(trim($stage))) {
-            '102133', 'call_1', 'call1', 'gọi lần 1' => 'call_1',
+            '102133', 'call_1', 'call1', 'gọi lần 1', 'new_customer', 'khách mới' => 'new_customer',
             '102134', 'call_2', 'call2', 'gọi lần 2' => 'call_2',
             '102135', 'call_3', 'call3', 'gọi lần 3' => 'call_3',
             '102136', 'call_4', 'call4', 'gọi lần 4' => 'call_4',
@@ -124,7 +132,7 @@ final class SalesLeaderReportQuery
     public function stageAliases(string $stage): array
     {
         return match ($stage) {
-            'call_1' => ['call_1', 'call1', 'Gọi lần 1', 'gọi lần 1'],
+            'new_customer' => ['new_customer', 'call_1', 'call1', 'Gọi lần 1', 'gọi lần 1', 'Khách mới'],
             'call_2' => ['call_2', 'call2', 'Gọi lần 2', 'gọi lần 2'],
             'call_3' => ['call_3', 'call3', 'Gọi lần 3', 'gọi lần 3'],
             'call_4' => ['call_4', 'call4', 'Gọi lần 4', 'gọi lần 4'],

@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { Fragment, useMemo, useState } from 'react';
 
+import { OperationStageSelect } from '@/components/filters/OperationStageSelect';
 import {
     PushsaleActionMenu,
     PushsaleDateRange,
@@ -100,6 +101,15 @@ function ReportField({ field, draft, set, filterOptions, t }) {
             return <PushsaleSelect placeholder={psText(t, 'choose_marketing', '--Marketing--')} value={draft.marketer_id ?? ''} options={filterOptions.marketingUsers ?? []} onChange={(value) => set('marketer_id', value)} />;
         case 'marketing_team_id':
             return <PushsaleSelect placeholder={psText(t, 'choose_marketing_team', '--Nhóm marketing--')} value={draft.marketing_team_id ?? ''} options={filterOptions.marketingTeams ?? []} onChange={(value) => set('marketing_team_id', value)} />;
+        case 'operation_stage':
+            return (
+                <OperationStageSelect
+                    placeholder={psText(t, 'choose_operation', '-- Chọn tác nghiệp --')}
+                    value={draft.operation_stage ?? ''}
+                    filterOptions={filterOptions}
+                    onChange={(value) => set('operation_stage', value)}
+                />
+            );
         case 'per_page':
             return <PushsaleSelect placeholder="20" value={String(draft.per_page ?? '20')} options={PER_PAGE_OPTIONS(t)} onChange={(value) => set('per_page', value)} />;
         case 'search':
@@ -182,18 +192,14 @@ function CommonToolbar({ title, routeUrl, filters, filterOptions, filterFields =
     );
 }
 
-const SALE_STAGES = [
-    ['new_customer', 'new_customer', 'Gọi lần 1'],
-    ['call_2', 'call_2', 'Gọi lần 2'],
-    ['call_3', 'call_3', 'Gọi lần 3'],
-    ['call_4', 'call_4', 'Gọi lần 4'],
-    ['call_5', 'call_5', 'Gọi lần 5'],
-    ['call_6', 'call_6', 'Gọi lần 6'],
-    ['care_1', 'care_1', 'Chăm sóc lần 1'],
-    ['care_2', 'care_2', 'Chăm sóc lần 2'],
-    ['care_3', 'care_3', 'Chăm sóc lần 3'],
-    ['skipped', 'skipped', 'Bỏ qua'],
-];
+function resolveOperationStages(filterOptions = {}) {
+    return (filterOptions.operationStages ?? [])
+        .map((stage) => ({
+            key: stage.value ?? stage.id ?? stage.key,
+            label: stage.label ?? stage.name ?? '',
+        }))
+        .filter((stage) => stage.key && stage.key !== 'no_operation');
+}
 
 function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFields, routeUrl }) {
     const t = useT();
@@ -201,18 +207,19 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
     const fields = new Set(filterFields);
     const [pageSize, setPageSize] = useState('50');
     const [page, setPage] = useState(1);
-    const operationOptions = SALE_STAGES.map(([value, key, label]) => ({ value, label: psText(t, key, label) }));
+    const stages = useMemo(() => resolveOperationStages(filterOptions), [filterOptions]);
+    const operationOptions = stages.map(({ key, label }) => ({ value: key, label }));
 
     const totalWithUntouched = useMemo(() => {
         const base = { ...(totals ?? {}) };
-        SALE_STAGES.forEach(([key]) => {
+        stages.forEach(({ key }) => {
             base[`stage_${key}_untouched`] = rows.reduce(
                 (sum, row) => sum + Number(row[`stage_${key}_untouched`] ?? 0),
                 0,
             );
         });
         return base;
-    }, [rows, totals]);
+    }, [rows, totals, stages]);
 
     const perPage = Number(pageSize) || 50;
     const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
@@ -243,7 +250,7 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
                     )}
                     <PushsaleDateRange filters={draft} onChange={set} />
                     {fields.has('operation_stage') && (
-                        <PushsaleSelect
+                        <OperationStageSelect
                             placeholder={psText(t, 'choose_operation', 'Chọn tác nghiệp')}
                             value={draft.operation_stage ?? ''}
                             options={operationOptions}
@@ -308,14 +315,14 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
                     <thead>
                         <tr>
                             <th colSpan={4} />
-                            {SALE_STAGES.map(([key, labelKey, label]) => <th key={key} colSpan={2}>{psText(t, labelKey, label)}</th>)}
+                            {stages.map(({ key, label }) => <th key={key} colSpan={2}>{label}</th>)}
                         </tr>
                         <tr>
                             <th>{psText(t, 'stt', 'STT')}</th>
                             <th>{psText(t, 'sale', 'SALE')}</th>
                             <th>{psText(t, 'total_contact', 'Tổng contact')}</th>
                             <th>{psText(t, 'total_contact_untouched', 'Tổng contact chưa tác nghiệp')}</th>
-                            {SALE_STAGES.flatMap(([key]) => [
+                            {stages.flatMap(({ key }) => [
                                 <th key={`${key}-contact`}>{psText(t, 'contact_count', 'Số contact')}</th>,
                                 <th key={`${key}-untouched`}>{psText(t, 'untouched', 'Chưa tác nghiệp')}</th>,
                             ])}
@@ -327,7 +334,7 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
                             <td className="ps-text-left">{psText(t, 'total', 'Tổng')}: <span>()</span></td>
                             <td>{formatNumber(totalWithUntouched.contacts)}</td>
                             <td>{formatNumber(totalWithUntouched.untouched)}</td>
-                            {SALE_STAGES.flatMap(([key]) => [
+                            {stages.flatMap(({ key }) => [
                                 <td key={`${key}-total`}>{formatNumber(totalWithUntouched[`stage_${key}`])}</td>,
                                 <td key={`${key}-untouched-total`}>{formatNumber(totalWithUntouched[`stage_${key}_untouched`])}</td>,
                             ])}
@@ -338,14 +345,14 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
                                 <td className="ps-text-left">{row.name}</td>
                                 <td>{formatNumber(row.contacts)}</td>
                                 <td>{formatNumber(row.untouched)}</td>
-                                {SALE_STAGES.flatMap(([key]) => [
+                                {stages.flatMap(({ key }) => [
                                     <td key={`${key}-value`}>{formatNumber(row[`stage_${key}`])}</td>,
                                     <td key={`${key}-untouched-value`}>{formatNumber(row[`stage_${key}_untouched`])}</td>,
                                 ])}
                             </tr>
                         ))}
                         {visibleRows.length === 0 && (
-                            <tr><td colSpan={24} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>
+                            <tr><td colSpan={4 + stages.length * 2} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>
                         )}
                     </tbody>
                 </table>
@@ -1272,7 +1279,14 @@ function AppointmentCardsReport({ rows, totals, filters, filterOptions, filterFi
                 actions={(
                     <div className="ps-extra-toolbar-controls">
                         <PushsaleDateRange filters={draft} onChange={set} />
-                        {fields.has('operation_stage') && <PushsaleSelect placeholder="--Tác nghiệp--" value={draft.operation_stage ?? ''} options={filterOptions.operationStages ?? []} onChange={(value)=>set('operation_stage',value)} />}
+                        {fields.has('operation_stage') && (
+                            <OperationStageSelect
+                                placeholder="--Tác nghiệp--"
+                                value={draft.operation_stage ?? ''}
+                                filterOptions={filterOptions}
+                                onChange={(value) => set('operation_stage', value)}
+                            />
+                        )}
                         {fields.has('operation_result') && <PushsaleSelect placeholder="--Kết quả--" value={draft.operation_result ?? ''} options={filterOptions.operationResults ?? []} onChange={(value)=>set('operation_result',value)} />}
                         {fields.has('team_id') && <PushsaleSelect placeholder={psText(t, 'choose_sales_team', '--Nhóm sale--')} value={draft.team_id ?? ''} options={filterOptions.salesTeams ?? filterOptions.teams ?? []} onChange={(value)=>set('team_id',value)} />}
                         {fields.has('sale_id') && <PushsaleSelect placeholder={psText(t, 'choose_sale', '--Chọn sale--')} value={draft.sale_id ?? ''} options={filterOptions.salesUsers ?? []} onChange={(value)=>set('sale_id',value)} />}

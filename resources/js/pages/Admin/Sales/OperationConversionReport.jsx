@@ -1,14 +1,17 @@
 import { Head, router } from '@inertiajs/react';
 import { Fragment, useMemo, useState } from 'react';
 
+import { OperationStageSelect } from '@/components/filters/OperationStageSelect';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
+import { ReportFilterField } from '@/components/reports/ReportFilterField';
 import {
     PushsaleDateRange,
     PushsaleExportButton,
     PushsaleSearchButton,
     PushsaleSelect,
 } from '@/components/reports/PushsaleReportChrome';
+import { reportPerPageOptions, resolveFilterOptions } from '@/config/reportFilters';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
@@ -18,39 +21,12 @@ const currencyFormatter = new Intl.NumberFormat('vi-VN', {
     maximumFractionDigits: 0,
 });
 
-const ALL_STAGES = [
-    { key: 'call_1', label: 'Gọi lần 1' },
-    { key: 'call_2', label: 'Gọi lần 2' },
-    { key: 'call_3', label: 'Gọi lần 3' },
-    { key: 'call_4', label: 'Gọi lần 4' },
-    { key: 'call_5', label: 'Gọi lần 5' },
-    { key: 'call_6', label: 'Gọi lần 6' },
-    { key: 'care_1', label: 'Chăm sóc lần 1' },
-    { key: 'care_2', label: 'Chăm sóc lần 2' },
-    { key: 'care_3', label: 'Chăm sóc lần 3' },
-    { key: 'skipped', label: 'Bỏ qua' },
-];
-
-const DATE_TYPE_OPTIONS = [
-    { id: '', label: '--Chuẩn Pushsale--' },
-    { id: 'next_operation_date', label: 'Ngày sale tác nghiệp tiếp' },
-    { id: 'closing_date', label: 'Ngày sale chốt đơn' },
-    { id: 'care_update', label: 'Ngày sale tác nghiệp' },
-    { id: 'data_arrival', label: 'Ngày data về hệ thống' },
-    { id: 'sale_received_data', label: 'Ngày sale nhận data' },
-    { id: 'posting_date', label: 'Ngày đăng đơn' },
-    { id: 'desired_delivery_date', label: 'Ngày nhận care đơn' },
-    { id: 'delivery_update_date', label: 'Ngày cập nhật care đơn' },
-];
-
 const METRIC_OPTIONS = [
     { id: 'total_revenue', label: '1.Doanh số tổng' },
     { id: 'total_closed', label: '2.Số chốt đơn' },
     { id: 'total_contacts', label: '3.Số contact' },
     { id: 'total_rate', label: '4.Tỷ lệ chốt' },
 ];
-
-const PER_PAGE_OPTIONS = [20, 50, 100, 200, 500, 1000].map((value) => ({ id: String(value), label: String(value) }));
 
 function currentQuery() {
     if (typeof window === 'undefined') return new URLSearchParams();
@@ -148,8 +124,11 @@ export default function OperationConversionReport({
         if (fromSummary.length) {
             return fromSummary.map((stage) => ({ key: stage.key, label: stage.label }));
         }
-        return ALL_STAGES;
-    }, [summary]);
+        return (filterOptions.operationStages ?? []).map((stage) => ({
+            key: stage.value ?? stage.id ?? stage.key,
+            label: stage.label ?? stage.name ?? stage.key,
+        }));
+    }, [summary, filterOptions.operationStages]);
     const totals = summary?.totals || null;
     const queryFilters = useMemo(() => {
         const payload = {
@@ -163,6 +142,9 @@ export default function OperationConversionReport({
     const search = () => {
         router.get(routeUrl, { ...queryFilters, page: 1 }, { preserveScroll: true, preserveState: false, replace: true });
     };
+
+    const perPageOptions = resolveFilterOptions(filterOptions, 'perPageOptions');
+    const resolvedPerPage = perPageOptions.length ? perPageOptions : reportPerPageOptions();
 
     return (
         <AppLayout activeMenuCode="4.6.1">
@@ -179,21 +161,9 @@ export default function OperationConversionReport({
                     defaultCollapsed={false}
                     filters={(
                         <div className="ps-operation-conversion-primary">
-                            <PushsaleSelect
-                                value={draft.date_type}
-                                options={DATE_TYPE_OPTIONS}
-                                placeholder="--Chuẩn Pushsale--"
-                                onChange={(value) => set('date_type', value)}
-                            />
+                            <ReportFilterField field="date_type" draft={draft} onChange={set} filterOptions={filterOptions} />
                             <PushsaleDateRange filters={draft} onChange={set} className="ps-operation-conversion-date" />
-                            <label className="ps-operation-conversion-check">
-                                <input
-                                    type="checkbox"
-                                    checked={Boolean(draft.no_closing_date_limit)}
-                                    onChange={(event) => set('no_closing_date_limit', event.target.checked)}
-                                />
-                                <span>Không giới hạn ngày chốt</span>
-                            </label>
+                            <ReportFilterField field="no_closing_date_limit" draft={draft} onChange={set} filterOptions={filterOptions} className="ps-operation-conversion-check" />
                         </div>
                     )}
                     actions={(
@@ -205,21 +175,11 @@ export default function OperationConversionReport({
                     advanced={(
                         <div className="ps-operation-conversion-advanced ps-adv-filter-panel">
                             <div className="ps-operation-conversion-filter-row ps-adv-filter-row" style={{ '--ps-adv-cols': 5 }}>
-                                <PushsaleSelect
-                                    value={draft.sale_leader_id}
-                                    options={filterOptions.saleLeaders ?? []}
-                                    placeholder="--Trưởng nhóm--"
-                                    onChange={(value) => set('sale_leader_id', value)}
-                                />
-                                <PushsaleSelect
-                                    value={draft.sale_team_id}
-                                    options={filterOptions.saleTeams ?? filterOptions.teams ?? []}
-                                    placeholder="--Chọn nhóm--"
-                                    onChange={(value) => set('sale_team_id', value)}
-                                />
-                                <PushsaleSelect
+                                <ReportFilterField field="sale_leader_id" draft={draft} onChange={set} filterOptions={filterOptions} />
+                                <ReportFilterField field="sale_team_id" draft={draft} onChange={set} filterOptions={filterOptions} />
+                                <OperationStageSelect
                                     value={draft.operation_stage}
-                                    options={ALL_STAGES.map(({ key, label }) => ({ id: key, label }))}
+                                    filterOptions={filterOptions}
                                     placeholder="--Tác nghiệp--"
                                     onChange={(value) => set('operation_stage', value)}
                                 />
@@ -231,7 +191,7 @@ export default function OperationConversionReport({
                                 />
                                 <PushsaleSelect
                                     value={draft.per_page}
-                                    options={PER_PAGE_OPTIONS}
+                                    options={resolvedPerPage}
                                     placeholder="20"
                                     onChange={(value) => set('per_page', value)}
                                 />

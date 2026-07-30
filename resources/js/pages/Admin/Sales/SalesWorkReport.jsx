@@ -1,39 +1,13 @@
 import { Head, router } from '@inertiajs/react';
 import { Fragment, useMemo, useState } from 'react';
 
-import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import {
-    PushsaleDateRange,
-    PushsaleExportButton,
-    PushsaleSearchButton,
-    PushsaleSelect,
-} from '@/components/reports/PushsaleReportChrome';
+    ReportFilterToolbar,
+    cleanReportFilterPayload,
+} from '@/components/reports/ReportFilterToolbar';
 import AppLayout from '@/layouts/AppLayout';
 
-const ALL_STAGES = [
-    { key: 'call_1', label: 'Gọi lần 1' },
-    { key: 'call_2', label: 'Gọi lần 2' },
-    { key: 'call_3', label: 'Gọi lần 3' },
-    { key: 'call_4', label: 'Gọi lần 4' },
-    { key: 'call_5', label: 'Gọi lần 5' },
-    { key: 'call_6', label: 'Gọi lần 6' },
-    { key: 'care_1', label: 'Chăm sóc lần 1' },
-    { key: 'care_2', label: 'Chăm sóc lần 2' },
-    { key: 'care_3', label: 'Chăm sóc lần 3' },
-    { key: 'skipped', label: 'Bỏ qua' },
-];
-
-const DATE_TYPE_OPTIONS = [
-    { id: 'sale_received_data', label: 'Ngày sale nhận data' },
-    { id: 'data_arrival', label: 'Ngày data về hệ thống' },
-    { id: 'care_update', label: 'Ngày sale tác nghiệp' },
-    { id: 'closing_date', label: 'Ngày sale chốt đơn' },
-    { id: 'posting_date', label: 'Ngày đăng đơn' },
-    { id: 'next_operation_date', label: 'Ngày sale tác nghiệp tiếp' },
-];
-
-const PER_PAGE_OPTIONS = [20, 50, 100, 200, 500, 1000].map((value) => ({ id: String(value), label: String(value) }));
 const numberFormatter = new Intl.NumberFormat('vi-VN');
 
 function currentQuery() {
@@ -50,12 +24,6 @@ function daysAgoIso(days) {
     const date = new Date();
     date.setDate(date.getDate() - days);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
-function cleanPayload(values) {
-    return Object.fromEntries(
-        Object.entries(values).filter(([, value]) => value !== '' && value !== null && value !== undefined && value !== false),
-    );
 }
 
 function buildInitialFilters() {
@@ -104,13 +72,17 @@ export default function SalesWorkReport({
         if (fromSummary.length) {
             return fromSummary.map((stage) => ({ key: stage.key, label: stage.label }));
         }
-        return ALL_STAGES;
-    }, [summary]);
+        // Fallback: server operationStages (menu 1.8.1), never hardcode call_1.
+        return (filterOptions.operationStages ?? []).map((stage) => ({
+            key: stage.value ?? stage.id ?? stage.key,
+            label: stage.label ?? stage.name ?? stage.key,
+        }));
+    }, [summary, filterOptions.operationStages]);
     const totals = summary?.totals || null;
-    const queryFilters = useMemo(() => cleanPayload(draft), [draft]);
+    const queryFilters = useMemo(() => cleanReportFilterPayload(draft), [draft]);
     const set = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
     const search = () => {
-        router.get(routeUrl, { ...cleanPayload(draft), page: 1 }, {
+        router.get(routeUrl, { ...cleanReportFilterPayload(draft), page: 1 }, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
@@ -120,73 +92,33 @@ export default function SalesWorkReport({
     return (
         <AppLayout activeMenuCode="4.6.2">
             <Head title={title} />
-            <PushsalePageShell
+            <ReportFilterToolbar
                 title={title}
                 pageCode="4.6.2"
+                routeUrl={routeUrl}
+                draft={draft}
+                onChange={set}
+                onSearch={search}
+                filterOptions={filterOptions}
                 className="ps-sale-work-page ps-report-toolbar-shell"
                 headerClassName="ps-sale-work-header"
                 bodyClassName="ps-sale-work-body"
-                collapsible
-                defaultFiltersCollapsed={false}
-                primaryFilters={(
-                    <div className="ps-sale-work-primary">
-                        <PushsaleSelect
-                            value={draft.date_type}
-                            options={DATE_TYPE_OPTIONS}
-                            placeholder="-- Kiểu ngày --"
-                            onChange={(value) => set('date_type', value)}
-                        />
-                        <PushsaleDateRange filters={draft} onChange={set} className="ps-sale-work-date" />
-                    </div>
-                )}
-                advancedFilters={(
-                    <div className="ps-sale-work-advanced ps-adv-filter-panel">
-                        <div className="ps-sale-work-advanced-row ps-adv-filter-row" style={{ '--ps-adv-cols': 6 }}>
-                            <PushsaleSelect
-                                value={draft.operation_stage}
-                                options={ALL_STAGES.map(({ key, label }) => ({ id: key, label }))}
-                                placeholder="-- Chọn tác nghiệp --"
-                                onChange={(value) => set('operation_stage', value)}
-                            />
-                            <PushsaleSelect
-                                value={draft.product_id}
-                                options={filterOptions.products ?? filterOptions.productGroups ?? []}
-                                placeholder="-- Chọn sản phẩm --"
-                                onChange={(value) => set('product_id', value)}
-                            />
-                            <PushsaleSelect
-                                value={draft.sale_id}
-                                options={filterOptions.sales ?? filterOptions.salesUsers ?? []}
-                                placeholder="-- Chọn sale --"
-                                onChange={(value) => set('sale_id', value)}
-                            />
-                            <PushsaleSelect
-                                value={draft.sale_leader_id}
-                                options={filterOptions.saleLeaders ?? []}
-                                placeholder="-- Trưởng nhóm sale --"
-                                onChange={(value) => set('sale_leader_id', value)}
-                            />
-                            <PushsaleSelect
-                                value={draft.sale_team_id}
-                                options={filterOptions.saleTeams ?? filterOptions.teams ?? []}
-                                placeholder="-- Chọn nhóm sale --"
-                                onChange={(value) => set('sale_team_id', value)}
-                            />
-                            <PushsaleSelect
-                                value={draft.per_page}
-                                options={PER_PAGE_OPTIONS}
-                                placeholder="50"
-                                onChange={(value) => set('per_page', value)}
-                            />
-                        </div>
-                    </div>
-                )}
-                actions={(
-                    <div className="ps-sale-work-actions">
-                        <PushsaleSearchButton onClick={search} label="Tìm kiếm" />
-                        <PushsaleExportButton routeUrl={routeUrl} filters={queryFilters} label="Xuất Excel" />
-                    </div>
-                )}
+                primaryClassName="ps-sale-work-primary"
+                advancedClassName="ps-sale-work-advanced ps-adv-filter-panel"
+                advancedRowClassName="ps-sale-work-advanced-row ps-adv-filter-row"
+                actionsClassName="ps-sale-work-actions"
+                advancedCols={6}
+                primary={['date_type', 'date_from']}
+                advanced={[
+                    'operation_stage',
+                    'product_id',
+                    'sale_id',
+                    'sale_leader_id',
+                    'sale_team_id',
+                    'per_page',
+                ]}
+                searchLabel="Tìm kiếm"
+                exportLabel="Xuất Excel"
                 notice={pageRuntimeError ? (
                     <div className="pushsale-error-banner">
                         <i className="fa fa-exclamation-triangle" /> {pageRuntimeError}
@@ -264,7 +196,7 @@ export default function SalesWorkReport({
                         perPageOptions={[20, 50, 100, 200, 500, 1000]}
                     />
                 </div>
-            </PushsalePageShell>
+            </ReportFilterToolbar>
         </AppLayout>
     );
 }

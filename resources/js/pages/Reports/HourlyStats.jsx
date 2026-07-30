@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 
 import {
     PushsaleDateRange,
@@ -114,8 +114,33 @@ function HeatmapChart({ title, rows, metric, dayLabel, className = '' }) {
                 {rows.map((row) => <span key={`${metric}-axis-${row.hour}`}>{row.hour}h</span>)}
                 <span />
             </div>
-            <div className="ps-hourly-credit">pushsale.vn</div>
         </div>
+    );
+}
+
+function PersonFilter({ draft, set, filterFields, filterOptions }) {
+    const fields = new Set(filterFields ?? []);
+
+    if (fields.has('sale_id')) {
+        return (
+            <PushsaleSelect
+                value={draft.sale_id ?? ''}
+                placeholder="-- Chọn sale --"
+                options={filterOptions.salesUsers ?? filterOptions.sales ?? []}
+                onChange={(value) => set('sale_id', value)}
+                className="ps-hourly-sale-select"
+            />
+        );
+    }
+
+    return (
+        <PushsaleSelect
+            value={draft.marketer_id ?? ''}
+            placeholder="-- Chọn marketing --"
+            options={filterOptions.marketingUsers ?? filterOptions.marketers ?? []}
+            onChange={(value) => set('marketer_id', value)}
+            className="ps-hourly-sale-select"
+        />
     );
 }
 
@@ -124,6 +149,7 @@ export default function HourlyStats({
     totals = {},
     filters = {},
     filterOptions = {},
+    filterFields = [],
     routeUrl,
     dayLabel = 'Tổng',
 }) {
@@ -145,12 +171,11 @@ export default function HourlyStats({
                 <div className="ps-hourly-filter-box box">
                     <div className="box-body">
                         <div className="ps-hourly-filter-row">
-                            <PushsaleSelect
-                                value={draft.sale_id ?? ''}
-                                placeholder="-- Chọn sale --"
-                                options={filterOptions.salesUsers ?? []}
-                                onChange={(value) => set('sale_id', value)}
-                                className="ps-hourly-sale-select"
+                            <PersonFilter
+                                draft={draft}
+                                set={set}
+                                filterFields={filterFields}
+                                filterOptions={filterOptions}
                             />
                             <PushsaleDateRange filters={draft} onChange={set} className="ps-hourly-date-range" />
                             <div className="ps-hourly-action-wrap">

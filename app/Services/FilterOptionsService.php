@@ -7,7 +7,6 @@ use App\Enums\DateType;
 use App\Enums\DeliveryStatus;
 use App\Enums\DiscountMode;
 use App\Enums\OperationResult;
-use App\Enums\OperationStage;
 use App\Enums\OrgLevel;
 use App\Enums\TeamType;
 use App\Enums\UserRole;
@@ -17,6 +16,7 @@ use App\Repositories\ProductRepository;
 use App\Repositories\TeamRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\WarehouseRepository;
+use App\Services\Operations\SaleOperationConfigurationService;
 
 class FilterOptionsService
 {
@@ -25,6 +25,7 @@ class FilterOptionsService
         private readonly ProductRepository $products,
         private readonly WarehouseRepository $warehouses,
         private readonly UserRepository $users,
+        private readonly SaleOperationConfigurationService $saleOperations,
     ) {}
 
     /** @return array<string, mixed> */
@@ -63,12 +64,13 @@ class FilterOptionsService
                 'value' => $e->value,
                 'label' => $e->label(),
             ])->values(),
-            'operationStages' => collect(OperationStage::cases())->map(fn ($e) => [
-                'value' => $e->value,
-                'label' => $e->label(),
-            ])->values(),
+            // Labels từ menu 1.8.1 (SaleOperationConfigurationService), không hardcode enum i18n.
+            'operationStages' => $this->saleOperations->filterOptions(includeNoOperation: false),
             'operationResults' => OperationResult::filterOptions(),
             'closingStatuses' => ClosingStatus::options(),
+            'perPageOptions' => collect([20, 50, 100, 200, 500, 1000])->map(
+                fn (int $value) => ['value' => (string) $value, 'id' => (string) $value, 'label' => (string) $value]
+            )->values(),
             'teams' => $allTeams,
             'salesTeams' => $salesTeams,
             'marketingTeams' => $marketingTeams,
@@ -311,10 +313,7 @@ class FilterOptionsService
                 ['value' => 'new', 'label' => 'Khách mới'],
                 ['value' => 'old', 'label' => 'Khách cũ'],
             ],
-            'operationStages' => collect(OperationStage::cases())->map(fn ($e) => [
-                'value' => $e->value,
-                'label' => $e->label(),
-            ])->values(),
+            'operationStages' => $this->saleOperations->filterOptions(includeNoOperation: true),
             'teams' => $allTeams,
             'salesTeams' => $salesTeams,
             'marketingTeams' => $marketingTeams,

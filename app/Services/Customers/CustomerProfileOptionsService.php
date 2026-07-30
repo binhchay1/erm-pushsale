@@ -5,7 +5,6 @@ namespace App\Services\Customers;
 use App\Enums\ClosingStatus;
 use App\Enums\DeliveryStatus;
 use App\Enums\OperationResult;
-use App\Enums\OperationStage;
 use App\Enums\TeamType;
 use App\Enums\UserRole;
 use App\Models\MarketingSource;
@@ -77,10 +76,8 @@ final class CustomerProfileOptionsService
                 'leaderId' => $team->leader_user_id ? (string) $team->leader_user_id : null,
             ])->values(),
             'marketers' => $marketers->map(fn (User $user) => $this->userOption($user))->values(),
-            'operationStages' => collect(OperationStage::cases())->map(fn (OperationStage $stage) => [
-                'value' => $stage->value,
-                'label' => $stage->label(),
-            ])->values(),
+            'operationStages' => app(\App\Services\Operations\SaleOperationConfigurationService::class)
+                ->filterOptions(includeNoOperation: true),
             'operationResults' => OperationResult::filterOptions(),
             'deliveryStatuses' => collect(DeliveryStatus::cases())->map(fn (DeliveryStatus $status) => [
                 'value' => $status->value,

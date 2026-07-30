@@ -3,34 +3,15 @@ import { useMemo, useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
+import { ReportFilterField } from '@/components/reports/ReportFilterField';
 import {
     PushsaleDateRange,
     PushsaleExportButton,
     PushsaleSearchButton,
-    PushsaleSelect,
 } from '@/components/reports/PushsaleReportChrome';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN');
-
-const DATE_TYPE_OPTIONS = [
-    { id: 'sale_received_data', label: 'Ngày sale nhận data' },
-    { id: 'closing_date', label: 'Ngày sale chốt đơn' },
-    { id: 'care_update', label: 'Ngày sale tác nghiệp' },
-    { id: 'data_arrival', label: 'Ngày data về hệ thống' },
-    { id: 'posting_date', label: 'Ngày đăng đơn' },
-];
-
-const DISCOUNT_OPTIONS = [
-    { id: 'after_discount', label: 'Sau chiết khấu' },
-    { id: 'before_discount', label: 'Trước chiết khấu' },
-];
-
-const PER_PAGE_OPTIONS = [20, 50, 100, 200, 500, 1000].map((value) => ({ id: String(value), label: String(value) }));
-const RECON_OPTIONS = [
-    { id: '0', label: 'Chưa đối soát' },
-    { id: '1', label: 'Đã đối soát' },
-];
 
 function currentQuery() {
     if (typeof window === 'undefined') return new URLSearchParams();
@@ -135,10 +116,10 @@ export default function SalesTeamReport({
                     defaultCollapsed={false}
                     filters={(
                         <div className="ps-sales-leader-primary">
-                            <PushsaleSelect value={draft.date_type} options={DATE_TYPE_OPTIONS} placeholder="--Chuẩn Pushsale--" onChange={(value) => set('date_type', value)} />
+                            <ReportFilterField field="date_type" draft={draft} onChange={set} filterOptions={filterOptions} />
                             <PushsaleDateRange filters={draft} onChange={set} />
-                            <PushsaleSelect value={draft.discount_mode} options={DISCOUNT_OPTIONS} placeholder="Sau chiết khấu" onChange={(value) => set('discount_mode', value)} />
-                            <PushsaleSelect value={draft.delivery_status} options={filterOptions.deliveryStatuses ?? []} placeholder="-- Chọn trạng thái giao hàng --" onChange={(value) => set('delivery_status', value)} />
+                            <ReportFilterField field="discount_mode" draft={draft} onChange={set} filterOptions={filterOptions} />
+                            <ReportFilterField field="delivery_status" draft={draft} onChange={set} filterOptions={filterOptions} />
                         </div>
                     )}
                     actions={(
@@ -150,12 +131,12 @@ export default function SalesTeamReport({
                     advanced={(
                         <div className="ps-sales-leader-advanced ps-adv-filter-panel">
                             <div className="ps-adv-filter-row" style={{ '--ps-adv-cols': 6 }}>
-                                <PushsaleSelect value={draft.sale_leader_id} options={filterOptions.saleLeaders ?? []} placeholder="--Trưởng nhóm--" onChange={(value) => set('sale_leader_id', value)} />
-                                <PushsaleSelect value={draft.sale_team_id} options={filterOptions.saleTeams ?? filterOptions.teams ?? []} placeholder="--Chọn nhóm--" onChange={(value) => set('sale_team_id', value)} />
-                                <PushsaleSelect value={draft.parent_product_id} options={filterOptions.productGroups ?? filterOptions.parentProducts ?? []} placeholder="-- Sản phẩm cha --" onChange={(value) => set('parent_product_id', value)} />
-                                <PushsaleSelect value={draft.product_id} options={filterOptions.products ?? []} placeholder="-- Sản phẩm --" onChange={(value) => set('product_id', value)} />
-                                <PushsaleSelect value={draft.reconciliation_status} options={RECON_OPTIONS} placeholder="-- Đối soát --" onChange={(value) => set('reconciliation_status', value)} />
-                                <PushsaleSelect value={draft.per_page} options={PER_PAGE_OPTIONS} placeholder="20" onChange={(value) => set('per_page', value)} />
+                                <ReportFilterField field="sale_leader_id" draft={draft} onChange={set} filterOptions={filterOptions} />
+                                <ReportFilterField field="sale_team_id" draft={draft} onChange={set} filterOptions={filterOptions} />
+                                <ReportFilterField field="parent_product_id" draft={draft} onChange={set} filterOptions={filterOptions} />
+                                <ReportFilterField field="product_id" draft={draft} onChange={set} filterOptions={filterOptions} />
+                                <ReportFilterField field="reconciliation_status" draft={draft} onChange={set} filterOptions={filterOptions} />
+                                <ReportFilterField field="per_page" draft={draft} onChange={set} filterOptions={filterOptions} />
                             </div>
                         </div>
                     )}

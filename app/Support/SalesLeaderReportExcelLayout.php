@@ -55,7 +55,7 @@ final class SalesLeaderReportExcelLayout
 
         return array_values(array_filter($columns, function (array $column) use ($allowed): bool {
             $key = (string) $column['key'];
-            if (! preg_match('/^(call_\d+|care_\d+|skipped)_/', $key, $matches)) {
+            if (! preg_match('/^(new_customer|call_\d+|care_\d+|skipped)_/', $key, $matches)) {
                 return true;
             }
 

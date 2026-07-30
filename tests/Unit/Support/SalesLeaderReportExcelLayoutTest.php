@@ -16,10 +16,10 @@ class SalesLeaderReportExcelLayoutTest extends TestCase
             ['key' => 'total_closed', 'label' => 'Tổng chốt đơn', 'format' => 'number'],
             ['key' => 'total_rate', 'label' => 'Tổng tỷ lệ', 'format' => 'percent'],
             ['key' => 'revenue', 'label' => 'Tổng doanh số', 'format' => 'currency'],
-            ['key' => 'call_1_contacts', 'label' => 'c1c', 'format' => 'number'],
-            ['key' => 'call_1_closed', 'label' => 'c1o', 'format' => 'number'],
-            ['key' => 'call_1_rate', 'label' => 'c1r', 'format' => 'percent'],
-            ['key' => 'call_1_revenue', 'label' => 'c1v', 'format' => 'currency'],
+            ['key' => 'new_customer_contacts', 'label' => 'c1c', 'format' => 'number'],
+            ['key' => 'new_customer_closed', 'label' => 'c1o', 'format' => 'number'],
+            ['key' => 'new_customer_rate', 'label' => 'c1r', 'format' => 'percent'],
+            ['key' => 'new_customer_revenue', 'label' => 'c1v', 'format' => 'currency'],
             ['key' => 'call_2_contacts', 'label' => 'c2c', 'format' => 'number'],
             ['key' => 'call_2_closed', 'label' => 'c2o', 'format' => 'number'],
             ['key' => 'call_2_rate', 'label' => 'c2r', 'format' => 'percent'],
@@ -28,12 +28,12 @@ class SalesLeaderReportExcelLayoutTest extends TestCase
 
         $layout = SalesLeaderReportExcelLayout::forPage('4.6.1', $columns, [
             'stages' => [
-                ['key' => 'call_1', 'label' => 'Gọi lần 1'],
+                ['key' => 'new_customer', 'label' => 'Gọi lần 1'],
             ],
         ]);
 
         $keys = array_column($layout['columns'], 'key');
-        $this->assertContains('call_1_contacts', $keys);
+        $this->assertContains('new_customer_contacts', $keys);
         $this->assertNotContains('call_2_contacts', $keys);
         $this->assertCount(2, $layout['header_rows']);
         $this->assertSame(4, (int) ($layout['header_rows'][0][6]['colspan'] ?? 0));

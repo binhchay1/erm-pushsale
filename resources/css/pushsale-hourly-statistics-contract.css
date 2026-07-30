@@ -218,14 +218,6 @@
     text-align: center;
 }
 
-.ps-hourly-credit {
-    position: absolute;
-    right: 20px;
-    bottom: 3px;
-    color: #999;
-    font-size: 9px;
-}
-
 .ps-hourly-chart-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

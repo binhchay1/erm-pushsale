@@ -3,7 +3,6 @@
 namespace App\Services\Leads;
 
 use App\Enums\LeadIngestionStatus;
-use App\Enums\OperationStage;
 use App\Models\LeadIngestion;
 use App\Models\Product;
 use App\Models\Pushsale\DataDistributionBatch;
@@ -41,9 +40,8 @@ class DataDistributionService
                 ->get(['id', 'name'])
                 ->map(fn (Team $team) => ['id' => (string) $team->id, 'name' => $team->name])
                 ->values(),
-            'operationOptions' => collect(OperationStage::cases())
-                ->map(fn (OperationStage $stage) => ['value' => $stage->value, 'label' => $stage->label()])
-                ->values(),
+            'operationOptions' => app(\App\Services\Operations\SaleOperationConfigurationService::class)
+                ->filterOptions(includeNoOperation: true),
             'stats' => [
                 'pending' => array_sum(array_column($productRows, 'contact_count')),
                 'max_batch_size' => self::MAX_BATCH_SIZE,

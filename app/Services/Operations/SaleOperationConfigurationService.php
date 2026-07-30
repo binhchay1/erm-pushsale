@@ -28,6 +28,37 @@ final class SaleOperationConfigurationService
         return array_values($this->definitionMap());
     }
 
+    /**
+     * Options cho filter tác nghiệp (menu 1.8.1 labels trên enum keys).
+     * Báo cáo mặc định bỏ `no_operation`; workspace/customer có thể bật lại.
+     *
+     * @return list<array{value:string,label:string,id:string,name:string}>
+     */
+    public function filterOptions(bool $includeNoOperation = false): array
+    {
+        return collect($this->definitions())
+            ->when(
+                ! $includeNoOperation,
+                fn (Collection $rows) => $rows->reject(
+                    fn (array $row): bool => $row['value'] === OperationStage::NoOperation->value
+                ),
+            )
+            ->map(fn (array $row): array => [
+                'value' => $row['value'],
+                'label' => $row['label'],
+                'id' => $row['value'],
+                'name' => $row['label'],
+            ])
+            ->values()
+            ->all();
+    }
+
+    /** @return list<string> */
+    public function reportStageKeys(bool $includeNoOperation = false): array
+    {
+        return array_column($this->filterOptions($includeNoOperation), 'value');
+    }
+
     /** @return array{value:string,label:string,durationMinutes:int,level:int,color:string} */
     public function definition(OperationStage|string|null $stage): array
     {

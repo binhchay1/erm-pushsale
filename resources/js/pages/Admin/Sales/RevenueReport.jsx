@@ -2,7 +2,8 @@ import { Head, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
-import { PushsaleExportButton, PushsaleSearchButton, PushsaleSelect } from '@/components/reports/PushsaleReportChrome';
+import { ReportFilterField } from '@/components/reports/ReportFilterField';
+import { PushsaleDateRange, PushsaleExportButton, PushsaleSearchButton } from '@/components/reports/PushsaleReportChrome';
 import { RevenueMetricsTable } from '@/components/reports/RevenueMetricsTable';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
@@ -56,42 +57,6 @@ function cleanPayload(values) {
     );
 }
 
-function formatDateLabel(value) {
-    if (!value) return '';
-    const [year, month, day] = String(value).split('-');
-    if (!year || !month || !day) return String(value);
-    return `${day}/${month}/${year}`;
-}
-
-function DateRangeInline({ draft, setDraft }) {
-    const label = `${formatDateLabel(draft.date_from) || '...'} 00:00 - ${formatDateLabel(draft.date_to) || '...'} 23:59`;
-
-    return (
-        <div className="ps-sales-revenue-date-range" title="Bấm nửa trái để chọn từ ngày, nửa phải để chọn đến ngày">
-            <input
-                type="text"
-                className="ps-control ps-sales-revenue-date-label"
-                value={label}
-                readOnly
-            />
-            <div className="ps-sales-revenue-date-native" aria-hidden="false">
-                <input
-                    type="date"
-                    value={draft.date_from ?? ''}
-                    onChange={(event) => setDraft((current) => ({ ...current, date_from: event.target.value }))}
-                    aria-label="Từ ngày"
-                />
-                <input
-                    type="date"
-                    value={draft.date_to ?? ''}
-                    onChange={(event) => setDraft((current) => ({ ...current, date_to: event.target.value }))}
-                    aria-label="Đến ngày"
-                />
-            </div>
-        </div>
-    );
-}
-
 function FormulaLegend() {
     return (
         <div className="ps-sales-revenue-formulas">
@@ -121,83 +86,26 @@ export default function SaleRevenueReport({ filters, filterOptions = {}, report 
 
     const primaryFilters = (
         <div className="ps-sales-revenue-primary">
-            <PushsaleSelect
-                value={draft.date_type}
-                options={filterOptions.dateTypes ?? []}
-                placeholder="--Chuẩn Pushsale--"
-                onChange={(value) => set('date_type', value)}
-            />
-            <DateRangeInline draft={draft} setDraft={setDraft} />
-            <PushsaleSelect
-                value={draft.discount_mode}
-                options={filterOptions.discountModes ?? []}
-                placeholder="Sau chiết khấu"
-                onChange={(value) => set('discount_mode', value)}
-            />
-            <PushsaleSelect
-                value={draft.reconciliation_status}
-                options={filterOptions.reconciliationStatuses ?? []}
-                placeholder="-- Đối soát --"
-                onChange={(value) => set('reconciliation_status', value)}
-            />
+            <ReportFilterField field="date_type" draft={draft} onChange={set} filterOptions={filterOptions} />
+            <PushsaleDateRange filters={draft} onChange={set} className="ps-sales-revenue-date-range" />
+            <ReportFilterField field="discount_mode" draft={draft} onChange={set} filterOptions={filterOptions} />
+            <ReportFilterField field="reconciliation_status" draft={draft} onChange={set} filterOptions={filterOptions} />
         </div>
     );
 
     const advancedFilters = (
         <div className="ps-sales-revenue-advanced-wrap ps-adv-filter-panel">
             <div className="ps-sales-revenue-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 4 }}>
-                <PushsaleSelect
-                    value={draft.team_leader_id}
-                    options={filterOptions.teamLeaders ?? []}
-                    placeholder="--Trưởng nhóm--"
-                    onChange={(value) => set('team_leader_id', value)}
-                />
-                <PushsaleSelect
-                    value={draft.team_id}
-                    options={filterOptions.salesTeams ?? filterOptions.teams ?? []}
-                    placeholder="--Chọn nhóm--"
-                    onChange={(value) => set('team_id', value)}
-                />
-                <PushsaleSelect
-                    value={draft.parent_product_id}
-                    options={filterOptions.parentProducts ?? []}
-                    placeholder="-- Sản phẩm cha --"
-                    onChange={(value) => set('parent_product_id', value)}
-                />
-                <PushsaleSelect
-                    value={draft.product_id}
-                    options={filterOptions.products ?? []}
-                    placeholder="-- Sản phẩm --"
-                    onChange={(value) => set('product_id', value)}
-                />
+                <ReportFilterField field="team_leader_id" draft={draft} onChange={set} filterOptions={filterOptions} />
+                <ReportFilterField field="team_id" draft={draft} onChange={set} filterOptions={filterOptions} />
+                <ReportFilterField field="parent_product_id" draft={draft} onChange={set} filterOptions={filterOptions} />
+                <ReportFilterField field="product_id" draft={draft} onChange={set} filterOptions={filterOptions} />
             </div>
             <div className="ps-sales-revenue-advanced ps-adv-filter-row" style={{ '--ps-adv-cols': 4 }}>
-                <PushsaleSelect
-                    value={draft.delivery_status}
-                    options={filterOptions.deliveryStatuses ?? []}
-                    placeholder="-- Chọn trạng thái giao hàng --"
-                    onChange={(value) => set('delivery_status', value)}
-                />
-                <PushsaleSelect
-                    value={draft.sale_id}
-                    options={filterOptions.salesUsers ?? []}
-                    placeholder="--Chọn sale--"
-                    onChange={(value) => set('sale_id', value)}
-                />
-                <PushsaleSelect
-                    value={draft.per_page}
-                    options={[20, 50, 100].map((value) => ({ value, label: String(value) }))}
-                    placeholder="20"
-                    onChange={(value) => set('per_page', value)}
-                />
-                <label className="ps-sales-revenue-check">
-                    <input
-                        type="checkbox"
-                        checked={Boolean(draft.no_closing_date_limit)}
-                        onChange={(event) => set('no_closing_date_limit', event.target.checked)}
-                    />
-                    <span>Không giới hạn ngày chốt</span>
-                </label>
+                <ReportFilterField field="delivery_status" draft={draft} onChange={set} filterOptions={filterOptions} />
+                <ReportFilterField field="sale_id" draft={draft} onChange={set} filterOptions={filterOptions} />
+                <ReportFilterField field="per_page" draft={draft} onChange={set} filterOptions={filterOptions} />
+                <ReportFilterField field="no_closing_date_limit" draft={draft} onChange={set} filterOptions={filterOptions} className="ps-sales-revenue-check" />
             </div>
         </div>
     );

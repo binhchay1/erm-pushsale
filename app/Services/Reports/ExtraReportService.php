@@ -281,12 +281,20 @@ class ExtraReportService
         $orders = $this->fetchOrders($user, $filter, scopeSales: true)
             ->filter(fn (Order $o) => $o->sale_user_id !== null);
 
-        $stages = [
-            OperationStage::NewCustomer, OperationStage::Call2, OperationStage::Call3,
-            OperationStage::Call4, OperationStage::Call5, OperationStage::Call6,
-            OperationStage::Care1, OperationStage::Care2, OperationStage::Care3,
-            OperationStage::Skipped,
-        ];
+        $saleOperations = app(\App\Services\Operations\SaleOperationConfigurationService::class);
+        $stages = collect($saleOperations->reportStageKeys(includeNoOperation: false))
+            ->map(fn (string $value) => OperationStage::tryFrom($value))
+            ->filter()
+            ->values()
+            ->all();
+        if ($stages === []) {
+            $stages = [
+                OperationStage::NewCustomer, OperationStage::Call2, OperationStage::Call3,
+                OperationStage::Call4, OperationStage::Call5, OperationStage::Call6,
+                OperationStage::Care1, OperationStage::Care2, OperationStage::Care3,
+                OperationStage::Skipped,
+            ];
+        }
 
         $columns = array_merge([
             $this->col('telesale', 'name', 'text'),
@@ -296,7 +304,7 @@ class ExtraReportService
             'key' => 'stage_'.$stage->value,
             'label_key' => $stage->value,
             'label_type' => 'operation_stage',
-            'label' => $stage->label(),
+            'label' => $saleOperations->label($stage),
             'format' => 'number',
         ], $stages));
 

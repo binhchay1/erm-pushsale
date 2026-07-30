@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
 
+import { OperationStageSelect } from '@/components/filters/OperationStageSelect';
 import { SelectFilter } from '@/components/filters/SelectFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,14 +70,15 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
                     options={localizedOptions?.discountModes}
                     onChange={set}
                 />
-                <SelectFilter
-                    label={t('rankings.operation_needed')}
-                    name="operation_stage"
-                    value={filters.operation_stage}
-                    options={localizedOptions?.operationStages}
-                    onChange={set}
-                    placeholder={t('rankings.all_operations')}
-                />
+                <div className="space-y-1">
+                    <Label className="text-xs">{t('rankings.operation_needed')}</Label>
+                    <OperationStageSelect
+                        value={filters.operation_stage ?? ''}
+                        filterOptions={localizedOptions}
+                        placeholder={t('rankings.all_operations')}
+                        onChange={(value) => set('operation_stage', value)}
+                    />
+                </div>
                 <SelectFilter
                     label={t('rankings.team_leader')}
                     name="team_leader_id"

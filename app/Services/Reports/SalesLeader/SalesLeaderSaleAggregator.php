@@ -13,7 +13,7 @@ final class SalesLeaderSaleAggregator
     /** @return Collection<int, array<string, mixed>> */
     public function groupBySale(Collection $orders, ?Request $request = null): Collection
     {
-        $stages = SalesLeaderReportQuery::STAGES;
+        $stages = $this->query->stages();
         $request ??= request();
 
         return $orders->groupBy(fn (Order $order) => $order->sale_user_id ?: 0)->map(function (Collection $saleOrders, int|string $saleId) use ($stages, $request): array {

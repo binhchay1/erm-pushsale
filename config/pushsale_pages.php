@@ -3765,7 +3765,7 @@ return array (
       ),
       6 => 
       array (
-        'key' => 'call_1',
+        'key' => 'new_customer',
         'label' => 'Gọi lần 1',
         'format' => 'text',
       ),
@@ -3863,22 +3863,22 @@ return array (
       ),
       6 => 
       array (
-        'key' => 'call_1_contacts',
+        'key' => 'new_customer_contacts',
         'format' => 'number',
       ),
       7 => 
       array (
-        'key' => 'call_1_closed',
+        'key' => 'new_customer_closed',
         'format' => 'number',
       ),
       8 => 
       array (
-        'key' => 'call_1_rate',
+        'key' => 'new_customer_rate',
         'format' => 'percent',
       ),
       9 => 
       array (
-        'key' => 'call_1_revenue',
+        'key' => 'new_customer_revenue',
         'format' => 'currency',
         'align' => 'right',
       ),
@@ -4104,7 +4104,7 @@ return array (
       ),
       4 => 
       array (
-        'key' => 'call_1',
+        'key' => 'new_customer',
         'label' => 'Gọi lần 1',
         'format' => 'text',
       ),
@@ -4191,12 +4191,12 @@ return array (
       ),
       4 => 
       array (
-        'key' => 'call_1_contacts',
+        'key' => 'new_customer_contacts',
         'format' => 'number',
       ),
       5 => 
       array (
-        'key' => 'call_1_untouched',
+        'key' => 'new_customer_untouched',
         'format' => 'number',
       ),
       6 => 

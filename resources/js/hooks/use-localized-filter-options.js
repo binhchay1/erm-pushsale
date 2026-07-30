@@ -29,7 +29,8 @@ export function useLocalizedFilterOptions(filterOptions) {
             dateTypes: mapEnumOptions(filterOptions.dateTypes, labels.date_type),
             discountModes: mapEnumOptions(filterOptions.discountModes, labels.discount_mode),
             deliveryStatuses: mapEnumOptions(filterOptions.deliveryStatuses, labels.delivery_status),
-            operationStages: mapEnumOptions(filterOptions.operationStages, labels.operation_stage),
+            // operationStages: labels từ menu 1.8.1 (server) — không ghi đè bằng enum i18n.
+            operationStages: filterOptions.operationStages,
             operationResults: mapEnumOptions(filterOptions.operationResults, labels.operation_result),
             closingStatuses: mapEnumOptions(filterOptions.closingStatuses, labels.closing_status),
             sourceTypes: filterOptions.sourceTypes?.map((opt) => ({

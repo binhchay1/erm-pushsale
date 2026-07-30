@@ -104,7 +104,6 @@ class DemoResetSeeder extends Seeder
         'product_categories',
         'marketing_source_daily_metrics',
         'marketing_sources',
-        'legacy_module_records',
         'products',
         'warehouses',
 

@@ -8,6 +8,7 @@ import { OrderMoneyCell, OrderProductsBreakdown, OrderStatusFlags } from '@/comp
 import { CustomerSupplementPacketsDialog } from '@/components/customers/CustomerSupplementPacketsDialog';
 import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
+import { OperationStageSelect } from '@/components/filters/OperationStageSelect';
 import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
 import { PageHeader } from '@/components/layout/PageHeader';
 import {
@@ -521,7 +522,14 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                             </div>
                             <div className="ps-adv-filter-row ps-customer-adv-filter-row is-5-equal">
                                 <FilterSelect value={form.operation_activity_status} onChange={(value) => setField('operation_activity_status', value)} options={filterOptions.operationActivityStatuses ?? [{ value: 'not_operated', label: 'Chưa tác nghiệp' }, { value: 'operated', label: 'Đã tác nghiệp' }]} placeholder="--Chọn trạng thái tác nghiệp--" />
-                                <FilterSelect value={form.operation_stage} onChange={(value) => setField('operation_stage', value)} options={filterOptions.operationStages} placeholder="--Chọn tác nghiệp--" />
+                                <OperationStageSelect
+                                    value={form.operation_stage}
+                                    onChange={(value) => setField('operation_stage', value)}
+                                    filterOptions={filterOptions}
+                                    placeholder="--Chọn tác nghiệp--"
+                                    includeNoOperation
+                                    className="form-control ps-filter-control"
+                                />
                                 <FilterSelect value={form.operation_result} onChange={(value) => setField('operation_result', value)} options={filterOptions.operationResults} placeholder="--Chọn kết quả tác nghiệp--" />
                                 <FilterSelect value={form.delivery_status} onChange={(value) => setField('delivery_status', value)} options={filterOptions.deliveryStatuses} placeholder="--Chọn trạng thái giao hàng--" />
                                 <ProductSearchSelect className="ps-filter-control" products={filterOptions.products ?? []} value={form.product_id} onChange={(value) => setField('product_id', value)} placeholder="--Chọn sản phẩm--" showPrice={false} />
