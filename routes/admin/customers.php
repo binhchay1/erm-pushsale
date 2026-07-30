@@ -47,7 +47,7 @@ foreach ([
     'marketing/customers' => 'marketing.customers',
     'sales/customers' => 'sales.customers',
 ] as $customerProfilePath => $customerProfileName) {
-    Route::get($customerProfilePath.'/export', [CustomerProfileBulkActionController::class, 'export'])->name($customerProfileName.'.export');
+    Route::match(['get', 'post'], $customerProfilePath.'/export', [CustomerProfileBulkActionController::class, 'export'])->name($customerProfileName.'.export');
     Route::post($customerProfilePath.'/bulk/reallocate-now', [CustomerProfileBulkActionController::class, 'reallocateNow'])->name($customerProfileName.'.bulk.reallocate-now');
     Route::post($customerProfilePath.'/bulk/queue-reallocation', [CustomerProfileBulkActionController::class, 'queueReallocation'])->name($customerProfileName.'.bulk.queue-reallocation');
     Route::post($customerProfilePath.'/bulk/recall', [CustomerProfileBulkActionController::class, 'recall'])->name($customerProfileName.'.bulk.recall');

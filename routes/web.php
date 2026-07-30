@@ -120,7 +120,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function (): void {
     Route::get('customers/orders/{order}/supplement-packets', [CustomerSupplementPacketController::class, 'index'])->name('customers.orders.supplement-packets.index');
     Route::post('customers/orders/{order}/supplement-packets/{leadIngestion}/review', [CustomerSupplementPacketController::class, 'store'])->name('customers.orders.supplement-packets.review');
 
-    Route::get('customers/export', [CustomerProfileBulkActionController::class, 'export'])->name('customers.export');
+    Route::match(['get', 'post'], 'customers/export', [CustomerProfileBulkActionController::class, 'export'])->name('customers.export');
     Route::post('customers/bulk/reallocate-now', [CustomerProfileBulkActionController::class, 'reallocateNow'])->name('customers.bulk.reallocate-now');
     Route::post('customers/bulk/queue-reallocation', [CustomerProfileBulkActionController::class, 'queueReallocation'])->name('customers.bulk.queue-reallocation');
     Route::post('customers/bulk/recall', [CustomerProfileBulkActionController::class, 'recall'])->name('customers.bulk.recall');

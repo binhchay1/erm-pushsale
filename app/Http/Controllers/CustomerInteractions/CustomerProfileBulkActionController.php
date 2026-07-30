@@ -177,8 +177,16 @@ class CustomerProfileBulkActionController extends Controller
             abort(403);
         }
 
-        $ids = collect($request->input('ids', []))->filter()->map(fn ($id) => (int) $id)->values();
-        $variant = min(4, max(1, $request->integer('variant', 1)));
+        $rawIds = $request->input('ids', $request->query('ids', []));
+        if (! is_array($rawIds)) {
+            $rawIds = [$rawIds];
+        }
+        $ids = collect($rawIds)->filter(fn ($id) => $id !== null && $id !== '')->map(fn ($id) => (int) $id)->filter(fn ($id) => $id > 0)->unique()->values();
+        $variant = min(4, max(1, (int) $request->input('variant', $request->integer('variant', 1))));
+
+        if ($ids->isEmpty()) {
+            return response()->json(['message' => 'Vui lòng chọn ít nhất một hồ sơ để xuất.'], 422);
+        }
 
         $headers = match ($variant) {
             2 => ['Tên khách hàng', 'Số điện thoại', 'Địa chỉ', 'Tin nhắn', 'Nguồn dữ liệu', 'Marketing', 'Sale'],
@@ -188,37 +196,102 @@ class CustomerProfileBulkActionController extends Controller
         };
 
         try {
+            $companyId = $request->user()?->company_id;
             $orders = Order::query()
-                ->with(['items', 'saleUser:id,name,email', 'marketerUser:id,name,email', 'marketingSource:id,name', 'warehouse:id,name'])
-                ->when($ids->isNotEmpty(), fn ($query) => $query->whereIn('id', $ids))
-                ->when($request->user()?->company_id, fn ($query, $companyId) => $query->where('company_id', $companyId))
+                ->with([
+                    'items:id,order_id,product_name,quantity',
+                    'saleUser:id,name,email',
+                    'marketerUser:id,name,email',
+                    'marketingSource:id,name',
+                    'warehouse:id,name',
+                ])
+                ->whereIn('id', $ids->all())
+                ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
                 ->latest('id')
-                ->limit($ids->isNotEmpty() ? max(1, $ids->count()) : 5000)
+                ->limit(max(1, $ids->count()))
                 ->get();
 
             $rows = $orders->map(function (Order $order) use ($variant): array {
-                $products = $order->items->map(fn ($item) => trim((string) $item->product_name).' x'.(int) $item->quantity)->implode(' | ');
+                $products = $order->items
+                    ->map(fn ($item) => trim((string) ($item->product_name ?? '')).' x'.(int) $item->quantity)
+                    ->filter()
+                    ->implode(' | ');
                 $quantity = (int) $order->items->sum('quantity');
+                $arrived = $order->data_arrived_at;
+                $arrivedLabel = $arrived ? $arrived->format('d/m/Y H:i:s') : '';
 
                 return match ($variant) {
-                    2 => [$order->customer_name, $order->customer_phone, $order->effectiveShippingAddress(), $order->customer_note, $order->marketingSource?->name, $order->marketerUser?->name, $order->saleUser?->name],
-                    3 => [$order->order_code, $products, $quantity, $order->subtotal, $order->discount, $order->vat, $order->shipping_fee_collected, $order->total, $order->deposit],
-                    4 => [$order->order_code, $order->customer_name, $order->customer_phone, $order->marketingSource?->name, $order->marketerUser?->name, $order->saleUser?->name, $order->operation_stage, $order->operation_result, $products, $order->total, $order->warehouse?->name, $order->shipping_method, $order->tracking_number, $order->delivery_status, $order->internal_recon_note],
-                    default => [$order->order_code, $order->marketingSource?->name, $order->data_arrived_at?->format('d/m/Y H:i:s'), $order->customer_name, $order->customer_phone, $order->saleUser?->name, $order->operation_stage, $order->operation_result, $products, $order->total, $order->delivery_status],
+                    2 => [
+                        $order->customer_name,
+                        $order->customer_phone,
+                        $order->effectiveShippingAddress(),
+                        $order->customer_note,
+                        $order->marketingSource?->name,
+                        $order->marketerUser?->name,
+                        $order->saleUser?->name,
+                    ],
+                    3 => [
+                        $order->order_code,
+                        $products,
+                        $quantity,
+                        $order->subtotal,
+                        $order->discount,
+                        $order->vat,
+                        $order->shipping_fee_collected,
+                        $order->total,
+                        $order->deposit,
+                    ],
+                    4 => [
+                        $order->order_code,
+                        $order->customer_name,
+                        $order->customer_phone,
+                        $order->marketingSource?->name,
+                        $order->marketerUser?->name,
+                        $order->saleUser?->name,
+                        $order->operation_stage,
+                        $order->operation_result,
+                        $products,
+                        $order->total,
+                        $order->warehouse?->name,
+                        $order->shipping_method,
+                        $order->tracking_number,
+                        $order->delivery_status,
+                        $order->internal_recon_note,
+                    ],
+                    default => [
+                        $order->order_code,
+                        $order->marketingSource?->name,
+                        $arrivedLabel,
+                        $order->customer_name,
+                        $order->customer_phone,
+                        $order->saleUser?->name,
+                        $order->operation_stage,
+                        $order->operation_result,
+                        $products,
+                        $order->total,
+                        $order->delivery_status,
+                    ],
                 };
             })->all();
         } catch (Throwable $e) {
             report($e);
-            $headers = ['Lỗi xuất dữ liệu'];
-            $rows = [['Không xuất được dữ liệu hồ sơ khách hàng. Vui lòng kiểm tra log server.']];
+
+            return response()->json([
+                'message' => 'Không xuất được dữ liệu hồ sơ khách hàng. Vui lòng thử lại hoặc kiểm tra log server.',
+            ], 500);
         }
 
-        return response()->streamDownload(function () use ($headers, $rows): void {
+        $safeRows = array_map(
+            fn (array $row) => array_map(fn ($value) => $value === null ? '' : $value, $row),
+            $rows,
+        );
+
+        return response()->streamDownload(function () use ($headers, $safeRows): void {
             $out = fopen('php://output', 'wb');
             fwrite($out, "\xEF\xBB\xBF");
             fputcsv($out, $headers);
 
-            foreach ($rows as $row) {
+            foreach ($safeRows as $row) {
                 fputcsv($out, $row);
             }
 
@@ -265,7 +338,7 @@ class CustomerProfileBulkActionController extends Controller
 
     private function success(Request $request, string $message): JsonResponse|RedirectResponse
     {
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
             return response()->json(['message' => $message]);
         }
 
@@ -274,7 +347,7 @@ class CustomerProfileBulkActionController extends Controller
 
     private function failure(Request $request, string $message, int $status = 422): JsonResponse|RedirectResponse
     {
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
             return response()->json(['message' => $message], $status);
         }
 

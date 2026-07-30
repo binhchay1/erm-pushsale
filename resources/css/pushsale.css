@@ -2277,14 +2277,15 @@ body.pushsale-app-body .ps-customer-profile-table > thead > tr > th {
     position: sticky;
     top: 0;
     z-index: 8;
-    height: 58px;
-    padding: 4px 5px;
+    height: auto;
+    min-height: 0;
+    padding: 4px 4px;
     border-color: #2b70bd !important;
     background: #3782dc !important;
     color: #fff !important;
     font-size: 11px;
     font-weight: 600;
-    line-height: 15px;
+    line-height: 1.15;
     vertical-align: middle;
 }
 

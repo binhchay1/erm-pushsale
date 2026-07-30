@@ -1409,17 +1409,26 @@ html body.pushsale-app-body .pushsale-page[data-page-code='1.2.4'] .box-body > .
 }
 
 
-/* Customer profile table th: compact size (page-header loads last — keep tight) */
+/* Customer profile table th: absolute last compact override (loads after final-contracts) */
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr,
+html body.pushsale-app-body .ps-customer-profile-page table.ps-customer-profile-table > thead > tr {
+    height: auto !important;
+    min-height: 0 !important;
+}
+
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th,
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table thead th {
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table thead th,
+html body.pushsale-app-body .ps-customer-profile-page table.ps-customer-profile-table.table > thead > tr > th {
     font-size: 11px !important;
     font-weight: 600 !important;
-    line-height: 1.25 !important;
+    line-height: 1.15 !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    padding: 6px 5px !important;
+    padding: 4px 4px !important;
     vertical-align: middle !important;
+    background: #3782dc !important;
+    color: #fff !important;
 }
 
 /* Warehouse list header filters — keep selects side-by-side (override global .ps-select width:100%) */

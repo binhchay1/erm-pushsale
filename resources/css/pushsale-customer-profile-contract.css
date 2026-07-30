@@ -3,23 +3,52 @@
  * Scoped to .ps-customer-profile-page / .ps-customer-dialog / .ps-purchase-history-dialog.
  */
 
-/* Table headers: compact like other ops tables (no tall empty blue band) */
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th,
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table th {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 8 !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    line-height: 1.25 !important;
+/* Table headers: compact — win over pushsale.css height:58px + late contracts */
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr,
+html body.pushsale-app-body .ps-customer-profile-page table.ps-customer-profile-table > thead > tr {
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    padding: 6px 5px !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table thead th,
+html body.pushsale-app-body .ps-customer-profile-page table.ps-customer-profile-table.table > thead > tr > th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 8 !important;
+    box-sizing: border-box !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1.15 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 4px 4px !important;
     vertical-align: middle !important;
     white-space: normal !important;
     background: #3782dc !important;
     color: #fff !important;
+    border-color: #2b70bd !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th br {
+    line-height: 0 !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr > th > span {
+    display: inline !important;
+    line-height: 1.15 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead .chk-all,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead .chk-all > label {
+    min-height: 0 !important;
+    height: auto !important;
+    line-height: 14px !important;
+    padding: 0 !important;
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > tbody > tr > td {

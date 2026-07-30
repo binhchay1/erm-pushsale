@@ -25,7 +25,15 @@ class SetLocale
 
         // Cookie giúp lần load đầu, route public và hard reload sau đổi ngôn ngữ
         // luôn đồng bộ, kể cả khi Inertia/session chưa kịp hydrate lại props.
-        return $response->withCookie(cookie()->forever('locale', $locale, '/', null, null, false, false, 'Lax'));
+        // Streamed/binary downloads (CSV export) are Symfony responses without Laravel's withCookie().
+        $localeCookie = cookie()->forever('locale', $locale, '/', null, null, false, false, 'Lax');
+        if (method_exists($response, 'withCookie')) {
+            return $response->withCookie($localeCookie);
+        }
+
+        $response->headers->setCookie($localeCookie);
+
+        return $response;
     }
 
     private function resolveLocale(Request $request): string

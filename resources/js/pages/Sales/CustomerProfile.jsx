@@ -296,12 +296,12 @@ function safeActionErrorMessage(raw, fallback = 'Không thực hiện được t
     return text.length > 220 ? `${text.slice(0, 220)}…` : text;
 }
 
-function FloatingActions({ selectedIds, permissions }) {
+function FloatingActions({ selectedIds, permissions, actionBaseUrl = '/customers' }) {
     const { ask } = useConfirm();
     const [open, setOpen] = useState(false);
     const hasSelection = selectedIds.length > 0;
-    // Shared CRUD lives under /customers (web.php), not role page prefixes like /sales/customers.
-    const actionBase = '/customers';
+    // Always use the page URL prefix (/admin/marketing/customers, /admin/sales/customers, …).
+    const actionBase = String(actionBaseUrl || '/customers').replace(/\/$/, '');
 
     const downloadBlob = (blob, filename) => {
         const url = window.URL.createObjectURL(blob);
@@ -321,15 +321,19 @@ function FloatingActions({ selectedIds, permissions }) {
         }
 
         try {
-            const query = new URLSearchParams({ variant: String(variant) });
-            selectedIds.forEach((id) => query.append('ids[]', id));
-            const response = await fetch(`${actionBase}/export?${query.toString()}`, {
-                method: 'GET',
+            const response = await fetch(`${actionBase}/export`, {
+                method: 'POST',
                 credentials: 'same-origin',
                 headers: {
+                    'Content-Type': 'application/json',
                     Accept: 'text/csv,application/json',
+                    'X-CSRF-TOKEN': getCsrfToken(),
                     'X-Requested-With': 'XMLHttpRequest',
                 },
+                body: JSON.stringify({
+                    variant,
+                    ids: selectedIds.map((id) => Number(id)).filter((id) => id > 0),
+                }),
             });
             const contentType = response.headers.get('content-type') ?? '';
             if (!response.ok) {
@@ -373,7 +377,7 @@ function FloatingActions({ selectedIds, permissions }) {
                     'X-CSRF-TOKEN': getCsrfToken(),
                     'X-Requested-With': 'XMLHttpRequest',
                 },
-                body: JSON.stringify({ ids: selectedIds }),
+                body: JSON.stringify({ ids: selectedIds.map((id) => Number(id)).filter((id) => id > 0) }),
             });
             const data = await response.json().catch(() => ({}));
             if (!response.ok) {
@@ -551,7 +555,7 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
 
                 <PushsalePagination routeUrl={routeUrl} filters={form} meta={pagination} scrollTargetId="customer-profile-table" />
 
-                <FloatingActions selectedIds={[...selected]} permissions={filterOptions.permissions} />
+                <FloatingActions selectedIds={[...selected]} permissions={filterOptions.permissions} actionBaseUrl={routeUrl} />
             </section>
 
             <PushsaleCustomerMessagesDialog order={dialog.order} open={dialog.type === 'messages'} onOpenChange={(open) => !open && closeDialog()} />
