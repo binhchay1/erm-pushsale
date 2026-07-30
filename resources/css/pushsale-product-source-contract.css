@@ -210,35 +210,24 @@ html body.pushsale-app-body .ps-taxonomy-source-form label {
     margin-bottom: 12px !important;
 }
 
+/* Product import: body shares --ps-header-x with PageHeader title (no Bootstrap col gutters). */
 html body.pushsale-app-body .ps-product-import-page {
+    --ps-header-x: 14px;
     min-height: calc(100vh - var(--ps-header-height, 50px)) !important;
-    padding-left: 15px !important;
-    padding-right: 15px !important;
+    padding: 0 !important;
     background: #fff !important;
-}
-
-html body.pushsale-app-body .ps-product-import-page .m-header-wrap {
-    margin-left: -15px !important;
-    margin-right: -15px !important;
-    margin-bottom: 14px !important;
-}
-
-html body.pushsale-app-body .ps-product-import-page .m-header {
-    min-height: 49px !important;
-    padding: 10px 15px !important;
-}
-
-html body.pushsale-app-body .ps-product-import-page .ps-title {
     color: #111 !important;
-    font: 700 14px/29px Arial, Helvetica, sans-serif !important;
+    font: 12px/1.4 Arial, Helvetica, sans-serif !important;
 }
 
 html body.pushsale-app-body .ps-product-import-body {
-    padding: 0 !important;
+    padding: 14px var(--ps-header-x, 14px) 28px !important;
+    margin: 0 !important;
 }
 
 html body.pushsale-app-body .ps-import-notice {
-    min-height: 67px !important;
+    width: min(100%, 720px) !important;
+    min-height: 0 !important;
     margin: 0 0 12px !important;
     padding: 8px 10px !important;
     border: 1px solid #ffb000 !important;
@@ -246,10 +235,11 @@ html body.pushsale-app-body .ps-import-notice {
     color: #111 !important;
     font-size: 12px !important;
     line-height: 18px !important;
+    box-sizing: border-box !important;
 }
 
 html body.pushsale-app-body .ps-import-alert {
-    width: 470px !important;
+    width: min(100%, 470px) !important;
     margin: 0 0 10px !important;
     padding: 7px 10px !important;
     border-radius: 0 !important;
@@ -257,25 +247,24 @@ html body.pushsale-app-body .ps-import-alert {
 }
 
 html body.pushsale-app-body .ps-import-workspace {
-    margin-top: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 html body.pushsale-app-body .ps-import-left {
-    width: 470px !important;
-    min-width: 470px !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-
-html body.pushsale-app-body .ps-import-preview {
-    width: calc(100% - 470px) !important;
+    width: min(100%, 470px) !important;
+    max-width: 470px !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 html body.pushsale-app-body .ps-import-table {
-    width: 470px !important;
+    width: 100% !important;
+    max-width: 470px !important;
     margin: 0 !important;
     border-collapse: collapse !important;
     font-size: 12px !important;
+    table-layout: fixed !important;
 }
 
 html body.pushsale-app-body .ps-import-table td {
@@ -286,7 +275,7 @@ html body.pushsale-app-body .ps-import-table td {
 }
 
 html body.pushsale-app-body .ps-import-label {
-    width: 61px !important;
+    width: 72px !important;
     white-space: nowrap !important;
 }
 
@@ -302,50 +291,61 @@ html body.pushsale-app-body .ps-upload-submit {
     font-size: 12px !important;
     line-height: 20px !important;
     box-shadow: none !important;
+    cursor: pointer !important;
 }
 
-html body.pushsale-app-body .ps-file-upload {
-    position: relative !important;
-    z-index: 99 !important;
+/* Joined file chooser + cloud button (same pattern as lead import). */
+html body.pushsale-app-body .ps-product-import-file {
+    display: flex !important;
+    align-items: stretch !important;
     width: 100% !important;
+    max-width: 100% !important;
+    gap: 0 !important;
 }
 
-html body.pushsale-app-body .ps-file-name-wrap {
-    float: left !important;
-    width: calc(100% - 30px) !important;
-}
-
-html body.pushsale-app-body .ps-file-upload-icon-wrap {
-    float: right !important;
-    width: 30px !important;
-}
-
-html body.pushsale-app-body .ps-file-chooser.form-control {
-    display: block !important;
-    width: 100% !important;
-    height: 31px !important;
-    min-height: 31px !important;
-    padding: 5px 10px !important;
-    border: 1px solid #d2d6de !important;
+html body.pushsale-app-body .ps-product-import-file-name {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    margin: 0 !important;
+    padding: 0 8px !important;
+    border: 1px solid #cfd9e2 !important;
+    border-right: 0 !important;
     border-radius: 0 !important;
     background: #fff !important;
-    color: #111 !important;
-    text-align: center !important;
-    font-size: 12px !important;
+    color: #555 !important;
+    font: 12px/26px Arial, Helvetica, sans-serif !important;
+    text-align: left !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
 }
 
-html body.pushsale-app-body .ps-file-upload-icon-wrap .btn {
-    width: 30px !important;
-    height: 31px !important;
-    padding: 4px 6px !important;
-    border: 1px solid #ccc !important;
-    border-left: 0 !important;
+html body.pushsale-app-body .ps-product-import-file-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid #cfd9e2 !important;
     border-radius: 0 !important;
     background: #fff !important;
     color: #1684f8 !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-product-import-file-btn i {
+    margin: 0 !important;
 }
 
 /* Inline hardening for menu flyout to avoid legacy white dropdown bleed on submenu level 3. */
@@ -1077,52 +1077,7 @@ html body.pushsale-app-body .ps-product-source-modal .ps-product-permission-sour
 }
 
 
-/* V113 — import file chooser must fit inside its bordered cell like Pushsale. */
-html body.pushsale-app-body .ps-import-table td:has(.ps-file-upload) {
+html body.pushsale-app-body .ps-import-table td:has(.ps-product-import-file) {
     padding: 4px 5px !important;
     overflow: hidden !important;
-}
-
-html body.pushsale-app-body .ps-file-upload {
-    display: flex !important;
-    align-items: stretch !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    height: 31px !important;
-    overflow: hidden !important;
-}
-
-html body.pushsale-app-body .ps-file-name-wrap {
-    float: none !important;
-    display: block !important;
-    flex: 1 1 auto !important;
-    width: auto !important;
-    min-width: 0 !important;
-}
-
-html body.pushsale-app-body .ps-file-upload-icon-wrap {
-    float: none !important;
-    display: block !important;
-    flex: 0 0 31px !important;
-    width: 31px !important;
-    min-width: 31px !important;
-}
-
-html body.pushsale-app-body .ps-file-chooser.form-control {
-    height: 31px !important;
-    min-height: 31px !important;
-    width: 100% !important;
-    border-right: 0 !important;
-    box-sizing: border-box !important;
-    text-align: left !important;
-}
-
-html body.pushsale-app-body .ps-file-upload-icon-wrap .btn {
-    width: 31px !important;
-    min-width: 31px !important;
-    height: 31px !important;
-    min-height: 31px !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    border-left: 1px solid #c8d6e5 !important;
 }

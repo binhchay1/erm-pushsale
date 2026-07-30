@@ -219,7 +219,7 @@ body.pushsale-app-body .ps-users-table th:nth-child(7) { width: 115px; }
 body.pushsale-app-body .ps-users-table th:nth-child(8) { width: 190px; }
 body.pushsale-app-body .ps-users-table th:nth-child(9) { width: 90px; }
 body.pushsale-app-body .ps-users-table th:nth-child(11) { width: 100px; }
-/* Nhận dữ liệu + Đang sử dụng: cùng độ rộng để icon thẳng hàng ngang. */
+/* Nhận dữ liệu + Đang sử dụng: fixed width + centered tick (1 straight vertical column). */
 body.pushsale-app-body .ps-users-table .ps-col-flag,
 body.pushsale-app-body .ps-users-table th.ps-col-flag,
 body.pushsale-app-body .ps-users-table td.ps-col-flag {
@@ -227,6 +227,25 @@ body.pushsale-app-body .ps-users-table td.ps-col-flag {
     min-width: 100px !important;
     max-width: 100px !important;
     text-align: center !important;
+    vertical-align: middle !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+html body.pushsale-app-body .ps-users-table td.ps-col-flag .ps-round-tick-wrap,
+html body.pushsale-app-body .ps-users-table td.ps-col-flag > .ps-round-tick {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    margin: 0 auto !important;
+    position: relative !important;
+    float: none !important;
+}
+html body.pushsale-app-body .ps-users-table td.ps-col-flag .ps-round-tick {
+    margin: 0 !important;
+    float: none !important;
 }
 body.pushsale-app-body .ps-users-table .ps-col-updated { width: 145px; }
 body.pushsale-app-body .ps-users-table .ps-action-col,
@@ -263,9 +282,13 @@ body.pushsale-app-body .ps-round-tick-wrap {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin: 0;
+    width: 18px;
+    margin: 0 auto;
+    padding: 0;
+    position: relative;
     cursor: pointer;
     line-height: 1;
+    vertical-align: middle;
 }
 body.pushsale-app-body .ps-round-tick-wrap.is-disabled {
     cursor: not-allowed;
