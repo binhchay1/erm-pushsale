@@ -26,8 +26,8 @@ return new class extends Migration
             $table->timestamp('applied_at')->nullable();
             $table->timestamps();
 
-            $table->unique(['company_id', 'batch_code']);
-            $table->index(['company_id', 'created_at']);
+            $table->unique(['company_id', 'batch_code'], 'ds_import_batches_company_code_uq');
+            $table->index(['company_id', 'created_at'], 'ds_import_batches_company_created_idx');
         });
 
         Schema::create('delivery_status_import_rows', function (Blueprint $table) {
@@ -46,8 +46,8 @@ return new class extends Migration
             $table->timestamp('processed_at')->nullable();
             $table->timestamps();
 
-            $table->index(['batch_id', 'process_status', 'result_status']);
-            $table->index(['batch_id', 'order_code']);
+            $table->index(['batch_id', 'process_status', 'result_status'], 'ds_import_rows_batch_status_idx');
+            $table->index(['batch_id', 'order_code'], 'ds_import_rows_batch_code_idx');
         });
     }
 
