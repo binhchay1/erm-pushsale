@@ -25,13 +25,13 @@ export default function PlatformSettings({ tenant }) {
     const slug = tenant.internal_slug ?? 'internal';
 
     return (
-        <AppLayout>
+        <AppLayout activeMenuCode="10.1.5">
             <Head title={t('pages.platform.settings_title')} />
 
             <div className="mx-auto max-w-2xl space-y-6">
                 <div className="flex items-center gap-3">
                     <Button variant="ghost" size="icon-sm" asChild>
-                        <Link href="/platform/companies">
+                        <Link href="/admin/system/settings">
                             <ArrowLeft className="size-4" />
                         </Link>
                     </Button>

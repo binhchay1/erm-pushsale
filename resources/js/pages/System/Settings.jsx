@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
@@ -85,11 +85,16 @@ export default function SystemSettingsPage({ activeMenuCode = '10.1.4', roles = 
                         <h1>Cấu hình hệ thống</h1>
                         <p>Thiết lập quyền mặc định theo vai trò cho toàn bộ hệ thống. Đây là cấu hình cấp platform, tách riêng với cấu hình chức năng của từng đơn vị.</p>
                     </div>
-                    <form onSubmit={submit}>
-                        <button className="btn btn-primary" type="submit" disabled={processing}>
-                            <i className="fa fa-save" /> Cập nhật
-                        </button>
-                    </form>
+                    <div className="ps-system-header-actions">
+                        <Link href="/platform/settings" className="btn btn-default">
+                            <i className="fa fa-id-card-o" /> Định danh đăng nhập
+                        </Link>
+                        <form onSubmit={submit}>
+                            <button className="btn btn-primary" type="submit" disabled={processing}>
+                                <i className="fa fa-save" /> Cập nhật
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 {errors.role_permissions ? <div className="ps-system-error">{errors.role_permissions}</div> : null}

@@ -17,6 +17,13 @@ html body.pushsale-app-body .ps-system-header {
     box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
 }
 
+html body.pushsale-app-body .ps-system-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
 html body.pushsale-app-body .ps-system-header h1 {
     margin: 0 0 4px;
     font-size: 18px;

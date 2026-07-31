@@ -39,8 +39,7 @@ class NavigationService
         $tree = array_map(fn (array $item): array => $this->adaptRoutes($item, $user->role), $tree);
         $tree = $this->filterTreeByPermission($user, $tree);
 
-        // Super admin có thêm màn quản trị nền tảng nhưng vẫn giữ nguyên 9 nhóm
-        // chuẩn Pushsale; mục này được gắn vào nhóm Quản trị đơn vị.
+        // Super admin: quản trị doanh nghiệp + định danh đăng nhập gắn vào menu 10.
         if ($user->canManagePlatform()) {
             $tree = $this->appendPlatformItems($tree);
         }
@@ -290,18 +289,40 @@ class NavigationService
     private function appendPlatformItems(array $tree): array
     {
         foreach ($tree as &$top) {
-            if ($this->menuNumber((string) ($top['title'] ?? '')) !== 1) {
+            if ($this->menuNumber((string) ($top['title'] ?? '')) !== 10) {
                 continue;
             }
 
-            // 1.16.2 (cấu hình nền tảng) trùng mục đích với 10.1.4 — không gắn lại vào menu 1.
-            $top['children'][] = [
-                'title' => '1.16 Quản trị nền tảng',
-                'children' => [
-                    ['title' => '1. Danh sách doanh nghiệp', 'url' => '/platform/companies', 'icon' => 'building', 'code' => '1.16.1'],
-                    ['title' => '2. Giám sát hệ thống', 'url' => '/admin/system-monitor', 'icon' => 'heartbeat', 'code' => '1.16.2'],
-                ],
-            ];
+            if (! empty($top['children']) && is_array($top['children'])) {
+                foreach ($top['children'] as &$group) {
+                    $groupTitle = (string) ($group['title'] ?? '');
+                    if (! str_starts_with(trim($groupTitle), '10.1')) {
+                        continue;
+                    }
+
+                    $group['children'] = array_values(array_merge(
+                        is_array($group['children'] ?? null) ? $group['children'] : [],
+                        [[
+                            'title' => '5. Định danh đăng nhập',
+                            'url' => '/platform/settings',
+                            'icon' => 'cog',
+                            'code' => '10.1.5',
+                        ]],
+                    ));
+                    break;
+                }
+                unset($group);
+            }
+
+            $top['children'] = array_values(array_merge(
+                is_array($top['children'] ?? null) ? $top['children'] : [],
+                [[
+                    'title' => '10.2 Quản trị doanh nghiệp',
+                    'url' => '/platform/companies',
+                    'icon' => 'building',
+                    'code' => '10.2',
+                ]],
+            ));
             break;
         }
         unset($top);

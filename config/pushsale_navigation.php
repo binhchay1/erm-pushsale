@@ -1487,8 +1487,10 @@ return array (
               0 => 'admin',
             ),
           ),
+          // 10.1.5 Định danh đăng nhập — append runtime cho platform admin (NavigationService).
         ),
       ),
+      // 10.2 Quản trị doanh nghiệp — append runtime cho platform admin (NavigationService).
     ),
   ),
 );

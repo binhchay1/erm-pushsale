@@ -94,6 +94,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-hourly-statistics-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-hourly-statistics-contract.css') },
     { file: 'pushsale-admin-85-reports-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-admin-85-reports-contract.css') },
     { file: 'pushsale-system-settings-admin.css', layer: 'final-contract', load: () => import('../../css/pushsale-system-settings-admin.css') },
+    { file: 'pushsale-platform-companies-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-platform-companies-contract.css') },
     { file: 'pushsale-unified-page-shell-contract.css', layer: 'final-contract-last', load: () => import('../../css/pushsale-unified-page-shell-contract.css') },
     { file: 'pushsale-adminlte-canonical-contract.css', layer: 'canonical-last', load: () => import('../../css/pushsale-adminlte-canonical-contract.css') },
     // Page frame before sidebar so menu chrome still wins conflicts.

@@ -1,11 +1,11 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Building2, Copy, FileUp, Pencil, Search, Settings2, UserPlus } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { TableEmptyRow } from '@/components/reports/TableEmpty';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -16,23 +16,10 @@ import {
 import { FieldError, RequiredMark } from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { ScrollDataTable, Td, Th } from '@/components/reports/ScrollDataTable';
 import { useRoleLabel } from '@/hooks/use-labels';
 import { useTableSort } from '@/hooks/use-table-sort';
 import { formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
-
-function StatCard({ label, value }) {
-    return (
-        <Card>
-            <CardContent className="p-4">
-                <p className="text-xs font-medium text-muted-foreground">{label}</p>
-                <p className="mt-1 text-2xl font-bold tracking-tight">{value}</p>
-            </CardContent>
-        </Card>
-    );
-}
 
 function CopyBtn({ value, t }) {
     const [copied, setCopied] = useState(false);
@@ -168,177 +155,233 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
         });
     };
 
+    const sortMark = (key) => {
+        if (sort?.key !== key) return '';
+        return sort.dir === 'asc' ? ' ↑' : ' ↓';
+    };
+
     return (
-        <AppLayout>
+        <AppLayout activeMenuCode="10.2">
             <Head title={t('pages.platform.title')} />
 
-            <div className="space-y-6">
+            <section className="ps-adminlte-page ps-platform-companies-page" data-page-code="10.2">
                 <PageHeader
-                    icon={Building2}
                     title={t('pages.platform.title')}
-                    description={t('pages.platform.desc')}
-                    actions={(
-                        <Button type="button" variant="outline" size="sm" asChild>
-                            <Link href="/platform/settings">
-                                <Settings2 className="size-4" /> {t('pages.platform.settings_title')}
-                            </Link>
-                        </Button>
+                    subtitle={t('pages.platform.desc')}
+                    pageCode="10.2"
+                    className="ps-platform-companies-header"
+                    filters={(
+                        <form id="ps-platform-companies-filters" className="ps-platform-companies-filters" onSubmit={search}>
+                            <input
+                                className="form-control"
+                                value={searchForm.data.search}
+                                onChange={(e) => searchForm.setData('search', e.target.value)}
+                                placeholder={t('pages.platform.search_ph')}
+                            />
+                            <button className="btn btn-sm btn-primary" type="submit">
+                                <i className="fa fa-search" /> Tìm kiếm
+                            </button>
+                        </form>
                     )}
+                    collapsible={false}
                 />
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <StatCard label={t('pages.platform.stat_total')} value={formatNumber(stats.total ?? 0)} />
-                    <StatCard label={t('pages.platform.stat_active')} value={formatNumber(stats.active ?? 0)} />
-                    <StatCard label={t('pages.platform.stat_users')} value={formatNumber(stats.users ?? 0)} />
+                <div className="ps-platform-companies-stats">
+                    <div className="ps-platform-stat">
+                        <span className="ps-platform-stat__label">{t('pages.platform.stat_total')}</span>
+                        <strong className="ps-platform-stat__value">{formatNumber(stats.total ?? 0)}</strong>
+                    </div>
+                    <div className="ps-platform-stat">
+                        <span className="ps-platform-stat__label">{t('pages.platform.stat_active')}</span>
+                        <strong className="ps-platform-stat__value">{formatNumber(stats.active ?? 0)}</strong>
+                    </div>
+                    <div className="ps-platform-stat">
+                        <span className="ps-platform-stat__label">{t('pages.platform.stat_users')}</span>
+                        <strong className="ps-platform-stat__value">{formatNumber(stats.users ?? 0)}</strong>
+                    </div>
                 </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-base">
-                            <UserPlus className="size-4" /> {t('pages.platform.create_title')}
-                        </CardTitle>
-                        <CardDescription>{t('pages.platform.create_desc')}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={create} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
-                                <Label htmlFor="name">
+                <div className="box box-solid ps-platform-create-box">
+                    <div className="box-header with-border">
+                        <h3 className="box-title">
+                            <i className="fa fa-star text-yellow" /> {t('pages.platform.create_title')}
+                        </h3>
+                    </div>
+                    <div className="box-body">
+                        <p className="ps-platform-create-desc">{t('pages.platform.create_desc')}</p>
+                        <form onSubmit={create} className="ps-platform-create-form">
+                            <div className="ps-platform-create-field">
+                                <label htmlFor="name">
                                     {t('pages.platform.field_name')}
                                     <RequiredMark />
-                                </Label>
-                                <Input id="name" value={createForm.data.name} aria-invalid={!!createForm.errors.name} onChange={(e) => createForm.setData('name', e.target.value)} required />
+                                </label>
+                                <input
+                                    id="name"
+                                    className="form-control"
+                                    value={createForm.data.name}
+                                    aria-invalid={!!createForm.errors.name}
+                                    onChange={(e) => createForm.setData('name', e.target.value)}
+                                    required
+                                />
                                 <FieldError message={createForm.errors.name} />
                             </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="slug">{t('pages.platform.field_slug')}</Label>
-                                <Input id="slug" value={createForm.data.slug} onChange={(e) => createForm.setData('slug', e.target.value)} placeholder="abc-corp" />
-                                <p className="text-xs text-muted-foreground">
+                            <div className="ps-platform-create-field">
+                                <label htmlFor="slug">{t('pages.platform.field_slug')}</label>
+                                <input
+                                    id="slug"
+                                    className="form-control"
+                                    value={createForm.data.slug}
+                                    onChange={(e) => createForm.setData('slug', e.target.value)}
+                                    placeholder="abc-corp"
+                                />
+                                <p className="help-block">
                                     {t('pages.platform.field_slug_hint').replace('{role}', 'sales').replace('{slug}', 'abc-corp').replace('saleops.local', emailDomain)}
                                 </p>
-                                {createForm.errors.slug && <p className="text-xs text-destructive">{createForm.errors.slug}</p>}
+                                {createForm.errors.slug ? <p className="text-danger">{createForm.errors.slug}</p> : null}
                             </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="owner_name">
+                            <div className="ps-platform-create-field">
+                                <label htmlFor="owner_name">
                                     {t('pages.platform.field_owner_name')}
                                     <RequiredMark />
-                                </Label>
-                                <Input id="owner_name" value={createForm.data.owner_name} aria-invalid={!!createForm.errors.owner_name} onChange={(e) => createForm.setData('owner_name', e.target.value)} required />
+                                </label>
+                                <input
+                                    id="owner_name"
+                                    className="form-control"
+                                    value={createForm.data.owner_name}
+                                    aria-invalid={!!createForm.errors.owner_name}
+                                    onChange={(e) => createForm.setData('owner_name', e.target.value)}
+                                    required
+                                />
                                 <FieldError message={createForm.errors.owner_name} />
                             </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="owner_email">{t('pages.platform.field_owner_email')}</Label>
-                                <Input id="owner_email" type="email" value={createForm.data.owner_email} onChange={(e) => createForm.setData('owner_email', e.target.value)} />
-                                <p className="text-xs text-muted-foreground">{t('pages.platform.field_owner_email_hint')}</p>
-                                {createForm.errors.owner_email && <p className="text-xs text-destructive">{createForm.errors.owner_email}</p>}
+                            <div className="ps-platform-create-field">
+                                <label htmlFor="owner_email">{t('pages.platform.field_owner_email')}</label>
+                                <input
+                                    id="owner_email"
+                                    type="email"
+                                    className="form-control"
+                                    value={createForm.data.owner_email}
+                                    onChange={(e) => createForm.setData('owner_email', e.target.value)}
+                                />
+                                <p className="help-block">{t('pages.platform.field_owner_email_hint')}</p>
+                                {createForm.errors.owner_email ? <p className="text-danger">{createForm.errors.owner_email}</p> : null}
                             </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="owner_password">{t('pages.platform.field_owner_password')}</Label>
-                                <Input id="owner_password" type="text" value={createForm.data.owner_password} onChange={(e) => createForm.setData('owner_password', e.target.value)} placeholder="password" />
+                            <div className="ps-platform-create-field">
+                                <label htmlFor="owner_password">{t('pages.platform.field_owner_password')}</label>
+                                <input
+                                    id="owner_password"
+                                    type="text"
+                                    className="form-control"
+                                    value={createForm.data.owner_password}
+                                    onChange={(e) => createForm.setData('owner_password', e.target.value)}
+                                    placeholder="password"
+                                />
                             </div>
-                            <div className="flex items-end sm:col-span-2 lg:col-span-3">
-                                <Button type="submit" disabled={createForm.processing}>
+                            <div className="ps-platform-create-actions">
+                                <button type="submit" className="btn btn-sm btn-primary" disabled={createForm.processing}>
+                                    <i className={`fa ${createForm.processing ? 'fa-spinner fa-spin' : 'fa-plus'}`} />{' '}
                                     {createForm.processing ? t('pages.platform.creating') : t('pages.platform.create_btn')}
-                                </Button>
+                                </button>
                             </div>
                         </form>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
 
-                <form onSubmit={search} className="flex max-w-sm items-center gap-2">
-                    <Input
-                        value={searchForm.data.search}
-                        onChange={(e) => searchForm.setData('search', e.target.value)}
-                        placeholder={t('pages.platform.search_ph')}
-                    />
-                    <Button type="submit" variant="outline" size="icon">
-                        <Search className="size-4" />
-                    </Button>
-                </form>
-
-                <Card>
-                    <CardContent className="overflow-x-auto p-0">
-                        <ScrollDataTable className="rounded-none border-0 shadow-none">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr>
-                                        <Th sortable sortKey="name" sort={sort} onSort={toggleSort}>{t('pages.platform.col_company')}</Th>
-                                        <Th sortable sortKey="owner_name" sort={sort} onSort={toggleSort}>{t('pages.platform.col_owner')}</Th>
-                                        <Th sortable sortKey="users_count" sort={sort} onSort={toggleSort} className="text-right">{t('pages.platform.col_users')}</Th>
-                                        <Th sortable sortKey="plan" sort={sort} onSort={toggleSort}>{t('pages.platform.col_plan')}</Th>
-                                        <Th sortable sortKey="is_active" sort={sort} onSort={toggleSort}>{t('pages.platform.col_status')}</Th>
-                                        <Th sortable sortKey="expires_at" sort={sort} onSort={toggleSort}>{t('pages.platform.col_expires')}</Th>
-                                        <Th className="text-right">{t('pages.platform.col_actions')}</Th>
+                <div className="ps-table-scroll ps-platform-companies-table-wrap">
+                    <table className="table table-bordered ps-source-table ps-platform-companies-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <button type="button" className="ps-sort-btn" onClick={() => toggleSort('name')}>
+                                        {t('pages.platform.col_company')}{sortMark('name')}
+                                    </button>
+                                </th>
+                                <th>
+                                    <button type="button" className="ps-sort-btn" onClick={() => toggleSort('owner_name')}>
+                                        {t('pages.platform.col_owner')}{sortMark('owner_name')}
+                                    </button>
+                                </th>
+                                <th>
+                                    <button type="button" className="ps-sort-btn" onClick={() => toggleSort('users_count')}>
+                                        {t('pages.platform.col_users')}{sortMark('users_count')}
+                                    </button>
+                                </th>
+                                <th>
+                                    <button type="button" className="ps-sort-btn" onClick={() => toggleSort('plan')}>
+                                        {t('pages.platform.col_plan')}{sortMark('plan')}
+                                    </button>
+                                </th>
+                                <th>
+                                    <button type="button" className="ps-sort-btn" onClick={() => toggleSort('is_active')}>
+                                        {t('pages.platform.col_status')}{sortMark('is_active')}
+                                    </button>
+                                </th>
+                                <th>
+                                    <button type="button" className="ps-sort-btn" onClick={() => toggleSort('expires_at')}>
+                                        {t('pages.platform.col_expires')}{sortMark('expires_at')}
+                                    </button>
+                                </th>
+                                <th>{t('pages.platform.col_actions')}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedRows.length ? (
+                                sortedRows.map((c) => (
+                                    <tr key={c.id}>
+                                        <td>
+                                            <strong>{c.name}</strong>
+                                            {c.is_internal ? (
+                                                <span className="label label-default ps-platform-internal-badge">{t('pages.platform.internal_badge')}</span>
+                                            ) : null}
+                                            <div className="text-muted">{c.slug}</div>
+                                        </td>
+                                        <td>
+                                            {c.owner ? (
+                                                <>
+                                                    <div>{c.owner.name}</div>
+                                                    <div className="text-muted">{c.owner.email}</div>
+                                                </>
+                                            ) : (
+                                                <span className="text-muted">{t('pages.platform.no_owner')}</span>
+                                            )}
+                                        </td>
+                                        <td className="text-center">{formatNumber(c.users_count)}</td>
+                                        <td className="text-center text-capitalize">{c.plan}</td>
+                                        <td className="text-center">
+                                            <span className={`label ${c.is_active ? 'label-success' : 'label-danger'}`}>
+                                                {c.is_active ? t('pages.platform.status_active') : t('pages.platform.status_suspended')}
+                                            </span>
+                                        </td>
+                                        <td className="text-center text-muted">{c.expires_at ?? t('pages.platform.no_expiry')}</td>
+                                        <td className="ps-platform-actions">
+                                            <button type="button" className="btn btn-xs btn-default" onClick={() => openEdit(c)}>
+                                                <i className="fa fa-pencil" /> {t('pages.platform.edit_btn')}
+                                            </button>
+                                            <Link href={`/platform/companies/${c.id}/admins`} className="btn btn-xs btn-default">
+                                                {t('pages.platform.manage_admins')}
+                                            </Link>
+                                            <Link href={`/platform/companies/${c.id}/accounts`} className="btn btn-xs btn-default">
+                                                {t('pages.platform.view_accounts')}
+                                            </Link>
+                                            {!c.is_internal ? (
+                                                <button
+                                                    type="button"
+                                                    className={`btn btn-xs ${c.status === 'active' ? 'btn-warning' : 'btn-success'}`}
+                                                    onClick={() => toggle(c)}
+                                                >
+                                                    {c.status === 'active' ? t('pages.platform.suspend') : t('pages.platform.activate')}
+                                                </button>
+                                            ) : null}
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {sortedRows.length ? (
-                                        sortedRows.map((c) => (
-                                            <tr key={c.id} className="border-b last:border-0 hover:bg-muted/20">
-                                                <Td className="px-4 py-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-medium">{c.name}</span>
-                                                        {c.is_internal ? (
-                                                            <StatusBadge tone="muted">{t('pages.platform.internal_badge')}</StatusBadge>
-                                                        ) : null}
-                                                    </div>
-                                                    <div className="text-xs text-muted-foreground">{c.slug}</div>
-                                                </Td>
-                                                <Td className="px-4 py-3">
-                                                    {c.owner ? (
-                                                        <div>
-                                                            <div>{c.owner.name}</div>
-                                                            <div className="text-xs text-muted-foreground">{c.owner.email}</div>
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-muted-foreground">{t('pages.platform.no_owner')}</span>
-                                                    )}
-                                                </Td>
-                                                <Td className="px-4 py-3 text-right">{formatNumber(c.users_count)}</Td>
-                                                <Td className="px-4 py-3 capitalize">{c.plan}</Td>
-                                                <Td className="px-4 py-3">
-                                                    <StatusBadge tone={c.is_active ? 'success' : 'danger'}>
-                                                        {c.is_active ? t('pages.platform.status_active') : t('pages.platform.status_suspended')}
-                                                    </StatusBadge>
-                                                </Td>
-                                                <Td className="px-4 py-3 text-muted-foreground">{c.expires_at ?? t('pages.platform.no_expiry')}</Td>
-                                                <Td className="px-4 py-3 text-right">
-                                                    <div className="flex justify-end gap-1">
-                                                        <Button size="sm" variant="outline" onClick={() => openEdit(c)}>
-                                                            <Pencil className="size-3.5" />
-                                                            {t('pages.platform.edit_btn')}
-                                                        </Button>
-                                                        <Button size="sm" variant="outline" asChild>
-                                                            <Link href={`/platform/companies/${c.id}/admins`}>{t('pages.platform.manage_admins')}</Link>
-                                                        </Button>
-                                                        <Button size="sm" variant="outline" asChild>
-                                                            <Link href={`/platform/companies/${c.id}/accounts`}>{t('pages.platform.view_accounts')}</Link>
-                                                        </Button>
-                                                        {!c.is_internal ? (
-                                                            <Button
-                                                                size="sm"
-                                                                variant={c.status === 'active' ? 'outline' : 'default'}
-                                                                onClick={() => toggle(c)}
-                                                            >
-                                                                {c.status === 'active' ? t('pages.platform.suspend') : t('pages.platform.activate')}
-                                                            </Button>
-                                                        ) : null}
-                                                    </div>
-                                                </Td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <Td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
-                                                {t('pages.platform.empty')}
-                                            </Td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </ScrollDataTable>
-                    </CardContent>
-                </Card>
-            </div>
+                                ))
+                            ) : (
+                                <TableEmptyRow colSpan={7} message={t('pages.platform.empty')} className="text-center ps-empty" />
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
             <Dialog open={provisionOpen} onOpenChange={setProvisionOpen}>
                 <DialogContent className="max-w-lg">
