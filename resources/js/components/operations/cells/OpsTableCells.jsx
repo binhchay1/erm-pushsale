@@ -152,13 +152,26 @@ export function CustomerContactCell({
     );
 }
 
-export function MessageCell({ note, onClick, className = 'area1 hidden-xs td-5715' }) {
+export function MessageCell({
+    note,
+    messageParts = null,
+    onClick,
+    className = 'area1 hidden-xs td-5715 ps-message-cell',
+}) {
+    const addressLine = messageParts?.address_line ?? null;
+    const statusSend = messageParts?.status_send ?? null;
+    const fallback = messageParts?.fallback ?? '';
+    const hasAddress = Boolean(addressLine);
+    const hasStatus = Boolean(statusSend);
+    const showDash = hasAddress && hasStatus;
+    const plain = note || fallback || '';
+    const title = [addressLine, statusSend].filter(Boolean).join('\n') || plain;
+
     return (
         <td className={className}>
             <span
-                className="td-message"
-                style={{ cursor: 'pointer', maxWidth: 250, display: 'inline-block' }}
-                title={note || ''}
+                className="td-message ps-msg-block"
+                title={title || ''}
                 onClick={onClick}
                 onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') onClick?.(event);
@@ -166,7 +179,13 @@ export function MessageCell({ note, onClick, className = 'area1 hidden-xs td-571
                 role={onClick ? 'button' : undefined}
                 tabIndex={onClick ? 0 : undefined}
             >
-                {note || '—'}
+                {hasAddress || hasStatus ? (
+                    <>
+                        {hasAddress ? <span className="ps-msg-line">{addressLine}</span> : null}
+                        {showDash ? <span className="ps-msg-dash" aria-hidden="true" /> : null}
+                        {hasStatus ? <span className="ps-msg-line">{statusSend}</span> : null}
+                    </>
+                ) : (plain || '—')}
             </span>
         </td>
     );

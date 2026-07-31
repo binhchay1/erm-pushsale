@@ -45,6 +45,7 @@ final class OrderOperationPresenter
             'carrierLabel' => \App\Support\PhoneCarrier::bracket($order->customer_phone, $order->phone_carrier),
             'customerNote' => $order->customer_note,
             'messageDisplay' => self::landingMessageDisplay($order),
+            'messageParts' => self::landingMessageParts($order),
             'saleOperationNote' => $order->sale_operation_note,
             'shippingAddress' => $order->shipping_address,
             'shippingAddress2' => $order->shipping_address_2,
@@ -138,11 +139,12 @@ final class OrderOperationPresenter
     }
 
     /**
-     * Cột Tin nhắn (Sale tác nghiệp): `Địa chỉ={address}`; nếu payload có status_send
-     * (gói chính hoặc gói bổ sung) thì `Địa chỉ={address} - {status_send}`.
-     * Bỏ qua khi trùng text đã có trong địa chỉ / ghi chú.
+     * Cột Tin nhắn: tách Địa chỉ=… và status_send thành 2 dòng.
+     * Chỉ có gạch đứt khi cả hai đều có nội dung.
+     *
+     * @return array{address_line: ?string, status_send: ?string, fallback: string}
      */
-    public static function landingMessageDisplay(Order $order): string
+    public static function landingMessageParts(Order $order): array
     {
         $address = trim((string) ($order->shipping_address ?? ''));
         if ($address === '') {
@@ -177,31 +179,50 @@ final class OrderOperationPresenter
         }
 
         $statusSends = array_values(array_unique(array_filter($statusSends, static fn (string $value): bool => $value !== '')));
-
         $note = trim((string) ($order->customer_note ?? ''));
-        $line = 'Địa chỉ='.$address;
 
+        $keptStatuses = [];
         foreach ($statusSends as $status) {
-            if (self::messageTextAlreadyPresent($status, $address, $note, $line)) {
+            if (self::messageTextAlreadyPresent($status, $address, $note, $address)) {
                 continue;
             }
-            $line .= ' - '.$status;
+            $keptStatuses[] = $status;
         }
 
-        // Không nhân đôi nếu note đã đúng format Địa chỉ=… (và không thêm được status mới).
-        if ($note !== '' && self::normalizeMessageCompare($note) === self::normalizeMessageCompare($line)) {
-            return $note;
+        $addressLine = $address !== '' ? 'Địa chỉ='.$address : null;
+        $statusLine = $keptStatuses !== [] ? implode(' · ', $keptStatuses) : null;
+
+        if ($addressLine === null && $statusLine === null) {
+            return [
+                'address_line' => null,
+                'status_send' => null,
+                'fallback' => $note,
+            ];
         }
 
-        if ($address === '' && $statusSends === [] && $note !== '') {
-            return $note;
+        return [
+            'address_line' => $addressLine,
+            'status_send' => $statusLine,
+            'fallback' => '',
+        ];
+    }
+
+    /**
+     * Plain-text fallback for title/tooltip (hai dòng nối bằng newline).
+     */
+    public static function landingMessageDisplay(Order $order): string
+    {
+        $parts = self::landingMessageParts($order);
+        $lines = array_values(array_filter([
+            $parts['address_line'],
+            $parts['status_send'],
+        ], static fn (?string $line): bool => $line !== null && $line !== ''));
+
+        if ($lines !== []) {
+            return implode("\n", $lines);
         }
 
-        if ($address === '' && $statusSends === []) {
-            return $note !== '' ? $note : '';
-        }
-
-        return $line;
+        return $parts['fallback'] ?? '';
     }
 
     private static function messageTextAlreadyPresent(string $status, string $address, string $note, string $line): bool

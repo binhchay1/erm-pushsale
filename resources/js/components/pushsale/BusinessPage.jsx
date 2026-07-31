@@ -942,10 +942,10 @@ function normalizeTemplateLayout(host) {
 
         [...row.children].forEach((column) => {
             if (!column.matches?.('[class*="col-"]')) return;
-            const hasTitle = Boolean(column.querySelector('[id$="lblModuleTitle"], .module-title, .ps-title, .text'));
+            const hasTitle = Boolean(column.querySelector('[id$="lblModuleTitle"], .module-title, .ps-title, span.text'));
             const hasSearchAction = Boolean(column.querySelector('[data-pushsale-action="search"], [id$="btnSearch"], .btn-reload'));
             const hasControls = Boolean(column.querySelector('select, .ps-ddl, input:not([type="hidden"]):not([type="file"]), textarea'));
-            column.classList.toggle('pushsale-header-title-col', hasTitle);
+            column.classList.toggle('pushsale-header-title-col', hasTitle && !hasSearchAction && !hasControls);
             column.classList.toggle('pushsale-header-actions-col', hasSearchAction);
             column.classList.toggle('pushsale-header-filter-col', !hasTitle && !hasSearchAction && hasControls);
         });
@@ -979,6 +979,117 @@ function normalizeTemplateLayout(host) {
             if (!hasInteractive && !hasText) column.classList.add('pushsale-empty-column');
         });
     });
+
+    // Warehouse 5.5.x reports: force filter toolbar layout in DOM (CSS alone was losing
+    // to Bootstrap/unified-shell). Hide template title header; keep controls in one flex row.
+    const pageRoot = host.closest('[data-page-code]');
+    const pageCode = String(pageRoot?.getAttribute('data-page-code') ?? '');
+    if (/^5\.5\./.test(pageCode)) {
+        host.classList.add('ps-wh-report-host');
+        pageRoot?.classList.add('ps-warehouse-report-page');
+
+        host.querySelectorAll('.m-header-wrap').forEach((wrap) => {
+            const header = wrap.querySelector('.m-header');
+            if (!header) {
+                wrap.style.setProperty('display', 'none', 'important');
+                return;
+            }
+
+            const controlCols = [...header.children].filter((column) => {
+                if (!column.matches?.('[class*="col-"]')) return false;
+                // Keep any column that still has real filter/action controls.
+                // Do NOT use .text CSS class here — it matches Bootstrap .text-right.
+                return Boolean(column.querySelector(
+                    'select, .ps-ddl, input:not([type="hidden"]):not([type="file"]), textarea, a.btn, a[data-pushsale-action], button.btn, button[type="button"]',
+                ));
+            });
+
+            if (!controlCols.length) {
+                wrap.style.setProperty('display', 'none', 'important');
+                return;
+            }
+
+            let toolbar = host.querySelector('.box-body > .ps-wh-report-filters[data-from-header="1"]');
+            const boxBody = host.querySelector('.box-body');
+            if (!toolbar && boxBody) {
+                toolbar = document.createElement('div');
+                toolbar.className = 'ps-wh-report-filters';
+                toolbar.dataset.fromHeader = '1';
+                boxBody.prepend(toolbar);
+            }
+
+            controlCols.forEach((column) => {
+                const item = document.createElement('div');
+                item.className = 'ps-wh-report-filter-item';
+                while (column.firstChild) item.appendChild(column.firstChild);
+                toolbar?.appendChild(item);
+            });
+
+            wrap.style.setProperty('display', 'none', 'important');
+        });
+
+        host.querySelectorAll('.box-body > .row').forEach((row) => {
+            if (row.querySelector('table, [data-pushsale-grid-anchor], [data-pushsale-pagination-anchor]')) return;
+            const controls = row.querySelectorAll('select, .ps-ddl, input:not([type="hidden"]):not([type="file"]), textarea, a.btn, a[data-pushsale-action]');
+            if (!controls.length) return;
+            row.classList.add('ps-wh-report-filters');
+            [...row.children].forEach((column) => {
+                if (!column.matches?.('[class*="col-"]')) return;
+                if (column.classList.contains('hidden') || column.classList.contains('pushsale-empty-column')) return;
+                column.classList.add('ps-wh-report-filter-item');
+            });
+        });
+
+        host.querySelectorAll('.ps-wh-report-filters').forEach((row) => {
+            row.style.setProperty('display', 'flex', 'important');
+            row.style.setProperty('flex-direction', 'row', 'important');
+            row.style.setProperty('flex-wrap', 'wrap', 'important');
+            row.style.setProperty('align-items', 'center', 'important');
+            row.style.setProperty('gap', '8px 10px', 'important');
+            row.style.setProperty('width', '100%', 'important');
+            row.style.setProperty('margin', '0 0 10px', 'important');
+            row.style.setProperty('padding', '0', 'important');
+            row.style.setProperty('float', 'none', 'important');
+            [...row.children].forEach((item) => {
+                if (item.classList.contains('hidden') || item.classList.contains('pushsale-empty-column')) {
+                    item.style.setProperty('display', 'none', 'important');
+                    return;
+                }
+                item.style.setProperty('float', 'none', 'important');
+                item.style.setProperty('flex', '1 1 160px', 'important');
+                item.style.setProperty('width', 'auto', 'important');
+                item.style.setProperty('min-width', '140px', 'important');
+                item.style.setProperty('max-width', '280px', 'important');
+                item.style.setProperty('margin', '0', 'important');
+                item.style.setProperty('padding', '0', 'important');
+            });
+        });
+
+        host.querySelectorAll('.box-body, .box, .content-wrapper, .pushsale-nested-content-wrapper, .pushsale-template-inner').forEach((node) => {
+            node.style.setProperty('padding-left', '0', 'important');
+            node.style.setProperty('padding-right', '0', 'important');
+            node.style.setProperty('margin-left', '0', 'important');
+            node.style.setProperty('margin-right', '0', 'important');
+            node.style.setProperty('max-width', 'none', 'important');
+            node.style.setProperty('width', '100%', 'important');
+        });
+
+        // Dual-table reports (5.5.6 / 5.5.8): force full-width stacked tables
+        host.querySelectorAll('.box-body > .row > .col-xs-6').forEach((column) => {
+            if (!column.querySelector('table')) return;
+            column.style.setProperty('float', 'none', 'important');
+            column.style.setProperty('width', '100%', 'important');
+            column.style.setProperty('max-width', '100%', 'important');
+            column.style.setProperty('padding-left', '0', 'important');
+            column.style.setProperty('padding-right', '0', 'important');
+            column.style.setProperty('margin', '0 0 12px', 'important');
+        });
+
+        host.querySelectorAll('[id$="btnXemDienGiai"]').forEach((node) => {
+            node.style.setProperty('display', 'none', 'important');
+            node.remove();
+        });
+    }
 }
 
 function LoginUserQuickFilters({ users = [], routeUrl }) {
