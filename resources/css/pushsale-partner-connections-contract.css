@@ -1,0 +1,296 @@
+/* Partner connections (2.6.3) — logo strip, detail panel, source picker dialog. */
+
+html body.pushsale-app-body .ps-partner-connections-page {
+    background: #fff;
+    min-height: calc(100vh - 52px);
+    padding-bottom: 28px;
+}
+
+html body.pushsale-app-body .ps-partner-connections-filters {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+html body.pushsale-app-body .ps-partner-connections-filters .form-control {
+    width: 240px;
+    max-width: 100%;
+    height: 30px;
+}
+
+html body.pushsale-app-body .ps-pc-partners {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 14px 0;
+}
+
+html body.pushsale-app-body .ps-pc-partner-tile {
+    width: 118px;
+    height: 72px;
+    padding: 6px 8px;
+    border: 1px solid #1a597c;
+    background: #fff;
+    opacity: .25;
+    cursor: pointer;
+    transition: opacity .15s ease;
+}
+
+html body.pushsale-app-body .ps-pc-partner-tile:hover,
+html body.pushsale-app-body .ps-pc-partner-tile.is-selected {
+    opacity: 1;
+}
+
+html body.pushsale-app-body .ps-pc-partner-tile.is-selected {
+    box-shadow: inset 0 0 0 2px #111;
+}
+
+html body.pushsale-app-body .ps-pc-partner-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+html body.pushsale-app-body .ps-pc-info {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr) 160px;
+    gap: 16px;
+    align-items: start;
+    margin: 12px 14px 0;
+    padding: 18px 16px;
+    border: 1px solid #e8e8e8;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-pc-info__logo img {
+    width: 80%;
+    max-width: 140px;
+    height: auto;
+    object-fit: contain;
+}
+
+html body.pushsale-app-body .ps-pc-info__title {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #222;
+}
+
+html body.pushsale-app-body .ps-pc-info__desc {
+    margin: 0;
+    color: #444;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+html body.pushsale-app-body .ps-pc-info__actions {
+    text-align: right;
+}
+
+html body.pushsale-app-body .ps-pc-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    margin: 0 0 10px;
+}
+
+html body.pushsale-app-body .ps-pc-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+html body.pushsale-app-body .ps-pc-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #ccc;
+    border-radius: 28px;
+    transition: .2s;
+}
+
+html body.pushsale-app-body .ps-pc-slider::before {
+    position: absolute;
+    content: '';
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: .2s;
+}
+
+html body.pushsale-app-body .ps-pc-switch input:checked + .ps-pc-slider {
+    background: #2196F3;
+}
+
+html body.pushsale-app-body .ps-pc-switch input:checked + .ps-pc-slider::before {
+    transform: translateX(22px);
+}
+
+html body.pushsale-app-body .ps-pc-data-list {
+    display: inline-block;
+    color: #2473c3;
+    font-weight: 600;
+    padding: 0;
+}
+
+html body.pushsale-app-body .ps-pc-toolbar {
+    margin: 12px 14px 0;
+}
+
+html body.pushsale-app-body .ps-pc-table-wrap {
+    margin: 10px 14px 0;
+}
+
+html body.pushsale-app-body .ps-pc-table > thead > tr > th {
+    background: #3185dc;
+    border-color: #2473c3;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-pc-table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+html body.pushsale-app-body .ps-pc-table .ps-empty {
+    padding: 28px 12px;
+    color: #657083;
+}
+
+html body.pushsale-app-body .ps-pc-channel {
+    color: #7b2cbf;
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-pc-url {
+    display: block;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-pc-token {
+    display: block;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-pc-copy {
+    display: inline-block;
+    padding: 0;
+    margin-top: 2px;
+    font-size: 12px;
+    color: #2473c3;
+}
+
+html body.pushsale-app-body .ps-pc-marketer .text-muted {
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-pc-source-dialog .ps-dialog-body {
+    padding-top: 8px;
+}
+
+html body.pushsale-app-body .ps-pc-source-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-pc-source-toolbar .form-control {
+    width: 240px;
+    max-width: 100%;
+    height: 30px;
+}
+
+html body.pushsale-app-body .ps-pc-filter-select {
+    min-width: 180px;
+}
+
+html body.pushsale-app-body .ps-pc-source-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 0 0 10px;
+    border-bottom: 1px solid #d9e0e7;
+}
+
+html body.pushsale-app-body .ps-pc-source-tabs button {
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+}
+
+html body.pushsale-app-body .ps-pc-source-tabs button.is-active {
+    color: #2473c3;
+    border-bottom-color: #2473c3;
+}
+
+html body.pushsale-app-body .ps-pc-table tr.is-attached {
+    opacity: .65;
+    background: #f7f9fb;
+}
+
+html body.pushsale-app-body .ps-pc-source-pager {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+html body.pushsale-app-body .ps-pc-source-pages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+html body.pushsale-app-body .ps-pc-source-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100%;
+}
+
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-pc-info {
+        grid-template-columns: 120px minmax(0, 1fr);
+    }
+
+    html body.pushsale-app-body .ps-pc-info__actions {
+        grid-column: 1 / -1;
+        text-align: left;
+    }
+}
+
+@media (max-width: 575px) {
+    html body.pushsale-app-body .ps-pc-info {
+        grid-template-columns: 1fr;
+    }
+
+    html body.pushsale-app-body .ps-partner-connections-filters {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    html body.pushsale-app-body .ps-partner-connections-filters .form-control {
+        width: 100%;
+    }
+}

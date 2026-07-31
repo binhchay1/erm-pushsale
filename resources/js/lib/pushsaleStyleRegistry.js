@@ -78,6 +78,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-kpi-catalog.css', layer: 'final-contract', load: () => import('../../css/pushsale-kpi-catalog.css') },
     { file: 'pushsale-revenue-bonus-714.css', layer: 'final-contract', load: () => import('../../css/pushsale-revenue-bonus-714.css') },
     { file: 'pushsale-landing-connections.css', layer: 'final-contract', load: () => import('../../css/pushsale-landing-connections.css') },
+    { file: 'pushsale-partner-connections-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-partner-connections-contract.css') },
     { file: 'pushsale-marketing-dashboard-filter-grid-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-marketing-dashboard-filter-grid-contract.css') },
     { file: 'pushsale-blacklist-invoice-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-blacklist-invoice-contract.css') },
     { file: 'pushsale-accounting-expenses-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-accounting-expenses-contract.css') },

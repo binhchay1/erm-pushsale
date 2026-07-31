@@ -2,6 +2,7 @@
 
 namespace App\Models\Pushsale;
 
+use App\Models\LandingConnection;
 use App\Models\MarketingSource;
 use App\Models\Product;
 use App\Models\User;
@@ -10,9 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PartnerConnection extends BusinessRecord
 {
     protected $fillable = [
-        'name', 'partner_type', 'endpoint_url', 'access_token', 'marketing_source_id',
-        'marketer_user_id', 'product_id', 'ad_channel', 'sale_priority', 'manual_import',
-        'is_approved', 'is_active', 'metadata', 'created_by_user_id', 'updated_by_user_id',
+        'name', 'partner_type', 'endpoint_url', 'access_token', 'public_token',
+        'marketing_source_id', 'landing_connection_id', 'marketer_user_id', 'product_id',
+        'ad_channel', 'sale_priority', 'manual_import', 'is_approved', 'is_active',
+        'metadata', 'created_by_user_id', 'updated_by_user_id',
     ];
 
     protected function casts(): array
@@ -26,7 +28,23 @@ class PartnerConnection extends BusinessRecord
         ];
     }
 
-    public function source(): BelongsTo { return $this->belongsTo(MarketingSource::class, 'marketing_source_id'); }
-    public function marketer(): BelongsTo { return $this->belongsTo(User::class, 'marketer_user_id'); }
-    public function product(): BelongsTo { return $this->belongsTo(Product::class); }
+    public function source(): BelongsTo
+    {
+        return $this->belongsTo(MarketingSource::class, 'marketing_source_id');
+    }
+
+    public function landingConnection(): BelongsTo
+    {
+        return $this->belongsTo(LandingConnection::class, 'landing_connection_id');
+    }
+
+    public function marketer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'marketer_user_id');
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

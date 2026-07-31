@@ -76,8 +76,10 @@ Route::get('marketing/leads/import', [LeadImportController::class, 'index'])->na
 Route::get('marketing/leads/manual', [ManualLeadEntryController::class, 'index'])->name('marketing.leads.manual-page');
 
 Route::get('marketing/partner-connections', [PartnerConnectionController::class, 'index'])->name('marketing.partner-connections');
-Route::post('marketing/partner-connections/records', [PartnerConnectionController::class, 'store'])->name('marketing.partner-connections.store');
-Route::match(['put', 'patch'], 'marketing/partner-connections/records/{record}', [PartnerConnectionController::class, 'update'])->whereNumber('record')->name('marketing.partner-connections.update');
+Route::patch('marketing/partner-connections/provider', [PartnerConnectionController::class, 'toggleProvider'])->name('marketing.partner-connections.provider');
+Route::get('marketing/partner-connections/eligible-sources', [PartnerConnectionController::class, 'eligibleSources'])->name('marketing.partner-connections.eligible');
+Route::post('marketing/partner-connections/attach-sources', [PartnerConnectionController::class, 'attachSources'])->name('marketing.partner-connections.attach');
+Route::patch('marketing/partner-connections/records/{record}/flags', [PartnerConnectionController::class, 'updateFlags'])->whereNumber('record')->name('marketing.partner-connections.flags');
 Route::delete('marketing/partner-connections/records/{record}', [PartnerConnectionController::class, 'destroy'])->whereNumber('record')->name('marketing.partner-connections.destroy');
 
 Route::get('marketing/seeding-numbers', [SeedingNumberController::class, 'index'])->name('marketing.seeding-numbers');
