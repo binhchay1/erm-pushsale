@@ -61,15 +61,154 @@ html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page > .m-header-wr
  * (and title cells) so warehouse 5.5.x / operation-workflows are not double-titled.
  * Must live here: this file loads after chrome contracts and otherwise forces display:block.
  */
+/* Title-only template headers (5.5.1/5.5.2) — React PageHeader already owns the title. */
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap.pushsale-primary-header-wrap:not(:has(.pushsale-header-filter-col)):not(:has(.pushsale-header-actions-col)),
 html body.pushsale-app-body .pushsale-page.ps-operation-workflow-page .m-header-wrap.pushsale-primary-header-wrap,
-html body.pushsale-app-body .pushsale-page[data-page-code='1.8.2'] .m-header-wrap.pushsale-primary-header-wrap {
+html body.pushsale-app-body .pushsale-page[data-page-code='1.8.2'] .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page.ps-voucher-entry-page .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page[data-page-code='5.3.1'] .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page[data-page-code='5.3.2'] .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page[data-page-code='5.3.3'] .m-header-wrap.pushsale-primary-header-wrap {
     display: none !important;
 }
 
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .pushsale-header-title-col,
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap [id$='lblModuleTitle'],
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .module-title {
+    display: none !important;
+}
+
+/*
+ * Warehouse 5.5.x — beat unified-shell flex wrap so filters stay grid / horizontal.
+ * Must live here: this file loads after pushsale-unified-page-shell-contract.css.
+ */
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap[data-pushsale-chrome-role='primary-header'] {
+    display: block !important;
+    position: relative !important;
+    top: auto !important;
+    z-index: 1 !important;
+    margin: 0 0 8px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap.pushsale-primary-header-wrap:not(:has(.pushsale-header-filter-col)):not(:has(.pushsale-header-actions-col)) {
+    display: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap.pushsale-primary-header-wrap > .m-header,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap[data-pushsale-chrome-role='primary-header'] > .m-header {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px 10px !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 0 8px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    grid-template-columns: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-title-col {
+    display: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-filter-col,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-actions-col {
+    float: none !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 140px !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-actions-col {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    justify-content: flex-end !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-actions-col .form-control,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-actions-col input.date-range,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-filter-col .form-control,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-filter-col input.date-range {
+    width: 220px !important;
+    max-width: 280px !important;
+    min-width: 160px !important;
+    display: inline-block !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-actions-col .btn,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-actions-col a[role='button'] {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box-body > .row.pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box-body > .row.form-group.pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+    gap: 8px 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 0 10px !important;
+    padding: 0 !important;
+    float: none !important;
+    flex-wrap: unset !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row > [class*='col-'] {
+    float: none !important;
+    flex: unset !important;
+    flex-basis: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box-body,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .content-wrapper,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-nested-content-wrapper,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-template-inner {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-empty-cell,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page td.ps-empty,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page tbody td[colspan] {
+    height: 72px !important;
+    padding: 18px 12px !important;
+    color: #7c8795 !important;
+    font-style: italic !important;
+    font-size: 13px !important;
+    text-align: center !important;
+    background: #fff !important;
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .pushsale-page[data-page-code='5.5.5'] [id$='btnXemDienGiai'] {
     display: none !important;
 }
 
@@ -1100,7 +1239,12 @@ html body.pushsale-app-body .ps-sales-revenue-summary,
 html body.pushsale-app-body .ps-sales-revenue-v2,
 html body.pushsale-app-body .ps-warehouse-report-page.ps-report-page,
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page,
-html body.pushsale-app-body .pushsale-page.ps-operation-workflow-page {
+html body.pushsale-app-body .pushsale-page.ps-operation-workflow-page,
+html body.pushsale-app-body .pushsale-page.ps-voucher-entry-page,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"],
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"],
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] {
     padding-left: var(--ps-header-x, 14px) !important;
     padding-right: var(--ps-header-x, 14px) !important;
     box-sizing: border-box !important;
@@ -1467,18 +1611,41 @@ html body.pushsale-app-body .pushsale-wrapper .ps-customer-profile-page table.ps
     line-height: 0 !important;
 }
 
-/* Warehouse list header filters — keep selects side-by-side (override global .ps-select width:100%) */
-html body.pushsale-app-body .ps-warehouse-page .ps-page-header .ps-warehouse-header-filters {
+/* Warehouse list header filters — keep selects side-by-side (override global .ps-select width:100%).
+ * PageHeader portals out of `.ps-warehouse-page`, so scope by header class / pageCode. */
+html body.pushsale-app-body .ps-page-header.ps-warehouse-list-header-wrap .ps-warehouse-header-filters,
+html body.pushsale-app-body .ps-page-header[data-page-code="5.2.1"] .ps-warehouse-header-filters,
+html body.pushsale-app-body .m-header-wrap.ps-warehouse-list-header-wrap .ps-warehouse-header-filters {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     gap: 8px !important;
     width: auto !important;
     max-width: 100% !important;
+    margin: 0 !important;
 }
 
-html body.pushsale-app-body .ps-warehouse-page .ps-page-header .ps-warehouse-header-filters > .ps-select {
+html body.pushsale-app-body .ps-page-header.ps-warehouse-list-header-wrap .ps-warehouse-header-filters > .ps-select,
+html body.pushsale-app-body .ps-page-header[data-page-code="5.2.1"] .ps-warehouse-header-filters > .ps-select,
+html body.pushsale-app-body .m-header-wrap.ps-warehouse-list-header-wrap .ps-warehouse-header-filters > .ps-select {
     position: relative !important;
+    flex: 0 0 160px !important;
+    width: 160px !important;
+    min-width: 140px !important;
+    max-width: 180px !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-warehouse-list-header-wrap .ps-warehouse-header-search,
+html body.pushsale-app-body .ps-page-header[data-page-code="5.2.1"] .ps-warehouse-header-search {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: auto !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-warehouse-list-header-wrap .ps-warehouse-header-search > input.form-control,
+html body.pushsale-app-body .ps-page-header[data-page-code="5.2.1"] .ps-warehouse-header-search > input.form-control {
     flex: 0 0 160px !important;
     width: 160px !important;
     min-width: 140px !important;

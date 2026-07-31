@@ -1221,7 +1221,7 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             if ([...select.options].some((option) => option.value === current)) {
                 select.value = current;
             } else if (isVoucherTypeSelect && options.length) {
-                select.value = String(options[0].id);
+                select.value = '-1';
             }
             select.disabled = false;
             select.classList.remove('aspNetDisabled');
@@ -1772,6 +1772,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
 
     const isVoucherEntryPage = String(schema.code) === '5.3.1';
     const isWarehouseReportPage = /^5\.5\./.test(String(schema.code ?? ''));
+    const isWarehouseFlowListPage = ['5.3.2', '5.3.3'].includes(String(schema.code));
     const isOperationWorkflowPage = String(schema.code) === '1.8.2';
     const voucherId = summary?.voucher_id ?? summary?.id ?? rows?.[0]?.voucher_id ?? '';
     const voucherTitle = voucherId
@@ -1821,7 +1822,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
         <AppLayout>
             <Head title={schema.title} />
             <div
-                className={`pushsale-page pushsale-kind-${schema.kind}${isVoucherEntryPage ? ' ps-voucher-entry-page' : ''}${isWarehouseReportPage ? ' ps-warehouse-report-page' : ''}${isOperationWorkflowPage ? ' ps-operation-workflow-page' : ''}`}
+                className={`pushsale-page pushsale-kind-${schema.kind}${isVoucherEntryPage ? ' ps-voucher-entry-page' : ''}${isWarehouseReportPage ? ' ps-warehouse-report-page' : ''}${isWarehouseFlowListPage ? ' ps-warehouse-flow-page' : ''}${isOperationWorkflowPage ? ' ps-operation-workflow-page' : ''}`}
                 data-page-code={schema.code}
             >
                 {isVoucherEntryPage ? (
@@ -1832,12 +1833,28 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
                         actions={(
                             <button
                                 type="button"
-                                className="btn btn-sm btn-default"
+                                className="btn btn-sm btn-default ps-header-close-icon"
                                 onClick={() => router.visit('/admin/warehouse/vouchers')}
                                 aria-label="Đóng"
+                                title="Đóng"
                             >
-                                <i className="fa fa-close" /> Đóng
+                                <i className="fa fa-close" aria-hidden="true" />
                             </button>
+                        )}
+                    />
+                ) : null}
+                {isWarehouseFlowListPage ? (
+                    <PageHeader
+                        title={schema.title}
+                        pageCode={String(schema.code)}
+                        className="ps-warehouse-flow-header"
+                        actions={(
+                            <a
+                                className="btn btn-sm btn-primary"
+                                href="/admin/warehouse/vouchers/entry"
+                            >
+                                <i className="fa fa-plus" aria-hidden="true" /> Xuất / nhập kho
+                            </a>
                         )}
                     />
                 ) : null}

@@ -328,7 +328,108 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .m-header > .
 }
 
 html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-composite-filter-row > .pushsale-filter-cell {
-    flex-basis: 270px !important;
+    flex-basis: 170px !important;
+    flex-grow: 0 !important;
+    min-width: 150px !important;
+    max-width: 220px !important;
+}
+
+/* Warehouse voucher list + stock card: keep body filters in one horizontal row */
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-composite-filter-row,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-composite-filter-row,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-composite-filter-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px 10px !important;
+    width: 100% !important;
+    margin: 0 0 10px !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-filter-row > [class*='col-'],
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-filter-row > [class*='col-'],
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-filter-row > [class*='col-'],
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-composite-filter-row > .pushsale-filter-cell,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-composite-filter-row > .pushsale-filter-cell,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-composite-filter-row > .pushsale-filter-cell {
+    float: none !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 140px !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-filter-row > .hidden,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-filter-row > .hidden,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-filter-row > .hidden,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-composite-filter-row > .hidden,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-composite-filter-row > .hidden,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-composite-filter-row > .hidden {
+    display: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .box-body,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .box-body,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .box-body {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-empty-cell,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-empty-cell,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-empty-cell,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page td.ps-empty,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] td.ps-empty,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] td.ps-empty {
+    color: #666 !important;
+    font-style: italic !important;
+    height: 72px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-header-close-icon,
+html body.pushsale-app-body .ps-page-header.ps-voucher-entry-header .ps-header-close-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    border: 1px solid #cfd8e3 !important;
+    background: #fff !important;
+    color: #5c6b7a !important;
+    line-height: 1 !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-header-close-icon .fa {
+    margin: 0 !important;
+    font-size: 14px !important;
+}
+
+@media (max-width: 1100px) {
+    html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-filter-row,
+    html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-filter-row,
+    html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-filter-row {
+        flex-wrap: wrap !important;
+    }
+
+    html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-filter-row > [class*='col-'],
+    html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-filter-row > [class*='col-'],
+    html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-filter-row > [class*='col-'] {
+        flex: 1 1 180px !important;
+        min-width: 160px !important;
+        max-width: 280px !important;
+    }
 }
 
 @media (max-width: 1280px) {
@@ -1174,9 +1275,13 @@ html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-filters {
     margin: 0 !important;
 }
 
-/* Header filters on warehouse list: never stack/overlap (global .ps-select is width:100%) */
+/* Header filters on warehouse list: never stack/overlap (global .ps-select is width:100%).
+ * PageHeader portals out of `.ps-warehouse-page`, so also scope by header class / pageCode. */
 html body.pushsale-app-body .ps-warehouse-page .ps-page-header__filters .ps-warehouse-header-filters,
-html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters {
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters,
+html body.pushsale-app-body .ps-page-header.ps-warehouse-list-header-wrap .ps-warehouse-header-filters,
+html body.pushsale-app-body .ps-page-header[data-page-code="5.2.1"] .ps-warehouse-header-filters,
+html body.pushsale-app-body .m-header-wrap.ps-warehouse-list-header-wrap .ps-warehouse-header-filters {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
@@ -1188,7 +1293,10 @@ html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters {
 }
 
 html body.pushsale-app-body .ps-warehouse-page .ps-page-header .ps-warehouse-header-filters > .ps-select,
-html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > .ps-select {
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > .ps-select,
+html body.pushsale-app-body .ps-page-header.ps-warehouse-list-header-wrap .ps-warehouse-header-filters > .ps-select,
+html body.pushsale-app-body .ps-page-header[data-page-code="5.2.1"] .ps-warehouse-header-filters > .ps-select,
+html body.pushsale-app-body .m-header-wrap.ps-warehouse-list-header-wrap .ps-warehouse-header-filters > .ps-select {
     position: relative !important;
     flex: 0 0 160px !important;
     width: 160px !important;
@@ -1196,7 +1304,9 @@ html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-filters > .p
     max-width: 180px !important;
 }
 
-html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-search {
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-search,
+html body.pushsale-app-body .ps-page-header.ps-warehouse-list-header-wrap .ps-warehouse-header-search,
+html body.pushsale-app-body .ps-page-header[data-page-code="5.2.1"] .ps-warehouse-header-search {
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
@@ -1204,7 +1314,9 @@ html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-search {
     margin: 0 !important;
 }
 
-html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-search > input.form-control {
+html body.pushsale-app-body .ps-warehouse-page .ps-warehouse-header-search > input.form-control,
+html body.pushsale-app-body .ps-page-header.ps-warehouse-list-header-wrap .ps-warehouse-header-search > input.form-control,
+html body.pushsale-app-body .ps-page-header[data-page-code="5.2.1"] .ps-warehouse-header-search > input.form-control {
     flex: 0 0 160px !important;
     width: 160px !important;
     min-width: 120px !important;

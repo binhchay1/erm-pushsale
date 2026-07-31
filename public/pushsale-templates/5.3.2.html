@@ -81,28 +81,6 @@
 <span class="text form-group" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho_lblModuleTitle">Danh sách phiếu xuất/nhập kho</span>
 </div>
 <div class="col-sm-5 form-group">
-<div style="width: calc(100% - 140px); float: left;">
-<input class="form-control pushsale-native-input" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho__keyword" name="dnn$ctr1644$Main$DanhSachPhieuXuatNhapKho$_keyword" placeholder="Mã phiếu đầy đủ" type="text"/>
-</div>
-<div style="width: 125px; float: right;">
-<a class="btn btn-sm btn-primary" data-pushsale-action="search" href="#" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho_btnSearch" role="button">
-<i class="fa fa-search"></i> Tìm kiếm
-                            </a>
-<a class="btn-reload btn btn-sm btn-primary hidden" data-pushsale-action="search" href="#" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho_btnRefresh" role="button">
-<i class="fa fa-refresh"></i> Tìm kiếm
-                            </a>
-<button aria-expanded="false" class="dropdown-toggle ichucnang" data-toggle="dropdown" role="button" type="button">
-<i class="fa fa-gear"></i>
-</button>
-<ul class="dropdown-menu dropdown-menu-right" role="menu" style="left: 43px; top: -3px;">
-<li>
-<a data-pushsale-action="export" href="#" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho_btnXuatExcelSale" role="button" title="Xuất Excel Sale">
-<i class="fa fa-file-excel-o"></i> Xuất Excel
-                                    </a>
-</li>
-</ul>
-</div>
-<div style="clear: both;"></div>
 </div>
 </div>
 </div>
@@ -154,11 +132,34 @@
 <option value="2">Hủy</option>
 </select>
 </div>
-<div class="col-sm-2 form-group text-right">
-<a class="btn btn-sm btn-primary" href="/ld/warehouse/nhap-xuat-kho" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho_hpThemMoi" role="button">
+<div class="col-sm-2 form-group">
+<input class="form-control pushsale-native-input" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho__keyword" name="dnn$ctr1644$Main$DanhSachPhieuXuatNhapKho$_keyword" placeholder="Mã phiếu đầy đủ" type="text"/>
+</div>
+<div class="col-sm-2 form-group">
+<a class="btn btn-sm btn-primary" data-pushsale-action="search" href="#" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho_btnSearch" role="button">
+<i class="fa fa-search"></i> Tìm kiếm
+                            </a>
+<a class="btn-reload btn btn-sm btn-primary hidden" data-pushsale-action="search" href="#" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho_btnRefresh" role="button">
+<i class="fa fa-refresh"></i> Tìm kiếm
+                            </a>
+<button aria-expanded="false" class="dropdown-toggle ichucnang" data-toggle="dropdown" role="button" type="button">
+<i class="fa fa-gear"></i>
+</button>
+<ul class="dropdown-menu dropdown-menu-right" role="menu">
+<li>
+<a data-pushsale-action="export" href="#" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho_btnXuatExcelSale" role="button" title="Xuất Excel Sale">
+<i class="fa fa-file-excel-o"></i> Xuất Excel
+                                    </a>
+</li>
+</ul>
+</div>
+<div class="col-sm-2 form-group text-right hidden">
+<a class="btn btn-sm btn-primary" href="/admin/warehouse/vouchers/entry" id="dnn_ctr1644_Main_DanhSachPhieuXuatNhapKho_hpThemMoi" role="button">
 <i class="fa fa-plus"></i> Xuất / nhập kho
                     </a>
 </div>
+</div>
+<div class="row">
 <div class="col-xs-12 form-group">
 <div style="width: 100%; overflow: hidden; overflow-x: auto;">
 <table class="table table-bordered pushsale-data-table" data-pushsale-grid-table="primary" id="tableReport">
@@ -181,7 +182,7 @@
 </tr></thead><tbody data-pushsale-grid-anchor="primary"></tbody></table><div data-pushsale-pagination-anchor="primary"></div>
 </div>
 </div>
-<div class="col-xs-12 text-right">
+<div class="col-xs-12 text-right pushsale-native-pager hidden">
 <div class="btn-group">
 <button class="btn btn-default btn-sm" role="button" type="button">
 <i class="fa fa-spinner fa-spin hidden spwait"></i>

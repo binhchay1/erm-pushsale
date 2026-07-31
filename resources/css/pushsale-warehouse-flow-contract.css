@@ -647,9 +647,14 @@
     }
 }
 
-/* Shared PageHeader for voucher entry; hide legacy template header. */
-html body.pushsale-app-body .pushsale-page.ps-voucher-entry-page > .m-header-wrap,
-html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .pushsale-template-host > #dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_pnlMain > .m-header-wrap {
+/* Shared PageHeader for voucher entry / warehouse flow lists; hide legacy template headers. */
+html body.pushsale-app-body .pushsale-page.ps-voucher-entry-page .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page.ps-voucher-entry-page .m-header-wrap[data-pushsale-chrome-role="primary-header"],
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .m-header-wrap[data-pushsale-chrome-role="primary-header"] {
     display: none !important;
 }
 
@@ -657,6 +662,67 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .ps-voucher-e
     display: inline-flex !important;
     align-items: baseline !important;
     gap: 6px !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-header-close-icon,
+html body.pushsale-app-body .ps-page-header.ps-voucher-entry-header .ps-header-close-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    border: 1px solid #cfd8e3 !important;
+    background: #fff !important;
+    color: #5c6b7a !important;
+    line-height: 1 !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-header-close-icon .fa {
+    margin: 0 !important;
+    font-size: 14px !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .box-body,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .box-body,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .box-body {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-filter-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px 10px !important;
+    margin: 0 0 10px !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-filter-row > [class*="col-"]:not(.hidden),
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-filter-row > [class*="col-"]:not(.hidden),
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-filter-row > [class*="col-"]:not(.hidden) {
+    float: none !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 130px !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-flow-page .pushsale-empty-cell,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.2"] .pushsale-empty-cell,
+html body.pushsale-app-body .pushsale-page[data-page-code="5.3.3"] .pushsale-empty-cell {
+    color: #666 !important;
+    font-style: italic !important;
+    height: 72px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    background: #fff !important;
 }
 
 html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .ps-voucher-id-wrap {

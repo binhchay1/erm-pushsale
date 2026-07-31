@@ -59,24 +59,13 @@
 <span class="text form-group" id="dnn_ctr1493_Main_DanhSachKhoLichSu_lblModuleTitle">Lịch sử nhập / xuất kho (Thẻ kho)</span>
 </div>
 <div class="col-sm-4 form-group">
-<div style="width: calc(100% - 125px);display:inline-block;">
-<input class="form-control pushsale-native-input" id="dnn_ctr1493_Main_DanhSachKhoLichSu__Keyword" name="dnn$ctr1493$Main$DanhSachKhoLichSu$_Keyword" placeholder="Mã đơn/Mã phiếu đầy đủ" type="text"/>
-</div>
-<div class="text-right" style="width: 121px;display:inline-block;">
-<a class="btn btn-sm btn-primary" data-pushsale-action="search" href="#" id="dnn_ctr1493_Main_DanhSachKhoLichSu_btnSearch" role="button">
-<i class="fa fa-search"></i> Tìm kiếm
-                            </a>
-<a class="btn btn-sm btn-primary hidden btn-reload" data-pushsale-action="reload" href="#" id="dnn_ctr1493_Main_DanhSachKhoLichSu_btnReload" role="button">
-<i class="fa fa-refresh"></i> Reload
-                            </a>
-</div>
 </div>
 </div>
 </div>
 </div>
 <div class="box-body">
 <div class="row">
-<div class="col-sm-4 form-group">
+<div class="col-sm-2 form-group">
 <input class="form-control date-range pushsale-native-input" id="dnn_ctr1493_Main_DanhSachKhoLichSu__TuNgay_DenNgay" name="dnn$ctr1493$Main$DanhSachKhoLichSu$_TuNgay_DenNgay" type="text" value="17/07/2026 00:00 - 23/07/2026 23:59"/>
 </div>
 <div class="col-sm-2 form-group">
@@ -118,6 +107,17 @@
 </div>
 
 </div>
+<div class="col-sm-2 form-group">
+<input class="form-control pushsale-native-input" id="dnn_ctr1493_Main_DanhSachKhoLichSu__Keyword" name="dnn$ctr1493$Main$DanhSachKhoLichSu$_Keyword" placeholder="Mã đơn/Mã phiếu đầy đủ" type="text"/>
+</div>
+<div class="col-sm-2 form-group">
+<a class="btn btn-sm btn-primary" data-pushsale-action="search" href="#" id="dnn_ctr1493_Main_DanhSachKhoLichSu_btnSearch" role="button">
+<i class="fa fa-search"></i> Tìm kiếm
+                            </a>
+<a class="btn btn-sm btn-primary hidden btn-reload" data-pushsale-action="reload" href="#" id="dnn_ctr1493_Main_DanhSachKhoLichSu_btnReload" role="button">
+<i class="fa fa-refresh"></i> Reload
+                            </a>
+</div>
 <div class="col-sm-2 form-group hidden">
 <select class="chosen pushsale-native-select" id="dnn_ctr1493_Main_DanhSachKhoLichSu__IsAuto" name="dnn$ctr1493$Main$DanhSachKhoLichSu$_IsAuto" style="" title="">
 <option selected="selected" value="-1">--Chế độ--</option>
@@ -125,8 +125,8 @@
 <option value="0">Thủ công</option>
 </select>
 </div>
-<div class="col-sm-2 form-group text-right">
-<a class="btn btn-sm btn-primary" href="/ld/warehouse/nhap-xuat-kho" id="dnn_ctr1493_Main_DanhSachKhoLichSu_hpThemMoi" role="button" style="color:white;">
+<div class="col-sm-2 form-group text-right hidden">
+<a class="btn btn-sm btn-primary" href="/admin/warehouse/vouchers/entry" id="dnn_ctr1493_Main_DanhSachKhoLichSu_hpThemMoi" role="button" style="color:white;">
 <i class="fa fa-plus"></i> Xuất / nhập kho
                     </a>
 </div>
@@ -150,7 +150,7 @@
 </tr></thead><tbody data-pushsale-grid-anchor="primary"></tbody></table><div data-pushsale-pagination-anchor="primary"></div>
 </div>
 </div>
-<div class="col-xs-6 text-left form-group">
+<div class="col-xs-6 text-left form-group pushsale-native-pager hidden">
 <div class="btn-group">
 <button class="btn btn-default btn-sm" role="button" type="button">
 <i class="fa fa-spinner fa-spin hidden spwait"></i>
@@ -164,7 +164,7 @@
 </a>
 </div>
 </div>
-<div class="col-xs-6 text-right form-group">
+<div class="col-xs-6 text-right form-group hidden">
 <ul "="" class="pagination pagination-sm no-margin">
 <li><a class="aspNetDisabled" id="dnn_ctr1493_Main_DanhSachKhoLichSu_tnPager_pre" role="button" title="Trang trước">«</a></li>
 <li class="active"><a href="#" id="dnn_ctr1493_Main_DanhSachKhoLichSu_tnPager_rptPagger_btnPage_0" role="button">1</a></li>
