@@ -66,6 +66,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-page-header-spacing-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-page-header-spacing-contract.css') },
     { file: 'pushsale-warehouse-delivery-handover-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-warehouse-delivery-handover-contract.css') },
     { file: 'pushsale-warehouse-report-chrome-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-warehouse-report-chrome-contract.css') },
+    { file: 'pushsale-warehouse-menu-report-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-warehouse-menu-report-contract.css') },
     { file: 'pushsale-warehouse-operations-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-warehouse-operations-contract.css') },
     { file: 'pushsale-warehouse-bulk-update-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-warehouse-bulk-update-contract.css') },
     { file: 'pushsale-customer-profile-contract.css', layer: 'final-contract', load: () => import('../../css/pushsale-customer-profile-contract.css') },

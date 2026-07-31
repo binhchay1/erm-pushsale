@@ -1,5 +1,5 @@
-import PushsaleBusinessPage from '@/components/pushsale/BusinessPage';
+import WarehouseMenuReportPage from '@/pages/Admin/Warehouse/WarehouseMenuReportPage';
 
 export default function Page(props) {
-    return <PushsaleBusinessPage {...props} />;
+    return <WarehouseMenuReportPage {...props} />;
 }

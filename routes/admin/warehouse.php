@@ -57,6 +57,7 @@ Route::get('warehouse/reports/pending-export', [PendingExportReportController::c
 Route::get('warehouse/reports/movement-summary', [MovementSummaryReportController::class, 'index'])->name('warehouse.reports.movement-summary');
 Route::get('warehouse/reports/care-orders', [WarehouseCareOrderReportController::class, 'index'])->name('warehouse.reports.care-orders');
 Route::get('warehouse/reports/phone-corrections', [PhoneCorrectionReportController::class, 'index'])->name('warehouse.reports.phone-corrections');
+Route::get('warehouse/reports/phone_corrections', [PhoneCorrectionReportController::class, 'index'])->name('warehouse.reports.phone-corrections.alias');
 Route::get('warehouse/reports/delivery-status', [DeliveryStatusReportController::class, 'index'])->name('warehouse.reports.delivery-status');
 Route::get('warehouse/reports/care-operations', [CareOperationReportController::class, 'index'])->name('warehouse.reports.care-operations');
 

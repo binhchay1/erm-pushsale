@@ -1,0 +1,108 @@
+/* Warehouse menu reports 5.5.x — React PageHeader filters, not template DOM. */
+
+html body.pushsale-app-body .ps-wh-menu-report-page {
+    background: #fff;
+    min-height: calc(100vh - 52px);
+    padding-bottom: 24px;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-filters {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px 10px !important;
+    margin: 0 !important;
+    width: 100%;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-filters > * {
+    flex: 0 1 auto;
+    min-width: 150px;
+    max-width: 260px;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-filters .ps-wh-menu-report-daterange,
+html body.pushsale-app-body .ps-wh-menu-report-filters .ps-date-range-filter,
+html body.pushsale-app-body .ps-wh-menu-report-filters .ps-drp {
+    min-width: 280px;
+    max-width: 340px;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    min-width: auto;
+    max-width: none;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-error {
+    margin: 10px 14px 0;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-table-wrap {
+    margin: 12px 14px 0;
+    overflow-x: auto;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-table {
+    width: 100%;
+    margin: 0;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-table > thead > tr > th {
+    background: #3185dc;
+    border-color: #2473c3;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    padding: 8px 6px;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-table .ps-empty {
+    padding: 28px 12px;
+    color: #657083;
+}
+
+html body.pushsale-app-body .ps-wh-menu-report-note {
+    margin: 8px 0 0;
+    color: #657083;
+    font-size: 12px;
+}
+
+/* PageHeader portals filters outside page root — target by page code too. */
+html body.pushsale-app-body .m-header-wrap[data-page-code^='5.5'] .ps-wh-menu-report-filters,
+html body.pushsale-app-body .ps-page-header[data-page-code^='5.5'] .ps-wh-menu-report-filters,
+html body.pushsale-app-body [data-page-code^='5.5'] ~ * .ps-wh-menu-report-filters,
+html body.pushsale-app-body .ps-wh-menu-report-header .ps-wh-menu-report-filters {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px 10px !important;
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-wh-menu-report-filters > * {
+        min-width: 100%;
+        max-width: 100%;
+    }
+}
