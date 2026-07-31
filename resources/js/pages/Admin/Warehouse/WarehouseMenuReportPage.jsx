@@ -44,15 +44,25 @@ const PER_PAGE_OPTIONS = [
     { value: '200', label: '200' },
 ];
 
-/** Filter sets for warehouse menu 5.5.x — React only, no template DOM. */
-const FILTERS_BY_CODE = {
-    '5.5.1': ['date', 'warehouse_id', 'product_id', 'movement', 'sort'],
-    '5.5.2': ['date', 'warehouse_id', 'product_id', 'movement'],
-    '5.5.4': ['date_type', 'date', 'warehouse_id', 'parent_product_id', 'product_id', 'warehouse_op', 'delivery_status', 'reconciliation', 'per_page', 'no_closing_limit'],
-    '5.5.5': ['date_type', 'date', 'shipping_account_id'],
-    '5.5.6': ['date', 'sale_leader_id', 'sale_team_id'],
-    '5.5.7': ['date_type', 'date', 'shipping_group_id', 'shipping_account_id', 'sort'],
-    '5.5.8': ['date', 'shipping_account_id'],
+/** Primary (header) vs advanced (toggle panel) for warehouse menu 5.5.x. */
+const PRIMARY_FILTERS_BY_CODE = {
+    '5.5.1': ['date', 'warehouse_id'],
+    '5.5.2': ['date', 'warehouse_id'],
+    '5.5.4': ['date_type', 'date'],
+    '5.5.5': ['date_type', 'date'],
+    '5.5.6': ['date'],
+    '5.5.7': ['date_type', 'date'],
+    '5.5.8': ['date'],
+};
+
+const ADVANCED_FILTERS_BY_CODE = {
+    '5.5.1': ['product_id', 'movement', 'sort'],
+    '5.5.2': ['product_id', 'movement'],
+    '5.5.4': ['warehouse_id', 'parent_product_id', 'product_id', 'warehouse_op', 'delivery_status', 'reconciliation', 'per_page', 'no_closing_limit'],
+    '5.5.5': ['shipping_account_id'],
+    '5.5.6': ['sale_leader_id', 'sale_team_id'],
+    '5.5.7': ['shipping_group_id', 'shipping_account_id', 'sort'],
+    '5.5.8': ['shipping_account_id'],
 };
 
 const EMPTY_BY_CODE = {
@@ -174,9 +184,12 @@ export default function WarehouseMenuReportPage({
     pageRuntimeError = null,
 }) {
     const pageCode = String(schema.code || activeMenuCode || '');
-    const filterKeys = FILTERS_BY_CODE[pageCode] ?? ['date', 'warehouse_id', 'product_id'];
+    const primaryKeys = PRIMARY_FILTERS_BY_CODE[pageCode] ?? ['date'];
+    const advancedKeys = ADVANCED_FILTERS_BY_CODE[pageCode] ?? [];
+    const filterKeys = [...primaryKeys, ...advancedKeys];
     const columns = useMemo(() => resolveColumns(schema), [schema]);
     const emptyMessage = EMPTY_BY_CODE[pageCode] || 'Không có dữ liệu phù hợp bộ lọc.';
+    const formId = `ps-wh-report-filters-${pageCode}`;
 
     const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
     const [draft, setDraft] = useState({
@@ -265,144 +278,194 @@ export default function WarehouseMenuReportPage({
 
     const title = schema.title || 'Báo cáo kho';
 
-    const filterControls = (
-        <form id={`ps-wh-report-filters-${pageCode}`} className="ps-wh-menu-report-filters" onSubmit={apply}>
-            {filterKeys.includes('date_type') ? (
-                <FilterSelect
-                    value={draft.date_type}
-                    onChange={(value) => setField('date_type', value)}
-                    options={DATE_TYPE_OPTIONS}
-                    placeholder="--Kiểu ngày--"
-                />
-            ) : null}
-            {filterKeys.includes('date') ? (
-                <DateRangeFilter
-                    className="ps-wh-menu-report-daterange"
-                    from={draft.date_from}
-                    to={draft.date_to}
-                    onChange={({ date_from, date_to }) => setDraft((current) => ({
-                        ...current,
-                        date_from: date_from || current.date_from,
-                        date_to: date_to || current.date_to,
-                    }))}
-                />
-            ) : null}
-            {filterKeys.includes('warehouse_id') ? (
-                <FilterSelect
-                    value={draft.warehouse_id}
-                    onChange={(value) => setField('warehouse_id', value)}
-                    options={warehouseOptions}
-                    placeholder="--Chọn kho--"
-                />
-            ) : null}
-            {filterKeys.includes('parent_product_id') ? (
-                <FilterSelect
-                    value={draft.parent_product_id}
-                    onChange={(value) => setField('parent_product_id', value)}
-                    options={parentProductOptions}
-                    placeholder="--Sản phẩm cha--"
-                />
-            ) : null}
-            {filterKeys.includes('product_id') ? (
-                <FilterSelect
-                    value={draft.product_id}
-                    onChange={(value) => setField('product_id', value)}
-                    options={productOptions}
-                    placeholder="--Chọn sản phẩm--"
-                />
-            ) : null}
-            {filterKeys.includes('movement') ? (
-                <FilterSelect
-                    value={draft.movement}
-                    onChange={(value) => setField('movement', value)}
-                    options={MOVEMENT_OPTIONS}
-                    placeholder="--Biến động--"
-                />
-            ) : null}
-            {filterKeys.includes('sort') ? (
-                <FilterSelect
-                    value={draft.sort}
-                    onChange={(value) => setField('sort', value)}
-                    options={SORT_OPTIONS}
-                    placeholder="--Sắp xếp--"
-                />
-            ) : null}
-            {filterKeys.includes('warehouse_op') ? (
-                <FilterSelect
-                    value={draft.warehouse_op}
-                    onChange={(value) => setField('warehouse_op', value)}
-                    options={WAREHOUSE_OP_OPTIONS}
-                    placeholder="--Nghiệp vụ kho--"
-                />
-            ) : null}
-            {filterKeys.includes('delivery_status') ? (
-                <FilterSelect
-                    value={draft.delivery_status}
-                    onChange={(value) => setField('delivery_status', value)}
-                    options={deliveryOptions}
-                    placeholder="--Trạng thái giao hàng--"
-                />
-            ) : null}
-            {filterKeys.includes('reconciliation') ? (
-                <FilterSelect
-                    value={draft.reconciliation}
-                    onChange={(value) => setField('reconciliation', value)}
-                    options={reconciliationOptions}
-                    placeholder="--Đối soát--"
-                />
-            ) : null}
-            {filterKeys.includes('sale_leader_id') ? (
-                <FilterSelect
-                    value={draft.sale_leader_id}
-                    onChange={(value) => setField('sale_leader_id', value)}
-                    options={leaderOptions}
-                    placeholder="--Trưởng nhóm--"
-                />
-            ) : null}
-            {filterKeys.includes('sale_team_id') ? (
-                <FilterSelect
-                    value={draft.sale_team_id}
-                    onChange={(value) => setField('sale_team_id', value)}
-                    options={teamOptions}
-                    placeholder="--Nhóm--"
-                />
-            ) : null}
-            {filterKeys.includes('shipping_group_id') ? (
-                <FilterSelect
-                    value={draft.shipping_group_id}
-                    onChange={(value) => setField('shipping_group_id', value)}
-                    options={shippingGroupOptions}
-                    placeholder="-- Chọn --"
-                />
-            ) : null}
-            {filterKeys.includes('shipping_account_id') ? (
-                <FilterSelect
-                    value={draft.shipping_account_id}
-                    onChange={(value) => setField('shipping_account_id', value)}
-                    options={shippingAccountOptions}
-                    placeholder="-- TK vận đơn --"
-                />
-            ) : null}
-            {filterKeys.includes('per_page') ? (
-                <FilterSelect
-                    value={draft.per_page}
-                    onChange={(value) => setField('per_page', value)}
-                    options={PER_PAGE_OPTIONS}
-                    placeholder="50"
-                />
-            ) : null}
-            {filterKeys.includes('no_closing_limit') ? (
-                <label className="ps-wh-menu-report-check">
-                    <input
-                        type="checkbox"
-                        checked={Boolean(draft.no_closing_date_limit)}
-                        onChange={(event) => setField('no_closing_date_limit', event.target.checked)}
+    const renderFilter = (key) => {
+        switch (key) {
+            case 'date_type':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.date_type}
+                        onChange={(value) => setField('date_type', value)}
+                        options={DATE_TYPE_OPTIONS}
+                        placeholder="--Kiểu ngày--"
                     />
-                    Không giới hạn ngày chốt
-                </label>
-            ) : null}
-        </form>
+                );
+            case 'date':
+                return (
+                    <DateRangeFilter
+                        key={key}
+                        className="ps-wh-menu-report-daterange"
+                        from={draft.date_from}
+                        to={draft.date_to}
+                        onChange={({ date_from, date_to }) => setDraft((current) => ({
+                            ...current,
+                            date_from: date_from || current.date_from,
+                            date_to: date_to || current.date_to,
+                        }))}
+                    />
+                );
+            case 'warehouse_id':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.warehouse_id}
+                        onChange={(value) => setField('warehouse_id', value)}
+                        options={warehouseOptions}
+                        placeholder="--Chọn kho--"
+                    />
+                );
+            case 'parent_product_id':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.parent_product_id}
+                        onChange={(value) => setField('parent_product_id', value)}
+                        options={parentProductOptions}
+                        placeholder="--Sản phẩm cha--"
+                    />
+                );
+            case 'product_id':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.product_id}
+                        onChange={(value) => setField('product_id', value)}
+                        options={productOptions}
+                        placeholder="--Chọn sản phẩm--"
+                    />
+                );
+            case 'movement':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.movement}
+                        onChange={(value) => setField('movement', value)}
+                        options={MOVEMENT_OPTIONS}
+                        placeholder="--Biến động--"
+                    />
+                );
+            case 'sort':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.sort}
+                        onChange={(value) => setField('sort', value)}
+                        options={SORT_OPTIONS}
+                        placeholder="--Sắp xếp--"
+                    />
+                );
+            case 'warehouse_op':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.warehouse_op}
+                        onChange={(value) => setField('warehouse_op', value)}
+                        options={WAREHOUSE_OP_OPTIONS}
+                        placeholder="--Nghiệp vụ kho--"
+                    />
+                );
+            case 'delivery_status':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.delivery_status}
+                        onChange={(value) => setField('delivery_status', value)}
+                        options={deliveryOptions}
+                        placeholder="--Trạng thái giao hàng--"
+                    />
+                );
+            case 'reconciliation':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.reconciliation}
+                        onChange={(value) => setField('reconciliation', value)}
+                        options={reconciliationOptions}
+                        placeholder="--Đối soát--"
+                    />
+                );
+            case 'sale_leader_id':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.sale_leader_id}
+                        onChange={(value) => setField('sale_leader_id', value)}
+                        options={leaderOptions}
+                        placeholder="--Trưởng nhóm--"
+                    />
+                );
+            case 'sale_team_id':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.sale_team_id}
+                        onChange={(value) => setField('sale_team_id', value)}
+                        options={teamOptions}
+                        placeholder="--Nhóm--"
+                    />
+                );
+            case 'shipping_group_id':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.shipping_group_id}
+                        onChange={(value) => setField('shipping_group_id', value)}
+                        options={shippingGroupOptions}
+                        placeholder="-- Chọn --"
+                    />
+                );
+            case 'shipping_account_id':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.shipping_account_id}
+                        onChange={(value) => setField('shipping_account_id', value)}
+                        options={shippingAccountOptions}
+                        placeholder="-- TK vận đơn --"
+                    />
+                );
+            case 'per_page':
+                return (
+                    <FilterSelect
+                        key={key}
+                        value={draft.per_page}
+                        onChange={(value) => setField('per_page', value)}
+                        options={PER_PAGE_OPTIONS}
+                        placeholder="50"
+                    />
+                );
+            case 'no_closing_limit':
+                return (
+                    <label key={key} className="ps-wh-menu-report-check">
+                        <input
+                            type="checkbox"
+                            checked={Boolean(draft.no_closing_date_limit)}
+                            onChange={(event) => setField('no_closing_date_limit', event.target.checked)}
+                        />
+                        Không giới hạn ngày chốt
+                    </label>
+                );
+            default:
+                return null;
+        }
+    };
+
+    const primaryFilters = (
+        <div className="ps-wh-menu-report-filters" id={formId}>
+            {primaryKeys.map((key) => renderFilter(key))}
+        </div>
     );
+
+    const advancedFilters = advancedKeys.length ? (
+        <div className="ps-wh-menu-report-advanced ps-adv-filter-panel">
+            <div
+                className="ps-wh-menu-report-advanced-row ps-adv-filter-row"
+                style={{ '--ps-adv-cols': Math.min(6, Math.max(2, advancedKeys.length)) }}
+            >
+                {advancedKeys.map((key) => renderFilter(key))}
+            </div>
+        </div>
+    ) : null;
 
     return (
         <AppLayout activeMenuCode={activeMenuCode || pageCode}>
@@ -412,10 +475,13 @@ export default function WarehouseMenuReportPage({
                     title={title}
                     pageCode={pageCode}
                     className="ps-wh-menu-report-header"
-                    filters={filterControls}
+                    filters={primaryFilters}
+                    advanced={advancedFilters}
+                    collapsible={Boolean(advancedFilters)}
+                    defaultCollapsed
                     actions={(
                         <div className="ps-wh-menu-report-actions">
-                            <button className="btn btn-sm btn-primary" type="submit" form={`ps-wh-report-filters-${pageCode}`}>
+                            <button className="btn btn-sm btn-primary" type="button" onClick={apply}>
                                 <i className="fa fa-search" /> Tìm kiếm
                             </button>
                             <button className="btn btn-sm btn-primary" type="button" onClick={exportExcel}>
@@ -423,7 +489,6 @@ export default function WarehouseMenuReportPage({
                             </button>
                         </div>
                     )}
-                    collapsible={false}
                 />
 
                 {pageRuntimeError ? (
