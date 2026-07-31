@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { createPortal } from 'react-dom';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { CustomerMessagesDialog } from '@/components/customers/CustomerMessagesDialog';
@@ -10,6 +10,7 @@ import { OrderOperationHistoryDialog } from '@/components/customers/OrderOperati
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { ConfirmActionDialog } from '@/components/ui/ConfirmActionDialog';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { DEFAULT_TABLE_EMPTY_MESSAGE, TableEmptyRow } from '@/components/reports/TableEmpty';
 import AppLayout from '@/layouts/AppLayout';
 import { vietnamesePhoneError, normalizeVietnamesePhone } from '@/lib/vietnamesePhone';
 import { useConfirm } from '@/hooks/use-confirm';
@@ -305,11 +306,11 @@ function PushsaleRows({ schema, rows, onEdit, onDelete, selectedRecordIds, onTog
                     ))}
                 </tr>
             )) : (!isVoucherEntry && (
-                <tr>
-                    <td colSpan={Math.max(columns.length, 1)} className="pushsale-empty-cell">
-                        Chưa có dữ liệu phù hợp với bộ lọc.
-                    </td>
-                </tr>
+                <TableEmptyRow
+                    colSpan={Math.max(columns.length, 1)}
+                    message={DEFAULT_TABLE_EMPTY_MESSAGE}
+                    className="pushsale-empty-cell text-center"
+                />
             ))}
         </>
     );
@@ -782,9 +783,10 @@ function inferFilterKey(node) {
     }
     if (source.includes('trangthaichotdon')) return 'closed_status';
     if (source.includes('trangthaigiaohang') || source.includes('deliverystatus')) return 'delivery_status';
-    if (source.includes('ketquatacnghiep')) return 'operation_result';
     if (source.includes('trangthaitacnghiep')) return 'operation_state';
     if (source.includes('tacnghiepcaredon')) return 'care_operation_status';
+    if (source.includes('idtacnghiepcanke') || source.includes('tacnghiepcan')) return 'from_operation_category_id';
+    if (source.includes('idtacnghieptiep') || source.includes('tacnghieptiep')) return 'to_operation_category_id';
     if (source.includes('idketquatacnghiep') || source.includes('ketquatacnghiep')) return 'operation_result';
     if (source.includes('idtacnghiep') || source.includes('tacnghiep')) return 'operation_stage';
     if (source.includes('kieungay')) return 'date_type';
@@ -876,6 +878,13 @@ function optionsForControl(id, filterOptions) {
     if (source.includes('nghiepvukho') || source.includes('loaiphieu')) return filterOptions?.warehouseVoucherTypes ?? voucherTypeOptions();
     // Tránh match nhầm mọi control có "CapNhatPhieuXuatNhapKho" chứa chữ "kho".
     if (source.includes('sanphamkho') || source.includes('id_san_pham_kho')) return filterOptions?.products ?? [];
+    if (source.includes('ketquatacnghiep') || (source.includes('ketqua') && source.includes('tacnghiep'))) {
+        return (filterOptions?.operationResults ?? []).map((item) => ({
+            id: item.value ?? item.id,
+            label: item.label ?? item.name ?? item.value,
+        }));
+    }
+    if (source.includes('tacnghiep') || source.includes('operationcategor')) return filterOptions?.operationCategories ?? [];
     if (source.includes('sanpham') || source.includes('product')) return filterOptions?.products ?? [];
     if (source.includes('landing') || source.includes('nguon')) return filterOptions?.sources ?? [];
     if (
@@ -1232,6 +1241,7 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             'company_id', 'role', 'user_id', 'login_status', 'login_permission_status', 'sort', 'care_user_id', 'warehouse_user_id',
             'category_id', 'parent_product_id', 'team_leader_id', 'active_status',
             'available_marketing', 'available_sale', 'available_care',
+            'from_operation_category_id', 'to_operation_category_id',
         ];
         knownKeys.forEach((key) => params.delete(key));
         Object.entries(collected).forEach(([key, value]) => params.set(key, String(value)));
@@ -1762,10 +1772,41 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
 
     const isVoucherEntryPage = String(schema.code) === '5.3.1';
     const isWarehouseReportPage = /^5\.5\./.test(String(schema.code ?? ''));
+    const isOperationWorkflowPage = String(schema.code) === '1.8.2';
     const voucherId = summary?.voucher_id ?? summary?.id ?? rows?.[0]?.voucher_id ?? '';
     const voucherTitle = voucherId
         ? `${schema.title} (${voucherId})`
         : schema.title;
+
+    const workflowFilterParams = useMemo(() => {
+        if (typeof window === 'undefined') return {};
+        const params = new URLSearchParams(window.location.search);
+        return {
+            from_operation_category_id: params.get('from_operation_category_id') ?? '',
+            operation_result: params.get('operation_result') ?? '',
+            to_operation_category_id: params.get('to_operation_category_id') ?? '',
+        };
+    }, [rows, pagination]);
+
+    const applyWorkflowFilters = useCallback((patch) => {
+        const params = new URLSearchParams(window.location.search);
+        params.delete('page');
+        Object.entries(patch).forEach(([key, value]) => {
+            if (!value || value === '-1') params.delete(key);
+            else params.set(key, String(value));
+        });
+        router.get(routeUrl, Object.fromEntries(params.entries()), {
+            preserveState: false,
+            preserveScroll: false,
+            replace: true,
+        });
+    }, [routeUrl]);
+
+    const operationCategoryOptions = filterOptions?.operationCategories ?? [];
+    const operationResultOptions = (filterOptions?.operationResults ?? []).map((item) => ({
+        id: item.value ?? item.id,
+        label: item.label ?? item.name ?? item.value,
+    }));
 
     useEffect(() => {
         if (!isVoucherEntryPage || typeof document === 'undefined') return undefined;
@@ -1780,7 +1821,7 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
         <AppLayout>
             <Head title={schema.title} />
             <div
-                className={`pushsale-page pushsale-kind-${schema.kind}${isVoucherEntryPage ? ' ps-voucher-entry-page' : ''}${isWarehouseReportPage ? ' ps-warehouse-report-page' : ''}`}
+                className={`pushsale-page pushsale-kind-${schema.kind}${isVoucherEntryPage ? ' ps-voucher-entry-page' : ''}${isWarehouseReportPage ? ' ps-warehouse-report-page' : ''}${isOperationWorkflowPage ? ' ps-operation-workflow-page' : ''}`}
                 data-page-code={schema.code}
             >
                 {isVoucherEntryPage ? (
@@ -1805,6 +1846,76 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
                         title={schema.title}
                         pageCode={String(schema.code)}
                         className="ps-warehouse-report-header"
+                    />
+                ) : null}
+                {isOperationWorkflowPage ? (
+                    <PageHeader
+                        title={schema.title}
+                        pageCode="1.8.2"
+                        className="ps-operation-workflow-header"
+                        filters={(
+                            <>
+                                <select
+                                    className="form-control"
+                                    value={workflowFilterParams.from_operation_category_id || '-1'}
+                                    onChange={(event) => applyWorkflowFilters({
+                                        ...workflowFilterParams,
+                                        from_operation_category_id: event.target.value,
+                                    })}
+                                    aria-label="Tác nghiệp cần"
+                                >
+                                    <option value="-1">--Chọn tác nghiệp cần--</option>
+                                    {operationCategoryOptions.map((option) => (
+                                        <option key={`from-${option.id}`} value={String(option.id)}>{option.label}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    className="form-control"
+                                    value={workflowFilterParams.operation_result || '-1'}
+                                    onChange={(event) => applyWorkflowFilters({
+                                        ...workflowFilterParams,
+                                        operation_result: event.target.value,
+                                    })}
+                                    aria-label="Kết quả tác nghiệp"
+                                >
+                                    <option value="-1">--Chọn kết quả tác nghiệp--</option>
+                                    {operationResultOptions.map((option) => (
+                                        <option key={`result-${option.id}`} value={String(option.id)}>{option.label}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    className="form-control"
+                                    value={workflowFilterParams.to_operation_category_id || '-1'}
+                                    onChange={(event) => applyWorkflowFilters({
+                                        ...workflowFilterParams,
+                                        to_operation_category_id: event.target.value,
+                                    })}
+                                    aria-label="Tác nghiệp tiếp"
+                                >
+                                    <option value="-1">--Chọn tác nghiệp tiếp--</option>
+                                    {operationCategoryOptions.map((option) => (
+                                        <option key={`to-${option.id}`} value={String(option.id)}>{option.label}</option>
+                                    ))}
+                                </select>
+                            </>
+                        )}
+                        actions={(
+                            <>
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-primary"
+                                    onClick={() => applyWorkflowFilters(workflowFilterParams)}
+                                >
+                                    <i className="fa fa-search" /> Tìm kiếm
+                                </button>
+                                <a
+                                    className="btn btn-sm btn-primary"
+                                    href={`${routeUrl}${routeUrl.includes('?') ? '&' : '?'}export=1`}
+                                >
+                                    <i className="fa fa-download" /> Xuất Excel Sandbox
+                                </a>
+                            </>
+                        )}
                     />
                 ) : null}
                 {(error || pageRuntimeError) && <div className="pushsale-error-banner"><i className="fa fa-exclamation-triangle" /> {error || pageRuntimeError}</div>}

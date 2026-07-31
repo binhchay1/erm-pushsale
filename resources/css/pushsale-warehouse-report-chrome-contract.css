@@ -1,18 +1,14 @@
 /* Shared chrome for warehouse menu 5.5 reports (BusinessPage + ExtraReport).
-   Aligns title / filters / table gutters with PageHeader ops pages. */
+   Aligns title / filters / table gutters with PageHeader ops pages.
+   Note: page-header-contract loads AFTER this file and forces .m-header-wrap
+   display:block — hide/title rules that must win live in page-header-contract. */
 
 html body.pushsale-app-body .ps-warehouse-report-page,
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page {
-    padding: 0 14px 14px !important;
+    padding: 0 var(--ps-header-x, 14px) 14px !important;
     margin: 0 !important;
     background: #fff !important;
-}
-
-/* Hide native template primary header when React PageHeader is present. */
-html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-primary-header-wrap,
-html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap.pushsale-primary-header-wrap,
-html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page [data-pushsale-chrome-role='primary-header'] {
-    display: none !important;
+    box-sizing: border-box !important;
 }
 
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-template-empty-spacer,
@@ -24,20 +20,62 @@ html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .content-hea
     padding: 0 !important;
 }
 
-/* Compact filter rows that remain in the HTML template body. */
-html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row,
-html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-composite-filter-row {
+/* Template primary header kept only for filter/action controls (title hidden via page-header-contract). */
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap.pushsale-primary-header-wrap > .m-header,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap[data-pushsale-chrome-role='primary-header'] > .m-header {
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
     gap: 8px !important;
-    margin: 8px 0 10px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 8px 0 10px !important;
+    float: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .pushsale-header-title-col,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap [id$='lblModuleTitle'],
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .module-title {
+    display: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > [class*='col-'] {
+    float: none !important;
+    width: auto !important;
+    max-width: none !important;
+    flex: 1 1 160px !important;
+    min-width: 140px !important;
+    margin: 0 !important;
     padding: 0 !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .m-header > .pushsale-header-actions-col {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* Advanced / body filter rows → equal full-width grid */
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box-body > .row.pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box-body > .row.form-group.pushsale-filter-row,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 8px 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 0 10px !important;
+    padding: 0 !important;
+    float: none !important;
 }
 
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row > [class*='col-'],
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-composite-filter-row > [class*='col-'] {
-    width: auto !important;
+    width: 100% !important;
+    max-width: none !important;
     float: none !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -49,29 +87,35 @@ html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-em
 
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row select,
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row input:not([type='hidden']):not([type='checkbox']):not([type='radio']),
-html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-composite-filter-row select,
-html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-composite-filter-row input:not([type='hidden']):not([type='checkbox']):not([type='radio']) {
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row .ps-ddl,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row .form-control,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap select,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap input:not([type='hidden']):not([type='checkbox']):not([type='radio']),
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .form-control {
     height: 31px !important;
     min-height: 31px !important;
-    max-width: 200px !important;
-    width: auto !important;
-    min-width: 120px !important;
-    display: inline-block !important;
-    vertical-align: middle !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
 }
 
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row .btn,
-html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-composite-filter-row .btn {
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .btn {
     height: 31px !important;
     padding: 5px 12px !important;
     line-height: 18px !important;
     white-space: nowrap !important;
 }
 
-/* Table gutters match PageHeader padding (14px on page root). */
+/* Table gutters match PageHeader --ps-header-x (page root already padded). */
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box,
 html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box-body,
-html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .table-responsive {
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .table-responsive,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .content-wrapper,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-nested-content-wrapper,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-template-inner {
     margin-left: 0 !important;
     margin-right: 0 !important;
     padding-left: 0 !important;
@@ -88,9 +132,22 @@ html body.pushsale-app-body .ps-warehouse-report-page .ps-sales-revenue-scroll {
     padding-right: 0 !important;
 }
 
-/* ExtraReport toolbars under 5.5: denser controls + same page padding. */
+/* Empty state inside template tables */
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-empty-cell,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page td.ps-empty,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .ps-empty {
+    height: 72px !important;
+    padding: 18px 12px !important;
+    color: #7c8795 !important;
+    font-style: italic !important;
+    font-size: 13px !important;
+    text-align: center !important;
+    background: #fff !important;
+    vertical-align: middle !important;
+}
+
 html body.pushsale-app-body .ps-warehouse-report-page.ps-report-page {
-    padding: 0 14px 14px !important;
+    padding: 0 var(--ps-header-x, 14px) 14px !important;
 }
 
 html body.pushsale-app-body .ps-warehouse-report-page .ps-report-toolbar-controls,
@@ -115,4 +172,18 @@ html body.pushsale-app-body .ps-warehouse-report-page .ps-report-toolbar-actions
     height: 31px !important;
     padding: 5px 12px !important;
     white-space: nowrap !important;
+}
+
+@media (max-width: 1100px) {
+    html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box-body > .row.pushsale-filter-row,
+    html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 720px) {
+    html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .box-body > .row.pushsale-filter-row,
+    html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .pushsale-filter-row {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
 }

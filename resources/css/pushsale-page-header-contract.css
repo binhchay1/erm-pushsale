@@ -56,6 +56,23 @@ html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page > .m-header-wr
     box-shadow: var(--ps-header-shadow) !important;
 }
 
+/*
+ * When React PageHeader already owns the title, hide template title-only headers
+ * (and title cells) so warehouse 5.5.x / operation-workflows are not double-titled.
+ * Must live here: this file loads after chrome contracts and otherwise forces display:block.
+ */
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap.pushsale-primary-header-wrap:not(:has(.pushsale-header-filter-col)):not(:has(.pushsale-header-actions-col)),
+html body.pushsale-app-body .pushsale-page.ps-operation-workflow-page .m-header-wrap.pushsale-primary-header-wrap,
+html body.pushsale-app-body .pushsale-page[data-page-code='1.8.2'] .m-header-wrap.pushsale-primary-header-wrap {
+    display: none !important;
+}
+
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .pushsale-header-title-col,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap [id$='lblModuleTitle'],
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page .m-header-wrap .module-title {
+    display: none !important;
+}
+
 /* Thanh xanh của app fixed 50px nên header trang phải dính ngay dưới nó. */
 html body.pushsale-app-body .ps-page-header.is-sticky,
 html body.pushsale-app-body .pushsale-page[data-page-code] .m-header-wrap.pushsale-primary-header-wrap,
@@ -775,21 +792,22 @@ html body.pushsale-app-body .ps-page-header__advanced .ps-adv-filter-panel {
     padding: 0 !important;
 }
 
-/* Filter bổ sung báo cáo: ô gọn, căn trái, không kéo full-width. */
+/* Filter bổ sung báo cáo: full hàng theo chiều ngang (1fr), không cap 220/980. */
 html body.pushsale-app-body .ps-page-extra-filters.ps-report-v2-header .ps-adv-filter-panel,
 html body.pushsale-app-body .ps-page-extra-filters.ps-system-business-toolbar .ps-adv-filter-panel,
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-adv-filter-panel,
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-adv-filter-panel,
 html body.pushsale-app-body .ps-page-extra-filters.ps-marketing-upsale-header .ps-adv-filter-panel {
-    max-width: 980px !important;
+    width: 100% !important;
+    max-width: none !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters.ps-report-v2-header .ps-adv-filter-row,
 html body.pushsale-app-body .ps-page-extra-filters.ps-system-business-toolbar .ps-adv-filter-row,
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-adv-filter-row,
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-adv-filter-row {
-    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 220px)) !important;
-    justify-content: start !important;
+    grid-template-columns: repeat(var(--ps-adv-cols, 4), minmax(0, 1fr)) !important;
+    justify-content: stretch !important;
     gap: 8px 10px !important;
 }
 
@@ -797,7 +815,9 @@ html body.pushsale-app-body .ps-page-extra-filters.ps-report-v2-header .ps-adv-f
 html body.pushsale-app-body .ps-page-extra-filters.ps-system-business-toolbar .ps-adv-filter-row > *,
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-overview-header .ps-adv-filter-row > *,
 html body.pushsale-app-body .ps-page-extra-filters.ps-revenue-detail-header .ps-adv-filter-row > * {
-    max-width: 220px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row,
@@ -1073,6 +1093,17 @@ html body.pushsale-app-body .ps-operation-conversion-report,
 html body.pushsale-app-body .pushsale-page[data-page-code^="4.6"] {
     padding-left: 0 !important;
     padding-right: 0 !important;
+}
+
+/* Revenue + warehouse report bodies: same horizontal gutter as PageHeader title */
+html body.pushsale-app-body .ps-sales-revenue-summary,
+html body.pushsale-app-body .ps-sales-revenue-v2,
+html body.pushsale-app-body .ps-warehouse-report-page.ps-report-page,
+html body.pushsale-app-body .pushsale-page.ps-warehouse-report-page,
+html body.pushsale-app-body .pushsale-page.ps-operation-workflow-page {
+    padding-left: var(--ps-header-x, 14px) !important;
+    padding-right: var(--ps-header-x, 14px) !important;
+    box-sizing: border-box !important;
 }
 html body.pushsale-app-body .ps-page-header + *,
 html body.pushsale-app-body .ps-page-header-outlet + * {

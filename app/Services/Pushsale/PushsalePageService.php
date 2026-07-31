@@ -421,19 +421,22 @@ class PushsalePageService
             }
         }
 
-        if ($pageCode === '1.8.1') {
+        if ($pageCode === '1.8.1' || $pageCode === '1.8.2') {
             $options['operationResults'] = collect(OperationResultSetting::optionRows())
                 ->values()
                 ->map(fn (array $item, int $index): array => [
                     'value' => $item['value'],
                     'label' => $item['label'],
+                    'id' => $item['value'],
                     'legacy_id' => $item['legacy_id'] ?: (109117 + $index),
                     'sort_order' => $item['sort_order'] ?? ($index + 1),
                     'closes_order' => (bool) ($item['closes_order'] ?? false),
                     'is_active' => (bool) ($item['is_active'] ?? true),
                 ])
                 ->all();
-            $options['operationWorkflowsFull'] = $this->operationWorkflows()->all();
+            if ($pageCode === '1.8.1') {
+                $options['operationWorkflowsFull'] = $this->operationWorkflows()->all();
+            }
         }
 
         return $options;
@@ -2543,12 +2546,15 @@ class PushsalePageService
         return OperationWorkflow::query()->with(['fromCategory:id,name', 'toCategory:id,name', 'updater:id,name'])->latest()->get()->map(fn (OperationWorkflow $row) => [
             'id' => $row->id,
             'from_operation_category_id' => $row->from_operation_category_id,
+            '_from_operation_category_id' => (string) ($row->from_operation_category_id ?? ''),
             'condition' => trim(($row->fromCategory?->name ?? 'Mọi tác nghiệp')."\n".($row->condition_type ?? '')),
             'condition_type' => $row->condition_type,
             'operation_result' => $row->operation_result,
             'result_value' => $row->operation_result,
+            '_operation_result' => (string) ($row->operation_result ?? ''),
             'result' => $row->operation_result === 'no_answer_auto' ? 'Không nghe máy' : (OperationResult::tryFromStored($row->operation_result)?->label() ?? $row->operation_result),
             'to_operation_category_id' => $row->to_operation_category_id,
+            '_to_operation_category_id' => (string) ($row->to_operation_category_id ?? ''),
             'next_operation' => $row->toCategory?->name,
             'delay_minutes' => $row->delay_minutes,
             'delay' => $row->delay_minutes.' phút',
@@ -2997,6 +3003,8 @@ class PushsalePageService
             'available_marketing' => '_available_marketing',
             'available_sale' => '_available_sale',
             'available_care' => '_available_care',
+            'from_operation_category_id' => '_from_operation_category_id',
+            'to_operation_category_id' => '_to_operation_category_id',
             'status' => 'status',
             'contract_type' => 'contract_type',
             'payment_code' => 'payment_code',

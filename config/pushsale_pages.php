@@ -6362,6 +6362,36 @@ return array (
         'key' => 'care_user',
         'format' => 'text',
       ),
+      2 => 
+      array (
+        'key' => 'pending',
+        'format' => 'text',
+      ),
+      3 => 
+      array (
+        'key' => 'shipping',
+        'format' => 'text',
+      ),
+      4 => 
+      array (
+        'key' => 'delivered',
+        'format' => 'text',
+      ),
+      5 => 
+      array (
+        'key' => 'returned',
+        'format' => 'text',
+      ),
+      6 => 
+      array (
+        'key' => 'cancelled',
+        'format' => 'text',
+      ),
+      7 => 
+      array (
+        'key' => 'total',
+        'format' => 'text',
+      ),
     ),
   ),
   '5.5.8' => 
