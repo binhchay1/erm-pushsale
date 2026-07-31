@@ -25,8 +25,12 @@ html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-toolbar-
 
 html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-ceo-toolbar-primary > .ps-select,
 html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-ceo-toolbar-primary > .ps-control,
+html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-ceo-toolbar-primary > .form-control,
+html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-ceo-toolbar-primary > select,
 html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-toolbar-primary > .ps-select,
-html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-toolbar-primary > .ps-control {
+html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-toolbar-primary > .ps-control,
+html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-toolbar-primary > .form-control,
+html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-toolbar-primary > select {
     flex: 0 1 190px !important;
     width: 190px !important;
     min-width: 150px !important;
@@ -34,25 +38,31 @@ html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-toolbar-
 }
 
 html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-ceo-date-range,
-html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-date-range,
-html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .date-range-wrap,
-html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .date-range-wrap {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 14px minmax(0, 1fr) !important;
-    align-items: center !important;
-    gap: 4px !important;
-    flex: 0 1 280px !important;
-    width: 280px !important;
-    min-width: 220px !important;
-    max-width: 320px !important;
+html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-date-range {
+    display: block !important;
+    flex: 0 1 320px !important;
+    width: 320px !important;
+    min-width: 260px !important;
+    max-width: 360px !important;
 }
 
-html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-ceo-date-range .ps-input,
-html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-ceo-date-range .ps-control,
-html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-date-range .ps-input,
-html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-date-range .ps-control {
+html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-ceo-date-range .ps-date-range-input,
+html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-date-range .ps-date-range-input,
+html body.pushsale-app-body .ps-page-header.ps-ceo-report-header .ps-ceo-date-range button.form-control,
+html body.pushsale-app-body .m-header-wrap.ps-ceo-report-header .ps-ceo-date-range button.form-control {
     width: 100% !important;
     min-width: 0 !important;
+}
+
+/* Native selects must keep border — do NOT treat select.ps-select as borderless wrapper */
+html body.pushsale-app-body .ps-page-header.ps-ceo-report-header select.form-control,
+html body.pushsale-app-body .ps-page-extra-filters.ps-ceo-report-header select.form-control,
+html body.pushsale-app-body .ps-page-extra-filters .ps-ceo-advanced select.form-control {
+    border: 1px solid #c7d3df !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    height: 32px !important;
+    min-height: 32px !important;
 }
 
 /* ---- Actions: search + export gear (không chồng chữ) ---- */

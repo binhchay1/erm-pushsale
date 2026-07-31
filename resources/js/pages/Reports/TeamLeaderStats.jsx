@@ -8,6 +8,7 @@ import {
     formatReportNumber,
     formatReportPercent,
 } from '@/components/reports/reportFormat';
+import { PushsaleDateRange } from '@/components/reports/PushsaleReportChrome';
 import { useInertiaFilters } from '@/hooks/useInertiaFilters';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
@@ -146,20 +147,7 @@ function MarketingLeaderFilter({ filters, filterOptions, routeUrl }) {
                             options={filterOptions?.dateTypes ?? []}
                             placeholder="--Chuẩn Pushsale--"
                         />
-                        <div className="date-range-wrap legacy-range">
-                            <input
-                                type="date"
-                                className="ps-input"
-                                value={form.date_from ?? ''}
-                                onChange={(event) => set('date_from', event.target.value)}
-                            />
-                            <input
-                                type="date"
-                                className="ps-input"
-                                value={form.date_to ?? ''}
-                                onChange={(event) => set('date_to', event.target.value)}
-                            />
-                        </div>
+                        <PushsaleDateRange filters={form} onChange={set} />
                         <Select
                             value={form.delivery_status}
                             onChange={(value) => set('delivery_status', value)}

@@ -1,9 +1,9 @@
 import { Search } from 'lucide-react';
 
+import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { OperationStageSelect } from '@/components/filters/OperationStageSelect';
 import { SelectFilter } from '@/components/filters/SelectFilter';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLocalizedFilterOptions } from '@/hooks/use-localized-filter-options';
 import { useInertiaFilters } from '@/hooks/useInertiaFilters';
@@ -47,20 +47,14 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
             </div>
 
             <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-                <div className="space-y-1">
-                    <Label className="text-xs">{t('rankings.from_date')}</Label>
-                    <Input
-                        type="date"
-                        value={filters.date_from ?? ''}
-                        onChange={(e) => set('date_from', e.target.value)}
-                    />
-                </div>
-                <div className="space-y-1">
-                    <Label className="text-xs">{t('rankings.to_date')}</Label>
-                    <Input
-                        type="date"
-                        value={filters.date_to ?? ''}
-                        onChange={(e) => set('date_to', e.target.value)}
+                <div className="space-y-1 sm:col-span-2">
+                    <Label className="text-xs">{t('rankings.from_date')} / {t('rankings.to_date')}</Label>
+                    <DateRangeFilter
+                        from={filters.date_from ?? ''}
+                        to={filters.date_to ?? ''}
+                        onChange={({ date_from, date_to }) => {
+                            search({ date_from, date_to, period: 'custom' });
+                        }}
                     />
                 </div>
                 <SelectFilter

@@ -2,6 +2,7 @@ import { ChevronDown, ChevronsDown, ChevronsUp, Settings } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
+import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { useLocalizedFilterOptions } from '@/hooks/use-localized-filter-options';
 import { useInertiaFilters } from '@/hooks/useInertiaFilters';
@@ -65,7 +66,7 @@ export function CeoReportFilterBar({
     );
 
     const select = (key, value, children) => (
-        <select className="ps-control ps-select" value={value ?? ''} onChange={(e) => set(key, e.target.value)}>
+        <select className="form-control" value={value ?? ''} onChange={(e) => set(key, e.target.value)}>
             {children}
         </select>
     );
@@ -78,11 +79,14 @@ export function CeoReportFilterBar({
                     {(options?.dateTypes ?? []).map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                 </>
             ))}
-            <div className="date-range-wrap ps-ceo-date-range">
-                <input type="date" className="ps-control ps-input" value={local.date_from ?? ''} onChange={(e) => set('date_from', e.target.value)} />
-                <span className="ps-date-separator">-</span>
-                <input type="date" className="ps-control ps-input" value={local.date_to ?? ''} onChange={(e) => set('date_to', e.target.value)} />
-            </div>
+            <DateRangeFilter
+                className="ps-ceo-date-range"
+                from={local.date_from ?? ''}
+                to={local.date_to ?? ''}
+                onChange={({ date_from, date_to }) => {
+                    setLocal((prev) => ({ ...prev, date_from, date_to }));
+                }}
+            />
         </div>
     );
 

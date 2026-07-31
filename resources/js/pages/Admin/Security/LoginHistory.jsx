@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
+import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -167,9 +168,13 @@ export default function LoginHistoryPage({ schema, rows = [], pagination = {}, f
                 {filteredUsers.map((user) => <option key={user.id} value={user.id}>{optionLabel(user)}</option>)}
             </select>
             <div className="ps-login-date-range">
-                <input className="form-control input-sm" type="date" value={filters.date_from} onChange={(event) => setField('date_from', event.target.value)} />
-                <span>-</span>
-                <input className="form-control input-sm" type="date" value={filters.date_to} onChange={(event) => setField('date_to', event.target.value)} />
+                <DateRangeFilter
+                    from={filters.date_from}
+                    to={filters.date_to}
+                    onChange={({ date_from, date_to }) => {
+                        setFilters((current) => ({ ...current, date_from, date_to }));
+                    }}
+                />
             </div>
             <select className="form-control input-sm" value={filters.login_status} onChange={(event) => setField('login_status', event.target.value)}>
                 <option value="-1">-- Trạng thái đăng nhập --</option>

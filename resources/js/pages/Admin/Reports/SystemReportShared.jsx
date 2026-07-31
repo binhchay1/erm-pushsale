@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { ReportExportControl } from '@/components/reports/ReportExportControl';
-import { PushsaleSearchButton } from '@/components/reports/PushsaleReportChrome';
+import { PushsaleDateRange, PushsaleSearchButton } from '@/components/reports/PushsaleReportChrome';
 import { TableEmptyRow } from '@/components/reports/TableEmpty';
 import { readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
@@ -62,18 +62,7 @@ function SystemReport85Shell({
 
     const primaryFilters = (
         <div className="ps85-filter-row">
-            <input
-                className="form-control"
-                type="date"
-                value={draft.date_from}
-                onChange={(event) => set('date_from', event.target.value)}
-            />
-            <input
-                className="form-control"
-                type="date"
-                value={draft.date_to}
-                onChange={(event) => set('date_to', event.target.value)}
-            />
+            <PushsaleDateRange filters={draft} onChange={set} />
             <input
                 className="form-control"
                 placeholder="Tìm theo tên / mã"

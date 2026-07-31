@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
+import { PushsaleDateRange } from '@/components/reports/PushsaleReportChrome';
 import AppLayout from '@/layouts/AppLayout';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 });
@@ -214,8 +215,10 @@ export default function PowerDashboardPage({ summary = {}, rows = [], routeUrl =
                         <option value="week">Tuần</option>
                         <option value="month">Tháng</option>
                     </select>
-                    <input className="form-control" type="date" value={draft.date_from} onChange={(event) => updateDraft('date_from', event.target.value)} />
-                    <input className="form-control" type="date" value={draft.date_to} onChange={(event) => updateDraft('date_to', event.target.value)} />
+                    <PushsaleDateRange
+                        filters={draft}
+                        onChange={(key, value) => updateDraft(key, value)}
+                    />
                     <div className="ps-power-cards">
                         {topCards.map((card) => <SummaryCard key={card.title} card={card} />)}
                     </div>

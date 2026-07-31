@@ -213,15 +213,54 @@ html body.pushsale-app-body .ps-acc-operation-table .ps-col-warehouse { width: 1
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-care { width: 130px !important; }
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-delivery { width: 130px !important; }
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-recon { width: 58px !important; }
-html body.pushsale-app-body .ps-acc-operation-table .ps-col-products { width: 250px !important; }
+html body.pushsale-app-body .ps-acc-operation-table .ps-col-products { width: 280px !important; min-width: 240px !important; max-width: 300px !important; overflow: hidden !important; }
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-money { width: 120px !important; }
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-deposit { width: 75px !important; }
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-collect { width: 105px !important; }
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-vc { width: 90px !important; }
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-support { width: 105px !important; }
-html body.pushsale-app-body .ps-acc-operation-table .ps-col-customer { width: 145px !important; }
+html body.pushsale-app-body .ps-acc-operation-table .ps-col-customer { width: 118px !important; min-width: 110px !important; max-width: 130px !important; }
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-address { width: 160px !important; }
 html body.pushsale-app-body .ps-acc-operation-table .ps-col-action { width: 64px !important; }
+
+html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-breakdown {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-breakdown > .row-sp {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 22px 72px !important;
+    align-items: center !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    line-height: 1.25 !important;
+}
+
+html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-breakdown .ten-sp,
+html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-breakdown .ps-order-product-name {
+    display: block !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-breakdown .ps-order-product-price {
+    text-align: right !important;
+    white-space: nowrap !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
 
 html body.pushsale-app-body .ps-acc-operation-table .small-tip {
     color: #666 !important;

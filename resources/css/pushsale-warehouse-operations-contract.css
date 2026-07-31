@@ -453,12 +453,15 @@ html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp.ps-order-products-brea
 html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-products-breakdown > .row-sp,
 html body.pushsale-app-body .ps-wh-legacy-table .tb-in-sp.ps-order-products-breakdown > .row-sp {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 28px 64px !important;
+    grid-template-columns: minmax(0, 1fr) 22px 72px !important;
     align-items: center !important;
-    gap: 4px !important;
+    gap: 2px !important;
     line-height: 1.25 !important;
     min-height: 18px !important;
-    padding: 1px 2px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    padding: 1px 0 !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-products-breakdown > .row-sp + .row-sp,
@@ -485,6 +488,11 @@ html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-product-qty {
 html body.pushsale-app-body .ps-wh-page .tb-in-sp .ps-order-product-price {
     text-align: right !important;
     white-space: nowrap !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-variant-numeric: tabular-nums !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .tb-in-sp.ps-order-money-breakdown,
@@ -563,9 +571,17 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table .ps-wh-sale-cell {
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-products,
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td.c-products-body {
-    max-width: 168px !important;
+    max-width: 280px !important;
+    min-width: 210px !important;
+    width: 240px !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-customer,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td.c-customer-body {
+    max-width: 160px !important;
     min-width: 120px !important;
-    width: 150px !important;
+    width: 140px !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-money,

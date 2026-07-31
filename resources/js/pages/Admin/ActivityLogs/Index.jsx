@@ -3,6 +3,7 @@ import { Eye } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
+import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
@@ -188,19 +189,12 @@ export default function ActivityLogsIndex({ logs, filters, actionOptions = [], s
                 placeholder={t('activity.filter_search')}
                 aria-label={t('activity.filter_search')}
             />
-            <input
-                className="form-control input-sm"
-                type="date"
-                value={draft.date_from}
-                onChange={(event) => setField('date_from', event.target.value)}
-                aria-label={t('activity.filter_date_from')}
-            />
-            <input
-                className="form-control input-sm"
-                type="date"
-                value={draft.date_to}
-                onChange={(event) => setField('date_to', event.target.value)}
-                aria-label={t('activity.filter_date_to')}
+            <DateRangeFilter
+                from={draft.date_from}
+                to={draft.date_to}
+                onChange={({ date_from, date_to }) => {
+                    setDraft((current) => ({ ...current, date_from, date_to }));
+                }}
             />
             <PushsaleSearchButton type="submit" label={t('common.search')} />
             <button type="button" className="btn btn-sm btn-default" onClick={reset} title="Xóa lọc">

@@ -241,9 +241,17 @@ html body.pushsale-app-body .ps-acc-upsell-tag {
 
 html body.pushsale-app-body .ps-sale-operation-table .ps-order-products-breakdown,
 html body.pushsale-app-body .ps-wh-table .ps-order-products-breakdown,
+html body.pushsale-app-body .ps-wh-legacy-table .ps-order-products-breakdown,
 html body.pushsale-app-body .ps-acc-operation-table .ps-order-products-breakdown,
 html body.pushsale-app-body .ps-customer-profile-table .ps-order-products-breakdown {
-    min-width: 220px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-wh-legacy-table td.c-products-body,
+html body.pushsale-app-body .ps-acc-operation-table td.ps-col-products {
+    overflow: hidden !important;
 }
 
 html body.pushsale-app-body .ps-sale-operation-table .ps-order-money-breakdown,

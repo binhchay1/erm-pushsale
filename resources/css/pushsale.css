@@ -11217,9 +11217,9 @@ body.pushsale-app-body .ps-wh-legacy-table .c-order { width: 170px; }
 body.pushsale-app-body .ps-wh-legacy-table .c-shipper { width: 165px; }
 body.pushsale-app-body .ps-wh-legacy-table .c-care { width: 245px; }
 body.pushsale-app-body .ps-wh-legacy-table .c-status { width: 170px; }
-body.pushsale-app-body .ps-wh-legacy-table .c-customer { width: 230px; }
+body.pushsale-app-body .ps-wh-legacy-table .c-customer { width: 140px; max-width: 160px; }
 body.pushsale-app-body .ps-wh-legacy-table .c-address { width: 420px; }
-body.pushsale-app-body .ps-wh-legacy-table .c-products { width: 330px; }
+body.pushsale-app-body .ps-wh-legacy-table .c-products { width: 240px; min-width: 210px; max-width: 280px; }
 body.pushsale-app-body .ps-wh-legacy-table .c-money { width: 155px; }
 body.pushsale-app-body .ps-wh-legacy-table .c-deposit { width: 95px; }
 body.pushsale-app-body .ps-wh-legacy-table .c-cod { width: 115px; }
