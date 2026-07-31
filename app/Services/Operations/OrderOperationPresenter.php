@@ -44,6 +44,7 @@ final class OrderOperationPresenter
             'phoneCarrierKey' => \App\Support\PhoneCarrier::key($order->customer_phone),
             'carrierLabel' => \App\Support\PhoneCarrier::bracket($order->customer_phone, $order->phone_carrier),
             'customerNote' => $order->customer_note,
+            'messageDisplay' => self::landingMessageDisplay($order),
             'saleOperationNote' => $order->sale_operation_note,
             'shippingAddress' => $order->shipping_address,
             'shippingAddress2' => $order->shipping_address_2,
@@ -134,6 +135,95 @@ final class OrderOperationPresenter
         $fallback = trim((string) ($order->landingConnection?->success_url ?? ''));
 
         return $fallback !== '' ? $fallback : null;
+    }
+
+    /**
+     * Cột Tin nhắn (Sale tác nghiệp): `Địa chỉ={address}`; nếu payload có status_send
+     * (gói chính hoặc gói bổ sung) thì `Địa chỉ={address} - {status_send}`.
+     * Bỏ qua khi trùng text đã có trong địa chỉ / ghi chú.
+     */
+    public static function landingMessageDisplay(Order $order): string
+    {
+        $address = trim((string) ($order->shipping_address ?? ''));
+        if ($address === '') {
+            $address = trim((string) ($order->effectiveShippingAddress() ?? ''));
+        }
+
+        $statusSends = [];
+        $packets = collect();
+        if ($order->relationLoaded('leadPackets')) {
+            $packets = $packets->merge($order->leadPackets);
+        }
+        if ($order->relationLoaded('relatedLeadPackets')) {
+            $packets = $packets->merge($order->relatedLeadPackets);
+        }
+
+        foreach ($packets as $packet) {
+            $payload = is_array($packet->payload) ? $packet->payload : [];
+            if ($address === '') {
+                foreach (['address', 'shipping_address', 'customer_address'] as $key) {
+                    $candidate = trim((string) ($payload[$key] ?? ''));
+                    if ($candidate !== '') {
+                        $address = $candidate;
+                        break;
+                    }
+                }
+            }
+
+            $status = trim((string) ($payload['status_send'] ?? ''));
+            if ($status !== '') {
+                $statusSends[] = $status;
+            }
+        }
+
+        $statusSends = array_values(array_unique(array_filter($statusSends, static fn (string $value): bool => $value !== '')));
+
+        $note = trim((string) ($order->customer_note ?? ''));
+        $line = 'Địa chỉ='.$address;
+
+        foreach ($statusSends as $status) {
+            if (self::messageTextAlreadyPresent($status, $address, $note, $line)) {
+                continue;
+            }
+            $line .= ' - '.$status;
+        }
+
+        // Không nhân đôi nếu note đã đúng format Địa chỉ=… (và không thêm được status mới).
+        if ($note !== '' && self::normalizeMessageCompare($note) === self::normalizeMessageCompare($line)) {
+            return $note;
+        }
+
+        if ($address === '' && $statusSends === [] && $note !== '') {
+            return $note;
+        }
+
+        if ($address === '' && $statusSends === []) {
+            return $note !== '' ? $note : '';
+        }
+
+        return $line;
+    }
+
+    private static function messageTextAlreadyPresent(string $status, string $address, string $note, string $line): bool
+    {
+        $needle = self::normalizeMessageCompare($status);
+        if ($needle === '') {
+            return true;
+        }
+
+        foreach ([$address, $note, $line] as $haystack) {
+            $normalized = self::normalizeMessageCompare($haystack);
+            if ($normalized === $needle || ($normalized !== '' && str_contains($normalized, $needle))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static function normalizeMessageCompare(string $value): string
+    {
+        return mb_strtolower(preg_replace('/\s+/u', ' ', trim($value)) ?? '');
     }
 
     /**

@@ -213,23 +213,32 @@ html body.pushsale-app-body .ps-product-conversion-report .ps-product-conversion
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: auto !important;
-    overflow-y: visible !important;
+    overflow-y: auto !important;
+    border-top: 0 !important;
 }
 
 html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table {
     table-layout: fixed !important;
     border-collapse: collapse !important;
+    border-spacing: 0 !important;
 }
 
 html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table th,
 html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table td {
     min-width: 78px !important;
-    white-space: normal !important;
+    white-space: nowrap !important;
     word-break: normal !important;
-    overflow-wrap: anywhere !important;
+    overflow-wrap: normal !important;
     padding: 6px 7px !important;
     line-height: 1.25 !important;
     vertical-align: middle !important;
+    border: 1px solid #cfd8e3 !important;
+}
+
+html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table thead th {
+    border-color: #2f72c4 !important;
+    background: #3f86d6 !important;
+    color: #fff !important;
 }
 
 html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table .ps-col-stt { width: 45px !important; min-width: 45px !important; }
@@ -238,8 +247,17 @@ html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-tab
 
 html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table .ps-sticky-col {
     position: sticky !important;
-    z-index: 3 !important;
-    background: inherit !important;
+    z-index: 8 !important;
+    background-clip: padding-box !important;
+}
+
+html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table thead .ps-sticky-col,
+html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table thead .ps-col-stt,
+html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table thead .ps-col-id,
+html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table thead .ps-col-product {
+    z-index: 14 !important;
+    background: #3f86d6 !important;
+    color: #fff !important;
 }
 
 html body.pushsale-app-body .ps-product-conversion-report .ps-product-matrix-table .ps-col-stt { left: 0 !important; }

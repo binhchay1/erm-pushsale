@@ -286,7 +286,7 @@ export function SaleWorkspaceTable({
                                     />
 
                                     <MessageCell
-                                        note={order.customerNote}
+                                        note={order.messageDisplay || order.customerNote}
                                         onClick={() => onMessages(order)}
                                     />
 
