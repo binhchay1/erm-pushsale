@@ -30,6 +30,8 @@ const EMPTY = {
     shipping_fee_collected: 0,
     deposit: 0,
     vat: 0,
+    operation_result: '',
+    next_operation_at: '',
     items: [],
 };
 
@@ -41,8 +43,21 @@ function newLine(type = 'product') {
     return { key: key(), item_type: type, product_id: '', product_name: '', quantity: 1, unit_price: 0, discount_amount: 0 };
 }
 
-function mapOrder(order) {
-    if (!order) return EMPTY;
+function toDateTimeLocal(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value).slice(0, 16);
+    const pad = (number) => String(number).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function operationResultValueForSelect(value) {
+    const result = String(value ?? '');
+    return /^no_answer_[1-6]$/.test(result) ? 'no_answer_auto' : result;
+}
+
+function mapOrder(order, operationResult = null) {
+    if (!order) return { ...EMPTY, operation_result: operationResultValueForSelect(operationResult?.value) };
     const geo = order.shippingGeo ?? {};
     return {
         ...EMPTY,
@@ -67,6 +82,8 @@ function mapOrder(order) {
         shipping_fee_collected: numberValue(order.shippingFeeCollected),
         deposit: numberValue(order.deposit),
         vat: numberValue(order.vat),
+        operation_result: operationResultValueForSelect(operationResult?.value ?? order.operationResultValue),
+        next_operation_at: toDateTimeLocal(order.nextOperationAt),
         items: (order.products ?? []).map((item) => ({
             key: key(),
             item_type: item.itemType ?? 'product',
@@ -99,6 +116,8 @@ export function SaleOrderDialog({
     productOptions = [],
     carrierOptions = [],
     shippingServiceOptions = {},
+    operationStatusOptions = [],
+    initialOperationResult = null,
 }) {
     const auth = usePage().props.auth;
     const [form, setForm] = useState(EMPTY);
@@ -107,6 +126,7 @@ export function SaleOrderDialog({
     const [manualDiscount, setManualDiscount] = useState(false);
     const [manualShippingFee, setManualShippingFee] = useState(false);
     const [recipientPaysCarrier, setRecipientPaysCarrier] = useState(false);
+    const [operationResultSeed, setOperationResultSeed] = useState('');
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
@@ -120,13 +140,15 @@ export function SaleOrderDialog({
 
     useEffect(() => {
         if (open) {
-            setForm(mapOrder(order));
+            const nextForm = mapOrder(order, initialOperationResult);
+            setForm(nextForm);
+            setOperationResultSeed(nextForm.operation_result || '');
             setFormError('');
-            setManualDiscount(numberValue(mapOrder(order).discount) > 0);
-            setManualShippingFee(numberValue(mapOrder(order).shipping_fee_collected) > 0);
+            setManualDiscount(numberValue(nextForm.discount) > 0);
+            setManualShippingFee(numberValue(nextForm.shipping_fee_collected) > 0);
             setRecipientPaysCarrier(false);
         }
-    }, [open, order]);
+    }, [open, order, initialOperationResult]);
 
     useEffect(() => {
         if (lockError) {
@@ -258,10 +280,46 @@ export function SaleOrderDialog({
         return value || 'Không thể lưu đơn.';
     };
 
+    const shouldSyncOperationResult = () => Boolean(
+        order?.id
+        && form.operation_result
+        && form.operation_result !== 'closed_success'
+        && (form.operation_result !== operationResultSeed || Boolean(initialOperationResult?.value))
+    );
+
+    const syncOperationStatus = (onDone) => {
+        if (!shouldSyncOperationResult()) {
+            onDone?.();
+            return;
+        }
+        router.post(`${ordersBase}/${order.id}/operation-status`, {
+            operation_result: form.operation_result,
+            next_operation_at: needsNextOperationAt ? form.next_operation_at : null,
+            note: '',
+            interaction_lock_token: lockToken,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success(`Đã cập nhật kết quả${selectedOperationResult?.label ? `: ${selectedOperationResult.label}` : ' tác nghiệp'}.`);
+                onDone?.();
+            },
+            onError: (errors) => setFormError(firstError(errors)),
+            onFinish: () => setProcessing(false),
+        });
+    };
+
     const submit = (shouldClose) => {
         const error = validate();
         if (error) {
             setFormError(error);
+            return;
+        }
+        if (!shouldClose && form.operation_result === 'closed_success') {
+            setFormError('Kết quả chốt đơn thành công cần bấm nút Chốt đơn để sinh mã đơn.');
+            return;
+        }
+        if (!shouldClose && needsNextOperationAt && !form.next_operation_at) {
+            setFormError('Vui lòng chọn thời gian tác nghiệp tiếp.');
             return;
         }
         setFormError('');
@@ -294,9 +352,11 @@ export function SaleOrderDialog({
             preserveScroll: true,
             onSuccess: () => {
                 if (!shouldClose) {
-                    toast.success('Đã cập nhật đơn.');
-                    onOpenChange(false);
-                    setProcessing(false);
+                    syncOperationStatus(() => {
+                        toast.success('Đã cập nhật đơn.');
+                        onOpenChange(false);
+                        setProcessing(false);
+                    });
                     return;
                 }
                 router.post(`${actionBaseUrl}/orders/${order.id}/close`, {
@@ -346,6 +406,8 @@ export function SaleOrderDialog({
 
     const selectedWarehouse = warehouseOptions.find((item) => String(item.id) === String(form.warehouse_id));
     const services = shippingServiceOptions?.[form.shipping_provider] ?? [];
+    const selectedOperationResult = operationStatusOptions.find((item) => String(item.value) === String(form.operation_result));
+    const needsNextOperationAt = form.operation_result === 'callback_scheduled';
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -359,6 +421,8 @@ export function SaleOrderDialog({
                     {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
                     <section className="ps-order-left-panel">
                         <div className="ps-order-field ps-full"><FieldLabel required>Nguồn dữ liệu</FieldLabel><Select value={form.marketing_source_id} onChange={(value) => update('marketing_source_id', value)}><option value="">--Chọn nguồn dữ liệu--</option>{sourceOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
+                        {order && operationStatusOptions.length ? <div className="ps-order-field ps-full ps-order-result-field"><FieldLabel>Kết quả</FieldLabel><Select value={form.operation_result} onChange={(value) => update('operation_result', value)}><option value="">--Chọn kết quả--</option>{operationStatusOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</Select></div> : null}
+                        {order && needsNextOperationAt ? <div className="ps-order-field ps-full ps-order-next-operation-field"><FieldLabel required>Tác nghiệp tiếp</FieldLabel><input className="form-control" type="datetime-local" value={form.next_operation_at} onChange={(event) => update('next_operation_at', event.target.value)} /></div> : null}
                         <div className="ps-order-field"><FieldLabel required>Họ tên khách hàng</FieldLabel><input className="form-control" value={form.name} onChange={(event) => update('name', event.target.value)} /></div>
                         <div className="ps-order-field"><FieldLabel required>Số điện thoại</FieldLabel><input className="form-control" value={form.phone} onChange={(event) => update('phone', event.target.value)} /></div>
                         <div className="ps-order-field ps-full"><FieldLabel>Tin nhắn</FieldLabel><textarea className="form-control" rows={2} maxLength={1000} value={form.message} onChange={(event) => update('message', event.target.value)} /></div>

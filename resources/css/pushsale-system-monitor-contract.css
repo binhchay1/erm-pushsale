@@ -170,3 +170,60 @@ html body.pushsale-app-body .ps-system-monitor-page .ps-sm-panel {
     border: 1px solid #dce6ef !important;
     border-radius: 6px !important;
 }
+
+/* Responsive completion contract — system monitor cards/tabs. */
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-stat-grid,
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-panel-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        margin-left: 10px !important;
+        margin-right: 10px !important;
+    }
+
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-panel {
+        margin-left: 10px !important;
+        margin-right: 10px !important;
+    }
+
+    html body.pushsale-app-body .ps-system-monitor-page .ps-system-tabs {
+        flex-wrap: nowrap !important;
+        max-width: calc(100vw - 20px) !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
+
+@media (max-width: 640px) {
+    html body.pushsale-app-body .ps-system-monitor-page {
+        --ps-sm-gap: 12px;
+    }
+
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-stat-grid,
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-panel-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        margin-left: 8px !important;
+        margin-right: 8px !important;
+    }
+
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-panel {
+        margin-left: 8px !important;
+        margin-right: 8px !important;
+    }
+
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-stat-card [data-slot='card-header'],
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-health-card [data-slot='card-header'],
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-panel [data-slot='card-header'],
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-health-card [data-slot='card-content'],
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-panel [data-slot='card-content'] {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-check-row,
+    html body.pushsale-app-body .ps-system-monitor-page .ps-sm-disk-row {
+        gap: 8px !important;
+        padding: 10px !important;
+    }
+}
+

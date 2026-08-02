@@ -980,6 +980,35 @@ function normalizeTemplateLayout(host) {
         });
     });
 
+    // Responsive audit guard: captured Pushsale HTML has many raw AdminLTE tables
+    // without `.table-responsive`. Mark/wrap them once so every menu page can scroll
+    // horizontally on phones while keeping the desktop template untouched.
+    host.querySelectorAll('table').forEach((table) => {
+        table.classList.add('pushsale-responsive-table');
+
+        const firstRow = table.tHead?.rows?.[0] ?? table.querySelector('tr');
+        const columnCount = firstRow
+            ? [...firstRow.cells].reduce((total, cell) => total + (Number(cell.colSpan) || 1), 0)
+            : 6;
+        const minWidth = Math.min(2200, Math.max(720, columnCount * 118));
+        table.style.setProperty('--pushsale-table-min-width', `${minWidth}px`);
+
+        const existing = table.closest('.pushsale-template-table-scroll, .table-responsive, .ps-table-scroll, .ps-table-wrap, .ps-op-table-wrap, .ps-system-table-wrap, .ps-login-table-wrap, .ps-ecommerce-table-wrap, .ps-wh-menu-report-table-wrap, [data-pushsale-table="true"]');
+        if (existing) {
+            existing.classList.add('pushsale-template-table-scroll');
+            return;
+        }
+
+        const parent = table.parentElement;
+        if (!parent || parent.dataset.pushsaleTableWrapped === '1') return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'pushsale-template-table-scroll';
+        wrapper.dataset.pushsaleTableWrapped = '1';
+        parent.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+    });
+
     // Warehouse 5.5.x reports: force filter toolbar layout in DOM (CSS alone was losing
     // to Bootstrap/unified-shell). Hide template title header; keep controls in one flex row.
     const pageRoot = host.closest('[data-page-code]');

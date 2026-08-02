@@ -14,7 +14,6 @@ import {
     BulkCloseDialog,
     DesiredDeliveryDialog,
     DuplicatePhoneOrdersDialog,
-    OperationResultDialog,
     SaleOperationHistoryDialog,
 } from '@/components/operations/pushsale/SaleOperationDialogs';
 import { SaleOrderDialog } from '@/components/operations/pushsale/SaleOrderDialog';
@@ -43,13 +42,12 @@ export default function Workspace({
     const ordersBase = `${String(actionBaseUrl || '/sales').replace(/\/$/, '')}/orders`;
     const orderIds = useMemo(() => rows.map((row) => row.id), [rows]);
     const locks = useOrderLockPresence({ actionApiBase: ordersBase, orderIds });
-    const [orderDialog, setOrderDialog] = useState({ open: false, order: null, closeIntent: false });
+    const [orderDialog, setOrderDialog] = useState({ open: false, order: null, closeIntent: false, operationResult: null });
     const [historyState, setHistoryState] = useState({ order: null, context: 'sale' });
     const [dataViewOrder, setDataViewOrder] = useState(null);
     const [messagesOrder, setMessagesOrder] = useState(null);
     const [duplicateOrder, setDuplicateOrder] = useState(null);
     const [desiredOrder, setDesiredOrder] = useState(null);
-    const [resultState, setResultState] = useState({ open: false, order: null, result: null });
     const [bulkOrderIds, setBulkOrderIds] = useState([]);
 
     useRealtimeReload('dashboard.sales', '.workspace.changed', ['report']);
@@ -66,9 +64,9 @@ export default function Workspace({
         return true;
     };
 
-    const openOrder = (order = null, closeIntent = false) => {
+    const openOrder = (order = null, closeIntent = false, operationResult = null) => {
         if (order && !assertUnlocked(order)) return;
-        setOrderDialog({ open: true, order, closeIntent });
+        setOrderDialog({ open: true, order, closeIntent, operationResult });
     };
 
     return (
@@ -93,7 +91,7 @@ export default function Workspace({
                         onMessages={setMessagesOrder}
                         onDuplicateOrders={setDuplicateOrder}
                         onDesiredDate={(order) => assertUnlocked(order) && setDesiredOrder(order)}
-                        onResult={(order, result) => assertUnlocked(order) && setResultState({ open: true, order, result })}
+                        onResult={(order, result) => openOrder(order, false, result)}
                         interactionLocks={locks}
                         authUserId={authUserId}
                         onBulkClose={setBulkOrderIds}
@@ -109,7 +107,7 @@ export default function Workspace({
                 order={orderDialog.order}
                 open={orderDialog.open}
                 closeIntent={orderDialog.closeIntent}
-                onOpenChange={(open) => setOrderDialog((current) => ({ ...current, open }))}
+                onOpenChange={(open) => setOrderDialog((current) => ({ ...current, open, operationResult: open ? current.operationResult : null }))}
                 manualUrl={manualUrl}
                 actionBaseUrl={actionBaseUrl}
                 sourceOptions={sourceOptions}
@@ -117,20 +115,14 @@ export default function Workspace({
                 productOptions={productOptions}
                 carrierOptions={carrierOptions}
                 shippingServiceOptions={shippingServiceOptions}
+                operationStatusOptions={operationStatusOptions}
+                initialOperationResult={orderDialog.operationResult}
             />
             <SaleOperationHistoryDialog order={historyState.order} context={historyState.context} open={Boolean(historyState.order)} onOpenChange={(open) => !open && setHistoryState({ order: null, context: 'sale' })} />
             <PushsaleDataViewHistoryDialog order={dataViewOrder} open={Boolean(dataViewOrder)} onOpenChange={(open) => !open && setDataViewOrder(null)} />
             <PushsaleCustomerMessagesDialog order={messagesOrder} open={Boolean(messagesOrder)} onOpenChange={(open) => !open && setMessagesOrder(null)} />
             <DuplicatePhoneOrdersDialog order={duplicateOrder} open={Boolean(duplicateOrder)} onOpenChange={(open) => !open && setDuplicateOrder(null)} />
             <DesiredDeliveryDialog order={desiredOrder} open={Boolean(desiredOrder)} onOpenChange={(open) => !open && setDesiredOrder(null)} actionBaseUrl={actionBaseUrl} />
-            <OperationResultDialog
-                order={resultState.order}
-                result={resultState.result}
-                open={resultState.open}
-                onOpenChange={(open) => setResultState((current) => ({ ...current, open }))}
-                actionBaseUrl={actionBaseUrl}
-                onCloseOrder={(order) => openOrder(order, true)}
-            />
             <BulkCloseDialog
                 orderIds={bulkOrderIds}
                 rows={rows}

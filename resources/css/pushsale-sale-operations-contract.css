@@ -932,3 +932,79 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-page-size .form-control 
     vertical-align: middle !important;
     width: 66px !important;
 }
+
+/* Responsive completion contract — sale workspace mobile/tablet. */
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep {
+        min-width: 150px !important;
+        max-width: 100% !important;
+        white-space: normal !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-tabs,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-status-tabs,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-workspace-tabs,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-tab-row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 6px !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-table-wrap,
+    html body.pushsale-app-body .ps-sale-workspace-page .table-responsive {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-note-stage-row {
+        gap: 6px !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .ps-operation-stage-label,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor .fb.ttgh7 {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .td-message,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .ps-msg-block {
+        max-width: 210px !important;
+        min-width: 120px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep {
+        flex: 0 0 146px !important;
+        min-width: 146px !important;
+        padding-right: 8px !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page td.area4.ps-delivery-status-cell {
+        min-width: 132px !important;
+        width: 150px !important;
+        max-width: 170px !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-note-mof .txt-mof,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof {
+        min-width: 120px !important;
+        width: 100% !important;
+    }
+}
+

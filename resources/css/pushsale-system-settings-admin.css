@@ -178,3 +178,49 @@ html body.pushsale-app-body .ps-system-rules p {
     margin: 0 0 10px;
     line-height: 1.5;
 }
+
+/* Responsive completion contract — system settings. */
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-system-settings-page {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    html body.pushsale-app-body .ps-system-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 10px;
+        margin-left: -8px;
+        margin-right: -8px;
+        padding: 10px 12px;
+    }
+
+    html body.pushsale-app-body .ps-system-header-actions {
+        width: 100%;
+    }
+
+    html body.pushsale-app-body .ps-system-header-actions > * {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    html body.pushsale-app-body .ps-system-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+    }
+
+    html body.pushsale-app-body .ps-system-tabs button {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    html body.pushsale-app-body .ps-system-table-wrap {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+

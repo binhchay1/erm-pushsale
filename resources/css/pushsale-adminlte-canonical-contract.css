@@ -2268,3 +2268,265 @@ html body.pushsale-app-body .ps-sale-operation-table .ps-cell-actions-right {
         max-width: none !important;
     }
 }
+
+/* Responsive completion contract — AdminLTE chrome/dialogs on phone. */
+@media (max-width: 767px) {
+    html body.pushsale-app-body .pushsale-main-header,
+    html body.pushsale-app-body .main-header.pushsale-main-header {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100vw !important;
+        overflow: visible !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-brand,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-header-brand,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-header-brand {
+        max-width: min(48vw, 178px) !important;
+    }
+
+    html body.pushsale-app-body .pushsale-logo,
+    html body.pushsale-app-body .main-header .logo.pushsale-logo {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-tools {
+        flex: 1 1 auto !important;
+        justify-content: flex-end !important;
+        gap: 4px !important;
+        min-width: 0 !important;
+        max-width: 52vw !important;
+        overflow: visible !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-tools > * {
+        flex: 0 0 auto !important;
+    }
+
+    html body.pushsale-app-body .pushsale-notification-trigger,
+    html body.pushsale-app-body .pushsale-page-info-button,
+    html body.pushsale-app-body .pushsale-user-trigger,
+    html body.pushsale-app-body .pushsale-language-trigger {
+        min-width: 34px !important;
+        width: 34px !important;
+        height: 34px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        justify-content: center !important;
+    }
+
+    html body.pushsale-app-body .pushsale-user-copy,
+    html body.pushsale-app-body .pushsale-user-trigger .caret,
+    html body.pushsale-app-body .pushsale-notification-trigger .pushsale-notification-label {
+        display: none !important;
+    }
+
+    html body.pushsale-app-body .content-wrapper,
+    html body.pushsale-app-body .right-side {
+        margin-left: 0 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+    }
+
+    html body.pushsale-app-body .modal-dialog,
+    html body.pushsale-app-body .modal-lg,
+    html body.pushsale-app-body .modal-xl,
+    html body.pushsale-app-body [data-slot='dialog-content'],
+    html body.pushsale-app-body .ps-dialog-surface,
+    html body.pushsale-app-body .ps-customer-dialog,
+    html body.pushsale-app-body .ps-operation-history-dialog,
+    html body.pushsale-app-body .ps-sale-history-dialog {
+        width: calc(100vw - 16px) !important;
+        max-width: calc(100vw - 16px) !important;
+        min-width: 0 !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    html body.pushsale-app-body .modal-content,
+    html body.pushsale-app-body [data-slot='dialog-content'],
+    html body.pushsale-app-body .ps-dialog-surface {
+        max-height: calc(100dvh - 16px) !important;
+        overflow: hidden !important;
+    }
+
+    html body.pushsale-app-body .modal-body,
+    html body.pushsale-app-body .ps-dialog-body,
+    html body.pushsale-app-body [data-slot='dialog-content'] [data-slot='dialog-body'] {
+        max-height: calc(100dvh - 124px) !important;
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
+
+@media (max-width: 480px) {
+    html body.pushsale-app-body .pushsale-header-brand,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-header-brand,
+    html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-header-brand {
+        max-width: 46vw !important;
+    }
+
+    html body.pushsale-app-body .pushsale-header-tools {
+        max-width: 54vw !important;
+    }
+
+    html body.pushsale-app-body .pushsale-page-info-button {
+        display: none !important;
+    }
+}
+
+
+/* v137 responsive audit: dialogs/actions/forms stay inside viewport on tablet/mobile. */
+@media (max-width: 1199px) {
+    html body.pushsale-app-body .ps-sale-order-dialog[data-slot='dialog-content'],
+    html body.pushsale-app-body .ps-sale-order-modal[data-slot='dialog-content'] {
+        width: calc(100vw - 16px) !important;
+        max-width: calc(100vw - 16px) !important;
+        min-height: 0 !important;
+        max-height: calc(100dvh - 12px) !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-order-body {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        overflow: auto !important;
+    }
+
+    html body.pushsale-app-body .ps-order-left-panel,
+    html body.pushsale-app-body .ps-order-right-panel {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        padding: 14px 16px !important;
+    }
+
+    html body.pushsale-app-body .ps-order-top-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-dialog-content,
+    html body.pushsale-app-body [data-slot='dialog-content'],
+    html body.pushsale-app-body .ps-dialog-surface,
+    html body.pushsale-app-body .ps-modal-dialog,
+    html body.pushsale-app-body .ps-modal-content,
+    html body.pushsale-app-body .modal-dialog,
+    html body.pushsale-app-body .modal-content {
+        width: calc(100vw - 14px) !important;
+        max-width: calc(100vw - 14px) !important;
+        min-width: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-dialog-header,
+    html body.pushsale-app-body .ps-sale-dialog-header,
+    html body.pushsale-app-body .ps-modal-header,
+    html body.pushsale-app-body .modal-header {
+        min-width: 0 !important;
+        padding-left: 12px !important;
+        padding-right: 40px !important;
+    }
+
+    html body.pushsale-app-body .ps-dialog-title,
+    html body.pushsale-app-body [data-slot='dialog-title'],
+    html body.pushsale-app-body .modal-title {
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    html body.pushsale-app-body .ps-dialog-body,
+    html body.pushsale-app-body .modal-body,
+    html body.pushsale-app-body .ps-modal-body,
+    html body.pushsale-app-body [data-slot='dialog-content'] [data-slot='dialog-body'] {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    html body.pushsale-app-body .ps-dialog-footer,
+    html body.pushsale-app-body [data-slot='dialog-footer'],
+    html body.pushsale-app-body .modal-footer,
+    html body.pushsale-app-body .ps-modal-footer,
+    html body.pushsale-app-body .ps-order-actions,
+    html body.pushsale-app-body .ps-ecommerce-modal-actions,
+    html body.pushsale-app-body .ps-sales-leader-dialog__actions {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-dialog-footer .btn,
+    html body.pushsale-app-body [data-slot='dialog-footer'] .btn,
+    html body.pushsale-app-body .modal-footer .btn,
+    html body.pushsale-app-body .ps-modal-footer .btn,
+    html body.pushsale-app-body .ps-order-actions .btn,
+    html body.pushsale-app-body .ps-ecommerce-modal-actions .btn,
+    html body.pushsale-app-body .ps-sales-leader-dialog__actions .btn,
+    html body.pushsale-app-body .ps-dialog-footer button,
+    html body.pushsale-app-body [data-slot='dialog-footer'] button,
+    html body.pushsale-app-body .modal-footer button,
+    html body.pushsale-app-body .ps-order-actions button {
+        width: 100% !important;
+        min-width: 0 !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+    }
+
+    html body.pushsale-app-body .ps-order-left-panel,
+    html body.pushsale-app-body .ps-order-right-panel {
+        padding: 12px 10px !important;
+    }
+
+    html body.pushsale-app-body .ps-order-left-panel,
+    html body.pushsale-app-body .ps-order-top-grid,
+    html body.pushsale-app-body .ps-generated-form,
+    html body.pushsale-app-body .pushsale-generated-form {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .ps-order-product-table {
+        min-width: 860px !important;
+    }
+}
+
+@media (max-width: 575px) {
+    html body.pushsale-app-body .ps-dialog-content,
+    html body.pushsale-app-body [data-slot='dialog-content'],
+    html body.pushsale-app-body .ps-dialog-surface,
+    html body.pushsale-app-body .ps-sale-order-dialog[data-slot='dialog-content'],
+    html body.pushsale-app-body .ps-sale-order-modal[data-slot='dialog-content'],
+    html body.pushsale-app-body .modal-dialog,
+    html body.pushsale-app-body .modal-content {
+        width: calc(100vw - 10px) !important;
+        max-width: calc(100vw - 10px) !important;
+        max-height: calc(100dvh - 10px) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    html body.pushsale-app-body .ps-dialog-footer,
+    html body.pushsale-app-body [data-slot='dialog-footer'],
+    html body.pushsale-app-body .modal-footer,
+    html body.pushsale-app-body .ps-modal-footer,
+    html body.pushsale-app-body .ps-order-actions,
+    html body.pushsale-app-body .ps-ecommerce-modal-actions,
+    html body.pushsale-app-body .ps-sales-leader-dialog__actions {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-dialog-header,
+    html body.pushsale-app-body .ps-dialog-header,
+    html body.pushsale-app-body .modal-header {
+        min-height: 38px !important;
+        padding-top: 9px !important;
+        padding-bottom: 8px !important;
+    }
+}

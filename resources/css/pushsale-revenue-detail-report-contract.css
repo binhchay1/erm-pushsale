@@ -288,3 +288,98 @@ html body.pushsale-app-body .pushsale-main-sidebar .pushsale-sidebar {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 }
+
+/* v138 — small laptop fix for wide revenue-detail reports.
+   Keep the customer context columns visible and make the horizontal scroll usable on 14" screens. */
+html body.pushsale-app-body .ps-revenue-detail-page {
+    --pushsale-table-viewport-offset: 330px;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-scroll {
+    position: relative !important;
+    border-top: 1px solid #2675bf !important;
+    border-bottom: 1px solid #d6dee6 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table {
+    min-width: 3280px !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table thead tr:first-child th:nth-child(1),
+html body.pushsale-app-body .ps-revenue-detail-table tbody td:nth-child(1) {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 5 !important;
+    width: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table thead tr:first-child th:nth-child(2),
+html body.pushsale-app-body .ps-revenue-detail-table tbody td:nth-child(2) {
+    position: sticky !important;
+    left: 56px !important;
+    z-index: 5 !important;
+    width: 190px !important;
+    min-width: 190px !important;
+    max-width: 190px !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table thead tr:first-child th:nth-child(1),
+html body.pushsale-app-body .ps-revenue-detail-table thead tr:first-child th:nth-child(2) {
+    z-index: 8 !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table tbody td:nth-child(1),
+html body.pushsale-app-body .ps-revenue-detail-table tbody td:nth-child(2) {
+    box-shadow: 1px 0 0 #2675bf !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table th,
+html body.pushsale-app-body .ps-revenue-detail-table td {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table thead th {
+    min-width: 80px !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table thead tr:nth-child(2) th:nth-child(even) {
+    min-width: 110px !important;
+}
+
+@media (max-width: 1440px), (max-height: 820px) {
+    html body.pushsale-app-body .ps-revenue-detail-page {
+        --pushsale-table-viewport-offset: 360px;
+    }
+
+    html body.pushsale-app-body .ps-revenue-detail-scroll {
+        max-height: max(300px, calc(100dvh - var(--pushsale-table-viewport-offset, 360px))) !important;
+        overflow: auto !important;
+        overscroll-behavior: contain !important;
+    }
+
+    html body.pushsale-app-body .ps-revenue-detail-table thead th {
+        top: 0 !important;
+        z-index: 6 !important;
+    }
+
+    html body.pushsale-app-body .ps-revenue-detail-table thead tr:first-child th:nth-child(1),
+    html body.pushsale-app-body .ps-revenue-detail-table thead tr:first-child th:nth-child(2) {
+        z-index: 10 !important;
+    }
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table thead tr:first-child th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 7 !important;
+}
+
+html body.pushsale-app-body .ps-revenue-detail-table thead tr:nth-child(2) th {
+    position: sticky !important;
+    top: 27px !important;
+    z-index: 6 !important;
+}

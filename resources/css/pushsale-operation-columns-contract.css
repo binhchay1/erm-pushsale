@@ -285,3 +285,59 @@ html body.pushsale-app-body .ps-sale-operation-table td.ps-result-cell > .small-
     display: block !important;
     max-width: calc(100% - 24px) !important;
 }
+
+/* Responsive completion contract — operation tables keep full Pushsale columns but never clip the viewport. */
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-sale-table-wrap,
+    html body.pushsale-app-body .ps-wh-table-shell,
+    html body.pushsale-app-body .ps-acc-table-wrap,
+    html body.pushsale-app-body .ps-customer-profile-table-wrap,
+    html body.pushsale-app-body .table-responsive:has(.ps-sale-operation-table),
+    html body.pushsale-app-body .table-responsive:has(.ps-wh-legacy-table),
+    html body.pushsale-app-body .table-responsive:has(.ps-acc-operation-table),
+    html body.pushsale-app-body .table-responsive:has(.ps-customer-profile-table) {
+        width: 100% !important;
+        max-width: 100vw !important;
+        min-width: 0 !important;
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior-inline: contain !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-operation-table {
+        min-width: 1320px !important;
+        width: max(100%, 1320px) !important;
+    }
+
+    html body.pushsale-app-body .ps-wh-legacy-table,
+    html body.pushsale-app-body .ps-wh-table,
+    html body.pushsale-app-body .ps-acc-operation-table,
+    html body.pushsale-app-body .ps-customer-profile-table {
+        max-width: none !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-sale-operation-table {
+        min-width: 1180px !important;
+        width: max-content !important;
+    }
+
+    html body.pushsale-app-body .ps-ops-money-cell,
+    html body.pushsale-app-body td.ps-ops-money-cell,
+    html body.pushsale-app-body .ps-sale-operation-table td.ps-ops-money-cell,
+    html body.pushsale-app-body .ps-wh-legacy-table td.ps-ops-money-cell,
+    html body.pushsale-app-body .ps-acc-operation-table td.ps-ops-money-cell,
+    html body.pushsale-app-body .ps-customer-profile-table td.ps-ops-money-cell {
+        min-width: 124px !important;
+        width: 132px !important;
+        max-width: 150px !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-operation-table td.ps-result-cell .ps-result-select {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+

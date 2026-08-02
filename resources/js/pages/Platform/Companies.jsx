@@ -3,7 +3,7 @@ import { Copy } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import AppLayout from '@/layouts/AppLayout';
-import { PageHeader } from '@/components/layout/PageHeader';
+import PushsalePageShell from '@/components/layout/PushsalePageShell';
 import { TableEmptyRow } from '@/components/reports/TableEmpty';
 import { Button } from '@/components/ui/button';
 import {
@@ -164,38 +164,42 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
         <AppLayout activeMenuCode="10.2">
             <Head title={t('pages.platform.title')} />
 
-            <section className="ps-adminlte-page ps-platform-companies-page" data-page-code="10.2">
-                <PageHeader
-                    title={t('pages.platform.title')}
-                    subtitle={t('pages.platform.desc')}
-                    pageCode="10.2"
-                    className="ps-platform-companies-header"
-                    filters={(
-                        <form id="ps-platform-companies-filters" className="ps-platform-companies-filters" onSubmit={search}>
-                            <input
-                                className="form-control"
-                                value={searchForm.data.search}
-                                onChange={(e) => searchForm.setData('search', e.target.value)}
-                                placeholder={t('pages.platform.search_ph')}
-                            />
-                            <button className="btn btn-sm btn-primary" type="submit">
-                                <i className="fa fa-search" /> Tìm kiếm
-                            </button>
-                        </form>
-                    )}
-                    collapsible={false}
-                />
+            <PushsalePageShell
+                title={t('pages.platform.title')}
+                subtitle={t('pages.platform.desc')}
+                pageCode="10.2"
+                className="ps-adminlte-page ps-platform-companies-page"
+                headerClassName="ps-platform-companies-header"
+                data-page-code="10.2"
+                filters={(
+                    <form id="ps-platform-companies-filters" className="ps-platform-companies-filters" onSubmit={search}>
+                        <input
+                            className="form-control"
+                            value={searchForm.data.search}
+                            onChange={(e) => searchForm.setData('search', e.target.value)}
+                            placeholder={t('pages.platform.search_ph')}
+                        />
+                        <button className="btn btn-sm btn-primary" type="submit">
+                            <i className="fa fa-search" /> {t('pages.platform.search_btn')}
+                        </button>
+                    </form>
+                )}
+                collapsible={false}
+            >
 
                 <div className="ps-platform-companies-stats">
                     <div className="ps-platform-stat">
+                        <span className="ps-platform-stat__icon"><i className="fa fa-building-o" aria-hidden="true" /></span>
                         <span className="ps-platform-stat__label">{t('pages.platform.stat_total')}</span>
                         <strong className="ps-platform-stat__value">{formatNumber(stats.total ?? 0)}</strong>
                     </div>
                     <div className="ps-platform-stat">
+                        <span className="ps-platform-stat__icon"><i className="fa fa-check-circle" aria-hidden="true" /></span>
                         <span className="ps-platform-stat__label">{t('pages.platform.stat_active')}</span>
                         <strong className="ps-platform-stat__value">{formatNumber(stats.active ?? 0)}</strong>
                     </div>
                     <div className="ps-platform-stat">
+                        <span className="ps-platform-stat__icon"><i className="fa fa-users" aria-hidden="true" /></span>
                         <span className="ps-platform-stat__label">{t('pages.platform.stat_users')}</span>
                         <strong className="ps-platform-stat__value">{formatNumber(stats.users ?? 0)}</strong>
                     </div>
@@ -208,75 +212,101 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                         </h3>
                     </div>
                     <div className="box-body">
-                        <p className="ps-platform-create-desc">{t('pages.platform.create_desc')}</p>
+                        <div className="ps-platform-create-intro">
+                            <p className="ps-platform-create-desc">{t('pages.platform.create_desc')}</p>
+                        </div>
                         <form onSubmit={create} className="ps-platform-create-form">
-                            <div className="ps-platform-create-field">
-                                <label htmlFor="name">
-                                    {t('pages.platform.field_name')}
-                                    <RequiredMark />
-                                </label>
-                                <input
-                                    id="name"
-                                    className="form-control"
-                                    value={createForm.data.name}
-                                    aria-invalid={!!createForm.errors.name}
-                                    onChange={(e) => createForm.setData('name', e.target.value)}
-                                    required
-                                />
-                                <FieldError message={createForm.errors.name} />
+                            <div className="ps-platform-create-section">
+                                <div className="ps-platform-create-section__head">
+                                    <span className="ps-platform-create-section__icon"><i className="fa fa-building" aria-hidden="true" /></span>
+                                    <div>
+                                        <h4>{t('pages.platform.company_section_title')}</h4>
+                                        <p>{t('pages.platform.company_section_desc')}</p>
+                                    </div>
+                                </div>
+                                <div className="ps-platform-create-section__fields">
+                                    <div className="ps-platform-create-field">
+                                        <label htmlFor="name">
+                                            {t('pages.platform.field_name')}
+                                            <RequiredMark />
+                                        </label>
+                                        <input
+                                            id="name"
+                                            className="form-control"
+                                            value={createForm.data.name}
+                                            aria-invalid={!!createForm.errors.name}
+                                            onChange={(e) => createForm.setData('name', e.target.value)}
+                                            required
+                                        />
+                                        <FieldError message={createForm.errors.name} />
+                                    </div>
+                                    <div className="ps-platform-create-field">
+                                        <label htmlFor="slug">{t('pages.platform.field_slug')}</label>
+                                        <input
+                                            id="slug"
+                                            className="form-control"
+                                            value={createForm.data.slug}
+                                            onChange={(e) => createForm.setData('slug', e.target.value)}
+                                            placeholder="abc-corp"
+                                        />
+                                        <p className="help-block">
+                                            {t('pages.platform.field_slug_hint').replace('{role}', 'sales').replace('{slug}', 'abc-corp').replace('saleops.local', emailDomain)}
+                                        </p>
+                                        {createForm.errors.slug ? <p className="text-danger">{createForm.errors.slug}</p> : null}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="ps-platform-create-field">
-                                <label htmlFor="slug">{t('pages.platform.field_slug')}</label>
-                                <input
-                                    id="slug"
-                                    className="form-control"
-                                    value={createForm.data.slug}
-                                    onChange={(e) => createForm.setData('slug', e.target.value)}
-                                    placeholder="abc-corp"
-                                />
-                                <p className="help-block">
-                                    {t('pages.platform.field_slug_hint').replace('{role}', 'sales').replace('{slug}', 'abc-corp').replace('saleops.local', emailDomain)}
-                                </p>
-                                {createForm.errors.slug ? <p className="text-danger">{createForm.errors.slug}</p> : null}
+
+                            <div className="ps-platform-create-section">
+                                <div className="ps-platform-create-section__head">
+                                    <span className="ps-platform-create-section__icon"><i className="fa fa-user-circle" aria-hidden="true" /></span>
+                                    <div>
+                                        <h4>{t('pages.platform.owner_section_title')}</h4>
+                                        <p>{t('pages.platform.owner_section_desc')}</p>
+                                    </div>
+                                </div>
+                                <div className="ps-platform-create-section__fields">
+                                    <div className="ps-platform-create-field">
+                                        <label htmlFor="owner_name">
+                                            {t('pages.platform.field_owner_name')}
+                                            <RequiredMark />
+                                        </label>
+                                        <input
+                                            id="owner_name"
+                                            className="form-control"
+                                            value={createForm.data.owner_name}
+                                            aria-invalid={!!createForm.errors.owner_name}
+                                            onChange={(e) => createForm.setData('owner_name', e.target.value)}
+                                            required
+                                        />
+                                        <FieldError message={createForm.errors.owner_name} />
+                                    </div>
+                                    <div className="ps-platform-create-field">
+                                        <label htmlFor="owner_email">{t('pages.platform.field_owner_email')}</label>
+                                        <input
+                                            id="owner_email"
+                                            type="email"
+                                            className="form-control"
+                                            value={createForm.data.owner_email}
+                                            onChange={(e) => createForm.setData('owner_email', e.target.value)}
+                                        />
+                                        <p className="help-block">{t('pages.platform.field_owner_email_hint')}</p>
+                                        {createForm.errors.owner_email ? <p className="text-danger">{createForm.errors.owner_email}</p> : null}
+                                    </div>
+                                    <div className="ps-platform-create-field">
+                                        <label htmlFor="owner_password">{t('pages.platform.field_owner_password')}</label>
+                                        <input
+                                            id="owner_password"
+                                            type="text"
+                                            className="form-control"
+                                            value={createForm.data.owner_password}
+                                            onChange={(e) => createForm.setData('owner_password', e.target.value)}
+                                            placeholder="password"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="ps-platform-create-field">
-                                <label htmlFor="owner_name">
-                                    {t('pages.platform.field_owner_name')}
-                                    <RequiredMark />
-                                </label>
-                                <input
-                                    id="owner_name"
-                                    className="form-control"
-                                    value={createForm.data.owner_name}
-                                    aria-invalid={!!createForm.errors.owner_name}
-                                    onChange={(e) => createForm.setData('owner_name', e.target.value)}
-                                    required
-                                />
-                                <FieldError message={createForm.errors.owner_name} />
-                            </div>
-                            <div className="ps-platform-create-field">
-                                <label htmlFor="owner_email">{t('pages.platform.field_owner_email')}</label>
-                                <input
-                                    id="owner_email"
-                                    type="email"
-                                    className="form-control"
-                                    value={createForm.data.owner_email}
-                                    onChange={(e) => createForm.setData('owner_email', e.target.value)}
-                                />
-                                <p className="help-block">{t('pages.platform.field_owner_email_hint')}</p>
-                                {createForm.errors.owner_email ? <p className="text-danger">{createForm.errors.owner_email}</p> : null}
-                            </div>
-                            <div className="ps-platform-create-field">
-                                <label htmlFor="owner_password">{t('pages.platform.field_owner_password')}</label>
-                                <input
-                                    id="owner_password"
-                                    type="text"
-                                    className="form-control"
-                                    value={createForm.data.owner_password}
-                                    onChange={(e) => createForm.setData('owner_password', e.target.value)}
-                                    placeholder="password"
-                                />
-                            </div>
+
                             <div className="ps-platform-create-actions">
                                 <button type="submit" className="btn btn-sm btn-primary" disabled={createForm.processing}>
                                     <i className={`fa ${createForm.processing ? 'fa-spinner fa-spin' : 'fa-plus'}`} />{' '}
@@ -287,8 +317,14 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                     </div>
                 </div>
 
-                <div className="ps-table-scroll ps-platform-companies-table-wrap">
-                    <table className="table table-bordered ps-source-table ps-platform-companies-table">
+                <div className="box box-solid ps-platform-table-box">
+                    <div className="box-header with-border">
+                        <h3 className="box-title">
+                            <i className="fa fa-list" aria-hidden="true" /> {t('pages.platform.table_title')}
+                        </h3>
+                    </div>
+                    <div className="ps-table-scroll ps-platform-companies-table-wrap">
+                        <table className="table table-bordered ps-source-table ps-platform-companies-table">
                         <thead>
                             <tr>
                                 <th>
@@ -328,14 +364,14 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                             {sortedRows.length ? (
                                 sortedRows.map((c) => (
                                     <tr key={c.id}>
-                                        <td>
+                                        <td className="ps-platform-company-cell">
                                             <strong>{c.name}</strong>
                                             {c.is_internal ? (
                                                 <span className="label label-default ps-platform-internal-badge">{t('pages.platform.internal_badge')}</span>
                                             ) : null}
                                             <div className="text-muted">{c.slug}</div>
                                         </td>
-                                        <td>
+                                        <td className="ps-platform-owner-cell">
                                             {c.owner ? (
                                                 <>
                                                     <div>{c.owner.name}</div>
@@ -345,23 +381,23 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                                                 <span className="text-muted">{t('pages.platform.no_owner')}</span>
                                             )}
                                         </td>
-                                        <td className="text-center">{formatNumber(c.users_count)}</td>
-                                        <td className="text-center text-capitalize">{c.plan}</td>
+                                        <td className="text-center ps-platform-number-cell"><span className="ps-platform-number-badge">{formatNumber(c.users_count)}</span></td>
+                                        <td className="text-center text-capitalize ps-platform-plan-cell">{c.plan}</td>
                                         <td className="text-center">
                                             <span className={`label ${c.is_active ? 'label-success' : 'label-danger'}`}>
                                                 {c.is_active ? t('pages.platform.status_active') : t('pages.platform.status_suspended')}
                                             </span>
                                         </td>
-                                        <td className="text-center text-muted">{c.expires_at ?? t('pages.platform.no_expiry')}</td>
+                                        <td className="text-center text-muted ps-platform-expiry-cell">{c.expires_at ?? t('pages.platform.no_expiry')}</td>
                                         <td className="ps-platform-actions">
                                             <button type="button" className="btn btn-xs btn-default" onClick={() => openEdit(c)}>
-                                                <i className="fa fa-pencil" /> {t('pages.platform.edit_btn')}
+                                                <i className="fa fa-pencil" aria-hidden="true" /> {t('pages.platform.edit_btn')}
                                             </button>
                                             <Link href={`/platform/companies/${c.id}/admins`} className="btn btn-xs btn-default">
-                                                {t('pages.platform.manage_admins')}
+                                                <i className="fa fa-user-plus" aria-hidden="true" /> {t('pages.platform.manage_admins')}
                                             </Link>
                                             <Link href={`/platform/companies/${c.id}/accounts`} className="btn btn-xs btn-default">
-                                                {t('pages.platform.view_accounts')}
+                                                <i className="fa fa-id-card-o" aria-hidden="true" /> {t('pages.platform.view_accounts')}
                                             </Link>
                                             {!c.is_internal ? (
                                                 <button
@@ -379,9 +415,10 @@ export default function PlatformCompanies({ companies = [], stats = {}, filters 
                                 <TableEmptyRow colSpan={7} message={t('pages.platform.empty')} className="text-center ps-empty" />
                             )}
                         </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
-            </section>
+            </PushsalePageShell>
 
             <Dialog open={provisionOpen} onOpenChange={setProvisionOpen}>
                 <DialogContent className="max-w-lg">

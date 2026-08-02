@@ -653,3 +653,380 @@ html body.pushsale-app-body .ps-page-shell.ps-account-profile-page .ps-profile-e
         grid-template-columns: 1fr !important;
     }
 }
+
+/* Responsive completion contract — shared page body/table containment.
+   Keep this in page-frame because it is about the content viewport, not sidebar/header chrome. */
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-page-viewport,
+    html body.pushsale-app-body .ps-page-shell,
+    html body.pushsale-app-body .pushsale-page-frame,
+    html body.pushsale-app-body .pushsale-page,
+    html body.pushsale-app-body .ps-adminlte-page,
+    html body.pushsale-app-body .ps-report-page,
+    html body.pushsale-app-body .ps-feature-page,
+    html body.pushsale-app-body .ps-page-shell__body,
+    html body.pushsale-app-body .box,
+    html body.pushsale-app-body .box-body {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    html body.pushsale-app-body .ps-page-shell,
+    html body.pushsale-app-body .pushsale-page-frame,
+    html body.pushsale-app-body .pushsale-page,
+    html body.pushsale-app-body .ps-adminlte-page,
+    html body.pushsale-app-body .ps-report-page,
+    html body.pushsale-app-body .ps-feature-page {
+        overflow-x: hidden !important;
+    }
+
+    html body.pushsale-app-body .ps-page-shell__notice,
+    html body.pushsale-app-body .ps-page-shell__toolbar,
+    html body.pushsale-app-body .ps-page-shell__body,
+    html body.pushsale-app-body .ps-toolbar,
+    html body.pushsale-app-body .box-body {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    html body.pushsale-app-body .table-responsive,
+    html body.pushsale-app-body .ps-table-scroll,
+    html body.pushsale-app-body [class*='table-scroll'],
+    html body.pushsale-app-body [class*='table-wrap'],
+    html body.pushsale-app-body [class*='table-shell'],
+    html body.pushsale-app-body .ps-grid-scroll,
+    html body.pushsale-app-body .dragscroll1,
+    html body.pushsale-app-body .tableFixHead {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior-inline: contain !important;
+    }
+
+    html body.pushsale-app-body .table-responsive > table,
+    html body.pushsale-app-body .ps-table-scroll > table,
+    html body.pushsale-app-body [class*='table-scroll'] > table,
+    html body.pushsale-app-body [class*='table-wrap'] > table,
+    html body.pushsale-app-body [class*='table-shell'] > table,
+    html body.pushsale-app-body .dragscroll1 > table,
+    html body.pushsale-app-body .tableFixHead > table {
+        max-width: none !important;
+    }
+
+    html body.pushsale-app-body .ps-page-shell__toolbar,
+    html body.pushsale-app-body .ps-toolbar,
+    html body.pushsale-app-body [class*='toolbar'] {
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-page-viewport,
+    html body.pushsale-app-body .ps-page-shell,
+    html body.pushsale-app-body .pushsale-page-frame,
+    html body.pushsale-app-body .pushsale-page,
+    html body.pushsale-app-body .ps-adminlte-page,
+    html body.pushsale-app-body .ps-report-page,
+    html body.pushsale-app-body .ps-feature-page {
+        width: 100vw !important;
+        max-width: 100vw !important;
+    }
+
+    html body.pushsale-app-body .ps-page-shell__notice,
+    html body.pushsale-app-body .ps-page-shell__toolbar,
+    html body.pushsale-app-body .ps-page-shell__body,
+    html body.pushsale-app-body .ps-toolbar,
+    html body.pushsale-app-body .box-body {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-shell__toolbar,
+    html body.pushsale-app-body .ps-toolbar,
+    html body.pushsale-app-body [class*='toolbar'] {
+        gap: 6px !important;
+    }
+}
+
+
+/* v137 responsive audit: shared page body/table/filter safety net.
+   This lives in page-frame because it concerns content surfaces, not sidebar/header chrome. */
+html body.pushsale-app-body .ps-page-viewport,
+html body.pushsale-app-body .content-inner,
+html body.pushsale-app-body .ps-page-shell,
+html body.pushsale-app-body .pushsale-page,
+html body.pushsale-app-body .pushsale-template-host {
+    max-width: 100% !important;
+}
+
+html body.pushsale-app-body .pushsale-template-table-scroll,
+html body.pushsale-app-body .table-responsive,
+html body.pushsale-app-body .ps-table-scroll,
+html body.pushsale-app-body .ps-table-wrap,
+html body.pushsale-app-body .ps-op-table-wrap,
+html body.pushsale-app-body .ps-system-table-wrap,
+html body.pushsale-app-body .ps-login-table-wrap,
+html body.pushsale-app-body .ps-ecommerce-table-wrap,
+html body.pushsale-app-body .ps-wh-menu-report-table-wrap,
+html body.pushsale-app-body [data-pushsale-table='true'] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-x: contain !important;
+}
+
+html body.pushsale-app-body .pushsale-responsive-table,
+html body.pushsale-app-body .pushsale-template-table-scroll > table,
+html body.pushsale-app-body .ps-page-shell__body .box-body > table.table,
+html body.pushsale-app-body .ps-page-shell__body .panel-body > table.table,
+html body.pushsale-app-body .pushsale-page table.table,
+html body.pushsale-app-body .pushsale-table-frame table {
+    max-width: none !important;
+}
+
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-page-shell__body,
+    html body.pushsale-app-body .pushsale-page,
+    html body.pushsale-app-body .pushsale-template-host,
+    html body.pushsale-app-body .box,
+    html body.pushsale-app-body .box-body,
+    html body.pushsale-app-body .panel,
+    html body.pushsale-app-body .panel-body,
+    html body.pushsale-app-body .card,
+    html body.pushsale-app-body .card-body {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-page-shell__body,
+    html body.pushsale-app-body .pushsale-page,
+    html body.pushsale-app-body .pushsale-template-host {
+        overflow-x: hidden !important;
+    }
+
+    html body.pushsale-app-body .box-body,
+    html body.pushsale-app-body .panel-body,
+    html body.pushsale-app-body .table-responsive {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    html body.pushsale-app-body .pushsale-template-table-scroll > table,
+    html body.pushsale-app-body .pushsale-template-host .pushsale-responsive-table,
+    html body.pushsale-app-body .ps-page-shell__body table.table,
+    html body.pushsale-app-body .ps-page-shell__body .box-body > table.table,
+    html body.pushsale-app-body .ps-page-shell__body .panel-body > table.table,
+    html body.pushsale-app-body .pushsale-page table.table {
+        width: max(100%, var(--pushsale-table-min-width, 860px)) !important;
+        min-width: var(--pushsale-table-min-width, 860px) !important;
+    }
+
+    html body.pushsale-app-body .pushsale-template-host .pushsale-filter-row,
+    html body.pushsale-app-body .pushsale-template-host .pushsale-composite-filter-row,
+    html body.pushsale-app-body .pushsale-template-host .ps-wh-report-filters,
+    html body.pushsale-app-body .pushsale-template-host .pushsale-header-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    html body.pushsale-app-body .pushsale-template-host .pushsale-filter-row > [class*='col-'],
+    html body.pushsale-app-body .pushsale-template-host .pushsale-composite-filter-row > [class*='col-'],
+    html body.pushsale-app-body .pushsale-template-host .ps-wh-report-filters > *,
+    html body.pushsale-app-body .pushsale-template-host .pushsale-header-row > [class*='col-'] {
+        float: none !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin: 0 !important;
+    }
+
+    html body.pushsale-app-body .pushsale-template-host .pushsale-filter-row .form-control,
+    html body.pushsale-app-body .pushsale-template-host .pushsale-composite-filter-row .form-control,
+    html body.pushsale-app-body .pushsale-template-host .pushsale-header-row .form-control,
+    html body.pushsale-app-body .pushsale-template-host .ps-ddl,
+    html body.pushsale-app-body .pushsale-template-host .select2-container,
+    html body.pushsale-app-body .pushsale-template-host .input-group,
+    html body.pushsale-app-body .ps-page-shell__body .form-control,
+    html body.pushsale-app-body .ps-page-shell__body .ps-select,
+    html body.pushsale-app-body .ps-page-shell__body .select2-container,
+    html body.pushsale-app-body .ps-page-shell__body .input-group {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    html body.pushsale-app-body .pushsale-template-host .pushsale-empty-column,
+    html body.pushsale-app-body .pushsale-template-host .hidden-xs,
+    html body.pushsale-app-body .pushsale-template-host .hidden-sm {
+        display: none !important;
+    }
+}
+
+@media (max-width: 575px) {
+    html body.pushsale-app-body .ps-page-viewport,
+    html body.pushsale-app-body .content-inner {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-page-shell,
+    html body.pushsale-app-body .pushsale-page,
+    html body.pushsale-app-body .pushsale-template-host {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    html body.pushsale-app-body .pushsale-template-host .pushsale-filter-row,
+    html body.pushsale-app-body .pushsale-template-host .pushsale-composite-filter-row,
+    html body.pushsale-app-body .pushsale-template-host .ps-wh-report-filters,
+    html body.pushsale-app-body .pushsale-template-host .pushsale-header-row {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 7px !important;
+    }
+
+    html body.pushsale-app-body .pushsale-template-host .pushsale-filter-row .btn,
+    html body.pushsale-app-body .pushsale-template-host .pushsale-composite-filter-row .btn,
+    html body.pushsale-app-body .pushsale-template-host .pushsale-header-row .btn,
+    html body.pushsale-app-body .ps-page-shell__toolbar .btn,
+    html body.pushsale-app-body .ps-page-shell__toolbar button:not(.btn-icon),
+    html body.pushsale-app-body .ps-page-shell__toolbar a.btn:not(.btn-icon) {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+/* v138 small-screen table scroll contract.
+   Scope: every existing Pushsale/AdminLTE table wrapper. Customer laptops (13"/14")
+   must be able to scroll wide tables without hunting for a hidden bottom scrollbar. */
+html body.pushsale-app-body .pushsale-template-table-scroll,
+html body.pushsale-app-body .table-responsive,
+html body.pushsale-app-body .ps-table-scroll,
+html body.pushsale-app-body .ps-table-wrap,
+html body.pushsale-app-body .ps-op-table-wrap,
+html body.pushsale-app-body .ps-system-table-wrap,
+html body.pushsale-app-body .ps-login-table-wrap,
+html body.pushsale-app-body .ps-ecommerce-table-wrap,
+html body.pushsale-app-body .ps-wh-menu-report-table-wrap,
+html body.pushsale-app-body [data-pushsale-table='true'],
+html body.pushsale-app-body .dragscroll1,
+html body.pushsale-app-body .tableFixHead {
+    scrollbar-gutter: stable both-edges !important;
+    scrollbar-width: auto !important;
+    scrollbar-color: #9aa6b2 #edf1f5 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-table-scroll::-webkit-scrollbar,
+html body.pushsale-app-body .table-responsive::-webkit-scrollbar,
+html body.pushsale-app-body .ps-table-scroll::-webkit-scrollbar,
+html body.pushsale-app-body .ps-table-wrap::-webkit-scrollbar,
+html body.pushsale-app-body .ps-op-table-wrap::-webkit-scrollbar,
+html body.pushsale-app-body .ps-system-table-wrap::-webkit-scrollbar,
+html body.pushsale-app-body .ps-login-table-wrap::-webkit-scrollbar,
+html body.pushsale-app-body .ps-ecommerce-table-wrap::-webkit-scrollbar,
+html body.pushsale-app-body .ps-wh-menu-report-table-wrap::-webkit-scrollbar,
+html body.pushsale-app-body [data-pushsale-table='true']::-webkit-scrollbar,
+html body.pushsale-app-body .dragscroll1::-webkit-scrollbar,
+html body.pushsale-app-body .tableFixHead::-webkit-scrollbar {
+    width: 12px !important;
+    height: 12px !important;
+}
+
+html body.pushsale-app-body .pushsale-template-table-scroll::-webkit-scrollbar-track,
+html body.pushsale-app-body .table-responsive::-webkit-scrollbar-track,
+html body.pushsale-app-body .ps-table-scroll::-webkit-scrollbar-track,
+html body.pushsale-app-body .ps-table-wrap::-webkit-scrollbar-track,
+html body.pushsale-app-body .ps-op-table-wrap::-webkit-scrollbar-track,
+html body.pushsale-app-body .ps-system-table-wrap::-webkit-scrollbar-track,
+html body.pushsale-app-body .ps-login-table-wrap::-webkit-scrollbar-track,
+html body.pushsale-app-body .ps-ecommerce-table-wrap::-webkit-scrollbar-track,
+html body.pushsale-app-body .ps-wh-menu-report-table-wrap::-webkit-scrollbar-track,
+html body.pushsale-app-body [data-pushsale-table='true']::-webkit-scrollbar-track,
+html body.pushsale-app-body .dragscroll1::-webkit-scrollbar-track,
+html body.pushsale-app-body .tableFixHead::-webkit-scrollbar-track {
+    background: #edf1f5 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-table-scroll::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .table-responsive::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .ps-table-scroll::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .ps-table-wrap::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .ps-op-table-wrap::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .ps-system-table-wrap::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .ps-login-table-wrap::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .ps-ecommerce-table-wrap::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .ps-wh-menu-report-table-wrap::-webkit-scrollbar-thumb,
+html body.pushsale-app-body [data-pushsale-table='true']::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .dragscroll1::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .tableFixHead::-webkit-scrollbar-thumb {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border: 2px solid #edf1f5 !important;
+    border-radius: 8px !important;
+    background: #9aa6b2 !important;
+}
+
+html body.pushsale-app-body .pushsale-template-table-scroll > table,
+html body.pushsale-app-body .table-responsive > table,
+html body.pushsale-app-body .ps-table-scroll > table,
+html body.pushsale-app-body .ps-table-wrap > table,
+html body.pushsale-app-body .ps-op-table-wrap > table,
+html body.pushsale-app-body .ps-system-table-wrap > table,
+html body.pushsale-app-body .ps-login-table-wrap > table,
+html body.pushsale-app-body .ps-ecommerce-table-wrap > table,
+html body.pushsale-app-body .ps-wh-menu-report-table-wrap > table,
+html body.pushsale-app-body [data-pushsale-table='true'] > table,
+html body.pushsale-app-body .dragscroll1 > table,
+html body.pushsale-app-body .tableFixHead > table {
+    cursor: grab !important;
+}
+
+html body.pushsale-app-body .pushsale-table-scroll--panning,
+html body.pushsale-app-body .pushsale-table-scroll--panning > table,
+html body.pushsale-app-body .pushsale-table-scroll--panning * {
+    cursor: grabbing !important;
+    user-select: none !important;
+}
+
+@media (max-width: 1440px), (max-height: 820px) {
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .pushsale-template-table-scroll,
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .table-responsive,
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-table-scroll,
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-table-wrap,
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-op-table-wrap,
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-system-table-wrap,
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-login-table-wrap,
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-ecommerce-table-wrap,
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-wh-menu-report-table-wrap,
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) [data-pushsale-table='true'],
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .pushsale-template-table-scroll,
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .table-responsive,
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-table-scroll,
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-table-wrap,
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-op-table-wrap,
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-system-table-wrap,
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-login-table-wrap,
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-ecommerce-table-wrap,
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-wh-menu-report-table-wrap,
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) [data-pushsale-table='true'] {
+        max-height: max(280px, calc(100dvh - var(--pushsale-table-viewport-offset, 260px))) !important;
+        overflow: auto !important;
+        overscroll-behavior: contain !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}

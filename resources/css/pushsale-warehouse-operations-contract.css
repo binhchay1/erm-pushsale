@@ -894,3 +894,38 @@ html body.pushsale-app-body .ps-ttgh-excel-footer {
         grid-template-columns: 1fr;
     }
 }
+
+/* Responsive completion contract — warehouse operations and TTGH dialogs. */
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-main,
+    html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-five,
+    html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-six,
+    html body.pushsale-app-body .ps-ttgh-excel-layout,
+    html body.pushsale-app-body .ps-ttgh-excel-filters {
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-main > *,
+    html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-five > *,
+    html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-six > *,
+    html body.pushsale-app-body .ps-ttgh-excel-filters > * {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-wh-page .ps-wh-table-shell,
+    html body.pushsale-app-body .ps-wh-page .table-responsive {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    html body.pushsale-app-body .ps-ttgh-excel-footer,
+    html body.pushsale-app-body .ps-ttgh-excel-side .ps-ttgh-excel-actions {
+        align-items: stretch !important;
+        flex-direction: column !important;
+    }
+}
+

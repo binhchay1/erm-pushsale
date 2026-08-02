@@ -163,3 +163,31 @@ html body.pushsale-app-body [data-page-code='4.3'] .pushsale-ranking-cards,
 html body.pushsale-app-body [data-page-code='4.3'] [data-pushsale-ranking-anchor] {
     display: none !important;
 }
+
+/* Responsive completion contract — heavy reports/ranking remain scrollable on phone. */
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-revenue-detail-scroll,
+    html body.pushsale-app-body .ps-sales-revenue-scroll,
+    html body.pushsale-app-body .ps-sales-revenue-v2-scroll,
+    html body.pushsale-app-body .ps-marketing-upsale-scroll,
+    html body.pushsale-app-body .ps-marketing-work-scroll,
+    html body.pushsale-app-body .ps-product-conversion-scroll,
+    html body.pushsale-app-body [data-page-code='4.3'] .bxh-container > div[style*='overflow-x'] {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    html body.pushsale-app-body [data-page-code='4.3'] table[data-pushsale-grid-table='primary'],
+    html body.pushsale-app-body [data-page-code='4.3'] .pushsale-data-table {
+        min-width: 1500px !important;
+    }
+
+    html body.pushsale-app-body [data-page-code='4.3'] table[data-pushsale-grid-table='primary'] th,
+    html body.pushsale-app-body [data-page-code='4.3'] table[data-pushsale-grid-table='primary'] td {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+    }
+}
+

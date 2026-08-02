@@ -624,3 +624,49 @@ html body.pushsale-app-body button.ps-create-order-fab {
     overflow: hidden !important;
     width: 56px !important;
 }
+
+/* Responsive completion contract — shared operation controls/dialog tables. */
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-operation-history-dialog.ps-customer-dialog.ps-dialog-surface,
+    html body.pushsale-app-body .ps-customer-dialog.ps-operation-history-dialog,
+    html body.pushsale-app-body .ps-operation-history-dialog.ps-dialog-surface,
+    html body.pushsale-app-body .ps-sale-history-dialog.ps-dialog-surface,
+    html body.pushsale-app-body .ps-operation-history-modal.ps-operation-history-dialog,
+    html body.pushsale-app-body .ps-operation-history-modal[data-slot='dialog-content'] {
+        width: calc(100vw - 16px) !important;
+        max-width: calc(100vw - 16px) !important;
+    }
+
+    html body.pushsale-app-body .ps-operation-history-dialog .ps-dialog-body,
+    html body.pushsale-app-body .ps-sale-history-dialog .ps-dialog-body,
+    html body.pushsale-app-body .ps-operation-history-modal .ps-dialog-body {
+        padding: 8px !important;
+    }
+
+    html body.pushsale-app-body .ps-operation-history-dialog .ps-history-table-wrap,
+    html body.pushsale-app-body .ps-sale-history-dialog .ps-history-table-wrap {
+        max-height: calc(100dvh - 132px) !important;
+        overflow: auto !important;
+    }
+
+    html body.pushsale-app-body .tb-in-sp.ps-order-product-lines,
+    html body.pushsale-app-body .tb-in-sp.ps-order-money-breakdown {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    html body.pushsale-app-body button.tao-don-fixed,
+    html body.pushsale-app-body .tao-don-fixed,
+    html body.pushsale-app-body .pushsale-create-order-fab,
+    html body.pushsale-app-body button.pushsale-create-order-fab,
+    html body.pushsale-app-body .ps-create-order-fab,
+    html body.pushsale-app-body button.ps-create-order-fab {
+        bottom: 14px !important;
+        right: 14px !important;
+        height: 52px !important;
+        min-height: 52px !important;
+        min-width: 52px !important;
+        width: 52px !important;
+    }
+}
+
