@@ -76,7 +76,10 @@ class SalesPerformanceReportService
         if ($filter->saleId) {
             $query->whereKey($filter->saleId);
         } elseif ($viewer->role === UserRole::Sales) {
-            $query->whereIn('id', $this->scope->allowedSaleIds($viewer));
+            $allowed = $this->scope->allowedSaleIds($viewer);
+            if ($allowed !== null) {
+                $query->whereIn('id', $allowed);
+            }
         }
 
         return $query->get();

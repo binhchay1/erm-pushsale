@@ -53,6 +53,8 @@ Thứ tự CSS runtime nằm ở `resources/js/lib/pushsaleStyleRegistry.js`.
   - Sidebar tokens: Arial, `#6C7D8B` / `#007BFF` / L3 `#0057B4`; slide `.3s ease-in-out`, accordion `.5s`, flyout `.5s`.
   - Webhook landing: **không** lưu URL trang/tracking vào `order_items.product_name`.
   - Date range: `DateRangeFilter` single-button (`ps-date-range-control`).
+  - **Sale visibility (mặc định, chưa đụng permission matrix cấu hình):** NV chỉ thấy/thao tác đơn `sale_user_id = mình`; team lead / Supervisor theo team + `manager_user_id` (`ReportScopeResolver::allowedSaleIds` + `SalesVisibilityScope`); Head = toàn bộ sale trong **company tenant**. List workspace + mutate dùng cùng scope.
+  - **Order interaction lock:** soft-lease theo `order_id` (TTL 90s, heartbeat ~25s) xuyên Sale / Thủ kho / Kế toán. Acquire khi mở dialog mutate; mutate gửi `interaction_lock_token`; 423 nếu bị giữ bởi user khác. Live badge qua Echo channel `company.{id}.order-locks` + poll fallback. WH/KT listing vẫn tenant-wide (không phân cấp NV/lead).
 - **i18n**: chuỗi UI qua `useT()` / `__()` + locale files.
 - Hồ sơ khách hàng: `pushsale-customer-profile-contract.css` + shared product/money/flag cells.
 - Cuối cascade (cố định):

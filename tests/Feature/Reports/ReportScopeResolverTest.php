@@ -54,6 +54,49 @@ class ReportScopeResolverTest extends TestCase
         $this->assertSame([$leaderOrder->id, $memberOrder->id], $ids);
     }
 
+    public function test_sales_head_scope_is_unrestricted_within_tenant(): void
+    {
+        $head = User::factory()->create(['role' => UserRole::Sales, 'org_level' => \App\Enums\OrgLevel::Head]);
+        $salesA = User::factory()->create(['role' => UserRole::Sales]);
+        $salesB = User::factory()->create(['role' => UserRole::Sales]);
+        $orderA = $this->createOrder('ORD-HEAD-A', ['sale_user_id' => $salesA->id]);
+        $orderB = $this->createOrder('ORD-HEAD-B', ['sale_user_id' => $salesB->id]);
+        $filter = ReportFilterData::fromRequest(Request::create('/reports'), $head);
+
+        $this->assertNull(app(ReportScopeResolver::class)->allowedSaleIds($head));
+
+        $ids = app(ReportScopeResolver::class)
+            ->applyOrderScope(Order::query()->orderBy('id'), $head, $filter)
+            ->pluck('id')
+            ->all();
+
+        $this->assertSame([$orderA->id, $orderB->id], $ids);
+    }
+
+    public function test_sales_supervisor_scope_includes_same_team(): void
+    {
+        $team = Team::query()->create(['name' => 'Sales Sup Team', 'type' => 'sale']);
+        $supervisor = User::factory()->create([
+            'role' => UserRole::Sales,
+            'team_id' => $team->id,
+            'org_level' => \App\Enums\OrgLevel::Supervisor,
+            'is_team_leader' => false,
+        ]);
+        $member = User::factory()->create(['role' => UserRole::Sales, 'team_id' => $team->id]);
+        $outsider = User::factory()->create(['role' => UserRole::Sales]);
+        $supOrder = $this->createOrder('ORD-SUP', ['sale_user_id' => $supervisor->id]);
+        $memberOrder = $this->createOrder('ORD-SUP-MEMBER', ['sale_user_id' => $member->id]);
+        $this->createOrder('ORD-SUP-OUT', ['sale_user_id' => $outsider->id]);
+        $filter = ReportFilterData::fromRequest(Request::create('/reports'), $supervisor);
+
+        $ids = app(ReportScopeResolver::class)
+            ->applyOrderScope(Order::query()->orderBy('id'), $supervisor, $filter)
+            ->pluck('id')
+            ->all();
+
+        $this->assertSame([$supOrder->id, $memberOrder->id], $ids);
+    }
+
     public function test_marketing_scope_uses_owned_campaigns_and_marketer(): void
     {
         $marketer = User::factory()->create(['role' => UserRole::Marketing]);

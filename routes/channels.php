@@ -35,3 +35,7 @@ Broadcast::channel('customer.pancake.{companyId}.{conversationKey}', function ($
     return (int) $user->company_id === (int) $companyId
         && $user->allows(PermissionArea::CustomerChat, PermissionLevel::View);
 });
+
+Broadcast::channel('company.{companyId}.order-locks', function ($user, $companyId) {
+    return (int) $user->company_id === (int) $companyId;
+});

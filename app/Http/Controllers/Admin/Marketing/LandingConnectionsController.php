@@ -141,7 +141,12 @@ final class LandingConnectionsController extends Controller
 
         try {
             $payload = $this->validated($request, $record);
-            $payload['preserve_product_mappings'] = true;
+            // Nếu client gửi product_ids/products thì đồng bộ mapping; không thì giữ mapping cũ.
+            if ($request->exists('product_ids') || $request->exists('products')) {
+                unset($payload['preserve_product_mappings']);
+            } else {
+                $payload['preserve_product_mappings'] = true;
+            }
 
             $this->manager->update($record, $payload, $request->user());
         } catch (ValidationException $exception) {

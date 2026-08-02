@@ -456,6 +456,33 @@ html body.pushsale-app-body .ps-order-products-row {
     border-bottom: 1px dashed #cfd8e3 !important;
 }
 
+html body.pushsale-app-body .ps-customer-profile-table .ps-order-products-row {
+    grid-template-columns: minmax(0, 1fr) 28px minmax(78px, 92px) !important;
+    column-gap: 4px !important;
+    padding: 2px 0 !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-table .ps-order-product-qty,
+html body.pushsale-app-body .ps-customer-profile-table .ps-order-product-price {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-table .ps-order-product-price {
+    min-width: 0 !important;
+    max-width: 92px !important;
+    overflow: visible !important;
+    text-align: right !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-table .ps-col-products,
+html body.pushsale-app-body .ps-customer-profile-table th.ps-col-products,
+html body.pushsale-app-body .ps-customer-profile-table td.ps-order-products-cell {
+    min-width: 220px !important;
+    width: 240px !important;
+}
+
 html body.pushsale-app-body .ps-order-products-row:last-child {
     border-bottom: 0 !important;
 }

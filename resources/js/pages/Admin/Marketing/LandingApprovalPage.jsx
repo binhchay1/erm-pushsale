@@ -254,18 +254,22 @@ export default function LandingApprovalPage({
                             <label>Url nguồn dữ liệu</label>
                             <input className="form-control" readOnly value={selected?.source_url || ''} />
 
-                            <label>Sản phẩm / gói sản phẩm <span className="text-muted">(tuỳ chọn)</span></label>
-                            <PushsaleMultiSelect
-                                label="Sản phẩm"
-                                options={productOptions}
-                                selectedIds={form.data.product_ids}
-                                enabled
-                                onEnabledChange={() => {}}
-                                onChange={(ids) => form.setData('product_ids', ids)}
-                                allLabel="Chọn sản phẩm / gói sản phẩm"
-                                placeholder="--Chọn sản phẩm / gói (không bắt buộc)--"
-                                emptyLabel="Chưa chọn sản phẩm — vẫn duyệt được"
-                            />
+                            <label>Sản phẩm (*) </label>
+                            <div className="pslc-inline-action-field">
+                                <PushsaleMultiSelect
+                                    label="Sản phẩm"
+                                    options={productOptions}
+                                    selectedIds={form.data.product_ids}
+                                    enabled
+                                    onEnabledChange={() => {}}
+                                    onChange={(ids) => form.setData('product_ids', ids)}
+                                    allLabel="Chọn sản phẩm / gói sản phẩm"
+                                    placeholder="--Chọn sản phẩm / gói--"
+                                    emptyLabel="Chưa chọn sản phẩm"
+                                />
+                            </div>
+                            <div></div>
+                            <small className="text-muted">* Khi chia số sẽ chia đều cho các Sale có quyền bán một trong các sản phẩm được cấu hình tại đây</small>
 
                             <label>Loại ngân sách</label>
                             <PushsaleSelect options={budgetTypeOptions} value={form.data.budget_type} searchable={false} onChange={(value) => form.setData('budget_type', value || 'total')} />

@@ -23,6 +23,7 @@ use App\Http\Controllers\Sales\SaleOperationNoteController;
 use App\Http\Controllers\Sales\SaleOperationOrderController;
 use App\Http\Controllers\Sales\SaleOperationStatusController;
 use App\Http\Controllers\Sales\SaleOrderDeletionController;
+use App\Http\Controllers\Operations\OrderInteractionLockController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,11 @@ Route::middleware('role:'.User::ROLE_SALES)->prefix('sales')->name('sales.')->gr
 
     Route::post('leads/manual', [ManualLeadController::class, 'store'])->name('leads.manual');
     Route::post('orders/bulk-close', [SaleBulkCloseController::class, 'store'])->name('orders.bulk-close');
+    Route::post('orders/interaction-locks', [OrderInteractionLockController::class, 'index'])->name('orders.interaction-locks.index');
+    Route::get('orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'show'])->name('orders.interaction-lock.show');
+    Route::post('orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'store'])->name('orders.interaction-lock.store');
+    Route::post('orders/{order}/interaction-lock/heartbeat', [OrderInteractionLockController::class, 'heartbeat'])->name('orders.interaction-lock.heartbeat');
+    Route::delete('orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'destroy'])->name('orders.interaction-lock.destroy');
     Route::post('orders/{order}/call', [SaleOperationCallController::class, 'store'])->name('orders.call');
     Route::post('orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('orders.operation-status');
     Route::patch('orders/{order}/operation-note', [SaleOperationNoteController::class, 'update'])->name('orders.operation-note');

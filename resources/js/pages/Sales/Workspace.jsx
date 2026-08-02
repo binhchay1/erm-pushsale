@@ -1,8 +1,10 @@
-import { Head } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, usePage } from '@inertiajs/react';
+import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
 import { useLandingUpsellHoldRefresh } from '@/hooks/useLandingUpsellHoldRefresh';
+import { useOrderLockPresence } from '@/hooks/useOrderLockPresence';
 import { useRealtimeReload } from '@/hooks/useRealtimeReload';
 import {
     PushsaleCustomerMessagesDialog,
@@ -37,6 +39,10 @@ export default function Workspace({
 }) {
     const rows = report?.rows?.data ?? [];
     const meta = report?.rows?.meta ?? null;
+    const authUserId = usePage().props?.auth?.user?.id;
+    const ordersBase = `${String(actionBaseUrl || '/sales').replace(/\/$/, '')}/orders`;
+    const orderIds = useMemo(() => rows.map((row) => row.id), [rows]);
+    const locks = useOrderLockPresence({ actionApiBase: ordersBase, orderIds });
     const [orderDialog, setOrderDialog] = useState({ open: false, order: null, closeIntent: false });
     const [historyState, setHistoryState] = useState({ order: null, context: 'sale' });
     const [dataViewOrder, setDataViewOrder] = useState(null);
@@ -49,7 +55,21 @@ export default function Workspace({
     useRealtimeReload('dashboard.sales', '.workspace.changed', ['report']);
     useLandingUpsellHoldRefresh(rows);
 
-    const openOrder = (order = null, closeIntent = false) => setOrderDialog({ open: true, order, closeIntent });
+    const assertUnlocked = (order) => {
+        if (!order?.id) return true;
+        const holder = locks[String(order.id)];
+        if (holder && Number(holder.user_id) !== Number(authUserId)) {
+            const role = holder.role_label || holder.role || '';
+            toast.error(`Đơn đang được thao tác bởi ${holder.user_name}${role ? ` (${role})` : ''}. Vui lòng đợi.`);
+            return false;
+        }
+        return true;
+    };
+
+    const openOrder = (order = null, closeIntent = false) => {
+        if (order && !assertUnlocked(order)) return;
+        setOrderDialog({ open: true, order, closeIntent });
+    };
 
     return (
         <AppLayout>
@@ -72,8 +92,10 @@ export default function Workspace({
                         onDataViewHistory={setDataViewOrder}
                         onMessages={setMessagesOrder}
                         onDuplicateOrders={setDuplicateOrder}
-                        onDesiredDate={setDesiredOrder}
-                        onResult={(order, result) => setResultState({ open: true, order, result })}
+                        onDesiredDate={(order) => assertUnlocked(order) && setDesiredOrder(order)}
+                        onResult={(order, result) => assertUnlocked(order) && setResultState({ open: true, order, result })}
+                        interactionLocks={locks}
+                        authUserId={authUserId}
                         onBulkClose={setBulkOrderIds}
                     />
                 </SaleWorkspaceFilters>

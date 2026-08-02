@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\UserRole;
+use App\Http\Controllers\Concerns\AssertsOrderInteractionLock;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -18,6 +19,7 @@ use Inertia\Response as InertiaResponse;
 
 class ShippingOrderController extends Controller
 {
+    use AssertsOrderInteractionLock;
     use InteractsWithReportFilters;
 
     private function assertShipmentPermission(Request $request, string $action): ?JsonResponse
@@ -88,6 +90,7 @@ class ShippingOrderController extends Controller
 
     public function createShipment(Request $request, Order $order, CreateShipmentService $service): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'create_shipment');
         if (! $order->closed_at) {
             return response()->json([
                 'success' => false,
@@ -144,6 +147,7 @@ class ShippingOrderController extends Controller
 
     public function cancelShipment(Request $request, Order $order, CreateShipmentService $service, ShippingOrderService $presenter): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'cancel_shipment');
         if ($blocked = $this->assertShipmentPermission($request, 'cancel')) {
             return $blocked;
         }

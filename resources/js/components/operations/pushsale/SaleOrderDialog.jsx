@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useOrderInteractionLock } from '@/hooks/useOrderInteractionLock';
 import { apiGet } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
 import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
@@ -109,6 +110,13 @@ export function SaleOrderDialog({
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
+    const ordersBase = `${String(actionBaseUrl || '/sales').replace(/\/$/, '')}/orders`;
+    const { token: lockToken, error: lockError, ready: lockReady } = useOrderInteractionLock({
+        orderId: order?.id,
+        actionApiBase: ordersBase,
+        action: closeIntent ? 'close' : 'edit_order',
+        enabled: Boolean(open && order?.id),
+    });
 
     useEffect(() => {
         if (open) {
@@ -119,6 +127,13 @@ export function SaleOrderDialog({
             setRecipientPaysCarrier(false);
         }
     }, [open, order]);
+
+    useEffect(() => {
+        if (lockError) {
+            toast.error(lockError);
+            onOpenChange(false);
+        }
+    }, [lockError, onOpenChange]);
 
     useEffect(() => {
         if (!open) return;
@@ -251,6 +266,13 @@ export function SaleOrderDialog({
         }
         setFormError('');
         const data = payload();
+        if (order) {
+            if (!lockToken) {
+                setFormError(lockError || 'Chưa lấy được quyền thao tác đơn.');
+                return;
+            }
+            data.interaction_lock_token = lockToken;
+        }
         setProcessing(true);
 
         if (!order) {
@@ -284,6 +306,7 @@ export function SaleOrderDialog({
                     shipping_address: data.shipping_address,
                     amount_to_collect: collect,
                     confirm_insufficient_stock: false,
+                    interaction_lock_token: lockToken,
                 }, {
                     preserveScroll: true,
                     onSuccess: () => { toast.success('Đã chốt đơn và sinh mã đơn.'); onOpenChange(false); },

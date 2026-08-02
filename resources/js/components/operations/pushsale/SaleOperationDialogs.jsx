@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useOrderInteractionLock } from '@/hooks/useOrderInteractionLock';
 import { apiGet } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
@@ -53,11 +54,26 @@ export function DesiredDeliveryDialog({ order, open, onOpenChange, actionBaseUrl
     const [date, setDate] = useState('');
     const [formError, setFormError] = useState('');
     const [processing, setProcessing] = useState(false);
+    const ordersBase = `${String(actionBaseUrl || '/sales').replace(/\/$/, '')}/orders`;
+    const { token: lockToken, error: lockError, ready: lockReady } = useOrderInteractionLock({
+        orderId: order?.id,
+        actionApiBase: ordersBase,
+        action: 'desired_delivery',
+        enabled: Boolean(open && order?.id),
+    });
 
     useEffect(() => {
         setDate(toDateTimeLocal(order?.desiredDeliveryAt));
         setFormError('');
     }, [order?.desiredDeliveryAt, open]);
+
+    useEffect(() => {
+        if (lockError) {
+            toast.error(lockError);
+            onOpenChange(false);
+        }
+    }, [lockError, onOpenChange]);
+
     if (!order) return null;
 
     const submit = (event) => {
@@ -66,9 +82,16 @@ export function DesiredDeliveryDialog({ order, open, onOpenChange, actionBaseUrl
             setFormError('Vui lòng chọn ngày muốn nhận hàng.');
             return;
         }
+        if (!lockToken) {
+            setFormError(lockError || 'Chưa lấy được quyền thao tác đơn.');
+            return;
+        }
         setFormError('');
         setProcessing(true);
-        router.patch(`${actionBaseUrl}/orders/${order.id}/desired-delivery-date`, { desired_delivery_at: date }, {
+        router.patch(`${ordersBase}/${order.id}/desired-delivery-date`, {
+            desired_delivery_at: date,
+            interaction_lock_token: lockToken,
+        }, {
             preserveScroll: true,
             onSuccess: () => {
                 toast.success('Đã cập nhật ngày muốn nhận hàng.');
@@ -83,6 +106,9 @@ export function DesiredDeliveryDialog({ order, open, onOpenChange, actionBaseUrl
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="ps-sale-dialog ps-sale-modal ps-desired-date-modal ps-desired-date-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Cập nhật ngày muốn giao hàng</DialogTitle></DialogHeader>
+                {!lockReady && open ? (
+                    <div className="ps-desired-date-body">Đang khóa đơn để thao tác…</div>
+                ) : (
                 <form onSubmit={submit} className="ps-desired-date-body">
                     {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
                     <table className="table table-bordered table-striped">
@@ -97,10 +123,11 @@ export function DesiredDeliveryDialog({ order, open, onOpenChange, actionBaseUrl
                                 <td>Ngày muốn nhận hàng</td>
                                 <td><input className="form-control" type="datetime-local" required value={date} onChange={(event) => setDate(event.target.value)} /></td>
                             </tr>
-                            <tr><td /><td><button className="btn btn-primary" disabled={processing}><i className="fa fa-floppy-o" /> Cập nhật</button></td></tr>
+                            <tr><td /><td><button className="btn btn-primary" disabled={processing || !lockToken}><i className="fa fa-floppy-o" /> Cập nhật</button></td></tr>
                         </tbody>
                     </table>
                 </form>
+                )}
             </DialogContent>
         </Dialog>
     );
@@ -112,6 +139,13 @@ export function OperationResultDialog({ order, result, open, onOpenChange, actio
     const [note, setNote] = useState('');
     const [formError, setFormError] = useState('');
     const [processing, setProcessing] = useState(false);
+    const ordersBase = `${String(actionBaseUrl || '/sales').replace(/\/$/, '')}/orders`;
+    const { token: lockToken, error: lockError, ready: lockReady } = useOrderInteractionLock({
+        orderId: order?.id,
+        actionApiBase: ordersBase,
+        action: 'operation_status',
+        enabled: Boolean(open && order?.id && result),
+    });
 
     useEffect(() => {
         if (open) {
@@ -120,6 +154,13 @@ export function OperationResultDialog({ order, result, open, onOpenChange, actio
             setFormError('');
         }
     }, [open, order?.nextOperationAt]);
+
+    useEffect(() => {
+        if (lockError) {
+            toast.error(lockError);
+            onOpenChange(false);
+        }
+    }, [lockError, onOpenChange]);
 
     if (!order || !result) return null;
     const needsDate = result.value === 'callback_scheduled';
@@ -135,12 +176,17 @@ export function OperationResultDialog({ order, result, open, onOpenChange, actio
             setFormError('Vui lòng chọn thời gian tác nghiệp tiếp.');
             return;
         }
+        if (!lockToken) {
+            setFormError(lockError || 'Chưa lấy được quyền thao tác đơn.');
+            return;
+        }
         setFormError('');
         setProcessing(true);
-        router.post(`${actionBaseUrl}/orders/${order.id}/operation-status`, {
+        router.post(`${ordersBase}/${order.id}/operation-status`, {
             operation_result: result.value,
             next_operation_at: needsDate ? nextAt : null,
             note,
+            interaction_lock_token: lockToken,
         }, {
             preserveScroll: true,
             onSuccess: () => {
@@ -156,6 +202,9 @@ export function OperationResultDialog({ order, result, open, onOpenChange, actio
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="ps-sale-dialog ps-sale-modal ps-operation-result-modal ps-operation-result-dialog" aria-describedby={undefined}>
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Cập nhật tác nghiệp</DialogTitle></DialogHeader>
+                {!lockReady && open ? (
+                    <div className="ps-operation-result-body">Đang khóa đơn để thao tác…</div>
+                ) : (
                 <form onSubmit={submit} className="ps-operation-result-body">
                     {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
                     <div className="form-group"><label>Khách hàng</label><div className="ps-static-value">{order.customerName} - {order.customerPhone}</div></div>
@@ -163,8 +212,9 @@ export function OperationResultDialog({ order, result, open, onOpenChange, actio
                     <div className="form-group"><label>Kết quả tác nghiệp</label><div className="ps-static-value"><b>{result.label}</b></div></div>
                     {needsDate && <div className="form-group"><label>Tác nghiệp tiếp (*)</label><input required className="form-control" type="datetime-local" value={nextAt} onChange={(event) => setNextAt(event.target.value)} /></div>}
                     <div className="form-group"><label>Ghi chú</label><textarea className="form-control" rows={4} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} /></div>
-                    <div className="ps-sale-dialog-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>Đóng</button><button className="btn btn-primary" disabled={processing}><i className="fa fa-floppy-o" /> Cập nhật</button></div>
+                    <div className="ps-sale-dialog-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>Đóng</button><button className="btn btn-primary" disabled={processing || !lockToken}><i className="fa fa-floppy-o" /> Cập nhật</button></div>
                 </form>
+                )}
             </DialogContent>
         </Dialog>
     );

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Sales;
 
+use App\Http\Controllers\Concerns\AssertsOrderInteractionLock;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Orders\OrderClosingService;
@@ -10,8 +11,11 @@ use Illuminate\Http\Request;
 
 class OrderClosingController extends Controller
 {
+    use AssertsOrderInteractionLock;
+
     public function store(Request $request, Order $order, OrderClosingService $service): RedirectResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'close');
         $validated = $request->validate([
             'shipping_address' => ['nullable', 'string', 'max:500'],
             'shipping_geo' => ['nullable', 'array'],

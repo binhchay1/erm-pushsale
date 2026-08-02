@@ -5,6 +5,7 @@ import { router } from '@inertiajs/react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useOrderInteractionLock } from '@/hooks/useOrderInteractionLock';
 import { apiRequest } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
@@ -28,6 +29,13 @@ function MoneyInput({ value, onChange }) {
 export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterOptions = {} }) {
     const row = action?.row;
     const type = action?.type;
+    const lockEnabled = Boolean(row && type && type !== 'timeline');
+    const { token: lockToken, error: lockError, ready: lockReady } = useOrderInteractionLock({
+        orderId: row?.id,
+        actionApiBase,
+        action: type || 'dialog',
+        enabled: lockEnabled,
+    });
     const [loading, setLoading] = useState(false);
     const [formError, setFormError] = useState('');
     const [form, setForm] = useState({});
@@ -37,6 +45,13 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
             .filter(([value]) => value);
         return fromOptions.length ? fromOptions : FALLBACK_DELIVERY_STATUSES;
     }, [filterOptions.deliveryStatuses]);
+
+    useEffect(() => {
+        if (lockError) {
+            toast.error(lockError);
+            onClose();
+        }
+    }, [lockError, onClose]);
 
     useEffect(() => {
         if (! row || ! type) return;
@@ -95,7 +110,7 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
         try {
             let path = endpoint;
             let method = 'PATCH';
-            let payload = { ...form };
+            let payload = { ...form, interaction_lock_token: lockToken };
             if (type === 'blacklist') {
                 payload = { ...payload, phone: normalizeVietnamesePhone(form.phone) ?? form.phone };
             }
@@ -111,18 +126,18 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
             if (type === 'date') path += '/desired-delivery';
             if (type === 'changeCode') {
                 path += '/order-code';
-                payload = { order_code: String(form.order_code ?? '').trim() };
+                payload = { order_code: String(form.order_code ?? '').trim(), interaction_lock_token: lockToken };
             }
             if (type === 'blacklist') { path += '/blacklist'; method = 'POST'; }
             if (type === 'care') path += '/care';
             if (type === 'message') {
                 path += '/internal-message';
                 method = 'POST';
-                payload = { message: String(form.message ?? '').trim() };
+                payload = { message: String(form.message ?? '').trim(), interaction_lock_token: lockToken };
             }
             if (type === 'delivery') path += '/delivery-status';
             if (type === 'edit') method = 'PUT';
-            if (type === 'split') { path += '/split'; method = 'POST'; payload = { items: form.items.filter((item) => Number(item.quantity) > 0).map(({ order_item_id, quantity }) => ({ order_item_id, quantity: Number(quantity) })) }; }
+            if (type === 'split') { path += '/split'; method = 'POST'; payload = { items: form.items.filter((item) => Number(item.quantity) > 0).map(({ order_item_id, quantity }) => ({ order_item_id, quantity: Number(quantity) })), interaction_lock_token: lockToken }; }
             if (type === 'return') { path += '/return-receipt'; method = 'POST'; }
             const result = await apiRequest(path, { method, body: payload });
             toast.success(result.message ?? 'Đã cập nhật đơn hàng.');
@@ -145,6 +160,7 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
                     status: 'reschedule',
                     note: form.note ?? '',
                     request_redelivery: true,
+                    interaction_lock_token: lockToken,
                 },
             });
             toast.success(result.message ?? 'Đã yêu cầu giao lại.');
@@ -158,6 +174,16 @@ export function WarehouseActionDialogs({ action, onClose, actionApiBase, filterO
     };
 
     if (! row) return null;
+    if (lockEnabled && !lockReady && !lockError) {
+        return (
+            <Dialog open={Boolean(action)} onOpenChange={(open) => !open && onClose()}>
+                <DialogContent className="ps-wh-dialog">
+                    <DialogHeader><DialogTitle>Đang khóa đơn…</DialogTitle></DialogHeader>
+                    <div className="ps-wh-dialog-body flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Đang lấy quyền thao tác đơn.</div>
+                </DialogContent>
+            </Dialog>
+        );
+    }
     const titles = {
         date: 'Cập nhật ngày giao hàng theo đơn',
         blacklist: 'Cập nhật số blacklist',

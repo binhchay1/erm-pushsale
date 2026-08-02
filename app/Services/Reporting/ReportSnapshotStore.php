@@ -357,7 +357,7 @@ class ReportSnapshotStore
             'manager_user_id' => $user->manager_user_id ? (int) $user->manager_user_id : null,
             'is_team_leader' => (bool) $user->is_team_leader,
             'permissions' => $permissions,
-            'allowed_sale_ids' => array_values($this->scopeResolver->allowedSaleIds($user)),
+            'allowed_sale_ids' => ($ids = $this->scopeResolver->allowedSaleIds($user)) === null ? null : array_values($ids),
             'allowed_marketer_ids' => array_values($this->scopeResolver->allowedMarketerIds($user)),
         ];
     }

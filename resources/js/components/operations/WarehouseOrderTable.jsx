@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -14,6 +14,7 @@ import { apiPost, apiRequest, getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useOrderLockPresence } from '@/hooks/useOrderLockPresence';
 
 const statusTone = {
     waiting_waybill: 'ttgh1',
@@ -440,13 +441,25 @@ export function WarehouseOrderTable({
     const [selected, setSelected] = useState([]);
     const checkAllRef = useRef(null);
     const { ask } = useConfirm();
+    const authUserId = usePage().props?.auth?.user?.id;
     const rowIds = useMemo(() => rows.map((row) => String(row.id)), [rows]);
+    const locks = useOrderLockPresence({ actionApiBase, orderIds: rowIds });
     const selectedRows = useMemo(() => rows.filter((row) => selected.includes(String(row.id))), [rows, selected]);
     const eligibleShipmentRows = useMemo(
         () => rows.filter((row) => row.canCreateShipment && !row.hasInsufficientStock),
         [rows],
     );
     const allSelected = rowIds.length > 0 && rowIds.every((id) => selected.includes(id));
+
+    const openAction = (next) => {
+        const holder = locks[String(next.row?.id)];
+        if (holder && Number(holder.user_id) !== Number(authUserId)) {
+            const role = holder.role_label || holder.role || '';
+            toast.error(`Đơn đang được thao tác bởi ${holder.user_name}${role ? ` (${role})` : ''}. Vui lòng đợi.`);
+            return;
+        }
+        setAction(next);
+    };
     const someSelected = selected.length > 0 && !allSelected;
 
     useEffect(() => {
@@ -542,7 +555,7 @@ export function WarehouseOrderTable({
                                             className="btn-icon aoh orange ps-wh-code-action"
                                             title="Thay đổi mã đơn"
                                             style={{ color: 'darkorange' }}
-                                            onClick={() => setAction({ type: 'changeCode', row })}
+                                            onClick={() => openAction({ type: 'changeCode', row })}
                                         >
                                             <i className="fa fa-repeat" />
                                         </button>
@@ -551,6 +564,12 @@ export function WarehouseOrderTable({
                                     <div>
                                         <button type="button" className="item-md ps-wh-order-code" onClick={() => setDetailOrderId(row.id)}>{row.orderCode}</button>
                                     </div>
+                                    {locks[String(row.id)] && Number(locks[String(row.id)].user_id) !== Number(authUserId) ? (
+                                        <div className="small-tip ps-wh-lock-badge" title="Đơn đang được thao tác">
+                                            Đang thao tác: {locks[String(row.id)].user_name}
+                                            {locks[String(row.id)].role_label ? ` (${locks[String(row.id)].role_label})` : ''}
+                                        </div>
+                                    ) : null}
                                     <div className="small-tip sline">{formatDateTime(row.closedAt, { withSeconds: true })}</div>
                                 </td>
                                     <td className="text-center no-wrap ps-wh-shipper-cell">
@@ -569,20 +588,20 @@ export function WarehouseOrderTable({
                                 <CareNoteCell
                                     row={row}
                                     actionApiBase={actionApiBase}
-                                    onCare={() => setAction({ type: 'care', row })}
-                                    onMessage={() => setAction({ type: 'message', row })}
+                                    onCare={() => openAction({ type: 'care', row })}
+                                    onMessage={() => openAction({ type: 'message', row })}
                                 />
                                 <td className="text-center area4 ps-wh-delivery-cell">
                     <div className="ps-wh-delivery-stack">
                         <div className="small-tip ps-wh-delivery-date">{formatDateTime(row.lastDeliveryEventAt, { withSeconds: true }) || '—'}</div>
                         <div className="ps-wh-delivery-actions no-wrap">
                             {isAccounting ? (
-                                <InlineIconButton title="Đồng bộ trạng thái giao hàng" icon="retweet" onClick={() => setAction({ type: 'delivery', row })} />
+                                <InlineIconButton title="Đồng bộ trạng thái giao hàng" icon="retweet" onClick={() => openAction({ type: 'delivery', row })} />
                             ) : (
-                                <InlineIconButton title="Đưa vào danh sách cảnh báo bom hàng" icon="bomb" onClick={() => setAction({ type: 'blacklist', row })} />
+                                <InlineIconButton title="Đưa vào danh sách cảnh báo bom hàng" icon="bomb" onClick={() => openAction({ type: 'blacklist', row })} />
                             )}
-                            <InlineIconButton title="Cập nhật trạng thái giao hàng" icon="refresh" onClick={() => setAction({ type: 'delivery', row })} />
-                            <InlineIconButton title="Lịch sử tác nghiệp" icon="history" onClick={() => setAction({ type: 'timeline', row })} />
+                            <InlineIconButton title="Cập nhật trạng thái giao hàng" icon="refresh" onClick={() => openAction({ type: 'delivery', row })} />
+                            <InlineIconButton title="Lịch sử tác nghiệp" icon="history" onClick={() => openAction({ type: 'timeline', row })} />
                         </div>
                         <LegacyStatus row={row} />
                         <div className="small-tip sline ps-wh-delivery-date">{formatDateTime(row.shipmentPostedAt || row.printedAt, { withSeconds: false }) || row.shipment?.statusText || '—'}</div>
@@ -591,11 +610,11 @@ export function WarehouseOrderTable({
                 </td>
                 <td className="text-center c-customer-body ps-contact-name-phone" title={`${row.id} | ${row.sourceType || ''}`}>
                     <div className="text-right">
-                        <InlineIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={() => setAction({ type: 'date', row })} />
+                        <InlineIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={() => openAction({ type: 'date', row })} />
                         {!isAccounting && (
-                            <InlineIconButton title="Tách đơn" icon="clipboard" onClick={() => setAction({ type: 'split', row })} disabled={!row.canSplit} />
+                            <InlineIconButton title="Tách đơn" icon="clipboard" onClick={() => openAction({ type: 'split', row })} disabled={!row.canSplit} />
                         )}
-                        <InlineIconButton title="Cập nhật đơn vị giao vận" icon="truck" onClick={() => setAction({ type: 'edit', row })} />
+                        <InlineIconButton title="Cập nhật đơn vị giao vận" icon="truck" onClick={() => openAction({ type: 'edit', row })} />
                     </div>
                     <div className="sline text-left ps-wh-customer-name">
                         <span>{row.effectiveReceiverName || row.customerName}</span>

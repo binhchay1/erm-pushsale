@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Warehouse;
 
 use App\Data\ReportFilterData;
 use App\Enums\DeliveryStatus;
+use App\Http\Controllers\Concerns\AssertsOrderInteractionLock;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Pushsale\ElectronicInvoiceJob;
@@ -24,12 +25,15 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WarehouseOrderActionController extends Controller
 {
+    use AssertsOrderInteractionLock;
+
     public function __construct(private readonly WarehouseOrderActionService $service) {}
 
 
 
     public function destroy(Request $request, Order $order): JsonResponse|RedirectResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'destroy');
         $actor = $request->user();
 
         if (filled($order->tracking_number) || $order->shipments()->exists() || $order->inventory_deducted_at) {
@@ -174,6 +178,7 @@ class WarehouseOrderActionController extends Controller
 
     public function changeOrderCode(Request $request, Order $order): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'order_code');
         $data = $request->validate([
             'order_code' => ['required', 'string', 'min:3', 'max:80', 'regex:/^[A-Za-z0-9._\\-]+$/'],
         ]);
@@ -186,12 +191,14 @@ class WarehouseOrderActionController extends Controller
 
     public function desiredDelivery(Request $request, Order $order): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'desired_delivery');
         $data = $request->validate(['desired_delivery_at' => ['nullable', 'date']]);
         return response()->json(['order' => $this->service->updateDesiredDelivery($order, $data['desired_delivery_at'] ?? null, $request->user())]);
     }
 
     public function blacklist(Request $request, Order $order): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'blacklist');
         $data = $request->validate([
             'phone' => ['required', 'string', 'max:30', new VietnameseMobilePhone],
             'reason' => ['required', 'string', 'max:500'],
@@ -202,6 +209,7 @@ class WarehouseOrderActionController extends Controller
 
     public function care(Request $request, Order $order): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'care');
         $data = $request->validate([
             'status' => ['nullable', Rule::in(['waiting', 'calling', 'confirmed', 'reschedule', 'complaint', 'completed'])],
             'note' => ['nullable', 'string', 'max:2000'],
@@ -224,6 +232,7 @@ class WarehouseOrderActionController extends Controller
 
     public function internalMessage(Request $request, Order $order): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'internal_message');
         $data = $request->validate([
             'message' => ['required', 'string', 'max:2000'],
         ]);
@@ -238,6 +247,7 @@ class WarehouseOrderActionController extends Controller
 
     public function deliveryStatus(Request $request, Order $order): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'delivery_status');
         $data = $request->validate([
             'delivery_status' => ['required', Rule::enum(DeliveryStatus::class)],
             'note' => ['nullable', 'string', 'max:2000'],
@@ -248,6 +258,7 @@ class WarehouseOrderActionController extends Controller
 
     public function updateOrder(Request $request, Order $order): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'edit_order');
         $data = $request->validate([
             'customer_name' => ['nullable', 'string', 'max:255'],
             'customer_phone' => ['nullable', 'string', 'max:30', new VietnameseMobilePhone],
@@ -277,6 +288,7 @@ class WarehouseOrderActionController extends Controller
 
     public function split(Request $request, Order $order): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'split');
         $data = $request->validate([
             'items' => ['required', 'array', 'min:1'],
             'items.*.order_item_id' => ['required', 'integer'],
@@ -287,11 +299,13 @@ class WarehouseOrderActionController extends Controller
 
     public function printed(Request $request, Order $order): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'printed');
         return response()->json(['order' => $this->service->markPrinted($order, $request->user())]);
     }
 
     public function receiveReturn(Request $request, Order $order): JsonResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'return_receipt');
         $data = $request->validate([
             'reason' => ['nullable', 'string', 'max:500'],
             'note' => ['nullable', 'string', 'max:2000'],

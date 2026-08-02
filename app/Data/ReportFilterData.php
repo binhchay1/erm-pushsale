@@ -61,8 +61,15 @@ readonly class ReportFilterData
         $dateRange = ReportDateRange::fromRequest($request);
 
         $saleId = self::optionalPositiveInt($request, 'sale_id');
-        if ($user?->isSales() && ! self::isElevatedOperator($user)) {
-            $saleId = $user->id;
+        if ($user?->isSales()) {
+            $allowed = app(\App\Services\Reports\ReportScopeResolver::class)->allowedSaleIds($user);
+            if ($allowed !== null) {
+                if (count($allowed) === 1 && $allowed[0] === (int) $user->id) {
+                    $saleId = $user->id;
+                } elseif ($saleId !== null && ! in_array($saleId, $allowed, true)) {
+                    $saleId = null;
+                }
+            }
         }
 
         $marketerId = self::optionalPositiveInt($request, 'marketer_id');

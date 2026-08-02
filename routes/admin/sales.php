@@ -30,6 +30,7 @@ use App\Http\Controllers\Sales\SaleOperationNoteController;
 use App\Http\Controllers\Sales\SaleOperationOrderController;
 use App\Http\Controllers\Sales\SaleOperationStatusController;
 use App\Http\Controllers\Sales\SaleOrderDeletionController;
+use App\Http\Controllers\Operations\OrderInteractionLockController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,11 @@ Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
 
     // Tác nghiệp đơn hàng từ workspace sale.
     Route::post('sales/orders/bulk-close', [SaleBulkCloseController::class, 'store'])->name('sales.orders.bulk-close');
+    Route::post('sales/orders/interaction-locks', [OrderInteractionLockController::class, 'index'])->name('sales.orders.interaction-locks.index');
+    Route::get('sales/orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'show'])->name('sales.orders.interaction-lock.show');
+    Route::post('sales/orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'store'])->name('sales.orders.interaction-lock.store');
+    Route::post('sales/orders/{order}/interaction-lock/heartbeat', [OrderInteractionLockController::class, 'heartbeat'])->name('sales.orders.interaction-lock.heartbeat');
+    Route::delete('sales/orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'destroy'])->name('sales.orders.interaction-lock.destroy');
     Route::post('sales/orders/{order}/call', [SaleOperationCallController::class, 'store'])->name('sales.orders.call');
     Route::post('sales/orders/{order}/operation-status', [SaleOperationStatusController::class, 'update'])->name('sales.orders.operation-status');
     Route::patch('sales/orders/{order}/operation-note', [SaleOperationNoteController::class, 'update'])->name('sales.orders.operation-note');

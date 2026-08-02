@@ -449,8 +449,13 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
         return () => document.removeEventListener('mousedown', close);
     }, []);
 
-    const teams = filterOptions.teams ?? [];
-    const marketers = filterOptions.marketingUsers ?? [];
+    const asSelectOptions = (items = []) => items.map((item) => ({
+        ...item,
+        value: String(item.value ?? item.id ?? ''),
+        label: item.label ?? item.name ?? String(item.value ?? item.id ?? ''),
+    }));
+    const teams = asSelectOptions(filterOptions.teams ?? []);
+    const marketers = asSelectOptions(filterOptions.marketingUsers ?? []);
     const selectedTeam = Number(draft.team_id || 0);
     const selectedLeader = Number(draft.team_leader_id || 0);
     const visibleTeams = selectedLeader ? teams.filter((team) => Number(team.leader_user_id) === selectedLeader) : teams;
@@ -459,7 +464,9 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
         && (!selectedLeader || Number(user.manager_user_id) === selectedLeader || Number(user.id) === selectedLeader)
     ));
     const selectedParent = Number(draft.parent_product_id || 0);
-    const products = (filterOptions.products ?? []).filter((product) => !selectedParent || Number(product.parent_id) === selectedParent || Number(product.id) === selectedParent);
+    const products = asSelectOptions((filterOptions.products ?? []).filter((product) => !selectedParent || Number(product.parent_id) === selectedParent || Number(product.id) === selectedParent));
+    const teamLeaders = asSelectOptions(filterOptions.teamLeaders ?? []);
+    const parentProducts = asSelectOptions(filterOptions.parentProducts ?? []);
     const pagination = report.pagination ?? { current_page: 1, last_page: 1, total: 0, from: 0, to: 0, per_page: 10 };
 
     const toggle = (key) => setExpanded((current) => {
@@ -471,9 +478,9 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
 
     const primaryFilters = (
         <div className="psm-top-selects">
-            <PushsaleSelect value={draft.team_leader_id ?? ''} onChange={(value) => { set('team_leader_id', value); set('team_id', ''); set('marketer_id', ''); }} options={filterOptions.teamLeaders ?? []} placeholder="--Chọn trưởng nhóm--" />
-            <PushsaleSelect value={draft.team_id ?? ''} onChange={(value) => { set('team_id', value); set('marketer_id', ''); }} options={visibleTeams} placeholder="--Chọn nhóm--" />
-            <PushsaleSelect value={draft.marketer_id ?? ''} onChange={(value) => set('marketer_id', value)} options={visibleMarketers} placeholder="--Marketing--" />
+            <PushsaleSelect value={draft.team_leader_id ?? ''} onChange={(value) => { set('team_leader_id', value); set('team_id', ''); set('marketer_id', ''); }} options={teamLeaders} placeholder="--Chọn trưởng nhóm--" searchable />
+            <PushsaleSelect value={draft.team_id ?? ''} onChange={(value) => { set('team_id', value); set('marketer_id', ''); }} options={visibleTeams} placeholder="--Chọn nhóm--" searchable />
+            <PushsaleSelect value={draft.marketer_id ?? ''} onChange={(value) => set('marketer_id', value)} options={visibleMarketers} placeholder="--Marketing--" searchable searchPlaceholder="Tìm marketing..." />
         </div>
     );
 
@@ -505,7 +512,7 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
                 <PushsaleSelect value={draft.ad_channel ?? ''} onChange={(value) => set('ad_channel', value)} options={filterOptions.adChannels ?? []} placeholder="--Kênh quảng cáo--" />
             </div>
             <div className="ps-adv-filter-row psm-filter-grid is-second">
-                <PushsaleSelect value={draft.parent_product_id ?? ''} onChange={(value) => { set('parent_product_id', value); set('product_id', ''); }} options={filterOptions.parentProducts ?? []} placeholder="--Sản phẩm cha--" />
+                <PushsaleSelect value={draft.parent_product_id ?? ''} onChange={(value) => { set('parent_product_id', value); set('product_id', ''); }} options={parentProducts} placeholder="--Sản phẩm cha--" searchable />
                 <ProductSearchSelect products={products} value={draft.product_id ?? ''} onChange={(value) => set('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
                 <input className="ps-control" value={draft.utm_keyword ?? ''} onChange={(event) => set('utm_keyword', event.target.value)} placeholder="Mã Utm" />
                 <input className="ps-control" value={draft.source_keyword ?? ''} onChange={(event) => set('source_keyword', event.target.value)} placeholder="Tên nguồn dữ liệu" />

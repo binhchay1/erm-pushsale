@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Sales;
 
 use App\Enums\OperationResult;
+use App\Http\Controllers\Concerns\AssertsOrderInteractionLock;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Operations\SaleOperationStatusService;
@@ -12,8 +13,11 @@ use Illuminate\Validation\Rule;
 
 class SaleOperationStatusController extends Controller
 {
+    use AssertsOrderInteractionLock;
+
     public function update(Request $request, Order $order, SaleOperationStatusService $service): RedirectResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'operation_status');
         $validated = $request->validate([
             'operation_result' => [
                 'required',

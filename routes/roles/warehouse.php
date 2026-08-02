@@ -20,6 +20,7 @@ use App\Http\Controllers\Warehouse\DeliveryStatusBulkController;
 use App\Http\Controllers\Warehouse\OrderReturnController;
 use App\Http\Controllers\Warehouse\ShippingOrderController as WarehouseShippingOrderController;
 use App\Http\Controllers\Warehouse\WarehouseOrderActionController;
+use App\Http\Controllers\Operations\OrderInteractionLockController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +45,11 @@ Route::middleware('role:'.User::ROLE_WAREHOUSE)->prefix('warehouse')->name('ware
     Route::get('orders/print/profiles', [ShippingLabelPrintController::class, 'profiles'])->name('orders.print.profiles');
     Route::post('orders/print/mark-printed', [ShippingLabelPrintController::class, 'markPrinted'])->name('orders.print.mark-printed');
     Route::get('orders/print/{profile}', [ShippingLabelPrintController::class, 'show'])->where('profile', 'internal|shopee|tiktok|ghtk|jnt|spx')->name('orders.print');
+    Route::post('orders/interaction-locks', [OrderInteractionLockController::class, 'index'])->name('orders.interaction-locks.index');
+    Route::get('orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'show'])->name('orders.interaction-lock.show');
+    Route::post('orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'store'])->name('orders.interaction-lock.store');
+    Route::post('orders/{order}/interaction-lock/heartbeat', [OrderInteractionLockController::class, 'heartbeat'])->name('orders.interaction-lock.heartbeat');
+    Route::delete('orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'destroy'])->name('orders.interaction-lock.destroy');
     Route::delete('orders/{order}', [WarehouseOrderActionController::class, 'destroy'])->name('orders.destroy');
     Route::patch('orders/{order}/desired-delivery', [WarehouseOrderActionController::class, 'desiredDelivery'])->name('orders.desired-delivery');
     Route::patch('orders/{order}/order-code', [WarehouseOrderActionController::class, 'changeOrderCode'])->name('orders.order-code');

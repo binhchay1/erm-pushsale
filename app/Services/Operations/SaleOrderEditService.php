@@ -24,6 +24,7 @@ class SaleOrderEditService
         private readonly LeadOrderFactory $factory,
         private readonly LandingUpsellService $landingUpsell,
         private readonly OrderOperationHistoryService $history,
+        private readonly SalesVisibilityScope $visibility,
     ) {}
 
     /**
@@ -31,7 +32,7 @@ class SaleOrderEditService
      */
     public function update(Order $order, User $actor, array $payload): Order
     {
-        if ($actor->isSales() && $order->sale_user_id !== $actor->id) {
+        if (! $this->visibility->canOperateOrder($actor, $order)) {
             throw ValidationException::withMessages([
                 'order' => __('messages.sale_ops.no_permission_operate'),
             ]);

@@ -92,11 +92,7 @@ class HourlyStatsService
     private function saleIds(User $user, ReportFilterData $filter): ?array
     {
         if ($user->role === UserRole::Sales) {
-            if ($user->org_level === OrgLevel::Head) {
-                return null;
-            }
-
-            return $user->is_team_leader ? $this->scope->allowedSaleIds($user) : [$user->id];
+            return $this->scope->allowedSaleIds($user);
         }
 
         if ($user->role === UserRole::Admin && $filter->saleId) {

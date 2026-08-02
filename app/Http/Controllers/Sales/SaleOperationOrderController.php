@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Sales;
 
+use App\Http\Controllers\Concerns\AssertsOrderInteractionLock;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Rules\VietnameseMobilePhone;
@@ -13,8 +14,11 @@ use Illuminate\Validation\Rule;
 
 class SaleOperationOrderController extends Controller
 {
+    use AssertsOrderInteractionLock;
+
     public function update(Request $request, Order $order, SaleOrderEditService $service): RedirectResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'edit_order');
         $validated = $request->validate([
             'items' => ['nullable', 'array'],
             'items.*.product_id' => ['nullable', 'integer'],

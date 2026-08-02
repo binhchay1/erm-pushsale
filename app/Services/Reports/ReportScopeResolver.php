@@ -3,6 +3,7 @@
 namespace App\Services\Reports;
 
 use App\Data\ReportFilterData;
+use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
@@ -37,31 +38,40 @@ class ReportScopeResolver
         };
     }
 
-    /** @return list<int> */
-    public function allowedSaleIds(User $user): array
+    /**
+     * Sale visibility whitelist within the current company tenant.
+     * null = unrestricted (Admin / Sales Head). Empty array = no sales visible.
+     *
+     * @return list<int>|null
+     */
+    public function allowedSaleIds(User $user): ?array
     {
         if ($user->role === UserRole::Admin) {
-            return User::query()->where('role', UserRole::Sales)->pluck('id')->map(fn ($id) => (int) $id)->all();
+            return null;
         }
 
         if ($user->role !== UserRole::Sales) {
             return [];
         }
 
-        if (! $user->is_team_leader) {
-            return [$user->id];
+        if ($user->org_level === OrgLevel::Head) {
+            return null;
         }
 
-        return User::query()
-            ->where('role', UserRole::Sales)
-            ->where(function (Builder $query) use ($user) {
-                $query->where('id', $user->id)
-                    ->orWhere('manager_user_id', $user->id)
-                    ->when($user->team_id, fn (Builder $q) => $q->orWhere('team_id', $user->team_id));
-            })
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
+        if ($user->org_level === OrgLevel::Supervisor || $user->is_team_leader) {
+            return User::query()
+                ->where('role', UserRole::Sales)
+                ->where(function (Builder $query) use ($user) {
+                    $query->where('id', $user->id)
+                        ->orWhere('manager_user_id', $user->id)
+                        ->when($user->team_id, fn (Builder $q) => $q->orWhere('team_id', $user->team_id));
+                })
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+        }
+
+        return [(int) $user->id];
     }
 
     /** @return list<int> */
@@ -94,7 +104,12 @@ class ReportScopeResolver
     /** @param  Builder<Order>  $query */
     private function scopeSalesOrders(Builder $query, User $user): Builder
     {
-        return $query->whereIn('sale_user_id', $this->allowedSaleIds($user));
+        $allowed = $this->allowedSaleIds($user);
+        if ($allowed === null) {
+            return $query;
+        }
+
+        return $query->whereIn('sale_user_id', $allowed);
     }
 
     /** @param  Builder<Order>  $query */

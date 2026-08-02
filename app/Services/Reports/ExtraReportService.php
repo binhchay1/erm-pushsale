@@ -1785,11 +1785,14 @@ class ExtraReportService
         }
 
         $allowed = $this->scope->allowedSaleIds($user);
+        if ($allowed === null) {
+            return $filter?->saleId ? [$filter->saleId] : null;
+        }
         if ($filter?->saleId) {
             return in_array($filter->saleId, $allowed, true) ? [$filter->saleId] : [];
         }
 
-        return $user->org_level === OrgLevel::Head ? null : $allowed;
+        return $allowed;
     }
 
     /** null = không giới hạn. */

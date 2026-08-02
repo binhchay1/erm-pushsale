@@ -26,6 +26,7 @@ class SaleOperationStatusService
         private readonly LandingUpsellService $landingUpsell,
         private readonly OrderOperationHistoryService $history,
         private readonly SaleOperationConfigurationService $configuration,
+        private readonly SalesVisibilityScope $visibility,
     ) {}
 
     public function logCall(Order $order, User $actor): Order
@@ -167,7 +168,7 @@ class SaleOperationStatusService
 
     private function assertCanAct(Order $order, User $actor): void
     {
-        if ($actor->isSales() && $order->sale_user_id !== $actor->id) {
+        if (! $this->visibility->canOperateOrder($actor, $order)) {
             throw ValidationException::withMessages([
                 'order' => __('messages.sale_ops.no_permission_operate'),
             ]);

@@ -202,7 +202,10 @@ class ReportFactReader
             ->when($filter->marketerId, fn (Builder $q) => $q->where('marketer_user_id', $filter->marketerId));
 
         if ($user->role === UserRole::Sales) {
-            $query->whereIn('sale_user_id', $this->scopeResolver->allowedSaleIds($user));
+            $allowed = $this->scopeResolver->allowedSaleIds($user);
+            if ($allowed !== null) {
+                $query->whereIn('sale_user_id', $allowed);
+            }
         }
 
         if ($user->role === UserRole::Marketing) {

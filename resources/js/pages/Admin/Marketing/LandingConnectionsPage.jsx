@@ -143,6 +143,7 @@ const blankForm = (marketerId = '') => {
         upsell_urls_text: '',
         sources: [{ ...source, name: 'Nguồn dữ liệu' }],
         products: [],
+        product_ids: [],
         sale_user_ids: [],
     };
 };
@@ -205,9 +206,30 @@ function cleanPayload(data, { canToggleApproval = false } = {}) {
         is_active: true,
     };
     payload.sources = [mainSource, ...sources.filter((source) => source.source_type !== 'main')];
-    // Trang 2.4.1 chỉ tạo/sửa nguồn dữ liệu. Product/package được xử lý duy nhất ở menu duyệt.
-    // Không gửi products từ dialog này để tránh validate theo flow cũ khi nguồn có upsell.
-    delete payload.products;
+    // Cho phép cập nhật products từ dialog sửa/duyệt; tạo mới có thể gửi rỗng.
+    if (Array.isArray(data.product_ids)) {
+        const mainKey = (payload.sources.find((source) => source.source_type === 'main') ?? blankSource('main')).client_key;
+        const catalogHint = Array.isArray(data.products) ? data.products : [];
+        payload.products = data.product_ids
+            .map((id, index) => {
+                const productId = Number(id);
+                if (!Number.isFinite(productId) || productId <= 0) return null;
+                const existing = catalogHint.find((row) => Number(row?.product_id) === productId);
+                return {
+                    product_id: productId,
+                    source_key: existing?.source_key || mainKey,
+                    item_type: existing?.item_type === 'combo' || existing?.product_type === 'combo' ? 'combo' : 'product',
+                    quantity: Math.max(1, Number(existing?.quantity ?? 1) || 1),
+                    unit_price_override: existing?.unit_price_override ?? '',
+                    is_default: index === 0,
+                    sort_order: index,
+                };
+            })
+            .filter(Boolean);
+    } else {
+        delete payload.products;
+    }
+    delete payload.product_ids;
     payload.success_url = payload.success_url || '';
     // Mặc định chưa duyệt; chỉ admin mới gửi is_approved=true để auto duyệt.
     payload.is_approved = canToggleApproval ? Boolean(data.is_approved) : false;
@@ -226,7 +248,8 @@ function PageDialog({ open, title, onClose, children }) {
             bodyClassName="pslc-dialog-shell"
             contentProps={{
                 style: {
-                    maxHeight: 'calc(100dvh - 8px)',
+                    height: 'calc(100dvh - 10px)',
+                    maxHeight: 'calc(100dvh - 10px)',
                 },
             }}
         >
@@ -387,6 +410,7 @@ export default function LandingConnectionsPage({
                     is_default: index === 0 ? true : Boolean(product.is_default),
                 }))
                 : [],
+            product_ids: (row.products ?? []).map((product) => Number(product.product_id)).filter((id) => id > 0),
             sale_user_ids: row.sale_user_ids ?? [],
             current_submit_url: row.sources?.find((source) => source.source_type === 'main')?.submit_url ?? '',
         });
@@ -731,6 +755,42 @@ export default function LandingConnectionsPage({
 
                             <label>{l('ad_channel')} <span className="required">(*)</span></label>
                             <PushsaleSelect options={channelTranslatedOptions} value={form.data.ad_channel} onChange={(value) => form.setData('ad_channel', value || 'facebook_ads')} searchable />
+
+                            <label>Sản phẩm (*) </label>
+                            <div className="pslc-inline-action-field">
+                                <PushsaleMultiSelect
+                                    label="Sản phẩm"
+                                    options={productOptions}
+                                    selectedIds={form.data.product_ids ?? []}
+                                    enabled
+                                    onEnabledChange={() => {}}
+                                    onChange={(ids) => {
+                                        const nextIds = (ids ?? []).map(Number).filter((id) => id > 0);
+                                        const sourceKey = form.data.sources?.[0]?.client_key ?? '';
+                                        form.setData({
+                                            ...form.data,
+                                            product_ids: nextIds,
+                                            products: nextIds.map((productId, index) => {
+                                                const product = productCatalog.find((item) => Number(item.id) === productId);
+                                                const existing = (form.data.products ?? []).find((row) => Number(row.product_id) === productId);
+                                                return {
+                                                    ...(existing ?? blankProduct(sourceKey)),
+                                                    product_id: String(productId),
+                                                    source_key: existing?.source_key || sourceKey,
+                                                    item_type: product?.type === 'combo' ? 'combo' : 'product',
+                                                    is_default: index === 0,
+                                                };
+                                            }),
+                                        });
+                                    }}
+                                    allLabel="Chọn sản phẩm / gói sản phẩm"
+                                    placeholder="--Chọn sản phẩm / gói--"
+                                    emptyLabel="Chưa chọn sản phẩm"
+                                />
+                                <button type="button" className="btn-icon" title="Xóa sản phẩm" onClick={() => form.setData({ ...form.data, product_ids: [], products: [] })}><i className="fa fa-trash" /></button>
+                            </div>
+                            <div></div>
+                            <small className="text-muted">* Khi chia số sẽ chia đều cho các Sale có quyền bán một trong các sản phẩm được cấu hình tại đây</small>
 
                             <label>{l('upsale_url')}</label>
                             <input className="form-control" type="url" value={form.data.upsell_urls_text ?? ''} onChange={(event) => form.setData('upsell_urls_text', event.target.value)} placeholder={l('optional')} />

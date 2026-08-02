@@ -725,22 +725,24 @@ html body.pushsale-app-body [data-slot='dialog-content'].pslc-source-dialog.ps-d
     width: min(1280px, 96vw) !important;
     max-width: min(1280px, 96vw) !important;
     min-width: min(980px, calc(100vw - 16px)) !important;
-    height: auto !important;
-    min-height: min(920px, calc(100dvh - 16px)) !important;
-    max-height: calc(100dvh - 8px) !important;
+    height: calc(100dvh - 10px) !important;
+    min-height: calc(100dvh - 10px) !important;
+    max-height: calc(100dvh - 10px) !important;
     overflow: hidden !important;
 }
 
 html body.pushsale-app-body .pslc-source-dialog .pslc-form,
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-form-v118,
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-form-v119 {
-    max-height: calc(100dvh - 8px) !important;
+    max-height: none !important;
+    height: 100% !important;
     overflow: hidden !important;
 }
 
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form {
     grid-template-columns: 220px minmax(0, 1fr) !important;
-    gap: 8px 16px !important;
+    gap: 6px 14px !important;
+    align-content: start !important;
 }
 
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-simple-form .ps-select,
@@ -789,7 +791,12 @@ html body.pushsale-app-body .pslc-source-dialog .pslc-dialog-shell {
 html body.pushsale-app-body .pslc-source-dialog .pslc-dialog-body,
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-form-v118 .pslc-dialog-body,
 html body.pushsale-app-body .pslc-source-dialog .pslc-source-form-v119 .pslc-dialog-body {
-    max-height: calc(100dvh - 52px) !important;
+    max-height: none !important;
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 10px 14px !important;
+}
     overflow-y: auto !important;
     overflow-x: hidden !important;
     padding: 10px 20px 6px !important;

@@ -190,7 +190,7 @@ class PushsaleMarketingDashboardService
             'adChannels' => MarketingSource::query()->visibleInReports()->whereNotNull('ad_channel')->where('ad_channel', '<>', '')
                 ->distinct()->orderBy('ad_channel')->pluck('ad_channel')->map(fn (string $value) => ['value' => $value, 'label' => $value])->values(),
             'dateTypes' => [
-                ['value' => DateType::DataArrival->value, 'label' => '--Chuẩn Pushsale--'],
+                ['value' => DateType::DataArrival->value, 'label' => 'Ngày data về'],
                 ['value' => DateType::Closing->value, 'label' => 'Ngày sale chốt đơn'],
                 ['value' => DateType::CareUpdate->value, 'label' => 'Ngày sale tác nghiệp'],
                 ['value' => DateType::SaleReceived->value, 'label' => 'Ngày sale nhận data'],

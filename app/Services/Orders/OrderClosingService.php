@@ -27,6 +27,7 @@ class OrderClosingService
         private readonly OrderOperationHistoryService $history,
         private readonly OrderCodeGenerator $orderCodes,
         private readonly FeatureSettingsService $featureSettings,
+        private readonly \App\Services\Operations\SalesVisibilityScope $visibility,
     ) {}
 
     /**
@@ -50,7 +51,7 @@ class OrderClosingService
             ]);
         }
 
-        if ($order->sale_user_id && $actor->isSales() && $order->sale_user_id !== $actor->id) {
+        if ($order->sale_user_id && ! $this->visibility->canOperateOrder($actor, $order)) {
             throw ValidationException::withMessages([
                 'order' => __('messages.sale_ops.no_permission_close'),
             ]);

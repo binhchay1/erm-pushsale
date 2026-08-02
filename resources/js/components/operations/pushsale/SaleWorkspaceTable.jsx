@@ -117,6 +117,8 @@ export function SaleWorkspaceTable({
     onDesiredDate,
     onResult,
     onBulkClose,
+    interactionLocks = {},
+    authUserId = null,
 }) {
     const { ask } = useConfirm();
     const [selected, setSelected] = useState([]);
@@ -230,12 +232,18 @@ export function SaleWorkspaceTable({
                         {rows.map((order, index) => {
                             const id = String(order.id);
                             const isSelected = selected.includes(id);
+                            const lockHolder = interactionLocks[id];
+                            const lockedByOther = lockHolder && Number(lockHolder.user_id) !== Number(authUserId);
+                            const lockTitle = lockedByOther
+                                ? `Đang thao tác bởi ${lockHolder.user_name}${lockHolder.role_label ? ` (${lockHolder.role_label})` : ''}`
+                                : undefined;
 
                             return (
                                 <tr
                                     key={order.id}
                                     data-id={order.id}
-                                    className={`contact-row item${order.id} ${order.closedAt ? 'is-closed' : ''} ${isSelected ? 'row-selected' : ''}`}
+                                    title={lockTitle}
+                                    className={`contact-row item${order.id} ${order.closedAt ? 'is-closed' : ''} ${isSelected ? 'row-selected' : ''}${lockedByOther ? ' is-interaction-locked' : ''}`}
                                 >
                                     <td className="text-center">
                                         <span className="chk-item">
@@ -248,6 +256,7 @@ export function SaleWorkspaceTable({
                                             />
                                             <label htmlFor={`sale-chk-${order.id}`}>{Number(meta?.from ?? 1) + index}</label>
                                         </span>
+                                        {lockedByOther ? <div className="small-tip ps-sale-lock-hint">{lockHolder.user_name}</div> : null}
                                     </td>
 
                                     <OrderCodeCell

@@ -50,7 +50,7 @@ class OperationController extends Controller
         $options['operationResults'] = OperationResult::filterOptions();
 
         try {
-            $report = $service->buildPaginated($filter);
+            $report = $service->buildPaginated($filter, $request->user());
             $workspaceError = null;
         } catch (\Throwable $e) {
             Log::error('Sales workspace failed to build report', [
@@ -139,9 +139,13 @@ class OperationController extends Controller
     /** @return list<array{id:int,name:string}> */
     private function saleOptions(Request $request): array
     {
+        $actor = $request->user();
         $query = User::query()->where('role', User::ROLE_SALES)->orderBy('name');
-        if ($request->user()?->isSales()) {
-            $query->whereKey($request->user()->id);
+        if ($actor?->isSales()) {
+            $allowed = app(\App\Services\Reports\ReportScopeResolver::class)->allowedSaleIds($actor);
+            if ($allowed !== null) {
+                $query->whereIn('id', $allowed);
+            }
         }
 
         return $query->get(['id', 'name'])

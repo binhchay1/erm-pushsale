@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\Warehouse\WarehouseIncidentController;
 use App\Http\Controllers\Admin\WarehouseInventoryController;
 use App\Http\Controllers\Warehouse\DeliveryStatusBulkController;
 use App\Http\Controllers\Warehouse\WarehouseOrderActionController;
+use App\Http\Controllers\Operations\OrderInteractionLockController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -70,6 +71,11 @@ Route::delete('warehouse/care-distribution/records/{record}', [CareDistributionC
 Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     // 5.1 Tác nghiệp vận đơn
     Route::get('warehouse/operations', WarehouseOperationsController::class)->name('warehouse.operations');
+    Route::post('warehouse/orders/interaction-locks', [OrderInteractionLockController::class, 'index'])->name('warehouse.orders.interaction-locks.index');
+    Route::get('warehouse/orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'show'])->name('warehouse.orders.interaction-lock.show');
+    Route::post('warehouse/orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'store'])->name('warehouse.orders.interaction-lock.store');
+    Route::post('warehouse/orders/{order}/interaction-lock/heartbeat', [OrderInteractionLockController::class, 'heartbeat'])->name('warehouse.orders.interaction-lock.heartbeat');
+    Route::delete('warehouse/orders/{order}/interaction-lock', [OrderInteractionLockController::class, 'destroy'])->name('warehouse.orders.interaction-lock.destroy');
     Route::delete('warehouse/orders/{order}', [WarehouseOrderActionController::class, 'destroy'])->name('warehouse.orders.destroy');
     Route::post('warehouse/orders/bulk/export', [WarehouseOrderActionController::class, 'bulkExport'])->name('warehouse.orders.bulk.export');
     Route::post('warehouse/orders/bulk/invoices', [WarehouseOrderActionController::class, 'bulkInvoices'])->name('warehouse.orders.bulk.invoices');

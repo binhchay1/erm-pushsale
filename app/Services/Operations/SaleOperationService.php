@@ -6,6 +6,7 @@ use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Data\ReportFilterData;
 use App\Enums\OperationStage;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 
@@ -14,12 +15,13 @@ class SaleOperationService
     public function __construct(
         private readonly OrderRepositoryInterface $orders,
         private readonly SaleOperationConfigurationService $configuration,
+        private readonly SalesVisibilityScope $visibility,
     ) {}
 
     /** @return array<string, mixed> */
-    public function build(ReportFilterData $filter): array
+    public function build(ReportFilterData $filter, ?User $viewer = null): array
     {
-        return $this->buildPaginated($filter);
+        return $this->buildPaginated($filter, $viewer);
     }
 
     /**
@@ -28,8 +30,9 @@ class SaleOperationService
      *
      * @return array<string, mixed>
      */
-    public function buildPaginated(ReportFilterData $filter): array
+    public function buildPaginated(ReportFilterData $filter, ?User $viewer = null): array
     {
+        $viewer = $viewer ?? auth()->user();
         $baseFilter = $filter->withoutOperationStage();
 
         // Count tab tác nghiệp bằng query sạch, không dùng repository queryFiltered()
@@ -39,7 +42,11 @@ class SaleOperationService
         // và gây SQLSTATE[HY093] trên /sales/workspace.
         try {
             $countQuery = Order::query()
-                ->applyReportFilter($baseFilter)
+                ->applyReportFilter($baseFilter);
+            if ($viewer instanceof User) {
+                $this->visibility->applyToOrders($countQuery, $viewer);
+            }
+            $countQuery = $countQuery
                 ->cloneWithout(['columns', 'orders', 'limit', 'offset'])
                 ->cloneWithoutBindings(['select', 'order']);
 
@@ -63,6 +70,9 @@ class SaleOperationService
 
         /** @var Builder $pageQuery */
         $pageQuery = $this->orders->queryFiltered($baseFilter);
+        if ($viewer instanceof User) {
+            $this->visibility->applyToOrders($pageQuery, $viewer);
+        }
         if ($selectedStage === OperationStage::NoOperation->value) {
             $pageQuery->where(function (Builder $query): void {
                 $query->whereNull('operation_stage')

@@ -18,11 +18,12 @@ final class SaleOperationNoteService
     public function __construct(
         private readonly LandingUpsellService $landingUpsell,
         private readonly OrderOperationHistoryService $history,
+        private readonly SalesVisibilityScope $visibility,
     ) {}
 
     public function update(Order $order, User $actor, ?string $note): Order
     {
-        if ($actor->isSales() && (int) $order->sale_user_id !== (int) $actor->id) {
+        if (! $this->visibility->canOperateOrder($actor, $order)) {
             throw ValidationException::withMessages(['order' => __('messages.sale_ops.no_permission_operate')]);
         }
 

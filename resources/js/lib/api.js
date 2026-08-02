@@ -16,6 +16,7 @@ function createApiError(response, data = {}) {
         404: 'Không tìm thấy chức năng hoặc dữ liệu.',
         419: 'Phiên làm việc đã hết hạn. Vui lòng tải lại trang.',
         422: 'Dữ liệu không hợp lệ.',
+        423: 'Đơn đang được người khác thao tác. Vui lòng đợi.',
         500: 'Máy chủ gặp lỗi. Vui lòng thử lại.',
     })[response.status];
     const error = new Error(

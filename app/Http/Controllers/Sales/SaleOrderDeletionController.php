@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Sales;
 
+use App\Http\Controllers\Concerns\AssertsOrderInteractionLock;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\DataDeletion\OrderDeletionService;
+use App\Services\Operations\SalesVisibilityScope;
 use App\Support\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,11 +14,14 @@ use Illuminate\Validation\ValidationException;
 
 class SaleOrderDeletionController extends Controller
 {
-    public function destroy(Request $request, Order $order, OrderDeletionService $deletion): RedirectResponse
+    use AssertsOrderInteractionLock;
+
+    public function destroy(Request $request, Order $order, OrderDeletionService $deletion, SalesVisibilityScope $visibility): RedirectResponse
     {
+        $this->ensureOrderInteractionLock($request, $order, 'destroy');
         $actor = $request->user();
 
-        if ($actor?->isSales() && (int) $order->sale_user_id !== (int) $actor->id) {
+        if ($actor && ! $visibility->canOperateOrder($actor, $order)) {
             throw ValidationException::withMessages([
                 'order' => 'Bạn không có quyền xóa data của sale khác.',
             ]);
