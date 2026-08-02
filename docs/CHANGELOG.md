@@ -106,3 +106,8 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 - Phân quyền org tree / team revenue / đơn hoàn kho.
 - Horizon + Reverb deploy hooks.
 - Report toolbar / PageHeader / sidebar canonical contracts.
+### v140 - Pushsale mobile header composition
+- Chuẩn hóa PageHeader mobile theo mẫu Pushsale thật: tiêu đề ở dòng đầu, filter chính xếp dọc bên dưới, action/search/icon nằm dòng cuối gọn bên trái.
+- Áp dụng ở contract dùng chung cho tất cả route dùng `PushsalePageShell`/`PageHeader`, không sửa lẻ từng trang và không tạo pattern CSS mới.
+- Ép control/header action về chiều cao 30px trên mobile để giảm độ dài header và tránh bóp layout bảng bên dưới.
+
