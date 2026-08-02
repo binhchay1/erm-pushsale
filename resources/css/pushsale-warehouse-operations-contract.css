@@ -975,20 +975,19 @@ html body.pushsale-app-body .ps-acc-page .ps-wh-status-row {
 html body.pushsale-app-body .ps-wh-page .ps-wh-status-row .col-sm-12,
 html body.pushsale-app-body .ps-acc-page .ps-wh-status-row .col-sm-12 {
     display: flex !important;
-    flex-wrap: nowrap !important;
-    gap: 6px 10px !important;
+    flex-wrap: wrap !important;
+    gap: 8px 18px !important;
     max-width: 100% !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-gutter: stable both-edges !important;
+    scrollbar-gutter: auto !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-status-row .dm-tac-nghiep,
 html body.pushsale-app-body .ps-acc-page .ps-wh-status-row .dm-tac-nghiep {
-    flex: 0 0 auto !important;
+    flex: 1 1 150px !important;
     min-width: 150px !important;
     max-width: 220px !important;
 }

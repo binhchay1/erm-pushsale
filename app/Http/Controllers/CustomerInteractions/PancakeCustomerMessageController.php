@@ -27,7 +27,9 @@ class PancakeCustomerMessageController extends Controller
 
         return response()->json([
             ...$result,
-            'canWrite' => $this->canWrite($request->user()) && (bool) $result['connected'],
+            'canWrite' => $this->canWrite($request->user())
+                && (bool) $result['connected']
+                && ($result['source'] ?? null) === 'pancake_api',
             'customer' => [
                 'name' => $order->customer_name,
                 'phone' => $order->customer_phone,

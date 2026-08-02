@@ -111,3 +111,7 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 - Áp dụng ở contract dùng chung cho tất cả route dùng `PushsalePageShell`/`PageHeader`, không sửa lẻ từng trang và không tạo pattern CSS mới.
 - Ép control/header action về chiều cao 30px trên mobile để giảm độ dài header và tránh bóp layout bảng bên dưới.
 
+
+- 2026-08-03: Polish customer profile table header parity, restore wrapped operation status chips, and clarify Pancake customer chat diagnostics/API v2 default.
+
+- 2026-08-03: Hoàn thiện responsive cho `/admin/shipping-partners` và toàn bộ tab content `/admin/settings/features`; form giao vận xếp 1 cột trên mobile, tab provider/config không tràn, bảng cấu hình chức năng chuyển sang dạng card dễ đọc trên điện thoại.

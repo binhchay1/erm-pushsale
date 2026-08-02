@@ -85,6 +85,10 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
                     canWrite: Boolean(data.canWrite),
                     connected: Boolean(data.connected),
                     source: data.source,
+                    reason: data.reason,
+                    pageId: data.pageId,
+                    conversationId: data.conversationId,
+                    realtime: data.realtime,
                 });
             })
             .catch((error) => {
@@ -155,6 +159,18 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
 
                 {tab === 'pancake' && pancake.loaded && !pancake.connected ? (
                     <div className="alert alert-warning ps-compact-alert">{t('operations.customer_interactions.pancake_not_connected')}</div>
+                ) : null}
+                {tab === 'pancake' && pancake.loaded && pancake.connected && pancake.source === 'cache' ? (
+                    <div className="alert alert-warning ps-compact-alert">{t('operations.customer_interactions.pancake_cache_notice')}</div>
+                ) : null}
+                {tab === 'pancake' && pancake.loaded && pancake.connected && pancake.source === 'error' ? (
+                    <div className="alert alert-danger ps-compact-alert">{t('operations.customer_interactions.pancake_error_notice')}</div>
+                ) : null}
+                {tab === 'pancake' && pancake.loaded && pancake.connected && pancake.conversationId ? (
+                    <div className="ps-pancake-thread-meta">
+                        <span>Page ID: {pancake.pageId ?? '—'}</span>
+                        <span>Conversation ID: {pancake.conversationId}</span>
+                    </div>
                 ) : null}
 
                 <div className="ps-message-composer">

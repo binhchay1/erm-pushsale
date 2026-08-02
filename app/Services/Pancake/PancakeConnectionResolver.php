@@ -23,7 +23,7 @@ class PancakeConnectionResolver
             baseUrl: $this->credential($credentials, 'base_url') ?: 'https://pos.pages.fm/api/v1',
             pageAccessToken: $this->credential($credentials, 'page_access_token'),
             pageId: $this->credential($credentials, 'page_id'),
-            pageApiBaseUrl: $this->credential($credentials, 'page_api_base_url') ?: 'https://pages.fm/api/public_api/v1',
+            pageApiBaseUrl: $this->credential($credentials, 'page_api_base_url') ?: 'https://pages.fm/api/public_api/v2',
         );
     }
 

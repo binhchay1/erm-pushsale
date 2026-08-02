@@ -2530,3 +2530,24 @@ html body.pushsale-app-body .ps-sale-operation-table .ps-cell-actions-right {
         padding-bottom: 8px !important;
     }
 }
+
+/* v151 — Pancake chat diagnostics inside customer message dialog. */
+html body.pushsale-app-body .ps-pancake-thread-meta {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px 12px !important;
+    margin: -2px 0 8px !important;
+    padding: 6px 8px !important;
+    border: 1px solid #d9edf7 !important;
+    background: #f5fbff !important;
+    color: #31708f !important;
+    font-size: 11px !important;
+    line-height: 16px !important;
+}
+
+html body.pushsale-app-body .ps-pancake-thread-meta span {
+    display: inline-block !important;
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+}

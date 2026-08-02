@@ -155,3 +155,211 @@ html body.pushsale-app-body .pssp-form .pssp-help {
         margin-bottom: 4px !important;
     }
 }
+
+/* Mobile completion — shipping partners (1.4). Keep the Pushsale desktop layout, but stack forms cleanly on phones. */
+@media (max-width: 767px) {
+    html body.pushsale-app-body .pssp-page.ps-legacy-page {
+        min-width: 0 !important;
+        padding-bottom: 24px !important;
+    }
+
+    html body.pushsale-app-body .pssp-page .pssp-page-body,
+    html body.pushsale-app-body .pssp-page-body {
+        padding: 8px !important;
+    }
+
+    html body.pushsale-app-body .pssp-section {
+        margin-bottom: 12px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .12) !important;
+    }
+
+    html body.pushsale-app-body .pssp-section .pu-caption {
+        min-height: 28px !important;
+        margin: 0 10px !important;
+        padding: 8px 0 5px !important;
+        line-height: 15px !important;
+    }
+
+    html body.pushsale-app-body .pssp-default-form {
+        padding: 10px !important;
+    }
+
+    html body.pushsale-app-body .pssp-default-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 5px !important;
+        min-height: 0 !important;
+        margin: 0 0 10px !important;
+        padding: 0 !important;
+    }
+
+    html body.pushsale-app-body .pssp-default-row label {
+        order: -1 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        line-height: 16px !important;
+    }
+
+    html body.pushsale-app-body .pssp-default-row select,
+    html body.pushsale-app-body .pssp-default-row .form-control {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    html body.pushsale-app-body .pssp-default-row .pssp-save-default {
+        grid-column: auto !important;
+        grid-row: auto !important;
+        justify-self: start !important;
+        min-width: 76px !important;
+    }
+
+    html body.pushsale-app-body .pssp-config-body {
+        display: block !important;
+        min-height: 0 !important;
+        padding: 10px !important;
+    }
+
+    html body.pushsale-app-body .pssp-provider-menu {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+        width: 100% !important;
+        min-height: 0 !important;
+        margin: 0 0 12px !important;
+        padding: 0 0 10px !important;
+        border-right: 0 !important;
+        border-bottom: 1px solid #d7dce2 !important;
+        overflow: visible !important;
+    }
+
+    html body.pushsale-app-body .pssp-provider-menu .btn-xem-kn,
+    html body.pushsale-app-body .pssp-provider-menu button.btn-xem-kn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: 30px !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 8px !important;
+        border: 1px solid #d5dde7 !important;
+        background: #fff !important;
+        color: #111 !important;
+        line-height: 28px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    html body.pushsale-app-body .pssp-provider-menu .btn-xem-kn.active,
+    html body.pushsale-app-body .pssp-provider-menu button.btn-xem-kn.active {
+        border-color: #3c8dbc !important;
+        background: #eaf4ff !important;
+        color: #007bff !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+    }
+
+    html body.pushsale-app-body .pssp-panel {
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+    html body.pushsale-app-body .pssp-form .pssp-row,
+    html body.pushsale-app-body .pssp-form .pssp-save-row,
+    html body.pushsale-app-body .pssp-form .pssp-help-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 4px !important;
+        min-height: 0 !important;
+        margin: 0 0 10px !important;
+        align-items: stretch !important;
+    }
+
+    html body.pushsale-app-body .pssp-form .pssp-label {
+        order: -1 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        color: #111 !important;
+        line-height: 16px !important;
+    }
+
+    html body.pushsale-app-body .pssp-form .pssp-control-wrap {
+        display: flex !important;
+        align-items: stretch !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        width: 100% !important;
+    }
+
+    html body.pushsale-app-body .pssp-form .pssp-control-wrap > input,
+    html body.pushsale-app-body .pssp-form .pssp-control-wrap > select,
+    html body.pushsale-app-body .pssp-form .pssp-control-wrap > .form-control,
+    html body.pushsale-app-body .pssp-form .pssp-control-wrap > select + select {
+        width: 100% !important;
+        max-width: none !important;
+        flex: 1 1 auto !important;
+    }
+
+    html body.pushsale-app-body .pssp-provider-name-row .pssp-control-wrap {
+        align-items: flex-start !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 8px 12px !important;
+    }
+
+    html body.pushsale-app-body .pssp-provider-name-row .dvgh-name {
+        font-size: 15px !important;
+        line-height: 24px !important;
+    }
+
+    html body.pushsale-app-body .pssp-status-toggle,
+    html body.pushsale-app-body .pssp-checkbox {
+        width: 100% !important;
+        margin: 0 !important;
+        white-space: normal !important;
+        line-height: 18px !important;
+    }
+
+    html body.pushsale-app-body .pssp-form .pssp-inline-action,
+    html body.pushsale-app-body .pssp-form .btn.btn-primary {
+        align-self: flex-start !important;
+        width: auto !important;
+        min-width: 76px !important;
+    }
+
+    html body.pushsale-app-body .pssp-form .pssp-save-row .pssp-control-col {
+        align-items: flex-start !important;
+        gap: 6px !important;
+    }
+
+    html body.pushsale-app-body .pssp-webhook {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+    }
+
+    html body.pushsale-app-body .pssp-help {
+        max-width: 100% !important;
+        padding: 8px 9px !important;
+        line-height: 17px !important;
+        overflow-wrap: anywhere !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+    html body.pushsale-app-body .pssp-config-body {
+        grid-template-columns: 150px minmax(0, 1fr) !important;
+        padding: 18px 0 !important;
+    }
+
+    html body.pushsale-app-body .pssp-provider-menu {
+        width: 150px !important;
+    }
+
+    html body.pushsale-app-body .pssp-panel {
+        padding: 0 14px 0 18px !important;
+    }
+}

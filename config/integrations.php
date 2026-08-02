@@ -124,7 +124,7 @@ return [
                 'allowed_page_ids' => ['label' => 'Page ID được phép (CSV)', 'env' => 'PANCAKE_ALLOWED_PAGE_IDS', 'default' => env('PANCAKE_ALLOWED_PAGE_IDS'), 'required' => false],
                 'base_url' => ['label' => 'Pancake POS API Base URL', 'env' => 'PANCAKE_API_BASE_URL', 'default' => env('PANCAKE_API_BASE_URL', 'https://pos.pages.fm/api/v1'), 'required' => false],
                 'api_key' => ['label' => 'API Key Pancake POS', 'env' => 'PANCAKE_API_KEY', 'secret' => true, 'default' => env('PANCAKE_API_KEY')],
-                'page_api_base_url' => ['label' => 'Pancake Page API Base URL', 'env' => 'PANCAKE_PAGE_API_BASE_URL', 'default' => env('PANCAKE_PAGE_API_BASE_URL', 'https://pages.fm/api/public_api/v1'), 'required' => false],
+                'page_api_base_url' => ['label' => 'Pancake Page API Base URL', 'env' => 'PANCAKE_PAGE_API_BASE_URL', 'default' => env('PANCAKE_PAGE_API_BASE_URL', 'https://pages.fm/api/public_api/v2'), 'required' => false],
                 'page_id' => ['label' => 'Page ID để chat', 'env' => 'PANCAKE_PAGE_ID', 'default' => env('PANCAKE_PAGE_ID'), 'required' => false],
                 'page_access_token' => ['label' => 'Page Access Token để chat', 'env' => 'PANCAKE_PAGE_ACCESS_TOKEN', 'secret' => true, 'default' => env('PANCAKE_PAGE_ACCESS_TOKEN'), 'required' => false],
                 'extension_token' => ['label' => 'Token riêng cho Extension', 'env' => 'PANCAKE_EXTENSION_TOKEN', 'secret' => true, 'default' => env('PANCAKE_EXTENSION_TOKEN'), 'required' => false],
