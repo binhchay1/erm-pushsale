@@ -770,6 +770,7 @@ html body.pushsale-app-body .pushsale-template-host {
 html body.pushsale-app-body .pushsale-template-table-scroll,
 html body.pushsale-app-body .table-responsive,
 html body.pushsale-app-body .ps-table-scroll,
+html body.pushsale-app-body .psm-table-scroll,
 html body.pushsale-app-body .ps-table-wrap,
 html body.pushsale-app-body .ps-op-table-wrap,
 html body.pushsale-app-body .ps-system-table-wrap,
@@ -917,6 +918,7 @@ html body.pushsale-app-body .pushsale-table-frame table {
 html body.pushsale-app-body .pushsale-template-table-scroll,
 html body.pushsale-app-body .table-responsive,
 html body.pushsale-app-body .ps-table-scroll,
+html body.pushsale-app-body .psm-table-scroll,
 html body.pushsale-app-body .ps-table-wrap,
 html body.pushsale-app-body .ps-op-table-wrap,
 html body.pushsale-app-body .ps-system-table-wrap,
@@ -934,6 +936,7 @@ html body.pushsale-app-body .tableFixHead {
 html body.pushsale-app-body .pushsale-template-table-scroll::-webkit-scrollbar,
 html body.pushsale-app-body .table-responsive::-webkit-scrollbar,
 html body.pushsale-app-body .ps-table-scroll::-webkit-scrollbar,
+html body.pushsale-app-body .psm-table-scroll::-webkit-scrollbar,
 html body.pushsale-app-body .ps-table-wrap::-webkit-scrollbar,
 html body.pushsale-app-body .ps-op-table-wrap::-webkit-scrollbar,
 html body.pushsale-app-body .ps-system-table-wrap::-webkit-scrollbar,
@@ -950,6 +953,7 @@ html body.pushsale-app-body .tableFixHead::-webkit-scrollbar {
 html body.pushsale-app-body .pushsale-template-table-scroll::-webkit-scrollbar-track,
 html body.pushsale-app-body .table-responsive::-webkit-scrollbar-track,
 html body.pushsale-app-body .ps-table-scroll::-webkit-scrollbar-track,
+html body.pushsale-app-body .psm-table-scroll::-webkit-scrollbar-track,
 html body.pushsale-app-body .ps-table-wrap::-webkit-scrollbar-track,
 html body.pushsale-app-body .ps-op-table-wrap::-webkit-scrollbar-track,
 html body.pushsale-app-body .ps-system-table-wrap::-webkit-scrollbar-track,
@@ -965,6 +969,7 @@ html body.pushsale-app-body .tableFixHead::-webkit-scrollbar-track {
 html body.pushsale-app-body .pushsale-template-table-scroll::-webkit-scrollbar-thumb,
 html body.pushsale-app-body .table-responsive::-webkit-scrollbar-thumb,
 html body.pushsale-app-body .ps-table-scroll::-webkit-scrollbar-thumb,
+html body.pushsale-app-body .psm-table-scroll::-webkit-scrollbar-thumb,
 html body.pushsale-app-body .ps-table-wrap::-webkit-scrollbar-thumb,
 html body.pushsale-app-body .ps-op-table-wrap::-webkit-scrollbar-thumb,
 html body.pushsale-app-body .ps-system-table-wrap::-webkit-scrollbar-thumb,
@@ -984,6 +989,7 @@ html body.pushsale-app-body .tableFixHead::-webkit-scrollbar-thumb {
 html body.pushsale-app-body .pushsale-template-table-scroll > table,
 html body.pushsale-app-body .table-responsive > table,
 html body.pushsale-app-body .ps-table-scroll > table,
+html body.pushsale-app-body .psm-table-scroll > table,
 html body.pushsale-app-body .ps-table-wrap > table,
 html body.pushsale-app-body .ps-op-table-wrap > table,
 html body.pushsale-app-body .ps-system-table-wrap > table,
@@ -1007,6 +1013,7 @@ html body.pushsale-app-body .pushsale-table-scroll--panning * {
     html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .pushsale-template-table-scroll,
     html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .table-responsive,
     html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-table-scroll,
+    html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .psm-table-scroll,
     html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-table-wrap,
     html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-op-table-wrap,
     html body.pushsale-app-body .ps-page-shell:not(.ps-dialog-surface) .ps-system-table-wrap,
@@ -1017,6 +1024,7 @@ html body.pushsale-app-body .pushsale-table-scroll--panning * {
     html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .pushsale-template-table-scroll,
     html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .table-responsive,
     html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-table-scroll,
+    html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .psm-table-scroll,
     html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-table-wrap,
     html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-op-table-wrap,
     html body.pushsale-app-body .pushsale-page:not(.ps-dialog-surface) .ps-system-table-wrap,
@@ -1028,5 +1036,393 @@ html body.pushsale-app-body .pushsale-table-scroll--panning * {
         overflow: auto !important;
         overscroll-behavior: contain !important;
         -webkit-overflow-scrolling: touch !important;
+    }
+}
+
+
+/* v139 — phone/tablet table containment. On real mobile we keep the data table
+ * wide and scrollable instead of squeezing headers into unreadable vertical text. */
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-page-shell__body,
+    html body.pushsale-app-body .pushsale-page,
+    html body.pushsale-app-body .pushsale-template-host,
+    html body.pushsale-app-body .box-body,
+    html body.pushsale-app-body .panel-body {
+        overflow-x: hidden !important;
+    }
+
+    html body.pushsale-app-body .table-responsive,
+    html body.pushsale-app-body .ps-table-scroll,
+    html body.pushsale-app-body .psm-table-scroll,
+    html body.pushsale-app-body .ps-table-wrap,
+    html body.pushsale-app-body .ps-op-table-wrap,
+    html body.pushsale-app-body .ps-system-table-wrap,
+    html body.pushsale-app-body .ps-login-table-wrap,
+    html body.pushsale-app-body .ps-ecommerce-table-wrap,
+    html body.pushsale-app-body .ps-wh-menu-report-table-wrap,
+    html body.pushsale-app-body .dragscroll1,
+    html body.pushsale-app-body .tableFixHead,
+    html body.pushsale-app-body [data-pushsale-table='true'] {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y !important;
+    }
+
+    html body.pushsale-app-body .table-responsive > table,
+    html body.pushsale-app-body .ps-table-scroll > table,
+    html body.pushsale-app-body .psm-table-scroll > table,
+    html body.pushsale-app-body .ps-table-wrap > table,
+    html body.pushsale-app-body .ps-op-table-wrap > table,
+    html body.pushsale-app-body .ps-system-table-wrap > table,
+    html body.pushsale-app-body .ps-login-table-wrap > table,
+    html body.pushsale-app-body .ps-ecommerce-table-wrap > table,
+    html body.pushsale-app-body .ps-wh-menu-report-table-wrap > table,
+    html body.pushsale-app-body .dragscroll1 > table,
+    html body.pushsale-app-body .tableFixHead > table,
+    html body.pushsale-app-body [data-pushsale-table='true'] > table {
+        width: max-content !important;
+        max-width: none !important;
+        table-layout: fixed !important;
+    }
+}
+
+/* v140 — full report/admin mobile surface audit.
+   Source of truth for responsive containment across report pages (sale/marketing/accounting/admin)
+   and menu 1.x administration pages. Keep tables wide + scrollable; never squeeze columns into vertical text. */
+html body.pushsale-app-body .pushsale-page,
+html body.pushsale-app-body .ps-adminlte-page,
+html body.pushsale-app-body .ps-report-page,
+html body.pushsale-app-body .ps-feature-page,
+html body.pushsale-app-body [data-page-code^='1.'],
+html body.pushsale-app-body [data-page-code^='2.'],
+html body.pushsale-app-body [data-page-code^='4.'],
+html body.pushsale-app-body [data-page-code^='6.'],
+html body.pushsale-app-body [data-page-code^='8.'] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+html body.pushsale-app-body [data-pushsale-mobile-table-shell='1'],
+html body.pushsale-app-body .pushsale-template-table-scroll,
+html body.pushsale-app-body .table-responsive,
+html body.pushsale-app-body [class*='table-scroll'],
+html body.pushsale-app-body [class*='table-wrap'],
+html body.pushsale-app-body [class*='table-shell'],
+html body.pushsale-app-body [class*='table-frame'],
+html body.pushsale-app-body .dragscroll1,
+html body.pushsale-app-body .tableFixHead {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-inline: contain !important;
+}
+
+html body.pushsale-app-body [data-pushsale-mobile-table-shell='1'] > table,
+html body.pushsale-app-body .pushsale-responsive-table,
+html body.pushsale-app-body [data-pushsale-responsive-table='1'] {
+    max-width: none !important;
+}
+
+html body.pushsale-app-body [data-pushsale-mobile-table-shell='1'] th,
+html body.pushsale-app-body [data-pushsale-mobile-table-shell='1'] td,
+html body.pushsale-app-body .pushsale-template-table-scroll th,
+html body.pushsale-app-body .pushsale-template-table-scroll td,
+html body.pushsale-app-body [class*='table-scroll'] th,
+html body.pushsale-app-body [class*='table-scroll'] td,
+html body.pushsale-app-body [class*='table-wrap'] th,
+html body.pushsale-app-body [class*='table-wrap'] td,
+html body.pushsale-app-body [class*='table-shell'] th,
+html body.pushsale-app-body [class*='table-shell'] td,
+html body.pushsale-app-body [class*='table-frame'] th,
+html body.pushsale-app-body [class*='table-frame'] td {
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+}
+
+html body.pushsale-app-body [data-pushsale-mobile-table-shell='1'] > table:not([data-pushsale-form-table='1']) th,
+html body.pushsale-app-body [data-pushsale-mobile-table-shell='1'] > table:not([data-pushsale-form-table='1']) td,
+html body.pushsale-app-body .pushsale-template-table-scroll > table:not([data-pushsale-form-table='1']) th,
+html body.pushsale-app-body .pushsale-template-table-scroll > table:not([data-pushsale-form-table='1']) td {
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body [data-pushsale-form-table='1'] th,
+html body.pushsale-app-body [data-pushsale-form-table='1'] td {
+    white-space: normal !important;
+    vertical-align: top !important;
+}
+
+html body.pushsale-app-body .ps-report-toolbar-controls,
+html body.pushsale-app-body .ps-report-v2-primary,
+html body.pushsale-app-body .ps-extra-toolbar-controls,
+html body.pushsale-app-body .ps-kpi-toolbar-controls,
+html body.pushsale-app-body .ps-closing-summary-filters,
+html body.pushsale-app-body .ps-revenue-detail-primary,
+html body.pushsale-app-body .ps-revenue-overview-primary,
+html body.pushsale-app-body .ps-sales-revenue-primary,
+html body.pushsale-app-body .ps-upsale-primary,
+html body.pushsale-app-body .ps-sales-leader-primary,
+html body.pushsale-app-body .ps-operation-conversion-primary,
+html body.pushsale-app-body .ps85-filter-row,
+html body.pushsale-app-body .ps-power-filter-bar,
+html body.pushsale-app-body .ps-login-filter-grid,
+html body.pushsale-app-body .ps-login-access-filter-grid,
+html body.pushsale-app-body .ps-hr-config-filters,
+html body.pushsale-app-body .ps-care-dist-filters,
+html body.pushsale-app-body .ps-partner-connections-filters,
+html body.pushsale-app-body .pslc-approval-filters,
+html body.pushsale-app-body .pslc-advanced-row,
+html body.pushsale-app-body .ps-lead-import-search,
+html body.pushsale-app-body .ps-facebook-unit-search,
+html body.pushsale-app-body .psdd-topbar,
+html body.pushsale-app-body .ps-expense-filters {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+@media (max-width: 1199px) {
+    html body.pushsale-app-body .ps-report-toolbar-controls,
+    html body.pushsale-app-body .ps-report-v2-primary,
+    html body.pushsale-app-body .ps-extra-toolbar-controls,
+    html body.pushsale-app-body .ps-kpi-toolbar-controls,
+    html body.pushsale-app-body .ps-closing-summary-filters,
+    html body.pushsale-app-body .ps-revenue-detail-primary,
+    html body.pushsale-app-body .ps-revenue-overview-primary,
+    html body.pushsale-app-body .ps-sales-revenue-primary,
+    html body.pushsale-app-body .ps-upsale-primary,
+    html body.pushsale-app-body .ps-sales-leader-primary,
+    html body.pushsale-app-body .ps-operation-conversion-primary,
+    html body.pushsale-app-body .ps85-filter-row,
+    html body.pushsale-app-body .ps-power-filter-bar,
+    html body.pushsale-app-body .ps-login-filter-grid,
+    html body.pushsale-app-body .ps-login-access-filter-grid,
+    html body.pushsale-app-body .ps-hr-config-filters,
+    html body.pushsale-app-body .ps-care-dist-filters,
+    html body.pushsale-app-body .ps-partner-connections-filters,
+    html body.pushsale-app-body .pslc-approval-filters,
+    html body.pushsale-app-body .pslc-advanced-row,
+    html body.pushsale-app-body .ps-lead-import-search,
+    html body.pushsale-app-body .ps-facebook-unit-search,
+    html body.pushsale-app-body .psdd-topbar,
+    html body.pushsale-app-body .ps-expense-filters {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        align-items: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-report-toolbar-controls > *,
+    html body.pushsale-app-body .ps-report-v2-primary > *,
+    html body.pushsale-app-body .ps-extra-toolbar-controls > *,
+    html body.pushsale-app-body .ps-kpi-toolbar-controls > *,
+    html body.pushsale-app-body .ps-closing-summary-filters > *,
+    html body.pushsale-app-body .ps-revenue-detail-primary > *,
+    html body.pushsale-app-body .ps-revenue-overview-primary > *,
+    html body.pushsale-app-body .ps-sales-revenue-primary > *,
+    html body.pushsale-app-body .ps-upsale-primary > *,
+    html body.pushsale-app-body .ps-sales-leader-primary > *,
+    html body.pushsale-app-body .ps-operation-conversion-primary > *,
+    html body.pushsale-app-body .ps85-filter-row > *,
+    html body.pushsale-app-body .ps-power-filter-bar > *,
+    html body.pushsale-app-body .ps-login-filter-grid > *,
+    html body.pushsale-app-body .ps-login-access-filter-grid > *,
+    html body.pushsale-app-body .ps-hr-config-filters > *,
+    html body.pushsale-app-body .ps-care-dist-filters > *,
+    html body.pushsale-app-body .ps-partner-connections-filters > *,
+    html body.pushsale-app-body .pslc-approval-filters > *,
+    html body.pushsale-app-body .pslc-advanced-row > *,
+    html body.pushsale-app-body .ps-lead-import-search > *,
+    html body.pushsale-app-body .ps-facebook-unit-search > *,
+    html body.pushsale-app-body .psdd-topbar > *,
+    html body.pushsale-app-body .ps-expense-filters > * {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .pushsale-page,
+    html body.pushsale-app-body .ps-adminlte-page,
+    html body.pushsale-app-body .ps-report-page,
+    html body.pushsale-app-body .ps-feature-page,
+    html body.pushsale-app-body .pushsale-template-host,
+    html body.pushsale-app-body .ps-page-shell__body {
+        overflow-x: hidden !important;
+    }
+
+    html body.pushsale-app-body [data-pushsale-mobile-table-shell='1'],
+    html body.pushsale-app-body .pushsale-template-table-scroll,
+    html body.pushsale-app-body .table-responsive,
+    html body.pushsale-app-body [class*='table-scroll'],
+    html body.pushsale-app-body [class*='table-wrap'],
+    html body.pushsale-app-body [class*='table-shell'],
+    html body.pushsale-app-body [class*='table-frame'],
+    html body.pushsale-app-body .dragscroll1,
+    html body.pushsale-app-body .tableFixHead {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: auto !important;
+        touch-action: pan-x pan-y !important;
+        border-radius: 0 !important;
+    }
+
+    html body.pushsale-app-body [data-pushsale-mobile-table-shell='1'] > table,
+    html body.pushsale-app-body .pushsale-template-table-scroll > table,
+    html body.pushsale-app-body .table-responsive > table,
+    html body.pushsale-app-body [class*='table-scroll'] > table,
+    html body.pushsale-app-body [class*='table-wrap'] > table,
+    html body.pushsale-app-body [class*='table-shell'] > table,
+    html body.pushsale-app-body [class*='table-frame'] > table,
+    html body.pushsale-app-body .dragscroll1 > table,
+    html body.pushsale-app-body .tableFixHead > table {
+        width: max(100%, var(--pushsale-table-min-width, 980px)) !important;
+        min-width: var(--pushsale-table-min-width, 980px) !important;
+        max-width: none !important;
+        table-layout: fixed !important;
+    }
+
+    html body.pushsale-app-body [data-pushsale-mobile-table-shell='1'] > table[data-pushsale-form-table='1'],
+    html body.pushsale-app-body .pushsale-template-table-scroll > table[data-pushsale-form-table='1'] {
+        width: max(100%, min(var(--pushsale-table-min-width, 560px), 760px)) !important;
+        min-width: min(var(--pushsale-table-min-width, 560px), 760px) !important;
+        table-layout: auto !important;
+    }
+
+    html body.pushsale-app-body .ps-report-toolbar-controls,
+    html body.pushsale-app-body .ps-report-v2-primary,
+    html body.pushsale-app-body .ps-extra-toolbar-controls,
+    html body.pushsale-app-body .ps-kpi-toolbar-controls,
+    html body.pushsale-app-body .ps-closing-summary-filters,
+    html body.pushsale-app-body .ps-revenue-detail-primary,
+    html body.pushsale-app-body .ps-revenue-overview-primary,
+    html body.pushsale-app-body .ps-sales-revenue-primary,
+    html body.pushsale-app-body .ps-upsale-primary,
+    html body.pushsale-app-body .ps-sales-leader-primary,
+    html body.pushsale-app-body .ps-operation-conversion-primary,
+    html body.pushsale-app-body .ps85-filter-row,
+    html body.pushsale-app-body .ps-power-filter-bar,
+    html body.pushsale-app-body .ps-login-filter-grid,
+    html body.pushsale-app-body .ps-login-access-filter-grid,
+    html body.pushsale-app-body .ps-hr-config-filters,
+    html body.pushsale-app-body .ps-care-dist-filters,
+    html body.pushsale-app-body .ps-partner-connections-filters,
+    html body.pushsale-app-body .pslc-approval-filters,
+    html body.pushsale-app-body .pslc-advanced-row,
+    html body.pushsale-app-body .ps-lead-import-search,
+    html body.pushsale-app-body .ps-facebook-unit-search,
+    html body.pushsale-app-body .psdd-topbar,
+    html body.pushsale-app-body .ps-expense-filters {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 7px !important;
+    }
+
+    html body.pushsale-app-body .ps-report-toolbar-controls .ps-date-range,
+    html body.pushsale-app-body .ps-report-v2-primary .ps-date-range,
+    html body.pushsale-app-body .ps-extra-toolbar-controls .ps-date-range,
+    html body.pushsale-app-body .ps-sales-leader-primary .ps-date-range,
+    html body.pushsale-app-body .ps-operation-conversion-primary .ps-date-range,
+    html body.pushsale-app-body .ps-revenue-detail-primary .ps-date-range,
+    html body.pushsale-app-body .ps-revenue-overview-primary .ps-date-range,
+    html body.pushsale-app-body .ps-sales-revenue-primary .ps-date-range,
+    html body.pushsale-app-body .ps-upsale-primary .ps-date-range,
+    html body.pushsale-app-body .ps-date-range-control,
+    html body.pushsale-app-body .date-range-wrap,
+    html body.pushsale-app-body .legacy-range {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-topbar-actions,
+    html body.pushsale-app-body .ps-report-toolbar-actions,
+    html body.pushsale-app-body .ps-revenue-detail-actions,
+    html body.pushsale-app-body .ps-upsale-actions,
+    html body.pushsale-app-body .ps-sales-opt-toolbar__actions,
+    html body.pushsale-app-body .psdd-actions,
+    html body.pushsale-app-body .ps-expense-toolbar,
+    html body.pushsale-app-body .ps-header-search,
+    html body.pushsale-app-body .ps-users-header-search {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+        gap: 7px !important;
+        justify-content: stretch !important;
+    }
+
+    html body.pushsale-app-body .ps-topbar-actions > .btn,
+    html body.pushsale-app-body .ps-topbar-actions > button,
+    html body.pushsale-app-body .ps-topbar-actions > a,
+    html body.pushsale-app-body .ps-report-toolbar-actions > .btn,
+    html body.pushsale-app-body .ps-report-toolbar-actions > button,
+    html body.pushsale-app-body .ps-report-toolbar-actions > a,
+    html body.pushsale-app-body .ps-revenue-detail-actions > .btn,
+    html body.pushsale-app-body .ps-revenue-detail-actions > button,
+    html body.pushsale-app-body .ps-revenue-detail-actions > a,
+    html body.pushsale-app-body .ps-users-header-search > .btn,
+    html body.pushsale-app-body .ps-users-header-search > button,
+    html body.pushsale-app-body .ps-header-search > .btn,
+    html body.pushsale-app-body .ps-header-search > button {
+        flex: 1 1 140px !important;
+        min-width: 0 !important;
+        justify-content: center !important;
+    }
+}
+
+@media (max-width: 575px) {
+    html body.pushsale-app-body .psdd-columns,
+    html body.pushsale-app-body .ps-facebook-unit-body,
+    html body.pushsale-app-body .ps-care-dist-layout,
+    html body.pushsale-app-body .ps-discount-cod-grid,
+    html body.pushsale-app-body .ps-op-grid-two,
+    html body.pushsale-app-body .ps-power-panels-grid,
+    html body.pushsale-app-body .ps85-chart-grid,
+    html body.pushsale-app-body .ps85-repurchase-layout,
+    html body.pushsale-app-body .ps-expense-body,
+    html body.pushsale-app-body .ps-expense-form-grid,
+    html body.pushsale-app-body .ps-team-form-grid,
+    html body.pushsale-app-body .ps-report-access-form,
+    html body.pushsale-app-body .ps-lead-import-body,
+    html body.pushsale-app-body .ps-import-guide-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-unit-form-row,
+    html body.pushsale-app-body .ps-work-shifts-row,
+    html body.pushsale-app-body .ps-report-access-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 5px !important;
+        width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-unit-actions,
+    html body.pushsale-app-body .ps-work-shifts-actions,
+    html body.pushsale-app-body .ps-report-access-actions,
+    html body.pushsale-app-body .ps-hr-config-actions,
+    html body.pushsale-app-body .ps-care-create-links {
+        padding-left: 0 !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
     }
 }

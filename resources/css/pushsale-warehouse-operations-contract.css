@@ -929,3 +929,216 @@ html body.pushsale-app-body .ps-ttgh-excel-footer {
     }
 }
 
+
+/* v140 — real mobile contract for Thủ kho/Kế toán tác nghiệp (5.1 / 6.1).
+ * Both routes use WarehouseFilterPanel + WarehouseOrderTable, so fix the shared
+ * contract instead of per-page one-off styles. */
+html body.pushsale-app-body .ps-wh-page,
+html body.pushsale-app-body .ps-acc-page {
+    --pushsale-table-min-width: 1960px;
+    --pushsale-table-viewport-offset: 255px;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-wh-search-header .ps-wh-check-col,
+html body.pushsale-app-body .ps-page-header[data-page-code="5.1"] .ps-wh-check-col,
+html body.pushsale-app-body .ps-page-header[data-page-code="6.1"] .ps-wh-check-col {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-wh-search-header .ps-page-header__actions,
+html body.pushsale-app-body .ps-page-header[data-page-code="5.1"] .ps-page-header__actions,
+html body.pushsale-app-body .ps-page-header[data-page-code="6.1"] .ps-page-header__actions {
+    display: grid !important;
+    grid-template-columns: minmax(220px, 1fr) auto auto !important;
+    gap: 8px !important;
+    align-items: center !important;
+    min-width: min(480px, 100%) !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-wh-search-header .ps-wh-filter-row.hidden-xs,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="5.1"] .ps-wh-filter-row.hidden-xs,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="6.1"] .ps-wh-filter-row.hidden-xs {
+    display: grid !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-status-row,
+html body.pushsale-app-body .ps-acc-page .ps-wh-status-row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-status-row .col-sm-12,
+html body.pushsale-app-body .ps-acc-page .ps-wh-status-row .col-sm-12 {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 6px 10px !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-gutter: stable both-edges !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-status-row .dm-tac-nghiep,
+html body.pushsale-app-body .ps-acc-page .ps-wh-status-row .dm-tac-nghiep {
+    flex: 0 0 auto !important;
+    min-width: 150px !important;
+    max-width: 220px !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-table-shell,
+html body.pushsale-app-body .ps-acc-page .ps-wh-table-shell,
+html body.pushsale-app-body .ps-wh-page .tableFixHead,
+html body.pushsale-app-body .ps-acc-page .tableFixHead {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-gutter: stable both-edges !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table {
+    width: max(100%, var(--pushsale-table-min-width)) !important;
+    min-width: var(--pushsale-table-min-width) !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table > thead > tr > th,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table > thead > tr > th {
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    line-height: 15px !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table > tbody > tr > td,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table > tbody > tr > td {
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-check,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(1),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-check,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(1) { width: 48px !important; min-width: 48px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-sale,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(2),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-sale,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(2) { width: 104px !important; min-width: 104px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-order,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(3),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-order,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(3) { width: 150px !important; min-width: 150px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-shipper,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(4),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-shipper,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(4) { width: 150px !important; min-width: 150px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-care,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(5),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-care,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(5) { width: 165px !important; min-width: 165px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-status,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(6),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-status,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(6) { width: 150px !important; min-width: 150px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-customer,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(7),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-customer,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(7) { width: 160px !important; min-width: 160px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-address,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(8),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-address,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(8) { width: 230px !important; min-width: 230px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-products,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(9),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-products,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(9) { width: 280px !important; min-width: 280px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-money,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(10),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-money,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(10) { width: 142px !important; min-width: 142px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-deposit,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(11),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-deposit,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(11) { width: 80px !important; min-width: 80px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-cod,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(12),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-cod,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(12) { width: 112px !important; min-width: 112px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-fee,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(13),
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(14),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-fee,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(13),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(14) { width: 92px !important; min-width: 92px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-recon,
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(15),
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-recon,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(15) { width: 72px !important; min-width: 72px !important; }
+
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-page-extra-filters.ps-wh-search-header .ps-wh-filter-row-main.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters.ps-wh-search-header .ps-wh-filter-row-five.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="5.1"] .ps-wh-filter-row-main.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="5.1"] .ps-wh-filter-row-five.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="6.1"] .ps-wh-filter-row-main.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="6.1"] .ps-wh-filter-row-five.ps-adv-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters.ps-wh-search-header .ps-wh-filter-row-six.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="5.1"] .ps-wh-filter-row-six.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="6.1"] .ps-wh-filter-row-six.ps-adv-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) 40px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-wh-page,
+    html body.pushsale-app-body .ps-acc-page {
+        --pushsale-table-viewport-offset: 230px;
+    }
+
+    html body.pushsale-app-body .ps-page-header.ps-wh-search-header .ps-page-header__actions,
+    html body.pushsale-app-body .ps-page-header[data-page-code="5.1"] .ps-page-header__actions,
+    html body.pushsale-app-body .ps-page-header[data-page-code="6.1"] .ps-page-header__actions {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters.ps-wh-search-header .ps-wh-filter-row-main.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters.ps-wh-search-header .ps-wh-filter-row-five.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters.ps-wh-search-header .ps-wh-filter-row-six.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="5.1"] .ps-wh-filter-row-main.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="5.1"] .ps-wh-filter-row-five.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="5.1"] .ps-wh-filter-row-six.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="6.1"] .ps-wh-filter-row-main.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="6.1"] .ps-wh-filter-row-five.ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="6.1"] .ps-wh-filter-row-six.ps-adv-filter-row {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .ps-wh-page .ps-wh-table-shell,
+    html body.pushsale-app-body .ps-acc-page .ps-wh-table-shell {
+        max-height: max(360px, calc(100dvh - var(--pushsale-table-viewport-offset))) !important;
+    }
+
+    html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table .ps-care-note-editor textarea.txt-mof,
+    html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table .ps-care-note-editor textarea.txt-mof {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+}

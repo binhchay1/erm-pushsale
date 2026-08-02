@@ -218,3 +218,183 @@ html body.pushsale-app-body .psm-page .ps-date-range {
         grid-template-columns: repeat(4, minmax(160px, 1fr)) !important;
     }
 }
+
+
+/* v139 — Marketing dashboard real mobile fix.
+ * The header advanced filters are rendered as sibling .ps-page-extra-filters,
+ * not inside .ps-page-header, so both scopes must be styled. */
+html body.pushsale-app-body .ps-page-extra-filters.psm-dashboard-header .ps-adv-filter-panel,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="2.1"] .ps-adv-filter-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.psm-dashboard-header .ps-adv-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="2.1"] .ps-adv-filter-row {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 8px 14px !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.psm-dashboard-header .ps-adv-filter-row > *,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="2.1"] .ps-adv-filter-row > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+html body.pushsale-app-body .psm-page {
+    --pushsale-table-viewport-offset: 230px;
+}
+
+html body.pushsale-app-body .psm-page .psm-table-area {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .psm-page .psm-table-scroll {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-x pan-y !important;
+    border-top: 1px solid #2675bf !important;
+    border-bottom: 1px solid #d6dee6 !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .psm-page .psm-dashboard-table {
+    width: 2470px !important;
+    min-width: 2470px !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+}
+
+html body.pushsale-app-body .psm-page .psm-dashboard-table.is-advanced {
+    width: 2830px !important;
+    min-width: 2830px !important;
+}
+
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-stt { width: 48px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-source { width: 220px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-product { width: 220px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-channel { width: 120px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-utm-source { width: 130px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-utm-campaign { width: 150px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-utm-medium,
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-utm-term,
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-utm-content { width: 120px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-budget { width: 118px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-clicks,
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contacts,
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-products { width: 96px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contact-rate { width: 130px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contact-price { width: 118px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-closed { width: 92px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-close-rate,
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-products-per-order { width: 120px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-revenue { width: 125px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-net-revenue,
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-budget-revenue { width: 130px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-budget-net-revenue { width: 145px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-chart { width: 66px !important; }
+
+html body.pushsale-app-body .psm-page .psm-dashboard-table th,
+html body.pushsale-app-body .psm-page .psm-dashboard-table td {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+}
+
+html body.pushsale-app-body .psm-page .psm-dashboard-table thead th {
+    position: sticky !important;
+    z-index: 3 !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body .psm-page .psm-dashboard-table thead tr:first-child th {
+    top: 0 !important;
+}
+
+html body.pushsale-app-body .psm-page .psm-dashboard-table thead tr:nth-child(2) th {
+    top: 28px !important;
+}
+
+@media (max-width: 1500px) {
+    html body.pushsale-app-body .ps-page-extra-filters.psm-dashboard-header .ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="2.1"] .ps-adv-filter-row {
+        grid-template-columns: repeat(4, minmax(160px, 1fr)) !important;
+    }
+}
+
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-page-extra-filters.psm-dashboard-header .ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="2.1"] .ps-adv-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 7px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-page-header.psm-dashboard-header .psm-top-selects,
+    html body.pushsale-app-body .ps-page-header[data-page-code="2.1"] .psm-top-selects {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 6px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header.psm-dashboard-header .psm-top-actions,
+    html body.pushsale-app-body .ps-page-header[data-page-code="2.1"] .psm-top-actions {
+        gap: 5px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters.psm-dashboard-header .ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="2.1"] .ps-adv-filter-row {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 6px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters.psm-dashboard-header .ps-adv-inline-cluster,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="2.1"] .ps-adv-inline-cluster {
+        justify-content: flex-start !important;
+    }
+
+    html body.pushsale-app-body .psm-page {
+        --pushsale-table-viewport-offset: 182px;
+    }
+
+    html body.pushsale-app-body .psm-page .psm-table-scroll {
+        max-height: max(360px, calc(100dvh - var(--pushsale-table-viewport-offset))) !important;
+    }
+
+    html body.pushsale-app-body .psm-page .psm-dashboard-table {
+        width: 2470px !important;
+        min-width: 2470px !important;
+    }
+
+    html body.pushsale-app-body .psm-page .psm-dashboard-table.is-advanced {
+        width: 2830px !important;
+        min-width: 2830px !important;
+    }
+
+    html body.pushsale-app-body .psm-page .psm-dashboard-table th,
+    html body.pushsale-app-body .psm-page .psm-dashboard-table td {
+        font-size: 11px !important;
+        line-height: 15px !important;
+        padding: 6px 7px !important;
+    }
+}

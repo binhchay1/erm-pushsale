@@ -1008,3 +1008,180 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-page-size .form-control 
     }
 }
 
+
+/* v140 — real mobile contract for Sale tác nghiệp (4.1).
+ * The workspace is a dense operations grid, so mobile must keep the full table
+ * wide and scrollable. Do not let Bootstrap .hidden-xs remove business columns. */
+html body.pushsale-app-body .ps-sale-workspace-page,
+html body.pushsale-app-body .ps-sale-workspace-shell {
+    --pushsale-table-min-width: 1910px;
+    --pushsale-table-viewport-offset: 255px;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-primary-filters,
+html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-search-wrap,
+html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-search-wrap {
+    display: grid !important;
+    grid-template-columns: minmax(190px, 1fr) auto !important;
+    gap: 8px !important;
+    min-width: min(360px, 100%) !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-filters,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-filters {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-row,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-row > *,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-stage-tabs,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-stage-tabs.row {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-gutter: stable both-edges !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-stage-tabs .dm-tac-nghiep,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-stage-tabs.row .dm-tac-nghiep {
+    flex: 0 0 auto !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-table-wrap,
+html body.pushsale-app-body .ps-sale-workspace-shell .ps-sale-table-wrap {
+    display: block !important;
+    max-width: 100% !important;
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-gutter: stable both-edges !important;
+    padding-left: var(--ps-header-x, 14px) !important;
+    padding-right: var(--ps-header-x, 14px) !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table,
+html body.pushsale-app-body .ps-sale-workspace-shell .ps-sale-operation-table {
+    width: max(100%, var(--pushsale-table-min-width)) !important;
+    min-width: var(--pushsale-table-min-width) !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td {
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(1),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(1) { width: 48px !important; min-width: 48px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(2),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(2) { width: 58px !important; min-width: 58px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(3),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(3) { width: 160px !important; min-width: 160px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(4),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(4) { width: 128px !important; min-width: 128px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(5),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(5) { width: 158px !important; min-width: 158px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(6),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(6) { width: 230px !important; min-width: 230px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(7),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(7) { width: 168px !important; min-width: 168px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(8),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(8) { width: 190px !important; min-width: 190px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(9),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(9) { width: 92px !important; min-width: 92px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(10),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(10) { width: 72px !important; min-width: 72px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(11),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(11) { width: 250px !important; min-width: 250px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(12),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(12) { width: 142px !important; min-width: 142px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(13),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(13) { width: 78px !important; min-width: 78px !important; }
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th:nth-child(14),
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:nth-child(14) { width: 170px !important; min-width: 170px !important; }
+
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-primary-filters,
+    html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters,
+    html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-sale-workspace-page,
+    html body.pushsale-app-body .ps-sale-workspace-shell {
+        --pushsale-table-viewport-offset: 230px;
+    }
+
+    html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-primary-filters,
+    html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters,
+    html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-search-wrap,
+    html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-search-wrap {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        min-width: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-table-wrap,
+    html body.pushsale-app-body .ps-sale-workspace-shell .ps-sale-table-wrap {
+        max-height: max(360px, calc(100dvh - var(--pushsale-table-viewport-offset))) !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th.hidden-xs,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td.hidden-xs,
+    html body.pushsale-app-body .ps-sale-workspace-shell .ps-sale-operation-table th.hidden-xs,
+    html body.pushsale-app-body .ps-sale-workspace-shell .ps-sale-operation-table td.hidden-xs {
+        display: table-cell !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table .ps-note-mof .txt-mof,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-operation-note-editor textarea.txt-mof {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-pagination-wrap {
+        align-items: flex-start !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+    }
+}

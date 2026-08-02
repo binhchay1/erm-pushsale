@@ -191,3 +191,157 @@ html body.pushsale-app-body [data-page-code='4.3'] [data-pushsale-ranking-anchor
     }
 }
 
+
+/* v140 — ranking pages mobile/tablet completion.
+ * Admin marketing ranking (2.2) and sales ranking (4.3 via Marketing/Ranking)
+ * share .psr-page. Keep podium/table wide and draggable instead of squeezing
+ * grouped headers into unreadable vertical text. */
+html body.pushsale-app-body .psr-page {
+    --pushsale-table-min-width: 1810px;
+    --pushsale-table-viewport-offset: 260px;
+}
+
+html body.pushsale-app-body .ps-page-header.psr-topbar .psr-primary-filters,
+html body.pushsale-app-body .ps-page-header[data-page-code="2.2"] .psr-primary-filters,
+html body.pushsale-app-body .ps-page-header[data-page-code="4.3"] .psr-primary-filters {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-page-extra-filters.psr-topbar .psr-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="2.2"] .psr-filter-row,
+html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.3"] .psr-filter-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 290px)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 8px var(--ps-header-x, 14px) !important;
+}
+
+html body.pushsale-app-body .psr-podium-scroll,
+html body.pushsale-app-body .psr-table-scroll {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    scrollbar-gutter: stable both-edges !important;
+}
+
+html body.pushsale-app-body .psr-podium {
+    width: max(100%, 1120px) !important;
+    min-width: 1120px !important;
+    max-width: none !important;
+}
+
+html body.pushsale-app-body .psr-table {
+    width: max(100%, var(--pushsale-table-min-width)) !important;
+    min-width: var(--pushsale-table-min-width) !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+}
+
+html body.pushsale-app-body .psr-table th,
+html body.pushsale-app-body .psr-table td {
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+}
+
+html body.pushsale-app-body .psr-table col.psr-col-index { width: 56px !important; }
+html body.pushsale-app-body .psr-table col.psr-col-sale { width: 230px !important; }
+html body.pushsale-app-body .psr-table col.psr-col-count,
+html body.pushsale-app-body .psr-table col.psr-col-rate,
+html body.pushsale-app-body .psr-table col.psr-col-products { width: 92px !important; }
+html body.pushsale-app-body .psr-table col.psr-col-revenue { width: 138px !important; }
+html body.pushsale-app-body .psr-table col.psr-col-discount { width: 105px !important; }
+html body.pushsale-app-body .psr-table col.psr-col-cod,
+html body.pushsale-app-body .psr-table col.psr-col-cod-fee { width: 128px !important; }
+
+html body.pushsale-app-body .psr-pagination-row {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px 14px !important;
+    justify-content: space-between !important;
+}
+
+/* Captured/table-template sale ranking safety net. */
+html body.pushsale-app-body [data-page-code='4.3'] .bxh-container > div[style*='overflow-x'],
+html body.pushsale-app-body [data-page-code='4.3'] .pushsale-template-table-scroll {
+    display: block !important;
+    overflow: auto !important;
+    max-width: 100% !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-gutter: stable both-edges !important;
+}
+
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-page-header.psr-topbar .psr-primary-filters,
+    html body.pushsale-app-body .ps-page-header[data-page-code="2.2"] .psr-primary-filters,
+    html body.pushsale-app-body .ps-page-header[data-page-code="4.3"] .psr-primary-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters.psr-topbar .psr-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="2.2"] .psr-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.3"] .psr-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .psr-page {
+        --pushsale-table-viewport-offset: 225px;
+    }
+
+    html body.pushsale-app-body .ps-page-header.psr-topbar .psr-primary-filters,
+    html body.pushsale-app-body .ps-page-header[data-page-code="2.2"] .psr-primary-filters,
+    html body.pushsale-app-body .ps-page-header[data-page-code="4.3"] .psr-primary-filters,
+    html body.pushsale-app-body .ps-page-extra-filters.psr-topbar .psr-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="2.2"] .psr-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.3"] .psr-filter-row {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .psr-podium-scroll {
+        max-height: 360px !important;
+    }
+
+    html body.pushsale-app-body .psr-podium {
+        min-width: 900px !important;
+        height: 430px !important;
+    }
+
+    html body.pushsale-app-body .psr-person {
+        width: 118px !important;
+        bottom: calc(34px + var(--psr-step) * 27px) !important;
+    }
+
+    html body.pushsale-app-body .psr-avatar {
+        width: 82px !important;
+        height: 82px !important;
+        border-width: 5px !important;
+    }
+
+    html body.pushsale-app-body .psr-podium-item.rank-1 .psr-avatar {
+        width: 96px !important;
+        height: 96px !important;
+    }
+
+    html body.pushsale-app-body .psr-table-scroll {
+        max-height: max(360px, calc(100dvh - var(--pushsale-table-viewport-offset))) !important;
+    }
+
+    html body.pushsale-app-body .psr-pagination-row {
+        align-items: flex-start !important;
+        flex-direction: column !important;
+    }
+}

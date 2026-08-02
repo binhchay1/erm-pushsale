@@ -25,16 +25,16 @@ export function RankingFilterBar({ routeUrl, filters, filterOptions, periods }) 
     };
 
     return (
-        <div className="space-y-4 rounded-lg bg-card p-5 shadow-sm">
+        <div className="space-y-4 rounded-lg bg-card p-3 shadow-sm sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm font-semibold text-foreground">{t('rankings.filter_title')}</p>
-                <div className="inline-flex rounded-lg border bg-muted/30 p-0.5">
+                <div className="flex max-w-full gap-1 overflow-x-auto rounded-lg border bg-muted/30 p-0.5">
                     {periods.map((item) => (
                         <button
                             key={item.value}
                             type="button"
                             onClick={() => applyPeriod(item.value)}
-                            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                            className={`shrink-0 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
                                 filters.period === item.value
                                     ? 'bg-primary text-primary-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'

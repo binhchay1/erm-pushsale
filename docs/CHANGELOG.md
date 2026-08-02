@@ -4,6 +4,33 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 
 ---
 
+## 2026-08-02 — Report/admin mobile completion sweep
+
+- Làm tiếp trên bản đã gộp đủ các task trước; lần này mở rộng responsive sang toàn bộ nhóm báo cáo Sale/Marketing/Kế toán/Quản trị và menu lớn 1.x Quản trị đơn vị.
+- Bổ sung runtime guard trong `uiShellStyles.js` để mọi bảng thực tế sau khi Inertia render đều được đánh dấu/wrap bằng shell scroll mobile, kể cả bảng nằm trong report page, admin page, dialog và template capture chưa có wrapper.
+- Mở rộng contract scroll/drag cho các wrapper report/admin còn thiếu như `ps85-*`, `ps-sales-leader-*`, `ps-operation-conversion-*`, `ps-revenue-*`, `ps-power-*`, `psdd-*`, `ps-facebook-*`, `pslc-*`, `ps-pc-*`; bảng giữ đủ cột nghiệp vụ và kéo ngang thay vì bị bóp chữ dọc.
+- Bổ sung mobile layout cho filter/action toolbar của các báo cáo và nhóm trang quản trị 1.x: tablet về 2 cột, mobile về 1 cột; các cụm body nhiều panel như phân bổ data, Facebook đơn vị, import lead, cấu hình HR, chi phí, power report xếp một cột trên màn hình nhỏ.
+
+## v140 - 2026-08-02
+
+- Hoàn thiện responsive mobile thật cho các trang bảng xếp hạng: Marketing ranking, Sales ranking và role rankings; bảng/podium giữ dạng wide table có scroll ngang thay vì bị bóp header.
+- Hoàn thiện mobile cho 3 trang tác nghiệp chính: Sale 4.1, Thủ kho 5.1, Kế toán 6.1; filter về 1 cột trên mobile, status tabs scroll ngang, bảng đầy đủ cột và kéo ngang/drag-scroll được.
+- Bổ sung drag-to-scroll cho các wrapper bảng thực tế: psr-table-scroll, ps-sale-table-wrap, ps-wh-table-shell, ps-acc-table-wrap.
+
+
+## 2026-08-02 — Mobile PageHeader + Marketing dashboard responsive correction
+
+- Corrected the previous responsive sweep gap: `PageHeader` is rendered through the header portal, so page-shell-only rules did not affect the actual mobile header/filter DOM.
+- Added a real phone/tablet PageHeader contract: title/actions stay usable, primary filters move below, and advanced filters collapse to two columns on tablet / one column on phone.
+- Fixed `/admin/marketing/dashboard` specifically:
+  - scoped advanced filter rules to `.ps-page-extra-filters.psm-dashboard-header` / `data-page-code=2.1`;
+  - forced primary filters and UTM/filter rows to one column on phone;
+  - gave the dashboard table explicit column widths and a wide scroll surface so headers are not squeezed vertically;
+  - enabled the same drag-to-scroll behavior for `.psm-table-scroll`.
+- No new CSS architecture or page-level pattern was introduced; changes remain in the existing shared contracts and the existing marketing dashboard contract.
+
+---
+
 ## 2026-08-02 — Small-screen table usability sweep
 
 - Hardened the shared Pushsale table scroll contract for 13"/14" laptop screens:
@@ -79,4 +106,3 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 - Phân quyền org tree / team revenue / đơn hoàn kho.
 - Horizon + Reverb deploy hooks.
 - Report toolbar / PageHeader / sidebar canonical contracts.
-

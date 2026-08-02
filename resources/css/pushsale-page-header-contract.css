@@ -1897,3 +1897,152 @@ html body.pushsale-app-body .ps-page-header[data-page-code="5.2.1"] .ps-warehous
         width: 100% !important;
     }
 }
+
+
+/* v139 — real phone/tablet header contract.
+ * PageHeader renders through a portal (.m-header-wrap.ps-page-header + sibling
+ * .ps-page-extra-filters), so page-shell-only responsive rules do not reach it.
+ * Keep title/actions usable on the first row and move primary filters below. */
+@media (max-width: 767px) {
+    html body.pushsale-app-body {
+        --ps-header-x: 8px;
+        --ps-header-gap: 7px;
+        --ps-header-control-h: 34px;
+    }
+
+    html body.pushsale-app-body .m-header-wrap.ps-page-header > .m-header,
+    html body.pushsale-app-body .m-header-wrap.ps-page-header > .m-header.ps-page-header__row,
+    html body.pushsale-app-body .ps-page-header > .m-header,
+    html body.pushsale-app-body .ps-page-header__row {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        grid-template-areas:
+            "title actions"
+            "filters filters" !important;
+        align-items: center !important;
+        gap: 7px 8px !important;
+        min-height: 0 !important;
+        padding: 7px var(--ps-header-x) !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header__title {
+        grid-area: title !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header__title > .text,
+    html body.pushsale-app-body .m-header-wrap .m-header .text,
+    html body.pushsale-app-body .m-header-wrap .m-header [id$="lblModuleTitle"],
+    html body.pushsale-app-body .m-header-wrap .m-header .module-title {
+        max-width: 100% !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        font-size: 13px !important;
+        line-height: 20px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header__filters {
+        grid-area: filters !important;
+        display: block !important;
+        justify-self: stretch !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header__filters > *,
+    html body.pushsale-app-body .ps-page-header__filters .ps-filter-row,
+    html body.pushsale-app-body .ps-page-header__filters .psm-top-selects,
+    html body.pushsale-app-body .ps-page-header__filters .ps-sale-primary-filters {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header__filters .ps-filter-row,
+    html body.pushsale-app-body .ps-page-header__filters .psm-top-selects,
+    html body.pushsale-app-body .ps-page-header__filters .ps-sale-primary-filters {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 6px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header__actions {
+        grid-area: actions !important;
+        align-self: start !important;
+        justify-self: end !important;
+        gap: 5px !important;
+        max-width: 100% !important;
+        white-space: nowrap !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header .ps-btn,
+    html body.pushsale-app-body .ps-page-header .ps-btn-primary,
+    html body.pushsale-app-body .ps-page-header button.ps-btn {
+        min-width: 88px !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters {
+        padding: 7px var(--ps-header-x) 9px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-panel,
+    html body.pushsale-app-body .ps-page-extra-filters .psm-filter-panel,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-filter-panel {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        gap: 7px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .psm-filter-grid,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row:last-child,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-customer-adv-filter-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 7px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row > *,
+    html body.pushsale-app-body .ps-page-extra-filters .psm-filter-grid > *,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-sale-extra-row > *,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-customer-adv-filter-row > * {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters .ps-adv-inline-cluster {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 7px 12px !important;
+    }
+
+    html body.pushsale-app-body .ps-page-extra-filters .ps-date-range,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-date-range-control,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-date-filter,
+    html body.pushsale-app-body .ps-page-extra-filters .date-range-wrap,
+    html body.pushsale-app-body .ps-page-extra-filters .legacy-range {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    html body.pushsale-app-body .ps-page-extra-filters .ps-adv-filter-row,
+    html body.pushsale-app-body .ps-page-extra-filters .psm-filter-grid,
+    html body.pushsale-app-body .ps-page-extra-filters .ps-customer-adv-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}

@@ -373,3 +373,32 @@ html body.pushsale-app-body .ps-acc-empty {
     }
 }
 
+
+/* v140 — accounting-specific mobile completion. Some accounting pages still use
+ * ps-acc-operation-table, while 6.1 reuses WarehouseOrderTable via .ps-wh-table-shell. */
+html body.pushsale-app-body .ps-acc-page .ps-acc-table-wrap {
+    display: block !important;
+    max-width: 100% !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    scrollbar-gutter: stable both-edges !important;
+}
+
+html body.pushsale-app-body .ps-acc-page .ps-acc-operation-table {
+    width: max(100%, 1780px) !important;
+    min-width: 1780px !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-acc-page {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-acc-page .ps-acc-table-wrap {
+        max-height: max(360px, calc(100dvh - 230px)) !important;
+    }
+}

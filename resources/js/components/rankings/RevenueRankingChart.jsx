@@ -76,7 +76,7 @@ export function RevenueRankingChart({
     const ascending = toAscendingChartData(chartItems);
     const rest = (tableItems ?? []).slice(3, 50);
     const barCount = ascending.length;
-    const chartMinWidth = Math.max(520, barCount * 52);
+    const chartMinWidth = Math.max(560, barCount * 56);
 
     if (!barCount) {
         return (
@@ -97,7 +97,7 @@ export function RevenueRankingChart({
                 <p className="text-xs text-muted-foreground">{t('rankings.chart_hint')}</p>
             </div>
 
-            <div className="-mx-1 overflow-x-auto pb-1">
+            <div className="-mx-1 max-w-full overflow-x-auto pb-1">
                 <div className="h-[340px]" style={{ minWidth: chartMinWidth }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart
@@ -167,7 +167,7 @@ export function RevenueRankingChart({
                         {t('rankings.rank_range', { count: 3 + rest.length })}
                     </p>
                     <ScrollDataTable>
-                        <table className="w-full border-collapse text-xs">
+                        <table className="min-w-[760px] w-full border-collapse text-xs">
                             <thead>
                                 <tr>
                                     <Th>#</Th>

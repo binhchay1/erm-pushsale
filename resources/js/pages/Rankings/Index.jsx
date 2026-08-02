@@ -26,7 +26,7 @@ export default function RankingsIndex({
         <AppLayout>
             <Head title={t('rankings.title')} />
 
-            <div className="space-y-6">
+            <div className="ps-role-rankings-page space-y-6 overflow-x-hidden px-0 sm:px-0">
                 <PageHeader title={t('rankings.title')} description={t('rankings.desc')} />
 
                 <RankingFilterBar
