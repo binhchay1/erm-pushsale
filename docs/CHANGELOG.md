@@ -115,3 +115,7 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 - 2026-08-03: Polish customer profile table header parity, restore wrapped operation status chips, and clarify Pancake customer chat diagnostics/API v2 default.
 
 - 2026-08-03: Hoàn thiện responsive cho `/admin/shipping-partners` và toàn bộ tab content `/admin/settings/features`; form giao vận xếp 1 cột trên mobile, tab provider/config không tràn, bảng cấu hình chức năng chuyển sang dạng card dễ đọc trên điện thoại.
+
+## 2026-08-04 - Marketing dashboard customer type filter placeholder
+
+- Updated `/admin/marketing/dashboard` customer type filter to show the empty option as `--Tất cả--` instead of defaulting visually to `Khách mới`, keeping it consistent with other Pushsale-style filters.
