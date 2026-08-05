@@ -310,7 +310,8 @@ class PushsaleMarketingDashboardService
             })->values();
 
         return [
-            'title' => 'Dữ liệu landing '.count($days).' ngày gần đây',
+            'title' => 'Dữ liệu landing theo bộ lọc ngoài',
+            'filterLabel' => $from->format('d/m/Y').' - '.$to->format('d/m/Y').' · '.count($days).' ngày',
             'source' => ['id' => $source->id, 'name' => $source->name],
             'utm_source' => $utmSource ?: '',
             'utm_campaign' => $utmCampaign ?: '',
@@ -604,22 +605,7 @@ class PushsaleMarketingDashboardService
 
         $this->applyIngestionDate($query, $filter);
 
-        if ($filter->customerType === 'new') {
-            $query->where(function (Builder $packet): void {
-                $packet->where(function (Builder $withoutOrder): void {
-                    $withoutOrder->whereDoesntHave('order')
-                        ->whereDoesntHave('relatedOrder')
-                        ->whereDoesntHave('parentIngestion.order')
-                        ->whereDoesntHave('parentIngestion.relatedOrder');
-                })->orWhere(function (Builder $withOrder): void {
-                    $this->wherePacketEffectiveOrder($withOrder, fn (Builder $q) => $q->where(function (Builder $type): void {
-                        $type->where('is_returning_customer', false)->orWhereNull('is_returning_customer');
-                    }));
-                });
-            });
-        } elseif ($filter->customerType === 'returning') {
-            $this->wherePacketEffectiveOrder($query, fn (Builder $q) => $q->where('is_returning_customer', true));
-        }
+        MarketingPacketMetrics::applyCustomerTypeScope($query, $filter->customerType);
 
         if ($filter->operationScope === 'next') {
             $this->wherePacketEffectiveOrder($query, fn (Builder $q) => $q->whereNotNull('next_operation_at'));

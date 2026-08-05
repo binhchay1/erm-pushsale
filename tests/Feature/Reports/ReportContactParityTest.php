@@ -151,6 +151,169 @@ class ReportContactParityTest extends TestCase
         $this->assertSame(150_000, (int) ($ceo['marketingRows'][0]['totalEstRevenue'] ?? 0));
     }
 
+
+    public function test_marketing_packets_count_only_merged_upsale_and_customer_type_partitions_total(): void
+    {
+        Carbon::setTestNow('2026-08-05 10:00:00');
+
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $marketer = User::factory()->create(['role' => UserRole::Marketing]);
+        $source = MarketingSource::query()->create([
+            'name' => 'Upsale parity source',
+            'marketer_user_id' => $marketer->id,
+            'creator_user_id' => $admin->id,
+            'webhook_token' => 'tok-upsale-parity',
+            'is_active' => true,
+        ]);
+
+        $newOrder = Order::query()->create([
+            'order_code' => 'ORD-UPSALE-NEW',
+            'marketer_user_id' => $marketer->id,
+            'marketing_source_id' => $source->id,
+            'customer_name' => 'Khách mới',
+            'customer_phone' => '0910000001',
+            'is_returning_customer' => false,
+            'data_arrived_at' => now(),
+            'total' => 100_000,
+        ]);
+        $returningOrder = Order::query()->create([
+            'order_code' => 'ORD-UPSALE-OLD',
+            'marketer_user_id' => $marketer->id,
+            'marketing_source_id' => $source->id,
+            'customer_name' => 'Khách cũ',
+            'customer_phone' => '0910000002',
+            'is_returning_customer' => true,
+            'data_arrived_at' => now(),
+            'total' => 120_000,
+        ]);
+        $supplementalOrder = Order::query()->create([
+            'order_code' => 'ORD-UPSALE-OLD-SUP',
+            'marketer_user_id' => $marketer->id,
+            'marketing_source_id' => $source->id,
+            'customer_name' => 'Khách cũ',
+            'customer_phone' => '0910000002',
+            'is_returning_customer' => true,
+            'data_arrived_at' => now(),
+            'total' => 80_000,
+        ]);
+
+        LeadIngestion::query()->create([
+            'platform' => 'landing',
+            'external_id' => 'new-primary',
+            'status' => LeadIngestionStatus::Processed,
+            'packet_type' => LeadPacketType::Lead,
+            'counts_as_lead' => true,
+            'customer_phone' => $newOrder->customer_phone,
+            'marketing_source_id' => $source->id,
+            'order_id' => $newOrder->id,
+            'payload' => [],
+            'processed_at' => now(),
+        ]);
+        LeadIngestion::query()->create([
+            'platform' => 'landing',
+            'external_id' => 'new-upsell-valid',
+            'status' => LeadIngestionStatus::Processed,
+            'packet_type' => LeadPacketType::Upsell,
+            'counts_as_lead' => false,
+            'customer_phone' => $newOrder->customer_phone,
+            'marketing_source_id' => $source->id,
+            'order_id' => $newOrder->id,
+            'payload' => [],
+            'processed_at' => now(),
+        ]);
+        LeadIngestion::query()->create([
+            'platform' => 'landing',
+            'external_id' => 'old-primary',
+            'status' => LeadIngestionStatus::Processed,
+            'packet_type' => LeadPacketType::Lead,
+            'counts_as_lead' => true,
+            'customer_phone' => $returningOrder->customer_phone,
+            'marketing_source_id' => $source->id,
+            'order_id' => $returningOrder->id,
+            'payload' => [],
+            'processed_at' => now(),
+        ]);
+        LeadIngestion::query()->create([
+            'platform' => 'landing',
+            'external_id' => 'old-late-upsell-valid',
+            'status' => LeadIngestionStatus::Processed,
+            'packet_type' => LeadPacketType::LateUpsell,
+            'counts_as_lead' => false,
+            'customer_phone' => $returningOrder->customer_phone,
+            'marketing_source_id' => $source->id,
+            'order_id' => $supplementalOrder->id,
+            'related_order_id' => $returningOrder->id,
+            'payload' => [],
+            'processed_at' => now(),
+        ]);
+
+        foreach ([
+            ['duplicate-upsell', LeadIngestionStatus::Duplicate, LeadPacketType::Upsell, $newOrder->id, false],
+            ['failed-upsell', LeadIngestionStatus::Failed, LeadPacketType::Upsell, $newOrder->id, false],
+            ['review-orphan-upsell', LeadIngestionStatus::NeedsReview, LeadPacketType::OrphanUpsell, null, true],
+            ['pending-upsell', LeadIngestionStatus::Pending, LeadPacketType::Upsell, $newOrder->id, false],
+        ] as [$externalId, $status, $packetType, $orderId, $requiresReview]) {
+            LeadIngestion::query()->create([
+                'platform' => 'landing',
+                'external_id' => $externalId,
+                'status' => $status,
+                'packet_type' => $packetType,
+                'counts_as_lead' => false,
+                'customer_phone' => '0910999999',
+                'marketing_source_id' => $source->id,
+                'order_id' => $orderId,
+                'requires_review' => $requiresReview,
+                'payload' => [],
+            ]);
+        }
+
+        $baseFilter = new ReportFilterData(
+            dateFrom: now()->startOfDay(),
+            dateTo: now()->endOfDay(),
+        );
+        $newFilter = new ReportFilterData(
+            dateFrom: now()->startOfDay(),
+            dateTo: now()->endOfDay(),
+            customerType: 'new',
+        );
+        $returningFilter = new ReportFilterData(
+            dateFrom: now()->startOfDay(),
+            dateTo: now()->endOfDay(),
+            customerType: 'returning',
+        );
+
+        $all = (int) MarketingPacketMetrics::countsBySource($baseFilter)->get($source->id, 0);
+        $new = (int) MarketingPacketMetrics::countsBySource($newFilter)->get($source->id, 0);
+        $returning = (int) MarketingPacketMetrics::countsBySource($returningFilter)->get($source->id, 0);
+
+        $this->assertSame(4, $all, '2 gói chính + 2 upsale đã gắn đơn');
+        $this->assertSame(2, (int) MarketingPacketMetrics::primaryCountsBySource($baseFilter)->get($source->id, 0));
+        $this->assertSame(2, (int) MarketingPacketMetrics::upsaleCountsBySource($baseFilter)->get($source->id, 0));
+        $this->assertSame($all, $new + $returning, 'Tất cả phải bằng Khách mới + Khách cũ');
+
+        $dashboardFilter = new MarketingDashboardFilterData(
+            dateFrom: now()->startOfDay(),
+            dateTo: now()->endOfDay(),
+        );
+        $dashboardNewFilter = new MarketingDashboardFilterData(
+            dateFrom: now()->startOfDay(),
+            dateTo: now()->endOfDay(),
+            customerType: 'new',
+        );
+        $dashboardReturningFilter = new MarketingDashboardFilterData(
+            dateFrom: now()->startOfDay(),
+            dateTo: now()->endOfDay(),
+            customerType: 'returning',
+        );
+
+        $dashboardAll = app(PushsaleMarketingDashboardService::class)->build($dashboardFilter)['filterTotal']['contacts'];
+        $dashboardNew = app(PushsaleMarketingDashboardService::class)->build($dashboardNewFilter)['filterTotal']['contacts'];
+        $dashboardReturning = app(PushsaleMarketingDashboardService::class)->build($dashboardReturningFilter)['filterTotal']['contacts'];
+
+        $this->assertSame(4, (int) $dashboardAll);
+        $this->assertSame((int) $dashboardAll, (int) $dashboardNew + (int) $dashboardReturning);
+    }
+
     public function test_all_reports_report_identical_contact_count(): void
     {
         Carbon::setTestNow('2026-07-07 10:00:00');

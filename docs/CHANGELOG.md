@@ -4,6 +4,12 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 
 ---
 
+## 2026-08-06 — Keep-account business data reset command
+
+- Sửa command `data:clear-all-keep-accounts` đúng business mới: giữ nguyên toàn bộ tài khoản hiện có, company, team, preference/token/session đăng nhập; chỉ xóa dữ liệu nghiệp vụ ở các bảng còn lại.
+- Bổ sung `--dry-run` để xem trước danh sách bảng/số dòng sẽ xóa, `--force` để chạy thật không hỏi lại và `--flush-sessions` nếu muốn đăng xuất toàn bộ phiên hiện tại.
+- Không còn truncate users rồi tạo lại riêng superadmin; tránh mất tài khoản khách hàng/demo/staging đang có.
+
 ## 2026-08-02 — Report/admin mobile completion sweep
 
 - Làm tiếp trên bản đã gộp đủ các task trước; lần này mở rộng responsive sang toàn bộ nhóm báo cáo Sale/Marketing/Kế toán/Quản trị và menu lớn 1.x Quản trị đơn vị.
@@ -127,3 +133,9 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 - Added packet breakdown to the marketing dashboard table/export/chart, campaign report, marketing revenue detail, marketing work matrix, upsale-source report and marketer revenue report contact cell.
 - Kept global `LeadContactMetrics` unchanged so CEO/Sale contact ratios still use the customer-primary contact contract.
 - Added regression coverage for packet-dialog totals and global-vs-marketing contact parity.
+
+## 2026-08-06 - Marketing upsale contract audit
+
+- Tightened `MarketingPacketMetrics`: marketing contact now counts primary packets plus only processed upsale packets already attached to an effective order. Duplicate, failed, pending, needs-review and orphan/unmerged upsale packets are excluded from contact totals.
+- Centralized customer type filtering for marketing packets so `/admin/marketing/dashboard` keeps the invariant `Tất cả = Khách mới + Khách cũ`.
+- Added regression coverage for valid/invalid upsale packets and customer-type partitioning on the Pushsale Marketing dashboard.

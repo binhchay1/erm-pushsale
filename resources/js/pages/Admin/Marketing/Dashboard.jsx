@@ -38,7 +38,7 @@ function money(value) {
 }
 
 function DialogShell({ open, title, size = 'lg', onClose, children, footer }) {
-    const widths = { md: '650px', lg: '980px', xl: '1280px', full: 'calc(100vw - 24px)' };
+    const widths = { md: '650px', lg: '980px', xl: '1280px', wide: 'min(1540px, calc(100vw - 32px))', full: 'calc(100vw - 24px)' };
 
     return (
         <PushsaleDialog
@@ -117,6 +117,8 @@ function ChartGraphic({ days = [] }) {
                 <span>Ngân sách: <b>{money(days.reduce((sum, day) => sum + Number(day.budget ?? 0), 0))}</b></span>
                 <span>Tương tác: <b>{money(days.reduce((sum, day) => sum + Number(day.clicks ?? 0), 0))}</b></span>
                 <span>Contact: <b>{money(days.reduce((sum, day) => sum + Number(day.contacts ?? 0), 0))}</b></span>
+                <span>Chính: <b>{money(days.reduce((sum, day) => sum + Number(day.baseContacts ?? 0), 0))}</b></span>
+                <span>Upsale: <b>{money(days.reduce((sum, day) => sum + Number(day.upsaleContacts ?? 0), 0))}</b></span>
                 <span>Doanh số: <b>{money(days.reduce((sum, day) => sum + Number(day.revenue ?? 0), 0))}</b></span>
             </div>
         </div>
@@ -154,7 +156,7 @@ function ChartDialog({ state, endpoint, filters, onClose }) {
                 <>
                     <div className="psm-chart-title">
                         <b>{data.title}</b>
-                        <span>{data.source?.name}{data.utm_source ? ` / ${data.utm_source}` : ''}{data.utm_campaign ? ` / ${data.utm_campaign}` : ''}</span>
+                        <span>{data.filterLabel ? `${data.filterLabel} · ` : ''}{data.source?.name}{data.utm_source ? ` / ${data.utm_source}` : ''}{data.utm_campaign ? ` / ${data.utm_campaign}` : ''}</span>
                     </div>
                     <ChartGraphic days={data.days ?? []} />
                 </>
@@ -215,7 +217,7 @@ function LandingPacketsDialog({ state, endpoint, filters, onClose }) {
         <DialogShell
             open={Boolean(state)}
             title={t('dashboard.marketing.packet_dialog.title')}
-            size="full"
+            size="wide"
             onClose={onClose}
             footer={<button type="button" className="btn btn-default btn-sm" onClick={onClose}><i className="fa fa-times" /> {t('dashboard.marketing.packet_dialog.close')}</button>}
         >
@@ -281,8 +283,8 @@ function LandingPacketsDialog({ state, endpoint, filters, onClose }) {
                                             <a href={`tel:${row.customerPhone}`}>{row.customerPhone}</a>
                                             {row.message && <small title={row.message}>{row.message}</small>}
                                         </td>
-                                        <td>{row.productSummary || '—'}</td>
-                                        <td>
+                                        <td className="psm-packet-product">{row.productSummary || '—'}</td>
+                                        <td className="psm-packet-landing">
                                             <b>{row.landingSourceName !== '—' ? row.landingSourceName : row.sourceName}</b>
                                             <small>{row.landingName !== '—' ? row.landingName : ''}</small>
                                         </td>
@@ -291,7 +293,7 @@ function LandingPacketsDialog({ state, endpoint, filters, onClose }) {
                                             <small>{row.utmCampaign || ''}</small>
                                         </td>
                                         <td>{row.orderCode || (row.orderId ? `#${row.orderId}` : '—')}</td>
-                                        <td>
+                                        <td className="psm-packet-status-cell">
                                             <span className={`psm-packet-status is-${row.status}`}>{row.statusLabel || row.status || '—'}</span>
                                             {row.requiresReview && <small className="psm-packet-review"><i className="fa fa-exclamation-triangle" /> {t('dashboard.marketing.packet_dialog.review')}</small>}
                                         </td>

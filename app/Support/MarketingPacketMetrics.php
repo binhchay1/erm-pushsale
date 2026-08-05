@@ -15,9 +15,9 @@ use Illuminate\Support\Collection;
 /**
  * Marketing packet contract.
  *
- * Unlike the global LeadContactMetrics contract, marketing needs to see the
- * actual landing traffic produced by a campaign: one primary packet plus each
- * upsale packet. Follow-up, duplicate and failed packets are excluded.
+ * Marketing xem traffic landing theo gói tin: gói chính + từng gói upsale đã
+ * gộp/xử lý thành công vào đơn. Gói follow-up, duplicate, failed, packet còn
+ * review/orphan chưa gộp và mọi upsale chưa có đơn hiệu lực đều không được tính.
  */
 final class MarketingPacketMetrics
 {
@@ -26,19 +26,55 @@ final class MarketingPacketMetrics
     {
         return $query
             ->whereNotIn('status', [
-                LeadIngestionStatus::Duplicate,
-                LeadIngestionStatus::Failed,
+                LeadIngestionStatus::Duplicate->value,
+                LeadIngestionStatus::Failed->value,
+                LeadIngestionStatus::NeedsReview->value,
             ])
             ->where(function (Builder $packet): void {
                 $packet->where(function (Builder $primary): void {
                     $primary->where('counts_as_lead', true)
-                        ->where('status', '<>', LeadIngestionStatus::NeedsReview);
-                })->orWhereIn('packet_type', self::upsaleTypes());
-            })
-            ->where(function (Builder $packet): void {
-                $packet->whereNull('packet_type')
-                    ->orWhere('packet_type', '<>', LeadPacketType::FollowUp->value);
+                        ->where(function (Builder $type): void {
+                            $type->whereNull('packet_type')
+                                ->orWhereIn('packet_type', self::primaryTypes());
+                        });
+                })->orWhere(function (Builder $upsale): void {
+                    self::applyValidUpsaleScope($upsale);
+                });
             });
+    }
+
+    /**
+     * Một gói upsale chỉ được tính vào Marketing khi đã xử lý/gắn với đơn.
+     * Packet review, orphan chưa xử lý, duplicate hoặc lỗi chỉ dùng audit, không
+     * làm tăng contact trên dashboard/report.
+     *
+     * @param Builder<LeadIngestion>|Relation<LeadIngestion, mixed, mixed> $query
+     */
+    public static function applyValidUpsaleScope(Builder|Relation $query): Builder|Relation
+    {
+        return $query
+            ->whereIn('packet_type', self::upsaleTypes())
+            ->where('counts_as_lead', false)
+            ->where('status', LeadIngestionStatus::Processed->value)
+            ->where(function (Builder $review): void {
+                $review->where('requires_review', false)->orWhereNull('requires_review');
+            })
+            ->where(function (Builder $linked): void {
+                $linked->whereNotNull('order_id')
+                    ->orWhereNotNull('related_order_id')
+                    ->orWhereHas('parentIngestion.order')
+                    ->orWhereHas('parentIngestion.relatedOrder');
+            });
+    }
+
+
+    /** @return list<string> */
+    public static function primaryTypes(): array
+    {
+        return [
+            LeadPacketType::Lead->value,
+            'base', // legacy/test fixtures before LeadPacketType::Lead was standardized
+        ];
     }
 
     /** @return list<string> */
@@ -83,22 +119,7 @@ final class MarketingPacketMetrics
             self::applyDateFilter($query, $filter);
         }
 
-        if (in_array($filter?->customerType, ['old', 'returning'], true)) {
-            self::constrainByEffectiveOrder($query, fn (Builder $order) => $order->where('is_returning_customer', true));
-        } elseif ($filter?->customerType === 'new') {
-            $query->where(function (Builder $packet): void {
-                $packet->where(function (Builder $withoutOrder): void {
-                    $withoutOrder->whereDoesntHave('order')
-                        ->whereDoesntHave('relatedOrder')
-                        ->whereDoesntHave('parentIngestion.order')
-                        ->whereDoesntHave('parentIngestion.relatedOrder');
-                })->orWhere(function (Builder $withOrder): void {
-                    self::constrainByEffectiveOrder($withOrder, fn (Builder $order) => $order->where(function (Builder $type): void {
-                        $type->where('is_returning_customer', false)->orWhereNull('is_returning_customer');
-                    }));
-                });
-            });
-        }
+        self::applyCustomerTypeScope($query, $filter?->customerType);
 
         if ($filter?->marketingSourceId) {
             $query->where('marketing_source_id', $filter->marketingSourceId);
@@ -140,6 +161,37 @@ final class MarketingPacketMetrics
         );
     }
 
+    /**
+     * Dùng chung cho Marketing dashboard và các báo cáo marketing để đảm bảo:
+     * Tất cả = Khách mới + Khách cũ. Packet chưa có đơn được xếp vào Khách mới;
+     * packet đã có đơn lấy cờ is_returning_customer của đơn hiệu lực.
+     *
+     * @param Builder<LeadIngestion>|Relation<LeadIngestion, mixed, mixed> $query
+     */
+    public static function applyCustomerTypeScope(Builder|Relation $query, ?string $customerType): void
+    {
+        if (in_array($customerType, ['old', 'returning'], true)) {
+            self::constrainByEffectiveOrder($query, fn (Builder $order) => $order->where('is_returning_customer', true));
+
+            return;
+        }
+
+        if ($customerType === 'new') {
+            $query->where(function (Builder $packet): void {
+                $packet->where(function (Builder $withoutOrder): void {
+                    $withoutOrder->whereDoesntHave('order')
+                        ->whereDoesntHave('relatedOrder')
+                        ->whereDoesntHave('parentIngestion.order')
+                        ->whereDoesntHave('parentIngestion.relatedOrder');
+                })->orWhere(function (Builder $withOrder): void {
+                    self::constrainByEffectiveOrder($withOrder, fn (Builder $order) => $order->where(function (Builder $type): void {
+                        $type->where('is_returning_customer', false)->orWhereNull('is_returning_customer');
+                    }));
+                });
+            });
+        }
+    }
+
     /** @return Collection<int, int> */
     public static function countsBySource(ReportFilterData $filter): Collection
     {
@@ -157,7 +209,7 @@ final class MarketingPacketMetrics
         return self::countableQuery($filter)
             ->where(function (Builder $packet): void {
                 $packet->whereNull('packet_type')
-                    ->orWhereNotIn('packet_type', self::upsaleTypes());
+                    ->orWhereIn('packet_type', self::primaryTypes());
             })
             ->whereNotNull('marketing_source_id')
             ->selectRaw('marketing_source_id, COUNT(*) as aggregate')
@@ -197,7 +249,7 @@ final class MarketingPacketMetrics
         return self::countableQuery($filter)
             ->where(function (Builder $packet): void {
                 $packet->whereNull('lead_ingestions.packet_type')
-                    ->orWhereNotIn('lead_ingestions.packet_type', self::upsaleTypes());
+                    ->orWhereIn('lead_ingestions.packet_type', self::primaryTypes());
             })
             ->join('marketing_sources', 'lead_ingestions.marketing_source_id', '=', 'marketing_sources.id')
             ->leftJoin('marketing_sources as parent_sources', 'marketing_sources.parent_id', '=', 'parent_sources.id')
@@ -243,8 +295,6 @@ final class MarketingPacketMetrics
     /** @param Collection<int, Order> $orders @return Collection<int, int> */
     public static function effectiveUpsaleCountsBySource(ReportFilterData $filter, Collection $orders): Collection
     {
-        // Legacy orders do not have packet metadata, so they are never added to
-        // the upsale bucket. They are counted as primary packets only.
         return self::upsaleCountsBySource($filter)->mapWithKeys(static fn ($count, $key): array => [(int) $key => (int) $count]);
     }
 
@@ -297,7 +347,7 @@ final class MarketingPacketMetrics
     }
 
     /** @param callable(Builder<Order>): void $constraint */
-    public static function constrainByEffectiveOrder(Builder $query, callable $constraint): void
+    public static function constrainByEffectiveOrder(Builder|Relation $query, callable $constraint): void
     {
         $query->where(function (Builder $packet) use ($constraint): void {
             $packet->whereHas('order', $constraint)
