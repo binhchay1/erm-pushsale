@@ -31,6 +31,7 @@ Route::middleware('role:'.User::ROLE_MARKETING)->prefix('marketing')->name('mark
 
     Route::get('workspace', MarketingDashboardController::class)->name('workspace');
     Route::get('workspace/chart', [MarketingDashboardDataController::class, 'chart'])->name('workspace.chart');
+    Route::get('workspace/packets', [MarketingDashboardDataController::class, 'packets'])->name('workspace.packets');
     Route::get('workspace/daily-metrics', [MarketingDashboardDataController::class, 'dailyMetrics'])->name('workspace.daily-metrics');
     Route::put('workspace/daily-metrics', [MarketingDashboardDataController::class, 'saveDailyMetrics'])->name('workspace.daily-metrics.update');
     Route::get('workspace/export', [MarketingDashboardDataController::class, 'export'])->name('workspace.export');

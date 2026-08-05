@@ -6,8 +6,10 @@ use App\Data\ReportFilterData;
 use App\Enums\DeliveryStatus;
 use App\Enums\UserRole;
 use App\Models\MarketingSource;
+use App\Models\Order;
 use App\Models\User;
 use App\Support\MarketingMetrics;
+use App\Support\MarketingPacketMetrics;
 use App\Support\RevenueMetricsCalculator;
 use Illuminate\Support\Collection;
 
@@ -42,14 +44,17 @@ class RevenueReportService
     private function buildGrouped(ReportFilterData $filter, User $viewer, $users, string $foreignKey, string $idKey, string $nameKey): array
     {
         $allQuery = $this->queries->orders($viewer, $filter)->with('items');
-        $totalMetrics = RevenueMetricsCalculator::build((clone $allQuery)->get());
+        $allOrders = (clone $allQuery)->get();
+        $totalMetrics = RevenueMetricsCalculator::build($allOrders);
         $totalRow = array_merge(['stt' => 0, $idKey => 'total', $nameKey => 'Tổng', 'isTotalRow' => true], $totalMetrics);
 
         if ($foreignKey === 'marketer_user_id') {
-            $totalRow = array_merge($totalRow, $this->marketingKpiForUserIds(
-                (clone $allQuery)->get(),
-                User::query()->where('role', UserRole::Marketing)->pluck('id')->all(),
-            ));
+            $allMarketerIds = User::query()->where('role', UserRole::Marketing)->pluck('id')->all();
+            $totalRow = array_merge(
+                $totalRow,
+                $this->marketingContactMetrics($filter, $allOrders, $allMarketerIds),
+                $this->marketingKpiForUserIds($allOrders, $allMarketerIds),
+            );
         }
 
         $rows = [$totalRow];
@@ -66,7 +71,11 @@ class RevenueReportService
             ], $metrics);
 
             if ($foreignKey === 'marketer_user_id') {
-                $row = array_merge($row, $this->marketingKpiForUserIds($subset, [$user->id]));
+                $row = array_merge(
+                    $row,
+                    $this->marketingContactMetrics($filter, $subset, [(int) $user->id]),
+                    $this->marketingKpiForUserIds($subset, [(int) $user->id]),
+                );
             }
 
             $rows[] = $row;
@@ -76,6 +85,33 @@ class RevenueReportService
             'rows' => $rows,
             'formulaLegend' => $this->formulaLegend(),
             'marketingKpiLegend' => $foreignKey === 'marketer_user_id' ? $this->marketingKpiLegend() : null,
+        ];
+    }
+
+    /**
+     * @param  Collection<int, Order>  $orders
+     * @param  list<int>  $marketerIds
+     * @return array<string, int|float>
+     */
+    private function marketingContactMetrics(ReportFilterData $filter, Collection $orders, array $marketerIds): array
+    {
+        $ids = array_values(array_filter(array_map('intval', $marketerIds)));
+        $contactCounts = MarketingPacketMetrics::effectiveCountsByMarketer($filter, $orders)->only($ids);
+        $primaryCounts = MarketingPacketMetrics::effectivePrimaryCountsByMarketer($filter, $orders)->only($ids);
+        $upsaleCounts = MarketingPacketMetrics::effectiveUpsaleCountsByMarketer($filter, $orders)->only($ids);
+        $contacts = (int) $contactCounts->sum();
+        $primaryPackets = (int) $primaryCounts->sum();
+        $upsalePackets = (int) $upsaleCounts->sum();
+        $closedOrders = $orders->filter(
+            static fn (Order $order): bool => $order->closed_at !== null
+                || (string) $order->closing_status === \App\Enums\ClosingStatus::Closed->value,
+        )->count();
+
+        return [
+            'contacts' => $contacts,
+            'primaryPackets' => $primaryPackets,
+            'upsalePackets' => $upsalePackets,
+            'closingRate' => $contacts > 0 ? round($closedOrders / $contacts * 100, 2) : 0.0,
         ];
     }
 

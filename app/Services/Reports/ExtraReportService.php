@@ -15,6 +15,7 @@ use App\Models\Pushsale\MonthlyKpiPlan;
 use App\Models\User;
 use App\Models\WarehouseInventory;
 use App\Support\LeadContactMetrics;
+use App\Support\MarketingPacketMetrics;
 use App\Support\OrderRevenueClassifier;
 use Illuminate\Support\Collection;
 
@@ -497,6 +498,10 @@ class ExtraReportService
             $this->col('pct_xngh', 'pct_xngh', 'percent', ['tone' => 'positive']),
             $this->col('pct_success', 'pct_success', 'percent', ['tone' => 'positive']),
             $this->col('contacts', 'contacts', 'number'),
+            ...($bySale ? [] : [
+                $this->col('primary_packets', 'primary_packets', 'number'),
+                $this->col('upsale_packets', 'upsale_packets', 'number'),
+            ]),
             $this->col('close_rate', 'close_rate', 'percent', ['tone' => 'positive']),
             $this->col('product_count', 'product_count', 'number'),
             $this->col('avg_order', 'avg_order', 'currency'),
@@ -513,9 +518,23 @@ class ExtraReportService
         $groupKey = $bySale ? 'sale_user_id' : 'marketer_user_id';
         $contactCounts = $bySale
             ? collect()
-            : LeadContactMetrics::effectiveCountsByMarketer($filter, $orders);
+            : MarketingPacketMetrics::effectiveCountsByMarketer($filter, $orders);
+        $primaryPacketCounts = $bySale
+            ? collect()
+            : MarketingPacketMetrics::effectivePrimaryCountsByMarketer($filter, $orders);
+        $upsalePacketCounts = $bySale
+            ? collect()
+            : MarketingPacketMetrics::effectiveUpsaleCountsByMarketer($filter, $orders);
+        $groupedOrders = $orders->groupBy($groupKey);
+        $groupIds = $bySale
+            ? $groupedOrders->keys()
+            : $groupedOrders->keys()->merge($contactCounts->keys())->unique()->values();
+        $usersById = $bySale
+            ? collect()
+            : User::query()->whereIn('id', $groupIds->filter()->map(fn ($id): int => (int) $id))->get(['id', 'name'])->keyBy('id');
 
-        $rows = $orders->groupBy($groupKey)->map(function (Collection $group, int|string $groupId) use ($bySale, $contactCounts, $filter) {
+        $rows = $groupIds->map(function (int|string $groupId) use ($bySale, $groupedOrders, $contactCounts, $primaryPacketCounts, $upsalePacketCounts, $filter, $usersById) {
+            $group = collect($groupedOrders->get($groupId, collect()))->values();
             $closed = $this->closed($group);
             $rev = fn (Collection $c) => (int) $c->sum(fn (Order $o): int => $this->reportRevenue($o, $filter));
 
@@ -541,8 +560,12 @@ class ExtraReportService
             $upsellOrderCount = $closed->filter(fn (Order $order): bool => $order->items->contains(fn (OrderItem $item): bool => $this->isUpsellItem($item)))->count();
             $upsellRevenue = (int) $upsellItems->sum(fn (OrderItem $item): int => $this->itemRevenue($item, $filter));
 
+            $displayName = $bySale
+                ? ($group->first()?->saleUser?->name ?? '—')
+                : ($group->first()?->marketerUser?->name ?? $usersById->get((int) $groupId)?->name ?? '—');
+
             return [
-                'name' => ($bySale ? $group->first()->saleUser?->name : $group->first()->marketerUser?->name) ?? '—',
+                'name' => $displayName,
                 'closed_qty' => $closed->count(),
                 'closed_rev' => $closedRev,
                 'xngh_qty' => $xngh->count(),
@@ -566,6 +589,8 @@ class ExtraReportService
                 'pct_xngh' => self::pct($xngh->count(), $closed->count()),
                 'pct_success' => self::pct($success->count(), $transfer->count()),
                 'contacts' => $contacts,
+                'primary_packets' => $bySale ? null : (int) $primaryPacketCounts->get((int) $groupId, 0),
+                'upsale_packets' => $bySale ? null : (int) $upsalePacketCounts->get((int) $groupId, 0),
                 'closed_contact_count' => $closedContacts->count(),
                 'close_rate' => self::pct($closedContacts->count(), $contacts),
                 'product_count' => (int) $closed->sum(fn (Order $o) => $o->items->sum('quantity')),
@@ -854,8 +879,8 @@ class ExtraReportService
      * Báo cáo công việc marketing — đúng màn 2.7.5 Pushsale.
      *
      * Trục dọc là nhân viên marketing, trục ngang là sale nhận data.
-     * Contact chỉ tính lead gốc (không cộng packet upsale), còn tỷ lệ chốt
-     * theo từng sale = số contact đã chốt / số contact sale đó nhận từ marketer.
+     * Contact marketing tính theo gói tin landing hợp lệ: gói chính + upsale,
+     * còn tỷ lệ chốt theo từng sale = số đơn chốt từ các gói tin đó / tổng gói tin.
      */
     private function marketingWork(User $user, ReportFilterData $filter): array
     {
@@ -870,14 +895,24 @@ class ExtraReportService
 
         $marketerIds = $this->visibleMarketerIds($user, $filter);
 
-        $leadsQuery = LeadContactMetrics::countableQuery($filter)
-            ->with(['marketingSource:id,marketer_user_id,name', 'marketingSource.marketer:id,name,email,team_id'])
+        $leadsQuery = MarketingPacketMetrics::countableQuery($filter)
+            ->with([
+                'marketingSource:id,parent_id,marketer_user_id,name',
+                'marketingSource.parent:id,marketer_user_id,name',
+                'marketingSource.marketer:id,name,email,team_id',
+                'marketingSource.parent.marketer:id,name,email,team_id',
+                'order:id,sale_user_id,closing_status,closed_at',
+                'relatedOrder:id,sale_user_id,closing_status,closed_at',
+                'parentIngestion:id,order_id,related_order_id',
+                'parentIngestion.order:id,sale_user_id,closing_status,closed_at',
+                'parentIngestion.relatedOrder:id,sale_user_id,closing_status,closed_at',
+            ])
             ->whereNotNull('marketing_source_id')
             ->when($marketerIds !== null, function ($q) use ($marketerIds): void {
-                $q->whereHas('marketingSource', fn ($sq) => $sq->whereIn('marketer_user_id', $marketerIds));
+                $q->whereHas('marketingSource', fn ($sq) => $sq->whereIn('marketer_user_id', $marketerIds)->orWhereHas('parent', fn ($parent) => $parent->whereIn('marketer_user_id', $marketerIds)));
             })
             ->when($filter->marketerId, function ($q) use ($filter): void {
-                $q->whereHas('marketingSource', fn ($sq) => $sq->where('marketer_user_id', $filter->marketerId));
+                $q->whereHas('marketingSource', fn ($sq) => $sq->where('marketer_user_id', $filter->marketerId)->orWhereHas('parent', fn ($parent) => $parent->where('marketer_user_id', $filter->marketerId)));
             })
             ->when($filter->search, function ($q) use ($filter): void {
                 $term = '%'.trim((string) $filter->search).'%';
@@ -889,23 +924,29 @@ class ExtraReportService
                 });
             })
             ->when($filter->marketingTeamLeaderId, function ($q) use ($filter): void {
-                $q->whereHas('marketingSource.marketer.team', fn ($team) => $team->where('leader_user_id', $filter->marketingTeamLeaderId));
+                $q->whereHas('marketingSource', fn ($source) => $source
+                    ->whereHas('marketer.team', fn ($team) => $team->where('leader_user_id', $filter->marketingTeamLeaderId))
+                    ->orWhereHas('parent.marketer.team', fn ($team) => $team->where('leader_user_id', $filter->marketingTeamLeaderId)));
             })
             ->when($filter->marketingTeamId, function ($q) use ($filter): void {
-                $q->whereHas('marketingSource.marketer', fn ($marketer) => $marketer->where('team_id', $filter->marketingTeamId));
+                $q->whereHas('marketingSource', fn ($source) => $source
+                    ->whereHas('marketer', fn ($marketer) => $marketer->where('team_id', $filter->marketingTeamId))
+                    ->orWhereHas('parent.marketer', fn ($marketer) => $marketer->where('team_id', $filter->marketingTeamId)));
             })
             ->when($filter->saleId, function ($q) use ($filter): void {
-                $q->whereHas('order', fn ($order) => $order->where('sale_user_id', $filter->saleId));
+                MarketingPacketMetrics::constrainByEffectiveOrder($q, fn ($order) => $order->where('sale_user_id', $filter->saleId));
             })
             ->when($filter->teamId, function ($q) use ($filter): void {
-                $q->whereHas('order.saleUser', fn ($sale) => $sale->where('team_id', $filter->teamId));
+                MarketingPacketMetrics::constrainByEffectiveOrder($q, fn ($order) => $order->whereHas('saleUser', fn ($sale) => $sale->where('team_id', $filter->teamId)));
             })
             ->when($filter->teamLeaderId, function ($q) use ($filter): void {
-                $q->whereHas('order.saleUser.team', fn ($team) => $team->where('leader_user_id', $filter->teamLeaderId));
+                MarketingPacketMetrics::constrainByEffectiveOrder($q, fn ($order) => $order->whereHas('saleUser.team', fn ($team) => $team->where('leader_user_id', $filter->teamLeaderId)));
             });
 
         $leads = $leadsQuery->get();
-        $contactCountsByMarketer = LeadContactMetrics::effectiveCountsByMarketer($filter, $orders);
+        $contactCountsByMarketer = MarketingPacketMetrics::effectiveCountsByMarketer($filter, $orders);
+        $primaryCountsByMarketer = MarketingPacketMetrics::effectivePrimaryCountsByMarketer($filter, $orders);
+        $upsaleCountsByMarketer = MarketingPacketMetrics::effectiveUpsaleCountsByMarketer($filter, $orders);
         $contactOrderIds = LeadContactMetrics::contactOrderIds($orders)->map(fn ($id): int => (int) $id);
 
         $saleIds = $orders->pluck('sale_user_id')
@@ -931,7 +972,7 @@ class ExtraReportService
         ])->values()->all();
 
         $marketerIdsInScope = $orders->pluck('marketer_user_id')
-            ->merge($leads->map(fn (LeadIngestion $lead) => $lead->marketingSource?->marketer_user_id))
+            ->merge($leads->map(fn (LeadIngestion $lead) => $lead->marketingSource?->marketer_user_id ?? $lead->marketingSource?->parent?->marketer_user_id))
             ->filter()
             ->map(fn ($id): int => (int) $id)
             ->unique()
@@ -941,10 +982,12 @@ class ExtraReportService
             ? collect()
             : User::query()->whereIn('id', $marketerIdsInScope)->get(['id', 'name', 'email', 'team_id'])->keyBy('id');
 
-        $rows = $marketerIdsInScope->map(function (int $marketerId) use ($orders, $leads, $contactCountsByMarketer, $contactOrderIds, $sales, $marketerUsers): array {
+        $rows = $marketerIdsInScope->map(function (int $marketerId) use ($orders, $leads, $contactCountsByMarketer, $primaryCountsByMarketer, $upsaleCountsByMarketer, $contactOrderIds, $sales, $marketerUsers): array {
             $group = $orders->where('marketer_user_id', $marketerId)->values();
-            $marketerLeads = $leads->filter(fn (LeadIngestion $lead): bool => (int) $lead->marketingSource?->marketer_user_id === $marketerId);
+            $marketerLeads = $leads->filter(fn (LeadIngestion $lead): bool => (int) ($lead->marketingSource?->marketer_user_id ?? $lead->marketingSource?->parent?->marketer_user_id) === $marketerId);
             $contactCount = (int) $contactCountsByMarketer->get($marketerId, 0);
+            $primaryPackets = (int) $primaryCountsByMarketer->get($marketerId, 0);
+            $upsalePackets = (int) $upsaleCountsByMarketer->get($marketerId, 0);
             $closedContactOrders = $group
                 ->whereIn('id', $contactOrderIds)
                 ->filter(fn (Order $order): bool => (string) $order->closing_status === 'closed');
@@ -954,16 +997,19 @@ class ExtraReportService
                     && in_array($lead->status->value, ['pending', 'gathering'], true),
             )->count() + $group->whereNull('sale_user_id')->count();
 
-            $saleCells = $sales->map(function (User $sale) use ($group, $contactOrderIds): array {
-                $saleOrders = $group->where('sale_user_id', $sale->id)->values();
-                $saleContacts = $saleOrders->whereIn('id', $contactOrderIds);
-                $saleClosed = $saleContacts->filter(fn (Order $order): bool => (string) $order->closing_status === 'closed');
+            $saleCells = $sales->map(function (User $sale) use ($marketerLeads): array {
+                $salePackets = $marketerLeads->filter(fn (LeadIngestion $lead): bool => (int) (MarketingPacketMetrics::effectiveOrder($lead)?->sale_user_id ?? 0) === (int) $sale->id);
+                $saleClosed = $salePackets
+                    ->map(fn (LeadIngestion $lead): ?Order => MarketingPacketMetrics::effectiveOrder($lead))
+                    ->filter(fn (?Order $order): bool => $order !== null && (string) $order->closing_status === 'closed')
+                    ->unique('id')
+                    ->count();
 
                 return [
                     'sale_id' => (int) $sale->id,
-                    'contacts' => $saleContacts->count(),
-                    'closed' => $saleClosed->count(),
-                    'rate' => self::pct($saleClosed->count(), $saleContacts->count()),
+                    'contacts' => $salePackets->count(),
+                    'closed' => $saleClosed,
+                    'rate' => self::pct($saleClosed, $salePackets->count()),
                 ];
             })->values()->all();
 
@@ -981,6 +1027,8 @@ class ExtraReportService
                 'name' => $name,
                 'username' => $email ? (strstr((string) $email, '@', true) ?: $email) : null,
                 'contacts' => $contactCount,
+                'primary_packets' => $primaryPackets,
+                'upsale_packets' => $upsalePackets,
                 'unallocated' => $unallocated,
                 'closed' => $closedContactOrders->count(),
                 'rate' => self::pct($closedContactOrders->count(), $contactCount),
@@ -991,6 +1039,8 @@ class ExtraReportService
         $totals = [
             'name' => __('reports.grand_total'),
             'contacts' => array_sum(array_column($rows, 'contacts')),
+            'primary_packets' => array_sum(array_column($rows, 'primary_packets')),
+            'upsale_packets' => array_sum(array_column($rows, 'upsale_packets')),
             'unallocated' => array_sum(array_column($rows, 'unallocated')),
             'closed' => array_sum(array_column($rows, 'closed')),
         ];
@@ -1018,6 +1068,8 @@ class ExtraReportService
         $columns = [
             $this->col('marketer', 'name', 'text'),
             $this->col('contacts_total', 'contacts', 'number'),
+            $this->col('primary_packets', 'primary_packets', 'number'),
+            $this->col('upsale_packets', 'upsale_packets', 'number'),
             $this->col('unallocated', 'unallocated', 'number'),
             $this->col('rate', 'rate', 'percent'),
         ];
@@ -1068,13 +1120,17 @@ class ExtraReportService
         $orders = $this->fetchOrdersWithItems($user, $filter, scopeMarketing: $user->role === UserRole::Marketing)
             ->filter(fn (Order $o) => $o->marketing_source_id !== null)
             ->values();
-        $contactCountsBySource = LeadContactMetrics::effectiveCountsBySource($filter, $orders);
+        $contactCountsBySource = MarketingPacketMetrics::effectiveCountsBySource($filter, $orders);
+        $primaryCountsBySource = MarketingPacketMetrics::effectivePrimaryCountsBySource($filter, $orders);
+        $upsaleCountsBySource = MarketingPacketMetrics::effectiveUpsaleCountsBySource($filter, $orders);
 
         $columns = [
             ['key' => 'name', 'label' => 'Nguồn dữ liệu (1)', 'format' => 'text'],
             ['key' => 'channel', 'label' => 'KÊNH (2)', 'format' => 'text'],
             ['key' => 'products', 'label' => 'SẢN PHẨM ĐĂNG KÝ TRÊN NGUỒN DỮ LIỆU (3)', 'format' => 'text'],
-            ['key' => 'contacts', 'label' => 'CONTACT (4)', 'format' => 'number'],
+            ['key' => 'contacts', 'label' => 'CONTACT (4 = gói chính + upsale)', 'format' => 'number'],
+            ['key' => 'primary_packets', 'label' => 'GÓI CHÍNH', 'format' => 'number'],
+            ['key' => 'upsale_packets', 'label' => 'GÓI UPSALE', 'format' => 'number'],
             ['key' => 'closed', 'label' => 'ĐƠN CHỐT (5)', 'format' => 'number'],
             ['key' => 'rate_decimal', 'label' => 'TỈ LỆ CHỐT ĐƠN (6 = 5/4)', 'format' => 'number'],
             ['key' => 'product_types', 'label' => 'SỐ LOẠI SP ĐƯỢC BÁN RA (7)', 'format' => 'number'],
@@ -1085,10 +1141,24 @@ class ExtraReportService
             ['key' => 'detail_url', 'label' => 'CHI TIẾT ĐƠN HÀNG TỪ NGUỒN DỮ LIỆU (12)', 'format' => 'text'],
         ];
 
-        $rows = $orders->groupBy('marketing_source_id')->map(function (Collection $group, int|string $sourceId) use ($contactCountsBySource, $user, $filter) {
-            $source = $group->first()->marketingSource;
+        $sourceIdsWithData = $orders->pluck('marketing_source_id')
+            ->merge($contactCountsBySource->keys())
+            ->filter()
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+        $sourcesById = $sourceIdsWithData->isEmpty()
+            ? collect()
+            : \App\Models\MarketingSource::query()->with('product:id,name')->whereIn('id', $sourceIdsWithData)->get()->keyBy('id');
+        $groupedBySource = $orders->groupBy('marketing_source_id');
+
+        $rows = $sourceIdsWithData->map(function (int $sourceId) use ($groupedBySource, $sourcesById, $contactCountsBySource, $primaryCountsBySource, $upsaleCountsBySource, $user, $filter) {
+            $group = collect($groupedBySource->get($sourceId, collect()))->values();
+            $source = $group->first()?->marketingSource ?? $sourcesById->get((int) $sourceId);
             $closedContacts = $this->closed($this->contactOrders($group));
             $contacts = (int) $contactCountsBySource->get((int) $sourceId, 0);
+            $primaryPackets = (int) $primaryCountsBySource->get((int) $sourceId, 0);
+            $upsalePackets = (int) $upsaleCountsBySource->get((int) $sourceId, 0);
 
             $closed = $this->closed($group);
             $revenueOrders = $this->upsaleRevenueOrders($closed);
@@ -1114,6 +1184,8 @@ class ExtraReportService
                 'channel' => $this->formatChannel($source?->ad_channel ?? $source?->utm_source),
                 'products' => $productNames->isNotEmpty() ? $productNames->implode('; ') : 'Tất cả',
                 'contacts' => $contacts,
+                'primary_packets' => $primaryPackets,
+                'upsale_packets' => $upsalePackets,
                 'closed' => $closedCount,
                 'rate' => $rate,
                 'rate_decimal' => $contacts > 0 ? round($closedCount / $contacts, 2) : null,
@@ -1152,7 +1224,7 @@ class ExtraReportService
                 'mode' => 'marketing_upsale_source',
                 'notes' => [
                     ['metric' => 'DOANH SỐ, ĐƠN CHỐT, SỐ SP BÁN RA TÍNH THEO DOANH SỐ TẠM TÍNH', 'meaning' => 'Doanh số sau khi đăng đơn, trừ đơn đã hoàn, hủy vận đơn và hủy đăng đơn.', 'formula' => 'DS = tổng giá trị đơn hợp lệ'],
-                    ['metric' => 'CONTACT (4)', 'meaning' => 'Chỉ đếm lead gốc đủ điều kiện, không nhân đôi packet upsale.', 'formula' => 'Lead counts_as_lead = true'],
+                    ['metric' => 'CONTACT (4)', 'meaning' => 'Đếm gói tin landing hợp lệ gồm gói chính và từng gói upsale; loại duplicate/failed/follow-up.', 'formula' => 'Contact MKT = gói chính + upsale'],
                     ['metric' => 'TỈ LỆ CHỐT (6)', 'meaning' => 'Tỷ lệ chốt theo nguồn dữ liệu.', 'formula' => 'Đơn chốt / Contact'],
                     ['metric' => 'UPSALE', 'meaning' => 'Sản phẩm item_type=upsell hoặc origin chứa upsell/upsale được cộng vào số lượng/doanh số bán ra nhưng không tạo thêm contact.', 'formula' => 'Tách theo order_items'],
                 ],

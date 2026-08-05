@@ -372,6 +372,8 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
     const isMarketingReport = fields.has('marketer_id') || fields.has('marketing_team_id') || fields.has('marketing_team_leader_id') || title.toLowerCase().includes('marketing');
     const personLabel = isMarketingReport ? psText(t, 'marketing_name', 'TÊN MARKETING') : psText(t, 'sale_name', 'TÊN SALE');
     const renderIf = (field, node) => (fields.has(field) ? node : null);
+    const hasPacketBreakdown = isMarketingReport && (totals?.primary_packets !== undefined || rows.some((row) => row.primary_packets !== undefined));
+    const contactBreakdownExtraCols = hasPacketBreakdown ? 2 : 0;
 
     const primaryFilters = (
         <div className="ps-revenue-detail-primary ps-report-toolbar-controls">
@@ -429,6 +431,8 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
                             <th className="text-center" rowSpan={2}>{psText(t, 'xngh_rate', '% XNGH (12)')}</th>
                             <th className="text-center" rowSpan={2}>{psText(t, 'success_rate', '% GH Thành công (13)')}</th>
                             <th className="text-center" rowSpan={2}>{psText(t, 'contact', 'Contact (14)')}</th>
+                            {hasPacketBreakdown && <th className="text-center" rowSpan={2}>{psText(t, 'primary_packets', 'Gói chính')}</th>}
+                            {hasPacketBreakdown && <th className="text-center" rowSpan={2}>{psText(t, 'upsale_packets', 'Upsale')}</th>}
                             <th className="text-center" rowSpan={2}>{psText(t, 'close_rate', 'Tỷ lệ chốt (%) (15)')}</th>
                             <th className="text-center" rowSpan={2}>{psText(t, 'product_qty', 'Số sản phẩm (16)')}</th>
                             <th className="text-center" rowSpan={2}>{psText(t, 'avg_order', 'Giá trị đơn (17)')}</th>
@@ -454,7 +458,7 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
                             <tr className="ps-total-row">
                                 <td>1</td><td className="ps-text-left">Tổng:</td>
                                 {REVENUE_GROUPS.flatMap(([, qty, rev]) => [<td key={qty}>{formatNumber(totals[qty])}</td>, <td key={rev}>{formatCurrency(totals[rev])}</td>])}
-                                {['pct_returned','pct_cancel','pct_xngh','pct_success','contacts','close_rate','product_count','avg_order','pct_rev_returned','pct_rev_cancel'].map((key) => (
+                                {['pct_returned','pct_cancel','pct_xngh','pct_success','contacts', ...(hasPacketBreakdown ? ['primary_packets','upsale_packets'] : []), 'close_rate','product_count','avg_order','pct_rev_returned','pct_rev_cancel'].map((key) => (
                                     <td key={key}>{formatCell(totals[key], key.includes('pct') || key === 'close_rate' ? 'percent' : key === 'avg_order' ? 'currency' : 'number')}</td>
                                 ))}
                                 <td>{formatNumber(totals.base_qty)}</td><td>{formatCurrency(totals.base_rev)}</td>
@@ -466,7 +470,7 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
                             <tr key={`${row.name}-${index}`}>
                                 <td>{index + 2}</td><td className="ps-text-left">{row.name}</td>
                                 {REVENUE_GROUPS.flatMap(([, qty, rev]) => [<td key={qty}>{formatNumber(row[qty])}</td>, <td key={rev}>{formatCurrency(row[rev])}</td>])}
-                                {['pct_returned','pct_cancel','pct_xngh','pct_success','contacts','close_rate','product_count','avg_order','pct_rev_returned','pct_rev_cancel'].map((key) => (
+                                {['pct_returned','pct_cancel','pct_xngh','pct_success','contacts', ...(hasPacketBreakdown ? ['primary_packets','upsale_packets'] : []), 'close_rate','product_count','avg_order','pct_rev_returned','pct_rev_cancel'].map((key) => (
                                     <td key={key}>{formatCell(row[key], key.includes('pct') || key === 'close_rate' ? 'percent' : key === 'avg_order' ? 'currency' : 'number')}</td>
                                 ))}
                                 <td>{formatNumber(row.base_qty)}</td><td>{formatCurrency(row.base_rev)}</td>
@@ -474,7 +478,7 @@ function RevenueDetailReport({ title, rows, totals, filters, filterOptions, filt
                                 <td>{formatCell(row.upsell_order_rate, 'percent')}</td><td>{formatCell(row.upsell_revenue_share, 'percent')}</td>
                             </tr>
                         ))}
-                        {rows.length === 0 && <tr><td colSpan={2 + REVENUE_GROUPS.length * 2 + 10 + 6} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
+                        {rows.length === 0 && <tr><td colSpan={2 + REVENUE_GROUPS.length * 2 + 10 + contactBreakdownExtraCols + 6} className="ps-empty">{psText(t, 'no_data', 'Không có dữ liệu.')}</td></tr>}
                     </tbody>
                 </table>
             </div>
@@ -1283,7 +1287,8 @@ function MarketingUpsaleReport({ title, rows, totals, filters, filterOptions, fi
 function MarketingWorkMatrixReport({ title, rows, totals, filters, filterOptions, filterFields, routeUrl, extra = {} }) {
     const matrixRows = extra.matrixRows ?? rows ?? [];
     const salesColumns = extra.salesColumns ?? [];
-    const totalColSpan = 5 + salesColumns.length * 2;
+    const hasPacketBreakdown = totals?.primary_packets !== undefined || matrixRows.some((row) => row.primary_packets !== undefined);
+    const totalColSpan = 5 + (hasPacketBreakdown ? 2 : 0) + salesColumns.length * 2;
     const perPage = Math.max(1, Number(filters?.per_page ?? 20) || 20);
     const [page, setPage] = useState(1);
     const totalPages = Math.max(1, Math.ceil(matrixRows.length / perPage));
@@ -1304,6 +1309,8 @@ function MarketingWorkMatrixReport({ title, rows, totals, filters, filterOptions
                 )}
             </td>
             <td className="text-center text-bold">{formatCell(row.contacts, 'number')}</td>
+            {hasPacketBreakdown && <td className="text-center">{formatCell(row.primary_packets ?? 0, 'number')}</td>}
+            {hasPacketBreakdown && <td className="text-center">{formatCell(row.upsale_packets ?? 0, 'number')}</td>}
             <td className="text-center">{row.unallocated ? formatCell(row.unallocated, 'number') : ''}</td>
             <td className={`nowrap text-center ${rateToneClass(row.rate)}`}>{renderRate(row.rate)}</td>
             {salesColumns.flatMap((sale) => {
@@ -1331,6 +1338,8 @@ function MarketingWorkMatrixReport({ title, rows, totals, filters, filterOptions
                             <th rowSpan={2} className="text-center">STT</th>
                             <th rowSpan={2} className="text-center">MARKETING</th>
                             <th rowSpan={2} className="text-center">Tổng contact</th>
+                            {hasPacketBreakdown && <th rowSpan={2} className="text-center">Gói chính</th>}
+                            {hasPacketBreakdown && <th rowSpan={2} className="text-center">Upsale</th>}
                             <th rowSpan={2} className="text-center">Tổng contact<br />chưa phân bổ</th>
                             <th rowSpan={2} className="text-center">Tỷ lệ chốt<br />(%)</th>
                             {salesColumns.map((sale) => (

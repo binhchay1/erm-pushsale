@@ -8,6 +8,7 @@ use App\Enums\ClosingStatus;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Support\LeadContactMetrics;
+use App\Support\MarketingPacketMetrics;
 use Illuminate\Support\Collection;
 
 class MarketingDashboardService
@@ -21,7 +22,9 @@ class MarketingDashboardService
     public function build(ReportFilterData $filter): array
     {
         $orderCollection = $this->orders->allFiltered($filter);
-        $leadCountsBySource = LeadContactMetrics::effectiveCountsBySource($filter, $orderCollection);
+        $leadCountsBySource = MarketingPacketMetrics::effectiveCountsBySource($filter, $orderCollection);
+        $primaryCountsBySource = MarketingPacketMetrics::effectivePrimaryCountsBySource($filter, $orderCollection);
+        $upsaleCountsBySource = MarketingPacketMetrics::effectiveUpsaleCountsBySource($filter, $orderCollection);
 
         $sources = MarketingSource::query()
             ->visibleInReports()
@@ -41,6 +44,8 @@ class MarketingDashboardService
                 sourceFamily: $family,
                 orders: $orderCollection,
                 leadCountsBySource: $leadCountsBySource,
+                primaryCountsBySource: $primaryCountsBySource,
+                upsaleCountsBySource: $upsaleCountsBySource,
                 stt: $stt,
                 parentId: null,
             );
@@ -51,6 +56,8 @@ class MarketingDashboardService
                     sourceFamily: collect([$child]),
                     orders: $orderCollection,
                     leadCountsBySource: $leadCountsBySource,
+                    primaryCountsBySource: $primaryCountsBySource,
+                    upsaleCountsBySource: $upsaleCountsBySource,
                     stt: $stt,
                     parentId: $source->id,
                 );
@@ -104,6 +111,8 @@ class MarketingDashboardService
      * @param Collection<int, MarketingSource> $sourceFamily
      * @param Collection<int, Order> $orders
      * @param Collection<int, int> $leadCountsBySource
+     * @param Collection<int, int> $primaryCountsBySource
+     * @param Collection<int, int> $upsaleCountsBySource
      * @return array<string, mixed>
      */
     private function mapSourceRow(
@@ -111,6 +120,8 @@ class MarketingDashboardService
         Collection $sourceFamily,
         Collection $orders,
         Collection $leadCountsBySource,
+        Collection $primaryCountsBySource,
+        Collection $upsaleCountsBySource,
         int $stt,
         ?int $parentId,
     ): array {
@@ -118,6 +129,10 @@ class MarketingDashboardService
         $sourceOrders = $orders->whereIn('marketing_source_id', $sourceIds);
         $contacts = (int) collect($sourceIds)
             ->sum(fn (int $sourceId): int => (int) $leadCountsBySource->get($sourceId, 0));
+        $primaryPackets = (int) collect($sourceIds)
+            ->sum(fn (int $sourceId): int => (int) $primaryCountsBySource->get($sourceId, 0));
+        $upsalePackets = (int) collect($sourceIds)
+            ->sum(fn (int $sourceId): int => (int) $upsaleCountsBySource->get($sourceId, 0));
         $interactions = max($contacts, 1);
         $contactOrderIds = LeadContactMetrics::contactOrderIds($sourceOrders);
         $closed = $sourceOrders->whereIn('id', $contactOrderIds)
@@ -141,6 +156,10 @@ class MarketingDashboardService
             'budget' => $budget,
             'interactions' => $interactions,
             'contacts' => $contacts,
+            'primaryPackets' => $primaryPackets,
+            'upsalePackets' => $upsalePackets,
+            'baseContacts' => $primaryPackets,
+            'upsaleContacts' => $upsalePackets,
             'contactRate' => $interactions > 0 ? round($contacts / $interactions * 100, 1) : 0,
             'costPerContact' => $contacts > 0 ? (int) round($budget / $contacts) : 0,
             'closedOrders' => $closed,
@@ -172,6 +191,10 @@ class MarketingDashboardService
         return [
             'budget' => array_sum(array_column($parents, 'budget')),
             'contacts' => array_sum(array_column($parents, 'contacts')),
+            'primaryPackets' => array_sum(array_column($parents, 'primaryPackets')),
+            'upsalePackets' => array_sum(array_column($parents, 'upsalePackets')),
+            'baseContacts' => array_sum(array_column($parents, 'baseContacts')),
+            'upsaleContacts' => array_sum(array_column($parents, 'upsaleContacts')),
             'closedOrders' => array_sum(array_column($parents, 'closedOrders')),
             'totalRevenue' => array_sum(array_column($parents, 'totalRevenue')),
         ];

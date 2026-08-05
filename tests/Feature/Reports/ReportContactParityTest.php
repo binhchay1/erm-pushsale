@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Reports;
 
+use App\Data\MarketingDashboardFilterData;
 use App\Data\ReportFilterData;
 use App\Enums\ClosingStatus;
 use App\Enums\DeliveryStatus;
@@ -16,7 +17,9 @@ use App\Services\Reports\CeoReportService;
 use App\Services\Reports\ExtraReportService;
 use App\Services\Reports\MarketingCampaignReportService;
 use App\Services\Reports\MarketingDashboardService;
+use App\Services\Reports\PushsaleMarketingDashboardService;
 use App\Support\LeadContactMetrics;
+use App\Support\MarketingPacketMetrics;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -24,7 +27,8 @@ use Tests\TestCase;
 /**
  * Bảo đảm MỌI báo cáo đếm "contact" giống hệt nhau và bằng số lead thật:
  * - Không cộng số lần gọi (contact_count).
- * - Không cộng dòng duplicate / :upsell audit.
+ * - Marketing dashboard/report cộng thêm từng gói upsale hợp lệ nhưng vẫn loại duplicate/failed/follow-up.
+ * - CEO/Sale vẫn giữ contract contact khách gốc để không làm sai tỷ lệ chốt ngoài Marketing.
  */
 class ReportContactParityTest extends TestCase
 {
@@ -116,15 +120,31 @@ class ReportContactParityTest extends TestCase
         $parentRow = collect($dashboard['rows'])->firstWhere('id', (string) $parent->id);
         $childRow = collect($dashboard['rows'])->firstWhere('id', (string) $child->id);
 
-        $this->assertSame(1, (int) $parentRow['contacts']);
-        $this->assertSame(1, (int) $childRow['contacts']);
-        $this->assertSame(1, (int) $dashboard['filterTotal']['contacts']);
+        $this->assertSame(2, (int) $parentRow['contacts']);
+        $this->assertSame(1, (int) $parentRow['primaryPackets']);
+        $this->assertSame(1, (int) $parentRow['upsalePackets']);
+        $this->assertSame(2, (int) $childRow['contacts']);
+        $this->assertSame(1, (int) $childRow['primaryPackets']);
+        $this->assertSame(1, (int) $childRow['upsalePackets']);
+        $this->assertSame(2, (int) $dashboard['filterTotal']['contacts']);
         $this->assertSame(150_000, (int) $parentRow['totalRevenue']);
 
         $campaign = app(MarketingCampaignReportService::class)->build($filter, $admin);
         $campaignRow = collect($campaign['rows'])->firstWhere('campaignId', (string) $parent->id);
-        $this->assertSame(1, (int) $campaignRow['leadsGenerated']);
+        $this->assertSame(2, (int) $campaignRow['leadsGenerated']);
+        $this->assertSame(1, (int) $campaignRow['primaryPackets']);
+        $this->assertSame(1, (int) $campaignRow['upsalePackets']);
         $this->assertSame(150_000, (int) $campaignRow['actualRevenue']);
+
+        $pushsaleFilter = new MarketingDashboardFilterData(
+            dateFrom: now()->startOfDay(),
+            dateTo: now()->endOfDay(),
+        );
+        $packetDialog = app(PushsaleMarketingDashboardService::class)->packetRows($pushsaleFilter, $parent, null, null);
+        $this->assertSame(2, (int) $packetDialog['summary']['contacts'], 'packet dialog total follows dashboard contact');
+        $this->assertSame(1, (int) $packetDialog['summary']['baseContacts'], 'packet dialog primary packets');
+        $this->assertSame(1, (int) $packetDialog['summary']['upsaleContacts'], 'packet dialog upsale packets');
+        $this->assertEqualsCanonicalizing(['late_upsale', 'primary'], collect($packetDialog['rows'])->pluck('packetType')->all());
 
         $ceo = app(CeoReportService::class)->build($filter, $admin);
         $this->assertSame(1, (int) ($ceo['marketingRows'][0]['contacts'] ?? 0));
@@ -172,7 +192,7 @@ class ReportContactParityTest extends TestCase
             ]);
         }
 
-        // Dòng audit upsell của khách 1 (KHÔNG tính là contact mới).
+        // Gói upsale của khách 1: Marketing tính là traffic upsale, contract global thì không.
         LeadIngestion::query()->create([
             'platform' => 'landing',
             'external_id' => 'sub-1:upsell',
@@ -203,16 +223,23 @@ class ReportContactParityTest extends TestCase
             dateTo: now()->endOfDay(),
         );
 
-        $expected = 3;
+        $expectedGlobal = 3;
+        $expectedMarketing = 4;
 
-        // Nguồn chân lý
-        $this->assertSame($expected, LeadContactMetrics::countToday(), 'countToday');
-        $this->assertSame($expected, (int) LeadContactMetrics::countsBySource($filter)->get($source->id), 'countsBySource');
-        $this->assertSame($expected, (int) LeadContactMetrics::countsByMarketer($filter)->get($marketer->id), 'countsByMarketer');
+        // Nguồn chân lý global vẫn giữ contact khách gốc.
+        $this->assertSame($expectedGlobal, LeadContactMetrics::countToday(), 'countToday');
+        $this->assertSame($expectedGlobal, (int) LeadContactMetrics::countsBySource($filter)->get($source->id), 'countsBySource');
+        $this->assertSame($expectedGlobal, (int) LeadContactMetrics::countsByMarketer($filter)->get($marketer->id), 'countsByMarketer');
+
+        // Contract Marketing mới = gói chính + upsale hợp lệ.
+        $this->assertSame($expectedMarketing, (int) MarketingPacketMetrics::countsBySource($filter)->get($source->id), 'marketing countsBySource');
+        $this->assertSame(3, (int) MarketingPacketMetrics::primaryCountsBySource($filter)->get($source->id), 'marketing primary source');
+        $this->assertSame(1, (int) MarketingPacketMetrics::upsaleCountsBySource($filter)->get($source->id), 'marketing upsale source');
+        $this->assertSame($expectedMarketing, (int) MarketingPacketMetrics::countsByMarketer($filter)->get($marketer->id), 'marketing countsByMarketer');
 
         // Marketing Dashboard (KPI + bảng nguồn + cây team)
         $mkt = app(MarketingDashboardService::class)->build($filter);
-        $this->assertSame($expected, (int) $mkt['kpis']['contacts'], 'marketing dashboard kpi contacts');
+        $this->assertSame($expectedMarketing, (int) $mkt['kpis']['contacts'], 'marketing dashboard kpi contacts');
 
         $treeContacts = 0;
         $walk = function (array $nodes) use (&$walk, &$treeContacts): void {
@@ -226,20 +253,25 @@ class ReportContactParityTest extends TestCase
             }
         };
         $walk($mkt['teamTree']['roots'] ?? []);
-        $this->assertSame($expected, $treeContacts, 'marketing dashboard team tree contacts');
+        $this->assertSame($expectedMarketing, $treeContacts, 'marketing dashboard team tree contacts');
 
         // Báo cáo công việc marketing (marketing-3)
         $work = app(ExtraReportService::class)->build('marketing-3', $admin, $filter);
-        $this->assertSame($expected, (int) ($work['totals']['contacts'] ?? 0), 'marketing-3 total contacts');
+        $this->assertSame($expectedMarketing, (int) ($work['totals']['contacts'] ?? 0), 'marketing-3 total contacts');
+        $this->assertSame(3, (int) ($work['totals']['primary_packets'] ?? 0), 'marketing-3 primary packets');
+        $this->assertSame(1, (int) ($work['totals']['upsale_packets'] ?? 0), 'marketing-3 upsale packets');
 
         // CEO report
         $ceo = app(CeoReportService::class)->build($filter, $admin);
         $ceoContacts = array_sum(array_map(fn ($r) => (int) ($r['contacts'] ?? 0), $ceo['marketingRows'] ?? []));
-        $this->assertSame($expected, $ceoContacts, 'ceo marketing contacts');
+        $this->assertSame($expectedGlobal, $ceoContacts, 'ceo marketing contacts');
 
         // Campaign report (leadsGenerated)
         $campaign = app(MarketingCampaignReportService::class)->build($filter, $admin);
         $campaignLeads = (int) collect($campaign['rows'])->firstWhere('isTotalRow', true)['leadsGenerated'];
-        $this->assertSame($expected, $campaignLeads, 'campaign report leads generated');
+        $this->assertSame($expectedMarketing, $campaignLeads, 'campaign report leads generated');
+        $campaignTotal = collect($campaign['rows'])->firstWhere('isTotalRow', true);
+        $this->assertSame(3, (int) $campaignTotal['primaryPackets'], 'campaign primary packets');
+        $this->assertSame(1, (int) $campaignTotal['upsalePackets'], 'campaign upsale packets');
     }
 }

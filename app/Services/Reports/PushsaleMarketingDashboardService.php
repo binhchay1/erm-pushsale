@@ -4,6 +4,8 @@ namespace App\Services\Reports;
 
 use App\Data\MarketingDashboardFilterData;
 use App\Enums\ClosingStatus;
+use App\Enums\LeadIngestionStatus;
+use App\Enums\LeadPacketType;
 use App\Enums\DateType;
 use App\Enums\TeamType;
 use App\Enums\UserRole;
@@ -16,6 +18,7 @@ use App\Models\Team;
 use App\Models\User;
 use App\Support\ActivityLogger;
 use App\Support\LeadContactMetrics;
+use App\Support\MarketingPacketMetrics;
 use App\Support\OrderRevenueClassifier;
 use App\Services\Marketing\MarketingBudgetService;
 use Carbon\Carbon;
@@ -287,12 +290,21 @@ class PushsaleMarketingDashboardService
                         $utmCampaign,
                     ));
 
+                $baseContacts = $ingestionDay->filter(
+                    fn (LeadIngestion $item): bool => ! MarketingPacketMetrics::isUpsale($item),
+                )->count();
+                $upsaleContacts = $ingestionDay->filter(
+                    fn (LeadIngestion $item): bool => MarketingPacketMetrics::isUpsale($item),
+                )->count();
+
                 return [
                     'date' => $day->toDateString(),
                     'label' => $day->format('d/m'),
                     'budget' => (int) $metricDay->sum('budget'),
                     'clicks' => (int) $metricDay->sum('clicks'),
-                    'contacts' => $ingestionDay->count(),
+                    'contacts' => $baseContacts + $upsaleContacts,
+                    'baseContacts' => $baseContacts,
+                    'upsaleContacts' => $upsaleContacts,
                     'revenue' => (int) $orderDay->sum(fn (Order $order): int => $order->effectiveRevenue()),
                 ];
             })->values();
@@ -303,6 +315,90 @@ class PushsaleMarketingDashboardService
             'utm_source' => $utmSource ?: '',
             'utm_campaign' => $utmCampaign ?: '',
             'days' => $days,
+        ];
+    }
+
+    /**
+     * Packet detail behind the plus button. The query deliberately reuses the
+     * exact dashboard filter contract so the dialog total always matches the
+     * selected source/UTM row outside.
+     *
+     * @return array<string, mixed>
+     */
+    public function packetRows(
+        MarketingDashboardFilterData $filter,
+        MarketingSource $source,
+        ?string $utmSource,
+        ?string $utmCampaign,
+        int $page = 1,
+        int $perPage = 20,
+    ): array {
+        $source->loadMissing('children:id,parent_id');
+        $sourceIds = collect([$source->id])
+            ->merge($source->children->pluck('id'))
+            ->map(static fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        $query = $this->ingestionQuery($filter, $sourceIds)
+            ->with([
+                'marketingSource:id,name,parent_id',
+                'landingConnection:id,name',
+                'landingConnectionSource:id,landing_connection_id,name,source_type',
+            ]);
+
+        $this->applyExactUtm($query, $utmSource, $utmCampaign);
+
+        $summaryQuery = clone $query;
+        $total = (int) (clone $summaryQuery)->count();
+        $baseContacts = (int) (clone $summaryQuery)
+            ->where(function (Builder $packet): void {
+                $packet->whereNull('packet_type')
+                    ->orWhereNotIn('packet_type', MarketingPacketMetrics::upsaleTypes());
+            })
+            ->count();
+        $upsaleContacts = (int) (clone $summaryQuery)
+            ->whereIn('packet_type', MarketingPacketMetrics::upsaleTypes())
+            ->count();
+        $reviewPackets = (int) (clone $summaryQuery)
+            ->where(function (Builder $packet): void {
+                $packet->where('requires_review', true)
+                    ->orWhere('status', LeadIngestionStatus::NeedsReview);
+            })
+            ->count();
+
+        $perPage = min(100, max(10, $perPage));
+        $lastPage = max(1, (int) ceil($total / $perPage));
+        $page = min(max(1, $page), $lastPage);
+
+        $packets = $query
+            ->latest('lead_ingestions.created_at')
+            ->latest('lead_ingestions.id')
+            ->forPage($page, $perPage)
+            ->get();
+
+        return [
+            'source' => [
+                'id' => $source->id,
+                'name' => $source->name,
+            ],
+            'utm_source' => trim((string) $utmSource),
+            'utm_campaign' => trim((string) $utmCampaign),
+            'summary' => [
+                'contacts' => $total,
+                'baseContacts' => $baseContacts,
+                'upsaleContacts' => $upsaleContacts,
+                'reviewPackets' => $reviewPackets,
+            ],
+            'rows' => $packets->map(fn (LeadIngestion $packet): array => $this->mapPacketRow($packet))->values(),
+            'pagination' => [
+                'current_page' => $page,
+                'last_page' => $lastPage,
+                'per_page' => $perPage,
+                'total' => $total,
+                'from' => $total === 0 ? 0 : (($page - 1) * $perPage) + 1,
+                'to' => min($page * $perPage, $total),
+            ],
         ];
     }
 
@@ -496,22 +592,39 @@ class PushsaleMarketingDashboardService
     /** @param Collection<int, int> $sourceIds */
     private function ingestionQuery(MarketingDashboardFilterData $filter, Collection $sourceIds): Builder
     {
-        $query = LeadContactMetrics::applyCountableScope(LeadIngestion::query())
-            ->with('order:id,is_returning_customer,operation_stage,next_operation_at,assigned_at,closed_at,updated_at,created_at')
+        $query = MarketingPacketMetrics::applyCountableScope(LeadIngestion::query())
+            ->with([
+                'order:id,order_code,is_returning_customer,operation_stage,next_operation_at,assigned_at,closed_at,updated_at,created_at',
+                'relatedOrder:id,order_code,is_returning_customer,operation_stage,next_operation_at,assigned_at,closed_at,updated_at,created_at',
+                'parentIngestion:id,order_id,related_order_id',
+                'parentIngestion.order:id,order_code,is_returning_customer,operation_stage,next_operation_at,assigned_at,closed_at,updated_at,created_at',
+                'parentIngestion.relatedOrder:id,order_code,is_returning_customer,operation_stage,next_operation_at,assigned_at,closed_at,updated_at,created_at',
+            ])
             ->whereIn('marketing_source_id', $sourceIds);
 
         $this->applyIngestionDate($query, $filter);
 
         if ($filter->customerType === 'new') {
-            $query->whereHas('order', fn (Builder $q) => $q->where('is_returning_customer', false));
+            $query->where(function (Builder $packet): void {
+                $packet->where(function (Builder $withoutOrder): void {
+                    $withoutOrder->whereDoesntHave('order')
+                        ->whereDoesntHave('relatedOrder')
+                        ->whereDoesntHave('parentIngestion.order')
+                        ->whereDoesntHave('parentIngestion.relatedOrder');
+                })->orWhere(function (Builder $withOrder): void {
+                    $this->wherePacketEffectiveOrder($withOrder, fn (Builder $q) => $q->where(function (Builder $type): void {
+                        $type->where('is_returning_customer', false)->orWhereNull('is_returning_customer');
+                    }));
+                });
+            });
         } elseif ($filter->customerType === 'returning') {
-            $query->whereHas('order', fn (Builder $q) => $q->where('is_returning_customer', true));
+            $this->wherePacketEffectiveOrder($query, fn (Builder $q) => $q->where('is_returning_customer', true));
         }
 
         if ($filter->operationScope === 'next') {
-            $query->whereHas('order', fn (Builder $q) => $q->whereNotNull('next_operation_at'));
+            $this->wherePacketEffectiveOrder($query, fn (Builder $q) => $q->whereNotNull('next_operation_at'));
         } elseif ($filter->operationScope === 'required') {
-            $query->whereHas('order', fn (Builder $q) => $q->whereNotNull('operation_stage'));
+            $this->wherePacketEffectiveOrder($query, fn (Builder $q) => $q->whereNotNull('operation_stage'));
         }
 
         return $query;
@@ -578,16 +691,109 @@ class PushsaleMarketingDashboardService
             ->whereBetween('metric_date', [$filter->dateFrom->toDateString(), $filter->dateTo->toDateString()]);
     }
 
+    /** @param callable(Builder<Order>): void $constraint */
+    private function wherePacketEffectiveOrder(Builder $query, callable $constraint): void
+    {
+        $query->where(function (Builder $packet) use ($constraint): void {
+            $packet->whereHas('order', $constraint)
+                ->orWhereHas('relatedOrder', $constraint)
+                ->orWhereHas('parentIngestion.order', $constraint)
+                ->orWhereHas('parentIngestion.relatedOrder', $constraint);
+        });
+    }
+
+    private function applyExactUtm(Builder $query, ?string $utmSource, ?string $utmCampaign): void
+    {
+        if ($utmSource !== null) {
+            $query->where('utm_source', trim($utmSource));
+        }
+
+        if ($utmCampaign !== null) {
+            $query->where('utm_campaign', trim($utmCampaign));
+        }
+    }
+
+    /** @return array<string, mixed> */
+    private function mapPacketRow(LeadIngestion $packet): array
+    {
+        $order = MarketingPacketMetrics::effectiveOrder($packet);
+        $payload = is_array($packet->payload) ? $packet->payload : [];
+        $message = data_get($payload, 'message')
+            ?? data_get($payload, 'customer_note')
+            ?? data_get($payload, 'note')
+            ?? data_get($payload, 'form.message');
+
+        return [
+            'id' => $packet->id,
+            'externalId' => $packet->external_id,
+            'receivedAt' => $packet->created_at?->timezone(config('app.timezone'))->format('d/m/Y H:i:s'),
+            'packetType' => MarketingPacketMetrics::typeKey($packet),
+            'packetTypeLabel' => $packet->packet_type?->label() ?? __('enums.lead_packet_type.lead'),
+            'isUpsale' => MarketingPacketMetrics::isUpsale($packet),
+            'status' => $packet->status?->value ?? '',
+            'statusLabel' => $packet->status?->label() ?? '',
+            'requiresReview' => (bool) $packet->requires_review,
+            'customerName' => $packet->customer_name ?: '—',
+            'customerPhone' => $packet->customer_phone ?: '—',
+            'productSummary' => $this->packetProductSummary($packet),
+            'message' => is_scalar($message) ? trim((string) $message) : '',
+            'sourceName' => $packet->marketingSource?->name ?? '—',
+            'landingName' => $packet->landingConnection?->name ?? '—',
+            'landingSourceName' => $packet->landingConnectionSource?->name ?? '—',
+            'landingSourceType' => $packet->landingConnectionSource?->source_type ?? '',
+            'utmSource' => trim((string) $packet->utm_source),
+            'utmCampaign' => trim((string) $packet->utm_campaign),
+            'orderId' => $order?->id,
+            'orderCode' => $order?->order_code,
+        ];
+    }
+
+    private function packetProductSummary(LeadIngestion $packet): string
+    {
+        $payload = is_array($packet->payload) ? $packet->payload : [];
+        $items = data_get($payload, 'items', []);
+
+        if (is_array($items)) {
+            $labels = collect($items)->map(function (mixed $item): string {
+                if (! is_array($item)) {
+                    return is_scalar($item) ? trim((string) $item) : '';
+                }
+
+                $name = trim((string) ($item['product_name'] ?? $item['name'] ?? $item['product'] ?? $item['sku'] ?? ''));
+                $quantity = max(1, (int) ($item['quantity'] ?? $item['qty'] ?? 1));
+
+                return $name === '' ? '' : $name.($quantity > 1 ? ' ×'.$quantity : '');
+            })->filter()->values();
+
+            if ($labels->isNotEmpty()) {
+                return $labels->take(3)->implode(', ').($labels->count() > 3 ? ' +'.($labels->count() - 3) : '');
+            }
+        }
+
+        return trim((string) ($packet->product_interest ?: data_get($payload, 'products', ''))) ?: '—';
+    }
+
     /** @param Builder<LeadIngestion> $query */
     private function applyIngestionDate(Builder $query, MarketingDashboardFilterData $filter): void
     {
-        match ($filter->dateType) {
-            DateType::Closing => $query->whereHas('order', fn (Builder $q) => $q->whereBetween('closed_at', [$filter->dateFrom, $filter->dateTo])),
-            DateType::SaleReceived => $query->whereHas('order', fn (Builder $q) => $q->whereBetween('assigned_at', [$filter->dateFrom, $filter->dateTo])),
-            DateType::CareUpdate => $query->whereHas('order', fn (Builder $q) => $q->whereBetween('updated_at', [$filter->dateFrom, $filter->dateTo])),
-            DateType::Posting => $query->whereHas('order', fn (Builder $q) => $q->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo])),
-            default => $query->whereBetween('lead_ingestions.created_at', [$filter->dateFrom, $filter->dateTo]),
+        $column = match ($filter->dateType) {
+            DateType::Closing => 'closed_at',
+            DateType::SaleReceived => 'assigned_at',
+            DateType::CareUpdate => 'updated_at',
+            DateType::Posting => 'created_at',
+            default => null,
         };
+
+        if ($column === null) {
+            $query->whereBetween('lead_ingestions.created_at', [$filter->dateFrom, $filter->dateTo]);
+
+            return;
+        }
+
+        $this->wherePacketEffectiveOrder(
+            $query,
+            fn (Builder $q) => $q->whereBetween($column, [$filter->dateFrom, $filter->dateTo]),
+        );
     }
 
     /** @param Builder<Order> $query */
@@ -672,7 +878,9 @@ class PushsaleMarketingDashboardService
         $metricSet = $dailyMetrics->whereIn('marketing_source_id', $sourceIds)
             ->filter(fn (MarketingSourceDailyMetric $item): bool => $this->utmMatches($item->utm_source, $item->utm_campaign, $utmSource, $utmCampaign));
 
-        $contacts = $ingestionSet->count();
+        $baseContacts = $ingestionSet->filter(fn (LeadIngestion $item): bool => ! MarketingPacketMetrics::isUpsale($item))->count();
+        $upsaleContacts = $ingestionSet->filter(fn (LeadIngestion $item): bool => MarketingPacketMetrics::isUpsale($item))->count();
+        $contacts = $baseContacts + $upsaleContacts;
         $budget = (int) $metricSet->sum('budget');
         $clicks = (int) $metricSet->sum('clicks');
         if ($level === 1) {
@@ -720,6 +928,8 @@ class PushsaleMarketingDashboardService
             'budget' => $budget,
             'interactions' => $clicks,
             'contacts' => $contacts,
+            'baseContacts' => $baseContacts,
+            'upsaleContacts' => $upsaleContacts,
             'contactRate' => $clicks > 0 ? round($contacts / $clicks * 100, 2) : null,
             'costPerContact' => $contacts > 0 ? (int) round($budget / $contacts) : 0,
             'closedOrders' => $closedOrders,
@@ -792,6 +1002,8 @@ class PushsaleMarketingDashboardService
         $budget = (int) $rows->sum('budget');
         $clicks = (int) $rows->sum('interactions');
         $contacts = (int) $rows->sum('contacts');
+        $baseContacts = (int) $rows->sum('baseContacts');
+        $upsaleContacts = (int) $rows->sum('upsaleContacts');
         $closed = (int) $rows->sum('closedOrders');
         $products = (int) $rows->sum('productQuantity');
         $gross = (int) $rows->sum('totalRevenue');
@@ -801,6 +1013,8 @@ class PushsaleMarketingDashboardService
             'budget' => $budget,
             'interactions' => $clicks,
             'contacts' => $contacts,
+            'baseContacts' => $baseContacts,
+            'upsaleContacts' => $upsaleContacts,
             'contactRate' => $clicks > 0 ? round($contacts / $clicks * 100, 2) : null,
             'costPerContact' => $contacts > 0 ? (int) round($budget / $contacts) : 0,
             'closedOrders' => $closed,

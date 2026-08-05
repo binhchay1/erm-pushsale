@@ -11,7 +11,7 @@ use App\Models\LeadIngestion;
 use App\Models\Order;
 use App\Models\Team;
 use App\Models\User;
-use App\Support\LeadContactMetrics;
+use App\Support\MarketingPacketMetrics;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -23,11 +23,15 @@ class MarketingLeaderboardService
         $users = $this->userQuery($filter)->with('team:id,name')->get();
         $userIds = $users->pluck('id')->map(fn ($id) => (int) $id)->values();
 
-        $ingestions = LeadContactMetrics::applyCountableScope(LeadIngestion::query())
+        $ingestions = MarketingPacketMetrics::applyCountableScope(LeadIngestion::query())
             ->with([
                 'marketingSource:id,parent_id,marketer_user_id',
                 'marketingSource.parent:id,marketer_user_id',
                 'order:id,marketer_user_id,is_returning_customer',
+                'relatedOrder:id,marketer_user_id,is_returning_customer',
+                'parentIngestion:id,order_id,related_order_id',
+                'parentIngestion.order:id,marketer_user_id,is_returning_customer',
+                'parentIngestion.relatedOrder:id,marketer_user_id,is_returning_customer',
             ])
             ->whereBetween('lead_ingestions.created_at', [$filter->dateFrom, $filter->dateTo])
             ->where(function (Builder $query) use ($userIds): void {
@@ -58,7 +62,7 @@ class MarketingLeaderboardService
 
         $rows = $users->map(function (User $user) use ($ingestions, $orders, $filter): array {
             $contacts = $ingestions->filter(function (LeadIngestion $lead) use ($user): bool {
-                $marketerId = $lead->order?->marketer_user_id
+                $marketerId = MarketingPacketMetrics::effectiveOrder($lead)?->marketer_user_id
                     ?? $lead->marketingSource?->marketer_user_id
                     ?? $lead->marketingSource?->parent?->marketer_user_id;
 
@@ -66,8 +70,12 @@ class MarketingLeaderboardService
             });
             $userOrders = $orders->where('marketer_user_id', $user->id);
 
-            $newContacts = $contacts->filter(fn (LeadIngestion $lead): bool => ! (bool) $lead->order?->is_returning_customer)->count();
-            $oldContacts = $contacts->filter(fn (LeadIngestion $lead): bool => (bool) $lead->order?->is_returning_customer)->count();
+            $newContacts = $contacts->filter(
+                fn (LeadIngestion $lead): bool => ! (bool) MarketingPacketMetrics::effectiveOrder($lead)?->is_returning_customer,
+            )->count();
+            $oldContacts = $contacts->filter(
+                fn (LeadIngestion $lead): bool => (bool) MarketingPacketMetrics::effectiveOrder($lead)?->is_returning_customer,
+            )->count();
             $newOrders = $userOrders->where('is_returning_customer', false);
             $oldOrders = $userOrders->where('is_returning_customer', true);
 

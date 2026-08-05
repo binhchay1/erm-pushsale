@@ -36,6 +36,14 @@ function pairValue(row, key) {
 
 function Value({ row, keyName, type }) {
     const value = row?.[keyName] ?? 0;
+    if (keyName === 'contacts' && row?.primaryPackets !== undefined) {
+        return (
+            <span className="ps-contact-breakdown-inline">
+                <b>{formatNumber(value)}</b>
+                <small>Chính {formatNumber(row.primaryPackets ?? 0)} · Upsale {formatNumber(row.upsalePackets ?? 0)}</small>
+            </span>
+        );
+    }
     if (type === 'percent') return formatPercent(value);
     if (type === 'currency') return formatCurrency(value);
     return formatNumber(value);

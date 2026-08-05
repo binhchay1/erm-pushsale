@@ -10,6 +10,7 @@ use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
 use App\Support\LeadContactMetrics;
+use App\Support\MarketingPacketMetrics;
 use App\Support\MarketingMetrics;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -26,11 +27,14 @@ class MarketingCampaignReportService
     {
         $orders = $this->queries->orders($viewer, $filter)->with('items')->get();
         $campaigns = $this->campaigns($viewer, $filter);
-        $leadCountsBySource = LeadContactMetrics::effectiveCountsBySource($filter, $orders);
+        $leadCountsBySource = MarketingPacketMetrics::effectiveCountsBySource($filter, $orders);
+        $upsaleCountsBySource = MarketingPacketMetrics::upsaleCountsBySource($filter);
 
         $rows = [];
         $totals = [
             'leadsGenerated' => 0,
+            'primaryPackets' => 0,
+            'upsalePackets' => 0,
             'junkLeads' => 0,
             'adCost' => 0,
             'actualRevenue' => 0,
@@ -43,12 +47,14 @@ class MarketingCampaignReportService
             $sourceIds = $family->pluck('id')->map(static fn ($id): int => (int) $id)->all();
             $campaignOrders = $orders->whereIn('marketing_source_id', $sourceIds);
 
-            // Contact chỉ lấy từ packet lead chính. Đơn bổ sung tạo từ late
-            // upsell vẫn được cộng doanh thu nhưng không được làm tăng lead.
             $leadCount = (int) collect($sourceIds)
                 ->sum(fn (int $sourceId): int => (int) $leadCountsBySource->get($sourceId, 0));
+            $upsaleCount = (int) collect($sourceIds)
+                ->sum(fn (int $sourceId): int => (int) $upsaleCountsBySource->get($sourceId, 0));
+            $primaryCount = max(0, $leadCount - $upsaleCount);
 
-            // Junk-rate là tỷ lệ trên khách/lead thật, không phải trên mọi order.
+            // Junk-rate remains based on primary contacts; an upsale packet is
+            // marketing traffic but is not an independent junk customer.
             $contactOrderIds = LeadContactMetrics::contactOrderIds($campaignOrders);
             $junkCount = $this->countJunkOrders($campaignOrders->whereIn('id', $contactOrderIds));
 
@@ -63,7 +69,9 @@ class MarketingCampaignReportService
                 'marketerName' => $campaign->marketer?->name ?? '—',
                 'creatorName' => $campaign->creator?->name ?? '—',
                 'leadsGenerated' => $leadCount,
-                'junkLeadRate' => $leadCount > 0 ? round($junkCount / $leadCount * 100, 1) : 0,
+                'primaryPackets' => $primaryCount,
+                'upsalePackets' => $upsaleCount,
+                'junkLeadRate' => $primaryCount > 0 ? round($junkCount / $primaryCount * 100, 1) : 0,
                 'junkLeads' => $junkCount,
                 'adCost' => $metrics['ad_spend'],
                 'actualRevenue' => $revenue,
@@ -74,13 +82,14 @@ class MarketingCampaignReportService
 
             $rows[] = $row;
             $totals['leadsGenerated'] += $leadCount;
+            $totals['primaryPackets'] += $primaryCount;
+            $totals['upsalePackets'] += $upsaleCount;
             $totals['junkLeads'] += $junkCount;
             $totals['adCost'] += $metrics['ad_spend'];
             $totals['actualRevenue'] += $revenue;
             $totals['netContribution'] += $metrics['net_contribution'];
         }
 
-        $totalLeads = max(1, $totals['leadsGenerated']);
         $totalRoas = $totals['adCost'] > 0
             ? round($totals['actualRevenue'] / $totals['adCost'], 2)
             : 0.0;
@@ -92,7 +101,9 @@ class MarketingCampaignReportService
             'marketerName' => '—',
             'creatorName' => '—',
             'leadsGenerated' => $totals['leadsGenerated'],
-            'junkLeadRate' => round($totals['junkLeads'] / $totalLeads * 100, 1),
+            'primaryPackets' => $totals['primaryPackets'],
+            'upsalePackets' => $totals['upsalePackets'],
+            'junkLeadRate' => round($totals['junkLeads'] / max(1, $totals['primaryPackets']) * 100, 1),
             'junkLeads' => $totals['junkLeads'],
             'adCost' => $totals['adCost'],
             'actualRevenue' => $totals['actualRevenue'],
@@ -115,6 +126,8 @@ class MarketingCampaignReportService
             ['key' => 'marketerName', 'label' => __('reports.campaign_report.marketer_name')],
             ['key' => 'creatorName', 'label' => __('reports.campaign_report.creator_name')],
             ['key' => 'leadsGenerated', 'label' => __('reports.campaign_report.leads_generated')],
+            ['key' => 'primaryPackets', 'label' => __('reports.campaign_report.primary_packets')],
+            ['key' => 'upsalePackets', 'label' => __('reports.campaign_report.upsale_packets')],
             ['key' => 'junkLeadRate', 'label' => __('reports.campaign_report.junk_lead_rate')],
             ['key' => 'adCost', 'label' => __('reports.campaign_report.ad_cost')],
             ['key' => 'actualRevenue', 'label' => __('reports.campaign_report.actual_revenue')],

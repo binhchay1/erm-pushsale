@@ -91,6 +91,7 @@ Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     // Tổng quan marketing
     Route::get('marketing/dashboard', MarketingDashboardController::class)->name('marketing.dashboard');
     Route::get('marketing/dashboard/chart', [MarketingDashboardDataController::class, 'chart'])->name('marketing.dashboard.chart');
+    Route::get('marketing/dashboard/packets', [MarketingDashboardDataController::class, 'packets'])->name('marketing.dashboard.packets');
     Route::get('marketing/dashboard/daily-metrics', [MarketingDashboardDataController::class, 'dailyMetrics'])->name('marketing.dashboard.daily-metrics');
     Route::put('marketing/dashboard/daily-metrics', [MarketingDashboardDataController::class, 'saveDailyMetrics'])->name('marketing.dashboard.daily-metrics.update');
     Route::get('marketing/dashboard/export', [MarketingDashboardDataController::class, 'export'])->name('marketing.dashboard.export');

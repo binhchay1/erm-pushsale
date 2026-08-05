@@ -47,6 +47,30 @@ class DashboardDataController extends Controller
             ->header('X-Report-Cache-Hit', $snapshot['fromCache'] ? '1' : '0');
     }
 
+    public function packets(
+        Request $request,
+        PushsaleMarketingDashboardService $service,
+    ): JsonResponse {
+        $validated = $request->validate([
+            'source_id' => ['required', 'integer', 'exists:marketing_sources,id'],
+            'utm_source' => ['nullable', 'string', 'max:191'],
+            'utm_campaign' => ['nullable', 'string', 'max:191'],
+            'packet_page' => ['nullable', 'integer', 'min:1'],
+            'packet_per_page' => ['nullable', 'integer', 'min:10', 'max:100'],
+        ]);
+        $source = MarketingSource::query()->findOrFail((int) $validated['source_id']);
+        $filter = MarketingDashboardFilterData::fromRequest($request, $request->user());
+
+        return response()->json($service->packetRows(
+            $filter,
+            $source,
+            array_key_exists('utm_source', $validated) ? $validated['utm_source'] : null,
+            array_key_exists('utm_campaign', $validated) ? $validated['utm_campaign'] : null,
+            (int) ($validated['packet_page'] ?? 1),
+            (int) ($validated['packet_per_page'] ?? 20),
+        ));
+    }
+
     public function dailyMetrics(
         Request $request,
         PushsaleMarketingDashboardService $service,
@@ -128,7 +152,7 @@ class DashboardDataController extends Controller
             fwrite($out, "\xEF\xBB\xBF");
             fputcsv($out, [
                 'Cấp', 'Tên nguồn dữ liệu', 'Sản phẩm', 'Kênh quảng cáo', 'UTM Source', 'UTM Campaign',
-                'Ngân sách', 'Số tương tác', 'Số contact', 'Tỷ lệ contact', 'Giá contact', 'Chốt đơn',
+                'Ngân sách', 'Số tương tác', 'Gói tin chính', 'Gói tin upsale', 'Số contact', 'Tỷ lệ contact', 'Giá contact', 'Chốt đơn',
                 'Tỷ lệ chốt', 'Số sản phẩm', 'Sản phẩm/đơn', 'Doanh số', 'Doanh số sau CK',
                 'NS/Doanh số', 'NS/Doanh số sau CK',
             ]);
@@ -142,6 +166,8 @@ class DashboardDataController extends Controller
                     $row['utmCampaign'] ?? '',
                     $row['budget'] ?? 0,
                     $row['interactions'] ?? 0,
+                    $row['baseContacts'] ?? 0,
+                    $row['upsaleContacts'] ?? 0,
                     $row['contacts'] ?? 0,
                     $row['contactRate'] ?? '',
                     $row['costPerContact'] ?? 0,

@@ -345,3 +345,25 @@ html body.pushsale-app-body [data-page-code='4.3'] .pushsale-template-table-scro
         flex-direction: column !important;
     }
 }
+
+/* Marketing report contact breakdown: keep total + primary/upsale visible inside existing report tables. */
+html body.pushsale-app-body .ps-contact-breakdown-inline {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    min-width: 76px;
+    line-height: 1.18;
+}
+
+html body.pushsale-app-body .ps-contact-breakdown-inline > b {
+    color: #111827;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-contact-breakdown-inline > small {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}

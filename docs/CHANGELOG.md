@@ -119,3 +119,11 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 ## 2026-08-04 - Marketing dashboard customer type filter placeholder
 
 - Updated `/admin/marketing/dashboard` customer type filter to show the empty option as `--Tất cả--` instead of defaulting visually to `Khách mới`, keeping it consistent with other Pushsale-style filters.
+
+## 2026-08-05 - Marketing landing packet dialog + upsale contact parity
+
+- Replaced the marketing dashboard row `+` action with a landing packet dialog showing the exact packets behind the selected source/UTM row under the active filter.
+- Marketing contact metrics now count valid landing traffic as `primary packets + upsale packets`; duplicate, failed and follow-up packets remain excluded.
+- Added packet breakdown to the marketing dashboard table/export/chart, campaign report, marketing revenue detail, marketing work matrix, upsale-source report and marketer revenue report contact cell.
+- Kept global `LeadContactMetrics` unchanged so CEO/Sale contact ratios still use the customer-primary contact contract.
+- Added regression coverage for packet-dialog totals and global-vs-marketing contact parity.

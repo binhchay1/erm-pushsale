@@ -56,7 +56,7 @@ export function MarketingCampaignTable({ rows = [], budgetUpdateUrl, canEditBudg
 
     return (
         <ScrollDataTable>
-            <table className="w-full min-w-[1200px] border-collapse text-xs">
+            <table className="w-full min-w-[1360px] border-collapse text-xs">
                 <thead>
                     <tr>
                         <Th>{t('reports.marketing_campaign_table.stt')}</Th>
@@ -64,6 +64,8 @@ export function MarketingCampaignTable({ rows = [], budgetUpdateUrl, canEditBudg
                         <Th>{t('reports.marketing_campaign_table.marketer')}</Th>
                         <Th>{t('reports.marketing_campaign_table.creator')}</Th>
                         <Th className="text-right">{t('reports.marketing_campaign_table.leads')}</Th>
+                        <Th className="text-right">{t('reports.marketing_campaign_table.primary_packets')}</Th>
+                        <Th className="text-right">{t('reports.marketing_campaign_table.upsale_packets')}</Th>
                         <Th className="text-right">{t('reports.marketing_campaign_table.junk_rate')}</Th>
                         <Th>{t('reports.marketing_campaign_table.ad_cost')}</Th>
                         <Th className="text-right">{t('reports.marketing_campaign_table.revenue')}</Th>
@@ -81,7 +83,9 @@ export function MarketingCampaignTable({ rows = [], budgetUpdateUrl, canEditBudg
                             <Td className="font-medium">{row.campaignName}</Td>
                             <Td>{row.marketerName}</Td>
                             <Td>{row.creatorName ?? '—'}</Td>
-                            <Td className="text-right tabular-nums">{formatNumber(row.leadsGenerated)}</Td>
+                            <Td className="text-right tabular-nums font-semibold">{formatNumber(row.leadsGenerated)}</Td>
+                            <Td className="text-right tabular-nums">{formatNumber(row.primaryPackets ?? Math.max(0, Number(row.leadsGenerated ?? 0) - Number(row.upsalePackets ?? 0)))}</Td>
+                            <Td className="text-right tabular-nums text-sky-700 dark:text-sky-400">{formatNumber(row.upsalePackets ?? 0)}</Td>
                             <Td className="text-right tabular-nums text-amber-700 dark:text-amber-400">
                                 {formatPercent(row.junkLeadRate)}
                             </Td>

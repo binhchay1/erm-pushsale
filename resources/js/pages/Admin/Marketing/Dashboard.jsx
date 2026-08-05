@@ -1,5 +1,5 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Head, Link } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
     PushsaleDateRange,
@@ -12,8 +12,9 @@ import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import AppLayout from '@/layouts/AppLayout';
-import { apiGet, getCsrfToken } from '@/lib/api';
+import { apiGet } from '@/lib/api';
 import { formatNumber } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 function queryString(values = {}) {
     const params = new URLSearchParams();
@@ -162,139 +163,159 @@ function ChartDialog({ state, endpoint, filters, onClose }) {
     );
 }
 
-function DailyMetricsDialog({ state, endpoint, filters, canEdit, onClose, onSaved }) {
-    const [range, setRange] = useState({ date_from: filters.date_from, date_to: filters.date_to });
-    const [rows, setRows] = useState([]);
-    const [source, setSource] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [savingKey, setSavingKey] = useState(null);
-    const [error, setError] = useState('');
-    const [message, setMessage] = useState('');
+function PacketTypeBadge({ row, t }) {
+    const label = {
+        primary: t('dashboard.marketing.packet_dialog.primary'),
+        upsale: t('dashboard.marketing.packet_dialog.upsale'),
+        late_upsale: t('dashboard.marketing.packet_dialog.late_upsale'),
+        orphan_upsale: t('dashboard.marketing.packet_dialog.orphan_upsale'),
+    }[row.packetType] ?? row.packetTypeLabel;
 
-    const load = async () => {
+    return <span className={`psm-packet-badge is-${row.packetType}`}>{label}</span>;
+}
+
+function LandingPacketsDialog({ state, endpoint, filters, onClose }) {
+    const t = useT();
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [data, setData] = useState(null);
+
+    useEffect(() => {
         if (!state?.row || !endpoint) return;
+        let alive = true;
         setLoading(true);
         setError('');
-        setMessage('');
-        try {
-            const result = await apiGet(`${endpoint}?${queryString({
-                source_id: state.row.sourceId,
-                date_from: range.date_from,
-                date_to: range.date_to,
-                utm_source: state.row.utmSource,
-                utm_campaign: state.row.utmCampaign,
-            })}`);
-            setSource(result.source);
-            setRows(result.rows ?? []);
-        } catch (exception) {
-            setError(exception.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+
+        apiGet(`${endpoint}?${queryString({
+            ...filters,
+            source_id: state.row.sourceId,
+            utm_source: state.row.utmSource,
+            utm_campaign: state.row.utmCampaign,
+            packet_page: page,
+            packet_per_page: 20,
+        })}`)
+            .then((result) => alive && setData(result))
+            .catch((exception) => alive && setError(exception.message))
+            .finally(() => alive && setLoading(false));
+
+        return () => { alive = false; };
+    }, [state, endpoint, filters, page]);
 
     useEffect(() => {
-        if (!state) return;
-        setRange({ date_from: filters.date_from, date_to: filters.date_to });
-    }, [state, filters.date_from, filters.date_to]);
-
-    useEffect(() => {
-        if (state) load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (state) setPage(1);
     }, [state]);
 
-    const updateRow = (index, key, value) => {
-        setRows((current) => current.map((row, rowIndex) => (
-            rowIndex === index ? { ...row, [key]: Math.max(0, Number(value || 0)) } : row
-        )));
-    };
-
-    const save = async (payloadRows = rows, key = 'all') => {
-        if (!canEdit || !endpoint || !payloadRows.length) return;
-        setSavingKey(key);
-        setError('');
-        setMessage('');
-        try {
-            const response = await fetch(endpoint, {
-                method: 'PUT',
-                credentials: 'same-origin',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': getCsrfToken(),
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: JSON.stringify({ source_id: state.row.sourceId, rows: payloadRows }),
-            });
-            const result = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                const first = Object.values(result.errors ?? {}).flat()[0];
-                throw new Error(first ?? result.message ?? 'Không thể lưu dữ liệu.');
-            }
-            setMessage(result.message ?? 'Đã lưu dữ liệu.');
-            onSaved?.();
-            await load();
-        } catch (exception) {
-            setError(exception.message);
-        } finally {
-            setSavingKey(null);
-        }
-    };
+    const summary = data?.summary ?? {};
+    const pagination = data?.pagination ?? { current_page: 1, last_page: 1, total: 0, from: 0, to: 0 };
+    const expected = Number(state?.row?.contacts ?? 0);
+    const actual = Number(summary.contacts ?? 0);
 
     return (
         <DialogShell
             open={Boolean(state)}
-            title="THÊM DỮ LIỆU CHO LANDING THEO NGÀY"
+            title={t('dashboard.marketing.packet_dialog.title')}
             size="full"
             onClose={onClose}
-            footer={(
-                <>
-                    <button type="button" className="btn btn-default btn-sm" onClick={onClose}><i className="fa fa-times" /> Đóng</button>
-                    {canEdit && <button type="button" className="btn btn-primary btn-sm" disabled={Boolean(savingKey) || loading} onClick={() => save(rows, 'all')}><i className={`fa ${savingKey === 'all' ? 'fa-spinner fa-spin' : 'fa-save'}`} /> Lưu</button>}
-                </>
-            )}
+            footer={<button type="button" className="btn btn-default btn-sm" onClick={onClose}><i className="fa fa-times" /> {t('dashboard.marketing.packet_dialog.close')}</button>}
         >
-            <div className="psm-daily-toolbar">
-                <div className="psm-daily-source"><b>Thêm dữ liệu nguồn dữ liệu</b><small>{source?.name ?? state?.row?.sourceName ?? '—'}</small></div>
-                <label>Từ ngày<input type="date" value={range.date_from ?? ''} onChange={(event) => setRange((current) => ({ ...current, date_from: event.target.value }))} /></label>
-                <label>Đến ngày<input type="date" value={range.date_to ?? ''} onChange={(event) => setRange((current) => ({ ...current, date_to: event.target.value }))} /></label>
-                <button type="button" className="btn btn-primary btn-sm" onClick={load}><i className="fa fa-search" /> Tìm kiếm</button>
-            </div>
-            <div className="psm-daily-legend">
-                <span className="is-ready">Ngân sách và số click &gt; 0</span>
-                <span className="is-zero">Ngân sách hoặc số click = 0</span>
-                <span className="is-missing">Chưa tạo dữ liệu</span>
-            </div>
-            {error && <ErrorBlock message={error} />}
-            {message && <div className="alert alert-success psm-alert"><i className="fa fa-check" /> {message}</div>}
-            {loading ? <LoadingBlock /> : (
-                <div className="table-responsive psm-daily-table-wrap">
-                    <table className="table table-bordered table-striped psm-daily-table">
-                        <thead><tr><th>STT</th><th>Sản phẩm</th><th>Nguồn dữ liệu</th><th>Kênh quảng cáo</th><th>Ngân sách</th><th>Số click</th><th>Dữ liệu ngày</th><th>Cập nhật</th><th>Thao tác</th></tr></thead>
-                        <tbody>
-                            {!rows.length && <tr><td colSpan="9" className="text-center">Không có ngày trong khoảng đã chọn.</td></tr>}
-                            {rows.map((row, index) => (
-                                <tr key={row.metric_date} className={`psm-daily-row is-${row.status}`}>
-                                    <td>{index + 1}</td>
-                                    <td>{row.product_name}</td>
-                                    <td>{row.source_name}{row.utm_source ? <small><br />UTM: {row.utm_source}{row.utm_campaign ? ` / ${row.utm_campaign}` : ''}</small> : null}</td>
-                                    <td>{row.ad_channel}</td>
-                                    <td><input type="number" min="0" disabled={!canEdit} value={row.budget ?? 0} onChange={(event) => updateRow(index, 'budget', event.target.value)} /></td>
-                                    <td><input type="number" min="0" disabled={!canEdit} value={row.clicks ?? 0} onChange={(event) => updateRow(index, 'clicks', event.target.value)} /></td>
-                                    <td>{row.display_date}</td>
-                                    <td className="psm-daily-updated">{row.updated_at ? <><b>{row.updated_at}</b><small>{row.updated_by || ''}</small></> : '—'}</td>
-                                    <td>
-                                        {canEdit ? (
-                                            <button type="button" className="btn btn-primary btn-xs" disabled={Boolean(savingKey)} onClick={() => save([row], row.metric_date)}>
-                                                <i className={`fa ${savingKey === row.metric_date ? 'fa-spinner fa-spin' : 'fa-save'}`} /> Lưu
-                                            </button>
-                                        ) : <span className={`psm-daily-status is-${row.status}`}>{row.status === 'ready' ? 'Đã nhập' : row.status === 'zero' ? 'Bằng 0' : 'Chưa nhập'}</span>}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            <div className="psm-packet-heading">
+                <div>
+                    <b>{data?.source?.name ?? state?.row?.sourceName ?? '—'}</b>
+                    <span>
+                        {data?.utm_source ? `UTM Source: ${data.utm_source}` : t('dashboard.marketing.packet_dialog.all_utm')}
+                        {data?.utm_campaign ? ` · UTM Campaign: ${data.utm_campaign}` : ''}
+                    </span>
                 </div>
+                <span className="psm-packet-filter-note">
+                    <i className="fa fa-filter" /> {t('dashboard.marketing.packet_dialog.filter_note')}
+                </span>
+            </div>
+
+            <div className="psm-packet-summary">
+                <div><span>{t('dashboard.marketing.packet_dialog.total')}</span><b>{money(summary.contacts)}</b></div>
+                <div><span>{t('dashboard.marketing.packet_dialog.primary')}</span><b>{money(summary.baseContacts)}</b></div>
+                <div className="is-upsale"><span>{t('dashboard.marketing.packet_dialog.upsale')}</span><b>{money(summary.upsaleContacts)}</b></div>
+                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.review')}</span><b>{money(summary.reviewPackets)}</b></div>
+            </div>
+
+            {!loading && !error && data && expected !== actual && (
+                <div className="alert alert-warning psm-alert">
+                    <i className="fa fa-warning" /> {t('dashboard.marketing.packet_dialog.total_mismatch', { expected, actual })}
+                </div>
+            )}
+            {loading && <LoadingBlock label={t('dashboard.marketing.packet_dialog.loading')} />}
+            {error && <ErrorBlock message={error} />}
+
+            {!loading && !error && data && (
+                <>
+                    <div className="table-responsive psm-packet-table-wrap">
+                        <table className="table table-bordered table-striped psm-packet-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>{t('dashboard.marketing.packet_dialog.received_at')}</th>
+                                    <th>{t('dashboard.marketing.packet_dialog.packet_type')}</th>
+                                    <th>{t('dashboard.marketing.packet_dialog.customer')}</th>
+                                    <th>{t('dashboard.marketing.packet_dialog.products')}</th>
+                                    <th>{t('dashboard.marketing.packet_dialog.landing')}</th>
+                                    <th>UTM</th>
+                                    <th>{t('dashboard.marketing.packet_dialog.order')}</th>
+                                    <th>{t('dashboard.marketing.packet_dialog.status')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {!data.rows?.length && (
+                                    <tr><td colSpan="9" className="text-center psm-packet-empty">{t('dashboard.marketing.packet_dialog.empty')}</td></tr>
+                                )}
+                                {(data.rows ?? []).map((row, index) => (
+                                    <tr key={row.id} className={row.isUpsale ? 'is-upsale' : 'is-primary'}>
+                                        <td>{Number(pagination.from || 1) + index}</td>
+                                        <td className="psm-packet-time">
+                                            <b>{row.receivedAt || '—'}</b>
+                                            {row.externalId && <small>ID: {row.externalId}</small>}
+                                        </td>
+                                        <td><PacketTypeBadge row={row} t={t} /></td>
+                                        <td className="psm-packet-customer">
+                                            <b>{row.customerName}</b>
+                                            <a href={`tel:${row.customerPhone}`}>{row.customerPhone}</a>
+                                            {row.message && <small title={row.message}>{row.message}</small>}
+                                        </td>
+                                        <td>{row.productSummary || '—'}</td>
+                                        <td>
+                                            <b>{row.landingSourceName !== '—' ? row.landingSourceName : row.sourceName}</b>
+                                            <small>{row.landingName !== '—' ? row.landingName : ''}</small>
+                                        </td>
+                                        <td className="psm-packet-utm">
+                                            <span>{row.utmSource || '—'}</span>
+                                            <small>{row.utmCampaign || ''}</small>
+                                        </td>
+                                        <td>{row.orderCode || (row.orderId ? `#${row.orderId}` : '—')}</td>
+                                        <td>
+                                            <span className={`psm-packet-status is-${row.status}`}>{row.statusLabel || row.status || '—'}</span>
+                                            {row.requiresReview && <small className="psm-packet-review"><i className="fa fa-exclamation-triangle" /> {t('dashboard.marketing.packet_dialog.review')}</small>}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="psm-packet-pagination">
+                        <span>{t('dashboard.marketing.packet_dialog.range', {
+                            from: pagination.from ?? 0,
+                            to: pagination.to ?? 0,
+                            total: pagination.total ?? 0,
+                        })}</span>
+                        <div>
+                            <button type="button" className="btn btn-default btn-xs" disabled={pagination.current_page <= 1} onClick={() => setPage(1)}><i className="fa fa-angle-double-left" /></button>
+                            <button type="button" className="btn btn-default btn-xs" disabled={pagination.current_page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))}><i className="fa fa-angle-left" /></button>
+                            <b>{pagination.current_page} / {pagination.last_page}</b>
+                            <button type="button" className="btn btn-default btn-xs" disabled={pagination.current_page >= pagination.last_page} onClick={() => setPage((current) => Math.min(pagination.last_page, current + 1))}><i className="fa fa-angle-right" /></button>
+                            <button type="button" className="btn btn-default btn-xs" disabled={pagination.current_page >= pagination.last_page} onClick={() => setPage(pagination.last_page)}><i className="fa fa-angle-double-right" /></button>
+                        </div>
+                    </div>
+                </>
             )}
         </DialogShell>
     );
@@ -304,8 +325,8 @@ function HelpDialog({ open, onClose }) {
     return (
         <DialogShell open={open} title="HƯỚNG DẪN MARKETING DASHBOARD" size="md" onClose={onClose}>
             <div className="psm-help">
-                <p><b>Ngân sách và số tương tác</b> được nhập theo ngày bằng nút dấu cộng tại từng nguồn/UTM.</p>
-                <p><b>Contact</b> lấy từ lead hợp lệ của nguồn dữ liệu trong khoảng lọc. <b>Chốt đơn và doanh số</b> lấy từ đơn đã chốt thực tế.</p>
+                <p><b>Nút dấu cộng</b> mở danh sách toàn bộ gói tin landing tương ứng với bộ lọc và dòng nguồn/UTM đang xem.</p>
+                <p><b>Số contact</b> gồm gói tin chính và từng gói tin upsale hợp lệ. <b>Chốt đơn và doanh số</b> lấy từ đơn đã chốt thực tế.</p>
                 <p>Bấm mũi tên tại cột sản phẩm để mở chi tiết UTM Source và UTM Campaign; bấm biểu đồ để xem biến động theo ngày.</p>
             </div>
         </DialogShell>
@@ -318,7 +339,7 @@ function TotalRow({ label, total = {}, advancedUtm = false }) {
             <td colSpan={advancedUtm ? 9 : 6}>{label}:</td>
             <td>{money(total.budget)}</td>
             <td>{money(total.interactions)}</td>
-            <td>{money(total.contacts)}</td>
+            <td><div className="psm-contact-breakdown"><b>{money(total.contacts)}</b><small>Chính {money(total.baseContacts)} · Upsale {money(total.upsaleContacts)}</small></div></td>
             <td>{percent(total.contactRate, true)}</td>
             <td>{money(total.costPerContact)}</td>
             <td>{money(total.closedOrders)}</td>
@@ -334,7 +355,7 @@ function TotalRow({ label, total = {}, advancedUtm = false }) {
     );
 }
 
-function DashboardTable({ report, expanded, onToggle, onChart, onDaily, advancedUtm = false }) {
+function DashboardTable({ report, expanded, onToggle, onChart, onPackets, advancedUtm = false }) {
     const rows = report.rows ?? [];
     const visibleRows = rows.filter((row) => {
         if (row.level === 1) return true;
@@ -380,7 +401,7 @@ function DashboardTable({ report, expanded, onToggle, onChart, onDaily, advanced
                     <tr>
                         <th>STT</th><th>Tên Nguồn dữ liệu</th><th>Sản phẩm</th><th>Kênh quảng cáo</th><th>UTM Source</th><th>UTM<br />Campaign</th>
                         {advancedUtm && <><th>UTM<br />Medium</th><th>UTM<br />Term</th><th>UTM<br />Content</th></>}
-                        <th>Ngân sách (1)</th><th>Số tương tác<br />(2)</th><th>Số contact<br />(3)</th><th>Tỷ lệ<br />contact/tương tác<br />(4=3/2) (%)</th>
+                        <th>Ngân sách (1)</th><th>Số tương tác<br />(2)</th><th>Số contact<br /><small>Chính + Upsale</small><br />(3)</th><th>Tỷ lệ<br />contact/tương tác<br />(4=3/2) (%)</th>
                         <th>Giá contact<br />(5=1/3)</th><th>Chốt đơn<br />(6)</th><th>Tỷ lệ chốt đơn<br />(7=6/3) (%)</th><th>Số sản phẩm<br />(8)</th>
                         <th>Sản phẩm/đơn<br />(9=8/6)</th><th>Doanh số<br />(10)</th><th>Doanh số sau CK<br />(11)</th><th>NS/Doanh số<br />(12=1/10) (%)</th>
                         <th>NS/Doanh số trừ CK<br />(13=1/11) (%)</th><th>Biểu đồ</th>
@@ -399,7 +420,7 @@ function DashboardTable({ report, expanded, onToggle, onChart, onDaily, advanced
                                 <td className="psm-source-cell">
                                     <span className="psm-indent" style={{ width: `${(row.level - 1) * 18}px` }} />
                                     {row.level <= 2 && (
-                                        <button type="button" className="psm-add-button" title="Thêm dữ liệu theo ngày" onClick={() => onDaily(row)}><i className="fa fa-plus" /></button>
+                                        <button type="button" className="psm-add-button" title="Xem gói tin landing" onClick={() => onPackets(row)}><i className="fa fa-plus" /></button>
                                     )}
                                     <span>{row.sourceName || (row.level === 2 ? 'Chi tiết UTM' : '')}</span>
                                 </td>
@@ -415,7 +436,7 @@ function DashboardTable({ report, expanded, onToggle, onChart, onDaily, advanced
                                 <td className="psm-utm-cell">{row.utmSource}</td>
                                 <td className="psm-utm-cell">{row.utmCampaign}</td>
                                 {advancedUtm && <><td className="psm-utm-cell">{row.utmMedium}</td><td className="psm-utm-cell">{row.utmTerm}</td><td className="psm-utm-cell">{row.utmContent}</td></>}
-                                <td>{money(row.budget)}</td><td>{money(row.interactions)}</td><td>{money(row.contacts)}</td><td>{percent(row.contactRate, true)}</td>
+                                <td>{money(row.budget)}</td><td>{money(row.interactions)}</td><td><div className="psm-contact-breakdown"><b>{money(row.contacts)}</b><small>Chính {money(row.baseContacts)} · Upsale {money(row.upsaleContacts)}</small></div></td><td>{percent(row.contactRate, true)}</td>
                                 <td>{money(row.costPerContact)}</td><td>{money(row.closedOrders)}</td><td className="psm-rate-cell"><span style={{ width: `${Math.min(100, Number(row.closingRate ?? 0))}%` }} />{percent(row.closingRate)}</td>
                                 <td>{money(row.productQuantity)}</td><td>{Number(row.avgProductPerOrder ?? 0).toFixed(2).replace(/\.00$/, '')}</td>
                                 <td><MetricFill value={row.totalRevenue} max={maxRevenue} tone="green" /></td>
@@ -437,7 +458,7 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
     const [gearOpen, setGearOpen] = useState(false);
     const [expanded, setExpanded] = useState(new Set());
     const [chartState, setChartState] = useState(null);
-    const [dailyState, setDailyState] = useState(null);
+    const [packetState, setPacketState] = useState(null);
     const [helpOpen, setHelpOpen] = useState(false);
     const gearRef = useRef(null);
 
@@ -539,13 +560,13 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
                 className="psm-page"
             >
                 <div className="psm-table-area">
-                    <DashboardTable report={report} expanded={expanded} advancedUtm={Boolean(draft.advanced_utm)} onToggle={toggle} onChart={(row) => setChartState({ row })} onDaily={(row) => setDailyState({ row })} />
+                    <DashboardTable report={report} expanded={expanded} advancedUtm={Boolean(draft.advanced_utm)} onToggle={toggle} onChart={(row) => setChartState({ row })} onPackets={(row) => setPacketState({ row })} />
                     <PushsalePagination meta={pagination} routeUrl={routeUrl} filters={draft} itemLabel="nguồn dữ liệu" />
                 </div>
             </PushsalePageShell>
 
             <ChartDialog state={chartState} endpoint={endpoints.chart} filters={draft} onClose={() => setChartState(null)} />
-            <DailyMetricsDialog state={dailyState} endpoint={endpoints.dailyMetrics} filters={draft} canEdit={Boolean(filterOptions.canEditDailyMetrics)} onClose={() => setDailyState(null)} onSaved={() => router.reload({ only: ['report'] })} />
+            <LandingPacketsDialog state={packetState} endpoint={endpoints.packets} filters={draft} onClose={() => setPacketState(null)} />
             <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
         </AppLayout>
     );

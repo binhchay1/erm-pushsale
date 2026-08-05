@@ -36,6 +36,7 @@ class DashboardController extends Controller
             'filterRouteUrl' => $baseUrl,
             'endpoints' => [
                 'chart' => $baseUrl.'/chart',
+                'packets' => $baseUrl.'/packets',
                 'dailyMetrics' => $baseUrl.'/daily-metrics',
                 'export' => $baseUrl.'/export',
                 'operationConfig' => $request->user()?->isAdmin() ? '/admin/sales/operation-categories' : null,
