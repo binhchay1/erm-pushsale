@@ -714,7 +714,7 @@ class PushsaleMarketingDashboardService
             'externalId' => $packet->external_id,
             'receivedAt' => $packet->created_at?->timezone(config('app.timezone'))->format('d/m/Y H:i:s'),
             'packetType' => MarketingPacketMetrics::typeKey($packet),
-            'packetTypeLabel' => $packet->packet_type?->label() ?? __('enums.lead_packet_type.lead'),
+            'packetTypeLabel' => MarketingPacketMetrics::typeLabel($packet),
             'isUpsale' => MarketingPacketMetrics::isUpsale($packet),
             'status' => $packet->status?->value ?? '',
             'statusLabel' => $packet->status?->label() ?? '',

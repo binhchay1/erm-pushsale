@@ -74,6 +74,8 @@ final class MarketingPacketMetrics
         return [
             LeadPacketType::Lead->value,
             'base', // legacy/test fixtures before LeadPacketType::Lead was standardized
+            'main',
+            'primary',
         ];
     }
 
@@ -84,21 +86,45 @@ final class MarketingPacketMetrics
             LeadPacketType::Upsell->value,
             LeadPacketType::LateUpsell->value,
             LeadPacketType::OrphanUpsell->value,
+            // Legacy UI/business wording used before the enum standardized on "upsell".
+            'upsale',
+            'late_upsale',
+            'orphan_upsale',
         ];
+    }
+
+    public static function packetTypeValue(LeadIngestion $packet): string
+    {
+        $raw = $packet->getRawOriginal('packet_type');
+        if (is_scalar($raw) && trim((string) $raw) !== '') {
+            return trim((string) $raw);
+        }
+
+        return $packet->packet_type?->value ?? LeadPacketType::Lead->value;
     }
 
     public static function isUpsale(LeadIngestion $packet): bool
     {
-        return in_array($packet->packet_type?->value, self::upsaleTypes(), true);
+        return in_array(self::packetTypeValue($packet), self::upsaleTypes(), true);
     }
 
     public static function typeKey(LeadIngestion $packet): string
     {
-        return match ($packet->packet_type) {
-            LeadPacketType::Upsell => 'upsale',
-            LeadPacketType::LateUpsell => 'late_upsale',
-            LeadPacketType::OrphanUpsell => 'orphan_upsale',
+        return match (self::packetTypeValue($packet)) {
+            LeadPacketType::Upsell->value, 'upsale' => 'upsale',
+            LeadPacketType::LateUpsell->value, 'late_upsale' => 'late_upsale',
+            LeadPacketType::OrphanUpsell->value, 'orphan_upsale' => 'orphan_upsale',
             default => 'primary',
+        };
+    }
+
+    public static function typeLabel(LeadIngestion $packet): string
+    {
+        return match (self::typeKey($packet)) {
+            'upsale' => __('enums.lead_packet_type.upsell'),
+            'late_upsale' => __('enums.lead_packet_type.late_upsell'),
+            'orphan_upsale' => __('enums.lead_packet_type.orphan_upsell'),
+            default => __('enums.lead_packet_type.lead'),
         };
     }
 
@@ -356,6 +382,7 @@ final class MarketingPacketMetrics
                 ->orWhereHas('parentIngestion.relatedOrder', $constraint);
         });
     }
+
 
     /** @param Collection<int, int|string> $counts @param Collection<int, Order> $orders @return Collection<int, int> */
     private static function addLegacyOrders(Collection $counts, Collection $orders, string $groupField): Collection

@@ -254,7 +254,7 @@ export default function LandingApprovalPage({
                             <label>Url nguồn dữ liệu</label>
                             <input className="form-control" readOnly value={selected?.source_url || ''} />
 
-                            <label>Sản phẩm (*) </label>
+                            <label>Sản phẩm</label>
                             <div className="pslc-inline-action-field">
                                 <PushsaleMultiSelect
                                     label="Sản phẩm"
@@ -264,6 +264,7 @@ export default function LandingApprovalPage({
                                     onEnabledChange={() => {}}
                                     onChange={(ids) => form.setData('product_ids', ids)}
                                     allLabel="Chọn sản phẩm / gói sản phẩm"
+                                    className="pslc-product-multiselect"
                                     placeholder="--Chọn sản phẩm / gói--"
                                     emptyLabel="Chưa chọn sản phẩm"
                                 />

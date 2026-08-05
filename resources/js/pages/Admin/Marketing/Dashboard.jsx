@@ -38,7 +38,7 @@ function money(value) {
 }
 
 function DialogShell({ open, title, size = 'lg', onClose, children, footer }) {
-    const widths = { md: '650px', lg: '980px', xl: '1280px', wide: 'min(1540px, calc(100vw - 32px))', full: 'calc(100vw - 24px)' };
+    const widths = { md: '650px', lg: '980px', xl: '1280px', wide: 'min(1540px, calc(100vw - 32px))', full: 'min(1760px, calc(100vw - 16px))' };
 
     return (
         <PushsaleDialog
@@ -217,9 +217,8 @@ function LandingPacketsDialog({ state, endpoint, filters, onClose }) {
         <DialogShell
             open={Boolean(state)}
             title={t('dashboard.marketing.packet_dialog.title')}
-            size="wide"
+            size="full"
             onClose={onClose}
-            footer={<button type="button" className="btn btn-default btn-sm" onClick={onClose}><i className="fa fa-times" /> {t('dashboard.marketing.packet_dialog.close')}</button>}
         >
             <div className="psm-packet-heading">
                 <div>

@@ -139,3 +139,9 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 - Tightened `MarketingPacketMetrics`: marketing contact now counts primary packets plus only processed upsale packets already attached to an effective order. Duplicate, failed, pending, needs-review and orphan/unmerged upsale packets are excluded from contact totals.
 - Centralized customer type filtering for marketing packets so `/admin/marketing/dashboard` keeps the invariant `Tất cả = Khách mới + Khách cũ`.
 - Added regression coverage for valid/invalid upsale packets and customer-type partitioning on the Pushsale Marketing dashboard.
+
+## 2026-08-06 - Landing tick indicator + upsale audit command
+
+- Fixed Landing Connections `Nhập TC` / `Duyệt` unchecked indicator so the inactive state remains an 18px round circle instead of collapsing into a thin oval.
+- Hardened `MarketingPacketMetrics` against legacy packet type aliases (`upsale`, `late_upsale`, `orphan_upsale`) while keeping the canonical enum values (`upsell`, `late_upsell`, `orphan_upsell`).
+- Added `landing:upsale-audit` for production checks: packet type/status distribution, valid counted upsale, invalid review-only states, and `Tất cả = Khách mới + Khách cũ` partition validation.

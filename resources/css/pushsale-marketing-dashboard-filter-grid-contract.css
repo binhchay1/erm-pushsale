@@ -486,7 +486,7 @@ html body.pushsale-app-body .psm-dialog .psm-packet-summary b {
 
 html body.pushsale-app-body .psm-dialog .psm-packet-table-wrap {
     width: 100% !important;
-    max-height: min(64vh, 720px) !important;
+    max-height: min(68vh, 760px) !important;
     overflow: auto !important;
     border: 1px solid #d6dee6 !important;
     -webkit-overflow-scrolling: touch !important;
@@ -494,7 +494,7 @@ html body.pushsale-app-body .psm-dialog .psm-packet-table-wrap {
 
 html body.pushsale-app-body .psm-dialog .psm-packet-table {
     width: 100% !important;
-    min-width: 1560px !important;
+    min-width: 1680px !important;
     margin: 0 !important;
     table-layout: auto !important;
     font-size: 11px !important;
@@ -694,4 +694,10 @@ html body.pushsale-app-body .psm-dialog .psm-packet-pagination b {
     html body.pushsale-app-body .psm-dialog .psm-packet-pagination > div {
         justify-content: center !important;
     }
+}
+
+
+html body.pushsale-app-body .psm-dialog .ps-dialog-footer:empty,
+html body.pushsale-app-body .psm-dialog .psm-dialog-footer:empty::before {
+    display: none !important;
 }

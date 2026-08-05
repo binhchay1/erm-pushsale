@@ -243,7 +243,7 @@ function PageDialog({ open, title, onClose, children }) {
             open={Boolean(open)}
             onOpenChange={(nextOpen) => !nextOpen && onClose?.()}
             title={title}
-            width="min(1280px, 96vw)"
+            width="min(1460px, 98vw)"
             className="pslc-dialog pslc-source-dialog"
             bodyClassName="pslc-dialog-shell"
             contentProps={{
@@ -756,7 +756,7 @@ export default function LandingConnectionsPage({
                             <label>{l('ad_channel')} <span className="required">(*)</span></label>
                             <PushsaleSelect options={channelTranslatedOptions} value={form.data.ad_channel} onChange={(value) => form.setData('ad_channel', value || 'facebook_ads')} searchable />
 
-                            <label>Sản phẩm (*) </label>
+                            <label>Sản phẩm</label>
                             <div className="pslc-inline-action-field">
                                 <PushsaleMultiSelect
                                     label="Sản phẩm"
@@ -784,6 +784,7 @@ export default function LandingConnectionsPage({
                                         });
                                     }}
                                     allLabel="Chọn sản phẩm / gói sản phẩm"
+                                    className="pslc-product-multiselect"
                                     placeholder="--Chọn sản phẩm / gói--"
                                     emptyLabel="Chưa chọn sản phẩm"
                                 />

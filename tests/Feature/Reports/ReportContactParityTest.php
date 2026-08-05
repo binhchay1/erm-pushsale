@@ -252,6 +252,7 @@ class ReportContactParityTest extends TestCase
             ['failed-upsell', LeadIngestionStatus::Failed, LeadPacketType::Upsell, $newOrder->id, false],
             ['review-orphan-upsell', LeadIngestionStatus::NeedsReview, LeadPacketType::OrphanUpsell, null, true],
             ['pending-upsell', LeadIngestionStatus::Pending, LeadPacketType::Upsell, $newOrder->id, false],
+            ['processed-upsell-without-order', LeadIngestionStatus::Processed, LeadPacketType::Upsell, null, false],
         ] as [$externalId, $status, $packetType, $orderId, $requiresReview]) {
             LeadIngestion::query()->create([
                 'platform' => 'landing',
