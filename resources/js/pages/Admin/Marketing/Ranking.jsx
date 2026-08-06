@@ -91,6 +91,7 @@ function RankingTable({ report = {} }) {
                     <col className="psr-col-sale" />
                     <col className="psr-col-count" />
                     <col className="psr-col-count" />
+                    <col className="psr-col-count" />
                     <col className="psr-col-rate" />
                     <col className="psr-col-products" />
                     <col className="psr-col-revenue" />
@@ -109,6 +110,7 @@ function RankingTable({ report = {} }) {
                     <tr className="psr-head-group">
                         <th rowSpan="2">STT</th>
                         <th rowSpan="2">SALE</th>
+                        <th rowSpan="2">Gói tin raw</th>
                         <th colSpan="5">KHÁCH HÀNG MỚI</th>
                         <th colSpan="5">KHÁCH HÀNG CŨ</th>
                         <th colSpan="5">TỔNG CHUNG</th>
@@ -122,9 +124,10 @@ function RankingTable({ report = {} }) {
                 <tbody>
                     <tr className="psr-total-row">
                         <td colSpan="2">Tổng cộng:</td>
+                        <td>{money(total.rawContacts)}</td>
                         <RankingCells row={total} />
                     </tr>
-                    {!rows.length && <tr><td colSpan="17" className="psr-empty">Không có dữ liệu.</td></tr>}
+                    {!rows.length && <tr><td colSpan="18" className="psr-empty">Không có dữ liệu.</td></tr>}
                     {rows.map((row) => (
                         <tr key={row.id} className={row.rank <= 3 ? `is-top rank-${row.rank}` : ''}>
                             <td>{row.rank}</td>
@@ -132,6 +135,7 @@ function RankingTable({ report = {} }) {
                                 <span className="psr-sale-avatar"><Avatar user={row} rank={row.rank} /></span>
                                 <span><b>{row.name}</b><small>{row.team || row.username}</small></span>
                             </td>
+                            <td>{money(row.rawContacts)}</td>
                             <RankingCells row={row} />
                         </tr>
                     ))}

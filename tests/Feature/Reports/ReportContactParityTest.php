@@ -5,10 +5,15 @@ namespace Tests\Feature\Reports;
 use App\Data\MarketingDashboardFilterData;
 use App\Data\ReportFilterData;
 use App\Enums\ClosingStatus;
+use App\Enums\InboundEventSource;
+use App\Enums\InboundEventStatus;
 use App\Enums\DeliveryStatus;
 use App\Enums\LeadIngestionStatus;
 use App\Enums\LeadPacketType;
 use App\Enums\UserRole;
+use App\Models\InboundEvent;
+use App\Models\LandingConnection;
+use App\Models\LandingConnectionSource;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
@@ -22,6 +27,7 @@ use App\Support\LeadContactMetrics;
 use App\Support\MarketingPacketMetrics;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -111,6 +117,9 @@ class ReportContactParityTest extends TestCase
             'processed_at' => now(),
         ]);
 
+        $this->createLandingRawPacket($child, '0900111222', ['utm_source' => 'family-main']);
+        $this->createLandingRawPacket($child, '0900111222', ['utm_source' => 'family-upsale'], LandingConnectionSource::TYPE_UPSELL);
+
         $filter = new ReportFilterData(
             dateFrom: now()->startOfDay(),
             dateTo: now()->endOfDay(),
@@ -144,7 +153,7 @@ class ReportContactParityTest extends TestCase
         $this->assertSame(2, (int) $packetDialog['summary']['contacts'], 'packet dialog total follows dashboard contact');
         $this->assertSame(1, (int) $packetDialog['summary']['baseContacts'], 'packet dialog primary packets');
         $this->assertSame(1, (int) $packetDialog['summary']['upsaleContacts'], 'packet dialog upsale packets');
-        $this->assertEqualsCanonicalizing(['late_upsale', 'primary'], collect($packetDialog['rows'])->pluck('packetType')->all());
+        $this->assertEqualsCanonicalizing(['primary', 'upsale'], collect($packetDialog['rows'])->pluck('packetType')->all());
 
         $ceo = app(CeoReportService::class)->build($filter, $admin);
         $this->assertSame(1, (int) ($ceo['marketingRows'][0]['contacts'] ?? 0));
@@ -268,6 +277,15 @@ class ReportContactParityTest extends TestCase
             ]);
         }
 
+        foreach ([
+            ['0910000001', LandingConnectionSource::TYPE_MAIN],
+            ['0910000001', LandingConnectionSource::TYPE_UPSELL],
+            ['0910000002', LandingConnectionSource::TYPE_MAIN],
+            ['0910000002', LandingConnectionSource::TYPE_UPSELL],
+        ] as [$phone, $sourceType]) {
+            $this->createLandingRawPacket($source, $phone, ['utm_source' => 'raw-audit'], $sourceType);
+        }
+
         $baseFilter = new ReportFilterData(
             dateFrom: now()->startOfDay(),
             dateTo: now()->endOfDay(),
@@ -296,23 +314,10 @@ class ReportContactParityTest extends TestCase
             dateFrom: now()->startOfDay(),
             dateTo: now()->endOfDay(),
         );
-        $dashboardNewFilter = new MarketingDashboardFilterData(
-            dateFrom: now()->startOfDay(),
-            dateTo: now()->endOfDay(),
-            customerType: 'new',
-        );
-        $dashboardReturningFilter = new MarketingDashboardFilterData(
-            dateFrom: now()->startOfDay(),
-            dateTo: now()->endOfDay(),
-            customerType: 'returning',
-        );
+        $pushsaleDashboard = app(PushsaleMarketingDashboardService::class)->build($dashboardFilter)['filterTotal'];
 
-        $dashboardAll = app(PushsaleMarketingDashboardService::class)->build($dashboardFilter)['filterTotal']['contacts'];
-        $dashboardNew = app(PushsaleMarketingDashboardService::class)->build($dashboardNewFilter)['filterTotal']['contacts'];
-        $dashboardReturning = app(PushsaleMarketingDashboardService::class)->build($dashboardReturningFilter)['filterTotal']['contacts'];
-
-        $this->assertSame(4, (int) $dashboardAll);
-        $this->assertSame((int) $dashboardAll, (int) $dashboardNew + (int) $dashboardReturning);
+        $this->assertSame(4, (int) $pushsaleDashboard['contacts'], 'Pushsale marketing dashboard counts raw landing packets');
+        $this->assertSame(4, (int) $pushsaleDashboard['validContacts'], 'Valid contacts remain visible as the processed/allocation layer');
     }
 
     public function test_all_reports_report_identical_contact_count(): void
@@ -437,5 +442,56 @@ class ReportContactParityTest extends TestCase
         $campaignTotal = collect($campaign['rows'])->firstWhere('isTotalRow', true);
         $this->assertSame(3, (int) $campaignTotal['primaryPackets'], 'campaign primary packets');
         $this->assertSame(1, (int) $campaignTotal['upsalePackets'], 'campaign upsale packets');
+    }
+
+    private function createLandingRawPacket(
+        MarketingSource $source,
+        string $phone,
+        array $payload = [],
+        string $sourceType = LandingConnectionSource::TYPE_MAIN,
+    ): void {
+        $companyId = (int) $source->company_id;
+        $connection = LandingConnection::query()->firstOrCreate(
+            [
+                'company_id' => $companyId,
+                'marketing_source_id' => $source->id,
+            ],
+            [
+                'name' => $source->name,
+                'marketer_user_id' => $source->marketer_user_id,
+                'public_token' => Str::lower(Str::random(40)),
+                'is_active' => true,
+                'is_approved' => true,
+            ],
+        );
+        $landingSource = LandingConnectionSource::query()->firstOrCreate(
+            [
+                'company_id' => $companyId,
+                'landing_connection_id' => $connection->id,
+                'source_type' => $sourceType,
+            ],
+            [
+                'name' => $source->name.($sourceType === LandingConnectionSource::TYPE_UPSELL ? ' upsale' : ''),
+                'source_url' => 'https://landing.test/'.$source->id,
+                'public_token' => Str::lower(Str::random(32)),
+                'is_active' => true,
+            ],
+        );
+
+        InboundEvent::query()->create([
+            'company_id' => $companyId,
+            'source' => InboundEventSource::LandingWebhook,
+            'channel' => 'landing-connection:'.$connection->id.':source:'.$landingSource->id,
+            'status' => InboundEventStatus::Processed,
+            'payload' => array_merge([
+                'phone' => $phone,
+                'name' => 'Raw '.$phone,
+                'utm_source' => 'raw-source',
+            ], $payload),
+            'headers' => [],
+            'ip_address' => '127.0.0.1',
+            'correlation_id' => (string) Str::uuid(),
+            'processed_at' => now(),
+        ]);
     }
 }

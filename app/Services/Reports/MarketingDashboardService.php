@@ -8,7 +8,7 @@ use App\Enums\ClosingStatus;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Support\LeadContactMetrics;
-use App\Support\MarketingPacketMetrics;
+use App\Support\MarketingRawPacketMetrics;
 use Illuminate\Support\Collection;
 
 class MarketingDashboardService
@@ -22,9 +22,9 @@ class MarketingDashboardService
     public function build(ReportFilterData $filter): array
     {
         $orderCollection = $this->orders->allFiltered($filter);
-        $leadCountsBySource = MarketingPacketMetrics::effectiveCountsBySource($filter, $orderCollection);
-        $primaryCountsBySource = MarketingPacketMetrics::effectivePrimaryCountsBySource($filter, $orderCollection);
-        $upsaleCountsBySource = MarketingPacketMetrics::effectiveUpsaleCountsBySource($filter, $orderCollection);
+        $leadCountsBySource = MarketingRawPacketMetrics::effectiveCountsBySource($filter, $orderCollection);
+        $primaryCountsBySource = MarketingRawPacketMetrics::effectivePrimaryCountsBySource($filter, $orderCollection);
+        $upsaleCountsBySource = MarketingRawPacketMetrics::effectiveUpsaleCountsBySource($filter, $orderCollection);
 
         $sources = MarketingSource::query()
             ->visibleInReports()

@@ -10,7 +10,7 @@ use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\User;
 use App\Support\LeadContactMetrics;
-use App\Support\MarketingPacketMetrics;
+use App\Support\MarketingRawPacketMetrics;
 use App\Support\MarketingMetrics;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -27,8 +27,8 @@ class MarketingCampaignReportService
     {
         $orders = $this->queries->orders($viewer, $filter)->with('items')->get();
         $campaigns = $this->campaigns($viewer, $filter);
-        $leadCountsBySource = MarketingPacketMetrics::effectiveCountsBySource($filter, $orders);
-        $upsaleCountsBySource = MarketingPacketMetrics::upsaleCountsBySource($filter);
+        $leadCountsBySource = MarketingRawPacketMetrics::effectiveCountsBySource($filter, $orders);
+        $upsaleCountsBySource = MarketingRawPacketMetrics::effectiveUpsaleCountsBySource($filter, $orders);
 
         $rows = [];
         $totals = [

@@ -116,7 +116,9 @@ class LeadIngestionService
             );
         }
 
-        $normalized['utm_campaign'] = $campaign->utm_campaign;
+        // Giữ UTM thật landing gửi lên; chỉ fallback sang cấu hình campaign khi payload không có.
+        // Marketing raw dashboard đọc inbound_events nên không bị ảnh hưởng bởi bước normalize này.
+        $normalized['utm_campaign'] = $normalized['utm_campaign'] ?? $campaign->utm_campaign;
         $normalized['utm_source'] = $normalized['utm_source'] ?? $campaign->utm_source ?? 'ladipage';
 
         $externalId = (string) ($normalized['external_id'] ?? '');

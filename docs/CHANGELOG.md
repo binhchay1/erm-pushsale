@@ -145,3 +145,17 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 - Fixed Landing Connections `Nhập TC` / `Duyệt` unchecked indicator so the inactive state remains an 18px round circle instead of collapsing into a thin oval.
 - Hardened `MarketingPacketMetrics` against legacy packet type aliases (`upsale`, `late_upsale`, `orphan_upsale`) while keeping the canonical enum values (`upsell`, `late_upsell`, `orphan_upsell`).
 - Added `landing:upsale-audit` for production checks: packet type/status distribution, valid counted upsale, invalid review-only states, and `Tất cả = Khách mới + Khách cũ` partition validation.
+
+## 2026-08-06 - Marketing dashboard raw landing packet contract
+
+- Changed Pushsale Marketing dashboard `/admin/marketing/dashboard` to use `inbound_events` (`source=landing_webhook`) as the primary landing packet count, so source/UTM totals match raw landing sheet rows instead of post-allocation contact dedupe.
+- Kept processed `lead_ingestions` as a secondary `validContacts` metric for sale allocation/customer handling, with duplicate/raw phone breakdown visible next to the raw packet count.
+- Updated the landing packet dialog opened by `+` to list raw inbound packets, while still showing the valid post-processing count for investigation.
+- Preserved real UTM campaign values from landing payload in `LandingConnectionPayloadMapper`; marketing-source config is now only the fallback.
+
+## 2026-08-06 - Marketing reports raw packet sync
+
+- Added `MarketingRawPacketMetrics` as the shared source-of-truth for Marketing packet totals from `inbound_events` (`source=landing_webhook`).
+- Synchronized Marketing dashboard, campaign report, team tree, marketing work matrix, marketer revenue detail and upsale-source report to prefer raw landing packet counts; legacy post-processing contacts remain fallback only when a source has no raw landing events.
+- Kept `lead_ingestions` metrics visible as secondary valid/contact-processing figures and preserved Sale/Customer anti-duplicate behavior.
+- Expanded the Pushsale Marketing `+` packet dialog summary with raw/valid/unique/duplicate/rejected/failed counters.

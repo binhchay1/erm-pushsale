@@ -280,15 +280,15 @@ html body.pushsale-app-body .psm-page .psm-table-scroll {
 }
 
 html body.pushsale-app-body .psm-page .psm-dashboard-table {
-    width: 2470px !important;
-    min-width: 2470px !important;
+    width: 2510px !important;
+    min-width: 2510px !important;
     max-width: none !important;
     table-layout: auto !important;
 }
 
 html body.pushsale-app-body .psm-page .psm-dashboard-table.is-advanced {
-    width: 2830px !important;
-    min-width: 2830px !important;
+    width: 2870px !important;
+    min-width: 2870px !important;
 }
 
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-stt { width: 48px !important; }
@@ -302,8 +302,8 @@ html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-utm-term,
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-utm-content { width: 120px !important; }
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-budget { width: 118px !important; }
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-clicks,
-html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contacts,
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-products { width: 96px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contacts { width: 136px !important; }
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contact-rate { width: 130px !important; }
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contact-price { width: 118px !important; }
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-closed { width: 92px !important; }
@@ -382,13 +382,13 @@ html body.pushsale-app-body .psm-page .psm-dashboard-table thead tr:nth-child(2)
     }
 
     html body.pushsale-app-body .psm-page .psm-dashboard-table {
-        width: 2470px !important;
-        min-width: 2470px !important;
+        width: 2510px !important;
+        min-width: 2510px !important;
     }
 
     html body.pushsale-app-body .psm-page .psm-dashboard-table.is-advanced {
-        width: 2830px !important;
-        min-width: 2830px !important;
+        width: 2870px !important;
+        min-width: 2870px !important;
     }
 
     html body.pushsale-app-body .psm-page .psm-dashboard-table th,
@@ -462,6 +462,12 @@ html body.pushsale-app-body .psm-dialog .psm-packet-summary > div {
     border-left: 3px solid #3c8dbc !important;
     background: #f8fbfd !important;
     padding: 8px 12px !important;
+}
+
+
+html body.pushsale-app-body .psm-dialog .psm-packet-summary > div.is-valid {
+    border-left-color: #00a65a !important;
+    background: #f0fff6 !important;
 }
 
 html body.pushsale-app-body .psm-dialog .psm-packet-summary > div.is-upsale {

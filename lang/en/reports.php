@@ -70,7 +70,7 @@ return [
     'campaign_report' => [
         'campaign_name' => 'Campaign name',
         'marketer_name' => 'Owner',
-        'leads_generated' => 'Total packets/contacts',
+        'leads_generated' => 'Total raw packets',
         'primary_packets' => 'Primary packets',
         'upsale_packets' => 'Upsale packets',
         'junk_lead_rate' => 'Junk lead rate (%)',
@@ -171,6 +171,7 @@ return [
         'product' => 'Product',
         'warehouse' => 'Warehouse',
         'contacts' => 'Contacts',
+        'raw_packets' => 'Raw packets',
         'primary_packets' => 'Primary packets',
         'upsale_packets' => 'Upsale packets',
         'contacts_total' => 'Total contacts',

@@ -37,7 +37,7 @@ class LandingConnectionPayloadMapper
         $payload['landing_connection_source_id'] = $source->id;
         $payload['landing_source_type'] = $source->source_type;
         $payload['utm_source'] = $payload['utm_source'] ?? $connection->marketingSource?->utm_source ?? 'landing_connection';
-        $payload['utm_campaign'] = $connection->marketingSource?->utm_campaign;
+        $payload['utm_campaign'] = $payload['utm_campaign'] ?? $connection->marketingSource?->utm_campaign;
         $payload['is_upsell'] = $source->isSupplemental();
         $payload['item_type'] = $source->isSupplemental() ? 'upsell' : 'product';
 

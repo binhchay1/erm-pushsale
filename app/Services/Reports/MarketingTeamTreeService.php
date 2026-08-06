@@ -7,7 +7,7 @@ use App\Enums\DeliveryStatus;
 use App\Enums\OrgLevel;
 use App\Enums\TeamType;
 use App\Enums\UserRole;
-use App\Support\MarketingPacketMetrics;
+use App\Support\MarketingRawPacketMetrics;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\Team;
@@ -27,7 +27,7 @@ class MarketingTeamTreeService
             ->when($filter->marketerId, fn ($q) => $q->where('marketer_user_id', $filter->marketerId))
             ->get();
 
-        $leadCountsByMarketer = MarketingPacketMetrics::effectiveCountsByMarketer($filter, $orders);
+        $leadCountsByMarketer = MarketingRawPacketMetrics::effectiveCountsByMarketer($filter, $orders);
 
         $marketers = User::query()
             ->where('role', UserRole::Marketing)

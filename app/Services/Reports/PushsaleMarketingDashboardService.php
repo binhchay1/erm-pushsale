@@ -4,11 +4,14 @@ namespace App\Services\Reports;
 
 use App\Data\MarketingDashboardFilterData;
 use App\Enums\ClosingStatus;
+use App\Enums\InboundEventSource;
+use App\Enums\InboundEventStatus;
 use App\Enums\LeadIngestionStatus;
-use App\Enums\LeadPacketType;
 use App\Enums\DateType;
 use App\Enums\TeamType;
 use App\Enums\UserRole;
+use App\Models\InboundEvent;
+use App\Models\LandingConnectionSource;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\MarketingSourceDailyMetric;
@@ -54,12 +57,14 @@ class PushsaleMarketingDashboardService
             ->unique()
             ->values();
 
+        $landingSourceMeta = $this->landingSourceMeta($allSourceIds);
+        $rawPackets = $this->rawPacketQuery($filter, $landingSourceMeta->keys())->get();
         $ingestions = $this->ingestionQuery($filter, $allSourceIds)->get();
         $orders = $this->orderQuery($filter, $allSourceIds)->get();
         $dailyMetrics = $this->dailyMetricQuery($filter, $allSourceIds)->get();
 
         $orderUtm = $this->orderUtmMap($orders);
-        $groups = $sources->map(function (MarketingSource $source) use ($ingestions, $orders, $dailyMetrics, $orderUtm): array {
+        $groups = $sources->map(function (MarketingSource $source) use ($rawPackets, $landingSourceMeta, $ingestions, $orders, $dailyMetrics, $orderUtm): array {
             $familyIds = collect([$source->id])
                 ->merge($source->children->pluck('id'))
                 ->map(static fn ($id): int => (int) $id)
@@ -69,6 +74,8 @@ class PushsaleMarketingDashboardService
             $root = $this->makeRow(
                 source: $source,
                 sourceIds: $familyIds,
+                rawPackets: $rawPackets,
+                landingSourceMeta: $landingSourceMeta,
                 ingestions: $ingestions,
                 orders: $orders,
                 dailyMetrics: $dailyMetrics,
@@ -78,7 +85,7 @@ class PushsaleMarketingDashboardService
                 utmCampaign: null,
             );
 
-            $utmPairs = $this->utmPairs($familyIds, $ingestions, $dailyMetrics, $orderUtm, $orders);
+            $utmPairs = $this->utmPairs($familyIds, $rawPackets, $landingSourceMeta, $ingestions, $dailyMetrics, $orderUtm, $orders);
             $children = collect();
 
             foreach ($utmPairs->groupBy('utm_source') as $utmSource => $pairs) {
@@ -86,6 +93,8 @@ class PushsaleMarketingDashboardService
                 $sourceRow = $this->makeRow(
                     source: $source,
                     sourceIds: $familyIds,
+                    rawPackets: $rawPackets,
+                    landingSourceMeta: $landingSourceMeta,
                     ingestions: $ingestions,
                     orders: $orders,
                     dailyMetrics: $dailyMetrics,
@@ -103,6 +112,8 @@ class PushsaleMarketingDashboardService
                     $campaignRow = $this->makeRow(
                         source: $source,
                         sourceIds: $familyIds,
+                        rawPackets: $rawPackets,
+                        landingSourceMeta: $landingSourceMeta,
                         ingestions: $ingestions,
                         orders: $orders,
                         dailyMetrics: $dailyMetrics,
@@ -208,8 +219,8 @@ class PushsaleMarketingDashboardService
                 ['value' => 'returning', 'label' => 'Khách cũ'],
             ],
             'contactModes' => [
-                ['value' => 'has', 'label' => 'Có Contact (Hoặc chốt đơn)'],
-                ['value' => 'none', 'label' => 'Không có contact về'],
+                ['value' => 'has', 'label' => 'Có gói tin landing'],
+                ['value' => 'none', 'label' => 'Không có gói tin về'],
             ],
             'sourceTypes' => [
                 ['value' => 'facebook', 'label' => 'Nguồn Facebook'],
@@ -217,7 +228,7 @@ class PushsaleMarketingDashboardService
                 ['value' => 'website', 'label' => 'Nguồn Website'],
             ],
             'sortOptions' => [
-                ['value' => 'contacts', 'label' => 'Số contact'],
+                ['value' => 'contacts', 'label' => 'Số gói tin landing'],
                 ['value' => 'closing_rate', 'label' => 'Tỷ lệ chốt'],
                 ['value' => 'revenue', 'label' => 'Doanh số'],
                 ['value' => 'budget_revenue', 'label' => 'Ngân sách trên doanh số'],
@@ -271,15 +282,19 @@ class PushsaleMarketingDashboardService
             advancedUtm: $filter->advancedUtm,
         );
 
+        $landingSourceMeta = $this->landingSourceMeta($sourceIds);
+        $rawPackets = $this->rawPacketQuery($chartFilter, $landingSourceMeta->keys())->get();
         $metrics = $this->dailyMetricQuery($chartFilter, $sourceIds)->get();
         $ingestions = $this->ingestionQuery($chartFilter, $sourceIds)->get();
         $orders = $this->orderQuery($chartFilter, $sourceIds)->get();
         $orderUtm = $this->orderUtmMap($orders);
 
         $days = collect(CarbonPeriod::create($from->toDateString(), $to->toDateString()))
-            ->map(function (Carbon $day) use ($metrics, $ingestions, $orders, $orderUtm, $utmSource, $utmCampaign): array {
+            ->map(function (Carbon $day) use ($rawPackets, $landingSourceMeta, $metrics, $ingestions, $orders, $orderUtm, $utmSource, $utmCampaign): array {
                 $metricDay = $metrics->filter(fn (MarketingSourceDailyMetric $item): bool => $item->metric_date->isSameDay($day))
                     ->filter(fn (MarketingSourceDailyMetric $item): bool => $this->utmMatches($item->utm_source, $item->utm_campaign, $utmSource, $utmCampaign));
+                $rawDay = $rawPackets->filter(fn (InboundEvent $item): bool => $item->created_at?->isSameDay($day) ?? false)
+                    ->filter(fn (InboundEvent $item): bool => $this->utmMatches($this->rawPacketUtmSource($item), $this->rawPacketUtmCampaign($item), $utmSource, $utmCampaign));
                 $ingestionDay = $ingestions->filter(fn (LeadIngestion $item): bool => $item->created_at?->isSameDay($day) ?? false)
                     ->filter(fn (LeadIngestion $item): bool => $this->utmMatches((string) $item->utm_source, (string) $item->utm_campaign, $utmSource, $utmCampaign));
                 $orderDay = $orders->filter(fn (Order $item): bool => ($item->closed_at ?? $item->data_arrived_at ?? $item->created_at)?->isSameDay($day) ?? false)
@@ -290,12 +305,14 @@ class PushsaleMarketingDashboardService
                         $utmCampaign,
                     ));
 
-                $baseContacts = $ingestionDay->filter(
-                    fn (LeadIngestion $item): bool => ! MarketingPacketMetrics::isUpsale($item),
-                )->count();
-                $upsaleContacts = $ingestionDay->filter(
-                    fn (LeadIngestion $item): bool => MarketingPacketMetrics::isUpsale($item),
-                )->count();
+                if ($landingSourceMeta->isNotEmpty()) {
+                    $baseContacts = $rawDay->filter(fn (InboundEvent $item): bool => ! $this->isRawUpsale($item, $landingSourceMeta))->count();
+                    $upsaleContacts = $rawDay->filter(fn (InboundEvent $item): bool => $this->isRawUpsale($item, $landingSourceMeta))->count();
+                } else {
+                    $baseContacts = $ingestionDay->filter(fn (LeadIngestion $item): bool => ! MarketingPacketMetrics::isUpsale($item))->count();
+                    $upsaleContacts = $ingestionDay->filter(fn (LeadIngestion $item): bool => MarketingPacketMetrics::isUpsale($item))->count();
+                }
+                $validContacts = $ingestionDay->count();
 
                 return [
                     'date' => $day->toDateString(),
@@ -305,6 +322,7 @@ class PushsaleMarketingDashboardService
                     'contacts' => $baseContacts + $upsaleContacts,
                     'baseContacts' => $baseContacts,
                     'upsaleContacts' => $upsaleContacts,
+                    'validContacts' => $validContacts,
                     'revenue' => (int) $orderDay->sum(fn (Order $order): int => $order->effectiveRevenue()),
                 ];
             })->values();
@@ -341,42 +359,46 @@ class PushsaleMarketingDashboardService
             ->unique()
             ->values();
 
-        $query = $this->ingestionQuery($filter, $sourceIds)
+        $landingSourceMeta = $this->landingSourceMeta($sourceIds);
+        $rawPackets = $this->rawPacketQuery($filter, $landingSourceMeta->keys())
+            ->get()
+            ->filter(fn (InboundEvent $packet): bool => $this->utmMatches($this->rawPacketUtmSource($packet), $this->rawPacketUtmCampaign($packet), $utmSource, $utmCampaign))
+            ->sortByDesc(fn (InboundEvent $packet): string => sprintf('%s-%012d', $packet->created_at?->format('Y-m-d H:i:s.u') ?? '', (int) $packet->id))
+            ->values();
+
+        $validQuery = $this->ingestionQuery($filter, $sourceIds)
             ->with([
                 'marketingSource:id,name,parent_id',
                 'landingConnection:id,name',
                 'landingConnectionSource:id,landing_connection_id,name,source_type',
             ]);
+        $this->applyExactUtm($validQuery, $utmSource, $utmCampaign);
+        $validSummaryQuery = clone $validQuery;
+        $validContacts = (int) (clone $validSummaryQuery)->count();
 
-        $this->applyExactUtm($query, $utmSource, $utmCampaign);
-
-        $summaryQuery = clone $query;
-        $total = (int) (clone $summaryQuery)->count();
-        $baseContacts = (int) (clone $summaryQuery)
-            ->where(function (Builder $packet): void {
-                $packet->whereNull('packet_type')
-                    ->orWhereNotIn('packet_type', MarketingPacketMetrics::upsaleTypes());
-            })
-            ->count();
-        $upsaleContacts = (int) (clone $summaryQuery)
-            ->whereIn('packet_type', MarketingPacketMetrics::upsaleTypes())
-            ->count();
-        $reviewPackets = (int) (clone $summaryQuery)
+        $reviewQuery = LeadIngestion::query()->whereIn('marketing_source_id', $sourceIds);
+        $this->applyIngestionDate($reviewQuery, $filter);
+        MarketingPacketMetrics::applyCustomerTypeScope($reviewQuery, $filter->customerType);
+        $this->applyExactUtm($reviewQuery, $utmSource, $utmCampaign);
+        $reviewPackets = (int) $reviewQuery
             ->where(function (Builder $packet): void {
                 $packet->where('requires_review', true)
-                    ->orWhere('status', LeadIngestionStatus::NeedsReview);
+                    ->orWhere('status', LeadIngestionStatus::NeedsReview->value);
             })
             ->count();
+
+        $total = $rawPackets->count();
+        $baseContacts = $rawPackets->filter(fn (InboundEvent $packet): bool => ! $this->isRawUpsale($packet, $landingSourceMeta))->count();
+        $upsaleContacts = $rawPackets->filter(fn (InboundEvent $packet): bool => $this->isRawUpsale($packet, $landingSourceMeta))->count();
+        $uniquePhones = $rawPackets->map(fn (InboundEvent $packet): string => $this->rawPacketPhone($packet))->filter()->unique()->count();
+        $duplicatePackets = max(0, $total - $uniquePhones);
+        $rejectedPackets = $rawPackets->filter(fn (InboundEvent $packet): bool => $this->rawStatusValue($packet) === InboundEventStatus::Rejected->value)->count();
+        $failedPackets = $rawPackets->filter(fn (InboundEvent $packet): bool => $this->rawStatusValue($packet) === InboundEventStatus::Failed->value)->count();
 
         $perPage = min(100, max(10, $perPage));
         $lastPage = max(1, (int) ceil($total / $perPage));
         $page = min(max(1, $page), $lastPage);
-
-        $packets = $query
-            ->latest('lead_ingestions.created_at')
-            ->latest('lead_ingestions.id')
-            ->forPage($page, $perPage)
-            ->get();
+        $packets = $rawPackets->slice(($page - 1) * $perPage, $perPage)->values();
 
         return [
             'source' => [
@@ -389,9 +411,14 @@ class PushsaleMarketingDashboardService
                 'contacts' => $total,
                 'baseContacts' => $baseContacts,
                 'upsaleContacts' => $upsaleContacts,
+                'validContacts' => $validContacts,
+                'uniquePhones' => $uniquePhones,
+                'duplicatePackets' => $duplicatePackets,
                 'reviewPackets' => $reviewPackets,
+                'rejectedPackets' => $rejectedPackets,
+                'failedPackets' => $failedPackets,
             ],
-            'rows' => $packets->map(fn (LeadIngestion $packet): array => $this->mapPacketRow($packet))->values(),
+            'rows' => $packets->map(fn (InboundEvent $packet): array => $this->mapRawPacketRow($packet, $landingSourceMeta))->values(),
             'pagination' => [
                 'current_page' => $page,
                 'last_page' => $lastPage,
@@ -677,6 +704,48 @@ class PushsaleMarketingDashboardService
             ->whereBetween('metric_date', [$filter->dateFrom->toDateString(), $filter->dateTo->toDateString()]);
     }
 
+    /** @param Collection<int, int> $sourceIds @return Collection<string, array<string, mixed>> */
+    private function landingSourceMeta(Collection $sourceIds): Collection
+    {
+        if ($sourceIds->isEmpty()) {
+            return collect();
+        }
+
+        return LandingConnectionSource::query()
+            ->with(['connection:id,name,marketing_source_id'])
+            ->whereHas('connection', fn (Builder $connection) => $connection->whereIn('marketing_source_id', $sourceIds))
+            ->get(['id', 'landing_connection_id', 'name', 'source_type'])
+            ->mapWithKeys(function (LandingConnectionSource $source): array {
+                $channel = 'landing-connection:'.$source->landing_connection_id.':source:'.$source->id;
+
+                return [$channel => [
+                    'channel' => $channel,
+                    'landing_connection_id' => (int) $source->landing_connection_id,
+                    'landing_connection_name' => $source->connection?->name ?? '—',
+                    'landing_source_id' => (int) $source->id,
+                    'landing_source_name' => $source->name ?: '—',
+                    'source_type' => $source->source_type ?: LandingConnectionSource::TYPE_MAIN,
+                    'marketing_source_id' => (int) ($source->connection?->marketing_source_id ?? 0),
+                ]];
+            });
+    }
+
+    /** @param Collection<int|string, string> $channels */
+    private function rawPacketQuery(MarketingDashboardFilterData $filter, Collection $channels): Builder
+    {
+        $query = InboundEvent::query()
+            ->where('source', InboundEventSource::LandingWebhook->value)
+            ->whereBetween('created_at', [$filter->dateFrom, $filter->dateTo]);
+
+        if ($channels->isEmpty()) {
+            $query->whereRaw('1 = 0');
+        } else {
+            $query->whereIn('channel', $channels->values()->all());
+        }
+
+        return $query;
+    }
+
     /** @param callable(Builder<Order>): void $constraint */
     private function wherePacketEffectiveOrder(Builder $query, callable $constraint): void
     {
@@ -697,6 +766,67 @@ class PushsaleMarketingDashboardService
         if ($utmCampaign !== null) {
             $query->where('utm_campaign', trim($utmCampaign));
         }
+    }
+
+    /** @param Collection<string, array<string, mixed>> $landingSourceMeta @return array<string, mixed> */
+    private function mapRawPacketRow(InboundEvent $packet, Collection $landingSourceMeta): array
+    {
+        $payload = is_array($packet->payload) ? $packet->payload : [];
+        $meta = $this->rawSourceMeta($packet, $landingSourceMeta);
+        $isUpsale = $this->isRawUpsale($packet, $landingSourceMeta);
+        $message = data_get($payload, 'message')
+            ?? data_get($payload, 'customer_note')
+            ?? data_get($payload, 'note')
+            ?? data_get($payload, 'form.message');
+
+        return [
+            'id' => $packet->id,
+            'externalId' => 'raw-'.$packet->id,
+            'receivedAt' => $packet->created_at?->timezone(config('app.timezone'))->format('d/m/Y H:i:s'),
+            'packetType' => $isUpsale ? 'upsale' : 'primary',
+            'packetTypeLabel' => $isUpsale ? __('enums.lead_packet_type.upsell') : __('enums.lead_packet_type.lead'),
+            'isUpsale' => $isUpsale,
+            'status' => $this->rawStatusValue($packet),
+            'statusLabel' => $this->rawStatusLabel($packet),
+            'requiresReview' => $this->rawStatusValue($packet) !== InboundEventStatus::Processed->value,
+            'customerName' => $this->rawPacketPayloadText($packet, ['name', 'customer_name', 'fullname', 'full_name', 'họ tên', 'Họ tên']) ?: '—',
+            'customerPhone' => $this->rawPacketPhone($packet) ?: '—',
+            'productSummary' => $this->rawPacketProductSummary($packet),
+            'message' => is_scalar($message) ? trim((string) $message) : '',
+            'sourceName' => '—',
+            'landingName' => (string) ($meta['landing_connection_name'] ?? '—'),
+            'landingSourceName' => (string) ($meta['landing_source_name'] ?? '—'),
+            'landingSourceType' => (string) ($meta['source_type'] ?? ''),
+            'utmSource' => $this->rawPacketUtmSource($packet),
+            'utmCampaign' => $this->rawPacketUtmCampaign($packet),
+            'orderId' => null,
+            'orderCode' => null,
+        ];
+    }
+
+    private function rawPacketProductSummary(InboundEvent $packet): string
+    {
+        $payload = is_array($packet->payload) ? $packet->payload : [];
+        $items = data_get($payload, 'items', []);
+
+        if (is_array($items) && $items !== []) {
+            $labels = collect($items)->map(function (mixed $item): string {
+                if (! is_array($item)) {
+                    return is_scalar($item) ? trim((string) $item) : '';
+                }
+
+                $name = trim((string) ($item['product_name'] ?? $item['name'] ?? $item['product'] ?? $item['sku'] ?? ''));
+                $quantity = max(1, (int) ($item['quantity'] ?? $item['qty'] ?? 1));
+
+                return $name === '' ? '' : $name.($quantity > 1 ? ' ×'.$quantity : '');
+            })->filter()->values();
+
+            if ($labels->isNotEmpty()) {
+                return $labels->take(3)->implode(', ').($labels->count() > 3 ? ' +'.($labels->count() - 3) : '');
+            }
+        }
+
+        return $this->rawPacketPayloadText($packet, ['products', 'product_interest', 'product', 'san_pham', 'sản phẩm', 'Sản phẩm']) ?: '—';
     }
 
     /** @return array<string, mixed> */
@@ -811,15 +941,27 @@ class PushsaleMarketingDashboardService
 
     /**
      * @param Collection<int, int> $sourceIds
+     * @param Collection<int, InboundEvent> $rawPackets
+     * @param Collection<string, array<string, mixed>> $landingSourceMeta
      * @param Collection<int, LeadIngestion> $ingestions
      * @param Collection<int, MarketingSourceDailyMetric> $metrics
      * @param array<int, array{utm_source: string, utm_campaign: string}> $orderUtm
      * @param Collection<int, Order> $orders
      * @return Collection<int, array{utm_source: string, utm_campaign: string}>
      */
-    private function utmPairs(Collection $sourceIds, Collection $ingestions, Collection $metrics, array $orderUtm, Collection $orders): Collection
+    private function utmPairs(Collection $sourceIds, Collection $rawPackets, Collection $landingSourceMeta, Collection $ingestions, Collection $metrics, array $orderUtm, Collection $orders): Collection
     {
         $pairs = collect();
+        $sourceIdLookup = $sourceIds->mapWithKeys(fn (int $id): array => [$id => true]);
+
+        $rawPackets->each(function (InboundEvent $item) use ($pairs, $landingSourceMeta, $sourceIdLookup): void {
+            $marketingSourceId = $this->rawMarketingSourceId($item, $landingSourceMeta);
+            if (! $marketingSourceId || ! $sourceIdLookup->has($marketingSourceId)) {
+                return;
+            }
+
+            $pairs->push(['utm_source' => $this->rawPacketUtmSource($item), 'utm_campaign' => $this->rawPacketUtmCampaign($item)]);
+        });
         $ingestions->whereIn('marketing_source_id', $sourceIds)->each(function (LeadIngestion $item) use ($pairs): void {
             $pairs->push(['utm_source' => trim((string) $item->utm_source), 'utm_campaign' => trim((string) $item->utm_campaign)]);
         });
@@ -835,6 +977,8 @@ class PushsaleMarketingDashboardService
 
     /**
      * @param Collection<int, int> $sourceIds
+     * @param Collection<int, InboundEvent> $rawPackets
+     * @param Collection<string, array<string, mixed>> $landingSourceMeta
      * @param Collection<int, LeadIngestion> $ingestions
      * @param Collection<int, Order> $orders
      * @param Collection<int, MarketingSourceDailyMetric> $dailyMetrics
@@ -844,6 +988,8 @@ class PushsaleMarketingDashboardService
     private function makeRow(
         MarketingSource $source,
         Collection $sourceIds,
+        Collection $rawPackets,
+        Collection $landingSourceMeta,
         Collection $ingestions,
         Collection $orders,
         Collection $dailyMetrics,
@@ -852,6 +998,10 @@ class PushsaleMarketingDashboardService
         ?string $utmSource,
         ?string $utmCampaign,
     ): array {
+        $sourceIdLookup = $sourceIds->mapWithKeys(fn (int $id): array => [$id => true]);
+        $rawSet = $rawPackets
+            ->filter(fn (InboundEvent $item): bool => $sourceIdLookup->has($this->rawMarketingSourceId($item, $landingSourceMeta)))
+            ->filter(fn (InboundEvent $item): bool => $this->utmMatches($this->rawPacketUtmSource($item), $this->rawPacketUtmCampaign($item), $utmSource, $utmCampaign));
         $ingestionSet = $ingestions->whereIn('marketing_source_id', $sourceIds)
             ->filter(fn (LeadIngestion $item): bool => $this->utmMatches((string) $item->utm_source, (string) $item->utm_campaign, $utmSource, $utmCampaign));
         $orderSet = $orders->whereIn('marketing_source_id', $sourceIds)
@@ -864,9 +1014,26 @@ class PushsaleMarketingDashboardService
         $metricSet = $dailyMetrics->whereIn('marketing_source_id', $sourceIds)
             ->filter(fn (MarketingSourceDailyMetric $item): bool => $this->utmMatches($item->utm_source, $item->utm_campaign, $utmSource, $utmCampaign));
 
-        $baseContacts = $ingestionSet->filter(fn (LeadIngestion $item): bool => ! MarketingPacketMetrics::isUpsale($item))->count();
-        $upsaleContacts = $ingestionSet->filter(fn (LeadIngestion $item): bool => MarketingPacketMetrics::isUpsale($item))->count();
-        $contacts = $baseContacts + $upsaleContacts;
+        $usesRawPackets = $landingSourceMeta->contains(fn (array $meta): bool => $sourceIdLookup->has((int) ($meta['marketing_source_id'] ?? 0)));
+        if ($usesRawPackets) {
+            $baseContacts = $rawSet->filter(fn (InboundEvent $item): bool => ! $this->isRawUpsale($item, $landingSourceMeta))->count();
+            $upsaleContacts = $rawSet->filter(fn (InboundEvent $item): bool => $this->isRawUpsale($item, $landingSourceMeta))->count();
+            $contacts = $baseContacts + $upsaleContacts;
+            $uniquePhones = $rawSet->map(fn (InboundEvent $item): string => $this->rawPacketPhone($item))->filter()->unique()->count();
+            $duplicatePackets = max(0, $contacts - $uniquePhones);
+            $rejectedPackets = $rawSet->filter(fn (InboundEvent $item): bool => $this->rawStatusValue($item) === InboundEventStatus::Rejected->value)->count();
+            $failedPackets = $rawSet->filter(fn (InboundEvent $item): bool => $this->rawStatusValue($item) === InboundEventStatus::Failed->value)->count();
+        } else {
+            $baseContacts = $ingestionSet->filter(fn (LeadIngestion $item): bool => ! MarketingPacketMetrics::isUpsale($item))->count();
+            $upsaleContacts = $ingestionSet->filter(fn (LeadIngestion $item): bool => MarketingPacketMetrics::isUpsale($item))->count();
+            $contacts = $baseContacts + $upsaleContacts;
+            $uniquePhones = $ingestionSet->pluck('customer_phone')->filter()->unique()->count();
+            $duplicatePackets = max(0, $contacts - $uniquePhones);
+            $rejectedPackets = 0;
+            $failedPackets = 0;
+        }
+        $validContacts = $ingestionSet->count();
+        $reviewPackets = $ingestionSet->filter(fn (LeadIngestion $item): bool => (bool) $item->requires_review || ($item->status?->value ?? (string) $item->status) === LeadIngestionStatus::NeedsReview->value)->count();
         $budget = (int) $metricSet->sum('budget');
         $clicks = (int) $metricSet->sum('clicks');
         if ($level === 1) {
@@ -894,9 +1061,9 @@ class PushsaleMarketingDashboardService
         $productQuantity = (int) $closedOrderSet->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
         $grossRevenue = (int) $closedOrderSet->sum(fn (Order $order): int => max((int) $order->subtotal, $order->items->sum(fn ($item) => (int) $item->quantity * (int) $item->unit_price)));
         $netRevenue = (int) $closedOrderSet->sum(fn (Order $order): int => $order->effectiveRevenue());
-        $utmMedium = $level >= 3 ? $this->summarizePayloadUtm($ingestionSet, 'utm_medium') : '';
-        $utmTerm = $level >= 3 ? $this->summarizePayloadUtm($ingestionSet, 'utm_term') : '';
-        $utmContent = $level >= 3 ? $this->summarizePayloadUtm($ingestionSet, 'utm_content') : '';
+        $utmMedium = $level >= 3 ? ($usesRawPackets ? $this->summarizeRawPayloadUtm($rawSet, 'utm_medium') : $this->summarizePayloadUtm($ingestionSet, 'utm_medium')) : '';
+        $utmTerm = $level >= 3 ? ($usesRawPackets ? $this->summarizeRawPayloadUtm($rawSet, 'utm_term') : $this->summarizePayloadUtm($ingestionSet, 'utm_term')) : '';
+        $utmContent = $level >= 3 ? ($usesRawPackets ? $this->summarizeRawPayloadUtm($rawSet, 'utm_content') : $this->summarizePayloadUtm($ingestionSet, 'utm_content')) : '';
 
         return [
             'id' => $source->id,
@@ -916,6 +1083,12 @@ class PushsaleMarketingDashboardService
             'contacts' => $contacts,
             'baseContacts' => $baseContacts,
             'upsaleContacts' => $upsaleContacts,
+            'validContacts' => $validContacts,
+            'uniquePhones' => $uniquePhones,
+            'duplicatePackets' => $duplicatePackets,
+            'reviewPackets' => $reviewPackets,
+            'rejectedPackets' => $rejectedPackets,
+            'failedPackets' => $failedPackets,
             'contactRate' => $clicks > 0 ? round($contacts / $clicks * 100, 2) : null,
             'costPerContact' => $contacts > 0 ? (int) round($budget / $contacts) : 0,
             'closedOrders' => $closedOrders,
@@ -927,6 +1100,114 @@ class PushsaleMarketingDashboardService
             'budgetRevenueRatio' => $grossRevenue > 0 ? round($budget / $grossRevenue * 100, 2) : 0,
             'budgetNetRevenueRatio' => $netRevenue > 0 ? round($budget / $netRevenue * 100, 2) : 0,
         ];
+    }
+
+    /** @param Collection<int, InboundEvent> $rawPackets */
+    private function summarizeRawPayloadUtm(Collection $rawPackets, string $key): string
+    {
+        $values = $rawPackets
+            ->map(fn (InboundEvent $packet): string => $this->rawPacketPayloadText($packet, [$key, 'utm.'.$key, 'tracking.'.$key, 'query.'.$key, 'form.'.$key]) ?: $this->rawUrlQueryValue($packet, $key))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($values->count() <= 1) {
+            return (string) ($values->first() ?? '');
+        }
+
+        return $values->take(2)->implode(', ').($values->count() > 2 ? ' +'.($values->count() - 2) : '');
+    }
+
+    /** @param Collection<string, array<string, mixed>> $landingSourceMeta */
+    private function rawMarketingSourceId(InboundEvent $packet, Collection $landingSourceMeta): ?int
+    {
+        $meta = $landingSourceMeta->get((string) $packet->channel) ?? [];
+        $id = (int) ($meta['marketing_source_id'] ?? 0);
+
+        return $id > 0 ? $id : null;
+    }
+
+    /** @param Collection<string, array<string, mixed>> $landingSourceMeta */
+    private function rawSourceMeta(InboundEvent $packet, Collection $landingSourceMeta): array
+    {
+        return $landingSourceMeta->get((string) $packet->channel) ?? [];
+    }
+
+    /** @param Collection<string, array<string, mixed>> $landingSourceMeta */
+    private function isRawUpsale(InboundEvent $packet, Collection $landingSourceMeta): bool
+    {
+        $sourceType = (string) ($this->rawSourceMeta($packet, $landingSourceMeta)['source_type'] ?? LandingConnectionSource::TYPE_MAIN);
+        if (in_array($sourceType, [LandingConnectionSource::TYPE_UPSELL, 'upsale', 'supplement'], true)) {
+            return true;
+        }
+
+        $payloadType = strtolower($this->rawPacketPayloadText($packet, ['item_type', 'landing_source_type']) ?? '');
+        $isUpsell = strtolower($this->rawPacketPayloadText($packet, ['is_upsell', 'is_upsale']) ?? '');
+
+        return in_array($payloadType, ['upsell', 'upsale', 'late_upsell', 'late_upsale'], true)
+            || in_array($isUpsell, ['1', 'true', 'yes', 'on'], true);
+    }
+
+    private function rawPacketUtmSource(InboundEvent $packet): string
+    {
+        return trim((string) ($this->rawPacketPayloadText($packet, ['utm_source', 'utm.utm_source', 'tracking.utm_source', 'query.utm_source'])
+            ?: $this->rawUrlQueryValue($packet, 'utm_source')));
+    }
+
+    private function rawPacketUtmCampaign(InboundEvent $packet): string
+    {
+        return trim((string) ($this->rawPacketPayloadText($packet, ['utm_campaign', 'campaign', 'utm.utm_campaign', 'tracking.utm_campaign', 'query.utm_campaign'])
+            ?: $this->rawUrlQueryValue($packet, 'utm_campaign')));
+    }
+
+    private function rawPacketPhone(InboundEvent $packet): string
+    {
+        $phone = $this->rawPacketPayloadText($packet, ['phone', 'customer_phone', 'sdt', 'Số điện thoại', 'số điện thoại', 'form.phone']);
+        $digits = preg_replace('/\D+/', '', (string) $phone) ?? '';
+
+        return $digits !== '' ? substr($digits, 0, 20) : '';
+    }
+
+    /** @param list<string> $keys */
+    private function rawPacketPayloadText(InboundEvent $packet, array $keys): ?string
+    {
+        $payload = is_array($packet->payload) ? $packet->payload : [];
+        foreach ($keys as $key) {
+            $value = data_get($payload, $key);
+            if (is_scalar($value) && trim((string) $value) !== '') {
+                return trim((string) $value);
+            }
+        }
+
+        return null;
+    }
+
+    private function rawUrlQueryValue(InboundEvent $packet, string $key): string
+    {
+        $url = $this->rawPacketPayloadText($packet, ['url_page', 'link', 'url', 'source_url', 'page_url', 'landing_url']);
+        if (! $url) {
+            return '';
+        }
+
+        $query = parse_url($url, PHP_URL_QUERY);
+        if (! is_string($query) || $query === '') {
+            return '';
+        }
+
+        parse_str($query, $params);
+        $value = $params[$key] ?? '';
+
+        return is_scalar($value) ? trim((string) $value) : '';
+    }
+
+    private function rawStatusValue(InboundEvent $packet): string
+    {
+        return $packet->status instanceof InboundEventStatus ? $packet->status->value : (string) $packet->status;
+    }
+
+    private function rawStatusLabel(InboundEvent $packet): string
+    {
+        return $packet->status instanceof InboundEventStatus ? $packet->status->label() : $this->rawStatusValue($packet);
     }
 
     /** @param Collection<int, LeadIngestion> $ingestions */
@@ -990,6 +1271,12 @@ class PushsaleMarketingDashboardService
         $contacts = (int) $rows->sum('contacts');
         $baseContacts = (int) $rows->sum('baseContacts');
         $upsaleContacts = (int) $rows->sum('upsaleContacts');
+        $validContacts = (int) $rows->sum('validContacts');
+        $uniquePhones = (int) $rows->sum('uniquePhones');
+        $duplicatePackets = (int) $rows->sum('duplicatePackets');
+        $reviewPackets = (int) $rows->sum('reviewPackets');
+        $rejectedPackets = (int) $rows->sum('rejectedPackets');
+        $failedPackets = (int) $rows->sum('failedPackets');
         $closed = (int) $rows->sum('closedOrders');
         $products = (int) $rows->sum('productQuantity');
         $gross = (int) $rows->sum('totalRevenue');
@@ -1001,6 +1288,12 @@ class PushsaleMarketingDashboardService
             'contacts' => $contacts,
             'baseContacts' => $baseContacts,
             'upsaleContacts' => $upsaleContacts,
+            'validContacts' => $validContacts,
+            'uniquePhones' => $uniquePhones,
+            'duplicatePackets' => $duplicatePackets,
+            'reviewPackets' => $reviewPackets,
+            'rejectedPackets' => $rejectedPackets,
+            'failedPackets' => $failedPackets,
             'contactRate' => $clicks > 0 ? round($contacts / $clicks * 100, 2) : null,
             'costPerContact' => $contacts > 0 ? (int) round($budget / $contacts) : 0,
             'closedOrders' => $closed,

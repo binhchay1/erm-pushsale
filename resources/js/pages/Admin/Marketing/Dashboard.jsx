@@ -37,6 +37,16 @@ function money(value) {
     return formatNumber(Number(value ?? 0));
 }
 
+function ContactBreakdown({ item = {} }) {
+    return (
+        <div className="psm-contact-breakdown">
+            <b>{money(item.contacts)}</b>
+            <small>Hợp lệ {money(item.validContacts)} · Trùng {money(item.duplicatePackets)}</small>
+            <small>Chính {money(item.baseContacts)} · Upsale {money(item.upsaleContacts)}</small>
+        </div>
+    );
+}
+
 function DialogShell({ open, title, size = 'lg', onClose, children, footer }) {
     const widths = { md: '650px', lg: '980px', xl: '1280px', wide: 'min(1540px, calc(100vw - 32px))', full: 'min(1760px, calc(100vw - 16px))' };
 
@@ -93,10 +103,10 @@ function ChartGraphic({ days = [] }) {
     return (
         <div className="psm-chart-wrap">
             <div className="psm-chart-legend">
-                <span><i className="is-contact" /> Contact</span>
+                <span><i className="is-contact" /> Gói tin</span>
                 <span><i className="is-revenue" /> Doanh số</span>
             </div>
-            <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Biểu đồ hiệu quả marketing">
+            <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Biểu đồ gói tin marketing">
                 {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
                     const y = padding.top + graphHeight * ratio;
                     return <line key={ratio} x1={padding.left} y1={y} x2={width - padding.right} y2={y} className="psm-chart-grid" />;
@@ -116,9 +126,10 @@ function ChartGraphic({ days = [] }) {
             <div className="psm-chart-summary">
                 <span>Ngân sách: <b>{money(days.reduce((sum, day) => sum + Number(day.budget ?? 0), 0))}</b></span>
                 <span>Tương tác: <b>{money(days.reduce((sum, day) => sum + Number(day.clicks ?? 0), 0))}</b></span>
-                <span>Contact: <b>{money(days.reduce((sum, day) => sum + Number(day.contacts ?? 0), 0))}</b></span>
+                <span>Gói tin: <b>{money(days.reduce((sum, day) => sum + Number(day.contacts ?? 0), 0))}</b></span>
                 <span>Chính: <b>{money(days.reduce((sum, day) => sum + Number(day.baseContacts ?? 0), 0))}</b></span>
                 <span>Upsale: <b>{money(days.reduce((sum, day) => sum + Number(day.upsaleContacts ?? 0), 0))}</b></span>
+                <span>Hợp lệ: <b>{money(days.reduce((sum, day) => sum + Number(day.validContacts ?? 0), 0))}</b></span>
                 <span>Doanh số: <b>{money(days.reduce((sum, day) => sum + Number(day.revenue ?? 0), 0))}</b></span>
             </div>
         </div>
@@ -237,7 +248,11 @@ function LandingPacketsDialog({ state, endpoint, filters, onClose }) {
                 <div><span>{t('dashboard.marketing.packet_dialog.total')}</span><b>{money(summary.contacts)}</b></div>
                 <div><span>{t('dashboard.marketing.packet_dialog.primary')}</span><b>{money(summary.baseContacts)}</b></div>
                 <div className="is-upsale"><span>{t('dashboard.marketing.packet_dialog.upsale')}</span><b>{money(summary.upsaleContacts)}</b></div>
-                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.review')}</span><b>{money(summary.reviewPackets)}</b></div>
+                <div className="is-valid"><span>{t('dashboard.marketing.packet_dialog.valid_contacts')}</span><b>{money(summary.validContacts)}</b></div>
+                <div><span>{t('dashboard.marketing.packet_dialog.unique_phones')}</span><b>{money(summary.uniquePhones)}</b></div>
+                <div><span>{t('dashboard.marketing.packet_dialog.duplicate_packets')}</span><b>{money(summary.duplicatePackets)}</b></div>
+                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.rejected_packets')}</span><b>{money(summary.rejectedPackets)}</b></div>
+                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.failed_packets')}</span><b>{money(summary.failedPackets)}</b></div>
             </div>
 
             {!loading && !error && data && expected !== actual && (
@@ -327,7 +342,7 @@ function HelpDialog({ open, onClose }) {
         <DialogShell open={open} title="HƯỚNG DẪN MARKETING DASHBOARD" size="md" onClose={onClose}>
             <div className="psm-help">
                 <p><b>Nút dấu cộng</b> mở danh sách toàn bộ gói tin landing tương ứng với bộ lọc và dòng nguồn/UTM đang xem.</p>
-                <p><b>Số contact</b> gồm gói tin chính và từng gói tin upsale hợp lệ. <b>Chốt đơn và doanh số</b> lấy từ đơn đã chốt thực tế.</p>
+                <p><b>Gói tin</b> là dữ liệu raw nhận từ landing/webhook để đối soát sheet. <b>Contact hợp lệ</b> là số sau xử lý/chống trùng để chia sale.</p>
                 <p>Bấm mũi tên tại cột sản phẩm để mở chi tiết UTM Source và UTM Campaign; bấm biểu đồ để xem biến động theo ngày.</p>
             </div>
         </DialogShell>
@@ -340,7 +355,7 @@ function TotalRow({ label, total = {}, advancedUtm = false }) {
             <td colSpan={advancedUtm ? 9 : 6}>{label}:</td>
             <td>{money(total.budget)}</td>
             <td>{money(total.interactions)}</td>
-            <td><div className="psm-contact-breakdown"><b>{money(total.contacts)}</b><small>Chính {money(total.baseContacts)} · Upsale {money(total.upsaleContacts)}</small></div></td>
+            <td><ContactBreakdown item={total} /></td>
             <td>{percent(total.contactRate, true)}</td>
             <td>{money(total.costPerContact)}</td>
             <td>{money(total.closedOrders)}</td>
@@ -402,8 +417,8 @@ function DashboardTable({ report, expanded, onToggle, onChart, onPackets, advanc
                     <tr>
                         <th>STT</th><th>Tên Nguồn dữ liệu</th><th>Sản phẩm</th><th>Kênh quảng cáo</th><th>UTM Source</th><th>UTM<br />Campaign</th>
                         {advancedUtm && <><th>UTM<br />Medium</th><th>UTM<br />Term</th><th>UTM<br />Content</th></>}
-                        <th>Ngân sách (1)</th><th>Số tương tác<br />(2)</th><th>Số contact<br /><small>Chính + Upsale</small><br />(3)</th><th>Tỷ lệ<br />contact/tương tác<br />(4=3/2) (%)</th>
-                        <th>Giá contact<br />(5=1/3)</th><th>Chốt đơn<br />(6)</th><th>Tỷ lệ chốt đơn<br />(7=6/3) (%)</th><th>Số sản phẩm<br />(8)</th>
+                        <th>Ngân sách (1)</th><th>Số tương tác<br />(2)</th><th>Gói tin<br /><small>Raw landing</small><br />(3)</th><th>Tỷ lệ<br />gói tin/tương tác<br />(4=3/2) (%)</th>
+                        <th>Giá/gói tin<br />(5=1/3)</th><th>Chốt đơn<br />(6)</th><th>Tỷ lệ chốt/gói tin<br />(7=6/3) (%)</th><th>Số sản phẩm<br />(8)</th>
                         <th>Sản phẩm/đơn<br />(9=8/6)</th><th>Doanh số<br />(10)</th><th>Doanh số sau CK<br />(11)</th><th>NS/Doanh số<br />(12=1/10) (%)</th>
                         <th>NS/Doanh số trừ CK<br />(13=1/11) (%)</th><th>Biểu đồ</th>
                     </tr>
@@ -437,7 +452,7 @@ function DashboardTable({ report, expanded, onToggle, onChart, onPackets, advanc
                                 <td className="psm-utm-cell">{row.utmSource}</td>
                                 <td className="psm-utm-cell">{row.utmCampaign}</td>
                                 {advancedUtm && <><td className="psm-utm-cell">{row.utmMedium}</td><td className="psm-utm-cell">{row.utmTerm}</td><td className="psm-utm-cell">{row.utmContent}</td></>}
-                                <td>{money(row.budget)}</td><td>{money(row.interactions)}</td><td><div className="psm-contact-breakdown"><b>{money(row.contacts)}</b><small>Chính {money(row.baseContacts)} · Upsale {money(row.upsaleContacts)}</small></div></td><td>{percent(row.contactRate, true)}</td>
+                                <td>{money(row.budget)}</td><td>{money(row.interactions)}</td><td><ContactBreakdown item={row} /></td><td>{percent(row.contactRate, true)}</td>
                                 <td>{money(row.costPerContact)}</td><td>{money(row.closedOrders)}</td><td className="psm-rate-cell"><span style={{ width: `${Math.min(100, Number(row.closingRate ?? 0))}%` }} />{percent(row.closingRate)}</td>
                                 <td>{money(row.productQuantity)}</td><td>{Number(row.avgProductPerOrder ?? 0).toFixed(2).replace(/\.00$/, '')}</td>
                                 <td><MetricFill value={row.totalRevenue} max={maxRevenue} tone="green" /></td>
@@ -529,7 +544,7 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
                 <PushsaleDateRange filters={draft} onChange={set} />
                 <PushsaleSelect value={draft.operation_scope ?? ''} onChange={(value) => set('operation_scope', value)} options={filterOptions.operationScopes ?? []} placeholder="Tác nghiệp cần" />
                 <PushsaleSelect value={draft.customer_type ?? ''} onChange={(value) => set('customer_type', value)} options={filterOptions.customerTypes ?? []} placeholder="--Tất cả--" />
-                <PushsaleSelect value={draft.contact_mode ?? ''} onChange={(value) => set('contact_mode', value)} options={filterOptions.contactModes ?? []} placeholder="Có Contact (Hoặc chốt đơn)" />
+                <PushsaleSelect value={draft.contact_mode ?? ''} onChange={(value) => set('contact_mode', value)} options={filterOptions.contactModes ?? []} placeholder="Có gói tin về" />
                 <PushsaleSelect value={draft.source_type ?? ''} onChange={(value) => set('source_type', value)} options={filterOptions.sourceTypes ?? []} placeholder="--Nguồn dữ liệu--" />
                 <PushsaleSelect value={draft.ad_channel ?? ''} onChange={(value) => set('ad_channel', value)} options={filterOptions.adChannels ?? []} placeholder="--Kênh quảng cáo--" />
             </div>
@@ -538,7 +553,7 @@ export default function Dashboard({ filters = {}, filterOptions = {}, report = {
                 <ProductSearchSelect products={products} value={draft.product_id ?? ''} onChange={(value) => set('product_id', value)} placeholder="--Sản phẩm / gói sản phẩm--" showPrice={false} />
                 <input className="ps-control" value={draft.utm_keyword ?? ''} onChange={(event) => set('utm_keyword', event.target.value)} placeholder="Mã Utm" />
                 <input className="ps-control" value={draft.source_keyword ?? ''} onChange={(event) => set('source_keyword', event.target.value)} placeholder="Tên nguồn dữ liệu" />
-                <PushsaleSelect value={draft.sort_by ?? ''} onChange={(value) => set('sort_by', value)} options={filterOptions.sortOptions ?? []} placeholder="Số contact" />
+                <PushsaleSelect value={draft.sort_by ?? ''} onChange={(value) => set('sort_by', value)} options={filterOptions.sortOptions ?? []} placeholder="Số gói tin" />
                 <PushsaleSelect value={draft.revenue_mode ?? ''} onChange={(value) => set('revenue_mode', value)} options={filterOptions.revenueModes ?? []} placeholder="1.Doanh số tổng" />
                 <div className="ps-adv-inline-cluster">
                     <label className="psm-utm-check"><input type="checkbox" checked={Boolean(draft.advanced_utm)} onChange={(event) => set('advanced_utm', event.target.checked ? 1 : 0)} /> UTM Nâng cao</label>

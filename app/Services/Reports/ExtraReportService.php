@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\WarehouseInventory;
 use App\Support\LeadContactMetrics;
 use App\Support\MarketingPacketMetrics;
+use App\Support\MarketingRawPacketMetrics;
 use App\Support\OrderRevenueClassifier;
 use Illuminate\Support\Collection;
 
@@ -497,7 +498,7 @@ class ExtraReportService
             $this->col('pct_cancel', 'pct_cancel', 'percent', ['tone' => 'negative']),
             $this->col('pct_xngh', 'pct_xngh', 'percent', ['tone' => 'positive']),
             $this->col('pct_success', 'pct_success', 'percent', ['tone' => 'positive']),
-            $this->col('contacts', 'contacts', 'number'),
+            $this->col('contacts', 'contacts', 'number', $bySale ? [] : ['label' => __('reports.columns.raw_packets')]),
             ...($bySale ? [] : [
                 $this->col('primary_packets', 'primary_packets', 'number'),
                 $this->col('upsale_packets', 'upsale_packets', 'number'),
@@ -518,13 +519,13 @@ class ExtraReportService
         $groupKey = $bySale ? 'sale_user_id' : 'marketer_user_id';
         $contactCounts = $bySale
             ? collect()
-            : MarketingPacketMetrics::effectiveCountsByMarketer($filter, $orders);
+            : MarketingRawPacketMetrics::effectiveCountsByMarketer($filter, $orders);
         $primaryPacketCounts = $bySale
             ? collect()
-            : MarketingPacketMetrics::effectivePrimaryCountsByMarketer($filter, $orders);
+            : MarketingRawPacketMetrics::effectivePrimaryCountsByMarketer($filter, $orders);
         $upsalePacketCounts = $bySale
             ? collect()
-            : MarketingPacketMetrics::effectiveUpsaleCountsByMarketer($filter, $orders);
+            : MarketingRawPacketMetrics::effectiveUpsaleCountsByMarketer($filter, $orders);
         $groupedOrders = $orders->groupBy($groupKey);
         $groupIds = $bySale
             ? $groupedOrders->keys()
@@ -879,8 +880,8 @@ class ExtraReportService
      * Báo cáo công việc marketing — đúng màn 2.7.5 Pushsale.
      *
      * Trục dọc là nhân viên marketing, trục ngang là sale nhận data.
-     * Contact marketing tính theo gói tin landing hợp lệ: gói chính + upsale,
-     * còn tỷ lệ chốt theo từng sale = số đơn chốt từ các gói tin đó / tổng gói tin.
+     * Marketing raw tính theo gói tin landing server đã nhận: gói chính + upsale raw,
+     * còn tỷ lệ chốt theo từng sale vẫn dựa trên tầng xử lý/chia số sau đó.
      */
     private function marketingWork(User $user, ReportFilterData $filter): array
     {
@@ -944,9 +945,9 @@ class ExtraReportService
             });
 
         $leads = $leadsQuery->get();
-        $contactCountsByMarketer = MarketingPacketMetrics::effectiveCountsByMarketer($filter, $orders);
-        $primaryCountsByMarketer = MarketingPacketMetrics::effectivePrimaryCountsByMarketer($filter, $orders);
-        $upsaleCountsByMarketer = MarketingPacketMetrics::effectiveUpsaleCountsByMarketer($filter, $orders);
+        $contactCountsByMarketer = MarketingRawPacketMetrics::effectiveCountsByMarketer($filter, $orders);
+        $primaryCountsByMarketer = MarketingRawPacketMetrics::effectivePrimaryCountsByMarketer($filter, $orders);
+        $upsaleCountsByMarketer = MarketingRawPacketMetrics::effectiveUpsaleCountsByMarketer($filter, $orders);
         $contactOrderIds = LeadContactMetrics::contactOrderIds($orders)->map(fn ($id): int => (int) $id);
 
         $saleIds = $orders->pluck('sale_user_id')
@@ -973,6 +974,7 @@ class ExtraReportService
 
         $marketerIdsInScope = $orders->pluck('marketer_user_id')
             ->merge($leads->map(fn (LeadIngestion $lead) => $lead->marketingSource?->marketer_user_id ?? $lead->marketingSource?->parent?->marketer_user_id))
+            ->merge($contactCountsByMarketer->keys())
             ->filter()
             ->map(fn ($id): int => (int) $id)
             ->unique()
@@ -1120,15 +1122,15 @@ class ExtraReportService
         $orders = $this->fetchOrdersWithItems($user, $filter, scopeMarketing: $user->role === UserRole::Marketing)
             ->filter(fn (Order $o) => $o->marketing_source_id !== null)
             ->values();
-        $contactCountsBySource = MarketingPacketMetrics::effectiveCountsBySource($filter, $orders);
-        $primaryCountsBySource = MarketingPacketMetrics::effectivePrimaryCountsBySource($filter, $orders);
-        $upsaleCountsBySource = MarketingPacketMetrics::effectiveUpsaleCountsBySource($filter, $orders);
+        $contactCountsBySource = MarketingRawPacketMetrics::effectiveCountsBySource($filter, $orders);
+        $primaryCountsBySource = MarketingRawPacketMetrics::effectivePrimaryCountsBySource($filter, $orders);
+        $upsaleCountsBySource = MarketingRawPacketMetrics::effectiveUpsaleCountsBySource($filter, $orders);
 
         $columns = [
             ['key' => 'name', 'label' => 'Nguồn dữ liệu (1)', 'format' => 'text'],
             ['key' => 'channel', 'label' => 'KÊNH (2)', 'format' => 'text'],
             ['key' => 'products', 'label' => 'SẢN PHẨM ĐĂNG KÝ TRÊN NGUỒN DỮ LIỆU (3)', 'format' => 'text'],
-            ['key' => 'contacts', 'label' => 'CONTACT (4 = gói chính + upsale)', 'format' => 'number'],
+            ['key' => 'contacts', 'label' => 'GÓI TIN RAW (4 = gói chính + upsale)', 'format' => 'number'],
             ['key' => 'primary_packets', 'label' => 'GÓI CHÍNH', 'format' => 'number'],
             ['key' => 'upsale_packets', 'label' => 'GÓI UPSALE', 'format' => 'number'],
             ['key' => 'closed', 'label' => 'ĐƠN CHỐT (5)', 'format' => 'number'],
@@ -1224,7 +1226,7 @@ class ExtraReportService
                 'mode' => 'marketing_upsale_source',
                 'notes' => [
                     ['metric' => 'DOANH SỐ, ĐƠN CHỐT, SỐ SP BÁN RA TÍNH THEO DOANH SỐ TẠM TÍNH', 'meaning' => 'Doanh số sau khi đăng đơn, trừ đơn đã hoàn, hủy vận đơn và hủy đăng đơn.', 'formula' => 'DS = tổng giá trị đơn hợp lệ'],
-                    ['metric' => 'CONTACT (4)', 'meaning' => 'Đếm gói tin landing hợp lệ gồm gói chính và từng gói upsale; loại duplicate/failed/follow-up.', 'formula' => 'Contact MKT = gói chính + upsale'],
+                    ['metric' => 'GÓI TIN RAW (4)', 'meaning' => 'Đếm raw inbound_events source=landing_webhook theo đúng request server nhận; không loại trùng SĐT, không phụ thuộc chia số hay xử lý Sale.', 'formula' => 'Raw MKT = gói chính raw + upsale raw'],
                     ['metric' => 'TỈ LỆ CHỐT (6)', 'meaning' => 'Tỷ lệ chốt theo nguồn dữ liệu.', 'formula' => 'Đơn chốt / Contact'],
                     ['metric' => 'UPSALE', 'meaning' => 'Sản phẩm item_type=upsell hoặc origin chứa upsell/upsale được cộng vào số lượng/doanh số bán ra nhưng không tạo thêm contact.', 'formula' => 'Tách theo order_items'],
                 ],

@@ -3,6 +3,7 @@
 namespace App\Services\Reports;
 
 use App\Data\MarketingRankingFilterData;
+use App\Data\ReportFilterData;
 use App\Enums\ClosingStatus;
 use App\Enums\DiscountMode;
 use App\Enums\TeamType;
@@ -12,6 +13,7 @@ use App\Models\Order;
 use App\Models\Team;
 use App\Models\User;
 use App\Support\MarketingPacketMetrics;
+use App\Support\MarketingRawPacketMetrics;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -41,6 +43,14 @@ class MarketingLeaderboardService
             })
             ->get();
 
+        $rawFilter = new ReportFilterData(
+            dateFrom: $filter->dateFrom,
+            dateTo: $filter->dateTo,
+            marketingTeamLeaderId: $filter->teamLeaderId,
+            marketingTeamId: $filter->teamId,
+        );
+        $rawContactsByMarketer = MarketingRawPacketMetrics::countsByMarketer($rawFilter);
+
         $orders = Order::query()
             ->with(['items:id,order_id,quantity,unit_price'])
             ->whereIn('marketer_user_id', $userIds)
@@ -60,7 +70,7 @@ class MarketingLeaderboardService
             ->when($filter->operationScope === 'required', fn (Builder $q) => $q->whereNotNull('operation_stage'))
             ->get();
 
-        $rows = $users->map(function (User $user) use ($ingestions, $orders, $filter): array {
+        $rows = $users->map(function (User $user) use ($ingestions, $orders, $filter, $rawContactsByMarketer): array {
             $contacts = $ingestions->filter(function (LeadIngestion $lead) use ($user): bool {
                 $marketerId = MarketingPacketMetrics::effectiveOrder($lead)?->marketer_user_id
                     ?? $lead->marketingSource?->marketer_user_id
@@ -94,6 +104,7 @@ class MarketingLeaderboardService
                 'team' => $user->team?->name,
                 'avatar' => $user->avatarUrl(),
                 'initials' => $user->initials(),
+                'rawContacts' => (int) $rawContactsByMarketer->get((int) $user->id, 0),
                 'newContacts' => $newContacts,
                 'newClosedOrders' => $newOrders->count(),
                 'newClosingRate' => $newContacts > 0 ? round($newOrders->count() / $newContacts * 100, 2) : 0,
@@ -207,12 +218,14 @@ class MarketingLeaderboardService
     /** @param Collection<int, array<string, mixed>> $rows @return array<string, int|float> */
     private function totals(Collection $rows): array
     {
+        $rawContacts = (int) $rows->sum('rawContacts');
         $newContacts = (int) $rows->sum('newContacts');
         $newClosed = (int) $rows->sum('newClosedOrders');
         $oldContacts = (int) $rows->sum('oldContacts');
         $oldClosed = (int) $rows->sum('oldClosedOrders');
 
         return [
+            'rawContacts' => $rawContacts,
             'newContacts' => $newContacts,
             'newClosedOrders' => $newClosed,
             'newClosingRate' => $newContacts > 0 ? round($newClosed / $newContacts * 100, 2) : 0,

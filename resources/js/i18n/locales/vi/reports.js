@@ -484,6 +484,7 @@ export default {
         product: 'Sản phẩm',
         warehouse: 'Kho',
         contacts: 'Số contact',
+        raw_packets: 'Gói tin raw',
         primary_packets: 'Gói tin chính',
         upsale_packets: 'Gói tin upsale',
         contacts_total: 'Tổng contact',
