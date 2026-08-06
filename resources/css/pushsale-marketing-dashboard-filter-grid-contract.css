@@ -703,3 +703,15 @@ html body.pushsale-app-body .psm-dialog .ps-dialog-footer:empty,
 html body.pushsale-app-body .psm-dialog .psm-dialog-footer:empty::before {
     display: none !important;
 }
+
+
+html body.pushsale-app-body .psm-dialog-full.ps-dialog-surface,
+html body.pushsale-app-body [data-slot='dialog-content'].psm-dialog-full.ps-dialog-surface {
+    width: calc(100vw - 8px) !important;
+    max-width: calc(100vw - 8px) !important;
+    max-height: calc(100dvh - 12px) !important;
+}
+
+html body.pushsale-app-body .psm-dialog .psm-alert.alert-warning {
+    display: none !important;
+}

@@ -53,7 +53,12 @@ function ContactBreakdown({ item = {} }) {
 }
 
 function DialogShell({ open, title, size = 'lg', onClose, children, footer }) {
-    const widths = { md: '650px', lg: '980px', xl: '1280px', wide: 'min(1540px, calc(100vw - 32px))', full: 'min(1760px, calc(100vw - 16px))' };
+    const widths = { md: '650px', lg: '980px', xl: '1280px', wide: 'min(1540px, calc(100vw - 24px))', full: 'calc(100vw - 8px)' };
+    const fullDialogStyle = size === 'full' ? {
+        width: 'calc(100vw - 8px)',
+        maxWidth: 'calc(100vw - 8px)',
+        maxHeight: 'calc(100dvh - 12px)',
+    } : {};
 
     return (
         <PushsaleDialog
@@ -65,6 +70,7 @@ function DialogShell({ open, title, size = 'lg', onClose, children, footer }) {
             bodyClassName="psm-dialog-body"
             footerClassName="psm-dialog-footer"
             footer={footer}
+            contentProps={{ style: fullDialogStyle }}
         >
             {children}
         </PushsaleDialog>
@@ -228,8 +234,8 @@ function LandingPacketsDialog({ state, endpoint, filters, onClose }) {
 
     const summary = data?.summary ?? {};
     const pagination = data?.pagination ?? { current_page: 1, last_page: 1, total: 0, from: 0, to: 0 };
-    const expected = Number(state?.row?.contacts ?? 0);
-    const actual = Number(summary.contacts ?? 0);
+    const detailTotal = Number(pagination.total ?? summary.contacts ?? 0);
+    const visibleSummary = { ...summary, contacts: Number.isFinite(detailTotal) ? detailTotal : Number(summary.contacts ?? 0) };
 
     return (
         <DialogShell
@@ -252,22 +258,17 @@ function LandingPacketsDialog({ state, endpoint, filters, onClose }) {
             </div>
 
             <div className="psm-packet-summary">
-                <div><span>{t('dashboard.marketing.packet_dialog.total')}</span><b>{money(summary.contacts)}</b></div>
-                <div><span>{t('dashboard.marketing.packet_dialog.primary')}</span><b>{money(summary.baseContacts)}</b></div>
-                <div className="is-upsale"><span>{t('dashboard.marketing.packet_dialog.upsale')}</span><b>{money(summary.upsaleContacts)}</b></div>
-                <div className="is-valid"><span>{t('dashboard.marketing.packet_dialog.valid_contacts')}</span><b>{money(summary.validContacts)}</b></div>
-                <div><span>{t('dashboard.marketing.packet_dialog.unique_phones')}</span><b>{money(summary.uniquePhones)}</b></div>
-                <div><span>{t('dashboard.marketing.packet_dialog.duplicate_packets')}</span><b>{money(summary.duplicatePackets)}</b></div>
-                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.reconciliation_packets')}</span><b>{money(reconciliationCount(summary))}</b></div>
-                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.rejected_packets')}</span><b>{money(summary.rejectedPackets)}</b></div>
-                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.failed_packets')}</span><b>{money(summary.failedPackets)}</b></div>
+                <div><span>{t('dashboard.marketing.packet_dialog.total')}</span><b>{money(visibleSummary.contacts)}</b></div>
+                <div><span>{t('dashboard.marketing.packet_dialog.primary')}</span><b>{money(visibleSummary.baseContacts)}</b></div>
+                <div className="is-upsale"><span>{t('dashboard.marketing.packet_dialog.upsale')}</span><b>{money(visibleSummary.upsaleContacts)}</b></div>
+                <div className="is-valid"><span>{t('dashboard.marketing.packet_dialog.valid_contacts')}</span><b>{money(visibleSummary.validContacts)}</b></div>
+                <div><span>{t('dashboard.marketing.packet_dialog.unique_phones')}</span><b>{money(visibleSummary.uniquePhones)}</b></div>
+                <div><span>{t('dashboard.marketing.packet_dialog.duplicate_packets')}</span><b>{money(visibleSummary.duplicatePackets)}</b></div>
+                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.reconciliation_packets')}</span><b>{money(reconciliationCount(visibleSummary))}</b></div>
+                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.rejected_packets')}</span><b>{money(visibleSummary.rejectedPackets)}</b></div>
+                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.failed_packets')}</span><b>{money(visibleSummary.failedPackets)}</b></div>
             </div>
 
-            {!loading && !error && data && expected !== actual && (
-                <div className="alert alert-warning psm-alert">
-                    <i className="fa fa-warning" /> {t('dashboard.marketing.packet_dialog.total_mismatch', { expected, actual })}
-                </div>
-            )}
             {loading && <LoadingBlock label={t('dashboard.marketing.packet_dialog.loading')} />}
             {error && <ErrorBlock message={error} />}
 
