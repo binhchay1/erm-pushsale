@@ -715,3 +715,34 @@ html body.pushsale-app-body [data-slot='dialog-content'].psm-dialog-full.ps-dial
 html body.pushsale-app-body .psm-dialog .psm-alert.alert-warning {
     display: none !important;
 }
+
+/* vraw-dialog-table-border: dialog packet tables should use only table borders.
+   The scroll wrapper is a viewport, not an extra card, so remove the double border/gutter. */
+html body.pushsale-app-body .psm-dialog .psm-packet-table-wrap,
+html body.pushsale-app-body .psm-dialog .table-responsive.psm-packet-table-wrap {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+html body.pushsale-app-body .psm-dialog .psm-packet-table-wrap > .psm-packet-table,
+html body.pushsale-app-body .psm-dialog .table-responsive.psm-packet-table-wrap > table.psm-packet-table {
+    margin: 0 !important;
+    border: 1px solid #d6dee6 !important;
+    border-collapse: collapse !important;
+}
+
+html body.pushsale-app-body .psm-dialog .psm-packet-table-wrap > .psm-packet-table th:first-child,
+html body.pushsale-app-body .psm-dialog .psm-packet-table-wrap > .psm-packet-table td:first-child {
+    border-left: 1px solid #d6dee6 !important;
+}
+
+html body.pushsale-app-body .psm-dialog .psm-packet-table-wrap > .psm-packet-table th:last-child,
+html body.pushsale-app-body .psm-dialog .psm-packet-table-wrap > .psm-packet-table td:last-child {
+    border-right: 1px solid #d6dee6 !important;
+}

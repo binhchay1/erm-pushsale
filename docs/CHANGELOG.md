@@ -168,3 +168,8 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 
 - Simplified the outer Pushsale Marketing dashboard table so the packet column shows only the final received packet count. Detailed processed/duplicate/review breakdown now stays inside the chart and packet dialogs.
 - Replaced customer-facing technical wording with business wording: received packets, processed contacts, duplicate submits, needs review, invalid packets, and processing errors.
+
+## 2026-08-07 - Dialog table border cleanup
+
+- Removed extra wrapper borders/padding from the Marketing landing packet dialog table so the scroll area no longer creates a double-border gutter; only the table border remains.
+- Added a generic dialog-table wrapper override for Pushsale dialogs to avoid the same double-border/indented table issue in other dialogs using Bootstrap/AdminLTE table wrappers.

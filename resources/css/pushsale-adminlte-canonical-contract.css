@@ -2551,3 +2551,35 @@ html body.pushsale-app-body .ps-pancake-thread-meta span {
     max-width: 100% !important;
     overflow-wrap: anywhere !important;
 }
+
+/* vraw-dialog-table-border: generic dialog table wrappers are scroll viewports only.
+   Keeps dialogs from rendering a second border around Bootstrap/AdminLTE tables. */
+html body.pushsale-app-body .ps-dialog-surface .table-responsive,
+html body.pushsale-app-body .ps-dialog-surface .ps-table-wrap,
+html body.pushsale-app-body .ps-dialog-surface .ps-table-scroll,
+html body.pushsale-app-body .ps-dialog-surface .ps-op-table-wrap,
+html body.pushsale-app-body .ps-dialog-surface .ps-system-table-wrap,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .table-responsive,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-table-wrap,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-table-scroll,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-op-table-wrap,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-system-table-wrap {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-dialog-surface .table-responsive > table,
+html body.pushsale-app-body .ps-dialog-surface .ps-table-wrap > table,
+html body.pushsale-app-body .ps-dialog-surface .ps-table-scroll > table,
+html body.pushsale-app-body .ps-dialog-surface .ps-op-table-wrap > table,
+html body.pushsale-app-body .ps-dialog-surface .ps-system-table-wrap > table,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .table-responsive > table,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-table-wrap > table,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-table-scroll > table,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-op-table-wrap > table,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-system-table-wrap > table {
+    margin: 0 !important;
+}
