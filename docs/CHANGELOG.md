@@ -159,3 +159,12 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 - Synchronized Marketing dashboard, campaign report, team tree, marketing work matrix, marketer revenue detail and upsale-source report to prefer raw landing packet counts; legacy post-processing contacts remain fallback only when a source has no raw landing events.
 - Kept `lead_ingestions` metrics visible as secondary valid/contact-processing figures and preserved Sale/Customer anti-duplicate behavior.
 - Expanded the Pushsale Marketing `+` packet dialog summary with raw/valid/unique/duplicate/rejected/failed counters.
+
+## 2026-08-06 - Marketing raw reconciliation remainder
+- Added `reconciliationPackets` / `noPhonePackets` to Pushsale Marketing Dashboard raw packet breakdown so the inline formula is explicit: received packets = processed contacts + duplicate submits + needs review.
+- Updated the landing packet dialog and chart summary to surface review/other packets instead of leaving a silent gap between raw packets and processed/allocation contacts.
+
+## 2026-08-06 - Marketing dashboard business wording cleanup
+
+- Simplified the outer Pushsale Marketing dashboard table so the packet column shows only the final received packet count. Detailed processed/duplicate/review breakdown now stays inside the chart and packet dialogs.
+- Replaced customer-facing technical wording with business wording: received packets, processed contacts, duplicate submits, needs review, invalid packets, and processing errors.

@@ -70,7 +70,7 @@ return [
     'campaign_report' => [
         'campaign_name' => 'Tên chiến dịch',
         'marketer_name' => 'Người phụ trách',
-        'leads_generated' => 'Tổng gói tin raw',
+        'leads_generated' => 'Tổng gói tin',
         'primary_packets' => 'Gói tin chính',
         'upsale_packets' => 'Gói tin upsale',
         'junk_lead_rate' => 'Tỷ lệ lead rác (%)',
@@ -171,7 +171,7 @@ return [
         'product' => 'Sản phẩm',
         'warehouse' => 'Kho',
         'contacts' => 'Số contact',
-        'raw_packets' => 'Gói tin raw',
+        'raw_packets' => 'Gói tin nhận được',
         'primary_packets' => 'Gói tin chính',
         'upsale_packets' => 'Gói tin upsale',
         'contacts_total' => 'Tổng contact',

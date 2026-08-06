@@ -313,6 +313,16 @@ class PushsaleMarketingDashboardService
                     $upsaleContacts = $ingestionDay->filter(fn (LeadIngestion $item): bool => MarketingPacketMetrics::isUpsale($item))->count();
                 }
                 $validContacts = $ingestionDay->count();
+                $rawBreakdown = $landingSourceMeta->isNotEmpty()
+                    ? $this->rawPacketBreakdown($rawDay, $validContacts)
+                    : [
+                        'uniquePhones' => $ingestionDay->pluck('customer_phone')->filter()->unique()->count(),
+                        'duplicatePackets' => 0,
+                        'reconciliationPackets' => 0,
+                        'rejectedPackets' => 0,
+                        'failedPackets' => 0,
+                        'noPhonePackets' => 0,
+                    ];
 
                 return [
                     'date' => $day->toDateString(),
@@ -323,6 +333,12 @@ class PushsaleMarketingDashboardService
                     'baseContacts' => $baseContacts,
                     'upsaleContacts' => $upsaleContacts,
                     'validContacts' => $validContacts,
+                    'uniquePhones' => $rawBreakdown['uniquePhones'],
+                    'duplicatePackets' => $rawBreakdown['duplicatePackets'],
+                    'reconciliationPackets' => $rawBreakdown['reconciliationPackets'],
+                    'rejectedPackets' => $rawBreakdown['rejectedPackets'],
+                    'failedPackets' => $rawBreakdown['failedPackets'],
+                    'noPhonePackets' => $rawBreakdown['noPhonePackets'],
                     'revenue' => (int) $orderDay->sum(fn (Order $order): int => $order->effectiveRevenue()),
                 ];
             })->values();
@@ -390,10 +406,13 @@ class PushsaleMarketingDashboardService
         $total = $rawPackets->count();
         $baseContacts = $rawPackets->filter(fn (InboundEvent $packet): bool => ! $this->isRawUpsale($packet, $landingSourceMeta))->count();
         $upsaleContacts = $rawPackets->filter(fn (InboundEvent $packet): bool => $this->isRawUpsale($packet, $landingSourceMeta))->count();
-        $uniquePhones = $rawPackets->map(fn (InboundEvent $packet): string => $this->rawPacketPhone($packet))->filter()->unique()->count();
-        $duplicatePackets = max(0, $total - $uniquePhones);
-        $rejectedPackets = $rawPackets->filter(fn (InboundEvent $packet): bool => $this->rawStatusValue($packet) === InboundEventStatus::Rejected->value)->count();
-        $failedPackets = $rawPackets->filter(fn (InboundEvent $packet): bool => $this->rawStatusValue($packet) === InboundEventStatus::Failed->value)->count();
+        $rawBreakdown = $this->rawPacketBreakdown($rawPackets, $validContacts);
+        $uniquePhones = $rawBreakdown['uniquePhones'];
+        $duplicatePackets = $rawBreakdown['duplicatePackets'];
+        $reconciliationPackets = $rawBreakdown['reconciliationPackets'];
+        $rejectedPackets = $rawBreakdown['rejectedPackets'];
+        $failedPackets = $rawBreakdown['failedPackets'];
+        $noPhonePackets = $rawBreakdown['noPhonePackets'];
 
         $perPage = min(100, max(10, $perPage));
         $lastPage = max(1, (int) ceil($total / $perPage));
@@ -414,9 +433,11 @@ class PushsaleMarketingDashboardService
                 'validContacts' => $validContacts,
                 'uniquePhones' => $uniquePhones,
                 'duplicatePackets' => $duplicatePackets,
+                'reconciliationPackets' => $reconciliationPackets,
                 'reviewPackets' => $reviewPackets,
                 'rejectedPackets' => $rejectedPackets,
                 'failedPackets' => $failedPackets,
+                'noPhonePackets' => $noPhonePackets,
             ],
             'rows' => $packets->map(fn (InboundEvent $packet): array => $this->mapRawPacketRow($packet, $landingSourceMeta))->values(),
             'pagination' => [
@@ -1014,25 +1035,30 @@ class PushsaleMarketingDashboardService
         $metricSet = $dailyMetrics->whereIn('marketing_source_id', $sourceIds)
             ->filter(fn (MarketingSourceDailyMetric $item): bool => $this->utmMatches($item->utm_source, $item->utm_campaign, $utmSource, $utmCampaign));
 
+        $validContacts = $ingestionSet->count();
         $usesRawPackets = $landingSourceMeta->contains(fn (array $meta): bool => $sourceIdLookup->has((int) ($meta['marketing_source_id'] ?? 0)));
         if ($usesRawPackets) {
             $baseContacts = $rawSet->filter(fn (InboundEvent $item): bool => ! $this->isRawUpsale($item, $landingSourceMeta))->count();
             $upsaleContacts = $rawSet->filter(fn (InboundEvent $item): bool => $this->isRawUpsale($item, $landingSourceMeta))->count();
             $contacts = $baseContacts + $upsaleContacts;
-            $uniquePhones = $rawSet->map(fn (InboundEvent $item): string => $this->rawPacketPhone($item))->filter()->unique()->count();
-            $duplicatePackets = max(0, $contacts - $uniquePhones);
-            $rejectedPackets = $rawSet->filter(fn (InboundEvent $item): bool => $this->rawStatusValue($item) === InboundEventStatus::Rejected->value)->count();
-            $failedPackets = $rawSet->filter(fn (InboundEvent $item): bool => $this->rawStatusValue($item) === InboundEventStatus::Failed->value)->count();
+            $rawBreakdown = $this->rawPacketBreakdown($rawSet, $validContacts);
+            $uniquePhones = $rawBreakdown['uniquePhones'];
+            $duplicatePackets = $rawBreakdown['duplicatePackets'];
+            $reconciliationPackets = $rawBreakdown['reconciliationPackets'];
+            $rejectedPackets = $rawBreakdown['rejectedPackets'];
+            $failedPackets = $rawBreakdown['failedPackets'];
+            $noPhonePackets = $rawBreakdown['noPhonePackets'];
         } else {
             $baseContacts = $ingestionSet->filter(fn (LeadIngestion $item): bool => ! MarketingPacketMetrics::isUpsale($item))->count();
             $upsaleContacts = $ingestionSet->filter(fn (LeadIngestion $item): bool => MarketingPacketMetrics::isUpsale($item))->count();
             $contacts = $baseContacts + $upsaleContacts;
             $uniquePhones = $ingestionSet->pluck('customer_phone')->filter()->unique()->count();
-            $duplicatePackets = max(0, $contacts - $uniquePhones);
+            $duplicatePackets = 0;
+            $reconciliationPackets = 0;
             $rejectedPackets = 0;
             $failedPackets = 0;
+            $noPhonePackets = 0;
         }
-        $validContacts = $ingestionSet->count();
         $reviewPackets = $ingestionSet->filter(fn (LeadIngestion $item): bool => (bool) $item->requires_review || ($item->status?->value ?? (string) $item->status) === LeadIngestionStatus::NeedsReview->value)->count();
         $budget = (int) $metricSet->sum('budget');
         $clicks = (int) $metricSet->sum('clicks');
@@ -1086,9 +1112,11 @@ class PushsaleMarketingDashboardService
             'validContacts' => $validContacts,
             'uniquePhones' => $uniquePhones,
             'duplicatePackets' => $duplicatePackets,
+            'reconciliationPackets' => $reconciliationPackets,
             'reviewPackets' => $reviewPackets,
             'rejectedPackets' => $rejectedPackets,
             'failedPackets' => $failedPackets,
+            'noPhonePackets' => $noPhonePackets,
             'contactRate' => $clicks > 0 ? round($contacts / $clicks * 100, 2) : null,
             'costPerContact' => $contacts > 0 ? (int) round($budget / $contacts) : 0,
             'closedOrders' => $closedOrders,
@@ -1200,6 +1228,31 @@ class PushsaleMarketingDashboardService
         return is_scalar($value) ? trim((string) $value) : '';
     }
 
+    /** @param Collection<int, InboundEvent> $rawPackets @return array{uniquePhones: int, duplicatePackets: int, reconciliationPackets: int, rejectedPackets: int, failedPackets: int, noPhonePackets: int} */
+    private function rawPacketBreakdown(Collection $rawPackets, int $validContacts): array
+    {
+        $total = $rawPackets->count();
+        $phones = $rawPackets
+            ->map(fn (InboundEvent $packet): string => $this->rawPacketPhone($packet))
+            ->filter()
+            ->values();
+        $uniquePhones = $phones->unique()->count();
+        $noPhonePackets = max(0, $total - $phones->count());
+        $duplicatePackets = max(0, $phones->count() - $uniquePhones);
+        $rejectedPackets = $rawPackets->filter(fn (InboundEvent $packet): bool => $this->rawStatusValue($packet) === InboundEventStatus::Rejected->value)->count();
+        $failedPackets = $rawPackets->filter(fn (InboundEvent $packet): bool => $this->rawStatusValue($packet) === InboundEventStatus::Failed->value)->count();
+        $reconciliationPackets = max(0, $total - $validContacts - $duplicatePackets);
+
+        return [
+            'uniquePhones' => $uniquePhones,
+            'duplicatePackets' => $duplicatePackets,
+            'reconciliationPackets' => $reconciliationPackets,
+            'rejectedPackets' => $rejectedPackets,
+            'failedPackets' => $failedPackets,
+            'noPhonePackets' => $noPhonePackets,
+        ];
+    }
+
     private function rawStatusValue(InboundEvent $packet): string
     {
         return $packet->status instanceof InboundEventStatus ? $packet->status->value : (string) $packet->status;
@@ -1274,9 +1327,11 @@ class PushsaleMarketingDashboardService
         $validContacts = (int) $rows->sum('validContacts');
         $uniquePhones = (int) $rows->sum('uniquePhones');
         $duplicatePackets = (int) $rows->sum('duplicatePackets');
+        $reconciliationPackets = (int) $rows->sum('reconciliationPackets');
         $reviewPackets = (int) $rows->sum('reviewPackets');
         $rejectedPackets = (int) $rows->sum('rejectedPackets');
         $failedPackets = (int) $rows->sum('failedPackets');
+        $noPhonePackets = (int) $rows->sum('noPhonePackets');
         $closed = (int) $rows->sum('closedOrders');
         $products = (int) $rows->sum('productQuantity');
         $gross = (int) $rows->sum('totalRevenue');
@@ -1291,9 +1346,11 @@ class PushsaleMarketingDashboardService
             'validContacts' => $validContacts,
             'uniquePhones' => $uniquePhones,
             'duplicatePackets' => $duplicatePackets,
+            'reconciliationPackets' => $reconciliationPackets,
             'reviewPackets' => $reviewPackets,
             'rejectedPackets' => $rejectedPackets,
             'failedPackets' => $failedPackets,
+            'noPhonePackets' => $noPhonePackets,
             'contactRate' => $clicks > 0 ? round($contacts / $clicks * 100, 2) : null,
             'costPerContact' => $contacts > 0 ? (int) round($budget / $contacts) : 0,
             'closedOrders' => $closed,

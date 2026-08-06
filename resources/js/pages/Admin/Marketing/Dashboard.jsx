@@ -37,12 +37,17 @@ function money(value) {
     return formatNumber(Number(value ?? 0));
 }
 
+function reconciliationCount(item = {}) {
+    const explicit = Number(item.reconciliationPackets ?? NaN);
+    if (Number.isFinite(explicit)) return Math.max(0, explicit);
+
+    return Math.max(0, Number(item.contacts ?? 0) - Number(item.validContacts ?? 0) - Number(item.duplicatePackets ?? 0));
+}
+
 function ContactBreakdown({ item = {} }) {
     return (
-        <div className="psm-contact-breakdown">
+        <div className="psm-contact-breakdown is-total-only" title="Chi tiết gói tin nằm trong biểu đồ và danh sách gói tin">
             <b>{money(item.contacts)}</b>
-            <small>Hợp lệ {money(item.validContacts)} · Trùng {money(item.duplicatePackets)}</small>
-            <small>Chính {money(item.baseContacts)} · Upsale {money(item.upsaleContacts)}</small>
         </div>
     );
 }
@@ -126,10 +131,12 @@ function ChartGraphic({ days = [] }) {
             <div className="psm-chart-summary">
                 <span>Ngân sách: <b>{money(days.reduce((sum, day) => sum + Number(day.budget ?? 0), 0))}</b></span>
                 <span>Tương tác: <b>{money(days.reduce((sum, day) => sum + Number(day.clicks ?? 0), 0))}</b></span>
-                <span>Gói tin: <b>{money(days.reduce((sum, day) => sum + Number(day.contacts ?? 0), 0))}</b></span>
+                <span>Tổng gói tin: <b>{money(days.reduce((sum, day) => sum + Number(day.contacts ?? 0), 0))}</b></span>
                 <span>Chính: <b>{money(days.reduce((sum, day) => sum + Number(day.baseContacts ?? 0), 0))}</b></span>
                 <span>Upsale: <b>{money(days.reduce((sum, day) => sum + Number(day.upsaleContacts ?? 0), 0))}</b></span>
-                <span>Hợp lệ: <b>{money(days.reduce((sum, day) => sum + Number(day.validContacts ?? 0), 0))}</b></span>
+                <span>Đã xử lý hợp lệ: <b>{money(days.reduce((sum, day) => sum + Number(day.validContacts ?? 0), 0))}</b></span>
+                <span>Gửi trùng: <b>{money(days.reduce((sum, day) => sum + Number(day.duplicatePackets ?? 0), 0))}</b></span>
+                <span>Cần rà soát: <b>{money(days.reduce((sum, day) => sum + reconciliationCount(day), 0))}</b></span>
                 <span>Doanh số: <b>{money(days.reduce((sum, day) => sum + Number(day.revenue ?? 0), 0))}</b></span>
             </div>
         </div>
@@ -251,6 +258,7 @@ function LandingPacketsDialog({ state, endpoint, filters, onClose }) {
                 <div className="is-valid"><span>{t('dashboard.marketing.packet_dialog.valid_contacts')}</span><b>{money(summary.validContacts)}</b></div>
                 <div><span>{t('dashboard.marketing.packet_dialog.unique_phones')}</span><b>{money(summary.uniquePhones)}</b></div>
                 <div><span>{t('dashboard.marketing.packet_dialog.duplicate_packets')}</span><b>{money(summary.duplicatePackets)}</b></div>
+                <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.reconciliation_packets')}</span><b>{money(reconciliationCount(summary))}</b></div>
                 <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.rejected_packets')}</span><b>{money(summary.rejectedPackets)}</b></div>
                 <div className="is-review"><span>{t('dashboard.marketing.packet_dialog.failed_packets')}</span><b>{money(summary.failedPackets)}</b></div>
             </div>
@@ -342,7 +350,7 @@ function HelpDialog({ open, onClose }) {
         <DialogShell open={open} title="HƯỚNG DẪN MARKETING DASHBOARD" size="md" onClose={onClose}>
             <div className="psm-help">
                 <p><b>Nút dấu cộng</b> mở danh sách toàn bộ gói tin landing tương ứng với bộ lọc và dòng nguồn/UTM đang xem.</p>
-                <p><b>Gói tin</b> là dữ liệu raw nhận từ landing/webhook để đối soát sheet. <b>Contact hợp lệ</b> là số sau xử lý/chống trùng để chia sale.</p>
+                <p><b>Tổng gói tin</b> là số form landing server nhận được để đối soát với sheet/quảng cáo. Chi tiết xử lý hợp lệ, gửi trùng và cần rà soát nằm trong biểu đồ hoặc danh sách gói tin.</p>
                 <p>Bấm mũi tên tại cột sản phẩm để mở chi tiết UTM Source và UTM Campaign; bấm biểu đồ để xem biến động theo ngày.</p>
             </div>
         </DialogShell>
@@ -417,7 +425,7 @@ function DashboardTable({ report, expanded, onToggle, onChart, onPackets, advanc
                     <tr>
                         <th>STT</th><th>Tên Nguồn dữ liệu</th><th>Sản phẩm</th><th>Kênh quảng cáo</th><th>UTM Source</th><th>UTM<br />Campaign</th>
                         {advancedUtm && <><th>UTM<br />Medium</th><th>UTM<br />Term</th><th>UTM<br />Content</th></>}
-                        <th>Ngân sách (1)</th><th>Số tương tác<br />(2)</th><th>Gói tin<br /><small>Raw landing</small><br />(3)</th><th>Tỷ lệ<br />gói tin/tương tác<br />(4=3/2) (%)</th>
+                        <th>Ngân sách (1)</th><th>Số tương tác<br />(2)</th><th>Tổng gói tin<br />(3)</th><th>Tỷ lệ<br />gói tin/tương tác<br />(4=3/2) (%)</th>
                         <th>Giá/gói tin<br />(5=1/3)</th><th>Chốt đơn<br />(6)</th><th>Tỷ lệ chốt/gói tin<br />(7=6/3) (%)</th><th>Số sản phẩm<br />(8)</th>
                         <th>Sản phẩm/đơn<br />(9=8/6)</th><th>Doanh số<br />(10)</th><th>Doanh số sau CK<br />(11)</th><th>NS/Doanh số<br />(12=1/10) (%)</th>
                         <th>NS/Doanh số trừ CK<br />(13=1/11) (%)</th><th>Biểu đồ</th>

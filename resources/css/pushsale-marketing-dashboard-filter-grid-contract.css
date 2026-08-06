@@ -303,7 +303,7 @@ html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-utm-conte
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-budget { width: 118px !important; }
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-clicks,
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-products { width: 96px !important; }
-html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contacts { width: 136px !important; }
+html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contacts { width: 108px !important; }
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contact-rate { width: 130px !important; }
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-contact-price { width: 118px !important; }
 html body.pushsale-app-body .psm-page .psm-dashboard-table col.psm-col-closed { width: 92px !important; }
@@ -402,20 +402,16 @@ html body.pushsale-app-body .psm-page .psm-dashboard-table thead tr:nth-child(2)
 /* Marketing landing packet detail: plus button now opens a filtered packet audit. */
 html body.pushsale-app-body .psm-contact-breakdown {
     display: flex !important;
-    flex-direction: column !important;
     align-items: center !important;
-    gap: 1px !important;
+    justify-content: center !important;
+    min-height: 24px !important;
     white-space: nowrap !important;
 }
 
 html body.pushsale-app-body .psm-contact-breakdown > b {
-    font-size: 12px !important;
-}
-
-html body.pushsale-app-body .psm-contact-breakdown > small {
-    color: #64748b !important;
-    font-size: 9px !important;
-    font-weight: 400 !important;
+    color: #111827 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
 }
 
 html body.pushsale-app-body .psm-dialog .psm-packet-heading {
