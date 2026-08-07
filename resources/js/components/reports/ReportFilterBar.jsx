@@ -68,7 +68,7 @@ export function ReportFilterBar({ routeUrl, filters, filterOptions, filterFields
                         <ProductSearchSelect
                             products={filterOptions?.products ?? []}
                             value={filters.product_id}
-                            placeholder="--Sản phẩm / gói sản phẩm--"
+                            placeholder={t('reports.pushsale.choose_product')}
                             showPrice={false}
                             onChange={(value) => set('product_id', value || null)}
                         />

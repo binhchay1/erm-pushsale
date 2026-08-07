@@ -9,6 +9,8 @@ import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { ReportFilterField } from '@/components/reports/ReportFilterField';
 import { ReportFilterToolbar } from '@/components/reports/ReportFilterToolbar';
 import { cleanReportPayload, REVENUE_DIMENSION_OPTIONS } from '@/components/reports/extra/extraReportUtils';
+import { translateReportText } from '@/lib/reportI18n';
+import { useT } from '@/providers/I18nProvider';
 
 function renderExtraField(field, draft, set, filterOptions) {
     return (
@@ -88,21 +90,23 @@ export function CommonToolbar({ title, routeUrl, filters, filterOptions, filterF
 }
 
 export function RevenueDimensionField() {
+    const t = useT();
     return (
         <select
             className="ps-control ps-revenue-view-select"
             value="warehouse"
             onChange={() => {}}
-            title="Giai đoạn này đang chuẩn hóa theo mẫu 1.Kho của Pushsale"
+            title={t('reports.pushsale.revenue_dimension_hint')}
         >
             {REVENUE_DIMENSION_OPTIONS.map((option) => (
-                <option value={option.value} key={option.value}>{option.label}</option>
+                <option value={option.value} key={option.value}>{translateReportText(t, option.label, option.label)}</option>
             ))}
         </select>
     );
 }
 
 export function RevenueGroupCompactPicker({ groups, selectedKeys, onChange }) {
+    const t = useT();
     const selected = new Set(selectedKeys);
     const addGroup = (key) => {
         if (!key) return;
@@ -122,16 +126,16 @@ export function RevenueGroupCompactPicker({ groups, selectedKeys, onChange }) {
                     const group = groups.find((item) => item.key === key);
                     return group ? (
                         <button type="button" key={key} className="ps-revenue-group-tag" onClick={() => removeGroup(key)} title={group.description}>
-                            <span>×</span> {group.number}.{group.label}
+                            <span>×</span> {group.number}.{translateReportText(t, group.label, group.label)}
                         </button>
                     ) : null;
                 })}
             </div>
             <select className="ps-control" value="" onChange={(event) => addGroup(event.target.value)}>
-                <option value="">-- Chọn nhóm doanh số --</option>
+                <option value="">{t('reports.extra.warehouse_sales.choose_visible')}</option>
                 {groups.map((group) => (
                     <option key={group.key} value={group.key} disabled={selected.has(group.key)}>
-                        {group.number}. {group.label}
+                        {group.number}. {translateReportText(t, group.label, group.label)}
                     </option>
                 ))}
             </select>
@@ -206,7 +210,7 @@ export function RevenueOverviewToolbar({
             actions={(
                 <div className="ps-revenue-overview-actions ps-report-toolbar-actions">
                     <PushsaleSearchButton onClick={() => apply()} />
-                    <button type="button" className="ps-report-gear" title="Cấu hình hiển thị">
+                    <button type="button" className="ps-report-gear" title={t('reports.pushsale.display_settings')}>
                         <i className="fa fa-gear" aria-hidden="true" />
                     </button>
                 </div>

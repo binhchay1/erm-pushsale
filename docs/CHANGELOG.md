@@ -173,3 +173,22 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 
 - Removed extra wrapper borders/padding from the Marketing landing packet dialog table so the scroll area no longer creates a double-border gutter; only the table border remains.
 - Added a generic dialog-table wrapper override for Pushsale dialogs to avoid the same double-border/indented table issue in other dialogs using Bootstrap/AdminLTE table wrappers.
+
+## 2026-08-07 - Report i18n sweep
+
+- Added a shared report i18n bridge for backend/legacy Pushsale labels so report titles, table columns, select options and empty states are translated instead of leaking Vietnamese text in English mode.
+- Localized the shared system report shell, data-allocation report, sales revenue report, revenue metrics table, extra report toolbar/dimension picker, Marketing dashboard dialogs/table, and Marketing ranking page.
+- Added English/Vietnamese keys for report runtime columns, allocation summary cards, revenue dimensions, date types, delivery statuses, Marketing dialog/help labels, and common report actions/messages.
+
+## 2026-08-07 - Global legacy filter i18n bridge
+
+- Added a deterministic legacy UI translation bridge for old Pushsale/AdminLTE pages that still hardcode static filter placeholders, native select options, titles, aria labels and toast text.
+- Wired the bridge into `I18nProvider` with a MutationObserver so static filter controls rendered after Inertia/React updates are translated when switching VI/EN without touching business data such as product/source/user names.
+- Updated shared select/product filter components to call the same legacy translation helper directly, and kept report i18n as the preferred typed path with the bridge as fallback for unmapped legacy labels.
+
+## 2026-08-07 - Whole-project visible UI i18n hardening
+
+- Expanded the legacy i18n bridge from report/filter-only coverage to all visible static UI nodes in React/Inertia pages: titles, text blocks, table headers/cells, dialog content, badges, tooltips, aria labels, placeholders, native select options and toast/status nodes.
+- Seeded the bridge from the typed VI/EN locale dictionaries and added broad business UI phrase coverage for Admin, Sales, Warehouse, Marketing, Customer, HR, Ecommerce, Accounting and system settings screens.
+- Added decorated/dynamic text handling for required labels, colon labels, numbered headings, record/row counters, and common `Nhập/Tìm/Chọn ...` patterns while keeping business data names untouched unless an exact known UI phrase matches.
+- Patched browser alert/confirm/prompt messages through the same deterministic dictionary so legacy JS messages are localized in English mode.

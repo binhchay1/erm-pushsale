@@ -1,3 +1,4 @@
+import { translateReportText } from '@/lib/reportI18n';
 import { useT } from '@/providers/I18nProvider';
 
 /**
@@ -6,7 +7,7 @@ import { useT } from '@/providers/I18nProvider';
  */
 export function PushsaleSearchButton({ onClick, label, type = 'button', form, className = '', disabled = false }) {
     const t = useT();
-    const text = label ?? t('reports.pushsale.search');
+    const text = label ? translateReportText(t, label, label) : t('reports.pushsale.search');
 
     return (
         <button

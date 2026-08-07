@@ -37,5 +37,7 @@ export default {
     tooltip_rank: 'Hạng #',
     tooltip_revenue: 'Doanh số chốt:',
     tooltip_orders: 'Đơn chốt:',
+    print: 'In',
+    help_title: 'Hướng dẫn bảng xếp hạng',
     tooltip_avg: 'TB/đơn:',
 };

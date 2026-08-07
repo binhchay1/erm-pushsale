@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { translate } from '@/i18n/translate';
+import { translateLegacyText } from '@/lib/legacyI18n';
 
 export function normalizeOptionText(value) {
     return String(value ?? '')
@@ -60,6 +61,9 @@ export function PushsaleSelect({
     const [keyword, setKeyword] = useState('');
     const rootRef = useRef(null);
     const selected = options.find((option) => String(option.value) === String(value));
+    const selectedLabel = selected ? translateLegacyText(selected.label) : null;
+    const resolvedPlaceholder = translateLegacyText(placeholder);
+    const resolvedEmptyLabel = emptyLabel ? translateLegacyText(emptyLabel) : null;
     const filtered = useMemo(() => filterOptions(options, keyword), [keyword, options]);
     useOutsideClose(open, rootRef, () => setOpen(false));
 
@@ -79,7 +83,7 @@ export function PushsaleSelect({
                 aria-expanded={open}
                 onClick={() => !disabled && setOpen((current) => !current)}
             >
-                <span className={selected ? '' : 'is-placeholder'}>{selected?.label || placeholder}</span>
+                <span className={selected ? '' : 'is-placeholder'}>{selectedLabel || resolvedPlaceholder}</span>
                 <i className="fa fa-caret-down" />
             </button>
             {open && !disabled && (
@@ -90,14 +94,14 @@ export function PushsaleSelect({
                                 className="form-control ps-select__search"
                                 autoFocus
                                 value={keyword}
-                                placeholder={searchPlaceholder || translate('common.search')}
+                                placeholder={translateLegacyText(searchPlaceholder || translate('common.search'))}
                                 onChange={(event) => setKeyword(event.target.value)}
                             />
                             <i className="fa fa-search" aria-hidden="true" />
                         </div>
                     )}
                     <button type="button" className={`ps-select__option is-empty ${String(value) === '' ? 'active' : ''}`} onClick={() => selectValue('')}>
-                        {placeholder}
+                        {resolvedPlaceholder}
                     </button>
                     <div className="ps-select__options">
                         {filtered.length ? filtered.map((option) => (
@@ -107,10 +111,10 @@ export function PushsaleSelect({
                                 className={`ps-select__option ${String(option.value) === String(value) ? 'active' : ''}`}
                                 onClick={() => selectValue(option.value)}
                             >
-                                <span>{option.label}</span>
-                                {option.subLabel && <small>{option.subLabel}</small>}
+                                <span>{translateLegacyText(option.label)}</span>
+                                {option.subLabel && <small>{translateLegacyText(option.subLabel)}</small>}
                             </button>
-                        )) : <div className="ps-select__empty">{emptyLabel || translate('pages.empty_data')}</div>}
+                        )) : <div className="ps-select__empty">{resolvedEmptyLabel || translate('pages.empty_data')}</div>}
                     </div>
                 </div>
             )}
@@ -137,15 +141,19 @@ export function PushsaleMultiSelect({
     const rootRef = useRef(null);
     const ids = toIntArray(selectedIds);
     const allSelected = enabled && ids.length === 0;
+    const resolvedLabel = translateLegacyText(label);
+    const resolvedAllLabel = allLabel ? translateLegacyText(allLabel) : null;
+    const resolvedEmptyLabel = emptyLabel ? translateLegacyText(emptyLabel) : null;
+    const resolvedPlaceholder = placeholder ? translateLegacyText(placeholder) : null;
     const optionMap = useMemo(() => new Map(options.map((option) => [Number(option.value), option])), [options]);
     const filtered = useMemo(() => filterOptions(options, keyword), [keyword, options]);
     useOutsideClose(open, rootRef, () => setOpen(false));
 
     const displayText = (() => {
-        if (!enabled) return emptyLabel || `Không cho ${label} sử dụng`;
-        if (allSelected) return allLabel || `Tất cả ${label} đều có quyền`;
+        if (!enabled) return resolvedEmptyLabel || translateLegacyText(`Không cho ${resolvedLabel} sử dụng`);
+        if (allSelected) return resolvedAllLabel || translateLegacyText(`Tất cả ${resolvedLabel} đều có quyền`);
         const names = ids.map((id) => optionMap.get(id)?.label).filter(Boolean);
-        if (names.length === 0) return placeholder || `--Chọn ${label}--`;
+        if (names.length === 0) return resolvedPlaceholder || translateLegacyText(`--Chọn ${resolvedLabel}--`);
         if (names.length <= 2) return names.join(', ');
         return `${names.slice(0, 2).join(', ')} +${names.length - 2}`;
     })();
@@ -189,17 +197,17 @@ export function PushsaleMultiSelect({
                                 className="form-control ps-select__search"
                                 autoFocus
                                 value={keyword}
-                                placeholder={searchPlaceholder || `Tìm ${label.toLowerCase()}...`}
+                                placeholder={translateLegacyText(searchPlaceholder || `Tìm ${String(resolvedLabel).toLowerCase()}...`)}
                                 onChange={(event) => setKeyword(event.target.value)}
                             />
                             <i className="fa fa-search" aria-hidden="true" />
                         </div>
                     )}
                     <button type="button" className={`ps-select__option ${allSelected ? 'active' : ''}`} onClick={setAll}>
-                        <span>{allLabel || `Tất cả ${label} đều có quyền`}</span>
+                        <span>{resolvedAllLabel || translateLegacyText(`Tất cả ${resolvedLabel} đều có quyền`)}</span>
                     </button>
                     <button type="button" className={`ps-select__option ${!enabled ? 'active' : ''}`} onClick={setNone}>
-                        <span>{emptyLabel || `Không cho ${label} sử dụng sản phẩm này`}</span>
+                        <span>{resolvedEmptyLabel || translateLegacyText(`Không cho ${resolvedLabel} sử dụng sản phẩm này`)}</span>
                     </button>
                     <div className="ps-select__options">
                         {filtered.length ? filtered.map((option) => {
@@ -207,10 +215,10 @@ export function PushsaleMultiSelect({
                             return (
                                 <button key={option.value} type="button" className={`ps-select__option ${checked ? 'active' : ''}`} onClick={() => toggleId(option.value)}>
                                     <input type="checkbox" readOnly checked={checked} />
-                                    <span>{option.label}{option.subLabel && <small>{option.subLabel}</small>}</span>
+                                    <span>{translateLegacyText(option.label)}{option.subLabel && <small>{translateLegacyText(option.subLabel)}</small>}</span>
                                 </button>
                             );
-                        }) : <div className="ps-select__empty">{emptyLabel || translate('pages.empty_data')}</div>}
+                        }) : <div className="ps-select__empty">{resolvedEmptyLabel || translate('pages.empty_data')}</div>}
                     </div>
                 </div>
             )}

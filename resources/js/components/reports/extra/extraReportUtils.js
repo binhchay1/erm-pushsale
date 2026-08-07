@@ -1,4 +1,5 @@
 import { formatCurrency, formatNumber } from '@/lib/format';
+import { translateReportText } from '@/lib/reportI18n';
 
 export function psText(t, key, fallback) {
     const path = `reports.pushsale.${key}`;
@@ -20,7 +21,7 @@ export function resolveColumnLabel(col, t, labels) {
         const translated = t(`reports.columns.${col.label_key}`);
         if (translated !== `reports.columns.${col.label_key}`) return translated;
     }
-    return col.label;
+    return translateReportText(t, col.label, col.label);
 }
 
 export function formatCell(value, format) {
@@ -42,11 +43,11 @@ export function cleanReportPayload(values = {}) {
     return Object.fromEntries(Object.entries(values).filter(([, value]) => hasValue(value)));
 }
 
-export function resolveOperationStages(filterOptions = {}) {
+export function resolveOperationStages(filterOptions = {}, t = null) {
     return (filterOptions.operationStages ?? [])
         .map((stage) => ({
             key: stage.value ?? stage.id ?? stage.key,
-            label: stage.label ?? stage.name ?? '',
+            label: t ? translateReportText(t, stage.label ?? stage.name ?? '', stage.label ?? stage.name ?? '') : (stage.label ?? stage.name ?? ''),
         }))
         .filter((stage) => stage.key && stage.key !== 'no_operation');
 }

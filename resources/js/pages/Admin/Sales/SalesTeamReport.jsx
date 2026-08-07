@@ -18,6 +18,8 @@ import {
 } from '@/components/reports/PushsaleReportChrome';
 import { cleanInertiaFilters, readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
+import { translateReportText } from '@/lib/reportI18n';
+import { useT } from '@/providers/I18nProvider';
 
 function todayIso() {
     const date = new Date();
@@ -49,7 +51,9 @@ export default function SalesTeamReport({
     routeUrl = '/admin/sales/reports/teams',
     pageRuntimeError = null,
 }) {
-    const title = schema?.title ?? 'Báo cáo nhóm sale';
+    const t = useT();
+    const title = translateReportText(t, schema?.title ?? 'Báo cáo nhóm sale', schema?.title ?? t('reports.extra.sale-team.title'));
+    const tt = (value, fallback = value) => translateReportText(t, value, fallback);
     const { draft, set, apply: search } = useInertiaFilters(routeUrl, buildInitialFilters(), {
         sync: false,
         clean: true,
@@ -81,8 +85,8 @@ export default function SalesTeamReport({
                     )}
                     actions={(
                         <>
-                            <PushsaleSearchButton onClick={search} label="Tìm kiếm" />
-                            <PushsaleExportButton routeUrl={routeUrl} filters={queryFilters} label="Xuất Excel" />
+                            <PushsaleSearchButton onClick={search} label={t('reports.pushsale.search')} />
+                            <PushsaleExportButton routeUrl={routeUrl} filters={queryFilters} label={t('reports.pushsale.export_excel')} />
                         </>
                     )}
                     advanced={(
@@ -102,10 +106,10 @@ export default function SalesTeamReport({
                 <div className="ps-sales-team-cards">
                     {cards.map((card) => (
                         <div key={card.key} className={`ps-sales-team-card tone-${card.tone}`}>
-                            <div className="ps-sales-team-card__label">{card.label}</div>
+                            <div className="ps-sales-team-card__label">{tt(card.label)}</div>
                             <div className="ps-sales-team-card__value">
-                                {num(card.count)}
-                                {card.rate !== undefined ? <small> ({pct(card.rate)})</small> : null}
+                                {formatReportNumber(card.count)}
+                                {card.rate !== undefined ? <small> ({formatReportPercent(card.rate)})</small> : null}
                             </div>
                         </div>
                     ))}
@@ -115,35 +119,35 @@ export default function SalesTeamReport({
                     <table className="table table-bordered table-striped" id="tblData">
                         <thead>
                             <tr>
-                                <th className="text-center" rowSpan="2">STT</th>
-                                <th className="text-center" rowSpan="2">SALE</th>
-                                <th className="text-center" colSpan="5">KHÁCH HÀNG MỚI</th>
-                                <th className="text-center" colSpan="5">KHÁCH HÀNG CŨ</th>
-                                <th className="text-center" colSpan="8">TỔNG CHUNG</th>
+                                <th className="text-center" rowSpan="2">{t('reports.pushsale.stt')}</th>
+                                <th className="text-center" rowSpan="2">{t('reports.pushsale.sale')}</th>
+                                <th className="text-center" colSpan="5">{t('reports.ceo_report.new_customers_group')}</th>
+                                <th className="text-center" colSpan="5">{t('reports.ceo_report.old_customers_group')}</th>
+                                <th className="text-center" colSpan="8">{t('reports.ceo_report.total_group')}</th>
                             </tr>
                             <tr>
-                                <th className="text-center">Contact</th>
-                                <th className="text-center">Chốt đơn</th>
-                                <th className="text-center">Tỷ lệ chốt (%)</th>
-                                <th className="text-center">Số sản phẩm</th>
-                                <th className="text-center">Doanh số tạm tính</th>
-                                <th className="text-center">Contact</th>
-                                <th className="text-center">Chốt đơn</th>
-                                <th className="text-center">Tỷ lệ chốt (%)</th>
-                                <th className="text-center">Số sản phẩm</th>
-                                <th className="text-center">Doanh số tạm tính</th>
-                                <th className="text-center">Doanh số tạm tính</th>
-                                <th className="text-center">Phí COD</th>
-                                <th className="text-center">Hỗ trợ COD</th>
-                                <th className="text-center">CK</th>
-                                <th className="text-center">Đặt cọc</th>
-                                <th className="text-center">Doanh số tạm tính sau chiết khấu</th>
-                                <th className="text-center">KPI doanh số</th>
-                                <th className="text-center">Tỷ lệ (%)</th>
+                                <th className="text-center">{t('reports.pushsale.contact')}</th>
+                                <th className="text-center">{t('reports.pushsale.closed_orders')}</th>
+                                <th className="text-center">{t('reports.pushsale.close_rate')}</th>
+                                <th className="text-center">{t('reports.pushsale.product_qty')}</th>
+                                <th className="text-center">{t('reports.pushsale.expected_revenue')}</th>
+                                <th className="text-center">{t('reports.pushsale.contact')}</th>
+                                <th className="text-center">{t('reports.pushsale.closed_orders')}</th>
+                                <th className="text-center">{t('reports.pushsale.close_rate')}</th>
+                                <th className="text-center">{t('reports.pushsale.product_qty')}</th>
+                                <th className="text-center">{t('reports.pushsale.expected_revenue')}</th>
+                                <th className="text-center">{t('reports.pushsale.expected_revenue')}</th>
+                                <th className="text-center">{t('reports.ceo_report.cod_fee')}</th>
+                                <th className="text-center">{t('reports.ceo_report.cod_support')}</th>
+                                <th className="text-center">{t('reports.ceo_report.discount')}</th>
+                                <th className="text-center">{t('reports.ceo_report.deposit')}</th>
+                                <th className="text-center">{t('reports.pushsale.actual_revenue')}</th>
+                                <th className="text-center">{t('reports.pushsale.target')}</th>
+                                <th className="text-center">{t('reports.pushsale.rate')}</th>
                             </tr>
                             {totals && (
                                 <tr className="rowsum">
-                                    <td colSpan="2" className="text-center font-weight-bold">Tổng:</td>
+                                    <td colSpan="2" className="text-center font-weight-bold">{t('reports.pushsale.total_colon')}</td>
                                     <td className="text-center font-weight-bold">{formatReportNumber(totals.new_contacts)}</td>
                                     <td className="text-center font-weight-bold">{formatReportNumber(totals.new_closed)}</td>
                                     <td className="text-center font-weight-bold">{formatReportPercent(totals.new_rate)}</td>

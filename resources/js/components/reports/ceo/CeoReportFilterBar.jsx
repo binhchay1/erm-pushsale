@@ -129,7 +129,7 @@ export function CeoReportFilterBar({
 
     const exportMenu = (
         <div className={`ps-ceo-export-menu${menuOpen ? ' is-open' : ''}`}>
-            <button type="button" className="ichucnang ps-ceo-export-trigger" onClick={() => setMenuOpen((v) => !v)} aria-expanded={menuOpen} title="Xuất dữ liệu">
+            <button type="button" className="ichucnang ps-ceo-export-trigger" onClick={() => setMenuOpen((v) => !v)} aria-expanded={menuOpen} title={t('reports.pushsale.export_data')}>
                 <Settings className="size-4" />
                 <ChevronDown className="size-3" />
             </button>

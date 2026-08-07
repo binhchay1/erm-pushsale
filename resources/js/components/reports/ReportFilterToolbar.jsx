@@ -7,6 +7,8 @@ import {
     PushsaleSearchButton,
 } from '@/components/reports/PushsaleReportChrome';
 import { cleanInertiaFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
+import { translateReportText } from '@/lib/reportI18n';
+import { useT } from '@/providers/I18nProvider';
 
 function chunkFields(items, size = 4) {
     const rows = [];
@@ -48,6 +50,8 @@ function ReportFilterToolbarShell({
     actionsExtra = null,
     children,
 }) {
+    const t = useT();
+    const resolvedTitle = translateReportText(t, title, title);
     const allowed = filterFields ? new Set(filterFields) : null;
     const include = (field) => !allowed || allowed.has(field) || (field === 'date_from' && allowed.has('date_to'));
 
@@ -93,7 +97,7 @@ function ReportFilterToolbarShell({
 
     return (
         <PushsalePageShell
-            title={title}
+            title={resolvedTitle}
             pageCode={pageCode}
             className={className}
             headerClassName={headerClassName}

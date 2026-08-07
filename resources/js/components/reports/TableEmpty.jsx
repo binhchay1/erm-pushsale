@@ -1,3 +1,6 @@
+import { useT } from '@/providers/I18nProvider';
+import { translateReportText } from '@/lib/reportI18n';
+
 /**
  * Shared empty table / block states (DRY #14).
  */
@@ -10,10 +13,13 @@ export function TableEmptyRow({
     message = DEFAULT_TABLE_EMPTY_MESSAGE,
     className = 'text-center',
 }) {
+    const t = useT();
+    const text = translateReportText(t, message, message);
+
     return (
         <tr>
             <td colSpan={colSpan} className={className}>
-                {message}
+                {text}
             </td>
         </tr>
     );
@@ -24,5 +30,6 @@ export function EmptyState({
     className = 'ps-empty-state text-center',
     as: Component = 'div',
 }) {
-    return <Component className={className}>{message}</Component>;
+    const t = useT();
+    return <Component className={className}>{translateReportText(t, message, message)}</Component>;
 }

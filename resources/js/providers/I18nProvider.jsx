@@ -4,6 +4,7 @@ import { router } from '@inertiajs/react';
 import en from '@/i18n/locales/en/index';
 import vi from '@/i18n/locales/vi/index';
 import { setTranslateLocale } from '@/i18n/translate';
+import { installLegacyI18nDomBridge } from '@/lib/legacyI18n';
 
 const DICTS = { vi, en };
 
@@ -31,6 +32,8 @@ export function I18nProvider({ children, initialLocale = 'vi', localeMeta = null
             document.documentElement.lang = locale;
         }
     }, [locale]);
+
+    useEffect(() => installLegacyI18nDomBridge(locale), [locale]);
 
     const applyLocale = useCallback((next) => {
         if (!next || next === locale) {

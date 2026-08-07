@@ -11,28 +11,30 @@ import { useT } from '@/providers/I18nProvider';
 
 const routeUrl = '/admin/sales/revenue';
 
-const formulaRows = [
-    ['(1) Đơn chốt = ', 'Đơn chốt'],
-    ['(2) Xác nhận giao hàng = ', '(1) - [Chờ vận đơn] - [Hoãn giao hàng] - [Hủy vận đơn]'],
-    ['(3) Huỷ vận đơn = ', '[Huỷ vận đơn]'],
-    ['(4) Tổng giao = ', '(1) - [Chờ vận đơn] - [Giao ngay] - [Hoãn giao hàng] - [Hủy vận đơn] - [Hủy đăng đơn] - [Không lấy được hàng]'],
-    ['(5) Đã hoàn = ', '[Đã hoàn]'],
-    ['(6) Đang hoàn = ', '[Đang hoàn]'],
-    ['(7) Đã giao hàng = ', '[Đã giao hàng]'],
-    ['(8) Đã thanh toán = ', '[Đã thanh toán]'],
-    ['(9) Giao thành công = ', '[Đã giao hàng] + [Đã thanh toán] + [Giao hàng 1 phần]'],
-    ['(10) % Đã hoàn = ', '(5) / (4)'],
-    ['(11) % Huỷ VĐ = ', '(3) / (1)'],
-    ['(12) % XNGH = ', '(2) / (1)'],
-    ['(13) % Giao thành công = ', '(9) / (4)'],
-    ['(14) Contact: ', 'Số contact'],
-    ['(15) Tỷ lệ chốt = ', 'Số lượng đơn chốt / Số contact'],
-    ['(16) Số sản phẩm = ', 'Số sản phẩm đơn chốt'],
-    ['Upsale = ', 'Sản phẩm upsale nằm trong đơn chốt; doanh số upsale tính riêng và vẫn cộng vào doanh số đơn tổng'],
-    ['(17) Giá trị đơn = ', 'Doanh số đơn chốt / Số lượng đơn chốt'],
-    ['(18) % doanh số hoàn = ', '(doanh số đã hoàn / Xác nhận giao hàng) * 100%'],
-    ['(19) % Doanh số huỷ = ', '((Doanh số huỷ vận đơn + Doanh số huỷ đăng đơn) / Doanh số đơn chốt) * 100%'],
-];
+function formulaRows(t) {
+    return [
+        [t('reports.revenue_formula.closed_orders_label'), t('reports.revenue_formula.closed_orders_text')],
+        [t('reports.revenue_formula.confirmed_delivery_label'), t('reports.revenue_formula.confirmed_delivery_text')],
+        [t('reports.revenue_formula.canceled_shipping_label'), t('reports.revenue_formula.canceled_shipping_text')],
+        [t('reports.revenue_formula.transferred_carrier_label'), t('reports.revenue_formula.transferred_carrier_text')],
+        [t('reports.revenue_formula.returned_label'), t('reports.revenue_formula.returned_text')],
+        [t('reports.revenue_formula.returning_label'), t('reports.revenue_formula.returning_text')],
+        [t('reports.revenue_formula.delivered_label'), t('reports.revenue_formula.delivered_text')],
+        [t('reports.revenue_formula.paid_label'), t('reports.revenue_formula.paid_text')],
+        [t('reports.revenue_formula.successful_delivery_label'), t('reports.revenue_formula.successful_delivery_text')],
+        [t('reports.revenue_formula.return_rate_label'), t('reports.revenue_formula.return_rate_text')],
+        [t('reports.revenue_formula.shipping_cancel_rate_label'), t('reports.revenue_formula.shipping_cancel_rate_text')],
+        [t('reports.revenue_formula.confirm_rate_label'), t('reports.revenue_formula.confirm_rate_text')],
+        [t('reports.revenue_formula.success_rate_label'), t('reports.revenue_formula.success_rate_text')],
+        [t('reports.revenue_formula.contact_label'), t('reports.revenue_formula.contact_text')],
+        [t('reports.revenue_formula.close_rate_label'), t('reports.revenue_formula.close_rate_text')],
+        [t('reports.revenue_formula.product_count_label'), t('reports.revenue_formula.product_count_text')],
+        [t('reports.revenue_formula.upsale_label'), t('reports.revenue_formula.upsale_text')],
+        [t('reports.revenue_formula.average_order_label'), t('reports.revenue_formula.average_order_text')],
+        [t('reports.revenue_formula.revenue_return_rate_label'), t('reports.revenue_formula.revenue_return_rate_text')],
+        [t('reports.revenue_formula.revenue_cancel_rate_label'), t('reports.revenue_formula.revenue_cancel_rate_text')],
+    ];
+}
 
 function normalizeDraft(filters = {}) {
     return {
@@ -53,9 +55,10 @@ function normalizeDraft(filters = {}) {
 }
 
 function FormulaLegend() {
+    const t = useT();
     return (
         <div className="ps-sales-revenue-formulas">
-            {formulaRows.map(([label, text]) => (
+            {formulaRows(t).map(([label, text]) => (
                 <div className="ps-sales-revenue-formula" key={label}>
                     <span>{label}</span>{text}
                 </div>
@@ -98,8 +101,8 @@ export default function SaleRevenueReport({ filters, filterOptions = {}, report 
 
     const actions = (
         <>
-            <PushsaleSearchButton onClick={search} label="Tìm kiếm" />
-            <PushsaleExportButton routeUrl={routeUrl} filters={cleanInertiaFilters(draft)} label="Xuất Excel" />
+            <PushsaleSearchButton onClick={search} />
+            <PushsaleExportButton routeUrl={routeUrl} filters={cleanInertiaFilters(draft)} />
         </>
     );
 
@@ -108,7 +111,7 @@ export default function SaleRevenueReport({ filters, filterOptions = {}, report 
             <Head title={t('reports.revenue_sales.title')} />
 
             <PushsalePageShell
-                title="Báo cáo doanh số chi tiết sale"
+                title={t('reports.revenue_sales.detail_title')}
                 className="ps-sales-revenue-page ps-report-toolbar-shell"
                 headerClassName="ps-sales-revenue-header"
                 bodyClassName="ps-sales-revenue-body"
@@ -120,7 +123,7 @@ export default function SaleRevenueReport({ filters, filterOptions = {}, report 
                 <RevenueMetricsTable
                     rows={report?.rows ?? []}
                     nameKey="saleName"
-                    nameLabel="TÊN SALE"
+                    nameLabel={t('reports.revenue_sales.name_label')}
                 />
             </PushsalePageShell>
         </AppLayout>

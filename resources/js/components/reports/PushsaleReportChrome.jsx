@@ -1,4 +1,5 @@
 import { useT } from '@/providers/I18nProvider';
+import { translateReportOptionLabel, translateReportText } from '@/lib/reportI18n';
 import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { DateRangeFilter } from '@/components/filters/DateRangeFilter';
 import { useInertiaFilters } from '@/hooks/useInertiaFilters';
@@ -46,6 +47,9 @@ export function optionLabel(option) {
 }
 
 export function PushsaleSelect({ value = '', onChange, options = [], placeholder, className = '', disabled = false }) {
+    const t = useT();
+    const resolvedPlaceholder = translateReportText(t, placeholder, placeholder);
+
     return (
         <select
             className={`ps-control ${className}`.trim()}
@@ -53,10 +57,10 @@ export function PushsaleSelect({ value = '', onChange, options = [], placeholder
             disabled={disabled}
             onChange={(event) => onChange?.(event.target.value)}
         >
-            <option value="">{placeholder}</option>
+            <option value="">{resolvedPlaceholder}</option>
             {options.map((option) => (
                 <option key={optionValue(option)} value={optionValue(option)}>
-                    {optionLabel(option)}
+                    {translateReportOptionLabel(t, option) ?? optionLabel(option)}
                 </option>
             ))}
         </select>

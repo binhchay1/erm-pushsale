@@ -60,7 +60,7 @@ function SaleWorkReport({ title, rows, totals, filters, filterOptions, filterFie
     const fields = new Set(filterFields);
     const [pageSize, setPageSize] = useState('50');
     const [page, setPage] = useState(1);
-    const stages = useMemo(() => resolveOperationStages(filterOptions), [filterOptions]);
+    const stages = useMemo(() => resolveOperationStages(filterOptions, t), [filterOptions, t]);
     const operationOptions = stages.map(({ key, label }) => ({ value: key, label }));
 
     const totalWithUntouched = useMemo(() => {

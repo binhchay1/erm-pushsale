@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { translateLegacyText } from '@/lib/legacyI18n';
+
 const normalize = (items = []) => (Array.isArray(items) ? items : Object.values(items ?? {}))
     .filter(Boolean)
     .map((item) => ({
@@ -31,6 +33,7 @@ export function ProductSearchSelect({
     const searchInputRef = useRef(null);
     const catalog = useMemo(() => normalize(products), [products]);
     const selected = catalog.find((item) => String(item.id) === String(value ?? '')) ?? null;
+    const resolvedPlaceholder = translateLegacyText(placeholder);
     const filtered = useMemo(() => {
         const q = keyword.trim().toLowerCase();
         if (!q) return catalog.slice(0, 80);
@@ -78,12 +81,12 @@ export function ProductSearchSelect({
                 aria-expanded={open}
             >
                 <span className={selected ? 'ps-product-select-label has-value' : 'ps-product-select-label'}>
-                    {selected ? `${selected.name}${selected.sku ? ` (${selected.sku})` : ''}` : placeholder}
+                    {selected ? `${selected.name}${selected.sku ? ` (${selected.sku})` : ''}` : resolvedPlaceholder}
                 </span>
                 <span className="ps-product-select-arrow"><i className="fa fa-caret-down" /></span>
             </button>
             {selected && allowClear && !disabled ? (
-                <button type="button" className="ps-product-clear" onMouseDown={(event) => event.preventDefault()} onClick={() => select(null)} title="Bỏ chọn">
+                <button type="button" className="ps-product-clear" onMouseDown={(event) => event.preventDefault()} onClick={() => select(null)} title={translateLegacyText("Bỏ chọn")}>
                     <i className="fa fa-times" />
                 </button>
             ) : null}
@@ -98,7 +101,7 @@ export function ProductSearchSelect({
                             value={keyword}
                             onChange={(event) => setKeyword(event.target.value)}
                             onBlur={closeLater}
-                            placeholder="Tìm theo tên, mã SKU hoặc loại..."
+                            placeholder={translateLegacyText("Tìm theo tên, mã SKU hoặc loại...")}
                             autoComplete="off"
                         />
                     </div>
@@ -115,10 +118,10 @@ export function ProductSearchSelect({
                             >
                                 <span className="ps-product-name">{item.name}</span>
                                 <span className="ps-product-meta">
-                                    {item.type === 'combo' ? 'Gói sản phẩm' : 'Sản phẩm'}{item.sku ? ` · ${item.sku}` : ''}{showPrice ? ` · ${formatVnd(item.unit_price)}` : ''}
+                                    {translateLegacyText(item.type === 'combo' ? 'Gói sản phẩm' : 'Sản phẩm')}{item.sku ? ` · ${item.sku}` : ''}{showPrice ? ` · ${formatVnd(item.unit_price)}` : ''}
                                 </span>
                             </button>
-                        )) : <div className="ps-product-empty">Không tìm thấy sản phẩm/gói phù hợp</div>}
+                        )) : <div className="ps-product-empty">{translateLegacyText('Không tìm thấy sản phẩm/gói phù hợp')}</div>}
                     </div>
                 </div>
             ) : null}
@@ -159,9 +162,9 @@ export function ProductMultiAdder({ products = [], selectedIds = [], onAdd }) {
     return (
         <div className="ps-product-multi-adder">
             <div className="ps-product-multi-head">
-                <input className="form-control" value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="Tìm sản phẩm/gói theo tên hoặc mã..." />
+                <input className="form-control" value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder={translateLegacyText("Tìm sản phẩm/gói theo tên hoặc mã...")} />
                 <button type="button" className="btn btn-success" disabled={checkedCount === 0} onClick={add}>
-                    <i className="fa fa-plus" /> Thêm {checkedCount || ''} sản phẩm
+                    <i className="fa fa-plus" /> {translateLegacyText('Thêm')} {checkedCount || ''} {translateLegacyText('sản phẩm')}
                 </button>
             </div>
             <div className="ps-product-multi-list">
@@ -171,7 +174,7 @@ export function ProductMultiAdder({ products = [], selectedIds = [], onAdd }) {
                         <label key={item.id} className={exists ? 'is-exists' : ''}>
                             <input type="checkbox" disabled={exists} checked={checked.has(String(item.id)) || exists} onChange={() => toggle(item.id)} />
                             <span className="ps-product-name">{item.name}</span>
-                            <span className="ps-product-meta">{item.type === 'combo' ? 'Gói sản phẩm' : 'Sản phẩm'}{item.sku ? ` · ${item.sku}` : ''} · {formatVnd(item.unit_price)}</span>
+                            <span className="ps-product-meta">{translateLegacyText(item.type === 'combo' ? 'Gói sản phẩm' : 'Sản phẩm')}{item.sku ? ` · ${item.sku}` : ''} · {formatVnd(item.unit_price)}</span>
                         </label>
                     );
                 })}

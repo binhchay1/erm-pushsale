@@ -9,6 +9,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cleanInertiaFilters } from '@/hooks/useInertiaFilters';
+import { translateReportText } from '@/lib/reportI18n';
 import { useT } from '@/providers/I18nProvider';
 
 /**
@@ -46,7 +47,7 @@ export function ReportExportControl({
     showIcon = true,
 }) {
     const t = useT();
-    const text = label ?? t('reports.pushsale.export_excel');
+    const text = label ? translateReportText(t, label, label) : t('reports.pushsale.export_excel');
 
     if (mode === 'visit') {
         return (
@@ -74,7 +75,7 @@ export function ReportExportControl({
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className={className || undefined}>
                         <Download className="size-4" />
-                        {label ?? t('common.export')}
+                        {label ? translateReportText(t, label, label) : t('common.export')}
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

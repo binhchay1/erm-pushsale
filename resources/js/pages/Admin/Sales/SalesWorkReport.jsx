@@ -11,6 +11,8 @@ import { TableEmptyRow } from '@/components/reports/TableEmpty';
 import { formatReportNumber } from '@/components/reports/reportFormat';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import AppLayout from '@/layouts/AppLayout';
+import { translateReportText } from '@/lib/reportI18n';
+import { useT } from '@/providers/I18nProvider';
 
 function currentQuery() {
     if (typeof window === 'undefined') return new URLSearchParams();
@@ -52,7 +54,8 @@ export default function SalesWorkReport({
     routeUrl = '/admin/sales/reports/work',
     pageRuntimeError = null,
 }) {
-    const title = schema?.title ?? 'Báo cáo công việc sale';
+    const t = useT();
+    const title = translateReportText(t, schema?.title ?? 'Báo cáo công việc sale', schema?.title ?? t('reports.extra.sale-work.title'));
     const { draft, set, apply: search } = useInertiaFilters(routeUrl, buildInitialFilters(), {
         sync: false,
         clean: true,
@@ -60,14 +63,14 @@ export default function SalesWorkReport({
     const stages = useMemo(() => {
         const fromSummary = Array.isArray(summary?.stages) ? summary.stages : [];
         if (fromSummary.length) {
-            return fromSummary.map((stage) => ({ key: stage.key, label: stage.label }));
+            return fromSummary.map((stage) => ({ key: stage.key, label: translateReportText(t, stage.label, stage.label) }));
         }
         // Fallback: server operationStages (menu 1.8.1), never hardcode call_1.
         return (filterOptions.operationStages ?? []).map((stage) => ({
             key: stage.value ?? stage.id ?? stage.key,
-            label: stage.label ?? stage.name ?? stage.key,
+            label: translateReportText(t, stage.label ?? stage.name ?? stage.key, stage.label ?? stage.name ?? stage.key),
         }));
-    }, [summary, filterOptions.operationStages]);
+    }, [summary, filterOptions.operationStages, t]);
     const totals = summary?.totals || null;
     const queryFilters = useMemo(() => cleanReportFilterPayload(draft), [draft]);
 
@@ -99,8 +102,8 @@ export default function SalesWorkReport({
                     'sale_team_id',
                     'per_page',
                 ]}
-                searchLabel="Tìm kiếm"
-                exportLabel="Xuất Excel"
+                searchLabel={t('reports.pushsale.search')}
+                exportLabel={t('reports.pushsale.export_excel')}
                 notice={pageRuntimeError ? (
                     <div className="pushsale-error-banner">
                         <i className="fa fa-exclamation-triangle" /> {pageRuntimeError}
@@ -111,10 +114,10 @@ export default function SalesWorkReport({
                     <table className="table table-bordered table-striped ps-sale-work-table">
                         <thead>
                             <tr>
-                                <th rowSpan="2" className="ps-col-stt">STT</th>
-                                <th rowSpan="2" className="ps-col-sale">SALE</th>
-                                <th rowSpan="2" className="ps-col-metric">Tổng<br />contact</th>
-                                <th rowSpan="2" className="ps-col-metric">Tổng contact<br />chưa TN</th>
+                                <th rowSpan="2" className="ps-col-stt">{t('reports.pushsale.stt')}</th>
+                                <th rowSpan="2" className="ps-col-sale">{t('reports.pushsale.sale')}</th>
+                                <th rowSpan="2" className="ps-col-metric">{t('reports.pushsale.total_contact')}</th>
+                                <th rowSpan="2" className="ps-col-metric">{t('reports.pushsale.total_contact_untouched')}</th>
                                 {stages.map(({ key, label }) => (
                                     <th key={key} colSpan="2">{label}</th>
                                 ))}
@@ -122,8 +125,8 @@ export default function SalesWorkReport({
                             <tr>
                                 {stages.map(({ key }) => (
                                     <Fragment key={key}>
-                                        <th className="ps-col-metric">Số<br />contact</th>
-                                        <th className="ps-col-metric">Chưa<br />TN</th>
+                                        <th className="ps-col-metric">{t('reports.pushsale.contact_count')}</th>
+                                        <th className="ps-col-metric">{t('reports.pushsale.untouched')}</th>
                                     </Fragment>
                                 ))}
                             </tr>
@@ -134,7 +137,7 @@ export default function SalesWorkReport({
                                     {totals && (
                                         <tr className="ps-sale-work-total">
                                             <td className="text-center" />
-                                            <td className="ps-sale-name">Tổng:</td>
+                                            <td className="ps-sale-name">{t('reports.pushsale.total_colon')}</td>
                                             <td className="text-center">{formatReportNumber(totals.total_contacts)}</td>
                                             <td className="text-center">{formatReportNumber(totals.untouched)}</td>
                                             {stages.map(({ key }) => (

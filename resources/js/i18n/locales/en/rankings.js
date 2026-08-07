@@ -37,5 +37,7 @@ export default {
     tooltip_rank: 'Rank #',
     tooltip_revenue: 'Closed revenue:',
     tooltip_orders: 'Closed orders:',
+    print: 'Print',
+    help_title: 'How this ranking works',
     tooltip_avg: 'Avg/order:',
 };

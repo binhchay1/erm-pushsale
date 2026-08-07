@@ -7,6 +7,8 @@ import { PushsaleDateRange, PushsaleSearchButton } from '@/components/reports/Pu
 import { TableEmptyRow } from '@/components/reports/TableEmpty';
 import { readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
+import { translateReportColumns, translateReportText } from '@/lib/reportI18n';
+import { useT } from '@/providers/I18nProvider';
 
 const numberFormatter = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 });
 const currencyFormatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
@@ -30,12 +32,12 @@ function buildInitialFilters(serverFilters = {}) {
     });
 }
 
-function format(value, fmt = 'text') {
+function format(t, value, fmt = 'text') {
     if (value === null || value === undefined || value === '') return '—';
     if (fmt === 'currency' || fmt === 'money') return currencyFormatter.format(Number(value) || 0);
     if (fmt === 'percent') return `${numberFormatter.format(Number(value) || 0)}%`;
     if (fmt === 'number' || fmt === 'decimal') return numberFormatter.format(Number(value) || 0);
-    if (fmt === 'boolean') return value ? 'Có' : 'Không';
+    if (fmt === 'boolean') return value ? t('reports.pushsale.yes') : t('reports.pushsale.no');
     return String(value);
 }
 
@@ -54,6 +56,8 @@ function SystemReport85Shell({
     className = 'ps85-page',
     children,
 }) {
+    const t = useT();
+    const resolvedTitle = translateReportText(t, title, title);
     const { draft, set, apply } = useInertiaFilters(routeUrl, buildInitialFilters(serverFilters), {
         sync: false,
         preserveScroll: true,
@@ -65,7 +69,7 @@ function SystemReport85Shell({
             <PushsaleDateRange filters={draft} onChange={set} />
             <input
                 className="form-control"
-                placeholder="Tìm theo tên / mã"
+                placeholder={t('reports.pushsale.search_name_code')}
                 value={draft.search}
                 onChange={(event) => set('search', event.target.value)}
             />
@@ -74,16 +78,16 @@ function SystemReport85Shell({
 
     const actions = (
         <>
-            <PushsaleSearchButton onClick={() => apply()} label="Tìm kiếm" />
+            <PushsaleSearchButton onClick={() => apply()} />
             {showExport ? (
-                <ReportExportControl mode="visit" routeUrl={routeUrl} filters={draft} label="Xuất Excel" />
+                <ReportExportControl mode="visit" routeUrl={routeUrl} filters={draft} />
             ) : null}
         </>
     );
 
     return (
         <PushsalePageShell
-            title={title}
+            title={resolvedTitle}
             pageCode={activeMenuCode}
             className={className}
             primaryFilters={primaryFilters}
@@ -96,14 +100,15 @@ function SystemReport85Shell({
 }
 
 function SummaryCards({ summary = {} }) {
+    const t = useT();
     const entries = Object.entries(summary).filter(([, value]) => typeof value === 'number' || typeof value === 'string');
     if (!entries.length) return null;
     return (
         <div className="ps85-summary-cards">
             {entries.slice(0, 6).map(([key, value]) => (
                 <div className="ps85-summary-card" key={key}>
-                    <span>{key.replaceAll('_', ' ')}</span>
-                    <b>{format(value, typeof value === 'number' ? 'number' : 'text')}</b>
+                    <span>{translateReportText(t, key.replaceAll('_', ' '), key.replaceAll('_', ' '))}</span>
+                    <b>{format(t, value, typeof value === 'number' ? 'number' : 'text')}</b>
                 </div>
             ))}
         </div>
@@ -111,22 +116,23 @@ function SummaryCards({ summary = {} }) {
 }
 
 export function DataTable({ columns = [], rows = [], compact = false }) {
+    const t = useT();
     const safeColumns = columns.length ? columns : Object.keys(rows[0] ?? {}).map((key) => ({ key, label: key, format: 'text' }));
     return (
         <div className="ps85-table-wrap">
             <table className={`ps85-table ${compact ? 'is-compact' : ''}`}>
                 <thead>
                     <tr>
-                        {safeColumns.map((column) => <th key={column.key}>{column.label || column.key}</th>)}
+                        {safeColumns.map((column) => <th key={column.key}>{translateReportText(t, column.label || column.key, column.label || column.key)}</th>)}
                     </tr>
                 </thead>
                 <tbody>
                     {rows.length ? rows.map((row, index) => (
                         <tr key={row._record_id ?? index}>
-                            {safeColumns.map((column) => <td key={column.key}>{format(row[column.key], column.format)}</td>)}
+                            {safeColumns.map((column) => <td key={column.key}>{format(t, row[column.key], column.format)}</td>)}
                         </tr>
                     )) : (
-                        <TableEmptyRow colSpan={safeColumns.length || 1} message="Không có dữ liệu." className="ps85-empty" />
+                        <TableEmptyRow colSpan={safeColumns.length || 1} message={t('reports.pushsale.no_data')} className="ps85-empty" />
                     )}
                 </tbody>
             </table>
@@ -135,12 +141,14 @@ export function DataTable({ columns = [], rows = [], compact = false }) {
 }
 
 function SimpleReport({ schema = {}, rows = [], summary = {}, routeUrl, activeMenuCode, pageRuntimeError }) {
-    const columns = schema.columns ?? [];
+    const t = useT();
+    const columns = translateReportColumns(t, schema.columns ?? []);
+    const title = translateReportText(t, schema.title ?? t('reports.pushsale.report'), schema.title ?? t('reports.pushsale.report'));
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
-            <Head title={schema.title ?? 'Báo cáo'} />
+            <Head title={title} />
             <SystemReport85Shell
-                title={schema.title ?? 'Báo cáo'}
+                title={title}
                 routeUrl={routeUrl}
                 filters={summary.filters ?? {}}
                 pageRuntimeError={pageRuntimeError}
@@ -154,6 +162,7 @@ function SimpleReport({ schema = {}, rows = [], summary = {}, routeUrl, activeMe
 }
 
 function TrendChart({ row }) {
+    const t = useT();
     const values = Array.from({ length: 7 }, (_, i) => Number(row[`day_${6 - i}_value`] ?? 0));
     const max = Math.max(1, ...values.map((value) => Math.abs(value)));
     const points = values.map((value, index) => {
@@ -164,8 +173,8 @@ function TrendChart({ row }) {
 
     return (
         <div className="ps85-chart-card">
-            <div className="ps85-chart-title">Giá trị {row.period}</div>
-            <svg viewBox="0 0 640 220" role="img" aria-label={`Biểu đồ ${row.period}`}>
+            <div className="ps85-chart-title">{t('reports.runtime.trend.value_title').replace('{period}', row.period)}</div>
+            <svg viewBox="0 0 640 220" role="img" aria-label={t('reports.runtime.trend.chart_aria').replace('{period}', row.period)}>
                 <line x1="30" y1="180" x2="610" y2="180" className="axis" />
                 <polyline points={points} className="line" />
                 {points.split(' ').map((point, index) => {
@@ -178,16 +187,18 @@ function TrendChart({ row }) {
 }
 
 export function TrendReport({ schema = {}, rows = [], summary = {}, routeUrl, activeMenuCode, pageRuntimeError }) {
+    const t = useT();
+    const title = translateReportText(t, schema.title ?? t('reports.runtime.trend.title'), schema.title ?? t('reports.runtime.trend.title'));
     const tableColumns = useMemo(() => [
-        { key: 'period', label: 'Thời gian', format: 'text' },
-        ...Array.from({ length: 7 }, (_, i) => ({ key: `day_${6 - i}_value`, label: `Ngày n-${6 - i}`, format: 'number' })),
-    ], []);
+        { key: 'period', label: t('reports.runtime.trend.period'), format: 'text' },
+        ...Array.from({ length: 7 }, (_, i) => ({ key: `day_${6 - i}_value`, label: t('reports.runtime.trend.day_n').replace('{day}', 6 - i), format: 'number' })),
+    ], [t]);
 
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
-            <Head title={schema.title ?? 'Biểu đồ xu hướng'} />
+            <Head title={title} />
             <SystemReport85Shell
-                title={schema.title ?? 'Biểu đồ xu hướng'}
+                title={title}
                 routeUrl={routeUrl}
                 filters={summary.filters ?? {}}
                 pageRuntimeError={pageRuntimeError}
@@ -204,20 +215,22 @@ export function TrendReport({ schema = {}, rows = [], summary = {}, routeUrl, ac
 }
 
 export function RepurchaseReport({ schema = {}, rows = [], summary = {}, routeUrl, activeMenuCode, pageRuntimeError }) {
+    const t = useT();
+    const title = translateReportText(t, schema.title ?? t('reports.runtime.repurchase.title'), schema.title ?? t('reports.runtime.repurchase.title'));
     const columns = [
-        { key: 'index', label: 'STT', format: 'number' },
-        { key: 'metric', label: 'Chỉ số', format: 'text' },
-        { key: 'purchase_1', label: 'Mua 1 Lần', format: 'number' },
-        { key: 'purchase_2', label: 'Mua 2 Lần', format: 'number' },
-        { key: 'purchase_3', label: 'Mua 3 Lần', format: 'number' },
-        { key: 'purchase_n', label: 'Mua >= 4 Lần', format: 'number' },
+        { key: 'index', label: t('reports.pushsale.stt'), format: 'number' },
+        { key: 'metric', label: t('reports.runtime.repurchase.metric'), format: 'text' },
+        { key: 'purchase_1', label: t('reports.runtime.repurchase.purchase_1'), format: 'number' },
+        { key: 'purchase_2', label: t('reports.runtime.repurchase.purchase_2'), format: 'number' },
+        { key: 'purchase_3', label: t('reports.runtime.repurchase.purchase_3'), format: 'number' },
+        { key: 'purchase_n', label: t('reports.runtime.repurchase.purchase_n'), format: 'number' },
     ];
 
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
-            <Head title={schema.title ?? 'Thống kê mua lại'} />
+            <Head title={title} />
             <SystemReport85Shell
-                title={schema.title ?? 'Thống kê mua lại'}
+                title={title}
                 routeUrl={routeUrl}
                 filters={summary.filters ?? {}}
                 showExport
@@ -229,7 +242,7 @@ export function RepurchaseReport({ schema = {}, rows = [], summary = {}, routeUr
                     <DataTable columns={columns} rows={rows} />
                     <div className="ps85-side-card">
                         <table className="ps85-table is-compact">
-                            <thead><tr><th>STT</th><th>Số lần mua</th><th>Xem danh sách khách</th></tr></thead>
+                            <thead><tr><th>{t('reports.pushsale.stt')}</th><th>{t('reports.runtime.repurchase.purchase_times')}</th><th>{t('reports.runtime.repurchase.view_customers')}</th></tr></thead>
                             <tbody>
                                 {[1, 2, 3, 4].map((times) => <tr key={times}><td>{times}</td><td>{times === 4 ? '>= 4' : times}</td><td><i className="fa fa-search" /></td></tr>)}
                             </tbody>
@@ -242,16 +255,18 @@ export function RepurchaseReport({ schema = {}, rows = [], summary = {}, routeUr
 }
 
 export function RepurchaseProductsReport({ schema = {}, rows = [], summary = {}, routeUrl, activeMenuCode, pageRuntimeError }) {
+    const t = useT();
+    const title = translateReportText(t, schema.title ?? t('reports.runtime.repurchase.products_title'), schema.title ?? t('reports.runtime.repurchase.products_title'));
     const columns = useMemo(() => [
-        { key: 'purchase_no', label: 'Lần mua', format: 'text' },
-        ...Array.from({ length: 30 }, (_, i) => ({ key: `product_${i + 1}`, label: `Mua ${i + 1} SP`, format: 'number' })),
-    ], []);
+        { key: 'purchase_no', label: t('reports.runtime.repurchase.purchase_no'), format: 'text' },
+        ...Array.from({ length: 30 }, (_, i) => ({ key: `product_${i + 1}`, label: t('reports.runtime.repurchase.buy_n_products').replace('{count}', i + 1), format: 'number' })),
+    ], [t]);
 
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
-            <Head title={schema.title ?? 'Thống kê KH mua lại theo số sản phẩm'} />
+            <Head title={title} />
             <SystemReport85Shell
-                title={schema.title ?? 'Thống kê KH mua lại theo số sản phẩm'}
+                title={title}
                 routeUrl={routeUrl}
                 filters={summary.filters ?? {}}
                 showExport

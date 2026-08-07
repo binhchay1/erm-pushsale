@@ -11,6 +11,8 @@ import {
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 import { formatNumber } from '@/lib/format';
+import { translateReportText } from '@/lib/reportI18n';
+import { useT } from '@/providers/I18nProvider';
 
 function money(value) {
     return formatNumber(Number(value ?? 0));
@@ -29,6 +31,7 @@ function Avatar({ user, rank }) {
 }
 
 function Podium({ items = [] }) {
+    const t = useT();
     const sorted = [...items].sort((a, b) => Number(b.rank) - Number(a.rank));
 
     return (
@@ -51,7 +54,7 @@ function Podium({ items = [] }) {
                         </div>
                     );
                 })}
-                {!sorted.length && <div className="psr-empty-podium">Chưa có dữ liệu xếp hạng trong khoảng thời gian đã chọn.</div>}
+                {!sorted.length && <div className="psr-empty-podium">{t('rankings.empty_period')}</div>}
             </div>
         </div>
     );
@@ -80,6 +83,7 @@ function RankingCells({ row }) {
 }
 
 function RankingTable({ report = {} }) {
+    const t = useT();
     const rows = report.rows ?? [];
     const total = report.totalRow ?? {};
 
@@ -108,26 +112,26 @@ function RankingTable({ report = {} }) {
                 </colgroup>
                 <thead>
                     <tr className="psr-head-group">
-                        <th rowSpan="2">STT</th>
-                        <th rowSpan="2">SALE</th>
-                        <th rowSpan="2">Tổng gói tin</th>
-                        <th colSpan="5">KHÁCH HÀNG MỚI</th>
-                        <th colSpan="5">KHÁCH HÀNG CŨ</th>
-                        <th colSpan="5">TỔNG CHUNG</th>
+                        <th rowSpan="2">{t('reports.pushsale.stt')}</th>
+                        <th rowSpan="2">{t('reports.pushsale.sale')}</th>
+                        <th rowSpan="2">{t('reports.columns.raw_packets')}</th>
+                        <th colSpan="5">{t('reports.ceo_report.new_customers_group')}</th>
+                        <th colSpan="5">{t('reports.ceo_report.old_customers_group')}</th>
+                        <th colSpan="5">{t('reports.ceo_report.total_group')}</th>
                     </tr>
                     <tr>
-                        <th>Contact</th><th>Chốt đơn</th><th>% chốt</th><th>Số SP</th><th>Doanh số tạm tính sau CK</th>
-                        <th>Contact</th><th>Chốt đơn</th><th>% chốt</th><th>Số SP</th><th>Doanh số tạm tính sau CK</th>
-                        <th>Doanh số tạm tính sau CK</th><th>CK</th><th>COD thu của khách</th><th>Phí COD dịch vụ</th><th>Doanh số</th>
+                        <th>{t('reports.pushsale.contact')}</th><th>{t('reports.pushsale.closed_orders')}</th><th>{t('reports.pushsale.close_rate')}</th><th>{t('reports.pushsale.product_qty')}</th><th>{t('reports.columns.net')}</th>
+                        <th>{t('reports.pushsale.contact')}</th><th>{t('reports.pushsale.closed_orders')}</th><th>{t('reports.pushsale.close_rate')}</th><th>{t('reports.pushsale.product_qty')}</th><th>{t('reports.columns.net')}</th>
+                        <th>{t('reports.columns.net')}</th><th>{t('reports.columns.discount')}</th><th>{t('reports.ceo_report.cod_fee')}</th><th>{t('reports.ceo_report.cod_fee')}</th><th>{t('reports.pushsale.revenue')}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr className="psr-total-row">
-                        <td colSpan="2">Tổng cộng:</td>
+                        <td colSpan="2">{t('common.grand_total')}:</td>
                         <td>{money(total.rawContacts)}</td>
                         <RankingCells row={total} />
                     </tr>
-                    {!rows.length && <tr><td colSpan="18" className="psr-empty">Không có dữ liệu.</td></tr>}
+                    {!rows.length && <tr><td colSpan="18" className="psr-empty">{t('reports.pushsale.no_data')}</td></tr>}
                     {rows.map((row) => (
                         <tr key={row.id} className={row.rank <= 3 ? `is-top rank-${row.rank}` : ''}>
                             <td>{row.rank}</td>
@@ -145,7 +149,9 @@ function RankingTable({ report = {} }) {
     );
 }
 
-export default function MarketingRanking({ report = {}, filters = {}, filterOptions = {}, filterRouteUrl = '/admin/rankings', activeMenuCode = '2.2', pageTitle = 'Bảng xếp hạng' }) {
+export default function MarketingRanking({ report = {}, filters = {}, filterOptions = {}, filterRouteUrl = '/admin/rankings', activeMenuCode = '2.2', pageTitle = '' }) {
+    const t = useT();
+    const resolvedTitle = translateReportText(t, pageTitle, pageTitle || t('rankings.title'));
     const { draft, set, apply } = useInertiaFilters(filterRouteUrl, filters);
     const [collapsed, setCollapsed] = useState(false);
     const [gearOpen, setGearOpen] = useState(false);
@@ -167,17 +173,17 @@ export default function MarketingRanking({ report = {}, filters = {}, filterOpti
 
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
-            <Head title={pageTitle} />
+            <Head title={resolvedTitle} />
             <section className="psr-page">
                 <PageHeader
-                    title={pageTitle}
+                    title={resolvedTitle}
                     pageCode={activeMenuCode}
                     className="psr-topbar"
                     filters={(
                         <div className="psr-primary-filters">
                             <PushsaleDateRange filters={draft} onChange={set} />
-                            <PushsaleSelect value={draft.discount_mode ?? ''} onChange={(value) => set('discount_mode', value)} options={filterOptions.discountModes ?? []} placeholder="Sau chiết khấu" />
-                            <PushsaleSelect value={draft.operation_scope ?? ''} onChange={(value) => set('operation_scope', value)} options={filterOptions.operationScopes ?? []} placeholder="Tác nghiệp cần" />
+                            <PushsaleSelect value={draft.discount_mode ?? ''} onChange={(value) => set('discount_mode', value)} options={filterOptions.discountModes ?? []} placeholder={t('reports.pushsale.discount_after')} />
+                            <PushsaleSelect value={draft.operation_scope ?? ''} onChange={(value) => set('operation_scope', value)} options={filterOptions.operationScopes ?? []} placeholder={t('dashboard.marketing.operation_scope')} />
                         </div>
                     )}
                     actions={(
@@ -186,15 +192,15 @@ export default function MarketingRanking({ report = {}, filters = {}, filterOpti
                             <PushsaleSearchButton onClick={() => apply()} />
                             <div className="psr-gear" ref={gearRef}>
                                 <button type="button" className="psr-square-button" onClick={() => setGearOpen((value) => !value)}><i className="fa fa-cog" /></button>
-                                {gearOpen && <div className="psr-gear-menu"><button type="button" onClick={() => window.print()}><i className="fa fa-print" /> In bảng xếp hạng</button><button type="button" onClick={() => apply()}><i className="fa fa-refresh" /> Làm mới dữ liệu</button></div>}
+                                {gearOpen && <div className="psr-gear-menu"><button type="button" onClick={() => window.print()}><i className="fa fa-print" /> {t('rankings.print')}</button><button type="button" onClick={() => apply()}><i className="fa fa-refresh" /> {t('common.refresh')}</button></div>}
                             </div>
-                            <button type="button" className="psr-help" title="Bảng xếp hạng được tính từ dữ liệu contact và đơn chốt thực tế"><i className="fa fa-question-circle" /></button>
+                            <button type="button" className="psr-help" title={t('rankings.help_title')}><i className="fa fa-question-circle" /></button>
                         </div>
                     )}
                     advanced={!collapsed ? (
                         <div className="psr-filter-row">
-                            <PushsaleSelect value={draft.team_leader_id ?? ''} onChange={(value) => { set('team_leader_id', value); set('team_id', ''); }} options={filterOptions.teamLeaders ?? []} placeholder="--Chọn trưởng nhóm--" />
-                            <PushsaleSelect value={draft.team_id ?? ''} onChange={(value) => set('team_id', value)} options={teams} placeholder="--Chọn nhóm--" />
+                            <PushsaleSelect value={draft.team_leader_id ?? ''} onChange={(value) => { set('team_leader_id', value); set('team_id', ''); }} options={filterOptions.teamLeaders ?? []} placeholder={t('reports.pushsale.choose_team_leader')} />
+                            <PushsaleSelect value={draft.team_id ?? ''} onChange={(value) => set('team_id', value)} options={teams} placeholder={t('reports.pushsale.choose_team')} />
                         </div>
                     ) : null}
                     collapsible={false}
@@ -204,9 +210,9 @@ export default function MarketingRanking({ report = {}, filters = {}, filterOpti
                     <Podium items={report.top ?? []} />
                     <RankingTable report={report} />
                     <div className="psr-pagination-row">
-                        <div>Hiển thị {pagination.from ?? 0} - {pagination.to ?? 0} / {pagination.total ?? 0} nhân sự</div>
+                        <div>{t('common.pagination.showing', { from: pagination.from ?? 0, to: pagination.to ?? 0, total: pagination.total ?? 0 })}</div>
                         <PushsalePager current={pagination.current_page} totalPages={pagination.last_page} onPage={(page) => apply({ page })} />
-                        <label>Hiển thị <select value={pagination.per_page ?? 10} onChange={(event) => apply({ page: 1, per_page: event.target.value })}><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option></select> dòng</label>
+                        <label>{t('common.pagination.rows_per_page')} <select value={pagination.per_page ?? 10} onChange={(event) => apply({ page: 1, per_page: event.target.value })}><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></label>
                     </div>
                 </div>
             </section>
