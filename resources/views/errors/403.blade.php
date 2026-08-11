@@ -13,7 +13,12 @@
 @section('vi_hint', 'Kiểm tra lại vai trò hoặc quyền của tài khoản trong hệ thống trước khi thao tác lại.')
 @section('en_hint', 'Please review the role or permission assigned to your account before trying again.')
 
-@section('actions')
-    <a href="{{ route('login') }}" class="btn btn-primary">Về đăng nhập / Back to login</a>
-    <button type="button" class="btn" onclick="history.back()">Quay lại / Go back</button>
+@section('actions_vi')
+    <a href="{{ route('login') }}" class="btn btn-primary">Về đăng nhập</a>
+    <button type="button" class="btn" onclick="history.back()">Quay lại</button>
+@endsection
+
+@section('actions_en')
+    <a href="{{ route('login') }}" class="btn btn-primary">Back to login</a>
+    <button type="button" class="btn" onclick="history.back()">Go back</button>
 @endsection

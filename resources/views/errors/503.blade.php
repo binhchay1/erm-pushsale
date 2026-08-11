@@ -13,7 +13,12 @@
 @section('vi_hint', 'Nếu đây là thời điểm làm việc cao điểm, hãy liên hệ ban quản trị để kiểm tra lịch bảo trì.')
 @section('en_hint', 'If this occurs during working hours, please contact the administrator to verify the maintenance window.')
 
-@section('actions')
-    <a href="{{ url('/') }}" class="btn btn-primary">Về trang chủ / Back to home</a>
-    <button type="button" class="btn" onclick="location.reload()">Tải lại / Reload</button>
+@section('actions_vi')
+    <a href="{{ url('/') }}" class="btn btn-primary">Về trang chủ</a>
+    <button type="button" class="btn" onclick="location.reload()">Tải lại</button>
+@endsection
+
+@section('actions_en')
+    <a href="{{ url('/') }}" class="btn btn-primary">Back to home</a>
+    <button type="button" class="btn" onclick="location.reload()">Reload</button>
 @endsection

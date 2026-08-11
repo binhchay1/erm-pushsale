@@ -2,47 +2,84 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\Reports\BuildDailyReportFactsJob;
-use App\Models\Company;
-use App\Services\Reporting\DailyReportAggregator;
+use App\Jobs\Reports\UpdateDailyFactJob;
+use App\Services\Reporting\SqlMarketingFactAggregator;
+use App\Services\Reporting\ReportFactSyncRangeResolver;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
 class BackfillReportFactsCommand extends Command
 {
     protected $signature = 'reports:backfill-facts
-        {--from= : YYYY-MM-DD}
-        {--to= : YYYY-MM-DD}
+        {--from= : YYYY-MM-DD; omitted = auto-detect earliest DB date}
+        {--to= : YYYY-MM-DD; omitted = auto-detect latest DB date, capped at yesterday}
         {--company= : Company id}
-        {--queue : Dispatch one job per company/day}';
+        {--queue : Dispatch one SQL job per company/day}
+        {--missing-only : Skip days that already have marketing packet facts}
+        {--force : Rebuild even when facts already exist}';
 
-    protected $description = 'Backfill historical daily facts without changing source business records';
+    protected $description = 'Backfill report facts with SQL aggregation, without loading raw rows into PHP memory';
 
-    public function handle(DailyReportAggregator $aggregator): int
+    public function handle(SqlMarketingFactAggregator $aggregator, ReportFactSyncRangeResolver $resolver): int
     {
-        $from = CarbonImmutable::parse($this->option('from') ?: now()->subMonth()->startOfMonth(), config('reporting.timezone'))->startOfDay();
-        $to = CarbonImmutable::parse($this->option('to') ?: yesterday(), config('reporting.timezone'))->startOfDay();
+        $timezone = config('reporting.timezone');
+        $today = CarbonImmutable::now($timezone)->startOfDay();
+        $companyId = $this->option('company') ? (int) $this->option('company') : null;
+        $missingOnly = (bool) $this->option('missing-only') && ! (bool) $this->option('force');
 
-        if ($from->isAfter($to)) {
-            $this->error('--from must be before or equal to --to.');
-            return self::FAILURE;
+        $ranges = $resolver->ranges(
+            companyId: $companyId,
+            from: $this->option('from') ?: null,
+            to: $this->option('to') ?: null,
+            includeToday: false,
+        );
+
+        if ($ranges->isEmpty()) {
+            $this->warn('No historical source data found for backfill.');
+            return self::SUCCESS;
         }
 
-        $companies = Company::query()
-            ->when($this->option('company'), fn ($q) => $q->whereKey($this->option('company')))
-            ->pluck('id');
+        foreach ($ranges as $range) {
+            $company = (int) $range['company_id'];
+            $from = $range['from'];
+            $to = $range['to']->min($today->subDay());
 
-        foreach ($companies as $companyId) {
+            if ($from->isAfter($to)) {
+                continue;
+            }
+
             for ($day = $from; $day->lte($to); $day = $day->addDay()) {
-                if ($this->option('queue')) {
-                    BuildDailyReportFactsJob::dispatch((int) $companyId, $day->toDateString(), true);
-                } else {
-                    $aggregator->rebuild((int) $companyId, $day, true);
+                $date = $day->toDateString();
+
+                if ($missingOnly && $this->hasMarketingFacts($company, $date)) {
+                    $this->line("{$company} {$date} SKIP existing");
+                    continue;
                 }
-                $this->line("{$companyId} {$day->toDateString()} OK");
+
+                if ($this->option('queue')) {
+                    UpdateDailyFactJob::dispatch($company, $date);
+                    $this->line("{$company} {$date} QUEUED");
+                } else {
+                    $result = $aggregator->aggregateDate($date, $company);
+                    $this->line(sprintf(
+                        '%d %s OK marketing=%d packets=%d',
+                        $company,
+                        $date,
+                        (int) $result['marketing_fact_rows'],
+                        (int) $result['marketing_packet_fact_rows'],
+                    ));
+                }
             }
         }
 
         return self::SUCCESS;
+    }
+
+    private function hasMarketingFacts(int $companyId, string $date): bool
+    {
+        return \Illuminate\Support\Facades\DB::table('report_daily_marketing_packet_facts')
+            ->where('company_id', $companyId)
+            ->whereDate('metric_date', $date)
+            ->exists();
     }
 }

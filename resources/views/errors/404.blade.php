@@ -13,7 +13,12 @@
 @section('vi_hint', 'Nếu bạn mở từ menu hệ thống, rất có thể route này đang trỏ sai hoặc chưa được cấu hình hoàn chỉnh.')
 @section('en_hint', 'If you opened this from the system menu, the route may be incorrect or not fully configured yet.')
 
-@section('actions')
-    <a href="{{ route('login') }}" class="btn btn-primary">Về đăng nhập / Back to login</a>
-    <button type="button" class="btn" onclick="history.back()">Quay lại / Go back</button>
+@section('actions_vi')
+    <a href="{{ route('login') }}" class="btn btn-primary">Về đăng nhập</a>
+    <button type="button" class="btn" onclick="history.back()">Quay lại</button>
+@endsection
+
+@section('actions_en')
+    <a href="{{ route('login') }}" class="btn btn-primary">Back to login</a>
+    <button type="button" class="btn" onclick="history.back()">Go back</button>
 @endsection

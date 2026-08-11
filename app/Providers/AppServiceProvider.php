@@ -22,6 +22,9 @@ use App\Models\WarehouseReturnReceiptLine;
 use App\Models\User;
 use App\Observers\ReportAccessScopeObserver;
 use App\Observers\ReportDateObserver;
+use App\Observers\InboundEventObserver;
+use App\Observers\LeadIngestionObserver;
+use App\Observers\OrderObserver;
 use App\Repositories\EloquentOrderRepository;
 use App\Services\Shipping\CarrierRegistry;
 use App\Services\Shipping\Carriers\Generic\GenericCarrier;
@@ -86,6 +89,10 @@ class AppServiceProvider extends ServiceProvider
         foreach ([User::class, Team::class, \App\Models\MarketingSource::class] as $scopeModel) {
             $scopeModel::observe(ReportAccessScopeObserver::class);
         }
+
+        Order::observe(OrderObserver::class);
+        LeadIngestion::observe(LeadIngestionObserver::class);
+        InboundEvent::observe(InboundEventObserver::class);
 
         foreach ([
             Order::class,

@@ -13,7 +13,12 @@
 @section('vi_hint', 'Đây thường là lỗi tạm thời và có thể xử lý ngay bằng cách tải lại trang.')
 @section('en_hint', 'This is usually temporary and can be resolved by reloading the page.')
 
-@section('actions')
-    <a href="{{ route('login') }}" class="btn btn-primary">Đăng nhập / Sign in</a>
-    <button type="button" class="btn" onclick="location.reload()">Tải lại / Reload</button>
+@section('actions_vi')
+    <a href="{{ route('login') }}" class="btn btn-primary">Đăng nhập</a>
+    <button type="button" class="btn" onclick="location.reload()">Tải lại</button>
+@endsection
+
+@section('actions_en')
+    <a href="{{ route('login') }}" class="btn btn-primary">Sign in</a>
+    <button type="button" class="btn" onclick="location.reload()">Reload</button>
 @endsection

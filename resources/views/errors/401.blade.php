@@ -13,7 +13,12 @@
 @section('vi_hint', 'Nếu bạn vừa thao tác xong rồi bị chuyển sang đây, rất có thể phiên đăng nhập đã hết hạn.')
 @section('en_hint', 'If you were redirected here right after an action, your sign-in session likely expired.')
 
-@section('actions')
-    <a href="{{ route('login') }}" class="btn btn-primary">Đăng nhập / Sign in</a>
-    <button type="button" class="btn" onclick="history.back()">Quay lại / Go back</button>
+@section('actions_vi')
+    <a href="{{ route('login') }}" class="btn btn-primary">Đăng nhập</a>
+    <button type="button" class="btn" onclick="location.reload()">Tải lại</button>
+@endsection
+
+@section('actions_en')
+    <a href="{{ route('login') }}" class="btn btn-primary">Sign in</a>
+    <button type="button" class="btn" onclick="location.reload()">Reload</button>
 @endsection

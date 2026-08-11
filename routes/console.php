@@ -8,6 +8,12 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// SQL-level Marketing facts: MySQL aggregates today's hot window; no raw payload rows are loaded into PHP.
+Schedule::command('reports:aggregate-sql --queue')
+    ->everyFiveMinutes()
+    ->withoutOverlapping(10)
+    ->onOneServer();
+
 // Hot window: hôm nay được tổng hợp lại mỗi 5 phút, dashboard vẫn live nhưng không quét toàn bộ lịch sử.
 Schedule::command('reports:aggregate-daily --queue')
     ->everyFiveMinutes()
@@ -41,6 +47,7 @@ Schedule::command('reports:verify-facts --days=14 --queue')
     ->timezone(config('reporting.timezone'))
     ->withoutOverlapping(60)
     ->onOneServer();
+
 
 // Archive theo NĂM (*_YYYY), không theo tháng — tránh nhân bảng khi data còn nhỏ.
 // Lịch 03/01 04:30: tránh đụng mysqldump 02:00 hàng ngày trên server.

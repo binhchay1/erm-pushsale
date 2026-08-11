@@ -94,7 +94,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 $status = 419;
             }
 
-            if (! in_array($status, [401, 403, 404, 419, 429, 500, 503], true)) {
+            if (! in_array($status, [400, 401, 403, 404, 405, 410, 419, 429, 500, 503], true)) {
                 if ($status < 500 || config('app.debug')) {
                     return null;
                 }

@@ -13,7 +13,12 @@
 @section('vi_hint', 'Nếu bạn đang import hoặc đồng bộ dữ liệu, hãy thử lại sau ít phút.')
 @section('en_hint', 'If you are importing or syncing data, please retry after a short wait.')
 
-@section('actions')
-    <a href="{{ url('/') }}" class="btn btn-primary">Về trang chủ / Back to home</a>
-    <button type="button" class="btn" onclick="location.reload()">Thử lại / Retry</button>
+@section('actions_vi')
+    <a href="{{ url('/') }}" class="btn btn-primary">Về trang chủ</a>
+    <button type="button" class="btn" onclick="location.reload()">Thử lại</button>
+@endsection
+
+@section('actions_en')
+    <a href="{{ url('/') }}" class="btn btn-primary">Back to home</a>
+    <button type="button" class="btn" onclick="location.reload()">Retry</button>
 @endsection

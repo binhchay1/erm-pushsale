@@ -8,7 +8,7 @@ class ReportDailyClosure extends Model
 {
     protected $fillable = [
         'company_id', 'metric_date', 'status', 'revision', 'lead_rows', 'order_rows',
-        'product_rows', 'cashflow_rows', 'inventory_rows', 'source_checksum', 'facts_checksum',
+        'marketing_packet_rows', 'product_rows', 'cashflow_rows', 'inventory_rows', 'source_checksum', 'facts_checksum',
         'source_watermark_at', 'last_rebuilt_at', 'finalized_at', 'last_error',
     ];
 

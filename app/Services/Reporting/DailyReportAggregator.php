@@ -57,12 +57,13 @@ class DailyReportAggregator
                 $this->deleteExisting($companyId, $day);
 
                 $leadRows = $this->aggregateLeads($companyId, $day);
+                $marketingPacketRows = $this->aggregateMarketingRawPackets($companyId, $day);
                 $orderRows = $this->aggregateOrders($companyId, $day);
                 $productRows = $this->aggregateProducts($companyId, $day);
                 $cashflowRows = $this->aggregateCashflow($companyId, $day);
                 $inventoryRows = $this->aggregateInventory($companyId, $day);
 
-                return compact('leadRows', 'orderRows', 'productRows', 'cashflowRows', 'inventoryRows');
+                return compact('leadRows', 'marketingPacketRows', 'orderRows', 'productRows', 'cashflowRows', 'inventoryRows');
             }, 3);
 
             $sourceChecksum = $this->sourceChecksum($companyId, $day);
@@ -78,6 +79,7 @@ class DailyReportAggregator
                 'status' => $finalize ? 'closed' : 'open',
                 'revision' => ((int) $closure->revision) + 1,
                 'lead_rows' => $result['leadRows'],
+                'marketing_packet_rows' => $result['marketingPacketRows'],
                 'order_rows' => $result['orderRows'],
                 'product_rows' => $result['productRows'],
                 'cashflow_rows' => $result['cashflowRows'],
@@ -122,6 +124,7 @@ class DailyReportAggregator
     {
         foreach ([
             'report_daily_lead_facts',
+            'report_daily_marketing_packet_facts',
             'report_daily_order_facts',
             'report_daily_product_facts',
             'report_daily_cashflow_facts',
@@ -132,6 +135,12 @@ class DailyReportAggregator
                 ->whereDate('metric_date', $day->toDateString())
                 ->delete();
         }
+    }
+
+
+    private function aggregateMarketingRawPackets(int $companyId, CarbonImmutable $day): int
+    {
+        return app(SqlMarketingFactAggregator::class)->aggregateMarketingPacketFactsDate($day, $companyId);
     }
 
     private function aggregateLeads(int $companyId, CarbonImmutable $day): int
@@ -194,9 +203,16 @@ class DailyReportAggregator
                 ->selectRaw('COALESCE(o.landing_connection_id, 0) as landing_connection_id')
                 ->selectRaw('COALESCE(o.warehouse_id, 0) as warehouse_id')
                 ->selectRaw("{$provider} as shipping_provider")
+                ->selectRaw("COALESCE(o.shipping_method, '') as shipping_method")
+                ->selectRaw("CASE WHEN COALESCE(o.is_returning_customer, 0) = 1 THEN 'old' ELSE 'new' END as customer_type")
+                ->selectRaw("CASE WHEN COALESCE(o.is_duplicate_phone, 0) = 1 THEN 'duplicate' ELSE 'unique' END as duplicate_phone_status")
+                ->selectRaw("COALESCE(o.warehouse_care_status, '') as warehouse_care_status")
+                ->selectRaw("CASE WHEN o.printed_at IS NULL THEN 'not_printed' ELSE 'printed' END as printed_status")
+                ->selectRaw("CASE WHEN COALESCE(o.deposit, 0) > 0 THEN 'with_deposit' ELSE 'without_deposit' END as deposit_status")
                 ->selectRaw("COALESCE(o.delivery_status, '') as delivery_status")
                 ->selectRaw("COALESCE(o.reconciliation_status, '') as reconciliation_status")
                 ->selectRaw("COALESCE(o.operation_stage, '') as operation_stage")
+                ->selectRaw("COALESCE(o.operation_result, '') as operation_result")
                 ->selectRaw("COALESCE(o.closing_status, '') as closing_status")
                 ->selectRaw('COUNT(*) as order_count')
                 ->selectRaw('SUM(CASE WHEN o.closed_at IS NOT NULL THEN 1 ELSE 0 END) as closed_order_count')
@@ -224,8 +240,9 @@ class DailyReportAggregator
                 ->selectRaw("SUM(COALESCE(o.settled_cod_amount, 0) + COALESCE(o.deposit, 0) - ({$shippingCost})) as net_cashflow")
                 ->groupBy([
                     'o.sale_user_id', 'o.marketer_user_id', 'o.team_id', 'o.marketing_source_id',
-                    'o.landing_connection_id', 'o.warehouse_id',
-                    'o.delivery_status', 'o.reconciliation_status', 'o.operation_stage', 'o.closing_status',
+                    'o.landing_connection_id', 'o.warehouse_id', 'o.shipping_method',
+                    'o.is_returning_customer', 'o.is_duplicate_phone', 'o.warehouse_care_status', 'o.printed_at',
+                    'o.delivery_status', 'o.reconciliation_status', 'o.operation_stage', 'o.operation_result', 'o.closing_status',
                 ])
                 ->groupByRaw($provider)
                 ->get()
@@ -237,8 +254,9 @@ class DailyReportAggregator
 
             $inserted += $this->insertFactRows('report_daily_order_facts', $companyId, $day, $rows, [
                 'date_basis', 'sale_user_id', 'marketer_user_id', 'team_id', 'marketing_source_id',
-                'landing_connection_id', 'warehouse_id', 'shipping_provider', 'delivery_status',
-                'reconciliation_status', 'operation_stage', 'closing_status',
+                'landing_connection_id', 'warehouse_id', 'shipping_provider', 'shipping_method',
+                'customer_type', 'duplicate_phone_status', 'warehouse_care_status', 'printed_status', 'deposit_status',
+                'delivery_status', 'reconciliation_status', 'operation_stage', 'operation_result', 'closing_status',
             ], ['date_basis' => $dateBasis]);
         }
 
@@ -256,9 +274,11 @@ class DailyReportAggregator
         foreach ($this->orderDateBases() as $dateBasis => $column) {
             $rows = DB::table('order_items as oi')
                 ->join('orders as o', 'o.id', '=', 'oi.order_id')
+                ->leftJoin('products as p', 'p.id', '=', 'oi.product_id')
                 ->where('o.company_id', $companyId)
                 ->whereBetween("o.{$column}", [$day, $day->endOfDay()])
                 ->selectRaw('COALESCE(oi.product_id, 0) as product_id')
+                ->selectRaw('COALESCE(p.parent_id, 0) as parent_product_id')
                 ->selectRaw('COALESCE(o.sale_user_id, 0) as sale_user_id')
                 ->selectRaw('COALESCE(o.marketer_user_id, 0) as marketer_user_id')
                 ->selectRaw('COALESCE(o.team_id, 0) as team_id')
@@ -278,7 +298,7 @@ class DailyReportAggregator
                 ->selectRaw('SUM(COALESCE(oi.cost_price, 0) * COALESCE(oi.quantity, 0)) as cost_of_goods')
                 ->selectRaw("SUM(CASE WHEN o.delivery_status IN ({$eligible}) THEN {$lineNet} ELSE 0 END) as recognized_revenue")
                 ->groupBy([
-                    'oi.product_id', 'o.sale_user_id', 'o.marketer_user_id', 'o.team_id',
+                    'oi.product_id', 'p.parent_id', 'o.sale_user_id', 'o.marketer_user_id', 'o.team_id',
                     'o.marketing_source_id', 'o.landing_connection_id', 'o.warehouse_id',
                     'oi.origin', 'o.delivery_status', 'o.reconciliation_status',
                 ])
@@ -292,7 +312,7 @@ class DailyReportAggregator
                 });
 
             $inserted += $this->insertFactRows('report_daily_product_facts', $companyId, $day, $rows, [
-                'date_basis', 'product_id', 'sale_user_id', 'marketer_user_id', 'team_id',
+                'date_basis', 'product_id', 'parent_product_id', 'sale_user_id', 'marketer_user_id', 'team_id',
                 'marketing_source_id', 'landing_connection_id', 'warehouse_id', 'item_origin',
                 'is_upsell', 'delivery_status', 'reconciliation_status',
             ], ['date_basis' => $dateBasis]);
@@ -435,7 +455,7 @@ class DailyReportAggregator
             $record['updated_at'] = $now;
 
             foreach ($record as $key => $value) {
-                if (is_numeric($value) && ! in_array($key, ['shipping_provider', 'delivery_status', 'status', 'platform', 'packet_type', 'date_basis', 'event_basis', 'operation_stage', 'closing_status', 'reconciliation_status', 'item_origin', 'movement_type'], true)) {
+                if (is_numeric($value) && ! in_array($key, ['shipping_provider', 'shipping_method', 'delivery_status', 'status', 'platform', 'packet_type', 'date_basis', 'event_basis', 'operation_stage', 'operation_result', 'closing_status', 'reconciliation_status', 'item_origin', 'movement_type', 'customer_type', 'duplicate_phone_status', 'warehouse_care_status', 'printed_status', 'deposit_status'], true)) {
                     $record[$key] = (int) $value;
                 }
             }
@@ -472,6 +492,76 @@ class DailyReportAggregator
         }
 
         return count($payload);
+    }
+
+
+    /** @return array<string,mixed> */
+    private function decodePayload(mixed $payload): array
+    {
+        if (is_array($payload)) {
+            return $payload;
+        }
+        if (is_string($payload) && $payload !== '') {
+            $decoded = json_decode($payload, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+        return [];
+    }
+
+    /** @param array<string,mixed> $payload @param list<string> $keys */
+    private function packetPayloadText(array $payload, array $keys): string
+    {
+        foreach ($keys as $key) {
+            $value = data_get($payload, $key);
+            if (is_scalar($value) && trim((string) $value) !== '') {
+                return trim((string) $value);
+            }
+        }
+
+        return '';
+    }
+
+    /** @param array<string,mixed> $payload */
+    private function packetPhone(array $payload): string
+    {
+        $raw = $this->packetPayloadText($payload, ['phone', 'customer_phone', 'sdt', 'Số điện thoại', 'số điện thoại', 'form.phone']);
+        $digits = preg_replace('/\D+/', '', $raw) ?? '';
+
+        return $digits !== '' ? mb_substr($digits, 0, 20) : '';
+    }
+
+    /** @param array<string,mixed> $payload */
+    private function urlQueryValue(array $payload, string $key): string
+    {
+        $url = $this->packetPayloadText($payload, ['url_page', 'link', 'url', 'source_url', 'page_url', 'landing_url']);
+        if ($url === '') {
+            return '';
+        }
+
+        $query = parse_url($url, PHP_URL_QUERY);
+        if (! is_string($query) || $query === '') {
+            return '';
+        }
+
+        parse_str($query, $params);
+        $value = $params[$key] ?? '';
+
+        return is_scalar($value) ? trim((string) $value) : '';
+    }
+
+    /** @param array<string,mixed> $payload */
+    private function isMarketingUpsalePacket(array $payload, string $sourceType): bool
+    {
+        $normalizedSourceType = strtolower($sourceType);
+        if (in_array($normalizedSourceType, ['upsell', 'upsale', 'supplement', 'thank_you'], true)) {
+            return true;
+        }
+
+        $payloadType = strtolower($this->packetPayloadText($payload, ['item_type', 'landing_source_type']));
+        $isUpsell = strtolower($this->packetPayloadText($payload, ['is_upsell', 'is_upsale']));
+
+        return in_array($payloadType, ['upsell', 'upsale', 'late_upsell', 'late_upsale'], true)
+            || in_array($isUpsell, ['1', 'true', 'yes', 'on'], true);
     }
 
     /** @return array<string,mixed> */
@@ -517,6 +607,13 @@ class DailyReportAggregator
                     ->where('li.company_id', $companyId)
                     ->whereBetween('li.created_at', [$day, $day->endOfDay()]),
                 'li.id', 'li.updated_at',
+            ],
+            'inbound_events_landing' => [
+                DB::table('inbound_events as ie')
+                    ->where('ie.company_id', $companyId)
+                    ->where('ie.source', 'landing_webhook')
+                    ->whereBetween('ie.created_at', [$day, $day->endOfDay()]),
+                'ie.id', 'ie.updated_at',
             ],
             'orders' => [
                 $this->whereAnyDate(
@@ -584,6 +681,7 @@ class DailyReportAggregator
         $hash = hash_init('sha256');
         foreach ([
             'report_daily_lead_facts',
+            'report_daily_marketing_packet_facts',
             'report_daily_order_facts',
             'report_daily_product_facts',
             'report_daily_cashflow_facts',

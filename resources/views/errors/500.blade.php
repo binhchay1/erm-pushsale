@@ -13,7 +13,12 @@
 @section('vi_hint', 'Bạn không cần gửi mã log. Chỉ cần báo lại trang đang thao tác và thời điểm lỗi xảy ra cho ban quản trị.')
 @section('en_hint', 'You do not need to send raw logs. Just report the page and the time of the issue to the administrator.')
 
-@section('actions')
-    <a href="{{ route('login') }}" class="btn btn-primary">Về đăng nhập / Back to login</a>
-    <button type="button" class="btn" onclick="location.reload()">Tải lại / Reload</button>
+@section('actions_vi')
+    <a href="{{ route('login') }}" class="btn btn-primary">Về đăng nhập</a>
+    <button type="button" class="btn" onclick="location.reload()">Tải lại</button>
+@endsection
+
+@section('actions_en')
+    <a href="{{ route('login') }}" class="btn btn-primary">Back to login</a>
+    <button type="button" class="btn" onclick="location.reload()">Reload</button>
 @endsection

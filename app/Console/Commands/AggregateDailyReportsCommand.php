@@ -39,10 +39,11 @@ class AggregateDailyReportsCommand extends Command
 
             $result = $aggregator->rebuild((int) $companyId, $date, (bool) $this->option('close'));
             $this->line(sprintf(
-                'Company %d %s: lead=%d order=%d product=%d cashflow=%d inventory=%d [%s]',
+                'Company %d %s: lead=%d raw_packet=%d order=%d product=%d cashflow=%d inventory=%d [%s]',
                 $companyId,
                 $date,
                 $result['leadRows'],
+                $result['marketingPacketRows'] ?? 0,
                 $result['orderRows'],
                 $result['productRows'],
                 $result['cashflowRows'],

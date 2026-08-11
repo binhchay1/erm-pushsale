@@ -37,6 +37,7 @@ class PushsaleMarketingDashboardService
 
     public function __construct(
         private readonly MarketingBudgetService $budgetService,
+        private readonly MarketingDashboardRawPacketStore $rawPacketStore,
     ) {}
 
     /** @return array<string, mixed> */
@@ -58,7 +59,7 @@ class PushsaleMarketingDashboardService
             ->values();
 
         $landingSourceMeta = $this->landingSourceMeta($allSourceIds);
-        $rawPackets = $this->rawPacketQuery($filter, $landingSourceMeta->keys())->get();
+        $rawPackets = $this->rawPacketStore->aggregates($filter, $landingSourceMeta->keys());
         $ingestions = $this->ingestionQuery($filter, $allSourceIds)->get();
         $orders = $this->orderQuery($filter, $allSourceIds)->get();
         $dailyMetrics = $this->dailyMetricQuery($filter, $allSourceIds)->get();
@@ -283,7 +284,7 @@ class PushsaleMarketingDashboardService
         );
 
         $landingSourceMeta = $this->landingSourceMeta($sourceIds);
-        $rawPackets = $this->rawPacketQuery($chartFilter, $landingSourceMeta->keys())->get();
+        $rawPackets = $this->rawPacketStore->aggregates($chartFilter, $landingSourceMeta->keys());
         $metrics = $this->dailyMetricQuery($chartFilter, $sourceIds)->get();
         $ingestions = $this->ingestionQuery($chartFilter, $sourceIds)->get();
         $orders = $this->orderQuery($chartFilter, $sourceIds)->get();
@@ -293,8 +294,8 @@ class PushsaleMarketingDashboardService
             ->map(function (Carbon $day) use ($rawPackets, $landingSourceMeta, $metrics, $ingestions, $orders, $orderUtm, $utmSource, $utmCampaign): array {
                 $metricDay = $metrics->filter(fn (MarketingSourceDailyMetric $item): bool => $item->metric_date->isSameDay($day))
                     ->filter(fn (MarketingSourceDailyMetric $item): bool => $this->utmMatches($item->utm_source, $item->utm_campaign, $utmSource, $utmCampaign));
-                $rawDay = $rawPackets->filter(fn (InboundEvent $item): bool => $item->created_at?->isSameDay($day) ?? false)
-                    ->filter(fn (InboundEvent $item): bool => $this->utmMatches($this->rawPacketUtmSource($item), $this->rawPacketUtmCampaign($item), $utmSource, $utmCampaign));
+                $rawDay = $rawPackets->filter(fn (object $item): bool => (string) ($item->metric_date ?? '') === $day->toDateString())
+                    ->filter(fn (object $item): bool => $this->utmMatches((string) ($item->utm_source ?? ''), (string) ($item->utm_campaign ?? ''), $utmSource, $utmCampaign));
                 $ingestionDay = $ingestions->filter(fn (LeadIngestion $item): bool => $item->created_at?->isSameDay($day) ?? false)
                     ->filter(fn (LeadIngestion $item): bool => $this->utmMatches((string) $item->utm_source, (string) $item->utm_campaign, $utmSource, $utmCampaign));
                 $orderDay = $orders->filter(fn (Order $item): bool => ($item->closed_at ?? $item->data_arrived_at ?? $item->created_at)?->isSameDay($day) ?? false)
@@ -306,15 +307,15 @@ class PushsaleMarketingDashboardService
                     ));
 
                 if ($landingSourceMeta->isNotEmpty()) {
-                    $baseContacts = $rawDay->filter(fn (InboundEvent $item): bool => ! $this->isRawUpsale($item, $landingSourceMeta))->count();
-                    $upsaleContacts = $rawDay->filter(fn (InboundEvent $item): bool => $this->isRawUpsale($item, $landingSourceMeta))->count();
+                    $baseContacts = (int) $rawDay->sum(fn (object $item): int => (int) ($item->primary_packet_count ?? 0));
+                    $upsaleContacts = (int) $rawDay->sum(fn (object $item): int => (int) ($item->upsale_packet_count ?? 0));
                 } else {
                     $baseContacts = $ingestionDay->filter(fn (LeadIngestion $item): bool => ! MarketingPacketMetrics::isUpsale($item))->count();
                     $upsaleContacts = $ingestionDay->filter(fn (LeadIngestion $item): bool => MarketingPacketMetrics::isUpsale($item))->count();
                 }
                 $validContacts = $ingestionDay->count();
                 $rawBreakdown = $landingSourceMeta->isNotEmpty()
-                    ? $this->rawPacketBreakdown($rawDay, $validContacts)
+                    ? $this->rawAggregateBreakdown($rawDay, $validContacts)
                     : [
                         'uniquePhones' => $ingestionDay->pluck('customer_phone')->filter()->unique()->count(),
                         'duplicatePackets' => 0,
@@ -975,13 +976,13 @@ class PushsaleMarketingDashboardService
         $pairs = collect();
         $sourceIdLookup = $sourceIds->mapWithKeys(fn (int $id): array => [$id => true]);
 
-        $rawPackets->each(function (InboundEvent $item) use ($pairs, $landingSourceMeta, $sourceIdLookup): void {
-            $marketingSourceId = $this->rawMarketingSourceId($item, $landingSourceMeta);
+        $rawPackets->each(function (object $item) use ($pairs, $sourceIdLookup): void {
+            $marketingSourceId = (int) ($item->marketing_source_id ?? 0);
             if (! $marketingSourceId || ! $sourceIdLookup->has($marketingSourceId)) {
                 return;
             }
 
-            $pairs->push(['utm_source' => $this->rawPacketUtmSource($item), 'utm_campaign' => $this->rawPacketUtmCampaign($item)]);
+            $pairs->push(['utm_source' => (string) ($item->utm_source ?? ''), 'utm_campaign' => (string) ($item->utm_campaign ?? '')]);
         });
         $ingestions->whereIn('marketing_source_id', $sourceIds)->each(function (LeadIngestion $item) use ($pairs): void {
             $pairs->push(['utm_source' => trim((string) $item->utm_source), 'utm_campaign' => trim((string) $item->utm_campaign)]);
@@ -1021,8 +1022,8 @@ class PushsaleMarketingDashboardService
     ): array {
         $sourceIdLookup = $sourceIds->mapWithKeys(fn (int $id): array => [$id => true]);
         $rawSet = $rawPackets
-            ->filter(fn (InboundEvent $item): bool => $sourceIdLookup->has($this->rawMarketingSourceId($item, $landingSourceMeta)))
-            ->filter(fn (InboundEvent $item): bool => $this->utmMatches($this->rawPacketUtmSource($item), $this->rawPacketUtmCampaign($item), $utmSource, $utmCampaign));
+            ->filter(fn (object $item): bool => $sourceIdLookup->has((int) ($item->marketing_source_id ?? 0)))
+            ->filter(fn (object $item): bool => $this->utmMatches((string) ($item->utm_source ?? ''), (string) ($item->utm_campaign ?? ''), $utmSource, $utmCampaign));
         $ingestionSet = $ingestions->whereIn('marketing_source_id', $sourceIds)
             ->filter(fn (LeadIngestion $item): bool => $this->utmMatches((string) $item->utm_source, (string) $item->utm_campaign, $utmSource, $utmCampaign));
         $orderSet = $orders->whereIn('marketing_source_id', $sourceIds)
@@ -1038,10 +1039,10 @@ class PushsaleMarketingDashboardService
         $validContacts = $ingestionSet->count();
         $usesRawPackets = $landingSourceMeta->contains(fn (array $meta): bool => $sourceIdLookup->has((int) ($meta['marketing_source_id'] ?? 0)));
         if ($usesRawPackets) {
-            $baseContacts = $rawSet->filter(fn (InboundEvent $item): bool => ! $this->isRawUpsale($item, $landingSourceMeta))->count();
-            $upsaleContacts = $rawSet->filter(fn (InboundEvent $item): bool => $this->isRawUpsale($item, $landingSourceMeta))->count();
-            $contacts = $baseContacts + $upsaleContacts;
-            $rawBreakdown = $this->rawPacketBreakdown($rawSet, $validContacts);
+            $baseContacts = (int) $rawSet->sum(fn (object $item): int => (int) ($item->primary_packet_count ?? 0));
+            $upsaleContacts = (int) $rawSet->sum(fn (object $item): int => (int) ($item->upsale_packet_count ?? 0));
+            $contacts = (int) $rawSet->sum(fn (object $item): int => (int) ($item->packet_count ?? 0));
+            $rawBreakdown = $this->rawAggregateBreakdown($rawSet, $validContacts);
             $uniquePhones = $rawBreakdown['uniquePhones'];
             $duplicatePackets = $rawBreakdown['duplicatePackets'];
             $reconciliationPackets = $rawBreakdown['reconciliationPackets'];
@@ -1087,9 +1088,9 @@ class PushsaleMarketingDashboardService
         $productQuantity = (int) $closedOrderSet->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
         $grossRevenue = (int) $closedOrderSet->sum(fn (Order $order): int => max((int) $order->subtotal, $order->items->sum(fn ($item) => (int) $item->quantity * (int) $item->unit_price)));
         $netRevenue = (int) $closedOrderSet->sum(fn (Order $order): int => $order->effectiveRevenue());
-        $utmMedium = $level >= 3 ? ($usesRawPackets ? $this->summarizeRawPayloadUtm($rawSet, 'utm_medium') : $this->summarizePayloadUtm($ingestionSet, 'utm_medium')) : '';
-        $utmTerm = $level >= 3 ? ($usesRawPackets ? $this->summarizeRawPayloadUtm($rawSet, 'utm_term') : $this->summarizePayloadUtm($ingestionSet, 'utm_term')) : '';
-        $utmContent = $level >= 3 ? ($usesRawPackets ? $this->summarizeRawPayloadUtm($rawSet, 'utm_content') : $this->summarizePayloadUtm($ingestionSet, 'utm_content')) : '';
+        $utmMedium = $level >= 3 ? ($usesRawPackets ? $this->summarizeRawAggregateUtm($rawSet, 'utm_medium') : $this->summarizePayloadUtm($ingestionSet, 'utm_medium')) : '';
+        $utmTerm = $level >= 3 ? ($usesRawPackets ? $this->summarizeRawAggregateUtm($rawSet, 'utm_term') : $this->summarizePayloadUtm($ingestionSet, 'utm_term')) : '';
+        $utmContent = $level >= 3 ? ($usesRawPackets ? $this->summarizeRawAggregateUtm($rawSet, 'utm_content') : $this->summarizePayloadUtm($ingestionSet, 'utm_content')) : '';
 
         return [
             'id' => $source->id,
@@ -1127,6 +1128,44 @@ class PushsaleMarketingDashboardService
             'revenueAfterDiscount' => $netRevenue,
             'budgetRevenueRatio' => $grossRevenue > 0 ? round($budget / $grossRevenue * 100, 2) : 0,
             'budgetNetRevenueRatio' => $netRevenue > 0 ? round($budget / $netRevenue * 100, 2) : 0,
+        ];
+    }
+
+
+    /** @param Collection<int,object> $rawPackets */
+    private function summarizeRawAggregateUtm(Collection $rawPackets, string $key): string
+    {
+        $values = $rawPackets
+            ->map(fn (object $packet): string => trim((string) ($packet->{$key} ?? '')))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($values->count() <= 1) {
+            return (string) ($values->first() ?? '');
+        }
+
+        return $values->take(2)->implode(', ').($values->count() > 2 ? ' +'.($values->count() - 2) : '');
+    }
+
+    /** @param Collection<int,object> $rawPackets @return array{uniquePhones: int, duplicatePackets: int, reconciliationPackets: int, rejectedPackets: int, failedPackets: int, noPhonePackets: int} */
+    private function rawAggregateBreakdown(Collection $rawPackets, int $validContacts): array
+    {
+        $total = (int) $rawPackets->sum(fn (object $packet): int => (int) ($packet->packet_count ?? 0));
+        $uniquePhones = (int) $rawPackets->sum(fn (object $packet): int => (int) ($packet->unique_phone_count ?? 0));
+        $duplicatePackets = (int) $rawPackets->sum(fn (object $packet): int => (int) ($packet->duplicate_packet_count ?? 0));
+        $rejectedPackets = (int) $rawPackets->sum(fn (object $packet): int => (int) ($packet->rejected_count ?? 0));
+        $failedPackets = (int) $rawPackets->sum(fn (object $packet): int => (int) ($packet->failed_count ?? 0));
+        $noPhonePackets = (int) $rawPackets->sum(fn (object $packet): int => (int) ($packet->no_phone_count ?? 0));
+        $reconciliationPackets = max(0, $total - $validContacts - $duplicatePackets);
+
+        return [
+            'uniquePhones' => $uniquePhones,
+            'duplicatePackets' => $duplicatePackets,
+            'reconciliationPackets' => $reconciliationPackets,
+            'rejectedPackets' => $rejectedPackets,
+            'failedPackets' => $failedPackets,
+            'noPhonePackets' => $noPhonePackets,
         ];
     }
 

@@ -8,6 +8,10 @@ return [
     'close_delay_minutes' => (int) env('REPORTING_CLOSE_DELAY_MINUTES', 20),
     'snapshot_live_ttl_seconds' => (int) env('REPORTING_SNAPSHOT_LIVE_TTL_SECONDS', 300),
     'snapshot_history_ttl_days' => (int) env('REPORTING_SNAPSHOT_HISTORY_TTL_DAYS', 730),
+    // Historical facts are rebuilt by SQL aggregation for the exact dirty day/company only.
+    // Keep live fallback bounded so many users cannot trigger full raw-table scans at once.
+    'max_live_fallback_days' => (int) env('REPORTING_MAX_LIVE_FALLBACK_DAYS', 2),
+    'max_detail_live_days' => (int) env('REPORTING_MAX_DETAIL_LIVE_DAYS', 7),
     'archive' => [
         // Hot tables stay in place. Physical copies are yearly (*_YYYY) so we do not
         // multiply schema/tables while data volume is still modest (NVMe + RAM OK).

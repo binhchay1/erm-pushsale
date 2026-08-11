@@ -192,3 +192,39 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 - Seeded the bridge from the typed VI/EN locale dictionaries and added broad business UI phrase coverage for Admin, Sales, Warehouse, Marketing, Customer, HR, Ecommerce, Accounting and system settings screens.
 - Added decorated/dynamic text handling for required labels, colon labels, numbered headings, record/row counters, and common `Nhập/Tìm/Chọn ...` patterns while keeping business data names untouched unless an exact known UI phrase matches.
 - Patched browser alert/confirm/prompt messages through the same deterministic dictionary so legacy JS messages are localized in English mode.
+
+## 2026-08-12 - Error pages + marketing raw daily facts
+
+- Reworked HTTP/React error pages to use a full-screen donut illustration layout with locale-specific i18n text instead of bilingual copy on the same screen.
+- Hidden browser/client error stack details from production-facing error UI.
+- Added Blade fallback pages for 400, 401, 403, 404, 405, 410, 419, 429, 500 and 503.
+- Added `report_daily_marketing_packet_facts` to aggregate landing raw packets by day/source/UTM/status.
+- Extended `reports:aggregate-daily` so Marketing raw packet counts are built with daily facts.
+- Updated Marketing Dashboard to read historical raw packet counts from daily facts and only query live inbound events for open/current days.
+
+## 2026-08-12 - Report dimension fact coverage hardening
+
+- Clarified the reporting contract: historical dashboards must use daily facts keyed by date plus all analytical filter dimensions, not date-only totals.
+- Added `config/reporting_dimensions.php` and `ReportFactCoverage` to document and audit fact-family dimensions/metrics for Marketing packets, Leads, Orders, Products, Cashflow and Inventory.
+- Added `reports:audit-fact-coverage` for production verification after migration/backfill.
+- Expanded order/product fact dimensions for customer type, duplicate phone status, shipping method, operation result, warehouse care status, printed/deposit status and parent product filters.
+- Added coverage indexes for fact tables and live-window operational tables to reduce long-range filter/query pressure.
+- Changed Marketing raw packet live fallback from eager `get()` to `lazyById()` chunking so missing historical facts do not load whole inbound payload ranges into memory.
+- Tuned error-page sizing so locale-specific donut error pages remain full-screen and balanced instead of squeezing the copy column.
+
+## 2026-08-12 - Full DB reporting fact sync
+
+- Added `reports:sync-all-facts` to auto-detect the full business-data date range per company and rebuild/queue fact days without requiring manual `--from`.
+- Added `ReportFactSyncRangeResolver` to scan source tables/columns that affect reports.
+- Added daily missing-only safety-net schedule at 02:30.
+- Added bounded missing-fact fallback: small gaps can live fallback, large gaps queue rebuilds and avoid raw full-range scans under concurrent report users.
+- Updated `reports:backfill-facts` so omitted `--from/--to` auto-detects all historical DB data.
+
+## 2026-08-12 - SQL-level reporting facts rebuild
+
+- Added `report_daily_marketing_facts` with a composite unique key for `ON DUPLICATE KEY UPDATE` SQL aggregation.
+- Added `SqlMarketingFactAggregator`, using raw `INSERT INTO ... SELECT ... GROUP BY ... ON DUPLICATE KEY UPDATE` statements for marketing facts and marketing landing packet facts.
+- Added `reports:aggregate-sql` for single-day, bounded-range, and one-time full DB history SQL aggregation.
+- Added `UpdateDailyFactJob` and Eloquent observers for `Order`, `LeadIngestion`, and `InboundEvent` to rebuild only affected company/day facts after data mutations.
+- Removed the scheduled `reports:sync-all-facts` full-history scanner.
+- Reworked Marketing dashboard live fallback to run SQL `GROUP BY` aggregates directly in MySQL instead of `lazyById()`/payload loops in PHP.
