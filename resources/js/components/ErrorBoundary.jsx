@@ -67,13 +67,9 @@ export class ErrorBoundary extends Component {
 
     render() {
         if (this.state.error) {
-            const message = this.state.error?.message ?? String(this.state.error ?? 'Unknown error');
-            const stack = this.state.error?.stack ?? '';
-
             return (
                 <ErrorShell
                     status="client"
-                    detail={import.meta.env.DEV ? `${message}${stack ? `\n\n${stack}` : ''}` : message}
                 >
                     <ClientErrorActions onRecover={this.recover} />
                 </ErrorShell>
