@@ -1342,8 +1342,26 @@ html body.pushsale-app-body .ps-sale-order-body {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    overflow: auto !important;
+    /* Visible so searchable selects (Tỉnh/Huyện/Xã, nguồn) are not clipped. */
+    overflow: visible !important;
     background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-sale-order-dialog .ps-order-left-panel {
+    position: relative !important;
+    z-index: 2 !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-sale-order-dialog .ps-order-right-panel {
+    position: relative !important;
+    z-index: 1 !important;
+    overflow: auto !important;
+    max-height: calc(100dvh - 72px) !important;
+}
+
+html body.pushsale-app-body .ps-sale-order-dialog .ps-order-field .ps-select.is-open {
+    z-index: 50 !important;
 }
 
 html body.pushsale-app-body .ps-order-left-panel {

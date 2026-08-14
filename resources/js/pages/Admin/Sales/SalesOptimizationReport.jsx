@@ -1,5 +1,6 @@
-import { Head, useForm } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { Head, router, useForm } from '@inertiajs/react';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
@@ -73,6 +74,8 @@ export default function SalesOptimizationReport({
     const { draft, set, visit } = useInertiaFilters(routeUrl, buildInitialFilters(), { sync: false });
     const [selected, setSelected] = useState([]);
     const [dialog, setDialog] = useState(null);
+    const [receiveDraft, setReceiveDraft] = useState({});
+    const [savingReceive, setSavingReceive] = useState(false);
     const queryFilters = useMemo(() => cleanInertiaFilters({
         ...draft,
         include_saturday: draft.include_saturday ? '1' : '',
@@ -89,6 +92,71 @@ export default function SalesOptimizationReport({
     const search = () => visit({ ...queryFilters, page: 1 });
     const toggleRow = (saleId) => {
         setSelected((current) => (current.includes(saleId) ? current.filter((id) => id !== saleId) : [...current, saleId]));
+    };
+
+    useEffect(() => {
+        setReceiveDraft(Object.fromEntries(
+            rows
+                .filter((row) => row.sale_id)
+                .map((row) => [String(row.sale_id), Boolean(row.receive_data)]),
+        ));
+    }, [rows]);
+
+    const dirtyReceiveRows = useMemo(
+        () => rows.filter((row) => row.sale_id && Boolean(receiveDraft[String(row.sale_id)]) !== Boolean(row.receive_data)),
+        [receiveDraft, rows],
+    );
+    const canSaveReceive = dirtyReceiveRows.length > 0 || selected.length > 0;
+
+    const toggleReceiveDraft = (saleId) => {
+        if (!saleId) return;
+        const key = String(saleId);
+        setReceiveDraft((current) => ({ ...current, [key]: !Boolean(current[key]) }));
+    };
+
+    const saveReceiveData = () => {
+        if (selected.length > 0 && dirtyReceiveRows.length === 0) {
+            setDialog('receive');
+            return;
+        }
+
+        const enableIds = dirtyReceiveRows
+            .filter((row) => Boolean(receiveDraft[String(row.sale_id)]))
+            .map((row) => row.sale_id);
+        const disableIds = dirtyReceiveRows
+            .filter((row) => !Boolean(receiveDraft[String(row.sale_id)]))
+            .map((row) => row.sale_id);
+
+        if (!enableIds.length && !disableIds.length) {
+            setDialog('receive');
+            return;
+        }
+
+        setSavingReceive(true);
+
+        const postBatch = (saleIds, receiveData) => new Promise((resolve, reject) => {
+            router.post('/admin/sales/reports/optimization/receive-data', {
+                sale_ids: saleIds,
+                receive_data: receiveData,
+            }, {
+                preserveScroll: true,
+                onSuccess: resolve,
+                onError: reject,
+            });
+        });
+
+        const chain = Promise.resolve()
+            .then(() => (enableIds.length ? postBatch(enableIds, true) : null))
+            .then(() => (disableIds.length ? postBatch(disableIds, false) : null));
+
+        chain
+            .then(() => {
+                toast.success('Đã cập nhật trạng thái nhận dữ liệu.');
+                setSelected([]);
+                router.reload({ only: ['rows', 'summary'] });
+            })
+            .catch(() => toast.error('Không cập nhật được trạng thái nhận dữ liệu.'))
+            .finally(() => setSavingReceive(false));
     };
 
     return (
@@ -148,7 +216,13 @@ export default function SalesOptimizationReport({
                         <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('targets')}>
                             <i className="fa fa-plus" /> Thiết lập mục tiêu sale
                         </button>
-                        <button type="button" className="btn btn-sm btn-default" disabled={!selected.length} onClick={() => setDialog('receive')}>
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-default"
+                            disabled={!canSaveReceive || savingReceive || receiveForm.processing}
+                            onClick={saveReceiveData}
+                            title={dirtyReceiveRows.length ? `Có ${dirtyReceiveRows.length} thay đổi cần lưu` : (selected.length ? 'Cập nhật các sale đã chọn' : 'Bật/tắt checkbox cột Nhận dữ liệu rồi bấm lưu')}
+                        >
                             <i className="fa fa-gears" /> Cập nhật nhận dữ liệu
                         </button>
                     </div>
@@ -226,7 +300,19 @@ export default function SalesOptimizationReport({
                                         </label>
                                     </td>
                                     <td><SaleNameCell row={row} /></td>
-                                    <td className="text-center">{row.receive_data ? 'Có' : 'Không'}</td>
+                                    <td className="text-center">
+                                        {row.sale_id ? (
+                                            <label className="ps-sales-data-check" title={receiveDraft[String(row.sale_id)] ? 'Đang nhận dữ liệu' : 'Không nhận dữ liệu'}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={Boolean(receiveDraft[String(row.sale_id)])}
+                                                    onChange={() => toggleReceiveDraft(row.sale_id)}
+                                                />
+                                            </label>
+                                        ) : (
+                                            <span>Không</span>
+                                        )}
+                                    </td>
                                     <td className="text-center">{num(row.provisional_revenue)}</td>
                                     <td className="text-center">{num(row.success_revenue)}</td>
                                     <td className="text-center">{num(row.contacts)}</td>

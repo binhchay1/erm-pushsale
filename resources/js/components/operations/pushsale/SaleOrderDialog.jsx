@@ -2,6 +2,7 @@ import { router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { PushsaleSelect } from '@/components/pushsale/PushsaleSelect';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useOrderInteractionLock } from '@/hooks/useOrderInteractionLock';
 import { apiGet } from '@/lib/api';
@@ -104,6 +105,19 @@ function Select({ value, onChange, children, ...props }) {
     return <select className="form-control" value={value ?? ''} onChange={(event) => onChange(event.target.value)} {...props}>{children}</select>;
 }
 
+function toSelectOptions(items = []) {
+    return items
+        .map((item) => {
+            const value = item.value ?? item.code ?? item.id;
+            if (value === null || value === undefined || value === '') return null;
+            return {
+                value: String(value),
+                label: String(item.label ?? item.name ?? value),
+            };
+        })
+        .filter(Boolean);
+}
+
 export function SaleOrderDialog({
     order = null,
     open,
@@ -184,6 +198,10 @@ export function SaleOrderDialog({
         products: productOptions.filter((item) => item.type !== 'combo'),
         combos: productOptions.filter((item) => item.type === 'combo'),
     }), [productOptions]);
+    const sourceSelectOptions = useMemo(() => toSelectOptions(sourceOptions), [sourceOptions]);
+    const provinceSelectOptions = useMemo(() => toSelectOptions(provinces), [provinces]);
+    const districtSelectOptions = useMemo(() => toSelectOptions(districts), [districts]);
+    const wardSelectOptions = useMemo(() => toSelectOptions(wards), [wards]);
 
     const subtotal = useMemo(() => form.items.reduce((sum, item) => (
         sum + numberValue(item.quantity) * numberValue(item.unit_price) - numberValue(item.discount_amount)
@@ -420,16 +438,61 @@ export function SaleOrderDialog({
                 <div className="ps-sale-order-body">
                     {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
                     <section className="ps-order-left-panel">
-                        <div className="ps-order-field ps-full"><FieldLabel required>Nguồn dữ liệu</FieldLabel><Select value={form.marketing_source_id} onChange={(value) => update('marketing_source_id', value)}><option value="">--Chọn nguồn dữ liệu--</option>{sourceOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
+                        <div className="ps-order-field ps-full">
+                            <FieldLabel required>Nguồn dữ liệu</FieldLabel>
+                            <PushsaleSelect
+                                searchable
+                                className="ps-order-search-select"
+                                options={sourceSelectOptions}
+                                value={form.marketing_source_id}
+                                onChange={(value) => update('marketing_source_id', value)}
+                                placeholder="--Chọn nguồn dữ liệu--"
+                                searchPlaceholder="Gõ tên nguồn để tìm..."
+                            />
+                        </div>
                         {order && operationStatusOptions.length ? <div className="ps-order-field ps-full ps-order-result-field"><FieldLabel>Kết quả</FieldLabel><Select value={form.operation_result} onChange={(value) => update('operation_result', value)}><option value="">--Chọn kết quả--</option>{operationStatusOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</Select></div> : null}
                         {order && needsNextOperationAt ? <div className="ps-order-field ps-full ps-order-next-operation-field"><FieldLabel required>Tác nghiệp tiếp</FieldLabel><input className="form-control" type="datetime-local" value={form.next_operation_at} onChange={(event) => update('next_operation_at', event.target.value)} /></div> : null}
                         <div className="ps-order-field"><FieldLabel required>Họ tên khách hàng</FieldLabel><input className="form-control" value={form.name} onChange={(event) => update('name', event.target.value)} /></div>
                         <div className="ps-order-field"><FieldLabel required>Số điện thoại</FieldLabel><input className="form-control" value={form.phone} onChange={(event) => update('phone', event.target.value)} /></div>
                         <div className="ps-order-field ps-full"><FieldLabel>Tin nhắn</FieldLabel><textarea className="form-control" rows={2} maxLength={1000} value={form.message} onChange={(event) => update('message', event.target.value)} /></div>
                         <div className="ps-order-field"><FieldLabel>Số nhà/đường/ngõ/ngách</FieldLabel><input className="form-control" maxLength={200} placeholder="Tìm kiếm (Tối đa 200 ký tự)" value={form.address_detail} onChange={(event) => update('address_detail', event.target.value)} /></div>
-                        <div className="ps-order-field"><FieldLabel>Tỉnh/TP</FieldLabel><Select value={form.province_code} onChange={(value) => { update('province_code', value); update('district_code', ''); update('ward_code', ''); }}><option value="">--Chọn Tỉnh/TP--</option>{provinces.map((item) => <option key={item.code ?? item.id} value={item.code ?? item.id}>{item.name}</option>)}</Select></div>
-                        <div className="ps-order-field"><FieldLabel>Quận/Huyện</FieldLabel><Select value={form.district_code} onChange={(value) => { update('district_code', value); update('ward_code', ''); }} disabled={form.address_mode === 'new'}><option value="">--Chọn Quận/Huyện--</option>{districts.map((item) => <option key={item.code ?? item.id} value={item.code ?? item.id}>{item.name}</option>)}</Select></div>
-                        <div className="ps-order-field"><FieldLabel>Phường/Xã</FieldLabel><Select value={form.ward_code} onChange={(value) => update('ward_code', value)}><option value="">--Chọn Phường/Xã--</option>{wards.map((item) => <option key={item.code ?? item.id} value={item.code ?? item.id}>{item.name}</option>)}</Select></div>
+                        <div className="ps-order-field">
+                            <FieldLabel>Tỉnh/TP</FieldLabel>
+                            <PushsaleSelect
+                                searchable
+                                className="ps-order-search-select"
+                                options={provinceSelectOptions}
+                                value={form.province_code}
+                                onChange={(value) => { update('province_code', value); update('district_code', ''); update('ward_code', ''); }}
+                                placeholder="--Chọn Tỉnh/TP--"
+                                searchPlaceholder="Gõ tỉnh/thành để tìm..."
+                            />
+                        </div>
+                        <div className="ps-order-field">
+                            <FieldLabel>Quận/Huyện</FieldLabel>
+                            <PushsaleSelect
+                                searchable
+                                className="ps-order-search-select"
+                                options={districtSelectOptions}
+                                value={form.district_code}
+                                onChange={(value) => { update('district_code', value); update('ward_code', ''); }}
+                                placeholder="--Chọn Quận/Huyện--"
+                                searchPlaceholder="Gõ quận/huyện để tìm..."
+                                disabled={form.address_mode === 'new'}
+                            />
+                        </div>
+                        <div className="ps-order-field">
+                            <FieldLabel>Phường/Xã</FieldLabel>
+                            <PushsaleSelect
+                                searchable
+                                className="ps-order-search-select"
+                                options={wardSelectOptions}
+                                value={form.ward_code}
+                                onChange={(value) => update('ward_code', value)}
+                                placeholder="--Chọn Phường/Xã--"
+                                searchPlaceholder="Gõ phường/xã để tìm..."
+                            />
+                        </div>
                         <div className="ps-order-field"><FieldLabel>Phương thức giao hàng</FieldLabel><Select value={form.shipping_provider} onChange={(value) => { update('shipping_provider', value); update('shipping_service', ''); update('shipping_method', value || 'Thủ công'); }}><option value="">Thủ công</option>{carrierOptions.map((item) => <option key={item.value ?? item.id} value={item.value ?? item.id}>{item.label ?? item.name}</option>)}</Select></div>
                         <div className="ps-order-field"><FieldLabel>Giao hàng bằng</FieldLabel><Select value={form.shipping_service} onChange={(value) => update('shipping_service', value)}><option value="">Giao hàng thủ công</option>{services.map((item) => <option key={item.value ?? item.code} value={item.value ?? item.code}>{item.label ?? item.name}</option>)}</Select></div>
                         <div className="ps-order-field ps-full"><FieldLabel>Mẫu giao hàng ghi chú</FieldLabel><Select value=""><option value="">--Mẫu ghi chú--</option></Select></div>
@@ -470,9 +533,67 @@ export function SaleOrderDialog({
                                 <tfoot>
                                     <tr><th colSpan={2} className="text-right">Tổng cộng:</th><th>{form.items.reduce((sum, item) => sum + numberValue(item.quantity), 0)}</th><th className="text-right">{money(subtotal + lineDiscount)}</th><th /><th className="text-right">{money(lineDiscount)}</th><th /><th /></tr>
                                     <tr><td colSpan={3} className="text-right">Chiết khấu sản phẩm (v):</td><td className="text-right">{money(lineDiscount)}</td><td colSpan={4} /></tr>
-                                    <tr><td><label><input type="checkbox" checked={manualDiscount} onChange={(event) => setManualDiscount(event.target.checked)} /> Tự nhập CK</label></td><td colSpan={2} className="text-right">Chiết khấu theo đơn (v):</td><td><input className="form-control text-right" type="number" value={form.discount} readOnly={!manualDiscount} onChange={(event) => update('discount', event.target.value)} /></td><td colSpan={4} /></tr>
-                                    <tr><td><label><input type="checkbox" checked={recipientPaysCarrier} onChange={(event) => setRecipientPaysCarrier(event.target.checked)} /> Người nhận trả phí VC trực tiếp cho đơn vị VC</label></td><td colSpan={2} className="text-right">Phí VC thu của khách (v):</td><td><input className="form-control text-right" type="number" value={form.shipping_fee_collected} readOnly={!manualShippingFee && !recipientPaysCarrier} onChange={(event) => update('shipping_fee_collected', event.target.value)} /></td><td colSpan={2}>Phí VC tạm tính:<br /><span className="text-muted">{recipientPaysCarrier ? money(form.shipping_fee_collected) : '0'}</span></td><td colSpan={2} /></tr>
-                                    <tr><td><label><input type="checkbox" checked={manualShippingFee} onChange={(event) => setManualShippingFee(event.target.checked)} /> Tự nhập phí VC thu của khách</label></td><td colSpan={2} className="text-right">Khách đã đặt cọc:</td><td><input className="form-control text-right" type="number" value={form.deposit} onChange={(event) => update('deposit', event.target.value)} /></td><td colSpan={4} /></tr>
+                                    <tr>
+                                        <td>
+                                            <label>
+                                                <input type="checkbox" checked={manualDiscount} onChange={(event) => setManualDiscount(event.target.checked)} /> Tự nhập CK
+                                            </label>
+                                        </td>
+                                        <td colSpan={2} className="text-right">Chiết khấu theo đơn (v):</td>
+                                        <td>
+                                            <input
+                                                className="form-control text-right"
+                                                type="number"
+                                                min="0"
+                                                value={form.discount}
+                                                onChange={(event) => {
+                                                    setManualDiscount(true);
+                                                    update('discount', event.target.value);
+                                                }}
+                                            />
+                                        </td>
+                                        <td colSpan={4} />
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label>
+                                                <input type="checkbox" checked={recipientPaysCarrier} onChange={(event) => setRecipientPaysCarrier(event.target.checked)} /> Người nhận trả phí VC trực tiếp cho đơn vị VC
+                                            </label>
+                                        </td>
+                                        <td colSpan={2} className="text-right">Phí VC thu của khách (v):</td>
+                                        <td>
+                                            <input
+                                                className="form-control text-right"
+                                                type="number"
+                                                min="0"
+                                                value={form.shipping_fee_collected}
+                                                onChange={(event) => {
+                                                    setManualShippingFee(true);
+                                                    update('shipping_fee_collected', event.target.value);
+                                                }}
+                                            />
+                                        </td>
+                                        <td colSpan={2}>Phí VC tạm tính:<br /><span className="text-muted">{recipientPaysCarrier ? money(form.shipping_fee_collected) : '0'}</span></td>
+                                        <td colSpan={2} />
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label>
+                                                <input type="checkbox" checked={manualShippingFee} onChange={(event) => setManualShippingFee(event.target.checked)} /> Tự nhập phí VC thu của khách
+                                            </label>
+                                        </td>
+                                        <td colSpan={2} className="text-right">Khách đã đặt cọc:</td>
+                                        <td>
+                                            <input
+                                                className="form-control text-right"
+                                                type="number"
+                                                min="0"
+                                                value={form.deposit}
+                                                onChange={(event) => update('deposit', event.target.value)}
+                                            />
+                                        </td>
+                                        <td colSpan={4} />
+                                    </tr>
                                     <tr><th colSpan={3} className="text-right">Tổng tiền đơn:</th><th className="text-right">{money(total)}</th><th colSpan={2}>Phải thu của khách:<br /><span className="text-success">{money(collect)}</span></th><th colSpan={2} /></tr>
                                 </tfoot>
                             </table>

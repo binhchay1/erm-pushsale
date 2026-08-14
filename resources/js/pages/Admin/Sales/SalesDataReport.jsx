@@ -1,5 +1,6 @@
-import { Head, useForm } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { Head, router, useForm } from '@inertiajs/react';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
@@ -50,6 +51,8 @@ export default function SalesDataReport({
     });
     const [selected, setSelected] = useState([]);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [receiveDraft, setReceiveDraft] = useState({});
+    const [savingReceive, setSavingReceive] = useState(false);
     const queryFilters = useMemo(() => cleanInertiaFilters(draft), [draft]);
     const totals = summary?.totals || null;
     const form = useForm({ sale_ids: [], receive_data: true });
@@ -58,6 +61,26 @@ export default function SalesDataReport({
             current.includes(saleId) ? current.filter((id) => id !== saleId) : [...current, saleId]
         ));
     };
+
+    useEffect(() => {
+        setReceiveDraft(Object.fromEntries(
+            rows
+                .filter((row) => row.sale_id)
+                .map((row) => [String(row.sale_id), Boolean(row.receive_data)]),
+        ));
+    }, [rows]);
+
+    const dirtyReceiveRows = useMemo(
+        () => rows.filter((row) => row.sale_id && Boolean(receiveDraft[String(row.sale_id)]) !== Boolean(row.receive_data)),
+        [receiveDraft, rows],
+    );
+
+    const toggleReceiveDraft = (saleId) => {
+        if (!saleId) return;
+        const key = String(saleId);
+        setReceiveDraft((current) => ({ ...current, [key]: !Boolean(current[key]) }));
+    };
+
     const submitReceive = (receiveData) => {
         form.transform(() => ({ sale_ids: selected, receive_data: receiveData }));
         form.post('/admin/sales/reports/data/receive-data', {
@@ -67,6 +90,48 @@ export default function SalesDataReport({
                 setSelected([]);
             },
         });
+    };
+
+    const saveReceiveData = () => {
+        if (selected.length > 0 && dirtyReceiveRows.length === 0) {
+            setDialogOpen(true);
+            return;
+        }
+
+        const enableIds = dirtyReceiveRows
+            .filter((row) => Boolean(receiveDraft[String(row.sale_id)]))
+            .map((row) => row.sale_id);
+        const disableIds = dirtyReceiveRows
+            .filter((row) => !Boolean(receiveDraft[String(row.sale_id)]))
+            .map((row) => row.sale_id);
+
+        if (!enableIds.length && !disableIds.length) {
+            setDialogOpen(true);
+            return;
+        }
+
+        setSavingReceive(true);
+        const postBatch = (saleIds, receiveData) => new Promise((resolve, reject) => {
+            router.post('/admin/sales/reports/data/receive-data', {
+                sale_ids: saleIds,
+                receive_data: receiveData,
+            }, {
+                preserveScroll: true,
+                onSuccess: resolve,
+                onError: reject,
+            });
+        });
+
+        Promise.resolve()
+            .then(() => (enableIds.length ? postBatch(enableIds, true) : null))
+            .then(() => (disableIds.length ? postBatch(disableIds, false) : null))
+            .then(() => {
+                toast.success('Đã cập nhật trạng thái nhận dữ liệu.');
+                setSelected([]);
+                router.reload({ only: ['rows', 'summary'] });
+            })
+            .catch(() => toast.error('Không cập nhật được trạng thái nhận dữ liệu.'))
+            .finally(() => setSavingReceive(false));
     };
 
     return (
@@ -92,7 +157,12 @@ export default function SalesDataReport({
                         <>
                             <PushsaleSearchButton onClick={search} label="Tìm kiếm" />
                             <PushsaleExportButton routeUrl={routeUrl} filters={queryFilters} label="Xuất Excel" />
-                            <button type="button" className="btn btn-sm btn-default" disabled={!selected.length} onClick={() => setDialogOpen(true)}>
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-default"
+                                disabled={(!selected.length && !dirtyReceiveRows.length) || savingReceive || form.processing}
+                                onClick={saveReceiveData}
+                            >
                                 <i className="fa fa-gears" /> Cập nhật nhận dữ liệu
                             </button>
                         </>
@@ -170,7 +240,19 @@ export default function SalesDataReport({
                                     <ReportProgressCell value={row.last_month_revenue} fillWhenNoMax />
                                     <ReportProgressCell value={row.this_month_rate} format="percent" />
                                     <ReportProgressCell value={row.this_month_revenue} fillWhenNoMax />
-                                    <td className="text-center">{row.receive_data ? 'Có' : 'Không'}</td>
+                                    <td className="text-center">
+                                        {row.sale_id ? (
+                                            <label className="ps-sales-data-check" title={receiveDraft[String(row.sale_id)] ? 'Đang nhận dữ liệu' : 'Không nhận dữ liệu'}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={Boolean(receiveDraft[String(row.sale_id)])}
+                                                    onChange={() => toggleReceiveDraft(row.sale_id)}
+                                                />
+                                            </label>
+                                        ) : (
+                                            <span>Không</span>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
                             {!rows.length && <TableEmptyRow colSpan={12} />}

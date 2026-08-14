@@ -18,6 +18,7 @@ return [
         '1_3_2' => '2. Combo management',
         '1_4' => '1.4 Shipping integration',
         '1_5' => '1.5 Data allocation',
+        '1_5_1' => '2. Duplicate data log',
         '1_6' => '1.6 Feature settings',
         '1_7' => '1.7 Security',
         '1_7_1' => '1. Login history',

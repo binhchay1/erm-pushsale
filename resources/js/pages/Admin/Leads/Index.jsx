@@ -186,7 +186,7 @@ export default function LeadsIndex({
             : t('pages.leads.allocate_steps');
 
     return (
-        <AppLayout>
+        <AppLayout activeMenuCode={exceptionsOnly ? '1.5.1' : '1.5'}>
             <Head title={t('pages.leads.title')} />
 
             <div className="space-y-6">

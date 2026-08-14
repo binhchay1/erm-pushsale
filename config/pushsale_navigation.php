@@ -104,9 +104,23 @@ return array (
       4 => 
       array (
         'title' => '1.5 Phân bổ data',
-        'url' => '/admin/leads',
-        'area' => 'leads',
-        'code' => '1.5',
+        'children' => 
+        array (
+          0 => 
+          array (
+            'title' => '1. Phân bổ data',
+            'url' => '/admin/leads',
+            'area' => 'leads',
+            'code' => '1.5',
+          ),
+          1 => 
+          array (
+            'title' => '2. Log data trùng',
+            'url' => '/admin/leads/log?bucket=exceptions',
+            'area' => 'leads',
+            'code' => '1.5.1',
+          ),
+        ),
       ),
       5 => 
       array (

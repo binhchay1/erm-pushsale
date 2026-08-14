@@ -1144,12 +1144,12 @@ class LeadIngestionService
 
         $packet->refresh();
 
-        NotificationService::pushToRole(UserRole::Admin, 'lead', null, null, '/admin/leads?bucket=exceptions', [
+        NotificationService::pushToRole(UserRole::Admin, 'lead', null, null, '/admin/leads/log?bucket=exceptions', [
             'variant' => 'orphan_upsell',
             'customer_name' => $packet->customer_name,
             'customer_phone' => $packet->customer_phone,
         ]);
-        NotificationService::pushToRole(UserRole::Allocator, 'lead', null, null, '/allocator/workspace?bucket=exceptions', [
+        NotificationService::pushToRole(UserRole::Allocator, 'lead', null, null, '/allocator/leads/log?bucket=exceptions', [
             'variant' => 'orphan_upsell',
             'customer_name' => $packet->customer_name,
             'customer_phone' => $packet->customer_phone,
@@ -1294,8 +1294,8 @@ class LeadIngestionService
         if ($order->sale_user_id) {
             NotificationService::push($order->sale_user_id, 'lead', null, null, '/sales/customers?search='.$order->customer_phone, $data);
         }
-        NotificationService::pushToRole(UserRole::Admin, 'lead', null, null, '/admin/leads?bucket=exceptions', $data);
-        NotificationService::pushToRole(UserRole::Allocator, 'lead', null, null, '/allocator/workspace?bucket=exceptions', $data);
+        NotificationService::pushToRole(UserRole::Admin, 'lead', null, null, '/admin/leads/log?bucket=exceptions', $data);
+        NotificationService::pushToRole(UserRole::Allocator, 'lead', null, null, '/allocator/leads/log?bucket=exceptions', $data);
     }
 
     protected function notifySupplementReview(LeadIngestion $packet, Order $order): void
@@ -1311,8 +1311,8 @@ class LeadIngestionService
         if ($order->sale_user_id) {
             NotificationService::push($order->sale_user_id, 'lead', null, null, '/sales/customers?search='.$order->customer_phone, $data);
         }
-        NotificationService::pushToRole(UserRole::Admin, 'lead', null, null, '/admin/leads?bucket=exceptions', $data);
-        NotificationService::pushToRole(UserRole::Allocator, 'lead', null, null, '/allocator/workspace?bucket=exceptions', $data);
+        NotificationService::pushToRole(UserRole::Admin, 'lead', null, null, '/admin/leads/log?bucket=exceptions', $data);
+        NotificationService::pushToRole(UserRole::Allocator, 'lead', null, null, '/allocator/leads/log?bucket=exceptions', $data);
     }
 
     /**

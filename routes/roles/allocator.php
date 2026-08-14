@@ -9,6 +9,7 @@
 
 use App\Http\Controllers\Admin\DataDistributionController;
 use App\Http\Controllers\Admin\LeadReviewController;
+use App\Http\Controllers\Admin\LeadsLogController;
 use App\Http\Controllers\Admin\ManualLeadAllocationController;
 use App\Http\Controllers\Admin\ManualLeadController;
 use App\Http\Controllers\Allocator\DashboardController as AllocatorDashboardController;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('role:'.User::ROLE_ALLOCATOR)->prefix('allocator')->name('allocator.')->group(function (): void {
     Route::get('dashboard', AllocatorDashboardController::class)->name('dashboard');
     Route::get('workspace', [DataDistributionController::class, 'index'])->name('workspace');
+    Route::get('leads/log', LeadsLogController::class)->name('leads.log');
     Route::get('customers', CustomerProfileController::class)->name('customers.index');
 
     Route::post('leads/distribute', [DataDistributionController::class, 'store'])->name('leads.distribute');

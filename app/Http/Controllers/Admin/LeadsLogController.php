@@ -147,9 +147,9 @@ class LeadsLogController extends Controller
                 default => '/admin/leads',
             },
             'listUrl' => match (true) {
-                $request->is('allocator/*') => '/allocator/workspace',
-                $request->is('marketing/*') => '/marketing/leads',
-                default => '/admin/leads',
+                $request->is('allocator/*') => '/allocator/leads/log',
+                $request->is('marketing/*') => '/marketing/leads/log',
+                default => '/admin/leads/log',
             },
             'canDelete' => ! $request->is('allocator/*') && ! $request->is('marketing/*'),
             'canReview' => ! $request->is('marketing/*'),

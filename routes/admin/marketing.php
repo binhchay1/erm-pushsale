@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\DataDistributionController;
 use App\Http\Controllers\Admin\LandingApprovalController;
 use App\Http\Controllers\Admin\LeadIngestionController;
 use App\Http\Controllers\Admin\LeadReviewController;
+use App\Http\Controllers\Admin\LeadsLogController;
 use App\Http\Controllers\Admin\ManualLeadAllocationController;
 use App\Http\Controllers\Admin\ManualLeadController;
 use App\Http\Controllers\Admin\Marketing\CampaignBudgetController;
@@ -105,6 +106,7 @@ Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     |----------------------------------------------------------------------
     */
     Route::get('leads', [DataDistributionController::class, 'index'])->name('leads.index');
+    Route::get('leads/log', LeadsLogController::class)->name('leads.log');
     Route::post('leads/distribute', [DataDistributionController::class, 'store'])->name('leads.distribute');
     Route::post('leads/allocate', [ManualLeadAllocationController::class, 'store'])->name('leads.allocate');
     Route::post('leads/allocation-mode', [ManualLeadAllocationController::class, 'updateMode'])->name('leads.allocation-mode');
