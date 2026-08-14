@@ -48,40 +48,29 @@ function pct(value) {
     return formatReportPercent(value, { empty: '', spaceBeforeSuffix: false });
 }
 
-function optToneClass(tone = 'average', variant = 'metric') {
-    const normalized = tone === 'bad' || tone === 'good' ? tone : 'average';
-    if (normalized === 'average') {
-        return '';
-    }
-    return variant === 'revenue'
-        ? `ps-opt-tone-revenue-${normalized}`
-        : `ps-opt-tone-metric-${normalized}`;
-}
-
-function OptValueCell({ value, tone = 'average', variant = 'metric', revenueLines = false }) {
-    const actualClass = revenueLines ? 'ps-opt-metric__actual--revenue' : 'ps-opt-metric__actual';
+function OptCell({ value, variant = 'plain', stacked = false }) {
     return (
-        <td className={`text-center ${optToneClass(tone, variant)}`}>
-            <div className={actualClass}>{value}</div>
-            {revenueLines && (
+        <td className={`text-center ps-opt-td ps-opt-td--${variant}`}>
+            <div className={variant === 'revenue' ? 'doanh_so_ds' : 'doanh_so'}>{value}</div>
+            {stacked && (
                 <>
-                    <div className="ps-opt-metric__target--revenue" />
-                    <div className="ps-opt-metric__ratio--revenue" />
+                    <div className={variant === 'revenue' ? 'doanh_so_mau_ds' : 'doanh_so_mau'} />
+                    <div className={variant === 'revenue' ? 'doanh_so_mau_ds' : 'doanh_so_mau'} />
                 </>
             )}
         </td>
     );
 }
 
-function MetricCell({ actual, target = null, ratio = null, tone = 'average' }) {
+function MetricCell({ actual, target = null, ratio = null }) {
     return (
-        <td className={`text-center ${optToneClass(tone, 'metric')}`}>
-            <div className="ps-opt-metric__actual">{actual}</div>
+        <td className="text-center ps-opt-td ps-opt-td--pink">
+            <div className="doanh_so">{actual}</div>
             {target !== null && target !== undefined && target !== '' && (
-                <div className="ps-opt-metric__target">{target}</div>
+                <div className="doanh_so_mau">{target}</div>
             )}
             {ratio !== null && ratio !== undefined && ratio !== '' && (
-                <div className="ps-opt-metric__ratio">{ratio}</div>
+                <div className="doanh_so_mau">{ratio}</div>
             )}
         </td>
     );
@@ -222,6 +211,29 @@ export default function SalesOptimizationReport({
 
                 <div className="dragscroll1 tableFixHead ps-sales-leader-table-wrap">
                     <table className="table table-bordered table-striped" id="tableReport">
+                        <colgroup>
+                            <col className="ps-opt-c-stt" />
+                            <col className="ps-opt-c-sale" />
+                            <col className="ps-opt-c-receive" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-4" />
+                            <col className="ps-opt-c-4" />
+                            <col className="ps-opt-c-4" />
+                            <col className="ps-opt-c-4" />
+                            <col className="ps-opt-c-7" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-7" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-6" />
+                            <col className="ps-opt-c-7" />
+                        </colgroup>
                         <thead>
                             <tr>
                                 <th className="text-center" rowSpan="2">STT</th>
@@ -274,8 +286,10 @@ export default function SalesOptimizationReport({
                             {rows.map((row, index) => (
                                 <tr key={`${row.sale_id}-${index}`}>
                                     <td className="text-center">{(pagination.from || 1) + index}</td>
-                                    <td><SaleNameCell row={row} /></td>
-                                    <td className="text-center">
+                                    <td className="ps-opt-td ps-opt-td--sale">
+                                        <SaleNameCell row={row} />
+                                    </td>
+                                    <td className="text-center ps-opt-td">
                                         {row.sale_id ? (
                                             <span className="ps-sales-receive-check myCheckChange" data-saleid={row.sale_id}>
                                                 <label title={row.receive_data ? 'Đang nhận dữ liệu' : 'Không nhận dữ liệu'}>
@@ -291,34 +305,28 @@ export default function SalesOptimizationReport({
                                             <span>Không</span>
                                         )}
                                     </td>
-                                    <OptValueCell
-                                        value={num(row.provisional_revenue)}
-                                        tone={row.tone}
-                                        variant="revenue"
-                                        revenueLines
-                                    />
-                                    <OptValueCell value={num(row.success_revenue)} tone={row.tone} />
-                                    <td className="text-center">{num(row.contacts)}</td>
-                                    <OptValueCell value={num(row.allocated_total)} tone={row.tone} />
-                                    <OptValueCell value={num(row.allocated_duplicate)} tone={row.tone} />
-                                    <OptValueCell value={num(row.allocated_unique)} tone={row.tone} />
-                                    <td className="text-center" />
-                                    <td className="text-center">{row.call_duration_seconds ?? ''}</td>
-                                    <td className="text-center">{row.avg_call_seconds ?? ''}</td>
-                                    <td className="text-center" />
-                                    <OptValueCell value={num(row.closed_contacts)} tone={row.tone} />
+                                    <OptCell value={num(row.provisional_revenue)} variant="revenue" stacked />
+                                    <OptCell value={num(row.success_revenue)} variant="pink" stacked />
+                                    <td className="text-center ps-opt-td">{num(row.contacts)}</td>
+                                    <OptCell value={num(row.allocated_total)} variant="pink" stacked />
+                                    <OptCell value={num(row.allocated_duplicate)} variant="pink" stacked />
+                                    <OptCell value={num(row.allocated_unique)} variant="pink" stacked />
+                                    <td className="text-center ps-opt-td">(/)</td>
+                                    <td className="text-center ps-opt-td">{row.call_duration_seconds ?? ''}</td>
+                                    <td className="text-center ps-opt-td">{row.avg_call_seconds ?? ''}</td>
+                                    <td className="text-center ps-opt-td">%</td>
+                                    <OptCell value={num(row.closed_contacts)} variant="pink" stacked />
                                     <MetricCell
                                         actual={pct(row.close_rate)}
                                         target={pct(row.close_rate_target)}
                                         ratio={pct(row.close_rate_ratio)}
-                                        tone={row.tone}
                                     />
-                                    <OptValueCell value={num(row.avg_order_value)} tone={row.tone} />
-                                    <OptValueCell value={row.products_per_order ?? ''} tone={row.tone} />
-                                    <OptValueCell value={num(row.untouched)} tone={row.tone} />
-                                    <OptValueCell value={num(row.revenue_per_contact)} tone={row.tone} />
-                                    <td className="text-center">{num(row.cancelled_revenue)}</td>
-                                    <td className="text-center">{num(row.returned_revenue)}</td>
+                                    <OptCell value={num(row.avg_order_value)} variant="pink" stacked />
+                                    <OptCell value={row.products_per_order ?? ''} variant="pink" stacked />
+                                    <OptCell value={num(row.untouched)} variant="green" stacked />
+                                    <OptCell value={num(row.revenue_per_contact)} variant="green" stacked />
+                                    <td className="text-center ps-opt-td">{num(row.cancelled_revenue)}</td>
+                                    <td className="text-center ps-opt-td">{num(row.returned_revenue)}</td>
                                 </tr>
                             ))}
                             {!rows.length && <TableEmptyRow colSpan={21} />}
