@@ -107,8 +107,8 @@ export default function AppLayout({ children }) {
             }
 
             clearTransitionTimer();
-            // Chỉ hiện overlay khi điều hướng chậm (>400ms) để tránh giật trên chuyển trang nhanh.
-            transitionTimer = window.setTimeout(() => setPageTransitioning(true), 400);
+            // Hiện overlay sớm hơn để trang báo cáo nặng không bị "treo" không phản hồi.
+            transitionTimer = window.setTimeout(() => setPageTransitioning(true), 180);
             setPendingDashboardRole(dashboardRoleFromUrl(targetUrl));
         });
         const finish = router.on('finish', () => {
@@ -179,7 +179,10 @@ export default function AppLayout({ children }) {
                             <div className="ps-page-viewport">
                                 <PageHeaderOutlet />
                                 {pageTransitioning && !pendingDashboardRole && (
-                                    <div className="pushsale-route-loading" aria-live="polite"><i className="fa fa-spinner fa-spin" /> Đang tải giao diện…</div>
+                                    <div className="pushsale-route-loading" aria-live="polite" aria-busy="true">
+                                        <i className="fa fa-spinner fa-spin" aria-hidden="true" />
+                                        <span>Đang tải dữ liệu…</span>
+                                    </div>
                                 )}
                                 {pendingDashboardRole ? (
                                     <DashboardSkeleton role={pendingDashboardRole} />

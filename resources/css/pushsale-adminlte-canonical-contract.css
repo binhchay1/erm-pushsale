@@ -9,21 +9,26 @@ html body.pushsale-app-body input.pslc-api-preview[readonly] {
 }
 html body.pushsale-app-body .pushsale-route-loading {
     position: fixed;
-    top: 58px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2200;
-    display: inline-flex;
+    inset: 0;
+    z-index: 3200;
+    display: flex;
     align-items: center;
-    gap: 7px;
-    min-height: 30px;
-    padding: 6px 14px;
-    border: 1px solid #b9daf4;
-    background: #eef8ff;
-    color: #1a689b;
-    font-size: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .10);
-    pointer-events: none;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+    padding: 16px;
+    border: 0;
+    background: rgba(60, 60, 60, 0.42);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: none;
+    pointer-events: auto;
+    cursor: wait;
+}
+
+html body.pushsale-app-body .pushsale-route-loading i {
+    font-size: 22px;
 }
 
 /* v131 — canonical final: page header alignment + real second-level menu hover.

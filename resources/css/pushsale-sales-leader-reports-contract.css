@@ -253,6 +253,100 @@ html body.pushsale-app-body .ps-sales-opt-toolbar__actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    align-items: flex-start;
+}
+
+html body.pushsale-app-body .ps-sales-opt-toolbar__actions-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+}
+
+html body.pushsale-app-body .ps-sales-opt-toolbar__actions-col .btn {
+    white-space: nowrap;
+}
+
+/* Optimization dialogs — Pushsale DanhMucToiUu / ThemChiSoCanhBao / ThemChiSoToiUu */
+html body.pushsale-app-body .ps-opt-dialog-body {
+    padding: 12px 14px 16px !important;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-toolbar .form-control {
+    width: auto;
+    min-width: 140px;
+    max-width: 260px;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-toolbar__right {
+    margin-left: auto;
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-table-wrap {
+    overflow: auto;
+    max-height: min(62vh, 640px);
+    border: 1px solid #d2d6de;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-table {
+    margin: 0 !important;
+    min-width: 1400px;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-table > thead > tr > th {
+    background: #3c8dbc !important;
+    color: #fff !important;
+    vertical-align: middle !important;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-table > thead > tr > th .btn-link {
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-table > tbody > tr > td {
+    vertical-align: middle !important;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-input,
+html body.pushsale-app-body .ps-opt-dialog-table .form-control {
+    height: 28px;
+    padding: 2px 6px;
+    font-size: 12px;
+    min-width: 72px;
+}
+
+html body.pushsale-app-body .ps-opt-alert-dialog-body {
+    padding: 16px 18px 20px !important;
+}
+
+html body.pushsale-app-body .ps-opt-alert-field {
+    display: block;
+    margin-bottom: 14px;
+    font-weight: 600;
+}
+
+html body.pushsale-app-body .ps-opt-alert-field > span {
+    display: block;
+    margin-bottom: 6px;
+}
+
+html body.pushsale-app-body .ps-opt-alert-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
 }
 
 html body.pushsale-app-body .ps-sales-opt-legend {

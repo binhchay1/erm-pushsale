@@ -3,6 +3,7 @@
 namespace App\Services\Reports\SalesLeader;
 
 use App\Models\SaleOptimizationAlertThreshold;
+use App\Models\SaleOptimizationCatalog;
 use App\Models\SaleOptimizationLevel;
 use App\Models\SaleOptimizationTarget;
 use Illuminate\Http\Request;
@@ -79,6 +80,8 @@ final class SalesOptimizationReportService
                 'thresholds' => $thresholds,
                 'levels' => $this->levels($request),
                 'targets' => array_values($targets),
+                'target_map' => $targets,
+                'catalogs' => $this->catalogs($request),
             ],
         ];
     }
@@ -110,6 +113,58 @@ final class SalesOptimizationReportService
                 ['target_value' => $row['target_value']],
             );
         }
+    }
+
+    /**
+     * @param  list<array{id?:int|null,name:string,metrics?:array<string,mixed>,sort_order?:int}>  $rows
+     */
+    public function saveCatalogs(int $companyId, ?int $leaderUserId, array $rows): void
+    {
+        if (! Schema::hasTable('sale_optimization_catalogs')) {
+            return;
+        }
+
+        $keptIds = [];
+        foreach (array_values($rows) as $index => $row) {
+            $name = trim((string) ($row['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $payload = [
+                'company_id' => $companyId,
+                'leader_user_id' => $leaderUserId,
+                'name' => $name,
+                'metrics' => is_array($row['metrics'] ?? null) ? $row['metrics'] : [],
+                'sort_order' => (int) ($row['sort_order'] ?? $index),
+            ];
+
+            $id = isset($row['id']) ? (int) $row['id'] : 0;
+            if ($id > 0) {
+                $model = SaleOptimizationCatalog::query()
+                    ->where('company_id', $companyId)
+                    ->where('id', $id)
+                    ->first();
+                if ($model) {
+                    $model->fill($payload)->save();
+                    $keptIds[] = $model->id;
+                    continue;
+                }
+            }
+
+            $created = SaleOptimizationCatalog::query()->create($payload);
+            $keptIds[] = $created->id;
+        }
+
+        SaleOptimizationCatalog::query()
+            ->where('company_id', $companyId)
+            ->when(
+                $leaderUserId,
+                fn ($q) => $q->where('leader_user_id', $leaderUserId),
+                fn ($q) => $q->whereNull('leader_user_id'),
+            )
+            ->when($keptIds !== [], fn ($q) => $q->whereNotIn('id', $keptIds))
+            ->delete();
     }
 
     private function thresholds(Request $request): array
@@ -156,6 +211,36 @@ final class SalesOptimizationReportService
             'min_ratio' => (float) $row->min_ratio,
             'max_ratio' => $row->max_ratio !== null ? (float) $row->max_ratio : null,
         ])->all();
+    }
+
+    /** @return list<array{id:int,name:string,leader_user_id:?int,metrics:array<string,mixed>,sort_order:int}> */
+    private function catalogs(Request $request): array
+    {
+        if (! Schema::hasTable('sale_optimization_catalogs')) {
+            return [];
+        }
+
+        $leaderId = (int) ($request->input('sale_leader_id') ?: 0);
+
+        return SaleOptimizationCatalog::query()
+            ->where('company_id', $request->user()?->company_id)
+            ->when(
+                $leaderId > 0,
+                fn ($q) => $q->where(function ($inner) use ($leaderId): void {
+                    $inner->where('leader_user_id', $leaderId)->orWhereNull('leader_user_id');
+                }),
+            )
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (SaleOptimizationCatalog $row): array => [
+                'id' => (int) $row->id,
+                'name' => (string) $row->name,
+                'leader_user_id' => $row->leader_user_id !== null ? (int) $row->leader_user_id : null,
+                'metrics' => is_array($row->metrics) ? $row->metrics : [],
+                'sort_order' => (int) $row->sort_order,
+            ])
+            ->all();
     }
 
     /** @return array<int, array<string, float>> */

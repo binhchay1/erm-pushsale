@@ -229,6 +229,8 @@ class PushsalePageService
         $mapUsers = static fn ($items) => $items->map(fn (User $user) => [
             'id' => $user->id,
             'label' => trim($user->name.' · '.$user->email),
+            'name' => $user->name,
+            'team_id' => $user->team_id,
         ])->all();
         $mapTeams = static fn ($items) => $items->map(fn (Team $team) => [
             'id' => $team->id,
@@ -325,7 +327,11 @@ class PushsalePageService
                 ['value' => 'Nâng cấp', 'label' => 'Nâng cấp'],
             ],
             'sales' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Sales)->values()),
-            'saleLeaders' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Sales && (bool) $user->is_team_leader)->values()),
+            // Pushsale leader filter includes Sale Admin + team leaders.
+            'saleLeaders' => $mapUsers($allUsers->filter(
+                fn (User $user): bool => $user->role === UserRole::Admin
+                    || ($user->role === UserRole::Sales && (bool) $user->is_team_leader),
+            )->values()),
             'marketers' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Marketing)->values()),
             'marketingLeaders' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Marketing && (bool) $user->is_team_leader)->values()),
             'warehouseUsers' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Warehouse)->values()),
@@ -335,8 +341,12 @@ class PushsalePageService
             'marketingTeams' => $mapTeams($allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Marketing)->values()),
             'warehouseTeams' => $mapTeams($allTeams->filter(fn (Team $team): bool => $team->type === TeamType::Warehouse)->values()),
             'teamLeaders' => $mapUsers($allUsers->filter(
-                fn (User $user): bool => (bool) $user->is_team_leader || $teamLeaderIds->contains((int) $user->id),
+                fn (User $user): bool => $user->role === UserRole::Admin
+                    || (bool) $user->is_team_leader
+                    || $teamLeaderIds->contains((int) $user->id),
             )->values()),
+            'admins' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Admin)->values()),
+            'salesUsers' => $mapUsers($allUsers->filter(fn (User $user): bool => $user->role === UserRole::Sales)->values()),
             'products' => $allProducts->map(fn (Product $product) => [
                 'id' => $product->id,
                 'label' => trim($product->name.($product->sku ? " ({$product->sku})" : '')),

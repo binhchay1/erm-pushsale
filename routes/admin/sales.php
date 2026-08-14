@@ -49,6 +49,7 @@ Route::post('sales/reports/data/receive-data', [SalesDataReportController::class
 Route::get('sales/reports/optimization', [SalesOptimizationReportController::class, 'index'])->name('sales.reports.optimization');
 Route::post('sales/reports/optimization/alerts', [SalesOptimizationReportController::class, 'saveAlerts'])->name('sales.reports.optimization.alerts');
 Route::post('sales/reports/optimization/targets', [SalesOptimizationReportController::class, 'saveTargets'])->name('sales.reports.optimization.targets');
+Route::post('sales/reports/optimization/catalogs', [SalesOptimizationReportController::class, 'saveCatalogs'])->name('sales.reports.optimization.catalogs');
 Route::post('sales/reports/optimization/receive-data', [SalesOptimizationReportController::class, 'updateReceiveData'])->name('sales.reports.optimization.receive-data');
 
 Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {

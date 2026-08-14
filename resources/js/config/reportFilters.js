@@ -67,7 +67,7 @@ export const REPORT_FILTER_FIELD_CATALOG = {
     },
     sale_leader_id: {
         type: 'select',
-        optionsKeys: ['saleLeaders', 'teamLeaders'],
+        optionsKeys: ['saleLeaders', 'teamLeaders', 'admins'],
         placeholder: '-- Trưởng nhóm sale --',
         placeholderKey: 'reports.pushsale.choose_team_leader',
     },

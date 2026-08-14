@@ -44,6 +44,25 @@ final class SalesOptimizationReportController extends BasePushsalePageController
         return back()->with('success', 'Đã lưu mục tiêu sale.');
     }
 
+    public function saveCatalogs(Request $request, SalesOptimizationReportService $service): RedirectResponse
+    {
+        $this->authorizePage($request);
+        $validated = $request->validate([
+            'leader_user_id' => ['required', 'integer'],
+            'catalogs' => ['required', 'array', 'min:1'],
+            'catalogs.*.id' => ['nullable', 'integer'],
+            'catalogs.*.name' => ['required', 'string', 'max:120'],
+            'catalogs.*.metrics' => ['nullable', 'array'],
+            'catalogs.*.sort_order' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $companyId = (int) ($request->user()?->company_id ?? 0);
+        abort_unless($companyId > 0, 403);
+        $service->saveCatalogs($companyId, (int) $validated['leader_user_id'], $validated['catalogs']);
+
+        return back()->with('success', 'Đã lưu danh mục tối ưu sale.');
+    }
+
     public function updateReceiveData(Request $request, SalesDataReportService $service): RedirectResponse
     {
         $this->authorizePage($request);

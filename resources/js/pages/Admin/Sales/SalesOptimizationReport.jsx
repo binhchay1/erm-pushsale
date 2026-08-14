@@ -1,4 +1,4 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -19,6 +19,12 @@ import {
 } from '@/components/reports/PushsaleReportChrome';
 import { cleanInertiaFilters, readQueryFilters, useInertiaFilters } from '@/hooks/useInertiaFilters';
 import AppLayout from '@/layouts/AppLayout';
+import {
+    leaderOptionsFrom,
+    OptimizationAlertsDialog,
+    OptimizationCatalogDialog,
+    OptimizationTargetsDialog,
+} from '@/pages/Admin/Sales/optimization/SalesOptimizationDialogs';
 
 function todayIso() {
     const date = new Date();
@@ -98,11 +104,22 @@ export default function SalesOptimizationReport({
     const totals = summary?.totals || null;
     const thresholds = summary?.thresholds || { low: 80, high: 100 };
     const levels = Array.isArray(summary?.levels) ? summary.levels : [];
-    const alertForm = useForm({ low_ratio: thresholds.low, high_ratio: thresholds.high });
-    const targetForm = useForm({
-        targets: [{ sale_user_id: '', metric_key: 'close_rate', target_value: 100 }],
-    });
+    const catalogs = Array.isArray(summary?.catalogs) ? summary.catalogs : [];
+    const targetMap = summary?.target_map || {};
+    const leaderOptions = useMemo(() => leaderOptionsFrom(filterOptions), [filterOptions]);
+    const selectedLeader = useMemo(
+        () => leaderOptions.find((option) => String(option.id) === String(draft.sale_leader_id || '')),
+        [leaderOptions, draft.sale_leader_id],
+    );
     const search = () => visit({ ...queryFilters, page: 1 });
+
+    const openLevelsDialog = () => {
+        if (!draft.sale_leader_id) {
+            toast.error('Vui lòng chọn Trưởng nhóm (hoặc Sale Admin) trước khi thiết lập level mục tiêu.');
+            return;
+        }
+        setDialog('levels');
+    };
 
     const confirmReceiveToggle = async (saleId, currentValue) => {
         if (!saleId || savingReceiveId) {
@@ -178,22 +195,24 @@ export default function SalesOptimizationReport({
 
                 <div className="ps-sales-opt-toolbar">
                     <div className="ps-sales-opt-toolbar__actions">
-                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('levels')}>
-                            <i className="fa fa-list" /> Thiết lập level mục tiêu
-                        </button>
+                        <div className="ps-sales-opt-toolbar__actions-col">
+                            <button type="button" className="btn btn-sm btn-primary" onClick={openLevelsDialog}>
+                                <i className="fa fa-list" /> Thiết lập level mục tiêu
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-default"
+                                onClick={() => setDialog('receive-bulk')}
+                                title="Hướng dẫn cập nhật nhận dữ liệu"
+                            >
+                                <i className="fa fa-gears" /> Cập nhật nhận dữ liệu
+                            </button>
+                        </div>
                         <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('alerts')}>
                             <i className="fa fa-asterisk" /> Mức cảnh báo
                         </button>
                         <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('targets')}>
                             <i className="fa fa-plus" /> Thiết lập mục tiêu sale
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn-sm btn-default"
-                            onClick={() => setDialog('receive-bulk')}
-                            title="Cập nhật hàng loạt qua popup (Pushsale parity)"
-                        >
-                            <i className="fa fa-gears" /> Cập nhật nhận dữ liệu
                         </button>
                     </div>
                     <div className="ps-sales-opt-legend">
@@ -336,90 +355,30 @@ export default function SalesOptimizationReport({
 
                 <PushsalePagination meta={pagination} routeUrl={routeUrl} filters={queryFilters} itemLabel="sale" perPageOptions={[20, 50, 100, 200, 500, 1000]} />
 
-                {dialog === 'levels' && (
-                    <div className="ps-sales-leader-dialog-backdrop">
-                        <div className="ps-sales-leader-dialog">
-                            <h4>Thiết lập level mục tiêu</h4>
-                            <p>Các cấp độ hiện tại (chỉ đọc — chỉnh ngưỡng cảnh báo để đổi màu):</p>
-                            <ul>
-                                {levels.map((level) => (
-                                    <li key={level.label}>{level.label}: {level.min_ratio}%{level.max_ratio !== null ? ` – ${level.max_ratio}%` : '+'}</li>
-                                ))}
-                            </ul>
-                            <button type="button" className="btn btn-sm btn-link" onClick={() => setDialog(null)}>Đóng</button>
-                        </div>
-                    </div>
-                )}
-
-                {dialog === 'alerts' && (
-                    <div className="ps-sales-leader-dialog-backdrop">
-                        <div className="ps-sales-leader-dialog">
-                            <h4>Mức cảnh báo</h4>
-                            <label>Dưới (%)
-                                <input className="form-control" type="number" value={alertForm.data.low_ratio} onChange={(event) => alertForm.setData('low_ratio', event.target.value)} />
-                            </label>
-                            <label>Trên (%)
-                                <input className="form-control" type="number" value={alertForm.data.high_ratio} onChange={(event) => alertForm.setData('high_ratio', event.target.value)} />
-                            </label>
-                            <div className="ps-sales-leader-dialog__actions">
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-primary"
-                                    disabled={alertForm.processing}
-                                    onClick={() => alertForm.post('/admin/sales/reports/optimization/alerts', { preserveScroll: true, onSuccess: () => setDialog(null) })}
-                                >
-                                    Lưu
-                                </button>
-                                <button type="button" className="btn btn-sm btn-link" onClick={() => setDialog(null)}>Đóng</button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {dialog === 'targets' && (
-                    <div className="ps-sales-leader-dialog-backdrop">
-                        <div className="ps-sales-leader-dialog">
-                            <h4>Thiết lập mục tiêu sale</h4>
-                            <label>Sale
-                                <select
-                                    className="form-control"
-                                    value={targetForm.data.targets[0]?.sale_user_id ?? ''}
-                                    onChange={(event) => targetForm.setData('targets', [{
-                                        ...targetForm.data.targets[0],
-                                        sale_user_id: event.target.value || null,
-                                    }])}
-                                >
-                                    <option value="">Mặc định toàn công ty</option>
-                                    {(filterOptions.sales ?? filterOptions.salesUsers ?? []).map((option) => (
-                                        <option key={option.id} value={option.id}>{option.label ?? option.name}</option>
-                                    ))}
-                                </select>
-                            </label>
-                            <label>Mục tiêu tỷ lệ chốt (%)
-                                <input
-                                    className="form-control"
-                                    type="number"
-                                    value={targetForm.data.targets[0]?.target_value ?? 100}
-                                    onChange={(event) => targetForm.setData('targets', [{
-                                        ...targetForm.data.targets[0],
-                                        target_value: event.target.value,
-                                    }])}
-                                />
-                            </label>
-                            <div className="ps-sales-leader-dialog__actions">
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-primary"
-                                    disabled={targetForm.processing}
-                                    onClick={() => targetForm.post('/admin/sales/reports/optimization/targets', { preserveScroll: true, onSuccess: () => setDialog(null) })}
-                                >
-                                    Lưu
-                                </button>
-                                <button type="button" className="btn btn-sm btn-link" onClick={() => setDialog(null)}>Đóng</button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <OptimizationCatalogDialog
+                    open={dialog === 'levels'}
+                    onOpenChange={(open) => setDialog(open ? 'levels' : null)}
+                    catalogs={catalogs.filter((row) => {
+                        if (!draft.sale_leader_id) return true;
+                        return row.leader_user_id == null
+                            || String(row.leader_user_id) === String(draft.sale_leader_id);
+                    })}
+                    leaderUserId={draft.sale_leader_id}
+                    leaderLabel={selectedLeader?.label ?? selectedLeader?.name ?? ''}
+                />
+                <OptimizationAlertsDialog
+                    open={dialog === 'alerts'}
+                    onOpenChange={(open) => setDialog(open ? 'alerts' : null)}
+                    thresholds={thresholds}
+                />
+                <OptimizationTargetsDialog
+                    open={dialog === 'targets'}
+                    onOpenChange={(open) => setDialog(open ? 'targets' : null)}
+                    filterOptions={filterOptions}
+                    targetMap={targetMap}
+                    draftLeaderId={draft.sale_leader_id}
+                    draftTeamId={draft.sale_team_id}
+                />
 
                 {dialog === 'receive-bulk' && (
                     <div className="ps-sales-leader-dialog-backdrop">
