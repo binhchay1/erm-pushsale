@@ -306,7 +306,7 @@ html body.pushsale-app-body .pushsale-page[data-page-code] table#tableReport td 
 }
 
 html body.pushsale-app-body .pushsale-page[data-page-code] table.pushsale-data-table tbody tr:nth-child(even) td,
-html body.pushsale-app-body .pushsale-page[data-page-code] table#tableReport tbody tr:nth-child(even) td {
+html body.pushsale-app-body .pushsale-page[data-page-code]:not([data-page-code="4.6.5"]) table#tableReport tbody tr:nth-child(even) td {
     background: #eeeeee !important;
 }
 

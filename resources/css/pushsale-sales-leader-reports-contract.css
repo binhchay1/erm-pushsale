@@ -280,57 +280,65 @@ html body.pushsale-app-body .ps-sales-opt-swatch.tone-bad { background: #fda2a2 
 html body.pushsale-app-body .ps-sales-opt-swatch.tone-average { background: #f3f3f3 !important; }
 html body.pushsale-app-body .ps-sales-opt-swatch.tone-good { background: #aef7cb !important; }
 
-/* 4.6.5 — column widths + colors from Pushsale ToiUuSale HTML */
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table#tableReport {
+/* 4.6.5 — column widths + colors from Pushsale ToiUuSale HTML.
+   Selectors include #tableReport + [data-page-code] so they beat the shared
+   shell even-row grey (`table#tableReport tbody tr:nth-child(even) td`). */
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport {
     table-layout: fixed !important;
     width: max(100%, 1680px) !important;
     min-width: 1680px !important;
     border-collapse: collapse !important;
 }
 
-html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-c-stt { width: 50px; }
-html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-c-sale { width: 150px; }
-html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-c-receive { width: 60px; }
-html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-c-4 { width: 4%; }
-html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-c-6 { width: 6%; }
-html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-c-7 { width: 7%; }
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-opt-c-stt { width: 50px; }
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-opt-c-sale { width: 150px; }
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-opt-c-receive { width: 60px; }
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-opt-c-4 { width: 4%; }
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-opt-c-6 { width: 6%; }
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-opt-c-7 { width: 7%; }
 
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table thead tr:first-child th,
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table thead tr:nth-child(2) th {
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport thead tr:first-child th,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport thead tr:nth-child(2) th {
     white-space: normal !important;
     word-break: break-word;
     line-height: 1.25 !important;
 }
 
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table thead tr.rowsum td {
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport thead tr.rowsum td {
     background: #d9edf7 !important;
     color: #111 !important;
 }
 
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody tr:nth-child(odd) td,
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td,
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td.ps-opt-td {
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody td,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody tr:nth-child(even) td,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody tr:nth-child(odd) td {
     background-color: #f3f3f3 !important;
     vertical-align: middle;
 }
 
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td.ps-opt-td--sale {
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody td.ps-opt-td--sale {
     text-align: left !important;
     background-color: #f3f3f3 !important;
     color: #337ab7;
     white-space: nowrap;
 }
 
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td.ps-opt-td--revenue {
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody td.ps-opt-td--revenue,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody tr:nth-child(even) td.ps-opt-td--revenue,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody tr:nth-child(odd) td.ps-opt-td--revenue {
     background-color: #eb1e1e !important;
     color: #000 !important;
 }
 
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td.ps-opt-td--pink {
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody td.ps-opt-td--pink,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody tr:nth-child(even) td.ps-opt-td--pink,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody tr:nth-child(odd) td.ps-opt-td--pink {
     background-color: #fda2a2 !important;
 }
 
-html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td.ps-opt-td--green {
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody td.ps-opt-td--green,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody tr:nth-child(even) td.ps-opt-td--green,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report[data-page-code="4.6.5"] .ps-sales-leader-table-wrap table#tableReport tbody tr:nth-child(odd) td.ps-opt-td--green {
     background-color: #aef7cb !important;
 }
 
