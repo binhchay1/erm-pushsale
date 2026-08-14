@@ -276,19 +276,64 @@ html body.pushsale-app-body .ps-sales-opt-swatch {
     display: inline-block;
 }
 
-html body.pushsale-app-body .ps-sales-opt-swatch.tone-bad,
-html body.pushsale-app-body .ps-opt-metric.tone-bad,
-html body.pushsale-app-body tr.tone-bad td.ps-opt-metric { background: #f8d7da; }
-html body.pushsale-app-body .ps-sales-opt-swatch.tone-average,
-html body.pushsale-app-body .ps-opt-metric.tone-average,
-html body.pushsale-app-body tr.tone-average td.ps-opt-metric { background: #fff3cd; }
-html body.pushsale-app-body .ps-sales-opt-swatch.tone-good,
-html body.pushsale-app-body .ps-opt-metric.tone-good,
-html body.pushsale-app-body tr.tone-good td.ps-opt-metric { background: #d4edda; }
+html body.pushsale-app-body .ps-sales-opt-swatch.tone-bad { background: #fda2a2 !important; }
+html body.pushsale-app-body .ps-sales-opt-swatch.tone-average { background: #f3f3f3 !important; }
+html body.pushsale-app-body .ps-sales-opt-swatch.tone-good { background: #aef7cb !important; }
 
-html body.pushsale-app-body .ps-opt-metric__actual { font-weight: 700; }
-html body.pushsale-app-body .ps-opt-metric__target,
-html body.pushsale-app-body .ps-opt-metric__ratio { color: #656161; font-size: 12px; }
+/* 4.6.5 Tối ưu Sale — Pushsale column tones (source: ToiUuSale DashboardCEO.css) */
+html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody tr:nth-child(odd) td,
+html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td {
+    background-color: #f3f3f3 !important;
+}
+
+html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td.ps-opt-tone-revenue-bad {
+    background-color: #eb1e1e !important;
+    color: #000 !important;
+}
+
+html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td.ps-opt-tone-revenue-good {
+    background-color: #26c863 !important;
+    color: #000 !important;
+}
+
+html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td.ps-opt-tone-metric-bad {
+    background-color: #fda2a2 !important;
+}
+
+html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-leader-table-wrap table.table-bordered tbody td.ps-opt-tone-metric-good {
+    background-color: #aef7cb !important;
+}
+
+html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-metric__actual,
+html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-metric__actual--revenue {
+    text-align: center;
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-metric__actual--revenue {
+    color: #000;
+}
+
+html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-metric__target,
+html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-metric__ratio,
+html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-metric__target--revenue,
+html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-metric__ratio--revenue {
+    text-align: center;
+    color: #656161;
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-metric__target--revenue,
+html body.pushsale-app-body .ps-sales-optimization-report .ps-opt-metric__ratio--revenue {
+    color: #000;
+}
+
+html body.pushsale-app-body .ps-sales-optimization-report .ps-sales-receive-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
 
 html body.pushsale-app-body .ps-sales-leader-dialog-backdrop {
     position: fixed;

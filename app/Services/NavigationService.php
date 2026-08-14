@@ -147,6 +147,7 @@ class NavigationService
             ],
             UserRole::Allocator => [
                 '/admin/leads' => '/allocator/workspace',
+                '/admin/leads/log' => '/allocator/leads/log',
                 '/admin/customers' => '/allocator/customers',
                 '/admin/reports/team-leaders' => '/allocator/reports/allocation',
                 '/admin/reports/hourly' => '/allocator/reports/load',
