@@ -79,9 +79,14 @@ final class CustomerProfileService
             $row['lastOperationAt'] = $order->updated_at?->toIso8601String();
             $row['shippingMethod'] = $order->shipping_method;
             $row['reconciliationStatus'] = $order->reconciliation_status;
+            $row['isReturningCustomer'] = (bool) ($row['isReturningCustomer'] ?? false);
+            $row['isDuplicatePhone'] = (bool) ($row['isDuplicatePhone'] ?? false);
 
             return $row;
         })->filter()->values()->all();
+
+        // Cùng enrichment với sale/kho/KT: icon trùng số khi SĐT đã có >1 đơn.
+        $rows = OrderOperationPresenter::applyDuplicatePhoneFlags($rows, $orders->values());
 
         return [
             'rows' => [

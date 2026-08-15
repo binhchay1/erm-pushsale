@@ -47,4 +47,32 @@ class VietnamesePhone
 
         return preg_match('/^0[35789]\d{8}$/', $digits) ? $digits : null;
     }
+
+    /**
+     * Biến thể phổ biến để tra cứu trùng số (exact match, index-friendly).
+     *
+     * @return list<string>
+     */
+    public static function lookupVariants(?string $raw): array
+    {
+        $local10 = self::normalize($raw);
+        $digits = self::digits($raw);
+
+        if ($local10 === null) {
+            return array_values(array_unique(array_filter([
+                is_string($raw) ? trim($raw) : null,
+                $digits !== '' ? $digits : null,
+            ])));
+        }
+
+        $national9 = substr($local10, 1);
+
+        return array_values(array_unique(array_filter([
+            $local10,
+            $national9,
+            '84'.$national9,
+            '+84'.$national9,
+            '0084'.$national9,
+        ])));
+    }
 }

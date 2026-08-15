@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { apiGet, apiPost } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
@@ -347,7 +348,12 @@ export function PushsalePurchaseHistoryDialog({ order, open, onOpenChange }) {
                                 {data.orders?.length ? data.orders.map((item, index) => (
                                     <tr key={item.id} className={item.isSelected ? 'info is-selected' : ''}>
                                         <td className="text-center">{index + 1}</td>
-                                        <td className="text-center"><strong>{item.orderCode || '—'}</strong></td>
+                                        <td className="text-center">
+                                            <div className="ps-purchase-code-cell">
+                                                <strong>{item.orderCode || '—'}</strong>
+                                                <OrderStatusFlags row={item} className="ps-contact-flags" showUpsell={false} />
+                                            </div>
+                                        </td>
                                         <td className="text-center">{formatDateTime(item.dataArrivedAt) || '—'}</td>
                                         <td>
                                             <div className="ps-stack-cell">

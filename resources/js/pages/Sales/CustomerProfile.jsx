@@ -67,9 +67,21 @@ function externalHref(url) {
     return `https://${value}`;
 }
 
-function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenDialog, saleWorkspaceUrl = null, warehouseOperationsUrl = null }) {
+function CustomerProfileTable({
+    rows,
+    pagination,
+    selected,
+    setSelected,
+    onOpenDialog,
+    saleWorkspaceUrl = null,
+    warehouseOperationsUrl = null,
+    canDeleteOrders = false,
+    orderActionBaseUrl = null,
+}) {
+    const { ask } = useConfirm();
     const allSelected = rows.length > 0 && rows.every((row) => selected.has(String(row.id)));
     const start = Number(pagination?.from ?? 1);
+    const ordersBase = String(orderActionBaseUrl || '').replace(/\/$/, '');
 
     const toggleAll = (checked) => {
         setSelected((current) => {
@@ -84,6 +96,24 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
             const next = new Set(current);
             checked ? next.add(String(id)) : next.delete(String(id));
             return next;
+        });
+    };
+
+    const deleteData = async (row) => {
+        if (!canDeleteOrders || !ordersBase) {
+            toast.warning('Bạn không có quyền xóa data từ hồ sơ khách hàng.');
+            return;
+        }
+        const ok = await ask({
+            description: `Bạn chắc chắn muốn xóa data của ${row.customerName || row.customerPhone || `#${row.id}`}?`,
+            confirmLabel: 'Xóa',
+            variant: 'destructive',
+        });
+        if (!ok) return;
+        router.delete(`${ordersBase}/orders/${row.id}`, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Đã xóa data.'),
+            onError: (errors) => toast.error(errors.order ?? 'Không thể xóa data.'),
         });
     };
 
@@ -169,7 +199,20 @@ function CustomerProfileTable({ rows, pagination, selected, setSelected, onOpenD
                                     <span>{message || '—'}</span>
                                     {row.hasDifferentReceiver ? <span className="small-tip ps-receiver-note">Người nhận: {row.effectiveReceiverName} · {row.effectiveReceiverPhone}</span> : null}
                                 </td>
-                                <td className="text-center">
+                                <td className="text-center ps-sale-cell">
+                                    <div className="text-right">
+                                        {canDeleteOrders && ordersBase ? (
+                                            <button
+                                                type="button"
+                                                className="btn-icon aoh ps-sale-delete"
+                                                title="Xóa data"
+                                                aria-label="Xóa data"
+                                                onClick={() => deleteData(row)}
+                                            >
+                                                <i className="fa fa-trash" aria-hidden="true" />
+                                            </button>
+                                        ) : null}
+                                    </div>
                                     <span>{safeText(row.saleName)}<br /><span className="small-tip">{row.saleEmail ? `(${row.saleEmail})` : ''}</span></span>
                                     <br />
                                     <span className="small-tip">{dateLabel(row.assignedAt)}</span>
@@ -420,7 +463,17 @@ function FloatingActions({ selectedIds, permissions, actionBaseUrl = '/customers
     );
 }
 
-export default function CustomerProfile({ filters = {}, filterOptions = {}, report, routeUrl = '/customers', saleWorkspaceUrl = null, warehouseOperationsUrl = null, pageTitle = 'Hồ sơ khách hàng', activeMenuCode = '4.2' }) {
+export default function CustomerProfile({
+    filters = {},
+    filterOptions = {},
+    report,
+    routeUrl = '/customers',
+    saleWorkspaceUrl = null,
+    saleOrderActionBaseUrl = null,
+    warehouseOperationsUrl = null,
+    pageTitle = 'Hồ sơ khách hàng',
+    activeMenuCode = '4.2',
+}) {
     const rows = report?.rows?.data ?? [];
     const pagination = report?.rows?.meta ?? { current_page: 1, last_page: 1, per_page: 20, total: 0, from: 0, to: 0 };
     const [form, setForm] = useState(filters);
@@ -549,7 +602,17 @@ export default function CustomerProfile({ filters = {}, filterOptions = {}, repo
                     ) : null}
                 />
 
-                <CustomerProfileTable rows={rows} pagination={pagination} selected={selected} setSelected={setSelected} onOpenDialog={openDialog} saleWorkspaceUrl={saleWorkspaceUrl} warehouseOperationsUrl={warehouseOperationsUrl} />
+                <CustomerProfileTable
+                    rows={rows}
+                    pagination={pagination}
+                    selected={selected}
+                    setSelected={setSelected}
+                    onOpenDialog={openDialog}
+                    saleWorkspaceUrl={saleWorkspaceUrl}
+                    warehouseOperationsUrl={warehouseOperationsUrl}
+                    canDeleteOrders={Boolean(filterOptions?.permissions?.canDeleteOrders)}
+                    orderActionBaseUrl={saleOrderActionBaseUrl}
+                />
 
                 <PushsalePagination routeUrl={routeUrl} filters={form} meta={pagination} scrollTargetId="customer-profile-table" />
 

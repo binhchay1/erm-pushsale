@@ -7,6 +7,7 @@ use App\Enums\DeliveryStatus;
 use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Models\Order;
+use App\Services\Operations\OrderOperationPresenter;
 use Illuminate\Support\Collection;
 
 final class CustomerPurchaseHistoryPresenter
@@ -73,6 +74,8 @@ final class CustomerPurchaseHistoryPresenter
             'total' => (int) $order->total,
             'deposit' => (int) $order->deposit,
             'amountToCollect' => (int) $order->amount_to_collect,
+            'isReturningCustomer' => (bool) $order->is_returning_customer,
+            'isDuplicatePhone' => (bool) $order->is_duplicate_phone || (bool) $order->phone_lock_conflict,
         ];
     }
 
@@ -82,9 +85,11 @@ final class CustomerPurchaseHistoryPresenter
      */
     public static function collection(Collection $orders, int|string $selectedOrderId): array
     {
-        return $orders
+        $rows = $orders
             ->map(fn (Order $order) => self::toArray($order, $selectedOrderId))
             ->values()
             ->all();
+
+        return OrderOperationPresenter::applyDuplicatePhoneFlags($rows, $orders);
     }
 }

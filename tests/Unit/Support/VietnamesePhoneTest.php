@@ -43,4 +43,14 @@ class VietnamesePhoneTest extends TestCase
             'letters only' => ['abcdefghij'],
         ];
     }
+
+    public function test_lookup_variants_cover_common_vietnamese_formats(): void
+    {
+        $variants = VietnamesePhone::lookupVariants('+84912223333');
+
+        $this->assertContains('0912223333', $variants);
+        $this->assertContains('912223333', $variants);
+        $this->assertContains('84912223333', $variants);
+        $this->assertContains('+84912223333', $variants);
+    }
 }

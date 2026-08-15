@@ -33,6 +33,7 @@ class CustomerProfileController extends Controller
             'report' => $service->paginate($filter),
             'routeUrl' => $path,
             'saleWorkspaceUrl' => RoleScopedRoutes::saleWorkspace($request->user()),
+            'saleOrderActionBaseUrl' => RoleScopedRoutes::saleOrderActionBase($request->user()),
             'warehouseOperationsUrl' => RoleScopedRoutes::warehouseOperations($request->user()),
             'activeMenuCode' => $activeMenuCode,
             'pageTitle' => 'Hồ sơ khách hàng',

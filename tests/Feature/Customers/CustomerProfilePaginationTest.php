@@ -48,4 +48,48 @@ class CustomerProfilePaginationTest extends TestCase
                 ->where('filters.per_page', 10)
             );
     }
+
+    public function test_customer_profile_exposes_duplicate_and_returning_flags_plus_delete_wiring(): void
+    {
+        $sales = User::factory()->create(['role' => UserRole::Sales]);
+        $phone = '0912888777';
+
+        Order::query()->create([
+            'order_code' => 'ORD-DUP-1',
+            'sale_user_id' => $sales->id,
+            'customer_name' => 'Khách trùng A',
+            'customer_phone' => $phone,
+            'is_duplicate_phone' => false,
+            'is_returning_customer' => false,
+            'operation_stage' => OperationStage::NewCustomer->value,
+            'closing_status' => ClosingStatus::Open->value,
+            'data_arrived_at' => now()->subHour(),
+            'assigned_at' => now()->subHour(),
+        ]);
+
+        Order::query()->create([
+            'order_code' => 'ORD-DUP-2',
+            'sale_user_id' => $sales->id,
+            'customer_name' => 'Khách trùng B',
+            'customer_phone' => '84912888777',
+            'is_duplicate_phone' => false,
+            'is_returning_customer' => true,
+            'operation_stage' => OperationStage::NewCustomer->value,
+            'closing_status' => ClosingStatus::Open->value,
+            'data_arrived_at' => now()->subMinutes(10),
+            'assigned_at' => now()->subMinutes(10),
+        ]);
+
+        $this->actingAs($sales)
+            ->get('/sales/customers?per_page=20&page=1')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Sales/CustomerProfile')
+                ->where('saleOrderActionBaseUrl', '/sales')
+                ->where('filterOptions.permissions.canDeleteOrders', true)
+                ->has('report.rows.data', 1)
+                ->where('report.rows.data.0.isDuplicatePhone', true)
+                ->where('report.rows.data.0.isReturningCustomer', true)
+            );
+    }
 }

@@ -251,7 +251,23 @@ html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table > tbod
 }
 
 html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-idx { width: 44px; }
-html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-code { width: 120px; }
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-code { width: 150px; }
+
+html body.pushsale-app-body .ps-purchase-history-dialog .ps-purchase-code-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-sale-cell {
+    position: relative;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-sale-cell .ps-sale-delete {
+    margin-bottom: 2px;
+}
 html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-date { width: 140px; }
 html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-sale { width: 120px; }
 html body.pushsale-app-body .ps-purchase-history-dialog .ps-history-table .c-ops { width: 140px; }

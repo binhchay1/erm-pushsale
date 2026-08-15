@@ -8,6 +8,7 @@ use App\Enums\OperationResult;
 use App\Enums\OperationStage;
 use App\Models\Order;
 use App\Services\Inventory\InventoryDeductionService;
+use App\Support\VietnamesePhone;
 use Illuminate\Support\Collection;
 
 /**
@@ -261,6 +262,7 @@ final class OrderOperationPresenter
 
     /**
      * Đánh dấu isDuplicatePhone khi SĐT đã xuất hiện trên hơn 1 đơn (hiển thị icon trùng số như cũ).
+     * Khớp theo số đã chuẩn hóa (0XXXXXXXXX) để không miss khi format SĐT lệch nhau.
      *
      * @param  list<array<string, mixed>>  $rows
      * @param  Collection<int, Order>  $orders
@@ -268,14 +270,19 @@ final class OrderOperationPresenter
      */
     public static function applyDuplicatePhoneFlags(array $rows, Collection $orders): array
     {
-        $duplicatePhones = array_fill_keys(self::phonesWithMultipleOrders($orders), true);
-        if ($duplicatePhones === []) {
+        $duplicateKeys = array_fill_keys(self::phonesWithMultipleOrders($orders), true);
+        if ($duplicateKeys === []) {
             return $rows;
         }
 
         foreach ($rows as $index => $row) {
             $phone = $row['customerPhone'] ?? $row['customer_phone'] ?? null;
-            if (is_string($phone) && $phone !== '' && isset($duplicatePhones[$phone])) {
+            if (! is_string($phone) || $phone === '') {
+                continue;
+            }
+
+            $key = VietnamesePhone::normalize($phone) ?? $phone;
+            if (isset($duplicateKeys[$key])) {
                 $rows[$index]['isDuplicatePhone'] = true;
             }
         }
@@ -285,7 +292,7 @@ final class OrderOperationPresenter
 
     /**
      * @param  Collection<int, Order>  $orders
-     * @return list<string>
+     * @return list<string> Normalized phone keys (0XXXXXXXXX) that appear on more than one order.
      */
     public static function phonesWithMultipleOrders(Collection $orders): array
     {
@@ -299,13 +306,32 @@ final class OrderOperationPresenter
             return [];
         }
 
-        return Order::query()
-            ->whereIn('customer_phone', $phones->all())
-            ->select('customer_phone')
-            ->groupBy('customer_phone')
-            ->havingRaw('COUNT(*) > 1')
+        $variants = [];
+        foreach ($phones as $phone) {
+            foreach (VietnamesePhone::lookupVariants($phone) as $variant) {
+                $variants[$variant] = true;
+            }
+            $variants[$phone] = true;
+        }
+
+        $variantList = array_keys($variants);
+        if ($variantList === []) {
+            return [];
+        }
+
+        $counts = [];
+        Order::query()
+            ->whereIn('customer_phone', $variantList)
             ->pluck('customer_phone')
-            ->all();
+            ->each(function ($phone) use (&$counts): void {
+                if (! is_string($phone) || $phone === '') {
+                    return;
+                }
+                $key = VietnamesePhone::normalize($phone) ?? $phone;
+                $counts[$key] = ($counts[$key] ?? 0) + 1;
+            });
+
+        return array_keys(array_filter($counts, fn (int $count): bool => $count > 1));
     }
 
 

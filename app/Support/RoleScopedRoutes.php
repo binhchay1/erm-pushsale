@@ -20,6 +20,20 @@ final class RoleScopedRoutes
         };
     }
 
+    /** Base path for sale order actions (delete/update) — `/admin/sales` or `/sales`. */
+    public static function saleOrderActionBase(?User $user): ?string
+    {
+        if (! $user) {
+            return null;
+        }
+
+        return match ($user->role) {
+            UserRole::Admin => '/admin/sales',
+            UserRole::Sales => '/sales',
+            default => null,
+        };
+    }
+
     public static function warehouseOperations(?User $user): ?string
     {
         if (! $user) {
