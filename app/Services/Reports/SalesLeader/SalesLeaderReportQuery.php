@@ -17,8 +17,7 @@ final class SalesLeaderReportQuery
      * Prefer {@see self::stages()} so labels/keys stay synced with menu 1.8.1.
      */
     public const STAGES = [
-        'new_customer', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6',
-        'care_1', 'care_2', 'care_3', 'skipped',
+        'new_customer', 'call_2', 'call_3', 'call_4', 'call_5', 'call_6', 'skipped',
     ];
 
     public function __construct(

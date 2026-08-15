@@ -54,12 +54,28 @@ class OperationResultSetting extends BusinessRecord
             return;
         }
 
+        $activeValues = [];
         foreach (self::defaultRows() as $row) {
+            $activeValues[] = $row['value'];
             /** @var self $setting */
             $setting = self::query()->firstOrNew(['value' => $row['value']]);
             if (! $setting->exists) {
                 $setting->fill($row)->save();
+            } else {
+                // Keep admin edits for label/closes_order; ensure active list is on.
+                $setting->is_active = true;
+                if (! filled($setting->label)) {
+                    $setting->label = $row['label'];
+                }
+                $setting->save();
             }
+        }
+
+        // Deactivate legacy results no longer in the active selectable list.
+        if ($activeValues !== []) {
+            self::query()
+                ->whereNotIn('value', $activeValues)
+                ->update(['is_active' => false]);
         }
     }
 

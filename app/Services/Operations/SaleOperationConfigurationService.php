@@ -14,8 +14,8 @@ use Illuminate\Support\Str;
  * vào các stage ổn định đang lưu trong bảng orders.
  *
  * Cấu hình tenant có thể đổi tên, thời lượng và luồng chuyển bước mà không phải
- * thay đổi dữ liệu lịch sử. Nếu doanh nghiệp chưa cấu hình, hệ thống dùng bộ
- * mặc định đúng quy trình Pushsale: Gọi lần 1 → ... → Chăm sóc lần 3 / Bỏ qua.
+ * thay đổi dữ liệu lịch sử. Quy trình đang dùng: Khách mới → Gọi lần 2…6 → Bỏ qua.
+ * Care lần 1–3 giữ trong enum/DB cho đơn cũ nhưng không còn trong filter/tab active.
  */
 final class SaleOperationConfigurationService
 {
@@ -29,20 +29,33 @@ final class SaleOperationConfigurationService
     }
 
     /**
+     * Tabs / filters active — không gồm chăm sóc lần 1–3.
+     *
+     * @return list<array{value:string,label:string,durationMinutes:int,level:int,color:string}>
+     */
+    public function activeDefinitions(bool $includeNoOperation = true): array
+    {
+        $allowed = OperationStage::activeWorkflowValues(
+            includeSkipped: true,
+            includeNoOperation: $includeNoOperation,
+        );
+
+        return collect($this->definitions())
+            ->filter(fn (array $row): bool => in_array($row['value'], $allowed, true))
+            ->values()
+            ->all();
+    }
+
+    /**
      * Options cho filter tác nghiệp (menu 1.8.1 labels trên enum keys).
      * Báo cáo mặc định bỏ `no_operation`; workspace/customer có thể bật lại.
+     * Care stages bị loại khỏi filter active.
      *
      * @return list<array{value:string,label:string,id:string,name:string}>
      */
     public function filterOptions(bool $includeNoOperation = false): array
     {
-        return collect($this->definitions())
-            ->when(
-                ! $includeNoOperation,
-                fn (Collection $rows) => $rows->reject(
-                    fn (array $row): bool => $row['value'] === OperationStage::NoOperation->value
-                ),
-            )
+        return collect($this->activeDefinitions(includeNoOperation: $includeNoOperation))
             ->map(fn (array $row): array => [
                 'value' => $row['value'],
                 'label' => $row['label'],
@@ -104,11 +117,11 @@ final class SaleOperationConfigurationService
 
         $configured = $workflow ? $this->stageFromCategory($workflow->toCategory) : null;
         if ($configured) {
-            return $configured;
+            return $this->coerceActiveStage($configured);
         }
 
         if (str_starts_with($result->value, 'no_answer_')) {
-            return $result->nextStage();
+            return $this->coerceActiveStage($result->nextStage());
         }
 
         if (in_array($result, [
@@ -121,7 +134,7 @@ final class SaleOperationConfigurationService
             return $this->advanceCallStage($current);
         }
 
-        return $result->nextStage();
+        return $this->coerceActiveStage($result->nextStage());
     }
 
     public function workflowDelayMinutes(OperationStage $current, OperationResult $result): int
@@ -159,7 +172,7 @@ final class SaleOperationConfigurationService
         }
 
         $defaults = [
-            OperationStage::NewCustomer->value => ['label' => 'Gọi lần 1', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
+            OperationStage::NewCustomer->value => ['label' => 'Khách mới', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
             OperationStage::Call2->value => ['label' => 'Gọi lần 2', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
             OperationStage::Call3->value => ['label' => 'Gọi lần 3', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
             OperationStage::Call4->value => ['label' => 'Gọi lần 4', 'durationMinutes' => 0, 'level' => 4, 'color' => 'orangered'],
@@ -207,7 +220,7 @@ final class SaleOperationConfigurationService
 
         $name = Str::of((string) $category->name)->ascii()->lower()->replaceMatches('/[^a-z0-9]+/', ' ')->trim()->value();
 
-        if ($category->is_start || preg_match('/\bgoi\s*lan\s*1\b/', $name)) {
+        if ($category->is_start || preg_match('/\bgoi\s*lan\s*1\b/', $name) || preg_match('/\bkhach\s*moi\b/', $name)) {
             return OperationStage::NewCustomer;
         }
 
@@ -264,5 +277,11 @@ final class SaleOperationConfigurationService
         return $index === false
             ? $current
             : $sequence[min($index + 1, count($sequence) - 1)];
+    }
+
+    /** Care stages còn trong DB/workflow cũ → ép về Skipped cho quy trình active. */
+    private function coerceActiveStage(OperationStage $stage): OperationStage
+    {
+        return $stage->isLegacyCare() ? OperationStage::Skipped : $stage;
     }
 }

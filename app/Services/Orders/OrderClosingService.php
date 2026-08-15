@@ -95,7 +95,7 @@ class OrderClosingService
                 'order_code' => $this->orderCodes->generate($order),
                 'closed_at' => now(),
                 'closing_status' => ClosingStatus::Closed->value,
-                'operation_stage' => OperationStage::Care1->value,
+                'operation_stage' => OperationStage::Skipped->value,
                 'operation_result' => $payload['operation_result'] ?? OperationResult::ClosedSuccess->value,
                 'delivery_status' => DeliveryStatus::WaitingWaybill->value,
                 'amount_to_collect' => $amountToCollect,

@@ -204,6 +204,10 @@ Do **not** add another sidebar override CSS file. Page CSS must not override `.p
 - A result with `closes_order = true` calls the same real close-order service used by sale operation, so it must be treated as business configuration.
 - Combo modal tables must stay inside the dialog frame; use canonical `.ps-combo-dialog` rules rather than per-dialog inline widths.
 - PageFrame title alignment must start from the 14px page gutter; do not center title text inside menu group 1/2 pages unless the original Pushsale HTML does so explicitly.
+- **Active sale workflow (feedback):** 6 stages — Khách mới + Gọi lần 2…6 (+ Bỏ qua / Chưa TN). `care_1…3` remain in enum/DB for history but are excluded from `SaleOperationConfigurationService::filterOptions()` / `activeDefinitions()` and workspace tabs. Closing an order sets `skipped`, not care.
+- **Active operation results:** Chốt đơn, Không nghe máy, Máy bận, Gọi lại sau, Trùng số, Sai số/Nhầm số, Thuê bao, Suy nghĩ thêm, Không có nhu cầu (`OperationResult::selectableOptions()` / `filterOptions()`). Legacy values still resolve via `tryFromStored`.
+- **Closing filter:** chỉ Đã chốt đơn / Chưa chốt đơn (`ClosingStatus::options()`).
+- **Date presets** (shared `DateRangeFilter`): Hôm nay, Hôm qua, Tuần này, Tuần trước, Tháng này, Tháng trước, Tùy chỉnh.
 
 ## v135 taxonomy modal contract
 

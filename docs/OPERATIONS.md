@@ -24,7 +24,9 @@ Landing / ads → Lead ingest → Sale tác nghiệp (4.1)
 - Icon layout Pushsale: `div.text-right` / float chat+save trên TN cần.
 - **Tin nhắn** = note landing (read-only). **TN cần** = ghi chú sale (`txt-mof`).
 - Upsale: cờ + dòng `—` trong cột SP (bổ sung so với mẫu gốc).
-- Tab trạng thái: Gọi lần / Chăm sóc / Bỏ qua / Chưa TN / Tất cả.
+- Tab trạng thái: Khách mới / Gọi lần 2–6 / Bỏ qua / Chưa TN / Tất cả (Chăm sóc lần 1–3 đã bỏ khỏi quy trình active; đơn cũ vẫn đọc được).
+- Kết quả tác nghiệp (dropdown): Chốt đơn, Không nghe máy, Máy bận, Gọi lại sau, Trùng số, Sai số/Nhầm số, Thuê bao, Suy nghĩ thêm, Không có nhu cầu.
+- Trạng thái chốt đơn (filter): Đã chốt đơn / Chưa chốt đơn.
 
 ## Kho tác nghiệp (5.1)
 

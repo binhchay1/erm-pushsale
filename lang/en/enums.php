@@ -21,8 +21,8 @@ return [
         'posted' => 'Posted',
     ],
     'closing_status' => [
-        'open' => 'Open',
-        'closed' => 'Closed',
+        'open' => 'Not closed',
+        'closed' => 'Closed order',
         'cancelled' => 'Cancelled',
     ],
     'lead_ingestion_status' => [

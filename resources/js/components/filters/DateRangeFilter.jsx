@@ -105,12 +105,22 @@ function buildMonthMatrix(monthDate) {
 function presetRanges(now = new Date()) {
     const today = startOfDay(now);
     const yesterday = startOfDay(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1));
-    const last7From = startOfDay(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6));
+    const thisWeekFrom = startOfWeekMonday(today);
+    const thisWeekTo = endOfWeekSunday(today);
+    const lastWeekTo = startOfDay(new Date(thisWeekFrom.getFullYear(), thisWeekFrom.getMonth(), thisWeekFrom.getDate() - 1));
+    const lastWeekFrom = startOfWeekMonday(lastWeekTo);
+    const thisMonthFrom = new Date(today.getFullYear(), today.getMonth(), 1);
+    const thisMonthTo = today;
+    const lastMonthFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastMonthTo = startOfDay(new Date(today.getFullYear(), today.getMonth(), 0));
 
     return [
-        { key: 'last7', label: '7 ngày vừa qua', from: last7From, to: today },
-        { key: 'yesterday', label: 'Hôm qua', from: yesterday, to: yesterday },
         { key: 'today', label: 'Hôm nay', from: today, to: today },
+        { key: 'yesterday', label: 'Hôm qua', from: yesterday, to: yesterday },
+        { key: 'this_week', label: 'Tuần này', from: thisWeekFrom, to: thisWeekTo },
+        { key: 'last_week', label: 'Tuần trước', from: lastWeekFrom, to: lastWeekTo },
+        { key: 'this_month', label: 'Tháng này', from: thisMonthFrom, to: thisMonthTo },
+        { key: 'last_month', label: 'Tháng trước', from: lastMonthFrom, to: lastMonthTo },
         { key: 'custom', label: 'Tùy chỉnh', from: null, to: null },
     ];
 }
@@ -308,9 +318,9 @@ export function DateRangeFilter({
         <div className={`ps-drp-popover ${showCalendar ? '' : 'is-presets-only'}`.trim()} style={(() => {
             const rect = rootRef.current?.getBoundingClientRect();
             if (!rect) return { top: 80, left: 24 };
-            const width = showCalendar ? 720 : 180;
+            const width = showCalendar ? Math.min(720, window.innerWidth - 16) : Math.min(220, window.innerWidth - 16);
             const left = Math.min(Math.max(8, rect.left), window.innerWidth - width - 8);
-            const top = Math.min(rect.bottom + 4, window.innerHeight - (showCalendar ? 420 : 200));
+            const top = Math.min(rect.bottom + 4, window.innerHeight - (showCalendar ? 420 : 320));
             return { top, left, width };
         })()}
         >

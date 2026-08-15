@@ -112,7 +112,52 @@ html body.pushsale-app-body .ps-role-chart-grid > * {
     html body.pushsale-app-body .ps-role-kpi-card {
         min-height: 96px !important;
     }
+
+    /* Role dashboards: avoid horizontal blowout on phone */
+    html body.pushsale-app-body .ps-role-dashboard.ps-page-shell,
+    html body.pushsale-app-body .ps-role-dashboard .ps-page-shell__body,
+    html body.pushsale-app-body .ps-role-dashboard .ps-role-dash-body {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    html body.pushsale-app-body .ps-role-dashboard .ps-role-dash-body {
+        padding: 0 10px 14px !important;
+        gap: 10px !important;
+    }
+
+    html body.pushsale-app-body .ps-role-dashboard .recharts-responsive-container,
+    html body.pushsale-app-body .ps-role-dashboard .ps-role-chart-card,
+    html body.pushsale-app-body .ps-role-dashboard .ps-role-kpi-card {
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
 }
+
+/* Wide Pushsale dialogs (optimization / customer history) — full usable phone surface */
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-opt-wide-dialog.ps-dialog-surface,
+    html body.pushsale-app-body [data-slot='dialog-content'].ps-opt-wide-dialog.ps-dialog-surface,
+    html body.pushsale-app-body .ps-purchase-history-dialog.ps-customer-dialog.ps-dialog-surface,
+    html body.pushsale-app-body .ps-customer-dialog.ps-dialog-surface {
+        width: calc(100vw - 8px) !important;
+        max-width: calc(100vw - 8px) !important;
+        max-height: calc(100dvh - 8px) !important;
+        height: auto !important;
+        margin: 4px auto !important;
+    }
+
+    html body.pushsale-app-body .ps-drp-popover {
+        max-width: calc(100vw - 16px) !important;
+    }
+
+    html body.pushsale-app-body .ps-drp-popover.is-presets-only {
+        width: min(240px, calc(100vw - 16px)) !important;
+    }
+}
+
 
 .ps-role-dashboard .ps-page-shell,
 .ps-role-dashboard .space-y-6 {

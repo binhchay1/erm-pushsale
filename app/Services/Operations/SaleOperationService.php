@@ -91,7 +91,7 @@ class SaleOperationService
             )
             ->withQueryString();
 
-        $definitions = $this->configuration->definitions();
+        $definitions = $this->configuration->activeDefinitions(includeNoOperation: true);
         $tabs = collect($definitions)
             ->map(function (array $definition) use ($counts, $total): array {
                 $count = (int) ($counts[$definition['value']] ?? 0);

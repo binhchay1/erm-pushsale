@@ -57,10 +57,10 @@ enum OperationResult: string
             self::NoAnswer4 => OperationStage::Call5,
             self::NoAnswer5, self::NoAnswer6 => OperationStage::Call6,
             self::DuplicateNumber, self::WrongNumber, self::NoNeed, self::PriceRejected => OperationStage::Skipped,
-            self::ClosedSuccess, self::ReceivedOrder, self::GoodEffect, self::Upsell7Days => OperationStage::Care1,
-            self::Upsell14Days => OperationStage::Care2,
-            self::Upsell21Days => OperationStage::Care3,
-            self::NotReceivedOrder, self::PoorEffect, self::NotRepurchased => OperationStage::Care3,
+            // Care stages removed from active workflow — closed / post-close results land on Skipped.
+            self::ClosedSuccess, self::ReceivedOrder, self::GoodEffect, self::Upsell7Days,
+            self::Upsell14Days, self::Upsell21Days,
+            self::NotReceivedOrder, self::PoorEffect, self::NotRepurchased => OperationStage::Skipped,
             self::ReadyToClose => OperationStage::Call6,
             self::Busy, self::SubscriberUnavailable, self::CallbackScheduled,
             self::Considering, self::SentQuote => OperationStage::NewCustomer,
@@ -119,8 +119,8 @@ enum OperationResult: string
     }
 
     /**
-     * Danh sách đúng thứ tự Pushsale. Không nghe máy dùng giá trị giả
-     * no_answer_auto để backend tự chọn lần gọi tương ứng với stage hiện tại.
+     * Danh sách kết quả tác nghiệp đang dùng (feedback sale): 9 kết quả + không nghe máy auto.
+     * Các enum legacy vẫn resolve qua tryFromStored cho dữ liệu lịch sử.
      *
      * @return list<array{value: string, label: string, group: string}>
      */
@@ -136,14 +136,6 @@ enum OperationResult: string
             ['value' => self::SubscriberUnavailable->value, 'label' => self::SubscriberUnavailable->label()],
             ['value' => self::Considering->value, 'label' => self::Considering->label()],
             ['value' => self::NoNeed->value, 'label' => self::NoNeed->label()],
-            ['value' => self::ReceivedOrder->value, 'label' => self::ReceivedOrder->label()],
-            ['value' => self::NotReceivedOrder->value, 'label' => self::NotReceivedOrder->label()],
-            ['value' => self::GoodEffect->value, 'label' => self::GoodEffect->label()],
-            ['value' => self::PoorEffect->value, 'label' => self::PoorEffect->label()],
-            ['value' => self::NotRepurchased->value, 'label' => self::NotRepurchased->label()],
-            ['value' => self::Upsell7Days->value, 'label' => self::Upsell7Days->label()],
-            ['value' => self::Upsell14Days->value, 'label' => self::Upsell14Days->label()],
-            ['value' => self::Upsell21Days->value, 'label' => self::Upsell21Days->label()],
         ];
 
         return array_map(fn (array $item): array => $item + ['group' => ''], $items);

@@ -21,8 +21,8 @@ return [
         'posted' => 'Đã đăng',
     ],
     'closing_status' => [
-        'open' => 'Đang mở',
-        'closed' => 'Đã chốt',
+        'open' => 'Chưa chốt đơn',
+        'closed' => 'Đã chốt đơn',
         'cancelled' => 'Đã hủy / bỏ',
     ],
     'lead_ingestion_status' => [
