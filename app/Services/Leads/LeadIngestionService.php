@@ -1922,6 +1922,7 @@ class LeadIngestionService
                 $order->forceFill([
                     'phone_lock_conflict' => true,
                     'phone_lock_note' => 'Đơn được chuyển về Sale đang sở hữu SĐT để tránh hai Sale gọi cùng một khách.',
+                    'is_duplicate_phone' => true,
                 ])->save();
             }
 

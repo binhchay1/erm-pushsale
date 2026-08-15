@@ -119,10 +119,13 @@ class SaleOperationService
 
         return [
             'rows' => [
-                'data' => collect($paginator->items())
-                    ->map(fn ($order) => OrderOperationPresenter::toArray($order, $this->configuration))
-                    ->values()
-                    ->all(),
+                'data' => OrderOperationPresenter::applyDuplicatePhoneFlags(
+                    collect($paginator->items())
+                        ->map(fn ($order) => OrderOperationPresenter::toArray($order, $this->configuration))
+                        ->values()
+                        ->all(),
+                    collect($paginator->items()),
+                ),
                 'meta' => [
                     'current_page' => $paginator->currentPage(),
                     'last_page' => $paginator->lastPage(),

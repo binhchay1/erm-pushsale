@@ -57,7 +57,7 @@ class LeadOrderFactory
             ? $lead->landingConnection
             : $source->landingConnection()->first();
 
-        // Khách cũ = SĐT đã từng có đơn trước đó (đồng bộ với báo cáo khách mới/cũ).
+        // Khách cũ / trùng số = SĐT đã từng có đơn trước đó (hiển thị icon như Pushsale).
         $isReturningCustomer = filled($normalized['customer_phone'] ?? null)
             && Order::query()->where('customer_phone', $normalized['customer_phone'])->exists();
 
@@ -91,7 +91,7 @@ class LeadOrderFactory
             'operation_stage' => OperationStage::NewCustomer->value,
             // Đơn mới chưa chốt → "cần giao/đang tác nghiệp"; chỉ chuyển 'waiting_waybill' khi chốt đơn.
             'delivery_status' => DeliveryStatus::DeliverNow->value,
-            'is_duplicate_phone' => false,
+            'is_duplicate_phone' => $isReturningCustomer,
             'is_returning_customer' => $isReturningCustomer,
             'contact_count' => 1,
         ]);
@@ -102,6 +102,15 @@ class LeadOrderFactory
             foreach ($comboItems as $row) {
                 $order->items()->create($row);
             }
+        }
+
+        // Đơn cùng SĐT (kể cả đơn cũ) đều gắn cờ trùng số để icon hiện trên sale/kho/KT.
+        if ($isReturningCustomer && filled($normalized['customer_phone'] ?? null)) {
+            Order::query()
+                ->where('customer_phone', $normalized['customer_phone'])
+                ->where('is_duplicate_phone', false)
+                ->update(['is_duplicate_phone' => true]);
+            $order->is_duplicate_phone = true;
         }
 
         return $this->syncTotals($order->fresh(['items']));

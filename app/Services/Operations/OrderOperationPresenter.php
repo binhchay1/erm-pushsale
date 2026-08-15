@@ -104,7 +104,8 @@ final class OrderOperationPresenter
             'carrierServiceFee' => $order->carrier_service_fee,
             'shippingSupportFee' => $order->shipping_support_fee,
             'isReturningCustomer' => $order->is_returning_customer,
-            'isDuplicatePhone' => $order->is_duplicate_phone,
+            // Hiển thị icon trùng số như Pushsale: cờ DB, phone-lock, hoặc SĐT đã có nhiều đơn.
+            'isDuplicatePhone' => (bool) $order->is_duplicate_phone || (bool) $order->phone_lock_conflict,
             'closedAt' => $order->closed_at?->toIso8601String(),
             'carePersonName' => $order->saleUser?->name,
             'stockWarnings' => app(InventoryDeductionService::class)->checkOrderStock($order),
@@ -253,7 +254,58 @@ final class OrderOperationPresenter
      */
     public static function collection(Collection $orders): array
     {
-        return $orders->map(fn (Order $o) => self::toArray($o))->values()->all();
+        $rows = $orders->map(fn (Order $o) => self::toArray($o))->values()->all();
+
+        return self::applyDuplicatePhoneFlags($rows, $orders);
+    }
+
+    /**
+     * Đánh dấu isDuplicatePhone khi SĐT đã xuất hiện trên hơn 1 đơn (hiển thị icon trùng số như cũ).
+     *
+     * @param  list<array<string, mixed>>  $rows
+     * @param  Collection<int, Order>  $orders
+     * @return list<array<string, mixed>>
+     */
+    public static function applyDuplicatePhoneFlags(array $rows, Collection $orders): array
+    {
+        $duplicatePhones = array_fill_keys(self::phonesWithMultipleOrders($orders), true);
+        if ($duplicatePhones === []) {
+            return $rows;
+        }
+
+        foreach ($rows as $index => $row) {
+            $phone = $row['customerPhone'] ?? $row['customer_phone'] ?? null;
+            if (is_string($phone) && $phone !== '' && isset($duplicatePhones[$phone])) {
+                $rows[$index]['isDuplicatePhone'] = true;
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @param  Collection<int, Order>  $orders
+     * @return list<string>
+     */
+    public static function phonesWithMultipleOrders(Collection $orders): array
+    {
+        $phones = $orders
+            ->pluck('customer_phone')
+            ->filter(fn ($phone): bool => is_string($phone) && $phone !== '')
+            ->unique()
+            ->values();
+
+        if ($phones->isEmpty()) {
+            return [];
+        }
+
+        return Order::query()
+            ->whereIn('customer_phone', $phones->all())
+            ->select('customer_phone')
+            ->groupBy('customer_phone')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('customer_phone')
+            ->all();
     }
 
 

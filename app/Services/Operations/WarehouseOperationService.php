@@ -7,6 +7,7 @@ use App\Enums\DeliveryStatus;
 use App\Models\Order;
 use App\Models\Shipment;
 use App\Services\Inventory\InventoryDeductionService;
+use App\Services\Operations\OrderOperationPresenter;
 use App\Services\Shipping\ShipmentActionResolver;
 use App\Support\OrderRevenue;
 use App\Support\PhoneCarrier;
@@ -84,7 +85,10 @@ class WarehouseOperationService
         return [
             'summary' => $summary,
             'rows' => [
-                'data' => collect($paginator->items())->map(fn (Order $order) => $this->presentRow($order))->values()->all(),
+                'data' => OrderOperationPresenter::applyDuplicatePhoneFlags(
+                    collect($paginator->items())->map(fn (Order $order) => $this->presentRow($order))->values()->all(),
+                    collect($paginator->items()),
+                ),
                 'meta' => [
                     'current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(),
                     'per_page' => $paginator->perPage(), 'total' => $paginator->total(),
@@ -287,7 +291,7 @@ class WarehouseOperationService
             'phoneCarrier' => PhoneCarrier::label($order->effectiveReceiverPhone() ?: $order->customer_phone) ?? $order->phone_carrier,
             'phoneCarrierKey' => PhoneCarrier::key($order->effectiveReceiverPhone() ?: $order->customer_phone),
             'isReturningCustomer' => (bool) $order->is_returning_customer,
-            'isDuplicatePhone' => (bool) $order->is_duplicate_phone,
+            'isDuplicatePhone' => (bool) $order->is_duplicate_phone || (bool) $order->phone_lock_conflict,
             'awaitingLandingUpsell' => $order->isAwaitingLandingUpsell(),
             'landingUpsellHoldUntil' => $order->landing_upsell_hold_until?->toIso8601String(),
             'pendingSupplementCount' => (int) ($order->pending_supplement_packets_count ?? 0),
