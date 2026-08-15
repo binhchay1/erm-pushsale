@@ -328,4 +328,11 @@ return [
         5 => 'Thứ 6',
         6 => 'Thứ 7',
     ],
+    'sales_optimization' => [
+        'alerts_saved' => 'Đã lưu mức cảnh báo.',
+        'targets_saved' => 'Đã lưu mục tiêu sale.',
+        'catalogs_saved' => 'Đã lưu danh mục tối ưu sale.',
+        'receive_saved' => 'Đã cập nhật nhận dữ liệu cho :count sale.',
+        'alerts_high_gte_low' => 'Chỉ số trên phải lớn hơn hoặc bằng chỉ số dưới.',
+    ],
 ];

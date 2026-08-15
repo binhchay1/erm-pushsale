@@ -3,20 +3,21 @@ import { useForm } from '@inertiajs/react';
 import { toast } from 'sonner';
 
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
+import { useT } from '@/providers/I18nProvider';
 
 export const OPT_METRIC_COLUMNS = [
-    { key: 'provisional_revenue', label: 'Doanh số tạm tính' },
-    { key: 'success_revenue', label: 'Doanh số thành công' },
-    { key: 'allocated_total', label: 'Contact được chia Tổng' },
-    { key: 'allocated_duplicate', label: 'Contact được chia trùng' },
-    { key: 'allocated_unique', label: 'Contact không trùng' },
-    { key: 'closed_contacts', label: 'Contact chốt đơn' },
-    { key: 'close_rate', label: 'Tỷ lệ chốt đơn' },
-    { key: 'avg_order_value', label: 'Giá trị đơn' },
-    { key: 'products_per_order', label: 'Số sản phẩm/Đơn' },
-    { key: 'untouched', label: 'Contact chưa tác nghiệp' },
-    { key: 'cancelled_revenue', label: 'Doanh số hủy' },
-    { key: 'returned_revenue', label: 'Doanh số hoàn' },
+    { key: 'provisional_revenue', labelKey: 'col_provisional_revenue' },
+    { key: 'success_revenue', labelKey: 'col_success_revenue' },
+    { key: 'allocated_total', labelKey: 'col_allocated_total' },
+    { key: 'allocated_duplicate', labelKey: 'col_allocated_duplicate' },
+    { key: 'allocated_unique', labelKey: 'col_allocated_unique' },
+    { key: 'closed_contacts', labelKey: 'col_closed_contacts' },
+    { key: 'close_rate', labelKey: 'col_close_rate' },
+    { key: 'avg_order_value', labelKey: 'col_avg_order_value' },
+    { key: 'products_per_order', labelKey: 'col_products_per_order' },
+    { key: 'untouched', labelKey: 'col_untouched' },
+    { key: 'cancelled_revenue', labelKey: 'col_cancelled_revenue' },
+    { key: 'returned_revenue', labelKey: 'col_returned_revenue' },
 ];
 
 function emptyMetrics() {
@@ -70,18 +71,23 @@ function salesOptionsFrom(filterOptions = {}) {
 }
 
 function MetricInputs({ metrics, onChange, prefix = '' }) {
-    return OPT_METRIC_COLUMNS.map((col) => (
-        <td key={`${prefix}${col.key}`} className="text-center">
-            <input
-                className="form-control input-sm ps-opt-dialog-input"
-                value={metrics?.[col.key] ?? ''}
-                onChange={(event) => onChange(col.key, event.target.value)}
-                placeholder="Chỉ tiêu"
-                title={`Nhập chỉ tiêu: ${col.label}`}
-                inputMode="decimal"
-            />
-        </td>
-    ));
+    const t = useT();
+
+    return OPT_METRIC_COLUMNS.map((col) => {
+        const label = t(`reports.sales_optimization.${col.labelKey}`);
+        return (
+            <td key={`${prefix}${col.key}`} className="text-center">
+                <input
+                    className="form-control input-sm ps-opt-dialog-input"
+                    value={metrics?.[col.key] ?? ''}
+                    onChange={(event) => onChange(col.key, event.target.value)}
+                    placeholder={t('reports.sales_optimization.target_placeholder')}
+                    title={t('reports.sales_optimization.target_input_title', { label })}
+                    inputMode="decimal"
+                />
+            </td>
+        );
+    });
 }
 
 /** Dialog ảnh 2 — Danh mục tối ưu sale */
@@ -92,6 +98,7 @@ export function OptimizationCatalogDialog({
     leaderUserId,
     leaderLabel = '',
 }) {
+    const t = useT();
     const [rows, setRows] = useState([]);
     const form = useForm({ leader_user_id: leaderUserId, catalogs: [] });
 
@@ -131,7 +138,7 @@ export function OptimizationCatalogDialog({
             }));
 
         if (!payload.length) {
-            toast.error('Nhập ít nhất một dòng danh mục (cột Tên).');
+            toast.error(t('reports.sales_optimization.catalog_name_required'));
             return;
         }
 
@@ -142,10 +149,10 @@ export function OptimizationCatalogDialog({
         form.post('/admin/sales/reports/optimization/catalogs', {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Đã lưu danh mục tối ưu sale.');
+                toast.success(t('reports.sales_optimization.catalog_saved'));
                 onOpenChange?.(false);
             },
-            onError: () => toast.error('Không lưu được danh mục tối ưu sale.'),
+            onError: () => toast.error(t('reports.sales_optimization.catalog_save_fail')),
         });
     };
 
@@ -153,23 +160,26 @@ export function OptimizationCatalogDialog({
         <PushsaleDialog
             open={open}
             onOpenChange={onOpenChange}
-            title="DANH MỤC TỐI ƯU SALE"
+            title={t('reports.sales_optimization.catalog_title')}
             size="full"
-            width="98vw"
+            width="99vw"
             className="ps-opt-wide-dialog"
             bodyClassName="ps-opt-dialog-body"
             footer={(
-                <button type="button" className="btn btn-sm btn-default" onClick={() => onOpenChange?.(false)}>Đóng</button>
+                <button type="button" className="btn btn-sm btn-default" onClick={() => onOpenChange?.(false)}>
+                    {t('reports.sales_optimization.close')}
+                </button>
             )}
         >
             <p className="ps-opt-dialog-hint">
-                Đây là form <strong>thiết lập chỉ tiêu mẫu</strong> (không phải số liệu báo cáo thực tế).
-                Nhập tên level + các chỉ tiêu rồi bấm <strong>Lưu</strong>.
+                {t('reports.sales_optimization.catalog_hint')}
             </p>
             <div className="ps-opt-dialog-toolbar">
-                <strong>Danh mục tối ưu sale</strong>
+                <strong>{t('reports.sales_optimization.catalog_heading')}</strong>
                 <div className="ps-opt-dialog-toolbar__right">
-                    <span className="text-muted">Trưởng nhóm: {leaderLabel || leaderUserId}</span>
+                    <span className="text-muted">
+                        {t('reports.sales_optimization.leader_label', { name: leaderLabel || leaderUserId })}
+                    </span>
                     <button
                         type="button"
                         className="btn btn-sm btn-primary"
@@ -184,7 +194,7 @@ export function OptimizationCatalogDialog({
                             setRows(next.length ? next : [emptyCatalogRow(0)]);
                         }}
                     >
-                        <i className="fa fa-search" /> Tìm kiếm
+                        <i className="fa fa-search" /> {t('reports.sales_optimization.search')}
                     </button>
                 </div>
             </div>
@@ -192,33 +202,33 @@ export function OptimizationCatalogDialog({
                 <table className="table table-bordered table-striped ps-opt-dialog-table">
                     <thead>
                         <tr>
-                            <th className="text-center" rowSpan="2">STT</th>
-                            <th className="text-center" rowSpan="2">Tên</th>
-                            <th className="text-center" rowSpan="2">Doanh số tạm tính</th>
-                            <th className="text-center" rowSpan="2">Doanh số thành công</th>
-                            <th className="text-center" colSpan="2">Contact được chia</th>
-                            <th className="text-center" rowSpan="2">Contact không trùng</th>
-                            <th className="text-center" rowSpan="2">Contact chốt đơn</th>
-                            <th className="text-center" rowSpan="2">Tỷ lệ chốt đơn</th>
-                            <th className="text-center" rowSpan="2">Giá trị đơn</th>
-                            <th className="text-center" rowSpan="2">Số sản phẩm/Đơn</th>
-                            <th className="text-center" rowSpan="2">Contact chưa tác nghiệp</th>
-                            <th className="text-center" rowSpan="2">Doanh số hủy</th>
-                            <th className="text-center" rowSpan="2">Doanh số hoàn</th>
-                            <th className="text-center" rowSpan="2">Cập nhật</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_stt')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_name')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_provisional_revenue')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_success_revenue')}</th>
+                            <th className="text-center" colSpan="2">{t('reports.sales_optimization.col_allocated')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_allocated_unique')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_closed_contacts')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_close_rate')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_avg_order_value')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_products_per_order')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_untouched')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_cancelled_revenue')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_returned_revenue')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.update_col')}</th>
                             <th className="text-center" rowSpan="2">
                                 <button
                                     type="button"
                                     className="btn btn-xs btn-link"
                                     onClick={() => setRows((current) => [...current, emptyCatalogRow(current.length)])}
                                 >
-                                    <i className="fa fa-plus" /> Thêm
+                                    <i className="fa fa-plus" /> {t('reports.sales_optimization.add')}
                                 </button>
                             </th>
                         </tr>
                         <tr>
-                            <th className="text-center">Tổng</th>
-                            <th className="text-center">trùng</th>
+                            <th className="text-center">{t('reports.sales_optimization.col_allocated_total')}</th>
+                            <th className="text-center">{t('reports.sales_optimization.col_allocated_duplicate')}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -240,7 +250,7 @@ export function OptimizationCatalogDialog({
                                 <td className="text-center" />
                                 <td className="text-center">
                                     <button type="button" className="btn btn-xs btn-link" onClick={save} disabled={form.processing}>
-                                        <i className="fa fa-save" /> Lưu
+                                        <i className="fa fa-save" /> {t('reports.sales_optimization.save')}
                                     </button>
                                 </td>
                             </tr>
@@ -254,6 +264,7 @@ export function OptimizationCatalogDialog({
 
 /** Dialog ảnh 3 — Cập nhật chỉ số cảnh báo */
 export function OptimizationAlertsDialog({ open, onOpenChange, thresholds }) {
+    const t = useT();
     const form = useForm({
         low_ratio: thresholds?.low ?? 80,
         high_ratio: thresholds?.high ?? 100,
@@ -271,10 +282,10 @@ export function OptimizationAlertsDialog({ open, onOpenChange, thresholds }) {
         form.post('/admin/sales/reports/optimization/alerts', {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Đã cập nhật chỉ số cảnh báo.');
+                toast.success(t('reports.sales_optimization.alerts_saved'));
                 onOpenChange?.(false);
             },
-            onError: () => toast.error('Không cập nhật được chỉ số cảnh báo.'),
+            onError: () => toast.error(t('reports.sales_optimization.alerts_save_fail')),
         });
     };
 
@@ -282,13 +293,13 @@ export function OptimizationAlertsDialog({ open, onOpenChange, thresholds }) {
         <PushsaleDialog
             open={open}
             onOpenChange={onOpenChange}
-            title="CẬP NHẬT CHỈ SỐ CẢNH BÁO"
+            title={t('reports.sales_optimization.alerts_title')}
             size="sm"
             width="420px"
             bodyClassName="ps-opt-alert-dialog-body"
         >
             <label className="ps-opt-alert-field">
-                <span>Chỉ số dưới (<span className="text-danger">*</span>)</span>
+                <span>{t('reports.sales_optimization.alerts_low')} (<span className="text-danger">*</span>)</span>
                 <input
                     className="form-control"
                     type="number"
@@ -297,7 +308,7 @@ export function OptimizationAlertsDialog({ open, onOpenChange, thresholds }) {
                 />
             </label>
             <label className="ps-opt-alert-field">
-                <span>Chỉ số trên (<span className="text-danger">*</span>)</span>
+                <span>{t('reports.sales_optimization.alerts_high')} (<span className="text-danger">*</span>)</span>
                 <input
                     className="form-control"
                     type="number"
@@ -307,7 +318,7 @@ export function OptimizationAlertsDialog({ open, onOpenChange, thresholds }) {
             </label>
             <div className="ps-opt-alert-actions">
                 <button type="button" className="btn btn-sm btn-primary" disabled={form.processing} onClick={save}>
-                    <i className="fa fa-save" /> Cập nhật
+                    <i className="fa fa-save" /> {t('reports.sales_optimization.update')}
                 </button>
             </div>
         </PushsaleDialog>
@@ -323,6 +334,7 @@ export function OptimizationTargetsDialog({
     draftLeaderId = '',
     draftTeamId = '',
 }) {
+    const t = useT();
     const now = new Date();
     const [year, setYear] = useState(now.getFullYear());
     const [month, setMonth] = useState(now.getMonth() + 1);
@@ -407,7 +419,7 @@ export function OptimizationTargetsDialog({
         });
 
         if (!targets.length) {
-            toast.error('Nhập ít nhất một chỉ số mục tiêu trước khi lưu.');
+            toast.error(t('reports.sales_optimization.targets_required'));
             return;
         }
 
@@ -415,10 +427,10 @@ export function OptimizationTargetsDialog({
         form.post('/admin/sales/reports/optimization/targets', {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Đã lưu mục tiêu sale.');
+                toast.success(t('reports.sales_optimization.targets_saved'));
                 onOpenChange?.(false);
             },
-            onError: () => toast.error('Không lưu được mục tiêu sale.'),
+            onError: () => toast.error(t('reports.sales_optimization.targets_save_fail')),
         });
     };
 
@@ -426,52 +438,51 @@ export function OptimizationTargetsDialog({
         <PushsaleDialog
             open={open}
             onOpenChange={onOpenChange}
-            title="THÊM CHỈ SỐ"
+            title={t('reports.sales_optimization.targets_title')}
             size="full"
-            width="98vw"
+            width="99vw"
             className="ps-opt-wide-dialog"
             bodyClassName="ps-opt-dialog-body"
             footer={(
                 <button type="button" className="btn btn-sm btn-primary" disabled={form.processing} onClick={save}>
-                    <i className="fa fa-save" /> Lưu
+                    <i className="fa fa-save" /> {t('reports.sales_optimization.save')}
                 </button>
             )}
         >
             <p className="ps-opt-dialog-hint">
-                Form <strong>thiết lập mục tiêu sale</strong>: chọn năm/tháng + sale, nhập chỉ tiêu vào các ô rồi bấm <strong>Lưu</strong>.
-                Các cột số là chỉ tiêu cần đạt, không phải số liệu thực tế trên báo cáo.
+                {t('reports.sales_optimization.targets_hint')}
             </p>
             <div className="ps-opt-dialog-toolbar">
-                <strong>Tối ưu sale</strong>
+                <strong>{t('reports.sales_optimization.targets_heading')}</strong>
                 <select className="form-control input-sm" value={year} onChange={(event) => setYear(Number(event.target.value))}>
                     {[year - 1, year, year + 1].map((value) => (
-                        <option key={value} value={value}>Năm {value}</option>
+                        <option key={value} value={value}>{t('reports.sales_optimization.year', { year: value })}</option>
                     ))}
                 </select>
                 <select className="form-control input-sm" value={month} onChange={(event) => setMonth(Number(event.target.value))}>
                     {Array.from({ length: 12 }, (_, index) => index + 1).map((value) => (
-                        <option key={value} value={value}>Tháng {value}</option>
+                        <option key={value} value={value}>{t('reports.sales_optimization.month', { month: value })}</option>
                     ))}
                 </select>
                 <button type="button" className="btn btn-sm btn-primary" onClick={searchSales}>
-                    <i className="fa fa-search" /> Tìm kiếm
+                    <i className="fa fa-search" /> {t('reports.sales_optimization.search')}
                 </button>
             </div>
             <div className="ps-opt-dialog-toolbar">
                 <select className="form-control input-sm" value={leaderId} onChange={(event) => setLeaderId(event.target.value)}>
-                    <option value="">-- Trưởng nhóm --</option>
+                    <option value="">{t('reports.sales_optimization.choose_leader')}</option>
                     {leaders.map((option) => (
                         <option key={option.id} value={option.id}>{option.label ?? option.name}</option>
                     ))}
                 </select>
                 <select className="form-control input-sm" value={teamId} onChange={(event) => setTeamId(event.target.value)}>
-                    <option value="">-- Chọn nhóm --</option>
+                    <option value="">{t('reports.sales_optimization.choose_team')}</option>
                     {teams.map((option) => (
                         <option key={option.id} value={option.id}>{option.label ?? option.name}</option>
                     ))}
                 </select>
                 <select className="form-control input-sm" value={saleId} onChange={(event) => setSaleId(event.target.value)}>
-                    <option value="">-- Sales --</option>
+                    <option value="">{t('reports.sales_optimization.choose_sale')}</option>
                     {sales.map((option) => (
                         <option key={option.id} value={option.id}>{option.label ?? option.name}</option>
                     ))}
@@ -481,37 +492,37 @@ export function OptimizationTargetsDialog({
                 <table className="table table-bordered table-striped ps-opt-dialog-table">
                     <thead>
                         <tr>
-                            <th className="text-center" rowSpan="2">STT</th>
-                            <th className="text-center" rowSpan="2">Tài khoản</th>
-                            <th className="text-center" rowSpan="2">Chỉ số mẫu</th>
-                            <th className="text-center" rowSpan="2">Năm</th>
-                            <th className="text-center" rowSpan="2">Tháng</th>
-                            <th className="text-center" rowSpan="2">Số ngày làm việc</th>
-                            <th className="text-center" rowSpan="2">Doanh số tạm tính</th>
-                            <th className="text-center" rowSpan="2">Doanh số thành công</th>
-                            <th className="text-center" colSpan="2">Contact được chia</th>
-                            <th className="text-center" rowSpan="2">Contact không trùng</th>
-                            <th className="text-center" rowSpan="2">Contact chốt đơn</th>
-                            <th className="text-center" rowSpan="2">Tỷ lệ chốt đơn</th>
-                            <th className="text-center" rowSpan="2">Giá trị đơn</th>
-                            <th className="text-center" rowSpan="2">Số sản phẩm/Đơn</th>
-                            <th className="text-center" rowSpan="2">Contact chưa tác nghiệp</th>
-                            <th className="text-center" rowSpan="2">Doanh số hủy</th>
-                            <th className="text-center" rowSpan="2">Doanh số hoàn</th>
-                            <th className="text-center" rowSpan="2">Cập nhật</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_stt')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.account')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.sample_metric')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_year')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_month')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.working_days')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_provisional_revenue')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_success_revenue')}</th>
+                            <th className="text-center" colSpan="2">{t('reports.sales_optimization.col_allocated')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_allocated_unique')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_closed_contacts')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_close_rate')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_avg_order_value')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_products_per_order')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_untouched')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_cancelled_revenue')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.col_returned_revenue')}</th>
+                            <th className="text-center" rowSpan="2">{t('reports.sales_optimization.update_col')}</th>
                             <th className="text-center" rowSpan="2">
                                 <button
                                     type="button"
                                     className="btn btn-xs btn-link"
                                     onClick={() => setRows((current) => [...current, emptyTargetRow(null, year, month)])}
                                 >
-                                    <i className="fa fa-plus" /> Thêm
+                                    <i className="fa fa-plus" /> {t('reports.sales_optimization.add')}
                                 </button>
                             </th>
                         </tr>
                         <tr>
-                            <th className="text-center">Tổng</th>
-                            <th className="text-center">Trùng</th>
+                            <th className="text-center">{t('reports.sales_optimization.col_allocated_total')}</th>
+                            <th className="text-center">{t('reports.sales_optimization.col_allocated_duplicate')}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -530,7 +541,7 @@ export function OptimizationTargetsDialog({
                                             });
                                         }}
                                     >
-                                        <option value="">-- Sales --</option>
+                                        <option value="">{t('reports.sales_optimization.choose_sale')}</option>
                                         {sales.map((option) => (
                                             <option key={option.id} value={option.id}>{option.label ?? option.name}</option>
                                         ))}
@@ -541,7 +552,7 @@ export function OptimizationTargetsDialog({
                                         className="form-control input-sm"
                                         value={row.catalog_name}
                                         onChange={(event) => updateRow(row._key, { catalog_name: event.target.value })}
-                                        placeholder="Chỉ số mẫu"
+                                        placeholder={t('reports.sales_optimization.sample_metric')}
                                     />
                                 </td>
                                 <td className="text-center">
@@ -576,11 +587,11 @@ export function OptimizationTargetsDialog({
                         ))}
                         {!rows.length && (
                             <tr>
-                                <td colSpan="20" className="text-center text-muted">Chọn bộ lọc rồi bấm Tìm kiếm để tải sale.</td>
+                                <td colSpan="20" className="text-center text-muted">{t('reports.sales_optimization.targets_empty')}</td>
                             </tr>
                         )}
                         <tr className="rowsum">
-                            <td colSpan="6" className="text-center font-weight-bold">Tổng:</td>
+                            <td colSpan="6" className="text-center font-weight-bold">{t('reports.sales_optimization.total_row')}</td>
                             <td colSpan="14" />
                         </tr>
                     </tbody>

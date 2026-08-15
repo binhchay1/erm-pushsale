@@ -17,14 +17,16 @@ final class SalesOptimizationReportController extends BasePushsalePageController
         $this->authorizePage($request);
         $validated = $request->validate([
             'low_ratio' => ['required', 'numeric', 'min:0', 'max:1000'],
-            'high_ratio' => ['required', 'numeric', 'min:0', 'max:1000'],
+            'high_ratio' => ['required', 'numeric', 'min:0', 'max:1000', 'gte:low_ratio'],
+        ], [
+            'high_ratio.gte' => __('reports.sales_optimization.alerts_high_gte_low'),
         ]);
 
         $companyId = (int) ($request->user()?->company_id ?? 0);
         abort_unless($companyId > 0, 403);
         $service->saveThresholds($companyId, (float) $validated['low_ratio'], (float) $validated['high_ratio']);
 
-        return back()->with('success', 'Đã lưu mức cảnh báo.');
+        return back()->with('success', __('reports.sales_optimization.alerts_saved'));
     }
 
     public function saveTargets(Request $request, SalesOptimizationReportService $service): RedirectResponse
@@ -41,14 +43,14 @@ final class SalesOptimizationReportController extends BasePushsalePageController
         abort_unless($companyId > 0, 403);
         $service->saveTargets($companyId, $validated['targets']);
 
-        return back()->with('success', 'Đã lưu mục tiêu sale.');
+        return back()->with('success', __('reports.sales_optimization.targets_saved'));
     }
 
     public function saveCatalogs(Request $request, SalesOptimizationReportService $service): RedirectResponse
     {
         $this->authorizePage($request);
         $validated = $request->validate([
-            'leader_user_id' => ['required', 'integer'],
+            'leader_user_id' => ['required', 'integer', 'min:1'],
             'catalogs' => ['required', 'array', 'min:1'],
             'catalogs.*.id' => ['nullable', 'integer'],
             'catalogs.*.name' => ['required', 'string', 'max:120'],
@@ -60,7 +62,7 @@ final class SalesOptimizationReportController extends BasePushsalePageController
         abort_unless($companyId > 0, 403);
         $service->saveCatalogs($companyId, (int) $validated['leader_user_id'], $validated['catalogs']);
 
-        return back()->with('success', 'Đã lưu danh mục tối ưu sale.');
+        return back()->with('success', __('reports.sales_optimization.catalogs_saved'));
     }
 
     public function updateReceiveData(Request $request, SalesDataReportService $service): RedirectResponse
@@ -78,6 +80,6 @@ final class SalesOptimizationReportController extends BasePushsalePageController
             (bool) $validated['receive_data'],
         );
 
-        return back()->with('success', "Đã cập nhật nhận dữ liệu cho {$updated} sale.");
+        return back()->with('success', __('reports.sales_optimization.receive_saved', ['count' => $updated]));
     }
 }

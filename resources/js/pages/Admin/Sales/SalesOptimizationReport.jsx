@@ -25,6 +25,7 @@ import {
     OptimizationCatalogDialog,
     OptimizationTargetsDialog,
 } from '@/pages/Admin/Sales/optimization/SalesOptimizationDialogs';
+import { useT } from '@/providers/I18nProvider';
 
 function todayIso() {
     const date = new Date();
@@ -91,7 +92,8 @@ export default function SalesOptimizationReport({
     routeUrl = '/admin/sales/reports/optimization',
     pageRuntimeError = null,
 }) {
-    const title = schema?.title ?? 'Báo cáo tối ưu Sale';
+    const t = useT();
+    const title = schema?.title ?? t('reports.sales_optimization.title');
     const { ask } = useConfirm();
     const { draft, set, visit } = useInertiaFilters(routeUrl, buildInitialFilters(), { sync: false });
     const [dialog, setDialog] = useState(null);
@@ -115,7 +117,7 @@ export default function SalesOptimizationReport({
 
     const openLevelsDialog = () => {
         if (!draft.sale_leader_id) {
-            toast.error('Vui lòng chọn Trưởng nhóm (hoặc Sale Admin) trước khi thiết lập level mục tiêu.');
+            toast.error(t('reports.sales_optimization.need_leader'));
             return;
         }
         setDialog('levels');
@@ -141,8 +143,8 @@ export default function SalesOptimizationReport({
             receive_data: !currentValue,
         }, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã cập nhật trạng thái nhận dữ liệu.'),
-            onError: () => toast.error('Không cập nhật được trạng thái nhận dữ liệu.'),
+            onSuccess: () => toast.success(t('reports.sales_optimization.receive_ok')),
+            onError: () => toast.error(t('reports.sales_optimization.receive_fail')),
             onFinish: () => setSavingReceiveId(null),
         });
     };
@@ -197,22 +199,22 @@ export default function SalesOptimizationReport({
                     <div className="ps-sales-opt-toolbar__actions">
                         <div className="ps-sales-opt-toolbar__actions-col">
                             <button type="button" className="btn btn-sm btn-primary" onClick={openLevelsDialog}>
-                                <i className="fa fa-list" /> Thiết lập level mục tiêu
+                                <i className="fa fa-list" /> {t('reports.sales_optimization.btn_levels')}
                             </button>
                             <button
                                 type="button"
                                 className="btn btn-sm btn-default"
                                 onClick={() => setDialog('receive-bulk')}
-                                title="Hướng dẫn cập nhật nhận dữ liệu"
+                                title={t('reports.sales_optimization.btn_receive')}
                             >
-                                <i className="fa fa-gears" /> Cập nhật nhận dữ liệu
+                                <i className="fa fa-gears" /> {t('reports.sales_optimization.btn_receive')}
                             </button>
                         </div>
                         <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('alerts')}>
-                            <i className="fa fa-asterisk" /> Mức cảnh báo
+                            <i className="fa fa-asterisk" /> {t('reports.sales_optimization.btn_alerts')}
                         </button>
                         <button type="button" className="btn btn-sm btn-primary" onClick={() => setDialog('targets')}>
-                            <i className="fa fa-plus" /> Thiết lập mục tiêu sale
+                            <i className="fa fa-plus" /> {t('reports.sales_optimization.btn_targets')}
                         </button>
                     </div>
                     <div className="ps-sales-opt-legend">
@@ -223,7 +225,11 @@ export default function SalesOptimizationReport({
                             </div>
                         ))}
                         <div className="ps-sales-opt-legend__note">
-                            <strong>Số liệu thực tế</strong> - <span>Chỉ tiêu</span> - <span>Tỷ lệ</span>
+                            <strong>{t('reports.sales_optimization.legend_actual')}</strong>
+                            {' - '}
+                            <span>{t('reports.sales_optimization.legend_target')}</span>
+                            {' - '}
+                            <span>{t('reports.sales_optimization.legend_ratio')}</span>
                         </div>
                     </div>
                 </div>
@@ -383,11 +389,13 @@ export default function SalesOptimizationReport({
                 {dialog === 'receive-bulk' && (
                     <div className="ps-sales-leader-dialog-backdrop">
                         <div className="ps-sales-leader-dialog">
-                            <h4>Cập nhật nhận dữ liệu</h4>
-                            <p>Bật/tắt nhận dữ liệu từng sale bằng checkbox cột <strong>Nhận dữ liệu</strong>. Mỗi lần tick sẽ xác nhận và lưu ngay.</p>
-                            <p className="text-muted">Cập nhật hàng loạt theo nhóm: dùng trang Nhân sự hoặc popup Pushsale tương đương.</p>
+                            <h4>{t('reports.sales_optimization.receive_help_title')}</h4>
+                            <p>{t('reports.sales_optimization.receive_help_body')}</p>
+                            <p className="text-muted">{t('reports.sales_optimization.receive_help_note')}</p>
                             <div className="ps-sales-leader-dialog__actions">
-                                <button type="button" className="btn btn-sm btn-link" onClick={() => setDialog(null)}>Đóng</button>
+                                <button type="button" className="btn btn-sm btn-link" onClick={() => setDialog(null)}>
+                                    {t('reports.sales_optimization.close')}
+                                </button>
                             </div>
                         </div>
                     </div>

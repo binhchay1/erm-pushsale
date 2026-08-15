@@ -226,9 +226,8 @@ final class SalesOptimizationReportService
             ->where('company_id', $request->user()?->company_id)
             ->when(
                 $leaderId > 0,
-                fn ($q) => $q->where(function ($inner) use ($leaderId): void {
-                    $inner->where('leader_user_id', $leaderId)->orWhereNull('leader_user_id');
-                }),
+                fn ($q) => $q->where('leader_user_id', $leaderId),
+                fn ($q) => $q->whereNull('leader_user_id'),
             )
             ->orderBy('sort_order')
             ->orderBy('id')

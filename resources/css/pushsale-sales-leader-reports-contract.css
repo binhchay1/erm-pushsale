@@ -278,13 +278,28 @@ html body.pushsale-app-body .ps-sales-opt-toolbar__actions-col .btn {
 /* Optimization dialogs — Pushsale DanhMucToiUu / ThemChiSoCanhBao / ThemChiSoToiUu */
 html body.pushsale-app-body .ps-opt-wide-dialog.ps-dialog-surface,
 html body.pushsale-app-body [data-slot='dialog-content'].ps-opt-wide-dialog.ps-dialog-surface {
-    width: min(98vw, 1800px) !important;
-    max-width: min(98vw, 1800px) !important;
-    max-height: calc(100dvh - 24px) !important;
+    width: calc(100vw - 12px) !important;
+    max-width: calc(100vw - 12px) !important;
+    max-height: calc(100dvh - 12px) !important;
+    height: calc(100dvh - 12px) !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
-html body.pushsale-app-body .ps-opt-dialog-body {
-    padding: 8px 10px 12px !important;
+html body.pushsale-app-body .ps-opt-wide-dialog .ps-dialog-body,
+html body.pushsale-app-body .ps-opt-wide-dialog .ps-opt-dialog-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+    padding: 6px 8px 10px !important;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-table-wrap {
+    overflow: auto;
+    max-height: none;
+    height: calc(100dvh - 210px);
+    margin: 0;
+    border: 1px solid #d2d6de;
 }
 
 html body.pushsale-app-body .ps-opt-dialog-hint {
@@ -313,13 +328,6 @@ html body.pushsale-app-body .ps-opt-dialog-toolbar__right {
     display: inline-flex;
     gap: 10px;
     align-items: center;
-}
-
-html body.pushsale-app-body .ps-opt-dialog-table-wrap {
-    overflow: auto;
-    max-height: min(70vh, 720px);
-    margin: 0 -2px;
-    border: 1px solid #d2d6de;
 }
 
 html body.pushsale-app-body .ps-opt-dialog-table {

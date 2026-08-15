@@ -328,4 +328,11 @@ return [
         5 => 'Friday',
         6 => 'Saturday',
     ],
+    'sales_optimization' => [
+        'alerts_saved' => 'Alert thresholds saved.',
+        'targets_saved' => 'Sale targets saved.',
+        'catalogs_saved' => 'Sale optimization catalog saved.',
+        'receive_saved' => 'Updated data reception for :count sale(s).',
+        'alerts_high_gte_low' => 'The upper threshold must be greater than or equal to the lower threshold.',
+    ],
 ];
