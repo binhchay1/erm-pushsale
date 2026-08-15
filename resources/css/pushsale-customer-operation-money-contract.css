@@ -83,6 +83,22 @@ html body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination {
     margin-right: 0 !important;
 }
 
+/* Keep Thành tiền readable on customer profile (shared ops money rules can otherwise squeeze it). */
+html body.pushsale-app-body .ps-customer-profile-table td.ps-order-money-cell,
+html body.pushsale-app-body .ps-customer-profile-table td.ps-col-money,
+html body.pushsale-app-body .ps-customer-profile-table th.ps-col-money {
+    min-width: 150px !important;
+    width: 150px !important;
+    max-width: none !important;
+    overflow: visible !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-table .ps-order-money-breakdown {
+    min-width: 132px !important;
+    max-width: none !important;
+    overflow: visible !important;
+}
+
 @media (max-width: 1100px) {
     html body.pushsale-app-body .ps-customer-profile-page .ps-customer-titlebar {
         grid-template-columns: 1fr !important;

@@ -89,9 +89,11 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-panel 
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-table-scroll,
 html body.pushsale-app-body .ps-customer-profile-page .pushsale-pagination {
-    margin-left: var(--ps-header-x, 14px) !important;
-    margin-right: var(--ps-header-x, 14px) !important;
-    width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
+    /* Align with filter panel / header — page already has 14px padding from money-contract. */
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
 }
 
@@ -341,20 +343,19 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-customer-filter-reset-
     }
 }
 
-/* v151 — Customer profile thead must use the same readable AdminLTE table chrome as operation tables.
-   Older capture CSS in pushsale.css forced nowrap/clip and made the header look shorter than other pages. */
+/* Table flush with filters; fit viewport when possible (no forced 2180px desktop min). */
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-table-scroll {
     display: block !important;
-    max-width: calc(100vw - var(--ps-header-x, 14px) * 2) !important;
+    max-width: 100% !important;
     overflow-x: auto !important;
     overflow-y: visible !important;
     -webkit-overflow-scrolling: touch !important;
-    scrollbar-gutter: stable both-edges !important;
+    scrollbar-gutter: stable !important;
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table {
-    width: max(100%, 2180px) !important;
-    min-width: 2180px !important;
+    width: 100% !important;
+    min-width: 0 !important;
     max-width: none !important;
     table-layout: fixed !important;
     border-collapse: collapse !important;
@@ -379,28 +380,76 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table
     overflow: visible !important;
     text-overflow: clip !important;
     word-break: normal !important;
-    overflow-wrap: normal !important;
+    overflow-wrap: break-word !important;
 }
 
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-check { width: 52px !important; min-width: 52px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-code { width: 118px !important; min-width: 118px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-source { width: 190px !important; min-width: 190px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-customer { width: 190px !important; min-width: 190px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-message { width: 320px !important; min-width: 320px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-sale { width: 160px !important; min-width: 160px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-operation { width: 150px !important; min-width: 150px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-result { width: 180px !important; min-width: 180px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-products { width: 340px !important; min-width: 340px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-money { width: 150px !important; min-width: 150px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-deposit { width: 96px !important; min-width: 96px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-shipping { width: 130px !important; min-width: 130px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-delivery { width: 170px !important; min-width: 170px !important; }
-html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-recon { width: 74px !important; min-width: 74px !important; }
+/* Compact widths so ~14–16" content area fits without horizontal scroll; money stays readable. */
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-check { width: 40px !important; min-width: 40px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-code { width: 88px !important; min-width: 80px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-source { width: 120px !important; min-width: 110px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-customer { width: 150px !important; min-width: 140px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-message { width: 16% !important; min-width: 140px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-sale { width: 110px !important; min-width: 100px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-operation { width: 100px !important; min-width: 90px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-result { width: 120px !important; min-width: 110px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-products,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table th.ps-col-products,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table td.ps-order-products-cell {
+    width: 18% !important;
+    min-width: 200px !important;
+    max-width: none !important;
+}
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-money,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table th.ps-col-money,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table td.ps-order-money-cell,
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table td.ps-col-money {
+    width: 150px !important;
+    min-width: 150px !important;
+    max-width: none !important;
+    overflow: visible !important;
+}
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-deposit { width: 78px !important; min-width: 72px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-shipping { width: 100px !important; min-width: 90px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-delivery { width: 110px !important; min-width: 100px !important; }
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-col-recon { width: 56px !important; min-width: 52px !important; }
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-order-money-breakdown {
+    min-width: 132px !important;
+    max-width: none !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table .ps-message-cell {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+}
+
+/* Same OrderStatusFlags chrome as sale/kho/KT workspaces */
+html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row .ps-order-flags,
+html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row .ps-contact-flags {
+    flex: 0 0 auto !important;
+    margin-left: 4px !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row .ps-order-flag .fa-heart,
+html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row .ps-order-flag .fa-clone,
+html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row .ps-order-flag .fa-level-up {
+    display: inline-block !important;
+}
+
+@media (max-width: 1280px) {
+    html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table {
+        min-width: 1480px !important;
+        width: max(100%, 1480px) !important;
+    }
+}
 
 @media (max-width: 767px) {
     html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table {
-        width: 2180px !important;
-        min-width: 2180px !important;
+        width: 1480px !important;
+        min-width: 1480px !important;
     }
 }
 

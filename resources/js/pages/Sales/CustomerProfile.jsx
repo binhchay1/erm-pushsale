@@ -195,7 +195,7 @@ function CustomerProfileTable({
                                         <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell />
                                     </div>
                                 </td>
-                                <td className="text-left ps-message-cell">
+                                <td className="text-left ps-message-cell ps-col-message">
                                     <span>{message || '—'}</span>
                                     {row.hasDifferentReceiver ? <span className="small-tip ps-receiver-note">Người nhận: {row.effectiveReceiverName} · {row.effectiveReceiverPhone}</span> : null}
                                 </td>
@@ -236,10 +236,10 @@ function CustomerProfileTable({
                                     </div>
                                     {row.nextOperationAt ? <div className="item-noidung-other">Hẹn: {dateLabel(row.nextOperationAt)}</div> : null}
                                 </td>
-                                <td className="text-left ps-order-products-cell">
+                                <td className="text-left ps-order-products-cell ps-col-products">
                                     <OrderProductsBreakdown items={row.products ?? []} order={row} />
                                 </td>
-                                <OrderMoneyCell className="no-wrap area3 ps-order-money-cell" row={row} />
+                                <OrderMoneyCell className="no-wrap area3 ps-order-money-cell ps-col-money" row={row} />
                                 <td className="text-right">{row.deposit ? formatCurrency(row.deposit) : ''}</td>
                                 <td className="text-center area4">
                                     <span className="ps-warehouse-name">{safeText(row.warehouseName, '')}</span>
