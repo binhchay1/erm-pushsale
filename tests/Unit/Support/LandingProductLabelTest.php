@@ -80,4 +80,28 @@ class LandingProductLabelTest extends TestCase
         $this->assertSame('Decal hoa sen 289k', $normalized['items'][0]['product_name']);
         $this->assertGreaterThan(0, $normalized['items'][0]['unit_price']);
     }
+
+    public function test_driver_keeps_bundle_price_when_label_has_free_ship(): void
+    {
+        $normalized = (new LandingFormDriver)->normalize([
+            'name' => 'Nguyen Van A',
+            'phone' => '0901234567',
+            'products' => 'MUA 4 GÓI + Tặng 5 Đồng xu ngũ sắc: 649k + Miễn Phí Ship',
+        ]);
+
+        $this->assertCount(1, $normalized['items']);
+        $this->assertSame(649000, $normalized['items'][0]['unit_price']);
+    }
+
+    public function test_driver_skips_ship_fee_but_keeps_product_price(): void
+    {
+        $normalized = (new LandingFormDriver)->normalize([
+            'name' => 'Nguyen Van A',
+            'phone' => '0901234567',
+            'products' => 'MUA 1 GÓI: 179k + 30k Phí Ship',
+        ]);
+
+        $this->assertCount(1, $normalized['items']);
+        $this->assertSame(179000, $normalized['items'][0]['unit_price']);
+    }
 }

@@ -600,13 +600,22 @@ class LandingFormDriver implements LeadPayloadNormalizer
             foreach ($all as $m) {
                 $token = $m[0];
                 $offset = mb_stripos($safeName, $token);
-                $around = $offset === false ? '' : mb_substr($safeName, max(0, $offset - 8), mb_strlen($token) + 16);
-                // Bỏ phí ship nếu gắn nhãn ship/vc trong đoạn gần token.
-                if (preg_match('/(ship|phí\s*vc|phi\s*vc|vận\s*chuyển|van\s*chuyen)/iu', $around) === 1) {
+                if ($offset === false) {
+                    continue;
+                }
+                $before = mb_substr($safeName, max(0, $offset - 16), min(16, $offset));
+                $after = mb_substr($safeName, $offset + mb_strlen($token), 16);
+                $around = $before.$after;
+                // Chỉ bỏ phí ship thật ("30k Phí Ship"), không bỏ giá gói chỉ vì có "Miễn Phí Ship" phía sau.
+                $looksLikeShipFee = preg_match('/^(?:\s*\+?\s*)?(?:phí\s*)?(?:ship|vc|vận\s*chuyển|van\s*chuyen)/iu', $after) === 1
+                    || preg_match('/(?:phí\s*)?(?:ship|vc|vận\s*chuyển|van\s*chuyen)\s*:?\s*$/iu', $before) === 1;
+                if ($looksLikeShipFee && preg_match('/miễn\s*phí/iu', $around) !== 1) {
                     continue;
                 }
                 $price = MoneyParser::parse($m[1].$m[2]);
-                break;
+                if ($price > 0) {
+                    break;
+                }
             }
         }
 

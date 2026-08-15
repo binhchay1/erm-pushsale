@@ -1,4 +1,4 @@
-import { formatCurrency, formatNumber } from '@/lib/format';
+import { formatNumber } from '@/lib/format';
 
 function formatOpsMoney(value) {
     if (value == null || Number.isNaN(Number(value))) return '';
@@ -15,12 +15,86 @@ function lineQuantity(item = {}) {
     return Number.isFinite(raw) && raw > 0 ? raw : 1;
 }
 
-function lineUnitPrice(item = {}) {
-    return Math.max(0, Number(item.unitPrice ?? item.unit_price ?? item.price ?? 0));
+function parseMoneyToken(amount, unit) {
+    const rawAmount = String(amount ?? '').replace(',', '.');
+    const n = Number(rawAmount);
+    if (!Number.isFinite(n) || n <= 0) return 0;
+    const u = String(unit ?? '').toLowerCase();
+    if (u === 'k' || u === 'nghìn' || u === 'nghin' || u === 'ngàn' || u === 'ngan') {
+        return Math.round(n * 1000);
+    }
+    if (u === 'tr' || u === 'triệu' || u === 'trieu') {
+        return Math.round(n * 1_000_000);
+    }
+
+    return Math.round(n);
 }
 
-function productsSubtotal(items = []) {
-    return items.reduce((sum, item) => sum + (lineQuantity(item) * lineUnitPrice(item)), 0);
+/** Parse "649k" / "169.000đ" from landing labels; skip ship-fee tokens like "30k Phí Ship". */
+function parseEmbeddedUnitPrice(label) {
+    const text = String(label ?? '');
+    if (!text) return 0;
+
+    const re = /([0-9][0-9.,]*)\s*(k|nghìn|nghin|ngàn|ngan|đ|vnđ|vnd|tr|triệu|trieu)\b/giu;
+    let match;
+    while ((match = re.exec(text)) !== null) {
+        const token = match[0];
+        const idx = match.index;
+        const before = text.slice(Math.max(0, idx - 16), idx);
+        const after = text.slice(idx + token.length, idx + token.length + 16);
+        const around = `${before}${after}`;
+        const looksLikeShipFee = /(?:phí\s*)?(?:ship|vc|vận\s*chuyển|van\s*chuyen)/iu.test(after)
+            || /(?:phí\s*)?(?:ship|vc|vận\s*chuyển|van\s*chuyen)\s*:?\s*$/iu.test(before);
+        if (looksLikeShipFee && !/miễn\s*phí/iu.test(around)) {
+            continue;
+        }
+
+        const parsed = parseMoneyToken(match[1], match[2]);
+        if (parsed > 0) return parsed;
+    }
+
+    return 0;
+}
+
+function decodeProductName(raw) {
+    const value = String(raw ?? '').trim();
+    if (!value) return '—';
+    try {
+        const decoded = decodeURIComponent(value.replace(/\+/g, ' '));
+        if (decoded && decoded !== value) return decoded.trim() || value;
+    } catch {
+        // keep raw
+    }
+    // Tracking / hash dumps are not product names
+    if (/^[A-Za-z0-9+/=_-]{48,}$/.test(value) || /^[0-9a-f]{40,}$/i.test(value)) {
+        return 'Sản phẩm (chưa map)';
+    }
+
+    return value;
+}
+
+function lineUnitPrice(item = {}, order = null) {
+    const stored = Math.max(0, Number(item.unitPrice ?? item.unit_price ?? item.price ?? 0));
+    if (stored > 0) return stored;
+
+    const name = item.productName ?? item.product_name ?? item.name ?? '';
+    const fromLabel = parseEmbeddedUnitPrice(name);
+    if (fromLabel > 0) return fromLabel;
+
+    const products = order?.products ?? order?.items ?? null;
+    if (Array.isArray(products) && products.length === 1) {
+        const orderTotal = Number(order?.total ?? order?.subtotal ?? 0);
+        const qty = lineQuantity(item);
+        if (orderTotal > 0 && qty > 0) {
+            return Math.round(orderTotal / qty);
+        }
+    }
+
+    return 0;
+}
+
+function productsSubtotal(items = [], order = null) {
+    return items.reduce((sum, item) => sum + (lineQuantity(item) * lineUnitPrice(item, order)), 0);
 }
 
 export function isUpsellOrderItem(item = {}) {
@@ -91,15 +165,15 @@ export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, c
     );
 }
 
-function ProductLine({ item, index, forceUpsell = false, showUpsellDivider = false }) {
+function ProductLine({ item, index, order = null, forceUpsell = false, showUpsellDivider = false }) {
     const isUpsell = forceUpsell || isUpsellOrderItem(item);
     const rawName = item.productName ?? item.product_name ?? item.name ?? '—';
     const looksLikeUrl = /^https?:\/\//i.test(String(rawName)) || /^www\./i.test(String(rawName));
-    const name = looksLikeUrl ? 'Sản phẩm (chưa map)' : rawName;
+    const name = looksLikeUrl ? 'Sản phẩm (chưa map)' : decodeProductName(rawName);
     const quantity = lineQuantity(item);
-    const unitPrice = lineUnitPrice(item);
+    const unitPrice = lineUnitPrice(item, order);
     const textOnly = Boolean(item.meta?.text_only ?? item.textOnly)
-        || (!item.productId && !item.product_id && unitPrice <= 0);
+        || (!item.productId && !item.product_id && unitPrice <= 0 && !parseEmbeddedUnitPrice(rawName));
 
     return (
         <div
@@ -118,7 +192,7 @@ function ProductLine({ item, index, forceUpsell = false, showUpsellDivider = fal
                 {textOnly && quantity <= 1 ? '' : `x${quantity}`}
             </span>
             <span className="ps-order-product-price no-wrap">
-                {unitPrice > 0 ? formatCurrency(unitPrice) : ''}
+                {unitPrice > 0 ? formatOpsMoney(unitPrice) : ''}
             </span>
         </div>
     );
@@ -138,7 +212,7 @@ export function OrderProductsBreakdown({ items = [], order = null, empty = '—'
     return (
         <div className="tb-in-sp ps-order-products-breakdown" aria-label="Sản phẩm trong đơn" role="list">
             {mainItems.map((item, index) => (
-                <ProductLine key={item.itemId ?? item.id ?? `main-${index}`} item={item} index={index} />
+                <ProductLine key={item.itemId ?? item.id ?? `main-${index}`} item={item} index={index} order={order} />
             ))}
             {showDashBeforeUpsell ? (
                 <div className="row-sp ps-order-products-upsell-rule-row" aria-hidden="true">
@@ -150,6 +224,7 @@ export function OrderProductsBreakdown({ items = [], order = null, empty = '—'
                     key={item.itemId ?? item.id ?? `upsell-${index}`}
                     item={item}
                     index={index}
+                    order={order}
                     forceUpsell
                     showUpsellDivider={index === 0 && !showDashBeforeUpsell}
                 />
@@ -161,7 +236,7 @@ export function OrderProductsBreakdown({ items = [], order = null, empty = '—'
 export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount = false }) {
     const products = items ?? row.products ?? row.items ?? [];
     const storedSubtotal = Number(row.subtotal ?? row.sub_total ?? 0);
-    const computed = productsSubtotal(products);
+    const computed = productsSubtotal(products, row);
     const subtotal = storedSubtotal > 0 ? storedSubtotal : computed;
     const discount = Number(row.discount ?? row.discountAmount ?? 0);
     const vat = Number(row.vat ?? row.tax ?? 0);

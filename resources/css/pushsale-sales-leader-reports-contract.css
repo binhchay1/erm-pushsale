@@ -96,6 +96,14 @@ html body.pushsale-app-body .ps-operation-conversion-pager-row {
     box-sizing: border-box !important;
 }
 
+/* both-edges tạo khoảng trống trái nhìn như bảng bị lùi — chỉ chừa gutter phải */
+html body.pushsale-app-body .ps-sales-leader-table-wrap,
+html body.pushsale-app-body .ps-operation-conversion-table-wrap,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report .dragscroll1,
+html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report .tableFixHead {
+    scrollbar-gutter: stable !important;
+}
+
 html body.pushsale-app-body .ps-sales-leader-table-wrap,
 html body.pushsale-app-body .ps-operation-conversion-table-wrap {
     overflow: auto;
@@ -268,8 +276,22 @@ html body.pushsale-app-body .ps-sales-opt-toolbar__actions-col .btn {
 }
 
 /* Optimization dialogs — Pushsale DanhMucToiUu / ThemChiSoCanhBao / ThemChiSoToiUu */
+html body.pushsale-app-body .ps-opt-wide-dialog.ps-dialog-surface,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-opt-wide-dialog.ps-dialog-surface {
+    width: min(98vw, 1800px) !important;
+    max-width: min(98vw, 1800px) !important;
+    max-height: calc(100dvh - 24px) !important;
+}
+
 html body.pushsale-app-body .ps-opt-dialog-body {
-    padding: 12px 14px 16px !important;
+    padding: 8px 10px 12px !important;
+}
+
+html body.pushsale-app-body .ps-opt-dialog-hint {
+    margin: 0 0 8px;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.35;
 }
 
 html body.pushsale-app-body .ps-opt-dialog-toolbar {
@@ -277,7 +299,7 @@ html body.pushsale-app-body .ps-opt-dialog-toolbar {
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 html body.pushsale-app-body .ps-opt-dialog-toolbar .form-control {
@@ -295,13 +317,15 @@ html body.pushsale-app-body .ps-opt-dialog-toolbar__right {
 
 html body.pushsale-app-body .ps-opt-dialog-table-wrap {
     overflow: auto;
-    max-height: min(62vh, 640px);
+    max-height: min(70vh, 720px);
+    margin: 0 -2px;
     border: 1px solid #d2d6de;
 }
 
 html body.pushsale-app-body .ps-opt-dialog-table {
     margin: 0 !important;
-    min-width: 1400px;
+    min-width: 100%;
+    width: max-content;
 }
 
 html body.pushsale-app-body .ps-opt-dialog-table > thead > tr > th {

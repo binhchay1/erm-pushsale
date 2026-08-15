@@ -76,6 +76,9 @@ function MetricInputs({ metrics, onChange, prefix = '' }) {
                 className="form-control input-sm ps-opt-dialog-input"
                 value={metrics?.[col.key] ?? ''}
                 onChange={(event) => onChange(col.key, event.target.value)}
+                placeholder="Chỉ tiêu"
+                title={`Nhập chỉ tiêu: ${col.label}`}
+                inputMode="decimal"
             />
         </td>
     ));
@@ -152,12 +155,17 @@ export function OptimizationCatalogDialog({
             onOpenChange={onOpenChange}
             title="DANH MỤC TỐI ƯU SALE"
             size="full"
-            width="96vw"
+            width="98vw"
+            className="ps-opt-wide-dialog"
             bodyClassName="ps-opt-dialog-body"
             footer={(
                 <button type="button" className="btn btn-sm btn-default" onClick={() => onOpenChange?.(false)}>Đóng</button>
             )}
         >
+            <p className="ps-opt-dialog-hint">
+                Đây là form <strong>thiết lập chỉ tiêu mẫu</strong> (không phải số liệu báo cáo thực tế).
+                Nhập tên level + các chỉ tiêu rồi bấm <strong>Lưu</strong>.
+            </p>
             <div className="ps-opt-dialog-toolbar">
                 <strong>Danh mục tối ưu sale</strong>
                 <div className="ps-opt-dialog-toolbar__right">
@@ -420,7 +428,8 @@ export function OptimizationTargetsDialog({
             onOpenChange={onOpenChange}
             title="THÊM CHỈ SỐ"
             size="full"
-            width="96vw"
+            width="98vw"
+            className="ps-opt-wide-dialog"
             bodyClassName="ps-opt-dialog-body"
             footer={(
                 <button type="button" className="btn btn-sm btn-primary" disabled={form.processing} onClick={save}>
@@ -428,6 +437,10 @@ export function OptimizationTargetsDialog({
                 </button>
             )}
         >
+            <p className="ps-opt-dialog-hint">
+                Form <strong>thiết lập mục tiêu sale</strong>: chọn năm/tháng + sale, nhập chỉ tiêu vào các ô rồi bấm <strong>Lưu</strong>.
+                Các cột số là chỉ tiêu cần đạt, không phải số liệu thực tế trên báo cáo.
+            </p>
             <div className="ps-opt-dialog-toolbar">
                 <strong>Tối ưu sale</strong>
                 <select className="form-control input-sm" value={year} onChange={(event) => setYear(Number(event.target.value))}>

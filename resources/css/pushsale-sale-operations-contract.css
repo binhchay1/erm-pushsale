@@ -446,9 +446,9 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td.
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td.ps-col-products,
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th.area3:nth-child(11),
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:has(.ps-order-products-breakdown) {
-    min-width: 0 !important;
-    max-width: 220px !important;
-    width: 200px !important;
+    min-width: 260px !important;
+    max-width: 320px !important;
+    width: 280px !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td.ps-col-money,
@@ -603,7 +603,7 @@ html body.pushsale-app-body .ps-sale-workspace-page .tb-in-sp.ps-order-products-
 
 html body.pushsale-app-body .ps-sale-workspace-page .tb-in-sp.ps-order-products-breakdown > .row-sp {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 28px 64px !important;
+    grid-template-columns: minmax(0, 1fr) 28px minmax(78px, auto) !important;
     align-items: center !important;
     gap: 4px !important;
     line-height: 1.25 !important;
