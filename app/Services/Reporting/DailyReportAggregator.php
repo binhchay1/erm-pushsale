@@ -245,6 +245,7 @@ class DailyReportAggregator
                     'o.delivery_status', 'o.reconciliation_status', 'o.operation_stage', 'o.operation_result', 'o.closing_status',
                 ])
                 ->groupByRaw($provider)
+                ->groupByRaw("CASE WHEN COALESCE(o.deposit, 0) > 0 THEN 'with_deposit' ELSE 'without_deposit' END")
                 ->get()
                 ->map(function ($row) use ($dateBasis) {
                     $row->date_basis = $dateBasis;
