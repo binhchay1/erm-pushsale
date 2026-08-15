@@ -21,6 +21,12 @@ class SaleOrderDeletionController extends Controller
         $this->ensureOrderInteractionLock($request, $order, 'destroy');
         $actor = $request->user();
 
+        if ($actor && ! $actor->isAdmin()) {
+            throw ValidationException::withMessages([
+                'order' => __('messages.sale_ops.no_permission_delete'),
+            ]);
+        }
+
         if ($actor && ! $visibility->canOperateOrder($actor, $order)) {
             throw ValidationException::withMessages([
                 'order' => 'Bạn không có quyền xóa data của sale khác.',

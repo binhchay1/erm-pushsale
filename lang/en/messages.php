@@ -148,6 +148,11 @@ return [
         'already_closed' => 'This order was already closed.',
         'no_permission_close' => 'You are not allowed to close this order.',
         'cannot_close_cancelled' => 'Order was cancelled — cannot be closed.',
+        'cannot_unclose' => 'Unclose is only allowed while waiting for waybill and before carrier handoff.',
+        'no_permission_unclose' => 'You are not allowed to unclose this order.',
+        'unclose_success' => 'Order unclosed — you can operate and edit again.',
+        'no_permission_delete' => 'Only admins can delete order data.',
+        'source_locked' => 'Data source is locked — sales cannot change it.',
     ],
     'shipping_actions' => [
         'order_not_closed' => 'Order is not closed yet.',

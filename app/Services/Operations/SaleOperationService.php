@@ -121,7 +121,7 @@ class SaleOperationService
             'rows' => [
                 'data' => OrderOperationPresenter::applyDuplicatePhoneFlags(
                     collect($paginator->items())
-                        ->map(fn ($order) => OrderOperationPresenter::toArray($order, $this->configuration))
+                        ->map(fn ($order) => OrderOperationPresenter::toArray($order, $this->configuration, $viewer))
                         ->values()
                         ->all(),
                     collect($paginator->items()),

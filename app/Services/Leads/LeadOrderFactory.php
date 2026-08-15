@@ -57,6 +57,13 @@ class LeadOrderFactory
             ? $lead->landingConnection
             : $source->landingConnection()->first();
 
+        if ($landingConnection) {
+            $landingConnection->loadMissing([
+                'products.product.children' => fn ($query) => $query->where('is_active', true),
+                'products.product' => fn ($query) => $query->where('is_active', true),
+            ]);
+        }
+
         // Khách cũ / trùng số = SĐT đã từng có đơn trước đó (hiển thị icon như Pushsale).
         $isReturningCustomer = filled($normalized['customer_phone'] ?? null)
             && Order::query()->where('customer_phone', $normalized['customer_phone'])->exists();
@@ -68,6 +75,14 @@ class LeadOrderFactory
         ]);
 
         $comboItems = $this->buildItemRows($normalized['items'] ?? [], $normalized['item_origin'] ?? 'landing');
+
+        // Ladi không gửi dòng hàng → lấy SP/SKU đã gắn trên kết nối landing (sale chỉnh SL sau).
+        if ($comboItems === []) {
+            $comboItems = $this->buildItemRows(
+                $this->landingConnectionDefaultItems($landingConnection),
+                $normalized['item_origin'] ?? 'landing',
+            );
+        }
 
         $order = Order::query()->create([
             // Mã đơn chỉ được cấp khi sale chốt đơn thành công.
@@ -262,6 +277,67 @@ class LeadOrderFactory
         ]);
 
         return $order->fresh(['items']);
+    }
+
+    /**
+     * SP/SKU mặc định gắn trên kết nối landing khi payload không có dòng hàng.
+     * Parent có phân loại → thêm từng SKU con (SL = 1, sale chỉnh sau).
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function landingConnectionDefaultItems(?\App\Models\LandingConnection $landingConnection): array
+    {
+        if (! $landingConnection) {
+            return [];
+        }
+
+        $mappings = $landingConnection->products
+            ->filter(fn ($mapping) => $mapping->product && $mapping->product->is_active)
+            ->sortBy([
+                ['sort_order', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->values();
+
+        if ($mappings->isEmpty()) {
+            return [];
+        }
+
+        $items = [];
+        $seen = [];
+
+        foreach ($mappings as $mapping) {
+            $product = $mapping->product;
+            $children = $product->relationLoaded('children')
+                ? $product->children
+                : $product->children()->where('is_active', true)->get();
+
+            $targets = $children->isNotEmpty() ? $children : collect([$product]);
+
+            foreach ($targets as $target) {
+                $id = (int) $target->id;
+                if (isset($seen[$id])) {
+                    continue;
+                }
+                $seen[$id] = true;
+
+                $items[] = [
+                    'product_id' => $id,
+                    'product_name' => $target->name,
+                    'name' => $target->name,
+                    'item_type' => $mapping->item_type ?: 'product',
+                    'quantity' => 1,
+                    'unit_price' => (int) ($mapping->unit_price_override ?? $target->unit_price ?? 0),
+                    'origin' => 'landing_connection',
+                    'meta' => [
+                        'landing_connection_product_id' => $mapping->id,
+                        'parent_product_id' => $product->id !== $id ? $product->id : null,
+                    ],
+                ];
+            }
+        }
+
+        return $items;
     }
 
     /**

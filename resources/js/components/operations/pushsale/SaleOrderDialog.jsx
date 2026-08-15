@@ -8,6 +8,7 @@ import { useOrderInteractionLock } from '@/hooks/useOrderInteractionLock';
 import { apiGet } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
 import { normalizeVietnamesePhone, vietnamesePhoneError } from '@/lib/vietnamesePhone';
+import { useT } from '@/providers/I18nProvider';
 
 const EMPTY = {
     marketing_source_id: '',
@@ -41,7 +42,16 @@ const money = (value) => formatCurrency(numberValue(value));
 const key = () => `${Date.now()}-${Math.random()}`;
 
 function newLine(type = 'product') {
-    return { key: key(), item_type: type, product_id: '', product_name: '', quantity: 1, unit_price: 0, discount_amount: 0 };
+    return {
+        key: key(),
+        item_type: type,
+        base_product_id: '',
+        product_id: '',
+        product_name: '',
+        quantity: 1,
+        unit_price: 0,
+        discount_amount: 0,
+    };
 }
 
 function toDateTimeLocal(value) {
@@ -57,9 +67,10 @@ function operationResultValueForSelect(value) {
     return /^no_answer_[1-6]$/.test(result) ? 'no_answer_auto' : result;
 }
 
-function mapOrder(order, operationResult = null) {
+function mapOrder(order, operationResult = null, productOptions = []) {
     if (!order) return { ...EMPTY, operation_result: operationResultValueForSelect(operationResult?.value) };
     const geo = order.shippingGeo ?? {};
+    const byId = new Map(productOptions.map((item) => [String(item.id), item]));
     return {
         ...EMPTY,
         marketing_source_id: order.marketingSourceId ?? '',
@@ -85,15 +96,20 @@ function mapOrder(order, operationResult = null) {
         vat: numberValue(order.vat),
         operation_result: operationResultValueForSelect(operationResult?.value ?? order.operationResultValue),
         next_operation_at: toDateTimeLocal(order.nextOperationAt),
-        items: (order.products ?? []).map((item) => ({
-            key: key(),
-            item_type: item.itemType ?? 'product',
-            product_id: item.productId ?? '',
-            product_name: item.productName ?? '',
-            quantity: numberValue(item.quantity) || 1,
-            unit_price: numberValue(item.unitPrice),
-            discount_amount: numberValue(item.discountAmount),
-        })),
+        items: (order.products ?? []).map((item) => {
+            const product = byId.get(String(item.productId ?? ''));
+            const baseId = product?.parent_id ? String(product.parent_id) : String(item.productId ?? '');
+            return {
+                key: key(),
+                item_type: item.itemType === 'combo' ? 'product' : (item.itemType ?? 'product'),
+                base_product_id: baseId,
+                product_id: item.productId ?? '',
+                product_name: item.productName ?? '',
+                quantity: numberValue(item.quantity) || 1,
+                unit_price: numberValue(item.unitPrice),
+                discount_amount: numberValue(item.discountAmount),
+            };
+        }),
     };
 }
 
@@ -113,6 +129,7 @@ function toSelectOptions(items = []) {
             return {
                 value: String(value),
                 label: String(item.label ?? item.name ?? value),
+                subLabel: item.subLabel ? String(item.subLabel) : undefined,
             };
         })
         .filter(Boolean);
@@ -133,7 +150,13 @@ export function SaleOrderDialog({
     operationStatusOptions = [],
     initialOperationResult = null,
 }) {
+    const t = useT();
     const auth = usePage().props.auth;
+    const isAdmin = auth?.user?.role === 'admin';
+    const sourceLocked = Boolean(order) && !isAdmin;
+    const unitPriceLocked = !isAdmin;
+    const canUnclose = Boolean(order?.canUnclose);
+    const orderClosed = Boolean(order?.closedAt);
     const [form, setForm] = useState(EMPTY);
     const [formError, setFormError] = useState('');
     const [processing, setProcessing] = useState(false);
@@ -144,25 +167,27 @@ export function SaleOrderDialog({
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
+    const [pickerProductId, setPickerProductId] = useState('');
     const ordersBase = `${String(actionBaseUrl || '/sales').replace(/\/$/, '')}/orders`;
     const { token: lockToken, error: lockError, ready: lockReady } = useOrderInteractionLock({
         orderId: order?.id,
         actionApiBase: ordersBase,
-        action: closeIntent ? 'close' : 'edit_order',
+        action: closeIntent ? 'close' : (canUnclose && orderClosed ? 'unclose' : 'edit_order'),
         enabled: Boolean(open && order?.id),
     });
 
     useEffect(() => {
         if (open) {
-            const nextForm = mapOrder(order, initialOperationResult);
+            const nextForm = mapOrder(order, initialOperationResult, productOptions);
             setForm(nextForm);
             setOperationResultSeed(nextForm.operation_result || '');
             setFormError('');
             setManualDiscount(numberValue(nextForm.discount) > 0);
             setManualShippingFee(numberValue(nextForm.shipping_fee_collected) > 0);
             setRecipientPaysCarrier(false);
+            setPickerProductId('');
         }
-    }, [open, order, initialOperationResult]);
+    }, [open, order, initialOperationResult, productOptions]);
 
     useEffect(() => {
         if (lockError) {
@@ -194,10 +219,25 @@ export function SaleOrderDialog({
         } else setWards([]);
     }, [form.address_mode, form.district_code, form.province_code]);
 
-    const catalog = useMemo(() => ({
-        products: productOptions.filter((item) => item.type !== 'combo'),
-        combos: productOptions.filter((item) => item.type === 'combo'),
-    }), [productOptions]);
+    const catalog = useMemo(() => {
+        const products = productOptions.filter((item) => item.type !== 'combo');
+        const byParent = new Map();
+        products.forEach((item) => {
+            if (!item.parent_id) return;
+            const parentKey = String(item.parent_id);
+            if (!byParent.has(parentKey)) byParent.set(parentKey, []);
+            byParent.get(parentKey).push(item);
+        });
+        const bases = products.filter((item) => !item.parent_id);
+        return { products, byParent, bases };
+    }, [productOptions]);
+
+    const baseProductSelectOptions = useMemo(() => toSelectOptions(catalog.bases.map((item) => ({
+        id: item.id,
+        name: item.name,
+        subLabel: item.sku || undefined,
+    }))), [catalog.bases]);
+
     const sourceSelectOptions = useMemo(() => toSelectOptions(sourceOptions), [sourceOptions]);
     const provinceSelectOptions = useMemo(() => toSelectOptions(provinces), [provinces]);
     const districtSelectOptions = useMemo(() => toSelectOptions(districts), [districts]);
@@ -214,30 +254,61 @@ export function SaleOrderDialog({
     const updateLine = (lineKey, patch) => setForm((current) => ({ ...current, items: current.items.map((item) => item.key === lineKey ? { ...item, ...patch } : item) }));
     const removeLine = (lineKey) => setForm((current) => ({ ...current, items: current.items.filter((item) => item.key !== lineKey) }));
 
-    const chooseProduct = (line, productId) => {
-        const list = line.item_type === 'combo' ? catalog.combos : catalog.products;
-        const product = list.find((item) => String(item.id) === String(productId));
+    const resolveLineFromProduct = (product) => {
+        if (!product) {
+            return {
+                base_product_id: '',
+                product_id: '',
+                product_name: '',
+                unit_price: 0,
+            };
+        }
+        const variants = catalog.byParent.get(String(product.id)) ?? [];
+        if (!product.parent_id && variants.length > 0) {
+            return {
+                base_product_id: String(product.id),
+                product_id: '',
+                product_name: product.name,
+                unit_price: numberValue(product.unit_price),
+            };
+        }
+        const baseId = product.parent_id ? String(product.parent_id) : String(product.id);
+        return {
+            base_product_id: baseId,
+            product_id: String(product.id),
+            product_name: product.name,
+            unit_price: numberValue(product.unit_price),
+        };
+    };
+
+    const chooseBaseProduct = (line, productId) => {
+        const product = catalog.products.find((item) => String(item.id) === String(productId));
+        updateLine(line.key, resolveLineFromProduct(product));
+    };
+
+    const chooseSku = (line, skuId) => {
+        const product = catalog.products.find((item) => String(item.id) === String(skuId));
+        if (!product) {
+            updateLine(line.key, { product_id: '', product_name: '', unit_price: 0 });
+            return;
+        }
         updateLine(line.key, {
-            product_id: product?.id ?? '',
-            product_name: product?.name ?? '',
-            unit_price: numberValue(product?.unit_price),
+            product_id: String(product.id),
+            product_name: product.name,
+            unit_price: numberValue(product.unit_price),
+            base_product_id: product.parent_id ? String(product.parent_id) : String(line.base_product_id || product.id),
         });
     };
 
-    const appendCatalogItem = (type, productId) => {
+    const appendCatalogItem = (productId) => {
         if (!productId) return;
-        const list = type === 'combo' ? catalog.combos : catalog.products;
-        const product = list.find((item) => String(item.id) === String(productId));
+        const product = catalog.products.find((item) => String(item.id) === String(productId));
         if (!product) return;
         setForm((current) => ({
             ...current,
-            items: [...current.items, {
-                ...newLine(type),
-                product_id: product.id,
-                product_name: product.name,
-                unit_price: numberValue(product.unit_price),
-            }],
+            items: [...current.items, { ...newLine('product'), ...resolveLineFromProduct(product) }],
         }));
+        setPickerProductId('');
     };
 
     const payload = () => ({
@@ -272,7 +343,7 @@ export function SaleOrderDialog({
         items: form.items.filter((item) => item.product_id).map((item) => ({
             product_id: Number(item.product_id),
             product_name: item.product_name,
-            item_type: item.item_type,
+            item_type: item.item_type === 'combo' ? 'product' : item.item_type,
             quantity: Math.max(1, numberValue(item.quantity)),
             unit_price: numberValue(item.unit_price),
             discount_amount: numberValue(item.discount_amount),
@@ -280,23 +351,29 @@ export function SaleOrderDialog({
     });
 
     const validate = () => {
-        if (!form.marketing_source_id && !order) return 'Vui lòng chọn nguồn dữ liệu.';
-        if (!form.name.trim()) return 'Vui lòng nhập họ tên khách hàng.';
+        if (!form.marketing_source_id && !order) return t('operations.sale_order.source_required');
+        if (!form.name.trim()) return t('operations.sale_order.name_required');
         const phoneError = vietnamesePhoneError(form.phone, { required: true });
         if (phoneError) return phoneError;
         if (!form.receiver_is_customer) {
             const receiverError = vietnamesePhoneError(form.receiver_phone, { required: true });
             if (receiverError) return receiverError;
         }
-        if (!form.items.some((item) => item.product_id)) return 'Vui lòng chọn ít nhất một sản phẩm hoặc combo.';
+        if (form.items.some((item) => item.base_product_id && !item.product_id && (catalog.byParent.get(String(item.base_product_id)) ?? []).length > 0)) {
+            return t('operations.sale_order.sku_required');
+        }
+        if (!form.items.some((item) => item.product_id)) return t('operations.sale_order.product_required');
         return null;
     };
 
     const firstError = (errors) => {
         const value = Object.values(errors ?? {})[0];
         if (Array.isArray(value)) return value[0];
-        return value || 'Không thể lưu đơn.';
+        return value || t('operations.sale_order.save_failed');
     };
+
+    const selectedOperationResult = operationStatusOptions.find((item) => String(item.value) === String(form.operation_result));
+    const needsNextOperationAt = form.operation_result === 'callback_scheduled';
 
     const shouldSyncOperationResult = () => Boolean(
         order?.id
@@ -318,7 +395,9 @@ export function SaleOrderDialog({
         }, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success(`Đã cập nhật kết quả${selectedOperationResult?.label ? `: ${selectedOperationResult.label}` : ' tác nghiệp'}.`);
+                toast.success(t('operations.sale_order.result_updated', {
+                    label: selectedOperationResult?.label ? `: ${selectedOperationResult.label}` : '',
+                }));
                 onDone?.();
             },
             onError: (errors) => setFormError(firstError(errors)),
@@ -327,24 +406,28 @@ export function SaleOrderDialog({
     };
 
     const submit = (shouldClose) => {
+        if (orderClosed) {
+            setFormError(t('operations.sale_order.closed_locked'));
+            return;
+        }
         const error = validate();
         if (error) {
             setFormError(error);
             return;
         }
         if (!shouldClose && form.operation_result === 'closed_success') {
-            setFormError('Kết quả chốt đơn thành công cần bấm nút Chốt đơn để sinh mã đơn.');
+            setFormError(t('operations.sale_order.close_via_button'));
             return;
         }
         if (!shouldClose && needsNextOperationAt && !form.next_operation_at) {
-            setFormError('Vui lòng chọn thời gian tác nghiệp tiếp.');
+            setFormError(t('operations.sale_order.next_operation_required'));
             return;
         }
         setFormError('');
         const data = payload();
         if (order) {
             if (!lockToken) {
-                setFormError(lockError || 'Chưa lấy được quyền thao tác đơn.');
+                setFormError(lockError || t('operations.sale_order.lock_missing'));
                 return;
             }
             data.interaction_lock_token = lockToken;
@@ -359,7 +442,10 @@ export function SaleOrderDialog({
             }
             router.post(manualUrl, data, {
                 preserveScroll: true,
-                onSuccess: () => { toast.success(shouldClose ? 'Đã tạo và chốt đơn.' : 'Đã lưu đơn mới.'); onOpenChange(false); },
+                onSuccess: () => {
+                    toast.success(shouldClose ? t('operations.sale_order.created_closed') : t('operations.sale_order.created'));
+                    onOpenChange(false);
+                },
                 onError: (errors) => setFormError(firstError(errors)),
                 onFinish: () => setProcessing(false),
             });
@@ -371,7 +457,7 @@ export function SaleOrderDialog({
             onSuccess: () => {
                 if (!shouldClose) {
                     syncOperationStatus(() => {
-                        toast.success('Đã cập nhật đơn.');
+                        toast.success(t('operations.sale_order.updated'));
                         onOpenChange(false);
                         setProcessing(false);
                     });
@@ -387,7 +473,7 @@ export function SaleOrderDialog({
                     interaction_lock_token: lockToken,
                 }, {
                     preserveScroll: true,
-                    onSuccess: () => { toast.success('Đã chốt đơn và sinh mã đơn.'); onOpenChange(false); },
+                    onSuccess: () => { toast.success(t('operations.sale_order.closed')); onOpenChange(false); },
                     onError: (errors) => setFormError(firstError(errors)),
                     onFinish: () => setProcessing(false),
                 });
@@ -396,36 +482,61 @@ export function SaleOrderDialog({
         });
     };
 
+    const uncloseOrder = () => {
+        if (!order?.id || !canUnclose) return;
+        if (!lockToken) {
+            setFormError(lockError || t('operations.sale_order.lock_missing'));
+            return;
+        }
+        setProcessing(true);
+        setFormError('');
+        router.post(`${actionBaseUrl}/orders/${order.id}/unclose`, {
+            interaction_lock_token: lockToken,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success(t('operations.sale_order.unclose_success'));
+                onOpenChange(false);
+            },
+            onError: (errors) => setFormError(firstError(errors)),
+            onFinish: () => setProcessing(false),
+        });
+    };
+
     const calcOrderDiscount = () => {
         if (manualDiscount) {
-            toast.info('Đang bật tự nhập chiết khấu đơn.');
+            toast.info(t('operations.sale_order.manual_discount_on'));
             return;
         }
         update('discount', lineDiscount);
-        toast.success('Đã tính chiết khấu theo sản phẩm.');
+        toast.success(t('operations.sale_order.discount_applied'));
     };
 
     const calcShippingFee = () => {
         if (!order?.id) {
-            toast.error('Vui lòng lưu đơn trước khi tính phí vận chuyển.');
+            toast.error(t('operations.sale_order.save_before_shipping_fee'));
             return;
         }
         if (!form.warehouse_id || !form.province_code) {
-            toast.error('Chọn kho và địa chỉ giao hàng trước khi tính phí VC.');
+            toast.error(t('operations.sale_order.shipping_fee_need_address'));
             return;
         }
-        toast.info('Phí VC tạm tính: nhập thủ công hoặc chốt đơn qua kho để tính theo đơn vị vận chuyển.');
+        toast.info(t('operations.sale_order.shipping_fee_hint'));
     };
 
     const refreshProducts = () => {
         setForm((current) => ({ ...current, items: [] }));
-        toast.success('Đã làm mới danh sách sản phẩm.');
+        toast.success(t('operations.sale_order.products_refreshed'));
     };
 
     const selectedWarehouse = warehouseOptions.find((item) => String(item.id) === String(form.warehouse_id));
     const services = shippingServiceOptions?.[form.shipping_provider] ?? [];
-    const selectedOperationResult = operationStatusOptions.find((item) => String(item.value) === String(form.operation_result));
-    const needsNextOperationAt = form.operation_result === 'callback_scheduled';
+    const formDisabled = orderClosed && !canUnclose;
+    const editDisabled = orderClosed || processing || (Boolean(order?.id) && !lockReady);
+
+    const dialogTitle = order
+        ? `${closeIntent ? t('operations.sale_order.title_close') : t('operations.sale_order.title_update')}: ${order.orderCode || t('operations.sale_order.uncoded')}`
+        : t('operations.sale_order.title_new');
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -434,112 +545,175 @@ export function SaleOrderDialog({
                 aria-describedby={undefined}
                 style={{ minHeight: 'min(920px, calc(100dvh - 16px))', maxHeight: 'calc(100dvh - 8px)' }}
             >
-                <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{order ? `${closeIntent ? 'Chốt đơn' : 'Cập nhật đơn'}: ${order.orderCode || 'Đơn chưa chốt'}` : 'Nhập đơn mới: --'}</DialogTitle></DialogHeader>
+                <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{dialogTitle}</DialogTitle></DialogHeader>
                 <div className="ps-sale-order-body">
                     {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
-                    <section className="ps-order-left-panel">
+                    {orderClosed && canUnclose ? (
+                        <div className="ps-dialog-form-error" role="status" style={{ background: '#fff8e6', color: '#8a6d3b', borderColor: '#faebcc' }}>
+                            {t('operations.sale_order.unclose_hint')}
+                        </div>
+                    ) : null}
+                    <section className={`ps-order-left-panel${formDisabled ? ' is-disabled' : ''}`}>
                         <div className="ps-order-field ps-full">
-                            <FieldLabel required>Nguồn dữ liệu</FieldLabel>
+                            <FieldLabel required>{t('operations.sale_order.source')}</FieldLabel>
                             <PushsaleSelect
                                 searchable
                                 className="ps-order-search-select"
                                 options={sourceSelectOptions}
                                 value={form.marketing_source_id}
                                 onChange={(value) => update('marketing_source_id', value)}
-                                placeholder="--Chọn nguồn dữ liệu--"
-                                searchPlaceholder="Gõ tên nguồn để tìm..."
+                                placeholder={t('operations.sale_order.source_placeholder')}
+                                searchPlaceholder={t('operations.sale_order.source_search')}
+                                disabled={sourceLocked || formDisabled}
                             />
+                            {sourceLocked ? <div className="small-tip">{t('operations.sale_order.source_locked_hint')}</div> : null}
                         </div>
-                        {order && operationStatusOptions.length ? <div className="ps-order-field ps-full ps-order-result-field"><FieldLabel>Kết quả</FieldLabel><Select value={form.operation_result} onChange={(value) => update('operation_result', value)}><option value="">--Chọn kết quả--</option>{operationStatusOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</Select></div> : null}
-                        {order && needsNextOperationAt ? <div className="ps-order-field ps-full ps-order-next-operation-field"><FieldLabel required>Tác nghiệp tiếp</FieldLabel><input className="form-control" type="datetime-local" value={form.next_operation_at} onChange={(event) => update('next_operation_at', event.target.value)} /></div> : null}
-                        <div className="ps-order-field"><FieldLabel required>Họ tên khách hàng</FieldLabel><input className="form-control" value={form.name} onChange={(event) => update('name', event.target.value)} /></div>
-                        <div className="ps-order-field"><FieldLabel required>Số điện thoại</FieldLabel><input className="form-control" value={form.phone} onChange={(event) => update('phone', event.target.value)} /></div>
-                        <div className="ps-order-field ps-full"><FieldLabel>Tin nhắn</FieldLabel><textarea className="form-control" rows={2} maxLength={1000} value={form.message} onChange={(event) => update('message', event.target.value)} /></div>
-                        <div className="ps-order-field"><FieldLabel>Số nhà/đường/ngõ/ngách</FieldLabel><input className="form-control" maxLength={200} placeholder="Tìm kiếm (Tối đa 200 ký tự)" value={form.address_detail} onChange={(event) => update('address_detail', event.target.value)} /></div>
+                        {order && operationStatusOptions.length ? <div className="ps-order-field ps-full ps-order-result-field"><FieldLabel>{t('operations.sale_order.result')}</FieldLabel><Select value={form.operation_result} onChange={(value) => update('operation_result', value)} disabled={editDisabled}><option value="">--{t('operations.sale_order.choose_result')}--</option>{operationStatusOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</Select></div> : null}
+                        {order && needsNextOperationAt ? <div className="ps-order-field ps-full ps-order-next-operation-field"><FieldLabel required>{t('operations.sale_order.next_operation')}</FieldLabel><input className="form-control" type="datetime-local" value={form.next_operation_at} onChange={(event) => update('next_operation_at', event.target.value)} disabled={editDisabled} /></div> : null}
+                        <div className="ps-order-field"><FieldLabel required>{t('operations.sale_order.customer_name')}</FieldLabel><input className="form-control" value={form.name} onChange={(event) => update('name', event.target.value)} disabled={editDisabled} /></div>
+                        <div className="ps-order-field"><FieldLabel required>{t('operations.sale_order.customer_phone')}</FieldLabel><input className="form-control" value={form.phone} onChange={(event) => update('phone', event.target.value)} disabled={editDisabled} /></div>
+                        <div className="ps-order-field ps-full"><FieldLabel>{t('operations.sale_order.message')}</FieldLabel><textarea className="form-control" rows={2} maxLength={1000} value={form.message} onChange={(event) => update('message', event.target.value)} disabled={editDisabled} /></div>
+                        <div className="ps-order-field"><FieldLabel>{t('operations.sale_order.address_detail')}</FieldLabel><input className="form-control" maxLength={200} placeholder={t('operations.sale_order.address_detail_placeholder')} value={form.address_detail} onChange={(event) => update('address_detail', event.target.value)} disabled={editDisabled} /></div>
                         <div className="ps-order-field">
-                            <FieldLabel>Tỉnh/TP</FieldLabel>
+                            <FieldLabel>{t('operations.sale_order.province')}</FieldLabel>
                             <PushsaleSelect
                                 searchable
                                 className="ps-order-search-select"
                                 options={provinceSelectOptions}
                                 value={form.province_code}
                                 onChange={(value) => { update('province_code', value); update('district_code', ''); update('ward_code', ''); }}
-                                placeholder="--Chọn Tỉnh/TP--"
-                                searchPlaceholder="Gõ tỉnh/thành để tìm..."
+                                placeholder={t('operations.sale_order.province_placeholder')}
+                                searchPlaceholder={t('operations.sale_order.province_search')}
+                                disabled={editDisabled}
                             />
                         </div>
                         <div className="ps-order-field">
-                            <FieldLabel>Quận/Huyện</FieldLabel>
+                            <FieldLabel>{t('operations.sale_order.district')}</FieldLabel>
                             <PushsaleSelect
                                 searchable
                                 className="ps-order-search-select"
                                 options={districtSelectOptions}
                                 value={form.district_code}
                                 onChange={(value) => { update('district_code', value); update('ward_code', ''); }}
-                                placeholder="--Chọn Quận/Huyện--"
-                                searchPlaceholder="Gõ quận/huyện để tìm..."
-                                disabled={form.address_mode === 'new'}
+                                placeholder={t('operations.sale_order.district_placeholder')}
+                                searchPlaceholder={t('operations.sale_order.district_search')}
+                                disabled={form.address_mode === 'new' || editDisabled}
                             />
                         </div>
                         <div className="ps-order-field">
-                            <FieldLabel>Phường/Xã</FieldLabel>
+                            <FieldLabel>{t('operations.sale_order.ward')}</FieldLabel>
                             <PushsaleSelect
                                 searchable
                                 className="ps-order-search-select"
                                 options={wardSelectOptions}
                                 value={form.ward_code}
                                 onChange={(value) => update('ward_code', value)}
-                                placeholder="--Chọn Phường/Xã--"
-                                searchPlaceholder="Gõ phường/xã để tìm..."
+                                placeholder={t('operations.sale_order.ward_placeholder')}
+                                searchPlaceholder={t('operations.sale_order.ward_search')}
+                                disabled={editDisabled}
                             />
                         </div>
-                        <div className="ps-order-field"><FieldLabel>Phương thức giao hàng</FieldLabel><Select value={form.shipping_provider} onChange={(value) => { update('shipping_provider', value); update('shipping_service', ''); update('shipping_method', value || 'Thủ công'); }}><option value="">Thủ công</option>{carrierOptions.map((item) => <option key={item.value ?? item.id} value={item.value ?? item.id}>{item.label ?? item.name}</option>)}</Select></div>
-                        <div className="ps-order-field"><FieldLabel>Giao hàng bằng</FieldLabel><Select value={form.shipping_service} onChange={(value) => update('shipping_service', value)}><option value="">Giao hàng thủ công</option>{services.map((item) => <option key={item.value ?? item.code} value={item.value ?? item.code}>{item.label ?? item.name}</option>)}</Select></div>
-                        <div className="ps-order-field ps-full"><FieldLabel>Mẫu giao hàng ghi chú</FieldLabel><Select value=""><option value="">--Mẫu ghi chú--</option></Select></div>
-                        <div className="ps-order-field ps-full"><FieldLabel>Giao hàng ghi chú</FieldLabel><textarea className="form-control" rows={2} value={form.shipping_notes} onChange={(event) => update('shipping_notes', event.target.value)} /></div>
-                        <label className="ps-order-checkbox ps-full"><input type="checkbox" checked={form.receiver_is_customer} onChange={(event) => update('receiver_is_customer', event.target.checked)} /> Khách đặt hàng là người nhận hàng</label>
-                        {!form.receiver_is_customer && <><div className="ps-order-field"><FieldLabel>Người nhận</FieldLabel><input className="form-control" value={form.receiver_name} onChange={(event) => update('receiver_name', event.target.value)} /></div><div className="ps-order-field"><FieldLabel>SĐT người nhận</FieldLabel><input className="form-control" value={form.receiver_phone} onChange={(event) => update('receiver_phone', event.target.value)} /></div></>}
-                        <label className="ps-order-checkbox"><input type="checkbox" checked={form.address_mode === 'new'} onChange={(event) => update('address_mode', event.target.checked ? 'new' : 'old')} /> Sử dụng địa chỉ 2 cấp</label>
-                        <label className="ps-order-checkbox"><input type="checkbox" checked={form.address_mode === 'new'} readOnly disabled title="Bật địa chỉ 2 cấp để dùng gợi ý chuyển đổi" /> Gợi ý chuyển địa chỉ</label>
+                        <div className="ps-order-field"><FieldLabel>{t('operations.sale_order.shipping_method')}</FieldLabel><Select value={form.shipping_provider} onChange={(value) => { update('shipping_provider', value); update('shipping_service', ''); update('shipping_method', value || 'Thủ công'); }} disabled={editDisabled}><option value="">{t('operations.sale_order.manual_shipping')}</option>{carrierOptions.map((item) => <option key={item.value ?? item.id} value={item.value ?? item.id}>{item.label ?? item.name}</option>)}</Select></div>
+                        <div className="ps-order-field"><FieldLabel>{t('operations.sale_order.ship_via')}</FieldLabel><Select value={form.shipping_service} onChange={(value) => update('shipping_service', value)} disabled={editDisabled}><option value="">{t('operations.sale_order.manual_carrier')}</option>{services.map((item) => <option key={item.value ?? item.code} value={item.value ?? item.code}>{item.label ?? item.name}</option>)}</Select></div>
+                        <div className="ps-order-field ps-full"><FieldLabel>{t('operations.sale_order.shipping_note_template')}</FieldLabel><Select value="" disabled={editDisabled}><option value="">--{t('operations.sale_order.note_template')}--</option></Select></div>
+                        <div className="ps-order-field ps-full"><FieldLabel>{t('operations.sale_order.shipping_notes')}</FieldLabel><textarea className="form-control" rows={2} value={form.shipping_notes} onChange={(event) => update('shipping_notes', event.target.value)} disabled={editDisabled} /></div>
+                        <label className="ps-order-checkbox ps-full"><input type="checkbox" checked={form.receiver_is_customer} onChange={(event) => update('receiver_is_customer', event.target.checked)} disabled={editDisabled} /> {t('operations.sale_order.receiver_is_customer')}</label>
+                        {!form.receiver_is_customer && <><div className="ps-order-field"><FieldLabel>{t('operations.sale_order.receiver_name')}</FieldLabel><input className="form-control" value={form.receiver_name} onChange={(event) => update('receiver_name', event.target.value)} disabled={editDisabled} /></div><div className="ps-order-field"><FieldLabel>{t('operations.sale_order.receiver_phone')}</FieldLabel><input className="form-control" value={form.receiver_phone} onChange={(event) => update('receiver_phone', event.target.value)} disabled={editDisabled} /></div></>}
+                        <label className="ps-order-checkbox"><input type="checkbox" checked={form.address_mode === 'new'} onChange={(event) => update('address_mode', event.target.checked ? 'new' : 'old')} disabled={editDisabled} /> {t('operations.sale_order.address_2_level')}</label>
+                        <label className="ps-order-checkbox"><input type="checkbox" checked={form.address_mode === 'new'} readOnly disabled title={t('operations.sale_order.address_suggest_title')} /> {t('operations.sale_order.address_suggest')}</label>
                     </section>
 
                     <section className="ps-order-right-panel">
                         <div className="ps-order-top-grid">
-                            <div><FieldLabel>Kho</FieldLabel><Select value={form.warehouse_id} onChange={(value) => update('warehouse_id', value)}><option value="">--Chọn kho--</option>{warehouseOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
-                            <div><FieldLabel>Địa chỉ lấy hàng</FieldLabel><div className="ps-static-line">{selectedWarehouse?.pickup_address ?? selectedWarehouse?.address ?? '—'}</div></div>
-                            <div><Select value="" onChange={(value) => appendCatalogItem('product', value)}><option value="">--Chọn sản phẩm--</option>{catalog.products.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
-                            <div><Select value="" onChange={(value) => appendCatalogItem('combo', value)}><option value="">--Chọn combo--</option>{catalog.combos.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
+                            <div><FieldLabel>{t('operations.sale_order.warehouse')}</FieldLabel><Select value={form.warehouse_id} onChange={(value) => update('warehouse_id', value)} disabled={editDisabled}><option value="">--{t('operations.sale_order.choose_warehouse')}--</option>{warehouseOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
+                            <div><FieldLabel>{t('operations.sale_order.pickup_address')}</FieldLabel><div className="ps-static-line">{selectedWarehouse?.pickup_address ?? selectedWarehouse?.address ?? '—'}</div></div>
+                            <div className="ps-full">
+                                <FieldLabel>{t('operations.sale_order.add_product')}</FieldLabel>
+                                <PushsaleSelect
+                                    searchable
+                                    className="ps-order-search-select"
+                                    options={baseProductSelectOptions}
+                                    value={pickerProductId}
+                                    onChange={(value) => appendCatalogItem(value)}
+                                    placeholder={t('operations.sale_order.product_placeholder')}
+                                    searchPlaceholder={t('operations.sale_order.product_search')}
+                                    disabled={editDisabled}
+                                />
+                            </div>
                         </div>
-                        <div className="ps-vat-note">(v) Đã bao gồm VAT</div>
+                        <div className="ps-vat-note">{t('operations.sale_order.vat_included')}</div>
                         <div className="table-responsive">
                             <table className="table table-bordered ps-order-product-table">
-                                <thead><tr><th>Tên/ Mã SP</th><th>Đơn giá</th><th>SL Tổng</th><th>Thành tiền</th><th>CK 1</th><th>Tiền CK (v)</th><th>CN(g)</th><th /></tr></thead>
+                                <thead><tr><th>{t('operations.sale_order.col_product')}</th><th>{t('operations.sale_order.col_sku')}</th><th>{t('operations.sale_order.col_price')}</th><th>{t('operations.sale_order.col_qty')}</th><th>{t('operations.sale_order.col_amount')}</th><th>{t('operations.sale_order.col_discount')}</th><th>{t('operations.sale_order.col_discount_money')}</th><th>{t('operations.sale_order.col_weight')}</th><th /></tr></thead>
                                 <tbody>
                                     {form.items.map((line) => {
-                                        const options = line.item_type === 'combo' ? catalog.combos : catalog.products;
+                                        const variants = catalog.byParent.get(String(line.base_product_id)) ?? [];
+                                        const skuOptions = toSelectOptions(variants.map((item) => ({
+                                            id: item.id,
+                                            name: item.name,
+                                            subLabel: item.sku || undefined,
+                                        })));
                                         const lineTotal = numberValue(line.quantity) * numberValue(line.unit_price) - numberValue(line.discount_amount);
                                         return <tr key={line.key}>
-                                            <td><Select value={line.product_id} onChange={(value) => chooseProduct(line, value)}><option value="">--Chọn {line.item_type === 'combo' ? 'combo' : 'sản phẩm'}--</option>{options.map((item) => <option key={item.id} value={item.id}>{item.name} {item.sku ? `(${item.sku})` : ''}</option>)}</Select></td>
-                                            <td><input className="form-control text-right" type="number" min="0" value={line.unit_price} onChange={(event) => updateLine(line.key, { unit_price: event.target.value })} /></td>
-                                            <td><input className="form-control text-center" type="number" min="1" value={line.quantity} onChange={(event) => updateLine(line.key, { quantity: event.target.value })} /></td>
+                                            <td>
+                                                <PushsaleSelect
+                                                    searchable
+                                                    className="ps-order-search-select"
+                                                    options={baseProductSelectOptions}
+                                                    value={line.base_product_id || line.product_id}
+                                                    onChange={(value) => chooseBaseProduct(line, value)}
+                                                    placeholder={t('operations.sale_order.product_placeholder')}
+                                                    searchPlaceholder={t('operations.sale_order.product_search')}
+                                                    disabled={editDisabled}
+                                                />
+                                            </td>
+                                            <td>
+                                                {variants.length > 0 ? (
+                                                    <PushsaleSelect
+                                                        searchable
+                                                        className="ps-order-search-select"
+                                                        options={skuOptions}
+                                                        value={line.product_id}
+                                                        onChange={(value) => chooseSku(line, value)}
+                                                        placeholder={t('operations.sale_order.sku_placeholder')}
+                                                        searchPlaceholder={t('operations.sale_order.sku_search')}
+                                                        disabled={editDisabled}
+                                                    />
+                                                ) : (
+                                                    <div className="ps-static-line">{line.product_name || '—'}</div>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <input
+                                                    className="form-control text-right"
+                                                    type="number"
+                                                    min="0"
+                                                    value={line.unit_price}
+                                                    onChange={(event) => updateLine(line.key, { unit_price: event.target.value })}
+                                                    disabled={editDisabled || unitPriceLocked}
+                                                    title={unitPriceLocked ? t('operations.sale_order.price_locked_hint') : undefined}
+                                                    readOnly={unitPriceLocked}
+                                                />
+                                            </td>
+                                            <td><input className="form-control text-center" type="number" min="1" value={line.quantity} onChange={(event) => updateLine(line.key, { quantity: event.target.value })} disabled={editDisabled} /></td>
                                             <td className="text-right"><b>{money(lineTotal)}</b></td>
-                                            <td><input className="form-control text-right" type="number" min="0" value={line.discount_amount} onChange={(event) => updateLine(line.key, { discount_amount: event.target.value })} /></td>
+                                            <td><input className="form-control text-right" type="number" min="0" value={line.discount_amount} onChange={(event) => updateLine(line.key, { discount_amount: event.target.value })} disabled={editDisabled} /></td>
                                             <td className="text-right">{money(line.discount_amount)}</td><td className="text-center">0</td>
-                                            <td className="text-center"><button className="btn-icon text-danger" type="button" onClick={() => removeLine(line.key)}><i className="fa fa-trash" /></button></td>
+                                            <td className="text-center"><button className="btn-icon text-danger" type="button" onClick={() => removeLine(line.key)} disabled={editDisabled}><i className="fa fa-trash" /></button></td>
                                         </tr>;
                                     })}
-                                    {!form.items.length && <tr><td colSpan={8} className="text-center ps-empty-products">Chưa chọn sản phẩm</td></tr>}
+                                    {!form.items.length && <tr><td colSpan={9} className="text-center ps-empty-products">{t('operations.sale_order.no_products')}</td></tr>}
                                 </tbody>
                                 <tfoot>
-                                    <tr><th colSpan={2} className="text-right">Tổng cộng:</th><th>{form.items.reduce((sum, item) => sum + numberValue(item.quantity), 0)}</th><th className="text-right">{money(subtotal + lineDiscount)}</th><th /><th className="text-right">{money(lineDiscount)}</th><th /><th /></tr>
-                                    <tr><td colSpan={3} className="text-right">Chiết khấu sản phẩm (v):</td><td className="text-right">{money(lineDiscount)}</td><td colSpan={4} /></tr>
+                                    <tr><th colSpan={3} className="text-right">{t('operations.sale_order.total_label')}</th><th>{form.items.reduce((sum, item) => sum + numberValue(item.quantity), 0)}</th><th className="text-right">{money(subtotal + lineDiscount)}</th><th /><th className="text-right">{money(lineDiscount)}</th><th /><th /></tr>
+                                    <tr><td colSpan={4} className="text-right">{t('operations.sale_order.product_discount')}:</td><td className="text-right">{money(lineDiscount)}</td><td colSpan={4} /></tr>
                                     <tr>
                                         <td>
                                             <label>
-                                                <input type="checkbox" checked={manualDiscount} onChange={(event) => setManualDiscount(event.target.checked)} /> Tự nhập CK
+                                                <input type="checkbox" checked={manualDiscount} onChange={(event) => setManualDiscount(event.target.checked)} disabled={editDisabled} /> {t('operations.sale_order.manual_discount')}
                                             </label>
                                         </td>
-                                        <td colSpan={2} className="text-right">Chiết khấu theo đơn (v):</td>
+                                        <td colSpan={3} className="text-right">{t('operations.sale_order.order_discount')}:</td>
                                         <td>
                                             <input
                                                 className="form-control text-right"
@@ -550,6 +724,7 @@ export function SaleOrderDialog({
                                                     setManualDiscount(true);
                                                     update('discount', event.target.value);
                                                 }}
+                                                disabled={editDisabled}
                                             />
                                         </td>
                                         <td colSpan={4} />
@@ -557,10 +732,10 @@ export function SaleOrderDialog({
                                     <tr>
                                         <td>
                                             <label>
-                                                <input type="checkbox" checked={recipientPaysCarrier} onChange={(event) => setRecipientPaysCarrier(event.target.checked)} /> Người nhận trả phí VC trực tiếp cho đơn vị VC
+                                                <input type="checkbox" checked={recipientPaysCarrier} onChange={(event) => setRecipientPaysCarrier(event.target.checked)} disabled={editDisabled} /> {t('operations.sale_order.recipient_pays_carrier')}
                                             </label>
                                         </td>
-                                        <td colSpan={2} className="text-right">Phí VC thu của khách (v):</td>
+                                        <td colSpan={3} className="text-right">{t('operations.sale_order.shipping_fee_collected')}:</td>
                                         <td>
                                             <input
                                                 className="form-control text-right"
@@ -571,18 +746,19 @@ export function SaleOrderDialog({
                                                     setManualShippingFee(true);
                                                     update('shipping_fee_collected', event.target.value);
                                                 }}
+                                                disabled={editDisabled}
                                             />
                                         </td>
-                                        <td colSpan={2}>Phí VC tạm tính:<br /><span className="text-muted">{recipientPaysCarrier ? money(form.shipping_fee_collected) : '0'}</span></td>
+                                        <td colSpan={2}>{t('operations.sale_order.shipping_fee_estimate')}:<br /><span className="text-muted">{recipientPaysCarrier ? money(form.shipping_fee_collected) : '0'}</span></td>
                                         <td colSpan={2} />
                                     </tr>
                                     <tr>
                                         <td>
                                             <label>
-                                                <input type="checkbox" checked={manualShippingFee} onChange={(event) => setManualShippingFee(event.target.checked)} /> Tự nhập phí VC thu của khách
+                                                <input type="checkbox" checked={manualShippingFee} onChange={(event) => setManualShippingFee(event.target.checked)} disabled={editDisabled} /> {t('operations.sale_order.manual_shipping_fee')}
                                             </label>
                                         </td>
-                                        <td colSpan={2} className="text-right">Khách đã đặt cọc:</td>
+                                        <td colSpan={3} className="text-right">{t('operations.sale_order.deposit')}:</td>
                                         <td>
                                             <input
                                                 className="form-control text-right"
@@ -590,20 +766,26 @@ export function SaleOrderDialog({
                                                 min="0"
                                                 value={form.deposit}
                                                 onChange={(event) => update('deposit', event.target.value)}
+                                                disabled={editDisabled}
                                             />
                                         </td>
                                         <td colSpan={4} />
                                     </tr>
-                                    <tr><th colSpan={3} className="text-right">Tổng tiền đơn:</th><th className="text-right">{money(total)}</th><th colSpan={2}>Phải thu của khách:<br /><span className="text-success">{money(collect)}</span></th><th colSpan={2} /></tr>
+                                    <tr><th colSpan={4} className="text-right">{t('operations.sale_order.order_total')}:</th><th className="text-right">{money(total)}</th><th colSpan={2}>{t('operations.sale_order.collect')}:<br /><span className="text-success">{money(collect)}</span></th><th colSpan={2} /></tr>
                                 </tfoot>
                             </table>
                         </div>
                         <div className="ps-order-actions">
-                            <button type="button" className="btn btn-default" onClick={calcShippingFee}><i className="fa fa-calculator" /> Tính phí VC</button>
-                            <button type="button" className="btn btn-default" onClick={calcOrderDiscount}><i className="fa fa-calendar-minus-o" /> Tính CK</button>
-                            <button type="button" className="btn btn-default" disabled={processing} onClick={() => submit(false)}><i className="fa fa-floppy-o" /> Lưu đơn</button>
-                            <button type="button" className="btn btn-default" onClick={refreshProducts}><i className="fa fa-cube" /> Làm mới SP</button>
-                            <button type="button" className="btn btn-primary" disabled={processing || Boolean(order?.closedAt)} onClick={() => submit(true)}><i className="fa fa-calendar-check-o" /> Chốt đơn</button>
+                            <button type="button" className="btn btn-default" onClick={calcShippingFee} disabled={editDisabled}><i className="fa fa-calculator" /> {t('operations.sale_order.calc_shipping')}</button>
+                            <button type="button" className="btn btn-default" onClick={calcOrderDiscount} disabled={editDisabled}><i className="fa fa-calendar-minus-o" /> {t('operations.sale_order.calc_discount')}</button>
+                            <button type="button" className="btn btn-default" disabled={editDisabled} onClick={() => submit(false)}><i className="fa fa-floppy-o" /> {t('operations.sale_order.save')}</button>
+                            <button type="button" className="btn btn-default" onClick={refreshProducts} disabled={editDisabled}><i className="fa fa-cube" /> {t('operations.sale_order.refresh_products')}</button>
+                            {canUnclose ? (
+                                <button type="button" className="btn btn-warning" disabled={processing || !lockReady} onClick={uncloseOrder}>
+                                    <i className="fa fa-undo" /> {t('operations.sale_order.unclose')}
+                                </button>
+                            ) : null}
+                            <button type="button" className="btn btn-primary" disabled={editDisabled || orderClosed} onClick={() => submit(true)}><i className="fa fa-calendar-check-o" /> {t('operations.sale_order.close')}</button>
                         </div>
                     </section>
                 </div>

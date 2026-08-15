@@ -17,7 +17,7 @@ use Illuminate\Support\Collection;
 final class OrderOperationPresenter
 {
     /** @return array<string, mixed> */
-    public static function toArray(Order $order, ?SaleOperationConfigurationService $configuration = null): array
+    public static function toArray(Order $order, ?SaleOperationConfigurationService $configuration = null, ?\App\Models\User $actor = null): array
     {
         $stage = OperationStage::tryFrom($order->operation_stage) ?? OperationStage::NoOperation;
         $configuration ??= app(SaleOperationConfigurationService::class);
@@ -71,7 +71,8 @@ final class OrderOperationPresenter
             'canCall' => SaleOperationPolicy::canCall($order),
             'canChangeStatus' => SaleOperationPolicy::canChangeStatus($order),
             'canClose' => SaleOperationPolicy::canClose($order),
-            'canDeleteData' => SaleOperationPolicy::canDeleteData($order),
+            'canUnclose' => SaleOperationPolicy::canUnclose($order),
+            'canDeleteData' => SaleOperationPolicy::canDeleteData($order, $actor),
             'products' => $order->items->map(fn ($item) => [
                 'itemId' => (string) $item->id,
                 'productId' => $item->product_id !== null ? (string) $item->product_id : null,

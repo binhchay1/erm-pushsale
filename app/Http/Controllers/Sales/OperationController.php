@@ -179,20 +179,21 @@ class OperationController extends Controller
             ->all();
     }
 
-    /** @return list<array{id:int,name:string,type:string,sku:?string,unit_price:int}> */
+    /** @return list<array{id:int,name:string,type:string,sku:?string,unit_price:int,parent_id:?int}> */
     private function productOptions(): array
     {
         return Product::query()
             ->where('is_active', true)
-            ->orderBy('type')
+            ->where('type', '!=', 'combo')
             ->orderBy('name')
-            ->get(['id', 'name', 'type', 'sku', 'unit_price'])
+            ->get(['id', 'name', 'type', 'sku', 'unit_price', 'parent_id'])
             ->map(fn (Product $product) => [
                 'id' => (int) $product->id,
                 'name' => $product->name,
                 'type' => $product->type ?? 'product',
                 'sku' => $product->sku,
                 'unit_price' => (int) $product->unit_price,
+                'parent_id' => $product->parent_id !== null ? (int) $product->parent_id : null,
             ])
             ->all();
     }

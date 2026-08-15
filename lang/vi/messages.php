@@ -148,6 +148,11 @@ return [
         'already_closed' => 'Đơn đã được chốt trước đó.',
         'no_permission_close' => 'Bạn không có quyền chốt đơn này.',
         'cannot_close_cancelled' => 'Đơn đã hủy — không thể chốt.',
+        'cannot_unclose' => 'Chỉ hủy chốt được khi đơn còn Chờ vận đơn và chưa chuyển ĐVVC.',
+        'no_permission_unclose' => 'Bạn không có quyền hủy chốt đơn này.',
+        'unclose_success' => 'Đã hủy chốt đơn — có thể tác nghiệp và chỉnh sửa lại.',
+        'no_permission_delete' => 'Chỉ quản trị viên được xóa data.',
+        'source_locked' => 'Nguồn dữ liệu cố định — sale không được thay đổi.',
     ],
     'shipping_actions' => [
         'order_not_closed' => 'Đơn chưa chốt.',

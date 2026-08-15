@@ -27,6 +27,38 @@ final class SaleOperationPolicy
         return true;
     }
 
+    /**
+     * Sale được hủy chốt khi đơn còn CHỜ VẬN ĐƠN và chưa đẩy sang ĐVVC / chưa trừ kho.
+     */
+    public static function canUnclose(Order $order): bool
+    {
+        if (! $order->closed_at) {
+            return false;
+        }
+
+        if ($order->delivery_status !== DeliveryStatus::WaitingWaybill->value) {
+            return false;
+        }
+
+        if (filled($order->tracking_number)) {
+            return false;
+        }
+
+        if ($order->inventory_deducted_at) {
+            return false;
+        }
+
+        if ($order->relationLoaded('shipments')) {
+            if ($order->shipments->contains(fn ($shipment) => filled($shipment->tracking_number))) {
+                return false;
+            }
+        } elseif ($order->shipments()->whereNotNull('tracking_number')->exists()) {
+            return false;
+        }
+
+        return true;
+    }
+
     public static function hasCallablePhone(Order $order): bool
     {
         $phone = preg_replace('/\s+/u', '', (string) $order->customer_phone) ?: '';
@@ -71,13 +103,12 @@ final class SaleOperationPolicy
     }
 
     /**
-     * Sale workspace luôn hiện nút xóa data trên mọi dòng.
-     * Backend vẫn kiểm tra quyền sở hữu (sale chỉ xóa data của mình).
+     * Chỉ Admin được xóa data trên workspace / hồ sơ khách hàng.
      */
-    public static function canDeleteData(Order $order): bool
+    public static function canDeleteData(Order $order, ?\App\Models\User $actor = null): bool
     {
         unset($order);
 
-        return true;
+        return (bool) $actor?->isAdmin();
     }
 }

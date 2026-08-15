@@ -48,6 +48,7 @@ Route::middleware('role:'.User::ROLE_SALES)->prefix('sales')->name('sales.')->gr
     Route::post('orders/{order}/details', [SaleOperationOrderController::class, 'update'])->name('orders.details');
     Route::delete('orders/{order}', [SaleOrderDeletionController::class, 'destroy'])->name('orders.destroy');
     Route::post('orders/{order}/close', [OrderClosingController::class, 'store'])->name('orders.close');
+    Route::post('orders/{order}/unclose', [OrderClosingController::class, 'unclose'])->name('orders.unclose');
 
     Route::get('reports/hourly', HourlyStatsController::class)->name('reports.hourly');
     Route::get('reports/{report}', ExtraReportController::class)->where('report', '[a-z0-9\-]+')->name('reports.extra');

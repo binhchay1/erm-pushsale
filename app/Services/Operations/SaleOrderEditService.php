@@ -49,9 +49,18 @@ class SaleOrderEditService
         return DB::transaction(function () use ($order, $actor, $payload) {
             $before = $this->history->snapshot($order);
 
+            // Nguồn dữ liệu cố định với sale — chỉ Admin được đổi.
+            if (array_key_exists('marketing_source_id', $payload) && $actor->isAdmin()) {
+                $order->marketing_source_id = $payload['marketing_source_id'] ?: null;
+            }
+
             if (array_key_exists('items', $payload) && is_array($payload['items'])) {
+                $items = $payload['items'];
+                if (! $actor->isAdmin()) {
+                    $items = $this->lockUnitPricesForSale($items);
+                }
                 $order->items()->delete();
-                foreach ($this->factory->buildItemRows($payload['items'], 'telesale') as $row) {
+                foreach ($this->factory->buildItemRows($items, 'telesale') as $row) {
                     $order->items()->create($row);
                 }
             }
@@ -68,10 +77,6 @@ class SaleOrderEditService
                 if (array_key_exists($key, $payload) && $payload[$key] !== null) {
                     $order->{$column} = $payload[$key];
                 }
-            }
-
-            if (array_key_exists('marketing_source_id', $payload)) {
-                $order->marketing_source_id = $payload['marketing_source_id'] ?: null;
             }
 
             if (array_key_exists('warehouse_id', $payload)) {
@@ -226,5 +231,34 @@ class SaleOrderEditService
             ->implode(', ');
 
         $order->shipping_address_2 = $full !== '' ? $full : null;
+    }
+
+    /**
+     * Sale không được tự ý đổi đơn giá — giữ giá catalog của sản phẩm.
+     *
+     * @param  list<array<string, mixed>>  $items
+     * @return list<array<string, mixed>>
+     */
+    private function lockUnitPricesForSale(array $items): array
+    {
+        $productIds = collect($items)
+            ->map(fn (array $item) => (int) ($item['product_id'] ?? 0))
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        $prices = $productIds === []
+            ? collect()
+            : \App\Models\Product::query()->whereIn('id', $productIds)->pluck('unit_price', 'id');
+
+        return array_map(function (array $item) use ($prices): array {
+            $productId = (int) ($item['product_id'] ?? 0);
+            if ($productId > 0 && $prices->has($productId)) {
+                $item['unit_price'] = (int) $prices->get($productId);
+            }
+
+            return $item;
+        }, $items);
     }
 }

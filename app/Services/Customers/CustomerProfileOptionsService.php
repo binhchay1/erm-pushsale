@@ -116,11 +116,8 @@ final class CustomerProfileOptionsService
                 'canWriteMessages' => (bool) $currentUser?->allows('customers', 'full'),
                 'canBulkManage' => (bool) $currentUser?->allows('customers', 'full'),
                 'canDeleteHistory' => (bool) $currentUser?->isAdmin(),
-                // Sale / Admin: xóa data khi check trùng trên hồ sơ (cùng SaleOrderDeletionController).
-                'canDeleteOrders' => (bool) (
-                    $currentUser
-                    && in_array($currentUser->role, [UserRole::Admin, UserRole::Sales], true)
-                ),
+                // Chỉ Admin được xóa data trên hồ sơ khách hàng.
+                'canDeleteOrders' => (bool) $currentUser?->isAdmin(),
             ],
         ];
     }

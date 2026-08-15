@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\CustomerInteractions\OrderOperationHistoryService;
 use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Leads\LandingUpsellService;
+use App\Services\Operations\SaleOperationPolicy;
 use App\Services\Settings\FeatureSettingsService;
 use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\DB;
@@ -134,6 +135,61 @@ class OrderClosingService
                     'amount_to_collect' => (int) $fresh->amount_to_collect,
                     'delivery_status' => $fresh->delivery_status,
                 ],
+            );
+
+            return $fresh;
+        });
+    }
+
+    /**
+     * Hủy chốt đơn khi còn CHỜ VẬN ĐƠN — sale tác nghiệp lại / sửa thông tin.
+     */
+    public function unclose(Order $order, User $actor): Order
+    {
+        if (! SaleOperationPolicy::canUnclose($order)) {
+            throw ValidationException::withMessages([
+                'order' => __('messages.sale_ops.cannot_unclose'),
+            ]);
+        }
+
+        if ($order->sale_user_id && ! $this->visibility->canOperateOrder($actor, $order)) {
+            throw ValidationException::withMessages([
+                'order' => __('messages.sale_ops.no_permission_unclose'),
+            ]);
+        }
+
+        return DB::transaction(function () use ($order, $actor) {
+            $before = $this->history->snapshot($order);
+
+            $order->update([
+                'closed_at' => null,
+                'closing_status' => ClosingStatus::Open->value,
+                'delivery_status' => DeliveryStatus::DeliverNow->value,
+                'operation_stage' => OperationStage::NewCustomer->value,
+                'operation_result' => null,
+            ]);
+
+            $fresh = $order->fresh(['items', 'warehouse']);
+
+            ActivityLogger::log(
+                'sale_order_unclosed',
+                $fresh,
+                [
+                    'delivery_status' => $fresh->delivery_status,
+                    'order_code' => $fresh->order_code,
+                ],
+                $fresh->order_code ?? ('#'.$fresh->id),
+                $actor,
+            );
+
+            $this->history->record(
+                $fresh,
+                $actor,
+                'order_unclosed',
+                $before,
+                $this->history->snapshot($fresh),
+                null,
+                ['delivery_status' => $fresh->delivery_status],
             );
 
             return $fresh;

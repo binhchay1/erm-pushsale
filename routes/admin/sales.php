@@ -72,6 +72,7 @@ Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     Route::post('sales/orders/{order}/details', [SaleOperationOrderController::class, 'update'])->name('sales.orders.details');
     Route::delete('sales/orders/{order}', [SaleOrderDeletionController::class, 'destroy'])->name('sales.orders.destroy');
     Route::post('sales/orders/{order}/close', [OrderClosingController::class, 'store'])->name('sales.orders.close');
+    Route::post('sales/orders/{order}/unclose', [OrderClosingController::class, 'unclose'])->name('sales.orders.unclose');
     Route::post('sales/leads/manual', [ManualLeadController::class, 'store'])->name('sales.leads.manual');
 
     // Đơn hàng lỗi / xóa đơn.

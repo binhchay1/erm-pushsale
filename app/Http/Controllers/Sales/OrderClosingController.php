@@ -35,4 +35,12 @@ class OrderClosingController extends Controller
 
         return back()->with('success', __('messages.order_closed'));
     }
+
+    public function unclose(Request $request, Order $order, OrderClosingService $service): RedirectResponse
+    {
+        $this->ensureOrderInteractionLock($request, $order, 'unclose');
+        $service->unclose($order, $request->user());
+
+        return back()->with('success', __('messages.sale_ops.unclose_success'));
+    }
 }

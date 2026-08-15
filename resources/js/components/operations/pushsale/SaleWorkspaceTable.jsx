@@ -120,6 +120,7 @@ export function SaleWorkspaceTable({
     interactionLocks = {},
     authUserId = null,
 }) {
+    const t = useT();
     const { ask } = useConfirm();
     const [selected, setSelected] = useState([]);
     const checkAllRef = useRef(null);
@@ -141,16 +142,22 @@ export function SaleWorkspaceTable({
     ));
 
     const deleteData = async (order) => {
+        if (!order.canDeleteData) {
+            toast.error(t('operations.sale_order.delete_failed'));
+            return;
+        }
         const ok = await ask({
-            description: `Bạn chắc chắn muốn xóa data của ${order.customerName || order.customerPhone || `#${order.id}`}?`,
-            confirmLabel: 'Xóa',
+            description: t('operations.sale_order.delete_confirm', {
+                name: order.customerName || order.customerPhone || `#${order.id}`,
+            }),
+            confirmLabel: t('operations.sale_order.delete_label'),
             variant: 'destructive',
         });
         if (!ok) return;
         router.delete(`${actionBaseUrl}/orders/${order.id}`, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã xóa data.'),
-            onError: (errors) => toast.error(errors.order ?? 'Không thể xóa data.'),
+            onSuccess: () => toast.success(t('operations.sale_order.delete_success')),
+            onError: (errors) => toast.error(errors.order ?? t('operations.sale_order.delete_failed')),
         });
     };
 
@@ -274,7 +281,7 @@ export function SaleWorkspaceTable({
                                         saleName={order.saleName}
                                         saleUsername={order.saleUsername}
                                         assignedAt={order.assignedAt}
-                                        canDelete
+                                        canDelete={Boolean(order.canDeleteData)}
                                         onDelete={() => deleteData(order)}
                                     />
 

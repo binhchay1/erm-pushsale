@@ -96,6 +96,13 @@ export function PushsaleSelect({
                                 value={keyword}
                                 placeholder={translateLegacyText(searchPlaceholder || translate('common.search'))}
                                 onChange={(event) => setKeyword(event.target.value)}
+                                onKeyDown={(event) => {
+                                    if (event.key !== 'Enter') return;
+                                    event.preventDefault();
+                                    if (filtered.length > 0) {
+                                        selectValue(filtered[0].value);
+                                    }
+                                }}
                             />
                             <i className="fa fa-search" aria-hidden="true" />
                         </div>
@@ -199,6 +206,13 @@ export function PushsaleMultiSelect({
                                 value={keyword}
                                 placeholder={translateLegacyText(searchPlaceholder || `Tìm ${String(resolvedLabel).toLowerCase()}...`)}
                                 onChange={(event) => setKeyword(event.target.value)}
+                                onKeyDown={(event) => {
+                                    if (event.key !== 'Enter') return;
+                                    event.preventDefault();
+                                    if (filtered.length > 0) {
+                                        toggleId(filtered[0].value);
+                                    }
+                                }}
                             />
                             <i className="fa fa-search" aria-hidden="true" />
                         </div>
