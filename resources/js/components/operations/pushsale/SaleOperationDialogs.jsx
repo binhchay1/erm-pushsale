@@ -285,10 +285,14 @@ export function SaleOperationHistoryDialog({ order, context = 'sale', open, onOp
     );
 }
 
-export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange }) {
+export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialClosedOnly = false }) {
     const [loading, setLoading] = useState(false);
-    const [closedOnly, setClosedOnly] = useState(false);
+    const [closedOnly, setClosedOnly] = useState(initialClosedOnly);
     const [data, setData] = useState({ customer: null, summary: null, orders: [] });
+
+    useEffect(() => {
+        if (open) setClosedOnly(initialClosedOnly);
+    }, [open, initialClosedOnly, order?.id]);
 
     useEffect(() => {
         if (!open || !order?.id) return;

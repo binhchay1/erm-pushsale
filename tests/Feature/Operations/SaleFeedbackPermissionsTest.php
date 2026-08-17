@@ -136,4 +136,69 @@ class SaleFeedbackPermissionsTest extends TestCase
         $this->assertSame($sourceB->id, (int) $updatedByAdmin->marketing_source_id);
         $this->assertSame(88_000, (int) $updatedByAdmin->items->first()->unit_price);
     }
+
+    public function test_landing_order_without_catalog_items_uses_connection_products(): void
+    {
+        $parent = Product::query()->create([
+            'name' => 'Set bông tai ngọc trai',
+            'type' => 'product',
+            'sku' => 'BT-PARENT',
+            'unit_price' => 199_000,
+            'is_active' => true,
+        ]);
+        $variantA = Product::query()->create([
+            'parent_id' => $parent->id,
+            'name' => 'Set bông tai ngọc trai - Mẫu 1',
+            'type' => 'product',
+            'sku' => 'BT-M1',
+            'unit_price' => 199_000,
+            'is_active' => true,
+        ]);
+        $variantB = Product::query()->create([
+            'parent_id' => $parent->id,
+            'name' => 'Set bông tai ngọc trai - Mẫu 2',
+            'type' => 'product',
+            'sku' => 'BT-M2',
+            'unit_price' => 219_000,
+            'is_active' => true,
+        ]);
+
+        $source = MarketingSource::query()->create(['name' => 'Ladi test', 'is_active' => true]);
+        $connection = \App\Models\LandingConnection::query()->create([
+            'marketing_source_id' => $source->id,
+            'name' => 'Ladi connection',
+            'public_token' => 'tok-test',
+            'is_active' => true,
+            'is_approved' => true,
+        ]);
+        \App\Models\LandingConnectionProduct::query()->create([
+            'landing_connection_id' => $connection->id,
+            'product_id' => $parent->id,
+            'item_type' => 'product',
+            'quantity' => 1,
+            'sort_order' => 1,
+        ]);
+
+        $lead = \App\Models\LeadIngestion::query()->create([
+            'platform' => 'landing',
+            'external_id' => 'lead-landing-products-1',
+            'marketing_source_id' => $source->id,
+            'landing_connection_id' => $connection->id,
+            'customer_name' => 'Khách Ladi',
+            'customer_phone' => '0905111222',
+            'payload' => ['message' => 'Muốn mua'],
+            'status' => 'processed',
+        ]);
+
+        $order = app(\App\Services\Leads\LeadOrderFactory::class)->createFromLead($lead, [
+            'customer_name' => 'Khách Ladi',
+            'customer_phone' => '0905111222',
+            'items' => [['product_name' => 'Ghi chú text', 'quantity' => 1, 'unit_price' => 0]],
+            'item_origin' => 'landing',
+        ], User::factory()->create(['role' => UserRole::Sales]));
+
+        $this->assertCount(2, $order->items);
+        $productIds = $order->items->pluck('product_id')->sort()->values()->all();
+        $this->assertSame([$variantA->id, $variantB->id], $productIds);
+    }
 }

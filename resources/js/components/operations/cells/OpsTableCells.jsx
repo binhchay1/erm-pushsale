@@ -287,6 +287,8 @@ export function DeliveryStatusCell({
     desiredDeliveryAt,
     onCalendar,
     onHistory,
+    onUnclose,
+    canUnclose = false,
     showAccountingHistory = false,
     className = 'text-center area4',
 }) {
@@ -298,6 +300,11 @@ export function DeliveryStatusCell({
                 ) : null}
                 <span className={`ps-delivery-status-label ttgh${deliveryStatusValue || 0}`}>{deliveryStatus || ''}</span>
             </div>
+            {canUnclose && onUnclose ? (
+                <button type="button" className="btn btn-warning btn-xs ps-sale-unclose-btn" onClick={onUnclose}>
+                    <i className="fa fa-undo" /> Hủy chốt
+                </button>
+            ) : null}
             <div className="small-tip ps-delivery-carrier-hint">()</div>
             {trackingNumber ? (
                 <a className="lnk-mdgv" href="javascript:void(0)" style={{ color: 'darkorange' }}>{trackingNumber}</a>

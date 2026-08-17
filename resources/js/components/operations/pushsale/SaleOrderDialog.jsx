@@ -167,7 +167,8 @@ export function SaleOrderDialog({
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
-    const [pickerProductId, setPickerProductId] = useState('');
+    const [pickerBaseId, setPickerBaseId] = useState('');
+    const [pickerSkuId, setPickerSkuId] = useState('');
     const ordersBase = `${String(actionBaseUrl || '/sales').replace(/\/$/, '')}/orders`;
     const { token: lockToken, error: lockError, ready: lockReady } = useOrderInteractionLock({
         orderId: order?.id,
@@ -185,7 +186,8 @@ export function SaleOrderDialog({
             setManualDiscount(numberValue(nextForm.discount) > 0);
             setManualShippingFee(numberValue(nextForm.shipping_fee_collected) > 0);
             setRecipientPaysCarrier(false);
-            setPickerProductId('');
+            setPickerBaseId('');
+            setPickerSkuId('');
         }
     }, [open, order, initialOperationResult, productOptions]);
 
@@ -281,34 +283,70 @@ export function SaleOrderDialog({
         };
     };
 
-    const chooseBaseProduct = (line, productId) => {
-        const product = catalog.products.find((item) => String(item.id) === String(productId));
-        updateLine(line.key, resolveLineFromProduct(product));
-    };
+    const pickerVariants = useMemo(
+        () => (pickerBaseId ? (catalog.byParent.get(String(pickerBaseId)) ?? []) : []),
+        [pickerBaseId, catalog.byParent],
+    );
+    const pickerSkuOptions = useMemo(() => toSelectOptions(pickerVariants.map((item) => ({
+        id: item.id,
+        name: item.name,
+        subLabel: item.sku || undefined,
+    }))), [pickerVariants]);
 
-    const chooseSku = (line, skuId) => {
-        const product = catalog.products.find((item) => String(item.id) === String(skuId));
-        if (!product) {
-            updateLine(line.key, { product_id: '', product_name: '', unit_price: 0 });
-            return;
+    const lineBaseName = (line) => {
+        const baseId = line.base_product_id || line.product_id;
+        const base = catalog.products.find((item) => String(item.id) === String(baseId) && !item.parent_id);
+        if (base) return base.name;
+        const parentId = catalog.products.find((item) => String(item.id) === String(line.product_id))?.parent_id;
+        if (parentId) {
+            return catalog.products.find((item) => String(item.id) === String(parentId))?.name ?? line.product_name;
         }
-        updateLine(line.key, {
-            product_id: String(product.id),
-            product_name: product.name,
-            unit_price: numberValue(product.unit_price),
-            base_product_id: product.parent_id ? String(product.parent_id) : String(line.base_product_id || product.id),
-        });
+        return line.product_name || '—';
     };
 
-    const appendCatalogItem = (productId) => {
-        if (!productId) return;
-        const product = catalog.products.find((item) => String(item.id) === String(productId));
-        if (!product) return;
+    const lineSkuName = (line) => {
+        const variants = catalog.byParent.get(String(line.base_product_id)) ?? [];
+        if (variants.length === 0) return '—';
+        const sku = catalog.products.find((item) => String(item.id) === String(line.product_id));
+        return sku?.name ?? '—';
+    };
+
+    const appendResolvedLine = (resolved) => {
+        if (!resolved.product_id && !resolved.base_product_id) return;
         setForm((current) => ({
             ...current,
-            items: [...current.items, { ...newLine('product'), ...resolveLineFromProduct(product) }],
+            items: [...current.items, { ...newLine('product'), ...resolved }],
         }));
-        setPickerProductId('');
+    };
+
+    const onPickerBaseChange = (baseId) => {
+        setPickerBaseId(baseId);
+        setPickerSkuId('');
+        setFormError('');
+        if (!baseId) return;
+
+        const variants = catalog.byParent.get(String(baseId)) ?? [];
+        if (variants.length > 0) return;
+
+        const product = catalog.products.find((item) => String(item.id) === String(baseId));
+        if (!product) return;
+        appendResolvedLine(resolveLineFromProduct(product));
+        setPickerBaseId('');
+    };
+
+    const onPickerSkuChange = (skuId) => {
+        setPickerSkuId(skuId);
+        setFormError('');
+        if (!skuId || !pickerBaseId) return;
+
+        const product = catalog.products.find((item) => String(item.id) === String(skuId));
+        if (!product) return;
+        appendResolvedLine({
+            ...resolveLineFromProduct(product),
+            base_product_id: String(pickerBaseId),
+        });
+        setPickerBaseId('');
+        setPickerSkuId('');
     };
 
     const payload = () => ({
@@ -566,7 +604,6 @@ export function SaleOrderDialog({
                                 searchPlaceholder={t('operations.sale_order.source_search')}
                                 disabled={sourceLocked || formDisabled}
                             />
-                            {sourceLocked ? <div className="small-tip">{t('operations.sale_order.source_locked_hint')}</div> : null}
                         </div>
                         {order && operationStatusOptions.length ? <div className="ps-order-field ps-full ps-order-result-field"><FieldLabel>{t('operations.sale_order.result')}</FieldLabel><Select value={form.operation_result} onChange={(value) => update('operation_result', value)} disabled={editDisabled}><option value="">--{t('operations.sale_order.choose_result')}--</option>{operationStatusOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</Select></div> : null}
                         {order && needsNextOperationAt ? <div className="ps-order-field ps-full ps-order-next-operation-field"><FieldLabel required>{t('operations.sale_order.next_operation')}</FieldLabel><input className="form-control" type="datetime-local" value={form.next_operation_at} onChange={(event) => update('next_operation_at', event.target.value)} disabled={editDisabled} /></div> : null}
@@ -624,76 +661,59 @@ export function SaleOrderDialog({
                     </section>
 
                     <section className="ps-order-right-panel">
-                        <div className="ps-order-top-grid">
+                        <div className="ps-order-top-grid ps-order-product-picker">
                             <div><FieldLabel>{t('operations.sale_order.warehouse')}</FieldLabel><Select value={form.warehouse_id} onChange={(value) => update('warehouse_id', value)} disabled={editDisabled}><option value="">--{t('operations.sale_order.choose_warehouse')}--</option>{warehouseOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
                             <div><FieldLabel>{t('operations.sale_order.pickup_address')}</FieldLabel><div className="ps-static-line">{selectedWarehouse?.pickup_address ?? selectedWarehouse?.address ?? '—'}</div></div>
-                            <div className="ps-full">
-                                <FieldLabel>{t('operations.sale_order.add_product')}</FieldLabel>
+                            <div>
+                                <FieldLabel>{t('operations.sale_order.pick_base_product')}</FieldLabel>
                                 <PushsaleSelect
                                     searchable
                                     className="ps-order-search-select"
                                     options={baseProductSelectOptions}
-                                    value={pickerProductId}
-                                    onChange={(value) => appendCatalogItem(value)}
-                                    placeholder={t('operations.sale_order.product_placeholder')}
+                                    value={pickerBaseId}
+                                    onChange={onPickerBaseChange}
+                                    placeholder={t('operations.sale_order.base_product_placeholder')}
                                     searchPlaceholder={t('operations.sale_order.product_search')}
                                     disabled={editDisabled}
+                                />
+                            </div>
+                            <div>
+                                <FieldLabel>{t('operations.sale_order.pick_variant_product')}</FieldLabel>
+                                <PushsaleSelect
+                                    searchable
+                                    className="ps-order-search-select"
+                                    options={pickerSkuOptions}
+                                    value={pickerSkuId}
+                                    onChange={onPickerSkuChange}
+                                    placeholder={t('operations.sale_order.variant_placeholder')}
+                                    searchPlaceholder={t('operations.sale_order.sku_search')}
+                                    disabled={editDisabled || !pickerBaseId || pickerVariants.length === 0}
                                 />
                             </div>
                         </div>
                         <div className="ps-vat-note">{t('operations.sale_order.vat_included')}</div>
                         <div className="table-responsive">
                             <table className="table table-bordered ps-order-product-table">
-                                <thead><tr><th>{t('operations.sale_order.col_product')}</th><th>{t('operations.sale_order.col_sku')}</th><th>{t('operations.sale_order.col_price')}</th><th>{t('operations.sale_order.col_qty')}</th><th>{t('operations.sale_order.col_amount')}</th><th>{t('operations.sale_order.col_discount')}</th><th>{t('operations.sale_order.col_discount_money')}</th><th>{t('operations.sale_order.col_weight')}</th><th /></tr></thead>
+                                <thead><tr><th>{t('operations.sale_order.col_base_product')}</th><th>{t('operations.sale_order.col_variant')}</th><th>{t('operations.sale_order.col_price')}</th><th>{t('operations.sale_order.col_qty')}</th><th>{t('operations.sale_order.col_amount')}</th><th>{t('operations.sale_order.col_discount')}</th><th>{t('operations.sale_order.col_discount_money')}</th><th>{t('operations.sale_order.col_weight')}</th><th /></tr></thead>
                                 <tbody>
                                     {form.items.map((line) => {
-                                        const variants = catalog.byParent.get(String(line.base_product_id)) ?? [];
-                                        const skuOptions = toSelectOptions(variants.map((item) => ({
-                                            id: item.id,
-                                            name: item.name,
-                                            subLabel: item.sku || undefined,
-                                        })));
                                         const lineTotal = numberValue(line.quantity) * numberValue(line.unit_price) - numberValue(line.discount_amount);
                                         return <tr key={line.key}>
-                                            <td>
-                                                <PushsaleSelect
-                                                    searchable
-                                                    className="ps-order-search-select"
-                                                    options={baseProductSelectOptions}
-                                                    value={line.base_product_id || line.product_id}
-                                                    onChange={(value) => chooseBaseProduct(line, value)}
-                                                    placeholder={t('operations.sale_order.product_placeholder')}
-                                                    searchPlaceholder={t('operations.sale_order.product_search')}
-                                                    disabled={editDisabled}
-                                                />
-                                            </td>
-                                            <td>
-                                                {variants.length > 0 ? (
-                                                    <PushsaleSelect
-                                                        searchable
-                                                        className="ps-order-search-select"
-                                                        options={skuOptions}
-                                                        value={line.product_id}
-                                                        onChange={(value) => chooseSku(line, value)}
-                                                        placeholder={t('operations.sale_order.sku_placeholder')}
-                                                        searchPlaceholder={t('operations.sale_order.sku_search')}
+                                            <td><div className="ps-static-line ps-order-line-name" title={lineBaseName(line)}>{lineBaseName(line)}</div></td>
+                                            <td><div className="ps-static-line ps-order-line-name" title={lineSkuName(line)}>{lineSkuName(line)}</div></td>
+                                            <td className="text-right">
+                                                {unitPriceLocked ? (
+                                                    <div className="ps-static-line ps-order-unit-price-locked" title={t('operations.sale_order.price_locked_hint')}>{money(line.unit_price)}</div>
+                                                ) : (
+                                                    <input
+                                                        className="form-control text-right"
+                                                        type="number"
+                                                        min="0"
+                                                        value={line.unit_price}
+                                                        onChange={(event) => updateLine(line.key, { unit_price: event.target.value })}
                                                         disabled={editDisabled}
                                                     />
-                                                ) : (
-                                                    <div className="ps-static-line">{line.product_name || '—'}</div>
                                                 )}
-                                            </td>
-                                            <td>
-                                                <input
-                                                    className="form-control text-right"
-                                                    type="number"
-                                                    min="0"
-                                                    value={line.unit_price}
-                                                    onChange={(event) => updateLine(line.key, { unit_price: event.target.value })}
-                                                    disabled={editDisabled || unitPriceLocked}
-                                                    title={unitPriceLocked ? t('operations.sale_order.price_locked_hint') : undefined}
-                                                    readOnly={unitPriceLocked}
-                                                />
                                             </td>
                                             <td><input className="form-control text-center" type="number" min="1" value={line.quantity} onChange={(event) => updateLine(line.key, { quantity: event.target.value })} disabled={editDisabled} /></td>
                                             <td className="text-right"><b>{money(lineTotal)}</b></td>

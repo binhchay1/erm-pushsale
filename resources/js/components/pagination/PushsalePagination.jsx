@@ -111,8 +111,10 @@ export function PushsalePagination({
     };
 
     if (variant === 'ops') {
-        const start = Math.max(1, current - 2);
-        const end = Math.min(last, current + 2);
+        const windowSize = 10;
+        let start = Math.max(1, current - Math.floor(windowSize / 2));
+        let end = Math.min(last, start + windowSize - 1);
+        start = Math.max(1, end - windowSize + 1);
         const windowPages = [];
         for (let page = start; page <= end; page += 1) windowPages.push(page);
 

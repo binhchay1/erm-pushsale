@@ -115,8 +115,8 @@ html body.pushsale-app-body .ps-contact-phone-row .ps-phone-main {
 html body.pushsale-app-body .ps-contact-phone-row .ps-order-flags.ps-contact-flags {
     display: inline-flex !important;
     flex: 0 0 auto !important;
-    gap: 4px !important;
-    margin-left: auto !important;
+    gap: 8px !important;
+    margin-left: 8px !important;
 }
 
 /* Pushsale-plain icons (no circular badges) in name/phone column */

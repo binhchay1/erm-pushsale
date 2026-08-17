@@ -76,12 +76,18 @@ class LeadOrderFactory
 
         $comboItems = $this->buildItemRows($normalized['items'] ?? [], $normalized['item_origin'] ?? 'landing');
 
-        // Ladi không gửi dòng hàng → lấy SP/SKU đã gắn trên kết nối landing (sale chỉnh SL sau).
-        if ($comboItems === []) {
-            $comboItems = $this->buildItemRows(
+        // Payload chỉ có text form_item (không product_id) → lấy SP/SKU từ kết nối landing.
+        $hasCatalogProduct = collect($comboItems)->contains(
+            fn (array $row) => filled($row['product_id'] ?? null),
+        );
+        if (! $hasCatalogProduct) {
+            $fromConnection = $this->buildItemRows(
                 $this->landingConnectionDefaultItems($landingConnection),
                 $normalized['item_origin'] ?? 'landing',
             );
+            if ($fromConnection !== []) {
+                $comboItems = $fromConnection;
+            }
         }
 
         $order = Order::query()->create([

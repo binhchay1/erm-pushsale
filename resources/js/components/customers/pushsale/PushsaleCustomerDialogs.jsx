@@ -47,14 +47,12 @@ function messageDirectionClass(message = {}) {
 
 export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
     const t = useT();
-    const [tab, setTab] = useState('internal');
     const [loading, setLoading] = useState(false);
     const [customer, setCustomer] = useState(null);
     const [messages, setMessages] = useState([]);
     const [canWrite, setCanWrite] = useState(false);
     const [draft, setDraft] = useState('');
     const [sending, setSending] = useState(false);
-    const [pancake, setPancake] = useState({ loaded: false, loading: false, messages: [], canWrite: false, connected: false });
 
     useEffect(() => {
         if (!open || !order?.id) return;
@@ -70,62 +68,19 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
             .catch((error) => active && toast.error(error.message ?? t('operations.customer_interactions.load_failed')))
             .finally(() => active && setLoading(false));
         return () => { active = false; };
-    }, [open, order?.id]);
+    }, [open, order?.id, t]);
 
     useEffect(() => {
-        if (!open || tab !== 'pancake' || pancake.loaded || !order?.id) return;
-        let active = true;
-        setPancake((current) => ({ ...current, loading: true }));
-        apiGet(`/customers/orders/${order.id}/pancake-messages`)
-            .then((data) => {
-                if (!active) return;
-                setPancake({
-                    loaded: true,
-                    loading: false,
-                    messages: data.messages ?? [],
-                    canWrite: Boolean(data.canWrite),
-                    connected: Boolean(data.connected),
-                    source: data.source,
-                    reason: data.reason,
-                    pageId: data.pageId,
-                    conversationId: data.conversationId,
-                    realtime: data.realtime,
-                });
-            })
-            .catch((error) => {
-                if (!active) return;
-                toast.error(error.message ?? t('operations.customer_interactions.load_failed'));
-                setPancake((current) => ({ ...current, loaded: true, loading: false }));
-            });
-        return () => { active = false; };
-    }, [open, order?.id, pancake.loaded, tab]);
-
-    useEffect(() => {
-        if (!open) {
-            setTab('internal');
-            setDraft('');
-            setPancake({ loaded: false, loading: false, messages: [], canWrite: false, connected: false });
-        }
+        if (!open) setDraft('');
     }, [open]);
-
-    const currentMessages = tab === 'internal' ? messages : pancake.messages;
-    const currentCanWrite = tab === 'internal' ? canWrite : pancake.canWrite;
-    const currentLoading = tab === 'internal' ? loading : pancake.loading;
 
     const send = async () => {
         const content = draft.trim();
-        if (!content || sending || !currentCanWrite) return;
+        if (!content || sending || !canWrite) return;
         setSending(true);
         try {
-            const endpoint = tab === 'internal'
-                ? `/customers/orders/${order.id}/messages`
-                : `/customers/orders/${order.id}/pancake-messages`;
-            const data = await apiPost(endpoint, { message: content });
-            if (tab === 'internal') {
-                setMessages((current) => [...current, data.message]);
-            } else {
-                setPancake((current) => ({ ...current, messages: [...current.messages, data.message] }));
-            }
+            const data = await apiPost(`/customers/orders/${order.id}/messages`, { message: content });
+            setMessages((current) => [...current, data.message]);
             setDraft('');
         } catch (error) {
             toast.error(error.message ?? t('operations.customer_interactions.send_failed'));
@@ -148,31 +103,9 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
                         <div className="ps-message-dialog-meta">{customer?.address ?? order?.effectiveShippingAddress ?? '—'}</div>
                     </div>
                     <div className="ps-message-dialog-meta text-right">
-                        <div>{tab === 'pancake' ? t('operations.customer_interactions.pancake_messages_title') : t('operations.customer_interactions.internal_messages_title')}</div>
-                        {pancake.source?.pageName ? <div>Page: {pancake.source.pageName}</div> : null}
+                        <div>{t('operations.customer_interactions.internal_messages_title')}</div>
                     </div>
                 </div>
-
-                <div className="ps-customer-tabs ps-message-tabs">
-                    <button type="button" className={tab === 'internal' ? 'active' : ''} onClick={() => setTab('internal')}>{t('operations.customer_interactions.internal_tab')}</button>
-                    <button type="button" className={tab === 'pancake' ? 'active' : ''} onClick={() => setTab('pancake')}>{t('operations.customer_interactions.pancake_tab')}</button>
-                </div>
-
-                {tab === 'pancake' && pancake.loaded && !pancake.connected ? (
-                    <div className="alert alert-warning ps-compact-alert">{t('operations.customer_interactions.pancake_not_connected')}</div>
-                ) : null}
-                {tab === 'pancake' && pancake.loaded && pancake.connected && pancake.source === 'cache' ? (
-                    <div className="alert alert-warning ps-compact-alert">{t('operations.customer_interactions.pancake_cache_notice')}</div>
-                ) : null}
-                {tab === 'pancake' && pancake.loaded && pancake.connected && pancake.source === 'error' ? (
-                    <div className="alert alert-danger ps-compact-alert">{t('operations.customer_interactions.pancake_error_notice')}</div>
-                ) : null}
-                {tab === 'pancake' && pancake.loaded && pancake.connected && pancake.conversationId ? (
-                    <div className="ps-pancake-thread-meta">
-                        <span>Page ID: {pancake.pageId ?? '—'}</span>
-                        <span>Conversation ID: {pancake.conversationId}</span>
-                    </div>
-                ) : null}
 
                 <div className="ps-message-composer">
                     <input
@@ -186,17 +119,17 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
                                 send();
                             }
                         }}
-                        disabled={!currentCanWrite || sending}
-                        placeholder={currentCanWrite ? (tab === 'pancake' ? t('operations.customer_interactions.pancake_message_placeholder') : t('operations.customer_interactions.message_placeholder')) : t('operations.customer_interactions.read_only')}
+                        disabled={!canWrite || sending}
+                        placeholder={canWrite ? t('operations.customer_interactions.message_placeholder') : t('operations.customer_interactions.read_only')}
                     />
-                    <button type="button" className="btn btn-primary" disabled={!currentCanWrite || !draft.trim() || sending} onClick={send}>
+                    <button type="button" className="btn btn-primary" disabled={!canWrite || !draft.trim() || sending} onClick={send}>
                         {sending ? <i className="fa fa-spinner fa-spin" /> : null} {t('operations.customer_interactions.send')}
                     </button>
                 </div>
 
                 <div className="ps-message-list">
-                    {currentLoading ? <LoadingBlock /> : currentMessages.length ? currentMessages.map((message) => (
-                        <div className={`ps-message-row ${messageDirectionClass(message)} ${tab === 'pancake' ? 'is-pancake' : 'is-internal'}`} key={`${tab}-${message.id ?? message.externalId ?? Math.random()}`}>
+                    {loading ? <LoadingBlock /> : messages.length ? messages.map((message) => (
+                        <div className={`ps-message-row ${messageDirectionClass(message)} is-internal`} key={message.id ?? message.externalId ?? `${messageAuthor(message)}-${messageDate(message)}`}>
                             <div className="ps-message-meta">
                                 <strong>{messageAuthor(message)}</strong>
                                 {message.orderCode ? <span> · {message.orderCode}</span> : null}
@@ -204,13 +137,9 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
                             </div>
                             <div className="ps-message-text">{message.message ?? '—'}</div>
                         </div>
-                    )) : <div className="ps-empty-message">{tab === 'pancake' ? t('operations.customer_interactions.pancake_messages_empty') : t('operations.customer_interactions.messages_empty')}</div>}
+                    )) : <div className="ps-empty-message">{t('operations.customer_interactions.messages_empty')}</div>}
                 </div>
             </div>
-
-            <button type="button" className="ps-same-phone-link" onClick={() => setTab('internal')}>
-                <i className="fa fa-link" /> {t('operations.customer_interactions.same_phone_link')}
-            </button>
         </CustomerDialogShell>
     );
 }

@@ -292,7 +292,8 @@ export function SaleWorkspaceTable({
                                         flags={(
                                             <OrderStatusFlags
                                                 row={order}
-                                                onDuplicate={onDuplicateOrders ? () => onDuplicateOrders(order) : null}
+                                                onDuplicate={onDuplicateOrders ? () => onDuplicateOrders(order, { closedOnly: false }) : null}
+                                                onReturning={onDuplicateOrders ? () => onDuplicateOrders(order, { closedOnly: true }) : null}
                                                 className="ps-contact-flags"
                                             />
                                         )}
@@ -350,6 +351,8 @@ export function SaleWorkspaceTable({
                                         onCalendar={() => onDesiredDate(order)}
                                         onHistory={() => onHistory(order, 'accounting')}
                                         showAccountingHistory={Boolean(order.closedAt)}
+                                        canUnclose={Boolean(order.canUnclose)}
+                                        onUnclose={order.canUnclose ? () => onEdit(order, false) : null}
                                     />
                                 </tr>
                             );

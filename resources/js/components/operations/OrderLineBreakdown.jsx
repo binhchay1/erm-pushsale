@@ -127,7 +127,7 @@ export function firstUpsellDivider(items = [], index = 0) {
     return !items.slice(0, index).some((item) => isUpsellOrderItem(item));
 }
 
-export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, className = '', showUpsell = true }) {
+export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, onReturning = null, className = '', showUpsell = true }) {
     const data = row ?? order ?? {};
     const hasDuplicate = Boolean(data.isDuplicatePhone);
     const hasReturning = Boolean(data.isReturningCustomer);
@@ -141,9 +141,15 @@ export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, c
     return (
         <span className={`ps-order-flags ${className}`.trim()} aria-label="Dấu hiệu khách hàng và đơn hàng">
             {hasReturning ? (
-                <span className="ps-order-flag is-returning" title="Khách hàng cũ" aria-label="Khách hàng cũ">
-                    <span className="ps-order-flag-inner"><i className="fa fa-heart" aria-hidden="true" /></span>
-                </span>
+                onReturning ? (
+                    <button type="button" className="ps-order-flag is-returning" title="Khách hàng cũ — xem đơn đã chốt" aria-label="Khách hàng cũ — xem đơn đã chốt" onClick={onReturning}>
+                        <span className="ps-order-flag-inner"><i className="fa fa-heart" aria-hidden="true" /></span>
+                    </button>
+                ) : (
+                    <span className="ps-order-flag is-returning" title="Khách hàng cũ" aria-label="Khách hàng cũ">
+                        <span className="ps-order-flag-inner"><i className="fa fa-heart" aria-hidden="true" /></span>
+                    </span>
+                )
             ) : null}
             {hasDuplicate ? (
                 onDuplicate ? (
