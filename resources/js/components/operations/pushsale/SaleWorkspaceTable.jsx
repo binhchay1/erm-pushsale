@@ -183,68 +183,68 @@ export function SaleWorkspaceTable({
                         <tr className="drags-area">
                             <th>
                                 <span className="chk-all">
-                                    <input ref={checkAllRef} type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="Chọn tất cả" />
+                                    <input ref={checkAllRef} type="checkbox" checked={allSelected} onChange={toggleAll} aria-label={t('operations.ops_table.select_all')} />
                                 </span>
                             </th>
-                            <th>Mã đơn</th>
+                            <th>{t('operations.ops_table.col_order_code')}</th>
                             <th className="text-center no-wrap area5 hidden-xs ps-col-source">
-                                <span className="span-col" style={{ width: 100 }}>Nguồn dữ liệu</span>
+                                <span className="span-col" style={{ width: 100 }}>{t('operations.ops_table.col_source')}</span>
                                 <br />
-                                Ngày data về
+                                {t('operations.ops_table.col_data_arrived')}
                             </th>
                             <th className="text-center no-wrap area5 hidden-xs">
                                 <span className="span-col" style={{ minWidth: 120, width: 120 }}>
-                                    Sale
+                                    {t('operations.ops_table.col_sale')}
                                     <br />
-                                    Ngày nhận data
+                                    {t('operations.ops_table.col_assigned_at')}
                                 </span>
                             </th>
                             <th className="text-center no-wrap area1">
                                 <span className="span-col text-center">
-                                    Họ tên
+                                    {t('operations.ops_table.col_customer_name')}
                                     <br />
-                                    <span className="span-col" style={{ display: 'inline-block', minWidth: 130 }}>Số điện thoại</span>
+                                    <span className="span-col" style={{ display: 'inline-block', minWidth: 130 }}>{t('operations.ops_table.col_phone')}</span>
                                     <br />
-                                    Ngày muốn nhận hàng
+                                    {t('operations.ops_table.col_desired_at')}
                                 </span>
                             </th>
                             <th className="text-center no-wrap area1 hidden-xs">
-                                <span className="span-col td-message td-793">Tin nhắn</span>
+                                <span className="span-col td-message td-793">{t('operations.ops_table.col_message')}</span>
                             </th>
                             <th className="text-center no-wrap area2 hidden-xs">
-                                <span className="span-col" style={{ display: 'inline-block', minWidth: 150 }}>TN cần</span>
+                                <span className="span-col" style={{ display: 'inline-block', minWidth: 150 }}>{t('operations.ops_table.col_operation_needed')}</span>
                             </th>
                             <th className="text-center no-wrap area2">
-                                <span className="span-col" style={{ width: 150 }}>Kết quả</span>
+                                <span className="span-col" style={{ width: 150 }}>{t('operations.ops_table.col_result')}</span>
                             </th>
                             <th className="text-center no-wrap area2 hidden-xs">
-                                <span className="span-col" style={{ minWidth: 80 }}>TN tiếp</span>
+                                <span className="span-col" style={{ minWidth: 80 }}>{t('operations.ops_table.col_next_operation')}</span>
                             </th>
                             <th className="text-center no-wrap area2 hidden-xs">
-                                <span className="span-col">Sau</span>
+                                <span className="span-col">{t('operations.ops_table.col_after')}</span>
                                 <br />
-                                Còn lại
+                                {t('operations.ops_table.col_remaining')}
                             </th>
                             <th className="text-center no-wrap area3 hidden-xs">
-                                <span className="span-col" style={{ display: 'inline-block', minWidth: 200 }}>Sản phẩm - Số lượng - Đơn giá</span>
+                                <span className="span-col" style={{ display: 'inline-block', minWidth: 200 }}>{t('operations.ops_table.col_products')}</span>
                             </th>
                             <th className="text-center no-wrap area3 hidden-xs">
                                 <span className="span-col">
-                                    Thành tiền
+                                    {t('operations.ops_table.col_line_total')}
                                     <br />
-                                    CK / VAT SP
+                                    {t('operations.ops_table.col_discount_vat')}
                                     <br />
-                                    Phí VC / Tổng tiền
+                                    {t('operations.ops_table.col_fee_total')}
                                 </span>
                             </th>
                             <th className="text-center no-wrap area3 hidden-xs">
-                                <span className="span-col">Đặt cọc</span>
+                                <span className="span-col">{t('operations.ops_table.col_deposit')}</span>
                             </th>
                             <th className="text-center no-wrap area4">
                                 <span className="span-col">
-                                    Trạng thái giao hàng
+                                    {t('operations.ops_table.col_delivery_status')}
                                     <br />
-                                    Ngày muốn nhận hàng
+                                    {t('operations.ops_table.col_desired_at')}
                                 </span>
                             </th>
                         </tr>
@@ -256,7 +256,9 @@ export function SaleWorkspaceTable({
                             const lockHolder = interactionLocks[id];
                             const lockedByOther = lockHolder && Number(lockHolder.user_id) !== Number(authUserId);
                             const lockTitle = lockedByOther
-                                ? `Đang thao tác bởi ${lockHolder.user_name}${lockHolder.role_label ? ` (${lockHolder.role_label})` : ''}`
+                                ? t('operations.ops_table.locked_by', {
+                                    name: `${lockHolder.user_name}${lockHolder.role_label ? ` (${lockHolder.role_label})` : ''}`,
+                                })
                                 : undefined;
 
                             return (
@@ -272,7 +274,7 @@ export function SaleWorkspaceTable({
                                                 type="checkbox"
                                                 checked={isSelected}
                                                 onChange={() => toggle(id)}
-                                                aria-label={`Chọn ${order.customerName ?? order.customerPhone}`}
+                                                aria-label={t('operations.ops_table.select_row', { name: order.customerName ?? order.customerPhone })}
                                                 id={`sale-chk-${order.id}`}
                                             />
                                             <label htmlFor={`sale-chk-${order.id}`}>{Number(meta?.from ?? 1) + index}</label>
@@ -374,7 +376,7 @@ export function SaleWorkspaceTable({
                         })}
                         {!rows.length && (
                             <tr>
-                                <td colSpan={14} className="ps-sale-empty text-center">Không có dữ liệu phù hợp.</td>
+                                <td colSpan={14} className="ps-sale-empty text-center">{t('pages.empty_data')}</td>
                             </tr>
                         )}
                     </tbody>

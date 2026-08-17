@@ -286,6 +286,7 @@ export function SaleOperationHistoryDialog({ order, context = 'sale', open, onOp
 }
 
 export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialClosedOnly = false }) {
+    const t = useT();
     const [loading, setLoading] = useState(false);
     const [closedOnly, setClosedOnly] = useState(initialClosedOnly);
     const [data, setData] = useState({ customer: null, summary: null, orders: [] });
@@ -301,7 +302,7 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialC
         const query = closedOnly ? '?closed_only=1' : '';
         apiGet(`/customers/orders/${order.id}/purchase-history${query}`)
             .then((payload) => active && setData(payload))
-            .catch((error) => active && toast.error(error.message ?? 'Không tải được danh sách cùng số điện thoại.'))
+            .catch((error) => active && toast.error(error.message ?? t('operations.duplicate_orders.load_failed')))
             .finally(() => active && setLoading(false));
         return () => { active = false; };
     }, [open, order?.id, closedOnly]);
@@ -319,32 +320,32 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialC
                 aria-describedby={undefined}
             >
                 <DialogHeader className="ps-sale-dialog-header ps-duplicate-phone-header">
-                    <DialogTitle>Danh sách đơn cùng số điện thoại</DialogTitle>
+                    <DialogTitle>{t('operations.duplicate_orders.title')}</DialogTitle>
                     <label className="ps-duplicate-closed-filter">
                         <input type="checkbox" checked={closedOnly} onChange={(event) => setClosedOnly(event.target.checked)} />
-                        <span>Đã chốt đơn</span>
+                        <span>{t('operations.duplicate_orders.closed_only')}</span>
                     </label>
                 </DialogHeader>
                 <div className="ps-duplicate-phone-body">
                     <div className="ps-duplicate-summary">
                         <span>
-                            Tổng đơn:
+                            {t('operations.duplicate_orders.total_orders')}:
                             {' '}
                             <b>{summary.orderCount ?? orders.length}</b>
                         </span>
                         <span>
-                            Đã chốt:
+                            {t('operations.duplicate_orders.closed_orders')}:
                             {' '}
                             <b>{summary.closedOrderCount ?? 0}</b>
                         </span>
                         <span>
-                            Doanh số:
+                            {t('operations.duplicate_orders.revenue')}:
                             {' '}
                             <b>{money(summary.totalValue ?? 0)}</b>
                         </span>
                         {data.customer?.phone ? (
                             <span>
-                                SĐT:
+                                {t('operations.duplicate_orders.phone')}:
                                 {' '}
                                 <b>{data.customer.phone}</b>
                             </span>
@@ -355,21 +356,21 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialC
                             <thead>
                                 <tr>
                                     <th className="text-center">#</th>
-                                    <th className="text-center">Mã đơn</th>
-                                    <th className="text-center">Nguồn dữ liệu / Ngày data về</th>
-                                    <th className="text-center">Sale / Ngày nhận data</th>
-                                    <th className="text-center">Họ tên / Số điện thoại</th>
-                                    <th className="text-center">Tin nhắn</th>
-                                    <th className="text-center">Tác nghiệp / Ngày chốt</th>
-                                    <th className="text-center">Kết quả</th>
-                                    <th className="text-center">Sản phẩm - SL - Đơn giá</th>
-                                    <th className="text-center">Thành tiền / CK / Tổng</th>
-                                    <th className="text-center">Đặt cọc</th>
-                                    <th className="text-center">Trạng thái GH / Ngày muốn nhận</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_order_code')}</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_source')}</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_sale')}</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_customer')}</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_message')}</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_operation')}</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_result')}</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_products')}</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_money')}</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_deposit')}</th>
+                                    <th className="text-center">{t('operations.duplicate_orders.col_delivery')}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {loading ? <tr><td colSpan={12} className="text-center">Đang tải...</td></tr> : null}
+                                {loading ? <tr><td colSpan={12} className="text-center">{t('operations.customer_interactions.loading')}</td></tr> : null}
                                 {!loading && orders.map((item, index) => (
                                     <tr key={item.id} className={item.isSelected ? 'info' : ''}>
                                         <td className="text-center">{index + 1}</td>
@@ -428,7 +429,7 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialC
                                         </td>
                                     </tr>
                                 ))}
-                                {!loading && !orders.length ? <tr><td colSpan={12} className="text-center">Không có đơn cùng số điện thoại.</td></tr> : null}
+                                {!loading && !orders.length ? <tr><td colSpan={12} className="text-center">{t('operations.duplicate_orders.empty')}</td></tr> : null}
                             </tbody>
                         </table>
                     </div>

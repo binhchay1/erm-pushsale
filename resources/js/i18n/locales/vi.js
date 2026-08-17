@@ -51,7 +51,10 @@ export default {
         appearance_dark: 'Tối',
         appearance_system: 'Theo hệ thống',
         pagination: {
+            label: 'Phân trang',
             showing: 'Hiển thị :from–:to trong tổng số :total bản ghi',
+            rows: 'Số dòng',
+            records: 'bản ghi',
             rows_per_page: 'Số dòng mỗi trang',
             first_page: 'Trang đầu',
             previous_page: 'Trang trước',

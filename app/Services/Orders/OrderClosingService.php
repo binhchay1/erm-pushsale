@@ -58,6 +58,13 @@ class OrderClosingService
             ]);
         }
 
+        // Ladi đổ sản phẩm về với SL 0 — không cho chốt đơn khi sale chưa nhập số lượng.
+        if ($order->items()->exists() && $order->items()->where('quantity', '>', 0)->doesntExist()) {
+            throw ValidationException::withMessages([
+                'order' => __('messages.sale_ops.close_requires_quantity'),
+            ]);
+        }
+
         $normalizedPhone = preg_replace('/\D+/', '', (string) $order->customer_phone);
         if ($normalizedPhone !== '') {
             $blacklist = PhoneBlacklist::query()->where('phone', $normalizedPhone)->first();

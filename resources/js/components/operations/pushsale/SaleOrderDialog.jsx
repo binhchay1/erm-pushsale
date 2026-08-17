@@ -298,12 +298,20 @@ export function SaleOrderDialog({
         subLabel: item.sku || undefined,
     }))), [pickerVariants]);
 
+    // Dòng sản phẩm Ladi đổ về chưa map catalog vẫn có tên hợp lệ để lưu/chốt đơn.
+    const lineDisplayName = (line) => {
+        const product = catalog.products.find((item) => String(item.id) === String(line.product_id));
+        return String(product?.name || line.product_name || '').trim();
+    };
+
     const lineProductLabel = (line) => {
         const product = catalog.products.find((item) => String(item.id) === String(line.product_id));
-        const name = product?.name || line.product_name || '—';
+        const name = lineDisplayName(line) || '—';
         const sku = product?.sku || line.product_sku;
         return sku ? `${name} (${sku})` : name;
     };
+
+    const hasProductLine = (line) => Boolean(line.product_id) || lineDisplayName(line) !== '';
 
     const appendResolvedLine = (resolved) => {
         if (!resolved.product_id && !resolved.base_product_id) return;
@@ -372,9 +380,9 @@ export function SaleOrderDialog({
         vat: numberValue(form.vat),
         shipping_fee_collected: numberValue(form.shipping_fee_collected),
         deposit: numberValue(form.deposit),
-        items: form.items.filter((item) => item.product_id).map((item) => ({
-            product_id: Number(item.product_id),
-            product_name: item.product_name,
+        items: form.items.filter(hasProductLine).map((item) => ({
+            product_id: item.product_id ? Number(item.product_id) : null,
+            product_name: lineDisplayName(item),
             item_type: item.item_type === 'combo' ? 'product' : item.item_type,
             quantity: Math.max(0, numberValue(item.quantity)),
             unit_price: numberValue(item.unit_price),
@@ -394,7 +402,7 @@ export function SaleOrderDialog({
         if (form.items.some((item) => item.base_product_id && !item.product_id && (catalog.byParent.get(String(item.base_product_id)) ?? []).length > 0)) {
             return t('operations.sale_order.sku_required');
         }
-        if (!form.items.some((item) => item.product_id)) return t('operations.sale_order.product_required');
+        if (!form.items.some(hasProductLine)) return t('operations.sale_order.product_required');
         return null;
     };
 
@@ -445,6 +453,11 @@ export function SaleOrderDialog({
         const error = validate();
         if (error) {
             setFormError(error);
+            return;
+        }
+        // Ladi đổ sản phẩm về với SL 0 — sale phải nhập số lượng trước khi chốt.
+        if (shouldClose && !form.items.some((item) => hasProductLine(item) && numberValue(item.quantity) > 0)) {
+            setFormError(t('operations.sale_order.quantity_required'));
             return;
         }
         if (!shouldClose && form.operation_result === 'closed_success') {
@@ -579,10 +592,14 @@ export function SaleOrderDialog({
             >
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{dialogTitle}</DialogTitle></DialogHeader>
                 <div className="ps-sale-order-body">
-                    {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
-                    {orderClosed && canUnclose ? (
-                        <div className="ps-dialog-form-error" role="status" style={{ background: '#fff8e6', color: '#8a6d3b', borderColor: '#faebcc' }}>
-                            {t('operations.sale_order.unclose_hint')}
+                    {formError || (orderClosed && canUnclose) ? (
+                        <div className="ps-sale-order-notices">
+                            {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
+                            {orderClosed && canUnclose ? (
+                                <div className="ps-dialog-form-error ps-dialog-form-hint" role="status">
+                                    {t('operations.sale_order.unclose_hint')}
+                                </div>
+                            ) : null}
                         </div>
                     ) : null}
                     <section className={`ps-order-left-panel${formDisabled ? ' is-disabled' : ''}`}>

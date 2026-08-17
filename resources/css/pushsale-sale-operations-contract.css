@@ -162,6 +162,26 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-unclose-btn {
     line-height: 1.4 !important;
 }
 
+/* Cảnh báo/hint là con trực tiếp của grid 2 cột — phải trải hết hàng, nếu không
+   panel trái/phải bị đẩy sang cột khác và vỡ toàn bộ dialog. */
+html body.pushsale-app-body .ps-sale-order-dialog .ps-sale-order-notices {
+    grid-column: 1 / -1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    padding: 12px 18px 0 28px !important;
+}
+
+html body.pushsale-app-body .ps-sale-order-dialog .ps-sale-order-notices .ps-dialog-form-error {
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-dialog-form-error.ps-dialog-form-hint {
+    background: #fff8e6 !important;
+    border-color: #faebcc !important;
+    color: #8a6d3b !important;
+}
+
 html body.pushsale-app-body .ps-sale-order-dialog .ps-order-product-picker {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;

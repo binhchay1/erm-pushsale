@@ -1,4 +1,6 @@
 import { formatNumber } from '@/lib/format';
+import { translate } from '@/i18n/translate';
+import { useT } from '@/providers/I18nProvider';
 
 function formatOpsMoney(value) {
     if (value == null || Number.isNaN(Number(value))) return '';
@@ -68,7 +70,7 @@ function decodeProductName(raw) {
     }
     // Tracking / hash dumps are not product names
     if (/^[A-Za-z0-9+/=_-]{48,}$/.test(value) || /^[0-9a-f]{40,}$/i.test(value)) {
-        return 'Sản phẩm (chưa map)';
+        return translate('operations.ops_table.unmapped_product');
     }
 
     return value;
@@ -129,6 +131,7 @@ export function firstUpsellDivider(items = [], index = 0) {
 }
 
 export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, onReturning = null, className = '', showUpsell = true }) {
+    const t = useT();
     const data = row ?? order ?? {};
     const hasDuplicate = Boolean(data.isDuplicatePhone);
     const hasReturning = Boolean(data.isReturningCustomer);
@@ -139,33 +142,37 @@ export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, o
         return null;
     }
 
+    const returningLabel = t(onReturning ? 'operations.order_flags.returning_click' : 'operations.order_flags.returning');
+    const duplicateLabel = t('operations.order_flags.duplicate');
+    const upsellLabel = t(isWaitingUpsell ? 'operations.order_flags.upsell_waiting' : 'operations.order_flags.upsell');
+
     return (
-        <span className={`ps-order-flags ${className}`.trim()} aria-label="Dấu hiệu khách hàng và đơn hàng">
+        <span className={`ps-order-flags ${className}`.trim()}>
             {hasReturning ? (
                 onReturning ? (
-                    <button type="button" className="ps-order-flag is-returning" title="Khách hàng cũ — xem đơn đã chốt" aria-label="Khách hàng cũ — xem đơn đã chốt" onClick={onReturning}>
+                    <button type="button" className="ps-order-flag is-returning" title={returningLabel} aria-label={returningLabel} onClick={onReturning}>
                         <span className="ps-order-flag-inner"><i className="fa fa-heart" aria-hidden="true" /></span>
                     </button>
                 ) : (
-                    <span className="ps-order-flag is-returning" title="Khách hàng cũ" aria-label="Khách hàng cũ">
+                    <span className="ps-order-flag is-returning" title={returningLabel} aria-label={returningLabel}>
                         <span className="ps-order-flag-inner"><i className="fa fa-heart" aria-hidden="true" /></span>
                     </span>
                 )
             ) : null}
             {hasDuplicate ? (
                 onDuplicate ? (
-                    <button type="button" className="ps-order-flag is-duplicate" title="Trùng số điện thoại" aria-label="Trùng số điện thoại" onClick={onDuplicate}>
+                    <button type="button" className="ps-order-flag is-duplicate" title={duplicateLabel} aria-label={duplicateLabel} onClick={onDuplicate}>
                         <span className="ps-order-flag-inner"><i className="fa fa-clone" aria-hidden="true" /></span>
                     </button>
                 ) : (
-                    <span className="ps-order-flag is-duplicate" title="Trùng số điện thoại" aria-label="Trùng số điện thoại">
+                    <span className="ps-order-flag is-duplicate" title={duplicateLabel} aria-label={duplicateLabel}>
                         <span className="ps-order-flag-inner"><i className="fa fa-clone" aria-hidden="true" /></span>
                     </span>
                 )
             ) : null}
             {hasUpsell ? (
-                <span className={`ps-order-flag is-upsale ${isWaitingUpsell ? 'is-waiting-upsale' : ''}`.trim()} title={isWaitingUpsell ? 'Có upsale đang chờ xử lý' : 'Có đơn upsale'} aria-label={isWaitingUpsell ? 'Có upsale đang chờ xử lý' : 'Có đơn upsale'}>
-                    <span className="ps-order-flag-inner"><i className="fa fa-level-up" aria-hidden="true" /></span>
+                <span className={`ps-order-flag is-upsale ${isWaitingUpsell ? 'is-waiting-upsale' : ''}`.trim()} title={upsellLabel} aria-label={upsellLabel}>
+                        <span className="ps-order-flag-inner"><i className="fa fa-level-up" aria-hidden="true" /></span>
                 </span>
             ) : null}
         </span>
@@ -173,10 +180,11 @@ export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, o
 }
 
 function ProductLine({ item, index, order = null, forceUpsell = false, showUpsellDivider = false }) {
+    const t = useT();
     const isUpsell = forceUpsell || isUpsellOrderItem(item);
     const rawName = item.productName ?? item.product_name ?? item.name ?? '—';
     const looksLikeUrl = /^https?:\/\//i.test(String(rawName)) || /^www\./i.test(String(rawName));
-    const name = looksLikeUrl ? 'Sản phẩm (chưa map)' : decodeProductName(rawName);
+    const name = looksLikeUrl ? t('operations.ops_table.unmapped_product') : decodeProductName(rawName);
     const quantity = lineQuantity(item);
     const unitPrice = lineUnitPrice(item, order);
     const textOnly = Boolean(item.meta?.text_only ?? item.textOnly)
@@ -189,7 +197,7 @@ function ProductLine({ item, index, order = null, forceUpsell = false, showUpsel
         >
             <span className="ten-sp ps-order-product-name" title={looksLikeUrl ? String(rawName) : name}>
                 {showUpsellDivider ? (
-                    <span className="ps-order-upsale-icon" title="Upsale" aria-label="Upsale">
+                    <span className="ps-order-upsale-icon" title={t('operations.order_flags.upsell_short')} aria-label={t('operations.order_flags.upsell_short')}>
                         <i className="fa fa-level-up" aria-hidden="true" />
                     </span>
                 ) : null}
@@ -217,7 +225,7 @@ export function OrderProductsBreakdown({ items = [], order = null, empty = '—'
     const showDashBeforeUpsell = mainItems.length > 0 && upsellItems.length > 0;
 
     return (
-        <div className="tb-in-sp ps-order-products-breakdown" aria-label="Sản phẩm trong đơn" role="list">
+        <div className="tb-in-sp ps-order-products-breakdown" aria-label={translate('operations.ops_table.col_products')} role="list">
             {mainItems.map((item, index) => (
                 <ProductLine key={item.itemId ?? item.id ?? `main-${index}`} item={item} index={index} order={order} />
             ))}
@@ -241,6 +249,7 @@ export function OrderProductsBreakdown({ items = [], order = null, empty = '—'
 }
 
 export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount = false }) {
+    const t = useT();
     const products = items ?? row.products ?? row.items ?? [];
     const storedSubtotal = Number(row.subtotal ?? row.sub_total ?? 0);
     const computed = productsSubtotal(products, row);
@@ -265,12 +274,12 @@ export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount =
     // Only show Thành tiền line when it differs from Tổng — identical values stacked
     // and looked like a ghosted "169.000" / "169.000 đ" overlap on WH/KT pages.
     if (subtotal > 0 && Math.abs(subtotal - total) > 0.5) {
-        lines.push({ key: 'subtotal', title: 'Thành tiền', text: moneyOrBlank(subtotal) });
+        lines.push({ key: 'subtotal', title: t('operations.ops_table.money_subtotal'), text: moneyOrBlank(subtotal) });
     }
     if (discount > 0 || showZeroDiscount) {
         lines.push({
             key: 'discount',
-            title: 'Chiết khấu',
+            title: t('operations.ops_table.money_discount'),
             text: discount > 0 ? `-${formatOpsMoney(discount)}` : formatOpsMoney(0),
         });
     }
@@ -278,18 +287,18 @@ export function OrderMoneyBreakdown({ row = {}, items = null, showZeroDiscount =
         lines.push({ key: 'vat', title: 'VAT', text: moneyOrBlank(vat) });
     }
     if (shippingFee > 0) {
-        lines.push({ key: 'shipping', title: 'Phí vận chuyển', text: moneyOrBlank(shippingFee) });
+        lines.push({ key: 'shipping', title: t('operations.ops_table.money_shipping'), text: moneyOrBlank(shippingFee) });
     }
     lines.push({
         key: 'total',
-        title: 'Tổng tiền đơn hàng',
+        title: t('operations.ops_table.money_total'),
         text: moneyOrBlank(total) || (subtotal > 0 ? formatOpsMoney(total) : ''),
         strong: true,
     });
 
     // Prefer plain "169.000 đ" (not Intl ₫) — avoids amount/symbol ghosting in ops tables.
     return (
-        <div className="ps-order-money-breakdown" aria-label="Thành tiền đơn hàng">
+        <div className="ps-order-money-breakdown" aria-label={t('operations.ops_table.money_total')}>
             {lines.filter((line) => line.text).map((line) => (
                 <div key={line.key} className={`ps-order-money-line${line.strong ? ' is-total' : ''}`} title={line.title}>
                     {line.text}

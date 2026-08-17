@@ -155,7 +155,11 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
                         className="btn-link ps-same-phone-link"
                         onClick={() => setSamePhone((current) => !current)}
                     >
-                        <i className="fa fa-arrow-down" aria-hidden="true" /> {t('operations.customer_interactions.same_phone_link')}
+                        <i className="fa fa-arrow-down" aria-hidden="true" />
+                        {' '}
+                        {t(samePhone
+                            ? 'operations.customer_interactions.same_phone_off'
+                            : 'operations.customer_interactions.same_phone_link')}
                     </button>
                 </div>
             </div>

@@ -148,6 +148,7 @@ return [
         'already_closed' => 'Đơn đã được chốt trước đó.',
         'no_permission_close' => 'Bạn không có quyền chốt đơn này.',
         'cannot_close_cancelled' => 'Đơn đã hủy — không thể chốt.',
+        'close_requires_quantity' => 'Cần nhập số lượng cho ít nhất một sản phẩm trước khi chốt đơn.',
         'cannot_unclose' => 'Chỉ hủy chốt được khi đơn còn Chờ vận đơn và chưa chuyển ĐVVC.',
         'no_permission_unclose' => 'Bạn không có quyền hủy chốt đơn này.',
         'unclose_success' => 'Đã hủy chốt đơn — có thể tác nghiệp và chỉnh sửa lại.',

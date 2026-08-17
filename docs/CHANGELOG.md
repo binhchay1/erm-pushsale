@@ -4,6 +4,14 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 
 ---
 
+## 2026-08-18 — Sale order dialog fixes + ops table i18n (FB 15/8 & 17/8)
+
+- Sửa vỡ layout dialog "Cập nhật đơn / Chốt đơn": khối cảnh báo lỗi và hint hủy chốt là con trực tiếp của grid 2 cột `.ps-sale-order-body` nên chiếm 1 ô grid, đẩy panel trái/phải sai cột. Nay bọc trong `.ps-sale-order-notices` với `grid-column: 1 / -1`.
+- Sale chốt được đơn có dòng sản phẩm Ladi chưa map catalog: payload giữ dòng chỉ có `product_name` (`product_id = null`) thay vì loại bỏ, nên không còn báo "Vui lòng chọn ít nhất một sản phẩm" khi đơn đã có sản phẩm từ landing.
+- SL 0 là trạng thái hợp lệ khi lưu nháp (Ladi đổ sản phẩm chưa có số lượng): `items.*.quantity` nhận `min:0`; chặn chốt đơn khi tất cả dòng đều SL 0 ở cả frontend và `OrderClosingService`.
+- Sale không hạ được đơn giá dòng Ladi chưa map catalog: `SaleOrderEditService` khóa giá theo giá đang lưu trên đơn (trước đây chỉ khóa theo giá catalog khi có `product_id`).
+- i18n: thêm `operations.ops_table`, `operations.order_flags`, `operations.duplicate_orders`, `common.pagination.*` và dùng cho bảng Sale tác nghiệp, cell dùng chung, cờ trùng/khách cũ, dialog đơn cùng số điện thoại, phân trang.
+
 ## 2026-08-06 — Keep-account business data reset command
 
 - Sửa command `data:clear-all-keep-accounts` đúng business mới: giữ nguyên toàn bộ tài khoản hiện có, company, team, preference/token/session đăng nhập; chỉ xóa dữ liệu nghiệp vụ ở các bảng còn lại.

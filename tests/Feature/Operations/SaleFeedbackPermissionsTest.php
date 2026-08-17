@@ -204,6 +204,54 @@ class SaleFeedbackPermissionsTest extends TestCase
         $this->assertTrue($order->items->every(fn ($item) => (int) $item->unit_price > 0));
     }
 
+    public function test_sale_can_save_landing_line_without_catalog_product_and_zero_quantity(): void
+    {
+        $sale = User::factory()->create(['role' => UserRole::Sales]);
+        $order = $this->openOrder($sale);
+        $order->items()->create([
+            'product_id' => null,
+            'product_name' => 'Mua 3 TẶNG 1 Túi (Tổng 2kg) : 399.000đ + MIỄN SHIP',
+            'item_type' => 'product',
+            'quantity' => 0,
+            'unit_price' => 399_000,
+        ]);
+
+        $this->actingAs($sale)
+            ->post("/sales/orders/{$order->id}/details", [
+                'items' => [[
+                    'product_id' => null,
+                    'product_name' => 'Mua 3 TẶNG 1 Túi (Tổng 2kg) : 399.000đ + MIỄN SHIP',
+                    'item_type' => 'product',
+                    'quantity' => 0,
+                    'unit_price' => 1,
+                ]],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $item = $order->fresh('items')->items->first();
+
+        $this->assertNull($item->product_id);
+        $this->assertSame(0, (int) $item->quantity);
+        // Sale không được hạ giá dòng Ladi chưa map catalog.
+        $this->assertSame(399_000, (int) $item->unit_price);
+    }
+
+    public function test_order_cannot_be_closed_while_every_line_has_zero_quantity(): void
+    {
+        $sale = User::factory()->create(['role' => UserRole::Sales]);
+        $order = $this->openOrder($sale);
+        $order->items()->create([
+            'product_id' => null,
+            'product_name' => 'Sản phẩm Ladi',
+            'item_type' => 'product',
+            'quantity' => 0,
+            'unit_price' => 399_000,
+        ]);
+
+        $this->expectException(ValidationException::class);
+        app(OrderClosingService::class)->close($order->fresh('items'), $sale);
+    }
+
     public function test_workspace_row_exposes_latest_internal_note(): void
     {
         $sale = User::factory()->create(['role' => UserRole::Sales]);

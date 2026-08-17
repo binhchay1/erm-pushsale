@@ -47,7 +47,7 @@ export function PushsalePagination({
     meta,
     routeUrl,
     filters = {},
-    itemLabel = 'bản ghi',
+    itemLabel = null,
     perPageOptions = DEFAULT_PER_PAGE_OPTIONS,
     align = 'split',
     scrollTargetId,
@@ -125,7 +125,7 @@ export function PushsalePagination({
                         <b>{meta?.from ?? 0}</b> - <b>{meta?.to ?? 0}</b> / <b>{meta?.total ?? 0}</b>
                         {showPerPage ? (
                             <label className="ps-page-size">
-                                <span>Số dòng</span>
+                                <span>{t('common.pagination.rows')}</span>
                                 <select
                                     className="form-control input-sm"
                                     value={perPage}
@@ -139,12 +139,12 @@ export function PushsalePagination({
                         ) : null}
                     </div>
                 ) : null}
-                <ul className="pagination pagination-sm ps-sale-pagination">
+                <ul className="pagination pagination-sm ps-sale-pagination" aria-label={t('common.pagination.label')}>
                     <li className={current <= 1 ? 'disabled' : ''}>
-                        <button type="button" onClick={() => go(1)} aria-label="Trang đầu">«</button>
+                        <button type="button" onClick={() => go(1)} aria-label={t('common.pagination.first_page')}>«</button>
                     </li>
                     <li className={current <= 1 ? 'disabled' : ''}>
-                        <button type="button" onClick={() => go(current - 1)} aria-label="Trang trước">‹</button>
+                        <button type="button" onClick={() => go(current - 1)} aria-label={t('common.pagination.previous_page')}>‹</button>
                     </li>
                     {start > 1 && <li className="disabled"><span>…</span></li>}
                     {windowPages.map((page) => (
@@ -154,10 +154,10 @@ export function PushsalePagination({
                     ))}
                     {end < last && <li className="disabled"><span>…</span></li>}
                     <li className={current >= last ? 'disabled' : ''}>
-                        <button type="button" onClick={() => go(current + 1)} aria-label="Trang sau">›</button>
+                        <button type="button" onClick={() => go(current + 1)} aria-label={t('common.pagination.next_page')}>›</button>
                     </li>
                     <li className={current >= last ? 'disabled' : ''}>
-                        <button type="button" onClick={() => go(last)} aria-label="Trang cuối">»</button>
+                        <button type="button" onClick={() => go(last)} aria-label={t('common.pagination.last_page')}>»</button>
                     </li>
                 </ul>
             </div>
@@ -175,10 +175,10 @@ export function PushsalePagination({
         return (
             <div
                 className={`ps-pager ps-pagination-v81 pushsale-pagination ${className}`.trim()}
-                aria-label={label !== 'reports.pushsale.pagination' ? label : 'Phân trang'}
+                aria-label={label !== 'reports.pushsale.pagination' ? label : t('common.pagination.label')}
             >
-                <button type="button" disabled={current <= 1} onClick={() => go(1)} title="Trang đầu">«</button>
-                <button type="button" disabled={current <= 1} onClick={() => go(current - 1)} title="Trang trước">‹</button>
+                <button type="button" disabled={current <= 1} onClick={() => go(1)} title={t('common.pagination.first_page')}>«</button>
+                <button type="button" disabled={current <= 1} onClick={() => go(current - 1)} title={t('common.pagination.previous_page')}>‹</button>
                 {windowPages.map((page) => (
                     <button
                         key={page}
@@ -190,8 +190,8 @@ export function PushsalePagination({
                         {page}
                     </button>
                 ))}
-                <button type="button" disabled={current >= last} onClick={() => go(current + 1)} title="Trang sau">›</button>
-                <button type="button" disabled={current >= last} onClick={() => go(last)} title="Trang cuối">»</button>
+                <button type="button" disabled={current >= last} onClick={() => go(current + 1)} title={t('common.pagination.next_page')}>›</button>
+                <button type="button" disabled={current >= last} onClick={() => go(last)} title={t('common.pagination.last_page')}>»</button>
             </div>
         );
     }
@@ -200,12 +200,12 @@ export function PushsalePagination({
         <div className={`pushsale-pagination ps-pagination-v81 is-${align} ${className}`.trim()}>
             {showInfo ? (
                 <div className="ps-pagination-info">
-                    Hiển thị <b>{meta?.from ?? 0}</b> - <b>{meta?.to ?? 0}</b> / <b>{meta?.total ?? 0}</b> {itemLabel}
+                    <b>{meta?.from ?? 0}</b> - <b>{meta?.to ?? 0}</b> / <b>{meta?.total ?? 0}</b> {itemLabel ?? t('common.pagination.records')}
                 </div>
             ) : null}
-            <div className="ps-pagination-pages" role="navigation" aria-label="Phân trang">
-                <button type="button" disabled={current <= 1} onClick={() => go(1)} title="Trang đầu" aria-label="Trang đầu">«</button>
-                <button type="button" disabled={current <= 1} onClick={() => go(current - 1)} title="Trang trước" aria-label="Trang trước">‹</button>
+            <div className="ps-pagination-pages" role="navigation" aria-label={t('common.pagination.label')}>
+                <button type="button" disabled={current <= 1} onClick={() => go(1)} title={t('common.pagination.first_page')} aria-label={t('common.pagination.first_page')}>«</button>
+                <button type="button" disabled={current <= 1} onClick={() => go(current - 1)} title={t('common.pagination.previous_page')} aria-label={t('common.pagination.previous_page')}>‹</button>
                 {pages.map((page) => (
                     typeof page === 'number' ? (
                         <button
@@ -221,12 +221,12 @@ export function PushsalePagination({
                         <span key={page} className="ellipsis">…</span>
                     )
                 ))}
-                <button type="button" disabled={current >= last} onClick={() => go(current + 1)} title="Trang sau" aria-label="Trang sau">›</button>
-                <button type="button" disabled={current >= last} onClick={() => go(last)} title="Trang cuối" aria-label="Trang cuối">»</button>
+                <button type="button" disabled={current >= last} onClick={() => go(current + 1)} title={t('common.pagination.next_page')} aria-label={t('common.pagination.next_page')}>›</button>
+                <button type="button" disabled={current >= last} onClick={() => go(last)} title={t('common.pagination.last_page')} aria-label={t('common.pagination.last_page')}>»</button>
             </div>
             {showPerPage ? (
                 <label className="ps-pagination-size">
-                    <span>Hiển thị</span>
+                    <span>{t('common.pagination.rows')}</span>
                     <select
                         value={perPage}
                         onChange={(event) => visit({ per_page: Number(event.target.value), page: 1 })}
@@ -235,7 +235,6 @@ export function PushsalePagination({
                             <option key={value} value={value}>{value}</option>
                         ))}
                     </select>
-                    <span>dòng</span>
                 </label>
             ) : null}
         </div>

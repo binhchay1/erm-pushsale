@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { formatCurrency } from '@/lib/format';
+import { useT } from '@/providers/I18nProvider';
 
 /** Shared Pushsale ops table cells — icon layout matches legacy `text-right` / float pattern. */
 
@@ -43,15 +44,17 @@ export function externalHref(url) {
     return `https://${value}`;
 }
 
-export function OrderCodeCell({ orderCode, onHistory, emptyTitle = 'Mã đơn chỉ sinh sau khi chốt đơn' }) {
+export function OrderCodeCell({ orderCode, onHistory, emptyTitle = null }) {
+    const t = useT();
+
     return (
         <td className="text-center">
             {orderCode ? (
                 <button type="button" className="lnk-md ps-order-code-link" onClick={onHistory}>{orderCode}</button>
             ) : (
-                <span className="lnk-md ps-order-code-empty" title={emptyTitle}>&nbsp;</span>
+                <span className="lnk-md ps-order-code-empty" title={emptyTitle ?? t('operations.ops_table.order_code_empty')}>&nbsp;</span>
             )}
-            <OpsIconButton title="Xem lịch sử xem thông tin số" icon="history" onClick={onHistory} style={{ fontSize: 14 }} />
+            <OpsIconButton title={t('operations.ops_table.data_view_history')} icon="history" onClick={onHistory} style={{ fontSize: 14 }} />
         </td>
     );
 }
@@ -82,11 +85,13 @@ export function SaleAssigneeCell({
     onDelete,
     className = 'text-center area5 hidden-xs',
 }) {
+    const t = useT();
+
     return (
         <td className={className}>
             <OpsTopRightIcons>
                 {canDelete ? (
-                    <OpsIconButton title="Xóa data" icon="trash" onClick={onDelete} className="ps-sale-delete" />
+                    <OpsIconButton title={t('operations.ops_table.delete_data')} icon="trash" onClick={onDelete} className="ps-sale-delete" />
                 ) : (
                     <a className="btn-icon invisible" aria-hidden="true">&nbsp;</a>
                 )}
@@ -111,6 +116,7 @@ export function CustomerContactCell({
     supplement = null,
     className = 'area1 ps-customer-cell',
 }) {
+    const t = useT();
     const name = order.customerName || order.effectiveReceiverName || '—';
     const phone = order.customerPhone || order.effectiveReceiverPhone || '';
     const carrier = order.carrierLabel || (order.phoneCarrier ? `[${order.phoneCarrier}]` : '');
@@ -119,7 +125,7 @@ export function CustomerContactCell({
         <td className={className} title={`${order.id} | ${order.sourceType || ''}`}>
             {onEdit ? (
                 <div className="text-right ps-customer-edit-wrap">
-                    <OpsIconButton title="Cập nhật đơn" icon="edit" onClick={onEdit} className="ps-cell-action" />
+                    <OpsIconButton title={t('operations.ops_table.edit_order')} icon="edit" onClick={onEdit} className="ps-cell-action" />
                 </div>
             ) : null}
             <div className="ps-customer-name-wrap" style={{ maxWidth: 170, textOverflow: 'ellipsis', overflow: 'hidden' }}>
@@ -132,7 +138,7 @@ export function CustomerContactCell({
                         type="button"
                         className="ps-phone-link"
                         onClick={onDuplicateOrders}
-                        title="Danh sách trùng số"
+                        title={t('operations.ops_table.duplicate_list')}
                     >
                         {phone || '—'}
                     </button>
@@ -199,10 +205,12 @@ export function OperationResultCell({
     onChange,
     className = 'area2 no-wrap fix_brower_continue_let_off',
 }) {
+    const t = useT();
+
     return (
         <td className={className}>
             <OpsTopRightIcons>
-                {onHistory ? <OpsIconButton title="Lịch sử tác nghiệp" icon="history" onClick={onHistory} /> : null}
+                {onHistory ? <OpsIconButton title={t('operations.ops_table.operation_history')} icon="history" onClick={onHistory} /> : null}
             </OpsTopRightIcons>
             <div style={{ maxWidth: 180 }}>
                 {canChangeStatus ? (
@@ -215,7 +223,7 @@ export function OperationResultCell({
                             event.target.value = '';
                         }}
                     >
-                        <option value="">--Chọn--</option>
+                        <option value="">{t('operations.ops_table.choose')}</option>
                         {options.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
@@ -232,10 +240,12 @@ export function OperationResultCell({
 }
 
 export function NextOperationCell({ nextOperationAt, onEdit, className = 'area2 hidden-xs' }) {
+    const t = useT();
+
     return (
         <td className={className}>
             <OpsTopRightIcons>
-                {onEdit ? <OpsIconButton title="Cập nhật tác nghiệp tiếp" icon="undo" onClick={onEdit} /> : null}
+                {onEdit ? <OpsIconButton title={t('operations.ops_table.next_operation_edit')} icon="undo" onClick={onEdit} /> : null}
             </OpsTopRightIcons>
             {nextOperationAt ? <span className="small-tip">{formatOpsDateTime(nextOperationAt)}</span> : null}
         </td>
@@ -243,6 +253,7 @@ export function NextOperationCell({ nextOperationAt, onEdit, className = 'area2 
 }
 
 export function TimeRemainingCell({ nextOperationAt, className = 'text-center no-wrap area2 hidden-xs' }) {
+    const t = useT();
     const [, tick] = useState(0);
     useEffect(() => {
         const timer = window.setInterval(() => tick((value) => value + 1), 60000);
@@ -265,7 +276,11 @@ export function TimeRemainingCell({ nextOperationAt, className = 'text-center no
     const absoluteMinutes = Math.floor(Math.abs(milliseconds) / 60000);
     const hours = Math.floor(absoluteMinutes / 60);
     const minutes = absoluteMinutes % 60;
-    const label = `${milliseconds < 0 ? 'Quá ' : 'Còn '}${hours ? `${hours}h ` : ''}${minutes}p`;
+    const duration = `${hours ? `${hours}${t('operations.ops_table.hours_short')} ` : ''}${minutes}${t('operations.ops_table.minutes_short')}`;
+    const label = t(
+        milliseconds < 0 ? 'operations.ops_table.time_overdue' : 'operations.ops_table.time_remaining',
+        { time: duration },
+    );
 
     return (
         <td className={className}>
@@ -289,21 +304,23 @@ export function DeliveryStatusCell({
     onHistory,
     onUnclose,
     canUnclose = false,
-    uncloseLabel = 'Hủy chốt đơn',
+    uncloseLabel = null,
     showAccountingHistory = false,
     className = 'text-center area4',
 }) {
+    const t = useT();
+
     return (
         <td className={`${className} ttgh ttgh-${deliveryStatusValue || 'none'} ps-delivery-status-cell`.trim()}>
             <div className="ps-delivery-status-row">
                 {showAccountingHistory && onHistory ? (
-                    <OpsIconButton title="Lịch sử kế toán" icon="history" onClick={onHistory} />
+                    <OpsIconButton title={t('operations.ops_table.accounting_history')} icon="history" onClick={onHistory} />
                 ) : null}
                 <span className={`ps-delivery-status-label ttgh${deliveryStatusValue || 0}`}>{deliveryStatus || ''}</span>
             </div>
             {canUnclose && onUnclose ? (
                 <button type="button" className="btn btn-warning btn-xs ps-sale-unclose-btn" onClick={onUnclose}>
-                    <i className="fa fa-undo" /> {uncloseLabel}
+                    <i className="fa fa-undo" /> {uncloseLabel ?? t('operations.sale_order.unclose')}
                 </button>
             ) : null}
             <div className="small-tip ps-delivery-carrier-hint">()</div>
@@ -312,7 +329,7 @@ export function DeliveryStatusCell({
             ) : null}
             {onCalendar ? (
                 <div className="ps-delivery-calendar-wrap">
-                    <OpsIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={onCalendar} />
+                    <OpsIconButton title={t('operations.ops_table.desired_at_edit')} icon="calendar" onClick={onCalendar} />
                 </div>
             ) : null}
             {desiredDeliveryAt ? (

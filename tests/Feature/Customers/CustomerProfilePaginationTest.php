@@ -86,10 +86,20 @@ class CustomerProfilePaginationTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Sales/CustomerProfile')
                 ->where('saleOrderActionBaseUrl', '/sales')
-                ->where('filterOptions.permissions.canDeleteOrders', true)
+                // Sale chỉ được xem: xóa data là quyền của Admin.
+                ->where('filterOptions.permissions.canDeleteOrders', false)
                 ->has('report.rows.data', 1)
                 ->where('report.rows.data.0.isDuplicatePhone', true)
                 ->where('report.rows.data.0.isReturningCustomer', true)
+            );
+
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+
+        $this->actingAs($admin)
+            ->get('/admin/customers?per_page=20&page=1')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('filterOptions.permissions.canDeleteOrders', true)
             );
     }
 }

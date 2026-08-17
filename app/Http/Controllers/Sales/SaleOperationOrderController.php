@@ -24,7 +24,8 @@ class SaleOperationOrderController extends Controller
             'items.*.product_id' => ['nullable', 'integer'],
             'items.*.product_name' => ['required_with:items', 'string', 'max:255'],
             'items.*.item_type' => ['nullable', Rule::in(['product', 'combo', 'upsell', 'gift'])],
-            'items.*.quantity' => ['required_with:items', 'integer', 'min:1', 'max:9999'],
+            // SL 0 hợp lệ khi lưu nháp: sản phẩm Ladi đổ về chưa có số lượng, sale nhập sau.
+            'items.*.quantity' => ['required_with:items', 'integer', 'min:0', 'max:9999'],
             'items.*.unit_price' => ['required_with:items', 'integer', 'min:0'],
             'items.*.discount_amount' => ['nullable', 'integer', 'min:0'],
             'discount' => ['nullable', 'integer', 'min:0'],

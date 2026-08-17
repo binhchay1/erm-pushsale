@@ -56,7 +56,7 @@ class ManualLeadController extends Controller
             'items' => ['nullable', 'array', 'max:50'],
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.item_type' => ['nullable', Rule::in(['product', 'combo'])],
-            'items.*.quantity' => ['nullable', 'integer', 'min:1', 'max:9999'],
+            'items.*.quantity' => ['nullable', 'integer', 'min:0', 'max:9999'],
             'items.*.unit_price' => ['nullable', 'integer', 'min:0'],
             'items.*.discount_amount' => ['nullable', 'integer', 'min:0'],
             'discount' => ['nullable', 'integer', 'min:0'],

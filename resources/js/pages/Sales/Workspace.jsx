@@ -20,6 +20,7 @@ import { SaleOrderDialog } from '@/components/operations/pushsale/SaleOrderDialo
 import { SaleWorkspaceFilters } from '@/components/operations/pushsale/SaleWorkspaceFilters';
 import { SaleWorkspaceTabs } from '@/components/operations/pushsale/SaleWorkspaceTabs';
 import { SaleWorkspaceTable } from '@/components/operations/pushsale/SaleWorkspaceTable';
+import { useT } from '@/providers/I18nProvider';
 
 export default function Workspace({
     filters = {},
@@ -36,6 +37,7 @@ export default function Workspace({
     manualUrl = '/sales/leads/manual',
     workspaceError = null,
 }) {
+    const t = useT();
     const rows = report?.rows?.data ?? [];
     const meta = report?.rows?.meta ?? null;
     const authUserId = usePage().props?.auth?.user?.id;
@@ -58,7 +60,9 @@ export default function Workspace({
         const holder = locks[String(order.id)];
         if (holder && Number(holder.user_id) !== Number(authUserId)) {
             const role = holder.role_label || holder.role || '';
-            toast.error(`Đơn đang được thao tác bởi ${holder.user_name}${role ? ` (${role})` : ''}. Vui lòng đợi.`);
+            toast.error(t('operations.ops_table.locked_by', {
+                name: `${holder.user_name}${role ? ` (${role})` : ''}`,
+            }));
             return false;
         }
         return true;
@@ -76,7 +80,7 @@ export default function Workspace({
 
     return (
         <AppLayout>
-            <Head title="Sale tác nghiệp" />
+            <Head title={t('operations.sale_workspace.page_title')} />
             <section className="ps-sale-workspace-page">
                 {workspaceError && (
                     <div className="ps-alert ps-alert-danger">{workspaceError}</div>

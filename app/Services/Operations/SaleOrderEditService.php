@@ -57,7 +57,7 @@ class SaleOrderEditService
             if (array_key_exists('items', $payload) && is_array($payload['items'])) {
                 $items = $payload['items'];
                 if (! $actor->isAdmin()) {
-                    $items = $this->lockUnitPricesForSale($items);
+                    $items = $this->lockUnitPricesForSale($items, $order);
                 }
                 $order->items()->delete();
                 foreach ($this->factory->buildItemRows($items, 'telesale') as $row) {
@@ -239,7 +239,7 @@ class SaleOrderEditService
      * @param  list<array<string, mixed>>  $items
      * @return list<array<string, mixed>>
      */
-    private function lockUnitPricesForSale(array $items): array
+    private function lockUnitPricesForSale(array $items, Order $order): array
     {
         $productIds = collect($items)
             ->map(fn (array $item) => (int) ($item['product_id'] ?? 0))
@@ -252,10 +252,24 @@ class SaleOrderEditService
             ? collect()
             : \App\Models\Product::query()->whereIn('id', $productIds)->pluck('unit_price', 'id');
 
-        return array_map(function (array $item) use ($prices): array {
+        // Dòng sản phẩm Ladi chưa map catalog: giữ đúng đơn giá đang lưu trên đơn.
+        $landingPrices = $order->items()
+            ->whereNull('product_id')
+            ->pluck('unit_price', 'product_name');
+
+        return array_map(function (array $item) use ($prices, $landingPrices): array {
             $productId = (int) ($item['product_id'] ?? 0);
-            if ($productId > 0 && $prices->has($productId)) {
-                $item['unit_price'] = (int) $prices->get($productId);
+            if ($productId > 0) {
+                if ($prices->has($productId)) {
+                    $item['unit_price'] = (int) $prices->get($productId);
+                }
+
+                return $item;
+            }
+
+            $name = (string) ($item['product_name'] ?? '');
+            if ($landingPrices->has($name)) {
+                $item['unit_price'] = (int) $landingPrices->get($name);
             }
 
             return $item;

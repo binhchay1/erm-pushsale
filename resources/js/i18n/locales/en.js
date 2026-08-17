@@ -51,7 +51,10 @@ export default {
         appearance_dark: 'Dark',
         appearance_system: 'System',
         pagination: {
+            label: 'Pagination',
             showing: 'Showing :from–:to of :total records',
+            rows: 'Rows',
+            records: 'records',
             rows_per_page: 'Rows per page',
             first_page: 'First page',
             previous_page: 'Previous page',
