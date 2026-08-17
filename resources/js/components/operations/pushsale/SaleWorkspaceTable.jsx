@@ -66,6 +66,20 @@ function OperationNeededCell({ order, actionBaseUrl, onMessages }) {
                     />
                 </div>
             </div>
+            {(order.latestInternalNote || order.saleOperationNote) ? (
+                <div
+                    className="ps-latest-internal-note"
+                    title={order.latestInternalNote || order.saleOperationNote}
+                    onClick={() => onMessages(order)}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') onMessages(order);
+                    }}
+                    role="button"
+                    tabIndex={0}
+                >
+                    {order.latestInternalNote || order.saleOperationNote}
+                </div>
+            ) : null}
             <div
                 className="mof-container ps-note-mof"
                 onMouseEnter={() => setHovered(true)}
@@ -352,6 +366,7 @@ export function SaleWorkspaceTable({
                                         onHistory={() => onHistory(order, 'accounting')}
                                         showAccountingHistory={Boolean(order.closedAt)}
                                         canUnclose={Boolean(order.canUnclose)}
+                                        uncloseLabel={t('operations.sale_order.unclose')}
                                         onUnclose={order.canUnclose ? () => onEdit(order, false) : null}
                                     />
                                 </tr>

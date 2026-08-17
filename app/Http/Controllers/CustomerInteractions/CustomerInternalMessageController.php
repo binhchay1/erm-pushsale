@@ -43,6 +43,7 @@ class CustomerInternalMessageController extends Controller
             ],
             'messages' => CustomerInternalMessagePresenter::collection($messages, $request->user()),
             'canWrite' => $this->canWrite($request->user()),
+            'samePhone' => true,
             'realtime' => [
                 'channel' => CustomerConversationChannel::internalForOrder($order),
                 'event' => '.customer.internal-message.created',
@@ -91,9 +92,8 @@ class CustomerInternalMessageController extends Controller
 
     private function canWrite(?User $user): bool
     {
-        // Dùng chung cơ chế phân quyền linh động của hệ thống:
-        // customers:view = chỉ xem, customers:full = được gửi tin nhắn.
+        // FB 17/8: sale + MKT + mọi nhân sự xem được khách hàng đều được note nội bộ.
         return $user !== null
-            && $user->allows(PermissionArea::Customers, PermissionLevel::Full);
+            && $user->allows(PermissionArea::Customers, PermissionLevel::View);
     }
 }

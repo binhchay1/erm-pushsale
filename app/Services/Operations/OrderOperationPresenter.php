@@ -48,6 +48,7 @@ final class OrderOperationPresenter
             'messageDisplay' => self::landingMessageDisplay($order),
             'messageParts' => self::landingMessageParts($order),
             'saleOperationNote' => $order->sale_operation_note,
+            'latestInternalNote' => self::latestInternalNote($order),
             'shippingAddress' => $order->shipping_address,
             'shippingAddress2' => $order->shipping_address_2,
             'effectiveShippingAddress' => $order->effectiveShippingAddress(),
@@ -77,10 +78,11 @@ final class OrderOperationPresenter
                 'itemId' => (string) $item->id,
                 'productId' => $item->product_id !== null ? (string) $item->product_id : null,
                 'productName' => $item->product_name,
+                'sku' => $item->product?->sku,
                 'itemType' => $item->item_type ?? 'product',
                 'origin' => $item->origin ?? '',
                 'isUpsell' => ($item->item_type === 'upsell') || str_contains(strtolower((string) ($item->origin ?? '')), 'upsell'),
-                'quantity' => max(1, (int) ($item->quantity ?? 1)),
+                'quantity' => max(0, (int) ($item->quantity ?? 0)),
                 'unitPrice' => (int) ($item->unit_price ?? 0),
                 'discountAmount' => (int) ($item->discount_amount ?? 0),
             ])->values()->all(),
@@ -208,6 +210,19 @@ final class OrderOperationPresenter
             'status_send' => $statusLine,
             'fallback' => '',
         ];
+    }
+
+    /**
+     * Note nội bộ mới nhất — hiện ngoài cột TN cần trên workspace.
+     */
+    public static function latestInternalNote(Order $order): ?string
+    {
+        $fromMessages = $order->relationLoaded('internalMessages')
+            ? $order->internalMessages->sortByDesc('id')->first()
+            : null;
+        $text = trim((string) ($fromMessages?->message ?? $order->sale_operation_note ?? ''));
+
+        return $text !== '' ? $text : null;
     }
 
     /**

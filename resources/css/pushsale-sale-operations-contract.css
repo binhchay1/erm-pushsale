@@ -132,8 +132,26 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-contact-phone-row .ps-co
     display: inline-flex !important;
     align-items: center !important;
     flex: 0 0 auto !important;
-    gap: 8px !important;
-    margin-left: 8px !important;
+    gap: 12px !important;
+    margin-left: 10px !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-latest-internal-note {
+    color: #e67e22 !important;
+    cursor: pointer;
+    display: -webkit-box;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    margin: 4px 0 6px;
+    max-width: 190px;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    white-space: normal;
+    word-break: break-word;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-unclose-btn {
@@ -149,6 +167,23 @@ html body.pushsale-app-body .ps-sale-order-dialog .ps-order-product-picker {
     grid-template-columns: 1fr 1fr !important;
     gap: 12px 24px !important;
     margin-bottom: 8px !important;
+}
+
+html body.pushsale-app-body .ps-message-same-phone {
+    padding: 8px 12px 12px;
+    text-align: right;
+}
+
+html body.pushsale-app-body .ps-same-phone-link {
+    background: none !important;
+    border: 0 !important;
+    color: #337ab7 !important;
+    font-size: 13px !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-same-phone-link .fa {
+    margin-right: 4px;
 }
 
 html body.pushsale-app-body .ps-sale-order-dialog .ps-order-line-name {
@@ -965,6 +1000,40 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-page-size .form-control 
     padding: 3px 6px !important;
     vertical-align: middle !important;
     width: 66px !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-pagination {
+    display: flex !important;
+    gap: 0 !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-pagination > li > button,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-pagination > li > span {
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    color: #444 !important;
+    display: inline-block !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    min-width: 32px !important;
+    padding: 5px 10px !important;
+    text-align: center !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-pagination > li.active > button {
+    background: #337ab7 !important;
+    border-color: #337ab7 !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-pagination > li.disabled > button,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-pagination > li.disabled > span {
+    color: #bbb !important;
+    cursor: not-allowed !important;
 }
 
 /* Responsive completion contract — sale workspace mobile/tablet. */

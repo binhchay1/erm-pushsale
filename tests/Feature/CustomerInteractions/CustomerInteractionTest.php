@@ -38,7 +38,7 @@ class CustomerInteractionTest extends TestCase
         $this->assertDatabaseCount('customer_internal_messages', 2);
     }
 
-    public function test_marketing_default_customer_permission_is_read_only(): void
+    public function test_marketing_can_write_internal_notes(): void
     {
         $sales = User::factory()->create(['role' => UserRole::Sales]);
         $marketing = User::factory()->create(['role' => UserRole::Marketing]);
@@ -57,12 +57,13 @@ class CustomerInteractionTest extends TestCase
         $this->actingAs($marketing)
             ->getJson("/customers/orders/{$order->id}/messages")
             ->assertOk()
-            ->assertJsonPath('canWrite', false)
+            ->assertJsonPath('canWrite', true)
             ->assertJsonPath('messages.0.message', 'Tin nhắn đã có.');
 
         $this->actingAs($marketing)
-            ->postJson("/customers/orders/{$order->id}/messages", ['message' => 'Không được gửi'])
-            ->assertForbidden();
+            ->postJson("/customers/orders/{$order->id}/messages", ['message' => 'MKT đã note cho sale.'])
+            ->assertCreated()
+            ->assertJsonPath('message.authorName', $marketing->name);
     }
 
     public function test_messages_are_shared_between_orders_with_the_same_customer_phone(): void

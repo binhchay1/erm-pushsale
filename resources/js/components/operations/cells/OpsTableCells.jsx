@@ -289,6 +289,7 @@ export function DeliveryStatusCell({
     onHistory,
     onUnclose,
     canUnclose = false,
+    uncloseLabel = 'Hủy chốt đơn',
     showAccountingHistory = false,
     className = 'text-center area4',
 }) {
@@ -302,7 +303,7 @@ export function DeliveryStatusCell({
             </div>
             {canUnclose && onUnclose ? (
                 <button type="button" className="btn btn-warning btn-xs ps-sale-unclose-btn" onClick={onUnclose}>
-                    <i className="fa fa-undo" /> Hủy chốt
+                    <i className="fa fa-undo" /> {uncloseLabel}
                 </button>
             ) : null}
             <div className="small-tip ps-delivery-carrier-hint">()</div>

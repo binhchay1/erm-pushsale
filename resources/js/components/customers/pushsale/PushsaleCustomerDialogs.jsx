@@ -51,6 +51,7 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
     const [customer, setCustomer] = useState(null);
     const [messages, setMessages] = useState([]);
     const [canWrite, setCanWrite] = useState(false);
+    const [samePhone, setSamePhone] = useState(false);
     const [draft, setDraft] = useState('');
     const [sending, setSending] = useState(false);
 
@@ -71,7 +72,10 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
     }, [open, order?.id, t]);
 
     useEffect(() => {
-        if (!open) setDraft('');
+        if (!open) {
+            setDraft('');
+            setSamePhone(false);
+        }
     }, [open]);
 
     const send = async () => {
@@ -89,6 +93,11 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
         }
     };
 
+    const visibleMessages = useMemo(() => {
+        if (samePhone || !order?.id) return messages;
+        return messages.filter((message) => !message.orderId || String(message.orderId) === String(order.id));
+    }, [messages, samePhone, order?.id]);
+
     return (
         <CustomerDialogShell
             open={open}
@@ -100,7 +109,7 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
                 <div className="ps-message-dialog-head">
                     <div>
                         <div className="ps-message-dialog-customer">{customer?.name ?? order?.customerName ?? '—'} / {customer?.phone ?? order?.customerPhone ?? '—'}</div>
-                        <div className="ps-message-dialog-meta">{customer?.address ?? order?.effectiveShippingAddress ?? '—'}</div>
+                        <div className="ps-message-dialog-meta">{customer?.note ?? order?.messageDisplay ?? order?.customerNote ?? customer?.address ?? order?.effectiveShippingAddress ?? '—'}</div>
                     </div>
                     <div className="ps-message-dialog-meta text-right">
                         <div>{t('operations.customer_interactions.internal_messages_title')}</div>
@@ -128,7 +137,7 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
                 </div>
 
                 <div className="ps-message-list">
-                    {loading ? <LoadingBlock /> : messages.length ? messages.map((message) => (
+                    {loading ? <LoadingBlock /> : visibleMessages.length ? visibleMessages.map((message) => (
                         <div className={`ps-message-row ${messageDirectionClass(message)} is-internal`} key={message.id ?? message.externalId ?? `${messageAuthor(message)}-${messageDate(message)}`}>
                             <div className="ps-message-meta">
                                 <strong>{messageAuthor(message)}</strong>
@@ -138,6 +147,16 @@ export function PushsaleCustomerMessagesDialog({ order, open, onOpenChange }) {
                             <div className="ps-message-text">{message.message ?? '—'}</div>
                         </div>
                     )) : <div className="ps-empty-message">{t('operations.customer_interactions.messages_empty')}</div>}
+                </div>
+
+                <div className="ps-message-same-phone">
+                    <button
+                        type="button"
+                        className="btn-link ps-same-phone-link"
+                        onClick={() => setSamePhone((current) => !current)}
+                    >
+                        <i className="fa fa-arrow-down" aria-hidden="true" /> {t('operations.customer_interactions.same_phone_link')}
+                    </button>
                 </div>
             </div>
         </CustomerDialogShell>

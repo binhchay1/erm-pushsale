@@ -107,7 +107,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function (): void {
     | Hồ sơ khách hàng dùng chung (quyền customers:view)
     |----------------------------------------------------------------------
     | Dialog lịch sử tác nghiệp / mua hàng / tin nội bộ / chat Pancake.
-    | customers:full gửi tin nội bộ; customer_chat:full gửi qua Pancake.
+    | customers:view gửi tin nội bộ; customer_chat:full gửi qua Pancake.
     */
     Route::get('customers', CustomerProfileController::class)->name('customers.index');
     Route::get('customers/orders/{order}/operation-history', [OrderOperationHistoryController::class, 'index'])->name('customers.orders.operation-history');

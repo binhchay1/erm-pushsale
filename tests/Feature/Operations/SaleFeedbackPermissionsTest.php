@@ -200,5 +200,27 @@ class SaleFeedbackPermissionsTest extends TestCase
         $this->assertCount(2, $order->items);
         $productIds = $order->items->pluck('product_id')->sort()->values()->all();
         $this->assertSame([$variantA->id, $variantB->id], $productIds);
+        $this->assertTrue($order->items->every(fn ($item) => (int) $item->quantity === 0));
+        $this->assertTrue($order->items->every(fn ($item) => (int) $item->unit_price > 0));
+    }
+
+    public function test_workspace_row_exposes_latest_internal_note(): void
+    {
+        $sale = User::factory()->create(['role' => UserRole::Sales]);
+        $order = $this->openOrder($sale, ['sale_operation_note' => 'Ghi chú cũ']);
+        $order->internalMessages()->create([
+            'company_id' => $order->company_id ?? $sale->company_id,
+            'author_user_id' => $sale->id,
+            'author_name' => $sale->name,
+            'author_role' => UserRole::Sales->value,
+            'customer_phone' => $order->customer_phone,
+            'message' => 'đơn đang giao hỏi khách time nhận hàng',
+        ]);
+        $order->load(['items', 'internalMessages']);
+
+        $payload = \App\Services\Operations\OrderOperationPresenter::toArray($order, null, $sale);
+
+        $this->assertSame('đơn đang giao hỏi khách time nhận hàng', $payload['latestInternalNote']);
+        $this->assertTrue($payload['canUnclose'] === false);
     }
 }

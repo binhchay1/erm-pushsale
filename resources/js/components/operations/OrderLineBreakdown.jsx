@@ -10,9 +10,10 @@ function normalizedText(value) {
 }
 
 function lineQuantity(item = {}) {
+    if (item.quantity === 0 || item.qty === 0) return 0;
     const raw = Number(item.quantity ?? item.qty ?? 1);
 
-    return Number.isFinite(raw) && raw > 0 ? raw : 1;
+    return Number.isFinite(raw) && raw >= 0 ? raw : 1;
 }
 
 function parseMoneyToken(amount, unit) {
@@ -195,7 +196,7 @@ function ProductLine({ item, index, order = null, forceUpsell = false, showUpsel
                 <span>{name}</span>
             </span>
             <span className="ps-order-product-qty no-wrap">
-                {textOnly && quantity <= 1 ? '' : `x${quantity}`}
+                {textOnly && quantity <= 1 && quantity !== 0 ? '' : `x${quantity}`}
             </span>
             <span className="ps-order-product-price no-wrap">
                 {unitPrice > 0 ? formatOpsMoney(unitPrice) : ''}

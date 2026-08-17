@@ -15,7 +15,8 @@ class EloquentOrderRepository implements OrderRepositoryInterface
     {
         return Order::query()
             ->with([
-                'items',
+                'items.product:id,name,sku,parent_id,unit_price',
+                'internalMessages' => fn ($query) => $query->latest('id')->limit(1),
                 'saleUser',
                 'marketerUser',
                 'marketingSource.product',

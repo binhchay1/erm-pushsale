@@ -21,6 +21,7 @@ final class CustomerInternalMessagePresenter
             'authorName' => $message->author_name ?? $message->author?->name ?? __('operations.customer_interactions.system_actor'),
             'authorRole' => filled($role) ? (UserRole::tryFrom($role)?->label() ?? $role) : null,
             'authorOrgLevel' => $message->author?->orgLevelLabel(),
+            'orderId' => $message->order_id !== null ? (string) $message->order_id : null,
             'orderCode' => $message->order?->order_code,
             'createdAt' => $message->created_at?->toIso8601String(),
             'isMine' => $viewer !== null && $message->author_user_id === $viewer->id,

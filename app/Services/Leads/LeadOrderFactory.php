@@ -183,7 +183,7 @@ class LeadOrderFactory
                     ? $item['item_type']
                     : 'combo',
                 'origin' => $item['origin'] ?? $defaultOrigin,
-                'quantity' => max(1, (int) ($item['quantity'] ?? 1)),
+                'quantity' => array_key_exists('quantity', $item) ? max(0, (int) $item['quantity']) : 1,
                 // Giá bán có thể đến từ mapping backend của kết nối landing; giá vốn
                 // tuyệt đối không lấy từ request/client mà luôn tra từ catalog nội bộ.
                 'unit_price' => max(0, (int) ($item['unit_price'] ?? 0)),
@@ -287,7 +287,7 @@ class LeadOrderFactory
 
     /**
      * SP/SKU mặc định gắn trên kết nối landing khi payload không có dòng hàng.
-     * Parent có phân loại → thêm từng SKU con (SL = 1, sale chỉnh sau).
+     * Parent có phân loại → thêm từng SKU con (SL = 0, sale chỉnh số lượng).
      *
      * @return list<array<string, mixed>>
      */
@@ -332,7 +332,7 @@ class LeadOrderFactory
                     'product_name' => $target->name,
                     'name' => $target->name,
                     'item_type' => $mapping->item_type ?: 'product',
-                    'quantity' => 1,
+                    'quantity' => 0,
                     'unit_price' => (int) ($mapping->unit_price_override ?? $target->unit_price ?? 0),
                     'origin' => 'landing_connection',
                     'meta' => [

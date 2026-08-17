@@ -122,7 +122,7 @@ export function PushsalePagination({
             <div className={`ps-sale-pagination-wrap ${className}`.trim()}>
                 {showInfo ? (
                     <div className="ps-sale-pagination-info">
-                        Hiển thị <b>{meta?.from ?? 0}</b> - <b>{meta?.to ?? 0}</b> / <b>{meta?.total ?? 0}</b> {itemLabel}
+                        <b>{meta?.from ?? 0}</b> - <b>{meta?.to ?? 0}</b> / <b>{meta?.total ?? 0}</b>
                         {showPerPage ? (
                             <label className="ps-page-size">
                                 <span>Số dòng</span>

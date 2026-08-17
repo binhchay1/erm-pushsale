@@ -48,6 +48,7 @@ function newLine(type = 'product') {
         base_product_id: '',
         product_id: '',
         product_name: '',
+        product_sku: '',
         quantity: 1,
         unit_price: 0,
         discount_amount: 0,
@@ -105,7 +106,8 @@ function mapOrder(order, operationResult = null, productOptions = []) {
                 base_product_id: baseId,
                 product_id: item.productId ?? '',
                 product_name: item.productName ?? '',
-                quantity: numberValue(item.quantity) || 1,
+                product_sku: item.sku ?? product?.sku ?? '',
+                quantity: item.quantity == null || item.quantity === '' ? 1 : numberValue(item.quantity),
                 unit_price: numberValue(item.unitPrice),
                 discount_amount: numberValue(item.discountAmount),
             };
@@ -262,6 +264,7 @@ export function SaleOrderDialog({
                 base_product_id: '',
                 product_id: '',
                 product_name: '',
+                product_sku: '',
                 unit_price: 0,
             };
         }
@@ -271,6 +274,7 @@ export function SaleOrderDialog({
                 base_product_id: String(product.id),
                 product_id: '',
                 product_name: product.name,
+                product_sku: product.sku || '',
                 unit_price: numberValue(product.unit_price),
             };
         }
@@ -279,6 +283,7 @@ export function SaleOrderDialog({
             base_product_id: baseId,
             product_id: String(product.id),
             product_name: product.name,
+            product_sku: product.sku || '',
             unit_price: numberValue(product.unit_price),
         };
     };
@@ -293,22 +298,11 @@ export function SaleOrderDialog({
         subLabel: item.sku || undefined,
     }))), [pickerVariants]);
 
-    const lineBaseName = (line) => {
-        const baseId = line.base_product_id || line.product_id;
-        const base = catalog.products.find((item) => String(item.id) === String(baseId) && !item.parent_id);
-        if (base) return base.name;
-        const parentId = catalog.products.find((item) => String(item.id) === String(line.product_id))?.parent_id;
-        if (parentId) {
-            return catalog.products.find((item) => String(item.id) === String(parentId))?.name ?? line.product_name;
-        }
-        return line.product_name || '—';
-    };
-
-    const lineSkuName = (line) => {
-        const variants = catalog.byParent.get(String(line.base_product_id)) ?? [];
-        if (variants.length === 0) return '—';
-        const sku = catalog.products.find((item) => String(item.id) === String(line.product_id));
-        return sku?.name ?? '—';
+    const lineProductLabel = (line) => {
+        const product = catalog.products.find((item) => String(item.id) === String(line.product_id));
+        const name = product?.name || line.product_name || '—';
+        const sku = product?.sku || line.product_sku;
+        return sku ? `${name} (${sku})` : name;
     };
 
     const appendResolvedLine = (resolved) => {
@@ -382,7 +376,7 @@ export function SaleOrderDialog({
             product_id: Number(item.product_id),
             product_name: item.product_name,
             item_type: item.item_type === 'combo' ? 'product' : item.item_type,
-            quantity: Math.max(1, numberValue(item.quantity)),
+            quantity: Math.max(0, numberValue(item.quantity)),
             unit_price: numberValue(item.unit_price),
             discount_amount: numberValue(item.discount_amount),
         })),
@@ -694,13 +688,12 @@ export function SaleOrderDialog({
                         <div className="ps-vat-note">{t('operations.sale_order.vat_included')}</div>
                         <div className="table-responsive">
                             <table className="table table-bordered ps-order-product-table">
-                                <thead><tr><th>{t('operations.sale_order.col_base_product')}</th><th>{t('operations.sale_order.col_variant')}</th><th>{t('operations.sale_order.col_price')}</th><th>{t('operations.sale_order.col_qty')}</th><th>{t('operations.sale_order.col_amount')}</th><th>{t('operations.sale_order.col_discount')}</th><th>{t('operations.sale_order.col_discount_money')}</th><th>{t('operations.sale_order.col_weight')}</th><th /></tr></thead>
+                                <thead><tr><th>{t('operations.sale_order.col_product')}</th><th>{t('operations.sale_order.col_price')}</th><th>{t('operations.sale_order.col_qty')}</th><th>{t('operations.sale_order.col_amount')}</th><th>{t('operations.sale_order.col_discount')}</th><th>{t('operations.sale_order.col_discount_money')}</th><th>{t('operations.sale_order.col_weight')}</th><th /></tr></thead>
                                 <tbody>
                                     {form.items.map((line) => {
                                         const lineTotal = numberValue(line.quantity) * numberValue(line.unit_price) - numberValue(line.discount_amount);
                                         return <tr key={line.key}>
-                                            <td><div className="ps-static-line ps-order-line-name" title={lineBaseName(line)}>{lineBaseName(line)}</div></td>
-                                            <td><div className="ps-static-line ps-order-line-name" title={lineSkuName(line)}>{lineSkuName(line)}</div></td>
+                                            <td><div className="ps-static-line ps-order-line-name" title={lineProductLabel(line)}>{lineProductLabel(line)}</div></td>
                                             <td className="text-right">
                                                 {unitPriceLocked ? (
                                                     <div className="ps-static-line ps-order-unit-price-locked" title={t('operations.sale_order.price_locked_hint')}>{money(line.unit_price)}</div>
@@ -715,25 +708,25 @@ export function SaleOrderDialog({
                                                     />
                                                 )}
                                             </td>
-                                            <td><input className="form-control text-center" type="number" min="1" value={line.quantity} onChange={(event) => updateLine(line.key, { quantity: event.target.value })} disabled={editDisabled} /></td>
+                                            <td><input className="form-control text-center" type="number" min="0" value={line.quantity} onChange={(event) => updateLine(line.key, { quantity: event.target.value })} disabled={editDisabled} /></td>
                                             <td className="text-right"><b>{money(lineTotal)}</b></td>
                                             <td><input className="form-control text-right" type="number" min="0" value={line.discount_amount} onChange={(event) => updateLine(line.key, { discount_amount: event.target.value })} disabled={editDisabled} /></td>
                                             <td className="text-right">{money(line.discount_amount)}</td><td className="text-center">0</td>
                                             <td className="text-center"><button className="btn-icon text-danger" type="button" onClick={() => removeLine(line.key)} disabled={editDisabled}><i className="fa fa-trash" /></button></td>
                                         </tr>;
                                     })}
-                                    {!form.items.length && <tr><td colSpan={9} className="text-center ps-empty-products">{t('operations.sale_order.no_products')}</td></tr>}
+                                    {!form.items.length && <tr><td colSpan={8} className="text-center ps-empty-products">{t('operations.sale_order.no_products')}</td></tr>}
                                 </tbody>
                                 <tfoot>
-                                    <tr><th colSpan={3} className="text-right">{t('operations.sale_order.total_label')}</th><th>{form.items.reduce((sum, item) => sum + numberValue(item.quantity), 0)}</th><th className="text-right">{money(subtotal + lineDiscount)}</th><th /><th className="text-right">{money(lineDiscount)}</th><th /><th /></tr>
-                                    <tr><td colSpan={4} className="text-right">{t('operations.sale_order.product_discount')}:</td><td className="text-right">{money(lineDiscount)}</td><td colSpan={4} /></tr>
+                                    <tr><th colSpan={2} className="text-right">{t('operations.sale_order.total_label')}</th><th>{form.items.reduce((sum, item) => sum + numberValue(item.quantity), 0)}</th><th className="text-right">{money(subtotal + lineDiscount)}</th><th /><th className="text-right">{money(lineDiscount)}</th><th /><th /></tr>
+                                    <tr><td colSpan={3} className="text-right">{t('operations.sale_order.product_discount')}:</td><td className="text-right">{money(lineDiscount)}</td><td colSpan={4} /></tr>
                                     <tr>
                                         <td>
                                             <label>
                                                 <input type="checkbox" checked={manualDiscount} onChange={(event) => setManualDiscount(event.target.checked)} disabled={editDisabled} /> {t('operations.sale_order.manual_discount')}
                                             </label>
                                         </td>
-                                        <td colSpan={3} className="text-right">{t('operations.sale_order.order_discount')}:</td>
+                                        <td colSpan={2} className="text-right">{t('operations.sale_order.order_discount')}:</td>
                                         <td>
                                             <input
                                                 className="form-control text-right"
@@ -755,7 +748,7 @@ export function SaleOrderDialog({
                                                 <input type="checkbox" checked={recipientPaysCarrier} onChange={(event) => setRecipientPaysCarrier(event.target.checked)} disabled={editDisabled} /> {t('operations.sale_order.recipient_pays_carrier')}
                                             </label>
                                         </td>
-                                        <td colSpan={3} className="text-right">{t('operations.sale_order.shipping_fee_collected')}:</td>
+                                        <td colSpan={2} className="text-right">{t('operations.sale_order.shipping_fee_collected')}:</td>
                                         <td>
                                             <input
                                                 className="form-control text-right"
@@ -778,7 +771,7 @@ export function SaleOrderDialog({
                                                 <input type="checkbox" checked={manualShippingFee} onChange={(event) => setManualShippingFee(event.target.checked)} disabled={editDisabled} /> {t('operations.sale_order.manual_shipping_fee')}
                                             </label>
                                         </td>
-                                        <td colSpan={3} className="text-right">{t('operations.sale_order.deposit')}:</td>
+                                        <td colSpan={2} className="text-right">{t('operations.sale_order.deposit')}:</td>
                                         <td>
                                             <input
                                                 className="form-control text-right"
@@ -791,7 +784,7 @@ export function SaleOrderDialog({
                                         </td>
                                         <td colSpan={4} />
                                     </tr>
-                                    <tr><th colSpan={4} className="text-right">{t('operations.sale_order.order_total')}:</th><th className="text-right">{money(total)}</th><th colSpan={2}>{t('operations.sale_order.collect')}:<br /><span className="text-success">{money(collect)}</span></th><th colSpan={2} /></tr>
+                                    <tr><th colSpan={3} className="text-right">{t('operations.sale_order.order_total')}:</th><th className="text-right">{money(total)}</th><th colSpan={2}>{t('operations.sale_order.collect')}:<br /><span className="text-success">{money(collect)}</span></th><th colSpan={2} /></tr>
                                 </tfoot>
                             </table>
                         </div>
