@@ -135,6 +135,7 @@ export default function Workspace({
                 initialClosedOnly={Boolean(duplicateOrder?.closedOnly)}
                 open={Boolean(duplicateOrder)}
                 onOpenChange={(open) => !open && setDuplicateOrder(null)}
+                actionBaseUrl={actionBaseUrl}
             />
             <DesiredDeliveryDialog order={desiredOrder} open={Boolean(desiredOrder)} onOpenChange={(open) => !open && setDesiredOrder(null)} actionBaseUrl={actionBaseUrl} />
             <BulkCloseDialog

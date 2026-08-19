@@ -3,6 +3,14 @@
  * Scoped to .ps-customer-profile-page / .ps-customer-dialog / .ps-purchase-history-dialog.
  */
 
+html body.pushsale-app-body .ps-customer-profile-page {
+    /* Header + filter + phân trang. Vùng data cố định ~5 dòng như Push. */
+    --pushsale-table-viewport-offset: 330px;
+    --ps-data-table-head: 42px;
+    --ps-data-table-row: 92px;
+    --ps-data-table-visible-rows: 5;
+}
+
 /* Table headers: compact — win over pushsale.css height:58px + late contracts */
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table > thead > tr,
 html body.pushsale-app-body .ps-customer-profile-page table.ps-customer-profile-table > thead > tr {
@@ -76,9 +84,16 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table
     vertical-align: middle !important;
 }
 
+/* Vùng data cuộn tại chỗ: 20 khách/trang, ~5 dòng nhìn thấy; trỏ chuột vào bảng
+   là cuộn được, không phải kéo thanh cuộn ngoài cùng của trang. Header sticky. */
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-table-scroll {
-    max-height: none !important;
+    height: auto !important;
+    max-height: calc(var(--ps-data-table-head) + (var(--ps-data-table-visible-rows) * var(--ps-data-table-row))) !important;
     min-height: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
 }
 
 /* —— Advanced filters: 4 rows like Pushsale screenshot —— */
@@ -348,9 +363,11 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-customer-table-scroll 
     display: block !important;
     max-width: 100% !important;
     overflow-x: auto !important;
-    overflow-y: visible !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-gutter: stable !important;
+    max-height: calc(var(--ps-data-table-head, 42px) + (var(--ps-data-table-visible-rows, 5) * var(--ps-data-table-row, 92px))) !important;
 }
 
 html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table {
@@ -426,6 +443,24 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-customer-profile-table
     white-space: normal !important;
 }
 
+/* Tin nhắn: địa chỉ khách để lại + combo khách mua / SP mua thêm + status_send */
+html body.pushsale-app-body .ps-customer-profile-page .ps-message-cell .ps-msg-block {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-message-cell .ps-msg-line {
+    display: block !important;
+    line-height: 1.35 !important;
+}
+
+html body.pushsale-app-body .ps-customer-profile-page .ps-message-cell .ps-msg-line + .ps-msg-line {
+    margin-top: 4px !important;
+    padding-top: 4px !important;
+    border-top: 1px dashed #cfd7df !important;
+}
+
 /* Same OrderStatusFlags chrome as sale/kho/KT workspaces */
 html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row .ps-order-flags,
 html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row .ps-contact-flags {
@@ -451,5 +486,36 @@ html body.pushsale-app-body .ps-customer-profile-page .ps-contact-phone-row .ps-
         width: 1480px !important;
         min-width: 1480px !important;
     }
+}
+
+html body.pushsale-app-body .ps-reallocate-dialog[data-slot='dialog-content'] {
+    width: min(480px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+}
+
+html body.pushsale-app-body .ps-reallocate-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+}
+
+html body.pushsale-app-body .ps-reallocate-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+html body.pushsale-app-body .ps-reallocate-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    margin: 0;
+}
+
+html body.pushsale-app-body .ps-duplicate-delete {
+    color: #dd4b39 !important;
 }
 

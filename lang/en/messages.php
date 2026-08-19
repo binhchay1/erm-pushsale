@@ -123,6 +123,20 @@ return [
         'review_create_order_history' => 'An operator created supplemental order :code from the late upsell packet.',
         'review_supplemental_order_history' => 'This supplemental order was created from an upsell related to original order :code.',
     ],
+    'landing' => [
+        'combo_note' => 'Customer package: :value',
+        'upsell_note' => 'Add-on products: :value',
+    ],
+    'customers' => [
+        'reallocate_success' => 'Reassigned :count profiles to :sale.',
+        'reallocate_failed' => 'Could not reassign the selected profiles.',
+        'reallocate_empty' => 'Select at least one profile.',
+        'reallocate_sale_required' => 'Choose the sales agent who will receive the profiles.',
+        'reallocate_sale_invalid' => 'The selected sales agent is not valid.',
+        'reallocate_sale_locked' => 'That sales account is locked.',
+        'reallocate_sale_not_receiving' => 'That sales agent is not receiving data.',
+        'reallocate_history' => 'Reassigned profile to :sale',
+    ],
     'manual_lead' => [
         'created' => 'Manual lead added.',
         'duplicate' => 'Phone already has a recent order — lead saved to exceptions for review.',
@@ -152,7 +166,7 @@ return [
         'cannot_unclose' => 'Unclose is only allowed while waiting for waybill and before carrier handoff.',
         'no_permission_unclose' => 'You are not allowed to unclose this order.',
         'unclose_success' => 'Order unclosed — you can operate and edit again.',
-        'no_permission_delete' => 'Only admins can delete order data.',
+        'no_permission_delete' => 'Only admins or support accounts (not regular telesales) can delete order data.',
         'source_locked' => 'Data source is locked — sales cannot change it.',
     ],
     'shipping_actions' => [

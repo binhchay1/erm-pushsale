@@ -68,27 +68,27 @@ class LeadOrderFactory
         $isReturningCustomer = filled($normalized['customer_phone'] ?? null)
             && Order::query()->where('customer_phone', $normalized['customer_phone'])->exists();
 
-        // Cột customer_note chỉ chứa nội dung khách nhập. Tên/SL/giá sản
-        // phẩm đã có cấu trúc riêng trong order_items, không được trộn vào tin nhắn.
-        $noteParts = array_filter([
-            filled($normalized['message'] ?? null) ? (string) $normalized['message'] : null,
-        ]);
+        $payloadItems = $this->buildItemRows($normalized['items'] ?? [], $normalized['item_origin'] ?? 'landing');
 
-        $comboItems = $this->buildItemRows($normalized['items'] ?? [], $normalized['item_origin'] ?? 'landing');
-
-        // Payload chỉ có text form_item (không product_id) → lấy SP/SKU từ kết nối landing.
-        $hasCatalogProduct = collect($comboItems)->contains(
-            fn (array $row) => filled($row['product_id'] ?? null),
+        // Kết nối landing có SP/SKU catalog → luôn dùng các dòng đó (SL = 0).
+        // Combo / form_item text của Ladi không bao giờ thành dòng hàng — kể cả khi
+        // webhook gắn product_id lạ — để sale mở đơn thấy đúng SKU như Push.
+        $connectionItems = $this->buildItemRows(
+            $this->landingConnectionDefaultItems($landingConnection),
+            $normalized['item_origin'] ?? 'landing',
         );
-        if (! $hasCatalogProduct) {
-            $fromConnection = $this->buildItemRows(
-                $this->landingConnectionDefaultItems($landingConnection),
-                $normalized['item_origin'] ?? 'landing',
-            );
-            if ($fromConnection !== []) {
-                $comboItems = $fromConnection;
-            }
-        }
+        $mappedPayloadItems = array_values(array_filter(
+            $payloadItems,
+            fn (array $row) => filled($row['product_id'] ?? null),
+        ));
+        $comboItems = $connectionItems !== [] ? $connectionItems : $mappedPayloadItems;
+
+        // Tin nhắn theo form khách yêu cầu: địa chỉ khách để lại (dựng ở presenter)
+        // + combo khách mua + sản phẩm mua thêm.
+        $noteParts = array_values(array_filter([
+            filled($normalized['message'] ?? null) ? (string) $normalized['message'] : null,
+            ...$this->landingLabelNotes($payloadItems),
+        ]));
 
         $order = Order::query()->create([
             // Mã đơn chỉ được cấp khi sale chốt đơn thành công.
@@ -117,8 +117,7 @@ class LeadOrderFactory
             'contact_count' => 1,
         ]);
 
-        // Chỉ tạo dòng hàng từ payload (form_item / combo / mapping).
-        // Không gắn SP mặc định chiến dịch khi landing không gửi sản phẩm — tránh giá catalog ảo.
+        // Dòng hàng: SP/SKU catalog của kết nối landing (SL = 0). Combo Ladi nằm ở tin nhắn.
         if ($comboItems !== []) {
             foreach ($comboItems as $row) {
                 $order->items()->create($row);
@@ -227,13 +226,63 @@ class LeadOrderFactory
     }
 
     /**
+     * Nhãn gói/combo landing (không map catalog) → dòng ghi chú cho cột tin nhắn.
+     *
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<string>
+     */
+    public function landingLabelNotes(array $rows): array
+    {
+        $labels = ['combo' => [], 'upsell' => []];
+
+        foreach ($rows as $row) {
+            $type = (string) ($row['item_type'] ?? '');
+            $hasCatalogId = filled($row['product_id'] ?? null);
+            $isPackageLabel = in_array($type, ['combo', 'upsell'], true) || ! $hasCatalogId;
+            if (! $isPackageLabel) {
+                continue;
+            }
+
+            $meta = is_array($row['meta'] ?? null) ? $row['meta'] : [];
+            $label = trim((string) ($meta['raw_label'] ?? $row['product_name'] ?? ''));
+            if ($label === '') {
+                continue;
+            }
+
+            $bucket = $type === 'upsell' ? 'upsell' : 'combo';
+            if (! in_array($label, $labels[$bucket], true)) {
+                $labels[$bucket][] = $label;
+            }
+        }
+
+        return array_values(array_filter([
+            $labels['combo'] !== []
+                ? __('messages.landing.combo_note', ['value' => implode(' + ', $labels['combo'])])
+                : null,
+            $labels['upsell'] !== []
+                ? __('messages.landing.upsell_note', ['value' => implode(' + ', $labels['upsell'])])
+                : null,
+        ]));
+    }
+
+    /**
      * Cộng thêm dòng hàng (thường là upsale trang cảm ơn) vào đơn có sẵn rồi đồng bộ tổng tiền.
      *
      * @param  array<int, array<string, mixed>>  $items
+     * @param  bool  $labelsToNote  Nhãn text không map catalog → tin nhắn thay vì dòng hàng.
      */
-    public function appendItems(Order $order, array $items, int $extraDiscount = 0, string $origin = 'upsell'): Order
+    public function appendItems(Order $order, array $items, int $extraDiscount = 0, string $origin = 'upsell', bool $labelsToNote = false): Order
     {
         $rows = $this->buildItemRows($items, $origin);
+
+        if ($labelsToNote) {
+            $notes = $this->landingLabelNotes($rows);
+            $rows = array_values(array_filter($rows, fn (array $row) => filled($row['product_id'] ?? null)));
+
+            if ($notes !== []) {
+                $this->appendCustomerNote($order, $notes);
+            }
+        }
 
         foreach ($rows as $row) {
             $order->items()->create($row);
@@ -245,6 +294,25 @@ class LeadOrderFactory
         }
 
         return $this->syncTotals($order->fresh(['items']));
+    }
+
+    /**
+     * @param  list<string>  $notes
+     */
+    private function appendCustomerNote(Order $order, array $notes): void
+    {
+        $current = trim((string) ($order->customer_note ?? ''));
+        $missing = array_values(array_filter(
+            $notes,
+            fn (string $note) => $note !== '' && ! str_contains($current, $note),
+        ));
+
+        if ($missing === []) {
+            return;
+        }
+
+        $order->customer_note = trim(implode("\n", array_filter([$current, ...$missing])));
+        $order->save();
     }
 
     public function syncTotals(Order $order): Order

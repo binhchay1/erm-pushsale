@@ -123,6 +123,20 @@ return [
         'review_create_order_history' => 'Người vận hành đã tạo đơn bổ sung :code từ gói upsell đến muộn.',
         'review_supplemental_order_history' => 'Đơn bổ sung được tạo từ gói upsell liên quan đến đơn gốc :code.',
     ],
+    'landing' => [
+        'combo_note' => 'Combo khách mua: :value',
+        'upsell_note' => 'Sản phẩm mua thêm: :value',
+    ],
+    'customers' => [
+        'reallocate_success' => 'Đã phân bổ lại :count hồ sơ cho :sale.',
+        'reallocate_failed' => 'Không phân bổ lại được hồ sơ đã chọn.',
+        'reallocate_empty' => 'Vui lòng tích chọn ít nhất một hồ sơ.',
+        'reallocate_sale_required' => 'Chọn sale nhận hồ sơ.',
+        'reallocate_sale_invalid' => 'Sale đã chọn không hợp lệ.',
+        'reallocate_sale_locked' => 'Sale đang bị khóa tài khoản.',
+        'reallocate_sale_not_receiving' => 'Sale đang tắt nhận dữ liệu.',
+        'reallocate_history' => 'Phân bổ lại hồ sơ cho :sale',
+    ],
     'manual_lead' => [
         'created' => 'Đã thêm lead thủ công.',
         'duplicate' => 'SĐT đã có đơn gần đây — lead được lưu vào mục ngoại lệ để kiểm soát.',
@@ -152,7 +166,7 @@ return [
         'cannot_unclose' => 'Chỉ hủy chốt được khi đơn còn Chờ vận đơn và chưa chuyển ĐVVC.',
         'no_permission_unclose' => 'Bạn không có quyền hủy chốt đơn này.',
         'unclose_success' => 'Đã hủy chốt đơn — có thể tác nghiệp và chỉnh sửa lại.',
-        'no_permission_delete' => 'Chỉ quản trị viên được xóa data.',
+        'no_permission_delete' => 'Chỉ Admin hoặc tài khoản hỗ trợ (không phải sale thường) được xóa data khi check số.',
         'source_locked' => 'Nguồn dữ liệu cố định — sale không được thay đổi.',
     ],
     'shipping_actions' => [

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useConfirm } from '@/hooks/use-confirm';
 import { useOrderInteractionLock } from '@/hooks/useOrderInteractionLock';
 import { apiGet } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
@@ -285,11 +286,15 @@ export function SaleOperationHistoryDialog({ order, context = 'sale', open, onOp
     );
 }
 
-export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialClosedOnly = false }) {
+export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialClosedOnly = false, actionBaseUrl = null }) {
     const t = useT();
+    const { ask } = useConfirm();
     const [loading, setLoading] = useState(false);
+    const [deletingId, setDeletingId] = useState(null);
     const [closedOnly, setClosedOnly] = useState(initialClosedOnly);
-    const [data, setData] = useState({ customer: null, summary: null, orders: [] });
+    const [data, setData] = useState({ customer: null, summary: null, orders: [], canDelete: false });
+    const [reloadToken, setReloadToken] = useState(0);
+    const ordersBase = String(actionBaseUrl || '').replace(/\/$/, '');
 
     useEffect(() => {
         if (open) setClosedOnly(initialClosedOnly);
@@ -305,12 +310,41 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialC
             .catch((error) => active && toast.error(error.message ?? t('operations.duplicate_orders.load_failed')))
             .finally(() => active && setLoading(false));
         return () => { active = false; };
-    }, [open, order?.id, closedOnly]);
+    }, [open, order?.id, closedOnly, reloadToken, t]);
 
     if (!order) return null;
 
     const orders = data.orders ?? [];
     const summary = data.summary ?? {};
+    const canDelete = Boolean(data.canDelete && ordersBase);
+    const colSpan = canDelete ? 13 : 12;
+
+    const deleteOrder = async (item) => {
+        if (!canDelete) return;
+        const ok = await ask({
+            title: t('operations.duplicate_orders.delete_title'),
+            description: t('operations.duplicate_orders.delete_confirm', { name: item.customerName || item.customerPhone || item.orderCode || `#${item.id}` }),
+            confirmLabel: t('operations.duplicate_orders.delete'),
+            variant: 'destructive',
+        });
+        if (!ok) return;
+        setDeletingId(item.id);
+        router.delete(`${ordersBase}/orders/${item.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success(t('operations.duplicate_orders.delete_success'));
+                if (String(item.id) === String(order.id)) {
+                    onOpenChange(false);
+                    router.reload({ preserveScroll: true });
+                    return;
+                }
+                setReloadToken((current) => current + 1);
+                router.reload({ preserveScroll: true });
+            },
+            onError: (errors) => toast.error(errors.order ?? t('operations.duplicate_orders.delete_failed')),
+            onFinish: () => setDeletingId(null),
+        });
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -367,10 +401,11 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialC
                                     <th className="text-center">{t('operations.duplicate_orders.col_money')}</th>
                                     <th className="text-center">{t('operations.duplicate_orders.col_deposit')}</th>
                                     <th className="text-center">{t('operations.duplicate_orders.col_delivery')}</th>
+                                    {canDelete ? <th className="text-center">{t('operations.duplicate_orders.col_actions')}</th> : null}
                                 </tr>
                             </thead>
                             <tbody>
-                                {loading ? <tr><td colSpan={12} className="text-center">{t('operations.customer_interactions.loading')}</td></tr> : null}
+                                {loading ? <tr><td colSpan={colSpan} className="text-center">{t('operations.customer_interactions.loading')}</td></tr> : null}
                                 {!loading && orders.map((item, index) => (
                                     <tr key={item.id} className={item.isSelected ? 'info' : ''}>
                                         <td className="text-center">{index + 1}</td>
@@ -427,9 +462,23 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialC
                                             <br />
                                             <span className="small-tip">{item.desiredDeliveryAt ? formatDateTime(item.desiredDeliveryAt) : ''}</span>
                                         </td>
+                                        {canDelete ? (
+                                            <td className="text-center">
+                                                <button
+                                                    type="button"
+                                                    className="btn-icon aoh ps-duplicate-delete"
+                                                    title={t('operations.duplicate_orders.delete')}
+                                                    aria-label={t('operations.duplicate_orders.delete')}
+                                                    disabled={deletingId === item.id}
+                                                    onClick={() => deleteOrder(item)}
+                                                >
+                                                    <i className="fa fa-trash" aria-hidden="true" />
+                                                </button>
+                                            </td>
+                                        ) : null}
                                     </tr>
                                 ))}
-                                {!loading && !orders.length ? <tr><td colSpan={12} className="text-center">{t('operations.duplicate_orders.empty')}</td></tr> : null}
+                                {!loading && !orders.length ? <tr><td colSpan={colSpan} className="text-center">{t('operations.duplicate_orders.empty')}</td></tr> : null}
                             </tbody>
                         </table>
                     </div>

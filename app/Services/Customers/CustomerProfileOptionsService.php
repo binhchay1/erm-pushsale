@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Services\Operations\SaleOperationPolicy;
 
 final class CustomerProfileOptionsService
 {
@@ -30,6 +31,7 @@ final class CustomerProfileOptionsService
 
         $sales = User::query()
             ->where('role', UserRole::Sales->value)
+            ->with('operationalProfile:id,user_id,receive_data,is_locked')
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'team_id', 'manager_user_id', 'is_team_leader']);
 
@@ -116,8 +118,7 @@ final class CustomerProfileOptionsService
                 'canWriteMessages' => (bool) $currentUser?->allows('customers', 'full'),
                 'canBulkManage' => (bool) $currentUser?->allows('customers', 'full'),
                 'canDeleteHistory' => (bool) $currentUser?->isAdmin(),
-                // Chỉ Admin được xóa data trên hồ sơ khách hàng.
-                'canDeleteOrders' => (bool) $currentUser?->isAdmin(),
+                'canDeleteOrders' => SaleOperationPolicy::actorCanDeleteCustomerData($currentUser),
             ],
         ];
     }
@@ -139,12 +140,16 @@ final class CustomerProfileOptionsService
     /** @return array<string, mixed> */
     private function userOption(User $user): array
     {
+        $profile = $user->operationalProfile;
+
         return [
             'value' => (string) $user->id,
             'label' => $user->name,
             'email' => $user->email,
             'teamId' => $user->team_id ? (string) $user->team_id : null,
             'managerId' => $user->manager_user_id ? (string) $user->manager_user_id : null,
+            'receiveData' => $profile?->receive_data !== false,
+            'isLocked' => (bool) ($profile?->is_locked ?? false),
         ];
     }
 }

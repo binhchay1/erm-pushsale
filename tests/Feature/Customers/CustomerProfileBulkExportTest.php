@@ -109,4 +109,53 @@ class CustomerProfileBulkExportTest extends TestCase
             'action' => 'customer_reallocation_queued',
         ]);
     }
+
+    public function test_reallocate_now_assigns_selected_sale(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $current = User::factory()->create(['role' => UserRole::Sales, 'company_id' => $admin->company_id, 'name' => 'Sale hiện tại']);
+        $target = User::factory()->create(['role' => UserRole::Sales, 'company_id' => $admin->company_id, 'name' => 'Sale nhận']);
+        $order = $this->makeOrder($current);
+
+        $this->actingAs($admin)
+            ->postJson('/admin/marketing/customers/bulk/reallocate-now', [
+                'ids' => [$order->id],
+                'sale_user_id' => $target->id,
+            ])
+            ->assertOk()
+            ->assertJsonFragment(['message' => 'Đã phân bổ lại 1 hồ sơ cho Sale nhận.']);
+
+        $order->refresh();
+        $this->assertSame($target->id, (int) $order->sale_user_id);
+        $this->assertNotNull($order->assigned_at);
+        $this->assertDatabaseHas('order_operation_histories', [
+            'order_id' => $order->id,
+            'action' => 'customer_reallocated_now',
+        ]);
+    }
+
+    public function test_reallocate_now_hides_locked_sale(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $current = User::factory()->create(['role' => UserRole::Sales, 'company_id' => $admin->company_id]);
+        $locked = User::factory()->create(['role' => UserRole::Sales, 'company_id' => $admin->company_id, 'name' => 'Sale khóa']);
+        \App\Models\Pushsale\UserOperationalProfile::query()->create([
+            'company_id' => $admin->company_id ?: app(\App\Support\TenantManager::class)->id(),
+            'user_id' => $locked->id,
+            'receive_data' => true,
+            'is_locked' => true,
+        ]);
+        $order = $this->makeOrder($current);
+
+        $this->actingAs($admin)
+            ->postJson('/admin/marketing/customers/bulk/reallocate-now', [
+                'ids' => [$order->id],
+                'sale_user_id' => $locked->id,
+                'hide_locked_sales' => true,
+            ])
+            ->assertStatus(422);
+
+        $order->refresh();
+        $this->assertSame($current->id, (int) $order->sale_user_id);
+    }
 }

@@ -82,6 +82,9 @@ class SaleFeedbackPermissionsTest extends TestCase
         $this->assertTrue(SaleOperationPolicy::canDeleteData($order, $admin));
         $this->assertFalse(SaleOperationPolicy::canDeleteData($order, $sale));
         $this->assertFalse(SaleOperationPolicy::canDeleteData($order, null));
+
+        $support = User::factory()->create(['role' => UserRole::Allocator]);
+        $this->assertFalse(SaleOperationPolicy::canDeleteData($order, $support));
     }
 
     public function test_sale_cannot_change_marketing_source_or_unit_price(): void
@@ -202,6 +205,73 @@ class SaleFeedbackPermissionsTest extends TestCase
         $this->assertSame([$variantA->id, $variantB->id], $productIds);
         $this->assertTrue($order->items->every(fn ($item) => (int) $item->quantity === 0));
         $this->assertTrue($order->items->every(fn ($item) => (int) $item->unit_price > 0));
+        $this->assertStringContainsString('Ghi chú text', (string) $order->customer_note);
+        $this->assertFalse($order->items->contains(fn ($item) => str_contains((string) $item->product_name, 'Ghi chú text')));
+    }
+
+    public function test_landing_combo_label_never_becomes_product_line_when_connection_has_skus(): void
+    {
+        $parent = Product::query()->create([
+            'name' => 'Set bông tai ngọc trai',
+            'type' => 'product',
+            'sku' => 'BT-PARENT-2',
+            'unit_price' => 199_000,
+            'is_active' => true,
+        ]);
+        $variant = Product::query()->create([
+            'parent_id' => $parent->id,
+            'name' => 'Set bông tai ngọc trai - Mẫu 1',
+            'type' => 'product',
+            'sku' => 'BT-M1-COMBO',
+            'unit_price' => 199_000,
+            'is_active' => true,
+        ]);
+        $source = MarketingSource::query()->create(['name' => 'Ladi combo', 'is_active' => true]);
+        $connection = \App\Models\LandingConnection::query()->create([
+            'marketing_source_id' => $source->id,
+            'name' => 'Ladi combo connection',
+            'public_token' => 'tok-combo',
+            'is_active' => true,
+            'is_approved' => true,
+        ]);
+        \App\Models\LandingConnectionProduct::query()->create([
+            'landing_connection_id' => $connection->id,
+            'product_id' => $parent->id,
+            'item_type' => 'product',
+            'quantity' => 1,
+            'sort_order' => 1,
+        ]);
+
+        $comboLabel = 'Mua 1 Túi (0,5kg/túi) : 169.000đ + 30k Ship';
+        $lead = \App\Models\LeadIngestion::query()->create([
+            'platform' => 'landing',
+            'external_id' => 'lead-landing-combo-1',
+            'marketing_source_id' => $source->id,
+            'landing_connection_id' => $connection->id,
+            'customer_name' => 'Khách Combo',
+            'customer_phone' => '0905111333',
+            'payload' => ['message' => ''],
+            'status' => 'processed',
+        ]);
+
+        $order = app(\App\Services\Leads\LeadOrderFactory::class)->createFromLead($lead, [
+            'customer_name' => 'Khách Combo',
+            'customer_phone' => '0905111333',
+            'items' => [[
+                'product_id' => 999999,
+                'product_name' => $comboLabel,
+                'item_type' => 'combo',
+                'quantity' => 1,
+                'unit_price' => 169_000,
+            ]],
+            'item_origin' => 'landing',
+        ], User::factory()->create(['role' => UserRole::Sales]));
+
+        $this->assertCount(1, $order->items);
+        $this->assertSame($variant->id, (int) $order->items->first()->product_id);
+        $this->assertSame(0, (int) $order->items->first()->quantity);
+        $this->assertStringContainsString($comboLabel, (string) $order->customer_note);
+        $this->assertFalse($order->items->contains(fn ($item) => str_contains((string) $item->product_name, 'Mua 1 Túi')));
     }
 
     public function test_sale_can_save_landing_line_without_catalog_product_and_zero_quantity(): void

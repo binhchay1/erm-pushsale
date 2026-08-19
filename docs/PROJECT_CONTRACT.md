@@ -57,6 +57,9 @@ Thứ tự CSS runtime nằm ở `resources/js/lib/pushsaleStyleRegistry.js`.
   - **Order interaction lock:** soft-lease theo `order_id` (TTL 90s, heartbeat ~25s) xuyên Sale / Thủ kho / Kế toán. Acquire khi mở dialog mutate; mutate gửi `interaction_lock_token`; 423 nếu bị giữ bởi user khác. Live badge qua Echo channel `company.{id}.order-locks` + poll fallback. WH/KT listing vẫn tenant-wide (không phân cấp NV/lead).
 - **i18n**: chuỗi UI qua `useT()` / `__()` + locale files.
 - Hồ sơ khách hàng: `pushsale-customer-profile-contract.css` + shared product/money/flag cells.
+  - SĐT / tim đỏ / trùng mở `DuplicatePhoneOrdersDialog` (tim = đơn đã chốt). Admin xóa trùng bằng thùng rác; sale thường không xóa.
+  - Phân bổ lại: dialog chọn sale + lọc khóa tài khoản / tắt nhận data.
+  - Vùng bảng ~5 dòng cố định, 20 khách/trang, cuộn chuột trong bảng.
 - Cuối cascade (cố định):
   1. `pushsale-unified-page-shell-contract.css`
   2. `pushsale-adminlte-canonical-contract.css`

@@ -7,14 +7,15 @@ use App\Enums\PermissionLevel;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderOperationHistory;
+use App\Models\User;
 use App\Services\CustomerInteractions\OrderOperationHistoryService;
-use App\Services\Customers\CustomerPhoneAssignmentService;
-use App\Services\Leads\LeadRoutingService;
+use App\Services\Customers\CustomerReallocationService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
@@ -22,58 +23,48 @@ class CustomerProfileBulkActionController extends Controller
 {
     public function reallocateNow(
         Request $request,
-        LeadRoutingService $routing,
-        CustomerPhoneAssignmentService $phoneAssignment,
-        OrderOperationHistoryService $history,
+        CustomerReallocationService $reallocation,
     ): JsonResponse|RedirectResponse {
         $this->authorizeFull($request);
+
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1', 'max:500'],
+            'ids.*' => ['integer'],
+            'sale_user_id' => ['required', 'integer'],
+            'hide_locked_sales' => ['sometimes', 'boolean'],
+            'hide_sales_not_receiving' => ['sometimes', 'boolean'],
+            'delete_operation_history' => ['sometimes', 'boolean'],
+            'delete_internal_messages' => ['sometimes', 'boolean'],
+            'operation_stage' => ['nullable', 'string', 'max:64'],
+        ]);
+
         $orders = $this->selectedOrders($request);
+        if ($orders->isEmpty()) {
+            return $this->failure($request, __('messages.customers.reallocate_empty'));
+        }
 
         try {
-            DB::transaction(function () use ($orders, $routing, $phoneAssignment, $history, $request): void {
-                foreach ($orders as $order) {
-                    $before = $history->snapshot($order);
-                    $candidateSale = $routing->assignSalesUser($order->marketingSource);
-                    if (! $candidateSale) {
-                        continue;
-                    }
+            $count = DB::transaction(fn (): int => $reallocation->reallocate(
+                $orders,
+                $request->user(),
+                $validated,
+            ));
+        } catch (ValidationException $e) {
+            $message = collect($e->errors())->flatten()->first() ?: __('messages.customers.reallocate_failed');
 
-                    $sale = $phoneAssignment->resolveSaleForNewOrder(
-                        $order->customer_phone,
-                        $candidateSale,
-                        $candidateSale,
-                        $order->company_id,
-                    ) ?: $candidateSale;
-                    $phoneAssignment->attachOrder($order, $sale, 'customer_reallocated_now');
-
-                    $order->forceFill([
-                        'sale_user_id' => $sale->id,
-                        'team_id' => $sale->team_id,
-                        'assigned_at' => now(),
-                        'phone_lock_conflict' => (int) $sale->id !== (int) $candidateSale->id,
-                        'phone_lock_note' => (int) $sale->id !== (int) $candidateSale->id
-                            ? 'Phân bổ lại tự đổi về Sale đang sở hữu SĐT để tránh gọi trùng khách.'
-                            : $order->phone_lock_note,
-                    ])->save();
-
-                    $history->record(
-                        $order,
-                        $request->user(),
-                        'customer_reallocated_now',
-                        $before,
-                        $history->snapshot($order),
-                        'Phân bổ lại ngay từ Hồ sơ khách hàng',
-                        ['sale_user_id' => $sale->id],
-                    );
-                }
-            });
+            return $this->failure($request, (string) $message);
         } catch (Throwable $e) {
             report($e);
 
-            return $this->failure($request, 'Không phân bổ lại được hồ sơ đã chọn.');
+            return $this->failure($request, __('messages.customers.reallocate_failed'));
         }
 
-        return $this->success($request, 'Đã phân bổ lại '.count($orders).' hồ sơ.');
+        $sale = User::query()->find((int) $validated['sale_user_id']);
+
+        return $this->success($request, __('messages.customers.reallocate_success', [
+            'count' => $count,
+            'sale' => $sale?->name ?? '#'.$validated['sale_user_id'],
+        ]));
     }
 
     public function queueReallocation(

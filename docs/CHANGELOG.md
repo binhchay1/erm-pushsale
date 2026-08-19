@@ -4,6 +4,14 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 
 ---
 
+## 2026-08-19 — FB 19/8: upsell badge, 4.2 trùng/xóa/phân bổ, cuộn bảng, combo Ladi
+
+- Badge **upsell chờ xử lý** là gói đến sau cửa sổ tự gộp, chờ Admin/chia số duyệt — không phải đơn đang chờ nhận upsale trong 15 phút. Tooltip/cờ phân biệt cửa sổ tự gộp và upsell đến muộn.
+- 4.2: click SĐT / tim / trùng mở danh sách đơn cùng số; Admin xóa bằng thùng rác. Sale thường không xóa được.
+- Phân bổ lại hồ sơ mở dialog chọn sale, lọc sale khóa tài khoản / tắt nhận dữ liệu (đúng Push). Confirm không còn nhầm title “Xóa mục này?”.
+- Bảng 4.1/4.2: 20 khách/trang, ~5 dòng nhìn thấy, cuộn chuột trong vùng data.
+- Ladi: combo/form_item vào tin nhắn (`Địa chỉ=` + combo + mua thêm); dòng hàng là SKU catalog của kết nối (SL = 0).
+
 ## 2026-08-18 — Sale order dialog fixes + ops table i18n (FB 15/8 & 17/8)
 
 - Sửa vỡ layout dialog "Cập nhật đơn / Chốt đơn": khối cảnh báo lỗi và hint hủy chốt là con trực tiếp của grid 2 cột `.ps-sale-order-body` nên chiếm 1 ô grid, đẩy panel trái/phải sai cột. Nay bọc trong `.ps-sale-order-notices` với `grid-column: 1 / -1`.

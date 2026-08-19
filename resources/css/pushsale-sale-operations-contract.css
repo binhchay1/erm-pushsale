@@ -1,7 +1,9 @@
-/**
- * Sale tác nghiệp — Pushsale parity (tabs level-*, message, TN cần, trash).
- * Scoped to .ps-sale-workspace-page. Does not touch sidebar/header chrome.
- */
+html body.pushsale-app-body .ps-sale-workspace-page,
+html body.pushsale-app-body .ps-sale-workspace-shell {
+    --ps-data-table-head: 42px;
+    --ps-data-table-row: 110px;
+    --ps-data-table-visible-rows: 5;
+}
 
 html body.pushsale-app-body .ps-sale-workspace-page .dm-tac-nghiep {
     align-items: center;
@@ -260,7 +262,7 @@ html body.pushsale-app-body .ps-sale-workspace-page td.area4.ps-delivery-status-
     white-space: normal !important;
 }
 
-/* Tin nhắn: Địa chỉ + status_send — 2 dòng, gạch đứt chỉ khi đủ cả 2 */
+/* Tin nhắn: Địa chỉ khách để lại + combo khách mua / SP mua thêm + status_send */
 html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .td-message,
 html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .ps-msg-block {
     cursor: pointer;
@@ -280,13 +282,10 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .ps-msg-lin
     line-height: 1.35;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .ps-msg-dash {
-    display: block;
-    width: 100%;
-    height: 0;
-    margin: 5px 0;
-    border: 0;
-    border-top: 1px dashed #9aa7b5;
+html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .ps-msg-line + .ps-msg-line {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px dashed #cfd7df;
 }
 
 /* TN cần: stage label + icons on ONE row, above textarea */
@@ -498,7 +497,11 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table {
     font-size: 12px !important;
 }
 
-html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > thead > tr > th {
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table > thead > tr > th,
+html body.pushsale-app-body .ps-sale-workspace-shell .ps-sale-operation-table > thead > tr > th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 6 !important;
     background: #3c8dbc !important;
     border-color: #2e6f99 !important;
     color: #fff !important;
@@ -1207,11 +1210,14 @@ html body.pushsale-app-body .ps-sale-workspace-shell .ps-sale-table-wrap {
     display: block !important;
     max-width: 100% !important;
     overflow: auto !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
     overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-gutter: stable both-edges !important;
     padding-left: var(--ps-header-x, 14px) !important;
     padding-right: var(--ps-header-x, 14px) !important;
+    max-height: calc(var(--ps-data-table-head, 42px) + (var(--ps-data-table-visible-rows, 5) * var(--ps-data-table-row, 110px))) !important;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table,

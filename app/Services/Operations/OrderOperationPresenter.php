@@ -144,10 +144,10 @@ final class OrderOperationPresenter
     }
 
     /**
-     * Cột Tin nhắn: tách Địa chỉ=… và status_send thành 2 dòng.
-     * Chỉ có gạch đứt khi cả hai đều có nội dung.
+     * Cột Tin nhắn theo form vận hành: Địa chỉ khách để lại + Combo khách mua +
+     * Sản phẩm mua thêm (ghi trong customer_note) + status_send của gói tin.
      *
-     * @return array{address_line: ?string, status_send: ?string, fallback: string}
+     * @return array{address_line: ?string, note_line: ?string, status_send: ?string, fallback: string}
      */
     public static function landingMessageParts(Order $order): array
     {
@@ -196,10 +196,14 @@ final class OrderOperationPresenter
 
         $addressLine = $address !== '' ? 'Địa chỉ='.$address : null;
         $statusLine = $keptStatuses !== [] ? implode(' · ', $keptStatuses) : null;
+        $noteLine = $note !== '' && ! self::messageTextAlreadyPresent($note, $address, '', (string) $addressLine)
+            ? $note
+            : null;
 
-        if ($addressLine === null && $statusLine === null) {
+        if ($addressLine === null && $statusLine === null && $noteLine === null) {
             return [
                 'address_line' => null,
+                'note_line' => null,
                 'status_send' => null,
                 'fallback' => $note,
             ];
@@ -207,6 +211,7 @@ final class OrderOperationPresenter
 
         return [
             'address_line' => $addressLine,
+            'note_line' => $noteLine,
             'status_send' => $statusLine,
             'fallback' => '',
         ];
@@ -233,6 +238,7 @@ final class OrderOperationPresenter
         $parts = self::landingMessageParts($order);
         $lines = array_values(array_filter([
             $parts['address_line'],
+            $parts['note_line'],
             $parts['status_send'],
         ], static fn (?string $line): bool => $line !== null && $line !== ''));
 

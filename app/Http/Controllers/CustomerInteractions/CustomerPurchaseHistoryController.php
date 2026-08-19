@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\CustomerInteractions\CustomerIdentity;
 use App\Services\CustomerInteractions\CustomerPurchaseHistoryPresenter;
+use App\Services\Operations\SaleOperationPolicy;
 use App\Support\VietnamesePhone;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -63,6 +64,8 @@ class CustomerPurchaseHistoryController extends Controller
                 'latestOrderAt' => $orders->first()?->data_arrived_at?->toIso8601String(),
             ],
             'orders' => CustomerPurchaseHistoryPresenter::collection($orders, $order->id),
+            // Xóa trùng số ngay trên danh sách: Admin + tài khoản hỗ trợ.
+            'canDelete' => SaleOperationPolicy::canDeleteData($order, $request->user()),
             'limited' => $orders->count() >= 100,
         ]);
     }

@@ -17,9 +17,12 @@ import {
     PushsaleOperationHistoryDialog,
     PushsalePurchaseHistoryDialog,
 } from '@/components/customers/pushsale/PushsaleCustomerDialogs';
+import { CustomerReallocateDialog } from '@/components/customers/pushsale/CustomerReallocateDialog';
+import { DuplicatePhoneOrdersDialog } from '@/components/operations/pushsale/SaleOperationDialogs';
 import { getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useT } from '@/providers/I18nProvider';
 
 const EMPTY_DIALOG = { type: null, order: null };
 
@@ -79,6 +82,7 @@ function CustomerProfileTable({
     orderActionBaseUrl = null,
 }) {
     const { ask } = useConfirm();
+    const t = useT();
     const allSelected = rows.length > 0 && rows.every((row) => selected.has(String(row.id)));
     const start = Number(pagination?.from ?? 1);
     const ordersBase = String(orderActionBaseUrl || '').replace(/\/$/, '');
@@ -101,19 +105,20 @@ function CustomerProfileTable({
 
     const deleteData = async (row) => {
         if (!canDeleteOrders || !ordersBase) {
-            toast.warning('Bạn không có quyền xóa data từ hồ sơ khách hàng.');
+            toast.warning(t('pages.customer_profile.no_delete_permission'));
             return;
         }
         const ok = await ask({
-            description: `Bạn chắc chắn muốn xóa data của ${row.customerName || row.customerPhone || `#${row.id}`}?`,
-            confirmLabel: 'Xóa',
+            title: t('pages.customer_profile.delete_data_title'),
+            description: t('pages.customer_profile.delete_data_confirm', { name: row.customerName || row.customerPhone || `#${row.id}` }),
+            confirmLabel: t('operations.duplicate_orders.delete'),
             variant: 'destructive',
         });
         if (!ok) return;
         router.delete(`${ordersBase}/orders/${row.id}`, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Đã xóa data.'),
-            onError: (errors) => toast.error(errors.order ?? 'Không thể xóa data.'),
+            onSuccess: () => toast.success(t('pages.customer_profile.delete_success')),
+            onError: (errors) => toast.error(errors.order ?? t('pages.customer_profile.delete_failed')),
         });
     };
 
@@ -146,9 +151,15 @@ function CustomerProfileTable({
                 <tbody>
                     {rows.length ? rows.map((row, index) => {
                         const checked = selected.has(String(row.id));
-                        const message = [row.customerNote, row.effectiveShippingAddress ? `Địa chỉ= ${row.effectiveShippingAddress}` : null]
-                            .filter(Boolean)
-                            .join('\n');
+                        // Form vận hành: địa chỉ khách để lại → combo khách mua / SP mua thêm → status_send.
+                        const messageLines = [
+                            row.messageParts?.address_line ?? null,
+                            row.messageParts?.note_line ?? null,
+                            row.messageParts?.status_send ?? null,
+                        ].filter(Boolean);
+                        const message = messageLines.length
+                            ? messageLines.join('\n')
+                            : (row.messageParts?.fallback || row.customerNote || '');
 
                         return (
                             <tr key={row.id} className={`contact-row ${checked ? 'ps-row-selected' : ''}`}>
@@ -191,12 +202,24 @@ function CustomerProfileTable({
                                         </div>
                                     ) : null}
                                     <div className="ps-contact-phone-row">
-                                        <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('purchase', row)}>{safeText(row.customerPhone)}</button>
-                                        <OrderStatusFlags row={row} onDuplicate={() => onOpenDialog('purchase', row)} className="ps-contact-flags" showUpsell />
+                                        <button type="button" className="ps-phone-link" onClick={() => onOpenDialog('duplicates', row)}>{safeText(row.customerPhone)}</button>
+                                        <OrderStatusFlags
+                                            row={row}
+                                            onDuplicate={() => onOpenDialog('duplicates', row)}
+                                            onReturning={() => onOpenDialog('returning', row)}
+                                            className="ps-contact-flags"
+                                            showUpsell
+                                        />
                                     </div>
                                 </td>
                                 <td className="text-left ps-message-cell ps-col-message">
-                                    <span>{message || '—'}</span>
+                                    <span className="ps-msg-block" title={message}>
+                                        {messageLines.length
+                                            ? messageLines.map((line, lineIndex) => (
+                                                <span className="ps-msg-line" key={`${lineIndex}-${line.slice(0, 24)}`}>{line}</span>
+                                            ))
+                                            : (message || '—')}
+                                    </span>
                                     {row.hasDifferentReceiver ? <span className="small-tip ps-receiver-note">Người nhận: {row.effectiveReceiverName} · {row.effectiveReceiverPhone}</span> : null}
                                 </td>
                                 <td className="text-center ps-sale-cell">
@@ -205,8 +228,8 @@ function CustomerProfileTable({
                                             <button
                                                 type="button"
                                                 className="btn-icon aoh ps-sale-delete"
-                                                title="Xóa data"
-                                                aria-label="Xóa data"
+                                                title={t('pages.customer_profile.delete_data_title')}
+                                                aria-label={t('operations.duplicate_orders.delete')}
                                                 onClick={() => deleteData(row)}
                                             >
                                                 <i className="fa fa-trash" aria-hidden="true" />
@@ -337,8 +360,9 @@ function safeActionErrorMessage(raw, fallback = 'Không thực hiện được t
     return text.length > 220 ? `${text.slice(0, 220)}…` : text;
 }
 
-function FloatingActions({ selectedIds, permissions, actionBaseUrl = '/customers' }) {
+function FloatingActions({ selectedIds, permissions, actionBaseUrl = '/customers', onReallocate }) {
     const { ask } = useConfirm();
+    const t = useT();
     const [open, setOpen] = useState(false);
     const hasSelection = selectedIds.length > 0;
     // Always use the page URL prefix (/admin/marketing/customers, /admin/sales/customers, …).
@@ -357,7 +381,7 @@ function FloatingActions({ selectedIds, permissions, actionBaseUrl = '/customers
 
     const exportCsv = async (variant) => {
         if (!hasSelection) {
-            toast.warning('Vui lòng tích chọn ít nhất một hồ sơ.');
+            toast.warning(t('pages.customer_profile.select_warning'));
             return;
         }
 
@@ -382,29 +406,34 @@ function FloatingActions({ selectedIds, permissions, actionBaseUrl = '/customers
                 if (contentType.includes('application/json')) {
                     message = (await response.json().catch(() => ({}))).message ?? '';
                 }
-                throw new Error(safeActionErrorMessage(message, `Không xuất được file (${response.status}).`));
+                throw new Error(safeActionErrorMessage(message, t('pages.customer_profile.export_failed')));
             }
             if (contentType.includes('text/html')) {
-                throw new Error('Máy chủ trả về trang lỗi thay vì file CSV.');
+                throw new Error(t('pages.customer_profile.export_failed'));
             }
             const blob = await response.blob();
             const disposition = response.headers.get('content-disposition') ?? '';
             const filenameMatch = disposition.match(/filename\*?=(?:UTF-8''|\")?([^";]+)/i);
             const filename = filenameMatch ? decodeURIComponent(filenameMatch[1].replaceAll('"', '')) : `ho-so-khach-hang-kieu-${variant}.csv`;
             downloadBlob(blob, filename);
-            toast.success('Đã xuất file.');
+            toast.success(t('pages.customer_profile.export_success'));
         } catch (error) {
-            toast.error(safeActionErrorMessage(error.message, 'Không xuất được file.'));
+            toast.error(safeActionErrorMessage(error.message, t('pages.customer_profile.export_failed')));
         }
     };
 
-    const submit = async (url, method, confirmMessage) => {
+    const submit = async (url, method, confirmMessage, confirmTitle = null) => {
         if (!hasSelection) {
-            toast.warning('Vui lòng tích chọn ít nhất một hồ sơ.');
+            toast.warning(t('pages.customer_profile.select_warning'));
             return;
         }
         if (confirmMessage) {
-            const ok = await ask({ description: confirmMessage, confirmLabel: 'Đồng ý', variant: 'destructive' });
+            const ok = await ask({
+                title: confirmTitle || t('confirm_dialog.title'),
+                description: confirmMessage,
+                confirmLabel: t('pages.customer_profile.confirm_ok'),
+                variant: 'destructive',
+            });
             if (!ok) return;
         }
 
@@ -422,12 +451,12 @@ function FloatingActions({ selectedIds, permissions, actionBaseUrl = '/customers
             });
             const data = await response.json().catch(() => ({}));
             if (!response.ok) {
-                throw new Error(safeActionErrorMessage(data.message, `Không thực hiện được thao tác (${response.status}).`));
+                throw new Error(safeActionErrorMessage(data.message, t('pages.customer_profile.action_failed')));
             }
-            toast.success(data.message ?? 'Đã thực hiện thao tác.');
+            toast.success(data.message || t('pages.customer_profile.action_ok'));
             router.reload({ preserveScroll: true });
         } catch (error) {
-            toast.error(safeActionErrorMessage(error.message, 'Không thực hiện được thao tác.'));
+            toast.error(safeActionErrorMessage(error.message, t('pages.customer_profile.action_failed')));
         }
     };
 
@@ -442,14 +471,14 @@ function FloatingActions({ selectedIds, permissions, actionBaseUrl = '/customers
                 </div>
                 {permissions?.canBulkManage ? (
                     <div className="icon-row">
-                        <ActionBubble tone="warning" label="Phân bổ lại ngay" onClick={() => submit(`${actionBase}/bulk/reallocate-now`, 'POST', 'Bạn chắc chắn muốn phân bổ lại hồ sơ khách hàng?')}><i className="fa fa-retweet" /></ActionBubble>
-                        <ActionBubble tone="warning" label="Chuyển phân bổ lại sau" onClick={() => submit(`${actionBase}/bulk/queue-reallocation`, 'POST', 'Bạn chắc chắn muốn chuyển hồ sơ về danh sách phân bổ lại?')}><i className="fa fa-send" /></ActionBubble>
-                        <ActionBubble tone="danger" label="Thu hồi số" onClick={() => submit(`${actionBase}/bulk/recall`, 'POST', 'Bạn chắc chắn muốn thu hồi các hồ sơ đã chọn?')}><i className="fa fa-chain-broken" /></ActionBubble>
+                        <ActionBubble tone="warning" label={t('pages.customer_profile.reallocate_submit')} onClick={() => onReallocate?.()}><i className="fa fa-retweet" /></ActionBubble>
+                        <ActionBubble tone="warning" label="Chuyển phân bổ lại sau" onClick={() => submit(`${actionBase}/bulk/queue-reallocation`, 'POST', t('pages.customer_profile.queue_desc'), t('pages.customer_profile.queue_title'))}><i className="fa fa-send" /></ActionBubble>
+                        <ActionBubble tone="danger" label="Thu hồi số" onClick={() => submit(`${actionBase}/bulk/recall`, 'POST', t('pages.customer_profile.recall_desc'), t('pages.customer_profile.recall_title'))}><i className="fa fa-chain-broken" /></ActionBubble>
                     </div>
                 ) : null}
                 {permissions?.canDeleteHistory ? (
                     <div className="icon-row">
-                        <ActionBubble tone="danger" label="Xóa lịch sử tác nghiệp" onClick={() => submit(`${actionBase}/bulk/operation-history`, 'DELETE', 'Bạn chắc chắn muốn xóa lịch sử tác nghiệp?')}><i className="fa fa-trash" /></ActionBubble>
+                        <ActionBubble tone="danger" label="Xóa lịch sử tác nghiệp" onClick={() => submit(`${actionBase}/bulk/operation-history`, 'DELETE', t('pages.customer_profile.delete_history_desc'), t('pages.customer_profile.delete_history_title'))}><i className="fa fa-trash" /></ActionBubble>
                     </div>
                 ) : null}
             </div>
@@ -474,12 +503,14 @@ export default function CustomerProfile({
     pageTitle = 'Hồ sơ khách hàng',
     activeMenuCode = '4.2',
 }) {
+    const t = useT();
     const rows = report?.rows?.data ?? [];
     const pagination = report?.rows?.meta ?? { current_page: 1, last_page: 1, per_page: 20, total: 0, from: 0, to: 0 };
     const [form, setForm] = useState(filters);
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [selected, setSelected] = useState(new Set());
     const [dialog, setDialog] = useState(EMPTY_DIALOG);
+    const [reallocateOpen, setReallocateOpen] = useState(false);
 
     useEffect(() => {
         setSelected(new Set());
@@ -616,12 +647,42 @@ export default function CustomerProfile({
 
                 <PushsalePagination routeUrl={routeUrl} filters={form} meta={pagination} scrollTargetId="customer-profile-table" />
 
-                <FloatingActions selectedIds={[...selected]} permissions={filterOptions.permissions} actionBaseUrl={routeUrl} />
+                <FloatingActions
+                    selectedIds={[...selected]}
+                    permissions={filterOptions.permissions}
+                    actionBaseUrl={routeUrl}
+                    onReallocate={() => {
+                        if (!selected.size) {
+                            toast.warning(t('pages.customer_profile.reallocate_need_selection'));
+                            return;
+                        }
+                        setReallocateOpen(true);
+                    }}
+                />
             </section>
 
             <PushsaleCustomerMessagesDialog order={dialog.order} open={dialog.type === 'messages'} onOpenChange={(open) => !open && closeDialog()} />
             <PushsaleOperationHistoryDialog order={dialog.order} open={dialog.type === 'operation'} onOpenChange={(open) => !open && closeDialog()} />
             <PushsalePurchaseHistoryDialog order={dialog.order} open={dialog.type === 'purchase'} onOpenChange={(open) => !open && closeDialog()} />
+            <DuplicatePhoneOrdersDialog
+                order={dialog.order}
+                open={dialog.type === 'duplicates' || dialog.type === 'returning'}
+                initialClosedOnly={dialog.type === 'returning'}
+                actionBaseUrl={saleOrderActionBaseUrl}
+                onOpenChange={(open) => !open && closeDialog()}
+            />
+            <CustomerReallocateDialog
+                open={reallocateOpen}
+                onOpenChange={setReallocateOpen}
+                selectedIds={[...selected]}
+                sales={filterOptions.sales ?? []}
+                operationStages={filterOptions.operationStages ?? []}
+                actionBaseUrl={routeUrl}
+                onDone={() => {
+                    setSelected(new Set());
+                    router.reload({ preserveScroll: true });
+                }}
+            />
             <PushsaleDataViewHistoryDialog order={dialog.order} open={dialog.type === 'view'} onOpenChange={(open) => !open && closeDialog()} />
         </AppLayout>
     );

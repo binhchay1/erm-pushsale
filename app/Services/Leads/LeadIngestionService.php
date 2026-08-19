@@ -721,7 +721,9 @@ class LeadIngestionService
 
                     return $item;
                 }, $items);
-                $this->orderFactory->appendItems($order, $upsellItems, $extraDiscount, 'upsell');
+                // Gói mua thêm chỉ có nhãn text → ghi vào tin nhắn đơn, không tạo
+                // dòng hàng giả tên sản phẩm.
+                $this->orderFactory->appendItems($order, $upsellItems, $extraDiscount, 'upsell', labelsToNote: true);
             }
 
             $parent = $this->findPrimaryIngestionForOrder($order);

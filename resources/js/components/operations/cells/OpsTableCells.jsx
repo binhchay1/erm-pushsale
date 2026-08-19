@@ -164,14 +164,15 @@ export function MessageCell({
     onClick,
     className = 'area1 hidden-xs td-5715 ps-message-cell',
 }) {
-    const addressLine = messageParts?.address_line ?? null;
-    const statusSend = messageParts?.status_send ?? null;
+    // Form vận hành: địa chỉ khách để lại → combo khách mua / SP mua thêm → status_send.
+    const lines = [
+        messageParts?.address_line ?? null,
+        messageParts?.note_line ?? null,
+        messageParts?.status_send ?? null,
+    ].filter(Boolean);
     const fallback = messageParts?.fallback ?? '';
-    const hasAddress = Boolean(addressLine);
-    const hasStatus = Boolean(statusSend);
-    const showDash = hasAddress && hasStatus;
     const plain = note || fallback || '';
-    const title = [addressLine, statusSend].filter(Boolean).join('\n') || plain;
+    const title = lines.join('\n') || plain;
 
     return (
         <td className={className}>
@@ -185,13 +186,9 @@ export function MessageCell({
                 role={onClick ? 'button' : undefined}
                 tabIndex={onClick ? 0 : undefined}
             >
-                {hasAddress || hasStatus ? (
-                    <>
-                        {hasAddress ? <span className="ps-msg-line">{addressLine}</span> : null}
-                        {showDash ? <span className="ps-msg-dash" aria-hidden="true" /> : null}
-                        {hasStatus ? <span className="ps-msg-line">{statusSend}</span> : null}
-                    </>
-                ) : (plain || '—')}
+                {lines.length ? lines.map((line, index) => (
+                    <span className="ps-msg-line" key={`${index}-${line.slice(0, 24)}`}>{line}</span>
+                )) : (plain || '—')}
             </span>
         </td>
     );

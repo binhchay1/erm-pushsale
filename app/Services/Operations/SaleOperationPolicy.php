@@ -6,7 +6,11 @@ use App\Enums\ClosingStatus;
 use App\Enums\DeliveryStatus;
 use App\Enums\OperationResult;
 use App\Enums\OperationStage;
+use App\Enums\PermissionArea;
+use App\Enums\PermissionLevel;
+use App\Enums\UserRole;
 use App\Models\Order;
+use App\Models\User;
 
 final class SaleOperationPolicy
 {
@@ -103,12 +107,32 @@ final class SaleOperationPolicy
     }
 
     /**
-     * Chỉ Admin được xóa data trên workspace / hồ sơ khách hàng.
+     * Xóa data / xóa trùng số khi check số (4.1, 4.2).
+     * Admin (kể cả tài khoản SALE SUPPORT/SALE ADMIN đăng nhập quyền quản trị) được xóa.
+     * Sale thường (role sales, gồm sales01) không xóa được — kể cả khi mặc định
+     * vẫn có quyền Khách hàng: Toàn quyền để ghi chú / xem hồ sơ.
      */
-    public static function canDeleteData(Order $order, ?\App\Models\User $actor = null): bool
+    public static function canDeleteData(Order $order, ?User $actor = null): bool
     {
         unset($order);
 
-        return (bool) $actor?->isAdmin();
+        return self::actorCanDeleteCustomerData($actor);
+    }
+
+    public static function actorCanDeleteCustomerData(?User $actor): bool
+    {
+        if (! $actor) {
+            return false;
+        }
+
+        if ($actor->isAdmin()) {
+            return true;
+        }
+
+        if ($actor->role === UserRole::Sales) {
+            return false;
+        }
+
+        return $actor->allows(PermissionArea::Customers, PermissionLevel::Full);
     }
 }

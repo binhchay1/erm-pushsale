@@ -136,7 +136,9 @@ export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, o
     const hasDuplicate = Boolean(data.isDuplicatePhone);
     const hasReturning = Boolean(data.isReturningCustomer);
     const hasUpsell = showUpsell && orderHasUpsell(data);
-    const isWaitingUpsell = Boolean(data.awaitingLandingUpsell) || Number(data.pendingSupplementCount ?? 0) > 0;
+    const isPendingReview = Number(data.pendingSupplementCount ?? 0) > 0;
+    const isHoldWindow = Boolean(data.awaitingLandingUpsell);
+    const isWaitingUpsell = isHoldWindow || isPendingReview;
 
     if (!hasDuplicate && !hasReturning && !hasUpsell) {
         return null;
@@ -144,7 +146,9 @@ export function OrderStatusFlags({ row = {}, order = null, onDuplicate = null, o
 
     const returningLabel = t(onReturning ? 'operations.order_flags.returning_click' : 'operations.order_flags.returning');
     const duplicateLabel = t('operations.order_flags.duplicate');
-    const upsellLabel = t(isWaitingUpsell ? 'operations.order_flags.upsell_waiting' : 'operations.order_flags.upsell');
+    const upsellLabel = isPendingReview
+        ? t('operations.order_flags.upsell_pending_review')
+        : t(isHoldWindow ? 'operations.order_flags.upsell_waiting' : 'operations.order_flags.upsell');
 
     return (
         <span className={`ps-order-flags ${className}`.trim()}>

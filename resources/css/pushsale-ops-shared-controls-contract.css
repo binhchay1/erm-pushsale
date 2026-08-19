@@ -670,3 +670,19 @@ html body.pushsale-app-body button.ps-create-order-fab {
     }
 }
 
+/* —— Vùng dữ liệu cuộn tại chỗ (sale / kho / kế toán tác nghiệp) ——
+   Bảng tác nghiệp phải luôn vừa trong viewport để trỏ chuột vào vùng data là
+   cuộn được data, thay vì phải kéo thanh cuộn ngoài cùng của trang. Header
+   bảng đã sticky nên tên cột vẫn hiển thị khi cuộn. */
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-table-wrap,
+html body.pushsale-app-body .ps-sale-workspace-shell .ps-sale-table-wrap,
+html body.pushsale-app-body .ps-wh-page .ps-wh-table-shell,
+html body.pushsale-app-body .ps-acc-page .ps-wh-table-shell {
+    height: auto !important;
+    max-height: calc(var(--ps-data-table-head, 42px) + (var(--ps-data-table-visible-rows, 5) * var(--ps-data-table-row, 110px))) !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+

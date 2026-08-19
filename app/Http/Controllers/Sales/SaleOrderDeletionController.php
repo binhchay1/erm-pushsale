@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\AssertsOrderInteractionLock;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\DataDeletion\OrderDeletionService;
+use App\Services\Operations\SaleOperationPolicy;
 use App\Services\Operations\SalesVisibilityScope;
 use App\Support\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +22,7 @@ class SaleOrderDeletionController extends Controller
         $this->ensureOrderInteractionLock($request, $order, 'destroy');
         $actor = $request->user();
 
-        if ($actor && ! $actor->isAdmin()) {
+        if ($actor && ! SaleOperationPolicy::canDeleteData($order, $actor)) {
             throw ValidationException::withMessages([
                 'order' => __('messages.sale_ops.no_permission_delete'),
             ]);
