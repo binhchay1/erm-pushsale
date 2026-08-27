@@ -64,9 +64,10 @@ const helpText = {
     holaship: ['Nhập Phone, Password và mã OTP rồi bấm Xác thực.', 'Hệ thống lưu ShopId/Token để tạo đơn và đồng bộ trạng thái.'],
     spx: ['Nhập User ID, Secret key và Account ID được SPX cấp.', 'Bật khai giá/bảo hiểm nếu cần, chọn phương thức lấy hàng và quyền xem hàng rồi Lưu.'],
     netship: [
-        'NetShip là cổng trung gian: không chọn trên đơn. Sale vẫn chọn Viettel Post / GHTK / …',
-        'Khi ĐVVC chưa cấu hình credential direct, hệ thống tự tạo vận đơn qua NetShip (nếu bật + có token).',
-        'Lấy access token Bên thứ ba trên NetShip, dán vào ô token, bật kết nối rồi Lưu. Webhook: /api/v1/shipping/webhooks/netship',
+        'Bắt buộc: bật “Sử dụng kết nối này” + Access token Bên thứ ba, rồi Lưu.',
+        'API Base URL để mặc định https://netship.vn (sandbox: https://test.netship.vn).',
+        'Ba trường còn lại là default tùy chọn khi tạo đơn (productType / deliveryNote / pickupType) — không điền vẫn dùng mặc định hệ thống.',
+        'NetShip không hiện trên dropdown ĐVVC của đơn. Webhook: /api/v1/shipping/webhooks/netship',
     ],
     default: ['Nhập đúng thông tin API do đơn vị giao hàng cấp.', 'Sau khi Lưu, hệ thống dùng cấu hình này khi đăng đơn và đồng bộ trạng thái/COD.'],
 };
@@ -284,7 +285,9 @@ export function ShippingPartnerCard({ provider }) {
     const connectButton = <ActionButton onClick={() => toast.message('Đã gửi yêu cầu kiểm tra kết nối.')}><i className="fa fa-spinner" /> Kết nối</ActionButton>;
     const verifyButton = <ActionButton onClick={() => toast.message('Đã gửi yêu cầu xác thực.')}><i className="fa fa-spinner" /> Xác thực</ActionButton>;
     const providerName = providerNames[provider.provider] ?? provider.label;
-    const useGeneric = !['vnpost', 'viettel_post', 'ghtk', 'ghn', 'jnt', 'holaship', 'spx'].includes(provider.provider);
+    const useGeneric = !['vnpost', 'viettel_post', 'ghtk', 'ghn', 'jnt', 'holaship', 'spx', 'netship'].includes(provider.provider);
+    const tokenField = provider.fields.find((field) => field.key === 'token');
+    const baseUrlField = provider.fields.find((field) => field.key === 'base_url');
 
     return (
         <form className="pssp-form tab-pane active" onSubmit={submit} noValidate>
@@ -295,6 +298,48 @@ export function ShippingPartnerCard({ provider }) {
                     <span>Sử dụng kết nối này</span>
                 </label>
             </Field>
+
+            {provider.provider === 'netship' && (
+                <>
+                    <Field label="Access token (Bên thứ ba)" required error={errorFor('token', 'credentials.token')}>
+                        <TextInput
+                            type="password"
+                            required={!secretSet.has('token')}
+                            value={credential('token')}
+                            onChange={(value) => setCredential('token', value)}
+                            placeholder={tokenField?.is_set ? (tokenField.masked ?? '') : 'Dán access token NetShip'}
+                            invalid={Boolean(errorFor('token', 'credentials.token'))}
+                        />
+                    </Field>
+                    <Field label="API Base URL">
+                        <TextInput
+                            value={credential('base_url')}
+                            onChange={(value) => setCredential('base_url', value)}
+                            placeholder={baseUrlField?.value || 'https://netship.vn'}
+                        />
+                    </Field>
+                    <Field label="Loại sản phẩm mặc định">
+                        <TextInput
+                            value={credential('product_type')}
+                            onChange={(value) => setCredential('product_type', value)}
+                            placeholder="Không bắt buộc — mặc định: Sức khỏe"
+                        />
+                    </Field>
+                    <Field label="Ghi chú giao (0/1/2)">
+                        <SelectInput value={credential('delivery_note') || '1'} onChange={(value) => setCredential('delivery_note', value)}>
+                            <option value="0">0 — Không cho xem hàng</option>
+                            <option value="1">1 — Cho xem hàng</option>
+                            <option value="2">2 — Cho thử hàng</option>
+                        </SelectInput>
+                    </Field>
+                    <Field label="Hình thức lấy hàng">
+                        <SelectInput value={credential('pickup_type') || '0'} onChange={(value) => setCredential('pickup_type', value)}>
+                            <option value="0">0 — Shipper tới lấy</option>
+                            <option value="1">1 — Mang ra bưu cục</option>
+                        </SelectInput>
+                    </Field>
+                </>
+            )}
 
             {provider.provider === 'vnpost' && (
                 <>
