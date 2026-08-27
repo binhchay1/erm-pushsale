@@ -17,6 +17,7 @@ use App\Repositories\TeamRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\WarehouseRepository;
 use App\Services\Operations\SaleOperationConfigurationService;
+use App\Support\ShippingProviders;
 
 class FilterOptionsService
 {
@@ -104,7 +105,7 @@ class FilterOptionsService
                 ['value' => 'pending', 'label' => __('filters.reconciliation_pending')],
                 ['value' => 'reconciled', 'label' => __('filters.reconciliation_reconciled')],
             ],
-            'shippingProviders' => collect(config('shipping_partners.providers', []))->map(
+            'shippingProviders' => collect(ShippingProviders::selectableProviders())->map(
                 fn (array $meta, string $provider) => ['value' => $provider, 'label' => $meta['label'] ?? $provider]
             )->values(),
             'warehouseCareStatuses' => [

@@ -181,6 +181,13 @@ return [
         'status_synced' => 'Status synced from the carrier.',
         'waybill_cancelled' => 'Waybill cancelled.',
         'label_failed' => 'Could not print label.',
+        'netship_not_ready' => 'NetShip is disabled or missing an access token.',
+        'netship_create_failed' => 'Could not create a waybill via NetShip.',
+        'netship_sync_failed' => 'Could not sync status from NetShip.',
+        'netship_cancel_failed' => 'Could not cancel the waybill on NetShip.',
+        'netship_missing_id' => 'Missing NetShip order id — cannot cancel/sync.',
+        'netship_label_unsupported' => 'NetShip does not support label printing from ERM yet.',
+        'netship_address_unmapped' => 'Could not map NetShip address (:part = :value).',
     ],
     'webhook' => [
         'platform_unsupported' => 'Platform not supported',

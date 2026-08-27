@@ -13,6 +13,7 @@ use App\Models\ShippingWebhookEvent;
 use App\Models\WarehouseReturnReceipt;
 use App\Services\Inventory\InventoryReturnService;
 use App\Services\Shipping\Carriers\Ghtk\GhtkStatusMapper;
+use App\Services\Shipping\Gateways\NetShip\NetShipStatusMapper;
 use App\Services\Shipping\Settlement\CarrierSettlementSyncService;
 use App\Services\Shipping\Settlement\ShipmentReconciliationEngine;
 use App\Services\Shipping\Support\DeliveryStatusTextMapper;
@@ -32,19 +33,33 @@ class ShippingWebhookService
     public function process(string $provider, array $payload): ShippingWebhookEvent
     {
         $flat = $this->normalizeRoot($payload);
+        $isNetShip = $provider === 'netship';
+
         $trackingNumber = $this->firstFilled($flat, [
             'tracking_number', 'trackingNo', 'tracking_no', 'trackingCode', 'waybill',
             'billcode', 'label_id', 'label', 'data.tracking_number', 'order.tracking_number',
         ]);
         $partnerOrderCode = $this->firstFilled($flat, [
             'partner_order_code', 'partnerOrderCode', 'order_code', 'orderCode', 'client_order_code',
-            'reference', 'partner_id', 'data.order_code', 'order.order_code', 'merchant_order_id',
+            'customerCode', 'reference', 'partner_id', 'data.order_code', 'order.order_code', 'merchant_order_id',
         ]);
+        $netshipOrderId = $isNetShip
+            ? $this->firstFilled($flat, ['id', 'netship_order_id', 'orderId', 'data.id'])
+            : null;
+
+        // NetShip thường dùng id nội bộ làm mã theo dõi khi chưa có tracking hãng.
+        if ($isNetShip && ! $trackingNumber && $netshipOrderId) {
+            $trackingNumber = $netshipOrderId;
+        }
+
         $rawStatus = $this->firstFilled($flat, [
             'status_text', 'status_name', 'status', 'state', 'current_status', 'order_status',
             'data.status', 'order.status', 'shipment.status',
         ]);
         $statusId = $this->toInt($this->firstFilled($flat, ['status_id', 'statusId', 'data.status_id']));
+        if ($isNetShip && $statusId === null && is_numeric($rawStatus)) {
+            $statusId = (int) $rawStatus;
+        }
         $mappedStatus = $this->mapStatus($rawStatus, $statusId, $provider);
         $eventType = $this->firstFilled($flat, ['event', 'event_type', 'type', 'eventName']) ?: 'status_update';
         $occurredAt = $this->parseDate($this->firstFilled($flat, [
@@ -63,8 +78,11 @@ class ShippingWebhookService
             'compensation_amount' => $this->money($this->firstValue($flat, ['compensation_amount', 'compensation', 'refund_amount', 'data.compensation_amount'])),
         ];
 
-        $order = $this->resolveOrder($trackingNumber, $partnerOrderCode);
-        $shipment = $this->resolveShipment($order, $provider, $trackingNumber, $partnerOrderCode);
+        $order = $this->resolveOrder($trackingNumber, $partnerOrderCode, $netshipOrderId);
+        $shipment = $this->resolveShipment($order, $provider, $trackingNumber, $partnerOrderCode, $netshipOrderId);
+        $businessProvider = $isNetShip
+            ? ($shipment?->provider ?: $order?->shipping_provider)
+            : $provider;
         $systemCod = $order?->amount_to_collect !== null ? (int) $order->amount_to_collect : null;
         $partnerCod = $financials['cod_amount'] ?: ($financials['cod_collected'] ?: $financials['cod_remitted']);
         $codMismatch = $this->reconciliationEngine->codMismatch($systemCod, $partnerCod ?: null);
@@ -76,16 +94,29 @@ class ShippingWebhookService
         }
 
         if ($order) {
+            $shipmentProvider = $businessProvider ?: ($order->shipping_provider ?: 'manual');
             $shipment ??= Shipment::query()->firstOrCreate(
-                ['order_id' => $order->id, 'provider' => $provider],
-                ['partner_order_id' => $partnerOrderCode ?: $order->order_code, 'tracking_number' => $trackingNumber, 'state' => Shipment::STATE_SUBMITTED],
+                ['order_id' => $order->id, 'provider' => $shipmentProvider],
+                [
+                    'partner_order_id' => $partnerOrderCode ?: $order->order_code,
+                    'tracking_number' => $trackingNumber,
+                    'state' => Shipment::STATE_SUBMITTED,
+                    'response_payload' => $isNetShip ? [
+                        'gateway' => 'netship',
+                        'netship_order_id' => $netshipOrderId,
+                    ] : null,
+                ],
             );
-            $this->applyShipment($shipment, $financials, $trackingNumber, $rawStatus, $mappedStatus, $occurredAt, $payload);
-            $this->applyOrder($order, $provider, $shipment, $financials, $mappedStatus, $codMismatch, $occurredAt);
+            $this->applyShipment($shipment, $financials, $trackingNumber, $rawStatus, $mappedStatus, $occurredAt, $payload, $isNetShip, $netshipOrderId);
+            $this->applyOrder($order, $shipmentProvider, $shipment, $financials, $mappedStatus, $codMismatch, $occurredAt);
             $this->recordStatusEvent($provider, $eventHash, $order, $shipment, $rawStatus, $mappedStatus, $occurredAt, $financials, $flat, $payload);
 
             if ($mappedStatus === DeliveryStatus::Returned) {
-                $settings = array_merge(config('shipping_partners.default_settings', []), ShippingPartnerConnection::forProvider($provider)->settings ?? []);
+                $settingsProvider = $isNetShip ? 'netship' : $shipmentProvider;
+                $settings = array_merge(
+                    config('shipping_partners.default_settings', []),
+                    ShippingPartnerConnection::forProvider($settingsProvider)->settings ?? []
+                );
                 if ((bool) ($settings['auto_restock_return'] ?? true)) {
                     $this->inventoryReturn->receiveReturn(
                         $order->fresh(['items']),
@@ -100,7 +131,7 @@ class ShippingWebhookService
             }
 
             if (($mappedStatus === DeliveryStatus::Paid || $financials['cod_remitted'] > 0) && $partnerCod > 0) {
-                $this->recordWebhookSettlement($provider, $order, $shipment, $partnerOrderCode, $financials, $payload, $occurredAt);
+                $this->recordWebhookSettlement($shipmentProvider, $order, $shipment, $partnerOrderCode, $financials, $payload, $occurredAt);
             }
 
             $this->reconciliationEngine->reconcileOrder($order->fresh(['settlementLines']));
@@ -128,6 +159,8 @@ class ShippingWebhookService
                 'tracking_number' => $trackingNumber,
                 'partner_order_code' => $partnerOrderCode,
                 'mapped_status' => $mappedStatus?->value,
+                'netship_order_id' => $netshipOrderId,
+                'business_provider' => $businessProvider,
             ]),
             'received_at' => now(),
             'occurred_at' => $occurredAt,
@@ -137,8 +170,17 @@ class ShippingWebhookService
     }
 
     /** @param array<string,int> $financials @param array<string,mixed> $payload */
-    private function applyShipment(Shipment $shipment, array $financials, ?string $tracking, ?string $rawStatus, ?DeliveryStatus $mapped, Carbon $at, array $payload): void
-    {
+    private function applyShipment(
+        Shipment $shipment,
+        array $financials,
+        ?string $tracking,
+        ?string $rawStatus,
+        ?DeliveryStatus $mapped,
+        Carbon $at,
+        array $payload,
+        bool $isNetShip = false,
+        ?string $netshipOrderId = null,
+    ): void {
         $timestamps = ['last_event_at' => $at, 'last_synced_at' => now()];
         if ($mapped === DeliveryStatus::Posted) $timestamps['posted_at'] = $shipment->posted_at ?: $at;
         if ($mapped === DeliveryStatus::PickingUp) $timestamps['picked_up_at'] = $shipment->picked_up_at ?: $at;
@@ -146,6 +188,15 @@ class ShippingWebhookService
         if ($mapped === DeliveryStatus::Returning) $timestamps['returning_at'] = $shipment->returning_at ?: $at;
         if ($mapped === DeliveryStatus::Returned) $timestamps['returned_at'] = $shipment->returned_at ?: $at;
         if ($mapped === DeliveryStatus::Paid || $financials['cod_remitted'] > 0) $timestamps['cod_remitted_at'] = $shipment->cod_remitted_at ?: $at;
+
+        $existingPayload = is_array($shipment->response_payload) ? $shipment->response_payload : [];
+        $responsePayload = $isNetShip
+            ? array_merge($existingPayload, $payload, array_filter([
+                'gateway' => 'netship',
+                'netship_order_id' => $netshipOrderId ?: ($existingPayload['netship_order_id'] ?? null),
+                'last_webhook' => $payload,
+            ]))
+            : $payload;
 
         $shipment->update(array_merge($timestamps, [
             'tracking_number' => $shipment->tracking_number ?: $tracking,
@@ -160,7 +211,7 @@ class ShippingWebhookService
             'return_fee' => $this->moneyOrCurrent($financials['return_fee'], $shipment->return_fee),
             'other_fee' => $this->moneyOrCurrent($financials['other_fee'], $shipment->other_fee),
             'compensation_amount' => $this->moneyOrCurrent($financials['compensation_amount'], $shipment->compensation_amount),
-            'response_payload' => $payload,
+            'response_payload' => $responsePayload,
         ]));
     }
 
@@ -226,31 +277,109 @@ class ShippingWebhookService
         ]);
     }
 
-    protected function resolveOrder(?string $trackingNumber, ?string $partnerOrderCode): ?Order
+    protected function resolveOrder(?string $trackingNumber, ?string $partnerOrderCode, ?string $netshipOrderId = null): ?Order
     {
-        if ($trackingNumber) {
-            $order = Order::query()->where('tracking_number', $trackingNumber)
-                ->orWhereHas('shipments', fn ($query) => $query->where('tracking_number', $trackingNumber))
-                ->first();
-            if ($order) return $order;
+        if ($partnerOrderCode) {
+            $byCode = Order::query()->where('order_code', $partnerOrderCode)->first();
+            if ($byCode) {
+                return $byCode;
+            }
         }
-        return $partnerOrderCode ? Order::query()->where('order_code', $partnerOrderCode)->first() : null;
+
+        if ($netshipOrderId) {
+            $shipment = Shipment::query()
+                ->where(function ($q) use ($netshipOrderId) {
+                    $q->where('response_payload->netship_order_id', $netshipOrderId);
+                    if (ctype_digit($netshipOrderId)) {
+                        $q->orWhere('tracking_id', (int) $netshipOrderId);
+                    }
+                })
+                ->first();
+            if ($shipment?->order_id) {
+                return Order::query()->find($shipment->order_id);
+            }
+        }
+
+        if ($trackingNumber) {
+            $order = Order::query()->where('tracking_number', $trackingNumber)->first();
+            if ($order) {
+                return $order;
+            }
+
+            $shipment = Shipment::query()->where('tracking_number', $trackingNumber)->first();
+            if ($shipment?->order_id) {
+                return Order::query()->find($shipment->order_id);
+            }
+        }
+
+        return null;
     }
 
-    private function resolveShipment(?Order $order, string $provider, ?string $tracking, ?string $partnerCode): ?Shipment
-    {
+    private function resolveShipment(
+        ?Order $order,
+        string $provider,
+        ?string $tracking,
+        ?string $partnerCode,
+        ?string $netshipOrderId = null,
+    ): ?Shipment {
+        if ($provider === 'netship') {
+            if ($netshipOrderId) {
+                $byNetship = Shipment::query()
+                    ->where(function ($q) use ($netshipOrderId) {
+                        $q->where('response_payload->netship_order_id', $netshipOrderId);
+                        if (ctype_digit($netshipOrderId)) {
+                            $q->orWhere('tracking_id', (int) $netshipOrderId);
+                        }
+                    })
+                    ->first();
+                if ($byNetship) {
+                    return $byNetship;
+                }
+            }
+            if ($partnerCode) {
+                $byPartner = Shipment::query()->where('partner_order_id', $partnerCode)->latest('id')->first();
+                if ($byPartner) {
+                    return $byPartner;
+                }
+            }
+            if ($tracking) {
+                $byTracking = Shipment::query()->where('tracking_number', $tracking)->latest('id')->first();
+                if ($byTracking) {
+                    return $byTracking;
+                }
+            }
+            if ($order) {
+                return $order->shipments()->latest('id')->first();
+            }
+
+            return null;
+        }
+
         if ($tracking) {
             $shipment = Shipment::query()->where('provider', $provider)->where('tracking_number', $tracking)->first();
-            if ($shipment) return $shipment;
+            if ($shipment) {
+                return $shipment;
+            }
         }
-        if ($order) return $order->shipments()->where('provider', $provider)->latest('id')->first();
-        if ($partnerCode) return Shipment::query()->where('provider', $provider)->where('partner_order_id', $partnerCode)->first();
+        if ($order) {
+            return $order->shipments()->where('provider', $provider)->latest('id')->first();
+        }
+        if ($partnerCode) {
+            return Shipment::query()->where('provider', $provider)->where('partner_order_id', $partnerCode)->first();
+        }
+
         return null;
     }
 
     protected function mapStatus(?string $raw, ?int $statusId, string $provider): ?DeliveryStatus
     {
-        if ($provider === 'ghtk' && $statusId) return GhtkStatusMapper::fromStatusId($statusId, $raw)['status'];
+        if ($provider === 'netship') {
+            return NetShipStatusMapper::fromStatusId($statusId ?? $raw, $raw)['status'];
+        }
+        if ($provider === 'ghtk' && $statusId) {
+            return GhtkStatusMapper::fromStatusId($statusId, $raw)['status'];
+        }
+
         return DeliveryStatusTextMapper::map($raw);
     }
 

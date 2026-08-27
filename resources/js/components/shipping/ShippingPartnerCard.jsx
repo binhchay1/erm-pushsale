@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { vietnamesePhoneError, normalizeVietnamesePhone } from '@/lib/vietnamesePhone';
 
 const providerNames = {
+    netship: 'NetShip (cổng trung gian)',
     vnpost: 'VN Post',
     viettel_post: 'Viettel Post',
     ghtk: 'Giao hàng tiết kiệm',
@@ -62,6 +63,11 @@ const helpText = {
     ems: ['Nhập token tài khoản để đăng đơn.', 'Authorization Token dùng để tracking đơn hàng, chọn điểm gửi hàng mặc định rồi bấm Lưu.'],
     holaship: ['Nhập Phone, Password và mã OTP rồi bấm Xác thực.', 'Hệ thống lưu ShopId/Token để tạo đơn và đồng bộ trạng thái.'],
     spx: ['Nhập User ID, Secret key và Account ID được SPX cấp.', 'Bật khai giá/bảo hiểm nếu cần, chọn phương thức lấy hàng và quyền xem hàng rồi Lưu.'],
+    netship: [
+        'NetShip là cổng trung gian: không chọn trên đơn. Sale vẫn chọn Viettel Post / GHTK / …',
+        'Khi ĐVVC chưa cấu hình credential direct, hệ thống tự tạo vận đơn qua NetShip (nếu bật + có token).',
+        'Lấy access token Bên thứ ba trên NetShip, dán vào ô token, bật kết nối rồi Lưu. Webhook: /api/v1/shipping/webhooks/netship',
+    ],
     default: ['Nhập đúng thông tin API do đơn vị giao hàng cấp.', 'Sau khi Lưu, hệ thống dùng cấu hình này khi đăng đơn và đồng bộ trạng thái/COD.'],
 };
 

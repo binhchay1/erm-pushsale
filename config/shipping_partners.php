@@ -204,6 +204,63 @@ return [
                 'timestamp_header' => ['label' => 'Header thời gian', 'secret' => false, 'required' => false, 'default' => env('SPX_TIMESTAMP_HEADER', 'X-Timestamp')],
             ],
         ],
+        // Cổng trung gian NetShip — không chọn trên đơn. Đơn vẫn chọn VTP/GHTK;
+        // nếu ĐVVC chưa setup credential thì tạo vận đơn qua NetShip (khi gateway bật).
+        'netship' => [
+            'label' => 'NetShip (cổng trung gian)',
+            'description' => 'Aggregator: cấu hình token bên thứ ba. Không hiện trên dropdown ĐVVC của đơn. Khi ĐVVC direct chưa sẵn sàng, hệ thống định tuyến qua NetShip.',
+            'docs_url' => 'https://steplap.gitbook.io/netship',
+            'api_base_url' => env('NETSHIP_USE_SANDBOX', false)
+                ? 'https://test.netship.vn'
+                : env('NETSHIP_BASE_URL', 'https://netship.vn'),
+            'integration_mode' => 'gateway',
+            'is_gateway' => true,
+            'selectable' => false,
+            'tracking_url' => null,
+            'services' => [['code' => 'standard', 'label' => 'Tiêu chuẩn']],
+            // Map ĐVVC nội bộ → mã carrier NetShip (gửi kèm payload khi API hỗ trợ).
+            'routed_providers' => [
+                'viettel_post' => env('NETSHIP_CODE_VIETTEL_POST', 'VTP'),
+                'ghtk' => env('NETSHIP_CODE_GHTK', 'GHTK'),
+                'ghn' => env('NETSHIP_CODE_GHN', 'GHN'),
+                'jnt' => env('NETSHIP_CODE_JNT', 'JNT'),
+                'spx' => env('NETSHIP_CODE_SPX', 'SPX'),
+            ],
+            'fields' => [
+                'token' => [
+                    'label' => 'Access token (Bên thứ ba)',
+                    'secret' => true,
+                    'required' => true,
+                    'default' => env('NETSHIP_TOKEN'),
+                ],
+                'base_url' => [
+                    'label' => 'API Base URL',
+                    'secret' => false,
+                    'required' => false,
+                    'default' => env('NETSHIP_USE_SANDBOX', false)
+                        ? 'https://test.netship.vn'
+                        : env('NETSHIP_BASE_URL', 'https://netship.vn'),
+                ],
+                'product_type' => [
+                    'label' => 'Loại sản phẩm mặc định',
+                    'secret' => false,
+                    'required' => false,
+                    'default' => env('NETSHIP_PRODUCT_TYPE', 'Sức khỏe'),
+                ],
+                'delivery_note' => [
+                    'label' => 'Ghi chú giao (0/1/2)',
+                    'secret' => false,
+                    'required' => false,
+                    'default' => env('NETSHIP_DELIVERY_NOTE', '1'),
+                ],
+                'pickup_type' => [
+                    'label' => 'Hình thức lấy hàng (0 shipper / 1 mang bưu cục)',
+                    'secret' => false,
+                    'required' => false,
+                    'default' => env('NETSHIP_PICKUP_TYPE', '0'),
+                ],
+            ],
+        ],
         'shippo' => $generic('Shippo', 'Kết nối Shippo hoặc cổng vận chuyển quốc tế theo API thống nhất.', 'https://docs.goshippo.com/', null, [], 'aggregator'),
         'aggregator' => $generic(
             'Đối tác trung gian / Multi-carrier API',

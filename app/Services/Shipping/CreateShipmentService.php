@@ -34,7 +34,12 @@ class CreateShipmentService
             throw new RuntimeException(__('messages.shipping_actions.no_carrier_configured'));
         }
 
-        $carrier = $this->registry->get($providerKey);
+        $latestShipment = $order->shipments()
+            ->where('provider', $providerKey)
+            ->latest('id')
+            ->first();
+
+        $carrier = $this->registry->get($providerKey, $latestShipment);
         if (! $carrier->isReady()) {
             throw new RuntimeException(__('messages.shipping_actions.no_carrier_configured'));
         }
@@ -106,6 +111,13 @@ class CreateShipmentService
     /** @return array<string, mixed> */
     public function runTest(string $provider, string $action): array
     {
+        if ($provider === 'netship') {
+            $routed = config('shipping_partners.providers.netship.routed_providers', []);
+            $business = array_key_first($routed) ?: 'viettel_post';
+
+            return $this->registry->netShipGateway()->proxyFor($business)->runTest($action);
+        }
+
         return $this->registry->get($provider)->runTest($action);
     }
 
@@ -121,6 +133,11 @@ class CreateShipmentService
             throw new RuntimeException(__('messages.shipping_actions.carrier_undetermined'));
         }
 
-        return $this->registry->get($key);
+        $shipment = $order->shipments()
+            ->when($key, fn ($q) => $q->where('provider', $key))
+            ->latest('id')
+            ->first();
+
+        return $this->registry->get($key, $shipment);
     }
 }

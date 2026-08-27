@@ -5,16 +5,34 @@ namespace App\Support;
 /** Danh sách đơn vị vận chuyển từ config để dùng cho UI & validate. */
 final class ShippingProviders
 {
+    /** Provider gateway (NetShip…) — cấu hình ở 1.4 nhưng không chọn trên đơn. */
+    public static function isGateway(string $provider): bool
+    {
+        $meta = config("shipping_partners.providers.{$provider}", []);
+
+        return (bool) ($meta['is_gateway'] ?? false)
+            || ($meta['integration_mode'] ?? null) === 'gateway'
+            || ($meta['selectable'] ?? true) === false && ($meta['integration_mode'] ?? null) === 'gateway';
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    public static function selectableProviders(): array
+    {
+        return collect(config('shipping_partners.providers', []))
+            ->reject(fn ($meta, $key) => self::isGateway((string) $key))
+            ->all();
+    }
+
     /** @return list<string> */
     public static function keys(): array
     {
-        return array_map('strval', array_keys((array) config('shipping_partners.providers', [])));
+        return array_map('strval', array_keys(self::selectableProviders()));
     }
 
     /** @return list<array{value: string, label: string}> */
     public static function options(): array
     {
-        return collect(config('shipping_partners.providers', []))
+        return collect(self::selectableProviders())
             ->map(fn ($provider, $key) => [
                 'value' => (string) $key,
                 'label' => $provider['label'] ?? (string) $key,
@@ -39,7 +57,7 @@ final class ShippingProviders
      */
     public static function serviceOptions(): array
     {
-        return collect(config('shipping_partners.providers', []))
+        return collect(self::selectableProviders())
             ->mapWithKeys(fn ($provider, $key) => [
                 (string) $key => collect($provider['services'] ?? [])
                     ->map(fn ($s) => ['value' => (string) $s['code'], 'label' => (string) $s['label']])

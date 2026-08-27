@@ -181,6 +181,13 @@ return [
         'status_synced' => 'Đã đồng bộ trạng thái từ hãng vận chuyển.',
         'waybill_cancelled' => 'Đã hủy vận đơn.',
         'label_failed' => 'Không in được nhãn.',
+        'netship_not_ready' => 'NetShip chưa bật hoặc thiếu access token.',
+        'netship_create_failed' => 'Không tạo được vận đơn qua NetShip.',
+        'netship_sync_failed' => 'Không đồng bộ được trạng thái từ NetShip.',
+        'netship_cancel_failed' => 'Không hủy được vận đơn trên NetShip.',
+        'netship_missing_id' => 'Thiếu mã đơn NetShip — không thể hủy/đồng bộ.',
+        'netship_label_unsupported' => 'NetShip chưa hỗ trợ in nhãn từ ERM.',
+        'netship_address_unmapped' => 'Không map được địa chỉ NetShip (:part = :value).',
     ],
     'webhook' => [
         'platform_unsupported' => 'Nền tảng không hỗ trợ',

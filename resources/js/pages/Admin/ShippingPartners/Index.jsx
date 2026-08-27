@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
 
 const providerOrder = [
+    'netship',
     'vnpost',
     'viettel_post',
     'ghtk',
@@ -26,6 +27,7 @@ const providerOrder = [
 
 const providerLabels = {
     manual: 'Thủ công',
+    netship: 'NetShip (cổng trung gian)',
     vnpost: 'VN Post',
     viettel_post: 'Viettel Post',
     ghtk: 'Giao hàng tiết kiệm',
@@ -52,11 +54,12 @@ function providerLabel(provider) {
 
 function ShippingDefaultPanel({ providers = [], defaultConfig = {} }) {
     const providerOptions = useMemo(() => {
-        const indexed = new Map(providers.map((provider) => [provider.provider, provider]));
-        const ordered = ['manual', ...providerOrder]
+        const selectable = providers.filter((provider) => provider.selectable !== false && !provider.is_gateway);
+        const indexed = new Map(selectable.map((provider) => [provider.provider, provider]));
+        const ordered = ['manual', ...providerOrder.filter((key) => key !== 'netship')]
             .map((key) => indexed.get(key))
             .filter(Boolean);
-        const fallback = providers.filter((provider) => !ordered.some((item) => item.provider === provider.provider));
+        const fallback = selectable.filter((provider) => !ordered.some((item) => item.provider === provider.provider));
 
         return [...ordered, ...fallback].map((provider) => ({
             value: provider.provider,
@@ -124,7 +127,11 @@ export default function ShippingPartnersIndex({ providers = [], defaultConfig = 
         .filter(Boolean);
     const fallbackProviders = providers.filter((provider) => !providerOrder.includes(provider.provider) && provider.provider !== 'manual');
     const allProviders = [...orderedProviders, ...fallbackProviders];
-    const [activeKey, setActiveKey] = useState(allProviders[0]?.provider ?? providers.find((provider) => provider.provider !== 'manual')?.provider);
+    const [activeKey, setActiveKey] = useState(
+        allProviders.find((provider) => provider.provider === 'netship')?.provider
+            ?? allProviders[0]?.provider
+            ?? providers.find((provider) => provider.provider !== 'manual')?.provider,
+    );
     const active = allProviders.find((item) => item.provider === activeKey) ?? allProviders[0];
 
     return (
@@ -148,6 +155,7 @@ export default function ShippingPartnersIndex({ providers = [], defaultConfig = 
                                         onClick={() => setActiveKey(provider.provider)}
                                     >
                                         {providerLabel(provider)}
+                                        {provider.is_gateway ? ' ★' : ''}
                                     </button>
                                 ))}
                             </aside>

@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use App\Support\VietnamDivisions;
+use App\Support\ShippingProviders;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -410,7 +411,7 @@ class WarehouseController extends Controller
     /** @return list<array<string,mixed>> */
     protected function shippingProviderOptions(): array
     {
-        return collect(config('shipping_partners.providers', []))
+        return collect(ShippingProviders::selectableProviders())
             ->map(fn (array $provider, string $key): array => [
                 'key' => $key,
                 'label' => (string) ($provider['label'] ?? $key),

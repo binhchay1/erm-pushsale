@@ -56,6 +56,7 @@ use App\Services\Reports\SalesLeader\SalesOptimizationReportService;
 use App\Services\Reports\SalesLeader\SalesTeamReportService;
 use App\Services\Reports\SalesLeader\SalesWorkReportService;
 use App\Support\ActivityLogger;
+use App\Support\ShippingProviders;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -369,7 +370,7 @@ class PushsalePageService
                 ['id' => '0', 'label' => 'Không được phép sử dụng'],
             ],
             'warehouses' => Warehouse::query()->orderBy('name')->limit(500)->get(['id', 'name'])->map(fn (Warehouse $warehouse) => ['id' => $warehouse->id, 'label' => $warehouse->name])->all(),
-            'shippingProviders' => collect(config('shipping_partners.providers', []))->map(
+            'shippingProviders' => collect(ShippingProviders::selectableProviders())->map(
                 fn (array $provider, string $key): array => ['id' => $key, 'label' => (string) ($provider['label'] ?? strtoupper($key))]
             )->values()->all(),
             // Enum / setup filters — shared with report toolbars (DRY #3 / mục A).

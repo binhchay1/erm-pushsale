@@ -34,7 +34,9 @@ use App\Services\Shipping\Carriers\Jnt\JntCarrier;
 use App\Services\Shipping\Carriers\Manual\ManualCarrier;
 use App\Services\Shipping\Carriers\Spx\SpxCarrier;
 use App\Services\Shipping\Carriers\ViettelPost\ViettelPostCarrier;
+use App\Services\Shipping\Gateways\NetShip\NetShipGateway;
 use App\Services\Shipping\Support\PartnerCredentialResolver;
+use App\Support\ShippingProviders;
 use App\Support\Seo;
 use App\Support\TenantManager;
 use Carbon\Carbon;
@@ -65,14 +67,19 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(SpxCarrier::class),
             ];
 
-            $direct = ['manual', 'ghtk', 'ghn', 'viettel_post', 'jnt', 'spx'];
+            $direct = ['manual', 'ghtk', 'ghn', 'viettel_post', 'jnt', 'spx', 'netship'];
             foreach (array_keys(config('shipping_partners.providers', [])) as $provider) {
-                if (! in_array($provider, $direct, true)) {
-                    $carriers[] = new GenericCarrier($provider, $resolver);
+                if (in_array($provider, $direct, true) || ShippingProviders::isGateway($provider)) {
+                    continue;
                 }
+                $carriers[] = new GenericCarrier($provider, $resolver);
             }
 
-            return new CarrierRegistry($carriers, $resolver);
+            return new CarrierRegistry(
+                $carriers,
+                $resolver,
+                $app->make(NetShipGateway::class),
+            );
         });
     }
 

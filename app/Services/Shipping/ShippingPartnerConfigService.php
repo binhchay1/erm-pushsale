@@ -5,6 +5,7 @@ namespace App\Services\Shipping;
 use App\Models\Company;
 use App\Models\ShippingPartnerConnection;
 use App\Services\Shipping\Support\PartnerCredentialResolver;
+use App\Support\ShippingProviders;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 
@@ -20,6 +21,7 @@ class ShippingPartnerConfigService
     {
         return collect(config('shipping_partners.providers', []))
             ->map(fn (array $meta, string $provider) => $this->buildProviderRow($provider, $meta))
+            ->sortByDesc(fn (array $row) => (int) ($row['is_gateway'] ?? false))
             ->values()
             ->all();
     }
@@ -35,7 +37,7 @@ class ShippingPartnerConfigService
             'provider' => $provider,
             'method' => $company?->default_shipping_method
                 ?: ($services[0]['code'] ?? 'standard'),
-            'provider_options' => collect(config('shipping_partners.providers', []))
+            'provider_options' => collect(ShippingProviders::selectableProviders())
                 ->map(fn (array $meta, string $key) => [
                     'value' => $key,
                     'label' => $meta['label'] ?? Str::headline($key),
@@ -50,6 +52,10 @@ class ShippingPartnerConfigService
     public function updateDefault(?int $companyId, string $provider, ?string $method): void
     {
         if (! $companyId || ! array_key_exists($provider, config('shipping_partners.providers', []))) {
+            return;
+        }
+
+        if (ShippingProviders::isGateway($provider)) {
             return;
         }
 
@@ -153,6 +159,9 @@ class ShippingPartnerConfigService
             'docs_url' => $meta['docs_url'] ?? null,
             'api_base_url' => $this->credentials->baseUrl($provider),
             'integration_mode' => $connection->integration_mode ?: ($meta['integration_mode'] ?? 'direct'),
+            'is_gateway' => ShippingProviders::isGateway($provider),
+            'selectable' => ! ShippingProviders::isGateway($provider),
+            'routed_providers' => $meta['routed_providers'] ?? [],
             'services' => $services,
             'settings' => $settings,
             'is_enabled' => (bool) $connection->is_enabled,
@@ -169,6 +178,17 @@ class ShippingPartnerConfigService
     /** @return list<array{key:string,label:string}> */
     protected function testActionsFor(string $provider): array
     {
+        if ($provider === 'netship') {
+            $proxy = $this->registry->netShipGateway()->proxyFor(
+                array_key_first(config('shipping_partners.providers.netship.routed_providers', ['viettel_post' => 'VTP']))
+                    ?: 'viettel_post'
+            );
+
+            return collect($proxy->testActions())
+                ->map(fn (string $label, string $key) => ['key' => $key, 'label' => $label])
+                ->values()->all();
+        }
+
         if (! $this->registry->has($provider)) {
             return [];
         }
