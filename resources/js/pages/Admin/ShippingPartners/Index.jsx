@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { ShippingPartnerCard } from '@/components/shipping/ShippingPartnerCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 const providerOrder = [
     'netship',
@@ -25,34 +26,18 @@ const providerOrder = [
     'spx',
 ];
 
-const providerLabels = {
-    manual: 'Thủ công',
-    netship: 'NetShip (cổng trung gian)',
-    vnpost: 'VN Post',
-    viettel_post: 'Viettel Post',
-    ghtk: 'Giao hàng tiết kiệm',
-    ghn: 'Giao hàng nhanh',
-    jnt: 'J&T',
-    ems: 'EMS',
-    supership: 'SuperShip',
-    best: 'Best',
-    boxme: 'BoxMe',
-    chimcat: 'Chim Cắt',
-    ship60: 'Ship60',
-    holaship: 'HolaShip',
-    ahamove: 'AhaMove',
-    ninjavan: 'NinjaVan',
-    spx: 'SPX Express',
-    tiktok_logistics: 'TikTok',
-    shopee_logistics: 'Shopee',
-    aggregator: 'Đối tác trung gian',
-};
-
-function providerLabel(provider) {
-    return providerLabels[provider?.provider] ?? provider?.label ?? provider?.value ?? '';
+function providerLabel(t, provider) {
+    const key = provider?.provider ?? provider?.value;
+    const translated = key ? t(`shipping.partners_page.names.${key}`) : '';
+    if (translated && !translated.startsWith('shipping.partners_page.names.')) {
+        return translated;
+    }
+    return provider?.label ?? key ?? '';
 }
 
 function ShippingDefaultPanel({ providers = [], defaultConfig = {} }) {
+    const t = useT();
+
     const providerOptions = useMemo(() => {
         const selectable = providers.filter((provider) => provider.selectable !== false && !provider.is_gateway);
         const indexed = new Map(selectable.map((provider) => [provider.provider, provider]));
@@ -63,10 +48,10 @@ function ShippingDefaultPanel({ providers = [], defaultConfig = {} }) {
 
         return [...ordered, ...fallback].map((provider) => ({
             value: provider.provider,
-            label: providerLabel(provider),
+            label: providerLabel(t, provider),
             services: provider.services ?? [],
         }));
-    }, [providers]);
+    }, [providers, t]);
 
     const form = useForm({
         provider: defaultConfig.provider ?? 'manual',
@@ -76,7 +61,10 @@ function ShippingDefaultPanel({ providers = [], defaultConfig = {} }) {
     const selectedProvider = providerOptions.find((provider) => provider.value === form.data.provider) ?? providerOptions[0];
     const serviceOptions = selectedProvider?.services?.length
         ? selectedProvider.services
-        : [{ code: form.data.provider === 'manual' ? 'manual' : 'standard', label: form.data.provider === 'manual' ? 'Giao hàng thủ công' : 'Tiêu chuẩn' }];
+        : [{
+            code: form.data.provider === 'manual' ? 'manual' : 'standard',
+            label: form.data.provider === 'manual' ? t('shipping.partners_page.manual_shipping') : t('shipping.partners_page.standard'),
+        }];
 
     const onProviderChange = (event) => {
         const provider = event.target.value;
@@ -89,16 +77,16 @@ function ShippingDefaultPanel({ providers = [], defaultConfig = {} }) {
         event.preventDefault();
         form.put('/admin/shipping-default', {
             preserveScroll: true,
-            onError: (errors) => toast.error(Object.values(errors)[0] ?? 'Không thể lưu cấu hình mặc định.'),
+            onError: (errors) => toast.error(Object.values(errors)[0] ?? t('shipping.partners_page.save_default_failed')),
         });
     };
 
     return (
         <section className="pssp-section pssp-default-section">
-            <div className="pu-caption mrl15">Đơn vị giao hàng mặc định</div>
+            <div className="pu-caption mrl15">{t('shipping.partners_page.default_section')}</div>
             <form className="pssp-default-form ibody" onSubmit={submit}>
                 <div className="pssp-default-row">
-                    <label>Phương thức giao hàng mặc định <span className="text-red">(*)</span></label>
+                    <label>{t('shipping.partners_page.default_method')} <span className="text-red">(*)</span></label>
                     <select value={form.data.provider} onChange={onProviderChange}>
                         {providerOptions.map((provider) => (
                             <option key={provider.value} value={provider.value}>{provider.label}</option>
@@ -106,14 +94,16 @@ function ShippingDefaultPanel({ providers = [], defaultConfig = {} }) {
                     </select>
                 </div>
                 <div className="pssp-default-row">
-                    <label>Giao hàng bằng mặc định <span className="text-red">(*)</span></label>
+                    <label>{t('shipping.partners_page.default_service')} <span className="text-red">(*)</span></label>
                     <select value={form.data.method ?? ''} onChange={(event) => form.setData('method', event.target.value)}>
                         {serviceOptions.map((service) => (
-                            <option key={service.code ?? service.value} value={service.code ?? service.value}>{service.label}</option>
+                            <option key={service.code ?? service.value} value={service.code ?? service.value}>
+                                {service.label}
+                            </option>
                         ))}
                     </select>
                     <button type="submit" disabled={form.processing} className="btn btn-sm btn-primary pssp-save-default">
-                        <i className="fa fa-save" /> Lưu
+                        <i className="fa fa-save" /> {t('shipping.partners_page.save')}
                     </button>
                 </div>
             </form>
@@ -122,6 +112,7 @@ function ShippingDefaultPanel({ providers = [], defaultConfig = {} }) {
 }
 
 export default function ShippingPartnersIndex({ providers = [], defaultConfig = {} }) {
+    const t = useT();
     const orderedProviders = providerOrder
         .map((key) => providers.find((provider) => provider.provider === key))
         .filter(Boolean);
@@ -136,17 +127,21 @@ export default function ShippingPartnersIndex({ providers = [], defaultConfig = 
 
     return (
         <AppLayout activeMenuCode="1.4">
-            <Head title="Cấu hình giao vận" />
+            <Head title={t('shipping.partners_page.title')} />
             <section className="pssp-page ps-legacy-page">
-                <PageHeader title="Cấu hình giao vận" pageCode="1.4" className="pssp-header-wrap" />
+                <PageHeader title={t('shipping.partners_page.title')} pageCode="1.4" className="pssp-header-wrap" />
 
                 <div className="box-body pssp-page-body">
                     <ShippingDefaultPanel providers={providers} defaultConfig={defaultConfig} />
 
                     <section className="pssp-section pssp-config-section">
-                        <div className="pu-caption mrl15">Cấu hình giao hàng</div>
+                        <div className="pu-caption mrl15">{t('shipping.partners_page.config_section')}</div>
                         <div className="pssp-config-body ibody">
-                            <aside className="pssp-provider-menu nav nav-tabs chon-kn-container" role="tablist" aria-label="Đơn vị giao hàng">
+                            <aside
+                                className="pssp-provider-menu nav nav-tabs chon-kn-container"
+                                role="tablist"
+                                aria-label={t('shipping.partners_page.carrier_list_aria')}
+                            >
                                 {allProviders.map((provider) => (
                                     <button
                                         key={provider.provider}
@@ -154,7 +149,7 @@ export default function ShippingPartnersIndex({ providers = [], defaultConfig = 
                                         className={`btn-xem-kn tab-${provider.provider}${provider.provider === active?.provider ? ' active' : ''}`}
                                         onClick={() => setActiveKey(provider.provider)}
                                     >
-                                        {providerLabel(provider)}
+                                        {providerLabel(t, provider)}
                                         {provider.is_gateway ? ' ★' : ''}
                                     </button>
                                 ))}

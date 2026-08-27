@@ -3,28 +3,7 @@ import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { vietnamesePhoneError, normalizeVietnamesePhone } from '@/lib/vietnamesePhone';
-
-const providerNames = {
-    netship: 'NetShip (cổng trung gian)',
-    vnpost: 'VN Post',
-    viettel_post: 'Viettel Post',
-    ghtk: 'Giao hàng tiết kiệm',
-    ghn: 'Giao hàng nhanh',
-    jnt: 'J&T',
-    ems: 'EMS',
-    supership: 'SuperShip',
-    best: 'Best',
-    boxme: 'BoxMe',
-    chimcat: 'Chim Cắt',
-    ship60: 'Ship60',
-    holaship: 'HolaShip',
-    ahamove: 'AhaMove',
-    ninjavan: 'NinjaVan',
-    spx: 'SPX Express',
-    aggregator: 'Đối tác trung gian',
-    tiktok_logistics: 'TikTok',
-    shopee_logistics: 'Shopee',
-};
+import { useT } from '@/providers/I18nProvider';
 
 const credentialAliases = {
     account: ['account', 'username', 'user_id', 'phone', 'user_mobile', 'partner_code', 'customer_code', 'client_id'],
@@ -40,48 +19,16 @@ const credentialAliases = {
     otp: ['otp'],
 };
 
-const helpText = {
-    vnpost: [
-        'Cấu hình đối tác tại donhang.vnpost.vn/#/app/cau-hinh-nguoi-dung.',
-        'Lấy mã CRM tại donhang.vnpost.vn, nhập tài khoản và mã CRM rồi bấm Kết nối.',
-        'Cấu hình bưu cục xử lý, quyền xem hàng và phương thức thu gom rồi bấm Lưu.',
-    ],
-    viettel_post: [
-        'Nhập tài khoản, mật khẩu rồi bấm Kết nối để hệ thống lấy token.',
-        'Bấm Xem người gửi để tải danh sách thông tin người gửi, chọn người gửi mặc định rồi Lưu.',
-        'Cấu hình dịch vụ gia tăng tại Viettel Post nếu shop cần bảo hiểm, hoàn hàng hoặc dịch vụ đặc biệt.',
-    ],
-    ghtk: [
-        'Lấy API Token tại trang khách hàng GHTK trong mục thông tin cá nhân.',
-        'Nhập tài khoản và API Token, chọn cấu hình lấy hàng/xem hàng rồi bấm Lưu.',
-    ],
-    ghn: [
-        'Lấy API Token tại hệ thống GHN, nhập Shop ID và token rồi bấm Kết nối.',
-        'Chọn cửa hàng/kho mặc định, quyền xem hàng và cấu hình COD trước khi Lưu.',
-    ],
-    jnt: ['Mã khách hàng chính là mã shop/tài khoản J&T được cấp.', 'Nhập API key/secret hoặc mã khách hàng rồi bấm Kết nối.'],
-    ems: ['Nhập token tài khoản để đăng đơn.', 'Authorization Token dùng để tracking đơn hàng, chọn điểm gửi hàng mặc định rồi bấm Lưu.'],
-    holaship: ['Nhập Phone, Password và mã OTP rồi bấm Xác thực.', 'Hệ thống lưu ShopId/Token để tạo đơn và đồng bộ trạng thái.'],
-    spx: ['Nhập User ID, Secret key và Account ID được SPX cấp.', 'Bật khai giá/bảo hiểm nếu cần, chọn phương thức lấy hàng và quyền xem hàng rồi Lưu.'],
-    netship: [
-        'Bắt buộc: bật “Sử dụng kết nối này” + Access token Bên thứ ba, rồi Lưu.',
-        'API Base URL để mặc định https://netship.vn (sandbox: https://test.netship.vn).',
-        'Ba trường còn lại là default tùy chọn khi tạo đơn (productType / deliveryNote / pickupType) — không điền vẫn dùng mặc định hệ thống.',
-        'NetShip không hiện trên dropdown ĐVVC của đơn. Webhook: /api/v1/shipping/webhooks/netship',
-    ],
-    default: ['Nhập đúng thông tin API do đơn vị giao hàng cấp.', 'Sau khi Lưu, hệ thống dùng cấu hình này khi đăng đơn và đồng bộ trạng thái/COD.'],
-};
-
 function findCredentialKey(provider, logicalKey) {
     const keys = provider.fields.map((field) => field.key);
     return (credentialAliases[logicalKey] ?? [logicalKey]).find((key) => keys.includes(key)) ?? logicalKey;
 }
 
-function firstError(errors) {
+function firstError(errors, fallback) {
     const value = Object.values(errors || {})[0];
     if (Array.isArray(value)) return value[0];
-    if (value && typeof value === 'object') return Object.values(value)[0] ?? 'Không thể lưu cấu hình.';
-    return value ? String(value) : 'Không thể lưu cấu hình.';
+    if (value && typeof value === 'object') return Object.values(value)[0] ?? fallback;
+    return value ? String(value) : fallback;
 }
 
 function Field({ label, required = false, error = '', children, className = '' }) {
@@ -141,16 +88,19 @@ function ActionButton({ children, onClick, type = 'button' }) {
 }
 
 function HelpBox({ provider }) {
-    const lines = helpText[provider.provider] ?? helpText.default;
+    const t = useT();
+    const lines = t(`shipping.partners_page.help.${provider.provider}`);
+    const helpLines = Array.isArray(lines) ? lines : t('shipping.partners_page.help.default');
+
     return (
         <div className="pssp-help-row">
             <div className="pssp-control-col">
                 <div className="notice pssp-help">
-                    <b>+ Hướng dẫn kết nối:</b><br />
-                    {lines.map((line) => <span key={line}>- {line}<br /></span>)}
+                    <b>{t('shipping.partners_page.help_title')}</b><br />
+                    {(Array.isArray(helpLines) ? helpLines : []).map((line) => <span key={line}>- {line}<br /></span>)}
                     <br />
-                    <b>+ Hủy kết nối:</b><br />
-                    <span>- Xóa thông tin tài khoản/token hoặc tắt trạng thái sử dụng rồi bấm Lưu.</span>
+                    <b>{t('shipping.partners_page.disconnect_title')}</b><br />
+                    <span>- {t('shipping.partners_page.disconnect_hint')}</span>
                 </div>
             </div>
             <div className="pssp-label" aria-hidden="true" />
@@ -158,26 +108,52 @@ function HelpBox({ provider }) {
     );
 }
 
+function fieldDisplayLabel(t, provider, field) {
+    const byProvider = t(`shipping.providers.${provider.provider}.fields.${field.key}`);
+    if (byProvider && !byProvider.startsWith('shipping.providers.')) {
+        return byProvider;
+    }
+    return field.label ?? field.key;
+}
+
 function GenericCredentialFields({ provider, credential, setCredential, fieldErrors, secretSet }) {
-    return provider.fields.map((field) => (
-        <Field key={field.key} label={field.label} required={field.required} error={fieldErrors[`credentials.${field.key}`] || fieldErrors[field.key] || ''}>
-            <TextInput
-                type={field.is_secret ? 'password' : 'text'}
-                value={credential(field.key)}
-                onChange={(value) => setCredential(field.key, value)}
-                placeholder={field.is_secret && field.is_set ? field.masked : ''}
-                required={Boolean(field.required) && !(field.is_secret && secretSet.has(field.key))}
-                invalid={Boolean(fieldErrors[`credentials.${field.key}`] || fieldErrors[field.key])}
-            />
-        </Field>
-    ));
+    const t = useT();
+
+    return provider.fields.map((field) => {
+        const label = fieldDisplayLabel(t, provider, field);
+        return (
+            <Field key={field.key} label={label} required={field.required} error={fieldErrors[`credentials.${field.key}`] || fieldErrors[field.key] || ''}>
+                <TextInput
+                    type={field.is_secret ? 'password' : 'text'}
+                    value={credential(field.key)}
+                    onChange={(value) => setCredential(field.key, value)}
+                    placeholder={field.is_secret && field.is_set ? field.masked : ''}
+                    required={Boolean(field.required) && !(field.is_secret && secretSet.has(field.key))}
+                    invalid={Boolean(fieldErrors[`credentials.${field.key}`] || fieldErrors[field.key])}
+                />
+            </Field>
+        );
+    });
 }
 
 function requiredCredentialKeys(provider) {
     return provider.fields.filter((field) => field.required).map((field) => field.key);
 }
 
+function providerDisplayName(t, provider) {
+    const translated = t(`shipping.partners_page.names.${provider.provider}`);
+    if (translated && !translated.startsWith('shipping.partners_page.names.')) {
+        return translated;
+    }
+    return provider.label ?? provider.provider;
+}
+
 export function ShippingPartnerCard({ provider }) {
+    const t = useT();
+    const L = (key) => t(`shipping.partners_page.labels.${key}`);
+    const O = (key) => t(`shipping.partners_page.options.${key}`);
+    const P = (key) => t(`shipping.partners_page.placeholders.${key}`);
+
     const initialCredentials = Object.fromEntries(provider.fields.map((field) => [field.key, field.value ?? '']));
     const form = useForm({
         is_enabled: provider.is_enabled,
@@ -239,12 +215,14 @@ export function ShippingPartnerCard({ provider }) {
             const value = String(form.data.credentials?.[key] ?? '').trim();
             const field = provider.fields.find((item) => item.key === key);
             if (!value && !(field?.is_secret && secretSet.has(key))) {
-                next[`credentials.${key}`] = `${field?.label ?? key} bắt buộc.`;
+                next[`credentials.${key}`] = t('shipping.partners_page.field_required', {
+                    label: fieldDisplayLabel(t, provider, field ?? { key, label: key }),
+                });
             }
         });
 
         if (['viettel_post'].includes(provider.provider) && !String(form.data.settings.sender_profile_id ?? '').trim()) {
-            next['settings.sender_profile_id'] = 'Thông tin người gửi bắt buộc.';
+            next['settings.sender_profile_id'] = t('shipping.partners_page.sender_required');
         }
 
         const fixedPhone = String(form.data.settings.fixed_receiver_phone ?? '').trim();
@@ -261,7 +239,7 @@ export function ShippingPartnerCard({ provider }) {
         const nextErrors = validateClient();
         if (Object.keys(nextErrors).length) {
             setClientErrors(nextErrors);
-            toast.error('Vui lòng kiểm tra các trường bắt buộc.');
+            toast.error(t('shipping.partners_page.check_required'));
             return;
         }
 
@@ -275,16 +253,25 @@ export function ShippingPartnerCard({ provider }) {
             fixed_receiver_phone: fixedPhone ? (normalizeVietnamesePhone(fixedPhone) ?? fixedPhone) : '',
         };
 
+        const name = providerDisplayName(t, provider);
         form.transform((data) => ({ ...data, credentials, settings })).put(`/admin/shipping-partners/${provider.provider}`, {
             preserveScroll: true,
-            onSuccess: () => toast.success(`Đã lưu cấu hình ${providerNames[provider.provider] ?? provider.label}.`),
-            onError: (errors) => toast.error(firstError(errors)),
+            onSuccess: () => toast.success(t('shipping.partners_page.saved_config', { name })),
+            onError: (errors) => toast.error(firstError(errors, t('shipping.partners_page.save_failed'))),
         });
     };
 
-    const connectButton = <ActionButton onClick={() => toast.message('Đã gửi yêu cầu kiểm tra kết nối.')}><i className="fa fa-spinner" /> Kết nối</ActionButton>;
-    const verifyButton = <ActionButton onClick={() => toast.message('Đã gửi yêu cầu xác thực.')}><i className="fa fa-spinner" /> Xác thực</ActionButton>;
-    const providerName = providerNames[provider.provider] ?? provider.label;
+    const connectButton = (
+        <ActionButton onClick={() => toast.message(t('shipping.partners_page.connect_sent'))}>
+            <i className="fa fa-spinner" /> {t('shipping.partners_page.connect')}
+        </ActionButton>
+    );
+    const verifyButton = (
+        <ActionButton onClick={() => toast.message(t('shipping.partners_page.verify_sent'))}>
+            <i className="fa fa-spinner" /> {t('shipping.partners_page.verify')}
+        </ActionButton>
+    );
+    const providerName = providerDisplayName(t, provider);
     const useGeneric = !['vnpost', 'viettel_post', 'ghtk', 'ghn', 'jnt', 'holaship', 'spx', 'netship'].includes(provider.provider);
     const tokenField = provider.fields.find((field) => field.key === 'token');
     const baseUrlField = provider.fields.find((field) => field.key === 'base_url');
@@ -295,47 +282,47 @@ export function ShippingPartnerCard({ provider }) {
                 <span className="dvgh-name">{providerName}</span>
                 <label className="pssp-status-toggle">
                     <input type="checkbox" checked={Boolean(form.data.is_enabled)} onChange={(event) => form.setData('is_enabled', event.target.checked)} />
-                    <span>Sử dụng kết nối này</span>
+                    <span>{t('shipping.partners_page.use_connection')}</span>
                 </label>
             </Field>
 
             {provider.provider === 'netship' && (
                 <>
-                    <Field label="Access token (Bên thứ ba)" required error={errorFor('token', 'credentials.token')}>
+                    <Field label={L('token_third_party')} required error={errorFor('token', 'credentials.token')}>
                         <TextInput
                             type="password"
                             required={!secretSet.has('token')}
                             value={credential('token')}
                             onChange={(value) => setCredential('token', value)}
-                            placeholder={tokenField?.is_set ? (tokenField.masked ?? '') : 'Dán access token NetShip'}
+                            placeholder={tokenField?.is_set ? (tokenField.masked ?? '') : P('paste_netship_token')}
                             invalid={Boolean(errorFor('token', 'credentials.token'))}
                         />
                     </Field>
-                    <Field label="API Base URL">
+                    <Field label={L('api_base_url')}>
                         <TextInput
                             value={credential('base_url')}
                             onChange={(value) => setCredential('base_url', value)}
                             placeholder={baseUrlField?.value || 'https://netship.vn'}
                         />
                     </Field>
-                    <Field label="Loại sản phẩm mặc định">
+                    <Field label={L('product_type')}>
                         <TextInput
                             value={credential('product_type')}
                             onChange={(value) => setCredential('product_type', value)}
-                            placeholder="Không bắt buộc — mặc định: Sức khỏe"
+                            placeholder={P('product_type_optional')}
                         />
                     </Field>
-                    <Field label="Ghi chú giao">
+                    <Field label={L('delivery_note')}>
                         <SelectInput value={credential('delivery_note') || '1'} onChange={(value) => setCredential('delivery_note', value)}>
-                            <option value="0">Không cho xem hàng</option>
-                            <option value="1">Cho xem hàng</option>
-                            <option value="2">Cho thử hàng</option>
+                            <option value="0">{O('none')}</option>
+                            <option value="1">{O('view_only')}</option>
+                            <option value="2">{O('open_and_try')}</option>
                         </SelectInput>
                     </Field>
-                    <Field label="Hình thức lấy hàng">
+                    <Field label={L('pickup_type')}>
                         <SelectInput value={credential('pickup_type') || '0'} onChange={(value) => setCredential('pickup_type', value)}>
-                            <option value="0">Shipper tới lấy</option>
-                            <option value="1">Mang ra bưu cục</option>
+                            <option value="0">{O('carrier_pickup')}</option>
+                            <option value="1">{O('dropoff')}</option>
                         </SelectInput>
                     </Field>
                 </>
@@ -343,54 +330,54 @@ export function ShippingPartnerCard({ provider }) {
 
             {provider.provider === 'vnpost' && (
                 <>
-                    <Field label="Tài khoản" required error={errorFor('account', findCredentialKey(provider, 'account'))}>
-                        <TextInput required value={credential('account')} onChange={(value) => setCredential('account', value)} placeholder="Ghi chú để biết đang sử dụng tài khoản VNPOST nào" invalid={Boolean(errorFor('account', findCredentialKey(provider, 'account')))} />
+                    <Field label={L('account')} required error={errorFor('account', findCredentialKey(provider, 'account'))}>
+                        <TextInput required value={credential('account')} onChange={(value) => setCredential('account', value)} placeholder={P('vnpost_account')} invalid={Boolean(errorFor('account', findCredentialKey(provider, 'account')))} />
                     </Field>
-                    <Field label="Mã khách hàng VNPOST (mã CRM)" required error={errorFor('customer_code', findCredentialKey(provider, 'customer_code'))}>
+                    <Field label={L('customer_code_vnpost')} required error={errorFor('customer_code', findCredentialKey(provider, 'customer_code'))}>
                         <TextInput required value={credential('customer_code')} onChange={(value) => setCredential('customer_code', value)} invalid={Boolean(errorFor('customer_code', findCredentialKey(provider, 'customer_code')))} />
                         {connectButton}
                     </Field>
-                    <Field label="Mã hợp đồng"><TextInput value={credential('contract_code')} onChange={(value) => setCredential('contract_code', value)} placeholder="Mã hợp đồng của khách hàng với VnPost" /></Field>
-                    <Field label="Mã bưu cục xử lý"><TextInput value={form.data.settings.sender_profile_id} onChange={(value) => setSetting('sender_profile_id', value)} placeholder="Không bắt buộc" /></Field>
-                    <Field label="Lựa chọn xem hàng">
-                        <SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">Cho xem hàng</option><option value="none">Không cho xem hàng</option><option value="open_and_try">Cho thử hàng</option></SelectInput>
-                        <SelectInput value={form.data.settings.pickup_mode} onChange={(value) => setSetting('pickup_mode', value)}><option value="carrier_pickup">Thu gom tận nơi</option><option value="dropoff">Gửi hàng tại bưu cục</option></SelectInput>
+                    <Field label={L('contract_code')}><TextInput value={credential('contract_code')} onChange={(value) => setCredential('contract_code', value)} placeholder={P('vnpost_contract')} /></Field>
+                    <Field label={L('post_office')}><TextInput value={form.data.settings.sender_profile_id} onChange={(value) => setSetting('sender_profile_id', value)} placeholder={P('optional')} /></Field>
+                    <Field label={L('inspection')}>
+                        <SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">{O('view_only')}</option><option value="none">{O('none')}</option><option value="open_and_try">{O('open_and_try')}</option></SelectInput>
+                        <SelectInput value={form.data.settings.pickup_mode} onChange={(value) => setSetting('pickup_mode', value)}><option value="carrier_pickup">{O('collect_onsite')}</option><option value="dropoff">{O('dropoff_vnpost')}</option></SelectInput>
                     </Field>
-                    <Field label="Cố định SĐT người nhận khi đăng đơn"><TextInput value={form.data.settings.fixed_receiver_phone} onChange={(value) => setSetting('fixed_receiver_phone', value)} /></Field>
+                    <Field label={L('fixed_receiver_phone')}><TextInput value={form.data.settings.fixed_receiver_phone} onChange={(value) => setSetting('fixed_receiver_phone', value)} /></Field>
                 </>
             )}
 
             {provider.provider === 'viettel_post' && (
                 <>
-                    <Field label="Tài khoản" required error={errorFor('account', findCredentialKey(provider, 'account'))}>
+                    <Field label={L('account')} required error={errorFor('account', findCredentialKey(provider, 'account'))}>
                         <TextInput required value={credential('account')} onChange={(value) => setCredential('account', value)} invalid={Boolean(errorFor('account', findCredentialKey(provider, 'account')))} />
                     </Field>
-                    <Field label="Mật khẩu" required error={errorFor('password', findCredentialKey(provider, 'password'))}>
+                    <Field label={L('password')} required error={errorFor('password', findCredentialKey(provider, 'password'))}>
                         <TextInput type="password" required={!secretSet.has(findCredentialKey(provider, 'password'))} value={credential('password')} onChange={(value) => setCredential('password', value)} placeholder={provider.fields.find((field) => field.key === findCredentialKey(provider, 'password'))?.masked ?? ''} invalid={Boolean(errorFor('password', findCredentialKey(provider, 'password')))} />
                         {connectButton}
                     </Field>
-                    <Field label="Mã Token Viettel Post"><TextInput value={credential('token')} onChange={(value) => setCredential('token', value)} placeholder="Tự động cập nhật sau khi kết nối" /></Field>
-                    <Field label="Thông tin người gửi" required error={fieldErrors['settings.sender_profile_id'] || ''}>
-                        <TextInput required value={form.data.settings.sender_profile_id} onChange={(value) => setSetting('sender_profile_id', value)} placeholder="Có thể hiểu là kho" invalid={Boolean(fieldErrors['settings.sender_profile_id'])} />
-                        <ActionButton onClick={() => toast.message('Đang tải thông tin người gửi.')}>Xem người gửi</ActionButton>
+                    <Field label={L('vtp_token')}><TextInput value={credential('token')} onChange={(value) => setCredential('token', value)} placeholder={P('vtp_token_auto')} /></Field>
+                    <Field label={L('sender_info')} required error={fieldErrors['settings.sender_profile_id'] || ''}>
+                        <TextInput required value={form.data.settings.sender_profile_id} onChange={(value) => setSetting('sender_profile_id', value)} placeholder={P('sender_as_warehouse')} invalid={Boolean(fieldErrors['settings.sender_profile_id'])} />
+                        <ActionButton onClick={() => toast.message(t('shipping.partners_page.loading_senders'))}>{t('shipping.partners_page.view_senders')}</ActionButton>
                     </Field>
-                    <Field label="Loại hàng hóa"><SelectInput value={form.data.settings.goods_type} onChange={(value) => setSetting('goods_type', value)}><option value="parcel">Hàng hóa</option><option value="document">Tài liệu</option><option value="fragile">Dễ vỡ</option></SelectInput></Field>
-                    <Field label="Dịch vụ gia tăng"><CheckboxInput checked={form.data.settings.insurance_enabled} onChange={(value) => setSetting('insurance_enabled', value)}>Sử dụng bảo hiểm</CheckboxInput><CheckboxInput checked={form.data.settings.allow_partial_delivery} onChange={(value) => setSetting('allow_partial_delivery', value)}>Giao hàng 1 phần</CheckboxInput></Field>
-                    <Field label="Cố định SĐT người nhận khi đăng đơn"><TextInput value={form.data.settings.fixed_receiver_phone} onChange={(value) => setSetting('fixed_receiver_phone', value)} /></Field>
+                    <Field label={L('goods_type')}><SelectInput value={form.data.settings.goods_type} onChange={(value) => setSetting('goods_type', value)}><option value="parcel">{O('parcel')}</option><option value="document">{O('document')}</option><option value="fragile">{O('fragile')}</option></SelectInput></Field>
+                    <Field label={L('extra_services')}><CheckboxInput checked={form.data.settings.insurance_enabled} onChange={(value) => setSetting('insurance_enabled', value)}>{L('use_insurance')}</CheckboxInput><CheckboxInput checked={form.data.settings.allow_partial_delivery} onChange={(value) => setSetting('allow_partial_delivery', value)}>{L('partial_delivery')}</CheckboxInput></Field>
+                    <Field label={L('fixed_receiver_phone')}><TextInput value={form.data.settings.fixed_receiver_phone} onChange={(value) => setSetting('fixed_receiver_phone', value)} /></Field>
                 </>
             )}
 
             {provider.provider === 'ghtk' && (
                 <>
-                    <Field label="Tài khoản" required error={errorFor('account', findCredentialKey(provider, 'account'))}>
+                    <Field label={L('account')} required error={errorFor('account', findCredentialKey(provider, 'account'))}>
                         <TextInput required value={credential('account')} onChange={(value) => setCredential('account', value)} invalid={Boolean(errorFor('account', findCredentialKey(provider, 'account')))} />
                     </Field>
-                    <Field label="Mã API Token" required error={errorFor('token', findCredentialKey(provider, 'token'))}>
+                    <Field label={L('api_token')} required error={errorFor('token', findCredentialKey(provider, 'token'))}>
                         <TextInput type="password" required={!secretSet.has(findCredentialKey(provider, 'token'))} value={credential('token')} onChange={(value) => setCredential('token', value)} placeholder={provider.fields.find((field) => field.key === findCredentialKey(provider, 'token'))?.masked ?? ''} invalid={Boolean(errorFor('token', findCredentialKey(provider, 'token')))} />
                     </Field>
-                    <Field label="Giao hàng bằng"><SelectInput value={form.data.settings.pickup_mode} onChange={(value) => setSetting('pickup_mode', value)}><option value="carrier_pickup">GHTK lấy hàng</option><option value="dropoff">Shop gửi hàng</option></SelectInput></Field>
-                    <Field label="Lựa chọn xem hàng"><SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">Cho xem hàng</option><option value="none">Không cho xem hàng</option></SelectInput></Field>
-                    <Field label="Cố định SĐT người nhận khi đăng đơn"><TextInput value={form.data.settings.fixed_receiver_phone} onChange={(value) => setSetting('fixed_receiver_phone', value)} /></Field>
+                    <Field label={L('ship_via')}><SelectInput value={form.data.settings.pickup_mode} onChange={(value) => setSetting('pickup_mode', value)}><option value="carrier_pickup">{O('ghtk_pickup')}</option><option value="dropoff">{O('shop_send')}</option></SelectInput></Field>
+                    <Field label={L('inspection')}><SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">{O('view_only')}</option><option value="none">{O('none')}</option></SelectInput></Field>
+                    <Field label={L('fixed_receiver_phone')}><TextInput value={form.data.settings.fixed_receiver_phone} onChange={(value) => setSetting('fixed_receiver_phone', value)} /></Field>
                 </>
             )}
 
@@ -401,81 +388,83 @@ export function ShippingPartnerCard({ provider }) {
                         {connectButton}
                     </Field>
                     {hasField('shop_id') && (
-                        <Field label="Shop ID" required error={errorFor('shop_id', findCredentialKey(provider, 'shop_id'))}>
+                        <Field label={L('shop_id')} required error={errorFor('shop_id', findCredentialKey(provider, 'shop_id'))}>
                             <TextInput required value={credential('shop_id')} onChange={(value) => setCredential('shop_id', value)} invalid={Boolean(errorFor('shop_id', findCredentialKey(provider, 'shop_id')))} />
                         </Field>
                     )}
-                    <Field label="Cửa hàng mặc định"><TextInput value={form.data.settings.sender_profile_id} onChange={(value) => setSetting('sender_profile_id', value)} placeholder="Mã shop / kho GHN" /></Field>
-                    <Field label="Gói dịch vụ"><SelectInput value={form.data.settings.goods_type} onChange={(value) => setSetting('goods_type', value)}><option value="parcel">Hàng nhẹ</option><option value="fragile">Hàng dễ vỡ</option><option value="document">Tài liệu</option></SelectInput></Field>
-                    <Field label="Lựa chọn xem hàng"><SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">Cho xem hàng</option><option value="none">Không cho xem hàng</option></SelectInput></Field>
+                    <Field label={L('default_shop')}><TextInput value={form.data.settings.sender_profile_id} onChange={(value) => setSetting('sender_profile_id', value)} placeholder={P('ghn_shop')} /></Field>
+                    <Field label={L('service_package')}><SelectInput value={form.data.settings.goods_type} onChange={(value) => setSetting('goods_type', value)}><option value="parcel">{O('light')}</option><option value="fragile">{O('fragile')}</option><option value="document">{O('document')}</option></SelectInput></Field>
+                    <Field label={L('inspection')}><SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">{O('view_only')}</option><option value="none">{O('none')}</option></SelectInput></Field>
                 </>
             )}
 
             {provider.provider === 'jnt' && (
                 <>
-                    <Field label="Mã khách hàng" required error={errorFor('customer_code', findCredentialKey(provider, 'customer_code'))}>
+                    <Field label={L('customer_code')} required error={errorFor('customer_code', findCredentialKey(provider, 'customer_code'))}>
                         <TextInput required value={credential('customer_code')} onChange={(value) => setCredential('customer_code', value)} invalid={Boolean(errorFor('customer_code', findCredentialKey(provider, 'customer_code')))} />
                     </Field>
-                    <Field label="API key" required error={errorFor('api_key', findCredentialKey(provider, 'api_key'))}>
+                    <Field label={L('api_key')} required error={errorFor('api_key', findCredentialKey(provider, 'api_key'))}>
                         <TextInput type="password" required={!secretSet.has(findCredentialKey(provider, 'api_key'))} value={credential('api_key')} onChange={(value) => setCredential('api_key', value)} invalid={Boolean(errorFor('api_key', findCredentialKey(provider, 'api_key')))} />
                     </Field>
-                    <Field label="API secret" required error={errorFor('api_secret', findCredentialKey(provider, 'api_secret'))}>
+                    <Field label={L('api_secret')} required error={errorFor('api_secret', findCredentialKey(provider, 'api_secret'))}>
                         <TextInput type="password" required={!secretSet.has(findCredentialKey(provider, 'api_secret'))} value={credential('api_secret')} onChange={(value) => setCredential('api_secret', value)} invalid={Boolean(errorFor('api_secret', findCredentialKey(provider, 'api_secret')))} />
                         {connectButton}
                     </Field>
-                    <Field label="Lựa chọn xem hàng"><SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">Cho xem hàng</option><option value="none">Không cho xem hàng</option></SelectInput></Field>
+                    <Field label={L('inspection')}><SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">{O('view_only')}</option><option value="none">{O('none')}</option></SelectInput></Field>
                 </>
             )}
 
             {provider.provider === 'holaship' && (
                 <>
-                    <Field label="Phone" required error={errorFor('account', findCredentialKey(provider, 'account'))}>
+                    <Field label={L('phone')} required error={errorFor('account', findCredentialKey(provider, 'account'))}>
                         <TextInput required value={credential('account')} onChange={(value) => setCredential('account', value)} invalid={Boolean(errorFor('account', findCredentialKey(provider, 'account')))} />
                     </Field>
-                    <Field label="Password" required error={errorFor('password', findCredentialKey(provider, 'password'))}>
+                    <Field label={L('password')} required error={errorFor('password', findCredentialKey(provider, 'password'))}>
                         <TextInput type="password" required={!secretSet.has(findCredentialKey(provider, 'password'))} value={credential('password')} onChange={(value) => setCredential('password', value)} invalid={Boolean(errorFor('password', findCredentialKey(provider, 'password')))} />
                     </Field>
-                    <Field label="OTP"><TextInput value={form.data.settings.otp} onChange={(value) => setSetting('otp', value)} />{verifyButton}</Field>
-                    <Field label="Shop ID"><TextInput value={form.data.settings.sender_profile_id} onChange={(value) => setSetting('sender_profile_id', value)} /></Field>
+                    <Field label={L('otp')}><TextInput value={form.data.settings.otp} onChange={(value) => setSetting('otp', value)} />{verifyButton}</Field>
+                    <Field label={L('shop_id')}><TextInput value={form.data.settings.sender_profile_id} onChange={(value) => setSetting('sender_profile_id', value)} /></Field>
                 </>
             )}
 
             {provider.provider === 'spx' && (
                 <>
-                    <Field label="User ID" required error={errorFor('account', findCredentialKey(provider, 'account'))}>
+                    <Field label={L('user_id')} required error={errorFor('account', findCredentialKey(provider, 'account'))}>
                         <TextInput required value={credential('account')} onChange={(value) => setCredential('account', value)} invalid={Boolean(errorFor('account', findCredentialKey(provider, 'account')))} />
                     </Field>
-                    <Field label="Secret key" required error={errorFor('token', findCredentialKey(provider, 'token'))}>
+                    <Field label={L('secret_key')} required error={errorFor('token', findCredentialKey(provider, 'token'))}>
                         <TextInput type="password" required={!secretSet.has(findCredentialKey(provider, 'token'))} value={credential('token')} onChange={(value) => setCredential('token', value)} invalid={Boolean(errorFor('token', findCredentialKey(provider, 'token')))} />
                     </Field>
-                    <Field label="Account ID" required error={errorFor('shop_id', findCredentialKey(provider, 'shop_id'))}>
+                    <Field label={L('account_id')} required error={errorFor('shop_id', findCredentialKey(provider, 'shop_id'))}>
                         <TextInput required value={credential('shop_id')} onChange={(value) => setCredential('shop_id', value)} invalid={Boolean(errorFor('shop_id', findCredentialKey(provider, 'shop_id')))} />
                         {connectButton}
                     </Field>
-                    <Field label="Sử dụng bảo hiểm"><CheckboxInput checked={form.data.settings.insurance_enabled} onChange={(value) => setSetting('insurance_enabled', value)}>Sử dụng bảo hiểm</CheckboxInput></Field>
-                    <Field label="Phương thức lấy hàng"><SelectInput value={form.data.settings.pickup_mode} onChange={(value) => setSetting('pickup_mode', value)}><option value="carrier_pickup">Bưu tá tới lấy hàng</option><option value="dropoff">Gửi tại bưu cục</option></SelectInput></Field>
-                    <Field label="Lựa chọn xem hàng"><SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">Cho xem hàng</option><option value="none">Không cho xem hàng</option></SelectInput></Field>
-                    <Field label="Giao hàng thất bại thu tiền"><TextInput value={form.data.settings.failed_delivery_collect_fee} onChange={(value) => setSetting('failed_delivery_collect_fee', value)} /></Field>
+                    <Field label={L('use_insurance')}><CheckboxInput checked={form.data.settings.insurance_enabled} onChange={(value) => setSetting('insurance_enabled', value)}>{L('use_insurance')}</CheckboxInput></Field>
+                    <Field label={L('pickup_method')}><SelectInput value={form.data.settings.pickup_mode} onChange={(value) => setSetting('pickup_mode', value)}><option value="carrier_pickup">{O('carrier_pickup_full')}</option><option value="dropoff">{O('dropoff_full')}</option></SelectInput></Field>
+                    <Field label={L('inspection')}><SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">{O('view_only')}</option><option value="none">{O('none')}</option></SelectInput></Field>
+                    <Field label={L('failed_collect_fee')}><TextInput value={form.data.settings.failed_delivery_collect_fee} onChange={(value) => setSetting('failed_delivery_collect_fee', value)} /></Field>
                 </>
             )}
 
             {useGeneric && (
                 <>
                     <GenericCredentialFields provider={provider} credential={credential} setCredential={setCredential} fieldErrors={fieldErrors} secretSet={secretSet} />
-                    <Field label="Cửa hàng / kho"><TextInput value={form.data.settings.sender_profile_id} onChange={(value) => setSetting('sender_profile_id', value)} /></Field>
-                    <Field label="Lựa chọn xem hàng"><SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">Cho xem hàng</option><option value="none">Không cho xem hàng</option><option value="open_and_try">Cho thử hàng</option></SelectInput></Field>
-                    <Field label="Phương thức lấy hàng"><SelectInput value={form.data.settings.pickup_mode} onChange={(value) => setSetting('pickup_mode', value)}><option value="carrier_pickup">Bưu tá tới lấy hàng</option><option value="dropoff">Gửi tại bưu cục</option><option value="manual">Thủ công</option></SelectInput></Field>
-                    <Field label="Dịch vụ"><CheckboxInput checked={form.data.settings.insurance_enabled} onChange={(value) => setSetting('insurance_enabled', value)}>Sử dụng bảo hiểm</CheckboxInput><CheckboxInput checked={form.data.settings.allow_partial_delivery} onChange={(value) => setSetting('allow_partial_delivery', value)}>Giao hàng 1 phần</CheckboxInput></Field>
-                    <Field label="Cố định SĐT người nhận khi đăng đơn"><TextInput value={form.data.settings.fixed_receiver_phone} onChange={(value) => setSetting('fixed_receiver_phone', value)} /></Field>
+                    <Field label={L('shop_warehouse')}><TextInput value={form.data.settings.sender_profile_id} onChange={(value) => setSetting('sender_profile_id', value)} /></Field>
+                    <Field label={L('inspection')}><SelectInput value={form.data.settings.inspection_mode} onChange={(value) => setSetting('inspection_mode', value)}><option value="view_only">{O('view_only')}</option><option value="none">{O('none')}</option><option value="open_and_try">{O('open_and_try')}</option></SelectInput></Field>
+                    <Field label={L('pickup_method')}><SelectInput value={form.data.settings.pickup_mode} onChange={(value) => setSetting('pickup_mode', value)}><option value="carrier_pickup">{O('carrier_pickup_full')}</option><option value="dropoff">{O('dropoff_full')}</option><option value="manual">{O('manual')}</option></SelectInput></Field>
+                    <Field label={L('services')}><CheckboxInput checked={form.data.settings.insurance_enabled} onChange={(value) => setSetting('insurance_enabled', value)}>{L('use_insurance')}</CheckboxInput><CheckboxInput checked={form.data.settings.allow_partial_delivery} onChange={(value) => setSetting('allow_partial_delivery', value)}>{L('partial_delivery')}</CheckboxInput></Field>
+                    <Field label={L('fixed_receiver_phone')}><TextInput value={form.data.settings.fixed_receiver_phone} onChange={(value) => setSetting('fixed_receiver_phone', value)} /></Field>
                 </>
             )}
 
             <div className="pssp-save-row">
                 <div className="pssp-control-col">
                     <button type="submit" disabled={form.processing} className="btn btn-sm btn-primary mr15">
-                        <i className={`fa ${form.processing ? 'fa-spinner fa-spin' : 'fa-save'}`} /> {form.processing ? 'Đang lưu…' : 'Lưu'}
+                        <i className={`fa ${form.processing ? 'fa-spinner fa-spin' : 'fa-save'}`} /> {form.processing ? t('shipping.partners_page.saving') : t('shipping.partners_page.save')}
                     </button>
-                    {provider.webhook_url && <span className="pssp-webhook">Webhook: {provider.webhook_url}</span>}
+                    {provider.webhook_url && (
+                        <span className="pssp-webhook">{t('shipping.partners_page.webhook_prefix')} {provider.webhook_url}</span>
+                    )}
                 </div>
                 <div className="pssp-label" />
             </div>

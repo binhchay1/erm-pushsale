@@ -207,7 +207,7 @@ return [
         // Cổng trung gian NetShip — không chọn trên đơn. Đơn vẫn chọn VTP/GHTK;
         // nếu ĐVVC chưa setup credential thì tạo vận đơn qua NetShip (khi gateway bật).
         'netship' => [
-            'label' => 'NetShip (cổng trung gian)',
+            'label' => 'NetShip',
             'description' => 'Aggregator: cấu hình token bên thứ ba. Không hiện trên dropdown ĐVVC của đơn. Khi ĐVVC direct chưa sẵn sàng, hệ thống định tuyến qua NetShip.',
             'docs_url' => 'https://steplap.gitbook.io/netship',
             'api_base_url' => env('NETSHIP_USE_SANDBOX', false)
@@ -228,7 +228,7 @@ return [
             ],
             'fields' => [
                 'token' => [
-                    'label' => 'Access token (Bên thứ ba)',
+                    'label' => 'Access token',
                     'secret' => true,
                     'required' => true,
                     'default' => env('NETSHIP_TOKEN'),
