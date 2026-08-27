@@ -325,17 +325,17 @@ export function ShippingPartnerCard({ provider }) {
                             placeholder="Không bắt buộc — mặc định: Sức khỏe"
                         />
                     </Field>
-                    <Field label="Ghi chú giao (0/1/2)">
+                    <Field label="Ghi chú giao">
                         <SelectInput value={credential('delivery_note') || '1'} onChange={(value) => setCredential('delivery_note', value)}>
-                            <option value="0">0 — Không cho xem hàng</option>
-                            <option value="1">1 — Cho xem hàng</option>
-                            <option value="2">2 — Cho thử hàng</option>
+                            <option value="0">Không cho xem hàng</option>
+                            <option value="1">Cho xem hàng</option>
+                            <option value="2">Cho thử hàng</option>
                         </SelectInput>
                     </Field>
                     <Field label="Hình thức lấy hàng">
                         <SelectInput value={credential('pickup_type') || '0'} onChange={(value) => setCredential('pickup_type', value)}>
-                            <option value="0">0 — Shipper tới lấy</option>
-                            <option value="1">1 — Mang ra bưu cục</option>
+                            <option value="0">Shipper tới lấy</option>
+                            <option value="1">Mang ra bưu cục</option>
                         </SelectInput>
                     </Field>
                 </>
