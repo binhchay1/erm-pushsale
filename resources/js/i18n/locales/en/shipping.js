@@ -186,7 +186,7 @@ export default {
             netship: [
                 'Required: enable “Use this connection” + Access token, then Save.',
                 'API Base URL defaults to https://netship.vn (sandbox: https://test.netship.vn).',
-                'When creating an account / getting an access token on NetShip, copy the webhook URL below and paste it into the callback URL field on that page.',
+                'When creating an account / getting an access token on NetShip, copy the webhook URL above (:url) and paste it into the callback URL field on that page.',
                 'The other fields are optional create-order defaults — leave blank to use system defaults.',
                 'NetShip does not appear in the order carrier dropdown.',
             ],

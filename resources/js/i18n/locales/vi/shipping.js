@@ -186,7 +186,7 @@ export default {
             netship: [
                 'Bắt buộc: bật “Sử dụng kết nối này” + Access token, rồi Lưu.',
                 'API Base URL để mặc định https://netship.vn (sandbox: https://test.netship.vn).',
-                'Khi tạo tài khoản / lấy access token trên NetShip, copy URL webhook bên dưới dán vào ô URL callback trên trang đó.',
+                'Khi tạo tài khoản / lấy access token trên NetShip, copy URL webhook bên trên (:url) dán vào ô URL callback trên trang đó.',
                 'Ba trường còn lại là default tùy chọn khi tạo đơn — không điền vẫn dùng mặc định hệ thống.',
                 'NetShip không hiện trên dropdown ĐVVC của đơn.',
             ],

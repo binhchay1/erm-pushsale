@@ -91,13 +91,19 @@ function HelpBox({ provider }) {
     const t = useT();
     const lines = t(`shipping.partners_page.help.${provider.provider}`);
     const helpLines = Array.isArray(lines) ? lines : t('shipping.partners_page.help.default');
+    const webhookUrl = provider.webhook_url || '';
 
     return (
         <div className="pssp-help-row">
             <div className="pssp-control-col">
                 <div className="notice pssp-help">
                     <b>{t('shipping.partners_page.help_title')}</b><br />
-                    {(Array.isArray(helpLines) ? helpLines : []).map((line) => <span key={line}>- {line}<br /></span>)}
+                    {(Array.isArray(helpLines) ? helpLines : []).map((line) => (
+                        <span key={line}>
+                            - {String(line).replaceAll(':url', webhookUrl)}
+                            <br />
+                        </span>
+                    ))}
                     <br />
                     <b>{t('shipping.partners_page.disconnect_title')}</b><br />
                     <span>- {t('shipping.partners_page.disconnect_hint')}</span>
