@@ -23,6 +23,12 @@ abstract class BasePushsalePageController extends Controller
 {
     protected string $pageCode;
 
+    /**
+     * Trang import/upload không cần rows + filterOptions nặng (1000 leads / 2000 SP).
+     * Override = true ở LeadImport* để GET < 2s.
+     */
+    protected bool $lightweightIndex = false;
+
     public function __construct(
         protected readonly PushsalePageService $pages,
         protected readonly PageResourceManager $resources,
@@ -45,6 +51,24 @@ abstract class BasePushsalePageController extends Controller
         ];
         $filterOptions = [];
         $pageRuntimeError = null;
+
+        if ($this->lightweightIndex) {
+            return Inertia::render($component, [
+                'schema' => array_merge($schema, [
+                    'form_fields' => [],
+                    'dialog_resource_schemas' => [],
+                ]),
+                'rows' => [],
+                'pagination' => $result['meta'],
+                'summary' => [],
+                'filterOptions' => [],
+                'routeUrl' => '/'.$request->path(),
+                'templateHtml' => '',
+                'dialogTemplates' => [],
+                'activeMenuCode' => $this->activeMenuCodeFromRequest($request),
+                'pageRuntimeError' => null,
+            ]);
+        }
 
         try {
             $result = $this->pages->rows($this->pageCode, $request);

@@ -1,4 +1,4 @@
-import { router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 
 import {
     DropdownMenu,
@@ -8,39 +8,54 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useT } from '@/providers/I18nProvider';
 
-export function ShopSwitcher({ pushsaleStyle = false }) {
+export function ShopSwitcher() {
     const t = useT();
     const { shops = [], current_shop: currentShop, auth } = usePage().props;
     const list = Array.isArray(shops) && shops.length
         ? shops
         : (auth?.user?.shops ?? []);
     const current = currentShop ?? auth?.user?.current_shop ?? null;
-
-    if (!list.length) {
-        return null;
-    }
+    const isAdmin = auth?.user?.role === 'admin' || auth?.user?.is_owner || auth?.user?.is_platform_admin;
 
     const switchTo = (shopId) => {
         if (current?.id === shopId) return;
         router.post('/shop/current', { shop_id: shopId, remember_default: true }, {
             preserveScroll: true,
             only: ['auth', 'shops', 'current_shop', 'flash'],
-            onSuccess: () => {
-                // Đổi shop xong phải reload trang để bảng/ops lấy data shop mới.
-                router.reload({ preserveScroll: true });
-            },
+            onSuccess: () => router.reload({ preserveScroll: true }),
         });
     };
 
-    if (!pushsaleStyle) {
-        return null;
+    // Chưa có cửa hàng: hiện CTA rõ (admin) hoặc nhãn trống (staff).
+    if (!list.length) {
+        if (!isAdmin) {
+            return (
+                <span className="pushsale-shop-switcher is-empty" title={t('shops.empty_state_title')}>
+                    <i className="fa fa-store" aria-hidden="true" />
+                    <span className="pushsale-shop-switcher__label">{t('shops.empty_state_staff')}</span>
+                </span>
+            );
+        }
+
+        return (
+            <Link
+                href="/admin/shops"
+                className="pushsale-shop-switcher is-empty"
+                title={t('shops.empty_state_title')}
+            >
+                <i className="fa fa-store" aria-hidden="true" />
+                <span className="pushsale-shop-switcher__label">{t('shops.empty_state_admin')}</span>
+            </Link>
+        );
     }
+
+    const label = current?.name ?? list[0]?.name ?? t('shops.switcher_placeholder');
 
     if (list.length === 1) {
         return (
-            <span className="pushsale-language-trigger" title={t('shops.switcher_title')} aria-label={t('shops.switcher_title')}>
+            <span className="pushsale-shop-switcher is-single" title={t('shops.switcher_title')}>
                 <i className="fa fa-store" aria-hidden="true" />
-                <span>{current?.name ?? list[0].name}</span>
+                <span className="pushsale-shop-switcher__label">{label}</span>
             </span>
         );
     }
@@ -50,25 +65,34 @@ export function ShopSwitcher({ pushsaleStyle = false }) {
             <DropdownMenuTrigger asChild>
                 <button
                     type="button"
-                    className="pushsale-language-trigger"
+                    className="pushsale-shop-switcher"
                     title={t('shops.switcher_title')}
                     aria-label={t('shops.switcher_title')}
                 >
                     <i className="fa fa-store" aria-hidden="true" />
-                    <span>{current?.name ?? t('shops.switcher_placeholder')}</span>
+                    <span className="pushsale-shop-switcher__label">{label}</span>
+                    <i className="fa fa-caret-down pushsale-shop-switcher__caret" aria-hidden="true" />
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" sideOffset={0} className="pushsale-language-dropdown">
+            <DropdownMenuContent align="end" sideOffset={4} className="pushsale-shop-switcher-dropdown">
                 {list.map((shop) => (
                     <DropdownMenuItem
                         key={shop.id}
-                        className={`pushsale-language-dropdown-item ${current?.id === shop.id ? 'is-active' : ''}`}
+                        className={`pushsale-shop-switcher-item ${current?.id === shop.id ? 'is-active' : ''}`}
                         onClick={() => switchTo(shop.id)}
                     >
                         <i className={`fa ${current?.id === shop.id ? 'fa-check' : 'fa-circle-o'}`} aria-hidden="true" />
                         <span>{shop.name}</span>
                     </DropdownMenuItem>
                 ))}
+                {isAdmin && (
+                    <DropdownMenuItem asChild className="pushsale-shop-switcher-item is-manage">
+                        <Link href="/admin/shops">
+                            <i className="fa fa-cog" aria-hidden="true" />
+                            <span>{t('shops.manage_link')}</span>
+                        </Link>
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
     );

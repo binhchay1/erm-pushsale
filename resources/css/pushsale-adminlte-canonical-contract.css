@@ -2606,3 +2606,83 @@ html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-o
 html body.pushsale-app-body [data-slot='dialog-content'].ps-dialog-surface .ps-system-table-wrap > table {
     margin: 0 !important;
 }
+
+/* ShopSwitcher — riêng biệt language toggle (không bị ép 34px / lowercase / cắt chữ). */
+html body.pushsale-app-body .pushsale-shop-switcher {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: var(--ps-v85-header-height, 50px) !important;
+    min-width: 0 !important;
+    max-width: 220px !important;
+    padding: 0 10px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .pushsale-shop-switcher:hover,
+html body.pushsale-app-body .pushsale-shop-switcher[data-state='open'] {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+    text-decoration: none !important;
+}
+
+html body.pushsale-app-body .pushsale-shop-switcher__label {
+    display: inline-block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 160px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    text-transform: none !important;
+    color: #fff !important;
+}
+
+html body.pushsale-app-body .pushsale-shop-switcher.is-empty .pushsale-shop-switcher__label {
+    opacity: 0.92 !important;
+    font-weight: 500 !important;
+}
+
+html body.pushsale-app-body .pushsale-shop-switcher__caret {
+    font-size: 10px !important;
+    opacity: 0.85 !important;
+}
+
+html body.pushsale-app-body .pushsale-shop-switcher-dropdown {
+    min-width: 200px !important;
+}
+
+html body.pushsale-app-body .pushsale-shop-switcher-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+html body.pushsale-app-body .pushsale-shop-switcher-item.is-active {
+    font-weight: 600 !important;
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .pushsale-shop-switcher {
+        max-width: 132px !important;
+        padding: 0 6px !important;
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
+    html body.pushsale-app-body .pushsale-shop-switcher__label {
+        max-width: 88px !important;
+        font-size: 11px !important;
+    }
+
+    html body.pushsale-app-body .pushsale-shop-switcher__caret {
+        display: none !important;
+    }
+}

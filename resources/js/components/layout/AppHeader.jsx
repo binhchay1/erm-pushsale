@@ -55,12 +55,12 @@ export function AppHeader({ onToggleSidebar }) {
 
             <div className="pushsale-header-tools">
                 <PageInfoButton className="is-header" />
-                <ShopSwitcher pushsaleStyle />
                 <LanguageToggle pushsaleStyle />
                 <NotificationBell pushsaleStyle />
                 <span className="pushsale-header-icon" aria-hidden="true" title="Thông báo hệ thống">
                     <i className="fa fa-bullhorn" />
                 </span>
+                <ShopSwitcher />
                 <UserMenu variant="pushsale" />
             </div>
         </header>

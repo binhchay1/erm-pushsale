@@ -31,8 +31,9 @@ Do **not** create `CONTEXT_HANDOFF_V*` / versioned UI docs / HTML templates unde
 - Trang so sánh: `/admin/shops/overview` (bypass `ShopScope`). CRUD: `/admin/shops` (menu 1.1.3 / 1.1.4).
 - **TLC** = closed contacts / contacts. **TLH** = appointment orders (`next_operation_at`) / contacts.
 - Khi `current_shop` đang set: báo cáo/dashboard **ép live** (`ReportFactReader::supports` = false) vì `report_daily_*` chưa có `shop_id`.
-- Không shop-scope: shipping partners, work shifts, phone blacklist, AppSetting, users org chart.
 - Tác nghiệp sale / kho / KT / hồ sơ KH: query `Order`/`Lead` qua ShopScope → chỉ data shop đang chọn (đúng form 2B).
+- **NetShip ↔ Shop:** NetShip không nhận `shops.id`. Luồng đúng: Shop → Order/Warehouse (`shop_id`) → `ShippingAddressHelper::pickupForOrder` lấy địa chỉ kho → NetShip proxy. `warehouse.shipping_account_settings.shop_id` là ID shop của **hãng** (GHN…), không phải org Shop.
+- Không shop-scope: shipping partners, work shifts, phone blacklist, AppSetting, users org chart.
 - `EcommerceShopConnection.shop_id` / Pancake = ID sàn ngoài, **không** phải org Shop.
 
 ## 0b. Route & menu naming
