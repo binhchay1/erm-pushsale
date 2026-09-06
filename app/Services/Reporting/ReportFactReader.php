@@ -33,6 +33,13 @@ class ReportFactReader
 
     public function supports(ReportFilterData $filter, ?User $user = null): bool
     {
+        // Fact tables chưa có shop_id — khi đang chọn shop phải dùng live query
+        // (Order/Lead đã ShopScope) để không hiện số liệu cả company.
+        $tenant = app(\App\Support\TenantManager::class);
+        if ($tenant->hasShopContext() && $tenant->shopId() !== null) {
+            return false;
+        }
+
         $shapeSupported = $this->unsupportedFilters($filter) === [];
 
         if (! $shapeSupported || ! $user) {

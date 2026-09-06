@@ -15,6 +15,7 @@ export default {
     compare_heading: 'So sánh cửa hàng',
     product_matrix_heading: 'TLC / TLH theo sản phẩm × cửa hàng',
     metric_help: 'TLC = đơn chốt / contact. TLH = đơn có lịch hẹn / contact.',
+    live_report_note: 'Khi đang chọn một cửa hàng, mọi báo cáo/dashboard dùng dữ liệu live theo cửa hàng đó (fact lịch sử vẫn là cấp công ty — chưa chia shop).',
     col_name: 'Cửa hàng',
     col_code: 'Mã',
     col_default: 'Mặc định',

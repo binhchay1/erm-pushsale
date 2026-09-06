@@ -28,7 +28,7 @@ class CurrentShopController extends Controller
 
         $request->session()->put(SetCurrentShop::SESSION_KEY, $shop->id);
 
-        if ($request->boolean('remember_default')) {
+        if ($request->boolean('remember_default') && (int) $user->default_shop_id !== (int) $shop->id) {
             $user->forceFill(['default_shop_id' => $shop->id])->save();
         }
 

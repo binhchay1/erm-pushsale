@@ -37,18 +37,18 @@ class LandingConnectionSubmissionController extends Controller
     public function __invoke(Request $request, string $connectionToken, string $sourceToken): JsonResponse|RedirectResponse|Response
     {
         $connection = LandingConnection::query()
-            ->withoutTenant()
+            ->withoutGlobalScopes()
             ->with([
-                'marketingSource' => fn ($query) => $query->withoutTenant(),
-                'products' => fn ($query) => $query->withoutTenant()->with([
-                    'product' => fn ($product) => $product->withoutTenant(),
+                'marketingSource' => fn ($query) => $query->withoutGlobalScopes(),
+                'products' => fn ($query) => $query->withoutGlobalScopes()->with([
+                    'product' => fn ($product) => $product->withoutGlobalScopes(),
                 ]),
             ])
             ->where('public_token', $connectionToken)
             ->first();
 
         $source = LandingConnectionSource::query()
-            ->withoutTenant()
+            ->withoutGlobalScopes()
             ->where('public_token', $sourceToken)
             ->where('landing_connection_id', $connection?->id)
             ->first();
@@ -79,6 +79,9 @@ class LandingConnectionSubmissionController extends Controller
 
         try {
             $result = app(TenantManager::class)->forCompany($connection->company_id, function () use ($request, $connection, $source): array {
+                $shopId = $connection->shop_id ?: $connection->marketingSource?->shop_id;
+
+                return app(TenantManager::class)->forShop($shopId ? (int) $shopId : null, function () use ($request, $connection, $source): array {
                 $driver = IntegrationDriverFactory::make('landing');
                 $rawNormalized = $driver->normalize($request->all());
                 $phone = $this->normalizePhone($rawNormalized['customer_phone'] ?? null);
@@ -121,6 +124,9 @@ class LandingConnectionSubmissionController extends Controller
                 $lead->forceFill([
                     'landing_connection_id' => $connection->id,
                     'landing_connection_source_id' => $source->id,
+                    'shop_id' => $lead->shop_id
+                        ?: $connection->shop_id
+                        ?: $connection->marketingSource?->shop_id,
                 ])->save();
 
                 $session = LandingSession::query()
@@ -147,7 +153,12 @@ class LandingConnectionSubmissionController extends Controller
                 if ($orderId) {
                     $order = Order::query()->whereKey($orderId)->first();
                     if ($order) {
-                        $orderUpdates = ['landing_connection_id' => $connection->id];
+                        $orderUpdates = [
+                            'landing_connection_id' => $connection->id,
+                            'shop_id' => $order->shop_id
+                                ?: $connection->shop_id
+                                ?: $connection->marketingSource?->shop_id,
+                        ];
                         if (! $source->isSupplemental() || ! $order->landing_connection_source_id) {
                             $orderUpdates['landing_connection_source_id'] = $source->id;
                         }
@@ -162,6 +173,7 @@ class LandingConnectionSubmissionController extends Controller
                     'status' => $lead->status instanceof LeadIngestionStatus ? $lead->status->value : (string) $lead->status,
                     'requires_review' => (bool) $lead->requires_review,
                 ];
+                });
             });
 
             $event->markProcessed();
@@ -269,7 +281,7 @@ class LandingConnectionSubmissionController extends Controller
         ]);
 
         if (! $isSupplemental && $connection->marketing_source_id) {
-            MarketingSource::query()->withoutTenant()->whereKey($connection->marketing_source_id)->increment('contacts');
+            MarketingSource::query()->withoutGlobalScopes()->whereKey($connection->marketing_source_id)->increment('contacts');
         }
 
         $session = LandingSession::query()

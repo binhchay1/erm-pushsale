@@ -44,7 +44,10 @@ class SetCurrentShop
         $shopId = $this->shops->resolveCurrentShopId($user, $sessionShopId);
 
         if ($shopId !== null) {
-            $request->session()->put(self::SESSION_KEY, $shopId);
+            // Chỉ ghi session khi đổi — tránh write session mọi request.
+            if ($sessionShopId !== $shopId) {
+                $request->session()->put(self::SESSION_KEY, $shopId);
+            }
             $this->tenant->setShop($shopId);
         } else {
             $this->tenant->clearShop();

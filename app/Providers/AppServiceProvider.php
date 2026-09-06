@@ -52,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(TenantManager::class);
+        $this->app->singleton(\App\Services\Shops\ShopProvisioningService::class);
         $this->app->singleton(Seo::class);
 
         $this->app->bind(OrderRepositoryInterface::class, EloquentOrderRepository::class);

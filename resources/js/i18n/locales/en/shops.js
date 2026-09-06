@@ -15,6 +15,7 @@ export default {
     compare_heading: 'Shop comparison',
     product_matrix_heading: 'TLC / TLH by product × shop',
     metric_help: 'TLC = closed orders / contacts. TLH = appointment orders / contacts.',
+    live_report_note: 'While a shop is selected, dashboards/reports use live shop-scoped data (historical facts remain company-level until shop grain is added).',
     col_name: 'Shop',
     col_code: 'Code',
     col_default: 'Default',

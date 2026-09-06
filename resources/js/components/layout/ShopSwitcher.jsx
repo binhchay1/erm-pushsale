@@ -24,38 +24,52 @@ export function ShopSwitcher({ pushsaleStyle = false }) {
         if (current?.id === shopId) return;
         router.post('/shop/current', { shop_id: shopId, remember_default: true }, {
             preserveScroll: true,
+            only: ['auth', 'shops', 'current_shop', 'flash'],
+            onSuccess: () => {
+                // Đổi shop xong phải reload trang để bảng/ops lấy data shop mới.
+                router.reload({ preserveScroll: true });
+            },
         });
     };
 
-    if (pushsaleStyle) {
+    if (!pushsaleStyle) {
+        return null;
+    }
+
+    if (list.length === 1) {
         return (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <button
-                        type="button"
-                        className="pushsale-language-trigger"
-                        title={t('shops.switcher_title')}
-                        aria-label={t('shops.switcher_title')}
-                    >
-                        <i className="fa fa-store" aria-hidden="true" />
-                        <span>{current?.name ?? t('shops.switcher_placeholder')}</span>
-                    </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={0} className="pushsale-language-dropdown">
-                    {list.map((shop) => (
-                        <DropdownMenuItem
-                            key={shop.id}
-                            className={`pushsale-language-dropdown-item ${current?.id === shop.id ? 'is-active' : ''}`}
-                            onClick={() => switchTo(shop.id)}
-                        >
-                            <i className={`fa ${current?.id === shop.id ? 'fa-check' : 'fa-circle-o'}`} aria-hidden="true" />
-                            <span>{shop.name}</span>
-                        </DropdownMenuItem>
-                    ))}
-                </DropdownMenuContent>
-            </DropdownMenu>
+            <span className="pushsale-language-trigger" title={t('shops.switcher_title')} aria-label={t('shops.switcher_title')}>
+                <i className="fa fa-store" aria-hidden="true" />
+                <span>{current?.name ?? list[0].name}</span>
+            </span>
         );
     }
 
-    return null;
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <button
+                    type="button"
+                    className="pushsale-language-trigger"
+                    title={t('shops.switcher_title')}
+                    aria-label={t('shops.switcher_title')}
+                >
+                    <i className="fa fa-store" aria-hidden="true" />
+                    <span>{current?.name ?? t('shops.switcher_placeholder')}</span>
+                </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" sideOffset={0} className="pushsale-language-dropdown">
+                {list.map((shop) => (
+                    <DropdownMenuItem
+                        key={shop.id}
+                        className={`pushsale-language-dropdown-item ${current?.id === shop.id ? 'is-active' : ''}`}
+                        onClick={() => switchTo(shop.id)}
+                    >
+                        <i className={`fa ${current?.id === shop.id ? 'fa-check' : 'fa-circle-o'}`} aria-hidden="true" />
+                        <span>{shop.name}</span>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
 }

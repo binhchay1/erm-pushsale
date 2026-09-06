@@ -107,6 +107,7 @@ export default function ShopOverview({ overview, filters = {} }) {
 
                 <h4>{t('shops.product_matrix_heading')}</h4>
                 <p className="text-muted">{t('shops.metric_help')}</p>
+                <p className="text-muted"><em>{t('shops.live_report_note')}</em></p>
                 <div className="table-responsive">
                     <table className="table table-bordered table-striped">
                         <thead>

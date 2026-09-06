@@ -5,11 +5,13 @@ namespace App\Services\Shops;
 use App\Models\Company;
 use App\Models\Shop;
 use App\Models\User;
-use App\Support\TenantManager;
 use Illuminate\Support\Facades\DB;
 
 class ShopProvisioningService
 {
+    /** @var array<int, list<Shop>> */
+    private array $accessibleCache = [];
+
     /**
      * Tạo shop mặc định cho company mới (hoặc đảm bảo đã có).
      * Gán toàn bộ user hiện có của company vào shop đó.
@@ -50,6 +52,8 @@ class ShopProvisioningService
                     ->update(['default_shop_id' => $shop->id]);
             }
 
+            unset($this->accessibleCache[(int) $company->id]);
+
             return $shop;
         });
     }
@@ -84,12 +88,15 @@ class ShopProvisioningService
                 $shop->users()->sync($attach);
             }
 
+            unset($this->accessibleCache[(int) $company->id]);
+
             return $shop;
         });
     }
 
     /**
      * Danh sách shop user được phép dùng (admin/owner = tất cả shop active của company).
+     * Cache theo request để SetCurrentShop + HandleInertiaRequests không query 2 lần.
      *
      * @return list<Shop>
      */
@@ -97,6 +104,11 @@ class ShopProvisioningService
     {
         if (! $user->company_id) {
             return [];
+        }
+
+        $cacheKey = (int) $user->id;
+        if (array_key_exists($cacheKey, $this->accessibleCache)) {
+            return $this->accessibleCache[$cacheKey];
         }
 
         $query = Shop::query()
@@ -110,7 +122,7 @@ class ShopProvisioningService
             $query->whereHas('users', fn ($q) => $q->where('users.id', $user->id));
         }
 
-        return $query->get()->all();
+        return $this->accessibleCache[$cacheKey] = $query->get()->all();
     }
 
     public function canAccessAllShops(User $user): bool
@@ -135,8 +147,14 @@ class ShopProvisioningService
     {
         $accessible = collect($this->accessibleShopsFor($user));
         if ($accessible->isEmpty()) {
-            $default = $this->ensureDefaultShop($user->company);
+            $company = $user->company;
+            if (! $company) {
+                return null;
+            }
+
+            $default = $this->ensureDefaultShop($company);
             $default->users()->syncWithoutDetaching([$user->id]);
+            unset($this->accessibleCache[(int) $user->id]);
             if (! $user->default_shop_id) {
                 $user->forceFill(['default_shop_id' => $default->id])->save();
             }
